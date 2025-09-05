@@ -68,7 +68,9 @@ export class TasksService {
         priority: createTaskDto.priority || TaskPriority.MEDIUM,
         status: TaskStatus.PENDING,
         createdBy: createTaskDto.createdBy || Role.USER,
-        model: getSafeModel(createTaskDto.model), // Use safe model converter
+        model: createTaskDto.model
+          ? (createTaskDto.model as Prisma.InputJsonValue)
+          : Prisma.JsonNull,
         ...(createTaskDto.scheduledFor && {
           scheduledFor: createTaskDto.scheduledFor,
         }),
@@ -244,11 +246,16 @@ export class TasksService {
     this.logger.log(`Updating task with ID: ${id}`);
     const updateDataStr = Object.entries(updateTaskDto)
       .map(([key, value]) => {
-        const valueStr = typeof value === 'string' ? value :
-                        typeof value === 'number' || typeof value === 'boolean' ? String(value) :
-                        value === null ? 'null' :
-                        value === undefined ? 'undefined' :
-                        JSON.stringify(value);
+        const valueStr =
+          typeof value === 'string'
+            ? value
+            : typeof value === 'number' || typeof value === 'boolean'
+              ? String(value)
+              : value === null
+                ? 'null'
+                : value === undefined
+                  ? 'undefined'
+                  : JSON.stringify(value);
         return `${key}: ${valueStr}`;
       })
       .join(', ');
