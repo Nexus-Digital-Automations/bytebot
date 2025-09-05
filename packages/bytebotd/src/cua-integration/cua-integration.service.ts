@@ -20,7 +20,6 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { promises as fs } from 'fs';
@@ -119,12 +118,9 @@ export class CuaIntegrationService implements OnModuleInit, OnModuleDestroy {
   private frameworkStatus: CuaFrameworkStatus;
   private healthCheckInterval!: NodeJS.Timeout;
 
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly httpService: HttpService,
-  ) {
+  constructor(private readonly httpService: HttpService) {
     // Initialize configuration from ConfigService
-    this.config = this.configService.get<CuaIntegrationConfig>('cua') || {
+    this.config = {
       framework: {
         enabled: false,
         containerId: 'unknown',

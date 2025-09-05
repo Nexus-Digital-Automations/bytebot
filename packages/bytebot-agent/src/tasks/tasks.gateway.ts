@@ -17,7 +17,7 @@ import { Injectable } from '@nestjs/common';
 })
 export class TasksGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server; // Definite assignment assertion for NestJS WebSocketServer injection
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
@@ -28,14 +28,14 @@ export class TasksGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('join_task')
-  handleJoinTask(client: Socket, taskId: string) {
-    client.join(`task_${taskId}`);
+  async handleJoinTask(client: Socket, taskId: string) {
+    await client.join(`task_${taskId}`);
     console.log(`Client ${client.id} joined task ${taskId}`);
   }
 
   @SubscribeMessage('leave_task')
-  handleLeaveTask(client: Socket, taskId: string) {
-    client.leave(`task_${taskId}`);
+  async handleLeaveTask(client: Socket, taskId: string) {
+    await client.leave(`task_${taskId}`);
     console.log(`Client ${client.id} left task ${taskId}`);
   }
 

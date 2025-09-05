@@ -17,13 +17,8 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
-import {
-  CuaIntegrationService,
-  CuaIntegrationConfig,
-} from './cua-integration.service';
-import { CuaPerformanceService } from './cua-performance.service';
+import { CuaIntegrationConfig } from './cua-integration.service';
 import * as crypto from 'crypto';
 
 /**
@@ -426,13 +421,8 @@ export class CuaVisionService {
   private readonly CACHE_TTL_MS = 60000; // 1 minute cache
   private readonly MAX_CACHE_SIZE = 1000;
 
-  constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-    private readonly cuaIntegrationService: CuaIntegrationService,
-    private readonly performanceService: CuaPerformanceService,
-  ) {
-    this.config = this.configService.get<CuaIntegrationConfig>('cua') || {
+  constructor(private readonly httpService: HttpService) {
+    this.config = {
       framework: {
         enabled: false,
         containerId: 'unknown',

@@ -6,7 +6,6 @@ import {
   MessageContentType,
   TextContentBlock,
   ToolUseContentBlock,
-  ToolResultContentBlock,
   ThinkingContentBlock,
   isUserActionContentBlock,
   isComputerToolUseContentBlock,
@@ -58,7 +57,7 @@ export class OpenAIService implements BytebotAgentService {
           max_output_tokens: maxTokens,
           input: openaiMessages,
           instructions: systemPrompt,
-          tools: useTools ? openaiTools : [],
+          tools: useTools ? (openaiTools as any[]) : [],
           reasoning: isReasoning ? { effort: 'medium' } : null,
           store: false,
           include: isReasoning ? ['reasoning.encrypted_content'] : [],
@@ -74,17 +73,21 @@ export class OpenAIService implements BytebotAgentService {
           totalTokens: response.usage?.total_tokens || 0,
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log('error', error);
-      console.log('error name', error.name);
+      const errorName = error instanceof Error ? error.name : 'Unknown';
+      console.log('error name', errorName);
 
       if (error instanceof APIUserAbortError) {
         this.logger.log('OpenAI API call aborted');
         throw new BytebotAgentInterrupt();
       }
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Error sending message to OpenAI: ${error.message}`,
-        error.stack,
+        `Error sending message to OpenAI: ${errorMessage}`,
+        errorStack,
       );
       throw error;
     }
@@ -247,7 +250,7 @@ export class OpenAIService implements BytebotAgentService {
     for (const item of response) {
       // Check the type of the output item
       switch (item.type) {
-        case 'message':
+        case 'message': {
           // Handle ResponseOutputMessage
           const message = item;
           for (const content of message.content) {
@@ -266,22 +269,24 @@ export class OpenAIService implements BytebotAgentService {
             }
           }
           break;
+        }
 
-        case 'function_call':
+        case 'function_call': {
           // Handle ResponseFunctionToolCall
           const toolCall = item;
           contentBlocks.push({
             type: MessageContentType.ToolUse,
             id: toolCall.call_id,
             name: toolCall.name,
-            input: JSON.parse(toolCall.arguments),
+            input: JSON.parse(toolCall.arguments) as Record<string, unknown>,
           } as ToolUseContentBlock);
           break;
+        }
 
         case 'file_search_call':
         case 'web_search_call':
         case 'computer_call':
-        case 'reasoning':
+        case 'reasoning': {
           const reasoning = item as OpenAI.Responses.ResponseReasoningItem;
           if (reasoning.encrypted_content) {
             contentBlocks.push({
@@ -291,6 +296,7 @@ export class OpenAIService implements BytebotAgentService {
             } as ThinkingContentBlock);
           }
           break;
+        }
         case 'image_generation_call':
         case 'code_interpreter_call':
         case 'local_shell_call':

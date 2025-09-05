@@ -15,8 +15,6 @@ import {
   TypeKeysAction,
   TypeTextAction,
 } from '@bytebot/shared';
-import { ComputerUseService } from '../computer-use/computer-use.service';
-import { InputTrackingGateway } from './input-tracking.gateway';
 import { keyInfoMap } from './input-tracking.helpers';
 
 @Injectable()
@@ -44,10 +42,7 @@ export class InputTrackingService implements OnModuleDestroy {
   private typingTimer: NodeJS.Timeout | null = null; // debounce
   private readonly TYPING_DEBOUNCE_MS = 500;
 
-  constructor(
-    private readonly gateway: InputTrackingGateway,
-    private readonly computerUseService: ComputerUseService,
-  ) {}
+  constructor() {}
 
   // Tracking is started manually via startTracking
 

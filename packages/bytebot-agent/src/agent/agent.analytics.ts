@@ -4,6 +4,42 @@ import { ConfigService } from '@nestjs/config';
 import { TasksService } from '../tasks/tasks.service';
 import { MessagesService } from '../messages/messages.service';
 
+/**
+ * Type guard to safely check if a value is an Error instance
+ * @param error - Unknown error value to check
+ * @returns True if the value is an Error instance
+ */
+function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
+/**
+ * Safely extracts error message from unknown error value
+ * @param error - Unknown error value
+ * @returns Safe error message string
+ */
+function getSafeErrorMessage(error: unknown): string {
+  if (isError(error)) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return String(error);
+}
+
+/**
+ * Safely extracts error stack trace from unknown error value
+ * @param error - Unknown error value
+ * @returns Safe error stack string or undefined
+ */
+function getSafeErrorStack(error: unknown): string | undefined {
+  if (isError(error)) {
+    return error.stack;
+  }
+  return undefined;
+}
+
 @Injectable()
 export class AgentAnalyticsService {
   private readonly logger = new Logger(AgentAnalyticsService.name);
@@ -37,10 +73,10 @@ export class AgentAnalyticsService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...task, messages }),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.logger.error(
-        `Failed to send analytics for task ${payload.taskId}: ${error.message}`,
-        error.stack,
+        `Failed to send analytics for task ${payload.taskId}: ${getSafeErrorMessage(error)}`,
+        getSafeErrorStack(error),
       );
     }
   }

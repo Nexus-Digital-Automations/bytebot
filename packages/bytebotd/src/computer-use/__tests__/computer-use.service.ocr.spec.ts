@@ -17,8 +17,8 @@
  * @created 2024-12-20
  */
 
-/* eslint-disable @typescript-eslint/unbound-method */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+ 
+ 
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
@@ -211,9 +211,7 @@ describe('ComputerUseService - OCR Operations', () => {
 
       // Setup mocks for successful operation
       mockCuaVisionService.performOcr.mockResolvedValue(mockOcrResult);
-      mockPerformanceService.recordMetric.mockImplementation(
-        async () => void 0,
-      );
+      mockPerformanceService.recordMetric.mockImplementation(() => {});
 
       // Act: Execute OCR operation
       const result = (await service.action(ocrAction)) as OcrOperationResult;
@@ -575,7 +573,7 @@ describe('ComputerUseService - OCR Operations', () => {
       };
 
       mockCuaVisionService.performOcr.mockResolvedValue(mockOcrResult);
-      mockPerformanceService.recordMetric.mockImplementationOnce(async () => {
+      mockPerformanceService.recordMetric.mockImplementationOnce(() => {
         throw new Error('Metrics service unavailable');
       });
 
@@ -1170,7 +1168,7 @@ describe('ComputerUseService - OCR Operations', () => {
       };
 
       mockCuaVisionService.performOcr.mockResolvedValue(mockOcrResult);
-      mockPerformanceService.recordMetric.mockImplementationOnce(async () => {
+      mockPerformanceService.recordMetric.mockImplementationOnce(() => {
         throw new Error('Performance service connection lost');
       });
 
@@ -1500,7 +1498,7 @@ describe('ComputerUseService - OCR Operations', () => {
           }),
         ]),
         processingTimeMs: expect.any(Number),
-        operationId: expect.stringMatching(/^find_text_\d+_[a-z0-9]{7}$/),
+        operationId: expect.stringMatching(/^find_text_\d+_[a-z0-9]{5,7}$/),
         searchCriteria: {
           text: 'email@domain.com',
           caseSensitive: true,

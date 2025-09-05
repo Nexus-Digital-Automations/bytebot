@@ -1,3 +1,4 @@
+ 
 import { IsNumber } from 'class-validator';
 
 /**
@@ -12,30 +13,47 @@ export class CoordinatesDto {
   y!: number;
 }
 
+// Enum values are used by external validation and DTO classes
 export enum ButtonType {
+   
   LEFT = 'left',
+   
   RIGHT = 'right',
+   
   MIDDLE = 'middle',
 }
 
 export enum PressType {
+   
   UP = 'up',
+   
   DOWN = 'down',
 }
 
 export enum ScrollDirection {
+   
   UP = 'up',
+   
   DOWN = 'down',
+   
   LEFT = 'left',
+   
   RIGHT = 'right',
 }
 
 export enum ApplicationName {
+   
   FIREFOX = 'firefox',
+   
   ONEPASSWORD = '1password',
+   
   THUNDERBIRD = 'thunderbird',
+   
   VSCODE = 'vscode',
+   
   TERMINAL = 'terminal',
+   
   DESKTOP = 'desktop',
+   
   DIRECTORY = 'directory',
 }

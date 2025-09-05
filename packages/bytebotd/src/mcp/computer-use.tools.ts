@@ -48,7 +48,7 @@ export class ComputerUseTools {
   private readonly logger = new Logger(ComputerUseTools.name);
   private operationCounter = 0;
 
-  constructor(private readonly computerUse: ComputerUseService) {
+  constructor(private readonly computerUseService: ComputerUseService) {
     this.logger.log('ComputerUseTools initialized - MCP integration ready');
   }
 
@@ -160,7 +160,10 @@ export class ComputerUseTools {
 
     try {
       // Execute mouse move operation through computer use service
-      await this.computerUse.action({ action: 'move_mouse', coordinates });
+      await this.computerUseService.action({
+        action: 'move_mouse',
+        coordinates,
+      });
 
       const result = `mouse moved to (${coordinates.x}, ${coordinates.y})`;
       this.logOperationSuccess(
@@ -243,7 +246,11 @@ export class ComputerUseTools {
 
     try {
       // Execute mouse trace operation through computer use service
-      await this.computerUse.action({ action: 'trace_mouse', path, holdKeys });
+      await this.computerUseService.action({
+        action: 'trace_mouse',
+        path,
+        holdKeys,
+      });
 
       const result = `mouse traced along ${path.length} points${holdKeys ? ` with keys: ${holdKeys.join(', ')}` : ''}`;
       this.logOperationSuccess(
@@ -314,7 +321,7 @@ export class ComputerUseTools {
     clickCount: number;
   }) {
     try {
-      await this.computerUse.action({
+      await this.computerUseService.action({
         action: 'click_mouse',
         coordinates,
         button,
@@ -368,7 +375,7 @@ export class ComputerUseTools {
     press: 'down' | 'up';
   }) {
     try {
-      await this.computerUse.action({
+      await this.computerUseService.action({
         action: 'press_mouse',
         coordinates,
         button,
@@ -427,7 +434,7 @@ export class ComputerUseTools {
     holdKeys?: string[];
   }) {
     try {
-      await this.computerUse.action({
+      await this.computerUseService.action({
         action: 'drag_mouse',
         path,
         button,
@@ -493,7 +500,7 @@ export class ComputerUseTools {
     holdKeys?: string[];
   }) {
     try {
-      await this.computerUse.action({
+      await this.computerUseService.action({
         action: 'scroll',
         coordinates,
         direction,
@@ -555,7 +562,11 @@ V, W, X, Y, Z`,
   })
   async typeKeys({ keys, delay }: { keys: string[]; delay?: number }) {
     try {
-      await this.computerUse.action({ action: 'type_keys', keys, delay });
+      await this.computerUseService.action({
+        action: 'type_keys',
+        keys,
+        delay,
+      });
       return { content: [{ type: 'text', text: 'keys typed' }] };
     } catch (err) {
       return {
@@ -610,7 +621,11 @@ V, W, X, Y, Z
   })
   async pressKeys({ keys, press }: { keys: string[]; press: 'down' | 'up' }) {
     try {
-      await this.computerUse.action({ action: 'press_keys', keys, press });
+      await this.computerUseService.action({
+        action: 'press_keys',
+        keys,
+        press,
+      });
       return { content: [{ type: 'text', text: 'keys pressed' }] };
     } catch (err) {
       return {
@@ -638,7 +653,11 @@ V, W, X, Y, Z
   })
   async typeText({ text, delay }: { text: string; delay?: number }) {
     try {
-      await this.computerUse.action({ action: 'type_text', text, delay });
+      await this.computerUseService.action({
+        action: 'type_text',
+        text,
+        delay,
+      });
       return { content: [{ type: 'text', text: 'text typed' }] };
     } catch (err) {
       return {
@@ -662,7 +681,7 @@ V, W, X, Y, Z
   })
   async pasteText({ text }: { text: string }) {
     try {
-      await this.computerUse.action({ action: 'paste_text', text });
+      await this.computerUseService.action({ action: 'paste_text', text });
       return { content: [{ type: 'text', text: 'text pasted' }] };
     } catch (err) {
       return {
@@ -688,7 +707,7 @@ V, W, X, Y, Z
   })
   async wait({ duration }: { duration: number }) {
     try {
-      await this.computerUse.action({ action: 'wait', duration });
+      await this.computerUseService.action({ action: 'wait', duration });
       return { content: [{ type: 'text', text: 'waiting done' }] };
     } catch (err) {
       return {
@@ -731,7 +750,10 @@ V, W, X, Y, Z
       | 'directory';
   }) {
     try {
-      await this.computerUse.action({ action: 'application', application });
+      await this.computerUseService.action({
+        action: 'application',
+        application,
+      });
       return { content: [{ type: 'text', text: 'application opened' }] };
     } catch (err) {
       return {
@@ -776,7 +798,7 @@ V, W, X, Y, Z
 
     try {
       // Capture raw screenshot through computer use service
-      const shot = (await this.computerUse.action({
+      const shot = (await this.computerUseService.action({
         action: 'screenshot',
       })) as { image: string };
 
@@ -846,7 +868,7 @@ V, W, X, Y, Z
   })
   async cursorPosition() {
     try {
-      const pos = (await this.computerUse.action({
+      const pos = (await this.computerUseService.action({
         action: 'cursor_position',
       })) as { x: number; y: number };
       return {
@@ -882,7 +904,7 @@ V, W, X, Y, Z
   })
   async writeFile({ path, data }: { path: string; data: string }) {
     try {
-      const result = await this.computerUse.action({
+      const result = await this.computerUseService.action({
         action: 'write_file',
         path,
         data,
@@ -926,7 +948,7 @@ V, W, X, Y, Z
   })
   async readFile({ path }: { path: string }) {
     try {
-      const result = await this.computerUse.action({
+      const result = await this.computerUseService.action({
         action: 'read_file',
         path,
       });

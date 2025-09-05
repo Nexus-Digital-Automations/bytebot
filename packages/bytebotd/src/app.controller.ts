@@ -1,9 +1,8 @@
 import { Controller, Get, Redirect, Headers } from '@nestjs/common';
-import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor() {}
 
   // When a client makes a GET request to /vnc,
   // this method will automatically redirect them to the noVNC URL.

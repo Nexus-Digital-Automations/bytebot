@@ -1,0 +1,63 @@
+{
+  "displayName": {
+    "name": "BytebotD E2E",
+    "color": "green"
+  },
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "..",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": [
+      "ts-jest",
+      {
+        "tsconfig": {
+          "target": "es2020",
+          "module": "commonjs",
+          "declaration": false,
+          "removeComments": true,
+          "emitDecoratorMetadata": true,
+          "experimentalDecorators": true,
+          "allowSyntheticDefaultImports": true,
+          "esModuleInterop": true,
+          "skipLibCheck": true,
+          "strictNullChecks": false,
+          "forceConsistentCasingInFileNames": true,
+          "strict": false
+        },
+        "isolatedModules": true
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "^@src/(.*)$": "<rootDir>/src/$1",
+    "^@bytebot/shared$": "<rootDir>/../shared/src",
+    "^@bytebot/shared/(.*)$": "<rootDir>/../shared/src/$1"
+  },
+  "testTimeout": 60000,
+  "setupFiles": ["<rootDir>/src/test-utils/setup.ts"],
+  "setupFilesAfterEnv": ["<rootDir>/src/test-utils/setupAfterEnv.ts"],
+  "collectCoverageFrom": [
+    "src/**/*.(t|j)s",
+    "!src/**/*.d.ts",
+    "!src/**/*.interface.ts",
+    "!src/**/*.spec.ts",
+    "!src/**/*.test.ts",
+    "!src/**/*.e2e-spec.ts",
+    "!src/**/__tests__/**",
+    "!src/main.ts",
+    "!src/test-utils/**"
+  ],
+  "coverageDirectory": "../coverage-e2e",
+  "coverageReporters": [
+    "html",
+    "lcov",
+    "text-summary",
+    "json"
+  ],
+  "maxWorkers": 1,
+  "forceExit": true,
+  "detectOpenHandles": true,
+  "verbose": true
+}

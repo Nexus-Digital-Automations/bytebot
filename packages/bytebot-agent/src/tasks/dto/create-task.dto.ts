@@ -13,25 +13,25 @@ import { Role, TaskPriority, TaskType } from '@prisma/client';
 export class TaskFileDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string; // Definite assignment assertion for NestJS DTO validation
 
   @IsNotEmpty()
   @IsString()
-  base64: string;
+  base64!: string; // Definite assignment assertion for NestJS DTO validation
 
   @IsNotEmpty()
   @IsString()
-  type: string;
+  type!: string; // Definite assignment assertion for NestJS DTO validation
 
   @IsNotEmpty()
   @IsNumber()
-  size: number;
+  size!: number; // Definite assignment assertion for NestJS DTO validation
 }
 
 export class CreateTaskDto {
   @IsNotEmpty()
   @IsString()
-  description: string;
+  description!: string; // Definite assignment assertion for NestJS DTO validation
 
   @IsOptional()
   @IsString()

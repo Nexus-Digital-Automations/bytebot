@@ -21,7 +21,6 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { CuaIntegrationConfig } from './cua-integration.service';
 import { promises as fs } from 'fs';
 import * as path from 'path';
@@ -129,8 +128,8 @@ export class CuaPerformanceService implements OnModuleInit, OnModuleDestroy {
   private readonly MAX_METRICS_HISTORY = 10000;
   private readonly METRICS_COLLECTION_INTERVAL = 30000; // 30 seconds
 
-  constructor(private readonly configService: ConfigService) {
-    this.config = this.configService.get<CuaIntegrationConfig>('cua') || {
+  constructor() {
+    this.config = {
       framework: {
         enabled: false,
         containerId: 'unknown',

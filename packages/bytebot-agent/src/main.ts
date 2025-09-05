@@ -5,10 +5,11 @@ import { json, urlencoded } from 'express';
 
 // Polyfill for crypto global (required by @nestjs/schedule)
 if (!globalThis.crypto) {
-  globalThis.crypto = webcrypto as any;
+  // Type-safe assignment with proper crypto interface
+  globalThis.crypto = webcrypto as unknown as Crypto;
 }
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   console.log('Starting bytebot-agent application...');
 
   try {
@@ -27,9 +28,17 @@ async function bootstrap() {
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     });
 
-    await app.listen(process.env.PORT ?? 9991);
+    const port = process.env.PORT ?? 9991;
+    await app.listen(port);
+    console.log(`Application successfully started on port ${port}`);
   } catch (error) {
     console.error('Error starting application:', error);
+    process.exit(1);
   }
 }
-bootstrap();
+
+// Properly handle bootstrap promise with error handling
+bootstrap().catch((error) => {
+  console.error('Bootstrap failed:', error);
+  process.exit(1);
+});

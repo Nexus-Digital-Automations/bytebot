@@ -51,7 +51,7 @@ export class TasksController {
   }
 
   @Get('models')
-  async getModels() {
+  getModels() {
     return [
       {
         provider: 'anthropic',

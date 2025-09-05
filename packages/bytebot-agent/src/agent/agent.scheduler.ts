@@ -26,7 +26,7 @@ export class AgentScheduler implements OnModuleInit {
     for (const scheduledTask of scheduledTasks) {
       if (scheduledTask.scheduledFor && scheduledTask.scheduledFor < now) {
         this.logger.debug(
-          `Task ID: ${scheduledTask.id} is scheduled for ${scheduledTask.scheduledFor}, queuing it`,
+          `Task ID: ${scheduledTask.id} is scheduled for ${scheduledTask.scheduledFor?.toISOString()}, queuing it`,
         );
         await this.tasksService.update(scheduledTask.id, {
           queuedAt: now,

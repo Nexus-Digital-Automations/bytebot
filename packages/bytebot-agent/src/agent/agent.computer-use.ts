@@ -23,7 +23,125 @@ import {
 } from '@bytebot/shared';
 import { Logger } from '@nestjs/common';
 
+// Type definitions for computer-use API responses
+interface CursorPositionResponse {
+  x: number;
+  y: number;
+}
+
+interface ScreenshotResponse {
+  image: string;
+}
+
+interface ReadFileResponse {
+  success: boolean;
+  data?: string;
+  name?: string;
+  size?: number;
+  mediaType?: string;
+  message?: string;
+}
+
+interface WriteFileResponse {
+  success: boolean;
+  message?: string;
+}
+
+// SUBAGENT 1: Removed duplicate function implementations - keeping comprehensive versions below
+
 const BYTEBOT_DESKTOP_BASE_URL = process.env.BYTEBOT_DESKTOP_BASE_URL as string;
+
+// SUBAGENT 1: Removed duplicate interface definitions - already defined above
+
+/**
+ * Type guard to safely check if a value is an Error instance
+ * @param error - Unknown error value to check
+ * @returns True if the value is an Error instance
+ */
+function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
+/**
+ * Safely extracts error message from unknown error value
+ * @param error - Unknown error value
+ * @returns Safe error message string
+ */
+function getSafeErrorMessage(error: unknown): string {
+  if (isError(error)) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return String(error);
+}
+
+/**
+ * Safely extracts error stack trace from unknown error value
+ * @param error - Unknown error value
+ * @returns Safe error stack string or undefined
+ */
+function getSafeErrorStack(error: unknown): string | undefined {
+  if (isError(error)) {
+    return error.stack;
+  }
+  return undefined;
+}
+
+/**
+ * Type guard for cursor position response
+ * @param data - Unknown API response
+ * @returns True if data matches CursorPositionResponse structure
+ */
+function isCursorPositionResponse(
+  data: unknown,
+): data is CursorPositionResponse {
+  if (typeof data !== 'object' || data === null) {
+    return false;
+  }
+  const obj = data as Record<string, unknown>;
+  return typeof obj.x === 'number' && typeof obj.y === 'number';
+}
+
+/**
+ * Type guard for screenshot response
+ * @param data - Unknown API response
+ * @returns True if data matches ScreenshotResponse structure
+ */
+function isScreenshotResponse(data: unknown): data is ScreenshotResponse {
+  if (typeof data !== 'object' || data === null) {
+    return false;
+  }
+  const obj = data as Record<string, unknown>;
+  return typeof obj.image === 'string';
+}
+
+/**
+ * Type guard for read file response
+ * @param data - Unknown API response
+ * @returns True if data matches ReadFileResponse structure
+ */
+function isReadFileResponse(data: unknown): data is ReadFileResponse {
+  if (typeof data !== 'object' || data === null) {
+    return false;
+  }
+  const obj = data as Record<string, unknown>;
+  return typeof obj.success === 'boolean';
+}
+
+/**
+ * Type guard for write file response
+ * @param data - Unknown API response
+ * @returns True if data matches WriteFileResponse structure
+ */
+function isWriteFileResponse(data: unknown): data is WriteFileResponse {
+  if (typeof data !== 'object' || data === null) {
+    return false;
+  }
+  const obj = data as Record<string, unknown>;
+  return typeof obj.success === 'boolean';
+}
 
 export async function handleComputerToolUse(
   block: ComputerToolUseContentBlock,
@@ -54,8 +172,11 @@ export async function handleComputerToolUse(
           },
         ],
       };
-    } catch (error) {
-      logger.error(`Screenshot failed: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      logger.error(
+        `Screenshot failed: ${getSafeErrorMessage(error)}`,
+        getSafeErrorStack(error),
+      );
       return {
         type: MessageContentType.ToolResult,
         tool_use_id: block.id,
@@ -87,10 +208,10 @@ export async function handleComputerToolUse(
           },
         ],
       };
-    } catch (error) {
+    } catch (error: unknown) {
       logger.error(
-        `Getting cursor position failed: ${error.message}`,
-        error.stack,
+        `Getting cursor position failed: ${getSafeErrorMessage(error)}`,
+        getSafeErrorStack(error),
       );
       return {
         type: MessageContentType.ToolResult,
@@ -191,7 +312,7 @@ export async function handleComputerToolUse(
       logger.debug('Taking screenshot');
       image = await screenshot();
       logger.debug('Screenshot captured successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       logger.error('Failed to take screenshot', error);
     }
 
@@ -219,10 +340,10 @@ export async function handleComputerToolUse(
     }
 
     return toolResult;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error(
-      `Error executing ${block.name} tool: ${error.message}`,
-      error.stack,
+      `Error executing ${block.name} tool: ${getSafeErrorMessage(error)}`,
+      getSafeErrorStack(error),
     );
     return {
       type: MessageContentType.ToolResult,
@@ -230,7 +351,7 @@ export async function handleComputerToolUse(
       content: [
         {
           type: MessageContentType.Text,
-          text: `Error executing ${block.name} tool: ${error.message}`,
+          text: `Error executing ${block.name} tool: ${getSafeErrorMessage(error)}`,
         },
       ],
       is_error: true,
@@ -265,7 +386,7 @@ async function traceMouse(input: {
 }): Promise<void> {
   const { path, holdKeys } = input;
   console.log(
-    `Tracing mouse to path: ${path} ${holdKeys ? `with holdKeys: ${holdKeys}` : ''}`,
+    `Tracing mouse to path: ${path.map((c) => `(${c.x},${c.y})`).join(' -> ')} ${holdKeys ? `with holdKeys: ${holdKeys.join(', ')}` : ''}`,
   );
 
   try {
@@ -292,7 +413,7 @@ async function clickMouse(input: {
 }): Promise<void> {
   const { coordinates, button, holdKeys, clickCount } = input;
   console.log(
-    `Clicking mouse ${button} ${clickCount} times ${coordinates ? `at coordinates: [${coordinates.x}, ${coordinates.y}] ` : ''} ${holdKeys ? `with holdKeys: ${holdKeys}` : ''}`,
+    `Clicking mouse ${button} ${clickCount} times ${coordinates ? `at coordinates: [${coordinates.x}, ${coordinates.y}] ` : ''} ${holdKeys ? `with holdKeys: ${holdKeys.join(', ')}` : ''}`,
   );
 
   try {
@@ -347,7 +468,7 @@ async function dragMouse(input: {
 }): Promise<void> {
   const { path, button, holdKeys } = input;
   console.log(
-    `Dragging mouse to path: ${path} ${holdKeys ? `with holdKeys: ${holdKeys}` : ''}`,
+    `Dragging mouse to path: ${path.map((c) => `(${c.x},${c.y})`).join(' -> ')} ${holdKeys ? `with holdKeys: ${holdKeys.join(', ')}` : ''}`,
   );
 
   try {
@@ -401,7 +522,7 @@ async function typeKeys(input: {
   delay?: number;
 }): Promise<void> {
   const { keys, delay } = input;
-  console.log(`Typing keys: ${keys}`);
+  console.log(`Typing keys: ${keys.join(', ')}`);
 
   try {
     await fetch(`${BYTEBOT_DESKTOP_BASE_URL}/computer-use`, {
@@ -424,7 +545,7 @@ async function pressKeys(input: {
   press: Press;
 }): Promise<void> {
   const { keys, press } = input;
-  console.log(`Pressing keys: ${keys}`);
+  console.log(`Pressing keys: ${keys.join(', ')}`);
 
   try {
     await fetch(`${BYTEBOT_DESKTOP_BASE_URL}/computer-use`, {
@@ -515,7 +636,12 @@ async function cursorPosition(): Promise<Coordinates> {
       }),
     });
 
-    const data = await response.json();
+    const data: unknown = await response.json();
+
+    if (!isCursorPositionResponse(data)) {
+      throw new Error('Invalid cursor position response format');
+    }
+
     return { x: data.x, y: data.y };
   } catch (error) {
     console.error('Error in cursor_position action:', error);
@@ -541,10 +667,12 @@ async function screenshot(): Promise<string> {
       throw new Error(`Failed to take screenshot: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: unknown = await response.json();
 
-    if (!data.image) {
-      throw new Error('Failed to take screenshot: No image data received');
+    if (!isScreenshotResponse(data)) {
+      throw new Error(
+        'Failed to take screenshot: Invalid response format or no image data received',
+      );
     }
 
     return data.image; // Base64 encoded image
@@ -598,13 +726,18 @@ async function readFile(input: { path: string }): Promise<{
       throw new Error(`Failed to read file: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: unknown = await response.json();
+
+    if (!isReadFileResponse(data)) {
+      throw new Error('Invalid read file response format');
+    }
+
     return data;
   } catch (error) {
     console.error('Error in read_file action:', error);
     return {
       success: false,
-      message: `Error reading file: ${error.message}`,
+      message: `Error reading file: ${getSafeErrorMessage(error)}`,
     };
   }
 }
@@ -634,13 +767,18 @@ export async function writeFile(input: {
       throw new Error(`Failed to write file: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: unknown = await response.json();
+
+    if (!isWriteFileResponse(data)) {
+      throw new Error('Invalid write file response format');
+    }
+
     return data;
   } catch (error) {
     console.error('Error in write_file action:', error);
     return {
       success: false,
-      message: `Error writing file: ${error.message}`,
+      message: `Error writing file: ${getSafeErrorMessage(error)}`,
     };
   }
 }

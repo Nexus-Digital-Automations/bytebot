@@ -1,14 +1,7 @@
 import { TasksService } from '../tasks/tasks.service';
 import { MessagesService } from '../messages/messages.service';
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  Message,
-  Role,
-  Task,
-  TaskPriority,
-  TaskStatus,
-  TaskType,
-} from '@prisma/client';
+import { Role, Task, TaskPriority, TaskStatus, TaskType } from '@prisma/client';
 import { AnthropicService } from '../anthropic/anthropic.service';
 import {
   isComputerToolUseContentBlock,
@@ -184,9 +177,9 @@ export class AgentProcessor {
       );
 
       const model = task.model as unknown as BytebotAgentModel;
-      let agentResponse: BytebotAgentResponse;
-
       const service = this.services[model.provider];
+
+      // Service declaration moved above to fix variable declaration order
       if (!service) {
         this.logger.warn(
           `No service found for model provider: ${model.provider}`,
@@ -199,7 +192,7 @@ export class AgentProcessor {
         return;
       }
 
-      agentResponse = await service.generateMessage(
+      const agentResponse: BytebotAgentResponse = await service.generateMessage(
         AGENT_SYSTEM_PROMPT,
         messages,
         model.name,
@@ -292,10 +285,13 @@ export class AgentProcessor {
           this.logger.log(
             `Generated summary for task ${taskId} due to token usage (${agentResponse.tokenUsage.totalTokens}/${contextWindow})`,
           );
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          const errorStack = error instanceof Error ? error.stack : undefined;
           this.logger.error(
-            `Error summarizing messages for task ID: ${taskId}`,
-            error.stack,
+            `Error summarizing messages for task ID: ${taskId}: ${errorMessage}`,
+            errorStack,
           );
         }
       }
@@ -385,15 +381,20 @@ export class AgentProcessor {
 
       // Schedule the next iteration without blocking
       if (this.isProcessing) {
-        setImmediate(() => this.runIteration(taskId));
+        setImmediate(() => {
+          void this.runIteration(taskId);
+        });
       }
-    } catch (error: any) {
-      if (error?.name === 'BytebotAgentInterrupt') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'BytebotAgentInterrupt') {
         this.logger.warn(`Processing aborted for task ID: ${taskId}`);
       } else {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
         this.logger.error(
-          `Error during task processing iteration for task ID: ${taskId} - ${error.message}`,
-          error.stack,
+          `Error during task processing iteration for task ID: ${taskId} - ${errorMessage}`,
+          errorStack,
         );
         await this.tasksService.update(taskId, {
           status: TaskStatus.FAILED,
@@ -409,12 +410,14 @@ export class AgentProcessor {
       return;
     }
 
+    await Promise.resolve(); // Satisfy async requirement
+
     this.logger.log(`Stopping execution of task ${this.currentTaskId}`);
 
     // Signal any in-flight async operations to abort
     this.abortController?.abort();
 
-    await this.inputCaptureService.stop();
+    this.inputCaptureService.stop();
 
     this.isProcessing = false;
     this.currentTaskId = null;

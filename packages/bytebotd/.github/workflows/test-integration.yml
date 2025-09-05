@@ -1,0 +1,458 @@
+# GitHub Actions CI/CD Pipeline for BytebotD Integration Testing
+#
+# This workflow provides comprehensive CI/CD integration for the BytebotD package
+# with full test suite execution, coverage reporting, and quality gates.
+#
+# Features:
+# - Multi-stage test execution (unit, integration, E2E)
+# - Comprehensive coverage aggregation and reporting
+# - Performance monitoring and quality gates
+# - Artifact collection and reporting
+# - Matrix testing across Node.js versions
+# - Docker container support for isolated testing
+#
+# @author Claude Code
+# @version 1.0.0
+
+name: BytebotD Integration Testing
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'bytebot/packages/bytebotd/**'
+      - '.github/workflows/test-integration.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'bytebot/packages/bytebotd/**'
+      - '.github/workflows/test-integration.yml'
+  workflow_dispatch:
+    inputs:
+      test_level:
+        description: 'Test execution level'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - 'unit'
+        - 'integration'
+        - 'e2e'
+        - 'all'
+
+env:
+  NODE_ENV: test
+  LOG_LEVEL: error
+  FORCE_COLOR: 1
+
+jobs:
+  # Pre-flight checks and setup
+  setup:
+    name: Setup and Validation
+    runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+      node-version-matrix: ${{ steps.node-versions.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'bytebot/packages/bytebotd/package-lock.json'
+
+      - name: Generate cache key
+        id: cache-key
+        run: |
+          echo "key=bytebotd-deps-${{ runner.os }}-${{ hashFiles('bytebot/packages/bytebotd/package-lock.json') }}" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js version matrix
+        id: node-versions
+        run: |
+          echo "matrix=[\"18\", \"20\", \"21\"]" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        working-directory: bytebot/packages/bytebotd
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            bytebot/packages/bytebotd/node_modules
+            ~/.npm
+          key: ${{ steps.cache-key.outputs.key }}
+          restore-keys: |
+            bytebotd-deps-${{ runner.os }}-
+
+      - name: Lint and format check
+        working-directory: bytebot/packages/bytebotd
+        run: |
+          npm run lint
+          npm run format
+
+  # Unit tests with coverage
+  unit-tests:
+    name: Unit Tests (Node.js ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    needs: setup
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ${{ fromJson(needs.setup.outputs.node-version-matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: 'bytebot/packages/bytebotd/package-lock.json'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            bytebot/packages/bytebotd/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+          restore-keys: |
+            bytebotd-deps-${{ runner.os }}-
+
+      - name: Install dependencies
+        working-directory: bytebot/packages/bytebotd
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Run unit tests
+        working-directory: bytebot/packages/bytebotd
+        run: |
+          npm run test:unit -- \
+            --coverage \
+            --coverageDirectory=coverage-unit \
+            --coverageReporters=lcov,json,text-summary \
+            --maxWorkers=2 \
+            --ci \
+            --watchAll=false
+
+      - name: Upload unit test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: unit-coverage-node-${{ matrix.node-version }}
+          path: bytebot/packages/bytebotd/coverage-unit/
+          retention-days: 7
+
+      - name: Comment coverage on PR (Node.js 18 only)
+        if: matrix.node-version == '18' && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          path: bytebot/packages/bytebotd/coverage-unit/coverage-summary.json
+
+  # Integration tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    services:
+      # Add any required services here (Redis, database, etc.)
+      test-db:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: bytebotd_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'bytebot/packages/bytebotd/package-lock.json'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            bytebot/packages/bytebotd/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Install dependencies
+        working-directory: bytebot/packages/bytebotd
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Setup test environment
+        working-directory: bytebot/packages/bytebotd
+        run: |
+          mkdir -p /tmp/bytebot-integration-tests
+          export DATABASE_URL=postgresql://postgres:test@localhost:5432/bytebotd_test
+
+      - name: Run integration tests
+        working-directory: bytebot/packages/bytebotd
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/bytebotd_test
+        run: |
+          npm run test:integration -- \
+            --coverage \
+            --coverageDirectory=coverage-integration \
+            --coverageReporters=lcov,json,text-summary \
+            --maxWorkers=1 \
+            --ci \
+            --watchAll=false \
+            --testTimeout=60000
+
+      - name: Upload integration test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: integration-coverage
+          path: bytebot/packages/bytebotd/coverage-integration/
+          retention-days: 7
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: integration-test-results
+          path: |
+            bytebot/packages/bytebotd/test-results/
+            bytebot/packages/bytebotd/coverage-integration/junit.xml
+          retention-days: 7
+
+  # E2E tests with browser automation
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    if: github.event.inputs.test_level == 'e2e' || github.event.inputs.test_level == 'all' || github.event.inputs.test_level == ''
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'bytebot/packages/bytebotd/package-lock.json'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            bytebot/packages/bytebotd/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Install dependencies
+        working-directory: bytebot/packages/bytebotd
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Setup E2E test environment
+        run: |
+          # Install system dependencies for headless testing
+          sudo apt-get update
+          sudo apt-get install -y \
+            xvfb \
+            x11-xserver-utils \
+            xfonts-100dpi \
+            xfonts-75dpi \
+            xfonts-scalable \
+            xfonts-cyrillic
+
+      - name: Run E2E tests
+        working-directory: bytebot/packages/bytebotd
+        env:
+          DISPLAY: ':99'
+        run: |
+          # Start virtual display
+          Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+          
+          # Run E2E tests
+          npm run test:e2e -- \
+            --coverage \
+            --coverageDirectory=coverage-e2e \
+            --coverageReporters=lcov,json,text-summary \
+            --maxWorkers=1 \
+            --ci \
+            --watchAll=false \
+            --testTimeout=120000
+
+      - name: Upload E2E test coverage
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-coverage
+          path: bytebot/packages/bytebotd/coverage-e2e/
+          retention-days: 7
+
+      - name: Upload E2E test artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-test-artifacts
+          path: |
+            bytebot/packages/bytebotd/test-results/
+            bytebot/packages/bytebotd/screenshots/
+            bytebot/packages/bytebotd/videos/
+          retention-days: 7
+
+  # Comprehensive test coordination and reporting
+  test-coordination:
+    name: Test Coordination & Reporting
+    runs-on: ubuntu-latest
+    needs: [setup, unit-tests, integration-tests]
+    if: always()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'bytebot/packages/bytebotd/package-lock.json'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            bytebot/packages/bytebotd/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Install dependencies
+        working-directory: bytebot/packages/bytebotd
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: bytebot/packages/bytebotd/coverage-artifacts
+
+      - name: Aggregate coverage reports
+        working-directory: bytebot/packages/bytebotd
+        run: |
+          # Create coverage aggregation directory
+          mkdir -p coverage-aggregated
+          
+          # Combine coverage reports
+          npx nyc merge coverage-artifacts/*/coverage-final.json coverage-aggregated/coverage-final.json
+          
+          # Generate combined HTML report
+          npx nyc report \
+            --reporter=html \
+            --reporter=lcov \
+            --reporter=text-summary \
+            --report-dir=coverage-aggregated \
+            --temp-dir=coverage-aggregated
+
+      - name: Run test validation
+        working-directory: bytebot/packages/bytebotd
+        run: npm run test:validate
+
+      - name: Generate comprehensive test report
+        working-directory: bytebot/packages/bytebotd
+        run: |
+          # Use our custom test runner for final reporting
+          node scripts/test-runner.js --report-only
+
+      - name: Upload aggregated coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: aggregated-coverage-report
+          path: bytebot/packages/bytebotd/coverage-aggregated/
+          retention-days: 30
+
+      - name: Upload test validation report
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-validation-report
+          path: |
+            bytebot/packages/bytebotd/test-results/
+            bytebot/packages/bytebotd/coverage-aggregated/
+          retention-days: 30
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: BytebotD Test Results
+          path: 'bytebot/packages/bytebotd/coverage-*/junit.xml'
+          reporter: jest-junit
+          fail-on-error: true
+
+      - name: Coverage comment on PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          header: coverage-report
+          message: |
+            ## 📊 Test Coverage Report
+            
+            Coverage reports have been generated and are available as artifacts.
+            
+            **Coverage Summary:**
+            - Unit Tests: Available in artifacts
+            - Integration Tests: Available in artifacts  
+            - E2E Tests: Available in artifacts (if run)
+            - Aggregated Report: Available in artifacts
+            
+            **Test Validation:** Check the validation report artifact for detailed quality metrics.
+
+  # Quality gates and final validation
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, test-coordination]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          echo "Unit Tests: ${{ needs.unit-tests.result }}"
+          echo "Integration Tests: ${{ needs.integration-tests.result }}"
+          echo "Test Coordination: ${{ needs.test-coordination.result }}"
+          
+          if [[ "${{ needs.unit-tests.result }}" != "success" ]]; then
+            echo "❌ Unit tests failed"
+            exit 1
+          fi
+          
+          if [[ "${{ needs.integration-tests.result }}" != "success" ]]; then
+            echo "❌ Integration tests failed"
+            exit 1
+          fi
+          
+          if [[ "${{ needs.test-coordination.result }}" != "success" ]]; then
+            echo "⚠️ Test coordination had issues, but continuing"
+          fi
+          
+          echo "✅ All quality gates passed"
+
+      - name: Update status check
+        if: always()
+        run: |
+          if [[ "${{ needs.unit-tests.result }}" == "success" && "${{ needs.integration-tests.result }}" == "success" ]]; then
+            echo "✅ BytebotD integration testing completed successfully"
+          else
+            echo "❌ BytebotD integration testing failed"
+            exit 1
+          fi

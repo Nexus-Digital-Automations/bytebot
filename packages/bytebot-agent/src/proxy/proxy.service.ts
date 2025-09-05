@@ -1,17 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI, { APIUserAbortError } from 'openai';
-import {
-  ChatCompletionMessageParam,
-  ChatCompletionContentPart,
-} from 'openai/resources/chat/completions';
+import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import {
   MessageContentBlock,
   MessageContentType,
   TextContentBlock,
   ToolUseContentBlock,
-  ToolResultContentBlock,
-  ImageContentBlock,
   isUserActionContentBlock,
   isComputerToolUseContentBlock,
   isImageContentBlock,
@@ -94,15 +89,19 @@ export class ProxyService implements BytebotAgentService {
           totalTokens: completion.usage?.total_tokens || 0,
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof APIUserAbortError) {
         this.logger.log('Chat Completion API call aborted');
         throw new BytebotAgentInterrupt();
       }
 
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
       this.logger.error(
-        `Error sending message to proxy: ${error.message}`,
-        error.stack,
+        `Error sending message to proxy: ${errorMessage}`,
+        errorStack,
       );
       throw error;
     }
@@ -171,7 +170,7 @@ export class ProxyService implements BytebotAgentService {
               break;
             }
             case MessageContentType.Image: {
-              const imageBlock = block as ImageContentBlock;
+              const imageBlock = block;
               chatMessages.push({
                 role: 'user',
                 content: [
@@ -204,7 +203,7 @@ export class ProxyService implements BytebotAgentService {
               break;
             }
             case MessageContentType.Thinking: {
-              const thinkingBlock = block as ThinkingContentBlock;
+              const thinkingBlock = block;
               const message: ChatCompletionMessageParam = {
                 role: 'assistant',
                 content: null,
@@ -214,7 +213,7 @@ export class ProxyService implements BytebotAgentService {
               break;
             }
             case MessageContentType.ToolResult: {
-              const toolResultBlock = block as ToolResultContentBlock;
+              const toolResultBlock = block;
 
               if (
                 toolResultBlock.content.every(
@@ -285,8 +284,8 @@ export class ProxyService implements BytebotAgentService {
     if (message['reasoning_content']) {
       contentBlocks.push({
         type: MessageContentType.Thinking,
-        thinking: message['reasoning_content'],
-        signature: message['reasoning_content'],
+        thinking: String(message['reasoning_content']),
+        signature: String(message['reasoning_content']),
       } as ThinkingContentBlock);
     }
 
@@ -294,10 +293,12 @@ export class ProxyService implements BytebotAgentService {
     if (message.tool_calls && message.tool_calls.length > 0) {
       for (const toolCall of message.tool_calls) {
         if (toolCall.type === 'function') {
-          let parsedInput = {};
+          let parsedInput: Record<string, unknown> = {};
           try {
-            parsedInput = JSON.parse(toolCall.function.arguments || '{}');
-          } catch (e) {
+            parsedInput = JSON.parse(
+              toolCall.function.arguments || '{}',
+            ) as Record<string, unknown>;
+          } catch {
             this.logger.warn(
               `Failed to parse tool call arguments: ${toolCall.function.arguments}`,
             );

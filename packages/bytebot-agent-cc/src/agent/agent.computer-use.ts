@@ -23,6 +23,37 @@ import {
 } from '@bytebot/shared';
 import { Logger } from '@nestjs/common';
 
+/**
+ * Safely extract error message from unknown error types
+ */
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  if (error && typeof error === 'object' && 'message' in error) {
+    const errorObj = error as { message: unknown };
+    return typeof errorObj.message === 'string' ? errorObj.message : String(error);
+  }
+  return String(error);
+}
+
+/**
+ * Safely extract error stack from unknown error types
+ */
+function getErrorStack(error: unknown): string | undefined {
+  if (error instanceof Error) {
+    return error.stack;
+  }
+  if (error && typeof error === 'object' && 'stack' in error) {
+    const errorObj = error as { stack: unknown };
+    return typeof errorObj.stack === 'string' ? errorObj.stack : undefined;
+  }
+  return undefined;
+}
+
 const BYTEBOT_DESKTOP_BASE_URL = process.env.BYTEBOT_DESKTOP_BASE_URL as string;
 
 export async function handleComputerToolUse(
@@ -55,7 +86,7 @@ export async function handleComputerToolUse(
         ],
       };
     } catch (error) {
-      logger.error(`Screenshot failed: ${error.message}`, error.stack);
+      logger.error(`Screenshot failed: ${getErrorMessage(error)}`, getErrorStack(error));
       return {
         type: MessageContentType.ToolResult,
         tool_use_id: block.id,
@@ -89,8 +120,8 @@ export async function handleComputerToolUse(
       };
     } catch (error) {
       logger.error(
-        `Getting cursor position failed: ${error.message}`,
-        error.stack,
+        `Getting cursor position failed: ${getErrorMessage(error)}`,
+        getErrorStack(error),
       );
       return {
         type: MessageContentType.ToolResult,
@@ -216,8 +247,8 @@ export async function handleComputerToolUse(
     return toolResult;
   } catch (error) {
     logger.error(
-      `Error executing ${block.name} tool: ${error.message}`,
-      error.stack,
+      `Error executing ${block.name} tool: ${getErrorMessage(error)}`,
+      getErrorStack(error),
     );
     return {
       type: MessageContentType.ToolResult,
@@ -225,7 +256,7 @@ export async function handleComputerToolUse(
       content: [
         {
           type: MessageContentType.Text,
-          text: `Error executing ${block.name} tool: ${error.message}`,
+          text: `Error executing ${block.name} tool: ${getErrorMessage(error)}`,
         },
       ],
       is_error: true,
@@ -260,7 +291,7 @@ async function traceMouse(input: {
 }): Promise<void> {
   const { path, holdKeys } = input;
   console.log(
-    `Tracing mouse to path: ${path} ${holdKeys ? `with holdKeys: ${holdKeys}` : ''}`,
+    `Tracing mouse to path: ${JSON.stringify(path)} ${holdKeys ? `with holdKeys: ${JSON.stringify(holdKeys)}` : ''}`,
   );
 
   try {
@@ -287,7 +318,7 @@ async function clickMouse(input: {
 }): Promise<void> {
   const { coordinates, button, holdKeys, clickCount } = input;
   console.log(
-    `Clicking mouse ${button} ${clickCount} times ${coordinates ? `at coordinates: [${coordinates.x}, ${coordinates.y}] ` : ''} ${holdKeys ? `with holdKeys: ${holdKeys}` : ''}`,
+    `Clicking mouse ${button} ${clickCount} times ${coordinates ? `at coordinates: [${coordinates.x}, ${coordinates.y}] ` : ''} ${holdKeys ? `with holdKeys: ${JSON.stringify(holdKeys)}` : ''}`,
   );
 
   try {
@@ -342,7 +373,7 @@ async function dragMouse(input: {
 }): Promise<void> {
   const { path, button, holdKeys } = input;
   console.log(
-    `Dragging mouse to path: ${path} ${holdKeys ? `with holdKeys: ${holdKeys}` : ''}`,
+    `Dragging mouse to path: ${JSON.stringify(path)} ${holdKeys ? `with holdKeys: ${JSON.stringify(holdKeys)}` : ''}`,
   );
 
   try {
@@ -396,7 +427,7 @@ async function typeKeys(input: {
   delay?: number;
 }): Promise<void> {
   const { keys, delay } = input;
-  console.log(`Typing keys: ${keys}`);
+  console.log(`Typing keys: ${JSON.stringify(keys)}`);
 
   try {
     await fetch(`${BYTEBOT_DESKTOP_BASE_URL}/computer-use`, {
@@ -419,7 +450,7 @@ async function pressKeys(input: {
   press: Press;
 }): Promise<void> {
   const { keys, press } = input;
-  console.log(`Pressing keys: ${keys}`);
+  console.log(`Pressing keys: ${JSON.stringify(keys)}`);
 
   try {
     await fetch(`${BYTEBOT_DESKTOP_BASE_URL}/computer-use`, {
@@ -510,7 +541,7 @@ async function cursorPosition(): Promise<Coordinates> {
       }),
     });
 
-    const data = await response.json();
+    const data = await response.json() as { x: number; y: number };
     return { x: data.x, y: data.y };
   } catch (error) {
     console.error('Error in cursor_position action:', error);

@@ -1,10 +1,45 @@
-import { ChatCompletionTool } from 'openai/resources';
+import { ChatCompletionTool, FunctionParameters } from 'openai/resources';
 import { agentTools } from '../agent/agent.tools';
+
+/**
+ * Interface for agent tool structure
+ */
+interface AgentTool {
+  name: string;
+  description: string;
+  input_schema: FunctionParameters;
+}
+
+/**
+ * Type guard to validate agent tool structure
+ */
+function isValidAgentTool(tool: unknown): tool is AgentTool {
+  return (
+    typeof tool === 'object' &&
+    tool !== null &&
+    'name' in tool &&
+    'description' in tool &&
+    'input_schema' in tool &&
+    typeof (tool as AgentTool).name === 'string' &&
+    typeof (tool as AgentTool).description === 'string' &&
+    typeof (tool as AgentTool).input_schema === 'object' &&
+    (tool as AgentTool).input_schema !== null
+  );
+}
 
 /**
  * Converts an agent tool definition to OpenAI Chat Completion tool format
  */
-function agentToolToChatCompletionTool(agentTool: any): ChatCompletionTool {
+function agentToolToChatCompletionTool(
+  agentTool: AgentTool,
+): ChatCompletionTool {
+  // Validate tool structure at runtime for additional safety
+  if (!isValidAgentTool(agentTool)) {
+    throw new Error(
+      `Invalid agent tool structure: ${JSON.stringify(agentTool)}`,
+    );
+  }
+
   return {
     type: 'function',
     function: {
@@ -34,7 +69,7 @@ function convertToCamelCase(name: string): string {
  * All tools converted to Chat Completion format
  */
 export const proxyTools: ChatCompletionTool[] = agentTools.map((tool) =>
-  agentToolToChatCompletionTool(tool),
+  agentToolToChatCompletionTool(tool as AgentTool),
 );
 
 /**
@@ -42,8 +77,9 @@ export const proxyTools: ChatCompletionTool[] = agentTools.map((tool) =>
  */
 const toolMap = agentTools.reduce(
   (acc, tool) => {
-    const chatCompletionTool = agentToolToChatCompletionTool(tool);
-    const camelCaseName = convertToCamelCase(tool.name);
+    const agentTool = tool as AgentTool;
+    const chatCompletionTool = agentToolToChatCompletionTool(agentTool);
+    const camelCaseName = convertToCamelCase(agentTool.name);
     acc[camelCaseName + 'Tool'] = chatCompletionTool;
     return acc;
   },

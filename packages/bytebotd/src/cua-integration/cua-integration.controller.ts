@@ -27,6 +27,14 @@ import {
   BadRequestException,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { CuaIntegrationService } from './cua-integration.service';
+import {
+  CuaVisionService,
+  OcrResult,
+  VisionProcessingOptions,
+} from './cua-vision.service';
+import { CuaPerformanceService } from './cua-performance.service';
+import { CuaBridgeService } from './cua-bridge.service';
 
 /**
  * Error Handler Utility for safe error processing
@@ -95,14 +103,6 @@ export class ErrorHandler {
     };
   }
 }
-import { CuaIntegrationService } from './cua-integration.service';
-import {
-  CuaVisionService,
-  OcrResult,
-  VisionProcessingOptions,
-} from './cua-vision.service';
-import { CuaPerformanceService } from './cua-performance.service';
-import { CuaBridgeService } from './cua-bridge.service';
 
 /**
  * OCR Request DTO

@@ -158,7 +158,7 @@ export class InputCaptureService {
     });
   }
 
-  async stop() {
+  stop() {
     if (!this.socket) return;
     if (this.socket.connected) this.socket.disconnect();
     else this.socket.removeAllListeners();

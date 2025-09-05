@@ -94,8 +94,8 @@ export class AnthropicService implements BytebotAgentService {
         throw new BytebotAgentInterrupt();
       }
       this.logger.error(
-        `Error sending message to Anthropic: ${error.message}`,
-        error.stack,
+        `Error sending message to Anthropic: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
       );
       throw error;
     }

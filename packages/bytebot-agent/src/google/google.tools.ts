@@ -1,6 +1,31 @@
 import { FunctionDeclaration, Type } from '@google/genai';
 import { agentTools } from '../agent/agent.tools';
 
+// Define interfaces for JSON Schema
+interface JsonSchemaProperty {
+  type: string;
+  description?: string;
+  enum?: unknown[];
+  nullable?: boolean;
+  items?: JsonSchemaProperty;
+  properties?: Record<string, JsonSchemaProperty>;
+  required?: string[];
+}
+
+// Type guard for JsonSchemaProperty
+function isValidJsonSchema(schema: unknown): schema is JsonSchemaProperty {
+  if (typeof schema !== 'object' || schema === null) return false;
+  const s = schema as Record<string, unknown>;
+  return typeof s.type === 'string';
+}
+
+// Define interface for agent tool
+interface AgentTool {
+  name: string;
+  description: string;
+  input_schema: JsonSchemaProperty;
+}
+
 /**
  * Converts JSON Schema type to Google Genai Type
  */
@@ -26,10 +51,12 @@ function jsonSchemaTypeToGoogleType(type: string): Type {
 /**
  * Converts JSON Schema to Google Genai parameter schema
  */
-function convertJsonSchemaToGoogleSchema(schema: any): any {
-  if (!schema) return {};
+function convertJsonSchemaToGoogleSchema(
+  schema: unknown,
+): Record<string, unknown> {
+  if (!schema || !isValidJsonSchema(schema)) return {};
 
-  const result: any = {
+  const result: Record<string, unknown> = {
     type: jsonSchemaTypeToGoogleType(schema.type),
   };
 
@@ -51,10 +78,11 @@ function convertJsonSchemaToGoogleSchema(schema: any): any {
   }
 
   if (schema.type === 'object' && schema.properties) {
-    result.properties = {};
+    const properties: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(schema.properties)) {
-      result.properties[key] = convertJsonSchemaToGoogleSchema(value);
+      properties[key] = convertJsonSchemaToGoogleSchema(value);
     }
+    result.properties = properties;
     if (schema.required) {
       result.required = schema.required;
     }
@@ -66,12 +94,24 @@ function convertJsonSchemaToGoogleSchema(schema: any): any {
 /**
  * Converts an agent tool definition to a Google FunctionDeclaration
  */
-function agentToolToGoogleTool(agentTool: any): FunctionDeclaration {
-  const parameters = convertJsonSchemaToGoogleSchema(agentTool.input_schema);
+function agentToolToGoogleTool(agentTool: unknown): FunctionDeclaration {
+  // Type guard for agent tool
+  if (typeof agentTool !== 'object' || agentTool === null) {
+    throw new Error('Invalid agent tool: must be an object');
+  }
+
+  const tool = agentTool as Record<string, unknown>;
+
+  if (typeof tool.name !== 'string' || typeof tool.description !== 'string') {
+    throw new Error('Invalid agent tool: name and description must be strings');
+  }
+
+  const typedTool = tool as unknown as AgentTool;
+  const parameters = convertJsonSchemaToGoogleSchema(typedTool.input_schema);
 
   return {
-    name: agentTool.name,
-    description: agentTool.description,
+    name: typedTool.name,
+    description: typedTool.description,
     parameters,
   };
 }

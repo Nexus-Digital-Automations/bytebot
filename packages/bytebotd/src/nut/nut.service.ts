@@ -175,17 +175,21 @@ export class NutService {
 
     // Create screenshot directory if it doesn't exist
     this.screenshotDir = path.join('/tmp', 'bytebot-screenshots');
-    void import('fs').then((fs) => {
-      fs.promises
-        .mkdir(this.screenshotDir, { recursive: true })
-        .catch((err: unknown) => {
-          const errorMessage =
-            err instanceof Error ? err.message : 'Unknown error';
-          this.logger.error(
-            `Failed to create screenshot directory: ${errorMessage}`,
-          );
-        });
-    });
+    void import('fs')
+      .then((fs) => {
+        return fs.promises
+          ?.mkdir(this.screenshotDir, { recursive: true })
+          ?.catch((err: unknown) => {
+            const errorMessage =
+              err instanceof Error ? err.message : 'Unknown error';
+            this.logger.error(
+              `Failed to create screenshot directory: ${errorMessage}`,
+            );
+          });
+      })
+      .catch((importError) => {
+        this.logger.error('Failed to import fs module:', importError);
+      });
   }
 
   /**

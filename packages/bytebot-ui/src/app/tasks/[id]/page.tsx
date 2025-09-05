@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { Header } from "@/components/layout/Header";
 import { ChatContainer } from "@/components/messages/ChatContainer";
 import { DesktopContainer } from "@/components/ui/desktop-container";
@@ -48,13 +48,13 @@ export default function TaskPage() {
   } = useChatSession({ initialTaskId: taskId });
 
   // Determine if task is inactive (show screenshot) or active (show VNC)
-  function isTaskInactive(): boolean {
+  const isTaskInactive = useCallback((): boolean => {
     return (
       taskStatus === TaskStatus.COMPLETED ||
       taskStatus === TaskStatus.FAILED ||
       taskStatus === TaskStatus.CANCELLED
     );
-  }
+  }, [taskStatus]);
 
   // Determine if user can take control
   function canTakeOver(): boolean {
@@ -89,15 +89,17 @@ export default function TaskPage() {
   });
 
   // For inactive tasks, auto-load all messages for proper screenshot navigation
+  const taskInactive = isTaskInactive();
   useEffect(() => {
-    if (isTaskInactive() && hasMoreMessages && !isLoadingMoreMessages) {
+    if (taskInactive && hasMoreMessages && !isLoadingMoreMessages) {
       loadMoreMessages();
     }
   }, [
-    isTaskInactive(),
+    taskInactive,
     hasMoreMessages,
     isLoadingMoreMessages,
     loadMoreMessages,
+    isTaskInactive,
   ]);
 
   // Map each message ID to its flat index for screenshot scroll logic

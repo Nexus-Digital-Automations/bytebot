@@ -52,7 +52,13 @@ export class TasksService {
           priority: createTaskDto.priority || TaskPriority.MEDIUM,
           status: TaskStatus.PENDING,
           createdBy: createTaskDto.createdBy || Role.USER,
-          model: createTaskDto.model,
+          ...(createTaskDto.model != null
+            ? {
+                model: JSON.stringify(
+                  createTaskDto.model,
+                ) as Prisma.InputJsonValue,
+              }
+            : { model: Prisma.JsonNull }),
           ...(createTaskDto.scheduledFor
             ? { scheduledFor: createTaskDto.scheduledFor }
             : {}),
@@ -207,9 +213,14 @@ export class TasksService {
 
       this.logger.debug(`Retrieved task with ID: ${id}`);
       return task;
-    } catch (error: any) {
-      this.logger.error(`Error retrieving task ID: ${id} - ${error.message}`);
-      this.logger.error(error.stack);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Error retrieving task ID: ${id} - ${errorMessage}`);
+      if (errorStack) {
+        this.logger.error(errorStack);
+      }
       throw error;
     }
   }

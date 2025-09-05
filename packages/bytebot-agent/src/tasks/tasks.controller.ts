@@ -20,6 +20,45 @@ import { OPENAI_MODELS } from '../openai/openai.constants';
 import { GOOGLE_MODELS } from '../google/google.constants';
 import { BytebotAgentModel } from 'src/agent/agent.types';
 
+// Type definitions for proxy API responses
+interface ProxyModelData {
+  litellm_params: {
+    model: string;
+  };
+  model_name: string;
+}
+
+interface ProxyModelsResponse {
+  data: ProxyModelData[];
+}
+
+function isProxyModelsResponse(
+  response: unknown,
+): response is ProxyModelsResponse {
+  return (
+    typeof response === 'object' &&
+    response !== null &&
+    'data' in response &&
+    Array.isArray((response as { data: unknown }).data)
+  );
+}
+
+function isProxyModelData(item: unknown): item is ProxyModelData {
+  return (
+    typeof item === 'object' &&
+    item !== null &&
+    'litellm_params' in item &&
+    'model_name' in item &&
+    typeof (item as { litellm_params: unknown }).litellm_params === 'object' &&
+    (item as { litellm_params: unknown }).litellm_params !== null &&
+    'model' in
+      (item as { litellm_params: { model: unknown } }).litellm_params &&
+    typeof (item as { litellm_params: { model: unknown } }).litellm_params
+      .model === 'string' &&
+    typeof (item as { model_name: unknown }).model_name === 'string'
+  );
+}
+
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 const openaiApiKey = process.env.OPENAI_API_KEY;
@@ -84,25 +123,34 @@ export class TasksController {
           );
         }
 
-        const proxyModels = await response.json();
+        const proxyModels: unknown = await response.json();
 
-        // Map proxy response to BytebotAgentModel format
-        const models: BytebotAgentModel[] = proxyModels.data.map(
-          (model: any) => ({
+        if (!isProxyModelsResponse(proxyModels)) {
+          throw new HttpException(
+            'Invalid response format from proxy',
+            HttpStatus.BAD_GATEWAY,
+          );
+        }
+
+        // Map proxy response to BytebotAgentModel format with type validation
+        const models: BytebotAgentModel[] = proxyModels.data
+          .filter(isProxyModelData)
+          .map((model) => ({
             provider: 'proxy',
             name: model.litellm_params.model,
             title: model.model_name,
             contextWindow: 128000,
-          }),
-        );
+          }));
 
         return models;
       } catch (error) {
         if (error instanceof HttpException) {
           throw error;
         }
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         throw new HttpException(
-          `Error fetching models: ${error.message}`,
+          `Error fetching models: ${errorMessage}`,
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }

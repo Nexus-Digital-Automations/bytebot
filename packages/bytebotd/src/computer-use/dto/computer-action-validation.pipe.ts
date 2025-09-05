@@ -101,13 +101,11 @@ export class ComputerActionValidationPipe
    * Validates and transforms raw input data into a strongly-typed action DTO
    *
    * @param value - Raw input data from the request body
-   * @param _metadata - ArgumentMetadata (required by interface but unused)
    * @returns Promise<ComputerActionDto> - Validated and transformed DTO instance
    * @throws BadRequestException - When validation fails or action is unsupported
    */
   async transform(
     value: unknown,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _metadata: ArgumentMetadata,
   ): Promise<ComputerActionDto> {
     // Validate input structure and extract action field

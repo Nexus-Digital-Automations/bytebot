@@ -1,0 +1,262 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { io, Socket } from 'socket.io-client';
+import { randomUUID } from 'crypto';
+import {
+  convertClickMouseActionToToolUseBlock,
+  convertDragMouseActionToToolUseBlock,
+  convertPressKeysActionToToolUseBlock,
+  convertPressMouseActionToToolUseBlock,
+  convertScrollActionToToolUseBlock,
+  convertTypeKeysActionToToolUseBlock,
+  convertTypeTextActionToToolUseBlock,
+  MessageContentType,
+  UserActionContentBlock,
+  ClickMouseAction as SharedClickMouseAction,
+  DragMouseAction as SharedDragMouseAction,
+  PressMouseAction as SharedPressMouseAction,
+  TypeKeysAction as SharedTypeKeysAction,
+  PressKeysAction as SharedPressKeysAction,
+  TypeTextAction as SharedTypeTextAction,
+  ScrollAction as SharedScrollAction,
+} from '@bytebot/shared';
+import { Role } from '@prisma/client';
+import { MessagesService } from '../messages/messages.service';
+import { ConfigService } from '@nestjs/config';
+
+// Define interfaces for action types
+interface ActionBase {
+  action: string;
+}
+
+interface ClickMouseAction extends ActionBase {
+  action: 'click_mouse';
+}
+
+interface DragMouseAction extends ActionBase {
+  action: 'drag_mouse';
+}
+
+interface PressMouseAction extends ActionBase {
+  action: 'press_mouse';
+}
+
+interface TypeKeysAction extends ActionBase {
+  action: 'type_keys';
+}
+
+interface PressKeysAction extends ActionBase {
+  action: 'press_keys';
+}
+
+interface TypeTextAction extends ActionBase {
+  action: 'type_text';
+}
+
+interface ScrollAction extends ActionBase {
+  action: 'scroll';
+}
+
+type UserAction =
+  | ClickMouseAction
+  | DragMouseAction
+  | PressMouseAction
+  | TypeKeysAction
+  | PressKeysAction
+  | TypeTextAction
+  | ScrollAction;
+
+@Injectable()
+export class InputCaptureService {
+  private readonly logger = new Logger(InputCaptureService.name);
+  private socket: Socket | null = null;
+  private capturing = false;
+
+  constructor(
+    private readonly messagesService: MessagesService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  isCapturing() {
+    return this.capturing;
+  }
+
+  start(taskId: string) {
+    if (this.socket?.connected && this.capturing) return;
+
+    if (this.socket && !this.socket.connected) {
+      this.socket.connect();
+      return;
+    }
+
+    const baseUrl = this.configService.get<string>('BYTEBOT_DESKTOP_BASE_URL');
+    if (!baseUrl) {
+      this.logger.warn('BYTEBOT_DESKTOP_BASE_URL missing.');
+      return;
+    }
+
+    this.socket = io(baseUrl, { transports: ['websocket'] });
+
+    this.socket.on('connect', () => {
+      this.logger.log('Input socket connected');
+      this.capturing = true;
+    });
+
+    this.socket.on(
+      'screenshotAndAction',
+      async (shot: { image: string }, action: UserAction) => {
+        if (!this.capturing || !taskId) return;
+        // The gateway only sends a click_mouse or drag_mouse action together with screenshots for now.
+        if (action.action !== 'click_mouse' && action.action !== 'drag_mouse')
+          return;
+
+        const userActionBlock: UserActionContentBlock = {
+          type: MessageContentType.UserAction,
+          content: [
+            {
+              type: MessageContentType.Image,
+              source: {
+                data: shot.image,
+                media_type: 'image/png',
+                type: 'base64',
+              },
+            },
+          ],
+        };
+
+        const toolUseId = randomUUID();
+        switch (action.action) {
+          case 'drag_mouse': {
+            const dragAction: SharedDragMouseAction = {
+              action: 'drag_mouse',
+              path: (action as any).path || [],
+              button: (action as any).button || ('left' as const),
+            };
+            userActionBlock.content.push(
+              convertDragMouseActionToToolUseBlock(dragAction, toolUseId),
+            );
+            break;
+          }
+          case 'click_mouse': {
+            const clickAction: SharedClickMouseAction = {
+              action: 'click_mouse',
+              coordinates: (action as any).coordinates,
+              button: (action as any).button || ('left' as const),
+              clickCount: (action as any).clickCount || 1,
+            };
+            userActionBlock.content.push(
+              convertClickMouseActionToToolUseBlock(clickAction, toolUseId),
+            );
+            break;
+          }
+        }
+
+        await this.messagesService.create({
+          content: [userActionBlock],
+          role: Role.USER,
+          taskId,
+        });
+      },
+    );
+
+    this.socket.on('action', async (action: UserAction) => {
+      if (!this.capturing || !taskId) return;
+      const toolUseId = randomUUID();
+      const userActionBlock: UserActionContentBlock = {
+        type: MessageContentType.UserAction,
+        content: [],
+      };
+
+      switch (action.action) {
+        case 'drag_mouse': {
+          const dragAction: SharedDragMouseAction = {
+            action: 'drag_mouse',
+            path: (action as any).path || [],
+            button: (action as any).button || ('left' as const),
+          };
+          userActionBlock.content.push(
+            convertDragMouseActionToToolUseBlock(dragAction, toolUseId),
+          );
+          break;
+        }
+        case 'press_mouse': {
+          const pressAction: SharedPressMouseAction = {
+            action: 'press_mouse',
+            coordinates: (action as any).coordinates,
+            button: (action as any).button || ('left' as const),
+            press: (action as any).press || true,
+          };
+          userActionBlock.content.push(
+            convertPressMouseActionToToolUseBlock(pressAction, toolUseId),
+          );
+          break;
+        }
+        case 'type_keys': {
+          const typeKeysAction: SharedTypeKeysAction = {
+            action: 'type_keys',
+            keys: (action as any).keys || [],
+          };
+          userActionBlock.content.push(
+            convertTypeKeysActionToToolUseBlock(typeKeysAction, toolUseId),
+          );
+          break;
+        }
+        case 'press_keys': {
+          const pressKeysAction: SharedPressKeysAction = {
+            action: 'press_keys',
+            keys: (action as any).keys || [],
+            press: (action as any).press || true,
+          };
+          userActionBlock.content.push(
+            convertPressKeysActionToToolUseBlock(pressKeysAction, toolUseId),
+          );
+          break;
+        }
+        case 'type_text': {
+          const typeTextAction: SharedTypeTextAction = {
+            action: 'type_text',
+            text: (action as any).text || '',
+          };
+          userActionBlock.content.push(
+            convertTypeTextActionToToolUseBlock(typeTextAction, toolUseId),
+          );
+          break;
+        }
+        case 'scroll': {
+          const scrollAction: SharedScrollAction = {
+            action: 'scroll',
+            coordinates: (action as any).coordinates,
+            direction: (action as any).direction || ('up' as const),
+            scrollCount: (action as any).scrollCount || 1,
+          };
+          userActionBlock.content.push(
+            convertScrollActionToToolUseBlock(scrollAction, toolUseId),
+          );
+          break;
+        }
+        default:
+          this.logger.warn(`Unknown action ${action.action}`);
+      }
+
+      if (userActionBlock.content.length > 0) {
+        await this.messagesService.create({
+          content: [userActionBlock],
+          role: Role.USER,
+          taskId,
+        });
+      }
+    });
+
+    this.socket.on('disconnect', () => {
+      this.logger.log('Input socket disconnected');
+      this.capturing = false;
+    });
+  }
+
+  stop() {
+    if (!this.socket) return;
+    if (this.socket.connected) this.socket.disconnect();
+    else this.socket.removeAllListeners();
+    this.socket = null;
+    this.capturing = false;
+  }
+}

@@ -21,11 +21,8 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
-import { firstValueFrom } from 'rxjs';
 import { CuaIntegrationConfig } from './cua-integration.service';
-import { CuaPerformanceService } from './cua-performance.service';
+import { firstValueFrom } from 'rxjs';
 import * as crypto from 'crypto';
 
 /**
@@ -82,12 +79,8 @@ export class CuaBridgeService implements OnModuleInit, OnModuleDestroy {
   private readonly HEALTH_CHECK_INTERVAL = 30000; // 30 seconds
   private readonly MAX_RETRY_ATTEMPTS = 3;
 
-  constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-    private readonly performanceService: CuaPerformanceService,
-  ) {
-    this.config = this.configService.get<CuaIntegrationConfig>('cua') || {
+  constructor() {
+    this.config = {
       framework: {
         enabled: false,
         containerId: 'unknown',
@@ -471,7 +464,7 @@ export class CuaBridgeService implements OnModuleInit, OnModuleDestroy {
       // Add resolve/reject handlers to request with proper typing
       const extendedRequest = request as BridgeRequest & {
         resolve: (value: BridgeResponse<T>) => void;
-        reject: (reason?: unknown) => void;
+        reject: (_reason?: unknown) => void;
       };
       extendedRequest.resolve = resolve;
       extendedRequest.reject = reject;
@@ -518,12 +511,12 @@ export class CuaBridgeService implements OnModuleInit, OnModuleDestroy {
       try {
         const result = await this.executeRequest(request);
         const extendedRequest = request as BridgeRequest & {
-          resolve: (value: BridgeResponse<unknown>) => void;
+          resolve: (_value: BridgeResponse<unknown>) => void;
         };
         extendedRequest.resolve(result);
       } catch (error: unknown) {
         const extendedRequest = request as BridgeRequest & {
-          reject: (reason?: unknown) => void;
+          reject: (_reason?: unknown) => void;
         };
         extendedRequest.reject(error);
       }

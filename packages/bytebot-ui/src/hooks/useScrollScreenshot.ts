@@ -1,14 +1,22 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Message } from '@/types';
-import { extractScreenshots, getScreenshotForScrollPosition, ScreenshotData } from '@/utils/screenshotUtils';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Message } from "@/types";
+import {
+  extractScreenshots,
+  getScreenshotForScrollPosition,
+  ScreenshotData,
+} from "@/utils/screenshotUtils";
 
 interface UseScrollScreenshotProps {
   messages: Message[];
   scrollContainerRef: React.RefObject<HTMLElement | null>;
 }
 
-export function useScrollScreenshot({ messages, scrollContainerRef }: UseScrollScreenshotProps) {
-  const [currentScreenshot, setCurrentScreenshot] = useState<ScreenshotData | null>(null);
+export function useScrollScreenshot({
+  messages,
+  scrollContainerRef,
+}: UseScrollScreenshotProps) {
+  const [currentScreenshot, setCurrentScreenshot] =
+    useState<ScreenshotData | null>(null);
   const [allScreenshots, setAllScreenshots] = useState<ScreenshotData[]>([]);
   const lastScrollTime = useRef<number>(0);
 
@@ -16,14 +24,14 @@ export function useScrollScreenshot({ messages, scrollContainerRef }: UseScrollS
   useEffect(() => {
     const screenshots = extractScreenshots(messages);
     setAllScreenshots(screenshots);
-    
+
     // Only set initial screenshot if we don't have one yet
     if (screenshots.length > 0 && !currentScreenshot) {
       setTimeout(() => {
         const initialScreenshot = getScreenshotForScrollPosition(
           screenshots,
           messages,
-          scrollContainerRef.current
+          scrollContainerRef.current,
         );
         if (initialScreenshot) {
           setCurrentScreenshot(initialScreenshot);
@@ -37,12 +45,12 @@ export function useScrollScreenshot({ messages, scrollContainerRef }: UseScrollS
       // When messages update, trigger a re-check
       setTimeout(() => {
         if (scrollContainerRef.current) {
-          const event = new Event('scroll');
+          const event = new Event("scroll");
           scrollContainerRef.current.dispatchEvent(event);
         }
       }, 300);
     }
-  }, [messages, scrollContainerRef]);
+  }, [messages, scrollContainerRef, currentScreenshot]);
 
   // After initial render, force a re-check for screenshot markers using MutationObserver
   useEffect(() => {
@@ -53,7 +61,7 @@ export function useScrollScreenshot({ messages, scrollContainerRef }: UseScrollS
     const observer = new MutationObserver(() => {
       clearTimeout(mutationTimeout);
       mutationTimeout = setTimeout(() => {
-        const event = new Event('scroll');
+        const event = new Event("scroll");
         container.dispatchEvent(event);
       }, 200);
     });
@@ -66,28 +74,34 @@ export function useScrollScreenshot({ messages, scrollContainerRef }: UseScrollS
     };
   }, [scrollContainerRef, allScreenshots.length]);
 
-
   // Handle scroll events to update current screenshot
-  const handleScroll = useCallback((scrollElement: HTMLElement) => {
-    if (allScreenshots.length === 0) return;
+  const handleScroll = useCallback(
+    (scrollElement: HTMLElement) => {
+      if (allScreenshots.length === 0) return;
 
-    const now = Date.now();
-    if (now - lastScrollTime.current < 100) return;
-    lastScrollTime.current = now;
+      const now = Date.now();
+      if (now - lastScrollTime.current < 100) return;
+      lastScrollTime.current = now;
 
-    setTimeout(() => {
-      if ((Date.now() - now) <= 150 && allScreenshots.length > 0) {
-        setCurrentScreenshot(prevScreenshot => {
-          const screenshot = getScreenshotForScrollPosition(allScreenshots, messages, scrollElement);
-          
-          if (screenshot && screenshot.id !== prevScreenshot?.id) {
-            return screenshot;
-          }
-          return prevScreenshot;
-        });
-      }
-    }, 50);
-  }, [allScreenshots, messages]);
+      setTimeout(() => {
+        if (Date.now() - now <= 150 && allScreenshots.length > 0) {
+          setCurrentScreenshot((prevScreenshot) => {
+            const screenshot = getScreenshotForScrollPosition(
+              allScreenshots,
+              messages,
+              scrollElement,
+            );
+
+            if (screenshot && screenshot.id !== prevScreenshot?.id) {
+              return screenshot;
+            }
+            return prevScreenshot;
+          });
+        }
+      }, 50);
+    },
+    [allScreenshots, messages],
+  );
 
   // Attach scroll listener
   useEffect(() => {
@@ -102,9 +116,9 @@ export function useScrollScreenshot({ messages, scrollContainerRef }: UseScrollS
     };
 
     // Only attach to the container itself
-    container.addEventListener('scroll', scrollHandler, { passive: true });
-    
-    return () => container.removeEventListener('scroll', scrollHandler);
+    container.addEventListener("scroll", scrollHandler, { passive: true });
+
+    return () => container.removeEventListener("scroll", scrollHandler);
   }, [handleScroll, scrollContainerRef]);
 
   return {

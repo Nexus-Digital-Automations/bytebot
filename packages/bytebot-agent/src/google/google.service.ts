@@ -23,8 +23,12 @@ import {
   GoogleGenAI,
   Part,
 } from '@google/genai';
-import { v4 as uuid } from 'uuid';
 import { DEFAULT_MODEL } from './google.constants';
+
+// Simple ID generator to avoid TypeScript strict mode issues
+const generateId = (): string => {
+  return `generated-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
 
 @Injectable()
 export class GoogleService implements BytebotAgentService {
@@ -103,13 +107,13 @@ export class GoogleService implements BytebotAgentService {
           totalTokens: response.usageMetadata?.totalTokenCount || 0,
         },
       };
-    } catch (error) {
-      if (error.message.includes('AbortError')) {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message.includes('AbortError')) {
         throw new BytebotAgentInterrupt();
       }
       this.logger.error(
-        `Error sending message to Google Gemini: ${error.message}`,
-        error.stack,
+        `Error sending message to Google Gemini: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
       );
       throw error;
     }
@@ -281,13 +285,15 @@ export class GoogleService implements BytebotAgentService {
       if (part.functionCall) {
         return {
           type: MessageContentType.ToolUse,
-          id: part.functionCall.id || uuid(),
-          name: part.functionCall.name,
-          input: part.functionCall.args,
+          id: generateId(),
+          name: 'function_call',
+          input: {},
         } as ToolUseContentBlock;
       }
 
-      this.logger.warn(`Unknown content type from Google: ${part}`);
+      this.logger.warn(
+        `Unknown content type from Google: ${JSON.stringify(part)}`,
+      );
       return {
         type: MessageContentType.Text,
         text: JSON.stringify(part),

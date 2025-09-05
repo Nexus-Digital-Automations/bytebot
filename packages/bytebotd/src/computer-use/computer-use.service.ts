@@ -196,9 +196,7 @@ export interface ApplicationCommandMap {
 /**
  * Process mapping interface for window management
  */
-export type ProcessMap = {
-  readonly [K in Application]: string;
-};
+export type ProcessMap = Record<Application, string>;
 
 /**
  * MIME type mapping for file media type detection
@@ -309,6 +307,7 @@ export class ComputerUseService {
    * @param cuaVisionService - Optional C/ua vision processing service
    * @param performanceService - Optional performance monitoring service
    */
+
   constructor(
     private readonly nutService: NutService,
     private readonly cuaIntegrationService?: CuaIntegrationService,
@@ -324,6 +323,11 @@ export class ComputerUseService {
       hasCuaVision: !!this.cuaVisionService,
       hasPerformanceService: !!this.performanceService,
     });
+
+    // Use injected services to initialize capabilities
+    if (this.performanceService) {
+      this.logger.debug(`[${operationId}] Performance monitoring enabled`);
+    }
 
     // Check if C/ua framework is enabled and available with safe access
     this.cuaEnabled = this.cuaIntegrationService?.isFrameworkEnabled() ?? false;

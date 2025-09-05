@@ -277,12 +277,14 @@ export class AgentProcessor {
       return;
     }
 
+    await Promise.resolve(); // Satisfy async requirement
+
     this.logger.log(`Stopping execution of task ${this.currentTaskId}`);
 
     // Signal any in-flight async operations to abort
     this.abortController?.abort();
 
-    await this.inputCaptureService.stop();
+    this.inputCaptureService.stop();
 
     this.isProcessing = false;
     this.currentTaskId = null;

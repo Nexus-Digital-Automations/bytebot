@@ -4,8 +4,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import * as express from 'express';
 import { json, urlencoded } from 'express';
 import { Logger } from '@nestjs/common';
-import type { Server } from 'http';
-import type { IncomingMessage } from 'http';
+import type { Server, IncomingMessage } from 'http';
 import type { Socket } from 'net';
 
 /**
