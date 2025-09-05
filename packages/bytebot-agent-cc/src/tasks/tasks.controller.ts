@@ -14,7 +14,6 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { Message, Task } from '@prisma/client';
 import { AddTaskMessageDto } from './dto/add-task-message.dto';
 import { MessagesService } from '../messages/messages.service';
-import { BytebotAgentModel } from 'src/agent/agent.types';
 
 @Controller('tasks')
 export class TasksController {

@@ -29,13 +29,13 @@ export class TasksGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('join_task')
   handleJoinTask(client: Socket, taskId: string) {
-    client.join(`task_${taskId}`);
+    void client.join(`task_${taskId}`);
     console.log(`Client ${client.id} joined task ${taskId}`);
   }
 
   @SubscribeMessage('leave_task')
   handleLeaveTask(client: Socket, taskId: string) {
-    client.leave(`task_${taskId}`);
+    void client.leave(`task_${taskId}`);
     console.log(`Client ${client.id} left task ${taskId}`);
   }
 

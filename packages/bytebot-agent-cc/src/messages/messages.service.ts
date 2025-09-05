@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  Inject,
-  forwardRef,
-} from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Message, Role, Prisma } from '@prisma/client';
 import {
@@ -52,7 +47,7 @@ export class MessagesService {
   }
 
   async findEvery(taskId: string): Promise<Message[]> {
-    return this.prisma.message.findMany({
+    return await this.prisma.message.findMany({
       where: {
         taskId,
       },
@@ -74,7 +69,7 @@ export class MessagesService {
     // Calculate offset based on page and limit
     const offset = (page - 1) * limit;
 
-    return this.prisma.message.findMany({
+    return await this.prisma.message.findMany({
       where: {
         taskId,
       },
@@ -87,7 +82,7 @@ export class MessagesService {
   }
 
   async findUnsummarized(taskId: string): Promise<Message[]> {
-    return this.prisma.message.findMany({
+    return await this.prisma.message.findMany({
       where: {
         taskId,
         // find messages that don't have a summaryId

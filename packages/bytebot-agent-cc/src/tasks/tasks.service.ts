@@ -23,6 +23,36 @@ import { TasksGateway } from './tasks.gateway';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
+// Type definitions for safe API interactions
+interface SafeError {
+  message: string;
+  stack?: string;
+  name?: string;
+}
+
+// Type guard for error objects
+function isSafeError(error: unknown): error is SafeError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message: unknown }).message === 'string'
+  );
+}
+
+// Type guard for model assignment
+function isValidModel(model: unknown): model is string | null {
+  return model === null || model === undefined || typeof model === 'string';
+}
+
+// Safe model converter
+function getSafeModel(model: unknown): string | undefined {
+  if (isValidModel(model)) {
+    return model ?? undefined;
+  }
+  return undefined;
+}
+
 @Injectable()
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
@@ -45,18 +75,20 @@ export class TasksService {
     const task = await this.prisma.$transaction(async (prisma) => {
       // Create the task first
       this.logger.debug('Creating task record in database');
+      const taskData: any = {
+        description: createTaskDto.description,
+        type: createTaskDto.type || TaskType.IMMEDIATE,
+        priority: createTaskDto.priority || TaskPriority.MEDIUM,
+        status: TaskStatus.PENDING,
+        createdBy: createTaskDto.createdBy || Role.USER,
+      };
+
+      if (createTaskDto.scheduledFor) {
+        taskData.scheduledFor = createTaskDto.scheduledFor;
+      }
+
       const task = await prisma.task.create({
-        data: {
-          description: createTaskDto.description,
-          type: createTaskDto.type || TaskType.IMMEDIATE,
-          priority: createTaskDto.priority || TaskPriority.MEDIUM,
-          status: TaskStatus.PENDING,
-          createdBy: createTaskDto.createdBy || Role.USER,
-          model: createTaskDto.model,
-          ...(createTaskDto.scheduledFor
-            ? { scheduledFor: createTaskDto.scheduledFor }
-            : {}),
-        },
+        data: taskData,
       });
       this.logger.log(`Task created successfully with ID: ${task.id}`);
 
@@ -207,9 +239,16 @@ export class TasksService {
 
       this.logger.debug(`Retrieved task with ID: ${id}`);
       return task;
-    } catch (error: any) {
-      this.logger.error(`Error retrieving task ID: ${id} - ${error.message}`);
-      this.logger.error(error.stack);
+    } catch (error: unknown) {
+      const safeError = isSafeError(error)
+        ? error
+        : { message: 'Unknown error occurred' };
+      this.logger.error(
+        `Error retrieving task ID: ${id} - ${safeError.message}`,
+      );
+      if (safeError.stack) {
+        this.logger.error(safeError.stack);
+      }
       throw error;
     }
   }

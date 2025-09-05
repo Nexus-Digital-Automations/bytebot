@@ -5,7 +5,7 @@ import { json, urlencoded } from 'express';
 
 // Polyfill for crypto global (required by @nestjs/schedule)
 if (!globalThis.crypto) {
-  globalThis.crypto = webcrypto as any;
+  globalThis.crypto = webcrypto as Crypto;
 }
 
 async function bootstrap() {
@@ -32,4 +32,7 @@ async function bootstrap() {
     console.error('Error starting application:', error);
   }
 }
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('Failed to start application:', error);
+  process.exit(1);
+});

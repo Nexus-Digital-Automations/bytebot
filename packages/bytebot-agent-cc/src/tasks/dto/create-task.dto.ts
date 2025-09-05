@@ -50,7 +50,8 @@ export class CreateTaskDto {
   createdBy?: Role;
 
   @IsOptional()
-  model?: any;
+  @IsString()
+  model?: string | null;
 
   @IsOptional()
   @IsArray()

@@ -35,7 +35,9 @@ function getErrorMessage(error: unknown): string {
   }
   if (error && typeof error === 'object' && 'message' in error) {
     const errorObj = error as { message: unknown };
-    return typeof errorObj.message === 'string' ? errorObj.message : String(error);
+    return typeof errorObj.message === 'string'
+      ? errorObj.message
+      : JSON.stringify(error);
   }
   return String(error);
 }
@@ -86,7 +88,10 @@ export async function handleComputerToolUse(
         ],
       };
     } catch (error) {
-      logger.error(`Screenshot failed: ${getErrorMessage(error)}`, getErrorStack(error));
+      logger.error(
+        `Screenshot failed: ${getErrorMessage(error)}`,
+        getErrorStack(error),
+      );
       return {
         type: MessageContentType.ToolResult,
         tool_use_id: block.id,
@@ -280,7 +285,7 @@ async function moveMouse(input: { coordinates: Coordinates }): Promise<void> {
       }),
     });
   } catch (error) {
-    console.error('Error in move_mouse action:', error);
+    console.error('Error in move_mouse action:', getErrorMessage(error));
     throw error;
   }
 }
@@ -290,9 +295,9 @@ async function traceMouse(input: {
   holdKeys?: string[];
 }): Promise<void> {
   const { path, holdKeys } = input;
-  console.log(
-    `Tracing mouse to path: ${JSON.stringify(path)} ${holdKeys ? `with holdKeys: ${JSON.stringify(holdKeys)}` : ''}`,
-  );
+  const pathStr = path.map((coord) => `(${coord.x},${coord.y})`).join(' -> ');
+  const holdKeysStr = holdKeys ? ` with holdKeys: ${holdKeys.join(', ')}` : '';
+  console.log(`Tracing mouse to path: ${pathStr}${holdKeysStr}`);
 
   try {
     await fetch(`${BYTEBOT_DESKTOP_BASE_URL}/computer-use`, {
@@ -317,8 +322,12 @@ async function clickMouse(input: {
   clickCount: number;
 }): Promise<void> {
   const { coordinates, button, holdKeys, clickCount } = input;
+  const coordinatesStr = coordinates
+    ? `at coordinates: [${coordinates.x}, ${coordinates.y}] `
+    : '';
+  const holdKeysStr = holdKeys ? `with holdKeys: ${holdKeys.join(', ')}` : '';
   console.log(
-    `Clicking mouse ${button} ${clickCount} times ${coordinates ? `at coordinates: [${coordinates.x}, ${coordinates.y}] ` : ''} ${holdKeys ? `with holdKeys: ${JSON.stringify(holdKeys)}` : ''}`,
+    `Clicking mouse ${button} ${clickCount} times ${coordinatesStr}${holdKeysStr}`,
   );
 
   try {
@@ -372,9 +381,9 @@ async function dragMouse(input: {
   holdKeys?: string[];
 }): Promise<void> {
   const { path, button, holdKeys } = input;
-  console.log(
-    `Dragging mouse to path: ${JSON.stringify(path)} ${holdKeys ? `with holdKeys: ${JSON.stringify(holdKeys)}` : ''}`,
-  );
+  const pathStr = path.map((coord) => `(${coord.x},${coord.y})`).join(' -> ');
+  const holdKeysStr = holdKeys ? ` with holdKeys: ${holdKeys.join(', ')}` : '';
+  console.log(`Dragging mouse to path: ${pathStr}${holdKeysStr}`);
 
   try {
     await fetch(`${BYTEBOT_DESKTOP_BASE_URL}/computer-use`, {
@@ -427,7 +436,7 @@ async function typeKeys(input: {
   delay?: number;
 }): Promise<void> {
   const { keys, delay } = input;
-  console.log(`Typing keys: ${JSON.stringify(keys)}`);
+  console.log(`Typing keys: ${keys.join(', ')}`);
 
   try {
     await fetch(`${BYTEBOT_DESKTOP_BASE_URL}/computer-use`, {
@@ -450,7 +459,7 @@ async function pressKeys(input: {
   press: Press;
 }): Promise<void> {
   const { keys, press } = input;
-  console.log(`Pressing keys: ${JSON.stringify(keys)}`);
+  console.log(`Pressing keys: ${keys.join(', ')}`);
 
   try {
     await fetch(`${BYTEBOT_DESKTOP_BASE_URL}/computer-use`, {
@@ -541,7 +550,7 @@ async function cursorPosition(): Promise<Coordinates> {
       }),
     });
 
-    const data = await response.json() as { x: number; y: number };
+    const data = (await response.json()) as { x: number; y: number };
     return { x: data.x, y: data.y };
   } catch (error) {
     console.error('Error in cursor_position action:', error);
@@ -567,7 +576,7 @@ async function screenshot(): Promise<string> {
       throw new Error(`Failed to take screenshot: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { image?: string };
 
     if (!data.image) {
       throw new Error('Failed to take screenshot: No image data received');
@@ -599,14 +608,31 @@ async function application(input: { application: string }): Promise<void> {
   }
 }
 
-async function readFile(input: { path: string }): Promise<{
+/**
+ * Interface for read file API response
+ */
+interface ReadFileResponse {
   success: boolean;
   data?: string;
   name?: string;
   size?: number;
   mediaType?: string;
   message?: string;
-}> {
+}
+
+/**
+ * Type guard to validate read file response
+ */
+function isReadFileResponse(data: unknown): data is ReadFileResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'success' in data &&
+    typeof (data as { success: unknown }).success === 'boolean'
+  );
+}
+
+async function readFile(input: { path: string }): Promise<ReadFileResponse> {
   const { path } = input;
   console.log(`Reading file: ${path}`);
 
@@ -624,21 +650,49 @@ async function readFile(input: { path: string }): Promise<{
       throw new Error(`Failed to read file: ${response.statusText}`);
     }
 
-    const data = await response.json();
-    return data;
+    const data = (await response.json()) as unknown;
+
+    if (isReadFileResponse(data)) {
+      return data;
+    } else {
+      return {
+        success: false,
+        message: 'Invalid response format from read file API',
+      };
+    }
   } catch (error) {
     console.error('Error in read_file action:', error);
     return {
       success: false,
-      message: `Error reading file: ${error.message}`,
+      message: `Error reading file: ${getErrorMessage(error)}`,
     };
   }
+}
+
+/**
+ * Interface for write file API response
+ */
+interface WriteFileResponse {
+  success: boolean;
+  message?: string;
+}
+
+/**
+ * Type guard to validate write file response
+ */
+function isWriteFileResponse(data: unknown): data is WriteFileResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'success' in data &&
+    typeof (data as { success: unknown }).success === 'boolean'
+  );
 }
 
 export async function writeFile(input: {
   path: string;
   content: string;
-}): Promise<{ success: boolean; message?: string }> {
+}): Promise<WriteFileResponse> {
   const { path, content } = input;
   console.log(`Writing file: ${path}`);
 
@@ -660,13 +714,21 @@ export async function writeFile(input: {
       throw new Error(`Failed to write file: ${response.statusText}`);
     }
 
-    const data = await response.json();
-    return data;
+    const data = (await response.json()) as unknown;
+
+    if (isWriteFileResponse(data)) {
+      return data;
+    } else {
+      return {
+        success: false,
+        message: 'Invalid response format from write file API',
+      };
+    }
   } catch (error) {
     console.error('Error in write_file action:', error);
     return {
       success: false,
-      message: `Error writing file: ${error.message}`,
+      message: `Error writing file: ${getErrorMessage(error)}`,
     };
   }
 }

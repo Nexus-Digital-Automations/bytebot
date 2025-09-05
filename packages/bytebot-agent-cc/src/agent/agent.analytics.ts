@@ -37,10 +37,13 @@ export class AgentAnalyticsService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...task, messages }),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Failed to send analytics for task ${payload.taskId}: ${error.message}`,
-        error.stack,
+        `Failed to send analytics for task ${payload.taskId}: ${errorMessage}`,
+        errorStack,
       );
     }
   }

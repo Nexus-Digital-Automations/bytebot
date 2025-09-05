@@ -1,19 +1,8 @@
 import { TasksService } from '../tasks/tasks.service';
 import { MessagesService } from '../messages/messages.service';
 import { Injectable, Logger } from '@nestjs/common';
+import { Role, Task, TaskStatus } from '@prisma/client';
 import {
-  Message,
-  Role,
-  Task,
-  TaskPriority,
-  TaskStatus,
-  TaskType,
-} from '@prisma/client';
-import {
-  isComputerToolUseContentBlock,
-  isSetTaskStatusToolUseBlock,
-  isCreateTaskToolUseBlock,
-  SetTaskStatusToolUseBlock,
   RedactedThinkingContentBlock,
   ThinkingContentBlock,
   ToolUseContentBlock,
@@ -22,20 +11,57 @@ import {
 import {
   MessageContentBlock,
   MessageContentType,
-  ToolResultContentBlock,
   TextContentBlock,
 } from '@bytebot/shared';
+
+/**
+ * Type-safe utility for extracting content from unknown message types
+ */
+interface MessageWithContent {
+  content?: unknown;
+}
+
+/**
+ * Type guard to check if a value has a content property
+ */
+function isMessageWithContent(value: unknown): value is MessageWithContent {
+  return value != null && typeof value === 'object' && 'content' in value;
+}
+
+/**
+ * Safely extract content from unknown message objects
+ */
+function getSafeMessageContent(
+  message: unknown,
+): MessageContentBlock[] | string | null {
+  if (!isMessageWithContent(message)) {
+    return null;
+  }
+
+  const { content } = message;
+
+  if (Array.isArray(content)) {
+    // Validate that all items are MessageContentBlock-like
+    const isValidContentArray = content.every(
+      (item) => item != null && typeof item === 'object' && 'type' in item,
+    );
+
+    if (isValidContentArray) {
+      return content as MessageContentBlock[];
+    }
+  }
+
+  if (typeof content === 'string') {
+    return content;
+  }
+
+  return null;
+}
+
 import { InputCaptureService } from './input-capture.service';
 import { OnEvent } from '@nestjs/event-emitter';
-import {
-  BytebotAgentModel,
-  BytebotAgentService,
-  BytebotAgentResponse,
-} from './agent.types';
-import {
-  AGENT_SYSTEM_PROMPT,
-  SUMMARIZATION_SYSTEM_PROMPT,
-} from './agent.constants';
+// Import from agent.types as needed
+import { AGENT_SYSTEM_PROMPT } from './agent.constants';
 import { query } from '@anthropic-ai/claude-code';
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -201,14 +227,14 @@ export class AgentProcessor {
         let role: Role = Role.ASSISTANT;
         switch (message.type) {
           case 'user': {
-            if (Array.isArray(message.message.content)) {
-              messageContentBlocks = message.message
-                .content as MessageContentBlock[];
-            } else if (typeof message.message.content === 'string') {
+            const safeContent = getSafeMessageContent(message.message);
+            if (Array.isArray(safeContent)) {
+              messageContentBlocks = safeContent;
+            } else if (typeof safeContent === 'string') {
               messageContentBlocks = [
                 {
                   type: MessageContentType.Text,
-                  text: message.message.content,
+                  text: safeContent,
                 } as TextContentBlock,
               ];
             }
@@ -217,9 +243,12 @@ export class AgentProcessor {
             break;
           }
           case 'assistant': {
-            messageContentBlocks = this.formatAnthropicResponse(
-              message.message.content,
-            );
+            const safeContent = getSafeMessageContent(message.message);
+            if (Array.isArray(safeContent)) {
+              messageContentBlocks = this.formatAnthropicResponse(
+                safeContent as Anthropic.ContentBlock[],
+              );
+            }
             break;
           }
           case 'system':
@@ -255,13 +284,16 @@ export class AgentProcessor {
           });
         }
       }
-    } catch (error: any) {
-      if (error?.message === 'Claude Code process aborted by user') {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      if (errorMessage === 'Claude Code process aborted by user') {
         this.logger.warn(`Processing aborted for task ID: ${taskId}`);
       } else {
         this.logger.error(
-          `Error during task processing iteration for task ID: ${taskId} - ${error.message}`,
-          error.stack,
+          `Error during task processing iteration for task ID: ${taskId} - ${errorMessage}`,
+          errorStack,
         );
         await this.tasksService.update(taskId, {
           status: TaskStatus.FAILED,
