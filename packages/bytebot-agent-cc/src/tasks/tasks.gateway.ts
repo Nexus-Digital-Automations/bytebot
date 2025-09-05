@@ -17,7 +17,7 @@ import { Injectable } from '@nestjs/common';
 })
 export class TasksGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server; // Definite assignment assertion - injected by @WebSocketServer() decorator
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);

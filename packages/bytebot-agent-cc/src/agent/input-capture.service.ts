@@ -76,13 +76,7 @@ function safeGetCoordinates(
   return undefined;
 }
 
-// Generic action type with type-safe property access
-interface GenericAction {
-  action: string;
-  [key: string]: unknown;
-}
-
-// Type guards for validating action properties
+// Type guard for validating action properties
 function isValidAction(obj: unknown): obj is GenericAction {
   return (
     typeof obj === 'object' &&
@@ -130,8 +124,15 @@ export class InputCaptureService {
 
     this.socket.on(
       'screenshotAndAction',
-      async (shot: { image: string }, action: GenericAction) => {
+      async (shot: { image: string }, action: unknown) => {
         if (!this.capturing || !taskId) return;
+
+        // Validate action is a valid GenericAction
+        if (!isValidAction(action)) {
+          this.logger.warn('Invalid action received in screenshotAndAction');
+          return;
+        }
+
         // The gateway only sends a click_mouse or drag_mouse action together with screenshots for now.
         const actionType = safeGetString(action, 'action', '');
         if (actionType !== 'click_mouse' && actionType !== 'drag_mouse') return;
@@ -155,7 +156,7 @@ export class InputCaptureService {
           case 'drag_mouse': {
             const dragAction: DragMouseAction = {
               action: 'drag_mouse',
-              path: safeGetArray(action, 'path', []),
+              path: safeGetArray<{ x: number; y: number }>(action, 'path', []),
               button: safeGetString(action, 'button', 'left') as
                 | 'left'
                 | 'right'
@@ -192,8 +193,15 @@ export class InputCaptureService {
       },
     );
 
-    this.socket.on('action', async (action: GenericAction) => {
+    this.socket.on('action', async (action: unknown) => {
       if (!this.capturing || !taskId) return;
+
+      // Validate action is a valid GenericAction
+      if (!isValidAction(action)) {
+        this.logger.warn('Invalid action received in action handler');
+        return;
+      }
+
       const toolUseId = randomUUID();
       const userActionBlock: UserActionContentBlock = {
         type: MessageContentType.UserAction,
@@ -205,7 +213,7 @@ export class InputCaptureService {
         case 'drag_mouse': {
           const dragAction: DragMouseAction = {
             action: 'drag_mouse',
-            path: safeGetArray(action, 'path', []),
+            path: safeGetArray<{ x: number; y: number }>(action, 'path', []),
             button: safeGetString(action, 'button', 'left') as
               | 'left'
               | 'right'
@@ -235,7 +243,7 @@ export class InputCaptureService {
         case 'type_keys': {
           const typeKeysAction: TypeKeysAction = {
             action: 'type_keys',
-            keys: safeGetArray(action, 'keys', []),
+            keys: safeGetArray<string>(action, 'keys', []),
           };
           userActionBlock.content.push(
             convertTypeKeysActionToToolUseBlock(typeKeysAction, toolUseId),
@@ -245,7 +253,7 @@ export class InputCaptureService {
         case 'press_keys': {
           const pressKeysAction: PressKeysAction = {
             action: 'press_keys',
-            keys: safeGetArray(action, 'keys', []),
+            keys: safeGetArray<string>(action, 'keys', []),
             press: safeGetString(action, 'press', 'down') as 'down' | 'up',
           };
           userActionBlock.content.push(

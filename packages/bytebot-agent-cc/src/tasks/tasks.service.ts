@@ -40,19 +40,6 @@ function isSafeError(error: unknown): error is SafeError {
   );
 }
 
-// Type guard for model assignment
-function isValidModel(model: unknown): model is string | null {
-  return model === null || model === undefined || typeof model === 'string';
-}
-
-// Safe model converter
-function getSafeModel(model: unknown): string | undefined {
-  if (isValidModel(model)) {
-    return model ?? undefined;
-  }
-  return undefined;
-}
-
 @Injectable()
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
@@ -75,17 +62,17 @@ export class TasksService {
     const task = await this.prisma.$transaction(async (prisma) => {
       // Create the task first
       this.logger.debug('Creating task record in database');
-      const taskData: any = {
+      const taskData: Prisma.TaskCreateInput = {
         description: createTaskDto.description,
         type: createTaskDto.type || TaskType.IMMEDIATE,
         priority: createTaskDto.priority || TaskPriority.MEDIUM,
         status: TaskStatus.PENDING,
         createdBy: createTaskDto.createdBy || Role.USER,
+        model: getSafeModel(createTaskDto.model), // Use safe model converter
+        ...(createTaskDto.scheduledFor && {
+          scheduledFor: createTaskDto.scheduledFor,
+        }),
       };
-
-      if (createTaskDto.scheduledFor) {
-        taskData.scheduledFor = createTaskDto.scheduledFor;
-      }
 
       const task = await prisma.task.create({
         data: taskData,
@@ -149,7 +136,7 @@ export class TasksService {
   }
 
   async findScheduledTasks(): Promise<Task[]> {
-    return this.prisma.task.findMany({
+    return await this.prisma.task.findMany({
       where: {
         scheduledFor: {
           not: null,
@@ -255,7 +242,17 @@ export class TasksService {
 
   async update(id: string, updateTaskDto: UpdateTaskDto): Promise<Task> {
     this.logger.log(`Updating task with ID: ${id}`);
-    this.logger.debug(`Update data: ${JSON.stringify(updateTaskDto)}`);
+    const updateDataStr = Object.entries(updateTaskDto)
+      .map(([key, value]) => {
+        const valueStr = typeof value === 'string' ? value :
+                        typeof value === 'number' || typeof value === 'boolean' ? String(value) :
+                        value === null ? 'null' :
+                        value === undefined ? 'undefined' :
+                        JSON.stringify(value);
+        return `${key}: ${valueStr}`;
+      })
+      .join(', ');
+    this.logger.debug(`Update data: {${updateDataStr}}`);
 
     const existingTask = await this.findById(id);
 
@@ -278,7 +275,8 @@ export class TasksService {
     }
 
     this.logger.log(`Successfully updated task ID: ${id}`);
-    this.logger.debug(`Updated task: ${JSON.stringify(updatedTask)}`);
+    const updatedTaskStr = `id: ${updatedTask.id}, status: ${updatedTask.status}, description: ${updatedTask.description}`;
+    this.logger.debug(`Updated task: {${updatedTaskStr}}`);
 
     this.tasksGateway.emitTaskUpdate(id, updatedTask);
 

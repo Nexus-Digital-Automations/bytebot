@@ -121,10 +121,10 @@ export class AgentProcessor {
   }
 
   @OnEvent('task.cancel')
-  async handleTaskCancel({ taskId }: { taskId: string }) {
+  handleTaskCancel({ taskId }: { taskId: string }) {
     this.logger.log(`Task cancel event received for task ID: ${taskId}`);
 
-    await this.stopProcessing();
+    this.stopProcessing();
   }
 
   processTask(taskId: string) {
@@ -304,7 +304,7 @@ export class AgentProcessor {
     }
   }
 
-  async stopProcessing(): Promise<void> {
+  stopProcessing(): void {
     if (!this.isProcessing) {
       return;
     }

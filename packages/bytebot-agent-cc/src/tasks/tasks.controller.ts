@@ -25,7 +25,7 @@ export class TasksController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
-    return this.tasksService.create(createTaskDto);
+    return await this.tasksService.create(createTaskDto);
   }
 
   @Get()
@@ -46,7 +46,7 @@ export class TasksController {
       statusFilter = [status];
     }
 
-    return this.tasksService.findAll(pageNum, limitNum, statusFilter);
+    return await this.tasksService.findAll(pageNum, limitNum, statusFilter);
   }
 
   @Get('models')
@@ -63,7 +63,7 @@ export class TasksController {
 
   @Get(':id')
   async findById(@Param('id') id: string): Promise<Task> {
-    return this.tasksService.findById(id);
+    return await this.tasksService.findById(id);
   }
 
   @Get(':id/messages')
@@ -87,7 +87,7 @@ export class TasksController {
     @Param('id') taskId: string,
     @Body() guideTaskDto: AddTaskMessageDto,
   ): Promise<Task> {
-    return this.tasksService.addTaskMessage(taskId, guideTaskDto);
+    return await this.tasksService.addTaskMessage(taskId, guideTaskDto);
   }
 
   @Get(':id/messages/raw')
@@ -101,7 +101,7 @@ export class TasksController {
       page: page ? parseInt(page, 10) : undefined,
     };
 
-    return this.messagesService.findRawMessages(taskId, options);
+    return await this.messagesService.findRawMessages(taskId, options);
   }
 
   @Get(':id/messages/processed')
@@ -115,7 +115,7 @@ export class TasksController {
       page: page ? parseInt(page, 10) : undefined,
     };
 
-    return this.messagesService.findProcessedMessages(taskId, options);
+    return await this.messagesService.findProcessedMessages(taskId, options);
   }
 
   @Delete(':id')
@@ -127,18 +127,18 @@ export class TasksController {
   @Post(':id/takeover')
   @HttpCode(HttpStatus.OK)
   async takeOver(@Param('id') taskId: string): Promise<Task> {
-    return this.tasksService.takeOver(taskId);
+    return await this.tasksService.takeOver(taskId);
   }
 
   @Post(':id/resume')
   @HttpCode(HttpStatus.OK)
   async resume(@Param('id') taskId: string): Promise<Task> {
-    return this.tasksService.resume(taskId);
+    return await this.tasksService.resume(taskId);
   }
 
   @Post(':id/cancel')
   @HttpCode(HttpStatus.OK)
   async cancel(@Param('id') taskId: string): Promise<Task> {
-    return this.tasksService.cancel(taskId);
+    return await this.tasksService.cancel(taskId);
   }
 }
