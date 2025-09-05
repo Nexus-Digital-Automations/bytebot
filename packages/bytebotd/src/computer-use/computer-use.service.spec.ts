@@ -13,17 +13,19 @@
  * @version 1.0.0
  */
 
+/* eslint-disable @typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
 import {
   ComputerUseService,
   ErrorHandler,
   ScreenshotResult,
-  CursorPositionResult,
   FileWriteResult,
   FileReadResult,
   FindTextResult,
-  OcrOperationResult,
   EnhancedScreenshotResult,
 } from './computer-use.service';
 import { NutService } from '../nut/nut.service';
@@ -31,7 +33,6 @@ import { CuaVisionService } from '../cua-integration/cua-vision.service';
 import { CuaIntegrationService } from '../cua-integration/cua-integration.service';
 import { CuaPerformanceService } from '../cua-integration/cua-performance.service';
 import {
-  ComputerAction,
   MoveMouseAction,
   TraceMouseAction,
   ClickMouseAction,
@@ -50,30 +51,24 @@ import {
   OcrAction,
   FindTextAction,
   EnhancedScreenshotAction,
-  Coordinates,
 } from '@bytebot/shared';
 import * as fs from 'fs/promises';
-import { exec } from 'child_process';
 
 // Mock external modules
 jest.mock('fs/promises');
 jest.mock('child_process');
 jest.mock('util', () => ({
-  promisify: jest.fn((fn) =>
+  promisify: jest.fn(() =>
     jest.fn().mockResolvedValue({ stdout: 'mocked output' }),
   ),
 }));
 
 describe('ComputerUseService', () => {
   let service: ComputerUseService;
-  let nutService: jest.Mocked<NutService>;
-  let cuaVisionService: jest.Mocked<CuaVisionService>;
-  let cuaIntegrationService: jest.Mocked<CuaIntegrationService>;
-  let performanceService: jest.Mocked<CuaPerformanceService>;
   let testModule: TestingModule;
 
-  // Mock implementations
-  const mockNutService = {
+  // Mock implementations with proper typing
+  const mockNutService: jest.Mocked<NutService> = {
     mouseMoveEvent: jest.fn(),
     mouseClickEvent: jest.fn(),
     mouseButtonEvent: jest.fn(),
@@ -84,20 +79,31 @@ describe('ComputerUseService', () => {
     pasteText: jest.fn(),
     screendump: jest.fn(),
     getCursorPosition: jest.fn(),
-  };
+    // Add any other required methods from NutService
+  } as unknown as jest.Mocked<NutService>;
 
-  const mockCuaVisionService = {
+  const mockCuaVisionService: jest.Mocked<CuaVisionService> = {
     performOcr: jest.fn(),
     detectText: jest.fn(),
-  };
+    batchOcr: jest.fn(),
+    getCapabilities: jest.fn(),
+  } as unknown as jest.Mocked<CuaVisionService>;
 
-  const mockCuaIntegrationService = {
+  const mockCuaIntegrationService: jest.Mocked<CuaIntegrationService> = {
     isFrameworkEnabled: jest.fn(),
-  };
+    isAneBridgeAvailable: jest.fn(),
+    getConfiguration: jest.fn(),
+    initialize: jest.fn(),
+    getNetworkTopology: jest.fn(),
+  } as unknown as jest.Mocked<CuaIntegrationService>;
 
-  const mockPerformanceService = {
+  const mockPerformanceService: jest.Mocked<CuaPerformanceService> = {
     recordMetric: jest.fn(),
-  };
+    getMetrics: jest.fn(),
+    clearMetrics: jest.fn(),
+    setMetricThreshold: jest.fn(),
+    // Add other required methods
+  } as unknown as jest.Mocked<CuaPerformanceService>;
 
   beforeEach(async () => {
     // Clear all mocks before each test
@@ -131,10 +137,6 @@ describe('ComputerUseService', () => {
     }).compile();
 
     service = testModule.get<ComputerUseService>(ComputerUseService);
-    nutService = testModule.get(NutService);
-    cuaVisionService = testModule.get(CuaVisionService);
-    cuaIntegrationService = testModule.get(CuaIntegrationService);
-    performanceService = testModule.get(CuaPerformanceService);
 
     // Setup default mock behaviors
     mockCuaIntegrationService.isFrameworkEnabled.mockReturnValue(true);
@@ -793,7 +795,7 @@ describe('ComputerUseService', () => {
 
     beforeEach(() => {
       // Mock exec and spawn
-      const util = require('util');
+      const util = jest.requireMock('util');
       util.promisify.mockReturnValue(mockExecAsync);
 
       // Mock child_process.spawn
@@ -872,7 +874,7 @@ describe('ComputerUseService', () => {
       it('should handle unsupported application', async () => {
         const action = {
           action: 'application' as const,
-          application: 'unsupported-app' as any,
+          application: 'unsupported-app' as 'firefox' | 'chrome' | 'safari',
         };
 
         await expect(service.action(action)).rejects.toThrow(
@@ -905,7 +907,7 @@ describe('ComputerUseService', () => {
     const mockExecAsync = jest.fn();
 
     beforeEach(() => {
-      const util = require('util');
+      const util = jest.requireMock('util');
       util.promisify.mockReturnValue(mockExecAsync);
       mockExecAsync.mockResolvedValue({ stdout: 'success' });
     });
@@ -1158,7 +1160,9 @@ describe('ComputerUseService', () => {
       it('should handle OCR without C/ua framework', async () => {
         mockCuaIntegrationService.isFrameworkEnabled.mockReturnValue(false);
 
-        const serviceWithoutCua = new ComputerUseService(mockNutService as any);
+        const serviceWithoutCua = new ComputerUseService(
+          mockNutService as NutService,
+        );
 
         const action: OcrAction = {
           action: 'ocr',
@@ -1364,7 +1368,9 @@ describe('ComputerUseService', () => {
       it('should handle find text without C/ua framework', async () => {
         mockCuaIntegrationService.isFrameworkEnabled.mockReturnValue(false);
 
-        const serviceWithoutCua = new ComputerUseService(mockNutService as any);
+        const serviceWithoutCua = new ComputerUseService(
+          mockNutService as NutService,
+        );
 
         const action: FindTextAction = {
           action: 'find_text',
@@ -1551,8 +1557,8 @@ describe('ComputerUseService', () => {
         mockCuaIntegrationService.isFrameworkEnabled.mockReturnValue(false);
 
         const serviceWithoutCua = new ComputerUseService(
-          mockNutService as any,
-          mockCuaIntegrationService as any,
+          mockNutService as NutService,
+          mockCuaIntegrationService as CuaIntegrationService,
         );
 
         const result = (await serviceWithoutCua.action(
@@ -1683,7 +1689,7 @@ describe('ComputerUseService', () => {
       it('should handle unknown action types', async () => {
         const invalidAction = {
           action: 'invalid_action',
-        } as any;
+        } as MoveMouseAction;
 
         await expect(service.action(invalidAction)).rejects.toThrow(
           'Unsupported computer action',

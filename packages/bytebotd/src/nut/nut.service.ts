@@ -635,7 +635,7 @@ export class NutService {
       const errorObj = error as { message: unknown };
       return typeof errorObj.message === 'string'
         ? errorObj.message
-        : String(errorObj.message);
+        : JSON.stringify(errorObj.message);
     }
     return 'Unknown error occurred';
   }

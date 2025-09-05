@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BytebotMcpModule } from './mcp';
 import { CuaIntegrationModule } from './cua-integration/cua-integration.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CuaIntegrationModule } from './cua-integration/cua-integration.module';
     InputTrackingModule,
     BytebotMcpModule,
     CuaIntegrationModule, // C/ua Framework Integration
+    HealthModule, // System health monitoring
   ],
   controllers: [AppController],
   providers: [AppService],
