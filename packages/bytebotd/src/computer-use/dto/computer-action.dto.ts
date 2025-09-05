@@ -19,6 +19,7 @@ import {
 
 /**
  * Base class for action DTOs with common validation decorator
+ * Properties are initialized by NestJS validation pipeline
  */
 abstract class BaseActionDto {
   abstract action: string;
@@ -26,21 +27,21 @@ abstract class BaseActionDto {
 
 export class MoveMouseActionDto extends BaseActionDto {
   @IsIn(['move_mouse'])
-  action: 'move_mouse';
+  action!: 'move_mouse';
 
   @ValidateNested()
   @Type(() => CoordinatesDto)
-  coordinates: CoordinatesDto;
+  coordinates!: CoordinatesDto;
 }
 
 export class TraceMouseActionDto extends BaseActionDto {
   @IsIn(['trace_mouse'])
-  action: 'trace_mouse';
+  action!: 'trace_mouse';
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CoordinatesDto)
-  path: CoordinatesDto[];
+  path!: CoordinatesDto[];
 
   @IsOptional()
   @IsArray()
@@ -50,7 +51,7 @@ export class TraceMouseActionDto extends BaseActionDto {
 
 export class ClickMouseActionDto extends BaseActionDto {
   @IsIn(['click_mouse'])
-  action: 'click_mouse';
+  action!: 'click_mouse';
 
   @IsOptional()
   @ValidateNested()
@@ -58,7 +59,7 @@ export class ClickMouseActionDto extends BaseActionDto {
   coordinates?: CoordinatesDto;
 
   @IsEnum(ButtonType)
-  button: ButtonType;
+  button!: ButtonType;
 
   @IsOptional()
   @IsArray()
@@ -67,12 +68,12 @@ export class ClickMouseActionDto extends BaseActionDto {
 
   @IsNumber()
   @Min(1)
-  clickCount: number;
+  clickCount!: number;
 }
 
 export class PressMouseActionDto extends BaseActionDto {
   @IsIn(['press_mouse'])
-  action: 'press_mouse';
+  action!: 'press_mouse';
 
   @IsOptional()
   @ValidateNested()
@@ -80,23 +81,23 @@ export class PressMouseActionDto extends BaseActionDto {
   coordinates?: CoordinatesDto;
 
   @IsEnum(ButtonType)
-  button: ButtonType;
+  button!: ButtonType;
 
   @IsEnum(PressType)
-  press: PressType;
+  press!: PressType;
 }
 
 export class DragMouseActionDto extends BaseActionDto {
   @IsIn(['drag_mouse'])
-  action: 'drag_mouse';
+  action!: 'drag_mouse';
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CoordinatesDto)
-  path: CoordinatesDto[];
+  path!: CoordinatesDto[];
 
   @IsEnum(ButtonType)
-  button: ButtonType;
+  button!: ButtonType;
 
   @IsOptional()
   @IsArray()
@@ -106,7 +107,7 @@ export class DragMouseActionDto extends BaseActionDto {
 
 export class ScrollActionDto extends BaseActionDto {
   @IsIn(['scroll'])
-  action: 'scroll';
+  action!: 'scroll';
 
   @IsOptional()
   @ValidateNested()
@@ -114,11 +115,11 @@ export class ScrollActionDto extends BaseActionDto {
   coordinates?: CoordinatesDto;
 
   @IsEnum(ScrollDirection)
-  direction: ScrollDirection;
+  direction!: ScrollDirection;
 
   @IsNumber()
   @Min(1)
-  scrollCount: number;
+  scrollCount!: number;
 
   @IsOptional()
   @IsArray()
@@ -128,11 +129,11 @@ export class ScrollActionDto extends BaseActionDto {
 
 export class TypeKeysActionDto extends BaseActionDto {
   @IsIn(['type_keys'])
-  action: 'type_keys';
+  action!: 'type_keys';
 
   @IsArray()
   @IsString({ each: true })
-  keys: string[];
+  keys!: string[];
 
   @IsOptional()
   @IsNumber()
@@ -142,22 +143,22 @@ export class TypeKeysActionDto extends BaseActionDto {
 
 export class PressKeysActionDto extends BaseActionDto {
   @IsIn(['press_keys'])
-  action: 'press_keys';
+  action!: 'press_keys';
 
   @IsArray()
   @IsString({ each: true })
-  keys: string[];
+  keys!: string[];
 
   @IsEnum(PressType)
-  press: PressType;
+  press!: PressType;
 }
 
 export class TypeTextActionDto extends BaseActionDto {
   @IsIn(['type_text'])
-  action: 'type_text';
+  action!: 'type_text';
 
   @IsString()
-  text: string;
+  text!: string;
 
   @IsOptional()
   @IsNumber()
@@ -167,56 +168,56 @@ export class TypeTextActionDto extends BaseActionDto {
 
 export class PasteTextActionDto extends BaseActionDto {
   @IsIn(['paste_text'])
-  action: 'paste_text';
+  action!: 'paste_text';
 
   @IsString()
-  text: string;
+  text!: string;
 }
 
 export class WaitActionDto extends BaseActionDto {
   @IsIn(['wait'])
-  action: 'wait';
+  action!: 'wait';
 
   @IsNumber()
   @Min(0)
-  duration: number;
+  duration!: number;
 }
 
 export class ScreenshotActionDto extends BaseActionDto {
   @IsIn(['screenshot'])
-  action: 'screenshot';
+  action!: 'screenshot';
 }
 
 export class CursorPositionActionDto extends BaseActionDto {
   @IsIn(['cursor_position'])
-  action: 'cursor_position';
+  action!: 'cursor_position';
 }
 
 export class ApplicationActionDto extends BaseActionDto {
   @IsIn(['application'])
-  action: 'application';
+  action!: 'application';
 
   @IsEnum(ApplicationName)
-  application: ApplicationName;
+  application!: ApplicationName;
 }
 
 export class WriteFileActionDto extends BaseActionDto {
   @IsIn(['write_file'])
-  action: 'write_file';
+  action!: 'write_file';
 
   @IsString()
-  path: string;
+  path!: string;
 
   @IsString()
-  data: string; // Base64 encoded data
+  data!: string; // Base64 encoded data
 }
 
 export class ReadFileActionDto extends BaseActionDto {
   @IsIn(['read_file'])
-  action: 'read_file';
+  action!: 'read_file';
 
   @IsString()
-  path: string;
+  path!: string;
 }
 
 // Union type for all computer actions

@@ -47,7 +47,7 @@ export function isTextContentBlock(obj: unknown): obj is TextContentBlock {
 }
 
 export function isThinkingContentBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is ThinkingContentBlock {
   if (!obj || typeof obj !== "object") {
     return false;
@@ -62,7 +62,7 @@ export function isThinkingContentBlock(
 }
 
 export function isRedactedThinkingContentBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is RedactedThinkingContentBlock {
   if (!obj || typeof obj !== "object") {
     return false;
@@ -97,7 +97,7 @@ export function isImageContentBlock(obj: unknown): obj is ImageContentBlock {
 }
 
 export function isUserActionContentBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is UserActionContentBlock {
   if (!obj || typeof obj !== "object") {
     return false;
@@ -114,7 +114,7 @@ export function isUserActionContentBlock(
  * @returns Type predicate indicating obj is DocumentContentBlock
  */
 export function isDocumentContentBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is DocumentContentBlock {
   if (!obj || typeof obj !== "object") {
     return false;
@@ -137,7 +137,7 @@ export function isDocumentContentBlock(
  * @returns Type predicate indicating obj is ToolUseContentBlock
  */
 export function isToolUseContentBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is ToolUseContentBlock {
   if (!obj || typeof obj !== "object") {
     return false;
@@ -159,13 +159,13 @@ export function isToolUseContentBlock(
  * @returns Type predicate indicating obj is ComputerToolUseContentBlock
  */
 export function isComputerToolUseContentBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is ComputerToolUseContentBlock {
   if (!isToolUseContentBlock(obj)) {
     return false;
   }
 
-  return (obj as ToolUseContentBlock).name.startsWith("computer_");
+  return obj.name.startsWith("computer_");
 }
 
 /**
@@ -174,7 +174,7 @@ export function isComputerToolUseContentBlock(
  * @returns Type predicate indicating obj is ToolResultContentBlock
  */
 export function isToolResultContentBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is ToolResultContentBlock {
   if (!obj || typeof obj !== "object") {
     return false;
@@ -193,7 +193,7 @@ export function isToolResultContentBlock(
  * @returns Type predicate indicating obj is MessageContentBlock
  */
 export function isMessageContentBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is MessageContentBlock {
   return (
     isTextContentBlock(obj) ||
@@ -239,11 +239,11 @@ export function getMessageContentBlockType(obj: unknown): string | null {
   }
 
   if (isComputerToolUseContentBlock(obj)) {
-    const computerBlock = obj as ComputerToolUseContentBlock;
+    const computerBlock = obj;
     if (computerBlock.input && typeof computerBlock.input === "object") {
       return `ComputerToolUseContentBlock:${computerBlock.name.replace(
         "computer_",
-        ""
+        "",
       )}`;
     }
     return "ComputerToolUseContentBlock";
@@ -266,7 +266,7 @@ export function getMessageContentBlockType(obj: unknown): string | null {
  * @returns Type predicate indicating obj is MoveMouseToolUseBlock
  */
 export function isMoveMouseToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is MoveMouseToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -282,7 +282,7 @@ export function isMoveMouseToolUseBlock(
  * @returns Type predicate indicating obj is TraceMouseToolUseBlock
  */
 export function isTraceMouseToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is TraceMouseToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -298,7 +298,7 @@ export function isTraceMouseToolUseBlock(
  * @returns Type predicate indicating obj is ClickMouseToolUseBlock
  */
 export function isClickMouseToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is ClickMouseToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -314,7 +314,7 @@ export function isClickMouseToolUseBlock(
  * @returns Type predicate indicating obj is CursorPositionToolUseBlock
  */
 export function isCursorPositionToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is CursorPositionToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -330,7 +330,7 @@ export function isCursorPositionToolUseBlock(
  * @returns Type predicate indicating obj is PressMouseToolUseBlock
  */
 export function isPressMouseToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is PressMouseToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -346,7 +346,7 @@ export function isPressMouseToolUseBlock(
  * @returns Type predicate indicating obj is DragMouseToolUseBlock
  */
 export function isDragMouseToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is DragMouseToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -376,7 +376,7 @@ export function isScrollToolUseBlock(obj: unknown): obj is ScrollToolUseBlock {
  * @returns Type predicate indicating obj is TypeKeysToolUseBlock
  */
 export function isTypeKeysToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is TypeKeysToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -392,7 +392,7 @@ export function isTypeKeysToolUseBlock(
  * @returns Type predicate indicating obj is PressKeysToolUseBlock
  */
 export function isPressKeysToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is PressKeysToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -408,7 +408,7 @@ export function isPressKeysToolUseBlock(
  * @returns Type predicate indicating obj is TypeTextToolUseBlock
  */
 export function isTypeTextToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is TypeTextToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -419,7 +419,7 @@ export function isTypeTextToolUseBlock(
 }
 
 export function isPasteTextToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is PasteTextToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -449,7 +449,7 @@ export function isWaitToolUseBlock(obj: unknown): obj is WaitToolUseBlock {
  * @returns Type predicate indicating obj is ScreenshotToolUseBlock
  */
 export function isScreenshotToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is ScreenshotToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -460,7 +460,7 @@ export function isScreenshotToolUseBlock(
 }
 
 export function isApplicationToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is ApplicationToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -471,7 +471,7 @@ export function isApplicationToolUseBlock(
 }
 
 export function isSetTaskStatusToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is SetTaskStatusToolUseBlock {
   if (!isToolUseContentBlock(obj)) {
     return false;
@@ -482,7 +482,7 @@ export function isSetTaskStatusToolUseBlock(
 }
 
 export function isCreateTaskToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is CreateTaskToolUseBlock {
   if (!isToolUseContentBlock(obj)) {
     return false;
@@ -493,7 +493,7 @@ export function isCreateTaskToolUseBlock(
 }
 
 export function isWriteFileToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is WriteFileToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;
@@ -504,7 +504,7 @@ export function isWriteFileToolUseBlock(
 }
 
 export function isReadFileToolUseBlock(
-  obj: unknown
+  obj: unknown,
 ): obj is ReadFileToolUseBlock {
   if (!isComputerToolUseContentBlock(obj)) {
     return false;

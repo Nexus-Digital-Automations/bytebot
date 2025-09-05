@@ -1,0 +1,92 @@
+{
+  "cua_framework": {
+    "version": "1.0.0",
+    "container_id": "bytebot-desktop-cua",
+    "agent_type": "computer_use",
+    "capabilities": [
+      "screen_capture",
+      "mouse_control",
+      "keyboard_input",
+      "application_control",
+      "file_operations",
+      "ocr_processing",
+      "ane_acceleration"
+    ]
+  },
+  "apple_neural_engine": {
+    "enabled": true,
+    "bridge_url": "http://host.docker.internal:8080",
+    "fallback_mode": "cpu",
+    "cache_enabled": true,
+    "batch_processing": true,
+    "performance_mode": "optimized",
+    "timeout_ms": 5000,
+    "max_retries": 3
+  },
+  "computer_interface": {
+    "display": {
+      "resolution": "auto",
+      "scaling": 1.0,
+      "refresh_rate": 60
+    },
+    "mouse": {
+      "acceleration": 1.0,
+      "double_click_speed": 500,
+      "drag_threshold": 3
+    },
+    "keyboard": {
+      "repeat_delay": 500,
+      "repeat_rate": 30,
+      "modifier_timeout": 1000
+    }
+  },
+  "performance": {
+    "monitoring_enabled": true,
+    "metrics_collection": true,
+    "resource_limits": {
+      "max_memory_mb": 4096,
+      "max_cpu_percent": 80,
+      "max_concurrent_operations": 10
+    },
+    "optimization": {
+      "image_compression": true,
+      "result_caching": true,
+      "connection_pooling": true
+    }
+  },
+  "api_endpoints": {
+    "computer_use": "/api/v1/computer",
+    "ocr_service": "/api/v1/vision/ocr",
+    "text_detection": "/api/v1/vision/text",
+    "screenshot": "/api/v1/screen/capture",
+    "health_check": "/api/v1/health",
+    "performance_metrics": "/api/v1/metrics"
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "output": "/opt/cua/logs/agent.log",
+    "max_file_size": "100MB",
+    "max_files": 10,
+    "performance_logs": true,
+    "debug_screenshots": false
+  },
+  "security": {
+    "api_key_required": false,
+    "rate_limiting": {
+      "enabled": true,
+      "requests_per_minute": 1000,
+      "burst_size": 50
+    },
+    "allowed_origins": ["*"],
+    "secure_headers": true
+  },
+  "hybrid_architecture": {
+    "native_bridge_enabled": true,
+    "container_orchestration": "cua",
+    "shared_volume_path": "/opt/cua/shared",
+    "ipc_method": "rest_api",
+    "health_check_interval": 30,
+    "reconnection_attempts": 5
+  }
+}

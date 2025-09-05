@@ -1,0 +1,317 @@
+# Enhanced C/ua Framework Docker Compose Configuration
+# Hybrid Architecture: Containerized Agents + Native macOS Services + Shared Memory IPC
+name: bytebot-cua-shmem
+
+services:
+  # === Core Services ===
+  postgres:
+    image: postgres:16-alpine
+    container_name: bytebot-postgres-cua-shmem
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=bytebotdb
+    networks:
+      - bytebot-cua-shmem-network
+    volumes:
+      - postgres_cua_shmem_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # === Enhanced C/ua-Compatible Bytebot Desktop with Shared Memory ===
+  bytebot-desktop-cua-shmem:
+    build:
+      context: .
+      dockerfile: bytebot-desktop-shmem.Dockerfile
+      args:
+        - CUA_VERSION=latest
+        - ANE_BRIDGE_VERSION=2.0.0
+        - SHARED_MEMORY_ENABLED=true
+    container_name: bytebot-desktop-cua-shmem
+    restart: unless-stopped
+    hostname: computer-cua-shmem
+    privileged: true
+    # Enable host IPC namespace for shared memory access
+    ipc: host
+    shm_size: "4g"  # Increased for shared memory operations
+    ports:
+      - "9990:9990"  # Original bytebotd service & noVNC
+      - "9993:9993"  # C/ua Agent API
+      - "9994:9994"  # ANE Bridge Communication (HTTP fallback)
+      - "9995:9995"  # Performance Monitoring
+      - "9996:9996"  # WebSocket for real-time communication
+      - "9997:9997"  # Shared Memory Bridge API
+    environment:
+      # === Original Environment ===
+      - DISPLAY=:0
+      
+      # === C/ua Framework Configuration ===
+      - CUA_FRAMEWORK_ENABLED=true
+      - CUA_CONTAINER_ID=bytebot-desktop-cua-shmem
+      - CUA_ANE_BRIDGE_URL=http://host.docker.internal:8080
+      - CUA_SHARED_MEMORY_ENABLED=true
+      - CUA_PERFORMANCE_MODE=optimized
+      - CUA_LOG_LEVEL=info
+      
+      # === Apple Neural Engine Bridge ===
+      - ANE_BRIDGE_ENABLED=true
+      - ANE_BRIDGE_HOST=host.docker.internal
+      - ANE_BRIDGE_PORT=8080
+      - ANE_FALLBACK_ENABLED=true
+      - ANE_CACHE_ENABLED=true
+      - ANE_BATCH_SIZE=10
+      - ANE_TIMEOUT_MS=5000
+      
+      # === Shared Memory IPC Configuration ===
+      - SHARED_MEMORY_BRIDGE_ENABLED=true
+      - SHARED_MEMORY_SEGMENT_SIZE_MB=100
+      - SHARED_MEMORY_MAX_SEGMENTS=30
+      - SHARED_MEMORY_MAX_CONCURRENT=15
+      - SHARED_MEMORY_FALLBACK_HTTP=true
+      - SHARED_MEMORY_CLEANUP_INTERVAL=300
+      
+      # === Performance Optimization ===
+      - PERFORMANCE_MONITORING=enabled
+      - METRICS_COLLECTION=enabled
+      - RESOURCE_LIMITS_ENABLED=true
+      - MEMORY_OPTIMIZATION=enabled
+      - ZERO_COPY_TRANSFERS=enabled
+      
+      # === Hybrid Architecture Settings ===
+      - NATIVE_BRIDGE_ENABLED=true
+      - CONTAINER_ORCHESTRATION=cua-shmem
+      - IPC_MODE=shared_memory
+    networks:
+      - bytebot-cua-shmem-network
+    volumes:
+      # === Shared Volumes for Hybrid Architecture ===
+      - cua_shared_volume:/opt/cua/shared
+      - ane_cache_volume:/opt/ane-bridge/cache
+      - monitoring_logs:/opt/monitoring/logs
+      
+      # === Shared Memory Volumes ===
+      - type: tmpfs
+        target: /shared_memory
+        tmpfs:
+          size: 2G  # Dedicated shared memory filesystem
+      - shared_memory_segments:/var/shared_memory
+      
+      # === Host Integration Volumes ===
+      - /tmp/bytebot-cua-shmem:/tmp/shared
+      - /dev/shm:/dev/shm  # Host shared memory access
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/opt/cua/scripts/health-check-shmem.sh"]
+      interval: 30s
+      timeout: 15s
+      start_period: 180s  # Extended for shared memory initialization
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '10.0'     # Increased for shared memory processing
+          memory: 12G      # Increased for shared memory segments
+        reservations:
+          cpus: '4.0'      # Higher baseline for performance cores
+          memory: 4G
+
+  # === Enhanced Bytebot Agent with Shared Memory Support ===
+  bytebot-agent-cua-shmem:
+    build:
+      context: ../packages/
+      dockerfile: bytebot-agent/Dockerfile.shmem
+      args:
+        - CUA_INTEGRATION=enabled
+        - SHARED_MEMORY_ENABLED=true
+    image: ghcr.io/bytebot-ai/bytebot-agent:cua-shmem-edge
+    container_name: bytebot-agent-cua-shmem
+    restart: unless-stopped
+    ipc: host  # Enable shared memory access
+    ports:
+      - "9991:9991"  # Original agent API
+      - "9998:9998"  # Shared Memory integration endpoints
+    environment:
+      # === Original Configuration ===
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/bytebotdb}
+      - BYTEBOT_DESKTOP_BASE_URL=${BYTEBOT_DESKTOP_BASE_URL:-http://bytebot-desktop-cua-shmem:9990}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      
+      # === C/ua Integration ===
+      - CUA_DESKTOP_URL=http://bytebot-desktop-cua-shmem:9993
+      - CUA_ANE_BRIDGE_URL=http://host.docker.internal:8080
+      - CUA_SHARED_MEMORY_URL=http://host.docker.internal:8080/api/v1/shmem
+      - CUA_INTEGRATION_ENABLED=true
+      - CUA_PERFORMANCE_TRACKING=enabled
+      
+      # === Enhanced API Configuration ===
+      - API_VERSION=v2
+      - ASYNC_JOB_PROCESSING=enabled
+      - JOB_QUEUE_ENABLED=true
+      - WEBHOOK_SUPPORT=enabled
+      - SHARED_MEMORY_CLIENT_ENABLED=true
+    volumes:
+      - shared_memory_segments:/var/shared_memory:ro  # Read-only access to shared memory
+    depends_on:
+      postgres:
+        condition: service_healthy
+      bytebot-desktop-cua-shmem:
+        condition: service_healthy
+    networks:
+      - bytebot-cua-shmem-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9991/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # === Enhanced UI with Shared Memory Monitoring ===
+  bytebot-ui-cua-shmem:
+    build:
+      context: ../packages/
+      dockerfile: bytebot-ui/Dockerfile.shmem
+      args:
+        - BYTEBOT_AGENT_BASE_URL=${BYTEBOT_AGENT_BASE_URL:-http://bytebot-agent-cua-shmem:9991}
+        - BYTEBOT_DESKTOP_VNC_URL=${BYTEBOT_DESKTOP_VNC_URL:-http://bytebot-desktop-cua-shmem:9990/websockify}
+        - CUA_MONITORING_ENABLED=true
+        - SHARED_MEMORY_MONITORING=true
+    image: ghcr.io/bytebot-ai/bytebot-ui:cua-shmem-edge
+    container_name: bytebot-ui-cua-shmem
+    restart: unless-stopped
+    ports:
+      - "9992:9992"  # Original UI
+      - "9999:9999"  # Shared Memory monitoring dashboard
+    environment:
+      - NODE_ENV=production
+      - BYTEBOT_AGENT_BASE_URL=${BYTEBOT_AGENT_BASE_URL:-http://bytebot-agent-cua-shmem:9991}
+      - BYTEBOT_DESKTOP_VNC_URL=${BYTEBOT_DESKTOP_VNC_URL:-http://bytebot-desktop-cua-shmem:9990/websockify}
+      
+      # === Enhanced Monitoring ===
+      - CUA_MONITORING_ENABLED=true
+      - CUA_PERFORMANCE_DASHBOARD=enabled
+      - ANE_METRICS_ENABLED=true
+      - SHARED_MEMORY_METRICS=enabled
+      - REALTIME_UPDATES=enabled
+      - ZERO_COPY_ANALYTICS=enabled
+    depends_on:
+      bytebot-agent-cua-shmem:
+        condition: service_healthy
+    networks:
+      - bytebot-cua-shmem-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9992"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # === Enhanced Performance Monitor with Shared Memory Analytics ===
+  cua-shmem-monitor:
+    build:
+      context: docker/cua-monitor/
+      dockerfile: Dockerfile.shmem
+      args:
+        - SHARED_MEMORY_MONITORING=true
+    container_name: cua-shmem-performance-monitor
+    restart: unless-stopped
+    ipc: host  # Access shared memory for monitoring
+    ports:
+      - "8000:8000"  # Performance monitoring API
+      - "8001:8001"  # Shared memory analytics API
+    environment:
+      - MONITOR_INTERVAL=5  # More frequent monitoring for shared memory
+      - METRICS_RETENTION_DAYS=14
+      - ANE_BRIDGE_URL=http://host.docker.internal:8080
+      - SHARED_MEMORY_BRIDGE_URL=http://host.docker.internal:8080/api/v1/shmem
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL:-}
+      - SHARED_MEMORY_ANALYTICS=enabled
+      - ZERO_COPY_TRACKING=enabled
+      - PERFORMANCE_BASELINE_ENABLED=true
+    networks:
+      - bytebot-cua-shmem-network
+    volumes:
+      - monitoring_logs:/app/logs
+      - shared_memory_segments:/var/shared_memory:ro
+    depends_on:
+      - bytebot-desktop-cua-shmem
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+# === Enhanced Network Configuration ===
+networks:
+  bytebot-cua-shmem-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/16  # Different subnet to avoid conflicts
+    driver_opts:
+      # Optimize network for low-latency communication
+      com.docker.network.bridge.name: "br-cua-shmem"
+      com.docker.network.driver.mtu: "9000"  # Jumbo frames for better performance
+
+# === Enhanced Volume Configuration ===
+volumes:
+  postgres_cua_shmem_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/postgres-cua-shmem
+
+  cua_shared_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tmp/bytebot-cua-shmem/shared
+
+  ane_cache_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tmp/bytebot-cua-shmem/ane-cache
+
+  monitoring_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/logs/monitoring-shmem
+
+  # === Shared Memory Volumes ===
+  shared_memory_segments:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "size=2G,uid=1000,gid=1000,mode=0755"
+
+# === Development and Testing Overrides ===
+# Override file: docker-compose-cua-shmem.override.yml for development
+# Use: docker-compose -f docker-compose-cua-shmem.yml -f docker-compose-cua-shmem.override.yml up
+
+# === Shared Memory IPC Performance Targets ===
+# Expected Performance Improvements:
+# - OCR Processing Latency: 2-5ms → 1-3ms (40-50% reduction)
+# - Memory Bandwidth: 50-100MB/s → 1-5GB/s (10-50x improvement)
+# - CPU Overhead: 15-25% → 5-10% (60-75% reduction)
+# - Concurrent Throughput: 100-500 → 200-800 images/second (2x improvement)

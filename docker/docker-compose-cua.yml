@@ -1,0 +1,291 @@
+# C/ua Framework Docker Compose Configuration
+# Hybrid Architecture: Containerized Agents + Native macOS Services
+name: bytebot-cua
+
+services:
+  # === Core Services ===
+  postgres:
+    image: postgres:16-alpine
+    container_name: bytebot-postgres-cua
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=bytebotdb
+    networks:
+      - bytebot-cua-network
+    volumes:
+      - postgres_cua_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # === Apple Silicon M4 Optimized C/ua-Compatible Bytebot Desktop ===
+  bytebot-desktop-cua:
+    build:
+      context: .
+      dockerfile: bytebot-desktop.Dockerfile
+      platforms:
+        - linux/arm64
+      args:
+        - CUA_VERSION=latest
+        - ANE_BRIDGE_VERSION=1.0.0
+        - APPLE_SILICON_M4=enabled
+        - BUILDKIT_INLINE_CACHE=1
+    container_name: bytebot-desktop-cua-m4
+    restart: unless-stopped
+    hostname: computer-cua-m4
+    privileged: true
+    # Apple Silicon M4 Optimized Shared Memory (reduced for unified memory efficiency)
+    shm_size: "2g"  # Optimized for Apple Silicon unified memory architecture
+    # Apple Silicon performance optimizations
+    ipc: host
+    pid: host
+    platform: linux/arm64
+    ports:
+      - "9990:9990"  # Original bytebotd service & noVNC
+      - "9993:9993"  # C/ua Agent API
+      - "9994:9994"  # ANE Bridge Communication
+      - "9995:9995"  # Performance Monitoring
+      - "9996:9996"  # WebSocket for real-time communication
+    environment:
+      # === Original Environment ===
+      - DISPLAY=:0
+      # === Apple Silicon M4 C/ua Framework Configuration ===
+      - CUA_FRAMEWORK_ENABLED=true
+      - CUA_CONTAINER_ID=bytebot-desktop-cua-m4
+      - CUA_ANE_BRIDGE_URL=http://host.docker.internal:8080
+      - CUA_PERFORMANCE_MODE=apple_silicon_m4
+      - CUA_LOG_LEVEL=info
+      - APPLE_SILICON_OPTIMIZATION=enabled
+      - M4_NEURAL_ENGINE_DIRECT=true
+      # === Apple Neural Engine Bridge ===
+      - ANE_BRIDGE_ENABLED=true
+      - ANE_BRIDGE_HOST=host.docker.internal
+      - ANE_BRIDGE_PORT=8080
+      - ANE_FALLBACK_ENABLED=true
+      - ANE_CACHE_ENABLED=true
+      - ANE_BATCH_SIZE=10
+      - ANE_TIMEOUT_MS=5000
+      # === Apple Silicon M4 Performance Optimization ===
+      - PERFORMANCE_MONITORING=enabled
+      - METRICS_COLLECTION=enabled
+      - RESOURCE_LIMITS_ENABLED=true
+      - MEMORY_OPTIMIZATION=apple_silicon_unified
+      - M4_PERFORMANCE_CORES=6
+      - M4_EFFICIENCY_CORES=4
+      - UNIFIED_MEMORY_MAPPING=enabled
+      - ZERO_COPY_IPC=enabled
+      # === Apple Silicon M4 Hybrid Architecture Settings ===
+      - NATIVE_BRIDGE_ENABLED=true
+      - CONTAINER_ORCHESTRATION=cua_m4
+      - SHARED_MEMORY_IPC=enabled
+      - ARM64_SIMD_ACCELERATION=enabled
+    networks:
+      - bytebot-cua-network
+    volumes:
+      # === Apple Silicon M4 Shared Volumes for Hybrid Architecture ===
+      - cua_shared_volume:/opt/cua/shared
+      - ane_cache_volume:/opt/ane-bridge/cache
+      - monitoring_logs:/opt/monitoring/logs
+      - m4_shared_memory:/dev/shm/ane-bridge
+      - apple_silicon_optimizations:/opt/apple-silicon-m4/shared
+      # === Apple Silicon M4 Host Integration Volumes ===
+      - /tmp/bytebot-cua-m4:/tmp/shared
+      # === Shared memory for zero-copy IPC ===
+      - /dev/shm:/dev/shm:rw
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/opt/cua/scripts/health-check-optimized.sh"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s   # Apple Silicon M4 optimized startup time (reduced from 120s)
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          # Apple Silicon M4 Optimized Resource Allocation
+          cpus: '6.0'      # Optimized for M4 performance cores (reduced from 8.0)
+          memory: 4G       # Unified memory efficient allocation (reduced from 8G)
+        reservations:
+          cpus: '4.0'      # M4 performance cores priority (increased from 2.0)
+          memory: 2G       # Guaranteed unified memory allocation
+      # Apple Silicon M4 specific deployment configuration
+      placement:
+        preferences:
+          - spread: node.platform.arch==arm64
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        order: stop-first
+
+  # === Enhanced Bytebot Agent with C/ua Integration ===
+  bytebot-agent-cua:
+    build:
+      context: ../packages/
+      dockerfile: bytebot-agent/Dockerfile
+      args:
+        - CUA_INTEGRATION=enabled
+    image: ghcr.io/bytebot-ai/bytebot-agent:cua-edge
+    container_name: bytebot-agent-cua
+    restart: unless-stopped
+    ports:
+      - "9991:9991"  # Original agent API
+      - "9997:9997"  # C/ua integration endpoints
+    environment:
+      # === Original Configuration ===
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/bytebotdb}
+      - BYTEBOT_DESKTOP_BASE_URL=${BYTEBOT_DESKTOP_BASE_URL:-http://bytebot-desktop-cua-m4:9990}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # === C/ua Integration ===
+      - CUA_DESKTOP_URL=http://bytebot-desktop-cua-m4:9993
+      - CUA_ANE_BRIDGE_URL=http://host.docker.internal:8080
+      - CUA_INTEGRATION_ENABLED=true
+      - CUA_PERFORMANCE_TRACKING=enabled
+      # === Enhanced API Configuration ===
+      - API_VERSION=v2
+      - ASYNC_JOB_PROCESSING=enabled
+      - JOB_QUEUE_ENABLED=true
+      - WEBHOOK_SUPPORT=enabled
+    depends_on:
+      postgres:
+        condition: service_healthy
+      bytebot-desktop-cua-m4:
+        condition: service_healthy
+    networks:
+      - bytebot-cua-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9991/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # === Enhanced UI with C/ua Monitoring ===
+  bytebot-ui-cua:
+    build:
+      context: ../packages/
+      dockerfile: bytebot-ui/Dockerfile
+      args:
+        - BYTEBOT_AGENT_BASE_URL=${BYTEBOT_AGENT_BASE_URL:-http://bytebot-agent-cua:9991}
+        - BYTEBOT_DESKTOP_VNC_URL=${BYTEBOT_DESKTOP_VNC_URL:-http://bytebot-desktop-cua-m4:9990/websockify}
+        - CUA_MONITORING_ENABLED=true
+    image: ghcr.io/bytebot-ai/bytebot-ui:cua-edge
+    container_name: bytebot-ui-cua
+    restart: unless-stopped
+    ports:
+      - "9992:9992"  # Original UI
+      - "9998:9998"  # C/ua monitoring dashboard
+    environment:
+      - NODE_ENV=production
+      - BYTEBOT_AGENT_BASE_URL=${BYTEBOT_AGENT_BASE_URL:-http://bytebot-agent-cua:9991}
+      - BYTEBOT_DESKTOP_VNC_URL=${BYTEBOT_DESKTOP_VNC_URL:-http://bytebot-desktop-cua-m4:9990/websockify}
+      # === C/ua UI Enhancements ===
+      - CUA_MONITORING_ENABLED=true
+      - CUA_PERFORMANCE_DASHBOARD=enabled
+      - ANE_METRICS_ENABLED=true
+      - REALTIME_UPDATES=enabled
+    depends_on:
+      bytebot-agent-cua:
+        condition: service_healthy
+    networks:
+      - bytebot-cua-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9992"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # === C/ua Performance Monitor Service ===
+  cua-monitor:
+    build:
+      context: docker/cua-monitor/
+      dockerfile: Dockerfile
+    container_name: cua-performance-monitor
+    restart: unless-stopped
+    ports:
+      - "9999:8000"  # Performance monitoring API
+    environment:
+      - MONITOR_INTERVAL=10
+      - METRICS_RETENTION_DAYS=7
+      - ANE_BRIDGE_URL=http://host.docker.internal:8080
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL:-}
+    networks:
+      - bytebot-cua-network
+    volumes:
+      - monitoring_logs:/app/logs
+    depends_on:
+      - bytebot-desktop-cua-m4
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+# === Network Configuration ===
+networks:
+  bytebot-cua-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+# === Volume Configuration ===
+volumes:
+  postgres_cua_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/postgres-cua
+
+  # === Apple Silicon M4 Optimized Volumes ===
+  cua_shared_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tmp/bytebot-cua-m4/shared
+
+  ane_cache_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tmp/bytebot-cua-m4/ane-cache
+
+  monitoring_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/logs/monitoring-m4
+
+  # === Apple Silicon M4 Specific Volumes ===
+  m4_shared_memory:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: size=1G,uid=1000,gid=1000
+
+  apple_silicon_optimizations:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tmp/bytebot-cua-m4/apple-silicon
+
+# === Development and Debug Overrides ===
+# Override file: docker-compose-cua.override.yml for development
+# Use: docker-compose -f docker-compose-cua.yml -f docker-compose-cua.override.yml up

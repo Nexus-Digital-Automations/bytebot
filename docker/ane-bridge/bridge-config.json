@@ -1,0 +1,139 @@
+{
+  "service_name": "Apple Neural Engine Bridge",
+  "version": "1.0.0",
+  "description": "Native macOS service providing ANE-accelerated vision processing for containerized agents",
+  
+  "server_config": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "workers": 4,
+    "max_connections": 100,
+    "timeout_seconds": 30,
+    "keep_alive": true
+  },
+  
+  "apple_neural_engine": {
+    "enabled": true,
+    "auto_detect_hardware": true,
+    "supported_chips": ["M1", "M2", "M3", "M4"],
+    "performance_mode": "balanced",
+    "fallback_to_cpu": true,
+    "max_concurrent_requests": 10
+  },
+  
+  "vision_processing": {
+    "ocr_service": {
+      "enabled": true,
+      "recognition_level": "accurate",
+      "supported_languages": ["en-US", "en-GB"],
+      "minimum_text_height": 0.03125,
+      "custom_words_enabled": true,
+      "batch_processing": true,
+      "max_batch_size": 10
+    },
+    "text_detection": {
+      "enabled": true,
+      "confidence_threshold": 0.8,
+      "bounding_box_enabled": true,
+      "text_orientation_detection": true
+    },
+    "image_preprocessing": {
+      "auto_enhance": true,
+      "noise_reduction": true,
+      "contrast_adjustment": true,
+      "supported_formats": ["PNG", "JPEG", "WebP", "TIFF"]
+    }
+  },
+  
+  "caching": {
+    "enabled": true,
+    "cache_directory": "/tmp/ane-bridge-cache",
+    "max_cache_size_mb": 500,
+    "ttl_seconds": 3600,
+    "cleanup_interval_minutes": 30,
+    "cache_strategy": "lru"
+  },
+  
+  "performance_optimization": {
+    "memory_management": {
+      "max_memory_usage_mb": 2048,
+      "garbage_collection_enabled": true,
+      "memory_pressure_handling": true
+    },
+    "request_queuing": {
+      "enabled": true,
+      "max_queue_size": 50,
+      "queue_timeout_seconds": 10,
+      "priority_levels": ["high", "normal", "low"]
+    },
+    "batch_optimization": {
+      "auto_batching": true,
+      "batch_timeout_ms": 100,
+      "max_batch_delay_ms": 500
+    }
+  },
+  
+  "monitoring": {
+    "metrics_enabled": true,
+    "performance_tracking": true,
+    "error_reporting": true,
+    "health_checks": {
+      "interval_seconds": 30,
+      "endpoints": ["/health", "/metrics", "/status"]
+    },
+    "logging": {
+      "level": "info",
+      "file": "/opt/ane-bridge/logs/service.log",
+      "max_file_size": "100MB",
+      "max_files": 10,
+      "structured_logging": true
+    }
+  },
+  
+  "api_endpoints": {
+    "base_path": "/api/v1",
+    "endpoints": {
+      "health": "/health",
+      "metrics": "/metrics", 
+      "ocr": "/vision/ocr",
+      "text_detection": "/vision/text",
+      "batch_ocr": "/vision/ocr/batch",
+      "image_info": "/vision/image/info",
+      "supported_formats": "/vision/formats"
+    }
+  },
+  
+  "security": {
+    "api_key_required": false,
+    "rate_limiting": {
+      "enabled": true,
+      "requests_per_minute": 500,
+      "burst_size": 50,
+      "per_ip_limits": true
+    },
+    "allowed_origins": ["*"],
+    "max_request_size_mb": 10,
+    "request_validation": true
+  },
+  
+  "integration": {
+    "container_communication": {
+      "supported_protocols": ["http", "websocket"],
+      "shared_volume_support": true,
+      "result_formats": ["json", "base64", "file"]
+    },
+    "bytebot_integration": {
+      "enabled": true,
+      "callback_url": "",
+      "webhook_support": true,
+      "status_updates": true
+    }
+  },
+  
+  "development": {
+    "debug_mode": false,
+    "test_endpoints_enabled": false,
+    "mock_ane_responses": false,
+    "performance_benchmarking": true
+  }
+}

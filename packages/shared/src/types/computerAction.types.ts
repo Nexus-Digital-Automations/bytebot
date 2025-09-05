@@ -105,6 +105,27 @@ export type ReadFileAction = {
   path: string;
 };
 
+export type OcrAction = {
+  action: "ocr";
+  coordinates?: Coordinates;
+  region?: { x: number; y: number; width: number; height: number };
+  language?: string;
+};
+
+export type FindTextAction = {
+  action: "find_text";
+  text: string;
+  caseSensitive?: boolean;
+  wholeWord?: boolean;
+};
+
+export type EnhancedScreenshotAction = {
+  action: "enhanced_screenshot";
+  region?: { x: number; y: number; width: number; height: number };
+  format?: "png" | "jpeg";
+  quality?: number;
+};
+
 // Define the union type using the individual action types
 export type ComputerAction =
   | MoveMouseAction
@@ -122,4 +143,7 @@ export type ComputerAction =
   | CursorPositionAction
   | ApplicationAction
   | WriteFileAction
-  | ReadFileAction;
+  | ReadFileAction
+  | OcrAction
+  | FindTextAction
+  | EnhancedScreenshotAction;

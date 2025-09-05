@@ -1,0 +1,50 @@
+# Apple Neural Engine Bridge Service Requirements
+# High-performance vision processing service for macOS with ANE acceleration
+
+# Core Framework
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+
+# HTTP and Async Support  
+httpx>=0.25.2
+aiohttp>=3.9.1
+asyncio-throttle>=1.0.2
+
+# System and Process Management
+psutil>=5.9.6
+python-multipart>=0.0.6
+
+# Image Processing and Encoding
+Pillow>=10.1.0
+numpy>=1.24.3
+
+# Monitoring and Logging
+structlog>=23.2.0
+prometheus-client>=0.19.0
+
+# Development and Testing (optional)
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+pytest-mock>=3.12.0
+black>=23.11.0
+ruff>=0.1.6
+
+# Performance Monitoring
+memory-profiler>=0.61.0
+line-profiler>=4.1.1
+
+# Configuration Management
+python-dotenv>=1.0.0
+PyYAML>=6.0.1
+
+# Security
+cryptography>=41.0.7
+
+# Core ML Tools for direct framework access and ANE optimization
+coremltools>=6.0,<8.0
+
+# Apple Framework Integration for enhanced ANE support
+pyobjc-framework-Metal>=10.0
+pyobjc-framework-Vision>=10.0
+pyobjc-framework-CoreML>=10.0

@@ -1,11 +1,15 @@
 import { IsNumber } from 'class-validator';
 
+/**
+ * Data Transfer Object for screen coordinates
+ * Properties are initialized by NestJS validation pipeline
+ */
 export class CoordinatesDto {
   @IsNumber()
-  x: number;
+  x!: number;
 
   @IsNumber()
-  y: number;
+  y!: number;
 }
 
 export enum ButtonType {

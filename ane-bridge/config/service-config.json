@@ -1,0 +1,207 @@
+{
+  "service_name": "Apple Neural Engine Bridge Service",
+  "version": "1.0.0",
+  "description": "Native macOS service providing ANE-accelerated vision processing for containerized AI agents",
+  
+  "server_config": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "workers": 1,
+    "max_connections": 100,
+    "timeout_seconds": 30,
+    "keepalive_timeout": 30,
+    "max_request_size_mb": 50
+  },
+  
+  "apple_neural_engine": {
+    "enabled": true,
+    "fallback_to_cpu": true,
+    "max_concurrent_requests": 10,
+    "performance_monitoring": true,
+    "hardware_detection": true
+  },
+  
+  "vision_processing": {
+    "ocr_service": {
+      "enabled": true,
+      "recognition_level": "accurate",
+      "supported_languages": [
+        "en-US",
+        "en-GB",
+        "es-ES",
+        "fr-FR",
+        "de-DE",
+        "it-IT",
+        "pt-BR",
+        "zh-CN",
+        "ja-JP"
+      ],
+      "minimum_text_height": 0.03125,
+      "batch_processing": true,
+      "custom_vocabulary_support": true,
+      "bounding_boxes": true
+    },
+    "text_detection": {
+      "enabled": true,
+      "confidence_threshold": 0.8,
+      "orientation_detection": true,
+      "region_analysis": true
+    }
+  },
+  
+  "caching": {
+    "enabled": true,
+    "ttl_seconds": 300,
+    "max_size": 1000,
+    "cleanup_interval_seconds": 300,
+    "cache_successful_only": true,
+    "intelligence_enabled": true,
+    "prediction_threshold": 0.8
+  },
+  
+  "performance": {
+    "target_latency_ms": 2,
+    "throughput_target_images_per_second": 500,
+    "memory_monitoring": true,
+    "cpu_monitoring": true,
+    "metrics_collection": true,
+    "metrics_retention_hours": 24
+  },
+  
+  "monitoring": {
+    "logging": {
+      "level": "info",
+      "file": "logs/ane-bridge.log",
+      "max_file_size_mb": 100,
+      "backup_count": 5,
+      "structured_logging": true
+    },
+    "health_check": {
+      "enabled": true,
+      "interval_seconds": 30,
+      "ane_availability_check": true,
+      "memory_threshold_mb": 1000,
+      "cpu_threshold_percent": 85
+    },
+    "alerts": {
+      "enabled": true,
+      "error_threshold": 5,
+      "latency_threshold_ms": 50,
+      "memory_threshold_mb": 2000
+    }
+  },
+  
+  "security": {
+    "cors_enabled": true,
+    "allowed_origins": ["*"],
+    "rate_limiting": {
+      "enabled": true,
+      "requests_per_minute": 1000,
+      "burst_size": 50
+    },
+    "request_size_limits": {
+      "max_image_size_mb": 25,
+      "max_batch_size": 100
+    }
+  },
+  
+  "integration": {
+    "bytebot_endpoints": [
+      "http://localhost:3001",
+      "http://bytebotd:3001"
+    ],
+    "container_communication": {
+      "health_ping_interval_seconds": 60,
+      "connection_timeout_seconds": 10,
+      "retry_attempts": 3
+    }
+  },
+  
+  "development": {
+    "debug_mode": false,
+    "script_generation": true,
+    "temp_file_cleanup": true,
+    "performance_profiling": false
+  },
+  
+  "phase_1_2_1_enhancements": {
+    "enabled": true,
+    "version": "1.2.1",
+    "description": "Core ML 2025 optimizations with async processing and intelligent caching",
+    
+    "async_config": {
+      "enabled": true,
+      "max_workers": 8,
+      "max_concurrent": 10,
+      "queue_size": 100,
+      "prediction_api_enabled": true,
+      "background_processing": true
+    },
+    
+    "batch_config": {
+      "adaptive_sizing": true,
+      "initial_size": 5,
+      "max_batch_size": 20,
+      "min_batch_size": 1,
+      "optimization_enabled": true,
+      "priority_based_batching": true,
+      "performance_target_ms": 5.0
+    },
+    
+    "resource_monitoring": {
+      "enabled": true,
+      "optimization_enabled": true,
+      "adaptive_throttling": true,
+      "predictive_scaling": true,
+      "monitoring_interval_ms": 1000,
+      "optimization_interval_ms": 5000,
+      "history_size": 1000,
+      "max_concurrent": 10,
+      "initial_batch_size": 5,
+      "queue_size": 50,
+      "memory_limit_mb": 2048,
+      "throttle_threshold": 0.85
+    },
+    
+    "cache_intelligence": {
+      "intelligence_enabled": true,
+      "prediction_threshold": 0.8,
+      "ml_driven_optimization": true,
+      "predictive_preloading": true,
+      "smart_eviction": true,
+      "pattern_analysis": true,
+      "learning_enabled": true,
+      "auto_threshold_tuning": true,
+      "target_accuracy": 0.85
+    },
+    
+    "core_ml_2025_features": {
+      "async_prediction_api": true,
+      "advanced_quantization": true,
+      "mixed_precision": true,
+      "foundation_models_integration": false,
+      "low_bit_palletization": true,
+      "performance_target_improvement": "5x-10x",
+      "latency_target_ms": 2.0,
+      "throughput_target_images_per_second": 500
+    },
+    
+    "performance_optimizations": {
+      "dynamic_batch_processing": true,
+      "intelligent_resource_allocation": true,
+      "concurrent_execution_optimization": true,
+      "memory_optimization": true,
+      "thermal_management": true,
+      "load_balancing": true,
+      "performance_monitoring": true
+    },
+    
+    "validation_targets": {
+      "latency_improvement_target": "60%",
+      "throughput_improvement_target": "150%",
+      "resource_efficiency_target": "30%",
+      "cache_hit_rate_target": "85%",
+      "availability_target": "99.95%"
+    }
+  }
+}

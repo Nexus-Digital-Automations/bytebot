@@ -85,14 +85,14 @@ export class InputTrackingService implements OnModuleDestroy {
     );
   }
   /** Convert buffered chars → action, then clear buffer. */
-  private async flushTypingBuffer() {
+  private flushTypingBuffer() {
     if (!this.typingBuffer.length) return;
     const action: TypeTextAction = {
       action: 'type_text',
       text: this.typingBuffer.join(''),
     };
     this.typingBuffer.length = 0;
-    await this.logAction(action);
+    this.logAction(action);
   }
 
   private isModifierKey(key: UiohookKeyboardEvent) {
@@ -107,8 +107,24 @@ export class InputTrackingService implements OnModuleDestroy {
         if (this.screenshotTimeout) {
           clearTimeout(this.screenshotTimeout);
         }
-        this.screenshotTimeout = setTimeout(async () => {
-          this.screenshot = await this.computerUseService.screenshot();
+        this.screenshotTimeout = setTimeout(() => {
+          void (async () => {
+            try {
+              const result = await (
+                this.computerUseService.screenshot as () => Promise<{
+                  image: string;
+                }>
+              )();
+              this.screenshot = result;
+            } catch (error) {
+              const errorMessage =
+                error instanceof Error ? error.message : 'Unknown error';
+              this.logger.error(
+                'Failed to take screenshot for action',
+                errorMessage,
+              );
+            }
+          })();
         }, this.SCREENSHOT_DEBOUNCE_MS);
       }
     });
@@ -131,12 +147,12 @@ export class InputTrackingService implements OnModuleDestroy {
         clearTimeout(this.clickMouseActionTimeout);
       }
 
-      this.clickMouseActionTimeout = setTimeout(async () => {
+      this.clickMouseActionTimeout = setTimeout(() => {
         // pick the event with the largest clickCount in the burst
         const final = this.clickMouseActionBuffer.reduce((a, b) =>
           b.clickCount > a.clickCount ? b : a,
         );
-        await this.logAction(final); // emit exactly once
+        this.logAction(final); // emit exactly once
 
         this.clickMouseActionTimeout = null;
         this.clickMouseActionBuffer = [];
@@ -158,18 +174,18 @@ export class InputTrackingService implements OnModuleDestroy {
       };
     });
 
-    uIOhook.on('mouseup', async (e: UiohookMouseEvent) => {
+    uIOhook.on('mouseup', (e: UiohookMouseEvent) => {
       if (this.isDragging && this.dragMouseAction) {
         this.dragMouseAction.path.push({ x: e.x, y: e.y });
         if (this.dragMouseAction.path.length > 3) {
-          await this.logAction(this.dragMouseAction);
+          this.logAction(this.dragMouseAction);
         }
         this.dragMouseAction = null;
       }
       this.isDragging = false;
     });
 
-    uIOhook.on('wheel', async (e: UiohookWheelEvent) => {
+    uIOhook.on('wheel', (e: UiohookWheelEvent) => {
       const direction =
         e.direction === WheelDirection.VERTICAL
           ? e.rotation > 0
@@ -180,7 +196,7 @@ export class InputTrackingService implements OnModuleDestroy {
             : 'left';
       const action: ScrollAction = {
         action: 'scroll',
-        direction: direction as any,
+        direction: direction,
         scrollCount: 1,
         coordinates: { x: e.x, y: e.y },
       };
@@ -191,7 +207,7 @@ export class InputTrackingService implements OnModuleDestroy {
       ) {
         this.scrollCount++;
         if (this.scrollCount >= 4) {
-          await this.logAction(this.scrollAction);
+          this.logAction(this.scrollAction);
           this.scrollAction = null;
           this.scrollCount = 0;
         }
@@ -201,7 +217,7 @@ export class InputTrackingService implements OnModuleDestroy {
       }
     });
 
-    uIOhook.on('keydown', async (e: UiohookKeyboardEvent) => {
+    uIOhook.on('keydown', (e: UiohookKeyboardEvent) => {
       if (!keyInfoMap[e.keycode]) {
         this.logger.warn(`Unknown key: ${e.keycode}`);
         return;
@@ -211,15 +227,15 @@ export class InputTrackingService implements OnModuleDestroy {
       if (!this.isModifierKey(e) && keyInfoMap[e.keycode].isPrintable) {
         this.bufferChar(
           e.shiftKey
-            ? keyInfoMap[e.keycode].shiftString!
-            : keyInfoMap[e.keycode].string!,
+            ? keyInfoMap[e.keycode].shiftString
+            : keyInfoMap[e.keycode].string,
         );
         return;
       }
 
       /* Anything with modifiers _or_ a non‑printable key: 
       first flush buffered text so ordering is preserved. */
-      await this.flushTypingBuffer();
+      this.flushTypingBuffer();
 
       /* Ignore auto‑repeat for pressed keys. */
       if (this.pressedKeys.has(e.keycode)) {
@@ -228,18 +244,18 @@ export class InputTrackingService implements OnModuleDestroy {
       this.pressedKeys.add(e.keycode);
     });
 
-    uIOhook.on('keyup', async (e: UiohookKeyboardEvent) => {
+    uIOhook.on('keyup', (e: UiohookKeyboardEvent) => {
       if (!keyInfoMap[e.keycode]) {
         this.logger.warn(`Unknown key: ${e.keycode}`);
         return;
       }
       /* If key belongs to typing buffer we don't emit anything on keyup. *
-       * (Up‑event is irrelevant for a pure “typed character”.) */
+       * (Up‑event is irrelevant for a pure "typed character".) */
       if (!this.isModifierKey(e) && keyInfoMap[e.keycode].isPrintable) {
         return;
       }
 
-      await this.flushTypingBuffer();
+      this.flushTypingBuffer();
 
       if (this.pressedKeys.size === 0) {
         return;
@@ -256,7 +272,7 @@ export class InputTrackingService implements OnModuleDestroy {
       };
 
       this.pressedKeys.clear();
-      await this.logAction(action);
+      this.logAction(action);
     });
   }
 
@@ -273,7 +289,7 @@ export class InputTrackingService implements OnModuleDestroy {
     }
   }
 
-  private async logAction(action: ComputerAction) {
+  private logAction(action: ComputerAction) {
     this.logger.log(`Detected action: ${JSON.stringify(action)}`);
 
     if (

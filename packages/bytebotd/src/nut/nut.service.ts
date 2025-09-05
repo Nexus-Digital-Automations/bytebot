@@ -1,3 +1,16 @@
+/**
+ * NUT Service - Node User Interface Testing automation service
+ * Provides keyboard, mouse, and screen interaction capabilities using nut-js
+ *
+ * Features:
+ * - Keyboard input simulation (keys, text typing, paste)
+ * - Mouse interaction (movement, clicks, wheel scrolling)
+ * - Screen capture functionality
+ * - Cursor position tracking
+ *
+ * Dependencies: @nut-tree-fork/nut-js, child_process, fs, path
+ * Usage: Inject NutService into controllers/other services
+ */
 // src/nut/nut.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import {
@@ -11,6 +24,40 @@ import {
 } from '@nut-tree-fork/nut-js';
 import { spawn } from 'child_process';
 import * as path from 'path';
+
+/**
+ * Interface for standard service responses
+ */
+interface ServiceResponse {
+  success: boolean;
+  message?: string;
+}
+
+/**
+ * Interface for coordinate positions
+ */
+interface Coordinates {
+  x: number;
+  y: number;
+}
+
+/**
+ * Interface for key mapping information
+ */
+interface KeyInfo {
+  keyCode: Key;
+  withShift: boolean;
+}
+
+/**
+ * Type definition for mouse button types
+ */
+type MouseButton = 'left' | 'right' | 'middle';
+
+/**
+ * Type definition for scroll directions
+ */
+type ScrollDirection = 'up' | 'down' | 'left' | 'right';
 
 /**
  * Enum representing key codes supported by nut-js.
@@ -128,12 +175,14 @@ export class NutService {
 
     // Create screenshot directory if it doesn't exist
     this.screenshotDir = path.join('/tmp', 'bytebot-screenshots');
-    import('fs').then((fs) => {
+    void import('fs').then((fs) => {
       fs.promises
         .mkdir(this.screenshotDir, { recursive: true })
-        .catch((err) => {
+        .catch((err: unknown) => {
+          const errorMessage =
+            err instanceof Error ? err.message : 'Unknown error';
           this.logger.error(
-            `Failed to create screenshot directory: ${err.message}`,
+            `Failed to create screenshot directory: ${errorMessage}`,
           );
         });
     });
@@ -144,18 +193,35 @@ export class NutService {
    *
    * @param keys An array of key strings.
    * @param delay Delay between pressing and releasing keys in ms.
+   * @returns Promise<ServiceResponse> Success status of key send operation
    */
-  async sendKeys(keys: string[], delay: number = 100): Promise<any> {
-    this.logger.log(`Sending keys: ${keys}`);
+  async sendKeys(
+    keys: string[],
+    delay: number = 100,
+  ): Promise<ServiceResponse> {
+    const operationId = this.generateOperationId();
+    this.logger.log(`[${operationId}] Starting key send operation`, {
+      keys: keys.join(', '),
+      delay,
+      operationId,
+    });
 
     try {
       const nutKeys = keys.map((key) => this.validateKey(key));
       await keyboard.pressKey(...nutKeys);
       await this.delay(delay);
       await keyboard.releaseKey(...nutKeys);
+
+      this.logger.log(
+        `[${operationId}] Key send operation completed successfully`,
+      );
       return { success: true };
     } catch (error) {
-      throw new Error(`Failed to send keys: ${error.message}`);
+      const errorMessage = this.getErrorMessage(error);
+      this.logger.error(
+        `[${operationId}] Key send operation failed: ${errorMessage}`,
+      );
+      throw new Error(`Failed to send keys: ${errorMessage}`);
     }
   }
 
@@ -164,8 +230,9 @@ export class NutService {
    *
    * @param keys An array of key strings.
    * @param down True to press the keys down, false to release them.
+   * @returns Promise<ServiceResponse> Success status of key hold operation
    */
-  async holdKeys(keys: string[], down: boolean): Promise<any> {
+  async holdKeys(keys: string[], down: boolean): Promise<ServiceResponse> {
     try {
       for (const key of keys) {
         const nutKey = this.validateKey(key);
@@ -177,7 +244,9 @@ export class NutService {
       }
       return { success: true };
     } catch (error) {
-      throw new Error(`Failed to hold keys: ${error.message}`);
+      const errorMessage = this.getErrorMessage(error);
+      this.logger.error(`Failed to hold keys operation: ${errorMessage}`);
+      throw new Error(`Failed to hold keys: ${errorMessage}`);
     }
   }
 
@@ -239,7 +308,9 @@ export class NutService {
         }
       }
     } catch (error) {
-      throw new Error(`Failed to type text: ${error.message}`);
+      const errorMessage = this.getErrorMessage(error);
+      this.logger.error(`Failed to type text: ${errorMessage}`);
+      throw new Error(`Failed to type text: ${errorMessage}`);
     }
   }
 
@@ -256,9 +327,11 @@ export class NutService {
 
         child.once('error', reject);
         child.once('close', (code) => {
-          code === 0
-            ? resolve()
-            : reject(new Error(`xclip exited with code ${code}`));
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(new Error(`xclip exited with code ${code}`));
+          }
         });
 
         child.stdin.write(text);
@@ -271,7 +344,9 @@ export class NutService {
       await keyboard.pressKey(Key.LeftControl, Key.V);
       await keyboard.releaseKey(Key.LeftControl, Key.V);
     } catch (error) {
-      throw new Error(`Failed to paste text: ${error.message}`);
+      const errorMessage = this.getErrorMessage(error);
+      this.logger.error(`Failed to paste text: ${errorMessage}`);
+      throw new Error(`Failed to paste text: ${errorMessage}`);
     }
   }
 
@@ -279,11 +354,9 @@ export class NutService {
    * Converts a character to its corresponding key information.
    *
    * @param char The character to convert.
-   * @returns An object containing the keyCode and whether shift is needed, or null if no mapping exists.
+   * @returns KeyInfo object containing the keyCode and whether shift is needed, or null if no mapping exists.
    */
-  private charToKeyInfo(
-    char: string,
-  ): { keyCode: Key; withShift: boolean } | null {
+  private charToKeyInfo(char: string): KeyInfo | null {
     // Handle lowercase letters
     if (/^[a-z]$/.test(char)) {
       return { keyCode: this.validateKey(char), withShift: false };
@@ -303,45 +376,44 @@ export class NutService {
     }
 
     // Handle special characters
-    const specialCharMap: Record<string, { keyCode: Key; withShift: boolean }> =
-      {
-        ' ': { keyCode: Key.Space, withShift: false },
-        '.': { keyCode: Key.Period, withShift: false },
-        ',': { keyCode: Key.Comma, withShift: false },
-        ';': { keyCode: Key.Semicolon, withShift: false },
-        "'": { keyCode: Key.Quote, withShift: false },
-        '`': { keyCode: Key.Grave, withShift: false },
-        '-': { keyCode: Key.Minus, withShift: false },
-        '=': { keyCode: Key.Equal, withShift: false },
-        '[': { keyCode: Key.LeftBracket, withShift: false },
-        ']': { keyCode: Key.RightBracket, withShift: false },
-        '\\': { keyCode: Key.Backslash, withShift: false },
-        '/': { keyCode: Key.Slash, withShift: false },
+    const specialCharMap: Record<string, KeyInfo> = {
+      ' ': { keyCode: Key.Space, withShift: false },
+      '.': { keyCode: Key.Period, withShift: false },
+      ',': { keyCode: Key.Comma, withShift: false },
+      ';': { keyCode: Key.Semicolon, withShift: false },
+      "'": { keyCode: Key.Quote, withShift: false },
+      '`': { keyCode: Key.Grave, withShift: false },
+      '-': { keyCode: Key.Minus, withShift: false },
+      '=': { keyCode: Key.Equal, withShift: false },
+      '[': { keyCode: Key.LeftBracket, withShift: false },
+      ']': { keyCode: Key.RightBracket, withShift: false },
+      '\\': { keyCode: Key.Backslash, withShift: false },
+      '/': { keyCode: Key.Slash, withShift: false },
 
-        // Characters that require shift
-        '!': { keyCode: Key.Num1, withShift: true },
-        '@': { keyCode: Key.Num2, withShift: true },
-        '#': { keyCode: Key.Num3, withShift: true },
-        $: { keyCode: Key.Num4, withShift: true },
-        '%': { keyCode: Key.Num5, withShift: true },
-        '^': { keyCode: Key.Num6, withShift: true },
-        '&': { keyCode: Key.Num7, withShift: true },
-        '*': { keyCode: Key.Num8, withShift: true },
-        '(': { keyCode: Key.Num9, withShift: true },
-        ')': { keyCode: Key.Num0, withShift: true },
-        _: { keyCode: Key.Minus, withShift: true },
-        '+': { keyCode: Key.Equal, withShift: true },
-        '{': { keyCode: Key.LeftBracket, withShift: true },
-        '}': { keyCode: Key.RightBracket, withShift: true },
-        '|': { keyCode: Key.Backslash, withShift: true },
-        ':': { keyCode: Key.Semicolon, withShift: true },
-        '"': { keyCode: Key.Quote, withShift: true },
-        '<': { keyCode: Key.Comma, withShift: true },
-        '>': { keyCode: Key.Period, withShift: true },
-        '?': { keyCode: Key.Slash, withShift: true },
-        '~': { keyCode: Key.Grave, withShift: true },
-        '\n': { keyCode: Key.Enter, withShift: false },
-      };
+      // Characters that require shift
+      '!': { keyCode: Key.Num1, withShift: true },
+      '@': { keyCode: Key.Num2, withShift: true },
+      '#': { keyCode: Key.Num3, withShift: true },
+      $: { keyCode: Key.Num4, withShift: true },
+      '%': { keyCode: Key.Num5, withShift: true },
+      '^': { keyCode: Key.Num6, withShift: true },
+      '&': { keyCode: Key.Num7, withShift: true },
+      '*': { keyCode: Key.Num8, withShift: true },
+      '(': { keyCode: Key.Num9, withShift: true },
+      ')': { keyCode: Key.Num0, withShift: true },
+      _: { keyCode: Key.Minus, withShift: true },
+      '+': { keyCode: Key.Equal, withShift: true },
+      '{': { keyCode: Key.LeftBracket, withShift: true },
+      '}': { keyCode: Key.RightBracket, withShift: true },
+      '|': { keyCode: Key.Backslash, withShift: true },
+      ':': { keyCode: Key.Semicolon, withShift: true },
+      '"': { keyCode: Key.Quote, withShift: true },
+      '<': { keyCode: Key.Comma, withShift: true },
+      '>': { keyCode: Key.Period, withShift: true },
+      '?': { keyCode: Key.Slash, withShift: true },
+      '~': { keyCode: Key.Grave, withShift: true },
+      '\n': { keyCode: Key.Enter, withShift: false },
+    };
 
     return specialCharMap[char] || null;
   }
@@ -350,19 +422,28 @@ export class NutService {
    * Moves the mouse to specified coordinates.
    *
    * @param coordinates The x and y coordinates.
+   * @returns Promise<ServiceResponse> Success status of mouse movement
    */
-  async mouseMoveEvent({ x, y }: { x: number; y: number }): Promise<any> {
+  async mouseMoveEvent({ x, y }: Coordinates): Promise<ServiceResponse> {
     this.logger.log(`Moving mouse to coordinates: (${x}, ${y})`);
     try {
       const point = new Point(x, y);
       await mouse.setPosition(point);
       return { success: true };
     } catch (error) {
-      throw new Error(`Failed to move mouse: ${error.message}`);
+      const errorMessage = this.getErrorMessage(error);
+      this.logger.error(`Failed to move mouse: ${errorMessage}`);
+      throw new Error(`Failed to move mouse: ${errorMessage}`);
     }
   }
 
-  async mouseClickEvent(button: 'left' | 'right' | 'middle'): Promise<any> {
+  /**
+   * Performs a mouse click with the specified button.
+   *
+   * @param button The mouse button to click
+   * @returns Promise<ServiceResponse> Success status of mouse click operation
+   */
+  async mouseClickEvent(button: MouseButton): Promise<ServiceResponse> {
     this.logger.log(`Clicking mouse button: ${button}`);
     try {
       switch (button) {
@@ -378,7 +459,9 @@ export class NutService {
       }
       return { success: true };
     } catch (error) {
-      throw new Error(`Failed to click mouse button: ${error.message}`);
+      const errorMessage = this.getErrorMessage(error);
+      this.logger.error(`Failed to click mouse button: ${errorMessage}`);
+      throw new Error(`Failed to click mouse button: ${errorMessage}`);
     }
   }
 
@@ -387,11 +470,12 @@ export class NutService {
    *
    * @param button The mouse button ('left', 'right', or 'middle').
    * @param pressed True to press, false to release.
+   * @returns Promise<ServiceResponse> Success status of mouse button operation
    */
   async mouseButtonEvent(
-    button: 'left' | 'right' | 'middle',
+    button: MouseButton,
     pressed: boolean,
-  ): Promise<any> {
+  ): Promise<ServiceResponse> {
     this.logger.log(
       `Mouse button event: ${button} ${pressed ? 'pressed' : 'released'}`,
     );
@@ -424,7 +508,7 @@ export class NutService {
       return { success: true };
     } catch (error) {
       throw new Error(
-        `Failed to send mouse ${button} button ${pressed ? 'press' : 'release'} event: ${error.message}`,
+        `Failed to send mouse ${button} button ${pressed ? 'press' : 'release'} event: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -434,11 +518,12 @@ export class NutService {
    *
    * @param direction The scroll direction ('up', 'down', 'left', or 'right').
    * @param amount The number of scroll steps.
+   * @returns Promise<ServiceResponse> Success status of scroll operation
    */
   async mouseWheelEvent(
-    direction: 'right' | 'left' | 'up' | 'down',
+    direction: ScrollDirection,
     amount: number,
-  ): Promise<any> {
+  ): Promise<ServiceResponse> {
     this.logger.log(`Mouse wheel event: ${direction} ${amount}`);
     try {
       switch (direction) {
@@ -458,7 +543,9 @@ export class NutService {
 
       return { success: true };
     } catch (error) {
-      throw new Error(`Failed to scroll: ${error.message}`);
+      const errorMessage = this.getErrorMessage(error);
+      this.logger.error(`Failed to scroll: ${errorMessage}`);
+      throw new Error(`Failed to scroll: ${errorMessage}`);
     }
   }
 
@@ -479,7 +566,8 @@ export class NutService {
       // Read the file back and return as buffer
       return await import('fs').then((fs) => fs.promises.readFile(filepath));
     } catch (error) {
-      this.logger.error(`Error taking screenshot: ${error.message}`);
+      const errorMessage = this.getErrorMessage(error);
+      this.logger.error(`Error taking screenshot: ${errorMessage}`);
       throw error;
     } finally {
       // Clean up the temporary file
@@ -487,20 +575,27 @@ export class NutService {
         await import('fs').then((fs) => fs.promises.unlink(filepath));
       } catch (unlinkError) {
         // Ignore if file doesn't exist
+        const errorMessage = this.getErrorMessage(unlinkError);
         this.logger.warn(
-          `Failed to remove temporary screenshot file: ${unlinkError.message}`,
+          `Failed to remove temporary screenshot file: ${errorMessage}`,
         );
       }
     }
   }
 
-  async getCursorPosition(): Promise<{ x: number; y: number }> {
+  /**
+   * Gets the current cursor position.
+   *
+   * @returns Promise<Coordinates> Current cursor coordinates
+   */
+  async getCursorPosition(): Promise<Coordinates> {
     this.logger.log(`Getting cursor position`);
     try {
       const position = await mouse.getPosition();
       return { x: position.x, y: position.y };
     } catch (error) {
-      this.logger.error(`Error getting cursor position: ${error.message}`);
+      const errorMessage = this.getErrorMessage(error);
+      this.logger.error(`Error getting cursor position: ${errorMessage}`);
       throw error;
     }
   }
@@ -512,5 +607,80 @@ export class NutService {
    */
   private async delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Generates a unique operation ID for tracking purposes
+   * @returns {string} Unique operation identifier
+   */
+  private generateOperationId(): string {
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    return `nut_operation_${timestamp}_${randomSuffix}`;
+  }
+
+  /**
+   * Extracts error message from unknown error objects
+   * @param error Unknown error object
+   * @returns {string} Formatted error message
+   */
+  private getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    if (typeof error === 'string') {
+      return error;
+    }
+    if (error && typeof error === 'object' && 'message' in error) {
+      const errorObj = error as { message: unknown };
+      return typeof errorObj.message === 'string'
+        ? errorObj.message
+        : String(errorObj.message);
+    }
+    return 'Unknown error occurred';
+  }
+
+  /**
+   * Validates that the service is properly initialized and ready for operations.
+   *
+   * @throws Error if service is not properly initialized
+   */
+  private validateServiceReady(): void {
+    if (!this.screenshotDir) {
+      throw new Error(
+        'NUT Service not properly initialized - screenshot directory not set',
+      );
+    }
+  }
+
+  /**
+   * Gets service health status and configuration information.
+   *
+   * @returns Object containing service health and configuration details
+   */
+  getServiceStatus(): {
+    healthy: boolean;
+    screenshotDir: string;
+    mouseConfig: { autoDelayMs: number };
+    keyboardConfig: { autoDelayMs: number };
+  } {
+    try {
+      this.validateServiceReady();
+      return {
+        healthy: true,
+        screenshotDir: this.screenshotDir,
+        mouseConfig: { autoDelayMs: mouse.config.autoDelayMs },
+        keyboardConfig: { autoDelayMs: keyboard.config.autoDelayMs },
+      };
+    } catch (error) {
+      const errorMessage = this.getErrorMessage(error);
+      this.logger.error(`Service status check failed: ${errorMessage}`);
+      return {
+        healthy: false,
+        screenshotDir: this.screenshotDir || 'not set',
+        mouseConfig: { autoDelayMs: mouse.config.autoDelayMs },
+        keyboardConfig: { autoDelayMs: keyboard.config.autoDelayMs },
+      };
+    }
   }
 }

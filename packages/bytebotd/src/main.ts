@@ -3,36 +3,69 @@ import { AppModule } from './app.module';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import * as express from 'express';
 import { json, urlencoded } from 'express';
+import { Logger } from '@nestjs/common';
+import type { Server } from 'http';
+import type { IncomingMessage } from 'http';
+import type { Socket } from 'net';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+/**
+ * Application bootstrap function
+ * Initializes NestJS application with proxy middleware and WebSocket handling
+ */
+async function bootstrap(): Promise<void> {
+  const logger = new Logger('Bootstrap');
 
-  // Configure body parser with increased payload size limit (50MB)
-  app.use(json({ limit: '50mb' }));
-  app.use(urlencoded({ limit: '50mb', extended: true }));
+  try {
+    const app = await NestFactory.create(AppModule);
 
-  // Enable CORS
-  app.enableCors({
-    origin: '*',
-    methods: ['GET', 'POST'],
-    credentials: true,
-  });
+    // Configure body parser with increased payload size limit (50MB)
+    app.use(json({ limit: '50mb' }));
+    app.use(urlencoded({ limit: '50mb', extended: true }));
 
-  const wsProxy = createProxyMiddleware({
-    target: 'http://localhost:6080',
-    ws: true,
-    changeOrigin: true,
-    pathRewrite: { '^/websockify': '/' },
-  });
-  app.use('/websockify', express.raw({ type: '*/*' }), wsProxy);
-  const server = await app.listen(9990);
+    // Enable CORS
+    app.enableCors({
+      origin: '*',
+      methods: ['GET', 'POST'],
+      credentials: true,
+    });
 
-  // Selective upgrade routing
-  server.on('upgrade', (req, socket, head) => {
-    if (req.url?.startsWith('/websockify')) {
-      wsProxy.upgrade(req, socket, head);
-    }
-    // else let Socket.IO/Nest handle it by not hijacking the socket
-  });
+    const wsProxy = createProxyMiddleware({
+      target: 'http://localhost:6080',
+      ws: true,
+      changeOrigin: true,
+      pathRewrite: { '^/websockify': '/' },
+    });
+
+    app.use('/websockify', express.raw({ type: '*/*' }), wsProxy);
+    const server = (await app.listen(9990)) as Server;
+
+    // Selective upgrade routing with proper typing
+    server.on(
+      'upgrade',
+      (req: IncomingMessage, socket: Socket, head: Buffer) => {
+        if (req.url?.startsWith('/websockify')) {
+          // Type-safe upgrade handling - http-proxy-middleware expects a Socket from 'net'
+          if (wsProxy && typeof wsProxy.upgrade === 'function') {
+            // Safe type assertion: socket parameter is guaranteed to be Socket from 'net' module
+            wsProxy.upgrade(req, socket, head);
+          } else {
+            logger.warn('WebSocket proxy upgrade method not available');
+          }
+        }
+        // else let Socket.IO/Nest handle it by not hijacking the socket
+      },
+    );
+
+    logger.log('Application bootstrap completed successfully');
+    logger.log('Server listening on port 9990');
+  } catch (error) {
+    logger.error(
+      'Failed to bootstrap application',
+      error instanceof Error ? error.stack : String(error),
+    );
+    process.exit(1);
+  }
 }
-bootstrap();
+
+// Start application with proper error handling
+void bootstrap();
