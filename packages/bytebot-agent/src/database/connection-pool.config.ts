@@ -6,6 +6,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SecretsService } from '../config/secrets.service';
 
 export interface ConnectionPoolOptions {
   // Primary connection pool settings
@@ -40,7 +41,10 @@ export interface ConnectionPoolOptions {
 export class ConnectionPoolConfig {
   private readonly logger = new Logger(ConnectionPoolConfig.name);
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly secretsService: SecretsService,
+  ) {
     this.logger.log('Initializing enterprise connection pool configuration');
   }
 
@@ -145,10 +149,20 @@ export class ConnectionPoolConfig {
    * Get Prisma datasource URL with connection pool parameters
    * Includes all PostgreSQL-specific optimizations for enterprise use
    */
-  getPrismaConnectionUrl(): string {
-    const baseUrl = this.configService.get<string>('DATABASE_URL');
+  async getPrismaConnectionUrl(): Promise<string> {
+    // Try to get DATABASE_URL from secrets service first
+    let baseUrl = await this.secretsService.getSecret(
+      'database-url',
+      'DATABASE_URL',
+    );
+
+    // Fallback to configuration service
     if (!baseUrl) {
-      throw new Error('DATABASE_URL environment variable is required');
+      baseUrl = this.configService.get<string>('DATABASE_URL');
+    }
+
+    if (!baseUrl) {
+      throw new Error('DATABASE_URL not found in secrets or configuration');
     }
 
     const config = this.getConnectionPoolOptions();

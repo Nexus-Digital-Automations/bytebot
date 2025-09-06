@@ -20,7 +20,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from '../jwt.strategy';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 import { UserRole } from '@prisma/client';
 import { JwtPayload } from '../../types/jwt-payload.interface';
 
@@ -43,11 +43,21 @@ describe('JwtStrategy', () => {
     updatedAt: new Date(),
     lastLoginAt: new Date(),
     permissions: [
-      { id: 'perm-1', name: 'task:read', description: 'Read tasks' },
+      {
+        id: 'perm-1',
+        userId: 'user-123',
+        role: UserRole.VIEWER,
+        permission: 'TASK_READ',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
       {
         id: 'perm-2',
-        name: 'computer:view',
-        description: 'View computer status',
+        userId: 'user-123',
+        role: UserRole.VIEWER,
+        permission: 'COMPUTER_CONTROL',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     ],
   };

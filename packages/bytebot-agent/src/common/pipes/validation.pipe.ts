@@ -497,6 +497,11 @@ export function createValidationPipe(
 }
 
 /**
+ * Main ValidationPipe class for backward compatibility
+ */
+export class ValidationPipe extends EnhancedValidationPipe {}
+
+/**
  * Pre-configured validation pipes for different security levels
  */
 export const ValidationPipes = {

@@ -23,7 +23,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../jwt-auth.guard';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 import { UserRole } from '@prisma/client';
 
 describe('JwtAuthGuard', () => {
@@ -172,7 +172,7 @@ describe('JwtAuthGuard', () => {
     it('should allow access to public routes without token', async () => {
       // Arrange
       reflector.getAllAndOverride.mockReturnValue(true); // Public route
-      mockRequest.headers.authorization = undefined;
+      delete mockRequest.headers.authorization;
 
       // Act
       const result = await guard.canActivate(mockExecutionContext);
@@ -185,7 +185,7 @@ describe('JwtAuthGuard', () => {
 
     it('should throw UnauthorizedException when no authorization header', async () => {
       // Arrange
-      mockRequest.headers.authorization = undefined;
+      delete mockRequest.headers.authorization;
 
       // Act & Assert
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(

@@ -37,7 +37,7 @@ import {
  */
 @ValidatorConstraint({ async: false })
 export class IsNotXSSConstraint implements ValidatorConstraintInterface {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: unknown): boolean {
     if (typeof value !== "string") {
       return true; // Let other validators handle type checking
     }
@@ -45,7 +45,7 @@ export class IsNotXSSConstraint implements ValidatorConstraintInterface {
     return !detectXSS(value);
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     return `${args.property} contains potential XSS content and has been blocked for security`;
   }
 }
@@ -57,7 +57,7 @@ export class IsNotXSSConstraint implements ValidatorConstraintInterface {
 export class IsNotSQLInjectionConstraint
   implements ValidatorConstraintInterface
 {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: unknown): boolean {
     if (typeof value !== "string") {
       return true; // Let other validators handle type checking
     }
@@ -65,7 +65,7 @@ export class IsNotSQLInjectionConstraint
     return !detectSQLInjection(value);
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     return `${args.property} contains potential SQL injection content and has been blocked for security`;
   }
 }
@@ -75,17 +75,17 @@ export class IsNotSQLInjectionConstraint
  */
 @ValidatorConstraint({ async: false })
 export class IsSafeFilePathConstraint implements ValidatorConstraintInterface {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: unknown, args: ValidationArguments): boolean {
     if (typeof value !== "string") {
       return false;
     }
 
-    const [allowedBasePaths] = args.constraints;
+    const allowedBasePaths = args.constraints[0] as string[] | undefined;
     const validation = validateFilePath(value, allowedBasePaths);
     return validation.isValid;
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     return `${args.property} contains unsafe file path patterns`;
   }
 }
@@ -97,22 +97,23 @@ export class IsSafeFilePathConstraint implements ValidatorConstraintInterface {
 export class IsValidScreenCoordinatesConstraint
   implements ValidatorConstraintInterface
 {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: unknown, args: ValidationArguments): boolean {
     if (typeof value !== "object" || value === null) {
       return false;
     }
 
-    const { x, y } = value;
+    const coords = value as Record<string, unknown>;
+    const { x, y } = coords;
     if (typeof x !== "number" || typeof y !== "number") {
       return false;
     }
 
-    const [screenBounds] = args.constraints;
+    const screenBounds = args.constraints[0] as { width: number; height: number; } | undefined;
     const validation = validateCoordinates(x, y, screenBounds);
     return validation.isValid;
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     return `${args.property} contains invalid or unsafe screen coordinates`;
   }
 }
@@ -124,16 +125,16 @@ export class IsValidScreenCoordinatesConstraint
 export class IsNotMaliciousFileConstraint
   implements ValidatorConstraintInterface
 {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: unknown, args: ValidationArguments): boolean {
     if (typeof value !== "string") {
       return false;
     }
 
-    const [filename] = args.constraints;
+    const filename = args.constraints[0] as string | undefined;
     return !detectMaliciousFileContent(value, filename);
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     return `${args.property} contains malicious file content and has been blocked`;
   }
 }
@@ -143,7 +144,7 @@ export class IsNotMaliciousFileConstraint
  */
 @ValidatorConstraint({ async: false })
 export class IsSafeTextInputConstraint implements ValidatorConstraintInterface {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: unknown, args: ValidationArguments): boolean {
     if (typeof value !== "string") {
       return true; // Let other validators handle type checking
     }
@@ -159,7 +160,7 @@ export class IsSafeTextInputConstraint implements ValidatorConstraintInterface {
     }
 
     // Additional security checks
-    const [additionalChecks] = args.constraints;
+    const additionalChecks = args.constraints[0] as boolean | undefined;
     if (additionalChecks) {
       // Check for template injection patterns
       if (/\{\{.*\}\}|\$\{.*\}/.test(value)) {
@@ -180,7 +181,7 @@ export class IsSafeTextInputConstraint implements ValidatorConstraintInterface {
     return true;
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     return `${args.property} contains potentially unsafe content and has been blocked for security`;
   }
 }
@@ -192,7 +193,7 @@ export class IsSafeTextInputConstraint implements ValidatorConstraintInterface {
 export class IsValidComputerActionTextConstraint
   implements ValidatorConstraintInterface
 {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: unknown, args: ValidationArguments): boolean {
     if (typeof value !== "string") {
       return false;
     }
@@ -220,7 +221,7 @@ export class IsValidComputerActionTextConstraint
     }
 
     // Check length constraints for computer-use operations
-    const [maxLength = 10000] = args.constraints;
+    const maxLength = (args.constraints[0] as number) ?? 10000;
     if (value.length > maxLength) {
       return false;
     }
@@ -228,7 +229,7 @@ export class IsValidComputerActionTextConstraint
     return true;
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     return `${args.property} contains potentially dangerous computer action text`;
   }
 }
@@ -242,10 +243,10 @@ export class IsValidComputerActionTextConstraint
  * @param validationOptions Standard class-validator options
  */
 export function IsNotXSS(validationOptions?: ValidationOptions) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isNotXSS",
-      target: object.constructor,
+      target: object.constructor as Function,
       propertyName: propertyName,
       options: validationOptions,
       validator: IsNotXSSConstraint,
@@ -258,10 +259,10 @@ export function IsNotXSS(validationOptions?: ValidationOptions) {
  * @param validationOptions Standard class-validator options
  */
 export function IsNotSQLInjection(validationOptions?: ValidationOptions) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isNotSQLInjection",
-      target: object.constructor,
+      target: object.constructor as Function,
       propertyName: propertyName,
       options: validationOptions,
       validator: IsNotSQLInjectionConstraint,
@@ -278,10 +279,10 @@ export function IsSafeFilePath(
   allowedBasePaths?: string[],
   validationOptions?: ValidationOptions,
 ) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isSafeFilePath",
-      target: object.constructor,
+      target: object.constructor as Function,
       propertyName: propertyName,
       constraints: [allowedBasePaths],
       options: validationOptions,
@@ -299,10 +300,10 @@ export function IsValidScreenCoordinates(
   screenBounds?: { width: number; height: number },
   validationOptions?: ValidationOptions,
 ) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isValidScreenCoordinates",
-      target: object.constructor,
+      target: object.constructor as Function,
       propertyName: propertyName,
       constraints: [screenBounds],
       options: validationOptions,
@@ -320,10 +321,10 @@ export function IsNotMaliciousFile(
   filename?: string,
   validationOptions?: ValidationOptions,
 ) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isNotMaliciousFile",
-      target: object.constructor,
+      target: object.constructor as Function,
       propertyName: propertyName,
       constraints: [filename],
       options: validationOptions,
@@ -341,10 +342,10 @@ export function IsSafeTextInput(
   enableAdditionalChecks: boolean = true,
   validationOptions?: ValidationOptions,
 ) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isSafeTextInput",
-      target: object.constructor,
+      target: object.constructor as Function,
       propertyName: propertyName,
       constraints: [enableAdditionalChecks],
       options: validationOptions,
@@ -362,10 +363,10 @@ export function IsValidComputerActionText(
   maxLength: number = 10000,
   validationOptions?: ValidationOptions,
 ) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isValidComputerActionText",
-      target: object.constructor,
+      target: object.constructor as Function,
       propertyName: propertyName,
       constraints: [maxLength],
       options: validationOptions,
@@ -383,27 +384,27 @@ export function IsSanitizedString(
   sanitizationOptions: SanitizationOptions = DEFAULT_SANITIZATION_OPTIONS,
   validationOptions?: ValidationOptions,
 ) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isSanitizedString",
-      target: object.constructor,
+      target: object.constructor as Function,
       propertyName: propertyName,
       constraints: [sanitizationOptions],
       options: validationOptions,
       validator: {
-        validate(value: any, args: ValidationArguments) {
+        validate(value: unknown, args: ValidationArguments): boolean {
           if (typeof value !== "string") {
             return true; // Let other validators handle type checking
           }
 
-          const [options] = args.constraints;
+          const options = args.constraints[0] as SanitizationOptions;
           const sanitized = sanitizeInput(value, options);
 
           // The value should be identical to its sanitized version
           // If they differ, it means potentially malicious content was removed
           return value === sanitized;
         },
-        defaultMessage(args: ValidationArguments) {
+        defaultMessage(args: ValidationArguments): string {
           return `${args.property} contains content that would be modified during sanitization`;
         },
       },
@@ -420,7 +421,7 @@ export function IsSanitizedString(
  * Combines XSS, SQL injection, and computer-specific safety checks
  */
 export function IsBytebotDSecureText(validationOptions?: ValidationOptions) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     // Apply multiple security decorators
     IsNotXSS(validationOptions)(object, propertyName);
     IsNotSQLInjection(validationOptions)(object, propertyName);
@@ -435,7 +436,7 @@ export function IsBytebotDSecureText(validationOptions?: ValidationOptions) {
 export function IsBytebotAgentSecureText(
   validationOptions?: ValidationOptions,
 ) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     IsNotXSS(validationOptions)(object, propertyName);
     IsNotSQLInjection(validationOptions)(object, propertyName);
     IsSafeTextInput(true, validationOptions)(object, propertyName);
@@ -447,7 +448,7 @@ export function IsBytebotAgentSecureText(
  * Standard security for frontend operations
  */
 export function IsBytebotUISecureText(validationOptions?: ValidationOptions) {
-  return function (object: any, propertyName: string) {
+  return function (object: object, propertyName: string) {
     IsNotXSS(validationOptions)(object, propertyName);
     IsSafeTextInput(false, validationOptions)(object, propertyName); // Lighter checks for UI
   };

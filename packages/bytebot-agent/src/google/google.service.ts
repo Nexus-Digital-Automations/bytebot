@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SecretsService } from '../config/secrets.service';
 import {
   isComputerToolUseContentBlock,
   isImageContentBlock,
@@ -35,18 +36,57 @@ export class GoogleService implements BytebotAgentService {
   private readonly google: GoogleGenAI;
   private readonly logger = new Logger(GoogleService.name);
 
-  constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
-
-    if (!apiKey) {
-      this.logger.warn(
-        'GEMINI_API_KEY is not set. GoogleService will not work properly.',
-      );
-    }
-
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly secretsService: SecretsService,
+  ) {
+    // Initialize with dummy key - actual key will be loaded dynamically
     this.google = new GoogleGenAI({
-      apiKey: apiKey || 'dummy-key-for-initialization',
+      apiKey: 'dummy-key-for-initialization',
     });
+  }
+
+  /**
+   * Get Google Gemini API key securely from secrets management
+   * @private
+   */
+  private async getApiKey(): Promise<string> {
+    const operationId = `get-gemini-key-${Date.now()}`;
+
+    try {
+      // Try to get from secrets service first (Kubernetes secrets)
+      const secretKey = await this.secretsService.getSecret(
+        'gemini-api-key',
+        'GEMINI_API_KEY',
+      );
+
+      if (secretKey) {
+        this.logger.debug(
+          `[${operationId}] API key retrieved from secrets service`,
+        );
+        return secretKey;
+      }
+
+      // Fallback to configuration service (environment variables)
+      const configKey = this.configService.get<string>('GEMINI_API_KEY');
+
+      if (configKey) {
+        this.logger.debug(
+          `[${operationId}] API key retrieved from configuration`,
+        );
+        return configKey;
+      }
+
+      this.logger.error(
+        `[${operationId}] GEMINI_API_KEY not found in secrets or configuration`,
+      );
+      throw new Error('GEMINI_API_KEY is not configured');
+    } catch (error) {
+      this.logger.error(`[${operationId}] Failed to retrieve Gemini API key`, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 
   async generateMessage(
@@ -56,6 +96,14 @@ export class GoogleService implements BytebotAgentService {
     useTools: boolean = true,
     signal?: AbortSignal,
   ): Promise<BytebotAgentResponse> {
+    // Ensure we have a valid API key before proceeding
+    const apiKey = await this.getApiKey();
+
+    // Update Google client with actual API key if needed
+    if (this.google.apiKey === 'dummy-key-for-initialization') {
+      this.google.apiKey = apiKey;
+    }
+
     try {
       const maxTokens = 8192;
 

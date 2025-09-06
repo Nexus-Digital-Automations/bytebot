@@ -10,6 +10,8 @@ export * from "./decorators/security-validation.decorators";
 export * from "./dto/task-validation.dto";
 
 // Standardized Security Middleware Framework
-export * from "./middleware/security-middleware.standardized";
-export * from "./pipes/validation.standardized";
-export * from "./guards/rate-limit.standardized";
+export * from "./middleware/cors-security-simple.middleware";
+export * from "./middleware/file-security.middleware";
+
+// Enhanced Security Services
+export * from "./services/enhanced-security.service";

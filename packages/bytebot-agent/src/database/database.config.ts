@@ -6,6 +6,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SecretsService } from '../config/secrets.service';
 
 export interface DatabaseConfiguration {
   // Connection settings
@@ -100,7 +101,35 @@ export class DatabaseConfig {
   private readonly logger = new Logger(DatabaseConfig.name);
   private readonly configuration: DatabaseConfiguration;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly secretsService: SecretsService,
+  ) {
+    // Configuration will be built asynchronously in init method
+    // This avoids blocking the constructor with async operations
+  }
+
+  /**
+   * Initialize database configuration with secure secrets loading
+   */
+  async initializeConfiguration(): Promise<void> {
+    this.configuration = await this.buildConfiguration();
+    this.validateConfiguration();
+
+    this.logger.log('Database configuration initialized', {
+      environment: this.configuration.environment.nodeEnv,
+      ssl: this.configuration.ssl.enabled,
+      monitoring: this.configuration.health.enabled,
+      metrics: this.configuration.metrics.enabled,
+      security: this.configuration.security.auditLogging,
+    });
+  }
+
+  /**
+   * Legacy constructor for backward compatibility
+   * @deprecated Use initializeConfiguration() instead
+   */
+  private legacyConstructor() {
     this.configuration = this.buildConfiguration();
     this.validateConfiguration();
 
@@ -341,18 +370,28 @@ export class DatabaseConfig {
   }
 
   /**
-   * Build comprehensive configuration from environment variables
+   * Build comprehensive configuration from environment variables and secrets
    */
-  private buildConfiguration(): DatabaseConfiguration {
+  private async buildConfiguration(): Promise<DatabaseConfiguration> {
+    // Get secure database URL from secrets service
+    let databaseUrl = await this.secretsService.getSecret(
+      'database-url',
+      'DATABASE_URL',
+    );
+
+    // Fallback to configuration service
+    if (!databaseUrl) {
+      databaseUrl = this.configService.get<string>('DATABASE_URL');
+    }
+
+    if (!databaseUrl) {
+      throw new Error('DATABASE_URL not found in secrets or configuration');
+    }
     const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
     const isProduction = nodeEnv === 'production';
     const isDevelopment = nodeEnv === 'development';
 
-    // Parse database URL for connection details
-    const databaseUrl = this.configService.get<string>('DATABASE_URL');
-    if (!databaseUrl) {
-      throw new Error('DATABASE_URL environment variable is required');
-    }
+    // Database URL is now loaded securely above
 
     const parsedUrl = new URL(databaseUrl);
 

@@ -220,10 +220,11 @@ export function generateAccessToken(
   expiresIn: string = "15m",
 ): string {
   const now = Math.floor(Date.now() / 1000);
+  const expSeconds = parseExpirationToSeconds(expiresIn);
   const fullPayload: JwtPayload = {
     ...payload,
     iat: now,
-    exp: now + parseExpirationToSeconds(expiresIn),
+    exp: now + expSeconds,
   };
 
   return jwt.sign(fullPayload, secret, {
@@ -267,9 +268,10 @@ export function verifyToken(token: string, secret: string): JwtPayload {
   try {
     return jwt.verify(token, secret) as JwtPayload;
   } catch (error) {
-    if (error.name === "TokenExpiredError") {
+    const errorObj = error as { name?: string };
+    if (errorObj.name === "TokenExpiredError") {
       throw new Error("Token has expired");
-    } else if (error.name === "JsonWebTokenError") {
+    } else if (errorObj.name === "JsonWebTokenError") {
       throw new Error("Invalid token");
     } else {
       throw new Error("Token verification failed");
@@ -382,7 +384,7 @@ export function sanitizeInput(
     .replace(/<!\[CDATA\[[\s\S]*?\]\]>/gi, "")
     // Remove data URIs that could contain malicious content
     .replace(
-      /data:(?!image\/(png|jpg|jpeg|gif|svg\+xml);base64,)[^;]*;base64,[a-zA-Z0-9+\/=]*/gi,
+      /data:(?!image\/(png|jpg|jpeg|gif|svg\+xml);base64,)[^;]*;base64,[a-zA-Z0-9+/=]*/gi,
       "",
     )
     // Remove potential LDAP injection
@@ -392,6 +394,7 @@ export function sanitizeInput(
     // Remove potential path traversal
     .replace(/\.{2,}[\/\\]/g, "")
     // Remove null bytes and control characters
+    // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
 
   return sanitized;
@@ -420,9 +423,10 @@ export function sanitizeObject(
   }
 
   if (typeof obj === "object") {
-    const sanitized: any = {};
+    const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
-      sanitized[sanitizeInput(key, options)] = sanitizeObject(value, options);
+      const sanitizedKey = sanitizeInput(key, options);
+      sanitized[sanitizedKey] = sanitizeObject(value, options);
     }
     return sanitized;
   }
@@ -797,8 +801,11 @@ export const DEFAULT_RATE_LIMITS: Record<RateLimitPreset, RateLimitConfig> = {
  * @param prefix Key prefix
  * @returns Rate limit key
  */
-export function generateRateLimitKey(req: any, prefix: string = "rl"): string {
-  const ip = req.ip || req.connection.remoteAddress || "unknown";
+export function generateRateLimitKey(
+  req: { ip?: string; connection?: { remoteAddress?: string }; user?: { id?: string } },
+  prefix: string = "rl"
+): string {
+  const ip = req.ip || req.connection?.remoteAddress || "unknown";
   const userId = req.user?.id || "anonymous";
   return `${prefix}:${ip}:${userId}`;
 }
@@ -881,8 +888,10 @@ export function detectMaliciousFileContent(
   // Check for executable file signatures
   const executableSignatures = [
     /^MZ/, // Windows PE
+    // eslint-disable-next-line no-control-regex
     /^\x7fELF/, // Linux ELF
     /^\xca\xfe\xba\xbe/, // Java class
+    // eslint-disable-next-line no-control-regex
     /^PK\x03\x04.*\.jar$/i, // JAR files
     /^#!/, // Shell scripts
   ];
@@ -979,6 +988,7 @@ export function validateFilePath(
   }
 
   // Check for null bytes
+  // eslint-disable-next-line no-control-regex
   if (/\x00/.test(filePath)) {
     errors.push({
       field: "filePath",
@@ -1007,6 +1017,7 @@ export function validateFilePath(
   }
 
   const sanitizedPath = filePath
+    // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x1f\x7f]/g, "") // Remove control characters
     .replace(/\.{3,}/g, "..") // Normalize multiple dots
     .replace(/[\/\\]{2,}/g, "/") // Normalize path separators
@@ -1087,6 +1098,488 @@ export function validateCoordinates(
   };
 }
 
+/**
+ * Enhanced XSS and content security scanning functions
+ */
+
+/**
+ * Advanced DOMPurify configuration for different content types
+ */
+export const ENHANCED_DOMPURIFY_CONFIGS = {
+  /**
+   * Ultra strict configuration - strips all HTML
+   */
+  ULTRA_STRICT: {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+    KEEP_CONTENT: true,
+    SANITIZE_DOM: true,
+    FORBID_TAGS: ['script', 'object', 'embed', 'link', 'style', 'iframe', 'frame', 'frameset'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit'],
+  },
+  
+  /**
+   * Strict configuration - minimal safe HTML
+   */
+  STRICT: {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'p'],
+    ALLOWED_ATTR: [],
+    KEEP_CONTENT: true,
+    SANITIZE_DOM: true,
+    FORBID_TAGS: ['script', 'object', 'embed', 'link', 'style', 'iframe', 'frame', 'frameset'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit'],
+  },
+
+  /**
+   * Moderate configuration - formatted text with safe attributes
+   */
+  MODERATE: {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'p', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li'],
+    ALLOWED_ATTR: ['class', 'id', 'title'],
+    KEEP_CONTENT: true,
+    SANITIZE_DOM: true,
+    FORBID_TAGS: ['script', 'object', 'embed', 'link', 'style', 'iframe', 'frame', 'frameset'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit'],
+  },
+
+  /**
+   * Rich content configuration - for trusted content areas
+   */
+  RICH_CONTENT: {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'p', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code'],
+    ALLOWED_ATTR: ['class', 'id', 'title', 'href', 'src', 'alt', 'target'],
+    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    KEEP_CONTENT: true,
+    SANITIZE_DOM: true,
+    FORBID_TAGS: ['script', 'object', 'embed', 'link', 'style', 'iframe', 'frame', 'frameset'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit'],
+  },
+} as const;
+
+/**
+ * Enhanced XSS pattern detection with more comprehensive patterns
+ */
+export function detectAdvancedXSS(input: string): { hasXSS: boolean; threats: string[]; riskScore: number } {
+  if (typeof input !== "string") {
+    return { hasXSS: false, threats: [], riskScore: 0 };
+  }
+
+  const threats: string[] = [];
+  let riskScore = 0;
+
+  const advancedXSSPatterns = [
+    // Basic script injection
+    { pattern: /<script[^>]*>.*?<\/script>/gi, threat: 'Script Injection', score: 10 },
+    { pattern: /<iframe[^>]*>.*?<\/iframe>/gi, threat: 'IFrame Injection', score: 9 },
+    
+    // Protocol-based attacks
+    { pattern: /javascript\s*:/gi, threat: 'JavaScript Protocol', score: 9 },
+    { pattern: /vbscript\s*:/gi, threat: 'VBScript Protocol', score: 8 },
+    { pattern: /data\s*:\s*text\/html/gi, threat: 'Data HTML Protocol', score: 8 },
+    { pattern: /data\s*:\s*image\/svg\+xml/gi, threat: 'SVG Data Protocol', score: 7 },
+    
+    // Event handlers (comprehensive list)
+    { pattern: /on(?:abort|blur|change|click|dblclick|error|focus|keydown|keypress|keyup|load|mousedown|mousemove|mouseout|mouseover|mouseup|reset|resize|select|submit|unload)\s*=/gi, threat: 'Event Handler', score: 8 },
+    
+    // Object/embed attacks
+    { pattern: /<object[^>]*>.*?<\/object>/gi, threat: 'Object Injection', score: 8 },
+    { pattern: /<embed[^>]*>.*?<\/embed>/gi, threat: 'Embed Injection', score: 8 },
+    { pattern: /<applet[^>]*>.*?<\/applet>/gi, threat: 'Applet Injection', score: 8 },
+    
+    // CSS-based attacks
+    { pattern: /expression\s*\(/gi, threat: 'CSS Expression', score: 7 },
+    { pattern: /-moz-binding\s*:/gi, threat: 'Mozilla Binding', score: 7 },
+    { pattern: /behavior\s*:/gi, threat: 'CSS Behavior', score: 6 },
+    { pattern: /<style[^>]*>.*?<\/style>/gi, threat: 'Style Injection', score: 6 },
+    
+    // Advanced encoding patterns
+    { pattern: /&#x[0-9a-f]+;/gi, threat: 'Hex Entity Encoding', score: 5 },
+    { pattern: /&#[0-9]+;/gi, threat: 'Decimal Entity Encoding', score: 4 },
+    { pattern: /\\u[0-9a-f]{4}/gi, threat: 'Unicode Escape', score: 5 },
+    { pattern: /\\x[0-9a-f]{2}/gi, threat: 'Hex Escape', score: 5 },
+    
+    // DOM-based XSS
+    { pattern: /document\.|window\.|eval\(|setTimeout\(|setInterval\(/gi, threat: 'DOM Manipulation', score: 8 },
+    
+    // Base64 encoded scripts
+    { pattern: /data\s*:.*base64.*(?:script|javascript)/gi, threat: 'Base64 Script', score: 9 },
+    
+    // SVG-based XSS
+    { pattern: /<svg[^>]*>.*?<\/svg>/gi, threat: 'SVG Injection', score: 7 },
+    { pattern: /<use[^>]*xlink:href/gi, threat: 'SVG XLink', score: 6 },
+    
+    // Template injection
+    { pattern: /\{\{.*?\}\}/gi, threat: 'Template Injection', score: 7 },
+    { pattern: /\$\{.*?\}/gi, threat: 'Template Literal', score: 7 },
+    
+    // Server-side includes
+    { pattern: /<!--\s*#(?:include|exec|echo)/gi, threat: 'SSI Injection', score: 8 },
+    
+    // Meta refresh attacks
+    { pattern: /<meta[^>]*refresh[^>]*>/gi, threat: 'Meta Refresh', score: 6 },
+    
+    // Form-based attacks
+    { pattern: /<form[^>]*>.*?<\/form>/gi, threat: 'Form Injection', score: 5 },
+    
+    // Link-based attacks
+    { pattern: /<link[^>]*>/gi, threat: 'Link Injection', score: 6 },
+    
+    // Import-based attacks
+    { pattern: /@import\s*["'].*?["']/gi, threat: 'CSS Import', score: 6 },
+  ];
+
+  for (const { pattern, threat, score } of advancedXSSPatterns) {
+    if (pattern.test(input)) {
+      threats.push(threat);
+      riskScore += score;
+    }
+  }
+
+  return {
+    hasXSS: threats.length > 0,
+    threats,
+    riskScore: Math.min(10, Math.floor(riskScore / 10)), // Normalize to 0-10 scale
+  };
+}
+
+/**
+ * Enhanced content sanitization with context-aware rules
+ */
+export function sanitizeContentByContext(
+  input: string,
+  context: 'task_description' | 'message_content' | 'search_query' | 'file_name' | 'config_data' | 'user_input',
+  options?: Partial<SanitizationOptions>
+): { sanitized: string; removed: string[]; riskScore: number } {
+  if (typeof input !== "string") {
+    return { sanitized: "", removed: [], riskScore: 0 };
+  }
+
+  const removed: string[] = [];
+  let sanitized = input;
+  
+  // Detect threats first
+  const xssAnalysis = detectAdvancedXSS(input);
+  
+  if (xssAnalysis.hasXSS) {
+    removed.push(...xssAnalysis.threats);
+  }
+
+  // Context-specific sanitization rules
+  const contextRules = {
+    task_description: {
+      allowHtml: false,
+      stripHtml: true,
+      maxLength: 10000,
+      allowedTags: [],
+      allowedAttributes: {},
+    },
+    message_content: {
+      allowHtml: false,
+      stripHtml: true,
+      maxLength: 50000,
+      allowedTags: ['b', 'i', 'em', 'strong', 'br', 'p'],
+      allowedAttributes: {},
+    },
+    search_query: {
+      allowHtml: false,
+      stripHtml: true,
+      maxLength: 500,
+      allowedTags: [],
+      allowedAttributes: {},
+    },
+    file_name: {
+      allowHtml: false,
+      stripHtml: true,
+      maxLength: 255,
+      allowedTags: [],
+      allowedAttributes: {},
+    },
+    config_data: {
+      allowHtml: false,
+      stripHtml: true,
+      maxLength: 1000,
+      allowedTags: [],
+      allowedAttributes: {},
+    },
+    user_input: {
+      allowHtml: false,
+      stripHtml: true,
+      maxLength: 5000,
+      allowedTags: [],
+      allowedAttributes: {},
+    },
+  };
+
+  const rules = { ...contextRules[context], ...options };
+
+  // Initialize DOMPurify if needed
+  const window = new JSDOM('').window;
+  const purify = DOMPurify(window as any);
+
+  // Apply context-specific sanitization
+  if (rules.stripHtml || !rules.allowHtml) {
+    // Strip all HTML tags
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+    if (/<[^>]*>/.test(input)) {
+      removed.push('HTML Tags Stripped');
+    }
+  } else if (rules.allowHtml) {
+    // Use DOMPurify with context-specific configuration
+    let config;
+    
+    switch (context) {
+      case 'message_content':
+        config = ENHANCED_DOMPURIFY_CONFIGS.MODERATE;
+        break;
+      case 'task_description':
+        config = ENHANCED_DOMPURIFY_CONFIGS.STRICT;
+        break;
+      default:
+        config = ENHANCED_DOMPURIFY_CONFIGS.ULTRA_STRICT;
+    }
+    
+    const originalLength = sanitized.length;
+    sanitized = purify.sanitize(sanitized, config);
+    
+    if (sanitized.length < originalLength) {
+      removed.push('Dangerous HTML Sanitized');
+    }
+  }
+
+  // Apply length limits
+  if (rules.maxLength && sanitized.length > rules.maxLength) {
+    sanitized = sanitized.substring(0, rules.maxLength);
+    removed.push(`Content Truncated (max: ${rules.maxLength})`);
+  }
+
+  // Remove dangerous characters and patterns
+  const originalSanitized = sanitized;
+  
+  sanitized = sanitized
+    // Remove potential script injections
+    .replace(/javascript\s*:/gi, '')
+    .replace(/vbscript\s*:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    .replace(/expression\s*\(/gi, '')
+    
+    // Remove potential template injections
+    .replace(/\{\{.*?\}\}/g, '')
+    .replace(/\$\{.*?\}/g, '')
+    
+    // Remove server-side includes
+    .replace(/<!--\s*#(?:include|exec|echo).*?-->/gi, '')
+    
+    // Remove potential XML/XXE attacks
+    .replace(/<\?xml[\s\S]*?\?>/gi, '')
+    .replace(/<!\[CDATA\[[\s\S]*?\]\]>/gi, '')
+    
+    // Remove dangerous data URIs
+    .replace(/data:(?!image\/(?:png|jpg|jpeg|gif|svg\+xml);base64,)[^;]*;base64,[a-zA-Z0-9+\/=]*/gi, '')
+    
+    // Remove potential LDAP injection characters
+    .replace(/[()\\*]/g, '')
+    
+    // Remove potential command injection characters
+    .replace(/[;&|`${}]/g, '')
+    
+    // Remove potential path traversal
+    .replace(/\.{2,}[\/\\]/g, '')
+    
+    // Remove null bytes and control characters
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    
+    // Normalize whitespace
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (originalSanitized !== sanitized) {
+    removed.push('Dangerous Patterns Removed');
+  }
+
+  return {
+    sanitized,
+    removed,
+    riskScore: xssAnalysis.riskScore,
+  };
+}
+
+/**
+ * Comprehensive file content security scanner
+ */
+export function scanFileContent(
+  content: string | Buffer,
+  fileName?: string,
+  mimeType?: string
+): {
+  isSafe: boolean;
+  threats: string[];
+  riskScore: number;
+  metadata: {
+    fileSize: number;
+    contentType?: string;
+    encoding?: string;
+  };
+} {
+  const threats: string[] = [];
+  let riskScore = 0;
+  
+  const contentStr = Buffer.isBuffer(content) ? content.toString('utf8') : content;
+  const fileSize = Buffer.isBuffer(content) ? content.length : Buffer.byteLength(contentStr, 'utf8');
+
+  // File size limits (10MB max)
+  if (fileSize > 10 * 1024 * 1024) {
+    threats.push('File Too Large');
+    riskScore += 8;
+  }
+
+  // Check file extension safety
+  if (fileName) {
+    const dangerousExtensions = [
+      '.exe', '.bat', '.cmd', '.com', '.pif', '.scr', '.vbs', '.vbe', '.js', '.jse',
+      '.ws', '.wsf', '.wsc', '.wsh', '.ps1', '.ps1xml', '.ps2', '.ps2xml', '.psc1',
+      '.psc2', '.msh', '.msh1', '.msh2', '.mshxml', '.msh1xml', '.msh2xml',
+      '.scf', '.lnk', '.inf', '.reg', '.doc', '.xls', '.ppt', '.docm', '.xlsm', '.pptm',
+      '.jar', '.class', '.war', '.ear', '.php', '.asp', '.aspx', '.jsp', '.py', '.rb',
+      '.pl', '.sh', '.bash', '.zsh', '.fish'
+    ];
+    
+    const fileExt = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
+    if (dangerousExtensions.includes(fileExt)) {
+      threats.push(`Dangerous File Extension: ${fileExt}`);
+      riskScore += 9;
+    }
+  }
+
+  // Check for executable signatures
+  const executableSignatures = [
+    { pattern: /^MZ/, name: 'Windows PE Executable', risk: 10 },
+    { pattern: /^\x7fELF/, name: 'Linux ELF Executable', risk: 10 },
+    { pattern: /^\xca\xfe\xba\xbe/, name: 'Java Class File', risk: 8 },
+    { pattern: /^PK\x03\x04.*\.jar$/i, name: 'JAR Archive', risk: 7 },
+    { pattern: /^#!/, name: 'Shell Script', risk: 8 },
+    { pattern: /^\xff\xfb/, name: 'MP3 with potential payload', risk: 3 },
+    { pattern: /^\x89PNG/, name: 'PNG with potential payload', risk: 2 },
+  ];
+
+  for (const { pattern, name, risk } of executableSignatures) {
+    if (pattern.test(contentStr)) {
+      threats.push(name);
+      riskScore += risk;
+    }
+  }
+
+  // Check for script content patterns
+  const scriptPatterns = [
+    { pattern: /<\?php/gi, name: 'PHP Code', risk: 9 },
+    { pattern: /<script[^>]*>/gi, name: 'JavaScript Code', risk: 8 },
+    { pattern: /<%[^>]*%>/gi, name: 'ASP Code', risk: 8 },
+    { pattern: /\${.*}/gi, name: 'Template Injection', risk: 7 },
+    { pattern: /eval\s*\(/gi, name: 'Eval Function', risk: 9 },
+    { pattern: /exec\s*\(/gi, name: 'Exec Function', risk: 9 },
+    { pattern: /system\s*\(/gi, name: 'System Function', risk: 9 },
+    { pattern: /passthru\s*\(/gi, name: 'Passthru Function', risk: 9 },
+    { pattern: /shell_exec\s*\(/gi, name: 'Shell Exec Function', risk: 9 },
+    { pattern: /base64_decode\s*\(/gi, name: 'Base64 Decode', risk: 6 },
+    { pattern: /document\.cookie/gi, name: 'Cookie Access', risk: 5 },
+    { pattern: /window\.location/gi, name: 'Location Manipulation', risk: 5 },
+  ];
+
+  for (const { pattern, name, risk } of scriptPatterns) {
+    if (pattern.test(contentStr)) {
+      threats.push(name);
+      riskScore += risk;
+    }
+  }
+
+  // Check for XSS patterns in file content
+  const xssAnalysis = detectAdvancedXSS(contentStr);
+  if (xssAnalysis.hasXSS) {
+    threats.push(...xssAnalysis.threats.map(t => `XSS: ${t}`));
+    riskScore += xssAnalysis.riskScore;
+  }
+
+  // Check for SQL injection patterns
+  if (detectSQLInjection(contentStr)) {
+    threats.push('SQL Injection Patterns');
+    riskScore += 7;
+  }
+
+  // Check for common malware patterns
+  const malwarePatterns = [
+    { pattern: /CreateObject\s*\(/gi, name: 'COM Object Creation', risk: 7 },
+    { pattern: /WScript\.Shell/gi, name: 'WScript Shell', risk: 8 },
+    { pattern: /cmd\.exe/gi, name: 'Command Prompt Access', risk: 7 },
+    { pattern: /powershell/gi, name: 'PowerShell Access', risk: 7 },
+    { pattern: /wget|curl/gi, name: 'Network Download Tools', risk: 6 },
+    { pattern: /nc\s|netcat/gi, name: 'Network Tools', risk: 6 },
+  ];
+
+  for (const { pattern, name, risk } of malwarePatterns) {
+    if (pattern.test(contentStr)) {
+      threats.push(name);
+      riskScore += risk;
+    }
+  }
+
+  return {
+    isSafe: threats.length === 0,
+    threats,
+    riskScore: Math.min(10, Math.floor(riskScore / 10)),
+    metadata: {
+      fileSize,
+      contentType: mimeType,
+      encoding: Buffer.isBuffer(content) ? 'binary' : 'utf8',
+    },
+  };
+}
+
+/**
+ * Content Security Policy (CSP) generator for different contexts
+ */
+export function generateCSPHeader(context: 'api' | 'ui' | 'admin'): string {
+  const baseCSP = {
+    'default-src': "'self'",
+    'script-src': "'self'",
+    'style-src': "'self' 'unsafe-inline'",
+    'img-src': "'self' data: https:",
+    'font-src': "'self'",
+    'connect-src': "'self'",
+    'frame-src': "'none'",
+    'object-src': "'none'",
+    'base-uri': "'self'",
+    'form-action': "'self'",
+    'frame-ancestors': "'none'",
+    'block-all-mixed-content': '',
+    'upgrade-insecure-requests': '',
+  };
+
+  const contextCSP = {
+    api: {
+      ...baseCSP,
+      'script-src': "'none'",
+      'style-src': "'none'",
+      'img-src': "'none'",
+    },
+    ui: {
+      ...baseCSP,
+      'script-src': "'self' 'unsafe-eval'",
+      'style-src': "'self' 'unsafe-inline'",
+      'img-src': "'self' data: https:",
+    },
+    admin: {
+      ...baseCSP,
+      'script-src': "'self' 'nonce-{nonce}'",
+      'style-src': "'self' 'nonce-{nonce}'",
+      'img-src': "'self' data:",
+    },
+  };
+
+  const csp = contextCSP[context];
+  return Object.entries(csp)
+    .map(([directive, sources]) => `${directive} ${sources}`)
+    .join('; ');
+}
+
 export default {
   // Password utilities
   hashPassword,
@@ -1106,6 +1599,13 @@ export default {
   detectXSS,
   detectSQLInjection,
   DEFAULT_SANITIZATION_OPTIONS,
+
+  // Enhanced security utilities
+  detectAdvancedXSS,
+  sanitizeContentByContext,
+  scanFileContent,
+  generateCSPHeader,
+  ENHANCED_DOMPURIFY_CONFIGS,
 
   // RBAC utilities
   hasPermission,

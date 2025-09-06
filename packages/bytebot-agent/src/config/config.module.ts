@@ -20,6 +20,9 @@ import {
   ConfigService,
 } from '@nestjs/config';
 import { BytebotConfigService } from './config.service';
+import { SecretsService } from './secrets.service';
+import { EnhancedSecretsService } from './secrets-enhanced.service';
+import { SecretsHealthController } from './secrets-health.controller';
 import appConfig from './configuration';
 
 /**
@@ -71,13 +74,18 @@ import appConfig from './configuration';
   ],
   providers: [
     BytebotConfigService,
+    SecretsService,
+    EnhancedSecretsService,
     {
       provide: 'CONFIG_LOGGER',
       useFactory: () => new Logger('ConfigModule'),
     },
   ],
+  controllers: [SecretsHealthController],
   exports: [
     BytebotConfigService,
+    SecretsService,
+    EnhancedSecretsService,
     ConfigService, // Export native ConfigService for backward compatibility
   ],
 })

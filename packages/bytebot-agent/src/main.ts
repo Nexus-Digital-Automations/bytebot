@@ -32,25 +32,96 @@ async function bootstrap(): Promise<void> {
     const apiConfig = configService.getApiConfig();
     const featuresConfig = configService.getFeaturesConfig();
 
-    // Configure security headers with helmet
+    // Configure security headers with helmet - environment-aware
     app.use(
       helmet({
         contentSecurityPolicy: {
           directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts for Swagger UI
-            styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for Swagger UI
-            imgSrc: ["'self'", 'data:', 'https:'],
-            connectSrc: ["'self'"],
-            fontSrc: ["'self'"],
+            scriptSrc: [
+              "'self'",
+              ...(developmentConfig.enableSwagger
+                ? ["'unsafe-inline'", "'unsafe-eval'"]
+                : []),
+              'https://cdn.jsdelivr.net',
+              'https://unpkg.com',
+            ],
+            styleSrc: [
+              "'self'",
+              ...(developmentConfig.enableSwagger ? ["'unsafe-inline'"] : []),
+              'https://fonts.googleapis.com',
+            ],
+            fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+            imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+            connectSrc: [
+              "'self'",
+              'ws:',
+              'wss:',
+              ...(config.nodeEnv === 'development'
+                ? ['http://localhost:*', 'https://localhost:*']
+                : []),
+              'https://app.bytebot.ai',
+              'https://api.bytebot.ai',
+            ],
             objectSrc: ["'none'"],
-            mediaSrc: ["'self'"],
-            frameSrc: ["'none'"],
+            mediaSrc: ["'self'", 'blob:'],
+            frameSrc: developmentConfig.enableSwagger ? ["'self'"] : ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            upgradeInsecureRequests:
+              config.nodeEnv === 'production' ? [] : undefined,
           },
+          reportOnly: config.nodeEnv === 'development',
         },
-        crossOriginEmbedderPolicy: false, // Disable for development compatibility
+        crossOriginEmbedderPolicy: false, // Disable for API compatibility
+        crossOriginOpenerPolicy: { policy: 'same-origin' },
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+        dnsPrefetchControl: { allow: false },
+        frameguard: { action: 'deny' },
+        hidePoweredBy: true,
+        hsts:
+          config.nodeEnv === 'production'
+            ? {
+                maxAge: 31536000, // 1 year
+                includeSubDomains: true,
+                preload: true,
+              }
+            : false,
+        ieNoOpen: true,
+        noSniff: true,
+        originAgentCluster: true,
+        permittedCrossDomainPolicies: false,
+        referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+        xssFilter: true,
+        expectCt:
+          config.nodeEnv === 'production'
+            ? {
+                maxAge: 86400,
+                enforce: true,
+              }
+            : false,
+        permissionsPolicy: {
+          camera: [],
+          microphone: [],
+          geolocation: [],
+          payment: [],
+          usb: [],
+        },
       }),
     );
+
+    // Additional security headers
+    app.use((req, res, next) => {
+      res.setHeader('X-Service', 'Bytebot-Agent');
+      res.setHeader('X-API-Version', '1.0');
+
+      if (config.nodeEnv === 'production') {
+        res.removeHeader('X-Powered-By');
+        res.removeHeader('Server');
+      }
+
+      next();
+    });
 
     // Configure body parser with configuration-driven limits
     app.use(json({ limit: apiConfig.bodyParserLimit }));
@@ -64,12 +135,93 @@ async function bootstrap(): Promise<void> {
     // Set global prefix for all routes
     app.setGlobalPrefix('api');
 
-    // Configure CORS with environment-specific origins
+    // Configure CORS with production-grade origin validation
+    const allowedOrigins = Array.isArray(apiConfig.corsOrigins)
+      ? apiConfig.corsOrigins
+      : [apiConfig.corsOrigins];
+
+    // Add environment-specific origins
+    const productionOrigins = [
+      'https://app.bytebot.ai',
+      'https://bytebot.ai',
+      'https://api.bytebot.ai',
+    ];
+
+    const developmentOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:9990',
+      'http://localhost:9991',
+      'http://localhost:9992',
+      'https://localhost:3000',
+      'https://localhost:3001',
+    ];
+
+    const corsOrigins =
+      config.nodeEnv === 'production'
+        ? [...allowedOrigins, ...productionOrigins]
+        : [...allowedOrigins, ...developmentOrigins];
+
     app.enableCors({
-      origin: apiConfig.corsOrigins,
+      origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, postman, etc.)
+        if (!origin) {
+          return callback(null, true);
+        }
+
+        // Check if origin is in allowed list
+        if (corsOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+
+        // Allow localhost with any port in development
+        if (
+          config.nodeEnv === 'development' &&
+          (origin.startsWith('http://localhost:') ||
+            origin.startsWith('https://localhost:'))
+        ) {
+          return callback(null, true);
+        }
+
+        // Support wildcard subdomains for bytebot.ai in production
+        if (config.nodeEnv === 'production' && origin.endsWith('.bytebot.ai')) {
+          return callback(null, true);
+        }
+
+        // Block unauthorized origins
+        logger.warn(`CORS blocked unauthorized origin: ${origin}`, {
+          blockedOrigin: origin,
+          allowedOrigins: corsOrigins,
+          environment: config.nodeEnv,
+          timestamp: new Date().toISOString(),
+        });
+
+        return callback(
+          new Error(`Origin ${origin} not allowed by CORS policy`),
+          false,
+        );
+      },
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+        'Cache-Control',
+        'X-API-Key',
+        'X-Service-ID',
+      ],
+      exposedHeaders: [
+        'X-Request-ID',
+        'X-Response-Time',
+        'X-Rate-Limit-Remaining',
+        'X-Total-Count',
+      ],
       credentials: true,
-      optionsSuccessStatus: 200, // For legacy browser support
+      maxAge: config.nodeEnv === 'production' ? 86400 : 3600, // 24h prod, 1h dev
+      preflightContinue: false,
+      optionsSuccessStatus: 204, // Some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
     // Add global validation pipe for request validation

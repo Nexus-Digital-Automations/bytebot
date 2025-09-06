@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SecretsService } from '../config/secrets.service';
 import Anthropic, { APIUserAbortError } from '@anthropic-ai/sdk';
 import {
   MessageContentBlock,
@@ -25,18 +26,60 @@ export class AnthropicService implements BytebotAgentService {
   private readonly anthropic: Anthropic;
   private readonly logger = new Logger(AnthropicService.name);
 
-  constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>('ANTHROPIC_API_KEY');
-
-    if (!apiKey) {
-      this.logger.warn(
-        'ANTHROPIC_API_KEY is not set. AnthropicService will not work properly.',
-      );
-    }
-
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly secretsService: SecretsService,
+  ) {
+    // Initialize with dummy key - actual key will be loaded dynamically
     this.anthropic = new Anthropic({
-      apiKey: apiKey || 'dummy-key-for-initialization',
+      apiKey: 'dummy-key-for-initialization',
     });
+  }
+
+  /**
+   * Get Anthropic API key securely from secrets management
+   * @private
+   */
+  private async getApiKey(): Promise<string> {
+    const operationId = `get-anthropic-key-${Date.now()}`;
+
+    try {
+      // Try to get from secrets service first (Kubernetes secrets)
+      const secretKey = await this.secretsService.getSecret(
+        'anthropic-api-key',
+        'ANTHROPIC_API_KEY',
+      );
+
+      if (secretKey) {
+        this.logger.debug(
+          `[${operationId}] API key retrieved from secrets service`,
+        );
+        return secretKey;
+      }
+
+      // Fallback to configuration service (environment variables)
+      const configKey = this.configService.get<string>('ANTHROPIC_API_KEY');
+
+      if (configKey) {
+        this.logger.debug(
+          `[${operationId}] API key retrieved from configuration`,
+        );
+        return configKey;
+      }
+
+      this.logger.error(
+        `[${operationId}] ANTHROPIC_API_KEY not found in secrets or configuration`,
+      );
+      throw new Error('ANTHROPIC_API_KEY is not configured');
+    } catch (error) {
+      this.logger.error(
+        `[${operationId}] Failed to retrieve Anthropic API key`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
+      throw error;
+    }
   }
 
   async generateMessage(
@@ -46,6 +89,13 @@ export class AnthropicService implements BytebotAgentService {
     useTools: boolean = true,
     signal?: AbortSignal,
   ): Promise<BytebotAgentResponse> {
+    // Ensure we have a valid API key before proceeding
+    const apiKey = await this.getApiKey();
+
+    // Update Anthropic client with actual API key if needed
+    if (this.anthropic.apiKey === 'dummy-key-for-initialization') {
+      this.anthropic.apiKey = apiKey;
+    }
     try {
       const maxTokens = 8192;
 
