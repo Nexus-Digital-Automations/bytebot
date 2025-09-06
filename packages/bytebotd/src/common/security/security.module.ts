@@ -11,9 +11,8 @@
  */
 
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { APP_PIPE, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_PIPE, APP_GUARD, APP_INTERCEPTOR, Reflector } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Reflector } from '@nestjs/core';
 import {
   GlobalValidationPipe,
   BytebotDValidationPipes,

@@ -802,8 +802,12 @@ export const DEFAULT_RATE_LIMITS: Record<RateLimitPreset, RateLimitConfig> = {
  * @returns Rate limit key
  */
 export function generateRateLimitKey(
-  req: { ip?: string; connection?: { remoteAddress?: string }; user?: { id?: string } },
-  prefix: string = "rl"
+  req: {
+    ip?: string;
+    connection?: { remoteAddress?: string };
+    user?: { id?: string };
+  },
+  prefix: string = "rl",
 ): string {
   const ip = req.ip || req.connection?.remoteAddress || "unknown";
   const userId = req.user?.id || "anonymous";
@@ -888,7 +892,7 @@ export function detectMaliciousFileContent(
   // Check for executable file signatures
   const executableSignatures = [
     /^MZ/, // Windows PE
-    // eslint-disable-next-line no-control-regex
+
     /^\x7fELF/, // Linux ELF
     /^\xca\xfe\xba\xbe/, // Java class
     // eslint-disable-next-line no-control-regex
@@ -1114,52 +1118,172 @@ export const ENHANCED_DOMPURIFY_CONFIGS = {
     ALLOWED_ATTR: [],
     KEEP_CONTENT: true,
     SANITIZE_DOM: true,
-    FORBID_TAGS: ['script', 'object', 'embed', 'link', 'style', 'iframe', 'frame', 'frameset'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit'],
+    FORBID_TAGS: [
+      "script",
+      "object",
+      "embed",
+      "link",
+      "style",
+      "iframe",
+      "frame",
+      "frameset",
+    ],
+    FORBID_ATTR: [
+      "onerror",
+      "onload",
+      "onclick",
+      "onmouseover",
+      "onfocus",
+      "onblur",
+      "onchange",
+      "onsubmit",
+    ],
   },
-  
+
   /**
    * Strict configuration - minimal safe HTML
    */
   STRICT: {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'p'],
+    ALLOWED_TAGS: ["b", "i", "em", "strong", "u", "br", "p"],
     ALLOWED_ATTR: [],
     KEEP_CONTENT: true,
     SANITIZE_DOM: true,
-    FORBID_TAGS: ['script', 'object', 'embed', 'link', 'style', 'iframe', 'frame', 'frameset'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit'],
+    FORBID_TAGS: [
+      "script",
+      "object",
+      "embed",
+      "link",
+      "style",
+      "iframe",
+      "frame",
+      "frameset",
+    ],
+    FORBID_ATTR: [
+      "onerror",
+      "onload",
+      "onclick",
+      "onmouseover",
+      "onfocus",
+      "onblur",
+      "onchange",
+      "onsubmit",
+    ],
   },
 
   /**
    * Moderate configuration - formatted text with safe attributes
    */
   MODERATE: {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'p', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li'],
-    ALLOWED_ATTR: ['class', 'id', 'title'],
+    ALLOWED_TAGS: [
+      "b",
+      "i",
+      "em",
+      "strong",
+      "u",
+      "br",
+      "p",
+      "span",
+      "div",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "ul",
+      "ol",
+      "li",
+    ],
+    ALLOWED_ATTR: ["class", "id", "title"],
     KEEP_CONTENT: true,
     SANITIZE_DOM: true,
-    FORBID_TAGS: ['script', 'object', 'embed', 'link', 'style', 'iframe', 'frame', 'frameset'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit'],
+    FORBID_TAGS: [
+      "script",
+      "object",
+      "embed",
+      "link",
+      "style",
+      "iframe",
+      "frame",
+      "frameset",
+    ],
+    FORBID_ATTR: [
+      "onerror",
+      "onload",
+      "onclick",
+      "onmouseover",
+      "onfocus",
+      "onblur",
+      "onchange",
+      "onsubmit",
+    ],
   },
 
   /**
    * Rich content configuration - for trusted content areas
    */
   RICH_CONTENT: {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'p', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code'],
-    ALLOWED_ATTR: ['class', 'id', 'title', 'href', 'src', 'alt', 'target'],
-    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    ALLOWED_TAGS: [
+      "b",
+      "i",
+      "em",
+      "strong",
+      "u",
+      "br",
+      "p",
+      "span",
+      "div",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "ul",
+      "ol",
+      "li",
+      "a",
+      "img",
+      "blockquote",
+      "pre",
+      "code",
+    ],
+    ALLOWED_ATTR: ["class", "id", "title", "href", "src", "alt", "target"],
+    ALLOWED_URI_REGEXP:
+      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
     KEEP_CONTENT: true,
     SANITIZE_DOM: true,
-    FORBID_TAGS: ['script', 'object', 'embed', 'link', 'style', 'iframe', 'frame', 'frameset'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit'],
+    FORBID_TAGS: [
+      "script",
+      "object",
+      "embed",
+      "link",
+      "style",
+      "iframe",
+      "frame",
+      "frameset",
+    ],
+    FORBID_ATTR: [
+      "onerror",
+      "onload",
+      "onclick",
+      "onmouseover",
+      "onfocus",
+      "onblur",
+      "onchange",
+      "onsubmit",
+    ],
   },
 } as const;
 
 /**
  * Enhanced XSS pattern detection with more comprehensive patterns
  */
-export function detectAdvancedXSS(input: string): { hasXSS: boolean; threats: string[]; riskScore: number } {
+export function detectAdvancedXSS(input: string): {
+  hasXSS: boolean;
+  threats: string[];
+  riskScore: number;
+} {
   if (typeof input !== "string") {
     return { hasXSS: false, threats: [], riskScore: 0 };
   }
@@ -1169,63 +1293,112 @@ export function detectAdvancedXSS(input: string): { hasXSS: boolean; threats: st
 
   const advancedXSSPatterns = [
     // Basic script injection
-    { pattern: /<script[^>]*>.*?<\/script>/gi, threat: 'Script Injection', score: 10 },
-    { pattern: /<iframe[^>]*>.*?<\/iframe>/gi, threat: 'IFrame Injection', score: 9 },
-    
+    {
+      pattern: /<script[^>]*>.*?<\/script>/gi,
+      threat: "Script Injection",
+      score: 10,
+    },
+    {
+      pattern: /<iframe[^>]*>.*?<\/iframe>/gi,
+      threat: "IFrame Injection",
+      score: 9,
+    },
+
     // Protocol-based attacks
-    { pattern: /javascript\s*:/gi, threat: 'JavaScript Protocol', score: 9 },
-    { pattern: /vbscript\s*:/gi, threat: 'VBScript Protocol', score: 8 },
-    { pattern: /data\s*:\s*text\/html/gi, threat: 'Data HTML Protocol', score: 8 },
-    { pattern: /data\s*:\s*image\/svg\+xml/gi, threat: 'SVG Data Protocol', score: 7 },
-    
+    { pattern: /javascript\s*:/gi, threat: "JavaScript Protocol", score: 9 },
+    { pattern: /vbscript\s*:/gi, threat: "VBScript Protocol", score: 8 },
+    {
+      pattern: /data\s*:\s*text\/html/gi,
+      threat: "Data HTML Protocol",
+      score: 8,
+    },
+    {
+      pattern: /data\s*:\s*image\/svg\+xml/gi,
+      threat: "SVG Data Protocol",
+      score: 7,
+    },
+
     // Event handlers (comprehensive list)
-    { pattern: /on(?:abort|blur|change|click|dblclick|error|focus|keydown|keypress|keyup|load|mousedown|mousemove|mouseout|mouseover|mouseup|reset|resize|select|submit|unload)\s*=/gi, threat: 'Event Handler', score: 8 },
-    
+    {
+      pattern:
+        /on(?:abort|blur|change|click|dblclick|error|focus|keydown|keypress|keyup|load|mousedown|mousemove|mouseout|mouseover|mouseup|reset|resize|select|submit|unload)\s*=/gi,
+      threat: "Event Handler",
+      score: 8,
+    },
+
     // Object/embed attacks
-    { pattern: /<object[^>]*>.*?<\/object>/gi, threat: 'Object Injection', score: 8 },
-    { pattern: /<embed[^>]*>.*?<\/embed>/gi, threat: 'Embed Injection', score: 8 },
-    { pattern: /<applet[^>]*>.*?<\/applet>/gi, threat: 'Applet Injection', score: 8 },
-    
+    {
+      pattern: /<object[^>]*>.*?<\/object>/gi,
+      threat: "Object Injection",
+      score: 8,
+    },
+    {
+      pattern: /<embed[^>]*>.*?<\/embed>/gi,
+      threat: "Embed Injection",
+      score: 8,
+    },
+    {
+      pattern: /<applet[^>]*>.*?<\/applet>/gi,
+      threat: "Applet Injection",
+      score: 8,
+    },
+
     // CSS-based attacks
-    { pattern: /expression\s*\(/gi, threat: 'CSS Expression', score: 7 },
-    { pattern: /-moz-binding\s*:/gi, threat: 'Mozilla Binding', score: 7 },
-    { pattern: /behavior\s*:/gi, threat: 'CSS Behavior', score: 6 },
-    { pattern: /<style[^>]*>.*?<\/style>/gi, threat: 'Style Injection', score: 6 },
-    
+    { pattern: /expression\s*\(/gi, threat: "CSS Expression", score: 7 },
+    { pattern: /-moz-binding\s*:/gi, threat: "Mozilla Binding", score: 7 },
+    { pattern: /behavior\s*:/gi, threat: "CSS Behavior", score: 6 },
+    {
+      pattern: /<style[^>]*>.*?<\/style>/gi,
+      threat: "Style Injection",
+      score: 6,
+    },
+
     // Advanced encoding patterns
-    { pattern: /&#x[0-9a-f]+;/gi, threat: 'Hex Entity Encoding', score: 5 },
-    { pattern: /&#[0-9]+;/gi, threat: 'Decimal Entity Encoding', score: 4 },
-    { pattern: /\\u[0-9a-f]{4}/gi, threat: 'Unicode Escape', score: 5 },
-    { pattern: /\\x[0-9a-f]{2}/gi, threat: 'Hex Escape', score: 5 },
-    
+    { pattern: /&#x[0-9a-f]+;/gi, threat: "Hex Entity Encoding", score: 5 },
+    { pattern: /&#[0-9]+;/gi, threat: "Decimal Entity Encoding", score: 4 },
+    { pattern: /\\u[0-9a-f]{4}/gi, threat: "Unicode Escape", score: 5 },
+    { pattern: /\\x[0-9a-f]{2}/gi, threat: "Hex Escape", score: 5 },
+
     // DOM-based XSS
-    { pattern: /document\.|window\.|eval\(|setTimeout\(|setInterval\(/gi, threat: 'DOM Manipulation', score: 8 },
-    
+    {
+      pattern: /document\.|window\.|eval\(|setTimeout\(|setInterval\(/gi,
+      threat: "DOM Manipulation",
+      score: 8,
+    },
+
     // Base64 encoded scripts
-    { pattern: /data\s*:.*base64.*(?:script|javascript)/gi, threat: 'Base64 Script', score: 9 },
-    
+    {
+      pattern: /data\s*:.*base64.*(?:script|javascript)/gi,
+      threat: "Base64 Script",
+      score: 9,
+    },
+
     // SVG-based XSS
-    { pattern: /<svg[^>]*>.*?<\/svg>/gi, threat: 'SVG Injection', score: 7 },
-    { pattern: /<use[^>]*xlink:href/gi, threat: 'SVG XLink', score: 6 },
-    
+    { pattern: /<svg[^>]*>.*?<\/svg>/gi, threat: "SVG Injection", score: 7 },
+    { pattern: /<use[^>]*xlink:href/gi, threat: "SVG XLink", score: 6 },
+
     // Template injection
-    { pattern: /\{\{.*?\}\}/gi, threat: 'Template Injection', score: 7 },
-    { pattern: /\$\{.*?\}/gi, threat: 'Template Literal', score: 7 },
-    
+    { pattern: /\{\{.*?\}\}/gi, threat: "Template Injection", score: 7 },
+    { pattern: /\$\{.*?\}/gi, threat: "Template Literal", score: 7 },
+
     // Server-side includes
-    { pattern: /<!--\s*#(?:include|exec|echo)/gi, threat: 'SSI Injection', score: 8 },
-    
+    {
+      pattern: /<!--\s*#(?:include|exec|echo)/gi,
+      threat: "SSI Injection",
+      score: 8,
+    },
+
     // Meta refresh attacks
-    { pattern: /<meta[^>]*refresh[^>]*>/gi, threat: 'Meta Refresh', score: 6 },
-    
+    { pattern: /<meta[^>]*refresh[^>]*>/gi, threat: "Meta Refresh", score: 6 },
+
     // Form-based attacks
-    { pattern: /<form[^>]*>.*?<\/form>/gi, threat: 'Form Injection', score: 5 },
-    
+    { pattern: /<form[^>]*>.*?<\/form>/gi, threat: "Form Injection", score: 5 },
+
     // Link-based attacks
-    { pattern: /<link[^>]*>/gi, threat: 'Link Injection', score: 6 },
-    
+    { pattern: /<link[^>]*>/gi, threat: "Link Injection", score: 6 },
+
     // Import-based attacks
-    { pattern: /@import\s*["'].*?["']/gi, threat: 'CSS Import', score: 6 },
+    { pattern: /@import\s*["'].*?["']/gi, threat: "CSS Import", score: 6 },
   ];
 
   for (const { pattern, threat, score } of advancedXSSPatterns) {
@@ -1247,8 +1420,14 @@ export function detectAdvancedXSS(input: string): { hasXSS: boolean; threats: st
  */
 export function sanitizeContentByContext(
   input: string,
-  context: 'task_description' | 'message_content' | 'search_query' | 'file_name' | 'config_data' | 'user_input',
-  options?: Partial<SanitizationOptions>
+  context:
+    | "task_description"
+    | "message_content"
+    | "search_query"
+    | "file_name"
+    | "config_data"
+    | "user_input",
+  options?: Partial<SanitizationOptions>,
 ): { sanitized: string; removed: string[]; riskScore: number } {
   if (typeof input !== "string") {
     return { sanitized: "", removed: [], riskScore: 0 };
@@ -1256,10 +1435,10 @@ export function sanitizeContentByContext(
 
   const removed: string[] = [];
   let sanitized = input;
-  
+
   // Detect threats first
   const xssAnalysis = detectAdvancedXSS(input);
-  
+
   if (xssAnalysis.hasXSS) {
     removed.push(...xssAnalysis.threats);
   }
@@ -1277,7 +1456,7 @@ export function sanitizeContentByContext(
       allowHtml: false,
       stripHtml: true,
       maxLength: 50000,
-      allowedTags: ['b', 'i', 'em', 'strong', 'br', 'p'],
+      allowedTags: ["b", "i", "em", "strong", "br", "p"],
       allowedAttributes: {},
     },
     search_query: {
@@ -1313,36 +1492,36 @@ export function sanitizeContentByContext(
   const rules = { ...contextRules[context], ...options };
 
   // Initialize DOMPurify if needed
-  const window = new JSDOM('').window;
+  const window = new JSDOM("").window;
   const purify = DOMPurify(window as any);
 
   // Apply context-specific sanitization
   if (rules.stripHtml || !rules.allowHtml) {
     // Strip all HTML tags
-    sanitized = sanitized.replace(/<[^>]*>/g, '');
+    sanitized = sanitized.replace(/<[^>]*>/g, "");
     if (/<[^>]*>/.test(input)) {
-      removed.push('HTML Tags Stripped');
+      removed.push("HTML Tags Stripped");
     }
   } else if (rules.allowHtml) {
     // Use DOMPurify with context-specific configuration
     let config;
-    
+
     switch (context) {
-      case 'message_content':
+      case "message_content":
         config = ENHANCED_DOMPURIFY_CONFIGS.MODERATE;
         break;
-      case 'task_description':
+      case "task_description":
         config = ENHANCED_DOMPURIFY_CONFIGS.STRICT;
         break;
       default:
         config = ENHANCED_DOMPURIFY_CONFIGS.ULTRA_STRICT;
     }
-    
+
     const originalLength = sanitized.length;
     sanitized = purify.sanitize(sanitized, config);
-    
+
     if (sanitized.length < originalLength) {
-      removed.push('Dangerous HTML Sanitized');
+      removed.push("Dangerous HTML Sanitized");
     }
   }
 
@@ -1354,46 +1533,49 @@ export function sanitizeContentByContext(
 
   // Remove dangerous characters and patterns
   const originalSanitized = sanitized;
-  
+
   sanitized = sanitized
     // Remove potential script injections
-    .replace(/javascript\s*:/gi, '')
-    .replace(/vbscript\s*:/gi, '')
-    .replace(/on\w+\s*=/gi, '')
-    .replace(/expression\s*\(/gi, '')
-    
+    .replace(/javascript\s*:/gi, "")
+    .replace(/vbscript\s*:/gi, "")
+    .replace(/on\w+\s*=/gi, "")
+    .replace(/expression\s*\(/gi, "")
+
     // Remove potential template injections
-    .replace(/\{\{.*?\}\}/g, '')
-    .replace(/\$\{.*?\}/g, '')
-    
+    .replace(/\{\{.*?\}\}/g, "")
+    .replace(/\$\{.*?\}/g, "")
+
     // Remove server-side includes
-    .replace(/<!--\s*#(?:include|exec|echo).*?-->/gi, '')
-    
+    .replace(/<!--\s*#(?:include|exec|echo).*?-->/gi, "")
+
     // Remove potential XML/XXE attacks
-    .replace(/<\?xml[\s\S]*?\?>/gi, '')
-    .replace(/<!\[CDATA\[[\s\S]*?\]\]>/gi, '')
-    
+    .replace(/<\?xml[\s\S]*?\?>/gi, "")
+    .replace(/<!\[CDATA\[[\s\S]*?\]\]>/gi, "")
+
     // Remove dangerous data URIs
-    .replace(/data:(?!image\/(?:png|jpg|jpeg|gif|svg\+xml);base64,)[^;]*;base64,[a-zA-Z0-9+\/=]*/gi, '')
-    
+    .replace(
+      /data:(?!image\/(?:png|jpg|jpeg|gif|svg\+xml);base64,)[^;]*;base64,[a-zA-Z0-9+\/=]*/gi,
+      "",
+    )
+
     // Remove potential LDAP injection characters
-    .replace(/[()\\*]/g, '')
-    
+    .replace(/[()\\*]/g, "")
+
     // Remove potential command injection characters
-    .replace(/[;&|`${}]/g, '')
-    
+    .replace(/[;&|`${}]/g, "")
+
     // Remove potential path traversal
-    .replace(/\.{2,}[\/\\]/g, '')
-    
+    .replace(/\.{2,}[\/\\]/g, "")
+
     // Remove null bytes and control characters
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-    
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+
     // Normalize whitespace
-    .replace(/\s+/g, ' ')
+    .replace(/\s+/g, " ")
     .trim();
 
   if (originalSanitized !== sanitized) {
-    removed.push('Dangerous Patterns Removed');
+    removed.push("Dangerous Patterns Removed");
   }
 
   return {
@@ -1409,7 +1591,7 @@ export function sanitizeContentByContext(
 export function scanFileContent(
   content: string | Buffer,
   fileName?: string,
-  mimeType?: string
+  mimeType?: string,
 ): {
   isSafe: boolean;
   threats: string[];
@@ -1422,28 +1604,77 @@ export function scanFileContent(
 } {
   const threats: string[] = [];
   let riskScore = 0;
-  
-  const contentStr = Buffer.isBuffer(content) ? content.toString('utf8') : content;
-  const fileSize = Buffer.isBuffer(content) ? content.length : Buffer.byteLength(contentStr, 'utf8');
+
+  const contentStr = Buffer.isBuffer(content)
+    ? content.toString("utf8")
+    : content;
+  const fileSize = Buffer.isBuffer(content)
+    ? content.length
+    : Buffer.byteLength(contentStr, "utf8");
 
   // File size limits (10MB max)
   if (fileSize > 10 * 1024 * 1024) {
-    threats.push('File Too Large');
+    threats.push("File Too Large");
     riskScore += 8;
   }
 
   // Check file extension safety
   if (fileName) {
     const dangerousExtensions = [
-      '.exe', '.bat', '.cmd', '.com', '.pif', '.scr', '.vbs', '.vbe', '.js', '.jse',
-      '.ws', '.wsf', '.wsc', '.wsh', '.ps1', '.ps1xml', '.ps2', '.ps2xml', '.psc1',
-      '.psc2', '.msh', '.msh1', '.msh2', '.mshxml', '.msh1xml', '.msh2xml',
-      '.scf', '.lnk', '.inf', '.reg', '.doc', '.xls', '.ppt', '.docm', '.xlsm', '.pptm',
-      '.jar', '.class', '.war', '.ear', '.php', '.asp', '.aspx', '.jsp', '.py', '.rb',
-      '.pl', '.sh', '.bash', '.zsh', '.fish'
+      ".exe",
+      ".bat",
+      ".cmd",
+      ".com",
+      ".pif",
+      ".scr",
+      ".vbs",
+      ".vbe",
+      ".js",
+      ".jse",
+      ".ws",
+      ".wsf",
+      ".wsc",
+      ".wsh",
+      ".ps1",
+      ".ps1xml",
+      ".ps2",
+      ".ps2xml",
+      ".psc1",
+      ".psc2",
+      ".msh",
+      ".msh1",
+      ".msh2",
+      ".mshxml",
+      ".msh1xml",
+      ".msh2xml",
+      ".scf",
+      ".lnk",
+      ".inf",
+      ".reg",
+      ".doc",
+      ".xls",
+      ".ppt",
+      ".docm",
+      ".xlsm",
+      ".pptm",
+      ".jar",
+      ".class",
+      ".war",
+      ".ear",
+      ".php",
+      ".asp",
+      ".aspx",
+      ".jsp",
+      ".py",
+      ".rb",
+      ".pl",
+      ".sh",
+      ".bash",
+      ".zsh",
+      ".fish",
     ];
-    
-    const fileExt = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
+
+    const fileExt = fileName.toLowerCase().substring(fileName.lastIndexOf("."));
     if (dangerousExtensions.includes(fileExt)) {
       threats.push(`Dangerous File Extension: ${fileExt}`);
       riskScore += 9;
@@ -1452,13 +1683,13 @@ export function scanFileContent(
 
   // Check for executable signatures
   const executableSignatures = [
-    { pattern: /^MZ/, name: 'Windows PE Executable', risk: 10 },
-    { pattern: /^\x7fELF/, name: 'Linux ELF Executable', risk: 10 },
-    { pattern: /^\xca\xfe\xba\xbe/, name: 'Java Class File', risk: 8 },
-    { pattern: /^PK\x03\x04.*\.jar$/i, name: 'JAR Archive', risk: 7 },
-    { pattern: /^#!/, name: 'Shell Script', risk: 8 },
-    { pattern: /^\xff\xfb/, name: 'MP3 with potential payload', risk: 3 },
-    { pattern: /^\x89PNG/, name: 'PNG with potential payload', risk: 2 },
+    { pattern: /^MZ/, name: "Windows PE Executable", risk: 10 },
+    { pattern: /^\x7fELF/, name: "Linux ELF Executable", risk: 10 },
+    { pattern: /^\xca\xfe\xba\xbe/, name: "Java Class File", risk: 8 },
+    { pattern: /^PK\x03\x04.*\.jar$/i, name: "JAR Archive", risk: 7 },
+    { pattern: /^#!/, name: "Shell Script", risk: 8 },
+    { pattern: /^\xff\xfb/, name: "MP3 with potential payload", risk: 3 },
+    { pattern: /^\x89PNG/, name: "PNG with potential payload", risk: 2 },
   ];
 
   for (const { pattern, name, risk } of executableSignatures) {
@@ -1470,18 +1701,18 @@ export function scanFileContent(
 
   // Check for script content patterns
   const scriptPatterns = [
-    { pattern: /<\?php/gi, name: 'PHP Code', risk: 9 },
-    { pattern: /<script[^>]*>/gi, name: 'JavaScript Code', risk: 8 },
-    { pattern: /<%[^>]*%>/gi, name: 'ASP Code', risk: 8 },
-    { pattern: /\${.*}/gi, name: 'Template Injection', risk: 7 },
-    { pattern: /eval\s*\(/gi, name: 'Eval Function', risk: 9 },
-    { pattern: /exec\s*\(/gi, name: 'Exec Function', risk: 9 },
-    { pattern: /system\s*\(/gi, name: 'System Function', risk: 9 },
-    { pattern: /passthru\s*\(/gi, name: 'Passthru Function', risk: 9 },
-    { pattern: /shell_exec\s*\(/gi, name: 'Shell Exec Function', risk: 9 },
-    { pattern: /base64_decode\s*\(/gi, name: 'Base64 Decode', risk: 6 },
-    { pattern: /document\.cookie/gi, name: 'Cookie Access', risk: 5 },
-    { pattern: /window\.location/gi, name: 'Location Manipulation', risk: 5 },
+    { pattern: /<\?php/gi, name: "PHP Code", risk: 9 },
+    { pattern: /<script[^>]*>/gi, name: "JavaScript Code", risk: 8 },
+    { pattern: /<%[^>]*%>/gi, name: "ASP Code", risk: 8 },
+    { pattern: /\${.*}/gi, name: "Template Injection", risk: 7 },
+    { pattern: /eval\s*\(/gi, name: "Eval Function", risk: 9 },
+    { pattern: /exec\s*\(/gi, name: "Exec Function", risk: 9 },
+    { pattern: /system\s*\(/gi, name: "System Function", risk: 9 },
+    { pattern: /passthru\s*\(/gi, name: "Passthru Function", risk: 9 },
+    { pattern: /shell_exec\s*\(/gi, name: "Shell Exec Function", risk: 9 },
+    { pattern: /base64_decode\s*\(/gi, name: "Base64 Decode", risk: 6 },
+    { pattern: /document\.cookie/gi, name: "Cookie Access", risk: 5 },
+    { pattern: /window\.location/gi, name: "Location Manipulation", risk: 5 },
   ];
 
   for (const { pattern, name, risk } of scriptPatterns) {
@@ -1494,24 +1725,24 @@ export function scanFileContent(
   // Check for XSS patterns in file content
   const xssAnalysis = detectAdvancedXSS(contentStr);
   if (xssAnalysis.hasXSS) {
-    threats.push(...xssAnalysis.threats.map(t => `XSS: ${t}`));
+    threats.push(...xssAnalysis.threats.map((t) => `XSS: ${t}`));
     riskScore += xssAnalysis.riskScore;
   }
 
   // Check for SQL injection patterns
   if (detectSQLInjection(contentStr)) {
-    threats.push('SQL Injection Patterns');
+    threats.push("SQL Injection Patterns");
     riskScore += 7;
   }
 
   // Check for common malware patterns
   const malwarePatterns = [
-    { pattern: /CreateObject\s*\(/gi, name: 'COM Object Creation', risk: 7 },
-    { pattern: /WScript\.Shell/gi, name: 'WScript Shell', risk: 8 },
-    { pattern: /cmd\.exe/gi, name: 'Command Prompt Access', risk: 7 },
-    { pattern: /powershell/gi, name: 'PowerShell Access', risk: 7 },
-    { pattern: /wget|curl/gi, name: 'Network Download Tools', risk: 6 },
-    { pattern: /nc\s|netcat/gi, name: 'Network Tools', risk: 6 },
+    { pattern: /CreateObject\s*\(/gi, name: "COM Object Creation", risk: 7 },
+    { pattern: /WScript\.Shell/gi, name: "WScript Shell", risk: 8 },
+    { pattern: /cmd\.exe/gi, name: "Command Prompt Access", risk: 7 },
+    { pattern: /powershell/gi, name: "PowerShell Access", risk: 7 },
+    { pattern: /wget|curl/gi, name: "Network Download Tools", risk: 6 },
+    { pattern: /nc\s|netcat/gi, name: "Network Tools", risk: 6 },
   ];
 
   for (const { pattern, name, risk } of malwarePatterns) {
@@ -1528,7 +1759,7 @@ export function scanFileContent(
     metadata: {
       fileSize,
       contentType: mimeType,
-      encoding: Buffer.isBuffer(content) ? 'binary' : 'utf8',
+      encoding: Buffer.isBuffer(content) ? "binary" : "utf8",
     },
   };
 }
@@ -1536,48 +1767,48 @@ export function scanFileContent(
 /**
  * Content Security Policy (CSP) generator for different contexts
  */
-export function generateCSPHeader(context: 'api' | 'ui' | 'admin'): string {
+export function generateCSPHeader(context: "api" | "ui" | "admin"): string {
   const baseCSP = {
-    'default-src': "'self'",
-    'script-src': "'self'",
-    'style-src': "'self' 'unsafe-inline'",
-    'img-src': "'self' data: https:",
-    'font-src': "'self'",
-    'connect-src': "'self'",
-    'frame-src': "'none'",
-    'object-src': "'none'",
-    'base-uri': "'self'",
-    'form-action': "'self'",
-    'frame-ancestors': "'none'",
-    'block-all-mixed-content': '',
-    'upgrade-insecure-requests': '',
+    "default-src": "'self'",
+    "script-src": "'self'",
+    "style-src": "'self' 'unsafe-inline'",
+    "img-src": "'self' data: https:",
+    "font-src": "'self'",
+    "connect-src": "'self'",
+    "frame-src": "'none'",
+    "object-src": "'none'",
+    "base-uri": "'self'",
+    "form-action": "'self'",
+    "frame-ancestors": "'none'",
+    "block-all-mixed-content": "",
+    "upgrade-insecure-requests": "",
   };
 
   const contextCSP = {
     api: {
       ...baseCSP,
-      'script-src': "'none'",
-      'style-src': "'none'",
-      'img-src': "'none'",
+      "script-src": "'none'",
+      "style-src": "'none'",
+      "img-src": "'none'",
     },
     ui: {
       ...baseCSP,
-      'script-src': "'self' 'unsafe-eval'",
-      'style-src': "'self' 'unsafe-inline'",
-      'img-src': "'self' data: https:",
+      "script-src": "'self' 'unsafe-eval'",
+      "style-src": "'self' 'unsafe-inline'",
+      "img-src": "'self' data: https:",
     },
     admin: {
       ...baseCSP,
-      'script-src': "'self' 'nonce-{nonce}'",
-      'style-src': "'self' 'nonce-{nonce}'",
-      'img-src': "'self' data:",
+      "script-src": "'self' 'nonce-{nonce}'",
+      "style-src": "'self' 'nonce-{nonce}'",
+      "img-src": "'self' data:",
     },
   };
 
   const csp = contextCSP[context];
   return Object.entries(csp)
     .map(([directive, sources]) => `${directive} ${sources}`)
-    .join('; ');
+    .join("; ");
 }
 
 export default {

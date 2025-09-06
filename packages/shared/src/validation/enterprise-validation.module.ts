@@ -17,13 +17,13 @@
  * @author Enterprise Security Validation Team
  */
 
-import { Module, Global, DynamicModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { 
-  StandardizedValidationPipe, 
+import { Module, Global, DynamicModule } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import {
+  StandardizedValidationPipe,
   ValidationServiceType,
-  ValidationSecurityLevel 
-} from '../pipes/validation.standardized';
+  ValidationSecurityLevel,
+} from "../pipes/validation.standardized";
 import {
   ValidationConfigurationService,
   ValidationProfileManager,
@@ -31,7 +31,7 @@ import {
   ValidationAuditLogger,
   ValidationMetricsCollector,
   ValidationCacheService,
-} from './services';
+} from "./services";
 
 /**
  * Enterprise validation module configuration options
@@ -39,32 +39,32 @@ import {
 export interface EnterpriseValidationModuleOptions {
   /** Service type for validation profile selection */
   serviceType: ValidationServiceType;
-  
+
   /** Environment (development, staging, production) */
   environment?: string;
-  
+
   /** Global security level override */
   globalSecurityLevel?: ValidationSecurityLevel;
-  
+
   /** Enable comprehensive audit logging */
   enableAuditLogging?: boolean;
-  
+
   /** Enable real-time metrics collection */
   enableMetrics?: boolean;
-  
+
   /** Enable validation result caching for performance */
   enableCaching?: boolean;
-  
+
   /** Custom validation rule overrides */
   customValidationRules?: Record<string, unknown>;
-  
+
   /** Advanced threat detection configuration */
   threatDetectionConfig?: {
     enableAIThreatDetection?: boolean;
-    threatSensitivity?: 'low' | 'medium' | 'high' | 'maximum';
+    threatSensitivity?: "low" | "medium" | "high" | "maximum";
     customThreatPatterns?: RegExp[];
   };
-  
+
   /** Performance optimization settings */
   performanceConfig?: {
     enableAsyncValidation?: boolean;
@@ -80,7 +80,6 @@ export interface EnterpriseValidationModuleOptions {
 @Global()
 @Module({})
 export class EnterpriseValidationModule {
-  
   /**
    * Register the validation module for a specific service
    * @param options Service-specific validation configuration
@@ -89,11 +88,11 @@ export class EnterpriseValidationModule {
   static forService(options: EnterpriseValidationModuleOptions): DynamicModule {
     const {
       serviceType,
-      environment = process.env.NODE_ENV || 'development',
+      environment = process.env.NODE_ENV || "development",
       globalSecurityLevel,
-      enableAuditLogging = environment !== 'development',
+      enableAuditLogging = environment !== "development",
       enableMetrics = true,
-      enableCaching = environment === 'production',
+      enableCaching = environment === "production",
       customValidationRules = {},
       threatDetectionConfig = {},
       performanceConfig = {},
@@ -104,13 +103,13 @@ export class EnterpriseValidationModule {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          envFilePath: ['.env.local', '.env'],
+          envFilePath: [".env.local", ".env"],
         }),
       ],
       providers: [
         // Core validation services
         {
-          provide: 'VALIDATION_CONFIG',
+          provide: "VALIDATION_CONFIG",
           useValue: {
             serviceType,
             environment,
@@ -129,10 +128,10 @@ export class EnterpriseValidationModule {
         ValidationAuditLogger,
         ValidationMetricsCollector,
         ValidationCacheService,
-        
+
         // Service-specific validation pipe
         {
-          provide: 'SERVICE_VALIDATION_PIPE',
+          provide: "SERVICE_VALIDATION_PIPE",
           useFactory: (
             configService: ValidationConfigurationService,
             profileManager: ValidationProfileManager,
@@ -170,7 +169,7 @@ export class EnterpriseValidationModule {
         ValidationAuditLogger,
         ValidationMetricsCollector,
         ValidationCacheService,
-        'SERVICE_VALIDATION_PIPE',
+        "SERVICE_VALIDATION_PIPE",
       ],
     };
   }
@@ -181,21 +180,22 @@ export class EnterpriseValidationModule {
    * @returns Configured dynamic module with enterprise defaults
    */
   static forEnterprise(serviceType: ValidationServiceType): DynamicModule {
-    const environment = process.env.NODE_ENV || 'development';
-    
+    const environment = process.env.NODE_ENV || "development";
+
     // Enterprise-grade default configuration
     const enterpriseOptions: EnterpriseValidationModuleOptions = {
       serviceType,
       environment,
-      globalSecurityLevel: environment === 'production' 
-        ? ValidationSecurityLevel.MAXIMUM 
-        : ValidationSecurityLevel.HIGH,
+      globalSecurityLevel:
+        environment === "production"
+          ? ValidationSecurityLevel.MAXIMUM
+          : ValidationSecurityLevel.HIGH,
       enableAuditLogging: true,
       enableMetrics: true,
-      enableCaching: environment === 'production',
+      enableCaching: environment === "production",
       threatDetectionConfig: {
         enableAIThreatDetection: true,
-        threatSensitivity: 'high',
+        threatSensitivity: "high",
         customThreatPatterns: [
           // Advanced pattern detection for enterprise environments
           /(?:union|select|insert|update|delete|drop|create|alter|exec|execute)[\s\/*]*(?:[\[\(].*?[\]\)]|[^\s;]+)/gi,
@@ -237,14 +237,14 @@ export class EnterpriseValidationModule {
   static forDevelopment(serviceType: ValidationServiceType): DynamicModule {
     return this.forService({
       serviceType,
-      environment: 'development',
+      environment: "development",
       globalSecurityLevel: ValidationSecurityLevel.DEVELOPMENT,
       enableAuditLogging: false,
       enableMetrics: true,
       enableCaching: false,
       threatDetectionConfig: {
         enableAIThreatDetection: false,
-        threatSensitivity: 'low',
+        threatSensitivity: "low",
       },
       performanceConfig: {
         enableAsyncValidation: false,
@@ -262,14 +262,14 @@ export class EnterpriseValidationModule {
   static forTesting(serviceType: ValidationServiceType): DynamicModule {
     return this.forService({
       serviceType,
-      environment: 'test',
+      environment: "test",
       globalSecurityLevel: ValidationSecurityLevel.STANDARD,
       enableAuditLogging: false,
       enableMetrics: false,
       enableCaching: false,
       threatDetectionConfig: {
         enableAIThreatDetection: false,
-        threatSensitivity: 'medium',
+        threatSensitivity: "medium",
       },
       performanceConfig: {
         enableAsyncValidation: false,
@@ -296,29 +296,33 @@ export class EnterpriseValidationPipe extends StandardizedValidationPipe {
       serviceType: ValidationServiceType;
       environment: string;
       globalSecurityLevel?: ValidationSecurityLevel;
-    }
+    },
   ) {
     // Initialize base validation pipe with enhanced configuration
     const profile = options.profileManager.getProfile(
       options.serviceType,
       options.environment,
-      options.globalSecurityLevel
+      options.globalSecurityLevel,
     );
-    
+
     super(options.serviceType, options.environment, profile);
   }
 
   /**
    * Enhanced transform method with enterprise features
    */
-  async transform(value: unknown, metadata: import('class-validator').ArgumentMetadata): Promise<unknown> {
+  async transform(
+    value: unknown,
+    metadata: import("class-validator").ArgumentMetadata,
+  ): Promise<unknown> {
     const operationId = `enterprise-validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
     try {
       // Check cache for previously validated inputs (if enabled)
       if (this.options.cacheService.isCachingEnabled()) {
-        const cachedResult = await this.options.cacheService.getCachedValidation(value, metadata);
+        const cachedResult =
+          await this.options.cacheService.getCachedValidation(value, metadata);
         if (cachedResult) {
           this.options.metricsCollector.recordCacheHit(operationId);
           return cachedResult;
@@ -327,15 +331,20 @@ export class EnterpriseValidationPipe extends StandardizedValidationPipe {
       }
 
       // Perform advanced threat detection
-      const threatAnalysis = await this.options.threatDetector.analyzeThreat(value, {
-        serviceType: this.options.serviceType,
-        environment: this.options.environment,
-        operationId,
-      });
+      const threatAnalysis = await this.options.threatDetector.analyzeThreat(
+        value,
+        {
+          serviceType: this.options.serviceType,
+          environment: this.options.environment,
+          operationId,
+        },
+      );
 
       if (threatAnalysis.isHighRisk) {
         await this.options.auditLogger.logSecurityThreat(threatAnalysis);
-        throw new Error(`High-risk security threat detected: ${threatAnalysis.threatTypes.join(', ')}`);
+        throw new Error(
+          `High-risk security threat detected: ${threatAnalysis.threatTypes.join(", ")}`,
+        );
       }
 
       // Execute base validation with enhanced error handling
@@ -343,7 +352,11 @@ export class EnterpriseValidationPipe extends StandardizedValidationPipe {
 
       // Cache successful validation result (if enabled)
       if (this.options.cacheService.isCachingEnabled()) {
-        await this.options.cacheService.cacheValidationResult(value, metadata, validatedResult);
+        await this.options.cacheService.cacheValidationResult(
+          value,
+          metadata,
+          validatedResult,
+        );
       }
 
       // Record success metrics
@@ -357,10 +370,9 @@ export class EnterpriseValidationPipe extends StandardizedValidationPipe {
       });
 
       return validatedResult;
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      
+
       // Log validation failure with detailed context
       await this.options.auditLogger.logValidationFailure({
         operationId,

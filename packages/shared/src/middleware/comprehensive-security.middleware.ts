@@ -13,28 +13,28 @@
  * @author CORS & Security Implementation Specialist
  */
 
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Request, Response, NextFunction } from 'express';
-import helmet from 'helmet';
-import { createHash, randomBytes } from 'crypto';
+import { Injectable, NestMiddleware, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { Request, Response, NextFunction } from "express";
+import helmet from "helmet";
+import { createHash, randomBytes } from "crypto";
 import {
   getEnvironmentConfig,
   validateOriginPattern,
   calculateCorsRiskScore,
   CorsSecurityEnvironmentConfig,
-} from '../config/cors-security.config';
+} from "../config/cors-security.config";
 
 /**
  * Security event types for monitoring
  */
 export enum SecurityEventType {
-  CORS_VIOLATION = 'cors_violation',
-  CSP_VIOLATION = 'csp_violation',
-  RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded',
-  SUSPICIOUS_ORIGIN = 'suspicious_origin',
-  MALFORMED_REQUEST = 'malformed_request',
-  SECURITY_BYPASS_ATTEMPT = 'security_bypass_attempt',
+  CORS_VIOLATION = "cors_violation",
+  CSP_VIOLATION = "csp_violation",
+  RATE_LIMIT_EXCEEDED = "rate_limit_exceeded",
+  SUSPICIOUS_ORIGIN = "suspicious_origin",
+  MALFORMED_REQUEST = "malformed_request",
+  SECURITY_BYPASS_ATTEMPT = "security_bypass_attempt",
 }
 
 /**
@@ -61,13 +61,13 @@ export interface SecurityEvent {
  * CSP violation report interface
  */
 export interface CSPViolationReport {
-  'document-uri': string;
-  'violated-directive': string;
-  'blocked-uri': string;
-  'source-file': string;
-  'line-number': number;
-  'column-number': number;
-  'status-code': number;
+  "document-uri": string;
+  "violated-directive": string;
+  "blocked-uri": string;
+  "source-file": string;
+  "line-number": number;
+  "column-number": number;
+  "status-code": number;
 }
 
 /**
@@ -101,8 +101,11 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
   private readonly nonceMap = new Map<string, string>();
 
   constructor(private configService: ConfigService) {
-    const environment = this.configService.get('NODE_ENV', 'development');
-    const serviceName = this.configService.get('SERVICE_NAME', 'Bytebot-Service');
+    const environment = this.configService.get("NODE_ENV", "development");
+    const serviceName = this.configService.get(
+      "SERVICE_NAME",
+      "Bytebot-Service",
+    );
 
     // Load environment-specific configuration
     this.envConfig = getEnvironmentConfig(environment);
@@ -113,24 +116,28 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       environment,
       enableCSP: this.envConfig.security.enableCSP,
       enableCSPReporting: this.envConfig.security.enableCSPReporting,
-      cspReportEndpoint: '/api/security/csp-report',
+      cspReportEndpoint: "/api/security/csp-report",
       enableHSTS: this.envConfig.security.enableHSTS,
-      hstsMaxAge: environment === 'production' ? 31536000 : 86400,
-      enableVNC: serviceName.toLowerCase().includes('bytebotd'),
-      enableSwagger: environment !== 'production' && serviceName.includes('Agent'),
-      customOrigins: this.configService.get('CORS_ORIGINS', '').split(',').filter(Boolean),
+      hstsMaxAge: environment === "production" ? 31536000 : 86400,
+      enableVNC: serviceName.toLowerCase().includes("bytebotd"),
+      enableSwagger:
+        environment !== "production" && serviceName.includes("Agent"),
+      customOrigins: this.configService
+        .get("CORS_ORIGINS", "")
+        .split(",")
+        .filter(Boolean),
       trustedProxies: this.envConfig.trustedProxies,
       enableSecurityLogging: this.envConfig.security.logCorsViolations,
       enableDynamicNonce: true,
       enableRiskScoring: true,
       maxRiskScore: 75,
-      blockHighRiskRequests: environment === 'production',
+      blockHighRiskRequests: environment === "production",
     };
 
     // Initialize helmet middleware
     this.helmetMiddleware = this.createComprehensiveHelmetConfig();
 
-    this.logger.log('Comprehensive security middleware initialized', {
+    this.logger.log("Comprehensive security middleware initialized", {
       serviceName: this.config.serviceName,
       environment: this.config.environment,
       csp: this.config.enableCSP,
@@ -154,8 +161,8 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
     this.logger.debug(`[${operationId}] Processing security middleware`, {
       method: req.method,
       url: req.url,
-      origin: req.get('Origin'),
-      userAgent: req.get('User-Agent')?.substring(0, 100),
+      origin: req.get("Origin"),
+      userAgent: req.get("User-Agent")?.substring(0, 100),
       ip: this.getClientIP(req),
     });
 
@@ -174,7 +181,7 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
           SecurityEventType.CORS_VIOLATION,
           corsResult.reason,
           operationId,
-          corsResult.riskScore
+          corsResult.riskScore,
         );
       }
 
@@ -220,9 +227,9 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
         timestamp: new Date(),
         serviceName: this.config.serviceName,
         environment: this.config.environment,
-        origin: req.get('Origin'),
+        origin: req.get("Origin"),
         ipAddress: this.getClientIP(req),
-        userAgent: req.get('User-Agent'),
+        userAgent: req.get("User-Agent"),
         endpoint: req.url,
         method: req.method,
         riskScore: 80,
@@ -243,92 +250,108 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
 
     return helmet({
       // Content Security Policy with dynamic nonce support
-      contentSecurityPolicy: config.enableCSP ? {
-        directives: {
-          defaultSrc: ["'self'"],
-          
-          scriptSrc: [
-            "'self'",
-            // Dynamic nonce will be added per request
-            (req: Request, res: Response) => `'nonce-${(res as any).locals?.nonce || ''}'`,
-            ...(config.enableSwagger ? ["'unsafe-inline'", "'unsafe-eval'"] : []),
-            ...(config.enableVNC ? ["'unsafe-inline'", "'unsafe-eval'"] : []),
-            "https://cdn.jsdelivr.net",
-            "https://unpkg.com",
-            "https://cdnjs.cloudflare.com",
-          ],
+      contentSecurityPolicy: config.enableCSP
+        ? {
+            directives: {
+              defaultSrc: ["'self'"],
 
-          styleSrc: [
-            "'self'",
-            "'unsafe-inline'", // Required for many UI frameworks
-            "https://fonts.googleapis.com",
-            "https://cdn.jsdelivr.net",
-          ],
+              scriptSrc: [
+                "'self'",
+                // Dynamic nonce will be added per request
+                (req: Request, res: Response) =>
+                  `'nonce-${(res as any).locals?.nonce || ""}'`,
+                ...(config.enableSwagger
+                  ? ["'unsafe-inline'", "'unsafe-eval'"]
+                  : []),
+                ...(config.enableVNC
+                  ? ["'unsafe-inline'", "'unsafe-eval'"]
+                  : []),
+                "https://cdn.jsdelivr.net",
+                "https://unpkg.com",
+                "https://cdnjs.cloudflare.com",
+              ],
 
-          fontSrc: [
-            "'self'",
-            "https://fonts.gstatic.com",
-            "https://cdn.jsdelivr.net",
-            "data:",
-          ],
+              styleSrc: [
+                "'self'",
+                "'unsafe-inline'", // Required for many UI frameworks
+                "https://fonts.googleapis.com",
+                "https://cdn.jsdelivr.net",
+              ],
 
-          imgSrc: [
-            "'self'",
-            "data:",
-            "blob:",
-            "https:",
-            ...(config.environment === 'development' ? ["http://localhost:*"] : []),
-          ],
+              fontSrc: [
+                "'self'",
+                "https://fonts.gstatic.com",
+                "https://cdn.jsdelivr.net",
+                "data:",
+              ],
 
-          connectSrc: [
-            "'self'",
-            "ws:",
-            "wss:",
-            ...(config.environment === 'development' ? [
-              "http://localhost:*",
-              "https://localhost:*",
-            ] : []),
-            ...(envConfig.websocketOrigins || []),
-            // Add production API endpoints
-            ...(config.environment === 'production' ? [
-              "https://api.bytebot.ai",
-              "wss://app.bytebot.ai",
-            ] : []),
-          ],
+              imgSrc: [
+                "'self'",
+                "data:",
+                "blob:",
+                "https:",
+                ...(config.environment === "development"
+                  ? ["http://localhost:*"]
+                  : []),
+              ],
 
-          objectSrc: ["'none'"],
-          mediaSrc: ["'self'", "blob:", "data:"],
-          
-          frameSrc: config.enableVNC ? [
-            "'self'",
-            ...(config.environment === 'development' ? ["http://localhost:*"] : []),
-          ] : ["'none'"],
+              connectSrc: [
+                "'self'",
+                "ws:",
+                "wss:",
+                ...(config.environment === "development"
+                  ? ["http://localhost:*", "https://localhost:*"]
+                  : []),
+                ...(envConfig.websocketOrigins || []),
+                // Add production API endpoints
+                ...(config.environment === "production"
+                  ? ["https://api.bytebot.ai", "wss://app.bytebot.ai"]
+                  : []),
+              ],
 
-          frameAncestors: config.enableVNC ? [
-            "'self'",
-            ...envConfig.allowedOrigins,
-          ] : ["'none'"],
+              objectSrc: ["'none'"],
+              mediaSrc: ["'self'", "blob:", "data:"],
 
-          baseUri: ["'self'"],
-          formAction: ["'self'"],
+              frameSrc: config.enableVNC
+                ? [
+                    "'self'",
+                    ...(config.environment === "development"
+                      ? ["http://localhost:*"]
+                      : []),
+                  ]
+                : ["'none'"],
 
-          // Report violations
-          reportUri: config.enableCSPReporting ? [config.cspReportEndpoint] : undefined,
+              frameAncestors: config.enableVNC
+                ? ["'self'", ...envConfig.allowedOrigins]
+                : ["'none'"],
 
-          // Upgrade insecure requests in production
-          ...(config.environment === 'production' ? {
-            upgradeInsecureRequests: [],
-          } : {}),
-        },
-        reportOnly: config.environment === 'development',
-      } : false,
+              baseUri: ["'self'"],
+              formAction: ["'self'"],
+
+              // Report violations
+              reportUri: config.enableCSPReporting
+                ? [config.cspReportEndpoint]
+                : undefined,
+
+              // Upgrade insecure requests in production
+              ...(config.environment === "production"
+                ? {
+                    upgradeInsecureRequests: [],
+                  }
+                : {}),
+            },
+            reportOnly: config.environment === "development",
+          }
+        : false,
 
       // HTTP Strict Transport Security
-      hsts: config.enableHSTS ? {
-        maxAge: config.hstsMaxAge,
-        includeSubDomains: true,
-        preload: config.environment === 'production',
-      } : false,
+      hsts: config.enableHSTS
+        ? {
+            maxAge: config.hstsMaxAge,
+            includeSubDomains: true,
+            preload: config.environment === "production",
+          }
+        : false,
 
       // Cross-Origin Policies
       crossOriginEmbedderPolicy: false, // Disabled for WebSocket compatibility
@@ -369,10 +392,13 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       xssFilter: true,
 
       // Certificate Transparency
-      expectCt: config.environment === 'production' ? {
-        maxAge: 86400,
-        enforce: true,
-      } : false,
+      expectCt:
+        config.environment === "production"
+          ? {
+              maxAge: 86400,
+              enforce: true,
+            }
+          : false,
 
       // Permissions Policy
       permissionsPolicy: {
@@ -384,10 +410,12 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
         magnetometer: [],
         gyroscope: [],
         accelerometer: [],
-        ...(config.enableVNC ? {
-          fullscreen: ["self"],
-          screen: ["self"],
-        } : {}),
+        ...(config.enableVNC
+          ? {
+              fullscreen: ["self"],
+              screen: ["self"],
+            }
+          : {}),
       },
     });
   }
@@ -395,20 +423,27 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
   /**
    * Validate CORS origin with comprehensive checks
    */
-  private validateCORS(req: Request, res: Response, operationId: string): {
+  private validateCORS(
+    req: Request,
+    res: Response,
+    operationId: string,
+  ): {
     allowed: boolean;
     reason: string;
     riskScore: number;
   } {
-    const origin = req.get('Origin');
-    
+    const origin = req.get("Origin");
+
     if (!origin) {
       // Allow requests with no origin (mobile apps, curl, etc.)
-      return { allowed: true, reason: 'No origin header', riskScore: 0 };
+      return { allowed: true, reason: "No origin header", riskScore: 0 };
     }
 
     // Check against environment-specific patterns
-    const patternValidation = validateOriginPattern(origin, this.config.environment);
+    const patternValidation = validateOriginPattern(
+      origin,
+      this.config.environment,
+    );
     if (patternValidation.valid) {
       this.applyCORSHeaders(req, res, origin, operationId);
       return { allowed: true, reason: patternValidation.reason, riskScore: 10 };
@@ -422,13 +457,13 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
 
     if (allAllowedOrigins.includes(origin)) {
       this.applyCORSHeaders(req, res, origin, operationId);
-      return { allowed: true, reason: 'Explicitly allowed', riskScore: 5 };
+      return { allowed: true, reason: "Explicitly allowed", riskScore: 5 };
     }
 
     // Calculate risk score for blocked origin
     const riskScore = calculateCorsRiskScore(origin, this.config.environment, {
-      userAgent: req.get('User-Agent'),
-      referer: req.get('Referer'),
+      userAgent: req.get("User-Agent"),
+      referer: req.get("Referer"),
       ipAddress: this.getClientIP(req),
     });
 
@@ -441,12 +476,12 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       environment: this.config.environment,
       origin,
       ipAddress: this.getClientIP(req),
-      userAgent: req.get('User-Agent'),
+      userAgent: req.get("User-Agent"),
       endpoint: req.url,
       method: req.method,
       riskScore,
       blocked: true,
-      reason: 'Origin not allowed by CORS policy',
+      reason: "Origin not allowed by CORS policy",
       metadata: {
         operationId,
         allowedOrigins: allAllowedOrigins.length,
@@ -454,85 +489,105 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       },
     });
 
-    return { allowed: false, reason: 'Origin not allowed by CORS policy', riskScore };
+    return {
+      allowed: false,
+      reason: "Origin not allowed by CORS policy",
+      riskScore,
+    };
   }
 
   /**
    * Apply CORS headers for allowed origins
    */
-  private applyCORSHeaders(req: Request, res: Response, origin: string, operationId: string): void {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Vary', 'Origin');
+  private applyCORSHeaders(
+    req: Request,
+    res: Response,
+    origin: string,
+    operationId: string,
+  ): void {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Vary", "Origin");
 
     // Handle preflight requests
-    if (req.method === 'OPTIONS') {
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', [
-        'Content-Type',
-        'Authorization',
-        'X-Requested-With',
-        'Accept',
-        'Origin',
-        'Cache-Control',
-        'X-API-Key',
-        'X-Service-ID',
-        'X-Request-ID',
-      ].join(', '));
-      
-      res.setHeader('Access-Control-Expose-Headers', [
-        'X-Request-ID',
-        'X-Response-Time',
-        'X-Rate-Limit-Remaining',
-        'X-Total-Count',
-        'X-Service-ID',
-        'X-API-Version',
-      ].join(', '));
+    if (req.method === "OPTIONS") {
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+      );
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        [
+          "Content-Type",
+          "Authorization",
+          "X-Requested-With",
+          "Accept",
+          "Origin",
+          "Cache-Control",
+          "X-API-Key",
+          "X-Service-ID",
+          "X-Request-ID",
+        ].join(", "),
+      );
 
-      const maxAge = this.config.environment === 'production' ? 86400 : 3600;
-      res.setHeader('Access-Control-Max-Age', maxAge.toString());
+      res.setHeader(
+        "Access-Control-Expose-Headers",
+        [
+          "X-Request-ID",
+          "X-Response-Time",
+          "X-Rate-Limit-Remaining",
+          "X-Total-Count",
+          "X-Service-ID",
+          "X-API-Version",
+        ].join(", "),
+      );
+
+      const maxAge = this.config.environment === "production" ? 86400 : 3600;
+      res.setHeader("Access-Control-Max-Age", maxAge.toString());
     }
 
-    this.logger.debug(`[${operationId}] CORS headers applied for origin: ${origin}`);
+    this.logger.debug(
+      `[${operationId}] CORS headers applied for origin: ${origin}`,
+    );
   }
 
   /**
    * Apply additional security headers
    */
   private applyAdditionalSecurityHeaders(
-    req: Request, 
-    res: Response, 
-    nonce: string, 
-    operationId: string
+    req: Request,
+    res: Response,
+    nonce: string,
+    operationId: string,
   ): void {
     // Service identification headers
-    res.setHeader('X-Service', this.config.serviceName);
-    res.setHeader('X-API-Version', '2.0');
-    res.setHeader('X-Environment', this.config.environment);
-    res.setHeader('X-Security-Level', this.getSecurityLevel());
+    res.setHeader("X-Service", this.config.serviceName);
+    res.setHeader("X-API-Version", "2.0");
+    res.setHeader("X-Environment", this.config.environment);
+    res.setHeader("X-Security-Level", this.getSecurityLevel());
 
     // Request tracking
-    res.setHeader('X-Request-ID', operationId);
-    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader("X-Request-ID", operationId);
+    res.setHeader("X-Content-Type-Options", "nosniff");
 
     // Dynamic nonce for CSP
     if (this.config.enableDynamicNonce) {
-      res.setHeader('X-CSP-Nonce', nonce);
+      res.setHeader("X-CSP-Nonce", nonce);
     }
 
     // Remove sensitive headers in production
-    if (this.config.environment === 'production') {
-      res.removeHeader('X-Powered-By');
-      res.removeHeader('Server');
-      res.removeHeader('X-AspNet-Version');
-      res.removeHeader('X-AspNetMvc-Version');
+    if (this.config.environment === "production") {
+      res.removeHeader("X-Powered-By");
+      res.removeHeader("Server");
+      res.removeHeader("X-AspNet-Version");
+      res.removeHeader("X-AspNetMvc-Version");
     }
 
     // Rate limiting information (if available from previous middleware)
     if ((req as any).rateLimit) {
       const rateLimit = (req as any).rateLimit;
-      res.setHeader('X-Rate-Limit-Remaining', rateLimit.remaining || 0);
-      res.setHeader('X-Rate-Limit-Reset', rateLimit.reset || 0);
+      res.setHeader("X-Rate-Limit-Remaining", rateLimit.remaining || 0);
+      res.setHeader("X-Rate-Limit-Reset", rateLimit.reset || 0);
     }
 
     this.logger.debug(`[${operationId}] Additional security headers applied`);
@@ -541,13 +596,17 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
   /**
    * Setup CSP violation reporting
    */
-  private setupCSPReporting(req: Request, res: Response, operationId: string): void {
+  private setupCSPReporting(
+    req: Request,
+    res: Response,
+    operationId: string,
+  ): void {
     if (!this.config.enableCSPReporting) {
       return;
     }
 
     // Add CSP report endpoint if not already handled
-    if (req.url === this.config.cspReportEndpoint && req.method === 'POST') {
+    if (req.url === this.config.cspReportEndpoint && req.method === "POST") {
       this.handleCSPViolationReport(req, res, operationId);
       return;
     }
@@ -556,10 +615,14 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
   /**
    * Handle CSP violation reports
    */
-  private handleCSPViolationReport(req: Request, res: Response, operationId: string): void {
+  private handleCSPViolationReport(
+    req: Request,
+    res: Response,
+    operationId: string,
+  ): void {
     try {
-      const report = req.body as { 'csp-report': CSPViolationReport };
-      const violation = report['csp-report'];
+      const report = req.body as { "csp-report": CSPViolationReport };
+      const violation = report["csp-report"];
 
       if (violation) {
         this.logSecurityEvent({
@@ -568,26 +631,29 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
           timestamp: new Date(),
           serviceName: this.config.serviceName,
           environment: this.config.environment,
-          endpoint: violation['document-uri'],
-          method: 'CSP_REPORT',
+          endpoint: violation["document-uri"],
+          method: "CSP_REPORT",
           riskScore: this.calculateCSPViolationRisk(violation),
           blocked: true,
-          reason: `CSP violation: ${violation['violated-directive']}`,
+          reason: `CSP violation: ${violation["violated-directive"]}`,
           metadata: {
-            violatedDirective: violation['violated-directive'],
-            blockedUri: violation['blocked-uri'],
-            sourceFile: violation['source-file'],
-            lineNumber: violation['line-number'],
-            columnNumber: violation['column-number'],
+            violatedDirective: violation["violated-directive"],
+            blockedUri: violation["blocked-uri"],
+            sourceFile: violation["source-file"],
+            lineNumber: violation["line-number"],
+            columnNumber: violation["column-number"],
           },
         });
       }
 
       res.status(204).end();
     } catch (error) {
-      this.logger.error(`[${operationId}] Failed to process CSP violation report`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(
+        `[${operationId}] Failed to process CSP violation report`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
       res.status(400).end();
     }
   }
@@ -599,17 +665,20 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
     let riskScore = 30; // Base risk for CSP violation
 
     // Higher risk for script violations
-    if (violation['violated-directive'].includes('script-src')) {
+    if (violation["violated-directive"].includes("script-src")) {
       riskScore += 40;
     }
 
     // Higher risk for external domains
-    if (violation['blocked-uri'] && !violation['blocked-uri'].includes(this.envConfig.domains.primary)) {
+    if (
+      violation["blocked-uri"] &&
+      !violation["blocked-uri"].includes(this.envConfig.domains.primary)
+    ) {
       riskScore += 25;
     }
 
     // Higher risk for eval attempts
-    if (violation['blocked-uri'].includes('eval')) {
+    if (violation["blocked-uri"].includes("eval")) {
       riskScore += 35;
     }
 
@@ -625,12 +694,12 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
     eventType: SecurityEventType,
     reason: string,
     operationId: string,
-    riskScore: number
+    riskScore: number,
   ): void {
     // Set security violation headers
-    res.setHeader('X-Security-Violation', eventType);
-    res.setHeader('X-Risk-Score', riskScore.toString());
-    res.setHeader('X-Blocked-Reason', reason);
+    res.setHeader("X-Security-Violation", eventType);
+    res.setHeader("X-Risk-Score", riskScore.toString());
+    res.setHeader("X-Blocked-Reason", reason);
 
     // Log security event
     this.logSecurityEvent({
@@ -639,9 +708,9 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       timestamp: new Date(),
       serviceName: this.config.serviceName,
       environment: this.config.environment,
-      origin: req.get('Origin'),
+      origin: req.get("Origin"),
       ipAddress: this.getClientIP(req),
-      userAgent: req.get('User-Agent'),
+      userAgent: req.get("User-Agent"),
       endpoint: req.url,
       method: req.method,
       riskScore,
@@ -652,12 +721,14 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
 
     // Return appropriate error response
     const errorResponse = {
-      error: 'Security Policy Violation',
-      code: 'SECURITY_VIOLATION',
-      message: this.config.environment === 'production' 
-        ? 'Request blocked by security policy'
-        : reason,
-      riskScore: this.config.environment !== 'production' ? riskScore : undefined,
+      error: "Security Policy Violation",
+      code: "SECURITY_VIOLATION",
+      message:
+        this.config.environment === "production"
+          ? "Request blocked by security policy"
+          : reason,
+      riskScore:
+        this.config.environment !== "production" ? riskScore : undefined,
       timestamp: new Date().toISOString(),
       requestId: operationId,
     };
@@ -673,8 +744,9 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       return;
     }
 
-    const logLevel = event.riskScore > 70 ? 'error' : event.riskScore > 40 ? 'warn' : 'log';
-    
+    const logLevel =
+      event.riskScore > 70 ? "error" : event.riskScore > 40 ? "warn" : "log";
+
     this.logger[logLevel](`Security Event: ${event.type}`, {
       eventId: event.eventId,
       type: event.type,
@@ -696,21 +768,21 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
    * Generate unique operation ID
    */
   private generateOperationId(): string {
-    return `sec-${Date.now()}-${randomBytes(4).toString('hex')}`;
+    return `sec-${Date.now()}-${randomBytes(4).toString("hex")}`;
   }
 
   /**
    * Generate cryptographic nonce for CSP
    */
   private generateNonce(operationId: string): string {
-    const nonce = randomBytes(16).toString('base64');
+    const nonce = randomBytes(16).toString("base64");
     this.nonceMap.set(operationId, nonce);
-    
+
     // Clean up old nonces (prevent memory leaks)
     setTimeout(() => {
       this.nonceMap.delete(operationId);
     }, 60000); // 1 minute
-    
+
     return nonce;
   }
 
@@ -718,17 +790,17 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
    * Get client IP address considering proxies
    */
   private getClientIP(req: Request): string {
-    const forwardedFor = req.get('X-Forwarded-For');
+    const forwardedFor = req.get("X-Forwarded-For");
     if (forwardedFor) {
-      return forwardedFor.split(',')[0].trim();
+      return forwardedFor.split(",")[0].trim();
     }
-    
-    const realIP = req.get('X-Real-IP');
+
+    const realIP = req.get("X-Real-IP");
     if (realIP) {
       return realIP;
     }
-    
-    return req.ip || req.socket.remoteAddress || 'unknown';
+
+    return req.ip || req.socket.remoteAddress || "unknown";
   }
 
   /**
@@ -736,16 +808,16 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
    */
   private getSecurityLevel(): string {
     const serviceName = this.config.serviceName.toLowerCase();
-    
-    if (serviceName.includes('bytebotd')) {
-      return 'MAXIMUM';
-    } else if (serviceName.includes('agent')) {
-      return 'HIGH';
-    } else if (serviceName.includes('ui')) {
-      return 'STANDARD';
+
+    if (serviceName.includes("bytebotd")) {
+      return "MAXIMUM";
+    } else if (serviceName.includes("agent")) {
+      return "HIGH";
+    } else if (serviceName.includes("ui")) {
+      return "STANDARD";
     }
-    
-    return 'STANDARD';
+
+    return "STANDARD";
   }
 
   /**
@@ -768,34 +840,34 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
 
     // Essential security headers
     const essentialHeaders = [
-      'x-content-type-options',
-      'x-frame-options',
-      'referrer-policy',
-      'x-service',
+      "x-content-type-options",
+      "x-frame-options",
+      "referrer-policy",
+      "x-service",
     ];
 
-    essentialHeaders.forEach(header => {
+    essentialHeaders.forEach((header) => {
       if (!headers[header]) {
         missing.push(header);
       }
     });
 
     // Environment-specific recommendations
-    if (this.config.environment === 'production') {
-      if (!headers['strict-transport-security']) {
-        missing.push('strict-transport-security');
-        recommendations.push('Enable HSTS for production environment');
+    if (this.config.environment === "production") {
+      if (!headers["strict-transport-security"]) {
+        missing.push("strict-transport-security");
+        recommendations.push("Enable HSTS for production environment");
       }
 
-      if (headers['x-powered-by']) {
-        recommendations.push('Remove X-Powered-By header in production');
+      if (headers["x-powered-by"]) {
+        recommendations.push("Remove X-Powered-By header in production");
       }
     }
 
     // CSP recommendations
-    if (this.config.enableCSP && !headers['content-security-policy']) {
-      missing.push('content-security-policy');
-      recommendations.push('Content Security Policy should be configured');
+    if (this.config.enableCSP && !headers["content-security-policy"]) {
+      missing.push("content-security-policy");
+      recommendations.push("Content Security Policy should be configured");
     }
 
     return {

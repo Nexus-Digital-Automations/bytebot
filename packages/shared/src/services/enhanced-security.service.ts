@@ -9,7 +9,7 @@
  * @author Security & Content Sanitization Specialist
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   detectAdvancedXSS,
   sanitizeContentByContext,
@@ -18,8 +18,8 @@ import {
   ENHANCED_DOMPURIFY_CONFIGS,
   createSecurityEvent,
   SecurityEventType,
-} from '../utils/security.utils';
-import { SanitizationOptions } from '../types/security.types';
+} from "../utils/security.utils";
+import { SanitizationOptions } from "../types/security.types";
 
 /**
  * Security monitoring metrics
@@ -79,7 +79,9 @@ export class EnhancedSecurityService {
   };
 
   constructor() {
-    this.logger.log('Enhanced Security Service initialized with comprehensive XSS protection');
+    this.logger.log(
+      "Enhanced Security Service initialized with comprehensive XSS protection",
+    );
   }
 
   /**
@@ -87,8 +89,14 @@ export class EnhancedSecurityService {
    */
   async sanitizeContent(
     content: string,
-    context: 'task_description' | 'message_content' | 'search_query' | 'file_name' | 'config_data' | 'user_input',
-    options?: Partial<SanitizationOptions>
+    context:
+      | "task_description"
+      | "message_content"
+      | "search_query"
+      | "file_name"
+      | "config_data"
+      | "user_input",
+    options?: Partial<SanitizationOptions>,
   ): Promise<ContentSanitizationResult> {
     const startTime = Date.now();
     const operationId = `sanitize-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -103,9 +111,9 @@ export class EnhancedSecurityService {
     try {
       this.metrics.totalRequestsProcessed++;
 
-      if (!content || typeof content !== 'string') {
+      if (!content || typeof content !== "string") {
         return {
-          sanitized: '',
+          sanitized: "",
           originalLength: 0,
           finalLength: 0,
           threatsRemoved: [],
@@ -118,14 +126,15 @@ export class EnhancedSecurityService {
 
       // Perform advanced XSS detection
       const xssAnalysis = detectAdvancedXSS(content);
-      
+
       if (xssAnalysis.hasXSS) {
         this.metrics.xssAttemptsBlocked++;
         this.metrics.lastThreatDetected = new Date();
-        
+
         // Update threat metrics
-        xssAnalysis.threats.forEach(threat => {
-          this.metrics.threatsByType[threat] = (this.metrics.threatsByType[threat] || 0) + 1;
+        xssAnalysis.threats.forEach((threat) => {
+          this.metrics.threatsByType[threat] =
+            (this.metrics.threatsByType[threat] || 0) + 1;
         });
 
         this.logger.warn(`[${operationId}] XSS threats detected`, {
@@ -133,16 +142,20 @@ export class EnhancedSecurityService {
           context,
           threats: xssAnalysis.threats,
           riskScore: xssAnalysis.riskScore,
-          contentPreview: content.substring(0, 100) + '...',
+          contentPreview: content.substring(0, 100) + "...",
         });
       }
 
       // Perform context-aware sanitization
-      const sanitizationResult = sanitizeContentByContext(content, context, options);
-      
+      const sanitizationResult = sanitizeContentByContext(
+        content,
+        context,
+        options,
+      );
+
       if (sanitizationResult.removed.length > 0) {
         this.metrics.contentSanitized++;
-        
+
         this.logger.info(`[${operationId}] Content sanitized`, {
           operationId,
           context,
@@ -175,10 +188,9 @@ export class EnhancedSecurityService {
       });
 
       return result;
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      
+
       this.logger.error(`[${operationId}] Content sanitization failed`, {
         operationId,
         error: error.message,
@@ -196,7 +208,7 @@ export class EnhancedSecurityService {
   async scanFile(
     content: string | Buffer,
     fileName?: string,
-    mimeType?: string
+    mimeType?: string,
   ): Promise<FileScanResult> {
     const startTime = Date.now();
     const operationId = `scan-file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -219,8 +231,9 @@ export class EnhancedSecurityService {
         this.metrics.lastThreatDetected = new Date();
 
         // Update threat metrics
-        scanResult.threats.forEach(threat => {
-          this.metrics.threatsByType[threat] = (this.metrics.threatsByType[threat] || 0) + 1;
+        scanResult.threats.forEach((threat) => {
+          this.metrics.threatsByType[threat] =
+            (this.metrics.threatsByType[threat] || 0) + 1;
         });
 
         this.logger.warn(`[${operationId}] File security threats detected`, {
@@ -233,7 +246,8 @@ export class EnhancedSecurityService {
       }
 
       // Generate security recommendations
-      const recommendations = this.generateFileSecurityRecommendations(scanResult);
+      const recommendations =
+        this.generateFileSecurityRecommendations(scanResult);
 
       const result: FileScanResult = {
         filename: fileName,
@@ -255,10 +269,9 @@ export class EnhancedSecurityService {
       });
 
       return result;
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      
+
       this.logger.error(`[${operationId}] File security scan failed`, {
         operationId,
         fileName,
@@ -273,13 +286,13 @@ export class EnhancedSecurityService {
   /**
    * Generate Content Security Policy header
    */
-  generateCSP(context: 'api' | 'ui' | 'admin', nonce?: string): string {
+  generateCSP(context: "api" | "ui" | "admin", nonce?: string): string {
     let csp = generateCSPHeader(context);
-    
-    if (nonce && context === 'admin') {
+
+    if (nonce && context === "admin") {
       csp = csp.replace(/\{nonce\}/g, nonce);
     }
-    
+
     return csp;
   }
 
@@ -289,9 +302,15 @@ export class EnhancedSecurityService {
   async batchSanitize(
     items: Array<{
       content: string;
-      context: 'task_description' | 'message_content' | 'search_query' | 'file_name' | 'config_data' | 'user_input';
+      context:
+        | "task_description"
+        | "message_content"
+        | "search_query"
+        | "file_name"
+        | "config_data"
+        | "user_input";
       options?: Partial<SanitizationOptions>;
-    }>
+    }>,
   ): Promise<ContentSanitizationResult[]> {
     const operationId = `batch-sanitize-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
@@ -303,12 +322,17 @@ export class EnhancedSecurityService {
 
     try {
       const results = await Promise.all(
-        items.map(item => this.sanitizeContent(item.content, item.context, item.options))
+        items.map((item) =>
+          this.sanitizeContent(item.content, item.context, item.options),
+        ),
       );
 
       const processingTime = Date.now() - startTime;
-      const totalThreats = results.reduce((sum, result) => sum + result.threatsRemoved.length, 0);
-      const unsafeItems = results.filter(result => !result.safe).length;
+      const totalThreats = results.reduce(
+        (sum, result) => sum + result.threatsRemoved.length,
+        0,
+      );
+      const unsafeItems = results.filter((result) => !result.safe).length;
 
       this.logger.debug(`[${operationId}] Batch sanitization completed`, {
         operationId,
@@ -319,10 +343,9 @@ export class EnhancedSecurityService {
       });
 
       return results;
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      
+
       this.logger.error(`[${operationId}] Batch sanitization failed`, {
         operationId,
         itemCount: items.length,
@@ -347,7 +370,7 @@ export class EnhancedSecurityService {
     userId?: string,
     ipAddress?: string,
     userAgent?: string,
-    sessionId?: string
+    sessionId?: string,
   ) {
     return createSecurityEvent(
       type,
@@ -357,32 +380,34 @@ export class EnhancedSecurityService {
       message,
       {
         ...metadata,
-        serviceVersion: '2.0.0',
+        serviceVersion: "2.0.0",
         enhancedSecurityService: true,
       },
       userId,
       ipAddress,
       userAgent,
-      sessionId
+      sessionId,
     );
   }
 
   /**
    * Get current security metrics
    */
-  getSecurityMetrics(): SecurityMetrics & { 
+  getSecurityMetrics(): SecurityMetrics & {
     uptime: number;
     version: string;
     threatDetectionRate: number;
   } {
     const totalProcessed = this.metrics.totalRequestsProcessed;
-    const totalThreats = this.metrics.xssAttemptsBlocked + this.metrics.fileThreatsBlocked;
-    
+    const totalThreats =
+      this.metrics.xssAttemptsBlocked + this.metrics.fileThreatsBlocked;
+
     return {
       ...this.metrics,
       uptime: process.uptime(),
-      version: '2.0.0',
-      threatDetectionRate: totalProcessed > 0 ? (totalThreats / totalProcessed) * 100 : 0,
+      version: "2.0.0",
+      threatDetectionRate:
+        totalProcessed > 0 ? (totalThreats / totalProcessed) * 100 : 0,
     };
   }
 
@@ -400,7 +425,7 @@ export class EnhancedSecurityService {
       threatsByType: {},
     });
 
-    this.logger.log('Security metrics reset');
+    this.logger.log("Security metrics reset");
   }
 
   /**
@@ -416,49 +441,66 @@ export class EnhancedSecurityService {
   private updateAverageProcessingTime(processingTime: number): void {
     const currentAverage = this.metrics.averageProcessingTime;
     const totalProcessed = this.metrics.totalRequestsProcessed;
-    
-    this.metrics.averageProcessingTime = 
-      ((currentAverage * (totalProcessed - 1)) + processingTime) / totalProcessed;
+
+    this.metrics.averageProcessingTime =
+      (currentAverage * (totalProcessed - 1) + processingTime) / totalProcessed;
   }
 
   private generateFileSecurityRecommendations(scanResult: {
     isSafe: boolean;
     threats: string[];
     riskScore: number;
-    metadata: { fileSize: number; contentType?: string; encoding?: string; };
+    metadata: { fileSize: number; contentType?: string; encoding?: string };
   }): string[] {
     const recommendations: string[] = [];
 
     if (!scanResult.isSafe) {
-      recommendations.push('🚨 File contains security threats - consider rejecting upload');
-      
-      if (scanResult.threats.includes('Windows PE Executable') || scanResult.threats.includes('Linux ELF Executable')) {
-        recommendations.push('❌ Executable files should be blocked completely');
+      recommendations.push(
+        "🚨 File contains security threats - consider rejecting upload",
+      );
+
+      if (
+        scanResult.threats.includes("Windows PE Executable") ||
+        scanResult.threats.includes("Linux ELF Executable")
+      ) {
+        recommendations.push(
+          "❌ Executable files should be blocked completely",
+        );
       }
-      
-      if (scanResult.threats.some(t => t.includes('Script'))) {
-        recommendations.push('⚠️ Script content detected - sanitize or reject if not expected');
+
+      if (scanResult.threats.some((t) => t.includes("Script"))) {
+        recommendations.push(
+          "⚠️ Script content detected - sanitize or reject if not expected",
+        );
       }
-      
-      if (scanResult.threats.some(t => t.includes('XSS'))) {
-        recommendations.push('🔒 XSS patterns found - apply additional sanitization');
+
+      if (scanResult.threats.some((t) => t.includes("XSS"))) {
+        recommendations.push(
+          "🔒 XSS patterns found - apply additional sanitization",
+        );
       }
-      
+
       if (scanResult.riskScore >= 8) {
-        recommendations.push('🔥 High risk score - immediate manual review recommended');
+        recommendations.push(
+          "🔥 High risk score - immediate manual review recommended",
+        );
       }
     }
 
     if (scanResult.metadata.fileSize > 5 * 1024 * 1024) {
-      recommendations.push('📏 Large file size - consider size limits for uploads');
+      recommendations.push(
+        "📏 Large file size - consider size limits for uploads",
+      );
     }
 
     if (!scanResult.metadata.contentType) {
-      recommendations.push('🏷️ Missing content type - validate file type before processing');
+      recommendations.push(
+        "🏷️ Missing content type - validate file type before processing",
+      );
     }
 
     if (scanResult.isSafe && scanResult.riskScore === 0) {
-      recommendations.push('✅ File appears safe for processing');
+      recommendations.push("✅ File appears safe for processing");
     }
 
     return recommendations;

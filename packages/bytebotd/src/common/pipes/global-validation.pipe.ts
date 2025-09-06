@@ -19,7 +19,7 @@ import {
   PayloadTooLargeException,
 } from '@nestjs/common';
 import { validate, ValidationError } from 'class-validator';
-import { plainToClass, Transform } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 import {
   sanitizeInput,
   sanitizeObject,
@@ -27,7 +27,6 @@ import {
   detectSQLInjection,
   createSecurityEvent,
   SecurityEventType,
-  ValidationResult,
   DEFAULT_SANITIZATION_OPTIONS,
   SanitizationOptions,
 } from '@bytebot/shared';

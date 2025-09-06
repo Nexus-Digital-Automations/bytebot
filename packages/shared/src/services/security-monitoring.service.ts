@@ -14,33 +14,36 @@
  * @author Security Monitoring Specialist
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { SecurityEvent, SecurityEventType } from '../middleware/comprehensive-security.middleware';
-import { createHash } from 'crypto';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import {
+  SecurityEvent,
+  SecurityEventType,
+} from "../middleware/comprehensive-security.middleware";
+import { createHash } from "crypto";
 
 /**
  * Security alert levels
  */
 export enum SecurityAlertLevel {
-  INFO = 'info',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  INFO = "info",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 /**
  * Security metric types
  */
 export enum SecurityMetricType {
-  CORS_VIOLATIONS = 'cors_violations',
-  CSP_VIOLATIONS = 'csp_violations',
-  RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded',
-  AUTHENTICATION_FAILURES = 'auth_failures',
-  SUSPICIOUS_ACTIVITIES = 'suspicious_activities',
-  BLOCKED_REQUESTS = 'blocked_requests',
+  CORS_VIOLATIONS = "cors_violations",
+  CSP_VIOLATIONS = "csp_violations",
+  RATE_LIMIT_EXCEEDED = "rate_limit_exceeded",
+  AUTHENTICATION_FAILURES = "auth_failures",
+  SUSPICIOUS_ACTIVITIES = "suspicious_activities",
+  BLOCKED_REQUESTS = "blocked_requests",
 }
 
 /**
@@ -123,8 +126,9 @@ export class SecurityMonitoringService {
     private configService: ConfigService,
     private eventEmitter: EventEmitter2,
   ) {
-    this.environment = this.configService.get('NODE_ENV', 'development');
-    this.enableRealTimeAlerting = this.configService.get('ENABLE_SECURITY_ALERTS', 'true') === 'true';
+    this.environment = this.configService.get("NODE_ENV", "development");
+    this.enableRealTimeAlerting =
+      this.configService.get("ENABLE_SECURITY_ALERTS", "true") === "true";
 
     // Configure alert thresholds by event type
     this.alertThresholds = {
@@ -142,7 +146,7 @@ export class SecurityMonitoringService {
     // Start monitoring tasks
     this.startPeriodicTasks();
 
-    this.logger.log('Security monitoring service initialized', {
+    this.logger.log("Security monitoring service initialized", {
       environment: this.environment,
       realTimeAlerting: this.enableRealTimeAlerting,
       alertThresholds: this.alertThresholds,
@@ -167,16 +171,16 @@ export class SecurityMonitoringService {
       await this.checkAlertConditions(event);
 
       // Emit event for real-time processing
-      this.eventEmitter.emit('security.event', event);
+      this.eventEmitter.emit("security.event", event);
 
-      this.logger.debug('Security event processed', {
+      this.logger.debug("Security event processed", {
         eventId: event.eventId,
         type: event.type,
         riskScore: event.riskScore,
         blocked: event.blocked,
       });
     } catch (error) {
-      this.logger.error('Failed to process security event', {
+      this.logger.error("Failed to process security event", {
         eventId: event.eventId,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -189,14 +193,14 @@ export class SecurityMonitoringService {
   private storeEventInBuffer(event: SecurityEvent): void {
     const bufferKey = `${event.serviceName}-${event.type}`;
     const events = this.eventBuffer.get(bufferKey) || [];
-    
+
     events.push(event);
-    
+
     // Keep only last 100 events per service/type
     if (events.length > 100) {
       events.splice(0, events.length - 100);
     }
-    
+
     this.eventBuffer.set(bufferKey, events);
   }
 
@@ -261,18 +265,22 @@ export class SecurityMonitoringService {
   /**
    * Detect CORS flood attack pattern
    */
-  private async detectCORSFloodPattern(events: SecurityEvent[], currentEvent: SecurityEvent): Promise<void> {
-    const recentEvents = events.filter(e => 
-      e.ipAddress === currentEvent.ipAddress &&
-      Date.now() - e.timestamp.getTime() < 60000 // Last minute
+  private async detectCORSFloodPattern(
+    events: SecurityEvent[],
+    currentEvent: SecurityEvent,
+  ): Promise<void> {
+    const recentEvents = events.filter(
+      (e) =>
+        e.ipAddress === currentEvent.ipAddress &&
+        Date.now() - e.timestamp.getTime() < 60000, // Last minute
     );
 
     if (recentEvents.length >= 10) {
       await this.createAttackPattern({
         patternId: `cors-flood-${currentEvent.ipAddress}`,
-        name: 'CORS Flood Attack',
+        name: "CORS Flood Attack",
         description: `Rapid CORS violations from IP ${currentEvent.ipAddress}`,
-        indicators: [`ip:${currentEvent.ipAddress}`, 'cors-flood'],
+        indicators: [`ip:${currentEvent.ipAddress}`, "cors-flood"],
         riskScore: 85,
         detectionCount: recentEvents.length,
         lastDetected: new Date(),
@@ -284,18 +292,24 @@ export class SecurityMonitoringService {
   /**
    * Detect CSP bypass attempt pattern
    */
-  private async detectCSPBypassPattern(events: SecurityEvent[], currentEvent: SecurityEvent): Promise<void> {
-    const recentEvents = events.filter(e => 
-      e.origin === currentEvent.origin &&
-      Date.now() - e.timestamp.getTime() < 300000 // Last 5 minutes
+  private async detectCSPBypassPattern(
+    events: SecurityEvent[],
+    currentEvent: SecurityEvent,
+  ): Promise<void> {
+    const recentEvents = events.filter(
+      (e) =>
+        e.origin === currentEvent.origin &&
+        Date.now() - e.timestamp.getTime() < 300000, // Last 5 minutes
     );
 
     if (recentEvents.length >= 3) {
       await this.createAttackPattern({
-        patternId: `csp-bypass-${createHash('md5').update(currentEvent.origin || '').digest('hex')}`,
-        name: 'CSP Bypass Attempt',
+        patternId: `csp-bypass-${createHash("md5")
+          .update(currentEvent.origin || "")
+          .digest("hex")}`,
+        name: "CSP Bypass Attempt",
         description: `Multiple CSP violations from origin ${currentEvent.origin}`,
-        indicators: [`origin:${currentEvent.origin}`, 'csp-bypass'],
+        indicators: [`origin:${currentEvent.origin}`, "csp-bypass"],
         riskScore: 75,
         detectionCount: recentEvents.length,
         lastDetected: new Date(),
@@ -307,18 +321,22 @@ export class SecurityMonitoringService {
   /**
    * Detect brute force attack pattern
    */
-  private async detectBruteForcePattern(events: SecurityEvent[], currentEvent: SecurityEvent): Promise<void> {
-    const recentEvents = events.filter(e => 
-      e.ipAddress === currentEvent.ipAddress &&
-      Date.now() - e.timestamp.getTime() < 900000 // Last 15 minutes
+  private async detectBruteForcePattern(
+    events: SecurityEvent[],
+    currentEvent: SecurityEvent,
+  ): Promise<void> {
+    const recentEvents = events.filter(
+      (e) =>
+        e.ipAddress === currentEvent.ipAddress &&
+        Date.now() - e.timestamp.getTime() < 900000, // Last 15 minutes
     );
 
     if (recentEvents.length >= 20) {
       await this.createAttackPattern({
         patternId: `brute-force-${currentEvent.ipAddress}`,
-        name: 'Brute Force Attack',
+        name: "Brute Force Attack",
         description: `Excessive rate limiting from IP ${currentEvent.ipAddress}`,
-        indicators: [`ip:${currentEvent.ipAddress}`, 'brute-force'],
+        indicators: [`ip:${currentEvent.ipAddress}`, "brute-force"],
         riskScore: 90,
         detectionCount: recentEvents.length,
         lastDetected: new Date(),
@@ -330,18 +348,21 @@ export class SecurityMonitoringService {
   /**
    * Detect suspicious origin pattern
    */
-  private async detectSuspiciousOriginPattern(events: SecurityEvent[], currentEvent: SecurityEvent): Promise<void> {
+  private async detectSuspiciousOriginPattern(
+    events: SecurityEvent[],
+    currentEvent: SecurityEvent,
+  ): Promise<void> {
     const suspiciousOrigins = events
-      .filter(e => e.riskScore > 70)
-      .map(e => e.origin)
+      .filter((e) => e.riskScore > 70)
+      .map((e) => e.origin)
       .filter((origin, index, array) => array.indexOf(origin) === index);
 
     if (suspiciousOrigins.length >= 5) {
       await this.createAttackPattern({
         patternId: `suspicious-origins-${Date.now()}`,
-        name: 'Suspicious Origin Campaign',
+        name: "Suspicious Origin Campaign",
         description: `Multiple high-risk origins detected`,
-        indicators: suspiciousOrigins.map(o => `origin:${o}`),
+        indicators: suspiciousOrigins.map((o) => `origin:${o}`),
         riskScore: 80,
         detectionCount: suspiciousOrigins.length,
         lastDetected: new Date(),
@@ -367,16 +388,21 @@ export class SecurityMonitoringService {
     // Create high-priority alert for new attack patterns
     await this.createSecurityAlert({
       alertId: `alert-${pattern.patternId}-${Date.now()}`,
-      level: pattern.riskScore > 85 ? SecurityAlertLevel.CRITICAL : SecurityAlertLevel.HIGH,
+      level:
+        pattern.riskScore > 85
+          ? SecurityAlertLevel.CRITICAL
+          : SecurityAlertLevel.HIGH,
       type: SecurityEventType.SECURITY_BYPASS_ATTEMPT,
       title: `Attack Pattern Detected: ${pattern.name}`,
       description: pattern.description,
       timestamp: new Date(),
-      serviceName: 'security-monitoring',
+      serviceName: "security-monitoring",
       environment: this.environment,
       eventCount: pattern.detectionCount,
       riskScore: pattern.riskScore,
-      sourceIPs: pattern.indicators.filter(i => i.startsWith('ip:')).map(i => i.substring(3)),
+      sourceIPs: pattern.indicators
+        .filter((i) => i.startsWith("ip:"))
+        .map((i) => i.substring(3)),
       affectedEndpoints: [],
       metadata: {
         patternId: pattern.patternId,
@@ -385,7 +411,7 @@ export class SecurityMonitoringService {
       resolved: false,
     });
 
-    this.logger.warn('Attack pattern detected', {
+    this.logger.warn("Attack pattern detected", {
       patternId: pattern.patternId,
       name: pattern.name,
       riskScore: pattern.riskScore,
@@ -402,8 +428,8 @@ export class SecurityMonitoringService {
     const events = this.eventBuffer.get(bufferKey) || [];
 
     // Count recent events of this type
-    const recentEvents = events.filter(e => 
-      Date.now() - e.timestamp.getTime() < 300000 // Last 5 minutes
+    const recentEvents = events.filter(
+      (e) => Date.now() - e.timestamp.getTime() < 300000, // Last 5 minutes
     );
 
     if (recentEvents.length >= threshold) {
@@ -411,15 +437,17 @@ export class SecurityMonitoringService {
         alertId: `alert-${event.type}-${Date.now()}`,
         level: this.getAlertLevelForEvent(event),
         type: event.type,
-        title: `Security Alert: ${event.type.replace('_', ' ').toUpperCase()}`,
+        title: `Security Alert: ${event.type.replace("_", " ").toUpperCase()}`,
         description: `${recentEvents.length} ${event.type} events detected in the last 5 minutes`,
         timestamp: new Date(),
         serviceName: event.serviceName,
         environment: event.environment,
         eventCount: recentEvents.length,
-        riskScore: Math.max(...recentEvents.map(e => e.riskScore)),
-        sourceIPs: [...new Set(recentEvents.map(e => e.ipAddress).filter(Boolean))],
-        affectedEndpoints: [...new Set(recentEvents.map(e => e.endpoint))],
+        riskScore: Math.max(...recentEvents.map((e) => e.riskScore)),
+        sourceIPs: [
+          ...new Set(recentEvents.map((e) => e.ipAddress).filter(Boolean)),
+        ],
+        affectedEndpoints: [...new Set(recentEvents.map((e) => e.endpoint))],
         metadata: {
           threshold,
           timeWindowMinutes: 5,
@@ -436,14 +464,14 @@ export class SecurityMonitoringService {
     this.alertBuffer.set(alert.alertId, alert);
 
     // Emit alert for real-time processing
-    this.eventEmitter.emit('security.alert', alert);
+    this.eventEmitter.emit("security.alert", alert);
 
     // Send notifications if enabled
     if (this.enableRealTimeAlerting) {
       await this.sendAlertNotification(alert);
     }
 
-    this.logger.warn('Security alert created', {
+    this.logger.warn("Security alert created", {
       alertId: alert.alertId,
       level: alert.level,
       type: alert.type,
@@ -474,7 +502,7 @@ export class SecurityMonitoringService {
         affectedEndpoints: alert.affectedEndpoints,
       });
     } catch (error) {
-      this.logger.error('Failed to send alert notification', {
+      this.logger.error("Failed to send alert notification", {
         alertId: alert.alertId,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -490,16 +518,20 @@ export class SecurityMonitoringService {
 
     // Calculate totals
     const allEvents = Array.from(this.eventBuffer.values()).flat();
-    const recentEvents = allEvents.filter(e => e.timestamp >= lastHour);
-    const recentAlerts = Array.from(this.alertBuffer.values()).filter(a => a.timestamp >= lastHour);
+    const recentEvents = allEvents.filter((e) => e.timestamp >= lastHour);
+    const recentAlerts = Array.from(this.alertBuffer.values()).filter(
+      (a) => a.timestamp >= lastHour,
+    );
 
     return {
       timestamp: now,
       environment: this.environment,
       totalEvents: recentEvents.length,
-      criticalAlerts: recentAlerts.filter(a => a.level === SecurityAlertLevel.CRITICAL).length,
-      highRiskEvents: recentEvents.filter(e => e.riskScore > 70).length,
-      blockedRequests: recentEvents.filter(e => e.blocked).length,
+      criticalAlerts: recentAlerts.filter(
+        (a) => a.level === SecurityAlertLevel.CRITICAL,
+      ).length,
+      highRiskEvents: recentEvents.filter((e) => e.riskScore > 70).length,
+      blockedRequests: recentEvents.filter((e) => e.blocked).length,
       topThreats: Array.from(this.attackPatterns.values())
         .sort((a, b) => b.riskScore - a.riskScore)
         .slice(0, 5),
@@ -524,7 +556,9 @@ export class SecurityMonitoringService {
   /**
    * Map event type to metric type
    */
-  private mapEventTypeToMetric(eventType: SecurityEventType): SecurityMetricType {
+  private mapEventTypeToMetric(
+    eventType: SecurityEventType,
+  ): SecurityMetricType {
     switch (eventType) {
       case SecurityEventType.CORS_VIOLATION:
         return SecurityMetricType.CORS_VIOLATIONS;
@@ -552,20 +586,20 @@ export class SecurityMonitoringService {
     // Initialize with known attack patterns
     const knownPatterns: AttackPattern[] = [
       {
-        patternId: 'cors-flood-generic',
-        name: 'Generic CORS Flood',
-        description: 'High frequency CORS violations from single source',
-        indicators: ['cors-flood', 'high-frequency'],
+        patternId: "cors-flood-generic",
+        name: "Generic CORS Flood",
+        description: "High frequency CORS violations from single source",
+        indicators: ["cors-flood", "high-frequency"],
         riskScore: 80,
         detectionCount: 0,
         lastDetected: new Date(),
         blocked: true,
       },
       {
-        patternId: 'csp-bypass-generic',
-        name: 'Generic CSP Bypass',
-        description: 'Content Security Policy bypass attempts',
-        indicators: ['csp-bypass', 'script-injection'],
+        patternId: "csp-bypass-generic",
+        name: "Generic CSP Bypass",
+        description: "Content Security Policy bypass attempts",
+        indicators: ["csp-bypass", "script-injection"],
         riskScore: 85,
         detectionCount: 0,
         lastDetected: new Date(),
@@ -573,7 +607,7 @@ export class SecurityMonitoringService {
       },
     ];
 
-    knownPatterns.forEach(pattern => {
+    knownPatterns.forEach((pattern) => {
       this.attackPatterns.set(pattern.patternId, pattern);
     });
   }
@@ -605,7 +639,7 @@ export class SecurityMonitoringService {
     const cutoff = Date.now() - 3600000; // 1 hour ago
 
     this.eventBuffer.forEach((events, key) => {
-      const filtered = events.filter(e => e.timestamp.getTime() > cutoff);
+      const filtered = events.filter((e) => e.timestamp.getTime() > cutoff);
       if (filtered.length !== events.length) {
         this.eventBuffer.set(key, filtered);
       }

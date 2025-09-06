@@ -278,7 +278,7 @@ export const SERVICE_SPECIFIC_ORIGINS = {
  * @returns Complete origin list for service
  */
 export function getServiceOrigins(
-  serviceName: keyof typeof SERVICE_SPECIFIC_ORIGINS | string,
+  serviceName: string,
   environment?: string,
 ): string[] {
   const envConfig = getEnvironmentConfig(environment);

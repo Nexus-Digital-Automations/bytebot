@@ -108,7 +108,9 @@ export class IsValidScreenCoordinatesConstraint
       return false;
     }
 
-    const screenBounds = args.constraints[0] as { width: number; height: number; } | undefined;
+    const screenBounds = args.constraints[0] as
+      | { width: number; height: number }
+      | undefined;
     const validation = validateCoordinates(x, y, screenBounds);
     return validation.isValid;
   }
@@ -246,7 +248,7 @@ export function IsNotXSS(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isNotXSS",
-      target: object.constructor as Function,
+      target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: IsNotXSSConstraint,
@@ -262,7 +264,7 @@ export function IsNotSQLInjection(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isNotSQLInjection",
-      target: object.constructor as Function,
+      target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: IsNotSQLInjectionConstraint,
@@ -282,7 +284,7 @@ export function IsSafeFilePath(
   return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isSafeFilePath",
-      target: object.constructor as Function,
+      target: object.constructor,
       propertyName: propertyName,
       constraints: [allowedBasePaths],
       options: validationOptions,
@@ -303,7 +305,7 @@ export function IsValidScreenCoordinates(
   return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isValidScreenCoordinates",
-      target: object.constructor as Function,
+      target: object.constructor,
       propertyName: propertyName,
       constraints: [screenBounds],
       options: validationOptions,
@@ -324,7 +326,7 @@ export function IsNotMaliciousFile(
   return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isNotMaliciousFile",
-      target: object.constructor as Function,
+      target: object.constructor,
       propertyName: propertyName,
       constraints: [filename],
       options: validationOptions,
@@ -345,7 +347,7 @@ export function IsSafeTextInput(
   return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isSafeTextInput",
-      target: object.constructor as Function,
+      target: object.constructor,
       propertyName: propertyName,
       constraints: [enableAdditionalChecks],
       options: validationOptions,
@@ -366,7 +368,7 @@ export function IsValidComputerActionText(
   return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isValidComputerActionText",
-      target: object.constructor as Function,
+      target: object.constructor,
       propertyName: propertyName,
       constraints: [maxLength],
       options: validationOptions,
@@ -387,7 +389,7 @@ export function IsSanitizedString(
   return function (object: object, propertyName: string) {
     registerDecorator({
       name: "isSanitizedString",
-      target: object.constructor as Function,
+      target: object.constructor,
       propertyName: propertyName,
       constraints: [sanitizationOptions],
       options: validationOptions,

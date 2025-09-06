@@ -21,13 +21,10 @@ import {
   Controller,
   Get,
   Post,
-  Put,
-  Delete,
   Param,
   Query,
   Body,
   HttpStatus,
-  UseGuards,
   Logger,
 } from "@nestjs/common";
 import {

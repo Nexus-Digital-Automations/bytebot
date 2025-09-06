@@ -18,7 +18,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
-import { plainToClass, Transform } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 import {
   sanitizeInput,
   sanitizeObject,
@@ -26,9 +26,7 @@ import {
   detectSQLInjection,
   DEFAULT_SANITIZATION_OPTIONS,
   SanitizationOptions,
-  EnhancedSecurityService,
   detectAdvancedXSS,
-  sanitizeContentByContext,
 } from '@bytebot/shared';
 
 /**
@@ -478,7 +476,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
       /(\||&|;|`|\$\(|\${|<!--)/gi,
 
       // Path traversal patterns
-      /(\.\.[\/\\]|\.\.%2f|\.\.%5c)/gi,
+      /(\.\.[\\/]|\.\.%2f|\.\.%5c)/gi,
 
       // Template injection patterns
       /(\{\{.*?\}\}|\[\[.*?\]\])/gi,

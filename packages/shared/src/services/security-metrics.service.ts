@@ -1,61 +1,61 @@
 /**
  * Security Metrics Collection Service
- * 
+ *
  * Advanced metrics collection and analysis service for comprehensive security monitoring,
  * performance tracking, and compliance reporting across Bytebot services.
- * 
+ *
  * Features:
  * - Real-time security metrics collection and aggregation
  * - Performance monitoring and SLA tracking
- * - Threat pattern analysis and trend detection  
+ * - Threat pattern analysis and trend detection
  * - Compliance metrics and audit trail management
  * - Custom dashboard and alerting integration
  * - Historical data analysis and reporting
- * 
+ *
  * @author Security Metrics & Analytics Specialist
  * @version 2.0.0
  * @since Bytebot Security Enhancement Phase
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
+import { Cron, CronExpression } from "@nestjs/schedule";
 
 /**
  * Metric data types for comprehensive tracking
  */
 export enum MetricType {
-  COUNTER = 'counter',
-  GAUGE = 'gauge', 
-  HISTOGRAM = 'histogram',
-  SUMMARY = 'summary',
+  COUNTER = "counter",
+  GAUGE = "gauge",
+  HISTOGRAM = "histogram",
+  SUMMARY = "summary",
 }
 
 /**
  * Metric aggregation periods
  */
 export enum AggregationPeriod {
-  REALTIME = 'realtime',
-  MINUTE = 'minute',
-  HOUR = 'hour',
-  DAY = 'day',
-  WEEK = 'week',
-  MONTH = 'month',
+  REALTIME = "realtime",
+  MINUTE = "minute",
+  HOUR = "hour",
+  DAY = "day",
+  WEEK = "week",
+  MONTH = "month",
 }
 
 /**
  * Security metric categories
  */
 export enum SecurityMetricCategory {
-  AUTHENTICATION = 'authentication',
-  AUTHORIZATION = 'authorization',
-  THREAT_DETECTION = 'threat_detection',
-  INCIDENT_RESPONSE = 'incident_response',
-  SYSTEM_PERFORMANCE = 'system_performance',
-  COMPLIANCE = 'compliance',
-  USER_BEHAVIOR = 'user_behavior',
-  NETWORK_SECURITY = 'network_security',
+  AUTHENTICATION = "authentication",
+  AUTHORIZATION = "authorization",
+  THREAT_DETECTION = "threat_detection",
+  INCIDENT_RESPONSE = "incident_response",
+  SYSTEM_PERFORMANCE = "system_performance",
+  COMPLIANCE = "compliance",
+  USER_BEHAVIOR = "user_behavior",
+  NETWORK_SECURITY = "network_security",
 }
 
 /**
@@ -64,25 +64,25 @@ export enum SecurityMetricCategory {
 interface MetricDataPoint {
   /** Metric identifier */
   metricId: string;
-  
+
   /** Metric name */
   name: string;
-  
+
   /** Category classification */
   category: SecurityMetricCategory;
-  
+
   /** Metric type */
   type: MetricType;
-  
+
   /** Numeric value */
   value: number;
-  
+
   /** Timestamp */
   timestamp: Date;
-  
+
   /** Additional labels/tags */
   labels: Record<string, string>;
-  
+
   /** Metadata */
   metadata?: Record<string, any>;
 }
@@ -93,16 +93,16 @@ interface MetricDataPoint {
 interface AggregatedMetric {
   /** Metric identifier */
   metricId: string;
-  
+
   /** Aggregation period */
   period: AggregationPeriod;
-  
+
   /** Time window start */
   windowStart: Date;
-  
+
   /** Time window end */
   windowEnd: Date;
-  
+
   /** Aggregated values */
   values: {
     count: number;
@@ -114,10 +114,10 @@ interface AggregatedMetric {
     p95: number;
     p99: number;
   };
-  
+
   /** Trend analysis */
   trend: {
-    direction: 'increasing' | 'decreasing' | 'stable';
+    direction: "increasing" | "decreasing" | "stable";
     rate: number; // Change rate percentage
     confidence: number; // 0-1 confidence score
   };
@@ -133,16 +133,16 @@ interface SecurityDashboard {
     period: AggregationPeriod;
     refreshInterval: number;
   };
-  
+
   /** Overall security posture */
   overview: {
     securityScore: number; // 0-100 overall security score
-    threatLevel: 'low' | 'medium' | 'high' | 'critical';
+    threatLevel: "low" | "medium" | "high" | "critical";
     activeThreatCount: number;
     incidentCount: number;
     systemHealth: number; // 0-100 system health score
   };
-  
+
   /** Authentication metrics */
   authentication: {
     totalAttempts: number;
@@ -152,7 +152,7 @@ interface SecurityDashboard {
     uniqueUsers: number;
     suspiciousAttempts: number;
   };
-  
+
   /** Threat detection metrics */
   threatDetection: {
     threatsDetected: number;
@@ -161,7 +161,7 @@ interface SecurityDashboard {
     falsePositiveRate: number;
     detectionAccuracy: number;
   };
-  
+
   /** System performance */
   performance: {
     responseTime: {
@@ -173,7 +173,7 @@ interface SecurityDashboard {
     errorRate: number;
     availabilityScore: number;
   };
-  
+
   /** Network security */
   network: {
     totalRequests: number;
@@ -182,7 +182,7 @@ interface SecurityDashboard {
     suspiciousIPs: number;
     geoDistribution: Record<string, number>;
   };
-  
+
   /** Compliance metrics */
   compliance: {
     auditTrailCompleteness: number;
@@ -198,28 +198,28 @@ interface SecurityDashboard {
 interface AlertThreshold {
   /** Threshold identifier */
   thresholdId: string;
-  
+
   /** Metric to monitor */
   metricId: string;
-  
+
   /** Threshold operator */
-  operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';
-  
+  operator: "gt" | "lt" | "eq" | "gte" | "lte";
+
   /** Threshold value */
   value: number;
-  
+
   /** Time window for evaluation */
   timeWindow: number; // milliseconds
-  
+
   /** Alert severity */
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  
+  severity: "low" | "medium" | "high" | "critical";
+
   /** Whether threshold is enabled */
   enabled: boolean;
-  
+
   /** Cooldown period between alerts */
   cooldownMs: number;
-  
+
   /** Last alert timestamp */
   lastAlertAt?: Date;
 }
@@ -227,16 +227,16 @@ interface AlertThreshold {
 @Injectable()
 export class SecurityMetricsService implements OnModuleInit {
   private readonly logger = new Logger(SecurityMetricsService.name);
-  
+
   /** Raw metric data storage */
   private readonly rawMetrics = new Map<string, MetricDataPoint[]>();
-  
+
   /** Aggregated metrics cache */
   private readonly aggregatedMetrics = new Map<string, AggregatedMetric[]>();
-  
+
   /** Alert thresholds configuration */
   private readonly alertThresholds = new Map<string, AlertThreshold>();
-  
+
   /** Performance tracking */
   private readonly performanceMetrics = {
     metricsCollected: 0,
@@ -244,15 +244,18 @@ export class SecurityMetricsService implements OnModuleInit {
     alertsTriggered: 0,
     processingTime: [] as number[],
   };
-  
+
   /** Metric definitions registry */
-  private readonly metricDefinitions = new Map<string, {
-    name: string;
-    category: SecurityMetricCategory;
-    type: MetricType;
-    description: string;
-    unit?: string;
-  }>();
+  private readonly metricDefinitions = new Map<
+    string,
+    {
+      name: string;
+      category: SecurityMetricCategory;
+      type: MetricType;
+      description: string;
+      unit?: string;
+    }
+  >();
 
   constructor(
     private readonly configService: ConfigService,
@@ -266,15 +269,17 @@ export class SecurityMetricsService implements OnModuleInit {
     const operationId = `security-metrics-init-${Date.now()}`;
     const startTime = Date.now();
 
-    this.logger.log(`[${operationId}] Initializing Security Metrics Service...`);
+    this.logger.log(
+      `[${operationId}] Initializing Security Metrics Service...`,
+    );
 
     try {
       // Start periodic aggregation tasks
       this.startAggregationTasks();
-      
+
       // Start alert monitoring
       this.startAlertMonitoring();
-      
+
       // Initialize dashboard
       await this.initializeDashboard();
 
@@ -310,7 +315,7 @@ export class SecurityMetricsService implements OnModuleInit {
     metricId: string,
     value: number,
     labels: Record<string, string> = {},
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): void {
     const definition = this.metricDefinitions.get(metricId);
     if (!definition) {
@@ -333,13 +338,13 @@ export class SecurityMetricsService implements OnModuleInit {
     if (!this.rawMetrics.has(metricId)) {
       this.rawMetrics.set(metricId, []);
     }
-    
+
     const metricData = this.rawMetrics.get(metricId)!;
     metricData.push(dataPoint);
-    
+
     // Keep only recent data (last 24 hours for raw metrics)
     const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const filteredData = metricData.filter(dp => dp.timestamp > cutoffTime);
+    const filteredData = metricData.filter((dp) => dp.timestamp > cutoffTime);
     this.rawMetrics.set(metricId, filteredData);
 
     this.performanceMetrics.metricsCollected++;
@@ -353,7 +358,7 @@ export class SecurityMetricsService implements OnModuleInit {
     });
 
     // Emit metric recorded event
-    this.eventEmitter.emit('security.metric.recorded', {
+    this.eventEmitter.emit("security.metric.recorded", {
       metricId,
       value,
       timestamp: dataPoint.timestamp,
@@ -364,33 +369,33 @@ export class SecurityMetricsService implements OnModuleInit {
   /**
    * Record authentication metrics
    */
-  @OnEvent('auth.*')
+  @OnEvent("auth.*")
   recordAuthenticationEvent(event: any): void {
-    const success = event.success || event.type?.includes('success');
-    
+    const success = event.success || event.type?.includes("success");
+
     // Record login attempt
-    this.recordMetric('auth.attempts.total', 1, {
-      result: success ? 'success' : 'failure',
-      method: event.method || 'unknown',
+    this.recordMetric("auth.attempts.total", 1, {
+      result: success ? "success" : "failure",
+      method: event.method || "unknown",
     });
 
     // Record specific success/failure metrics
     if (success) {
-      this.recordMetric('auth.login.success', 1, {
-        userId: event.userId || 'unknown',
-        ip: event.ipAddress || 'unknown',
+      this.recordMetric("auth.login.success", 1, {
+        userId: event.userId || "unknown",
+        ip: event.ipAddress || "unknown",
       });
     } else {
-      this.recordMetric('auth.login.failure', 1, {
-        reason: event.reason || 'unknown',
-        ip: event.ipAddress || 'unknown',
+      this.recordMetric("auth.login.failure", 1, {
+        reason: event.reason || "unknown",
+        ip: event.ipAddress || "unknown",
       });
     }
 
     // Record response time if available
     if (event.responseTime) {
-      this.recordMetric('auth.response.time', event.responseTime, {
-        result: success ? 'success' : 'failure',
+      this.recordMetric("auth.response.time", event.responseTime, {
+        result: success ? "success" : "failure",
       });
     }
   }
@@ -398,35 +403,39 @@ export class SecurityMetricsService implements OnModuleInit {
   /**
    * Record threat detection metrics
    */
-  @OnEvent('security.threat.detected')
+  @OnEvent("security.threat.detected")
   recordThreatDetectionEvent(event: any): void {
     // Record threat detection
-    this.recordMetric('threat.detected', 1, {
-      severity: event.threatSeverity || 'unknown',
-      category: event.category || 'unknown',
-      sourceIP: event.ipAddress || 'unknown',
+    this.recordMetric("threat.detected", 1, {
+      severity: event.threatSeverity || "unknown",
+      category: event.category || "unknown",
+      sourceIP: event.ipAddress || "unknown",
     });
 
     // Record risk score
     if (event.riskScore !== undefined) {
-      this.recordMetric('threat.risk.score', event.riskScore, {
-        severity: event.threatSeverity || 'unknown',
+      this.recordMetric("threat.risk.score", event.riskScore, {
+        severity: event.threatSeverity || "unknown",
       });
     }
 
     // Record rules triggered
     if (event.rulesTrigggered?.length) {
-      this.recordMetric('threat.rules.triggered', event.rulesTrigggered.length, {
-        severity: event.threatSeverity || 'unknown',
-      });
+      this.recordMetric(
+        "threat.rules.triggered",
+        event.rulesTrigggered.length,
+        {
+          severity: event.threatSeverity || "unknown",
+        },
+      );
     }
 
     // Record response actions
     if (event.responseActions?.length) {
       event.responseActions.forEach((action: string) => {
-        this.recordMetric('threat.response.action', 1, {
+        this.recordMetric("threat.response.action", 1, {
           action: action,
-          severity: event.threatSeverity || 'unknown',
+          severity: event.threatSeverity || "unknown",
         });
       });
     }
@@ -435,19 +444,19 @@ export class SecurityMetricsService implements OnModuleInit {
   /**
    * Record incident metrics
    */
-  @OnEvent('security.incident.*')
+  @OnEvent("security.incident.*")
   recordIncidentEvent(event: any): void {
-    const eventType = event.type || 'unknown';
-    
-    if (eventType.includes('created')) {
-      this.recordMetric('incident.created', 1, {
-        severity: event.severity || 'unknown',
-        category: event.category || 'unknown',
+    const eventType = event.type || "unknown";
+
+    if (eventType.includes("created")) {
+      this.recordMetric("incident.created", 1, {
+        severity: event.severity || "unknown",
+        category: event.category || "unknown",
       });
-    } else if (eventType.includes('resolved')) {
-      this.recordMetric('incident.resolved', 1, {
-        severity: event.severity || 'unknown',
-        resolutionTime: event.resolutionTime?.toString() || '0',
+    } else if (eventType.includes("resolved")) {
+      this.recordMetric("incident.resolved", 1, {
+        severity: event.severity || "unknown",
+        resolutionTime: event.resolutionTime?.toString() || "0",
       });
     }
   }
@@ -459,17 +468,17 @@ export class SecurityMetricsService implements OnModuleInit {
     endpoint: string,
     method: string,
     responseTime: number,
-    statusCode: number
+    statusCode: number,
   ): void {
     // Record response time
-    this.recordMetric('http.response.time', responseTime, {
+    this.recordMetric("http.response.time", responseTime, {
       endpoint: endpoint,
       method: method,
       status: statusCode.toString(),
     });
 
     // Record request count
-    this.recordMetric('http.requests.total', 1, {
+    this.recordMetric("http.requests.total", 1, {
       endpoint: endpoint,
       method: method,
       status: statusCode.toString(),
@@ -477,7 +486,7 @@ export class SecurityMetricsService implements OnModuleInit {
 
     // Record error rate
     if (statusCode >= 400) {
-      this.recordMetric('http.errors.total', 1, {
+      this.recordMetric("http.errors.total", 1, {
         endpoint: endpoint,
         method: method,
         status: statusCode.toString(),
@@ -495,17 +504,17 @@ export class SecurityMetricsService implements OnModuleInit {
     country?: string;
   }): void {
     // Record network event
-    this.recordMetric('network.requests.total', 1, {
+    this.recordMetric("network.requests.total", 1, {
       sourceIP: event.sourceIP,
       blocked: event.blocked.toString(),
-      country: event.country || 'unknown',
+      country: event.country || "unknown",
     });
 
     // Record blocked requests
     if (event.blocked) {
-      this.recordMetric('network.blocked.total', 1, {
-        reason: event.reason || 'unknown',
-        country: event.country || 'unknown',
+      this.recordMetric("network.blocked.total", 1, {
+        reason: event.reason || "unknown",
+        country: event.country || "unknown",
       });
     }
   }
@@ -526,13 +535,13 @@ export class SecurityMetricsService implements OnModuleInit {
       for (const [metricId, dataPoints] of this.rawMetrics.entries()) {
         // Filter data points for the time window
         const windowData = dataPoints.filter(
-          dp => dp.timestamp >= windowStart && dp.timestamp <= windowEnd
+          (dp) => dp.timestamp >= windowStart && dp.timestamp <= windowEnd,
         );
 
         if (windowData.length === 0) continue;
 
         // Calculate aggregated values
-        const values = windowData.map(dp => dp.value);
+        const values = windowData.map((dp) => dp.value);
         const sortedValues = [...values].sort((a, b) => a - b);
 
         const aggregated: AggregatedMetric = {
@@ -558,23 +567,27 @@ export class SecurityMetricsService implements OnModuleInit {
         if (!this.aggregatedMetrics.has(aggregationKey)) {
           this.aggregatedMetrics.set(aggregationKey, []);
         }
-        
+
         const aggregations = this.aggregatedMetrics.get(aggregationKey)!;
         aggregations.push(aggregated);
-        
+
         // Keep only recent aggregations
-        const maxAggregations = period === AggregationPeriod.MINUTE ? 1440 : // 24 hours
-                                period === AggregationPeriod.HOUR ? 168 : // 7 days  
-                                period === AggregationPeriod.DAY ? 30 : // 30 days
-                                52; // 52 weeks
-        
+        const maxAggregations =
+          period === AggregationPeriod.MINUTE
+            ? 1440 // 24 hours
+            : period === AggregationPeriod.HOUR
+              ? 168 // 7 days
+              : period === AggregationPeriod.DAY
+                ? 30 // 30 days
+                : 52; // 52 weeks
+
         if (aggregations.length > maxAggregations) {
           aggregations.splice(0, aggregations.length - maxAggregations);
         }
       }
 
       this.performanceMetrics.aggregationsPerformed++;
-      
+
       const processingTime = Date.now() - startTime;
       this.performanceMetrics.processingTime.push(processingTime);
 
@@ -584,7 +597,6 @@ export class SecurityMetricsService implements OnModuleInit {
         processingTimeMs: processingTime,
         metricsProcessed: this.rawMetrics.size,
       });
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
       this.logger.error(`[${operationId}] Metrics aggregation failed`, {
@@ -599,25 +611,28 @@ export class SecurityMetricsService implements OnModuleInit {
   /**
    * Calculate trend analysis for metric
    */
-  private async calculateTrend(metricId: string, period: AggregationPeriod): Promise<{
-    direction: 'increasing' | 'decreasing' | 'stable';
+  private async calculateTrend(
+    metricId: string,
+    period: AggregationPeriod,
+  ): Promise<{
+    direction: "increasing" | "decreasing" | "stable";
     rate: number;
     confidence: number;
   }> {
     try {
       const aggregationKey = `${metricId}-${period}`;
       const aggregations = this.aggregatedMetrics.get(aggregationKey) || [];
-      
+
       if (aggregations.length < 2) {
-        return { direction: 'stable', rate: 0, confidence: 0 };
+        return { direction: "stable", rate: 0, confidence: 0 };
       }
 
       // Simple trend calculation using linear regression
       const recentAggregations = aggregations.slice(-10); // Last 10 periods
-      const values = recentAggregations.map(a => a.values.avg);
-      
+      const values = recentAggregations.map((a) => a.values.avg);
+
       if (values.length < 2) {
-        return { direction: 'stable', rate: 0, confidence: 0 };
+        return { direction: "stable", rate: 0, confidence: 0 };
       }
 
       const n = values.length;
@@ -629,19 +644,18 @@ export class SecurityMetricsService implements OnModuleInit {
       const slope = (n * xySum - xSum * ySum) / (n * xSqSum - xSum * xSum);
       const rate = Math.abs(slope) * 100; // Convert to percentage
 
-      let direction: 'increasing' | 'decreasing' | 'stable' = 'stable';
-      if (slope > 0.1) direction = 'increasing';
-      else if (slope < -0.1) direction = 'decreasing';
+      let direction: "increasing" | "decreasing" | "stable" = "stable";
+      if (slope > 0.1) direction = "increasing";
+      else if (slope < -0.1) direction = "decreasing";
 
       // Simple confidence calculation based on consistency
       const consistency = this.calculateConsistency(values);
       const confidence = Math.min(1, consistency * (rate / 100));
 
       return { direction, rate, confidence };
-
     } catch (error) {
       this.logger.debug(`Trend calculation failed for ${metricId}:`, error);
-      return { direction: 'stable', rate: 0, confidence: 0 };
+      return { direction: "stable", rate: 0, confidence: 0 };
     }
   }
 
@@ -650,13 +664,15 @@ export class SecurityMetricsService implements OnModuleInit {
    */
   private calculateConsistency(values: number[]): number {
     if (values.length < 2) return 0;
-    
+
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    const variance =
+      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      values.length;
     const stdDev = Math.sqrt(variance);
-    
+
     // Return inverse coefficient of variation as consistency measure
-    return mean === 0 ? 0 : Math.max(0, 1 - (stdDev / Math.abs(mean)));
+    return mean === 0 ? 0 : Math.max(0, 1 - stdDev / Math.abs(mean));
   }
 
   /**
@@ -669,8 +685,10 @@ export class SecurityMetricsService implements OnModuleInit {
       if (!threshold.enabled) continue;
 
       // Check cooldown period
-      if (threshold.lastAlertAt && 
-          (now - threshold.lastAlertAt.getTime()) < threshold.cooldownMs) {
+      if (
+        threshold.lastAlertAt &&
+        now - threshold.lastAlertAt.getTime() < threshold.cooldownMs
+      ) {
         continue;
       }
 
@@ -681,43 +699,46 @@ export class SecurityMetricsService implements OnModuleInit {
         // Get recent values within time window
         const windowStart = new Date(now - threshold.timeWindow);
         const recentValues = metricData
-          .filter(dp => dp.timestamp >= windowStart)
-          .map(dp => dp.value);
+          .filter((dp) => dp.timestamp >= windowStart)
+          .map((dp) => dp.value);
 
         if (recentValues.length === 0) continue;
 
         // Calculate value to compare against threshold
         const latestValue = recentValues[recentValues.length - 1];
-        const avgValue = recentValues.reduce((a, b) => a + b, 0) / recentValues.length;
-        const valueToCheck = threshold.metricId.includes('rate') ? avgValue : latestValue;
+        const avgValue =
+          recentValues.reduce((a, b) => a + b, 0) / recentValues.length;
+        const valueToCheck = threshold.metricId.includes("rate")
+          ? avgValue
+          : latestValue;
 
         // Check threshold condition
         let thresholdExceeded = false;
         switch (threshold.operator) {
-          case 'gt':
+          case "gt":
             thresholdExceeded = valueToCheck > threshold.value;
             break;
-          case 'lt':
+          case "lt":
             thresholdExceeded = valueToCheck < threshold.value;
             break;
-          case 'gte':
+          case "gte":
             thresholdExceeded = valueToCheck >= threshold.value;
             break;
-          case 'lte':
+          case "lte":
             thresholdExceeded = valueToCheck <= threshold.value;
             break;
-          case 'eq':
+          case "eq":
             thresholdExceeded = valueToCheck === threshold.value;
             break;
         }
 
         if (thresholdExceeded) {
           threshold.lastAlertAt = new Date();
-          
+
           this.performanceMetrics.alertsTriggered++;
-          
+
           // Emit alert event
-          this.eventEmitter.emit('security.metric.alert', {
+          this.eventEmitter.emit("security.metric.alert", {
             thresholdId,
             metricId: threshold.metricId,
             value: valueToCheck,
@@ -735,7 +756,6 @@ export class SecurityMetricsService implements OnModuleInit {
             severity: threshold.severity,
           });
         }
-
       } catch (error) {
         this.logger.error(`Alert threshold check failed: ${thresholdId}`, {
           thresholdId,
@@ -748,7 +768,9 @@ export class SecurityMetricsService implements OnModuleInit {
   /**
    * Generate security dashboard data
    */
-  async generateSecurityDashboard(period: AggregationPeriod = AggregationPeriod.HOUR): Promise<SecurityDashboard> {
+  async generateSecurityDashboard(
+    period: AggregationPeriod = AggregationPeriod.HOUR,
+  ): Promise<SecurityDashboard> {
     const operationId = `dashboard-${period}-${Date.now()}`;
 
     try {
@@ -774,7 +796,6 @@ export class SecurityMetricsService implements OnModuleInit {
       });
 
       return dashboard;
-
     } catch (error) {
       this.logger.error(`[${operationId}] Dashboard generation failed`, {
         operationId,
@@ -789,26 +810,28 @@ export class SecurityMetricsService implements OnModuleInit {
   /**
    * Generate overview metrics
    */
-  private async generateOverviewMetrics(): Promise<SecurityDashboard['overview']> {
+  private async generateOverviewMetrics(): Promise<
+    SecurityDashboard["overview"]
+  > {
     // Calculate security score based on various factors
     let securityScore = 100;
-    
+
     // Reduce score based on active threats
     const activeThreatCount = await this.getActiveThreatCount();
     securityScore -= Math.min(50, activeThreatCount * 5);
-    
+
     // Reduce score based on incidents
     const incidentCount = await this.getActiveIncidentCount();
     securityScore -= Math.min(30, incidentCount * 10);
-    
+
     // Ensure score is between 0-100
     securityScore = Math.max(0, Math.min(100, securityScore));
-    
+
     // Determine threat level
-    let threatLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
-    if (securityScore < 30) threatLevel = 'critical';
-    else if (securityScore < 50) threatLevel = 'high';
-    else if (securityScore < 80) threatLevel = 'medium';
+    let threatLevel: "low" | "medium" | "high" | "critical" = "low";
+    if (securityScore < 30) threatLevel = "critical";
+    else if (securityScore < 50) threatLevel = "high";
+    else if (securityScore < 80) threatLevel = "medium";
 
     return {
       securityScore,
@@ -822,16 +845,30 @@ export class SecurityMetricsService implements OnModuleInit {
   /**
    * Generate authentication metrics
    */
-  private async generateAuthenticationMetrics(period: AggregationPeriod): Promise<SecurityDashboard['authentication']> {
-    const totalAttempts = await this.getMetricValue('auth.attempts.total', period);
-    const successfulLogins = await this.getMetricValue('auth.login.success', period);
-    const failedLogins = await this.getMetricValue('auth.login.failure', period);
-    
+  private async generateAuthenticationMetrics(
+    period: AggregationPeriod,
+  ): Promise<SecurityDashboard["authentication"]> {
+    const totalAttempts = await this.getMetricValue(
+      "auth.attempts.total",
+      period,
+    );
+    const successfulLogins = await this.getMetricValue(
+      "auth.login.success",
+      period,
+    );
+    const failedLogins = await this.getMetricValue(
+      "auth.login.failure",
+      period,
+    );
+
     return {
       totalAttempts: totalAttempts.sum,
       successfulLogins: successfulLogins.sum,
       failedLogins: failedLogins.sum,
-      successRate: totalAttempts.sum > 0 ? (successfulLogins.sum / totalAttempts.sum) * 100 : 100,
+      successRate:
+        totalAttempts.sum > 0
+          ? (successfulLogins.sum / totalAttempts.sum) * 100
+          : 100,
       uniqueUsers: await this.getUniqueUserCount(period),
       suspiciousAttempts: failedLogins.sum, // Simplified - failed logins as suspicious
     };
@@ -840,10 +877,15 @@ export class SecurityMetricsService implements OnModuleInit {
   /**
    * Generate threat detection metrics
    */
-  private async generateThreatDetectionMetrics(period: AggregationPeriod): Promise<SecurityDashboard['threatDetection']> {
-    const threatsDetected = await this.getMetricValue('threat.detected', period);
-    const riskScore = await this.getMetricValue('threat.risk.score', period);
-    
+  private async generateThreatDetectionMetrics(
+    period: AggregationPeriod,
+  ): Promise<SecurityDashboard["threatDetection"]> {
+    const threatsDetected = await this.getMetricValue(
+      "threat.detected",
+      period,
+    );
+    const riskScore = await this.getMetricValue("threat.risk.score", period);
+
     return {
       threatsDetected: threatsDetected.sum,
       threatsByCategory: await this.getThreatsByCategory(period),
@@ -856,30 +898,46 @@ export class SecurityMetricsService implements OnModuleInit {
   /**
    * Generate performance metrics
    */
-  private async generatePerformanceMetrics(period: AggregationPeriod): Promise<SecurityDashboard['performance']> {
-    const responseTime = await this.getMetricValue('http.response.time', period);
-    const requests = await this.getMetricValue('http.requests.total', period);
-    const errors = await this.getMetricValue('http.errors.total', period);
-    
+  private async generatePerformanceMetrics(
+    period: AggregationPeriod,
+  ): Promise<SecurityDashboard["performance"]> {
+    const responseTime = await this.getMetricValue(
+      "http.response.time",
+      period,
+    );
+    const requests = await this.getMetricValue("http.requests.total", period);
+    const errors = await this.getMetricValue("http.errors.total", period);
+
     return {
       responseTime: {
         avg: responseTime.avg,
         p95: responseTime.p95,
         p99: responseTime.p99,
       },
-      throughput: requests.sum / this.getWindowSizeMs(period) * 1000, // Requests per second
+      throughput: (requests.sum / this.getWindowSizeMs(period)) * 1000, // Requests per second
       errorRate: requests.sum > 0 ? (errors.sum / requests.sum) * 100 : 0,
-      availabilityScore: Math.max(0, 100 - (errors.sum / Math.max(1, requests.sum)) * 100),
+      availabilityScore: Math.max(
+        0,
+        100 - (errors.sum / Math.max(1, requests.sum)) * 100,
+      ),
     };
   }
 
   /**
    * Generate network security metrics
    */
-  private async generateNetworkMetrics(period: AggregationPeriod): Promise<SecurityDashboard['network']> {
-    const totalRequests = await this.getMetricValue('network.requests.total', period);
-    const blockedRequests = await this.getMetricValue('network.blocked.total', period);
-    
+  private async generateNetworkMetrics(
+    period: AggregationPeriod,
+  ): Promise<SecurityDashboard["network"]> {
+    const totalRequests = await this.getMetricValue(
+      "network.requests.total",
+      period,
+    );
+    const blockedRequests = await this.getMetricValue(
+      "network.blocked.total",
+      period,
+    );
+
     return {
       totalRequests: totalRequests.sum,
       blockedRequests: blockedRequests.sum,
@@ -892,7 +950,9 @@ export class SecurityMetricsService implements OnModuleInit {
   /**
    * Generate compliance metrics
    */
-  private async generateComplianceMetrics(): Promise<SecurityDashboard['compliance']> {
+  private async generateComplianceMetrics(): Promise<
+    SecurityDashboard["compliance"]
+  > {
     return {
       auditTrailCompleteness: 100, // Assuming full audit trail
       dataRetentionCompliance: 100, // Assuming compliant retention
@@ -904,7 +964,10 @@ export class SecurityMetricsService implements OnModuleInit {
   /**
    * Get aggregated metric value for period
    */
-  private async getMetricValue(metricId: string, period: AggregationPeriod): Promise<{
+  private async getMetricValue(
+    metricId: string,
+    period: AggregationPeriod,
+  ): Promise<{
     sum: number;
     avg: number;
     count: number;
@@ -913,11 +976,11 @@ export class SecurityMetricsService implements OnModuleInit {
   }> {
     const aggregationKey = `${metricId}-${period}`;
     const aggregations = this.aggregatedMetrics.get(aggregationKey) || [];
-    
+
     if (aggregations.length === 0) {
       return { sum: 0, avg: 0, count: 0, p95: 0, p99: 0 };
     }
-    
+
     // Get the latest aggregation
     const latest = aggregations[aggregations.length - 1];
     return {
@@ -952,7 +1015,9 @@ export class SecurityMetricsService implements OnModuleInit {
     return 0; // Placeholder
   }
 
-  private async getThreatsByCategory(period: AggregationPeriod): Promise<Record<string, number>> {
+  private async getThreatsByCategory(
+    period: AggregationPeriod,
+  ): Promise<Record<string, number>> {
     // This would analyze threat detection events by category
     return {}; // Placeholder
   }
@@ -972,12 +1037,16 @@ export class SecurityMetricsService implements OnModuleInit {
     return 0; // Placeholder
   }
 
-  private async getSuspiciousIPCount(period: AggregationPeriod): Promise<number> {
+  private async getSuspiciousIPCount(
+    period: AggregationPeriod,
+  ): Promise<number> {
     // This would analyze network events for suspicious IPs
     return 0; // Placeholder
   }
 
-  private async getGeoDistribution(period: AggregationPeriod): Promise<Record<string, number>> {
+  private async getGeoDistribution(
+    period: AggregationPeriod,
+  ): Promise<Record<string, number>> {
     // This would analyze geographic distribution of requests
     return {}; // Placeholder
   }
@@ -988,32 +1057,124 @@ export class SecurityMetricsService implements OnModuleInit {
   private initializeMetricDefinitions(): void {
     const definitions = [
       // Authentication metrics
-      { id: 'auth.attempts.total', name: 'Authentication Attempts', category: SecurityMetricCategory.AUTHENTICATION, type: MetricType.COUNTER, description: 'Total authentication attempts' },
-      { id: 'auth.login.success', name: 'Successful Logins', category: SecurityMetricCategory.AUTHENTICATION, type: MetricType.COUNTER, description: 'Successful login attempts' },
-      { id: 'auth.login.failure', name: 'Failed Logins', category: SecurityMetricCategory.AUTHENTICATION, type: MetricType.COUNTER, description: 'Failed login attempts' },
-      { id: 'auth.response.time', name: 'Auth Response Time', category: SecurityMetricCategory.AUTHENTICATION, type: MetricType.HISTOGRAM, description: 'Authentication response time', unit: 'ms' },
-      
+      {
+        id: "auth.attempts.total",
+        name: "Authentication Attempts",
+        category: SecurityMetricCategory.AUTHENTICATION,
+        type: MetricType.COUNTER,
+        description: "Total authentication attempts",
+      },
+      {
+        id: "auth.login.success",
+        name: "Successful Logins",
+        category: SecurityMetricCategory.AUTHENTICATION,
+        type: MetricType.COUNTER,
+        description: "Successful login attempts",
+      },
+      {
+        id: "auth.login.failure",
+        name: "Failed Logins",
+        category: SecurityMetricCategory.AUTHENTICATION,
+        type: MetricType.COUNTER,
+        description: "Failed login attempts",
+      },
+      {
+        id: "auth.response.time",
+        name: "Auth Response Time",
+        category: SecurityMetricCategory.AUTHENTICATION,
+        type: MetricType.HISTOGRAM,
+        description: "Authentication response time",
+        unit: "ms",
+      },
+
       // Threat detection metrics
-      { id: 'threat.detected', name: 'Threats Detected', category: SecurityMetricCategory.THREAT_DETECTION, type: MetricType.COUNTER, description: 'Security threats detected' },
-      { id: 'threat.risk.score', name: 'Threat Risk Score', category: SecurityMetricCategory.THREAT_DETECTION, type: MetricType.GAUGE, description: 'Risk score of detected threats' },
-      { id: 'threat.rules.triggered', name: 'Detection Rules Triggered', category: SecurityMetricCategory.THREAT_DETECTION, type: MetricType.COUNTER, description: 'Number of detection rules triggered' },
-      { id: 'threat.response.action', name: 'Response Actions', category: SecurityMetricCategory.THREAT_DETECTION, type: MetricType.COUNTER, description: 'Automated response actions taken' },
-      
+      {
+        id: "threat.detected",
+        name: "Threats Detected",
+        category: SecurityMetricCategory.THREAT_DETECTION,
+        type: MetricType.COUNTER,
+        description: "Security threats detected",
+      },
+      {
+        id: "threat.risk.score",
+        name: "Threat Risk Score",
+        category: SecurityMetricCategory.THREAT_DETECTION,
+        type: MetricType.GAUGE,
+        description: "Risk score of detected threats",
+      },
+      {
+        id: "threat.rules.triggered",
+        name: "Detection Rules Triggered",
+        category: SecurityMetricCategory.THREAT_DETECTION,
+        type: MetricType.COUNTER,
+        description: "Number of detection rules triggered",
+      },
+      {
+        id: "threat.response.action",
+        name: "Response Actions",
+        category: SecurityMetricCategory.THREAT_DETECTION,
+        type: MetricType.COUNTER,
+        description: "Automated response actions taken",
+      },
+
       // Incident metrics
-      { id: 'incident.created', name: 'Incidents Created', category: SecurityMetricCategory.INCIDENT_RESPONSE, type: MetricType.COUNTER, description: 'Security incidents created' },
-      { id: 'incident.resolved', name: 'Incidents Resolved', category: SecurityMetricCategory.INCIDENT_RESPONSE, type: MetricType.COUNTER, description: 'Security incidents resolved' },
-      
+      {
+        id: "incident.created",
+        name: "Incidents Created",
+        category: SecurityMetricCategory.INCIDENT_RESPONSE,
+        type: MetricType.COUNTER,
+        description: "Security incidents created",
+      },
+      {
+        id: "incident.resolved",
+        name: "Incidents Resolved",
+        category: SecurityMetricCategory.INCIDENT_RESPONSE,
+        type: MetricType.COUNTER,
+        description: "Security incidents resolved",
+      },
+
       // Performance metrics
-      { id: 'http.response.time', name: 'HTTP Response Time', category: SecurityMetricCategory.SYSTEM_PERFORMANCE, type: MetricType.HISTOGRAM, description: 'HTTP response time', unit: 'ms' },
-      { id: 'http.requests.total', name: 'HTTP Requests', category: SecurityMetricCategory.SYSTEM_PERFORMANCE, type: MetricType.COUNTER, description: 'Total HTTP requests' },
-      { id: 'http.errors.total', name: 'HTTP Errors', category: SecurityMetricCategory.SYSTEM_PERFORMANCE, type: MetricType.COUNTER, description: 'Total HTTP errors' },
-      
+      {
+        id: "http.response.time",
+        name: "HTTP Response Time",
+        category: SecurityMetricCategory.SYSTEM_PERFORMANCE,
+        type: MetricType.HISTOGRAM,
+        description: "HTTP response time",
+        unit: "ms",
+      },
+      {
+        id: "http.requests.total",
+        name: "HTTP Requests",
+        category: SecurityMetricCategory.SYSTEM_PERFORMANCE,
+        type: MetricType.COUNTER,
+        description: "Total HTTP requests",
+      },
+      {
+        id: "http.errors.total",
+        name: "HTTP Errors",
+        category: SecurityMetricCategory.SYSTEM_PERFORMANCE,
+        type: MetricType.COUNTER,
+        description: "Total HTTP errors",
+      },
+
       // Network security metrics
-      { id: 'network.requests.total', name: 'Network Requests', category: SecurityMetricCategory.NETWORK_SECURITY, type: MetricType.COUNTER, description: 'Total network requests' },
-      { id: 'network.blocked.total', name: 'Blocked Requests', category: SecurityMetricCategory.NETWORK_SECURITY, type: MetricType.COUNTER, description: 'Blocked network requests' },
+      {
+        id: "network.requests.total",
+        name: "Network Requests",
+        category: SecurityMetricCategory.NETWORK_SECURITY,
+        type: MetricType.COUNTER,
+        description: "Total network requests",
+      },
+      {
+        id: "network.blocked.total",
+        name: "Blocked Requests",
+        category: SecurityMetricCategory.NETWORK_SECURITY,
+        type: MetricType.COUNTER,
+        description: "Blocked network requests",
+      },
     ];
 
-    definitions.forEach(def => {
+    definitions.forEach((def) => {
       this.metricDefinitions.set(def.id, {
         name: def.name,
         category: def.category,
@@ -1032,38 +1193,38 @@ export class SecurityMetricsService implements OnModuleInit {
   private initializeAlertThresholds(): void {
     const thresholds: AlertThreshold[] = [
       {
-        thresholdId: 'high-auth-failure-rate',
-        metricId: 'auth.login.failure',
-        operator: 'gt',
+        thresholdId: "high-auth-failure-rate",
+        metricId: "auth.login.failure",
+        operator: "gt",
         value: 10, // More than 10 failures per minute
         timeWindow: 60000, // 1 minute
-        severity: 'high',
+        severity: "high",
         enabled: true,
         cooldownMs: 300000, // 5 minutes
       },
       {
-        thresholdId: 'critical-threat-detected',
-        metricId: 'threat.risk.score',
-        operator: 'gt',
+        thresholdId: "critical-threat-detected",
+        metricId: "threat.risk.score",
+        operator: "gt",
         value: 80, // Risk score > 80
-        timeWindow: 60000, // 1 minute  
-        severity: 'critical',
+        timeWindow: 60000, // 1 minute
+        severity: "critical",
         enabled: true,
         cooldownMs: 60000, // 1 minute
       },
       {
-        thresholdId: 'high-error-rate',
-        metricId: 'http.errors.total',
-        operator: 'gt',
+        thresholdId: "high-error-rate",
+        metricId: "http.errors.total",
+        operator: "gt",
         value: 50, // More than 50 errors per minute
         timeWindow: 60000, // 1 minute
-        severity: 'medium',
+        severity: "medium",
         enabled: true,
         cooldownMs: 300000, // 5 minutes
       },
     ];
 
-    thresholds.forEach(threshold => {
+    thresholds.forEach((threshold) => {
       this.alertThresholds.set(threshold.thresholdId, threshold);
     });
 
@@ -1143,7 +1304,7 @@ export class SecurityMetricsService implements OnModuleInit {
       },
       overview: {
         securityScore: 0,
-        threatLevel: 'medium',
+        threatLevel: "medium",
         activeThreatCount: 0,
         incidentCount: 0,
         systemHealth: 0,
@@ -1199,8 +1360,10 @@ export class SecurityMetricsService implements OnModuleInit {
 
       for (const [metricId, dataPoints] of this.rawMetrics.entries()) {
         const originalCount = dataPoints.length;
-        const filteredPoints = dataPoints.filter(dp => dp.timestamp > cutoffTime);
-        
+        const filteredPoints = dataPoints.filter(
+          (dp) => dp.timestamp > cutoffTime,
+        );
+
         if (filteredPoints.length !== originalCount) {
           this.rawMetrics.set(metricId, filteredPoints);
           metricsCleanedUp += originalCount - filteredPoints.length;
@@ -1208,15 +1371,14 @@ export class SecurityMetricsService implements OnModuleInit {
       }
 
       const cleanupTime = Date.now() - startTime;
-      this.logger.log('Security metrics cleanup completed', {
+      this.logger.log("Security metrics cleanup completed", {
         metricsCleanedUp,
         cleanupTimeMs: cleanupTime,
         activeMetrics: this.rawMetrics.size,
         aggregatedMetrics: this.aggregatedMetrics.size,
       });
-
     } catch (error) {
-      this.logger.error('Security metrics cleanup failed', {
+      this.logger.error("Security metrics cleanup failed", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -1231,9 +1393,11 @@ export class SecurityMetricsService implements OnModuleInit {
     alertsTriggered: number;
     averageProcessingTime: number;
   } {
-    const avgProcessingTime = this.performanceMetrics.processingTime.length > 0 ?
-      this.performanceMetrics.processingTime.reduce((a, b) => a + b, 0) / this.performanceMetrics.processingTime.length :
-      0;
+    const avgProcessingTime =
+      this.performanceMetrics.processingTime.length > 0
+        ? this.performanceMetrics.processingTime.reduce((a, b) => a + b, 0) /
+          this.performanceMetrics.processingTime.length
+        : 0;
 
     return {
       metricsCollected: this.performanceMetrics.metricsCollected,

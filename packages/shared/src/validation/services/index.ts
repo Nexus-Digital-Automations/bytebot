@@ -9,12 +9,12 @@
  * @author Enterprise Security Validation Team
  */
 
-export { ValidationConfigurationService } from './validation-configuration.service';
-export { ValidationProfileManager } from './validation-profile-manager.service';
-export { SecurityThreatDetector } from './security-threat-detector.service';
-export { ValidationAuditLogger } from './validation-audit-logger.service';
-export { ValidationMetricsCollector } from './validation-metrics-collector.service';
-export { ValidationCacheService } from './validation-cache.service';
+export { ValidationConfigurationService } from "./validation-configuration.service";
+export { ValidationProfileManager } from "./validation-profile-manager.service";
+export { SecurityThreatDetector } from "./security-threat-detector.service";
+export { ValidationAuditLogger } from "./validation-audit-logger.service";
+export { ValidationMetricsCollector } from "./validation-metrics-collector.service";
+export { ValidationCacheService } from "./validation-cache.service";
 
 // Export types and interfaces
-export * from './types';
+export * from "./types";

@@ -3,6 +3,7 @@ export * from "./utils/messageContent.utils";
 export * from "./utils/computerAction.utils";
 export * from "./types/computerAction.types";
 export * from "./types/security.types";
+export * from "./types/agent.types";
 export * from "./utils/security.utils";
 
 // Enhanced Security Validation Framework
@@ -15,3 +16,4 @@ export * from "./middleware/file-security.middleware";
 
 // Enhanced Security Services
 export * from "./services/enhanced-security.service";
+export * from "./services/output-encoding.service";

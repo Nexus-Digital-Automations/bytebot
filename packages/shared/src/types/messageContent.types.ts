@@ -7,6 +7,7 @@ export enum MessageContentType {
   Document = "document",
   ToolUse = "tool_use",
   ToolResult = "tool_result",
+  ComputerToolUse = "computer_tool_use",
   Thinking = "thinking",
   RedactedThinking = "redacted_thinking",
   UserAction = "user_action",
