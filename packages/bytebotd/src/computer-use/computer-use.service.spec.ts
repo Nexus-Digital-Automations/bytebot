@@ -13,11 +13,6 @@
  * @version 1.0.0
  */
 
- 
- 
- 
- 
-
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   ComputerUseService,
@@ -609,7 +604,7 @@ describe('ComputerUseService', () => {
           text: 'Hello World',
         };
 
-        mockNutService.typeText.mockResolvedValue({ success: true });
+        mockNutService.typeText.mockResolvedValue(undefined);
 
         await service.action(action);
 
@@ -627,7 +622,7 @@ describe('ComputerUseService', () => {
           sensitive: true,
         };
 
-        mockNutService.typeText.mockResolvedValue({ success: true });
+        mockNutService.typeText.mockResolvedValue(undefined);
 
         await service.action(action);
 
@@ -645,7 +640,7 @@ describe('ComputerUseService', () => {
           text: 'Clipboard content',
         };
 
-        mockNutService.pasteText.mockResolvedValue({ success: true });
+        mockNutService.pasteText.mockResolvedValue(undefined);
 
         await service.action(action);
 
@@ -874,7 +869,7 @@ describe('ComputerUseService', () => {
       it('should handle unsupported application', async () => {
         const action = {
           action: 'application' as const,
-          application: 'unsupported-app' as 'firefox' | 'chrome' | 'safari',
+          application: 'unsupported-app' as any,
         };
 
         await expect(service.action(action)).rejects.toThrow(
@@ -1128,7 +1123,7 @@ describe('ComputerUseService', () => {
               confidence: 0.9,
             },
           ],
-          method: 'ANE',
+          method: 'ane' as const,
           processingTimeMs: 50,
         };
 
@@ -1142,7 +1137,7 @@ describe('ComputerUseService', () => {
           confidence: 0.95,
           boundingBoxes: expect.any(Array),
           processingTimeMs: expect.any(Number),
-          method: 'ANE',
+          method: 'ane',
           operationId: expect.any(String),
           language: 'en',
         });
@@ -1206,7 +1201,7 @@ describe('ComputerUseService', () => {
         mockCuaVisionService.performOcr.mockResolvedValue({
           text: 'text',
           confidence: 0.9,
-          method: 'CPU',
+          method: 'cpu' as const,
           processingTimeMs: 100,
         });
 
@@ -1243,6 +1238,8 @@ describe('ComputerUseService', () => {
               confidence: 0.95,
             },
           ],
+          processingTimeMs: 100,
+          method: 'cpu' as const,
         };
 
         mockNutService.screendump.mockResolvedValue(Buffer.from('screenshot'));
@@ -1283,6 +1280,8 @@ describe('ComputerUseService', () => {
           text: 'This has casesensitive text',
           confidence: 0.9,
           boundingBoxes: [],
+          processingTimeMs: 80,
+          method: 'cpu' as const,
         };
 
         mockNutService.screendump.mockResolvedValue(Buffer.from('screenshot'));
@@ -1314,6 +1313,8 @@ describe('ComputerUseService', () => {
               confidence: 0.9,
             },
           ],
+          processingTimeMs: 120,
+          method: 'ane' as const,
         };
 
         mockNutService.screendump.mockResolvedValue(Buffer.from('screenshot'));
@@ -1335,6 +1336,8 @@ describe('ComputerUseService', () => {
           text: 'This uses fallback search',
           confidence: 0.8,
           // No boundingBoxes provided
+          processingTimeMs: 90,
+          method: 'cached' as const,
         };
 
         mockNutService.screendump.mockResolvedValue(Buffer.from('screenshot'));
@@ -1393,6 +1396,8 @@ describe('ComputerUseService', () => {
           text: 'no match',
           confidence: 0.9,
           boundingBoxes: [],
+          processingTimeMs: 75,
+          method: 'cpu' as const,
         });
 
         await service.action(action);
@@ -1446,7 +1451,8 @@ describe('ComputerUseService', () => {
         const ocrResult = {
           text: 'OCR text',
           confidence: 0.9,
-          method: 'ANE',
+          method: 'ane' as const,
+          processingTimeMs: 60,
         };
 
         mockNutService.screendump.mockResolvedValue(
@@ -1478,8 +1484,11 @@ describe('ComputerUseService', () => {
 
         const textDetectionResult = {
           regions: [
-            { text: 'detected text', x: 10, y: 20, width: 100, height: 15 },
+            { text: 'detected text', x: 10, y: 20, width: 100, height: 15, confidence: 0.9 },
           ],
+          detected: true,
+          processingTimeMs: 45,
+          method: 'ane' as const,
         };
 
         mockNutService.screendump.mockResolvedValue(
@@ -1577,8 +1586,8 @@ describe('ComputerUseService', () => {
           includeTextDetection: true,
         };
 
-        const ocrResult = { text: 'OCR', confidence: 0.9, method: 'ANE' };
-        const textDetectionResult = { regions: [{ text: 'region' }] };
+        const ocrResult = { text: 'OCR', confidence: 0.9, method: 'ane' as const, processingTimeMs: 55 };
+        const textDetectionResult = { regions: [{ text: 'region', x: 0, y: 0, width: 50, height: 20, confidence: 0.85 }], detected: true, processingTimeMs: 40, method: 'ane' as const };
 
         mockNutService.screendump.mockResolvedValue(
           Buffer.from('screenshot-data'),
@@ -1689,7 +1698,7 @@ describe('ComputerUseService', () => {
       it('should handle unknown action types', async () => {
         const invalidAction = {
           action: 'invalid_action',
-        } as MoveMouseAction;
+        } as any;
 
         await expect(service.action(invalidAction)).rejects.toThrow(
           'Unsupported computer action',
@@ -1720,9 +1729,9 @@ describe('ComputerUseService', () => {
         };
 
         mockNutService.screendump.mockResolvedValue(Buffer.from('test'));
-        mockPerformanceService.recordMetric.mockRejectedValue(
-          new Error('Metrics service down'),
-        );
+        mockPerformanceService.recordMetric.mockImplementation(() => {
+          throw new Error('Metrics service down');
+        });
 
         // Should complete successfully despite metrics error
         const result = await service.action(action);
@@ -1786,7 +1795,8 @@ describe('ComputerUseService', () => {
       mockCuaVisionService.performOcr.mockResolvedValue({
         text: 'OCR success',
         confidence: 0.9,
-        method: 'ANE',
+        method: 'ane' as const,
+        processingTimeMs: 65,
       });
       // Text detection fails
       mockCuaVisionService.detectText.mockRejectedValue(

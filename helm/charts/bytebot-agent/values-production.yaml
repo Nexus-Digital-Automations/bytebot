@@ -1,0 +1,407 @@
+# Production Configuration for Bytebot Agent Helm Chart
+# Enterprise-grade settings optimized for production deployment
+# Security: Maximum security with comprehensive monitoring
+
+# Global Configuration
+global:
+  environment: "production"
+  imageTag: "latest"
+  pullPolicy: "IfNotPresent"
+
+# Replica Configuration for High Availability
+replicaCount: 3
+
+# Container Image Configuration
+image:
+  repository: ghcr.io/bytebot-ai/bytebot-agent
+  tag: "latest" # Override with specific version in production
+  pullPolicy: IfNotPresent
+  imagePullSecrets: []
+
+# Service Configuration
+service:
+  type: ClusterIP
+  port: 9991
+  targetPort: 9991
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9464"
+    prometheus.io/path: "/metrics"
+
+# Resource Configuration for Production Workloads
+resources:
+  limits:
+    memory: "4Gi"
+    cpu: "2000m"
+    ephemeral-storage: "10Gi"
+  requests:
+    memory: "2Gi"
+    cpu: "1000m"
+    ephemeral-storage: "5Gi"
+
+# Horizontal Pod Autoscaler
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  scaleUpPolicy:
+    stabilizationWindowSeconds: 120
+    policies:
+    - type: Percent
+      value: 50
+      periodSeconds: 60
+  scaleDownPolicy:
+    stabilizationWindowSeconds: 300
+    policies:
+    - type: Percent
+      value: 25
+      periodSeconds: 60
+
+# Application Configuration
+config:
+  # Database Configuration
+  database:
+    maxConnections: 50
+    connectionTimeout: 30000
+    poolSize: 20
+    idleTimeout: 30000
+    
+  # API Configuration
+  api:
+    rateLimitWindow: 900000  # 15 minutes
+    rateLimitMaxRequests: 100
+    corsOrigins:
+      - "https://app.bytebot.ai"
+      - "https://api.bytebot.ai"
+      - "https://dashboard.bytebot.ai"
+    bodyParserLimit: "50mb"
+    requestTimeout: 30000
+    
+  # Security Configuration (non-sensitive)
+  security:
+    jwtExpiresIn: "15m"          # Short expiry for security
+    jwtRefreshExpiresIn: "7d"
+    
+  # Service URLs
+  services:
+    bytebotDesktopUrl: "http://bytebot-desktop:9990"
+    llmProxyUrl: "http://bytebot-llm-proxy:8000"
+    analyticsEndpoint: "https://analytics.bytebot.ai/api/events"
+    
+  # Feature Flags (Full production features)
+  features:
+    authentication: true
+    rateLimiting: true
+    metricsCollection: true
+    healthChecks: true
+    circuitBreaker: true
+    
+  # Monitoring & Observability
+  monitoring:
+    prometheusMetricsPort: 9464
+    logLevel: "warn"             # Minimal noise in production
+    logFormat: "json"            # Structured logs for aggregation
+    distributedTracing: true
+    jaegerEndpoint: "http://jaeger-collector:14268/api/traces"
+    
+  # Performance Settings
+  performance:
+    gracefulShutdownTimeout: 30000  # Allow time for connection drain
+    
+  # Circuit Breaker Settings
+  circuitBreaker:
+    failureThreshold: 50         # 50% failure rate
+    timeout: 60000              # 60 second timeout
+    resetTimeout: 30000         # 30 second reset
+    
+  # Health Check Settings
+  healthCheck:
+    timeout: 5000               # 5 second timeout
+    interval: 30000             # 30 second interval
+    
+  # Development Features (Disabled in production)
+  development:
+    enableSwagger: false        # No API docs in production
+    swaggerPath: "/api/docs"
+    debugMode: false            # No debug features
+
+# Secrets Configuration
+secrets:
+  # JWT and encryption secrets (set during deployment)
+  jwtSecret: ""                 # Must be at least 64 characters
+  encryptionKey: ""             # Must be at least 64 characters
+  
+  # Database URL with credentials
+  databaseUrl: ""               # PostgreSQL connection string with credentials
+  
+  # External service secrets
+  analyticsApiKey: ""           # Analytics service API key
+  webhookSecret: ""             # Webhook validation secret
+  
+  # Secrets rotation configuration
+  rotationEnabled: true
+  rotationInterval: "30d"
+  rotationPolicy: "automatic"
+
+# Legacy API Keys (for backward compatibility)
+apiKeys:
+  anthropic:
+    useExisting: true
+    secretName: "bytebot-llm-secrets"
+    secretKey: "anthropic-api-key"
+    value: ""
+  openai:
+    useExisting: true
+    secretName: "bytebot-llm-secrets"
+    secretKey: "openai-api-key"
+    value: ""
+  gemini:
+    useExisting: true
+    secretName: "bytebot-llm-secrets"
+    secretKey: "gemini-api-key"
+    value: ""
+
+# TLS Configuration
+tls:
+  enabled: true
+  certificate: ""               # Base64 encoded TLS certificate
+  privateKey: ""                # Base64 encoded private key
+  caCertificate: ""            # Base64 encoded CA certificate (optional)
+  certificateExpiry: ""        # Certificate expiry date
+  autoRenewal: true            # Enable automatic certificate renewal
+
+# Image Pull Credentials
+imageCredentials:
+  registry: ""                 # Private registry URL
+  username: ""                 # Registry username
+  password: ""                 # Registry password
+
+# Health Check Probes Configuration
+healthCheck:
+  liveness:
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
+  readiness:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
+  startup:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 30
+
+# Security Context Configuration
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    add: []
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+# Persistence Configuration
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: "fast-ssd"      # Use fast storage class
+  accessMode: ReadWriteOnce
+  mountPath: "/app/data"
+
+# Service Account Configuration
+serviceAccount:
+  create: true
+  name: ""
+  annotations:
+    eks.amazonaws.com/role-arn: ""  # AWS IAM role for service account (if using EKS)
+
+# RBAC Configuration
+rbac:
+  create: true
+  rules:
+    - apiGroups: [""]
+      resources: ["secrets", "configmaps"]
+      verbs: ["get", "list", "watch"]
+    - apiGroups: [""]
+      resources: ["pods"]
+      verbs: ["get", "list"]
+
+# Network Policy
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: bytebot-ui
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: bytebot-desktop
+      - namespaceSelector:
+          matchLabels:
+            name: ingress-system
+      ports:
+      - protocol: TCP
+        port: 9991
+  egress:
+    - to: []
+      ports:
+      - protocol: TCP
+        port: 5432  # PostgreSQL
+      - protocol: TCP
+        port: 443   # HTTPS
+      - protocol: TCP
+        port: 80    # HTTP
+      - protocol: UDP
+        port: 53    # DNS
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+  # maxUnavailable: 1  # Alternative to minAvailable
+
+# Ingress Configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.bytebot.ai,https://dashboard.bytebot.ai"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+  hosts:
+    - host: api.bytebot.ai
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: bytebot-api-tls
+      hosts:
+        - api.bytebot.ai
+
+# Node Selection and Affinity
+nodeSelector:
+  node-type: "application"
+
+tolerations:
+  - key: "application-nodes"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - bytebot-agent
+        topologyKey: kubernetes.io/hostname
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: node-type
+          operator: In
+          values:
+          - application
+        - key: kubernetes.io/arch
+          operator: In
+          values:
+          - amd64
+
+# DNS Configuration
+dnsConfig:
+  options:
+  - name: ndots
+    value: "2"
+  - name: edns0
+
+# Monitoring and Metrics
+monitoring:
+  serviceMonitor:
+    enabled: true
+    namespace: monitoring
+    labels:
+      release: prometheus
+    interval: 30s
+    scrapeTimeout: 10s
+    path: /metrics
+    port: metrics
+
+# Backup Configuration
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  retention: 30          # Keep 30 days of backups
+  storage:
+    type: s3
+    bucket: "bytebot-backups"
+    region: "us-west-2"
+
+# Disaster Recovery
+disasterRecovery:
+  enabled: true
+  replicationFactor: 3
+  backupRegions:
+    - "us-east-1"
+    - "eu-west-1"
+
+# Compliance and Auditing
+compliance:
+  enabled: true
+  auditLogging: true
+  dataEncryption: true
+  accessLogging: true
+  retentionPeriod: "7y"  # 7 years for compliance
+
+# External Dependencies
+postgresql:
+  enabled: false  # Use external managed PostgreSQL in production
+
+externalDatabase:
+  host: "bytebot-prod-db.cluster-xyz.us-west-2.rds.amazonaws.com"
+  port: 5432
+  database: "bytebotdb"
+  username: "bytebot_app"
+  existingSecret: "bytebot-db-credentials"
+  existingSecretPasswordKey: "password"
+
+# Legacy Configuration (for backward compatibility)
+env: {}
+
+# Additional Labels and Annotations
+labels:
+  environment: "production"
+  team: "platform"
+  cost-center: "engineering"
+  
+annotations:
+  deployment.kubernetes.io/revision-history-limit: "10"
+  config.bytebot.ai/environment: "production"
+  config.bytebot.ai/compliance-level: "high"

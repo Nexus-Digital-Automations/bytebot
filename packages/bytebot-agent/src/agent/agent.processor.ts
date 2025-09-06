@@ -1,7 +1,13 @@
 import { TasksService } from '../tasks/tasks.service';
 import { MessagesService } from '../messages/messages.service';
 import { Injectable, Logger } from '@nestjs/common';
-import { Role, Task, TaskPriority, TaskStatus, TaskType } from '@prisma/client';
+import {
+  MessageRole,
+  Task,
+  TaskPriority,
+  TaskStatus,
+  TaskType,
+} from '@prisma/client';
 import { AnthropicService } from '../anthropic/anthropic.service';
 import {
   isComputerToolUseContentBlock,
@@ -160,7 +166,7 @@ export class AgentProcessor {
                 taskId,
                 summaryId: null,
                 userId: null,
-                role: Role.USER,
+                role: MessageRole.USER,
                 content: [
                   {
                     type: MessageContentType.Text,
@@ -220,7 +226,7 @@ export class AgentProcessor {
 
       await this.messagesService.create({
         content: messageContentBlocks,
-        role: Role.ASSISTANT,
+        role: MessageRole.ASSISTANT,
         taskId,
       });
 
@@ -244,7 +250,7 @@ export class AgentProcessor {
                 taskId,
                 summaryId: null,
                 userId: null,
-                role: Role.USER,
+                role: MessageRole.USER,
                 content: [
                   {
                     type: MessageContentType.Text,
@@ -317,7 +323,7 @@ export class AgentProcessor {
           await this.tasksService.create({
             description: block.input.description,
             type,
-            createdBy: Role.ASSISTANT,
+            createdBy: MessageRole.ASSISTANT,
             ...(block.input.scheduledFor && {
               scheduledFor: new Date(block.input.scheduledFor),
             }),
@@ -357,7 +363,7 @@ export class AgentProcessor {
       if (generatedToolResults.length > 0) {
         await this.messagesService.create({
           content: generatedToolResults,
-          role: Role.USER,
+          role: MessageRole.USER,
           taskId,
         });
       }

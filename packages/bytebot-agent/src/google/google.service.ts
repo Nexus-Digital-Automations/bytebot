@@ -15,7 +15,7 @@ import {
   BytebotAgentInterrupt,
   BytebotAgentResponse,
 } from '../agent/agent.types';
-import { Message, Role } from '@prisma/client';
+import { Message, MessageRole } from '@prisma/client';
 import { googleTools } from './google.tools';
 import {
   Content,
@@ -229,7 +229,7 @@ export class GoogleService implements BytebotAgentService {
       }
 
       googleMessages.push({
-        role: message.role === Role.USER ? 'user' : 'model',
+        role: message.role === MessageRole.USER ? 'user' : 'model',
         parts: parts,
       });
     }

@@ -22,8 +22,15 @@ import { AddTaskMessageDto } from './dto/add-task-message.dto';
 import { TasksGateway } from './tasks.gateway';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  CircuitBreakerGuard,
+  UseCircuitBreaker,
+} from '../common/guards/circuit-breaker.guard';
+import { RequireDatabaseHealth } from '../common/guards/database-health.guard';
 
 @Injectable()
+@RequireDatabaseHealth({ gracefulDegradation: true, blockOnUnhealthy: false })
+@UseCircuitBreaker({ failureThreshold: 5, timeout: 60000 })
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
 
@@ -33,8 +40,11 @@ export class TasksService {
     private readonly tasksGateway: TasksGateway,
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly circuitBreakerGuard: CircuitBreakerGuard,
   ) {
-    this.logger.log('TasksService initialized');
+    this.logger.log(
+      'TasksService initialized with database resilience features',
+    );
   }
 
   async create(createTaskDto: CreateTaskDto): Promise<Task> {
@@ -51,7 +61,7 @@ export class TasksService {
           type: createTaskDto.type || TaskType.IMMEDIATE,
           priority: createTaskDto.priority || TaskPriority.MEDIUM,
           status: TaskStatus.PENDING,
-          createdBy: createTaskDto.createdBy || Role.USER,
+          createdBy: createTaskDto.createdBy || MessageRole.USER,
           ...(createTaskDto.model != null
             ? {
                 model: JSON.stringify(
@@ -108,7 +118,7 @@ export class TasksService {
               text: `${createTaskDto.description} ${filesDescription}`,
             },
           ] as Prisma.InputJsonValue,
-          role: Role.USER,
+          role: MessageRole.USER,
           taskId: task.id,
         },
       });
@@ -281,7 +291,7 @@ export class TasksService {
     const message = await this.prisma.message.create({
       data: {
         content: [{ type: 'text', text: addTaskMessageDto.message }],
-        role: Role.USER,
+        role: MessageRole.USER,
         taskId,
       },
     });
@@ -298,14 +308,14 @@ export class TasksService {
       throw new NotFoundException(`Task with ID ${taskId} not found`);
     }
 
-    if (task.control !== Role.USER) {
+    if (task.control !== MessageRole.USER) {
       throw new BadRequestException(`Task ${taskId} is not under user control`);
     }
 
     const updatedTask = await this.prisma.task.update({
       where: { id: taskId },
       data: {
-        control: Role.ASSISTANT,
+        control: MessageRole.ASSISTANT,
         status: TaskStatus.RUNNING,
       },
     });
@@ -336,7 +346,7 @@ export class TasksService {
       throw new NotFoundException(`Task with ID ${taskId} not found`);
     }
 
-    if (task.control !== Role.ASSISTANT) {
+    if (task.control !== MessageRole.ASSISTANT) {
       throw new BadRequestException(
         `Task ${taskId} is not under agent control`,
       );
@@ -345,7 +355,7 @@ export class TasksService {
     const updatedTask = await this.prisma.task.update({
       where: { id: taskId },
       data: {
-        control: Role.USER,
+        control: MessageRole.USER,
       },
     });
 

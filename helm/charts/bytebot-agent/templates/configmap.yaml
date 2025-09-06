@@ -1,0 +1,218 @@
+{{/*
+ConfigMap for Bytebot Agent Configuration
+Manages non-sensitive configuration data with environment-specific overrides
+*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bytebot-agent.fullname" . }}-config
+  labels:
+    {{- include "bytebot-agent.labels" . | nindent 4 }}
+  annotations:
+    config.bytebot.ai/environment: {{ .Values.global.environment | default "production" }}
+    config.bytebot.ai/version: {{ .Chart.AppVersion }}
+    config.bytebot.ai/last-updated: {{ now | date "2006-01-02T15:04:05Z" }}
+data:
+  # Environment Configuration
+  NODE_ENV: {{ .Values.global.environment | default "production" | quote }}
+  PORT: {{ .Values.service.targetPort | quote }}
+  
+  # Database Configuration (non-sensitive)
+  DATABASE_MAX_CONNECTIONS: {{ .Values.config.database.maxConnections | default 50 | quote }}
+  DATABASE_CONNECTION_TIMEOUT: {{ .Values.config.database.connectionTimeout | default 30000 | quote }}
+  
+  # API Configuration
+  API_RATE_LIMIT_WINDOW: {{ .Values.config.api.rateLimitWindow | default 900000 | quote }}
+  API_RATE_LIMIT_MAX_REQUESTS: {{ .Values.config.api.rateLimitMaxRequests | default 100 | quote }}
+  {{- if .Values.config.api.corsOrigins }}
+  API_CORS_ORIGINS: {{ .Values.config.api.corsOrigins | toJson | quote }}
+  {{- end }}
+  BODY_PARSER_LIMIT: {{ .Values.config.api.bodyParserLimit | default "50mb" | quote }}
+  REQUEST_TIMEOUT: {{ .Values.config.api.requestTimeout | default 30000 | quote }}
+  
+  # Security Configuration (non-sensitive)
+  JWT_EXPIRES_IN: {{ .Values.config.security.jwtExpiresIn | default "15m" | quote }}
+  JWT_REFRESH_EXPIRES_IN: {{ .Values.config.security.jwtRefreshExpiresIn | default "7d" | quote }}
+  
+  # Service URLs
+  BYTEBOT_DESKTOP_BASE_URL: {{ .Values.config.services.bytebotDesktopUrl | default "http://bytebot-desktop:9990" | quote }}
+  {{- if .Values.config.services.llmProxyUrl }}
+  BYTEBOT_LLM_PROXY_URL: {{ .Values.config.services.llmProxyUrl | quote }}
+  {{- end }}
+  {{- if .Values.config.services.analyticsEndpoint }}
+  BYTEBOT_ANALYTICS_ENDPOINT: {{ .Values.config.services.analyticsEndpoint | quote }}
+  {{- end }}
+  
+  # Feature Flags
+  ENABLE_AUTHENTICATION: {{ .Values.config.features.authentication | default true | quote }}
+  ENABLE_RATE_LIMITING: {{ .Values.config.features.rateLimiting | default true | quote }}
+  ENABLE_METRICS_COLLECTION: {{ .Values.config.features.metricsCollection | default true | quote }}
+  ENABLE_HEALTH_CHECKS: {{ .Values.config.features.healthChecks | default true | quote }}
+  ENABLE_CIRCUIT_BREAKER: {{ .Values.config.features.circuitBreaker | default true | quote }}
+  
+  # Monitoring Configuration
+  PROMETHEUS_METRICS_PORT: {{ .Values.config.monitoring.prometheusMetricsPort | default 9464 | quote }}
+  LOG_LEVEL: {{ .Values.config.monitoring.logLevel | default "warn" | quote }}
+  LOG_FORMAT: {{ .Values.config.monitoring.logFormat | default "json" | quote }}
+  ENABLE_DISTRIBUTED_TRACING: {{ .Values.config.monitoring.distributedTracing | default true | quote }}
+  {{- if .Values.config.monitoring.jaegerEndpoint }}
+  JAEGER_ENDPOINT: {{ .Values.config.monitoring.jaegerEndpoint | quote }}
+  {{- end }}
+  
+  # Performance Configuration
+  GRACEFUL_SHUTDOWN_TIMEOUT: {{ .Values.config.performance.gracefulShutdownTimeout | default 30000 | quote }}
+  
+  # Circuit Breaker Configuration
+  CIRCUIT_BREAKER_FAILURE_THRESHOLD: {{ .Values.config.circuitBreaker.failureThreshold | default 50 | quote }}
+  CIRCUIT_BREAKER_TIMEOUT: {{ .Values.config.circuitBreaker.timeout | default 60000 | quote }}
+  CIRCUIT_BREAKER_RESET_TIMEOUT: {{ .Values.config.circuitBreaker.resetTimeout | default 30000 | quote }}
+  
+  # Health Check Configuration
+  HEALTH_CHECK_TIMEOUT: {{ .Values.config.healthCheck.timeout | default 5000 | quote }}
+  HEALTH_CHECK_INTERVAL: {{ .Values.config.healthCheck.interval | default 30000 | quote }}
+  
+  # Kubernetes Configuration
+  KUBERNETES_NAMESPACE: {{ .Release.Namespace | quote }}
+  KUBERNETES_SERVICE_NAME: {{ include "bytebot-agent.fullname" . | quote }}
+  
+  # Development Configuration
+  ENABLE_SWAGGER: {{ .Values.config.development.enableSwagger | default false | quote }}
+  SWAGGER_PATH: {{ .Values.config.development.swaggerPath | default "/api/docs" | quote }}
+  DEBUG_MODE: {{ .Values.config.development.debugMode | default false | quote }}
+
+---
+{{/*
+ConfigMap for Application Configuration File
+Provides structured YAML configuration for complex settings
+*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bytebot-agent.fullname" . }}-app-config
+  labels:
+    {{- include "bytebot-agent.labels" . | nindent 4 }}
+    config.bytebot.ai/type: "application-config"
+data:
+  application.yaml: |
+    # Application Configuration for Bytebot Agent
+    # Environment: {{ .Values.global.environment | default "production" }}
+    # Version: {{ .Chart.AppVersion }}
+    
+    server:
+      port: {{ .Values.service.targetPort }}
+      shutdownTimeout: {{ .Values.config.performance.gracefulShutdownTimeout | default 30000 }}
+    
+    database:
+      maxConnections: {{ .Values.config.database.maxConnections | default 50 }}
+      connectionTimeout: {{ .Values.config.database.connectionTimeout | default 30000 }}
+      healthCheck:
+        enabled: true
+        timeout: {{ .Values.config.healthCheck.timeout | default 5000 }}
+    
+    api:
+      rateLimit:
+        window: {{ .Values.config.api.rateLimitWindow | default 900000 }}
+        maxRequests: {{ .Values.config.api.rateLimitMaxRequests | default 100 }}
+      cors:
+        {{- if .Values.config.api.corsOrigins }}
+        origins: {{ .Values.config.api.corsOrigins | toYaml | nindent 8 }}
+        {{- else }}
+        origins:
+          - "https://app.bytebot.ai"
+          - "https://api.bytebot.ai"
+        {{- end }}
+      bodyParser:
+        limit: {{ .Values.config.api.bodyParserLimit | default "50mb" }}
+      timeout: {{ .Values.config.api.requestTimeout | default 30000 }}
+    
+    security:
+      jwt:
+        expiresIn: {{ .Values.config.security.jwtExpiresIn | default "15m" }}
+        refreshExpiresIn: {{ .Values.config.security.jwtRefreshExpiresIn | default "7d" }}
+      headers:
+        enabled: true
+        contentSecurityPolicy: true
+        hsts: true
+        noSniff: true
+        frameOptions: "DENY"
+    
+    services:
+      bytebotDesktop:
+        url: {{ .Values.config.services.bytebotDesktopUrl | default "http://bytebot-desktop:9990" }}
+        timeout: 30000
+        retries: 3
+      {{- if .Values.config.services.llmProxyUrl }}
+      llmProxy:
+        url: {{ .Values.config.services.llmProxyUrl }}
+        timeout: 60000
+        retries: 2
+      {{- end }}
+      {{- if .Values.config.services.analyticsEndpoint }}
+      analytics:
+        endpoint: {{ .Values.config.services.analyticsEndpoint }}
+        batchSize: 100
+        flushInterval: 30000
+      {{- end }}
+    
+    features:
+      authentication: {{ .Values.config.features.authentication | default true }}
+      rateLimiting: {{ .Values.config.features.rateLimiting | default true }}
+      metricsCollection: {{ .Values.config.features.metricsCollection | default true }}
+      healthChecks: {{ .Values.config.features.healthChecks | default true }}
+      circuitBreaker: {{ .Values.config.features.circuitBreaker | default true }}
+    
+    monitoring:
+      prometheus:
+        enabled: {{ .Values.config.features.metricsCollection | default true }}
+        port: {{ .Values.config.monitoring.prometheusMetricsPort | default 9464 }}
+        path: "/metrics"
+      logging:
+        level: {{ .Values.config.monitoring.logLevel | default "warn" }}
+        format: {{ .Values.config.monitoring.logFormat | default "json" }}
+        structured: true
+        includeTimestamp: true
+        includeCorrelationId: true
+      tracing:
+        enabled: {{ .Values.config.monitoring.distributedTracing | default true }}
+        {{- if .Values.config.monitoring.jaegerEndpoint }}
+        jaegerEndpoint: {{ .Values.config.monitoring.jaegerEndpoint }}
+        {{- end }}
+        serviceName: "bytebot-agent"
+        environment: {{ .Values.global.environment | default "production" }}
+    
+    circuitBreaker:
+      enabled: {{ .Values.config.features.circuitBreaker | default true }}
+      failureThreshold: {{ .Values.config.circuitBreaker.failureThreshold | default 50 }}
+      timeout: {{ .Values.config.circuitBreaker.timeout | default 60000 }}
+      resetTimeout: {{ .Values.config.circuitBreaker.resetTimeout | default 30000 }}
+      halfOpenMaxCalls: 10
+      rollingCountTimeout: 10000
+    
+    healthCheck:
+      enabled: {{ .Values.config.features.healthChecks | default true }}
+      timeout: {{ .Values.config.healthCheck.timeout | default 5000 }}
+      interval: {{ .Values.config.healthCheck.interval | default 30000 }}
+      endpoints:
+        liveness: "/health/live"
+        readiness: "/health/ready"
+        startup: "/health/startup"
+      checks:
+        database: true
+        externalServices: true
+        diskSpace: true
+        memoryUsage: true
+    
+    kubernetes:
+      namespace: {{ .Release.Namespace }}
+      serviceName: {{ include "bytebot-agent.fullname" . }}
+      podName: ${HOSTNAME}
+      secrets:
+        path: "/etc/secrets"
+        autoReload: true
+        
+    development:
+      swagger:
+        enabled: {{ .Values.config.development.enableSwagger | default false }}
+        path: {{ .Values.config.development.swaggerPath | default "/api/docs" }}
+      debug:
+        enabled: {{ .Values.config.development.debugMode | default false }}

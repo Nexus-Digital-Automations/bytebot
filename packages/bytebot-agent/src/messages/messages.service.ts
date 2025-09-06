@@ -1,6 +1,6 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Message, Role, Prisma } from '@prisma/client';
+import { Message, MessageRole, Prisma } from '@prisma/client';
 import {
   MessageContentBlock,
   isComputerToolUseContentBlock,
@@ -164,10 +164,10 @@ export class MessagesService {
       const contentBlocks = message.content as MessageContentBlock[];
 
       // If the role is a user message and all the content blocks are tool result blocks or they are take over actions
-      if (message.role === Role.USER) {
+      if (message.role === MessageRole.USER) {
         if (contentBlocks.every((block) => isToolResultContentBlock(block))) {
           // Pure tool results should be shown as assistant messages
-          processedMessage.role = Role.ASSISTANT;
+          processedMessage.role = MessageRole.ASSISTANT;
         } else if (
           contentBlocks.every((block) => isUserActionContentBlock(block))
         ) {
@@ -177,7 +177,7 @@ export class MessagesService {
               return block.content;
             })
             .filter((block) => isComputerToolUseContentBlock(block));
-          processedMessage.role = Role.ASSISTANT;
+          processedMessage.role = MessageRole.ASSISTANT;
           processedMessage.take_over = true;
         }
         // If there are text blocks mixed with tool blocks, keep as user message

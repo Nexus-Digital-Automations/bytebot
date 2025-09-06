@@ -19,7 +19,7 @@ import {
   TypeTextAction,
   ScrollAction,
 } from '@bytebot/shared';
-import { Role } from '@prisma/client';
+import { MessageRole } from '@prisma/client';
 import { MessagesService } from '../messages/messages.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -176,7 +176,7 @@ export class InputCaptureService {
 
         await this.messagesService.create({
           content: [userActionBlock],
-          role: Role.USER,
+          role: MessageRole.USER,
           taskId,
         });
       },
@@ -276,7 +276,7 @@ export class InputCaptureService {
       if (userActionBlock.content.length > 0) {
         await this.messagesService.create({
           content: [userActionBlock],
-          role: Role.USER,
+          role: MessageRole.USER,
           taskId,
         });
       }

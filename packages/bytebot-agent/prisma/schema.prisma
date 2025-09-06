@@ -30,9 +30,24 @@ enum TaskPriority {
   URGENT
 }
 
-enum Role {
+enum MessageRole {
   USER
   ASSISTANT
+}
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+enum Permission {
+  TASK_READ
+  TASK_WRITE
+  TASK_DELETE
+  COMPUTER_CONTROL
+  SYSTEM_ADMIN
+  USER_MANAGEMENT
 }
 
 enum TaskType {
@@ -46,9 +61,10 @@ model Task {
   type          TaskType      @default(IMMEDIATE)
   status        TaskStatus    @default(PENDING)
   priority      TaskPriority  @default(MEDIUM)
-  control       Role          @default(ASSISTANT)
+  control       MessageRole   @default(ASSISTANT)
   createdAt     DateTime      @default(now())
-  createdBy     Role          @default(USER)
+  createdBy     MessageRole   @default(USER)
+  userId        String?       // Optional foreign key to User
   scheduledFor  DateTime?
   updatedAt     DateTime      @updatedAt
   executedAt    DateTime?
@@ -62,6 +78,7 @@ model Task {
   messages      Message[]
   summaries     Summary[]
   files         File[]
+  user          User?         @relation(fields: [userId], references: [id])
 }
 
 model Summary {
@@ -89,7 +106,7 @@ model Message {
   //   {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": "..."}}
   // ]
   content   Json
-  role      Role @default(ASSISTANT)
+  role      MessageRole @default(ASSISTANT)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   task      Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
@@ -110,5 +127,59 @@ model File {
   // Relations
   task          Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
   taskId        String
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  username      String         @unique
+  firstName     String?
+  lastName      String?
+  passwordHash  String
+  role          UserRole       @default(VIEWER)
+  isActive      Boolean        @default(true)
+  emailVerified Boolean        @default(false)
+  lastLoginAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  // Relations
+  tasks         Task[]
+  sessions      UserSession[]
+  permissions   RolePermission[]
+  
+  @@map("users")
+}
+
+model UserSession {
+  id            String       @id @default(uuid())
+  userId        String
+  refreshToken  String       @unique
+  isRevoked     Boolean      @default(false)
+  expiresAt     DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  ipAddress     String?
+  userAgent     String?
+  
+  // Relations
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_sessions")
+}
+
+model RolePermission {
+  id         String      @id @default(uuid())
+  userId     String
+  role       UserRole
+  permission Permission
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  
+  // Relations
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, role, permission])
+  @@map("role_permissions")
 }
 

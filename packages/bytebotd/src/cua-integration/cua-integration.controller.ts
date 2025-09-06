@@ -26,7 +26,12 @@ import {
   HttpStatus,
   BadRequestException,
   ServiceUnavailableException,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { OperatorOrAdmin, Authenticated, CurrentUser, ByteBotdUser } from '../auth/decorators/roles.decorator';
 import { CuaIntegrationService } from './cua-integration.service';
 import {
   CuaVisionService,
@@ -130,6 +135,8 @@ export class BatchOcrRequestDto {
 }
 
 @Controller('api/v1/cua')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth('bearer')
 export class CuaIntegrationController {
   private readonly logger = new Logger(CuaIntegrationController.name);
 
@@ -147,7 +154,8 @@ export class CuaIntegrationController {
    * GET /api/v1/cua/status
    */
   @Get('status')
-  getFrameworkStatus() {
+  @Authenticated()
+  getFrameworkStatus(@CurrentUser() user: ByteBotdUser) {
     try {
       const frameworkStatus = this.cuaIntegrationService.getFrameworkStatus();
       const bridgeHealth = this.bridgeService.getHealthStatus();
@@ -191,7 +199,8 @@ export class CuaIntegrationController {
    * GET /api/v1/cua/health
    */
   @Get('health')
-  healthCheck() {
+  @Authenticated()
+  healthCheck(@CurrentUser() user: ByteBotdUser) {
     const frameworkEnabled = this.cuaIntegrationService.isFrameworkEnabled();
     const bridgeHealthy = this.bridgeService.isHealthy();
     const systemHealthy = this.performanceService.isSystemHealthy();
@@ -220,7 +229,8 @@ export class CuaIntegrationController {
    * POST /api/v1/cua/vision/ocr
    */
   @Post('vision/ocr')
-  async performOcr(@Body() request: OcrRequestDto): Promise<{
+  @OperatorOrAdmin()
+  async performOcr(@Body() request: OcrRequestDto, @CurrentUser() user: ByteBotdUser): Promise<{
     success: boolean;
     result?: OcrResult;
     error?: string;
@@ -306,8 +316,10 @@ export class CuaIntegrationController {
    * GET /api/v1/cua/performance
    */
   @Get('performance')
+  @OperatorOrAdmin()
   getPerformanceMetrics(
     @Query('timeRange') timeRange: string = '60', // minutes
+    @CurrentUser() user: ByteBotdUser,
   ) {
     try {
       const timeRangeMinutes = parseInt(timeRange, 10) || 60;
@@ -359,7 +371,8 @@ export class CuaIntegrationController {
    * GET /api/v1/cua/capabilities
    */
   @Get('capabilities')
-  getCapabilities() {
+  @Authenticated()
+  getCapabilities(@CurrentUser() user: ByteBotdUser) {
     try {
       const frameworkConfig = this.cuaIntegrationService.getConfiguration();
       const visionCapabilities = this.visionService.getCapabilities();

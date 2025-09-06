@@ -1,0 +1,86 @@
+# Production Configuration - Bytebot API Platform
+# Enterprise-grade configuration optimized for security, performance, and reliability
+# Security: Maximum security with strict validation
+# Performance: Optimized for high availability and scalability
+
+# Environment Settings
+NODE_ENV: production
+PORT: 9991
+
+# Database Configuration
+database:
+  url: ${DATABASE_URL}      # From Kubernetes secret
+  maxConnections: 50        # Higher for production load
+  connectionTimeout: 30000
+
+# API Configuration
+api:
+  rateLimitWindow: 900000    # 15 minutes
+  rateLimitMaxRequests: 100  # Standard rate limit
+  corsOrigins:
+    - "https://app.bytebot.ai"
+    - "https://api.bytebot.ai"
+    - "https://dashboard.bytebot.ai"
+  bodyParserLimit: "50mb"
+  requestTimeout: 30000
+
+# Security Configuration (Maximum security)
+security:
+  jwtSecret: ${JWT_SECRET}           # From Kubernetes secret (64+ chars)
+  jwtExpiresIn: "15m"               # Short expiry for security
+  jwtRefreshExpiresIn: "7d"
+  encryptionKey: ${ENCRYPTION_KEY}   # From Kubernetes secret (64+ chars)
+
+# LLM API Keys (From Kubernetes secrets)
+llmApiKeys:
+  anthropic: ${ANTHROPIC_API_KEY}    # From kubernetes secret
+  openai: ${OPENAI_API_KEY}          # From kubernetes secret  
+  gemini: ${GEMINI_API_KEY}          # From kubernetes secret
+
+# Service URLs
+services:
+  bytebotDesktopUrl: "http://bytebot-desktop:9990"
+  llmProxyUrl: "http://bytebot-llm-proxy:8000"
+  analyticsEndpoint: "https://analytics.bytebot.ai/api/events"
+
+# Feature Flags (Full production features)
+features:
+  authentication: true       # Required in production
+  rateLimiting: true        # Essential protection
+  metricsCollection: true   # Critical monitoring
+  healthChecks: true        # Required for K8s
+  circuitBreaker: true      # Production resilience
+
+# Monitoring & Observability (Full observability)
+monitoring:
+  prometheusMetricsPort: 9464
+  logLevel: warn            # Minimal noise in production
+  logFormat: json           # Structured logs for aggregation
+  distributedTracing: true  # Full tracing enabled
+  jaegerEndpoint: "http://jaeger-collector:14268/api/traces"
+
+# Performance Settings (Production optimized)
+performance:
+  gracefulShutdownTimeout: 30000  # Allow time for connection drain
+
+# Circuit Breaker Settings (Production tuned)
+circuitBreaker:
+  failureThreshold: 50      # 50% failure rate
+  timeout: 60000           # 60 second timeout
+  resetTimeout: 30000      # 30 second reset
+
+# Health Checks (Production tuned)
+healthCheck:
+  timeout: 5000            # 5 second timeout
+  interval: 30000          # 30 second interval
+
+# Kubernetes Configuration (Production)
+kubernetes:
+  namespace: "bytebot-production"
+  serviceName: "bytebot-agent"
+
+# Development Features (Disabled in production)
+development:
+  enableSwagger: false      # No API docs in production
+  swaggerPath: "/api/docs"
+  debugMode: false          # No debug features

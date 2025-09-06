@@ -1,0 +1,424 @@
+# Kubernetes Deployment - Bytebot Agent
+# Production-ready deployment configuration with security, monitoring, and resilience features
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bytebot-agent
+  namespace: bytebot-production
+  labels:
+    app: bytebot-agent
+    component: api-server
+    version: "1.0.0"
+    environment: production
+    tier: backend
+spec:
+  replicas: 3  # High availability with 3 replicas
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: bytebot-agent
+      component: api-server
+  template:
+    metadata:
+      labels:
+        app: bytebot-agent
+        component: api-server
+        version: "1.0.0"
+        environment: production
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9464"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Security Context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+
+      # Service Account for RBAC
+      serviceAccountName: bytebot-agent
+
+      # Pod Anti-Affinity for High Availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - bytebot-agent
+              topologyKey: kubernetes.io/hostname
+
+      # Init Containers
+      initContainers:
+      # Database Migration Init Container
+      - name: db-migrate
+        image: ghcr.io/bytebot-ai/bytebot-agent:latest
+        command:
+        - npm
+        - run
+        - prisma:prod
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: DATABASE_URL
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi" 
+            cpu: "500m"
+
+      # Main Application Container
+      containers:
+      - name: bytebot-agent
+        image: ghcr.io/bytebot-ai/bytebot-agent:latest
+        imagePullPolicy: IfNotPresent
+        
+        # Security Context
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+
+        # Ports
+        ports:
+        - name: http
+          containerPort: 9991
+          protocol: TCP
+        - name: metrics
+          containerPort: 9464
+          protocol: TCP
+
+        # Environment Variables from ConfigMap
+        envFrom:
+        - configMapRef:
+            name: bytebot-agent-config
+
+        # Sensitive Environment Variables from Secrets
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: DATABASE_URL
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: JWT_SECRET
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: ENCRYPTION_KEY
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: ANTHROPIC_API_KEY
+              optional: true
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: OPENAI_API_KEY
+              optional: true
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: GEMINI_API_KEY
+              optional: true
+
+        # Health Probes
+        livenessProbe:
+          httpGet:
+            path: /api/health/live
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+
+        readinessProbe:
+          httpGet:
+            path: /api/health/ready
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+          successThreshold: 1
+
+        startupProbe:
+          httpGet:
+            path: /api/health/startup
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 6
+          successThreshold: 1
+
+        # Resource Requirements
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+
+        # Volume Mounts
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/.cache
+        - name: secrets-volume
+          mountPath: /etc/secrets
+          readOnly: true
+
+      # Metrics Sidecar Container (Optional)
+      - name: metrics-exporter
+        image: prom/node-exporter:latest
+        ports:
+        - name: node-metrics
+          containerPort: 9100
+          protocol: TCP
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+
+      # Volumes
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: cache
+        emptyDir: {}
+      - name: secrets-volume
+        secret:
+          secretName: bytebot-agent-secrets
+          defaultMode: 0400  # Read-only for owner only
+
+      # DNS Policy
+      dnsPolicy: ClusterFirst
+      
+      # Restart Policy
+      restartPolicy: Always
+
+      # Grace Period
+      terminationGracePeriodSeconds: 30
+
+      # Image Pull Secrets (if using private registry)
+      imagePullSecrets:
+      - name: ghcr-secret
+
+---
+# Staging Deployment (Simplified)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bytebot-agent
+  namespace: bytebot-staging
+  labels:
+    app: bytebot-agent
+    component: api-server
+    version: "1.0.0"
+    environment: staging
+spec:
+  replicas: 2  # Reduced replicas for staging
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: bytebot-agent
+      component: api-server
+  template:
+    metadata:
+      labels:
+        app: bytebot-agent
+        component: api-server
+        version: "1.0.0"
+        environment: staging
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9464"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+
+      serviceAccountName: bytebot-agent
+
+      initContainers:
+      - name: db-migrate
+        image: ghcr.io/bytebot-ai/bytebot-agent:latest
+        command:
+        - npm
+        - run
+        - prisma:prod
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: DATABASE_URL
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+      containers:
+      - name: bytebot-agent
+        image: ghcr.io/bytebot-ai/bytebot-agent:latest
+        imagePullPolicy: IfNotPresent
+        
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+
+        ports:
+        - name: http
+          containerPort: 9991
+          protocol: TCP
+        - name: metrics
+          containerPort: 9464
+          protocol: TCP
+
+        envFrom:
+        - configMapRef:
+            name: bytebot-agent-config
+
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: DATABASE_URL
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: JWT_SECRET
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: ENCRYPTION_KEY
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: ANTHROPIC_API_KEY
+              optional: true
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: OPENAI_API_KEY
+              optional: true
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bytebot-agent-secrets
+              key: GEMINI_API_KEY
+              optional: true
+
+        livenessProbe:
+          httpGet:
+            path: /api/health/live
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /api/health/ready
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+        startupProbe:
+          httpGet:
+            path: /api/health/startup
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 6
+
+        resources:
+          requests:
+            memory: "384Mi"
+            cpu: "200m"
+          limits:
+            memory: "768Mi"
+            cpu: "500m"
+
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/.cache
+        - name: secrets-volume
+          mountPath: /etc/secrets
+          readOnly: true
+
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: cache
+        emptyDir: {}
+      - name: secrets-volume
+        secret:
+          secretName: bytebot-agent-secrets
+          defaultMode: 0400
+
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      
+      imagePullSecrets:
+      - name: ghcr-secret

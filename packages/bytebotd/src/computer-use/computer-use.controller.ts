@@ -5,7 +5,30 @@ import {
   Logger,
   HttpException,
   HttpStatus,
+  UseGuards,
+  UsePipes,
+  UseInterceptors,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import {
+  EnterpriseRateLimitGuard,
+  RateLimit,
+} from '../common/guards/rate-limit.guard';
+import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
+import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
+import {
+  ComputerUseApi,
+  ForVersion,
+  SUPPORTED_API_VERSIONS,
+} from '../common/versioning/api-version.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { OperatorOrAdmin, CurrentUser, ByteBotdUser } from '../auth/decorators/roles.decorator';
 import { ComputerUseService } from './computer-use.service';
 import { ComputerActionValidationPipe } from './dto/computer-action-validation.pipe';
 import { ComputerActionDto } from './dto/computer-action.dto';
@@ -93,16 +116,25 @@ type ComputerActionResponse =
     };
 
 /**
- * Computer Use Controller - Handles HTTP requests for computer automation actions
+ * Computer Use Controller - Secured Computer Automation API
  *
- * This controller provides a REST API endpoint for executing various computer automation
- * actions such as mouse movements, keyboard input, screenshots, file operations, and
- * advanced vision-based operations like OCR and text finding.
+ * This controller provides enterprise-grade security for computer automation actions
+ * including comprehensive input validation, sanitization, rate limiting, and
+ * security monitoring for all computer control operations.
+ *
+ * Security Features:
+ * - Rate limiting with suspicious activity detection
+ * - Input sanitization and XSS/injection prevention
+ * - Comprehensive request/response logging
+ * - Malicious payload detection and blocking
  *
  * Dependencies: ComputerUseService for action execution
- * Security: Uses validation pipe for request sanitization
  */
 @Controller('computer-use')
+@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
+@UsePipes(SecuritySanitizationPipes.HIGH_SECURITY)
+@UseInterceptors(LoggingInterceptor)
+@ApiBearerAuth('bearer')
 export class ComputerUseController {
   private readonly logger = new Logger(ComputerUseController.name);
 
@@ -123,8 +155,45 @@ export class ComputerUseController {
    * @throws HttpException - On action execution failure with detailed error info
    */
   @Post()
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @ApiOperation({
+    summary: 'Execute computer action',
+    description:
+      'Execute various computer control actions including mouse, keyboard, and application operations. Requires OPERATOR or ADMIN role.',
+    operationId: 'executeComputerAction',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Action executed successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        result: { type: 'object' },
+        operationId: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid action parameters',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Authentication required',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Rate limit exceeded',
+  })
   async action(
     @Body(new ComputerActionValidationPipe()) params: ComputerActionDto,
+    @CurrentUser() user: ByteBotdUser,
   ): Promise<ComputerActionResponse> {
     // Generate unique operation ID for tracking this action request
     const operationId = `action_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -139,7 +208,13 @@ export class ComputerUseController {
 
       this.logger.log(
         `[${operationId}] Computer action request: ${JSON.stringify(paramsCopy)}`,
-        { operationId, action: params.action },
+        { 
+          operationId, 
+          action: params.action, 
+          userId: user.id, 
+          username: user.username, 
+          userRole: user.role 
+        },
       );
 
       // Execute the computer action through the service
@@ -151,7 +226,13 @@ export class ComputerUseController {
       const processingTime = Date.now() - startTime;
       this.logger.log(
         `[${operationId}] Computer action completed successfully (${processingTime}ms)`,
-        { operationId, action: params.action, processingTime },
+        { 
+          operationId, 
+          action: params.action, 
+          processingTime, 
+          userId: user.id, 
+          username: user.username 
+        },
       );
 
       return result;

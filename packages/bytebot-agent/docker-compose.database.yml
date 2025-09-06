@@ -1,0 +1,243 @@
+# Docker Compose for Database Testing - Enterprise Database Configuration
+# This configuration sets up PostgreSQL with performance-optimized settings
+# for testing the Phase 1 Database Hardening implementation
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database with Enterprise Configuration
+  postgres:
+    image: postgres:16-alpine
+    container_name: bytebot-postgres-optimized
+    restart: unless-stopped
+    
+    # Environment configuration for optimal performance
+    environment:
+      POSTGRES_DB: bytebot_production
+      POSTGRES_USER: bytebot_user
+      POSTGRES_PASSWORD: secure_database_password_2024
+      PGDATA: /var/lib/postgresql/data/pgdata
+      
+      # PostgreSQL performance configuration
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+      
+    # Port mapping
+    ports:
+      - "5432:5432"
+    
+    # Volume mounts for persistence and configuration
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./docker/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./docker/postgres/init-scripts:/docker-entrypoint-initdb.d:ro
+    
+    # PostgreSQL command with optimized configuration
+    command: >
+      postgres
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c hba_file=/etc/postgresql/pg_hba.conf
+      -c log_destination=stderr
+      -c logging_collector=on
+      -c log_directory=/var/log/postgresql
+      -c log_statement=ddl
+      -c log_min_duration_statement=1000
+      -c shared_preload_libraries=pg_stat_statements
+    
+    # Health check configuration
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bytebot_user -d bytebot_production -h localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    # Resource limits for testing
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    
+    # Network configuration
+    networks:
+      - bytebot-network
+
+  # Redis for caching and session storage (Phase 1B requirement)
+  redis:
+    image: redis:7-alpine
+    container_name: bytebot-redis-cache
+    restart: unless-stopped
+    
+    # Redis configuration
+    command: >
+      redis-server
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfsync everysec
+      --save 900 1 300 10 60 10000
+    
+    ports:
+      - "6379:6379"
+    
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf:/etc/redis/redis.conf:ro
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    
+    networks:
+      - bytebot-network
+
+  # PgBouncer for connection pooling (production-grade)
+  pgbouncer:
+    image: pgbouncer/pgbouncer:latest
+    container_name: bytebot-pgbouncer
+    restart: unless-stopped
+    
+    environment:
+      DATABASES_HOST: postgres
+      DATABASES_PORT: 5432
+      DATABASES_USER: bytebot_user
+      DATABASES_PASSWORD: secure_database_password_2024
+      DATABASES_DBNAME: bytebot_production
+      
+      # PgBouncer configuration
+      POOL_MODE: transaction
+      SERVER_RESET_QUERY: DISCARD ALL
+      MAX_CLIENT_CONN: 200
+      DEFAULT_POOL_SIZE: 25
+      MIN_POOL_SIZE: 10
+      RESERVE_POOL_SIZE: 5
+      SERVER_LIFETIME: 3600
+      SERVER_IDLE_TIMEOUT: 600
+      LOG_CONNECTIONS: 1
+      LOG_DISCONNECTIONS: 1
+      STATS_PERIOD: 60
+    
+    ports:
+      - "6432:6432"
+    
+    volumes:
+      - ./docker/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./docker/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ["CMD-SHELL", "psql -h localhost -p 6432 -U bytebot_user -d pgbouncer -c 'SHOW STATS;' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    
+    networks:
+      - bytebot-network
+
+  # Prometheus for metrics collection (Phase 1B)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: bytebot-prometheus
+    restart: unless-stopped
+    
+    ports:
+      - "9090:9090"
+    
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    
+    networks:
+      - bytebot-network
+
+  # PostgreSQL Exporter for metrics
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: bytebot-postgres-exporter
+    restart: unless-stopped
+    
+    environment:
+      DATA_SOURCE_NAME: "postgresql://bytebot_user:secure_database_password_2024@postgres:5432/bytebot_production?sslmode=disable"
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
+    
+    volumes:
+      - ./docker/postgres-exporter/queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    
+    ports:
+      - "9187:9187"
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+    
+    networks:
+      - bytebot-network
+
+  # Grafana for visualization (Phase 1B)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: bytebot-grafana
+    restart: unless-stopped
+    
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: secure_grafana_password
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    
+    ports:
+      - "3001:3000"
+    
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    
+    depends_on:
+      - prometheus
+    
+    networks:
+      - bytebot-network
+
+# Named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# Custom network for service communication
+networks:
+  bytebot-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

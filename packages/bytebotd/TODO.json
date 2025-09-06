@@ -1,0 +1,101 @@
+{
+  "project": "unknown",
+  "tasks": [
+    {
+      "id": "task_1757122372905_jwfufnbyn",
+      "title": "Standardize Security Middleware Across All Bytebot Services",
+      "description": "Deploy comprehensive security middleware (SecurityHeadersMiddleware, GlobalValidationPipe, RateLimitGuard, CORS) consistently across bytebot-agent, bytebotd, and bytebot-ui with service-specific security configurations",
+      "category": "linter-error",
+      "priority": "critical",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "packages/bytebotd/src/main.ts",
+        "packages/bytebot-agent/src/main.ts",
+        "packages/bytebot-ui/src/main.ts",
+        "packages/shared/src/middleware/",
+        "packages/shared/src/guards/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T01:32:52.905Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "task_1757123202296_pdspgsq9z",
+      "title": "Enhance input validation and sanitization with advanced XSS/SQL injection protection",
+      "description": "Deploy specialized subagent to enhance and standardize comprehensive input validation and sanitization across all Bytebot services with advanced XSS protection, SQL injection prevention, and malicious payload detection",
+      "category": "error",
+      "priority": "high",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "packages/shared/src/utils/security.utils.ts",
+        "packages/shared/src/pipes/validation.standardized.ts",
+        "packages/bytebotd/src/computer-use/dto/computer-action-validation.pipe.ts",
+        "packages/bytebotd/src/computer-use/dto/computer-action.dto.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T01:46:42.297Z",
+      "auto_research_created": false
+    }
+  ],
+  "agents": {
+    "development_session_1757122364516_1_general_a4a408b8": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-06T01:32:44.516Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-06T01:32:44.516Z",
+      "sessionId": "session_1757122364516",
+      "metadata": {}
+    }
+  },
+  "settings": {
+    "auto_sort_enabled": true,
+    "sort_criteria": {
+      "primary": "category",
+      "secondary": "created_at"
+    },
+    "priority_values": {
+      "critical": 4,
+      "high": 3,
+      "medium": 2,
+      "low": 1
+    },
+    "category_enabled": true,
+    "category_ranks": {
+      "linter-error": 1,
+      "build-error": 2,
+      "start-error": 3,
+      "error": 4,
+      "missing-feature": 5,
+      "missing-test": 6,
+      "test-linter-error": 7,
+      "test-error": 8,
+      "bug": 9,
+      "enhancement": 10,
+      "refactor": 11,
+      "documentation": 12,
+      "chore": 13,
+      "research": 14
+    }
+  }
+}

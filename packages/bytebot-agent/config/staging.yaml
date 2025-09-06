@@ -1,0 +1,85 @@
+# Staging Configuration - Bytebot API Platform
+# Production-like environment for testing and validation
+# Security: Production-level with some debugging enabled
+# Performance: Production optimized with monitoring
+
+# Environment Settings
+NODE_ENV: staging
+PORT: 9991
+
+# Database Configuration
+database:
+  url: ${DATABASE_URL}      # From environment/secrets
+  maxConnections: 20
+  connectionTimeout: 30000
+
+# API Configuration
+api:
+  rateLimitWindow: 900000    # 15 minutes
+  rateLimitMaxRequests: 100  # Standard limit
+  corsOrigins: 
+    - "https://staging.bytebot.ai"
+    - "https://staging-api.bytebot.ai"
+  bodyParserLimit: "50mb"
+  requestTimeout: 30000
+
+# Security Configuration (Production-level)
+security:
+  jwtSecret: ${JWT_SECRET}           # From Kubernetes secret
+  jwtExpiresIn: "15m"
+  jwtRefreshExpiresIn: "7d"
+  encryptionKey: ${ENCRYPTION_KEY}   # From Kubernetes secret
+
+# LLM API Keys (From secrets)
+llmApiKeys:
+  anthropic: ${ANTHROPIC_API_KEY}    # From Kubernetes secret
+  openai: ${OPENAI_API_KEY}          # From Kubernetes secret
+  gemini: ${GEMINI_API_KEY}          # From Kubernetes secret
+
+# Service URLs
+services:
+  bytebotDesktopUrl: "http://bytebot-desktop:9990"
+  llmProxyUrl: "http://bytebot-llm-proxy:8000"
+  analyticsEndpoint: "https://analytics.bytebot.ai/api/events"
+
+# Feature Flags (Production-like)
+features:
+  authentication: true       # Required in staging
+  rateLimiting: true        # Test rate limiting
+  metricsCollection: true   # Monitor performance
+  healthChecks: true        # Essential monitoring
+  circuitBreaker: false     # Test without first
+
+# Monitoring & Observability
+monitoring:
+  prometheusMetricsPort: 9464
+  logLevel: info            # Balanced logging
+  logFormat: json           # Structured logs
+  distributedTracing: false # Test without first
+  jaegerEndpoint: ""
+
+# Performance Settings
+performance:
+  gracefulShutdownTimeout: 10000
+
+# Circuit Breaker Settings
+circuitBreaker:
+  failureThreshold: 50
+  timeout: 60000
+  resetTimeout: 30000
+
+# Health Checks
+healthCheck:
+  timeout: 5000
+  interval: 30000
+
+# Kubernetes Configuration
+kubernetes:
+  namespace: "bytebot-staging"
+  serviceName: "bytebot-agent"
+
+# Development Features (Limited in staging)
+development:
+  enableSwagger: true       # API docs available
+  swaggerPath: "/api/docs"
+  debugMode: false          # No debug in staging

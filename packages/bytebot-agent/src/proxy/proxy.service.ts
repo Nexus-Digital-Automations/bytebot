@@ -12,7 +12,7 @@ import {
   isImageContentBlock,
   ThinkingContentBlock,
 } from '@bytebot/shared';
-import { Message, Role } from '@prisma/client';
+import { Message, MessageRole } from '@prisma/client';
 import { proxyTools } from './proxy.tools';
 import {
   BytebotAgentService,
@@ -164,7 +164,7 @@ export class ProxyService implements BytebotAgentService {
           switch (block.type) {
             case MessageContentType.Text: {
               chatMessages.push({
-                role: message.role === Role.USER ? 'user' : 'assistant',
+                role: message.role === MessageRole.USER ? 'user' : 'assistant',
                 content: block.text,
               });
               break;

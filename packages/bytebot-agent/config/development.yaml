@@ -1,0 +1,83 @@
+# Development Configuration - Bytebot API Platform
+# Optimized for local development with debugging features enabled
+# Security: Relaxed for development convenience
+# Performance: Fast startup and reload
+
+# Environment Settings
+NODE_ENV: development
+PORT: 9991
+
+# Database Configuration
+database:
+  url: postgresql://postgres:postgres@localhost:5432/bytebotdb
+  maxConnections: 10
+  connectionTimeout: 30000
+
+# API Configuration  
+api:
+  rateLimitWindow: 900000    # 15 minutes
+  rateLimitMaxRequests: 1000 # Higher limit for dev
+  corsOrigins: "*"
+  bodyParserLimit: "50mb"
+  requestTimeout: 30000
+
+# Security Configuration (Relaxed for dev)
+security:
+  jwtSecret: "dev-jwt-secret-key-at-least-32-chars-long"
+  jwtExpiresIn: "24h"        # Longer expiry for dev
+  jwtRefreshExpiresIn: "7d"
+  encryptionKey: "dev-encryption-key-at-least-32-chars"
+
+# LLM API Keys (Optional in development)
+llmApiKeys:
+  anthropic: ""     # Set via environment if needed
+  openai: ""        # Set via environment if needed  
+  gemini: ""        # Set via environment if needed
+
+# Service URLs
+services:
+  bytebotDesktopUrl: "http://localhost:9990"
+  llmProxyUrl: ""
+  analyticsEndpoint: ""
+
+# Feature Flags (Development friendly)
+features:
+  authentication: false      # Disabled for easier dev
+  rateLimiting: false       # Disabled for dev testing
+  metricsCollection: false  # Disabled to reduce noise
+  healthChecks: true        # Keep enabled
+  circuitBreaker: false     # Disabled for dev
+
+# Monitoring & Observability  
+monitoring:
+  prometheusMetricsPort: 9464
+  logLevel: debug           # Verbose logging for dev
+  logFormat: text           # Human readable
+  distributedTracing: false # Disabled for dev
+  jaegerEndpoint: ""
+
+# Performance Settings
+performance:
+  gracefulShutdownTimeout: 5000  # Faster shutdown in dev
+
+# Circuit Breaker (Disabled but configured)
+circuitBreaker:
+  failureThreshold: 50
+  timeout: 60000
+  resetTimeout: 30000
+
+# Health Checks
+healthCheck:
+  timeout: 5000
+  interval: 30000
+
+# Kubernetes (Not used in dev)
+kubernetes:
+  namespace: "default"
+  serviceName: "bytebot-agent"
+
+# Development Features
+development:
+  enableSwagger: true       # API documentation
+  swaggerPath: "/api/docs"
+  debugMode: true           # Enable debug features

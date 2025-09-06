@@ -23,14 +23,210 @@ spec:
           containerPort: {{ .Values.service.targetPort }}
           protocol: TCP
         env:
+        {{- /* Environment variables from ConfigMap */ -}}
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: NODE_ENV
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: PORT
+        
+        {{- /* Database Configuration */ -}}
         - name: DATABASE_URL
+          {{- if .Values.secrets.databaseUrl }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-secrets
+              key: database-url
+          {{- else }}
           value: {{ include "bytebot-agent.databaseUrl" . | quote }}
+          {{- end }}
+        - name: DATABASE_MAX_CONNECTIONS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: DATABASE_MAX_CONNECTIONS
+        - name: DATABASE_CONNECTION_TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: DATABASE_CONNECTION_TIMEOUT
+        
+        {{- /* Service URLs */ -}}
         - name: BYTEBOT_DESKTOP_BASE_URL
-          value: {{ .Values.config.bytebotDesktopUrl | default .Values.env.BYTEBOT_DESKTOP_BASE_URL | quote }}
-        {{- if or .Values.config.llmProxyUrl .Values.env.BYTEBOT_LLM_PROXY_URL }}
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: BYTEBOT_DESKTOP_BASE_URL
+        {{- if .Values.config.services.llmProxyUrl }}
         - name: BYTEBOT_LLM_PROXY_URL
-          value: {{ .Values.config.llmProxyUrl | default .Values.env.BYTEBOT_LLM_PROXY_URL | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: BYTEBOT_LLM_PROXY_URL
         {{- end }}
+        {{- if .Values.config.services.analyticsEndpoint }}
+        - name: BYTEBOT_ANALYTICS_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: BYTEBOT_ANALYTICS_ENDPOINT
+        {{- end }}
+        
+        {{- /* Security Configuration */ -}}
+        {{- if .Values.secrets.jwtSecret }}
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-secrets
+              key: jwt-secret
+        {{- end }}
+        {{- if .Values.secrets.encryptionKey }}
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-secrets
+              key: encryption-key
+        {{- end }}
+        - name: JWT_EXPIRES_IN
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: JWT_EXPIRES_IN
+        - name: JWT_REFRESH_EXPIRES_IN
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: JWT_REFRESH_EXPIRES_IN
+        
+        {{- /* Feature Flags */ -}}
+        - name: ENABLE_AUTHENTICATION
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: ENABLE_AUTHENTICATION
+        - name: ENABLE_RATE_LIMITING
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: ENABLE_RATE_LIMITING
+        - name: ENABLE_METRICS_COLLECTION
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: ENABLE_METRICS_COLLECTION
+        - name: ENABLE_HEALTH_CHECKS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: ENABLE_HEALTH_CHECKS
+        - name: ENABLE_CIRCUIT_BREAKER
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: ENABLE_CIRCUIT_BREAKER
+        
+        {{- /* Monitoring Configuration */ -}}
+        - name: PROMETHEUS_METRICS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: PROMETHEUS_METRICS_PORT
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: LOG_LEVEL
+        - name: LOG_FORMAT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: LOG_FORMAT
+        - name: ENABLE_DISTRIBUTED_TRACING
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: ENABLE_DISTRIBUTED_TRACING
+        {{- if .Values.config.monitoring.jaegerEndpoint }}
+        - name: JAEGER_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: JAEGER_ENDPOINT
+        {{- end }}
+        
+        {{- /* Performance Configuration */ -}}
+        - name: GRACEFUL_SHUTDOWN_TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: GRACEFUL_SHUTDOWN_TIMEOUT
+        
+        {{- /* Circuit Breaker Configuration */ -}}
+        - name: CIRCUIT_BREAKER_FAILURE_THRESHOLD
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: CIRCUIT_BREAKER_FAILURE_THRESHOLD
+        - name: CIRCUIT_BREAKER_TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: CIRCUIT_BREAKER_TIMEOUT
+        - name: CIRCUIT_BREAKER_RESET_TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: CIRCUIT_BREAKER_RESET_TIMEOUT
+        
+        {{- /* Health Check Configuration */ -}}
+        - name: HEALTH_CHECK_TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: HEALTH_CHECK_TIMEOUT
+        - name: HEALTH_CHECK_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: HEALTH_CHECK_INTERVAL
+        
+        {{- /* Kubernetes Configuration */ -}}
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: KUBERNETES_NAMESPACE
+        - name: KUBERNETES_SERVICE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: KUBERNETES_SERVICE_NAME
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        
+        {{- /* Development Configuration */ -}}
+        - name: ENABLE_SWAGGER
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: ENABLE_SWAGGER
+        - name: SWAGGER_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: SWAGGER_PATH
+        - name: DEBUG_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "bytebot-agent.fullname" . }}-config
+              key: DEBUG_MODE
         {{- /* Anthropic API Key */ -}}
         {{- if .Values.env.ANTHROPIC_API_KEY }}
         - name: ANTHROPIC_API_KEY
@@ -91,8 +287,130 @@ spec:
               name: {{ include "bytebot-agent.fullname" . }}-secrets
               key: gemini-api-key
         {{- end }}
+        {{- /* Health Check Probes */ -}}
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: http
+          initialDelaySeconds: {{ .Values.healthCheck.liveness.initialDelaySeconds | default 30 }}
+          periodSeconds: {{ .Values.healthCheck.liveness.periodSeconds | default 30 }}
+          timeoutSeconds: {{ .Values.healthCheck.liveness.timeoutSeconds | default 5 }}
+          successThreshold: {{ .Values.healthCheck.liveness.successThreshold | default 1 }}
+          failureThreshold: {{ .Values.healthCheck.liveness.failureThreshold | default 3 }}
+        
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+          initialDelaySeconds: {{ .Values.healthCheck.readiness.initialDelaySeconds | default 10 }}
+          periodSeconds: {{ .Values.healthCheck.readiness.periodSeconds | default 10 }}
+          timeoutSeconds: {{ .Values.healthCheck.readiness.timeoutSeconds | default 5 }}
+          successThreshold: {{ .Values.healthCheck.readiness.successThreshold | default 1 }}
+          failureThreshold: {{ .Values.healthCheck.readiness.failureThreshold | default 3 }}
+        
+        startupProbe:
+          httpGet:
+            path: /health/startup
+            port: http
+          initialDelaySeconds: {{ .Values.healthCheck.startup.initialDelaySeconds | default 10 }}
+          periodSeconds: {{ .Values.healthCheck.startup.periodSeconds | default 10 }}
+          timeoutSeconds: {{ .Values.healthCheck.startup.timeoutSeconds | default 5 }}
+          successThreshold: {{ .Values.healthCheck.startup.successThreshold | default 1 }}
+          failureThreshold: {{ .Values.healthCheck.startup.failureThreshold | default 30 }}
+        
+        {{- /* Volume Mounts */ -}}
+        volumeMounts:
+        - name: secrets-volume
+          mountPath: /etc/secrets
+          readOnly: true
+        - name: config-volume
+          mountPath: /etc/config
+          readOnly: true
+        {{- if .Values.persistence.enabled }}
+        - name: data-volume
+          mountPath: {{ .Values.persistence.mountPath | default "/app/data" }}
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls-certs
+          mountPath: /etc/ssl/certs/app
+          readOnly: true
+        {{- end }}
+        
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
+        
+        {{- /* Security Context */ -}}
+        securityContext:
+          runAsNonRoot: {{ .Values.securityContext.runAsNonRoot | default true }}
+          runAsUser: {{ .Values.securityContext.runAsUser | default 1000 }}
+          runAsGroup: {{ .Values.securityContext.runAsGroup | default 1000 }}
+          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation | default false }}
+          readOnlyRootFilesystem: {{ .Values.securityContext.readOnlyRootFilesystem | default true }}
+          capabilities:
+            drop:
+            - ALL
+            {{- if .Values.securityContext.capabilities.add }}
+            add:
+            {{- toYaml .Values.securityContext.capabilities.add | nindent 12 }}
+            {{- end }}
+      
+      {{- /* Pod Security Context */ -}}
+      securityContext:
+        fsGroup: {{ .Values.podSecurityContext.fsGroup | default 1000 }}
+        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot | default true }}
+        runAsUser: {{ .Values.podSecurityContext.runAsUser | default 1000 }}
+        runAsGroup: {{ .Values.podSecurityContext.runAsGroup | default 1000 }}
+        {{- if .Values.podSecurityContext.seccompProfile }}
+        seccompProfile: {{- toYaml .Values.podSecurityContext.seccompProfile | nindent 8 }}
+        {{- end }}
+      
+      {{- /* Volumes */ -}}
+      volumes:
+      - name: secrets-volume
+        secret:
+          secretName: {{ include "bytebot-agent.fullname" . }}-secrets
+          defaultMode: 0400
+      - name: config-volume
+        configMap:
+          name: {{ include "bytebot-agent.fullname" . }}-app-config
+          defaultMode: 0644
+      {{- if .Values.persistence.enabled }}
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: {{ include "bytebot-agent.fullname" . }}-data
+      {{- end }}
+      {{- if .Values.tls.enabled }}
+      - name: tls-certs
+        secret:
+          secretName: {{ include "bytebot-agent.fullname" . }}-tls
+          defaultMode: 0400
+      {{- end }}
+      
+      {{- /* Service Account */ -}}
+      serviceAccountName: {{ include "bytebot-agent.serviceAccountName" . }}
+      
+      {{- /* Image Pull Secrets */ -}}
+      {{- if .Values.imageCredentials.registry }}
+      imagePullSecrets:
+      - name: {{ include "bytebot-agent.fullname" . }}-registry
+      {{- else if .Values.image.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.image.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      
+      {{- /* DNS Configuration */ -}}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{- toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
+      
+      {{- /* Host Network Configuration */ -}}
+      {{- if .Values.hostNetwork }}
+      hostNetwork: {{ .Values.hostNetwork }}
+      {{- end }}
+      
+      {{- /* Restart Policy */ -}}
+      restartPolicy: {{ .Values.restartPolicy | default "Always" }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

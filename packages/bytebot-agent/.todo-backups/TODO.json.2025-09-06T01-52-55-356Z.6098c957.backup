@@ -1,0 +1,230 @@
+{
+  "project": "unknown",
+  "tasks": [
+    {
+      "id": "task_1757121910664_t08mei2ff",
+      "title": "CRITICAL: Fix orchestrator test coverage from 41% to 90%+ production standard",
+      "description": "URGENT: orchestrator package has insufficient test coverage at 41% (3593 missing statements out of 6064 total) which is below the 90%+ requirement for production readiness. Critical modules need 100% coverage including ai/coordination (0% coverage), security modules (0% coverage), and significant gaps in ai/context (21%), server (56%).",
+      "category": "error",
+      "priority": "critical",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/ai/coordination.py",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/security/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/ai/context.py",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/server.py"
+      ],
+      "success_criteria": [
+        "100% coverage for ai/coordination.py (currently 0%)",
+        "100% coverage for security modules (currently 0%)",
+        "90%+ coverage for ai/context.py (currently 21%)",
+        "90%+ coverage for server.py (currently 56%)",
+        "All tests passing with production-ready quality"
+      ],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T01:25:10.664Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "task_1757121885706_8f5ebepaf",
+      "title": "CRITICAL: Set up comprehensive test framework and CI/CD integration",
+      "description": "URGENT: Implement robust test framework setup across all packages with Jest configuration, coverage reporting, test runners, and CI/CD integration. Set up test databases, mock services, and automated test execution pipelines to support the massive testing effort required.",
+      "category": "error",
+      "priority": "critical",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/.github/workflows/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/package.json"
+      ],
+      "success_criteria": [
+        "Jest configuration optimized for all packages",
+        "Coverage thresholds enforced (100% for critical modules, 90%+ others)",
+        "Test database setup and seeding",
+        "Mock service configurations",
+        "CI/CD pipeline integration for automated testing",
+        "Test reporting and metrics dashboard"
+      ],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T01:24:45.706Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "task_1757121874778_d9ma8nqah",
+      "title": "CRITICAL: Create complete test suite for bytebot-ui package (0% to 100% coverage)",
+      "description": "URGENT: bytebot-ui package has NO TEST COVERAGE WHATSOEVER (0% coverage) which is unacceptable for a production frontend. Must create comprehensive test suites including React component tests, hook tests, utility function tests, API integration tests, and user interaction tests for all UI components.",
+      "category": "error",
+      "priority": "critical",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-ui/src/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-ui/src/components/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-ui/src/hooks/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-ui/src/utils/"
+      ],
+      "success_criteria": [
+        "90%+ statement coverage for React components",
+        "100% coverage for custom hooks and utilities",
+        "Component rendering tests for all UI elements",
+        "User interaction testing with React Testing Library",
+        "API integration testing for all service calls"
+      ],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T01:24:34.778Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "task_1757121865446_jazsb60xj",
+      "title": "CRITICAL: Create complete test suite for shared package (0% to 100% coverage)",
+      "description": "URGENT: shared package has NO TEST COVERAGE WHATSOEVER (0% coverage) which is a critical failure for a shared library. Must create comprehensive test suites for all types, utilities, and shared functions including computerAction types, messageContent types, security types, and utility functions.",
+      "category": "error",
+      "priority": "critical",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/types/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/utils/"
+      ],
+      "success_criteria": [
+        "100% statement coverage for all shared utilities",
+        "100% branch coverage for type validators",
+        "Comprehensive test cases for all type definitions",
+        "Unit tests for all utility functions",
+        "Integration tests for cross-package compatibility"
+      ],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T01:24:25.446Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "task_1757121856588_auif8irh4",
+      "title": "CRITICAL: Fix bytebotd test coverage from 8.71% to 100% production standard",
+      "description": "URGENT: bytebotd package has critically insufficient test coverage (8.71% statements, 5.63% branches) far below production requirements of 100% for important modules. Current coverage: 195/2238 statements, 50/887 branches, 35/280 functions covered. Must achieve 100% coverage for computer-use, auth, health, mcp modules and 90%+ for others.",
+      "category": "error",
+      "priority": "critical",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/computer-use/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/health/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/mcp/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/input-tracking/"
+      ],
+      "success_criteria": [
+        "100% statement coverage for critical modules",
+        "90%+ branch coverage across all modules",
+        "All existing tests passing reliably",
+        "Integration tests for API endpoints",
+        "Security test coverage for authentication"
+      ],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T01:24:16.588Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "task_1757121845633_g0ins5tx0",
+      "title": "CRITICAL: Complete test suite for bytebot-agent package (2% to 100% coverage)",
+      "description": "URGENT: bytebot-agent package has catastrophically low test coverage with only 1 test file for a massive codebase. Must create comprehensive test suites for all modules including auth, tasks, messages, agents, config, database, and API integrations to achieve 100% coverage on this critical package.",
+      "category": "error",
+      "priority": "critical",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/src/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/src/auth/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/src/tasks/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/src/messages/"
+      ],
+      "success_criteria": [
+        "100% statement coverage for all core modules",
+        "100% branch coverage for critical business logic",
+        "Comprehensive test cases for all API endpoints",
+        "Integration tests for database operations",
+        "Authentication and authorization test coverage",
+        "All tests passing with production-ready quality"
+      ],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T01:24:05.633Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    }
+  ],
+  "agents": {
+    "development_session_1757114415990_1_general_d3fe23c7": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-05T23:20:15.990Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-05T23:20:15.990Z",
+      "sessionId": "session_1757114415990",
+      "metadata": {}
+    }
+  },
+  "settings": {
+    "auto_sort_enabled": true,
+    "sort_criteria": {
+      "primary": "category",
+      "secondary": "created_at"
+    },
+    "priority_values": {
+      "critical": 4,
+      "high": 3,
+      "medium": 2,
+      "low": 1
+    },
+    "category_enabled": true,
+    "category_ranks": {
+      "linter-error": 1,
+      "build-error": 2,
+      "start-error": 3,
+      "error": 4,
+      "missing-feature": 5,
+      "missing-test": 6,
+      "test-linter-error": 7,
+      "test-error": 8,
+      "bug": 9,
+      "enhancement": 10,
+      "refactor": 11,
+      "documentation": 12,
+      "chore": 13,
+      "research": 14
+    }
+  },
+  "review_strikes": 0,
+  "strikes_completed_last_run": false,
+  "current_task_index": 0
+}

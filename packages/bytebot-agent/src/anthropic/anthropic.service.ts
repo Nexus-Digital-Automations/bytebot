@@ -12,7 +12,7 @@ import {
   isComputerToolUseContentBlock,
 } from '@bytebot/shared';
 import { DEFAULT_MODEL } from './anthropic.constants';
-import { Message, Role } from '@prisma/client';
+import { Message, MessageRole } from '@prisma/client';
 import { anthropicTools } from './anthropic.tools';
 import {
   BytebotAgentService,
@@ -145,7 +145,7 @@ export class AnthropicService implements BytebotAgentService {
         };
       }
       anthropicMessages.push({
-        role: message.role === Role.USER ? 'user' : 'assistant',
+        role: message.role === MessageRole.USER ? 'user' : 'assistant',
         content: content,
       });
     }

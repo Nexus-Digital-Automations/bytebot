@@ -12,7 +12,7 @@ import {
   isImageContentBlock,
 } from '@bytebot/shared';
 import { DEFAULT_MODEL } from './openai.constants';
-import { Message, Role } from '@prisma/client';
+import { Message, MessageRole } from '@prisma/client';
 import { openaiTools } from './openai.tools';
 import {
   BytebotAgentService,
@@ -138,7 +138,7 @@ export class OpenAIService implements BytebotAgentService {
         for (const block of messageContentBlocks) {
           switch (block.type) {
             case MessageContentType.Text: {
-              if (message.role === Role.USER) {
+              if (message.role === MessageRole.USER) {
                 openaiMessages.push({
                   type: 'message',
                   role: 'user',
@@ -165,7 +165,7 @@ export class OpenAIService implements BytebotAgentService {
             }
             case MessageContentType.ToolUse:
               // For assistant messages with tool use, convert to function call
-              if (message.role === Role.ASSISTANT) {
+              if (message.role === MessageRole.ASSISTANT) {
                 const toolBlock = block as ToolUseContentBlock;
                 openaiMessages.push({
                   type: 'function_call',

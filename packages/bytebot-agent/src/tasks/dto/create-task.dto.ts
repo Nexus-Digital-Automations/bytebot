@@ -8,7 +8,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Role, TaskPriority, TaskType } from '@prisma/client';
+import { MessageRole, TaskPriority, TaskType } from '@prisma/client';
 
 export class TaskFileDto {
   @IsNotEmpty()

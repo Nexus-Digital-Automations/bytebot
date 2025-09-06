@@ -1,0 +1,145 @@
+# Kubernetes ConfigMap - Bytebot Agent Configuration
+# Contains non-sensitive configuration data for the Bytebot API platform
+# Secrets are managed separately in secrets.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bytebot-agent-config
+  namespace: bytebot-production
+  labels:
+    app: bytebot-agent
+    component: configuration
+    version: "1.0.0"
+    environment: production
+data:
+  # Environment Configuration
+  NODE_ENV: "production"
+  PORT: "9991"
+
+  # Database Configuration (Non-sensitive)
+  DATABASE_MAX_CONNECTIONS: "50"
+  DATABASE_CONNECTION_TIMEOUT: "30000"
+
+  # API Configuration
+  API_RATE_LIMIT_WINDOW: "900000"  # 15 minutes
+  API_RATE_LIMIT_MAX_REQUESTS: "100"
+  API_CORS_ORIGINS: "https://app.bytebot.ai,https://api.bytebot.ai,https://dashboard.bytebot.ai"
+  BODY_PARSER_LIMIT: "50mb"
+  REQUEST_TIMEOUT: "30000"
+
+  # Security Configuration (Non-sensitive)
+  JWT_EXPIRES_IN: "15m"
+  JWT_REFRESH_EXPIRES_IN: "7d"
+
+  # Service URLs
+  BYTEBOT_DESKTOP_BASE_URL: "http://bytebot-desktop:9990"
+  BYTEBOT_LLM_PROXY_URL: "http://bytebot-llm-proxy:8000"
+  BYTEBOT_ANALYTICS_ENDPOINT: "https://analytics.bytebot.ai/api/events"
+
+  # Feature Flags
+  ENABLE_AUTHENTICATION: "true"
+  ENABLE_RATE_LIMITING: "true"
+  ENABLE_METRICS_COLLECTION: "true"
+  ENABLE_HEALTH_CHECKS: "true"
+  ENABLE_CIRCUIT_BREAKER: "true"
+
+  # Monitoring & Observability
+  PROMETHEUS_METRICS_PORT: "9464"
+  LOG_LEVEL: "warn"
+  LOG_FORMAT: "json"
+  ENABLE_DISTRIBUTED_TRACING: "true"
+  JAEGER_ENDPOINT: "http://jaeger-collector:14268/api/traces"
+
+  # Performance Settings
+  GRACEFUL_SHUTDOWN_TIMEOUT: "30000"
+
+  # Circuit Breaker Configuration
+  CIRCUIT_BREAKER_FAILURE_THRESHOLD: "50"
+  CIRCUIT_BREAKER_TIMEOUT: "60000"
+  CIRCUIT_BREAKER_RESET_TIMEOUT: "30000"
+
+  # Health Check Configuration
+  HEALTH_CHECK_TIMEOUT: "5000"
+  HEALTH_CHECK_INTERVAL: "30000"
+
+  # Kubernetes Configuration
+  KUBERNETES_NAMESPACE: "bytebot-production"
+  KUBERNETES_SERVICE_NAME: "bytebot-agent"
+
+  # Development Features (Disabled in production)
+  ENABLE_SWAGGER: "false"
+  SWAGGER_PATH: "/api/docs"
+  DEBUG_MODE: "false"
+
+---
+# Staging ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bytebot-agent-config
+  namespace: bytebot-staging
+  labels:
+    app: bytebot-agent
+    component: configuration
+    version: "1.0.0"
+    environment: staging
+data:
+  # Environment Configuration
+  NODE_ENV: "staging"
+  PORT: "9991"
+
+  # Database Configuration (Non-sensitive)
+  DATABASE_MAX_CONNECTIONS: "20"
+  DATABASE_CONNECTION_TIMEOUT: "30000"
+
+  # API Configuration
+  API_RATE_LIMIT_WINDOW: "900000"  # 15 minutes
+  API_RATE_LIMIT_MAX_REQUESTS: "100"
+  API_CORS_ORIGINS: "https://staging.bytebot.ai,https://staging-api.bytebot.ai"
+  BODY_PARSER_LIMIT: "50mb"
+  REQUEST_TIMEOUT: "30000"
+
+  # Security Configuration (Non-sensitive)
+  JWT_EXPIRES_IN: "15m"
+  JWT_REFRESH_EXPIRES_IN: "7d"
+
+  # Service URLs
+  BYTEBOT_DESKTOP_BASE_URL: "http://bytebot-desktop:9990"
+  BYTEBOT_LLM_PROXY_URL: "http://bytebot-llm-proxy:8000"
+  BYTEBOT_ANALYTICS_ENDPOINT: "https://analytics.bytebot.ai/api/events"
+
+  # Feature Flags
+  ENABLE_AUTHENTICATION: "true"
+  ENABLE_RATE_LIMITING: "true"
+  ENABLE_METRICS_COLLECTION: "true"
+  ENABLE_HEALTH_CHECKS: "true"
+  ENABLE_CIRCUIT_BREAKER: "false"  # Disabled in staging
+
+  # Monitoring & Observability
+  PROMETHEUS_METRICS_PORT: "9464"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  ENABLE_DISTRIBUTED_TRACING: "false"  # Disabled in staging
+  JAEGER_ENDPOINT: ""
+
+  # Performance Settings
+  GRACEFUL_SHUTDOWN_TIMEOUT: "10000"
+
+  # Circuit Breaker Configuration
+  CIRCUIT_BREAKER_FAILURE_THRESHOLD: "50"
+  CIRCUIT_BREAKER_TIMEOUT: "60000"
+  CIRCUIT_BREAKER_RESET_TIMEOUT: "30000"
+
+  # Health Check Configuration
+  HEALTH_CHECK_TIMEOUT: "5000"
+  HEALTH_CHECK_INTERVAL: "30000"
+
+  # Kubernetes Configuration
+  KUBERNETES_NAMESPACE: "bytebot-staging"
+  KUBERNETES_SERVICE_NAME: "bytebot-agent"
+
+  # Development Features (Limited in staging)
+  ENABLE_SWAGGER: "true"
+  SWAGGER_PATH: "/api/docs"
+  DEBUG_MODE: "false"
