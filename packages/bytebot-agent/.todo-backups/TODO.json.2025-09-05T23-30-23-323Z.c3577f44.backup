@@ -1,6 +1,30 @@
 {
   "project": "unknown",
-  "tasks": [],
+  "tasks": [
+    {
+      "id": "task_1757114431369_ootaocstj",
+      "title": "Final TypeScript Cleanup - 15 Remaining Violations",
+      "description": "Deploy 5 specialized subagents to eliminate remaining TypeScript strict violations for enterprise compliance",
+      "category": "linter-error",
+      "priority": "critical",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "src/services/google.service.ts",
+        "src/main.ts",
+        "src/services/openai.service.ts",
+        "src/services/proxy.service.ts",
+        "src/services/messages.service.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-05T23:20:31.369Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    }
+  ],
   "agents": {
     "development_session_1757114415990_1_general_d3fe23c7": {
       "name": "development Agent",

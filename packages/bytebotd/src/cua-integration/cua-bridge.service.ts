@@ -21,8 +21,11 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { CuaIntegrationConfig } from './cua-integration.service';
+import { CuaPerformanceService } from './cua-performance.service';
 import { firstValueFrom } from 'rxjs';
+import { AxiosResponse } from 'axios';
 import * as crypto from 'crypto';
 
 /**
@@ -63,6 +66,35 @@ export interface BridgeResponse<T = any> {
   requestId: string;
 }
 
+/**
+ * HTTP Response Data Type Guards
+ */
+interface HttpResponseData {
+  [key: string]: unknown;
+}
+
+/**
+ * Health Check Response Interface
+ */
+interface HealthCheckResponse {
+  capabilities?: string[];
+  version?: string;
+}
+
+/**
+ * Type guard for HTTP response data
+ */
+function isHttpResponseData(data: unknown): data is HttpResponseData {
+  return data !== null && typeof data === 'object';
+}
+
+/**
+ * Type guard for health check response
+ */
+function isHealthCheckResponse(data: unknown): data is HealthCheckResponse {
+  return isHttpResponseData(data);
+}
+
 @Injectable()
 export class CuaBridgeService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CuaBridgeService.name);
@@ -79,7 +111,10 @@ export class CuaBridgeService implements OnModuleInit, OnModuleDestroy {
   private readonly HEALTH_CHECK_INTERVAL = 30000; // 30 seconds
   private readonly MAX_RETRY_ATTEMPTS = 3;
 
-  constructor() {
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly performanceService: CuaPerformanceService,
+  ) {
     this.config = {
       framework: {
         enabled: false,
@@ -349,10 +384,10 @@ export class CuaBridgeService implements OnModuleInit, OnModuleDestroy {
     });
 
     try {
-      let response: { data: T; status: number };
+      let axiosResponse: AxiosResponse<T>;
 
       if (request.method === 'GET') {
-        const axiosResponse = await firstValueFrom(
+        axiosResponse = await firstValueFrom(
           this.httpService.get<T>(fullUrl, {
             timeout: request.timeout,
             headers: {
@@ -361,12 +396,8 @@ export class CuaBridgeService implements OnModuleInit, OnModuleDestroy {
             },
           }),
         );
-        response = {
-          data: axiosResponse.data,
-          status: axiosResponse.status,
-        };
       } else {
-        const axiosResponse = await firstValueFrom(
+        axiosResponse = await firstValueFrom(
           this.httpService.request<T>({
             method: request.method,
             url: fullUrl,
@@ -379,11 +410,11 @@ export class CuaBridgeService implements OnModuleInit, OnModuleDestroy {
             },
           }),
         );
-        response = {
-          data: axiosResponse.data,
-          status: axiosResponse.status,
-        };
       }
+
+      // Type-safe response data and status access
+      const responseData = axiosResponse.data;
+      const responseStatus = axiosResponse.status;
 
       const responseTime = Date.now() - startTime;
 
@@ -412,8 +443,8 @@ export class CuaBridgeService implements OnModuleInit, OnModuleDestroy {
 
       return {
         success: true,
-        data: response.data,
-        statusCode: response.status,
+        data: responseData,
+        statusCode: responseStatus,
         responseTime,
         requestId: request.id,
       };
@@ -544,23 +575,32 @@ export class CuaBridgeService implements OnModuleInit, OnModuleDestroy {
 
     try {
       const response = await firstValueFrom(
-        this.httpService.get<{
-          capabilities?: string[];
-          version?: string;
-        }>(`${this.config.aneBridge.baseUrl}/health`, {
-          timeout: 5000,
-        }),
+        this.httpService.get<HealthCheckResponse>(
+          `${this.config.aneBridge.baseUrl}/health`,
+          {
+            timeout: 5000,
+          },
+        ),
       );
 
       const responseTime = Date.now() - startTime;
+
+      // Type-safe access to response data
+      const healthData = response.data;
+      const capabilities = isHealthCheckResponse(healthData)
+        ? healthData.capabilities || []
+        : [];
+      const version = isHealthCheckResponse(healthData)
+        ? healthData.version
+        : undefined;
 
       this.healthStatus = {
         connected: true,
         responseTime,
         lastCheck: new Date(),
         errorCount: Math.max(0, this.healthStatus.errorCount - 1),
-        capabilities: response.data.capabilities || [],
-        version: response.data.version,
+        capabilities,
+        version,
       };
 
       this.logger.debug(

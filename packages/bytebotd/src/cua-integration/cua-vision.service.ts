@@ -18,7 +18,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { CuaIntegrationConfig } from './cua-integration.service';
+import {
+  CuaIntegrationService,
+  CuaIntegrationConfig,
+} from './cua-integration.service';
+import { CuaPerformanceService } from './cua-performance.service';
 import * as crypto from 'crypto';
 
 /**
@@ -421,26 +425,13 @@ export class CuaVisionService {
   private readonly CACHE_TTL_MS = 60000; // 1 minute cache
   private readonly MAX_CACHE_SIZE = 1000;
 
-  constructor(private readonly httpService: HttpService) {
-    this.config = {
-      framework: {
-        enabled: false,
-        containerId: 'unknown',
-        version: '1.0.0',
-        performanceMode: 'standard',
-        logLevel: 'info',
-      },
-      aneBridge: {
-        enabled: false,
-        host: 'localhost',
-        port: 8080,
-        baseUrl: 'http://localhost:8080',
-        fallbackEnabled: true,
-        timeoutMs: 5000,
-      },
-      monitoring: { enabled: false, metricsCollection: false },
-      hybrid: { nativeBridgeEnabled: false, sharedVolumePath: '/tmp' },
-    };
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly cuaIntegrationService: CuaIntegrationService,
+    private readonly performanceService: CuaPerformanceService,
+  ) {
+    // Get configuration from integration service instead of hardcoding
+    this.config = this.cuaIntegrationService.getConfiguration();
 
     this.logger.log(
       `C/ua Vision Service initialized - ANE Bridge: ${this.config?.aneBridge?.enabled ? 'enabled' : 'disabled'}`,

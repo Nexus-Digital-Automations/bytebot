@@ -76,6 +76,12 @@ function safeGetCoordinates(
   return undefined;
 }
 
+// Generic action type
+type GenericAction = {
+  action: string;
+  [key: string]: unknown;
+};
+
 // Type guard for validating action properties
 function isValidAction(obj: unknown): obj is GenericAction {
   return (

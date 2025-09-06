@@ -16,6 +16,8 @@ import {
   TypeTextAction,
 } from '@bytebot/shared';
 import { keyInfoMap } from './input-tracking.helpers';
+import { ComputerUseService } from '../computer-use/computer-use.service';
+import { InputTrackingGateway } from './input-tracking.gateway';
 
 @Injectable()
 export class InputTrackingService implements OnModuleDestroy {
@@ -42,7 +44,16 @@ export class InputTrackingService implements OnModuleDestroy {
   private typingTimer: NodeJS.Timeout | null = null; // debounce
   private readonly TYPING_DEBOUNCE_MS = 500;
 
-  constructor() {}
+  /**
+   * Initialize Input Tracking Service with dependency injection
+   *
+   * @param computerUseService - Computer automation service for screenshot capture
+   * @param gateway - WebSocket gateway for real-time event broadcasting
+   */
+  constructor(
+    private readonly computerUseService: ComputerUseService,
+    private readonly gateway: InputTrackingGateway,
+  ) {}
 
   // Tracking is started manually via startTracking
 
@@ -220,11 +231,11 @@ export class InputTrackingService implements OnModuleDestroy {
 
       /* Printable char with no active modifier → buffer for TypeTextAction. */
       if (!this.isModifierKey(e) && keyInfoMap[e.keycode].isPrintable) {
-        this.bufferChar(
-          e.shiftKey
-            ? keyInfoMap[e.keycode].shiftString
-            : keyInfoMap[e.keycode].string,
-        );
+        const keyInfo = keyInfoMap[e.keycode];
+        const char = e.shiftKey
+          ? (keyInfo.shiftString ?? keyInfo.string ?? '')
+          : (keyInfo.string ?? '');
+        this.bufferChar(char);
         return;
       }
 
