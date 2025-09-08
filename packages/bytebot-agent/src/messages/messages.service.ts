@@ -28,6 +28,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Message, MessageRole, Prisma } from '@prisma/client';
 import {
   MessageContentBlock,
+  MessageContentType,
   isComputerToolUseContentBlock,
   isToolResultContentBlock,
   isUserActionContentBlock,
@@ -160,7 +161,7 @@ export class MessagesService {
 
     try {
       // Validate input data
-      await this.validateMessageData(data, operationId);
+      this.validateMessageData(data, operationId);
 
       // Validate and process content blocks
       const validationStartTime = performance.now();
@@ -701,10 +702,10 @@ export class MessagesService {
    * Validates message creation data
    * @private
    */
-  private async validateMessageData(
+  private validateMessageData(
     data: CreateMessageRequest,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     this.logger.debug('Validating message data', {
       operationId,
       component: 'MessagesService',
@@ -767,13 +768,18 @@ export class MessagesService {
         validatedBlocks++;
 
         // Calculate character count based on block type
-        if (block.type === 'text' && typeof block.text === 'string') {
+        if (
+          block.type === MessageContentType.TEXT &&
+          'text' in block &&
+          typeof block.text === 'string'
+        ) {
           totalCharacters += block.text.length;
         } else if (
-          block.type === 'tool_result' &&
+          block.type === MessageContentType.TOOL_RESULT &&
+          'content' in block &&
           typeof block.content === 'string'
         ) {
-          totalCharacters += block.content.length;
+          totalCharacters += (block.content as string).length;
         }
       }
     }
@@ -790,38 +796,49 @@ export class MessagesService {
    * @private
    */
   private calculateGroupContentLength(messages: ProcessedMessage[]): number {
-    return messages.reduce((total, message) => {
-      if (Array.isArray(message.content)) {
-        return (
-          total +
-          (message.content as unknown[]).reduce((contentTotal, block) => {
-            if (isMessageContentBlock(block)) {
-              if (block.type === 'text' && typeof block.text === 'string') {
-                return contentTotal + block.text.length;
-              } else if (
-                block.type === 'tool_result' &&
-                typeof block.content === 'string'
-              ) {
-                return contentTotal + block.content.length;
+    return messages.reduce(
+      (total: number, message: ProcessedMessage): number => {
+        if (Array.isArray(message.content)) {
+          const contentLength = (
+            message.content as MessageContentBlock[]
+          ).reduce(
+            (contentTotal: number, block: MessageContentBlock): number => {
+              if (isMessageContentBlock(block)) {
+                if (
+                  block.type === MessageContentType.TEXT &&
+                  'text' in block &&
+                  typeof block.text === 'string'
+                ) {
+                  return contentTotal + block.text.length;
+                } else if (
+                  block.type === MessageContentType.TOOL_RESULT &&
+                  'content' in block &&
+                  typeof block.content === 'string'
+                ) {
+                  return contentTotal + (block.content as string).length;
+                }
               }
-            }
-            return contentTotal;
-          }, 0)
-        );
-      }
-      return total;
-    }, 0);
+              return contentTotal;
+            },
+            0,
+          );
+          return total + contentLength;
+        }
+        return total;
+      },
+      0,
+    );
   }
 
   /**
    * Emits new message WebSocket notification with comprehensive logging
    * @private
    */
-  private async emitNewMessageWithLogging(
+  private emitNewMessageWithLogging(
     taskId: string,
     message: Message,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     try {
       this.logger.debug('Emitting WebSocket notification for new message', {
         operationId,
@@ -831,7 +848,7 @@ export class MessagesService {
         action: 'emitNewMessageWithLogging',
       });
 
-      await this.tasksGateway.emitNewMessage(taskId, message);
+      this.tasksGateway.emitNewMessage(taskId, message);
 
       this.logger.debug('WebSocket notification emitted successfully', {
         operationId,

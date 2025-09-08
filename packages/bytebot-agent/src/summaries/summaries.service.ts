@@ -118,7 +118,7 @@ export class SummariesService {
 
     try {
       // Validate input data
-      await this.validateSummaryData(data, operationId);
+      this.validateSummaryData(data, operationId);
 
       // Calculate content metrics
       const contentMetrics = this.calculateContentMetrics(
@@ -423,10 +423,10 @@ export class SummariesService {
    * Validates summary creation data
    * @private
    */
-  private async validateSummaryData(
+  private validateSummaryData(
     data: CreateSummaryRequest,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     this.logger.debug('Validating summary data', {
       operationId,
       component: 'SummariesService',

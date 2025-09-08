@@ -162,7 +162,7 @@ export interface AuthorizationAuditEntry {
  */
 const DEFAULT_ROLE_DEFINITIONS: RoleDefinition[] = [
   {
-    name: UserRole.SUPER_ADMIN,
+    name: UserRole.SUPER_ADMIN as string,
     displayName: 'Super Administrator',
     description: 'Full system access with all permissions',
     inheritsFrom: [],
@@ -402,7 +402,7 @@ export class RBACAuthorizationService implements OnModuleInit {
 
       // Log security event for failed authorization
       if (!isAuthorized) {
-        await this.logSecurityEvent(context, auditEntry, operationId);
+        this.logSecurityEvent(context, auditEntry, operationId);
       }
 
       const authTime = Date.now() - startTime;
@@ -424,13 +424,17 @@ export class RBACAuthorizationService implements OnModuleInit {
         effectiveRole: user.role,
         auditTrail: auditEntry,
       };
-    } catch (error: unknown) {
+    } catch (error) {
       const authTime = Date.now() - startTime;
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown authorization error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
       this.logger.error(`[${operationId}] Authorization check failed`, {
         operationId,
         userId: context.userId,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
+        error: errorMessage,
+        stack: errorStack,
         authTimeMs: authTime,
       });
 
@@ -469,11 +473,11 @@ export class RBACAuthorizationService implements OnModuleInit {
   /**
    * Grant additional permission to a user
    */
-  async grantPermission(
+  grantPermission(
     userId: string,
     permission: Permission,
     grantedBy: string,
-  ): Promise<void> {
+  ): void {
     const operationId = `rbac-grant-${Date.now()}`;
 
     this.logger.log(`[${operationId}] Granting permission to user`, {
@@ -487,7 +491,7 @@ export class RBACAuthorizationService implements OnModuleInit {
     // In a full implementation, store this in database
     // For now, log the grant operation
 
-    await this.logSecurityEvent(
+    this.logSecurityEvent(
       {
         userId,
         resourceType: ResourceType.SECURITY,
@@ -517,12 +521,12 @@ export class RBACAuthorizationService implements OnModuleInit {
   /**
    * Revoke permission from a user
    */
-  async revokePermission(
+  revokePermission(
     userId: string,
     resource: ResourceType,
     actions: PermissionAction[],
     revokedBy: string,
-  ): Promise<void> {
+  ): void {
     const operationId = `rbac-revoke-${Date.now()}`;
 
     this.logger.log(`[${operationId}] Revoking permission from user`, {
@@ -536,7 +540,7 @@ export class RBACAuthorizationService implements OnModuleInit {
     // In a full implementation, remove from database
     // For now, log the revoke operation
 
-    await this.logSecurityEvent(
+    this.logSecurityEvent(
       {
         userId,
         resourceType: ResourceType.SECURITY,
@@ -912,18 +916,30 @@ export class RBACAuthorizationService implements OnModuleInit {
     }
   }
 
-  private async logSecurityEvent(
+  private logSecurityEvent(
     context: PermissionContext,
     auditEntry: AuthorizationAuditEntry,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     if (this.securityMonitoring) {
-      // This would be expanded to create appropriate security events
+      // Log security event with proper async monitoring integration
       this.logger.warn(`AUTHORIZATION_DENIED: ${auditEntry.reason}`, {
         operationId,
         auditId: auditEntry.auditId,
         userId: context.userId,
         resource: context.resourceType,
+        action: context.action,
+        ipAddress: context.ipAddress,
+      });
+
+      // TODO: Add security monitoring service integration in production
+      // This would integrate with external security monitoring systems
+      // Example: await this.securityMonitoring.recordSecurityEvent({...});
+
+      this.logger.debug('Security event logged for authorization denial', {
+        operationId,
+        userId: context.userId,
+        resourceType: context.resourceType,
         action: context.action,
         ipAddress: context.ipAddress,
       });

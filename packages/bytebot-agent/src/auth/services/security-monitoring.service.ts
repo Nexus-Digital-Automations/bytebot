@@ -165,13 +165,13 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Record login attempt with comprehensive security analysis
    */
-  async recordLoginAttempt(
+  recordLoginAttempt(
     email: string,
     ipAddress: string,
     userAgent?: string,
     success = false,
     userId?: string,
-  ): Promise<SecurityEvent> {
+  ): SecurityEvent {
     const operationId = `security-login-attempt-${Date.now()}`;
     const startTime = Date.now();
 
@@ -189,7 +189,7 @@ export class SecurityMonitoringService implements OnModuleInit {
       const geolocation = this.getIpGeolocation(ipAddress);
 
       // Calculate risk score based on multiple factors
-      const riskScore = await this.calculateRiskScore(
+      const riskScore = this.calculateRiskScore(
         email,
         ipAddress,
         geolocation,
@@ -202,7 +202,7 @@ export class SecurityMonitoringService implements OnModuleInit {
 
       // Detect geolocation anomalies for existing users
       const locationAnomaly = userId
-        ? await this.detectGeolocationAnomaly(userId, geolocation)
+        ? this.detectGeolocationAnomaly(userId, geolocation)
         : null;
 
       // Determine event severity and type
@@ -234,14 +234,14 @@ export class SecurityMonitoringService implements OnModuleInit {
       };
 
       // Log security event
-      await this.logSecurityEvent(securityEvent);
+      this.logSecurityEvent(securityEvent);
 
       // Take automated security actions if needed
       if (
         severity === SecurityEventSeverity.HIGH ||
         severity === SecurityEventSeverity.CRITICAL
       ) {
-        await this.takeAutomatedSecurityAction(securityEvent);
+        this.takeAutomatedSecurityAction(securityEvent);
       }
 
       const monitoringTime = Date.now() - startTime;
@@ -445,13 +445,13 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Calculate comprehensive risk score based on multiple security factors
    */
-  private async calculateRiskScore(
+  private calculateRiskScore(
     email: string,
     ipAddress: string,
     geolocation: GeolocationData | null,
     userAgent?: string,
     success = false,
-  ): Promise<number> {
+  ): number {
     let riskScore = 0.0;
 
     // Base score for failed login
@@ -546,14 +546,14 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Detect geolocation anomalies for user login patterns
    */
-  private async detectGeolocationAnomaly(
+  private detectGeolocationAnomaly(
     userId: string,
     currentLocation: GeolocationData | null,
-  ): Promise<{
+  ): {
     isAnomalous: boolean;
     distance?: number;
     previousLocation?: GeolocationData;
-  } | null> {
+  } | null {
     if (
       !currentLocation ||
       !currentLocation.latitude ||
@@ -633,7 +633,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Log security event with structured data
    */
-  private async logSecurityEvent(event: SecurityEvent): Promise<void> {
+  private logSecurityEvent(event: SecurityEvent): void {
     // Log to application logger
     const logLevel =
       event.severity === SecurityEventSeverity.CRITICAL
@@ -654,17 +654,21 @@ export class SecurityMonitoringService implements OnModuleInit {
       metadata: event.metadata,
     });
 
-    // In production, also send to SIEM, security dashboard, or external monitoring
-    // await this.sendToSecurityDashboard(event);
-    // await this.sendToSIEM(event);
+    // TODO: Implement database storage for security events in production
+    // Example: Store events in dedicated security audit log table
+    // await this.prismaService.securityAuditLog.create({...});
+
+    this.logger.debug('Security event logged and would be stored in database', {
+      eventId: event.eventId,
+      eventType: event.type,
+      severity: event.severity,
+    });
   }
 
   /**
    * Take automated security actions for high-risk events
    */
-  private async takeAutomatedSecurityAction(
-    event: SecurityEvent,
-  ): Promise<void> {
+  private takeAutomatedSecurityAction(event: SecurityEvent): void {
     const operationId = `security-action-${Date.now()}`;
 
     this.logger.warn(`[${operationId}] Taking automated security action`, {
@@ -679,22 +683,19 @@ export class SecurityMonitoringService implements OnModuleInit {
     switch (event.type) {
       case SecurityEventType.BRUTE_FORCE_DETECTED:
         // IP is already blocked by brute force tracker
-        await this.notifySecurityTeam(
+        this.notifySecurityTeam(
           event,
           'Brute force attack detected and IP blocked',
         );
         break;
 
       case SecurityEventType.GEOLOCATION_ANOMALY:
-        await this.notifySecurityTeam(event, 'Unusual login location detected');
+        this.notifySecurityTeam(event, 'Unusual login location detected');
         // Could trigger additional verification requirements
         break;
 
       case SecurityEventType.SUSPICIOUS_IP:
-        await this.notifySecurityTeam(
-          event,
-          'Login from suspicious IP address',
-        );
+        this.notifySecurityTeam(event, 'Login from suspicious IP address');
         break;
     }
   }
@@ -702,16 +703,8 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Notify security team of high-risk events
    */
-  private async notifySecurityTeam(
-    event: SecurityEvent,
-    message: string,
-  ): Promise<void> {
-    // In production, integrate with:
-    // - Slack/Teams notifications
-    // - Email alerts
-    // - PagerDuty/incident management
-    // - Security dashboard
-
+  private notifySecurityTeam(event: SecurityEvent, message: string): void {
+    // Log the security alert
     this.logger.error(`SECURITY_ALERT: ${message}`, {
       eventId: event.eventId,
       eventType: event.type,
@@ -722,6 +715,25 @@ export class SecurityMonitoringService implements OnModuleInit {
       riskScore: event.riskScore,
       timestamp: event.timestamp,
     });
+
+    // TODO: Implement database storage for security alert notifications in production
+    // Example: Store notifications in dedicated security alert table
+    // await this.prismaService.securityAlertNotification.create({...});
+
+    this.logger.debug(
+      'Security alert notification logged and would be stored in database',
+      {
+        eventId: event.eventId,
+        alertMessage: message,
+        severity: event.severity,
+      },
+    );
+
+    // In production, add integrations with external notification systems:
+    // - await this.sendSlackNotification(message, event);
+    // - await this.sendEmailAlert(message, event);
+    // - await this.createPagerDutyIncident(message, event);
+    // - await this.updateSecurityDashboard(message, event);
   }
 
   /**
