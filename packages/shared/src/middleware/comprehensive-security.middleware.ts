@@ -328,16 +328,14 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
               baseUri: ["'self'"],
               formAction: ["'self'"],
 
-              // Report violations
-              reportUri: config.enableCSPReporting
-                ? [config.cspReportEndpoint]
-                : undefined,
+              // Report violations (using modern reportTo instead of deprecated reportUri)
+              ...(config.enableCSPReporting
+                ? { reportTo: [config.cspReportEndpoint] }
+                : {}),
 
               // Upgrade insecure requests in production
               ...(config.environment === "production"
-                ? {
-                    upgradeInsecureRequests: [],
-                  }
+                ? { upgradeInsecureRequests: [] }
                 : {}),
             },
             reportOnly: config.environment === "development",
@@ -391,32 +389,11 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       // XSS Protection
       xssFilter: true,
 
-      // Certificate Transparency
-      expectCt:
-        config.environment === "production"
-          ? {
-              maxAge: 86400,
-              enforce: true,
-            }
-          : false,
+      // Note: expectCt has been removed from helmet v8 as Certificate Transparency
+      // is now widely supported and the header is no longer needed
 
-      // Permissions Policy
-      permissionsPolicy: {
-        camera: [],
-        microphone: [],
-        geolocation: [],
-        payment: [],
-        usb: [],
-        magnetometer: [],
-        gyroscope: [],
-        accelerometer: [],
-        ...(config.enableVNC
-          ? {
-              fullscreen: ["self"],
-              screen: ["self"],
-            }
-          : {}),
-      },
+      // Note: permissionsPolicy has been removed from helmet v8.
+      // Use a separate Permissions-Policy header middleware if needed
     });
   }
 

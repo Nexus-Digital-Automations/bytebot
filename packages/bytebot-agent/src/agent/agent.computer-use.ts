@@ -49,7 +49,7 @@ interface WriteFileResponse {
 
 // SUBAGENT 1: Removed duplicate function implementations - keeping comprehensive versions below
 
-const BYTEBOT_DESKTOP_BASE_URL = process.env.BYTEBOT_DESKTOP_BASE_URL as string;
+const BYTEBOT_DESKTOP_BASE_URL = process.env.BYTEBOT_DESKTOP_BASE_URL;
 
 // SUBAGENT 1: Removed duplicate interface definitions - already defined above
 
@@ -74,7 +74,11 @@ function getSafeErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
-  return String(error);
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return '[Unserializable Error Object]';
+  }
 }
 
 /**

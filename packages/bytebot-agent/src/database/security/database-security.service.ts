@@ -11,7 +11,7 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaClient } from '@prisma/client';
+import * as fs from 'fs';
 
 export interface DatabaseSecurityConfig {
   // SSL/TLS Configuration
@@ -108,7 +108,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  async onModuleInit() {
+  onModuleInit(): void {
     this.logger.log('Starting database security monitoring');
 
     // Validate SSL/TLS configuration
@@ -124,7 +124,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
     this.logger.log('Database security service fully operational');
   }
 
-  async onModuleDestroy() {
+  onModuleDestroy(): void {
     this.logger.log('Shutting down database security service');
 
     if (this.auditCleanupInterval) {
@@ -133,7 +133,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
 
     // Flush any pending audit events
     if (this.auditEvents.length > 0) {
-      await this.flushAuditEvents();
+      this.flushAuditEvents();
     }
 
     this.logger.log('Database security service shutdown complete');
@@ -142,7 +142,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
   /**
    * Audit database operation
    */
-  async auditOperation(
+  auditOperation(
     operation: string,
     context: {
       userId?: string;
@@ -156,7 +156,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
       error?: string;
       affectedRows?: number;
     },
-  ): Promise<void> {
+  ): void {
     if (!this.securityConfig.auditLoggingEnabled) {
       return;
     }
@@ -201,7 +201,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
       this.addAuditEvent(auditEvent);
 
       // Check for security violations
-      await this.checkSecurityViolations(auditEvent, context);
+      this.checkSecurityViolations(auditEvent, context);
 
       // Log significant events
       if (severity === 'error' || severity === 'critical') {
@@ -226,7 +226,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
   /**
    * Audit database connection
    */
-  async auditConnection(
+  auditConnection(
     connectionId: string,
     event: 'connect' | 'disconnect',
     context: {
@@ -236,7 +236,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
       success: boolean;
       error?: string;
     },
-  ): Promise<void> {
+  ): void {
     const operationId = this.generateOperationId();
 
     try {
@@ -256,7 +256,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
       }
 
       // Audit the connection event
-      await this.auditOperation(`database_${event}`, {
+      this.auditOperation(`database_${event}`, {
         ...context,
         duration: 0,
       });
@@ -281,17 +281,17 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
   /**
    * Check query for security violations
    */
-  async validateQuerySecurity(
+  validateQuerySecurity(
     queryText: string,
     context: {
       userId?: string;
       sessionId?: string;
       ipAddress?: string;
     },
-  ): Promise<{
+  ): {
     allowed: boolean;
     violations: SecurityViolation[];
-  }> {
+  } {
     const violations: SecurityViolation[] = [];
 
     try {
@@ -508,7 +508,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
 
     if (
       this.securityConfig.sslCertPath &&
-      !require('fs').existsSync(this.securityConfig.sslCertPath)
+      !fs.existsSync(this.securityConfig.sslCertPath)
     ) {
       this.logger.error('SSL certificate file not found', {
         path: this.securityConfig.sslCertPath,
@@ -603,10 +603,14 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
   /**
    * Check for security violations in audit events
    */
-  private async checkSecurityViolations(
+  private checkSecurityViolations(
     event: DatabaseAuditEvent,
-    context: any,
-  ): Promise<void> {
+    context: {
+      userId?: string;
+      sessionId?: string;
+      ipAddress?: string;
+    },
+  ): void {
     // Check for failed authentication attempts
     if (event.eventType === 'authentication' && !event.success) {
       const violation = this.createSecurityViolation(
@@ -685,7 +689,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
       /information_schema\.(tables|columns)/i,
       /pg_catalog\./i,
       /--\s*$/m, // SQL comments at end of line
-      /\/\*.*\*\//s, // Multi-line comments
+      /\/\*[\s\S]*?\*\//g, // Multi-line comments
     ];
 
     return suspiciousPatterns.some((pattern) => pattern.test(queryText));
@@ -736,7 +740,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
   /**
    * Flush audit events (placeholder for persistent storage)
    */
-  private async flushAuditEvents(): Promise<void> {
+  private flushAuditEvents(): void {
     // In a production system, this would persist audit events to:
     // - Database audit table
     // - External log management system

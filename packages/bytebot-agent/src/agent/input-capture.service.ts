@@ -52,12 +52,50 @@ function safeGetNumber(
   return defaultValue;
 }
 
-function safeGetArray<T>(obj: unknown, prop: string, defaultValue: T[]): T[] {
-  if (hasProperty(obj, prop)) {
-    const value = (obj as Record<string, unknown>)[prop];
-    return Array.isArray(value) ? (value as T[]) : defaultValue;
+function safeGetCoordinatesArray(
+  obj: unknown,
+  prop: string,
+): { x: number; y: number }[] {
+  if (!hasProperty(obj, prop)) {
+    return [];
   }
-  return defaultValue;
+
+  const value = (obj as Record<string, unknown>)[prop];
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => {
+      if (
+        typeof item === 'object' &&
+        item !== null &&
+        'x' in item &&
+        'y' in item
+      ) {
+        const typedItem = item as Record<string, unknown>;
+        const x = typeof typedItem.x === 'number' ? typedItem.x : 0;
+        const y = typeof typedItem.y === 'number' ? typedItem.y : 0;
+        return { x, y };
+      }
+      return null;
+    })
+    .filter((item): item is { x: number; y: number } => item !== null);
+}
+
+function safeGetStringArray(obj: unknown, prop: string): string[] {
+  if (!hasProperty(obj, prop)) {
+    return [];
+  }
+
+  const value = (obj as Record<string, unknown>)[prop];
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => (typeof item === 'string' ? item : null))
+    .filter((item): item is string => item !== null);
 }
 
 function safeGetCoordinates(
@@ -145,7 +183,7 @@ export class InputCaptureService {
           case 'drag_mouse': {
             const dragAction: DragMouseAction = {
               action: 'drag_mouse',
-              path: safeGetArray(action, 'path', []),
+              path: safeGetCoordinatesArray(action, 'path'),
               button: safeGetString(action, 'button', 'left') as
                 | 'left'
                 | 'right'
@@ -194,7 +232,7 @@ export class InputCaptureService {
         case 'drag_mouse': {
           const dragAction: DragMouseAction = {
             action: 'drag_mouse',
-            path: safeGetArray(action, 'path', []),
+            path: safeGetCoordinatesArray(action, 'path'),
             button: safeGetString(action, 'button', 'left') as
               | 'left'
               | 'right'
@@ -224,7 +262,7 @@ export class InputCaptureService {
         case 'type_keys': {
           const typeKeysAction: TypeKeysAction = {
             action: 'type_keys',
-            keys: safeGetArray(action, 'keys', []),
+            keys: safeGetStringArray(action, 'keys'),
           };
           userActionBlock.content.push(
             convertTypeKeysActionToToolUseBlock(typeKeysAction, toolUseId),
@@ -234,7 +272,7 @@ export class InputCaptureService {
         case 'press_keys': {
           const pressKeysAction: PressKeysAction = {
             action: 'press_keys',
-            keys: safeGetArray(action, 'keys', []),
+            keys: safeGetStringArray(action, 'keys'),
             press: safeGetString(action, 'press', 'down') as 'down' | 'up',
           };
           userActionBlock.content.push(

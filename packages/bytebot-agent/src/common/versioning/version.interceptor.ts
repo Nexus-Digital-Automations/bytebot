@@ -29,11 +29,26 @@ import {
   VERSION_METADATA_KEY,
   VERSION_CONFIG_KEY,
   ApiVersionConfig,
-  SupportedVersion,
-  getVersionConfig,
   getMultiVersions,
 } from './api-version.decorator';
 import { createSecurityEvent, SecurityEventType } from '@bytebot/shared';
+
+/**
+ * Safely converts an unknown error to a string representation
+ */
+function getSafeErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return '[Unserializable Error]';
+  }
+}
 
 /**
  * Version negotiation result
@@ -75,6 +90,52 @@ interface VersionValidation {
   sunset: boolean;
 }
 
+/**
+ * Error type with message and optional stack
+ */
+interface ErrorWithStack {
+  message: string;
+  stack?: string;
+}
+
+/**
+ * Request with extended properties
+ */
+interface RequestWithVersioning extends Request {
+  apiVersion?: string;
+  apiVersionConfig?: ApiVersionConfig;
+  apiVersionSource?: string;
+  user?: {
+    id?: string;
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * Type guard to check if object is an error with stack
+ * @param obj - Object to check
+ * @returns Whether object is ErrorWithStack
+ */
+function isErrorWithStack(obj: unknown): obj is ErrorWithStack {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof (obj as ErrorWithStack).message === 'string'
+  );
+}
+
+/**
+ * Type guard to check if request has user property with id
+ * @param request - Request to check
+ * @returns Whether request has user.id
+ */
+function isRequestWithUser(request: Request): request is RequestWithVersioning {
+  return (
+    typeof (request as RequestWithVersioning).user === 'object' &&
+    (request as RequestWithVersioning).user !== null
+  );
+}
+
 @Injectable()
 export class VersionInterceptor implements NestInterceptor {
   private readonly logger = new Logger(VersionInterceptor.name);
@@ -105,11 +166,11 @@ export class VersionInterceptor implements NestInterceptor {
    * @param next - Call handler
    * @returns Observable with version headers
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const operationId = `version-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<RequestWithVersioning>();
     const response = context.switchToHttp().getResponse<Response>();
 
     try {
@@ -145,9 +206,9 @@ export class VersionInterceptor implements NestInterceptor {
       }
 
       // Set version context for downstream processors
-      (request as any).apiVersion = negotiation.version;
-      (request as any).apiVersionConfig = negotiation.config;
-      (request as any).apiVersionSource = negotiation.source;
+      request.apiVersion = negotiation.version;
+      request.apiVersionConfig = negotiation.config;
+      request.apiVersionSource = negotiation.source;
 
       // Log version negotiation
       const processingTime = Date.now() - startTime;
@@ -162,7 +223,7 @@ export class VersionInterceptor implements NestInterceptor {
       });
 
       return next.handle().pipe(
-        map((data) => {
+        map((data: unknown) => {
           // Set response headers
           this.setVersionHeaders(
             response,
@@ -184,19 +245,27 @@ export class VersionInterceptor implements NestInterceptor {
           return data;
         }),
       );
-    } catch (error) {
+    } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
 
       if (error instanceof HttpException) {
         throw error;
       }
 
-      this.logger.error(`[${operationId}] Version negotiation error`, {
-        operationId,
-        error: error.message,
-        stack: error.stack,
-        processingTimeMs: processingTime,
-      });
+      if (isErrorWithStack(error)) {
+        this.logger.error(`[${operationId}] Version negotiation error`, {
+          operationId,
+          error: error.message,
+          stack: error.stack,
+          processingTimeMs: processingTime,
+        });
+      } else {
+        this.logger.error(`[${operationId}] Version negotiation error`, {
+          operationId,
+          error: getSafeErrorMessage(error),
+          processingTimeMs: processingTime,
+        });
+      }
 
       // Log security event
       this.logVersionError(request, error, operationId);
@@ -212,13 +281,13 @@ export class VersionInterceptor implements NestInterceptor {
 
   /**
    * Negotiate API version from request
-   * @param request - Express request
+   * @param request - Express request with versioning
    * @param context - Execution context
    * @param operationId - Operation ID for tracking
    * @returns Version negotiation result
    */
   private negotiateVersion(
-    request: Request,
+    request: RequestWithVersioning,
     context: ExecutionContext,
     operationId: string,
   ): VersionNegotiation {
@@ -521,21 +590,22 @@ export class VersionInterceptor implements NestInterceptor {
 
   /**
    * Log deprecation security event
-   * @param request - Express request
+   * @param request - Express request with versioning
    * @param negotiation - Version negotiation
    * @param validation - Version validation
    * @param operationId - Operation ID
    */
   private logDeprecationEvent(
-    request: Request,
+    request: RequestWithVersioning,
     negotiation: VersionNegotiation,
     validation: VersionValidation,
     operationId: string,
   ): void {
     try {
-      const eventType = validation.sunset
-        ? SecurityEventType.API_DEPRECATED
-        : SecurityEventType.API_DEPRECATED;
+      const eventType = SecurityEventType.SUSPICIOUS_ACTIVITY;
+
+      const userId = isRequestWithUser(request) ? request.user?.id : undefined;
+      const userAgent = request.get('User-Agent') || undefined;
 
       const securityEvent = createSecurityEvent(
         eventType,
@@ -553,9 +623,9 @@ export class VersionInterceptor implements NestInterceptor {
           sunsetDate: negotiation.config.deprecation?.sunset,
           migrationGuide: negotiation.config.deprecation?.migration,
         },
-        (request as any).user?.id,
+        userId,
         request.ip,
-        request.get('User-Agent'),
+        userAgent,
       );
 
       this.logger.warn(`Deprecated API access: ${securityEvent.eventId}`, {
@@ -564,32 +634,40 @@ export class VersionInterceptor implements NestInterceptor {
         riskScore: securityEvent.riskScore,
         operationId,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error('Failed to log deprecation security event', {
         operationId,
-        error: error.message,
+        error: isErrorWithStack(error)
+          ? error.message
+          : getSafeErrorMessage(error),
       });
     }
   }
 
   /**
    * Log version negotiation error
-   * @param request - Express request
+   * @param request - Express request with versioning
    * @param error - Error that occurred
    * @param operationId - Operation ID
    */
   private logVersionError(
-    request: Request,
-    error: any,
+    request: RequestWithVersioning,
+    error: unknown,
     operationId: string,
   ): void {
     try {
+      const errorMessage = isErrorWithStack(error)
+        ? error.message
+        : getSafeErrorMessage(error);
+      const userId = isRequestWithUser(request) ? request.user?.id : undefined;
+      const userAgent = request.get('User-Agent') || undefined;
+
       const securityEvent = createSecurityEvent(
         SecurityEventType.VALIDATION_FAILED,
         request.url,
         request.method,
         false,
-        `API version negotiation failed: ${error.message}`,
+        `API version negotiation failed: ${errorMessage}`,
         {
           operationId,
           requestedVersionHeaders: {
@@ -599,9 +677,9 @@ export class VersionInterceptor implements NestInterceptor {
           queryVersion: request.query.version,
           urlPath: request.path,
         },
-        (request as any).user?.id,
+        userId,
         request.ip,
-        request.get('User-Agent'),
+        userAgent,
       );
 
       this.logger.error(`Version negotiation error: ${securityEvent.eventId}`, {
@@ -609,10 +687,12 @@ export class VersionInterceptor implements NestInterceptor {
         riskScore: securityEvent.riskScore,
         operationId,
       });
-    } catch (loggingError) {
+    } catch (loggingError: unknown) {
       this.logger.error('Failed to log version error security event', {
         operationId,
-        error: loggingError.message,
+        error: isErrorWithStack(loggingError)
+          ? loggingError.message
+          : getSafeErrorMessage(loggingError),
       });
     }
   }

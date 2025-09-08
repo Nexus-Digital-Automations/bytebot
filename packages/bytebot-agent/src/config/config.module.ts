@@ -86,7 +86,7 @@ import appConfig from './configuration';
     BytebotConfigService,
     SecretsService,
     EnhancedSecretsService,
-    ConfigService, // Export native ConfigService for backward compatibility
+    // ConfigService is already globally available through NestConfigModule
   ],
 })
 export class ConfigurationModule {
@@ -249,7 +249,7 @@ export class ConfigurationModule {
       );
       const logLevel = this.configService.get<string>('LOG_LEVEL', 'info');
 
-      return !!(healthChecksEnabled && logLevel);
+      return !!(metricsEnabled && healthChecksEnabled && logLevel);
     } catch {
       return false;
     }

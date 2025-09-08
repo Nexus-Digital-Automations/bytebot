@@ -11,7 +11,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 
 describe('Security Validation E2E Tests', () => {
@@ -123,7 +123,7 @@ describe('Security Validation E2E Tests', () => {
           .send({
             action: 'write_file',
             path: `/tmp/test${payload}.txt`,
-            data: btoa('test content'),
+            data: Buffer.from('test content').toString('base64'),
           })
           .expect(400);
 
@@ -281,8 +281,8 @@ describe('Security Validation E2E Tests', () => {
 
       // Should not contain file paths, stack traces, or system info
       const bodyStr = JSON.stringify(response.body);
-      expect(bodyStr).not.toMatch(/\/[a-zA-Z0-9\/_\-\.]+/); // File paths
-      expect(bodyStr).not.toMatch(/at [a-zA-Z0-9\._]+\(/); // Stack traces
+      expect(bodyStr).not.toMatch(/\/[a-zA-Z0-9/_\-.]+/); // File paths
+      expect(bodyStr).not.toMatch(/at [a-zA-Z0-9._]+\(/); // Stack traces
       expect(bodyStr).not.toMatch(/NODE_ENV|API_KEY|SECRET|PASSWORD/i); // Env vars
     });
 

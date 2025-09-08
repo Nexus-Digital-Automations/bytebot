@@ -12,11 +12,13 @@ import {
   HttpStatus,
   HttpCode,
   Logger,
-  UseGuards,
   Header,
 } from '@nestjs/common';
 import { DatabaseService } from './database.service';
-import { CircuitBreakerGuard } from '../common/guards/circuit-breaker.guard';
+import {
+  CircuitBreakerGuard,
+  CircuitBreakerState,
+} from '../common/guards/circuit-breaker.guard';
 import {
   DatabaseHealthGuard,
   RequireDatabaseHealth,
@@ -40,7 +42,7 @@ export class DatabaseHealthController {
   @Get('health')
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
-  async getHealthStatus() {
+  getHealthStatus() {
     const operationId = this.generateOperationId();
 
     try {
@@ -48,7 +50,7 @@ export class DatabaseHealthController {
         operationId,
       });
 
-      const healthStatus = await this.databaseService.getHealthStatus();
+      const healthStatus = this.databaseService.getHealthStatus();
       const detailedHealth = this.databaseHealthGuard.getDetailedHealthReport();
 
       const response = {
@@ -105,7 +107,7 @@ export class DatabaseHealthController {
   @Get('metrics')
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-cache, max-age=30')
-  async getDatabaseMetrics() {
+  getDatabaseMetrics() {
     const operationId = this.generateOperationId();
 
     try {
@@ -113,7 +115,7 @@ export class DatabaseHealthController {
         operationId,
       });
 
-      const metrics = await this.databaseService.getMetrics();
+      const metrics = this.databaseService.getMetrics();
       const healthReport = this.databaseHealthGuard.getDetailedHealthReport();
 
       const response = {
@@ -167,7 +169,7 @@ export class DatabaseHealthController {
   @Get('circuit-breaker')
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-cache, max-age=30')
-  async getCircuitBreakerStatus() {
+  getCircuitBreakerStatus() {
     const operationId = this.generateOperationId();
 
     try {
@@ -194,13 +196,13 @@ export class DatabaseHealthController {
         })),
         summary: {
           openCircuits: Array.from(allCircuits.values()).filter(
-            (c) => c.state === 'OPEN',
+            (c) => c.state === CircuitBreakerState.OPEN,
           ).length,
           halfOpenCircuits: Array.from(allCircuits.values()).filter(
-            (c) => c.state === 'HALF_OPEN',
+            (c) => c.state === CircuitBreakerState.HALF_OPEN,
           ).length,
           closedCircuits: Array.from(allCircuits.values()).filter(
-            (c) => c.state === 'CLOSED',
+            (c) => c.state === CircuitBreakerState.CLOSED,
           ).length,
         },
         operationId,
@@ -231,7 +233,7 @@ export class DatabaseHealthController {
    */
   @Post('circuit-breaker/:circuitKey/reset')
   @HttpCode(HttpStatus.OK)
-  async resetCircuitBreaker(@Param('circuitKey') circuitKey: string) {
+  resetCircuitBreaker(@Param('circuitKey') circuitKey: string) {
     const operationId = this.generateOperationId();
 
     try {
@@ -316,7 +318,7 @@ export class DatabaseHealthController {
   @Get('connection-pool')
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-cache, max-age=10')
-  async getConnectionPoolStatus() {
+  getConnectionPoolStatus() {
     const operationId = this.generateOperationId();
 
     try {
@@ -324,7 +326,7 @@ export class DatabaseHealthController {
         operationId,
       });
 
-      const metrics = await this.databaseService.getMetrics();
+      const metrics = this.databaseService.getMetrics();
 
       const response = {
         timestamp: new Date().toISOString(),

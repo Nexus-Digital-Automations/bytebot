@@ -1,5 +1,5 @@
 import { IsNumber, Min, Max } from 'class-validator';
-import { IsValidScreenCoordinates } from '@bytebot/shared/decorators/security-validation.decorators';
+import { IsValidScreenCoordinates } from '@bytebot/shared/dist/index-server';
 
 /**
  * Data Transfer Object for screen coordinates with enhanced security validation

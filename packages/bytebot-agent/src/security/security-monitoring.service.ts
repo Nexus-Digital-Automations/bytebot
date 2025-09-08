@@ -144,31 +144,28 @@ interface ThreatDetectionRule {
   responseActions: string[];
 
   /** Rule conditions */
-  conditions: {
-    field: string;
-    operator: 'equals' | 'contains' | 'regex' | 'greater_than' | 'less_than';
-    value: any;
-  }[];
+  conditions: ThreatCondition[];
 }
 
 /**
  * Anomaly detection algorithm configuration
+ * Note: Currently unused but reserved for future ML implementation
  */
-interface AnomalyDetectionConfig {
-  /** Algorithm type */
-  algorithm: 'statistical' | 'ml' | 'hybrid';
+// interface AnomalyDetectionConfig {
+//   algorithm: 'statistical' | 'ml' | 'hybrid';
+//   trainingWindow: number;
+//   sensitivity: number;
+//   minSamples: number;
+//   features: string[];
+// }
 
-  /** Training data window (in days) */
-  trainingWindow: number;
-
-  /** Sensitivity level (0-1) */
-  sensitivity: number;
-
-  /** Minimum samples for training */
-  minSamples: number;
-
-  /** Features to analyze */
-  features: string[];
+/**
+ * Threat detection condition interface
+ */
+interface ThreatCondition {
+  field: string;
+  operator: 'equals' | 'contains' | 'regex' | 'greater_than' | 'less_than';
+  value: any;
 }
 
 /**
@@ -244,7 +241,7 @@ export class SecurityMonitoringService implements OnModuleInit {
     private readonly prismaService: PrismaService,
   ) {}
 
-  async onModuleInit(): Promise<void> {
+  onModuleInit(): void {
     const operationId = `security-monitoring-init-${Date.now()}`;
     const startTime = Date.now();
 
@@ -254,13 +251,13 @@ export class SecurityMonitoringService implements OnModuleInit {
 
     try {
       // Initialize threat detection rules
-      await this.initializeThreatDetectionRules();
+      this.initializeThreatDetectionRules();
 
       // Load IP reputation data
-      await this.loadIpReputationData();
+      this.loadIpReputationData();
 
       // Initialize anomaly detection models
-      await this.initializeAnomalyDetection();
+      this.initializeAnomalyDetection();
 
       // Start security event listeners
       this.setupEventListeners();
@@ -294,15 +291,13 @@ export class SecurityMonitoringService implements OnModuleInit {
    * Process incoming security event for threat detection
    * Main entry point for security event processing
    */
-  async processSecurityEvent(
-    event: Partial<SecurityEvent>,
-  ): Promise<SecurityEvent> {
+  processSecurityEvent(event: Partial<SecurityEvent>): SecurityEvent {
     const operationId = `process-security-event-${Date.now()}`;
     const startTime = Date.now();
 
     try {
       // Enrich event with additional security context
-      const enrichedEvent = await this.enrichSecurityEvent(event);
+      const enrichedEvent = this.enrichSecurityEvent(event);
 
       this.logger.debug(`[${operationId}] Processing security event`, {
         operationId,
@@ -314,13 +309,13 @@ export class SecurityMonitoringService implements OnModuleInit {
       });
 
       // Store event in cache for correlation analysis
-      await this.cacheSecurityEvent(enrichedEvent);
+      this.cacheSecurityEvent(enrichedEvent);
 
       // Perform threat detection analysis
-      const threatAnalysis = await this.performThreatDetection(enrichedEvent);
+      const threatAnalysis = this.performThreatDetection(enrichedEvent);
 
       // Check for anomalous behavior
-      const anomalyAnalysis = await this.detectAnomalies(enrichedEvent);
+      const anomalyAnalysis = this.detectAnomalies(enrichedEvent);
 
       // Update event with analysis results
       const processedEvent = {
@@ -346,7 +341,7 @@ export class SecurityMonitoringService implements OnModuleInit {
 
       // Trigger automated response if necessary
       if (processedEvent.responseTriggered) {
-        await this.triggerAutomatedResponse(processedEvent);
+        this.triggerAutomatedResponse(processedEvent);
       }
 
       // Create security incident if severity is high enough
@@ -354,7 +349,7 @@ export class SecurityMonitoringService implements OnModuleInit {
         processedEvent.severity === SecuritySeverity.HIGH ||
         processedEvent.severity === SecuritySeverity.CRITICAL
       ) {
-        await this.createSecurityIncident(processedEvent);
+        this.createSecurityIncident(processedEvent);
       }
 
       // Emit event for external systems
@@ -393,7 +388,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Initialize threat detection rules from configuration
    */
-  private async initializeThreatDetectionRules(): Promise<void> {
+  private initializeThreatDetectionRules(): void {
     this.threatDetectionRules = [
       {
         ruleId: 'brute-force-detection',
@@ -468,7 +463,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Load IP reputation data from threat intelligence sources
    */
-  private async loadIpReputationData(): Promise<void> {
+  private loadIpReputationData(): void {
     // In a production environment, this would load from threat intelligence APIs
     // For now, we'll initialize with basic known bad IPs
     const knownBadIps = [
@@ -489,7 +484,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Initialize anomaly detection models
    */
-  private async initializeAnomalyDetection(): Promise<void> {
+  private initializeAnomalyDetection(): void {
     // Load historical user behavior data to establish baselines
     // This would typically involve ML model training
 
@@ -505,29 +500,29 @@ export class SecurityMonitoringService implements OnModuleInit {
   private setupEventListeners(): void {
     // Listen for authentication events
     this.eventEmitter.on('auth.login.failed', (event) => {
-      this.processSecurityEvent({
+      void this.processSecurityEvent({
         type: SecurityEventType.AUTHENTICATION_FAILURE,
         severity: SecuritySeverity.MEDIUM,
         ...event,
-      });
+      } as Partial<SecurityEvent>);
     });
 
     // Listen for authorization events
     this.eventEmitter.on('auth.access.denied', (event) => {
-      this.processSecurityEvent({
+      void this.processSecurityEvent({
         type: SecurityEventType.AUTHORIZATION_DENIED,
         severity: SecuritySeverity.MEDIUM,
         ...event,
-      });
+      } as Partial<SecurityEvent>);
     });
 
     // Listen for rate limiting events
     this.eventEmitter.on('rate-limit.exceeded', (event) => {
-      this.processSecurityEvent({
+      void this.processSecurityEvent({
         type: SecurityEventType.RATE_LIMIT_EXCEEDED,
         severity: SecuritySeverity.LOW,
         ...event,
-      });
+      } as Partial<SecurityEvent>);
     });
 
     this.logger.log('Security event listeners configured');
@@ -536,9 +531,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Enrich security event with additional context
    */
-  private async enrichSecurityEvent(
-    event: Partial<SecurityEvent>,
-  ): Promise<SecurityEvent> {
+  private enrichSecurityEvent(event: Partial<SecurityEvent>): SecurityEvent {
     const eventId = `evt_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
     const timestamp = new Date();
 
@@ -592,14 +585,14 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Cache security event for correlation analysis
    */
-  private async cacheSecurityEvent(event: SecurityEvent): Promise<void> {
+  private cacheSecurityEvent(event: SecurityEvent): void {
     const cacheKey = `${event.sourceIp}-${event.userId || 'anonymous'}`;
 
     if (!this.eventCache.has(cacheKey)) {
       this.eventCache.set(cacheKey, []);
     }
 
-    const events = this.eventCache.get(cacheKey)!;
+    const events = this.eventCache.get(cacheKey);
     events.push(event);
 
     // Keep only recent events (last hour)
@@ -613,12 +606,12 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Perform threat detection analysis
    */
-  private async performThreatDetection(event: SecurityEvent): Promise<{
+  private performThreatDetection(event: SecurityEvent): {
     riskScore: number;
     correlationId?: string;
     responseTriggered: boolean;
     responseActions: string[];
-  }> {
+  } {
     let maxRiskScore = 0;
     let correlationId: string | undefined;
     let responseTriggered = false;
@@ -685,11 +678,11 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Detect anomalous behavior using statistical analysis
    */
-  private async detectAnomalies(event: SecurityEvent): Promise<{
+  private detectAnomalies(event: SecurityEvent): {
     riskScore: number;
     responseTriggered: boolean;
     responseActions: string[];
-  }> {
+  } {
     // Simple anomaly detection based on request frequency
     const cacheKey = `${event.sourceIp}-${event.userId || 'anonymous'}`;
     const recentEvents = this.eventCache.get(cacheKey) || [];
@@ -720,16 +713,37 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Evaluate condition against security event
    */
-  private evaluateCondition(event: SecurityEvent, condition: any): boolean {
+  private evaluateCondition(
+    event: SecurityEvent,
+    condition: ThreatCondition,
+  ): boolean {
     const fieldValue = this.getFieldValue(event, condition.field);
 
     switch (condition.operator) {
       case 'equals':
         return condition.value === null ? true : fieldValue === condition.value;
-      case 'contains':
-        return String(fieldValue).includes(condition.value);
-      case 'regex':
-        return new RegExp(condition.value).test(String(fieldValue));
+      case 'contains': {
+        const fieldStr =
+          typeof fieldValue === 'string'
+            ? fieldValue
+            : JSON.stringify(fieldValue);
+        const valueStr =
+          typeof condition.value === 'string'
+            ? condition.value
+            : JSON.stringify(condition.value);
+        return fieldStr.includes(valueStr);
+      }
+      case 'regex': {
+        const regexStr =
+          typeof condition.value === 'string'
+            ? condition.value
+            : JSON.stringify(condition.value);
+        const testStr =
+          typeof fieldValue === 'string'
+            ? fieldValue
+            : JSON.stringify(fieldValue);
+        return new RegExp(regexStr).test(testStr);
+      }
       case 'greater_than':
         return Number(fieldValue) > Number(condition.value);
       case 'less_than':
@@ -742,12 +756,16 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Get field value from event object
    */
-  private getFieldValue(event: SecurityEvent, field: string): any {
+  private getFieldValue(event: SecurityEvent, field: string): unknown {
     const parts = field.split('.');
-    let value: any = event;
+    let value: unknown = event;
 
     for (const part of parts) {
-      value = value?.[part];
+      if (value && typeof value === 'object' && value !== null) {
+        value = (value as Record<string, unknown>)[part];
+      } else {
+        return undefined;
+      }
     }
 
     return value;
@@ -779,7 +797,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Trigger automated response actions
    */
-  private async triggerAutomatedResponse(event: SecurityEvent): Promise<void> {
+  private triggerAutomatedResponse(event: SecurityEvent): void {
     this.logger.warn(`Triggering automated response for security event`, {
       eventId: event.eventId,
       responseActions: event.responseActions,
@@ -788,7 +806,7 @@ export class SecurityMonitoringService implements OnModuleInit {
 
     for (const action of event.responseActions) {
       try {
-        await this.executeResponseAction(action, event);
+        this.executeResponseAction(action, event);
       } catch (error) {
         this.logger.error(`Failed to execute response action: ${action}`, {
           eventId: event.eventId,
@@ -802,10 +820,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Execute individual response action
    */
-  private async executeResponseAction(
-    action: string,
-    event: SecurityEvent,
-  ): Promise<void> {
+  private executeResponseAction(action: string, event: SecurityEvent): void {
     switch (action) {
       case 'block_ip_temporary':
         // Implement temporary IP blocking (e.g., add to Redis blacklist)
@@ -860,7 +875,7 @@ export class SecurityMonitoringService implements OnModuleInit {
   /**
    * Create security incident for high-severity events
    */
-  private async createSecurityIncident(event: SecurityEvent): Promise<void> {
+  private createSecurityIncident(event: SecurityEvent): void {
     const incidentId = `inc_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
     const incident: SecurityIncident = {
@@ -934,7 +949,7 @@ export class SecurityMonitoringService implements OnModuleInit {
    * Cleanup old events and incidents (run hourly)
    */
   @Cron(CronExpression.EVERY_HOUR)
-  async cleanupOldData(): Promise<void> {
+  cleanupOldData(): void {
     const startTime = Date.now();
     let eventsCleanedUp = 0;
     let incidentsArchived = 0;

@@ -9,26 +9,21 @@ import {
   UsePipes,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
-import {
-  EnterpriseRateLimitGuard,
-  RateLimit,
-} from '../common/guards/rate-limit.guard';
+import { ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
 import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import {
-  ComputerUseApi,
   ForVersion,
   SUPPORTED_API_VERSIONS,
 } from '../common/versioning/api-version.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { OperatorOrAdmin, CurrentUser, ByteBotdUser } from '../auth/decorators/roles.decorator';
+import {
+  OperatorOrAdmin,
+  CurrentUser,
+  ByteBotdUser,
+} from '../auth/decorators/roles.decorator';
 import { ComputerUseService } from './computer-use.service';
 import { ComputerActionValidationPipe } from './dto/computer-action-validation.pipe';
 import { ComputerActionDto } from './dto/computer-action.dto';
@@ -208,12 +203,12 @@ export class ComputerUseController {
 
       this.logger.log(
         `[${operationId}] Computer action request: ${JSON.stringify(paramsCopy)}`,
-        { 
-          operationId, 
-          action: params.action, 
-          userId: user.id, 
-          username: user.username, 
-          userRole: user.role 
+        {
+          operationId,
+          action: params.action,
+          userId: user.id,
+          username: user.username,
+          userRole: user.role,
         },
       );
 
@@ -226,12 +221,12 @@ export class ComputerUseController {
       const processingTime = Date.now() - startTime;
       this.logger.log(
         `[${operationId}] Computer action completed successfully (${processingTime}ms)`,
-        { 
-          operationId, 
-          action: params.action, 
-          processingTime, 
-          userId: user.id, 
-          username: user.username 
+        {
+          operationId,
+          action: params.action,
+          processingTime,
+          userId: user.id,
+          username: user.username,
         },
       );
 

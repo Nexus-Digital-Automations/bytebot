@@ -1,20 +1,22 @@
 /**
- * Enterprise Health Monitoring Service
+ * Enterprise Health Monitoring Service - LOCAL DEPLOYMENT OPTIMIZED
  *
  * Core service for comprehensive system health monitoring, service dependencies,
  * and performance metrics. Provides enterprise-grade observability with database
- * connectivity, external service monitoring, and Kubernetes-compatible health checks.
+ * connectivity, external service monitoring, and local deployment health checks.
  *
  * Features:
  * - Process uptime and memory monitoring
  * - Database connectivity health checking
  * - External service dependency monitoring
  * - System resource utilization
- * - Kubernetes probe support (liveness, readiness, startup)
+ * - Local deployment probe support (liveness, readiness, startup)
  * - Configuration validation
+ * - Docker Compose compatibility
+ * - File-based health indicators
  *
  * @author Claude Code
- * @version 2.0.0
+ * @version 3.0.0 - Local Deployment Optimized
  */
 
 import { Injectable, Logger } from '@nestjs/common';
@@ -61,7 +63,7 @@ export interface DetailedStatusResponse {
 }
 
 /**
- * Enterprise health monitoring service with Kubernetes support
+ * Enterprise health monitoring service optimized for local deployment
  */
 @Injectable()
 export class HealthService extends HealthIndicator {

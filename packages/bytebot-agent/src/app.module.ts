@@ -11,11 +11,16 @@ import { GoogleModule } from './google/google.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
+import { HealthModule } from './health/health.module';
+import { MetricsModule } from './metrics/metrics.module';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { SummariesModule } from './summaries/summaries.modue';
+import { SummariesModule } from './summaries/summaries.module';
 import { ProxyModule } from './proxy/proxy.module';
 import { ConfigurationModule } from './config/config.module';
+import { EnterpriseConfigModule } from './config/enterprise-config.module';
 import { ReliabilityModule } from './common/reliability/reliability.module';
 
 @Module({
@@ -26,6 +31,10 @@ import { ReliabilityModule } from './common/reliability/reliability.module';
 
     // Configuration management (must be first for other modules to use)
     ConfigurationModule,
+    EnterpriseConfigModule.forEnvironment(
+      (process.env.NODE_ENV as 'development' | 'staging' | 'production') ||
+        'development',
+    ),
 
     // Monitoring and Observability (early import for comprehensive coverage)
     HealthModule,
@@ -69,8 +78,14 @@ import { ReliabilityModule } from './common/reliability/reliability.module';
 export class AppModule {
   constructor() {
     console.log(
-      '🚀 Bytebot Agent Application initialized with enterprise monitoring',
+      '🚀 Bytebot Agent Application initialized with enterprise-grade security',
     );
+    console.log('🔒 Enterprise Security Features:');
+    console.log('   ✅ Kubernetes secrets management');
+    console.log('   ✅ External secrets provider integration');
+    console.log('   ✅ Configuration security validation');
+    console.log('   ✅ Secrets rotation and hot-reload');
+    console.log('   ✅ Enterprise secrets audit logging');
     console.log('📊 Observability features active:');
     console.log('   ✅ Health monitoring endpoints');
     console.log('   ✅ Prometheus metrics collection');

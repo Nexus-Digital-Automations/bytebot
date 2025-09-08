@@ -20,11 +20,9 @@ import {
   StandardizedSecurityMiddleware,
   ServiceType,
   StandardizedValidationPipe,
-  ValidationServiceType,
   StandardizedRateLimitGuard,
-  RateLimitServiceType,
   StandardizedValidationPipes,
-} from '@bytebot/shared';
+} from '@bytebot/shared/dist/index-server';
 
 /**
  * BytebotD Security Configuration Service
@@ -57,13 +55,14 @@ export class BytebotDSecurityConfigService {
    * Create BytebotD rate limit guard with strict rate limits
    */
   createRateLimitGuard(
-    reflector: any,
-    redisClient?: any,
+    _reflector: any,
+    _redisClient?: any,
   ): StandardizedRateLimitGuard {
     return StandardizedRateLimitGuard.createBytebotDGuard(
-      reflector,
-      this.configService,
-      redisClient,
+      this.configService.get('NODE_ENV', 'development'),
+      {
+        // Additional configuration can be added here if needed
+      },
     );
   }
 

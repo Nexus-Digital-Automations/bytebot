@@ -18,7 +18,8 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger, Inject, CACHE_MANAGER } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { CacheKeyGenerator } from './cache-key.generator';
 import { MetricsService } from '../metrics/metrics.service';
@@ -401,7 +402,7 @@ export class CacheService {
    * @param pattern Key pattern to match (supports wildcards)
    * @param namespace Optional namespace
    */
-  async invalidatePattern(pattern: string, namespace?: string): Promise<void> {
+  async invalidatePattern(pattern: string, _namespace?: string): Promise<void> {
     const operationId = `cache_invalidate_${Date.now()}`;
 
     try {

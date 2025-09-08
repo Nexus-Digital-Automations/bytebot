@@ -18,8 +18,8 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Observable, throwError, timer, of, EMPTY } from 'rxjs';
-import { mergeMap, retryWhen, tap, delay, switchMap } from 'rxjs/operators';
+import { Observable, throwError, timer } from 'rxjs';
+import { mergeMap, retryWhen, tap } from 'rxjs/operators';
 
 export interface RetryConfig {
   /** Maximum number of retry attempts. Default: 3 */
@@ -35,13 +35,28 @@ export interface RetryConfig {
   /** Jitter range (0.0 - 1.0). Default: 0.1 (10% jitter) */
   jitterRange: number;
   /** Custom retry condition function. Default: retry on all errors */
-  retryCondition?: (error: any, attempt: number) => boolean;
+  retryCondition: (error: unknown, attempt: number) => boolean;
   /** Custom delay calculation function. Default: exponential backoff */
-  delayCalculator?: (
+  delayCalculator: (
     attempt: number,
     baseDelay: number,
     multiplier: number,
   ) => number;
+}
+
+/** Safe error message extraction */
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return '[Unserializable Error]';
+  }
 }
 
 export interface RetryMetrics {
@@ -100,8 +115,15 @@ export class RetryService {
       ),
       useJitter: this.configService.get<boolean>('RETRY_USE_JITTER', true),
       jitterRange: this.configService.get<number>('RETRY_JITTER_RANGE', 0.1),
-      retryCondition: this.defaultRetryCondition.bind(this),
-      delayCalculator: this.exponentialBackoffDelay.bind(this),
+      retryCondition: this.defaultRetryCondition.bind(this) as (
+        error: unknown,
+        attempt: number,
+      ) => boolean,
+      delayCalculator: this.exponentialBackoffDelay.bind(this) as (
+        attempt: number,
+        baseDelay: number,
+        multiplier: number,
+      ) => number,
     };
 
     this.logger.log('Retry Service initialized with enterprise configuration', {
@@ -149,7 +171,7 @@ export class RetryService {
       baseDelay: finalConfig.baseDelay,
     });
 
-    let lastError: any;
+    let lastError: unknown;
 
     for (let attempt = 1; attempt <= finalConfig.maxAttempts; attempt++) {
       retryState.attempt = attempt;
@@ -172,10 +194,9 @@ export class RetryService {
         });
 
         return result;
-      } catch (error) {
+      } catch (error: unknown) {
         lastError = error;
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
+        const errorMessage = getErrorMessage(error);
         retryState.errors.push(errorMessage);
 
         this.logger.warn(
@@ -188,7 +209,7 @@ export class RetryService {
         );
 
         // Check if we should retry this error
-        if (!finalConfig.retryCondition!(error, attempt)) {
+        if (!finalConfig.retryCondition(error, attempt)) {
           this.logger.debug('Error not retryable, stopping attempts', {
             operationId,
             attempt,
@@ -258,8 +279,7 @@ export class RetryService {
           mergeMap((error) => {
             attempt++;
 
-            const errorMessage =
-              error instanceof Error ? error.message : String(error);
+            const errorMessage = getErrorMessage(error);
 
             this.logger.warn(
               `Observable attempt ${attempt}/${finalConfig.maxAttempts} failed`,
@@ -279,16 +299,16 @@ export class RetryService {
                   finalError: errorMessage,
                 },
               );
-              return throwError(() => error);
+              return throwError(() => error as Error);
             }
 
-            if (!finalConfig.retryCondition!(error, attempt)) {
+            if (!finalConfig.retryCondition(error, attempt)) {
               this.logger.debug('Observable error not retryable', {
                 operationId,
                 attempt,
                 error: errorMessage,
               });
-              return throwError(() => error);
+              return throwError(() => error as Error);
             }
 
             const delay = this.calculateDelay(attempt, finalConfig);
@@ -375,9 +395,9 @@ export class RetryService {
       baseDelay: 1000,
       maxDelay: 15000,
       backoffMultiplier: 2,
-      retryCondition: (error: any) => {
+      retryCondition: (error: unknown): boolean => {
         // Retry on connection errors, timeouts, and temporary failures
-        const errorMessage = error?.message?.toLowerCase() || '';
+        const errorMessage = getErrorMessage(error).toLowerCase();
         return (
           errorMessage.includes('connection') ||
           errorMessage.includes('timeout') ||
@@ -396,14 +416,22 @@ export class RetryService {
       baseDelay: 1000,
       maxDelay: 10000,
       backoffMultiplier: 2,
-      retryCondition: (error: any) => {
+      retryCondition: (error: unknown): boolean => {
         // Retry on 5xx errors, network errors, timeouts
-        const status = error?.status || error?.response?.status;
+        const errorObj = error as {
+          status?: number;
+          response?: { status?: number };
+          code?: string;
+          message?: string;
+        };
+        const status = errorObj?.status ?? errorObj?.response?.status;
+        const message = errorObj?.message;
+
         return (
-          status >= 500 ||
-          error?.code === 'ECONNRESET' ||
-          error?.code === 'ETIMEDOUT' ||
-          error?.message?.includes('timeout')
+          (typeof status === 'number' && status >= 500) ||
+          errorObj?.code === 'ECONNRESET' ||
+          errorObj?.code === 'ETIMEDOUT' ||
+          (typeof message === 'string' && message.includes('timeout'))
         );
       },
     } as Partial<RetryConfig>,
@@ -413,7 +441,7 @@ export class RetryService {
    * Calculate delay for next retry attempt
    */
   private calculateDelay(attempt: number, config: RetryConfig): number {
-    let delay = config.delayCalculator!(
+    let delay = config.delayCalculator(
       attempt,
       config.baseDelay,
       config.backoffMultiplier,
@@ -453,14 +481,23 @@ export class RetryService {
   /**
    * Default retry condition - retry most errors except explicit business logic errors
    */
-  private defaultRetryCondition(error: any, attempt: number): boolean {
+  private defaultRetryCondition(error: unknown, _attempt: number): boolean {
+    const errorObj = error as {
+      status?: number;
+      retryable?: boolean;
+    };
+
     // Don't retry validation errors (4xx) or authentication errors
-    if (error?.status >= 400 && error?.status < 500) {
+    if (
+      typeof errorObj?.status === 'number' &&
+      errorObj.status >= 400 &&
+      errorObj.status < 500
+    ) {
       return false;
     }
 
     // Don't retry if explicitly marked as non-retryable
-    if (error?.retryable === false) {
+    if (errorObj?.retryable === false) {
       return false;
     }
 
@@ -471,7 +508,7 @@ export class RetryService {
   /**
    * Record successful operation metrics
    */
-  private recordSuccessMetrics<T>(retryState: RetryState, result: T): void {
+  private recordSuccessMetrics<T>(retryState: RetryState, _result: T): void {
     const metrics: RetryMetrics = {
       operationId: retryState.operationId,
       totalAttempts: retryState.attempt,
@@ -490,7 +527,10 @@ export class RetryService {
   /**
    * Record failed operation metrics
    */
-  private recordFailureMetrics(retryState: RetryState, finalError: any): void {
+  private recordFailureMetrics(
+    retryState: RetryState,
+    _finalError: unknown,
+  ): void {
     const metrics: RetryMetrics = {
       operationId: retryState.operationId,
       totalAttempts: retryState.attempt,

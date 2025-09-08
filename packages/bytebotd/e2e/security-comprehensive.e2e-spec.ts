@@ -18,7 +18,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserRole, Permission } from '@bytebot/shared';
@@ -811,48 +811,50 @@ describe('Security E2E - Comprehensive Testing', () => {
       res.json(protectedController.getUserTasks(req.user));
     });
 
-    app
-      .getHttpAdapter()
-      .post('/api/tasks', requireRole(UserRole.OPERATOR), (req, res) => {
+    app.getHttpAdapter().post('/api/tasks', (req, res) => {
+      const middleware = requireRole(UserRole.OPERATOR);
+      middleware(req, res, () => {
         res.json(protectedController.createTask(req.user, req.body));
       });
+    });
 
-    app
-      .getHttpAdapter()
-      .put('/api/tasks/:id', requireRole(UserRole.OPERATOR), (req, res) => {
+    app.getHttpAdapter().put('/api/tasks/:id', (req, res) => {
+      const middleware = requireRole(UserRole.OPERATOR);
+      middleware(req, res, () => {
         res.json(
           protectedController.updateTask(req.user, req.params.id, req.body),
         );
       });
+    });
 
     // Admin-only routes
-    app
-      .getHttpAdapter()
-      .get('/api/admin/users', requireRole(UserRole.ADMIN), (req, res) => {
+    app.getHttpAdapter().get('/api/admin/users', (req, res) => {
+      const middleware = requireRole(UserRole.ADMIN);
+      middleware(req, res, () => {
         res.json(adminController.getUserList(req.user));
       });
+    });
 
-    app
-      .getHttpAdapter()
-      .get('/api/admin/metrics', requireRole(UserRole.ADMIN), (req, res) => {
+    app.getHttpAdapter().get('/api/admin/metrics', (req, res) => {
+      const middleware = requireRole(UserRole.ADMIN);
+      middleware(req, res, () => {
         res.json(adminController.getSystemMetrics(req.user));
       });
+    });
 
-    app
-      .getHttpAdapter()
-      .delete(
-        '/api/admin/users/:id',
-        requireRole(UserRole.ADMIN),
-        (req, res) => {
-          res.json(adminController.deleteUser(req.user, req.params.id));
-        },
-      );
+    app.getHttpAdapter().delete('/api/admin/users/:id', (req, res) => {
+      const middleware = requireRole(UserRole.ADMIN);
+      middleware(req, res, () => {
+        res.json(adminController.deleteUser(req.user, req.params.id));
+      });
+    });
 
-    app
-      .getHttpAdapter()
-      .get('/api/admin/audit-logs', requireRole(UserRole.ADMIN), (req, res) => {
+    app.getHttpAdapter().get('/api/admin/audit-logs', (req, res) => {
+      const middleware = requireRole(UserRole.ADMIN);
+      middleware(req, res, () => {
         res.json(adminController.getAuditLogs(req.user));
       });
+    });
 
     // Health endpoints
     app.getHttpAdapter().get('/health', (req, res) => {

@@ -1,83 +1,99 @@
 /**
- * Secrets Service - Enterprise-grade secrets management for Bytebot API Platform
- * Provides secure secrets loading, rotation, and management with Kubernetes integration
+ * Local Secrets Service - 100% Local-Only Enterprise-grade Secrets Management for Bytebot
+ * Provides secure local file-based secrets loading, rotation, and management with encryption
  *
  * Features:
- * - Kubernetes secrets loading with automatic fallback
- * - Secrets rotation and hot-reloading capabilities
- * - Encrypted secrets storage and retrieval
- * - Performance monitoring and caching
- * - Integration with external secret management systems
+ * - Local encrypted file storage system with proper Unix file permissions (600/700)
+ * - Environment variable security with validation and sanitization
+ * - Local secrets rotation and hot-reloading capabilities
+ * - Docker Compose secrets integration using bind mounts and environment files
+ * - Performance monitoring and caching for local deployment
+ * - NO Kubernetes or cloud dependencies
+ * - Enterprise-grade security using only local components
  *
- * @author Infrastructure & Configuration Specialist
- * @version 1.0.0
- * @since Phase 1: Bytebot API Hardening
+ * @author Local Configuration Security Specialist
+ * @version 2.0.0 - Local-Only Architecture Implementation
+ * @since Phase 1: Bytebot API Hardening - Local Deployment
  */
 
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { readFileSync, existsSync, watchFile } from 'fs';
-import { join } from 'path';
+import {
+  readFileSync,
+  existsSync,
+  watchFile,
+  writeFileSync,
+  mkdirSync,
+  chmodSync,
+  accessSync,
+  constants,
+} from 'fs';
+import { join, dirname } from 'path';
 import * as crypto from 'crypto';
 import { EventEmitter } from 'events';
 
 /**
- * Secret metadata interface
+ * Local secret metadata interface
  */
-interface SecretMetadata {
+interface LocalSecretMetadata {
   name: string;
   key: string;
-  source: 'kubernetes' | 'environment' | 'external';
+  source: 'local-file' | 'environment' | 'docker-compose';
   lastUpdated: Date;
   version: string;
   encrypted: boolean;
+  filePath?: string;
+  permissions: string;
 }
 
 /**
- * Secret value with metadata
+ * Local secret value with metadata
  */
-interface SecretValue {
+interface LocalSecretValue {
   value: string;
-  metadata: SecretMetadata;
+  metadata: LocalSecretMetadata;
 }
 
 /**
- * Secret rotation configuration
+ * Local secret rotation configuration
  */
-interface RotationConfig {
+interface LocalRotationConfig {
   enabled: boolean;
   intervalMs: number;
   maxAge: number;
   notifyBeforeExpiry: number;
+  backupRetention: number;
 }
 
 /**
- * Secrets management service
- * Provides enterprise-grade secrets management with rotation and monitoring
+ * Local secrets management service
+ * Provides enterprise-grade local secrets management with rotation and monitoring
  */
 @Injectable()
 export class SecretsService extends EventEmitter implements OnModuleInit {
-  private readonly logger = new Logger('SecretsService');
-  private readonly secretsCache = new Map<string, SecretValue>();
-  private readonly secretsPath = '/etc/secrets';
+  private readonly logger = new Logger('LocalSecretsService');
+  private readonly secretsCache = new Map<string, LocalSecretValue>();
+  private readonly localSecretsPath: string;
   private readonly encryptionKey: Buffer;
-  private readonly rotationConfig: RotationConfig;
+  private readonly rotationConfig: LocalRotationConfig;
   private rotationTimer?: NodeJS.Timeout;
   private fileWatchers = new Map<string, () => void>();
 
   constructor(private readonly configService: ConfigService) {
     super();
 
-    // Initialize encryption key for secrets encryption
-    const encryptionKeyString = this.configService.get<string>(
-      'app.security.encryptionKey',
-    );
-    this.encryptionKey = Buffer.from(encryptionKeyString!, 'utf8').subarray(
-      0,
-      32,
-    );
+    // Initialize local secrets directory with proper permissions
+    this.localSecretsPath = process.env.LOCAL_SECRETS_DIR || './.env/secrets';
 
-    // Configure secrets rotation
+    // Initialize encryption key for local secrets encryption
+    const encryptionKeyString =
+      process.env.LOCAL_SECRETS_ENCRYPTION_KEY ||
+      this.configService.get<string>('app.security.encryptionKey') ||
+      'default-local-key-change-in-production';
+
+    this.encryptionKey = crypto.scryptSync(encryptionKeyString, 'salt', 32);
+
+    // Configure local secrets rotation
     this.rotationConfig = {
       enabled:
         this.configService.get<boolean>('app.features.secretsRotation') ??
@@ -89,39 +105,59 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
       notifyBeforeExpiry:
         this.configService.get<number>('app.secrets.notifyBeforeExpiry') ??
         86400000, // 1 day
+      backupRetention:
+        this.configService.get<number>('app.secrets.backupRetention') ?? 5,
     };
+
+    this.logger.log('Local Secrets Service initialized', {
+      secretsPath: this.localSecretsPath,
+      rotationEnabled: this.rotationConfig.enabled,
+      cloudDependencies: false,
+      localFileBasedSecrets: true,
+      dockerComposeCompatible: true,
+    });
   }
 
   /**
-   * Initialize secrets service
-   * Sets up secret loading, caching, and rotation
+   * Initialize local secrets service
+   * Sets up local secret loading, caching, and rotation
    */
-  async onModuleInit(): Promise<void> {
+  onModuleInit(): void {
     const startTime = Date.now();
-    this.logger.log('Initializing Secrets Service...');
+    this.logger.log('Initializing Local Secrets Service...');
 
     try {
-      // Load critical secrets
-      await this.loadCriticalSecrets();
+      // Initialize local secrets directory
+      this.initializeLocalSecretsDirectory();
 
-      // Setup secrets rotation if enabled
+      // Load critical secrets from local storage
+      this.loadCriticalLocalSecrets();
+
+      // Setup local secrets rotation if enabled
       if (this.rotationConfig.enabled) {
-        this.setupSecretsRotation();
+        this.setupLocalSecretsRotation();
       }
 
-      // Setup file watching for Kubernetes secrets
-      this.setupSecretsWatching();
+      // Setup local file watching for secrets hot-reloading
+      this.setupLocalSecretsWatching();
 
       const initTime = Date.now() - startTime;
-      this.logger.log('Secrets Service initialized successfully', {
+      this.logger.log('Local Secrets Service initialized successfully', {
         initTimeMs: initTime,
         cachedSecretsCount: this.secretsCache.size,
         rotationEnabled: this.rotationConfig.enabled,
         watchersCount: this.fileWatchers.size,
+        secretsDirectoryReady: existsSync(this.localSecretsPath),
+      });
+
+      this.emit('localSecretsInitialized', {
+        timestamp: new Date().toISOString(),
+        initTime,
+        secretsCount: this.secretsCache.size,
       });
     } catch (error) {
       const initTime = Date.now() - startTime;
-      this.logger.error('Secrets Service initialization failed', {
+      this.logger.error('Local Secrets Service initialization failed', {
         error: error instanceof Error ? error.message : String(error),
         initTimeMs: initTime,
       });
@@ -130,27 +166,28 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
   }
 
   /**
-   * Get secret value securely
+   * Get secret value securely from local storage
    *
    * @param secretName - Name of the secret
    * @param key - Key within the secret (optional)
    * @param encrypted - Whether the secret is encrypted
    * @returns Secret value or null if not found
    */
-  async getSecret(
+  getSecret(
     secretName: string,
     key?: string,
     encrypted = false,
-  ): Promise<string | null> {
-    const operationId = `get-secret-${Date.now()}`;
+  ): string | null {
+    const operationId = `get-local-secret-${Date.now()}`;
     const startTime = Date.now();
     const cacheKey = key ? `${secretName}:${key}` : secretName;
 
-    this.logger.debug(`[${operationId}] Retrieving secret`, {
+    this.logger.debug(`[${operationId}] Retrieving local secret`, {
       secretName,
       key,
       encrypted,
       cacheKey,
+      secretsPath: this.localSecretsPath,
     });
 
     try {
@@ -163,42 +200,48 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
           source: cachedSecret.metadata.source,
         });
         return encrypted
-          ? this.decryptSecret(cachedSecret.value)
+          ? this.decryptLocalSecret(cachedSecret.value)
           : cachedSecret.value;
       }
 
-      // Load from Kubernetes secrets first
-      let secretValue = await this.loadFromKubernetes(secretName, key);
-      let source: SecretMetadata['source'] = 'kubernetes';
+      // Load from local encrypted file storage first
+      let secretValue = this.loadFromLocalFile(secretName, key);
+      let source: LocalSecretMetadata['source'] = 'local-file';
 
       // Fallback to environment variables
       if (!secretValue) {
-        secretValue = await this.loadFromEnvironment(key || secretName);
+        secretValue = this.loadFromEnvironment(key || secretName);
         source = 'environment';
       }
 
-      // Fallback to external secret management (placeholder)
+      // Fallback to Docker Compose environment
       if (!secretValue) {
-        secretValue = await this.loadFromExternal(secretName, key);
-        source = 'external';
+        secretValue = this.loadFromDockerCompose(secretName, key);
+        source = 'docker-compose';
       }
 
       if (!secretValue) {
-        this.logger.debug(`[${operationId}] Secret not found`, {
+        this.logger.debug(`[${operationId}] Local secret not found`, {
           secretName,
           key,
+          searchedSources: ['local-file', 'environment', 'docker-compose'],
         });
         return null;
       }
 
-      // Cache the secret with metadata
-      const metadata: SecretMetadata = {
+      // Cache the secret with local metadata
+      const metadata: LocalSecretMetadata = {
         name: secretName,
         key: key || secretName,
         source,
         lastUpdated: new Date(),
         version: this.generateSecretVersion(),
         encrypted,
+        permissions: '600',
+        filePath:
+          source === 'local-file'
+            ? join(this.localSecretsPath, `${secretName}.enc`)
+            : undefined,
       };
 
       this.secretsCache.set(cacheKey, {
@@ -207,7 +250,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
       });
 
       const loadTime = Date.now() - startTime;
-      this.logger.debug(`[${operationId}] Secret loaded and cached`, {
+      this.logger.debug(`[${operationId}] Local secret loaded and cached`, {
         secretName,
         key,
         source,
@@ -215,10 +258,10 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
         loadTimeMs: loadTime,
       });
 
-      return encrypted ? this.decryptSecret(secretValue) : secretValue;
+      return encrypted ? this.decryptLocalSecret(secretValue) : secretValue;
     } catch (error) {
       const loadTime = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Failed to retrieve secret`, {
+      this.logger.error(`[${operationId}] Failed to retrieve local secret`, {
         secretName,
         key,
         error: error instanceof Error ? error.message : String(error),
@@ -229,82 +272,133 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
   }
 
   /**
-   * Set secret value (for testing and development)
+   * Set secret value in local encrypted storage
    *
    * @param secretName - Name of the secret
    * @param value - Secret value
    * @param key - Key within the secret (optional)
    * @param encrypted - Whether to encrypt the secret
    */
-  async setSecret(
+  setLocalSecret(
     secretName: string,
     value: string,
     key?: string,
-    encrypted = false,
-  ): Promise<void> {
-    const operationId = `set-secret-${Date.now()}`;
+    encrypted = true,
+  ): boolean {
+    const operationId = `set-local-secret-${Date.now()}`;
+    const startTime = Date.now();
     const cacheKey = key ? `${secretName}:${key}` : secretName;
 
-    this.logger.debug(`[${operationId}] Setting secret`, {
+    this.logger.debug(`[${operationId}] Setting local secret`, {
       secretName,
       key,
       encrypted,
       cacheKey,
     });
 
-    const encryptedValue = encrypted ? this.encryptSecret(value) : value;
+    try {
+      const secretFile = join(this.localSecretsPath, `${secretName}.enc`);
+      let secrets: Record<string, string> = {};
 
-    const metadata: SecretMetadata = {
-      name: secretName,
-      key: key || secretName,
-      source: 'external',
-      lastUpdated: new Date(),
-      version: this.generateSecretVersion(),
-      encrypted,
-    };
+      // Load existing secrets if file exists
+      if (existsSync(secretFile)) {
+        try {
+          const encryptedData = readFileSync(secretFile, 'utf8');
+          const decryptedData = this.decryptLocalSecret(encryptedData);
+          secrets = JSON.parse(decryptedData) as Record<string, string>;
+        } catch (error) {
+          this.logger.warn(
+            `[${operationId}] Could not load existing secrets, creating new`,
+            {
+              secretName,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          );
+        }
+      }
 
-    this.secretsCache.set(cacheKey, {
-      value: encryptedValue,
-      metadata,
-    });
+      // Update the secret
+      const secretKey = key || 'value';
+      secrets[secretKey] = value;
 
-    this.emit('secretUpdated', { secretName, key, metadata });
-    this.logger.debug(`[${operationId}] Secret set successfully`, {
-      secretName,
-      key,
-      encrypted,
-    });
+      // Encrypt and store with proper permissions
+      const encryptedData = this.encryptLocalSecret(JSON.stringify(secrets));
+      writeFileSync(secretFile, encryptedData, { mode: 0o600 });
+
+      // Set directory permissions
+      chmodSync(dirname(secretFile), 0o700);
+
+      // Cache the secret with metadata
+      const metadata: LocalSecretMetadata = {
+        name: secretName,
+        key: secretKey,
+        source: 'local-file',
+        lastUpdated: new Date(),
+        version: this.generateSecretVersion(),
+        encrypted: true,
+        filePath: secretFile,
+        permissions: '600',
+      };
+
+      this.secretsCache.set(cacheKey, {
+        value: encrypted ? encryptedData : value,
+        metadata,
+      });
+
+      const storeTime = Date.now() - startTime;
+      this.logger.debug(`[${operationId}] Local secret stored successfully`, {
+        secretName,
+        key,
+        storeTimeMs: storeTime,
+        filePath: secretFile,
+      });
+
+      this.emit('localSecretUpdated', { secretName, key, metadata });
+      return true;
+    } catch (error) {
+      const storeTime = Date.now() - startTime;
+      this.logger.error(`[${operationId}] Failed to store local secret`, {
+        secretName,
+        key,
+        error: error instanceof Error ? error.message : String(error),
+        storeTimeMs: storeTime,
+      });
+      return false;
+    }
   }
 
   /**
-   * Rotate secret (trigger rotation for a specific secret)
+   * Rotate local secret (trigger rotation for a specific secret)
    *
    * @param secretName - Name of the secret to rotate
    * @param key - Key within the secret (optional)
    */
-  async rotateSecret(secretName: string, key?: string): Promise<void> {
-    const operationId = `rotate-secret-${Date.now()}`;
+  rotateLocalSecret(secretName: string, key?: string): void {
+    const operationId = `rotate-local-secret-${Date.now()}`;
     const cacheKey = key ? `${secretName}:${key}` : secretName;
 
-    this.logger.log(`[${operationId}] Rotating secret`, {
+    this.logger.log(`[${operationId}] Rotating local secret`, {
       secretName,
       key,
     });
 
     try {
+      // Create backup before rotation
+      this.createLocalSecretBackup(secretName);
+
       // Remove from cache to force reload
       this.secretsCache.delete(cacheKey);
 
-      // Reload secret
-      await this.getSecret(secretName, key);
+      // Reload secret from local storage
+      this.getSecret(secretName, key);
 
-      this.emit('secretRotated', { secretName, key });
-      this.logger.log(`[${operationId}] Secret rotated successfully`, {
+      this.emit('localSecretRotated', { secretName, key });
+      this.logger.log(`[${operationId}] Local secret rotated successfully`, {
         secretName,
         key,
       });
     } catch (error) {
-      this.logger.error(`[${operationId}] Failed to rotate secret`, {
+      this.logger.error(`[${operationId}] Failed to rotate local secret`, {
         secretName,
         key,
         error: error instanceof Error ? error.message : String(error),
@@ -314,20 +408,34 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
   }
 
   /**
-   * Get secrets metadata for monitoring
+   * Set secret value in local encrypted storage (alias for setLocalSecret)
    *
-   * @returns Array of secret metadata (without values)
+   * @param secretName - Name of the secret
+   * @param value - Secret value
+   * @param key - Key within the secret (optional)
+   * @param encrypted - Whether to encrypt the secret
    */
-  getSecretsMetadata(): SecretMetadata[] {
-    return Array.from(this.secretsCache.values()).map(
-      (secret) => secret.metadata,
-    );
+  setSecret(
+    secretName: string,
+    value: string,
+    key?: string,
+    encrypted = true,
+  ): boolean {
+    return this.setLocalSecret(secretName, value, key, encrypted);
   }
 
   /**
-   * Check secret health and expiry status
+   * Rotate secret (alias for rotateLocalSecret)
    *
-   * @returns Health status of all secrets
+   * @param secretName - Name of the secret to rotate
+   * @param key - Key within the secret (optional)
+   */
+  rotateSecret(secretName: string, key?: string): void {
+    return this.rotateLocalSecret(secretName, key);
+  }
+
+  /**
+   * Get local secrets health (alias for getLocalSecretsHealth)
    */
   getSecretsHealth(): {
     healthy: number;
@@ -339,6 +447,37 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
       key: string;
       status: 'healthy' | 'expiring' | 'expired';
       age: number;
+      source: string;
+    }>;
+  } {
+    return this.getLocalSecretsHealth();
+  }
+
+  /**
+   * Get local secrets metadata for monitoring
+   *
+   * @returns Array of local secret metadata (without values)
+   */
+  getLocalSecretsMetadata(): LocalSecretMetadata[] {
+    return Array.from(this.secretsCache.values()).map(
+      (secret) => secret.metadata,
+    );
+  }
+
+  /**
+   * Check local secrets health and expiry status
+   */
+  getLocalSecretsHealth(): {
+    healthy: number;
+    expiring: number;
+    expired: number;
+    total: number;
+    details: Array<{
+      name: string;
+      key: string;
+      status: 'healthy' | 'expiring' | 'expired';
+      age: number;
+      source: string;
     }>;
   } {
     const now = Date.now();
@@ -358,6 +497,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
         key: secret.metadata.key,
         status,
         age,
+        source: secret.metadata.source,
       };
     });
 
@@ -371,29 +511,64 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
   }
 
   /**
-   * Load secret from Kubernetes mounted volume
+   * Initialize local secrets directory with proper permissions
+   *
+   * @private
+   */
+  private initializeLocalSecretsDirectory(): void {
+    try {
+      if (!existsSync(this.localSecretsPath)) {
+        mkdirSync(this.localSecretsPath, { recursive: true });
+        chmodSync(this.localSecretsPath, 0o700); // Owner read/write/execute only
+        this.logger.log(
+          `Created local secrets directory with secure permissions: ${this.localSecretsPath}`,
+        );
+      }
+
+      // Verify directory permissions
+      try {
+        accessSync(this.localSecretsPath, constants.R_OK | constants.W_OK);
+        this.logger.debug('Local secrets directory access validated');
+      } catch (error) {
+        this.logger.error('Local secrets directory access validation failed', {
+          path: this.localSecretsPath,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    } catch (error) {
+      this.logger.error('Failed to initialize local secrets directory', {
+        path: this.localSecretsPath,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Load secret from local encrypted file storage
    *
    * @private
    * @param secretName - Name of the secret
    * @param key - Key within the secret
    * @returns Secret value or null
    */
-  private async loadFromKubernetes(
-    secretName: string,
-    key?: string,
-  ): Promise<string | null> {
+  private loadFromLocalFile(secretName: string, key?: string): string | null {
     try {
-      const secretPath = key
-        ? join(this.secretsPath, secretName, key)
-        : join(this.secretsPath, secretName);
+      const secretFile = join(this.localSecretsPath, `${secretName}.enc`);
 
-      if (!existsSync(secretPath)) {
+      if (!existsSync(secretFile)) {
         return null;
       }
 
-      return readFileSync(secretPath, 'utf8').trim();
+      // Read and decrypt the secret file
+      const encryptedData = readFileSync(secretFile, 'utf8');
+      const decryptedData = this.decryptLocalSecret(encryptedData);
+
+      // Parse the secrets JSON
+      const secrets = JSON.parse(decryptedData) as Record<string, string>;
+      return secrets[key || 'value'] || null;
     } catch (error) {
-      this.logger.debug('Failed to load from Kubernetes', {
+      this.logger.debug('Failed to load from local file', {
         secretName,
         key,
         error: error instanceof Error ? error.message : String(error),
@@ -403,110 +578,148 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
   }
 
   /**
-   * Load secret from environment variables
+   * Load secret from environment variables with security validation
    *
    * @private
    * @param key - Environment variable key
    * @returns Secret value or null
    */
-  private async loadFromEnvironment(key: string): Promise<string | null> {
-    return process.env[key] || null;
+  private loadFromEnvironment(key: string): string | null {
+    const envValue = process.env[key];
+    if (!envValue) {
+      return null;
+    }
+
+    // Sanitize environment variable value
+    return this.sanitizeEnvValue(envValue);
   }
 
   /**
-   * Load secret from external secret management system
-   * Placeholder for integration with HashiCorp Vault, AWS Secrets Manager, etc.
+   * Load secret from Docker Compose environment
    *
    * @private
    * @param secretName - Name of the secret
    * @param key - Key within the secret
    * @returns Secret value or null
    */
-  private async loadFromExternal(
+  private loadFromDockerCompose(
     secretName: string,
     key?: string,
-  ): Promise<string | null> {
-    // Placeholder for external secret management integration
-    // TODO: Implement integration with external systems like:
-    // - HashiCorp Vault
-    // - AWS Secrets Manager
-    // - Azure Key Vault
-    // - Google Secret Manager
-    return null;
+  ): string | null {
+    // Check for Docker Compose specific environment variables
+    const dockerComposeKey = `DOCKER_${(key || secretName).toUpperCase()}`;
+    return process.env[dockerComposeKey] || null;
   }
 
   /**
-   * Load critical secrets during initialization
+   * Load critical secrets during initialization from local storage
    *
    * @private
    */
-  private async loadCriticalSecrets(): Promise<void> {
+  private loadCriticalLocalSecrets(): void {
     const criticalSecrets = [
-      { name: 'jwt-secret', key: 'JWT_SECRET' },
-      { name: 'encryption-key', key: 'ENCRYPTION_KEY' },
-      { name: 'anthropic-api-key', key: 'ANTHROPIC_API_KEY' },
-      { name: 'openai-api-key', key: 'OPENAI_API_KEY' },
-      { name: 'gemini-api-key', key: 'GEMINI_API_KEY' },
+      { name: 'api-keys', key: 'ANTHROPIC_API_KEY' },
+      { name: 'api-keys', key: 'OPENAI_API_KEY' },
+      { name: 'api-keys', key: 'GEMINI_API_KEY' },
+      { name: 'auth', key: 'JWT_SECRET' },
+      { name: 'security', key: 'ENCRYPTION_KEY' },
     ];
 
-    const loadPromises = criticalSecrets.map(async ({ name, key }) => {
-      try {
-        await this.getSecret(name, key);
-      } catch (error) {
-        this.logger.warn(`Failed to load critical secret: ${name}`, {
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    });
+    let initializedCount = 0;
+    let fromEnvCount = 0;
 
-    await Promise.all(loadPromises);
+    for (const { name, key } of criticalSecrets) {
+      try {
+        // Check if secret exists in local storage
+        let secretValue = this.getSecret(name, key);
+
+        // If not found, try to initialize from environment
+        if (!secretValue) {
+          const envValue = process.env[key];
+          if (envValue) {
+            this.setLocalSecret(name, envValue, key, true);
+            secretValue = envValue;
+            fromEnvCount++;
+            this.logger.debug(
+              `Initialized local secret from environment: ${name}:${key}`,
+            );
+          }
+        }
+
+        if (secretValue) {
+          initializedCount++;
+        } else {
+          this.logger.warn(`Critical local secret not found: ${name}:${key}`);
+        }
+      } catch (error) {
+        this.logger.error(
+          `Failed to initialize critical local secret: ${name}:${key}`,
+          {
+            error: error instanceof Error ? error.message : String(error),
+          },
+        );
+      }
+    }
+
+    this.logger.log('Critical local secrets initialization completed', {
+      total: criticalSecrets.length,
+      initialized: initializedCount,
+      fromEnvironment: fromEnvCount,
+      missing: criticalSecrets.length - initializedCount,
+    });
   }
 
   /**
-   * Setup secrets rotation timer
+   * Setup local secrets rotation timer
    *
    * @private
    */
-  private setupSecretsRotation(): void {
+  private setupLocalSecretsRotation(): void {
     if (this.rotationTimer) {
       clearInterval(this.rotationTimer);
     }
 
     this.rotationTimer = setInterval(() => {
-      this.performSecretsRotation();
+      try {
+        this.performLocalSecretsRotation();
+      } catch (error) {
+        this.logger.error('Failed to perform local secrets rotation', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     }, this.rotationConfig.intervalMs);
 
-    this.logger.log('Secrets rotation enabled', {
+    this.logger.log('Local secrets rotation enabled', {
       intervalMs: this.rotationConfig.intervalMs,
       maxAge: this.rotationConfig.maxAge,
     });
   }
 
   /**
-   * Perform automatic secrets rotation
+   * Perform automatic local secrets rotation
    *
    * @private
    */
-  private async performSecretsRotation(): Promise<void> {
-    this.logger.log('Starting automatic secrets rotation...');
+  private performLocalSecretsRotation(): void {
+    this.logger.log('Starting automatic local secrets rotation...');
 
-    const health = this.getSecretsHealth();
+    const health = this.getLocalSecretsHealth();
     const secretsToRotate = health.details.filter(
       (secret) => secret.status === 'expired',
     );
 
     if (secretsToRotate.length === 0) {
-      this.logger.debug('No secrets require rotation');
+      this.logger.debug('No local secrets require rotation');
       return;
     }
 
-    this.logger.log(`Rotating ${secretsToRotate.length} expired secrets`);
+    this.logger.log(`Rotating ${secretsToRotate.length} expired local secrets`);
 
     for (const secret of secretsToRotate) {
       try {
-        await this.rotateSecret(secret.name, secret.key);
+        this.rotateLocalSecret(secret.name, secret.key);
       } catch (error) {
-        this.logger.error(`Failed to rotate secret: ${secret.name}`, {
+        this.logger.error(`Failed to rotate local secret: ${secret.name}`, {
           error: error instanceof Error ? error.message : String(error),
         });
       }
@@ -514,53 +727,83 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
   }
 
   /**
-   * Setup file watching for Kubernetes secrets hot-reloading
+   * Setup file watching for local secrets hot-reloading
    *
    * @private
    */
-  private setupSecretsWatching(): void {
-    if (!existsSync(this.secretsPath)) {
-      this.logger.debug(
-        'Kubernetes secrets path not found, skipping file watching',
-      );
+  private setupLocalSecretsWatching(): void {
+    if (!existsSync(this.localSecretsPath)) {
+      this.logger.debug('Local secrets path not found, skipping file watching');
       return;
     }
 
     // Watch critical secret files for changes
-    const criticalSecrets = [
-      'jwt-secret',
-      'encryption-key',
-      'anthropic-api-key',
-      'openai-api-key',
-      'gemini-api-key',
-    ];
+    const criticalSecrets = ['api-keys', 'auth', 'security'];
 
     criticalSecrets.forEach((secretName) => {
-      const secretDir = join(this.secretsPath, secretName);
-      if (existsSync(secretDir)) {
+      const secretFile = join(this.localSecretsPath, `${secretName}.enc`);
+      if (existsSync(secretFile)) {
         const watcher = () => {
-          this.logger.log(`Secret file changed: ${secretName}`);
-          this.rotateSecret(secretName);
+          this.logger.log(`Local secret file changed: ${secretName}`);
+          try {
+            this.rotateLocalSecret(secretName);
+          } catch (error) {
+            this.logger.error(
+              `Failed to rotate local secret on file change: ${secretName}`,
+              {
+                error: error instanceof Error ? error.message : String(error),
+              },
+            );
+          }
         };
 
-        watchFile(secretDir, watcher);
+        watchFile(secretFile, watcher);
         this.fileWatchers.set(secretName, watcher);
       }
     });
 
-    this.logger.log('File watching setup for secrets hot-reloading', {
+    this.logger.log('Local file watching setup for secrets hot-reloading', {
       watchersCount: this.fileWatchers.size,
     });
   }
 
   /**
-   * Encrypt secret value
+   * Create backup of local secret before rotation
+   *
+   * @private
+   * @param secretName - Name of the secret to backup
+   */
+  private createLocalSecretBackup(secretName: string): void {
+    try {
+      const secretFile = join(this.localSecretsPath, `${secretName}.enc`);
+      if (existsSync(secretFile)) {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupFile = join(
+          this.localSecretsPath,
+          `${secretName}.${timestamp}.backup`,
+        );
+
+        const secretData = readFileSync(secretFile);
+        writeFileSync(backupFile, secretData, { mode: 0o600 });
+
+        this.logger.debug(`Created local secret backup: ${backupFile}`);
+      }
+    } catch (error) {
+      this.logger.error('Failed to create local secret backup', {
+        secretName,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * Encrypt secret value using AES-256-GCM
    *
    * @private
    * @param value - Secret value to encrypt
    * @returns Encrypted secret value
    */
-  private encryptSecret(value: string): string {
+  private encryptLocalSecret(value: string): string {
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv('aes-256-gcm', this.encryptionKey, iv);
     let encrypted = cipher.update(value, 'utf8', 'hex');
@@ -570,13 +813,13 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
   }
 
   /**
-   * Decrypt secret value
+   * Decrypt secret value using AES-256-GCM
    *
    * @private
    * @param encryptedValue - Encrypted secret value
    * @returns Decrypted secret value
    */
-  private decryptSecret(encryptedValue: string): string {
+  private decryptLocalSecret(encryptedValue: string): string {
     const [ivHex, authTagHex, encrypted] = encryptedValue.split(':');
     const iv = Buffer.from(ivHex, 'hex');
     const authTag = Buffer.from(authTagHex, 'hex');
@@ -589,6 +832,31 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
+  }
+
+  /**
+   * Sanitize environment variable value to prevent injection attacks
+   *
+   * @private
+   * @param value - Raw environment variable value
+   * @returns Sanitized value
+   */
+  private sanitizeEnvValue(value: string): string {
+    // Remove potentially dangerous characters and limit length
+    const sanitized = value
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '') // Remove control characters
+      .trim()
+      .substring(0, 4096); // Limit to reasonable length
+
+    if (sanitized !== value) {
+      this.logger.warn('Environment variable value was sanitized', {
+        originalLength: value.length,
+        sanitizedLength: sanitized.length,
+      });
+    }
+
+    return sanitized;
   }
 
   /**
@@ -612,6 +880,6 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
     // Cleanup file watchers
     this.fileWatchers.clear();
 
-    this.logger.log('Secrets Service destroyed');
+    this.logger.log('Local Secrets Service destroyed');
   }
 }

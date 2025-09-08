@@ -26,6 +26,32 @@ import {
 } from './security-monitoring.service';
 
 /**
+ * Security configuration interface
+ */
+interface SecurityConfig {
+  alerts: {
+    enabled: boolean;
+    severity: SecuritySeverity;
+    throttling: {
+      enabled: boolean;
+    };
+  };
+}
+
+/**
+ * Security incident interface
+ */
+interface SecurityIncident {
+  incidentId: string;
+  eventIds: string[];
+  severity: SecuritySeverity;
+  status: string;
+  title: string;
+  description: string;
+  tags: string[];
+}
+
+/**
  * Alert channel types
  */
 export enum AlertChannel {
@@ -216,10 +242,10 @@ export class SecurityAlertsService implements OnModuleInit {
   constructor(
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
-    @Inject('SECURITY_CONFIG') private readonly securityConfig: any,
+    @Inject('SECURITY_CONFIG') private readonly securityConfig: SecurityConfig,
   ) {}
 
-  async onModuleInit(): Promise<void> {
+  onModuleInit(): void {
     const operationId = `security-alerts-init-${Date.now()}`;
     const startTime = Date.now();
 
@@ -227,10 +253,10 @@ export class SecurityAlertsService implements OnModuleInit {
 
     try {
       // Initialize alert delivery configurations
-      await this.initializeDeliveryConfigs();
+      this.initializeDeliveryConfigs();
 
       // Initialize alert templates
-      await this.initializeAlertTemplates();
+      this.initializeAlertTemplates();
 
       // Setup event listeners
       this.setupEventListeners();
@@ -265,7 +291,7 @@ export class SecurityAlertsService implements OnModuleInit {
    * Process security event and generate alerts
    */
   @OnEvent('security.event.processed')
-  async handleSecurityEvent(event: SecurityEvent): Promise<void> {
+  handleSecurityEvent(event: SecurityEvent): void {
     if (!this.securityConfig.alerts.enabled) {
       return;
     }
@@ -298,7 +324,7 @@ export class SecurityAlertsService implements OnModuleInit {
       }
 
       // Check for alert deduplication
-      const existingAlert = await this.findExistingAlert(event);
+      const existingAlert = this.findExistingAlert(event);
       if (existingAlert) {
         this.logger.debug(`[${operationId}] Duplicate alert suppressed`, {
           operationId,
@@ -309,13 +335,13 @@ export class SecurityAlertsService implements OnModuleInit {
       }
 
       // Generate alert
-      const alert = await this.generateAlert(event);
+      const alert = this.generateAlert(event);
 
       // Store alert
       this.activeAlerts.set(alert.alertId, alert);
 
       // Send alert through configured channels
-      await this.deliverAlert(alert);
+      this.deliverAlert(alert);
 
       // Update metrics
       this.updateAlertMetrics(alert);
@@ -345,7 +371,7 @@ export class SecurityAlertsService implements OnModuleInit {
    * Process security incidents and generate high-priority alerts
    */
   @OnEvent('security.incident.created')
-  async handleSecurityIncident(incident: any): Promise<void> {
+  handleSecurityIncident(incident: SecurityIncident): void {
     const operationId = `incident-alert-${Date.now()}`;
 
     this.logger.warn(
@@ -386,7 +412,7 @@ export class SecurityAlertsService implements OnModuleInit {
 
       // Store and deliver incident alert
       this.activeAlerts.set(alert.alertId, alert);
-      await this.deliverAlert(alert);
+      this.deliverAlert(alert);
       this.updateAlertMetrics(alert);
 
       this.logger.error(`[${operationId}] Security incident alert delivered`, {
@@ -408,7 +434,7 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Initialize alert delivery configurations
    */
-  private async initializeDeliveryConfigs(): Promise<void> {
+  private initializeDeliveryConfigs(): void {
     this.deliveryConfigs = [
       {
         channel: AlertChannel.CONSOLE,
@@ -420,24 +446,28 @@ export class SecurityAlertsService implements OnModuleInit {
         channel: AlertChannel.EMAIL,
         config: {
           email: {
-            to: this.configService
-              .get('SECURITY_EMAIL_ALERTS', '')
+            to: (
+              this.configService.get<string>('SECURITY_EMAIL_ALERTS', '') || ''
+            )
               .split(',')
               .filter(Boolean),
-            from: this.configService.get('EMAIL_FROM', 'security@bytebot.ai'),
+            from: this.configService.get<string>(
+              'EMAIL_FROM',
+              'security@bytebot.ai',
+            ),
             subject: 'Bytebot Security Alert',
           },
         },
         minSeverity: SecuritySeverity.MEDIUM,
-        enabled: this.configService.get('EMAIL_ALERTS_ENABLED', false),
+        enabled: this.configService.get<boolean>('EMAIL_ALERTS_ENABLED', false),
       },
       {
         channel: AlertChannel.WEBHOOK,
         config: {
-          url: this.configService.get('SECURITY_WEBHOOK_URL'),
+          url: this.configService.get<string>('SECURITY_WEBHOOK_URL'),
         },
         minSeverity: SecuritySeverity.MEDIUM,
-        enabled: !!this.configService.get('SECURITY_WEBHOOK_URL'),
+        enabled: !!this.configService.get<string>('SECURITY_WEBHOOK_URL'),
         rateLimit: {
           maxAlerts: 10,
           windowSeconds: 300, // 5 minutes
@@ -447,15 +477,18 @@ export class SecurityAlertsService implements OnModuleInit {
         channel: AlertChannel.SLACK,
         config: {
           slack: {
-            webhook: this.configService.get('SLACK_WEBHOOK_URL'),
-            channel: this.configService.get('SLACK_CHANNEL', '#security'),
+            webhook: this.configService.get<string>('SLACK_WEBHOOK_URL'),
+            channel: this.configService.get<string>(
+              'SLACK_CHANNEL',
+              '#security',
+            ),
             username: 'Bytebot Security Bot',
           },
         },
         minSeverity: SecuritySeverity.HIGH,
-        enabled: !!this.configService.get('SLACK_WEBHOOK_URL'),
+        enabled: !!this.configService.get<string>('SLACK_WEBHOOK_URL'),
       },
-    ].filter((config) => config.enabled);
+    ].filter((config) => config.enabled) as AlertDeliveryConfig[];
 
     this.logger.log('Alert delivery configurations initialized', {
       channels: this.deliveryConfigs.map((c) => c.channel),
@@ -466,7 +499,7 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Initialize alert templates
    */
-  private async initializeAlertTemplates(): Promise<void> {
+  private initializeAlertTemplates(): void {
     this.alertTemplates = [
       {
         templateId: 'authentication-failure',
@@ -557,9 +590,7 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Find existing alert to prevent duplication
    */
-  private async findExistingAlert(
-    event: SecurityEvent,
-  ): Promise<SecurityAlert | null> {
+  private findExistingAlert(event: SecurityEvent): SecurityAlert | null {
     const recentAlerts = Array.from(this.activeAlerts.values()).filter(
       (alert) => {
         const timeDiff = Date.now() - alert.timestamp.getTime();
@@ -581,7 +612,7 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Generate alert from security event
    */
-  private async generateAlert(event: SecurityEvent): Promise<SecurityAlert> {
+  private generateAlert(event: SecurityEvent): SecurityAlert {
     const alertId = `alert_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
     // Find matching template
@@ -638,14 +669,14 @@ export class SecurityAlertsService implements OnModuleInit {
     severity: SecuritySeverity,
   ): AlertChannel[] {
     return this.deliveryConfigs
-      .filter((config) => this.meetsSeverityThreshold(severity))
+      .filter((_config) => this.meetsSeverityThreshold(severity))
       .map((config) => config.channel);
   }
 
   /**
    * Deliver alert through all configured channels
    */
-  private async deliverAlert(alert: SecurityAlert): Promise<void> {
+  private deliverAlert(alert: SecurityAlert): void {
     const operationId = `deliver-alert-${alert.alertId}`;
 
     this.logger.debug(`[${operationId}] Delivering alert through channels`, {
@@ -656,9 +687,9 @@ export class SecurityAlertsService implements OnModuleInit {
       emergency: alert.emergency,
     });
 
-    const deliveryPromises = alert.channels.map(async (channel) => {
+    alert.channels.forEach((channel) => {
       try {
-        await this.deliverToChannel(alert, channel, operationId);
+        this.deliverToChannel(alert, channel, operationId);
         this.deliveryMetrics.alertsByChannel.set(
           channel,
           (this.deliveryMetrics.alertsByChannel.get(channel) || 0) + 1,
@@ -677,8 +708,6 @@ export class SecurityAlertsService implements OnModuleInit {
       }
     });
 
-    await Promise.allSettled(deliveryPromises);
-
     alert.status = AlertStatus.SENT;
     alert.deliveryAttempts++;
     alert.lastDeliveryAttempt = new Date();
@@ -687,18 +716,18 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Deliver alert to specific channel
    */
-  private async deliverToChannel(
+  private deliverToChannel(
     alert: SecurityAlert,
     channel: AlertChannel,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     const config = this.deliveryConfigs.find((c) => c.channel === channel);
     if (!config) {
       throw new Error(`No configuration found for channel: ${channel}`);
     }
 
     // Check rate limiting
-    if (await this.isRateLimited(channel, config)) {
+    if (this.isRateLimited(channel, config)) {
       alert.status = AlertStatus.THROTTLED;
       this.deliveryMetrics.throttledAlerts++;
       this.logger.warn(
@@ -714,16 +743,16 @@ export class SecurityAlertsService implements OnModuleInit {
 
     switch (channel) {
       case AlertChannel.CONSOLE:
-        await this.deliverToConsole(alert, operationId);
+        this.deliverToConsole(alert, operationId);
         break;
       case AlertChannel.EMAIL:
-        await this.deliverToEmail(alert, config, operationId);
+        this.deliverToEmail(alert, config, operationId);
         break;
       case AlertChannel.WEBHOOK:
-        await this.deliverToWebhook(alert, config, operationId);
+        this.deliverToWebhook(alert, config, operationId);
         break;
       case AlertChannel.SLACK:
-        await this.deliverToSlack(alert, config, operationId);
+        this.deliverToSlack(alert, config, operationId);
         break;
       default:
         throw new Error(`Unsupported alert channel: ${channel}`);
@@ -733,10 +762,10 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Check if channel is rate limited
    */
-  private async isRateLimited(
+  private isRateLimited(
     channel: AlertChannel,
     config: AlertDeliveryConfig,
-  ): Promise<boolean> {
+  ): boolean {
     if (!config.rateLimit || !this.securityConfig.alerts.throttling.enabled) {
       return false;
     }
@@ -759,10 +788,7 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Deliver alert to console
    */
-  private async deliverToConsole(
-    alert: SecurityAlert,
-    operationId: string,
-  ): Promise<void> {
+  private deliverToConsole(alert: SecurityAlert, operationId: string): void {
     const logMessage = `SECURITY ALERT [${alert.severity}]: ${alert.title}`;
     const logData = {
       operationId,
@@ -793,11 +819,11 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Deliver alert to email
    */
-  private async deliverToEmail(
+  private deliverToEmail(
     alert: SecurityAlert,
     config: AlertDeliveryConfig,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     // In a production environment, this would use a real email service
     this.logger.log(`[${operationId}] Email alert sent`, {
       operationId,
@@ -810,11 +836,11 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Deliver alert to webhook
    */
-  private async deliverToWebhook(
+  private deliverToWebhook(
     alert: SecurityAlert,
     config: AlertDeliveryConfig,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     // In a production environment, this would make an HTTP POST request
     this.logger.log(`[${operationId}] Webhook alert sent`, {
       operationId,
@@ -834,11 +860,11 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Deliver alert to Slack
    */
-  private async deliverToSlack(
+  private deliverToSlack(
     alert: SecurityAlert,
     config: AlertDeliveryConfig,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     // In a production environment, this would send to Slack webhook
     const slackMessage = {
       channel: config.config.slack?.channel,
@@ -852,12 +878,18 @@ export class SecurityAlertsService implements OnModuleInit {
             { title: 'Event ID', value: alert.eventId, short: true },
             {
               title: 'Source IP',
-              value: alert.metadata.sourceIp || 'Unknown',
+              value:
+                typeof alert.metadata.sourceIp === 'string'
+                  ? alert.metadata.sourceIp
+                  : 'Unknown',
               short: true,
             },
             {
               title: 'Risk Score',
-              value: alert.metadata.riskScore || 'Unknown',
+              value:
+                typeof alert.metadata.riskScore === 'number'
+                  ? alert.metadata.riskScore.toString()
+                  : 'Unknown',
               short: true,
             },
           ],
@@ -899,12 +931,37 @@ export class SecurityAlertsService implements OnModuleInit {
 
     // Replace event fields
     rendered = rendered.replace(/\{\{(\w+)\}\}/g, (match, field) => {
-      return String(event[field as keyof SecurityEvent] || match);
+      const fieldValue = event[field as keyof SecurityEvent];
+      if (fieldValue === null || fieldValue === undefined) {
+        return match;
+      }
+      return typeof fieldValue === 'object'
+        ? JSON.stringify(fieldValue)
+        : String(fieldValue);
     });
 
     // Replace metadata fields
     rendered = rendered.replace(/\{\{metadata\.(\w+)\}\}/g, (match, field) => {
-      return String(event.metadata[field] || match);
+      if (typeof field !== 'string') {
+        return match;
+      }
+      const metadataValue: unknown = (
+        event.metadata as Record<string, unknown>
+      )[field];
+      if (metadataValue === null || metadataValue === undefined) {
+        return match;
+      }
+      if (typeof metadataValue === 'object' && metadataValue !== null) {
+        return JSON.stringify(metadataValue);
+      }
+      if (
+        typeof metadataValue === 'string' ||
+        typeof metadataValue === 'number' ||
+        typeof metadataValue === 'boolean'
+      ) {
+        return String(metadataValue);
+      }
+      return match;
     });
 
     return rendered;
@@ -933,7 +990,7 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Acknowledge security alert
    */
-  async acknowledgeAlert(alertId: string, userId: string): Promise<void> {
+  acknowledgeAlert(alertId: string, userId: string): void {
     const alert = this.activeAlerts.get(alertId);
     if (!alert) {
       throw new Error(`Alert not found: ${alertId}`);
@@ -962,7 +1019,7 @@ export class SecurityAlertsService implements OnModuleInit {
   /**
    * Get alert delivery metrics
    */
-  getAlertMetrics(): any {
+  getAlertMetrics(): Record<string, unknown> {
     return {
       ...this.deliveryMetrics,
       alertsBySeverity: Object.fromEntries(
@@ -980,7 +1037,7 @@ export class SecurityAlertsService implements OnModuleInit {
    * Cleanup old alerts (run daily)
    */
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async cleanupOldAlerts(): Promise<void> {
+  cleanupOldAlerts(): void {
     const startTime = Date.now();
     let alertsCleanedUp = 0;
 

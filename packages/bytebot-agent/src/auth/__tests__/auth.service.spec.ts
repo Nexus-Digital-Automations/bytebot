@@ -146,13 +146,15 @@ describe('AuthService', () => {
 
     it('should successfully login with valid credentials', async () => {
       // Arrange
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
-      bcryptMock.compare.mockResolvedValue(true as never);
-      jwtService.signAsync
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      (bcryptMock.compare as jest.Mock).mockResolvedValue(true as never);
+      (jwtService.signAsync as jest.Mock)
         .mockResolvedValueOnce('mock-access-token')
         .mockResolvedValueOnce('mock-refresh-token');
-      prismaService.userSession.create.mockResolvedValue(mockSession);
-      prismaService.user.update.mockResolvedValue(mockUser);
+      (prismaService.userSession.create as jest.Mock).mockResolvedValue(
+        mockSession,
+      );
+      (prismaService.user.update as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
       const result = await service.login(loginDto);
@@ -165,54 +167,56 @@ describe('AuthService', () => {
         expiresIn: 900, // 15 minutes in seconds
       });
 
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+      expect(jest.mocked(prismaService.user.findUnique)).toHaveBeenCalledWith({
         where: { email: loginDto.email },
         include: { permissions: true },
       });
-      expect(bcryptMock.compare).toHaveBeenCalledWith(
+      expect(jest.mocked(bcryptMock.compare)).toHaveBeenCalledWith(
         loginDto.password,
         mockUser.passwordHash,
       );
-      expect(prismaService.userSession.create).toHaveBeenCalled();
-      expect(prismaService.user.update).toHaveBeenCalledWith({
+      expect(jest.mocked(prismaService.userSession.create)).toHaveBeenCalled();
+      expect(jest.mocked(prismaService.user.update)).toHaveBeenCalledWith({
         where: { id: mockUser.id },
-        data: { lastLoginAt: expect.any(Date) },
+        data: { lastLoginAt: expect.any(Date) as Date },
       });
     });
 
     it('should throw UnauthorizedException when user not found', async () => {
       // Arrange
-      prismaService.user.findUnique.mockResolvedValue(null);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.login(loginDto)).rejects.toThrow(
         UnauthorizedException,
       );
-      expect(bcryptMock.compare).not.toHaveBeenCalled();
+      expect(jest.mocked(bcryptMock.compare)).not.toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException when user is inactive', async () => {
       // Arrange
       const inactiveUser = { ...mockUser, isActive: false };
-      prismaService.user.findUnique.mockResolvedValue(inactiveUser);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(
+        inactiveUser,
+      );
 
       // Act & Assert
       await expect(service.login(loginDto)).rejects.toThrow(
         UnauthorizedException,
       );
-      expect(bcryptMock.compare).not.toHaveBeenCalled();
+      expect(jest.mocked(bcryptMock.compare)).not.toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException when password is invalid', async () => {
       // Arrange
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
-      bcryptMock.compare.mockResolvedValue(false as never);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      (bcryptMock.compare as jest.Mock).mockResolvedValue(false as never);
 
       // Act & Assert
       await expect(service.login(loginDto)).rejects.toThrow(
         UnauthorizedException,
       );
-      expect(bcryptMock.compare).toHaveBeenCalledWith(
+      expect(jest.mocked(bcryptMock.compare)).toHaveBeenCalledWith(
         loginDto.password,
         mockUser.passwordHash,
       );
@@ -240,11 +244,13 @@ describe('AuthService', () => {
         lastName: registerDto.lastName,
       };
 
-      prismaService.user.findUnique
+      (prismaService.user.findUnique as jest.Mock)
         .mockResolvedValueOnce(null) // Email check
         .mockResolvedValueOnce(null); // Username check
-      bcryptMock.hash.mockResolvedValue('hashed-password' as never);
-      prismaService.user.create.mockResolvedValue(newUser);
+      (bcryptMock.hash as jest.Mock).mockResolvedValue(
+        'hashed-password' as never,
+      );
+      (prismaService.user.create as jest.Mock).mockResolvedValue(newUser);
 
       // Act
       const result = await service.register(registerDto);
@@ -264,8 +270,11 @@ describe('AuthService', () => {
         updatedAt: newUser.updatedAt,
       });
 
-      expect(bcryptMock.hash).toHaveBeenCalledWith(registerDto.password, 12);
-      expect(prismaService.user.create).toHaveBeenCalledWith({
+      expect(jest.mocked(bcryptMock.hash)).toHaveBeenCalledWith(
+        registerDto.password,
+        12,
+      );
+      expect(jest.mocked(prismaService.user.create)).toHaveBeenCalledWith({
         data: {
           email: registerDto.email,
           username: registerDto.username,
@@ -290,12 +299,14 @@ describe('AuthService', () => {
       await expect(service.register(invalidDto)).rejects.toThrow(
         BadRequestException,
       );
-      expect(prismaService.user.findUnique).not.toHaveBeenCalled();
+      expect(jest.mocked(prismaService.user.findUnique)).not.toHaveBeenCalled();
     });
 
     it('should throw ConflictException when email already exists', async () => {
       // Arrange
-      prismaService.user.findUnique.mockResolvedValueOnce(mockUser); // Email exists
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValueOnce(
+        mockUser,
+      ); // Email exists
 
       // Act & Assert
       await expect(service.register(registerDto)).rejects.toThrow(
@@ -305,7 +316,7 @@ describe('AuthService', () => {
 
     it('should throw ConflictException when username already exists', async () => {
       // Arrange
-      prismaService.user.findUnique
+      (prismaService.user.findUnique as jest.Mock)
         .mockResolvedValueOnce(null) // Email check passes
         .mockResolvedValueOnce(mockUser); // Username exists
 
@@ -328,12 +339,14 @@ describe('AuthService', () => {
 
     it('should successfully refresh tokens', async () => {
       // Arrange
-      jwtService.verifyAsync.mockResolvedValue(refreshPayload);
-      prismaService.userSession.findUnique.mockResolvedValue(mockSession);
-      jwtService.signAsync
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(refreshPayload);
+      (prismaService.userSession.findUnique as jest.Mock).mockResolvedValue(
+        mockSession,
+      );
+      (jwtService.signAsync as jest.Mock)
         .mockResolvedValueOnce('new-access-token')
         .mockResolvedValueOnce('new-refresh-token');
-      prismaService.userSession.update.mockResolvedValue({
+      (prismaService.userSession.update as jest.Mock).mockResolvedValue({
         ...mockSession,
         refreshToken: 'new-refresh-token',
       });
@@ -349,18 +362,22 @@ describe('AuthService', () => {
         expiresIn: 900,
       });
 
-      expect(jwtService.verifyAsync).toHaveBeenCalledWith(refreshToken);
-      expect(prismaService.userSession.findUnique).toHaveBeenCalledWith({
+      expect(jest.mocked(jwtService.verifyAsync)).toHaveBeenCalledWith(
+        refreshToken,
+      );
+      expect(
+        jest.mocked(prismaService.userSession.findUnique),
+      ).toHaveBeenCalledWith({
         where: { refreshToken },
         include: { user: true },
       });
-      expect(prismaService.userSession.update).toHaveBeenCalled();
+      expect(jest.mocked(prismaService.userSession.update)).toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException when token type is invalid', async () => {
       // Arrange
       const invalidPayload = { ...refreshPayload, type: 'access' as const };
-      jwtService.verifyAsync.mockResolvedValue(invalidPayload);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(invalidPayload);
 
       // Act & Assert
       await expect(service.refreshTokens(refreshToken)).rejects.toThrow(
@@ -371,8 +388,10 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException when session is revoked', async () => {
       // Arrange
       const revokedSession = { ...mockSession, isRevoked: true };
-      jwtService.verifyAsync.mockResolvedValue(refreshPayload);
-      prismaService.userSession.findUnique.mockResolvedValue(revokedSession);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(refreshPayload);
+      (prismaService.userSession.findUnique as jest.Mock).mockResolvedValue(
+        revokedSession,
+      );
 
       // Act & Assert
       await expect(service.refreshTokens(refreshToken)).rejects.toThrow(
@@ -386,8 +405,10 @@ describe('AuthService', () => {
         ...mockSession,
         expiresAt: new Date(Date.now() - 1000),
       };
-      jwtService.verifyAsync.mockResolvedValue(refreshPayload);
-      prismaService.userSession.findUnique.mockResolvedValue(expiredSession);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(refreshPayload);
+      (prismaService.userSession.findUnique as jest.Mock).mockResolvedValue(
+        expiredSession,
+      );
 
       // Act & Assert
       await expect(service.refreshTokens(refreshToken)).rejects.toThrow(
@@ -401,8 +422,8 @@ describe('AuthService', () => {
         ...mockSession,
         user: { ...mockUser, isActive: false },
       };
-      jwtService.verifyAsync.mockResolvedValue(refreshPayload);
-      prismaService.userSession.findUnique.mockResolvedValue(
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(refreshPayload);
+      (prismaService.userSession.findUnique as jest.Mock).mockResolvedValue(
         inactiveUserSession,
       );
 
@@ -418,8 +439,10 @@ describe('AuthService', () => {
 
     it('should successfully logout user', async () => {
       // Arrange
-      prismaService.userSession.findUnique.mockResolvedValue(mockSession);
-      prismaService.userSession.update.mockResolvedValue({
+      (prismaService.userSession.findUnique as jest.Mock).mockResolvedValue(
+        mockSession,
+      );
+      (prismaService.userSession.update as jest.Mock).mockResolvedValue({
         ...mockSession,
         isRevoked: true,
       });
@@ -428,25 +451,33 @@ describe('AuthService', () => {
       await service.logout(refreshToken);
 
       // Assert
-      expect(prismaService.userSession.findUnique).toHaveBeenCalledWith({
+      expect(
+        jest.mocked(prismaService.userSession.findUnique),
+      ).toHaveBeenCalledWith({
         where: { refreshToken },
       });
-      expect(prismaService.userSession.update).toHaveBeenCalledWith({
+      expect(
+        jest.mocked(prismaService.userSession.update),
+      ).toHaveBeenCalledWith({
         where: { id: mockSession.id },
         data: {
           isRevoked: true,
-          updatedAt: expect.any(Date),
+          updatedAt: expect.any(Date) as Date,
         },
       });
     });
 
     it('should handle logout gracefully when session not found', async () => {
       // Arrange
-      prismaService.userSession.findUnique.mockResolvedValue(null);
+      (prismaService.userSession.findUnique as jest.Mock).mockResolvedValue(
+        null,
+      );
 
       // Act & Assert
       await expect(service.logout(refreshToken)).resolves.toBeUndefined();
-      expect(prismaService.userSession.update).not.toHaveBeenCalled();
+      expect(
+        jest.mocked(prismaService.userSession.update),
+      ).not.toHaveBeenCalled();
     });
   });
 
@@ -460,39 +491,45 @@ describe('AuthService', () => {
 
     it('should successfully change password', async () => {
       // Arrange
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
-      bcryptMock.compare.mockResolvedValue(true as never);
-      bcryptMock.hash.mockResolvedValue('new-hashed-password' as never);
-      prismaService.user.update.mockResolvedValue({
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      (bcryptMock.compare as jest.Mock).mockResolvedValue(true as never);
+      (bcryptMock.hash as jest.Mock).mockResolvedValue(
+        'new-hashed-password' as never,
+      );
+      (prismaService.user.update as jest.Mock).mockResolvedValue({
         ...mockUser,
         passwordHash: 'new-hashed-password',
       });
-      prismaService.userSession.updateMany.mockResolvedValue({ count: 2 });
+      (prismaService.userSession.updateMany as jest.Mock).mockResolvedValue({
+        count: 2,
+      });
 
       // Act
       await service.changePassword(userId, changePasswordDto);
 
       // Assert
-      expect(bcryptMock.compare).toHaveBeenCalledWith(
+      expect(jest.mocked(bcryptMock.compare)).toHaveBeenCalledWith(
         changePasswordDto.currentPassword,
         mockUser.passwordHash,
       );
-      expect(bcryptMock.hash).toHaveBeenCalledWith(
+      expect(jest.mocked(bcryptMock.hash)).toHaveBeenCalledWith(
         changePasswordDto.newPassword,
         12,
       );
-      expect(prismaService.user.update).toHaveBeenCalledWith({
+      expect(jest.mocked(prismaService.user.update)).toHaveBeenCalledWith({
         where: { id: userId },
         data: {
           passwordHash: 'new-hashed-password',
-          updatedAt: expect.any(Date),
+          updatedAt: expect.any(Date) as Date,
         },
       });
-      expect(prismaService.userSession.updateMany).toHaveBeenCalledWith({
+      expect(
+        jest.mocked(prismaService.userSession.updateMany),
+      ).toHaveBeenCalledWith({
         where: { userId },
         data: {
           isRevoked: true,
-          updatedAt: expect.any(Date),
+          updatedAt: expect.any(Date) as Date,
         },
       });
     });
@@ -508,12 +545,12 @@ describe('AuthService', () => {
       await expect(service.changePassword(userId, invalidDto)).rejects.toThrow(
         BadRequestException,
       );
-      expect(prismaService.user.findUnique).not.toHaveBeenCalled();
+      expect(jest.mocked(prismaService.user.findUnique)).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when user not found', async () => {
       // Arrange
-      prismaService.user.findUnique.mockResolvedValue(null);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(null);
 
       // Act & Assert
       await expect(
@@ -523,14 +560,14 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException when current password is invalid', async () => {
       // Arrange
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
-      bcryptMock.compare.mockResolvedValue(false as never);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      (bcryptMock.compare as jest.Mock).mockResolvedValue(false as never);
 
       // Act & Assert
       await expect(
         service.changePassword(userId, changePasswordDto),
       ).rejects.toThrow(UnauthorizedException);
-      expect(bcryptMock.hash).not.toHaveBeenCalled();
+      expect(jest.mocked(bcryptMock.hash)).not.toHaveBeenCalled();
     });
   });
 });

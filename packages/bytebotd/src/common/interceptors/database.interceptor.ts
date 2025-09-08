@@ -354,7 +354,7 @@ export class DatabaseInterceptor implements NestInterceptor {
    */
   private extractDatabaseOperation(
     context: ExecutionContext,
-    request: any,
+    _request: any,
   ): DatabaseOperation | null {
     // This would need to be customized based on the ORM/database library used
     // For Prisma, we might extract from the handler name or method metadata

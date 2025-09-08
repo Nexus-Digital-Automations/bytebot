@@ -14,17 +14,16 @@ import {
   MiddlewareConsumer,
   Module,
   NestModule,
-} from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+} from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import {
   StandardizedSecurityMiddleware,
   ServiceType,
   StandardizedValidationPipe,
-  ValidationServiceType,
   StandardizedRateLimitGuard,
-  RateLimitServiceType,
   StandardizedValidationPipes,
-} from '@bytebot/shared';
+} from "@bytebot/shared";
+import type { Reflector } from "@nestjs/core";
 
 /**
  * Bytebot-UI Security Configuration Service
@@ -47,7 +46,7 @@ export class BytebotUISecurityConfigService {
    * Create Bytebot-UI validation pipe with standard security settings
    */
   createValidationPipe(): StandardizedValidationPipe {
-    const environment = this.configService.get('NODE_ENV', 'development');
+    const environment = this.configService.get("NODE_ENV", "development");
 
     // Use standard security pipe for Bytebot-UI
     return StandardizedValidationPipes.STANDARD_SECURITY(environment);
@@ -57,8 +56,8 @@ export class BytebotUISecurityConfigService {
    * Create Bytebot-UI rate limit guard with lenient rate limits for UI interactions
    */
   createRateLimitGuard(
-    reflector: any,
-    redisClient?: any,
+    reflector: Reflector,
+    redisClient?: unknown,
   ): StandardizedRateLimitGuard {
     return StandardizedRateLimitGuard.createBytebotUIGuard(
       reflector,
@@ -71,35 +70,35 @@ export class BytebotUISecurityConfigService {
    * Get security configuration for manual inspection
    */
   getSecurityConfig() {
-    const environment = this.configService.get('NODE_ENV', 'development');
+    const environment = this.configService.get("NODE_ENV", "development");
 
     return {
       serviceType: ServiceType.BYTEBOT_UI,
       environment,
-      securityLevel: 'STANDARD',
-      description: 'Frontend UI Service - Standard Security Configuration',
+      securityLevel: "STANDARD",
+      description: "Frontend UI Service - Standard Security Configuration",
       middleware: {
         enabled: true,
         csp: true, // Always enable CSP for UI
-        hsts: environment === 'production',
-        frameOptions: 'SAMEORIGIN', // Allow embedding for UI components
+        hsts: environment === "production",
+        frameOptions: "SAMEORIGIN", // Allow embedding for UI components
         corsOrigins:
-          environment === 'production'
-            ? ['https://app.bytebot.ai', 'https://bytebot.ai']
+          environment === "production"
+            ? ["https://app.bytebot.ai", "https://bytebot.ai"]
             : [
-                'http://localhost:3000',
-                'http://localhost:3001',
-                'http://localhost:8080',
-                'http://localhost:9990',
-                'http://localhost:9991',
-                'http://localhost:9992',
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://localhost:8080",
+                "http://localhost:9990",
+                "http://localhost:9991",
+                "http://localhost:9992",
               ],
       },
       validation: {
         enableSanitization: true,
         enableThreatDetection: true,
-        maxPayloadSize: '15mb', // Moderate size for UI uploads
-        securityLevel: 'STANDARD',
+        maxPayloadSize: "15mb", // Moderate size for UI uploads
+        securityLevel: "STANDARD",
         allowHtml: true, // UI may handle rich content
       },
       rateLimiting: {
@@ -115,46 +114,43 @@ export class BytebotUISecurityConfigService {
         staticAssets: true,
         apiProxy: true, // UI may proxy API requests
         realTimeUpdates: true,
-        fileUploads: environment !== 'production' || true, // Allow file uploads
+        fileUploads: environment !== "production" || true, // Allow file uploads
         authentication: true,
-        securityLogging: environment !== 'development',
+        securityLogging: environment !== "development",
       },
       nextjs: {
         // Next.js specific security configurations
         poweredByHeader: false, // Hide X-Powered-By header
-        strictTransportSecurity: environment === 'production',
+        strictTransportSecurity: environment === "production",
         contentSecurityPolicy: {
           enabled: true,
-          reportOnly: environment === 'development',
+          reportOnly: environment === "development",
           directives: {
             defaultSrc: ["'self'"],
             scriptSrc: [
               "'self'",
               "'unsafe-inline'", // Required for Next.js
               "'unsafe-eval'", // Required for development
-              'https://cdn.jsdelivr.net',
-              'https://unpkg.com',
+              "https://cdn.jsdelivr.net",
+              "https://unpkg.com",
             ],
             styleSrc: [
               "'self'",
               "'unsafe-inline'", // Required for CSS-in-JS
-              'https://fonts.googleapis.com',
+              "https://fonts.googleapis.com",
             ],
-            fontSrc: [
-              "'self'",
-              'https://fonts.gstatic.com',
-            ],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
             imgSrc: [
               "'self'",
-              'data:', // For inline images
-              'blob:', // For generated images
-              'https://images.unsplash.com', // If using external images
+              "data:", // For inline images
+              "blob:", // For generated images
+              "https://images.unsplash.com", // If using external images
             ],
             connectSrc: [
               "'self'",
-              'ws://localhost:*', // WebSocket in development
-              'wss://app.bytebot.ai', // WebSocket in production
-              'https://api.bytebot.ai', // API connections
+              "ws://localhost:*", // WebSocket in development
+              "wss://app.bytebot.ai", // WebSocket in production
+              "https://api.bytebot.ai", // API connections
             ],
             frameSrc: ["'self'"], // Allow same-origin framing
           },
@@ -173,39 +169,39 @@ export class BytebotUISecurityConfigService {
   providers: [
     BytebotUISecurityConfigService,
     {
-      provide: 'BYTEBOT_UI_SECURITY_MIDDLEWARE',
+      provide: "BYTEBOT_UI_SECURITY_MIDDLEWARE",
       useFactory: (configService: ConfigService) =>
         StandardizedSecurityMiddleware.createBytebotUIMiddleware(configService),
       inject: [ConfigService],
     },
     {
-      provide: 'BYTEBOT_UI_VALIDATION_PIPE',
+      provide: "BYTEBOT_UI_VALIDATION_PIPE",
       useFactory: (configService: ConfigService) => {
-        const environment = configService.get('NODE_ENV', 'development');
+        const environment = configService.get("NODE_ENV", "development");
         return StandardizedValidationPipes.STANDARD_SECURITY(environment);
       },
       inject: [ConfigService],
     },
     {
-      provide: 'BYTEBOT_UI_RATE_LIMIT_GUARD',
+      provide: "BYTEBOT_UI_RATE_LIMIT_GUARD",
       useFactory: (
-        reflector: any,
+        reflector: Reflector,
         configService: ConfigService,
-        redisClient?: any,
+        redisClient?: unknown,
       ) =>
         StandardizedRateLimitGuard.createBytebotUIGuard(
           reflector,
           configService,
           redisClient,
         ),
-      inject: ['Reflector', ConfigService, 'REDIS_CLIENT'],
+      inject: ["Reflector", ConfigService, "REDIS_CLIENT"],
     },
   ],
   exports: [
     BytebotUISecurityConfigService,
-    'BYTEBOT_UI_SECURITY_MIDDLEWARE',
-    'BYTEBOT_UI_VALIDATION_PIPE',
-    'BYTEBOT_UI_RATE_LIMIT_GUARD',
+    "BYTEBOT_UI_SECURITY_MIDDLEWARE",
+    "BYTEBOT_UI_VALIDATION_PIPE",
+    "BYTEBOT_UI_RATE_LIMIT_GUARD",
   ],
 })
 export class BytebotUISecurityModule implements NestModule {
@@ -220,7 +216,7 @@ export class BytebotUISecurityModule implements NestModule {
 
     consumer
       .apply(securityMiddleware.use.bind(securityMiddleware))
-      .forRoutes('*');
+      .forRoutes("*");
   }
 }
 
@@ -234,15 +230,24 @@ export class BytebotUISecurityDeployment {
    * @param app - NestJS application instance
    * @param configService - Configuration service
    */
-  static async applySecurityToApp(app: any, configService: ConfigService) {
-    const environment = configService.get('NODE_ENV', 'development');
+  static async applySecurityToApp(
+    app: {
+      useGlobalPipes: (pipe: unknown) => void;
+      useGlobalGuards: (guard: unknown) => void;
+      get: (key: string) => unknown;
+    },
+    configService: ConfigService,
+  ) {
+    const environment = configService.get("NODE_ENV", "development");
 
     // Apply global validation pipe with standard security
-    app.useGlobalPipes(StandardizedValidationPipes.STANDARD_SECURITY(environment));
+    app.useGlobalPipes(
+      StandardizedValidationPipes.STANDARD_SECURITY(environment),
+    );
 
     // Apply global rate limiting guard
-    const reflector = app.get('Reflector');
-    const redisClient = app.get('REDIS_CLIENT', null);
+    const reflector = app.get("Reflector");
+    const redisClient = app.get("REDIS_CLIENT", null);
     const rateLimitGuard = StandardizedRateLimitGuard.createBytebotUIGuard(
       reflector,
       configService,
@@ -252,11 +257,11 @@ export class BytebotUISecurityDeployment {
     app.useGlobalGuards(rateLimitGuard);
 
     // Log security deployment
-    const logger = app.get('Logger');
+    const logger = app.get("Logger");
     if (logger) {
-      logger.log('Bytebot-UI security middleware deployed successfully', {
-        service: 'Bytebot-UI',
-        securityLevel: 'STANDARD',
+      logger.log("Bytebot-UI security middleware deployed successfully", {
+        service: "Bytebot-UI",
+        securityLevel: "STANDARD",
         environment,
         features: {
           ui: true,
@@ -274,28 +279,28 @@ export class BytebotUISecurityDeployment {
    * Get security headers for Bytebot-UI with Next.js optimizations
    */
   static getSecurityHeaders(environment: string) {
-    const isProd = environment === 'production';
+    const isProd = environment === "production";
 
     return {
-      'X-Service': 'Bytebot-UI',
-      'X-Security-Level': 'STANDARD',
-      'X-UI-Version': '2.0',
-      'X-Framework': 'Next.js',
-      'X-Frame-Options': 'SAMEORIGIN', // Allow same-origin framing for UI
-      'X-Powered-By': undefined, // Remove Next.js header
+      "X-Service": "Bytebot-UI",
+      "X-Security-Level": "STANDARD",
+      "X-UI-Version": "2.0",
+      "X-Framework": "Next.js",
+      "X-Frame-Options": "SAMEORIGIN", // Allow same-origin framing for UI
+      "X-Powered-By": undefined, // Remove Next.js header
       ...(isProd && {
-        'Strict-Transport-Security':
-          'max-age=31536000; includeSubDomains; preload',
-        'X-Content-Type-Options': 'nosniff',
-        'X-XSS-Protection': '1; mode=block',
-        'Referrer-Policy': 'same-origin',
+        "Strict-Transport-Security":
+          "max-age=31536000; includeSubDomains; preload",
+        "X-Content-Type-Options": "nosniff",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "same-origin",
       }),
       // UI-specific headers
-      'Cache-Control': isProd 
-        ? 'public, max-age=31536000, immutable' // Aggressive caching for static assets
-        : 'no-cache, no-store, must-revalidate', // No caching in development
-      'X-DNS-Prefetch-Control': 'on',
-      'X-Download-Options': 'noopen',
+      "Cache-Control": isProd
+        ? "public, max-age=31536000, immutable" // Aggressive caching for static assets
+        : "no-cache, no-store, must-revalidate", // No caching in development
+      "X-DNS-Prefetch-Control": "on",
+      "X-Download-Options": "noopen",
     };
   }
 
@@ -303,8 +308,8 @@ export class BytebotUISecurityDeployment {
    * Validate Bytebot-UI security configuration
    */
   static validateSecurityConfig(configService: ConfigService) {
-    const environment = configService.get('NODE_ENV', 'development');
-    const corsOrigins = configService.get('CORS_ORIGINS', []);
+    const environment = configService.get("NODE_ENV", "development");
+    const corsOrigins = configService.get("CORS_ORIGINS", []);
 
     const validationResults = {
       environment,
@@ -314,51 +319,51 @@ export class BytebotUISecurityDeployment {
     };
 
     // Check CORS configuration
-    if (environment === 'production' && corsOrigins.includes('*')) {
+    if (environment === "production" && corsOrigins.includes("*")) {
       validationResults.errors.push(
-        'Wildcard CORS origins not allowed in production',
+        "Wildcard CORS origins not allowed in production",
       );
       validationResults.valid = false;
     }
 
     // Check Next.js configuration
-    const nextConfig = configService.get('NEXT_CONFIG');
-    if (!nextConfig && environment === 'production') {
+    const nextConfig = configService.get("NEXT_CONFIG");
+    if (!nextConfig && environment === "production") {
       validationResults.warnings.push(
-        'Next.js configuration not found - using defaults',
+        "Next.js configuration not found - using defaults",
       );
     }
 
     // Check static file serving configuration
-    const staticPath = configService.get('STATIC_FILES_PATH', './public');
-    if (environment === 'production' && !staticPath) {
+    const staticPath = configService.get("STATIC_FILES_PATH", "./public");
+    if (environment === "production" && !staticPath) {
       validationResults.errors.push(
-        'Static files path not configured for production',
+        "Static files path not configured for production",
       );
       validationResults.valid = false;
     }
 
     // Check Redis configuration for session storage
-    const redisHost = configService.get('REDIS_HOST');
-    if (!redisHost && environment === 'production') {
+    const redisHost = configService.get("REDIS_HOST");
+    if (!redisHost && environment === "production") {
       validationResults.warnings.push(
-        'Redis not configured - sessions and caching will use fallbacks',
+        "Redis not configured - sessions and caching will use fallbacks",
       );
     }
 
     // Check API proxy configuration
-    const apiProxyUrl = configService.get('API_PROXY_URL');
+    const apiProxyUrl = configService.get("API_PROXY_URL");
     if (!apiProxyUrl) {
       validationResults.warnings.push(
-        'API proxy URL not configured - direct API calls will be used',
+        "API proxy URL not configured - direct API calls will be used",
       );
     }
 
     // Check CSP configuration
-    const cspEnabled = configService.get('security.csp.enabled', true);
-    if (!cspEnabled && environment === 'production') {
+    const cspEnabled = configService.get("security.csp.enabled", true);
+    if (!cspEnabled && environment === "production") {
       validationResults.errors.push(
-        'Content Security Policy is disabled in production',
+        "Content Security Policy is disabled in production",
       );
       validationResults.valid = false;
     }
@@ -370,17 +375,18 @@ export class BytebotUISecurityDeployment {
    * Configure Next.js security middleware
    */
   static configureNextJsSecurity(configService: ConfigService) {
-    const environment = configService.get('NODE_ENV', 'development');
-    
+    const environment = configService.get("NODE_ENV", "development");
+
     return {
       // Security headers for Next.js
       headers: {
-        'X-Frame-Options': 'SAMEORIGIN',
-        'X-Content-Type-Options': 'nosniff',
-        'Referrer-Policy': 'same-origin',
-        'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-        ...(environment === 'production' && {
-          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+        "X-Frame-Options": "SAMEORIGIN",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+        ...(environment === "production" && {
+          "Strict-Transport-Security":
+            "max-age=31536000; includeSubDomains; preload",
         }),
       },
 
@@ -390,31 +396,37 @@ export class BytebotUISecurityDeployment {
           defaultSrc: ["'self'"],
           scriptSrc: [
             "'self'",
-            ...(environment === 'development' ? ["'unsafe-eval'", "'unsafe-inline'"] : []),
+            ...(environment === "development"
+              ? ["'unsafe-eval'", "'unsafe-inline'"]
+              : []),
           ],
           styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'", 'data:', 'blob:'],
+          imgSrc: ["'self'", "data:", "blob:"],
           fontSrc: ["'self'"],
           objectSrc: ["'none'"],
           baseUri: ["'self'"],
           formAction: ["'self'"],
           frameAncestors: ["'none'"],
-          upgradeInsecureRequests: environment === 'production' ? [] : undefined,
+          upgradeInsecureRequests:
+            environment === "production" ? [] : undefined,
         },
       },
 
       // HSTS configuration
-      hsts: environment === 'production' ? {
-        maxAge: 31536000,
-        includeSubDomains: true,
-        preload: true,
-      } : false,
+      hsts:
+        environment === "production"
+          ? {
+              maxAge: 31536000,
+              includeSubDomains: true,
+              preload: true,
+            }
+          : false,
 
       // Hide powered by header
       poweredByHeader: false,
 
       // Force HTTPS in production
-      forceHTTPSRedirect: environment === 'production',
+      forceHTTPSRedirect: environment === "production",
     };
   }
 
@@ -427,42 +439,44 @@ export class BytebotUISecurityDeployment {
       uiInteraction: {
         max: 200,
         windowMs: 60 * 1000, // 1 minute
-        message: 'UI interaction rate limit exceeded',
+        message: "UI interaction rate limit exceeded",
       },
-      
+
       // High limits for data fetching
       dataFetching: {
         max: 1000,
         windowMs: 60 * 1000, // 1 minute
-        message: 'Data fetching rate limit exceeded',
+        message: "Data fetching rate limit exceeded",
       },
-      
+
       // Moderate limits for form submissions
       formSubmission: {
         max: 50,
         windowMs: 60 * 1000, // 1 minute
-        message: 'Form submission rate limit exceeded',
+        message: "Form submission rate limit exceeded",
       },
-      
+
       // Strict limits for file uploads
       fileUpload: {
         max: 10,
         windowMs: 60 * 1000, // 1 minute
-        message: 'File upload rate limit exceeded',
+        message: "File upload rate limit exceeded",
       },
-      
+
       // High limits for WebSocket connections
       websocketConnection: {
         max: 50,
         windowMs: 60 * 1000, // 1 minute
-        message: 'WebSocket connection rate limit exceeded',
+        message: "WebSocket connection rate limit exceeded",
       },
     };
   }
 }
 
-export default {
+const BytebotUISecurityExports = {
   BytebotUISecurityConfigService,
   BytebotUISecurityModule,
   BytebotUISecurityDeployment,
 };
+
+export default BytebotUISecurityExports;

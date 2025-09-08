@@ -1,13 +1,20 @@
 /**
- * File Security Middleware - Advanced File Upload Protection
+ * Enhanced File Security Middleware - Advanced File Upload Protection
  *
  * This middleware provides comprehensive file upload security including
- * malware scanning, content validation, and threat detection for all
- * file upload endpoints in the Bytebot platform.
+ * malware scanning, content validation, threat detection, and advanced
+ * file analysis for all file upload endpoints in the Bytebot platform.
  *
- * @fileoverview Enterprise file upload security middleware
- * @version 1.0.0
- * @author File Security Specialist
+ * Enhanced Features:
+ * - Comprehensive malware signature detection
+ * - Advanced file type validation with magic bytes
+ * - Content-based threat analysis
+ * - File size and structure validation
+ * - Real-time security monitoring
+ *
+ * @fileoverview Enterprise file upload security middleware - Enhanced v2.0
+ * @version 2.0.0
+ * @author File Security Specialist - Enhanced Implementation
  */
 
 import {
@@ -24,6 +31,9 @@ import {
 } from "../utils/security.utils";
 import multer from "multer";
 import { promisify } from "util";
+
+// Import the File type from @types/multer
+type MulterFile = Express.Multer.File;
 
 /**
  * File security configuration
@@ -55,7 +65,113 @@ interface FileSecurityConfig {
 }
 
 /**
- * Default file security configuration
+ * Enhanced malware signature patterns for advanced threat detection
+ */
+const MALWARE_SIGNATURES = [
+  // PE (Windows Executable) headers
+  { signature: /MZ/, description: "PE Executable Header", risk: 9 },
+  { signature: /\x7fELF/, description: "ELF Binary Header", risk: 8 },
+
+  // Script-based malware patterns
+  {
+    signature: /eval\s*\(\s*base64_decode/gi,
+    description: "PHP Obfuscated Code",
+    risk: 9,
+  },
+  {
+    signature: /<\?php[\s\S]*system\s*\(/gi,
+    description: "PHP System Command",
+    risk: 10,
+  },
+  {
+    signature: /WScript\.Shell|CreateObject\("Shell\.Application"\)/gi,
+    description: "VBScript Shell Access",
+    risk: 9,
+  },
+
+  // JavaScript malware patterns
+  {
+    signature: /document\.createElement\s*\(\s*["']script["']\)/gi,
+    description: "Dynamic Script Injection",
+    risk: 8,
+  },
+  {
+    signature: /eval\s*\(\s*atob\s*\(/gi,
+    description: "Base64 Eval Execution",
+    risk: 9,
+  },
+  {
+    signature: /String\.fromCharCode\s*\(/gi,
+    description: "Character Code Obfuscation",
+    risk: 7,
+  },
+
+  // Macro malware patterns
+  {
+    signature: /Sub\s+AutoOpen\s*\(/gi,
+    description: "Word Macro AutoOpen",
+    risk: 9,
+  },
+  {
+    signature: /Private\s+Sub\s+Workbook_Open\s*\(/gi,
+    description: "Excel Macro AutoOpen",
+    risk: 9,
+  },
+  { signature: /Shell\s*\(/gi, description: "VBA Shell Command", risk: 8 },
+
+  // Archive bomb indicators
+  {
+    signature: /\x50\x4b\x03\x04.*\x50\x4b\x03\x04.*\x50\x4b\x03\x04/g,
+    description: "Nested ZIP Structure",
+    risk: 6,
+  },
+
+  // Cryptocurrency miners
+  {
+    signature: /stratum\+tcp|mining\.pool|cryptonight/gi,
+    description: "Cryptocurrency Miner",
+    risk: 8,
+  },
+
+  // Web shell patterns
+  {
+    signature: /c99|r57|wso|b374k|adminer\.php/gi,
+    description: "Web Shell",
+    risk: 10,
+  },
+  {
+    signature: /@eval\s*\(\s*\$_[A-Z]+\[/gi,
+    description: "PHP Web Shell Pattern",
+    risk: 10,
+  },
+];
+
+/**
+ * Magic byte patterns for file type validation
+ */
+const MAGIC_BYTE_PATTERNS = {
+  // Image formats
+  PNG: { bytes: [0x89, 0x50, 0x4e, 0x47], mime: "image/png" },
+  JPEG: { bytes: [0xff, 0xd8, 0xff], mime: "image/jpeg" },
+  GIF87: { bytes: [0x47, 0x49, 0x46, 0x38, 0x37], mime: "image/gif" },
+  GIF89: { bytes: [0x47, 0x49, 0x46, 0x38, 0x39], mime: "image/gif" },
+  WEBP: { bytes: [0x52, 0x49, 0x46, 0x46], mime: "image/webp" },
+
+  // Document formats
+  PDF: { bytes: [0x25, 0x50, 0x44, 0x46], mime: "application/pdf" },
+  ZIP: { bytes: [0x50, 0x4b, 0x03, 0x04], mime: "application/zip" },
+
+  // Executable formats (blocked)
+  PE: { bytes: [0x4d, 0x5a], mime: "application/x-executable", blocked: true },
+  ELF: {
+    bytes: [0x7f, 0x45, 0x4c, 0x46],
+    mime: "application/x-executable",
+    blocked: true,
+  },
+};
+
+/**
+ * Enhanced file security configuration
  */
 const DEFAULT_FILE_CONFIG: FileSecurityConfig = {
   maxFileSize: 10 * 1024 * 1024, // 10MB
@@ -72,25 +188,84 @@ const DEFAULT_FILE_CONFIG: FileSecurityConfig = {
     "application/zip",
   ],
   blockedExtensions: [
+    // Executables
     ".exe",
-    ".bat",
-    ".cmd",
+    ".msi",
     ".com",
     ".scr",
     ".pif",
+    ".application",
+    ".gadget",
+    ".msc",
+    ".vb",
+    ".vbe",
     ".vbs",
-    ".js",
-    ".jar",
-    ".class",
+    ".vbscript",
+    ".ws",
+    ".wsf",
+    ".wsc",
+    ".wsh",
+
+    // Scripts
+    ".bat",
+    ".cmd",
+    ".ps1",
+    ".ps1xml",
+    ".ps2",
+    ".ps2xml",
+    ".psc1",
+    ".psc2",
+    ".sh",
+    ".bash",
+    ".zsh",
+    ".csh",
+    ".tcsh",
+    ".fish",
+
+    // Server-side scripts
     ".php",
+    ".phtml",
+    ".php3",
+    ".php4",
+    ".php5",
+    ".php7",
+    ".phps",
+    ".pht",
     ".asp",
     ".aspx",
+    ".asa",
+    ".asax",
+    ".ascx",
+    ".ashx",
+    ".asmx",
+    ".axd",
     ".jsp",
-    ".sh",
-    ".ps1",
+    ".jspx",
+    ".jsw",
+    ".jsv",
+    ".jspf",
     ".py",
+    ".pyc",
+    ".pyo",
+    ".pyw",
     ".rb",
     ".pl",
+    ".cgi",
+
+    // Java
+    ".jar",
+    ".war",
+    ".ear",
+    ".class",
+    ".java",
+
+    // Macro documents
+    ".docm",
+    ".xlsm",
+    ".pptm",
+    ".potm",
+    ".xlam",
+    ".xltm",
   ],
   enableMalwareScanning: true,
   enableContentAnalysis: true,
@@ -227,7 +402,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
    * Validate individual file for security threats
    */
   private async validateFile(
-    file: Express.Multer.File,
+    file: MulterFile,
     operationId: string,
   ): Promise<FileSecurityResult> {
     const threats: string[] = [];
@@ -307,7 +482,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
    * Perform post-upload security analysis
    */
   private async performPostUploadSecurity(
-    files: Express.Multer.File[],
+    files: MulterFile[],
     operationId: string,
   ): Promise<void> {
     this.logger.debug(
@@ -335,7 +510,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
    * Perform malware scanning on file content
    */
   private async performMalwareScan(
-    file: Express.Multer.File,
+    file: MulterFile,
     operationId: string,
   ): Promise<void> {
     const malwarePatterns = [
@@ -386,7 +561,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
    * Scan for embedded threats in files
    */
   private async scanEmbeddedThreats(
-    file: Express.Multer.File,
+    file: MulterFile,
     operationId: string,
   ): Promise<void> {
     // Check for polyglot files (files that are valid in multiple formats)

@@ -15,6 +15,7 @@ import {
   ValidationFailureContext,
   ValidationAuditEntry,
 } from "./types";
+import { ValidationSecurityLevel } from "../../pipes/validation.standardized";
 import { generateEventId } from "../../utils/security.utils";
 
 /**
@@ -29,12 +30,12 @@ export class ValidationAuditLogger {
    * Log a security threat detection event
    * @param threatAnalysis Threat analysis result
    */
-  async logSecurityThreat(threatAnalysis: ThreatAnalysisResult): Promise<void> {
+  logSecurityThreat(threatAnalysis: ThreatAnalysisResult): Promise<void> {
     const logEntry: ValidationAuditEntry = {
       logId: generateEventId(),
       operationId: threatAnalysis.metadata.operationId,
       serviceType: threatAnalysis.metadata.serviceType,
-      securityLevel: "maximum" as const,
+      securityLevel: ValidationSecurityLevel.MAXIMUM,
       timestamp: new Date(),
       eventType: "security_threat",
       details: {
@@ -48,18 +49,19 @@ export class ValidationAuditLogger {
       `Security threat detected: ${threatAnalysis.analysisId}`,
       logEntry,
     );
+    return Promise.resolve();
   }
 
   /**
    * Log a validation failure event
    * @param context Validation failure context
    */
-  async logValidationFailure(context: ValidationFailureContext): Promise<void> {
+  logValidationFailure(context: ValidationFailureContext): Promise<void> {
     const logEntry: ValidationAuditEntry = {
       logId: generateEventId(),
       operationId: context.operationId,
       serviceType: context.serviceType,
-      securityLevel: "standard" as const,
+      securityLevel: ValidationSecurityLevel.STANDARD,
       timestamp: new Date(),
       eventType: "validation_failure",
       details: {
@@ -71,6 +73,7 @@ export class ValidationAuditLogger {
     };
 
     this.logger.error(`Validation failure: ${context.operationId}`, logEntry);
+    return Promise.resolve();
   }
 }
 

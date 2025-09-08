@@ -198,8 +198,8 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       'DB_HEALTH_CHECK_INTERVAL',
       30000,
     );
-    this.healthCheckInterval = setInterval(async () => {
-      await this.performHealthCheck();
+    this.healthCheckInterval = setInterval(() => {
+      void this.performHealthCheck();
     }, healthCheckInterval);
   }
 
@@ -218,7 +218,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       await this.prismaClient.$queryRaw`SELECT 1 as health_check`;
 
       // Test connection pool status
-      const poolMetrics = await this.getConnectionPoolMetrics();
+      const poolMetrics = this.getConnectionPoolMetrics();
 
       const duration = Date.now() - startTime;
 
@@ -254,16 +254,16 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     this.logger.log('Starting database metrics collection');
 
     this.metricsInterval = setInterval(() => {
-      this.collectAndLogMetrics();
+      void this.collectAndLogMetrics();
     }, metricsConfig.metricsCollectionInterval);
   }
 
   /**
    * Collect and log comprehensive database metrics
    */
-  private async collectAndLogMetrics() {
+  private collectAndLogMetrics() {
     try {
-      const metrics = await this.getMetrics();
+      const metrics = this.getMetrics();
 
       this.logger.debug('Database metrics collected', {
         connectionPool: metrics.connectionPool,
@@ -320,8 +320,8 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   /**
    * Get comprehensive database metrics
    */
-  async getMetrics(): Promise<DatabaseMetrics> {
-    const poolMetrics = await this.getConnectionPoolMetrics();
+  getMetrics(): DatabaseMetrics {
+    const poolMetrics = this.getConnectionPoolMetrics();
     const uptime = Date.now() - this.startTime.getTime();
 
     return {
@@ -346,7 +346,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   /**
    * Get connection pool metrics
    */
-  private async getConnectionPoolMetrics() {
+  private getConnectionPoolMetrics() {
     // Note: These metrics would be available in a production environment
     // with proper connection pool monitoring. For now, return estimated values.
     return {
@@ -360,7 +360,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   /**
    * Get database health status for health checks
    */
-  async getHealthStatus() {
+  getHealthStatus() {
     return {
       isHealthy: this.isHealthy,
       lastHealthCheck: this.lastHealthCheck,
@@ -384,7 +384,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   /**
    * Execute a raw query with performance monitoring
    */
-  async executeRawQuery(query: string, params?: any[]) {
+  async executeRawQuery(query: string, params?: unknown[]) {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
 
@@ -440,16 +440,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     operation: () => Promise<T>,
     circuitName: string = 'database_default',
   ): Promise<T> {
-    return this.circuitBreakerService.execute(
-      circuitName,
-      operation,
-      async () => {
-        // Fallback: return cached data or throw service unavailable
-        throw new Error(
-          'Database circuit breaker is open - service unavailable',
-        );
-      },
-    );
+    return this.circuitBreakerService.execute(circuitName, operation, () => {
+      // Fallback: return cached data or throw service unavailable
+      throw new Error('Database circuit breaker is open - service unavailable');
+    });
   }
 
   /**
@@ -549,13 +543,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     );
 
     // Register metrics cleanup
-    this.shutdownService.registerCleanupTask('database-metrics', async () => {
+    this.shutdownService.registerCleanupTask('database-metrics', () => {
       this.logger.log('Clearing database metrics');
       this.queryMetrics = [];
       this.totalQueries = 0;
       this.totalQueryTime = 0;
       this.slowQueries = 0;
       this.errorCount = 0;
+      return Promise.resolve();
     });
   }
 
@@ -564,8 +559,8 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
    */
   async executeRawQueryWithReliability(
     query: string,
-    params?: any[],
-  ): Promise<any> {
+    params?: unknown[],
+  ): Promise<unknown> {
     const operationId = this.generateOperationId();
 
     return this.executeWithReliability(async () => {
@@ -626,7 +621,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   /**
    * Get reliability metrics for monitoring
    */
-  async getReliabilityMetrics() {
+  getReliabilityMetrics() {
     const circuitMetrics = this.circuitBreakerService.getAllCircuitMetrics();
     const databaseCircuits = circuitMetrics.filter((circuit) =>
       circuit.circuitName.startsWith('database_'),
@@ -634,7 +629,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
     return {
       circuitBreakers: databaseCircuits,
-      connectionPool: await this.getConnectionPoolMetrics(),
+      connectionPool: this.getConnectionPoolMetrics(),
       performance: {
         averageQueryTime:
           this.totalQueries > 0 ? this.totalQueryTime / this.totalQueries : 0,

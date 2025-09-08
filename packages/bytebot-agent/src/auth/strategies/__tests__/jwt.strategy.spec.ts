@@ -27,7 +27,11 @@ import { JwtPayload } from '../../types/jwt-payload.interface';
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
   let configService: jest.Mocked<ConfigService>;
-  let prismaService: jest.Mocked<PrismaService>;
+  let prismaService: {
+    user: {
+      findUnique: jest.MockedFunction<any>;
+    };
+  };
 
   // Test data
   const mockUser = {
@@ -39,6 +43,7 @@ describe('JwtStrategy', () => {
     role: UserRole.VIEWER,
     isActive: true,
     emailVerified: true,
+    passwordHash: 'hashed-password',
     createdAt: new Date(),
     updatedAt: new Date(),
     lastLoginAt: new Date(),
@@ -88,7 +93,7 @@ describe('JwtStrategy', () => {
 
     const mockPrismaService = {
       user: {
-        findUnique: jest.fn(),
+        findUnique: jest.fn().mockResolvedValue(null),
       },
     };
 
@@ -101,7 +106,7 @@ describe('JwtStrategy', () => {
         },
         {
           provide: PrismaService,
-          useValue: mockPrismaService,
+          useValue: mockPrismaService as any,
         },
       ],
     }).compile();
@@ -135,7 +140,7 @@ describe('JwtStrategy', () => {
 
       // Act & Assert
       expect(() => {
-        new JwtStrategy(configService, prismaService);
+        new JwtStrategy(configService, prismaService as any);
       }).toThrow('Security configuration not found');
     });
 
@@ -297,7 +302,7 @@ describe('JwtStrategy', () => {
       );
 
       // Act
-      const result = await strategy.validate(validJwtPayload);
+      const result = (await strategy.validate(validJwtPayload)) as any;
 
       // Assert
       expect(result.permissions).toHaveLength(4);
@@ -328,7 +333,7 @@ describe('JwtStrategy', () => {
         UserRole.ADMIN,
         UserRole.OPERATOR,
         UserRole.VIEWER,
-        UserRole.API_CONSUMER,
+        // UserRole.API_CONSUMER removed - not in Prisma schema
       ];
 
       for (const role of testRoles) {
@@ -423,7 +428,7 @@ describe('JwtStrategy', () => {
       prismaService.user.findUnique.mockResolvedValue(mockUser);
 
       // Act
-      await strategy.validate(sensitivePayload as any);
+      await strategy.validate(sensitivePayload as JwtPayload);
 
       // Assert
       const logCalls = loggerSpy.mock.calls.flat();
@@ -484,7 +489,7 @@ describe('JwtStrategy', () => {
 
       // Act
       const startTime = Date.now();
-      const result = await strategy.validate(validJwtPayload);
+      const result = (await strategy.validate(validJwtPayload)) as any;
       const duration = Date.now() - startTime;
 
       // Assert
@@ -496,12 +501,12 @@ describe('JwtStrategy', () => {
   describe('edge cases', () => {
     it('should handle null/undefined JWT payload gracefully', async () => {
       // Act & Assert
-      await expect(strategy.validate(null as any)).rejects.toThrow(
-        UnauthorizedException,
-      );
-      await expect(strategy.validate(undefined as any)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        strategy.validate(null as unknown as JwtPayload),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        strategy.validate(undefined as unknown as JwtPayload),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should handle malformed JWT payload', async () => {
@@ -512,9 +517,9 @@ describe('JwtStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(malformedPayload as any)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        strategy.validate(malformedPayload as unknown as JwtPayload),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should handle user with missing permissions array', async () => {
@@ -526,7 +531,7 @@ describe('JwtStrategy', () => {
       prismaService.user.findUnique.mockResolvedValue(userWithoutPermissions);
 
       // Act
-      const result = await strategy.validate(validJwtPayload);
+      const result = (await strategy.validate(validJwtPayload)) as any;
 
       // Assert
       expect(result.permissions).toBeUndefined();
@@ -541,7 +546,7 @@ describe('JwtStrategy', () => {
       prismaService.user.findUnique.mockResolvedValue(userWithEmptyPermissions);
 
       // Act
-      const result = await strategy.validate(validJwtPayload);
+      const result = (await strategy.validate(validJwtPayload)) as any;
 
       // Assert
       expect(result.permissions).toEqual([]);

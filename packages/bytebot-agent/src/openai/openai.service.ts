@@ -40,12 +40,12 @@ export class OpenAIService implements BytebotAgentService {
    * Get OpenAI API key securely from secrets management
    * @private
    */
-  private async getApiKey(): Promise<string> {
+  private getApiKey(): string {
     const operationId = `get-openai-key-${Date.now()}`;
 
     try {
       // Try to get from secrets service first (Kubernetes secrets)
-      const secretKey = await this.secretsService.getSecret(
+      const secretKey = this.secretsService.getSecret(
         'openai-api-key',
         'OPENAI_API_KEY',
       );
@@ -87,7 +87,7 @@ export class OpenAIService implements BytebotAgentService {
     signal?: AbortSignal,
   ): Promise<BytebotAgentResponse> {
     // Ensure we have a valid API key before proceeding
-    const apiKey = await this.getApiKey();
+    const apiKey = this.getApiKey();
 
     // Update OpenAI client with actual API key if needed
     if (this.openai.apiKey === 'dummy-key-for-initialization') {
@@ -105,7 +105,7 @@ export class OpenAIService implements BytebotAgentService {
           max_output_tokens: maxTokens,
           input: openaiMessages,
           instructions: systemPrompt,
-          tools: useTools ? (openaiTools as any[]) : [],
+          tools: useTools ? openaiTools : [],
           reasoning: isReasoning ? { effort: 'medium' } : null,
           store: false,
           include: isReasoning ? ['reasoning.encrypted_content'] : [],
@@ -131,7 +131,16 @@ export class OpenAIService implements BytebotAgentService {
         throw new BytebotAgentInterrupt();
       }
       const errorMessage =
-        error instanceof Error ? error.message : String(error);
+        error instanceof Error
+          ? error.message
+          : (() => {
+              if (typeof error === 'string') return error;
+              try {
+                return JSON.stringify(error);
+              } catch {
+                return '[Unserializable Error]';
+              }
+            })();
       const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
         `Error sending message to OpenAI: ${errorMessage}`,

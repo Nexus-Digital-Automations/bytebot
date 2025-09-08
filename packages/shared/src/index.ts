@@ -1,19 +1,14 @@
-export * from "./types/messageContent.types";
-export * from "./utils/messageContent.utils";
-export * from "./utils/computerAction.utils";
-export * from "./types/computerAction.types";
-export * from "./types/security.types";
-export * from "./types/agent.types";
-export * from "./utils/security.utils";
+/**
+ * Default exports for @bytebot/shared package
+ *
+ * By default, we export client-safe components to prevent browser
+ * build issues. For server-specific components, use:
+ * import {...} from "@bytebot/shared/server"
+ */
 
-// Enhanced Security Validation Framework
-export * from "./decorators/security-validation.decorators";
-export * from "./dto/task-validation.dto";
+// Export client-safe components by default
+export * from "./index-client";
 
-// Standardized Security Middleware Framework
-export * from "./middleware/cors-security-simple.middleware";
-export * from "./middleware/file-security.middleware";
-
-// Enhanced Security Services
-export * from "./services/enhanced-security.service";
-export * from "./services/output-encoding.service";
+// Note: For server-specific components (NestJS interceptors, services, etc.)
+// use the server entry point:
+// import { CriticalAreaSanitizationInterceptor } from "@bytebot/shared/server"

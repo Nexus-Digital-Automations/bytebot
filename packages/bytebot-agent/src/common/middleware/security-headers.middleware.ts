@@ -14,12 +14,7 @@ import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
-import {
-  SecurityHeadersConfig,
-  CorsConfig,
-  SecurityEventType,
-  createSecurityEvent,
-} from '@bytebot/shared';
+import { SecurityEventType, createSecurityEvent } from '@bytebot/shared';
 
 /**
  * Security headers configuration interface
@@ -141,10 +136,16 @@ const DEFAULT_CSP_DIRECTIVES = {
 export class SecurityHeadersMiddleware implements NestMiddleware {
   private readonly logger = new Logger(SecurityHeadersMiddleware.name);
   private readonly config: SecurityMiddlewareConfig;
-  private readonly helmetMiddleware: any;
+  private readonly helmetMiddleware: (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => void;
 
   constructor(private configService: ConfigService) {
-    const environment = this.configService.get('NODE_ENV', 'development');
+    const environment =
+      this.configService.get<string>('NODE_ENV', 'development') ||
+      'development';
 
     // Build configuration
     this.config = {
@@ -158,14 +159,15 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       noSniff: true,
       xssFilter: true,
       referrerPolicy: 'same-origin',
-      corsOrigins: this.configService.get('CORS_ORIGINS', [
+      corsOrigins: this.configService.get<string[]>('CORS_ORIGINS') || [
         'http://localhost:3000',
-      ]),
+      ],
       corsCredentials: true,
       enableSecurityLogging: environment !== 'development',
-      ...SECURITY_CONFIGS[environment],
+      ...(SECURITY_CONFIGS[environment] || {}),
       // Override with specific config values
-      ...this.configService.get('security.headers', {}),
+      ...(this.configService.get<Record<string, unknown>>('security.headers') ||
+        {}),
     };
 
     // Initialize helmet middleware
@@ -187,11 +189,11 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
    * Apply security headers to request
    */
   use(req: Request, res: Response, next: NextFunction): void {
-    const operationId = `security-headers-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const operationId = `security-headers-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const startTime = Date.now();
 
     // Set correlation ID for request tracking
-    (req as any).correlationId = operationId;
+    Object.assign(req, { correlationId: operationId });
 
     this.logger.debug(`[${operationId}] Applying security headers`, {
       operationId,
@@ -204,14 +206,14 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
     try {
       // Apply helmet security headers
-      this.helmetMiddleware(req, res, (err?: any) => {
+      this.helmetMiddleware(req, res, (err?: Error | string) => {
         if (err) {
           const processingTime = Date.now() - startTime;
 
           this.logger.error(`[${operationId}] Helmet middleware error`, {
             operationId,
-            error: err.message,
-            stack: err.stack,
+            error: err instanceof Error ? err.message : String(err),
+            stack: err instanceof Error ? err.stack : undefined,
             processingTimeMs: processingTime,
           });
 
@@ -219,7 +221,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
           this.logSecurityEvent(
             req,
             'MIDDLEWARE_ERROR',
-            err.message,
+            err instanceof Error ? err.message : String(err),
             operationId,
           );
 
@@ -248,11 +250,14 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       });
     } catch (error) {
       const processingTime = Date.now() - startTime;
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
 
       this.logger.error(`[${operationId}] Security headers middleware error`, {
         operationId,
-        error: error.message,
-        stack: error.stack,
+        error: errorMessage,
+        stack: errorStack,
         processingTimeMs: processingTime,
       });
 
@@ -260,7 +265,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       this.logSecurityEvent(
         req,
         'MIDDLEWARE_FAILURE',
-        error.message,
+        errorMessage,
         operationId,
       );
 
@@ -271,8 +276,12 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
   /**
    * Create helmet middleware with configuration
    */
-  private createHelmetMiddleware(): any {
-    const helmetOptions: any = {
+  private createHelmetMiddleware(): (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => void {
+    const helmetOptions = {
       // Content Security Policy
       contentSecurityPolicy: this.config.csp
         ? {
@@ -321,27 +330,29 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
         allow: false,
       },
 
-      // Expect-CT
-      expectCt:
-        this.config.environment === 'production'
-          ? {
-              maxAge: 86400,
-              enforce: true,
-            }
-          : false,
-
-      // Permissions Policy (formerly Feature Policy)
-      permissionsPolicy: {
-        camera: [],
-        microphone: [],
-        geolocation: [],
-        payment: [],
-        usb: [],
-        magnetometer: [],
-        gyroscope: [],
-        accelerometer: [],
+      // X-Permitted-Cross-Domain-Policies
+      xPermittedCrossDomainPolicies: {
+        permittedPolicies: 'none',
       },
-    };
+
+      // Origin Agent Cluster
+      originAgentCluster: true,
+
+      // Cross-Origin Embedder Policy
+      crossOriginEmbedderPolicy: {
+        policy: 'credentialless',
+      },
+
+      // Cross-Origin Opener Policy
+      crossOriginOpenerPolicy: {
+        policy: 'same-origin',
+      },
+
+      // Cross-Origin Resource Policy
+      crossOriginResourcePolicy: {
+        policy: 'same-origin',
+      },
+    } as Parameters<typeof helmet>[0];
 
     return helmet(helmetOptions);
   }
@@ -510,9 +521,11 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
         operationId,
       });
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown logging error';
       this.logger.error('Failed to log security headers event', {
         operationId,
-        error: error.message,
+        error: errorMessage,
         originalEventType: eventType,
       });
     }

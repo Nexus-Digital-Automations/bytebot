@@ -28,11 +28,14 @@ import {
   IsNotEmpty,
   IsEmail,
   IsUrl,
-  Transform,
-  Type,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose, Transform as ClassTransform } from 'class-transformer';
+import {
+  Expose,
+  Transform,
+  Type as ClassTransformerType,
+  TransformFnParams,
+} from 'class-transformer';
 
 /**
  * Standard HTTP status codes for API responses
@@ -67,7 +70,7 @@ export class ResponseMetadata {
     example: '2025-01-15T10:30:00.000Z',
   })
   @IsDate()
-  @Type(() => Date)
+  @ClassTransformerType(() => Date)
   @Expose()
   timestamp: Date = new Date();
 
@@ -107,6 +110,7 @@ export class ResponseMetadata {
   @ApiPropertyOptional({
     description: 'Rate limiting information',
     type: 'object',
+    additionalProperties: true,
   })
   @IsOptional()
   @IsObject()
@@ -155,6 +159,7 @@ export class BaseResponseDto<T = any> {
   @ApiProperty({
     description: 'Response data payload',
     type: 'object',
+    additionalProperties: true,
   })
   @IsOptional()
   @Expose()
@@ -165,7 +170,7 @@ export class BaseResponseDto<T = any> {
     type: ResponseMetadata,
   })
   @ValidateNested()
-  @Type(() => ResponseMetadata)
+  @ClassTransformerType(() => ResponseMetadata)
   @Expose()
   metadata: ResponseMetadata;
 
@@ -245,13 +250,14 @@ export class BaseErrorResponseDto extends BaseResponseDto {
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => ValidationErrorDetail)
+  @ClassTransformerType(() => ValidationErrorDetail)
   @Expose()
   validationErrors?: ValidationErrorDetail[];
 
   @ApiPropertyOptional({
     description: 'Additional error context',
     type: 'object',
+    additionalProperties: true,
   })
   @IsOptional()
   @IsObject()
@@ -288,7 +294,9 @@ export class PaginationDto {
   @IsNumber()
   @Min(1)
   @Max(10000)
-  @Transform(({ value }) => parseInt(value, 10))
+  @Transform(({ value }: TransformFnParams): number =>
+    parseInt(String(value), 10),
+  )
   @Expose()
   page: number = 1;
 
@@ -303,7 +311,9 @@ export class PaginationDto {
   @IsNumber()
   @Min(1)
   @Max(100)
-  @Transform(({ value }) => parseInt(value, 10))
+  @Transform(({ value }: TransformFnParams): number =>
+    parseInt(String(value), 10),
+  )
   @Expose()
   limit: number = 20;
 
@@ -340,7 +350,9 @@ export class PaginationDto {
   @IsOptional()
   @IsString()
   @Length(1, 200)
-  @ClassTransform(({ value }) => value?.trim())
+  @Transform(({ value }: TransformFnParams): string =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @Expose()
   search?: string;
 }
@@ -441,7 +453,7 @@ export class PaginatedResponseDto<T> extends BaseResponseDto<T[]> {
     type: PaginationMetadata,
   })
   @ValidateNested()
-  @Type(() => PaginationMetadata)
+  @ClassTransformerType(() => PaginationMetadata)
   @Expose()
   pagination: PaginationMetadata;
 
@@ -485,7 +497,7 @@ export class BaseEntityDto {
     format: 'date-time',
   })
   @IsDate()
-  @Type(() => Date)
+  @ClassTransformerType(() => Date)
   @Expose()
   createdAt: Date;
 
@@ -495,7 +507,7 @@ export class BaseEntityDto {
     format: 'date-time',
   })
   @IsDate()
-  @Type(() => Date)
+  @ClassTransformerType(() => Date)
   @Expose()
   updatedAt: Date;
 
@@ -522,7 +534,7 @@ export class FilterDto {
   })
   @IsOptional()
   @IsDate()
-  @Type(() => Date)
+  @ClassTransformerType(() => Date)
   @Expose()
   createdAfter?: Date;
 
@@ -533,7 +545,7 @@ export class FilterDto {
   })
   @IsOptional()
   @IsDate()
-  @Type(() => Date)
+  @ClassTransformerType(() => Date)
   @Expose()
   createdBefore?: Date;
 
@@ -544,7 +556,7 @@ export class FilterDto {
   })
   @IsOptional()
   @IsDate()
-  @Type(() => Date)
+  @ClassTransformerType(() => Date)
   @Expose()
   updatedAfter?: Date;
 
@@ -555,7 +567,7 @@ export class FilterDto {
   })
   @IsOptional()
   @IsDate()
-  @Type(() => Date)
+  @ClassTransformerType(() => Date)
   @Expose()
   updatedBefore?: Date;
 }
@@ -564,11 +576,11 @@ export class FilterDto {
  * Input sanitization and validation utilities
  */
 export class SanitizedStringField {
-  @Transform(({ value }) => {
+  @Transform(({ value }: TransformFnParams): string => {
     if (typeof value === 'string') {
       return value.trim().replace(/\s+/g, ' ');
     }
-    return value;
+    return value as string;
   })
   @IsString()
   @IsNotEmpty()
@@ -580,11 +592,11 @@ export class SanitizedStringField {
  * Secure email field with comprehensive validation
  */
 export class SecureEmailField {
-  @Transform(({ value }) => {
+  @Transform(({ value }: TransformFnParams): string => {
     if (typeof value === 'string') {
       return value.trim().toLowerCase();
     }
-    return value;
+    return value as string;
   })
   @IsEmail({}, { message: 'Must be a valid email address' })
   @Length(5, 320, { message: 'Email must be between 5 and 320 characters' })
@@ -598,11 +610,11 @@ export class SecureEmailField {
  * Secure URL field with validation
  */
 export class SecureUrlField {
-  @Transform(({ value }) => {
+  @Transform(({ value }: TransformFnParams): string => {
     if (typeof value === 'string') {
       return value.trim();
     }
-    return value;
+    return value as string;
   })
   @IsUrl(
     {
@@ -651,6 +663,7 @@ export class HealthCheckResponseDto extends BaseResponseDto {
   @ApiProperty({
     description: 'Service dependencies status',
     type: 'object',
+    additionalProperties: true,
     example: {
       database: 'healthy',
       redis: 'healthy',

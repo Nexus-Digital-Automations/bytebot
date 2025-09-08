@@ -149,16 +149,16 @@ export class ConnectionPoolConfig {
    * Get Prisma datasource URL with connection pool parameters
    * Includes all PostgreSQL-specific optimizations for enterprise use
    */
-  async getPrismaConnectionUrl(): Promise<string> {
+  getPrismaConnectionUrl(): string {
     // Try to get DATABASE_URL from secrets service first
-    let baseUrl = await this.secretsService.getSecret(
+    let baseUrl: string | null = this.secretsService.getSecret(
       'database-url',
       'DATABASE_URL',
     );
 
     // Fallback to configuration service
     if (!baseUrl) {
-      baseUrl = this.configService.get<string>('DATABASE_URL');
+      baseUrl = this.configService.get<string>('DATABASE_URL') ?? null;
     }
 
     if (!baseUrl) {
@@ -233,7 +233,10 @@ export class ConnectionPoolConfig {
         );
       }
 
-      if (!connectionUrl || !connectionUrl.startsWith('postgresql://')) {
+      if (
+        typeof connectionUrl !== 'string' ||
+        !connectionUrl.startsWith('postgresql://')
+      ) {
         throw new Error('Invalid PostgreSQL connection URL format');
       }
 
@@ -242,11 +245,13 @@ export class ConnectionPoolConfig {
       );
       return true;
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.error(
         'Database connection configuration validation failed',
-        error,
+        errorMessage,
       );
-      throw error;
+      throw new Error(`Configuration validation failed: ${errorMessage}`);
     }
   }
 

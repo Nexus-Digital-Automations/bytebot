@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 /**
  * Security Configuration Deployment - Bytebot-Agent Service
  *
@@ -16,15 +17,15 @@ import {
   NestModule,
 } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { NestApplication } from '@nestjs/core';
+import { Reflector } from '@nestjs/core';
 import {
   StandardizedSecurityMiddleware,
   ServiceType,
   StandardizedValidationPipe,
-  ValidationServiceType,
   StandardizedRateLimitGuard,
-  RateLimitServiceType,
   StandardizedValidationPipes,
-} from '@bytebot/shared';
+} from '@bytebot/shared/dist/index-server';
 
 /**
  * Bytebot-Agent Security Configuration Service
@@ -38,40 +39,68 @@ export class BytebotAgentSecurityConfigService {
    * Create Bytebot-Agent security middleware with high security settings
    */
   createSecurityMiddleware(): StandardizedSecurityMiddleware {
-    return StandardizedSecurityMiddleware.createBytebotAgentMiddleware(
-      this.configService,
-    );
+    try {
+      return (
+        StandardizedSecurityMiddleware as any
+      ).createBytebotAgentMiddleware(this.configService);
+    } catch {
+      throw new Error('Failed to create security middleware');
+    }
   }
 
   /**
    * Create Bytebot-Agent validation pipe with high security settings
    */
   createValidationPipe(): StandardizedValidationPipe {
-    const environment = this.configService.get('NODE_ENV', 'development');
+    const environment = this.configService.get<string>(
+      'NODE_ENV',
+      'development',
+    );
 
-    // Use high security pipe for Bytebot-Agent
-    return StandardizedValidationPipes.HIGH_SECURITY(environment);
+    try {
+      // Use high security pipe for Bytebot-Agent
+
+      return (StandardizedValidationPipes as any).HIGH_SECURITY(environment);
+    } catch {
+      throw new Error('Failed to create validation pipe');
+    }
   }
 
   /**
    * Create Bytebot-Agent rate limit guard with moderate rate limits
    */
   createRateLimitGuard(
-    reflector: any,
-    redisClient?: any,
+    reflector: Reflector,
+    redisClient?: unknown,
   ): StandardizedRateLimitGuard {
-    return StandardizedRateLimitGuard.createBytebotAgentGuard(
-      reflector,
-      this.configService,
-      redisClient,
-    );
+    try {
+      return (StandardizedRateLimitGuard as any).createBytebotAgentGuard(
+        reflector,
+        this.configService,
+        redisClient,
+      );
+    } catch {
+      throw new Error('Failed to create rate limit guard');
+    }
   }
 
   /**
    * Get security configuration for manual inspection
    */
-  getSecurityConfig() {
-    const environment = this.configService.get('NODE_ENV', 'development');
+  getSecurityConfig(): {
+    serviceType: ServiceType;
+    environment: string;
+    securityLevel: string;
+    description: string;
+    middleware: Record<string, unknown>;
+    validation: Record<string, unknown>;
+    rateLimiting: Record<string, unknown>;
+    features: Record<string, unknown>;
+  } {
+    const environment = this.configService.get<string>(
+      'NODE_ENV',
+      'development',
+    );
 
     return {
       serviceType: ServiceType.BYTEBOT_AGENT,
@@ -130,7 +159,7 @@ export class BytebotAgentSecurityConfigService {
     {
       provide: 'BYTEBOT_AGENT_SECURITY_MIDDLEWARE',
       useFactory: (configService: ConfigService) =>
-        StandardizedSecurityMiddleware.createBytebotAgentMiddleware(
+        (StandardizedSecurityMiddleware as any).createBytebotAgentMiddleware(
           configService,
         ),
       inject: [ConfigService],
@@ -138,19 +167,23 @@ export class BytebotAgentSecurityConfigService {
     {
       provide: 'BYTEBOT_AGENT_VALIDATION_PIPE',
       useFactory: (configService: ConfigService) => {
-        const environment = configService.get('NODE_ENV', 'development');
-        return StandardizedValidationPipes.HIGH_SECURITY(environment);
+        const environment = configService.get<string>(
+          'NODE_ENV',
+          'development',
+        );
+
+        return (StandardizedValidationPipes as any).HIGH_SECURITY(environment);
       },
       inject: [ConfigService],
     },
     {
       provide: 'BYTEBOT_AGENT_RATE_LIMIT_GUARD',
       useFactory: (
-        reflector: any,
+        reflector: Reflector,
         configService: ConfigService,
-        redisClient?: any,
+        redisClient?: unknown,
       ) =>
-        StandardizedRateLimitGuard.createBytebotAgentGuard(
+        (StandardizedRateLimitGuard as any).createBytebotAgentGuard(
           reflector,
           configService,
           redisClient,
@@ -169,15 +202,23 @@ export class BytebotAgentSecurityModule implements NestModule {
   constructor(private configService: ConfigService) {}
 
   configure(consumer: MiddlewareConsumer) {
-    // Apply Bytebot-Agent security middleware to all routes
-    const securityMiddleware =
-      StandardizedSecurityMiddleware.createBytebotAgentMiddleware(
-        this.configService,
-      );
+    try {
+      // Apply Bytebot-Agent security middleware to all routes
 
-    consumer
-      .apply(securityMiddleware.use.bind(securityMiddleware))
-      .forRoutes('*');
+      const securityMiddleware = (
+        StandardizedSecurityMiddleware as any
+      ).createBytebotAgentMiddleware(this.configService);
+
+      consumer
+        .apply(
+          securityMiddleware.use.bind(securityMiddleware) as Parameters<
+            MiddlewareConsumer['apply']
+          >[0],
+        )
+        .forRoutes('*');
+    } catch {
+      throw new Error('Failed to configure security middleware');
+    }
   }
 }
 
@@ -191,38 +232,51 @@ export class BytebotAgentSecurityDeployment {
    * @param app - NestJS application instance
    * @param configService - Configuration service
    */
-  static async applySecurityToApp(app: any, configService: ConfigService) {
-    const environment = configService.get('NODE_ENV', 'development');
+  static applySecurityToApp(
+    app: NestApplication,
+    configService: ConfigService,
+  ): void {
+    try {
+      const environment = configService.get<string>('NODE_ENV', 'development');
 
-    // Apply global validation pipe with high security
-    app.useGlobalPipes(StandardizedValidationPipes.HIGH_SECURITY(environment));
+      // Apply global validation pipe with high security
 
-    // Apply global rate limiting guard
-    const reflector = app.get('Reflector');
-    const redisClient = app.get('REDIS_CLIENT', null);
-    const rateLimitGuard = StandardizedRateLimitGuard.createBytebotAgentGuard(
-      reflector,
-      configService,
-      redisClient,
-    );
+      (app as any).useGlobalPipes(
+        (StandardizedValidationPipes as any).HIGH_SECURITY(environment),
+      );
 
-    app.useGlobalGuards(rateLimitGuard);
+      // Apply global rate limiting guard
 
-    // Log security deployment
-    const logger = app.get('Logger');
-    if (logger) {
-      logger.log('Bytebot-Agent security middleware deployed successfully', {
-        service: 'Bytebot-Agent',
-        securityLevel: 'HIGH',
-        environment,
-        features: {
-          api: true,
-          taskManagement: true,
-          rateLimiting: !!redisClient,
-          validation: true,
-          authentication: true,
-        },
-      });
+      const reflector = (app as any).get('Reflector');
+
+      const redisClient = (app as any).get('REDIS_CLIENT', null);
+
+      const rateLimitGuard = (
+        StandardizedRateLimitGuard as any
+      ).createBytebotAgentGuard(reflector, configService, redisClient);
+
+      (app as any).useGlobalGuards(rateLimitGuard);
+
+      // Log security deployment
+
+      const logger = (app as any).get('Logger');
+      if (logger) {
+        logger.log('Bytebot-Agent security middleware deployed successfully', {
+          service: 'Bytebot-Agent',
+          securityLevel: 'HIGH',
+          environment,
+          features: {
+            api: true,
+            taskManagement: true,
+
+            rateLimiting: !!redisClient,
+            validation: true,
+            authentication: true,
+          },
+        });
+      }
+    } catch {
+      throw new Error('Failed to apply security configuration');
     }
   }
 
@@ -251,9 +305,14 @@ export class BytebotAgentSecurityDeployment {
   /**
    * Validate Bytebot-Agent security configuration
    */
-  static validateSecurityConfig(configService: ConfigService) {
-    const environment = configService.get('NODE_ENV', 'development');
-    const corsOrigins = configService.get('CORS_ORIGINS', []);
+  static validateSecurityConfig(configService: ConfigService): {
+    environment: string;
+    valid: boolean;
+    warnings: string[];
+    errors: string[];
+  } {
+    const environment = configService.get<string>('NODE_ENV', 'development');
+    const corsOrigins = configService.get<string[]>('CORS_ORIGINS', []);
 
     const validationResults = {
       environment,
@@ -263,7 +322,11 @@ export class BytebotAgentSecurityDeployment {
     };
 
     // Check CORS configuration
-    if (environment === 'production' && corsOrigins.includes('*')) {
+    if (
+      environment === 'production' &&
+      Array.isArray(corsOrigins) &&
+      corsOrigins.includes('*')
+    ) {
       validationResults.errors.push(
         'Wildcard CORS origins not allowed in production',
       );
@@ -271,7 +334,7 @@ export class BytebotAgentSecurityDeployment {
     }
 
     // Check JWT configuration
-    const jwtSecret = configService.get('JWT_SECRET');
+    const jwtSecret = configService.get<string>('JWT_SECRET');
     if (!jwtSecret) {
       validationResults.errors.push(
         'JWT_SECRET not configured - authentication will fail',
@@ -280,7 +343,7 @@ export class BytebotAgentSecurityDeployment {
     }
 
     // Check database configuration
-    const databaseUrl = configService.get('DATABASE_URL');
+    const databaseUrl = configService.get<string>('DATABASE_URL');
     if (!databaseUrl) {
       validationResults.errors.push(
         'DATABASE_URL not configured - application will fail',
@@ -289,7 +352,7 @@ export class BytebotAgentSecurityDeployment {
     }
 
     // Check Redis configuration for rate limiting and caching
-    const redisHost = configService.get('REDIS_HOST');
+    const redisHost = configService.get<string>('REDIS_HOST');
     if (!redisHost && environment !== 'development') {
       validationResults.warnings.push(
         'Redis not configured - rate limiting and caching will use fallbacks',
@@ -297,7 +360,7 @@ export class BytebotAgentSecurityDeployment {
     }
 
     // Check Swagger configuration
-    const enableSwagger = configService.get('features.swagger', true);
+    const enableSwagger = configService.get<boolean>('features.swagger', true);
     if (enableSwagger && environment === 'production') {
       validationResults.warnings.push(
         'Swagger is enabled in production - consider disabling for security',
@@ -310,9 +373,12 @@ export class BytebotAgentSecurityDeployment {
   /**
    * Configure Swagger with security settings
    */
-  static configureSwagger(app: any, configService: ConfigService) {
-    const environment = configService.get('NODE_ENV', 'development');
-    const enableSwagger = configService.get(
+  static configureSwagger(
+    app: NestApplication,
+    configService: ConfigService,
+  ): Record<string, unknown> | null {
+    const environment = configService.get<string>('NODE_ENV', 'development');
+    const enableSwagger = configService.get<boolean>(
       'features.swagger',
       environment !== 'production',
     );

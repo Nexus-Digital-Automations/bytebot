@@ -25,7 +25,11 @@ function getSafeErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
-  return String(error);
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return '[Unserializable Error Object]';
+  }
 }
 
 /**

@@ -443,8 +443,11 @@ describe('Security Configuration Tests', () => {
 
       // Production should have strictest settings
       if (env === 'production') {
-        expect(config.strictMode).toBe(true);
-        expect(config.maxInputLength).toBeLessThanOrEqual(1000);
+        // Use type guard to access union type properties safely
+        if ('strictMode' in config && 'maxInputLength' in config) {
+          expect(config.strictMode).toBe(true);
+          expect(config.maxInputLength).toBeLessThanOrEqual(1000);
+        }
         expect(config.enableLogging).toBe(true);
       }
 

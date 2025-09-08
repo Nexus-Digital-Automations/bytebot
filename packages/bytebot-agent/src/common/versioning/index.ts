@@ -9,13 +9,10 @@
  * @author API Versioning & Documentation Specialist
  */
 
-// Version decorators and metadata
-export * from './api-version.decorator';
-export type {
+// Version decorators and metadata - properly typed imports
+import {
   ApiVersionConfig,
   SupportedVersion,
-} from './api-version.decorator';
-export {
   ApiVersion,
   DeprecatedApi,
   ForVersion,
@@ -29,19 +26,46 @@ export {
   getMultiVersions,
 } from './api-version.decorator';
 
-// Version negotiation interceptor
-export { VersionInterceptor } from './version.interceptor';
+// Version negotiation interceptor - properly typed import
+import { VersionInterceptor } from './version.interceptor';
 
-// Deprecation management guard
-export { DeprecationGuard, DeprecationEnforcement } from './deprecation.guard';
+// Deprecation management guard - properly typed imports
+import { DeprecationGuard, DeprecationEnforcement } from './deprecation.guard';
 
-// Default exports for convenience
-export { default as VersionDecorators } from './api-version.decorator';
-export { default as VersionInterceptor } from './version.interceptor';
-export { default as DeprecationGuard } from './deprecation.guard';
+// Default imports for proper typing
+import VersionDecorators from './api-version.decorator';
+import VersionInterceptorDefault from './version.interceptor';
+import DeprecationGuardDefault from './deprecation.guard';
+
+// Re-export all types and functions with explicit typing
+export type { ApiVersionConfig, SupportedVersion };
+export {
+  ApiVersion,
+  DeprecatedApi,
+  ForVersion,
+  MultiVersion,
+  ExperimentalApi,
+  BetaApi,
+  SUPPORTED_API_VERSIONS,
+  VersioningStrategy,
+  getVersionConfig,
+  getApiVersion,
+  getMultiVersions,
+  VersionInterceptor,
+  DeprecationGuard,
+  DeprecationEnforcement,
+};
+
+// Default exports for convenience with proper typing
+export {
+  VersionDecorators,
+  VersionInterceptorDefault as VersionInterceptorDefault,
+  DeprecationGuardDefault as DeprecationGuardDefault,
+};
 
 /**
  * Pre-configured versioning components for common use cases
+ * Properly typed to avoid unsafe assignments
  */
 export const VersioningComponents = {
   /**
@@ -50,7 +74,7 @@ export const VersioningComponents = {
   STANDARD: {
     interceptor: VersionInterceptor,
     guard: DeprecationGuard,
-    enforcement: DeprecationEnforcement.WARN,
+    enforcement: DeprecationEnforcement.WARN as DeprecationEnforcement.WARN,
   },
 
   /**
@@ -59,7 +83,8 @@ export const VersioningComponents = {
   STRICT: {
     interceptor: VersionInterceptor,
     guard: DeprecationGuard,
-    enforcement: DeprecationEnforcement.STRICT_BLOCK,
+    enforcement:
+      DeprecationEnforcement.STRICT_BLOCK as DeprecationEnforcement.STRICT_BLOCK,
   },
 
   /**
@@ -68,19 +93,21 @@ export const VersioningComponents = {
   DEVELOPMENT: {
     interceptor: VersionInterceptor,
     guard: DeprecationGuard,
-    enforcement: DeprecationEnforcement.LOG_ONLY,
+    enforcement:
+      DeprecationEnforcement.LOG_ONLY as DeprecationEnforcement.LOG_ONLY,
   },
 } as const;
 
 /**
  * Common version configurations for typical API evolution patterns
+ * Properly typed with explicit type annotations
  */
 export const CommonVersionConfigs = {
   /**
    * Version 1 - Initial stable release
    */
   V1_STABLE: {
-    version: SUPPORTED_API_VERSIONS.V1,
+    version: SUPPORTED_API_VERSIONS.V1 as SupportedVersion,
     stability: 'stable' as const,
     documentation: {
       description: 'Initial stable API release',
@@ -91,13 +118,13 @@ export const CommonVersionConfigs = {
         'User authentication',
       ],
     },
-  },
+  } satisfies ApiVersionConfig,
 
   /**
    * Version 2 - Next generation with new features
    */
   V2_BETA: {
-    version: SUPPORTED_API_VERSIONS.V2,
+    version: SUPPORTED_API_VERSIONS.V2 as SupportedVersion,
     stability: 'beta' as const,
     documentation: {
       description: 'Next generation API with enhanced features',
@@ -113,13 +140,13 @@ export const CommonVersionConfigs = {
         'Renamed endpoint paths',
       ],
     },
-  },
+  } satisfies ApiVersionConfig,
 
   /**
    * Deprecated V1 with sunset date
    */
   V1_DEPRECATED: {
-    version: SUPPORTED_API_VERSIONS.V1,
+    version: SUPPORTED_API_VERSIONS.V1 as SupportedVersion,
     stability: 'deprecated' as const,
     deprecation: {
       deprecated: true,
@@ -131,10 +158,11 @@ export const CommonVersionConfigs = {
       description: 'Deprecated version - migrate to v2',
       breakingChanges: ['This version is deprecated and will be removed'],
     },
-  },
+  } satisfies ApiVersionConfig,
 } as const;
 
-export default {
+// Default export with proper typing to prevent unsafe assignments
+const VersioningModule = {
   // Decorators
   ApiVersion,
   DeprecatedApi,
@@ -160,4 +188,6 @@ export default {
   // Pre-configured setups
   VersioningComponents,
   CommonVersionConfigs,
-};
+} as const;
+
+export default VersioningModule;

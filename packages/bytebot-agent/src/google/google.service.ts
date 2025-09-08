@@ -24,6 +24,43 @@ import {
   GoogleGenAI,
   Part,
 } from '@google/genai';
+
+// Enhanced type definitions for better type safety
+interface GoogleApiError extends Error {
+  code?: string;
+  status?: number;
+  details?: unknown;
+}
+
+// Type guards for Google API responses
+interface ValidatedGenerateContentResponse extends GenerateContentResponse {
+  candidates: Array<{
+    content: {
+      parts: Part[];
+    };
+  }>;
+}
+
+// Enhanced Part interface for our specific use cases
+interface ExtendedPart extends Part {
+  text?: string;
+  thought?: boolean;
+  thoughtSignature?: string;
+  functionCall?: {
+    id: string;
+    name: string;
+    args: Record<string, unknown>;
+  };
+  functionResponse?: {
+    id: string;
+    name: string;
+    response: Record<string, unknown>;
+  };
+  inlineData?: {
+    data: string;
+    mimeType: string;
+  };
+}
 import { DEFAULT_MODEL } from './google.constants';
 
 // Simple ID generator to avoid TypeScript strict mode issues
@@ -33,8 +70,9 @@ const generateId = (): string => {
 
 @Injectable()
 export class GoogleService implements BytebotAgentService {
-  private readonly google: GoogleGenAI;
+  private google: GoogleGenAI;
   private readonly logger = new Logger(GoogleService.name);
+  private currentApiKey = 'dummy-key-for-initialization';
 
   constructor(
     private readonly configService: ConfigService,
@@ -42,20 +80,21 @@ export class GoogleService implements BytebotAgentService {
   ) {
     // Initialize with dummy key - actual key will be loaded dynamically
     this.google = new GoogleGenAI({
-      apiKey: 'dummy-key-for-initialization',
+      apiKey: this.currentApiKey,
     });
   }
 
   /**
    * Get Google Gemini API key securely from secrets management
    * @private
+   * @throws {GoogleApiError} When API key is not found or retrieval fails
    */
-  private async getApiKey(): Promise<string> {
+  private getApiKey(): string {
     const operationId = `get-gemini-key-${Date.now()}`;
 
     try {
       // Try to get from secrets service first (Kubernetes secrets)
-      const secretKey = await this.secretsService.getSecret(
+      const secretKey = this.secretsService.getSecret(
         'gemini-api-key',
         'GEMINI_API_KEY',
       );
@@ -80,11 +119,20 @@ export class GoogleService implements BytebotAgentService {
       this.logger.error(
         `[${operationId}] GEMINI_API_KEY not found in secrets or configuration`,
       );
-      throw new Error('GEMINI_API_KEY is not configured');
+      const error = new Error(
+        'GEMINI_API_KEY is not configured',
+      ) as GoogleApiError;
+      error.code = 'MISSING_API_KEY';
+      throw error;
     } catch (error) {
       this.logger.error(`[${operationId}] Failed to retrieve Gemini API key`, {
         error: error instanceof Error ? error.message : String(error),
       });
+      if (error instanceof Error) {
+        const googleError = error as GoogleApiError;
+        googleError.code = googleError.code || 'API_KEY_RETRIEVAL_ERROR';
+        throw googleError;
+      }
       throw error;
     }
   }
@@ -97,11 +145,16 @@ export class GoogleService implements BytebotAgentService {
     signal?: AbortSignal,
   ): Promise<BytebotAgentResponse> {
     // Ensure we have a valid API key before proceeding
-    const apiKey = await this.getApiKey();
+    const apiKey = this.getApiKey();
 
     // Update Google client with actual API key if needed
-    if (this.google.apiKey === 'dummy-key-for-initialization') {
-      this.google.apiKey = apiKey;
+    // Note: GoogleGenAI client requires recreation for API key changes
+    if (this.currentApiKey === 'dummy-key-for-initialization') {
+      // Recreate client with actual API key
+      this.currentApiKey = apiKey;
+      this.google = new GoogleGenAI({
+        apiKey: apiKey,
+      });
     }
 
     try {
@@ -131,39 +184,59 @@ export class GoogleService implements BytebotAgentService {
           },
         });
 
-      const candidate = response.candidates?.[0];
-
-      if (!candidate) {
-        throw new Error('No candidate found in response');
+      // Validate response structure
+      if (!this.isValidGenerateContentResponse(response)) {
+        const error = new Error(
+          'Invalid response structure from Google Gemini API',
+        ) as GoogleApiError;
+        error.code = 'INVALID_API_RESPONSE';
+        throw error;
       }
 
+      const candidate = response.candidates[0]; // We've validated this exists
       const content = candidate.content;
-
-      if (!content) {
-        throw new Error('No content found in candidate');
-      }
-
-      if (!content.parts) {
-        throw new Error('No parts found in content');
-      }
+      const parts = content.parts;
 
       return {
-        contentBlocks: this.formatGoogleResponse(content.parts),
+        contentBlocks: this.formatGoogleResponse(parts),
         tokenUsage: {
-          inputTokens: response.usageMetadata?.promptTokenCount || 0,
-          outputTokens: response.usageMetadata?.candidatesTokenCount || 0,
-          totalTokens: response.usageMetadata?.totalTokenCount || 0,
+          inputTokens: response.usageMetadata?.promptTokenCount ?? 0,
+          outputTokens: response.usageMetadata?.candidatesTokenCount ?? 0,
+          totalTokens: response.usageMetadata?.totalTokenCount ?? 0,
         },
       };
     } catch (error: unknown) {
       if (error instanceof Error && error.message.includes('AbortError')) {
         throw new BytebotAgentInterrupt();
       }
+
+      let googleError: GoogleApiError;
+      if (error instanceof Error) {
+        googleError = error as GoogleApiError;
+        googleError.code = googleError.code || 'GENERATION_ERROR';
+      } else {
+        const errorMessage = (() => {
+          if (typeof error === 'string') return error;
+          if (error instanceof Error) return error.message;
+          try {
+            return JSON.stringify(error);
+          } catch {
+            return '[Unserializable Error]';
+          }
+        })();
+        googleError = new Error(errorMessage) as GoogleApiError;
+        googleError.code = 'UNKNOWN_ERROR';
+      }
+
       this.logger.error(
-        `Error sending message to Google Gemini: ${error instanceof Error ? error.message : String(error)}`,
-        error instanceof Error ? error.stack : undefined,
+        `Error sending message to Google Gemini: ${googleError.message}`,
+        {
+          code: googleError.code,
+          stack: googleError.stack,
+          details: googleError.details,
+        },
       );
-      throw error;
+      throw googleError;
     }
   }
 
@@ -285,66 +358,98 @@ export class GoogleService implements BytebotAgentService {
     return googleMessages;
   }
 
-  // Find the content block with the tool_use_id and return the name
-  private getToolName(
-    tool_use_id: string,
-    messages: Message[],
-  ): string | undefined {
-    const toolMessage = messages.find((message) =>
-      (message.content as MessageContentBlock[]).some(
+  /**
+   * Find the content block with the tool_use_id and return the tool name
+   * @private
+   */
+  private getToolName(tool_use_id: string, messages: Message[]): string {
+    const toolMessage = messages.find((message) => {
+      const contentBlocks = message.content as MessageContentBlock[];
+      return contentBlocks.some(
         (block) =>
           block.type === MessageContentType.ToolUse && block.id === tool_use_id,
-      ),
-    );
+      );
+    });
+
     if (!toolMessage) {
-      return undefined;
+      this.logger.warn(
+        `Tool message not found for tool_use_id: ${tool_use_id}`,
+      );
+      return 'unknown_tool';
     }
 
     const toolBlock = (toolMessage.content as MessageContentBlock[]).find(
       (block) =>
         block.type === MessageContentType.ToolUse && block.id === tool_use_id,
-    );
+    ) as ToolUseContentBlock | undefined;
+
     if (!toolBlock) {
-      return undefined;
+      this.logger.warn(`Tool block not found for tool_use_id: ${tool_use_id}`);
+      return 'unknown_tool';
     }
-    return (toolBlock as ToolUseContentBlock).name;
+
+    return toolBlock.name;
+  }
+
+  /**
+   * Type guard to validate Google API response structure
+   * @private
+   */
+  private isValidGenerateContentResponse(
+    response: GenerateContentResponse,
+  ): response is ValidatedGenerateContentResponse {
+    return (
+      Array.isArray(response.candidates) &&
+      response.candidates.length > 0 &&
+      Boolean(response.candidates[0]?.content?.parts) &&
+      Array.isArray(response.candidates[0]?.content?.parts)
+    );
   }
 
   /**
    * Convert Google Gemini's response content to our MessageContentBlock format
+   * @private
    */
   private formatGoogleResponse(parts: Part[]): MessageContentBlock[] {
     return parts.map((part) => {
-      if (part.text) {
+      const extendedPart = part as ExtendedPart;
+
+      // Handle text content
+      if (extendedPart.text && !extendedPart.thought) {
         return {
           type: MessageContentType.Text,
-          text: part.text,
+          text: extendedPart.text,
         } as TextContentBlock;
       }
 
-      if (part.thought) {
+      // Handle thinking content
+      if (extendedPart.thought && extendedPart.text) {
         return {
           type: MessageContentType.Thinking,
-          signature: part.thoughtSignature,
-          thinking: part.text,
+          signature: extendedPart.thoughtSignature ?? '',
+          thinking: extendedPart.text,
         } as ThinkingContentBlock;
       }
 
-      if (part.functionCall) {
+      // Handle function calls
+      if (extendedPart.functionCall) {
         return {
           type: MessageContentType.ToolUse,
-          id: generateId(),
-          name: 'function_call',
-          input: {},
+          id: extendedPart.functionCall.id || generateId(),
+          name: extendedPart.functionCall.name || 'function_call',
+          input: extendedPart.functionCall.args || {},
         } as ToolUseContentBlock;
       }
 
-      this.logger.warn(
-        `Unknown content type from Google: ${JSON.stringify(part)}`,
-      );
+      // Handle unknown content types with proper logging
+      this.logger.warn('Unknown content type from Google API', {
+        partKeys: Object.keys(extendedPart),
+        partContent: JSON.stringify(extendedPart, null, 2),
+      });
+
       return {
         type: MessageContentType.Text,
-        text: JSON.stringify(part),
+        text: JSON.stringify(extendedPart),
       } as TextContentBlock;
     });
   }

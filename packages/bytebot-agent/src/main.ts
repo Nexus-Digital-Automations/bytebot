@@ -1,11 +1,17 @@
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { BytebotConfigService } from './config/config.service';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { webcrypto } from 'crypto';
-import { json, urlencoded } from 'express';
+import { json, urlencoded, Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
+import {
+  StandardizedSecurityMiddleware,
+  ServiceType,
+} from '@bytebot/shared/dist/index-server';
+import { ConfigService } from '@nestjs/config';
 
 // Polyfill for crypto global (required by @nestjs/schedule)
 if (!globalThis.crypto) {
@@ -28,9 +34,27 @@ async function bootstrap(): Promise<void> {
 
     // Get configuration service for typed configuration access
     const configService = app.get(BytebotConfigService);
+    const standardConfigService = app.get(ConfigService);
     const config = configService.getAppConfig();
     const apiConfig = configService.getApiConfig();
     const featuresConfig = configService.getFeaturesConfig();
+    const developmentConfig = configService.getDevelopmentConfig();
+
+    // Deploy standardized security middleware for Bytebot-Agent - HIGH SECURITY
+    const securityMiddleware =
+      StandardizedSecurityMiddleware.createBytebotAgentMiddleware(
+        standardConfigService,
+      );
+    app.use('/api', securityMiddleware.use.bind(securityMiddleware));
+
+    logger.log(
+      'Bytebot-Agent standardized security middleware deployed successfully',
+      {
+        serviceType: ServiceType.BYTEBOT_AGENT,
+        environment: config.nodeEnv,
+        securityLevel: securityMiddleware.getSecurityConfig().securityLevel,
+      },
+    );
 
     // Configure security headers with helmet - environment-aware
     app.use(
@@ -65,11 +89,14 @@ async function bootstrap(): Promise<void> {
             ],
             objectSrc: ["'none'"],
             mediaSrc: ["'self'", 'blob:'],
-            frameSrc: developmentConfig.enableSwagger ? ["'self'"] : ["'none'"],
+            frameSrc: (developmentConfig.enableSwagger
+              ? ["'self'"]
+              : ["'none'"]) as string[],
             baseUri: ["'self'"],
             formAction: ["'self'"],
-            upgradeInsecureRequests:
-              config.nodeEnv === 'production' ? [] : undefined,
+            ...(config.nodeEnv === 'production' && {
+              upgradeInsecureRequests: [],
+            }),
           },
           reportOnly: config.nodeEnv === 'development',
         },
@@ -93,25 +120,15 @@ async function bootstrap(): Promise<void> {
         permittedCrossDomainPolicies: false,
         referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
         xssFilter: true,
-        expectCt:
-          config.nodeEnv === 'production'
-            ? {
-                maxAge: 86400,
-                enforce: true,
-              }
-            : false,
-        permissionsPolicy: {
-          camera: [],
-          microphone: [],
-          geolocation: [],
-          payment: [],
-          usb: [],
-        },
+        // Note: expectCt has been removed from helmet v8 as Certificate Transparency
+        // is now widely supported and the header is no longer needed
+        // Note: permissionsPolicy has been removed from helmet v8.
+        // Use a separate Permissions-Policy header middleware if needed
       }),
     );
 
     // Additional security headers
-    app.use((req, res, next) => {
+    app.use((req: Request, res: Response, next: NextFunction) => {
       res.setHeader('X-Service', 'Bytebot-Agent');
       res.setHeader('X-API-Version', '1.0');
 
@@ -163,7 +180,10 @@ async function bootstrap(): Promise<void> {
         : [...allowedOrigins, ...developmentOrigins];
 
     app.enableCors({
-      origin: (origin, callback) => {
+      origin: (
+        origin: string | undefined,
+        callback: (error: Error | null, allow?: boolean) => void,
+      ) => {
         // Allow requests with no origin (mobile apps, curl, postman, etc.)
         if (!origin) {
           return callback(null, true);
@@ -235,7 +255,6 @@ async function bootstrap(): Promise<void> {
     );
 
     // Configure Swagger API documentation
-    const developmentConfig = configService.getDevelopmentConfig();
     if (developmentConfig.enableSwagger) {
       const swaggerConfig = new DocumentBuilder()
         .setTitle('Bytebot Agent API')
@@ -298,7 +317,7 @@ async function bootstrap(): Promise<void> {
     app.enableShutdownHooks();
 
     // Initialize shutdown service for enterprise-grade graceful shutdown
-    const shutdownService = app.get('ShutdownService');
+    const shutdownService: unknown = app.get('ShutdownService');
     if (shutdownService) {
       logger.log('Enterprise graceful shutdown service initialized');
     }
@@ -359,7 +378,17 @@ function setupGracefulShutdown(): void {
   // Handle unhandled promise rejections
   process.on('unhandledRejection', (reason, promise) => {
     logger.error('Unhandled Rejection:', {
-      reason: reason instanceof Error ? reason.message : String(reason),
+      reason:
+        reason instanceof Error
+          ? reason.message
+          : (() => {
+              if (typeof reason === 'string') return reason;
+              try {
+                return JSON.stringify(reason);
+              } catch {
+                return '[Unserializable Reason]';
+              }
+            })(),
       stack: reason instanceof Error ? reason.stack : undefined,
       promise: promise,
     });

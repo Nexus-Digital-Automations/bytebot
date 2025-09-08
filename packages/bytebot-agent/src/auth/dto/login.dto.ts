@@ -38,7 +38,9 @@ export class LoginDto {
   })
   @IsEmail({}, { message: 'Please provide a valid email address' })
   @IsNotEmpty({ message: 'Email is required' })
-  @Transform(({ value }) => value?.toLowerCase()?.trim())
+  @Transform(({ value }: { value: string | undefined }) =>
+    typeof value === 'string' ? value.toLowerCase().trim() : value,
+  )
   email: string;
 
   @ApiProperty({
@@ -75,7 +77,9 @@ export class RegisterDto {
   })
   @IsEmail({}, { message: 'Please provide a valid email address' })
   @IsNotEmpty({ message: 'Email is required' })
-  @Transform(({ value }) => value?.toLowerCase()?.trim())
+  @Transform(({ value }: { value: string | undefined }) =>
+    typeof value === 'string' ? value.toLowerCase().trim() : value,
+  )
   email: string;
 
   @ApiProperty({
@@ -92,7 +96,9 @@ export class RegisterDto {
     message:
       'Username can only contain letters, numbers, underscores, and hyphens',
   })
-  @Transform(({ value }) => value?.toLowerCase()?.trim())
+  @Transform(({ value }: { value: string | undefined }) =>
+    typeof value === 'string' ? value.toLowerCase().trim() : value,
+  )
   username: string;
 
   @ApiProperty({
@@ -103,7 +109,9 @@ export class RegisterDto {
   @IsOptional()
   @IsString({ message: 'First name must be a string' })
   @MaxLength(50, { message: 'First name must not exceed 50 characters' })
-  @Transform(({ value }) => value?.trim())
+  @Transform(({ value }: { value: string | undefined }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   firstName?: string;
 
   @ApiProperty({
@@ -114,7 +122,9 @@ export class RegisterDto {
   @IsOptional()
   @IsString({ message: 'Last name must be a string' })
   @MaxLength(50, { message: 'Last name must not exceed 50 characters' })
-  @Transform(({ value }) => value?.trim())
+  @Transform(({ value }: { value: string | undefined }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   lastName?: string;
 
   @ApiProperty({

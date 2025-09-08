@@ -35,7 +35,7 @@ function createActionTypeGuard<T extends ComputerAction>(
     if (!obj || typeof obj !== "object") {
       return false;
     }
-    const action = obj as Record<string, any>;
+    const action = obj as Record<string, unknown>;
     return action.action === actionType;
   };
 }
@@ -74,7 +74,7 @@ export const isApplicationAction =
 function createToolUseBlock(
   toolName: string,
   toolUseId: string,
-  input: Record<string, any>,
+  input: Record<string, unknown>,
 ): ComputerToolUseContentBlock {
   return {
     type: MessageContentType.ToolUse,
@@ -87,14 +87,14 @@ function createToolUseBlock(
 /**
  * Utility to conditionally add properties to objects
  */
-function conditionallyAdd<T extends Record<string, any>>(
+function conditionallyAdd<T extends Record<string, unknown>>(
   obj: T,
-  conditions: Array<[boolean | undefined, string, any]>,
+  conditions: Array<[boolean | undefined, string, unknown]>,
 ): T {
-  const result: Record<string, any> = { ...obj };
+  const result: Record<string, unknown> = { ...obj };
   conditions.forEach(([condition, key, value]) => {
     if (condition) {
-      (result as Record<string, unknown>)[key] = value;
+      result[key] = value;
     }
   });
   return result as T;

@@ -224,7 +224,8 @@ export class AgentProcessor {
         },
       })) {
         let messageContentBlocks: MessageContentBlock[] = [];
-        let role: Role = Role.ASSISTANT;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        let role: Role = Role.ASSISTANT as Role;
         switch (message.type) {
           case 'user': {
             const safeContent = getSafeMessageContent(message.message);
@@ -239,7 +240,8 @@ export class AgentProcessor {
               ];
             }
 
-            role = Role.USER;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            role = Role.USER as Role;
             break;
           }
           case 'assistant': {
@@ -279,7 +281,8 @@ export class AgentProcessor {
         if (messageContentBlocks.length > 0) {
           await this.messagesService.create({
             content: messageContentBlocks,
-            role,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            role: role,
             taskId,
           });
         }

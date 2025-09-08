@@ -46,10 +46,15 @@ export interface ShutdownMetrics {
   cleanupStepsFailed: string[];
 }
 
+interface Connection {
+  destroy?(): void;
+  [key: string]: unknown;
+}
+
 interface ShutdownState {
   isShuttingDown: boolean;
   shutdownInitiated: Date | null;
-  activeConnections: Set<any>;
+  activeConnections: Set<Connection>;
   cleanupTasks: Map<string, () => Promise<void>>;
   shutdownMetrics: ShutdownMetrics | null;
 }
@@ -185,14 +190,14 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
   /**
    * Track an active connection
    */
-  trackConnection(connection: any): void {
+  trackConnection(connection: Connection): void {
     this.shutdownState.activeConnections.add(connection);
   }
 
   /**
    * Untrack a connection when it closes
    */
-  untrackConnection(connection: any): void {
+  untrackConnection(connection: Connection): void {
     this.shutdownState.activeConnections.delete(connection);
   }
 
@@ -249,7 +254,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       await this.executeCleanupTasks();
 
       // Phase 4: Final cleanup
-      await this.finalCleanup();
+      this.finalCleanup();
 
       // Mark shutdown as completed
       this.shutdownState.shutdownMetrics.shutdownCompleted = new Date();
@@ -273,7 +278,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       });
 
       // Trigger force shutdown if graceful shutdown fails
-      await this.forceShutdown();
+      this.forceShutdown();
     } finally {
       // Resolve shutdown promise
       if (this.shutdownResolve) {
@@ -298,7 +303,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       // Wait for health check grace period
       await this.sleep(this.config.healthCheckGracePeriod);
 
-      this.shutdownState.shutdownMetrics!.cleanupStepsCompleted.push(
+      this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
         'stop_new_connections',
       );
 
@@ -307,7 +312,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
         duration: Date.now() - startTime,
       });
     } catch (error) {
-      this.shutdownState.shutdownMetrics!.cleanupStepsFailed.push(
+      this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
         'stop_new_connections',
       );
       this.logger.error('Phase 1 failed: Could not stop new connections', {
@@ -350,8 +355,8 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       const remainingConnections = this.shutdownState.activeConnections.size;
 
       if (remainingConnections === 0) {
-        this.shutdownState.shutdownMetrics!.drainCompleted = true;
-        this.shutdownState.shutdownMetrics!.cleanupStepsCompleted.push(
+        this.shutdownState.shutdownMetrics.drainCompleted = true;
+        this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
           'drain_connections',
         );
 
@@ -371,12 +376,12 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
           },
         );
 
-        this.shutdownState.shutdownMetrics!.cleanupStepsCompleted.push(
+        this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
           'drain_connections_partial',
         );
       }
     } catch (error) {
-      this.shutdownState.shutdownMetrics!.cleanupStepsFailed.push(
+      this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
         'drain_connections',
       );
       this.logger.error('Phase 2 failed: Error during connection draining', {
@@ -396,7 +401,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
 
     const startTime = Date.now();
     const cleanupPromises: Array<
-      Promise<{ taskName: string; success: boolean; error?: any }>
+      Promise<{ taskName: string; success: boolean; error?: string }>
     > = [];
 
     // Execute all cleanup tasks concurrently
@@ -415,10 +420,10 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       const completed = results.filter((r) => r.success);
       const failed = results.filter((r) => !r.success);
 
-      this.shutdownState.shutdownMetrics!.cleanupStepsCompleted.push(
+      this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
         ...completed.map((r) => `cleanup_${r.taskName}`),
       );
-      this.shutdownState.shutdownMetrics!.cleanupStepsFailed.push(
+      this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
         ...failed.map((r) => `cleanup_${r.taskName}`),
       );
 
@@ -439,7 +444,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
         });
       }
     } catch (error) {
-      this.shutdownState.shutdownMetrics!.cleanupStepsFailed.push(
+      this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
         'execute_cleanup_tasks',
       );
       this.logger.error('Phase 3 failed: Error during cleanup task execution', {
@@ -455,7 +460,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
   private async executeCleanupTask(
     taskName: string,
     cleanupFunction: () => Promise<void>,
-  ): Promise<{ taskName: string; success: boolean; error?: any }> {
+  ): Promise<{ taskName: string; success: boolean; error?: string }> {
     try {
       this.logger.debug('Executing cleanup task', { taskName });
 
@@ -486,7 +491,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
   /**
    * Phase 4: Final cleanup
    */
-  private async finalCleanup(): Promise<void> {
+  private finalCleanup(): void {
     this.logger.log('Phase 4: Final cleanup');
 
     try {
@@ -494,13 +499,13 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       this.shutdownState.activeConnections.clear();
       this.shutdownState.cleanupTasks.clear();
 
-      this.shutdownState.shutdownMetrics!.cleanupStepsCompleted.push(
+      this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
         'final_cleanup',
       );
 
       this.logger.log('Phase 4 completed: Final cleanup successful');
     } catch (error) {
-      this.shutdownState.shutdownMetrics!.cleanupStepsFailed.push(
+      this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
         'final_cleanup',
       );
       this.logger.error('Phase 4 failed: Final cleanup error', {
@@ -513,10 +518,10 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
   /**
    * Force shutdown when graceful shutdown fails or times out
    */
-  private async forceShutdown(): Promise<void> {
+  private forceShutdown(): void {
     this.logger.warn('Force shutdown initiated');
 
-    this.shutdownState.shutdownMetrics!.forceShutdownTriggered = true;
+    this.shutdownState.shutdownMetrics.forceShutdownTriggered = true;
 
     try {
       // Force close all active connections
@@ -531,6 +536,10 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
           }
         } catch (error) {
           // Ignore individual connection cleanup errors during force shutdown
+          // Log for debugging purposes
+          this.logger.debug('Connection cleanup failed during force shutdown', {
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       }
 
@@ -553,12 +562,12 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
     // Handle graceful shutdown signals
     process.on('SIGTERM', () => {
       this.logger.log('Received SIGTERM signal');
-      this.initiateShutdown('SIGTERM');
+      void this.initiateShutdown('SIGTERM');
     });
 
     process.on('SIGINT', () => {
       this.logger.log('Received SIGINT signal');
-      this.initiateShutdown('SIGINT');
+      void this.initiateShutdown('SIGINT');
     });
 
     // Handle force shutdown on second signal

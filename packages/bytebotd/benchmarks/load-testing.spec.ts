@@ -24,7 +24,7 @@ import { MetricsService } from '../src/metrics/metrics.service';
 import { CacheService } from '../src/cache/cache.service';
 import { PerformanceInterceptor } from '../src/common/interceptors/performance.interceptor';
 import { CompressionInterceptor } from '../src/common/interceptors/compression.interceptor';
-import * as request from 'supertest';
+import request from 'supertest';
 
 /**
  * Load test configuration

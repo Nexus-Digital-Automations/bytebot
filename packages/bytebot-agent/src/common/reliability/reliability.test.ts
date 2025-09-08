@@ -16,8 +16,8 @@ describe('Reliability Framework Integration', () => {
   beforeEach(() => {
     // Mock ConfigService
     configService = {
-      get: jest.fn((key: string, defaultValue?: any) => defaultValue),
-    } as any;
+      get: jest.fn((key: string, defaultValue?: unknown) => defaultValue),
+    } as unknown as ConfigService;
   });
 
   describe('CircuitBreakerService', () => {
@@ -121,7 +121,7 @@ describe('Reliability Framework Integration', () => {
         return configs[key] ?? defaultValue;
       });
 
-      const configService = { get: mockGet } as any;
+      const configService = { get: mockGet } as unknown as ConfigService;
 
       // Test CircuitBreaker config
       const circuitBreaker = new CircuitBreakerService(configService);

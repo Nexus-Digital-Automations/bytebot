@@ -11,7 +11,7 @@
  */
 
 import { SetMetadata, applyDecorators } from '@nestjs/common';
-import { ApiHeader, ApiTags, ApiExtraModels } from '@nestjs/swagger';
+import { ApiHeader, ApiTags } from '@nestjs/swagger';
 
 /**
  * API versioning strategy enumeration

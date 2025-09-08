@@ -78,6 +78,7 @@ module.exports = [
       '**/*.test.ts',
       '**/test-utils/**/*.ts',
       '**/__tests__/**/*.ts',
+      'test/**/*.ts',
     ],
     languageOptions: {
       globals: {

@@ -36,6 +36,7 @@ import {
 import { LoginDto, RegisterDto, ChangePasswordDto } from './dto/login.dto';
 import { User, UserSession, UserRole } from '@prisma/client';
 import { AppConfig } from '../config/configuration';
+import { SecurityMonitoringService } from './services/security-monitoring.service';
 
 /**
  * Authentication service implementing enterprise-grade security features
@@ -50,6 +51,7 @@ export class AuthService {
     private readonly configService: ConfigService<AppConfig>,
     private readonly jwtService: JwtService,
     private readonly prismaService: PrismaService,
+    private readonly securityMonitoring: SecurityMonitoringService,
   ) {
     const operationId = `auth-service-init-${Date.now()}`;
     const startTime = Date.now();
@@ -93,6 +95,26 @@ export class AuthService {
     });
 
     try {
+      // Record login attempt for security monitoring
+      await this.securityMonitoring.recordLoginAttempt(
+        loginDto.email,
+        ipAddress || 'unknown',
+        userAgent,
+        false, // Will be updated to true on success
+      );
+
+      // Check for IP blocking due to brute force attempts
+      if (this.securityMonitoring.isIpBlocked(ipAddress || 'unknown')) {
+        this.logger.warn(`[${operationId}] Login attempt from blocked IP`, {
+          operationId,
+          email: loginDto.email,
+          ipAddress,
+        });
+        throw new UnauthorizedException(
+          'IP address temporarily blocked due to suspicious activity',
+        );
+      }
+
       // Find user by email
       const user = await this.prismaService.user.findUnique({
         where: { email: loginDto.email },
@@ -152,6 +174,15 @@ export class AuthService {
         where: { id: user.id },
         data: { lastLoginAt: new Date() },
       });
+
+      // Record successful login for security monitoring
+      await this.securityMonitoring.recordLoginAttempt(
+        loginDto.email,
+        ipAddress || 'unknown',
+        userAgent,
+        true, // Success
+        user.id,
+      );
 
       const loginTime = Date.now() - startTime;
       this.logger.log(`[${operationId}] User login successful`, {
@@ -291,8 +322,8 @@ export class AuthService {
         passwordHashTimeMs: hashTime,
       });
 
-      // Return user without password hash
-      const { passwordHash: _, ...userWithoutPassword } = user;
+      // Return user without password hash for security
+      const { passwordHash, ...userWithoutPassword } = user;
       return userWithoutPassword;
     } catch (error) {
       const registrationTime = Date.now() - startTime;
@@ -639,7 +670,9 @@ export class AuthService {
     const operationId = `jwt-generate-${Date.now()}`;
     const startTime = Date.now();
 
-    const securityConfig = this.configService.get('security', { infer: true });
+    const securityConfig = this.configService.get('security', {
+      infer: true,
+    });
     if (!securityConfig) {
       throw new Error('Security configuration not found');
     }

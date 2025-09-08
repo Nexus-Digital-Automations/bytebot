@@ -334,7 +334,7 @@ export class CacheKeyGenerator {
    */
   private sanitizeKey(key: string): string {
     return key
-      .replace(/[^a-zA-Z0-9_\-\.]/g, '_') // Replace invalid characters
+      .replace(/[^a-zA-Z0-9_\-.]/g, '_') // Replace invalid characters
       .replace(/_+/g, '_') // Collapse multiple underscores
       .replace(/^_|_$/g, '') // Remove leading/trailing underscores
       .toLowerCase();

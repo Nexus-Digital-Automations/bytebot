@@ -99,7 +99,7 @@ export interface DatabaseConfiguration {
 @Injectable()
 export class DatabaseConfig {
   private readonly logger = new Logger(DatabaseConfig.name);
-  private readonly configuration: DatabaseConfiguration;
+  private configuration: DatabaseConfiguration;
 
   constructor(
     private readonly configService: ConfigService,
@@ -112,8 +112,8 @@ export class DatabaseConfig {
   /**
    * Initialize database configuration with secure secrets loading
    */
-  async initializeConfiguration(): Promise<void> {
-    this.configuration = await this.buildConfiguration();
+  initializeConfiguration(): void {
+    this.configuration = this.buildConfiguration();
     this.validateConfiguration();
 
     this.logger.log('Database configuration initialized', {
@@ -129,7 +129,7 @@ export class DatabaseConfig {
    * Legacy constructor for backward compatibility
    * @deprecated Use initializeConfiguration() instead
    */
-  private legacyConstructor() {
+  private legacyConstructor(): void {
     this.configuration = this.buildConfiguration();
     this.validateConfiguration();
 
@@ -372,16 +372,16 @@ export class DatabaseConfig {
   /**
    * Build comprehensive configuration from environment variables and secrets
    */
-  private async buildConfiguration(): Promise<DatabaseConfiguration> {
+  private buildConfiguration(): DatabaseConfiguration {
     // Get secure database URL from secrets service
-    let databaseUrl = await this.secretsService.getSecret(
+    let databaseUrl: string | null = this.secretsService.getSecret(
       'database-url',
       'DATABASE_URL',
     );
 
     // Fallback to configuration service
     if (!databaseUrl) {
-      databaseUrl = this.configService.get<string>('DATABASE_URL');
+      databaseUrl = this.configService.get<string>('DATABASE_URL') ?? null;
     }
 
     if (!databaseUrl) {

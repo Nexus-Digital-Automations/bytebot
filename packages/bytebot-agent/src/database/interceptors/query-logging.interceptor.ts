@@ -14,6 +14,21 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { performance } from 'perf_hooks';
+import { Request } from 'express';
+
+/**
+ * Extended Request interface to include user and session information
+ */
+interface ExtendedRequest extends Request {
+  user?: {
+    id: string;
+    email?: string;
+  };
+  sessionId?: string;
+  route: {
+    path: string;
+  };
+}
 
 export interface QueryMetrics {
   operationId: string;
@@ -40,7 +55,7 @@ export interface SlowQueryAlert {
   duration: number;
   threshold: number;
   timestamp: Date;
-  context: any;
+  context: Record<string, unknown>;
 }
 
 @Injectable()
@@ -81,7 +96,7 @@ export class QueryLoggingInterceptor implements NestInterceptor {
     });
   }
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const operationId = this.generateOperationId();
     const startTime = performance.now();
     const requestContext = this.extractRequestContext(context);
@@ -138,7 +153,10 @@ export class QueryLoggingInterceptor implements NestInterceptor {
             duration,
             threshold: this.slowQueryThreshold,
             timestamp: new Date(),
-            context: { ...requestContext, result: this.sanitizeResult(result) },
+            context: {
+              ...requestContext,
+              result: this.sanitizeResult(result),
+            } as Record<string, unknown>,
           });
         }
       }),
@@ -171,7 +189,7 @@ export class QueryLoggingInterceptor implements NestInterceptor {
           requestContext,
         });
 
-        return throwError(() => error);
+        return throwError(() => error as Error);
       }),
     );
   }
@@ -281,19 +299,27 @@ export class QueryLoggingInterceptor implements NestInterceptor {
   /**
    * Extract request context from execution context
    */
-  private extractRequestContext(context: ExecutionContext) {
+  private extractRequestContext(context: ExecutionContext): {
+    userId?: string;
+    sessionId?: string;
+    endpoint?: string;
+    method?: string;
+    userAgent?: string;
+    correlationId?: string;
+  } {
     try {
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest<ExtendedRequest>();
 
       return {
-        userId: request.user?.id || request.headers['x-user-id'],
-        sessionId: request.sessionId || request.headers['x-session-id'],
+        userId: request.user?.id || (request.headers['x-user-id'] as string),
+        sessionId:
+          request.sessionId || (request.headers['x-session-id'] as string),
         endpoint: request.route?.path || request.url,
         method: request.method,
         userAgent: request.headers['user-agent'],
-        correlationId: request.headers['x-correlation-id'],
+        correlationId: request.headers['x-correlation-id'] as string,
       };
-    } catch (error) {
+    } catch {
       // If HTTP context is not available (e.g., in background tasks)
       return {
         userId: 'system',
@@ -358,11 +384,14 @@ export class QueryLoggingInterceptor implements NestInterceptor {
   /**
    * Extract rows affected from query result
    */
-  private extractRowsAffected(result: any): number | undefined {
+  private extractRowsAffected(result: unknown): number | undefined {
     if (typeof result === 'object' && result !== null) {
       // Prisma typically returns count for bulk operations
-      if ('count' in result && typeof result.count === 'number') {
-        return result.count;
+      if (
+        'count' in result &&
+        typeof (result as { count: unknown }).count === 'number'
+      ) {
+        return (result as { count: number }).count;
       }
 
       // Array results indicate multiple rows
@@ -382,7 +411,7 @@ export class QueryLoggingInterceptor implements NestInterceptor {
   /**
    * Sanitize result for logging (remove sensitive data)
    */
-  private sanitizeResult(result: any): any {
+  private sanitizeResult(result: unknown): unknown {
     if (typeof result !== 'object' || result === null) {
       return result;
     }
@@ -391,7 +420,9 @@ export class QueryLoggingInterceptor implements NestInterceptor {
     const sensitiveFields = ['password', 'token', 'secret', 'key', 'hash'];
 
     if (Array.isArray(result)) {
-      return result.map((item) => this.sanitizeObject(item, sensitiveFields));
+      return result.map((item: unknown) =>
+        this.sanitizeObject(item, sensitiveFields),
+      );
     }
 
     return this.sanitizeObject(result, sensitiveFields);
@@ -400,17 +431,17 @@ export class QueryLoggingInterceptor implements NestInterceptor {
   /**
    * Sanitize object by removing sensitive fields
    */
-  private sanitizeObject(obj: any, sensitiveFields: string[]): any {
+  private sanitizeObject(obj: unknown, sensitiveFields: string[]): unknown {
     if (typeof obj !== 'object' || obj === null) {
       return obj;
     }
 
-    const sanitized = { ...obj };
+    const sanitized = { ...(obj as Record<string, unknown>) };
 
     for (const field of sensitiveFields) {
       for (const key of Object.keys(sanitized)) {
         if (key.toLowerCase().includes(field)) {
-          sanitized[key] = '[REDACTED]';
+          (sanitized as Record<string, unknown>)[key] = '[REDACTED]';
         }
       }
     }

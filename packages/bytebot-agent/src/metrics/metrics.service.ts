@@ -26,10 +26,12 @@ import {
   Counter,
   Histogram,
   Gauge,
-  Summary,
   Registry,
+  // Summary, // unused for now
 } from 'prom-client';
 import { v4 as uuidv4 } from 'uuid';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * Metrics collection service for Prometheus integration
@@ -70,6 +72,38 @@ export class MetricsService {
   private readonly authenticationAttempts: Counter<string>;
   private readonly authenticationDuration: Histogram<string>;
   private readonly activeUserSessions: Gauge<string>;
+  private readonly authenticationFailures: Counter<string>;
+  private readonly sessionDuration: Histogram<string>;
+
+  // Authorization Metrics
+  private readonly authorizationChecks: Counter<string>;
+  private readonly authorizationDuration: Histogram<string>;
+  private readonly accessDenials: Counter<string>;
+  private readonly privilegeEscalations: Counter<string>;
+
+  // Rate Limiting Metrics
+  private readonly rateLimitHits: Counter<string>;
+  private readonly rateLimitBypass: Counter<string>;
+  private readonly throttledRequests: Counter<string>;
+  private readonly rateLimitWindowUtilization: Gauge<string>;
+
+  // Security Event Metrics
+  private readonly securityEvents: Counter<string>;
+  private readonly threatDetections: Counter<string>;
+  private readonly vulnerabilityScans: Counter<string>;
+  private readonly complianceChecks: Counter<string>;
+
+  // Observability Metrics
+  private readonly tracingSpans: Counter<string>;
+  private readonly tracingErrors: Counter<string>;
+  private readonly logEvents: Counter<string>;
+  private readonly alertsTriggered: Counter<string>;
+
+  // Custom Business Metrics
+  private readonly userInteractions: Counter<string>;
+  private readonly featureUsage: Counter<string>;
+  private readonly businessProcessDuration: Histogram<string>;
+  private readonly revenueMetrics: Gauge<string>;
 
   // System Metrics
   private readonly memoryUsage: Gauge<string>;
@@ -85,7 +119,10 @@ export class MetricsService {
   private readonly taskSuccessRate: Gauge<string>;
   private readonly systemHealth: Gauge<string>;
 
-  constructor() {
+  constructor(
+    private readonly eventEmitter: EventEmitter2,
+    private readonly config: ConfigService,
+  ) {
     this.logger.log('Prometheus Metrics Service initializing');
 
     // Create dedicated registry for better control
@@ -247,6 +284,168 @@ export class MetricsService {
       name: 'bytebot_agent_active_user_sessions',
       help: 'Number of active user sessions',
       labelNames: ['session_type'],
+      registers: [this.registry],
+    });
+
+    this.authenticationFailures = new Counter({
+      name: 'bytebot_agent_auth_failures_total',
+      help: 'Total number of authentication failures',
+      labelNames: ['method', 'reason', 'user_agent'],
+      registers: [this.registry],
+    });
+
+    this.sessionDuration = new Histogram({
+      name: 'bytebot_agent_session_duration_seconds',
+      help: 'User session duration in seconds',
+      labelNames: ['session_type', 'termination_reason'],
+      buckets: [60, 300, 900, 1800, 3600, 7200, 14400, 28800],
+      registers: [this.registry],
+    });
+
+    // Initialize Authorization Metrics
+    this.authorizationChecks = new Counter({
+      name: 'bytebot_agent_authorization_checks_total',
+      help: 'Total number of authorization checks',
+      labelNames: ['resource', 'action', 'result'],
+      registers: [this.registry],
+    });
+
+    this.authorizationDuration = new Histogram({
+      name: 'bytebot_agent_authorization_duration_seconds',
+      help: 'Authorization check duration in seconds',
+      labelNames: ['resource', 'action'],
+      buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
+      registers: [this.registry],
+    });
+
+    this.accessDenials = new Counter({
+      name: 'bytebot_agent_access_denials_total',
+      help: 'Total number of access denials',
+      labelNames: ['resource', 'reason', 'user_role'],
+      registers: [this.registry],
+    });
+
+    this.privilegeEscalations = new Counter({
+      name: 'bytebot_agent_privilege_escalations_total',
+      help: 'Total number of privilege escalation attempts',
+      labelNames: ['user_role', 'target_role', 'result'],
+      registers: [this.registry],
+    });
+
+    // Initialize Rate Limiting Metrics
+    this.rateLimitHits = new Counter({
+      name: 'bytebot_agent_rate_limit_hits_total',
+      help: 'Total number of rate limit hits',
+      labelNames: ['endpoint', 'limit_type', 'user_id'],
+      registers: [this.registry],
+    });
+
+    this.rateLimitBypass = new Counter({
+      name: 'bytebot_agent_rate_limit_bypass_total',
+      help: 'Total number of rate limit bypass attempts',
+      labelNames: ['endpoint', 'method', 'source_ip'],
+      registers: [this.registry],
+    });
+
+    this.throttledRequests = new Counter({
+      name: 'bytebot_agent_throttled_requests_total',
+      help: 'Total number of throttled requests',
+      labelNames: ['endpoint', 'throttle_type'],
+      registers: [this.registry],
+    });
+
+    this.rateLimitWindowUtilization = new Gauge({
+      name: 'bytebot_agent_rate_limit_window_utilization',
+      help: 'Current rate limit window utilization percentage',
+      labelNames: ['endpoint', 'window_duration'],
+      registers: [this.registry],
+    });
+
+    // Initialize Security Event Metrics
+    this.securityEvents = new Counter({
+      name: 'bytebot_agent_security_events_total',
+      help: 'Total number of security events',
+      labelNames: ['event_type', 'severity', 'source'],
+      registers: [this.registry],
+    });
+
+    this.threatDetections = new Counter({
+      name: 'bytebot_agent_threat_detections_total',
+      help: 'Total number of threat detections',
+      labelNames: ['threat_type', 'confidence', 'mitigation'],
+      registers: [this.registry],
+    });
+
+    this.vulnerabilityScans = new Counter({
+      name: 'bytebot_agent_vulnerability_scans_total',
+      help: 'Total number of vulnerability scans',
+      labelNames: ['scan_type', 'result', 'severity'],
+      registers: [this.registry],
+    });
+
+    this.complianceChecks = new Counter({
+      name: 'bytebot_agent_compliance_checks_total',
+      help: 'Total number of compliance checks',
+      labelNames: ['framework', 'control', 'result'],
+      registers: [this.registry],
+    });
+
+    // Initialize Observability Metrics
+    this.tracingSpans = new Counter({
+      name: 'bytebot_agent_tracing_spans_total',
+      help: 'Total number of tracing spans',
+      labelNames: ['service', 'operation', 'status'],
+      registers: [this.registry],
+    });
+
+    this.tracingErrors = new Counter({
+      name: 'bytebot_agent_tracing_errors_total',
+      help: 'Total number of tracing errors',
+      labelNames: ['service', 'error_type'],
+      registers: [this.registry],
+    });
+
+    this.logEvents = new Counter({
+      name: 'bytebot_agent_log_events_total',
+      help: 'Total number of log events',
+      labelNames: ['level', 'component', 'correlation_id'],
+      registers: [this.registry],
+    });
+
+    this.alertsTriggered = new Counter({
+      name: 'bytebot_agent_alerts_triggered_total',
+      help: 'Total number of alerts triggered',
+      labelNames: ['alert_type', 'severity', 'channel'],
+      registers: [this.registry],
+    });
+
+    // Initialize Custom Business Metrics
+    this.userInteractions = new Counter({
+      name: 'bytebot_agent_user_interactions_total',
+      help: 'Total number of user interactions',
+      labelNames: ['interaction_type', 'feature', 'user_segment'],
+      registers: [this.registry],
+    });
+
+    this.featureUsage = new Counter({
+      name: 'bytebot_agent_feature_usage_total',
+      help: 'Total feature usage count',
+      labelNames: ['feature', 'version', 'user_type'],
+      registers: [this.registry],
+    });
+
+    this.businessProcessDuration = new Histogram({
+      name: 'bytebot_agent_business_process_duration_seconds',
+      help: 'Business process completion time in seconds',
+      labelNames: ['process_name', 'process_version', 'result'],
+      buckets: [0.5, 1, 2, 5, 10, 30, 60, 300, 600, 1800],
+      registers: [this.registry],
+    });
+
+    this.revenueMetrics = new Gauge({
+      name: 'bytebot_agent_revenue_metrics',
+      help: 'Revenue-related metrics',
+      labelNames: ['metric_type', 'currency', 'period'],
       registers: [this.registry],
     });
 
@@ -685,6 +884,457 @@ export class MetricsService {
   }
 
   /**
+   * Record authentication failure
+   */
+  recordAuthFailure(method: string, reason: string, userAgent?: string): void {
+    this.authenticationFailures
+      .labels(method, reason, userAgent || 'unknown')
+      .inc();
+
+    this.logger.debug('Authentication failure recorded', {
+      method,
+      reason,
+      userAgent,
+    });
+  }
+
+  /**
+   * Record user session duration
+   */
+  recordSessionDuration(
+    sessionType: string,
+    duration: number,
+    terminationReason: string,
+  ): void {
+    const durationSeconds = duration / 1000;
+    this.sessionDuration
+      .labels(sessionType, terminationReason)
+      .observe(durationSeconds);
+
+    this.logger.debug('Session duration recorded', {
+      sessionType,
+      durationMs: duration,
+      terminationReason,
+    });
+  }
+
+  /**
+   * Record authorization check
+   */
+  recordAuthorizationCheck(
+    resource: string,
+    action: string,
+    result: 'allowed' | 'denied',
+    duration: number,
+  ): void {
+    const durationSeconds = duration / 1000;
+
+    this.authorizationChecks.labels(resource, action, result).inc();
+    this.authorizationDuration
+      .labels(resource, action)
+      .observe(durationSeconds);
+
+    this.logger.debug('Authorization check recorded', {
+      resource,
+      action,
+      result,
+      durationMs: duration,
+    });
+  }
+
+  /**
+   * Record access denial
+   */
+  recordAccessDenial(resource: string, reason: string, userRole: string): void {
+    this.accessDenials.labels(resource, reason, userRole).inc();
+
+    this.logger.debug('Access denial recorded', {
+      resource,
+      reason,
+      userRole,
+    });
+  }
+
+  /**
+   * Record privilege escalation attempt
+   */
+  recordPrivilegeEscalation(
+    userRole: string,
+    targetRole: string,
+    result: 'success' | 'failure',
+  ): void {
+    this.privilegeEscalations.labels(userRole, targetRole, result).inc();
+
+    this.logger.warn('Privilege escalation attempt recorded', {
+      userRole,
+      targetRole,
+      result,
+    });
+  }
+
+  /**
+   * Record rate limit hit
+   */
+  recordRateLimitHit(
+    endpoint: string,
+    limitType: string,
+    userId?: string,
+  ): void {
+    this.rateLimitHits.labels(endpoint, limitType, userId || 'anonymous').inc();
+
+    this.logger.debug('Rate limit hit recorded', {
+      endpoint,
+      limitType,
+      userId,
+    });
+  }
+
+  /**
+   * Record rate limit bypass attempt
+   */
+  recordRateLimitBypass(
+    endpoint: string,
+    method: string,
+    sourceIp: string,
+  ): void {
+    this.rateLimitBypass.labels(endpoint, method, sourceIp).inc();
+
+    this.logger.warn('Rate limit bypass attempt recorded', {
+      endpoint,
+      method,
+      sourceIp,
+    });
+  }
+
+  /**
+   * Record throttled request
+   */
+  recordThrottledRequest(endpoint: string, throttleType: string): void {
+    this.throttledRequests.labels(endpoint, throttleType).inc();
+
+    this.logger.debug('Throttled request recorded', {
+      endpoint,
+      throttleType,
+    });
+  }
+
+  /**
+   * Update rate limit window utilization
+   */
+  updateRateLimitUtilization(
+    endpoint: string,
+    windowDuration: string,
+    utilizationPercent: number,
+  ): void {
+    this.rateLimitWindowUtilization
+      .labels(endpoint, windowDuration)
+      .set(utilizationPercent);
+  }
+
+  /**
+   * Record security event
+   */
+  recordSecurityEvent(
+    eventType: string,
+    severity: 'low' | 'medium' | 'high' | 'critical',
+    source: string,
+  ): void {
+    this.securityEvents.labels(eventType, severity, source).inc();
+
+    this.logger.debug('Security event recorded', {
+      eventType,
+      severity,
+      source,
+    });
+
+    // Emit event for real-time alerting
+    this.eventEmitter.emit('security.event', {
+      type: eventType,
+      severity,
+      source,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * Record threat detection
+   */
+  recordThreatDetection(
+    threatType: string,
+    confidence: 'low' | 'medium' | 'high',
+    mitigation: string,
+  ): void {
+    this.threatDetections.labels(threatType, confidence, mitigation).inc();
+
+    this.logger.warn('Threat detection recorded', {
+      threatType,
+      confidence,
+      mitigation,
+    });
+
+    // Emit high-priority event for immediate response
+    this.eventEmitter.emit('security.threat', {
+      type: threatType,
+      confidence,
+      mitigation,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * Record vulnerability scan
+   */
+  recordVulnerabilityScan(
+    scanType: string,
+    result: 'clean' | 'vulnerabilities_found',
+    severity?: 'low' | 'medium' | 'high' | 'critical',
+  ): void {
+    this.vulnerabilityScans.labels(scanType, result, severity || 'none').inc();
+
+    this.logger.debug('Vulnerability scan recorded', {
+      scanType,
+      result,
+      severity,
+    });
+  }
+
+  /**
+   * Record compliance check
+   */
+  recordComplianceCheck(
+    framework: string,
+    control: string,
+    result: 'compliant' | 'non_compliant',
+  ): void {
+    this.complianceChecks.labels(framework, control, result).inc();
+
+    this.logger.debug('Compliance check recorded', {
+      framework,
+      control,
+      result,
+    });
+  }
+
+  /**
+   * Record tracing span
+   */
+  recordTracingSpan(
+    service: string,
+    operation: string,
+    status: 'success' | 'error',
+  ): void {
+    this.tracingSpans.labels(service, operation, status).inc();
+
+    this.logger.debug('Tracing span recorded', {
+      service,
+      operation,
+      status,
+    });
+  }
+
+  /**
+   * Record tracing error
+   */
+  recordTracingError(service: string, errorType: string): void {
+    this.tracingErrors.labels(service, errorType).inc();
+
+    this.logger.debug('Tracing error recorded', {
+      service,
+      errorType,
+    });
+  }
+
+  /**
+   * Record log event
+   */
+  recordLogEvent(
+    level: string,
+    component: string,
+    correlationId?: string,
+  ): void {
+    this.logEvents.labels(level, component, correlationId || 'none').inc();
+  }
+
+  /**
+   * Record alert triggered
+   */
+  recordAlertTriggered(
+    alertType: string,
+    severity: 'low' | 'medium' | 'high' | 'critical',
+    channel: string,
+  ): void {
+    this.alertsTriggered.labels(alertType, severity, channel).inc();
+
+    this.logger.debug('Alert triggered recorded', {
+      alertType,
+      severity,
+      channel,
+    });
+
+    // Emit alert event
+    this.eventEmitter.emit('alert.triggered', {
+      type: alertType,
+      severity,
+      channel,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * Record user interaction
+   */
+  recordUserInteraction(
+    interactionType: string,
+    feature: string,
+    userSegment: string,
+  ): void {
+    this.userInteractions.labels(interactionType, feature, userSegment).inc();
+
+    this.logger.debug('User interaction recorded', {
+      interactionType,
+      feature,
+      userSegment,
+    });
+  }
+
+  /**
+   * Record feature usage
+   */
+  recordFeatureUsage(feature: string, version: string, userType: string): void {
+    this.featureUsage.labels(feature, version, userType).inc();
+
+    this.logger.debug('Feature usage recorded', {
+      feature,
+      version,
+      userType,
+    });
+  }
+
+  /**
+   * Record business process duration
+   */
+  recordBusinessProcess(
+    processName: string,
+    processVersion: string,
+    result: 'success' | 'failure',
+    duration: number,
+  ): void {
+    const durationSeconds = duration / 1000;
+
+    this.businessProcessDuration
+      .labels(processName, processVersion, result)
+      .observe(durationSeconds);
+
+    this.logger.debug('Business process recorded', {
+      processName,
+      processVersion,
+      result,
+      durationMs: duration,
+    });
+  }
+
+  /**
+   * Update revenue metrics
+   */
+  updateRevenueMetrics(
+    metricType: string,
+    value: number,
+    currency: string,
+    period: string,
+  ): void {
+    this.revenueMetrics.labels(metricType, currency, period).set(value);
+
+    this.logger.debug('Revenue metrics updated', {
+      metricType,
+      value,
+      currency,
+      period,
+    });
+  }
+
+  /**
+   * Get comprehensive metrics summary
+   */
+  async getMetricsSummary(): Promise<{
+    security: any;
+    performance: any;
+    business: any;
+    observability: any;
+  }> {
+    const operationId = `metrics_summary_${Date.now()}_${uuidv4().substring(0, 8)}`;
+    this.logger.debug(`[${operationId}] Generating metrics summary`);
+
+    try {
+      const metricsString = await this.getPrometheusMetrics();
+      const lines = metricsString.split('\n');
+
+      const categorizeMetric = (line: string) => {
+        if (
+          line.includes('security_') ||
+          line.includes('auth_') ||
+          line.includes('rate_limit_') ||
+          line.includes('threat_')
+        ) {
+          return 'security';
+        }
+        if (
+          line.includes('duration') ||
+          line.includes('latency') ||
+          line.includes('response_time')
+        ) {
+          return 'performance';
+        }
+        if (
+          line.includes('user_') ||
+          line.includes('feature_') ||
+          line.includes('business_') ||
+          line.includes('revenue_')
+        ) {
+          return 'business';
+        }
+        if (
+          line.includes('tracing_') ||
+          line.includes('log_') ||
+          line.includes('alert_')
+        ) {
+          return 'observability';
+        }
+        return 'other';
+      };
+
+      const summary = {
+        security: { total: 0, categories: [] },
+        performance: { total: 0, categories: [] },
+        business: { total: 0, categories: [] },
+        observability: { total: 0, categories: [] },
+      };
+
+      lines.forEach((line) => {
+        if (line.startsWith('bytebot_agent_')) {
+          const category = categorizeMetric(line);
+          if (category !== 'other' && summary[category]) {
+            summary[category].total++;
+          }
+        }
+      });
+
+      this.logger.debug(`[${operationId}] Metrics summary generated`, {
+        security: summary.security.total,
+        performance: summary.performance.total,
+        business: summary.business.total,
+        observability: summary.observability.total,
+      });
+
+      return summary;
+    } catch (error) {
+      this.logger.error(`[${operationId}] Failed to generate metrics summary`, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
+  /**
    * Clear all metrics (for testing)
    */
   clearMetrics(): void {
@@ -697,5 +1347,56 @@ export class MetricsService {
    */
   getRegistry(): Registry {
     return this.registry;
+  }
+
+  /**
+   * Record health check metric
+   */
+  recordHealthCheck(
+    service: string,
+    isHealthy: boolean,
+    timestamp: number,
+  ): void {
+    try {
+      // Record using the existing API metrics with health-specific labels
+      this.httpRequestsTotal.inc({
+        method: 'GET',
+        route: '/health/' + service,
+        status_code: isHealthy ? '200' : '500',
+      });
+
+      this.logger.debug('Health check metric recorded', {
+        service,
+        isHealthy,
+        timestamp,
+      });
+    } catch (error) {
+      this.logger.warn('Failed to record health check metric', {
+        service,
+        isHealthy,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * Record dashboard access metric
+   */
+  recordDashboardAccess(operationId: string): void {
+    try {
+      // Record using existing API metrics with dashboard-specific labels
+      this.httpRequestsTotal.inc({
+        method: 'GET',
+        route: '/health/dashboard',
+        status_code: '200',
+      });
+
+      this.logger.debug('Dashboard access metric recorded', { operationId });
+    } catch (error) {
+      this.logger.warn('Failed to record dashboard access metric', {
+        operationId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 }

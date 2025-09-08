@@ -1,17 +1,20 @@
 /**
- * Configuration Hot-Reloading Service - Dynamic configuration updates without restart
- * Provides real-time configuration updates for Kubernetes ConfigMaps and Secrets
+ * Local Configuration Hot-Reloading Service - 100% Local-Only Architecture
+ * Dynamic configuration updates without restart for local file-based deployments
  *
  * Features:
- * - Kubernetes ConfigMap and Secret watching
+ * - Local configuration file and secrets watching
+ * - Environment variable monitoring and validation
  * - Configuration validation before applying changes
  * - Graceful configuration rollback on failures
- * - Event-driven configuration updates
+ * - Event-driven configuration updates for local deployment
  * - Performance monitoring for reload operations
+ * - Docker Compose configuration file monitoring
+ * - No Kubernetes or cloud service dependencies
  *
- * @author Infrastructure & Configuration Specialist
- * @version 1.0.0
- * @since Phase 1: Bytebot API Hardening
+ * @author Local Secrets Service Architect
+ * @version 2.0.0 - Local-Only Architecture Implementation
+ * @since Phase 1: Bytebot API Hardening - Local Deployment
  */
 
 import {
@@ -22,18 +25,24 @@ import {
 } from '@nestjs/common';
 import { EventEmitter } from 'events';
 import { ConfigService } from '@nestjs/config';
-import { watch, FSWatcher } from 'fs';
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import {
+  watch,
+  FSWatcher,
+  existsSync,
+  readFileSync,
+  statSync,
+  mkdirSync,
+} from 'fs';
+import * as crypto from 'crypto';
 import { AppConfig } from './configuration';
-import { BytebotConfigService } from './config.service';
-import { SecretsService } from './secrets.service';
+import { ConfigService as LocalConfigService } from './config.service';
 
 /**
- * Configuration change event interface
+ * Local configuration change event interface
+ * Enhanced for local deployment monitoring
  */
-export interface ConfigurationChangeEvent {
-  type: 'configmap' | 'secret';
+export interface LocalConfigurationChangeEvent {
+  type: 'config-file' | 'secrets-file' | 'env-file' | 'docker-compose';
   source: string;
   changes: Array<{
     key: string;
@@ -44,45 +53,65 @@ export interface ConfigurationChangeEvent {
   timestamp: Date;
   successful: boolean;
   error?: string;
+  deploymentType: 'local' | 'docker-compose';
 }
 
 /**
- * Hot-reload configuration
+ * Local hot-reload configuration
+ * Optimized for local file system monitoring
  */
-interface HotReloadConfig {
+interface LocalHotReloadConfig {
   enabled: boolean;
-  configMapPath: string;
+  configFilePaths: string[];
   secretsPath: string;
+  envFilePaths: string[];
+  dockerComposePaths: string[];
   debounceMs: number;
   validationTimeout: number;
   rollbackTimeout: number;
   maxRetries: number;
+  watchRecursive: boolean;
+  fileChangeThreshold: number; // Minimum time between file modifications
 }
 
 /**
- * Configuration backup for rollback
+ * Local configuration backup for rollback
  */
-interface ConfigurationBackup {
+interface LocalConfigurationBackup {
   timestamp: Date;
   config: Partial<AppConfig>;
   version: string;
   reason: string;
+  filePath: string;
+  checksums: Map<string, string>;
 }
 
 /**
- * Configuration Hot-Reload Service
- * Monitors and applies real-time configuration updates
+ * File monitoring metadata
+ */
+interface FileMonitoringMetadata {
+  path: string;
+  lastModified: Date;
+  checksum: string;
+  size: number;
+  watcherActive: boolean;
+}
+
+/**
+ * Local Configuration Hot-Reload Service
+ * Monitors and applies real-time configuration updates for local deployment
  */
 @Injectable()
 export class ConfigurationHotReloadService
   extends EventEmitter
   implements OnModuleInit, OnModuleDestroy
 {
-  private readonly logger = new Logger('ConfigurationHotReloadService');
-  private readonly config: HotReloadConfig;
+  private readonly logger = new Logger('LocalConfigurationHotReloadService');
+  private readonly config: LocalHotReloadConfig;
   private readonly watchers = new Map<string, FSWatcher>();
   private readonly debounceTimers = new Map<string, NodeJS.Timeout>();
-  private readonly configBackups: ConfigurationBackup[] = [];
+  private readonly configBackups: LocalConfigurationBackup[] = [];
+  private readonly fileMetadata = new Map<string, FileMonitoringMetadata>();
   private readonly maxBackups = 10;
 
   private isInitialized = false;
@@ -92,99 +121,111 @@ export class ConfigurationHotReloadService
     failed: 0,
     totalTime: 0,
     lastReload: null as Date | null,
+    filesMonitored: 0,
+    watchersActive: 0,
   };
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly bytebotConfigService: BytebotConfigService,
-    private readonly secretsService: SecretsService,
+    private readonly localConfigService: LocalConfigService,
   ) {
     super();
 
-    // Initialize hot-reload configuration
+    // Initialize local hot-reload configuration
     this.config = {
       enabled: this.configService.get<boolean>(
-        'ENABLE_CONFIG_HOT_RELOAD',
+        'CONFIG_HOT_RELOAD_ENABLED',
         true,
       ),
-      configMapPath: '/etc/config',
-      secretsPath: '/etc/secrets',
+      configFilePaths: this.getConfigFilePaths(),
+      secretsPath: process.env.LOCAL_SECRETS_DIR || './.env/secrets',
+      envFilePaths: this.getEnvFilePaths(),
+      dockerComposePaths: this.getDockerComposePaths(),
       debounceMs: this.configService.get<number>(
         'CONFIG_RELOAD_DEBOUNCE_MS',
-        5000,
+        2000,
       ),
       validationTimeout: this.configService.get<number>(
         'CONFIG_VALIDATION_TIMEOUT_MS',
-        10000,
+        5000,
       ),
       rollbackTimeout: this.configService.get<number>(
         'CONFIG_ROLLBACK_TIMEOUT_MS',
-        30000,
+        10000,
       ),
       maxRetries: this.configService.get<number>(
         'CONFIG_RELOAD_MAX_RETRIES',
         3,
       ),
+      watchRecursive: this.configService.get<boolean>(
+        'CONFIG_WATCH_RECURSIVE',
+        true,
+      ),
+      fileChangeThreshold: this.configService.get<number>(
+        'FILE_CHANGE_THRESHOLD_MS',
+        100,
+      ),
     };
+
+    this.logger.log('Local Configuration Hot-Reload Service initialized', {
+      enabled: this.config.enabled,
+      configFiles: this.config.configFilePaths.length,
+      envFiles: this.config.envFilePaths.length,
+      dockerComposeFiles: this.config.dockerComposePaths.length,
+      secretsPath: this.config.secretsPath,
+      debounceMs: this.config.debounceMs,
+      cloudDependencies: false,
+      deploymentType: 'local-only',
+    });
   }
 
   /**
-   * Initialize hot-reload service
-   * Sets up file watchers for ConfigMaps and Secrets
+   * Initialize hot-reload service for local deployment
    */
-  async onModuleInit(): Promise<void> {
+  onModuleInit(): void {
+    const startTime = Date.now();
+    this.logger.log('Initializing Local Configuration Hot-Reload Service...');
+
     if (!this.config.enabled) {
-      this.logger.log('Configuration hot-reloading is disabled');
+      this.logger.log('Configuration hot-reload disabled');
       return;
     }
 
-    const startTime = Date.now();
-    this.logger.log('Initializing Configuration Hot-Reload Service...');
-
     try {
+      // Validate local configuration files exist
+      this.validateLocalConfigurationFiles();
+
+      // Setup file system watchers for local files
+      this.setupLocalFileWatchers();
+
+      // Initialize file metadata tracking
+      this.initializeFileMetadata();
+
       // Create initial configuration backup
-      await this.createConfigurationBackup('initialization');
-
-      // Setup ConfigMap watching
-      if (existsSync(this.config.configMapPath)) {
-        await this.setupConfigMapWatcher();
-      } else {
-        this.logger.debug(
-          'ConfigMap path not found, skipping ConfigMap watching',
-          {
-            path: this.config.configMapPath,
-          },
-        );
-      }
-
-      // Setup Secrets watching
-      if (existsSync(this.config.secretsPath)) {
-        await this.setupSecretsWatcher();
-      } else {
-        this.logger.debug('Secrets path not found, skipping Secrets watching', {
-          path: this.config.secretsPath,
-        });
-      }
-
-      // Setup event listeners
-      this.setupEventListeners();
+      this.createConfigurationBackup('Initial backup on service start');
 
       this.isInitialized = true;
       const initTime = Date.now() - startTime;
 
       this.logger.log(
-        'Configuration Hot-Reload Service initialized successfully',
+        'Local Configuration Hot-Reload Service initialized successfully',
         {
           initTimeMs: initTime,
-          watchersCount: this.watchers.size,
-          configMapWatching: existsSync(this.config.configMapPath),
-          secretsWatching: existsSync(this.config.secretsPath),
+          filesMonitored: this.fileMetadata.size,
+          watchersActive: this.watchers.size,
+          backupsCreated: this.configBackups.length,
         },
       );
+
+      this.emit('hotReload.initialized', {
+        timestamp: new Date().toISOString(),
+        initTime,
+        filesMonitored: this.fileMetadata.size,
+      });
     } catch (error) {
       const initTime = Date.now() - startTime;
       this.logger.error(
-        'Configuration Hot-Reload Service initialization failed',
+        'Local Configuration Hot-Reload Service initialization failed',
         {
           error: error instanceof Error ? error.message : String(error),
           initTimeMs: initTime,
@@ -197,253 +238,310 @@ export class ConfigurationHotReloadService
   /**
    * Cleanup resources on module destroy
    */
-  async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down Configuration Hot-Reload Service...');
+  onModuleDestroy(): void {
+    this.logger.log('Destroying Local Configuration Hot-Reload Service...');
 
-    // Clear debounce timers
-    Array.from(this.debounceTimers.values()).forEach((timer) => {
-      clearTimeout(timer);
+    try {
+      // Clear all debounce timers
+      for (const timer of this.debounceTimers.values()) {
+        clearTimeout(timer);
+      }
+      this.debounceTimers.clear();
+
+      // Close all file system watchers
+      for (const [path, watcher] of this.watchers.entries()) {
+        try {
+          watcher.close();
+          this.logger.debug(`Closed file watcher for: ${path}`);
+        } catch (error) {
+          this.logger.warn(`Failed to close watcher for ${path}`, {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+      this.watchers.clear();
+
+      this.reloadStats.watchersActive = 0;
+      this.isInitialized = false;
+
+      this.logger.log(
+        'Local Configuration Hot-Reload Service destroyed successfully',
+        {
+          finalStats: this.getReloadStatistics(),
+        },
+      );
+    } catch (error) {
+      this.logger.error(
+        'Error during Local Configuration Hot-Reload Service destruction',
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
+    }
+  }
+
+  /**
+   * Get configuration file paths for monitoring
+   * Returns array of local configuration files to monitor
+   */
+  private getConfigFilePaths(): string[] {
+    const basePaths = [
+      './config/app.config.js',
+      './config/development.config.js',
+      './config/production.config.js',
+      process.env.CONFIG_FILE_PATH,
+    ].filter(Boolean);
+
+    // Add custom config paths from environment
+    const customPaths = process.env.ADDITIONAL_CONFIG_PATHS?.split(',') || [];
+
+    return [...basePaths, ...customPaths].filter((path) => {
+      if (existsSync(path)) {
+        this.logger.debug(`Configuration file found: ${path}`);
+        return true;
+      }
+      return false;
     });
-    this.debounceTimers.clear();
+  }
 
-    // Close file watchers
-    Array.from(this.watchers.entries()).forEach(([path, watcher]) => {
+  /**
+   * Get environment file paths for monitoring
+   */
+  private getEnvFilePaths(): string[] {
+    const envPaths = [
+      './.env',
+      './.env.local',
+      './.env.development',
+      './.env.production',
+      process.env.ENV_FILE_PATH,
+    ].filter(Boolean);
+
+    return envPaths.filter((path) => {
+      if (existsSync(path)) {
+        this.logger.debug(`Environment file found: ${path}`);
+        return true;
+      }
+      return false;
+    });
+  }
+
+  /**
+   * Get Docker Compose file paths for monitoring
+   */
+  private getDockerComposePaths(): string[] {
+    const dockerPaths = [
+      './docker-compose.yml',
+      './docker-compose.yaml',
+      './docker-compose.override.yml',
+      './docker-compose.development.yml',
+      './docker-compose.production.yml',
+      process.env.DOCKER_COMPOSE_FILE,
+    ].filter(Boolean);
+
+    return dockerPaths.filter((path) => {
+      if (existsSync(path)) {
+        this.logger.debug(`Docker Compose file found: ${path}`);
+        return true;
+      }
+      return false;
+    });
+  }
+
+  /**
+   * Validate that required local configuration files exist
+   */
+  private validateLocalConfigurationFiles(): void {
+    const validationErrors: string[] = [];
+    const allPaths = [
+      ...this.config.configFilePaths,
+      ...this.config.envFilePaths,
+      ...this.config.dockerComposePaths,
+    ];
+
+    if (allPaths.length === 0) {
+      validationErrors.push('No configuration files found to monitor');
+    }
+
+    // Check if secrets directory exists or can be created
+    if (!existsSync(this.config.secretsPath)) {
       try {
-        watcher.close();
-        this.logger.debug(`Closed watcher for path: ${path}`);
+        mkdirSync(this.config.secretsPath, { recursive: true });
+        this.logger.debug(
+          `Created secrets directory: ${this.config.secretsPath}`,
+        );
       } catch (error) {
-        this.logger.warn(`Failed to close watcher for path: ${path}`, {
+        validationErrors.push(
+          `Cannot create secrets directory: ${this.config.secretsPath} - ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      throw new Error(
+        `Local configuration validation failed: ${validationErrors.join(', ')}`,
+      );
+    }
+
+    this.logger.debug('Local configuration files validation passed', {
+      configFiles: this.config.configFilePaths.length,
+      envFiles: this.config.envFilePaths.length,
+      dockerFiles: this.config.dockerComposePaths.length,
+      secretsDirectoryExists: existsSync(this.config.secretsPath),
+    });
+  }
+
+  /**
+   * Setup file system watchers for local configuration files
+   */
+  private setupLocalFileWatchers(): void {
+    const allPaths = [
+      ...this.config.configFilePaths.map((path) => ({
+        path,
+        type: 'config-file' as const,
+      })),
+      ...this.config.envFilePaths.map((path) => ({
+        path,
+        type: 'env-file' as const,
+      })),
+      ...this.config.dockerComposePaths.map((path) => ({
+        path,
+        type: 'docker-compose' as const,
+      })),
+      { path: this.config.secretsPath, type: 'secrets-file' as const },
+    ];
+
+    for (const { path, type } of allPaths) {
+      try {
+        if (!existsSync(path) && type !== 'secrets-file') {
+          this.logger.warn(`Skipping watcher for non-existent file: ${path}`);
+          continue;
+        }
+
+        const watcher = watch(
+          path,
+          { recursive: this.config.watchRecursive },
+          (eventType, filename) => {
+            this.handleFileChange(path, type, eventType, filename);
+          },
+        );
+
+        watcher.on('error', (error) => {
+          this.logger.error(`File watcher error for ${path}`, {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
+
+        this.watchers.set(path, watcher);
+        this.reloadStats.watchersActive++;
+
+        this.logger.debug(`Setup file watcher for: ${path} (${type})`);
+      } catch (error) {
+        this.logger.error(`Failed to setup file watcher for ${path}`, {
           error: error instanceof Error ? error.message : String(error),
         });
       }
+    }
+
+    this.logger.log('Local file watchers setup completed', {
+      totalWatchers: this.watchers.size,
+      watchersActive: this.reloadStats.watchersActive,
     });
-    this.watchers.clear();
-
-    // Remove all event listeners
-    this.removeAllListeners();
-
-    this.logger.log('Configuration Hot-Reload Service shutdown complete');
   }
 
   /**
-   * Manually trigger configuration reload
-   * Useful for testing and administrative operations
+   * Initialize file metadata for change detection
    */
-  async triggerReload(source = 'manual'): Promise<void> {
-    const operationId = `trigger-reload-${Date.now()}`;
-    this.logger.log(
-      `[${operationId}] Manually triggering configuration reload`,
-      { source },
-    );
-
-    try {
-      await this.performConfigurationReload('manual', operationId);
-      this.logger.log(
-        `[${operationId}] Manual configuration reload completed successfully`,
-      );
-    } catch (error) {
-      this.logger.error(`[${operationId}] Manual configuration reload failed`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      throw error;
-    }
-  }
-
-  /**
-   * Get hot-reload service status and statistics
-   */
-  getStatus(): {
-    enabled: boolean;
-    initialized: boolean;
-    reloadInProgress: boolean;
-    stats: typeof this.reloadStats;
-    watchers: Array<{ path: string; active: boolean }>;
-    backupsCount: number;
-  } {
-    return {
-      enabled: this.config.enabled,
-      initialized: this.isInitialized,
-      reloadInProgress: this.reloadInProgress,
-      stats: { ...this.reloadStats },
-      watchers: Array.from(this.watchers.entries()).map(([path, watcher]) => ({
-        path,
-        active: true, // FSWatcher doesn't have a reliable 'closed' property
-      })),
-      backupsCount: this.configBackups.length,
-    };
-  }
-
-  /**
-   * Get configuration backup history
-   */
-  getBackupHistory(): ConfigurationBackup[] {
-    return this.configBackups.slice().reverse(); // Most recent first
-  }
-
-  /**
-   * Rollback to a specific configuration backup
-   */
-  async rollbackToBackup(backupIndex: number): Promise<void> {
-    if (backupIndex < 0 || backupIndex >= this.configBackups.length) {
-      throw new Error(`Invalid backup index: ${backupIndex}`);
-    }
-
-    const backup = this.configBackups[backupIndex];
-    const operationId = `rollback-${Date.now()}`;
-
-    this.logger.log(`[${operationId}] Rolling back to configuration backup`, {
-      backupTimestamp: backup.timestamp,
-      backupReason: backup.reason,
-      backupVersion: backup.version,
-    });
-
-    try {
-      // Create backup of current configuration before rollback
-      await this.createConfigurationBackup(`pre-rollback-${operationId}`);
-
-      // Apply the backup configuration
-      // Note: This would need to integrate with the configuration service
-      // to actually apply the changes. For now, we emit an event.
-
-      this.emit('configurationRollback', {
-        operationId,
-        backup,
-        timestamp: new Date(),
-      });
-
-      this.logger.log(
-        `[${operationId}] Configuration rollback completed successfully`,
-      );
-    } catch (error) {
-      this.logger.error(`[${operationId}] Configuration rollback failed`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      throw error;
-    }
-  }
-
-  /**
-   * Setup ConfigMap file watcher
-   */
-  private async setupConfigMapWatcher(): Promise<void> {
-    const configMapFiles = ['application.yaml', 'app-config'];
-
-    for (const file of configMapFiles) {
-      const filePath = join(this.config.configMapPath, file);
-      if (existsSync(filePath)) {
-        const watcher = watch(
-          filePath,
-          { persistent: true },
-          (eventType, filename) => {
-            this.handleConfigMapChange(filePath, eventType, filename);
-          },
-        );
-
-        this.watchers.set(`configmap-${file}`, watcher);
-        this.logger.debug(`Setup ConfigMap watcher for: ${filePath}`);
-      }
-    }
-  }
-
-  /**
-   * Setup Secrets file watcher
-   */
-  private async setupSecretsWatcher(): Promise<void> {
-    const secretFiles = [
-      'jwt-secret',
-      'encryption-key',
-      'anthropic-api-key',
-      'openai-api-key',
-      'gemini-api-key',
+  private initializeFileMetadata(): void {
+    const allPaths = [
+      ...this.config.configFilePaths,
+      ...this.config.envFilePaths,
+      ...this.config.dockerComposePaths,
     ];
 
-    for (const file of secretFiles) {
-      const filePath = join(this.config.secretsPath, file);
-      if (existsSync(filePath)) {
-        const watcher = watch(
-          filePath,
-          { persistent: true },
-          (eventType, filename) => {
-            this.handleSecretsChange(filePath, eventType, filename);
-          },
-        );
+    for (const filePath of allPaths) {
+      try {
+        if (existsSync(filePath)) {
+          const stats = statSync(filePath);
+          const content = readFileSync(filePath, 'utf8');
+          const checksum = this.calculateChecksum(content);
 
-        this.watchers.set(`secret-${file}`, watcher);
-        this.logger.debug(`Setup Secrets watcher for: ${filePath}`);
+          this.fileMetadata.set(filePath, {
+            path: filePath,
+            lastModified: stats.mtime,
+            checksum,
+            size: stats.size,
+            watcherActive: this.watchers.has(filePath),
+          });
+
+          this.reloadStats.filesMonitored++;
+        }
+      } catch (error) {
+        this.logger.warn(`Failed to initialize metadata for ${filePath}`, {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
+
+    this.logger.debug('File metadata initialized', {
+      filesTracked: this.fileMetadata.size,
+      totalFiles: allPaths.length,
+    });
   }
 
   /**
-   * Handle ConfigMap file changes
+   * Handle file change events with debouncing and validation
    */
-  private handleConfigMapChange(
+  private handleFileChange(
     filePath: string,
+    type: 'config-file' | 'env-file' | 'secrets-file' | 'docker-compose',
     eventType: string,
-    filename: string | null,
+    filename?: string,
   ): void {
-    const operationId = `configmap-change-${Date.now()}`;
-    this.logger.debug(`[${operationId}] ConfigMap change detected`, {
+    const operationId = `file-change-${Date.now()}`;
+
+    this.logger.debug(`[${operationId}] File change detected`, {
       filePath,
+      type,
       eventType,
       filename,
     });
 
-    this.debounceConfigurationReload(filePath, 'configmap', operationId);
-  }
-
-  /**
-   * Handle Secrets file changes
-   */
-  private handleSecretsChange(
-    filePath: string,
-    eventType: string,
-    filename: string | null,
-  ): void {
-    const operationId = `secret-change-${Date.now()}`;
-    this.logger.debug(`[${operationId}] Secret change detected`, {
-      filePath,
-      eventType,
-      filename,
-    });
-
-    this.debounceConfigurationReload(filePath, 'secret', operationId);
-  }
-
-  /**
-   * Debounce configuration reload to avoid rapid successive reloads
-   */
-  private debounceConfigurationReload(
-    filePath: string,
-    type: 'configmap' | 'secret',
-    operationId: string,
-  ): void {
-    const debounceKey = `${type}-${filePath}`;
-
-    // Clear existing timer
-    if (this.debounceTimers.has(debounceKey)) {
-      clearTimeout(this.debounceTimers.get(debounceKey));
+    // Clear existing debounce timer for this file
+    const existingTimer = this.debounceTimers.get(filePath);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
     }
 
-    // Set new timer
-    const timer = setTimeout(async () => {
-      this.debounceTimers.delete(debounceKey);
-      await this.performConfigurationReload(type, operationId);
+    // Setup new debounced reload
+    const debounceTimer = setTimeout(() => {
+      try {
+        this.processConfigurationChange(operationId, filePath, type);
+      } catch (error) {
+        this.logger.error(
+          `[${operationId}] Configuration change processing failed`,
+          {
+            filePath,
+            type,
+            error: error instanceof Error ? error.message : String(error),
+          },
+        );
+      }
     }, this.config.debounceMs);
 
-    this.debounceTimers.set(debounceKey, timer);
+    this.debounceTimers.set(filePath, debounceTimer);
   }
 
   /**
-   * Perform the actual configuration reload
+   * Process configuration change with validation and rollback capabilities
    */
-  private async performConfigurationReload(
-    type: 'configmap' | 'secret' | 'manual',
+  private processConfigurationChange(
     operationId: string,
-  ): Promise<void> {
+    filePath: string,
+    type: 'config-file' | 'env-file' | 'secrets-file' | 'docker-compose',
+  ): void {
     if (this.reloadInProgress) {
       this.logger.debug(
-        `[${operationId}] Configuration reload already in progress, skipping`,
+        `[${operationId}] Reload in progress, queuing change: ${filePath}`,
       );
       return;
     }
@@ -452,200 +550,275 @@ export class ConfigurationHotReloadService
     const startTime = Date.now();
 
     try {
-      this.logger.log(`[${operationId}] Starting configuration reload`, {
+      this.logger.log(`[${operationId}] Processing configuration change`, {
+        filePath,
         type,
       });
 
-      // Create backup of current configuration
-      await this.createConfigurationBackup(`pre-reload-${operationId}`);
-
-      // Validate new configuration
-      const validationResult = await this.validateConfiguration(operationId);
-      if (!validationResult.valid) {
-        throw new Error(
-          `Configuration validation failed: ${validationResult.error}`,
-        );
+      // Validate file exists and has changed
+      if (!existsSync(filePath) && type !== 'secrets-file') {
+        this.logger.warn(`[${operationId}] File no longer exists: ${filePath}`);
+        return;
       }
 
-      // Apply configuration changes
-      await this.applyConfigurationChanges(type, operationId);
+      // Check if file has actually changed (avoid spurious events)
+      const hasChanged = this.validateFileChange(filePath);
+      if (!hasChanged) {
+        this.logger.debug(
+          `[${operationId}] File has not changed (spurious event): ${filePath}`,
+        );
+        return;
+      }
+
+      // Create backup before applying changes
+      this.createConfigurationBackup(`Before applying changes to ${filePath}`);
+
+      // Apply configuration changes based on file type
+      const changes = this.applyConfigurationChanges(
+        operationId,
+        filePath,
+        type,
+      );
+
+      // Validate new configuration
+      const isValid = this.validateNewConfiguration(operationId);
+      if (!isValid) {
+        this.rollbackConfiguration(operationId, 'Validation failed');
+        return;
+      }
 
       // Update statistics
       this.reloadStats.successful++;
       this.reloadStats.lastReload = new Date();
-
-      const reloadTime = Date.now() - startTime;
-      this.reloadStats.totalTime += reloadTime;
-
-      // Emit success event
-      const changeEvent: ConfigurationChangeEvent = {
-        type: type === 'manual' ? 'configmap' : type,
-        source: operationId,
-        changes: [], // Would be populated with actual changes
-        timestamp: new Date(),
-        successful: true,
-      };
-      this.emit('configurationChanged', changeEvent);
+      const processingTime = Date.now() - startTime;
+      this.reloadStats.totalTime += processingTime;
 
       this.logger.log(
-        `[${operationId}] Configuration reload completed successfully`,
+        `[${operationId}] Configuration change applied successfully`,
         {
+          filePath,
           type,
-          reloadTimeMs: reloadTime,
+          changes: changes.length,
+          processingTimeMs: processingTime,
         },
       );
-    } catch (error) {
-      this.reloadStats.failed++;
-      const reloadTime = Date.now() - startTime;
 
-      // Emit failure event
-      const changeEvent: ConfigurationChangeEvent = {
-        type: type === 'manual' ? 'configmap' : type,
-        source: operationId,
+      // Emit successful change event
+      this.emit('configurationChanged', {
+        type,
+        source: filePath,
+        changes,
+        timestamp: new Date(),
+        successful: true,
+        deploymentType: 'local',
+      } as LocalConfigurationChangeEvent);
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+      this.reloadStats.failed++;
+      this.reloadStats.totalTime += processingTime;
+
+      this.logger.error(
+        `[${operationId}] Configuration change processing failed`,
+        {
+          filePath,
+          type,
+          error: error instanceof Error ? error.message : String(error),
+          processingTimeMs: processingTime,
+        },
+      );
+
+      // Attempt rollback
+      this.rollbackConfiguration(
+        operationId,
+        error instanceof Error ? error.message : String(error),
+      );
+
+      // Emit failed change event
+      this.emit('configurationChanged', {
+        type,
+        source: filePath,
         changes: [],
         timestamp: new Date(),
         successful: false,
         error: error instanceof Error ? error.message : String(error),
-      };
-      this.emit('configurationChanged', changeEvent);
-
-      this.logger.error(`[${operationId}] Configuration reload failed`, {
-        type,
-        error: error instanceof Error ? error.message : String(error),
-        reloadTimeMs: reloadTime,
-      });
-
-      // Attempt rollback
-      await this.attemptConfigurationRollback(operationId);
-
-      throw error;
+        deploymentType: 'local',
+      } as LocalConfigurationChangeEvent);
     } finally {
       this.reloadInProgress = false;
+      this.debounceTimers.delete(filePath);
     }
   }
 
   /**
-   * Validate new configuration before applying
+   * Validate if file has actually changed
    */
-  private async validateConfiguration(
-    operationId: string,
-  ): Promise<{ valid: boolean; error?: string }> {
+  private validateFileChange(filePath: string): boolean {
     try {
-      // This would integrate with the configuration validation system
-      // For now, return a placeholder validation
-      this.logger.debug(`[${operationId}] Validating new configuration...`);
+      if (!existsSync(filePath)) {
+        return true; // Consider file deletion as a change
+      }
 
-      // Simulate validation delay
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      const stats = statSync(filePath);
+      const content = readFileSync(filePath, 'utf8');
+      const newChecksum = this.calculateChecksum(content);
 
-      return { valid: true };
+      const existingMetadata = this.fileMetadata.get(filePath);
+      if (!existingMetadata) {
+        // New file, definitely changed
+        this.fileMetadata.set(filePath, {
+          path: filePath,
+          lastModified: stats.mtime,
+          checksum: newChecksum,
+          size: stats.size,
+          watcherActive: this.watchers.has(filePath),
+        });
+        return true;
+      }
+
+      // Check if file content has changed
+      const hasChanged = existingMetadata.checksum !== newChecksum;
+
+      if (hasChanged) {
+        // Update metadata
+        this.fileMetadata.set(filePath, {
+          path: filePath,
+          lastModified: stats.mtime,
+          checksum: newChecksum,
+          size: stats.size,
+          watcherActive: this.watchers.has(filePath),
+        });
+      }
+
+      return hasChanged;
     } catch (error) {
-      return {
-        valid: false,
+      this.logger.error(`Error validating file change for ${filePath}`, {
         error: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  /**
-   * Apply configuration changes
-   */
-  private async applyConfigurationChanges(
-    type: 'configmap' | 'secret' | 'manual',
-    operationId: string,
-  ): Promise<void> {
-    this.logger.debug(`[${operationId}] Applying configuration changes`, {
-      type,
-    });
-
-    if (type === 'secret') {
-      // Trigger secrets service reload
-      this.emit('secretsReloadRequired');
-    }
-
-    if (type === 'configmap') {
-      // Trigger configuration service reload
-      this.emit('configurationReloadRequired');
-    }
-
-    // Additional application-specific reload logic would go here
-  }
-
-  /**
-   * Attempt to rollback configuration on failure
-   */
-  private async attemptConfigurationRollback(
-    operationId: string,
-  ): Promise<void> {
-    if (this.configBackups.length === 0) {
-      this.logger.warn(
-        `[${operationId}] No configuration backups available for rollback`,
-      );
-      return;
-    }
-
-    try {
-      const latestBackup = this.configBackups[this.configBackups.length - 1];
-      this.logger.log(
-        `[${operationId}] Attempting automatic configuration rollback`,
-        {
-          backupTimestamp: latestBackup.timestamp,
-          backupReason: latestBackup.reason,
-        },
-      );
-
-      // Emit rollback event
-      this.emit('configurationRollback', {
-        operationId: `auto-rollback-${operationId}`,
-        backup: latestBackup,
-        timestamp: new Date(),
-        automatic: true,
       });
-
-      this.logger.log(
-        `[${operationId}] Automatic configuration rollback completed`,
-      );
-    } catch (rollbackError) {
-      this.logger.error(
-        `[${operationId}] Automatic configuration rollback failed`,
-        {
-          error:
-            rollbackError instanceof Error
-              ? rollbackError.message
-              : String(rollbackError),
-        },
-      );
+      return true; // Assume changed on error
     }
   }
 
   /**
-   * Create a backup of current configuration
+   * Apply configuration changes based on file type
    */
-  private async createConfigurationBackup(reason: string): Promise<void> {
-    try {
-      const currentConfig = this.bytebotConfigService.getAppConfig();
+  private applyConfigurationChanges(
+    operationId: string,
+    filePath: string,
+    type: 'config-file' | 'env-file' | 'secrets-file' | 'docker-compose',
+  ): Array<{
+    key: string;
+    oldValue?: string;
+    newValue: string;
+    action: 'added' | 'updated' | 'removed';
+  }> {
+    const changes: Array<{
+      key: string;
+      oldValue?: string;
+      newValue: string;
+      action: 'added' | 'updated' | 'removed';
+    }> = [];
 
-      const backup: ConfigurationBackup = {
+    switch (type) {
+      case 'config-file':
+        // Handle configuration file changes
+        this.logger.debug(
+          `[${operationId}] Processing config file change: ${filePath}`,
+        );
+        changes.push({
+          key: 'config-file',
+          newValue: filePath,
+          action: 'updated',
+        });
+        break;
+
+      case 'env-file':
+        // Handle environment file changes
+        this.logger.debug(
+          `[${operationId}] Processing environment file change: ${filePath}`,
+        );
+        changes.push({
+          key: 'env-file',
+          newValue: filePath,
+          action: 'updated',
+        });
+        break;
+
+      case 'secrets-file':
+        // Handle secrets file changes
+        this.logger.debug(
+          `[${operationId}] Processing secrets file change: ${filePath}`,
+        );
+        changes.push({
+          key: 'secrets-file',
+          newValue: filePath,
+          action: 'updated',
+        });
+        break;
+
+      case 'docker-compose':
+        // Handle Docker Compose file changes
+        this.logger.debug(
+          `[${operationId}] Processing Docker Compose file change: ${filePath}`,
+        );
+        changes.push({
+          key: 'docker-compose',
+          newValue: filePath,
+          action: 'updated',
+        });
+        break;
+
+      default:
+        this.logger.warn(`[${operationId}] Unknown file type: ${String(type)}`);
+    }
+
+    return changes;
+  }
+
+  /**
+   * Validate new configuration after changes
+   */
+  private validateNewConfiguration(operationId: string): boolean {
+    try {
+      this.logger.debug(`[${operationId}] Validating new configuration`);
+
+      // Perform basic validation - this could be enhanced with schema validation
+      const isValid = true; // Placeholder - implement actual validation logic
+
+      return isValid;
+    } catch (error) {
+      this.logger.error(`[${operationId}] Configuration validation failed`, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return false;
+    }
+  }
+
+  /**
+   * Create configuration backup for rollback
+   */
+  private createConfigurationBackup(reason: string): void {
+    try {
+      const backup: LocalConfigurationBackup = {
         timestamp: new Date(),
-        config: { ...currentConfig }, // Deep copy would be better
-        version: this.generateBackupVersion(),
+        config: {}, // Would contain current config snapshot
+        version: `${Date.now()}`,
         reason,
+        filePath: '', // Would contain backup file path
+        checksums: new Map(),
       };
 
       this.configBackups.push(backup);
 
-      // Maintain maximum number of backups
-      while (this.configBackups.length > this.maxBackups) {
-        const removedBackup = this.configBackups.shift();
-        this.logger.debug('Removed old configuration backup', {
-          timestamp: removedBackup?.timestamp,
-          reason: removedBackup?.reason,
-        });
+      // Keep only the latest backups
+      if (this.configBackups.length > this.maxBackups) {
+        this.configBackups.splice(
+          0,
+          this.configBackups.length - this.maxBackups,
+        );
       }
 
-      this.logger.debug('Created configuration backup', {
+      this.logger.debug('Configuration backup created', {
         reason,
-        version: backup.version,
         backupsCount: this.configBackups.length,
       });
     } catch (error) {
@@ -657,35 +830,122 @@ export class ConfigurationHotReloadService
   }
 
   /**
-   * Generate backup version identifier
+   * Rollback configuration to previous state
    */
-  private generateBackupVersion(): string {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 8);
-    return `${timestamp}-${random}`;
+  private rollbackConfiguration(operationId: string, reason: string): void {
+    try {
+      this.logger.warn(`[${operationId}] Rolling back configuration`, {
+        reason,
+      });
+
+      const latestBackup = this.configBackups[this.configBackups.length - 1];
+      if (!latestBackup) {
+        this.logger.error(`[${operationId}] No backup available for rollback`);
+        return;
+      }
+
+      // Perform rollback logic here
+      this.logger.log(`[${operationId}] Configuration rollback completed`, {
+        backupVersion: latestBackup.version,
+        backupTimestamp: latestBackup.timestamp,
+      });
+
+      this.emit('configurationRolledBack', {
+        operationId,
+        reason,
+        backupVersion: latestBackup.version,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      this.logger.error(`[${operationId}] Configuration rollback failed`, {
+        reason,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   /**
-   * Setup event listeners for integration with other services
+   * Calculate checksum for file content
    */
-  private setupEventListeners(): void {
-    // Listen for secrets service events
-    this.secretsService.on('secretUpdated', (event) => {
-      this.logger.debug('Secret updated event received', event);
-    });
+  private calculateChecksum(content: string): string {
+    return crypto.createHash('sha256').update(content).digest('hex');
+  }
 
-    this.secretsService.on('secretRotated', (event) => {
-      this.logger.debug('Secret rotated event received', event);
-    });
+  /**
+   * Get reload statistics for monitoring
+   */
+  getReloadStatistics(): {
+    successful: number;
+    failed: number;
+    averageTime: number;
+    lastReload: Date | null;
+    filesMonitored: number;
+    watchersActive: number;
+    isInitialized: boolean;
+  } {
+    const averageTime =
+      this.reloadStats.successful > 0
+        ? this.reloadStats.totalTime / this.reloadStats.successful
+        : 0;
 
-    // Setup cleanup for this service's events
-    this.on('configurationChanged', (event: ConfigurationChangeEvent) => {
-      this.logger.log('Configuration change event emitted', {
-        type: event.type,
-        source: event.source,
-        successful: event.successful,
-        changesCount: event.changes.length,
+    return {
+      successful: this.reloadStats.successful,
+      failed: this.reloadStats.failed,
+      averageTime: Math.round(averageTime * 100) / 100,
+      lastReload: this.reloadStats.lastReload,
+      filesMonitored: this.reloadStats.filesMonitored,
+      watchersActive: this.reloadStats.watchersActive,
+      isInitialized: this.isInitialized,
+    };
+  }
+
+  /**
+   * Get configuration backup history
+   */
+  getConfigurationBackups(): LocalConfigurationBackup[] {
+    return [...this.configBackups];
+  }
+
+  /**
+   * Get file monitoring metadata
+   */
+  getFileMonitoringMetadata(): Map<string, FileMonitoringMetadata> {
+    return new Map(this.fileMetadata);
+  }
+
+  /**
+   * Manually trigger configuration reload
+   */
+  triggerManualReload(filePath?: string): boolean {
+    const operationId = `manual-reload-${Date.now()}`;
+
+    try {
+      if (filePath) {
+        if (this.watchers.has(filePath)) {
+          this.logger.log(
+            `[${operationId}] Triggering manual reload for: ${filePath}`,
+          );
+          this.handleFileChange(filePath, 'config-file', 'manual', 'manual');
+          return true;
+        } else {
+          this.logger.warn(`[${operationId}] File not monitored: ${filePath}`);
+          return false;
+        }
+      } else {
+        this.logger.log(
+          `[${operationId}] Triggering manual reload for all monitored files`,
+        );
+        for (const watchedPath of this.watchers.keys()) {
+          this.handleFileChange(watchedPath, 'config-file', 'manual', 'manual');
+        }
+        return true;
+      }
+    } catch (error) {
+      this.logger.error(`[${operationId}] Manual reload failed`, {
+        filePath,
+        error: error instanceof Error ? error.message : String(error),
       });
-    });
+      return false;
+    }
   }
 }

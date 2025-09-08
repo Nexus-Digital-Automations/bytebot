@@ -175,7 +175,7 @@ export class IsSafeTextInputConstraint implements ValidatorConstraintInterface {
       }
 
       // Check for path traversal patterns
-      if (/\.{2,}[\/\\]/.test(value)) {
+      if (/\.{2,}[/\\]/.test(value)) {
         return false;
       }
     }
@@ -399,7 +399,7 @@ export function IsSanitizedString(
             return true; // Let other validators handle type checking
           }
 
-          const options = args.constraints[0] as SanitizationOptions;
+          const options = (args.constraints?.[0] as SanitizationOptions) || {};
           const sanitized = sanitizeInput(value, options);
 
           // The value should be identical to its sanitized version

@@ -146,7 +146,7 @@ export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
     this.logger.log('Database metrics service fully operational');
   }
 
-  async onModuleDestroy() {
+  onModuleDestroy(): void {
     this.logger.log('Shutting down database metrics service');
 
     if (this.metricsCollectionInterval) {
@@ -303,20 +303,18 @@ export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
       this.logger.debug(`[${operationId}] Collecting database metrics`);
 
       // Collect metrics from all sources
-      const [databaseHealth, poolMetrics, queryStats, systemResources] =
-        await Promise.all([
-          this.collectHealthMetrics(),
-          this.collectConnectionPoolMetrics(),
-          this.collectQueryMetrics(),
-          this.collectSystemResourceMetrics(),
-        ]);
+      const databaseHealth = await this.collectHealthMetrics();
+      const poolMetrics = this.collectConnectionPoolMetrics();
+      const queryStats = this.collectQueryMetrics();
+      const systemResources = this.collectSystemResourceMetrics();
+      const transactionMetrics = this.collectTransactionMetrics();
 
       // Combine all metrics
       this.currentMetrics = {
         connectionPool: poolMetrics,
         queryPerformance: queryStats,
         health: databaseHealth,
-        transactions: await this.collectTransactionMetrics(),
+        transactions: transactionMetrics,
         resources: systemResources,
         timestamp: new Date(),
       };
@@ -475,12 +473,14 @@ export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
       60000, // 1 minute
     );
 
-    this.metricsCollectionInterval = setInterval(async () => {
-      try {
-        await this.collectMetrics();
-      } catch (error) {
-        this.logger.error('Scheduled metrics collection failed', error);
-      }
+    this.metricsCollectionInterval = setInterval(() => {
+      void (async () => {
+        try {
+          await this.collectMetrics();
+        } catch (error) {
+          this.logger.error('Scheduled metrics collection failed', error);
+        }
+      })();
     }, interval);
 
     this.logger.debug('Metrics collection started', { interval });
@@ -490,7 +490,9 @@ export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
    * Collect database health metrics
    */
   private async collectHealthMetrics() {
-    const healthStatus = await this.databaseService.getHealthStatus();
+    const healthStatus = await Promise.resolve(
+      this.databaseService.getHealthStatus(),
+    );
 
     return {
       isHealthy: healthStatus.isHealthy,
@@ -505,7 +507,7 @@ export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
   /**
    * Collect connection pool metrics
    */
-  private async collectConnectionPoolMetrics() {
+  private collectConnectionPoolMetrics() {
     const poolMetrics = this.connectionPoolService.getPoolMetrics();
 
     return {
@@ -526,7 +528,7 @@ export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
   /**
    * Collect query performance metrics
    */
-  private async collectQueryMetrics() {
+  private collectQueryMetrics() {
     const queryStats = this.queryLoggingInterceptor.getQueryStatistics();
 
     // Calculate additional metrics
@@ -562,7 +564,7 @@ export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
   /**
    * Collect transaction metrics (placeholder implementation)
    */
-  private async collectTransactionMetrics() {
+  private collectTransactionMetrics() {
     // This would require integration with database transaction monitoring
     return {
       activeTransactions: 0,
@@ -577,7 +579,7 @@ export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
   /**
    * Collect system resource metrics
    */
-  private async collectSystemResourceMetrics() {
+  private collectSystemResourceMetrics() {
     // This would require system monitoring integration
     return {
       memoryUsage: process.memoryUsage().heapUsed / 1024 / 1024, // MB

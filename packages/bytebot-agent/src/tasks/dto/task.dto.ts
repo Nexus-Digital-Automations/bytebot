@@ -29,7 +29,6 @@ import {
   ApiPropertyOptional,
   PartialType,
   OmitType,
-  PickType,
 } from '@nestjs/swagger';
 
 /**

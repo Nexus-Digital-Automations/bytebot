@@ -388,9 +388,6 @@ export function getSecurityConfig(
   return {
     environment,
     serviceName: serviceName,
-    enableSwagger: environment !== "production",
-    enableVNC: false,
-    enableHSTS: environment === "production",
     ...preset,
     ...overrides,
   };

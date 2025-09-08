@@ -11,7 +11,8 @@
  */
 
 import { SetMetadata, applyDecorators } from '@nestjs/common';
-import { ApiHeader, ApiTags, ApiExtraModels } from '@nestjs/swagger';
+import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import 'reflect-metadata';
 
 /**
  * API versioning strategy enumeration
@@ -228,12 +229,28 @@ export const BetaApi = (version: SupportedVersion) => {
 };
 
 /**
+ * Type guard to check if metadata is an ApiVersionConfig
+ */
+function isApiVersionConfig(metadata: unknown): metadata is ApiVersionConfig {
+  return (
+    typeof metadata === 'object' &&
+    metadata !== null &&
+    'version' in metadata &&
+    typeof (metadata as Record<string, unknown>).version === 'string'
+  );
+}
+
+/**
  * Get version configuration from metadata
  * @param target - Target class or method
  * @returns Version configuration or null
  */
-export function getVersionConfig(target: any): ApiVersionConfig | null {
-  return Reflect.getMetadata(VERSION_CONFIG_KEY, target) || null;
+export function getVersionConfig(target: object): ApiVersionConfig | null {
+  const metadata: unknown = Reflect.getMetadata(VERSION_CONFIG_KEY, target);
+  if (isApiVersionConfig(metadata)) {
+    return metadata;
+  }
+  return null;
 }
 
 /**
@@ -241,8 +258,28 @@ export function getVersionConfig(target: any): ApiVersionConfig | null {
  * @param target - Target class or method
  * @returns API version or null
  */
-export function getApiVersion(target: any): string | null {
-  return Reflect.getMetadata(VERSION_METADATA_KEY, target) || null;
+export function getApiVersion(target: object): string | null {
+  const metadata: unknown = Reflect.getMetadata(VERSION_METADATA_KEY, target);
+  if (typeof metadata === 'string') {
+    return metadata;
+  }
+  return null;
+}
+
+/**
+ * Type guard to check if metadata is a valid SupportedVersion array
+ */
+function isSupportedVersionArray(
+  metadata: unknown,
+): metadata is SupportedVersion[] {
+  return (
+    Array.isArray(metadata) &&
+    metadata.every(
+      (v): v is SupportedVersion =>
+        typeof v === 'string' &&
+        Object.values(SUPPORTED_API_VERSIONS).includes(v as SupportedVersion),
+    )
+  );
 }
 
 /**
@@ -250,8 +287,12 @@ export function getApiVersion(target: any): string | null {
  * @param target - Target class or method
  * @returns Array of supported versions or null
  */
-export function getMultiVersions(target: any): SupportedVersion[] | null {
-  return Reflect.getMetadata('multi_version', target) || null;
+export function getMultiVersions(target: object): SupportedVersion[] | null {
+  const metadata: unknown = Reflect.getMetadata('multi_version', target);
+  if (isSupportedVersionArray(metadata)) {
+    return metadata;
+  }
+  return null;
 }
 
 export default {

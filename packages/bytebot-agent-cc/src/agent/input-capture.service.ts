@@ -193,7 +193,8 @@ export class InputCaptureService {
 
         await this.messagesService.create({
           content: [userActionBlock],
-          role: Role.USER,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          role: Role.USER as Role,
           taskId,
         });
       },
@@ -301,7 +302,8 @@ export class InputCaptureService {
       if (userActionBlock.content.length > 0) {
         await this.messagesService.create({
           content: [userActionBlock],
-          role: Role.USER,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          role: Role.USER as Role,
           taskId,
         });
       }

@@ -21,17 +21,113 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
-  HttpException,
-  HttpStatus,
   ServiceUnavailableException,
   RequestTimeoutException,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
+
+/**
+ * Extended Request interface with user properties
+ */
+interface ExtendedRequest extends Request {
+  user?: {
+    id?: string | number;
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * Structured error interface
+ */
+interface StructuredError {
+  message?: string;
+  stack?: string;
+  status?: number;
+  statusCode?: number;
+  response?: {
+    status?: number;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * Circuit Breaker Guard interface for type safety
+ */
+interface CircuitBreakerGuardInterface {
+  recordSuccess(circuitName: string): void;
+  recordFailure(circuitName: string, error: StructuredError): void;
+}
+
+/**
+ * Type guard to check if an error is a structured error
+ */
+function isStructuredError(error: unknown): error is StructuredError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    (typeof error.message === 'string' || error.message === undefined)
+  );
+}
+
+/**
+ * Safely converts error to StructuredError format
+ */
+function normalizeError(error: unknown): StructuredError {
+  if (isStructuredError(error)) {
+    return error;
+  }
+
+  if (error instanceof Error) {
+    return {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    };
+  }
+
+  if (typeof error === 'string') {
+    return {
+      message: error,
+    };
+  }
+
+  return {
+    message: 'Unknown error occurred',
+    originalError: error,
+  };
+}
+
+/**
+ * Safely serializes error object to string
+ */
+function serializeError(error: unknown): string {
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (isStructuredError(error) && error.message) {
+    return error.message;
+  }
+
+  try {
+    return JSON.stringify(error, Object.getOwnPropertyNames(error));
+  } catch {
+    return '[Unserializable Error Object]';
+  }
+}
 import { Reflector } from '@nestjs/core';
 import { Observable, throwError, TimeoutError } from 'rxjs';
 import { catchError, timeout, tap } from 'rxjs/operators';
 import {
   CircuitBreakerService,
   CircuitBreakerConfig,
+  CircuitBreakerState,
 } from '../services/circuit-breaker.service';
 import { RetryService, RetryConfig } from '../services/retry.service';
 
@@ -52,7 +148,7 @@ export interface ResilienceConfig {
   /** Enable fallback response */
   enableFallback?: boolean;
   /** Fallback response data */
-  fallbackResponse?: any;
+  fallbackResponse?: unknown;
   /** Custom circuit name (defaults to controller.method) */
   circuitName?: string;
 }
@@ -62,7 +158,7 @@ export interface ResilienceConfig {
  */
 export const UseResilience = (config: ResilienceConfig = {}) => {
   return (
-    target: any,
+    target: Record<string, unknown>,
     propertyKey?: string,
     descriptor?: PropertyDescriptor,
   ) => {
@@ -145,10 +241,10 @@ export class ResilienceInterceptor implements NestInterceptor {
     }, 600000); // Clean every 10 minutes
   }
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const operationId = this.generateOperationId();
-    const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
+    const request = context.switchToHttp().getRequest<ExtendedRequest>();
+    const response = context.switchToHttp().getResponse<Response>();
     const handler = context.getHandler();
     const controller = context.getClass();
 
@@ -176,9 +272,13 @@ export class ResilienceInterceptor implements NestInterceptor {
       ...handlerConfig,
     };
 
-    const endpoint = `${request.method} ${request.path}`;
+    const endpoint = `${request.method} ${request.path || request.url}`;
     const circuitName =
-      config.circuitName || this.generateCircuitName(controller, handler);
+      config.circuitName ||
+      this.generateCircuitName(
+        controller,
+        handler as (...args: any[]) => unknown,
+      );
 
     // Initialize metrics
     const metrics: ResilienceMetrics = {
@@ -233,7 +333,11 @@ export class ResilienceInterceptor implements NestInterceptor {
 
             // Record timeout as failure for circuit breaker
             if (config.enableCircuitBreaker) {
-              this.recordCircuitBreakerFailure(circuitName, error, operationId);
+              this.recordCircuitBreakerFailure(
+                circuitName,
+                normalizeError(error),
+                operationId,
+              );
             }
 
             return throwError(
@@ -243,7 +347,7 @@ export class ResilienceInterceptor implements NestInterceptor {
                 ),
             );
           }
-          return throwError(() => error);
+          return throwError(() => error as Error);
         }),
       );
     }
@@ -254,7 +358,7 @@ export class ResilienceInterceptor implements NestInterceptor {
         this.circuitBreakerService.getCircuitMetrics(circuitName);
 
       // Check if circuit is open before proceeding
-      if (circuitMetrics && circuitMetrics.state === 'OPEN') {
+      if (circuitMetrics && circuitMetrics.state === CircuitBreakerState.OPEN) {
         metrics.errorType = 'CIRCUIT_OPEN';
 
         if (config.enableFallback && config.fallbackResponse !== undefined) {
@@ -288,19 +392,19 @@ export class ResilienceInterceptor implements NestInterceptor {
     // Process request with error handling
     return observable.pipe(
       tap({
-        next: (data) => {
+        next: (_data) => {
           // Record success
           metrics.success = true;
           metrics.httpStatus = response.statusCode;
           this.recordSuccess(config, circuitName, operationId, metrics);
         },
-        error: (error) => {
+        error: (_error) => {
           // This will be handled in catchError below
         },
       }),
       catchError((error) => {
         return this.handleError(
-          error,
+          normalizeError(error),
           config,
           circuitName,
           operationId,
@@ -332,17 +436,17 @@ export class ResilienceInterceptor implements NestInterceptor {
    * Handle errors with resilience patterns
    */
   private handleError(
-    error: any,
+    error: StructuredError,
     config: ResilienceConfig,
     circuitName: string,
     operationId: string,
     metrics: ResilienceMetrics,
-  ): Observable<any> {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const httpStatus = error?.status || error?.response?.status;
+  ): Observable<unknown> {
+    const errorMessage = error.message ?? serializeError(error);
+    const httpStatus = error.status ?? error.response?.status;
 
     metrics.errorType = this.classifyError(error);
-    metrics.httpStatus = httpStatus;
+    metrics.httpStatus = httpStatus ?? null;
 
     this.logger.warn('Request error occurred', {
       operationId,
@@ -394,7 +498,7 @@ export class ResilienceInterceptor implements NestInterceptor {
       // This requires extending the circuit breaker guard to expose this method
       // For now, we'll call the service method directly
       const circuitBreakerGuard = this.getCircuitBreakerGuard();
-      if (circuitBreakerGuard) {
+      if (this.isCircuitBreakerGuard(circuitBreakerGuard)) {
         circuitBreakerGuard.recordSuccess(circuitName);
       }
     }
@@ -412,11 +516,11 @@ export class ResilienceInterceptor implements NestInterceptor {
    */
   private recordCircuitBreakerFailure(
     circuitName: string,
-    error: any,
-    operationId: string,
+    error: StructuredError,
+    _operationId: string,
   ): void {
     const circuitBreakerGuard = this.getCircuitBreakerGuard();
-    if (circuitBreakerGuard) {
+    if (this.isCircuitBreakerGuard(circuitBreakerGuard)) {
       circuitBreakerGuard.recordFailure(circuitName, error);
     }
   }
@@ -424,7 +528,7 @@ export class ResilienceInterceptor implements NestInterceptor {
   /**
    * Classify error type for monitoring
    */
-  private classifyError(error: any): string {
+  private classifyError(error: StructuredError): string {
     if (error instanceof TimeoutError) {
       return 'TIMEOUT';
     }
@@ -433,14 +537,14 @@ export class ResilienceInterceptor implements NestInterceptor {
       return 'SERVICE_UNAVAILABLE';
     }
 
-    const status = error?.status || error?.response?.status;
+    const status = error.status ?? error.response?.status;
     if (status) {
       if (status >= 500) return 'SERVER_ERROR';
       if (status === 429) return 'RATE_LIMITED';
       if (status >= 400) return 'CLIENT_ERROR';
     }
 
-    const errorMessage = error?.message?.toLowerCase() || '';
+    const errorMessage = error.message?.toLowerCase() ?? '';
     if (errorMessage.includes('connection')) return 'CONNECTION_ERROR';
     if (errorMessage.includes('timeout')) return 'TIMEOUT_ERROR';
     if (errorMessage.includes('network')) return 'NETWORK_ERROR';
@@ -451,12 +555,12 @@ export class ResilienceInterceptor implements NestInterceptor {
   /**
    * Check if fallback should be used for this error
    */
-  private shouldUseFallback(error: any): boolean {
+  private shouldUseFallback(error: StructuredError): boolean {
     // Use fallback for 5xx errors, timeouts, and service unavailable
-    const status = error?.status || error?.response?.status;
+    const status = error.status ?? error.response?.status;
 
     return (
-      status >= 500 ||
+      (typeof status === 'number' && status >= 500) ||
       error instanceof TimeoutError ||
       error instanceof ServiceUnavailableException ||
       this.classifyError(error) === 'CONNECTION_ERROR'
@@ -467,22 +571,22 @@ export class ResilienceInterceptor implements NestInterceptor {
    * Create fallback response observable
    */
   private createFallbackResponse(
-    fallbackData: any,
+    fallbackData: unknown,
     metrics: ResilienceMetrics,
-  ): Observable<any> {
+  ): Observable<unknown> {
     metrics.success = true;
     metrics.httpStatus = 200;
 
     // If fallback data is a function, execute it
     if (typeof fallbackData === 'function') {
       try {
-        const result = fallbackData();
+        const result = (fallbackData as () => unknown)();
         return new Observable((subscriber) => {
           subscriber.next(result);
           subscriber.complete();
         });
       } catch (error) {
-        return throwError(() => error);
+        return throwError(() => error as Error);
       }
     }
 
@@ -496,7 +600,10 @@ export class ResilienceInterceptor implements NestInterceptor {
   /**
    * Generate circuit name from controller and handler
    */
-  private generateCircuitName(controller: Function, handler: Function): string {
+  private generateCircuitName(
+    controller: new (...args: any[]) => any,
+    handler: (...args: any[]) => unknown,
+  ): string {
     return `${controller.name}.${handler.name}`;
   }
 
@@ -535,10 +642,26 @@ export class ResilienceInterceptor implements NestInterceptor {
    * Get circuit breaker guard instance (helper method)
    * This is a temporary solution - ideally we'd inject the guard properly
    */
-  private getCircuitBreakerGuard(): any {
+  private getCircuitBreakerGuard(): unknown {
     // This would need to be properly injected or accessed through a service registry
     // For now, we'll return null and handle the circuit breaker directly through the service
     return null;
+  }
+
+  /**
+   * Type guard to check if object implements CircuitBreakerGuardInterface
+   */
+  private isCircuitBreakerGuard(
+    guard: unknown,
+  ): guard is CircuitBreakerGuardInterface {
+    return (
+      guard !== null &&
+      typeof guard === 'object' &&
+      'recordSuccess' in guard &&
+      'recordFailure' in guard &&
+      typeof (guard as Record<string, unknown>).recordSuccess === 'function' &&
+      typeof (guard as Record<string, unknown>).recordFailure === 'function'
+    );
   }
 
   /**

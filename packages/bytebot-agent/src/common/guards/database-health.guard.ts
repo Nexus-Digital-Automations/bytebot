@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
+import { Request, Response } from 'express';
 import { DatabaseService } from '../../database/database.service';
 
 export enum HealthStatus {
@@ -62,7 +63,7 @@ export const RequireDatabaseHealth = (
   config?: Partial<DatabaseHealthConfig>,
 ) => {
   return (
-    target: any,
+    target: object,
     propertyKey?: string,
     descriptor?: PropertyDescriptor,
   ) => {
@@ -70,13 +71,17 @@ export const RequireDatabaseHealth = (
       // Method decorator
       Reflect.defineMetadata(
         'database-health-config',
-        config || {},
+        (config as Record<string, unknown>) || {},
         target,
         propertyKey,
       );
     } else {
       // Class decorator
-      Reflect.defineMetadata('database-health-config', config || {}, target);
+      Reflect.defineMetadata(
+        'database-health-config',
+        (config as Record<string, unknown>) || {},
+        target,
+      );
     }
   };
 };
@@ -138,8 +143,10 @@ export class DatabaseHealthGuard implements CanActivate {
     });
   }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+  canActivate(context: ExecutionContext): boolean {
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { res?: Response }>();
     const handler = context.getHandler();
     const controller = context.getClass();
 
@@ -384,11 +391,11 @@ export class DatabaseHealthGuard implements CanActivate {
     });
 
     // Perform initial health check
-    this.performHealthCheck();
+    void this.performHealthCheck();
 
     // Schedule periodic health checks
-    this.healthCheckInterval = setInterval(async () => {
-      await this.performHealthCheck();
+    this.healthCheckInterval = setInterval(() => {
+      void this.performHealthCheck();
     }, this.defaultConfig.checkInterval);
   }
 

@@ -42,6 +42,7 @@ import {
   TaskPriority,
   TaskType,
   MessageRole,
+  File,
 } from '@prisma/client';
 import { GlobalValidationPipe } from '../../common/pipes/validation.pipe';
 import { SanitizationPipe } from '../../common/pipes/sanitization.pipe';
@@ -104,7 +105,7 @@ describe('TasksController', () => {
     model: { provider: 'anthropic', name: 'claude-3-sonnet' },
   };
 
-  const mockTaskWithFiles: Task & { files: any[] } = {
+  const mockTaskWithFiles: Task & { files: File[] } = {
     ...mockTask,
     files: [
       {
@@ -183,6 +184,21 @@ describe('TasksController', () => {
       get: jest.fn(),
     };
 
+    const mockRedisClient = {
+      get: jest.fn(),
+      set: jest.fn(),
+      del: jest.fn(),
+      incr: jest.fn(),
+      expire: jest.fn(),
+    };
+
+    const mockReflector = {
+      get: jest.fn(),
+      getAll: jest.fn(),
+      getAllAndOverride: jest.fn(),
+      getAllAndMerge: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [TasksController],
       providers: [
@@ -198,8 +214,26 @@ describe('TasksController', () => {
           provide: ConfigService,
           useValue: mockConfigService,
         },
-        GlobalValidationPipe,
-        SanitizationPipe,
+        {
+          provide: 'REDIS_CLIENT',
+          useValue: mockRedisClient,
+        },
+        {
+          provide: 'Reflector',
+          useValue: mockReflector,
+        },
+        {
+          provide: GlobalValidationPipe,
+          useValue: {
+            transform: jest.fn((value) => value),
+          },
+        },
+        {
+          provide: SanitizationPipe,
+          useValue: {
+            transform: jest.fn((value) => value),
+          },
+        },
       ],
     }).compile();
 
@@ -310,11 +344,11 @@ describe('TasksController', () => {
 
     it('should retrieve tasks with default pagination', async () => {
       const result = await controller.findAll(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
         mockUser,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
       );
 
       expect(result).toEqual(mockTasksListResponse);
@@ -322,18 +356,18 @@ describe('TasksController', () => {
     });
 
     it('should retrieve tasks with custom pagination', async () => {
-      await controller.findAll('2', '20', undefined, undefined, mockUser);
+      await controller.findAll(mockUser, '2', '20', undefined, undefined);
 
       expect(tasksService.findAll).toHaveBeenCalledWith(2, 20, undefined);
     });
 
     it('should retrieve tasks filtered by single status', async () => {
       await controller.findAll(
+        mockUser,
         undefined,
         undefined,
         'PENDING',
         undefined,
-        mockUser,
       );
 
       expect(tasksService.findAll).toHaveBeenCalledWith(1, 10, ['PENDING']);
@@ -341,11 +375,11 @@ describe('TasksController', () => {
 
     it('should retrieve tasks filtered by multiple statuses', async () => {
       await controller.findAll(
+        mockUser,
         undefined,
         undefined,
         undefined,
         'PENDING,RUNNING',
-        mockUser,
       );
 
       expect(tasksService.findAll).toHaveBeenCalledWith(1, 10, [
@@ -356,11 +390,11 @@ describe('TasksController', () => {
 
     it('should prioritize statuses parameter over status parameter', async () => {
       await controller.findAll(
+        mockUser,
         undefined,
         undefined,
         'COMPLETED',
         'PENDING,RUNNING',
-        mockUser,
       );
 
       expect(tasksService.findAll).toHaveBeenCalledWith(1, 10, [
@@ -371,11 +405,11 @@ describe('TasksController', () => {
 
     it('should handle invalid pagination parameters gracefully', async () => {
       await controller.findAll(
-        'invalid',
-        'invalid',
-        undefined,
-        undefined,
         mockUser,
+        'invalid',
+        'invalid',
+        undefined,
+        undefined,
       );
 
       expect(tasksService.findAll).toHaveBeenCalledWith(NaN, NaN, undefined);
@@ -386,11 +420,11 @@ describe('TasksController', () => {
       tasksService.findAll.mockResolvedValue(emptyResponse);
 
       const result = await controller.findAll(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
         mockUser,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
       );
 
       expect(result).toEqual(emptyResponse);
@@ -402,11 +436,11 @@ describe('TasksController', () => {
 
       await expect(
         controller.findAll(
-          undefined,
-          undefined,
-          undefined,
-          undefined,
           mockUser,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
         ),
       ).rejects.toThrow('Database query failed');
     });
@@ -588,7 +622,6 @@ describe('TasksController', () => {
         'task-123',
         undefined,
         undefined,
-        mockUser,
       );
 
       expect(result).toEqual([mockMessage]);
@@ -599,7 +632,7 @@ describe('TasksController', () => {
     });
 
     it('should retrieve task messages with pagination', async () => {
-      await controller.taskMessages('task-123', '10', '2', mockUser);
+      await controller.taskMessages('task-123', '10', '2');
 
       expect(messagesService.findAll).toHaveBeenCalledWith('task-123', {
         limit: 10,
@@ -608,7 +641,7 @@ describe('TasksController', () => {
     });
 
     it('should handle invalid pagination parameters', async () => {
-      await controller.taskMessages('task-123', 'invalid', 'invalid', mockUser);
+      await controller.taskMessages('task-123', 'invalid', 'invalid');
 
       expect(messagesService.findAll).toHaveBeenCalledWith('task-123', {
         limit: NaN,
@@ -626,7 +659,6 @@ describe('TasksController', () => {
       const result = await controller.addTaskMessage(
         'task-123',
         mockAddTaskMessageDto,
-        mockUser,
       );
 
       expect(result).toEqual(mockTask);
@@ -642,11 +674,7 @@ describe('TasksController', () => {
       );
 
       await expect(
-        controller.addTaskMessage(
-          'nonexistent',
-          mockAddTaskMessageDto,
-          mockUser,
-        ),
+        controller.addTaskMessage('nonexistent', mockAddTaskMessageDto),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -682,7 +710,13 @@ describe('TasksController', () => {
 
   describe('Processed Messages - GET /tasks/:id/messages/processed', () => {
     beforeEach(() => {
-      messagesService.findProcessedMessages.mockResolvedValue([mockMessage]);
+      messagesService.findProcessedMessages.mockResolvedValue([
+        {
+          role: mockMessage.role,
+          messages: [mockMessage],
+          take_over: false,
+        },
+      ]);
     });
 
     it('should retrieve processed messages with default options', async () => {
@@ -692,7 +726,13 @@ describe('TasksController', () => {
         undefined,
       );
 
-      expect(result).toEqual([mockMessage]);
+      expect(result).toEqual([
+        {
+          role: mockMessage.role,
+          messages: [mockMessage],
+          take_over: false,
+        },
+      ]);
       expect(messagesService.findProcessedMessages).toHaveBeenCalledWith(
         'task-123',
         {
@@ -721,7 +761,7 @@ describe('TasksController', () => {
     });
 
     it('should successfully delete task', async () => {
-      await controller.delete('task-123', mockAdminUser);
+      await controller.delete('task-123');
 
       expect(tasksService.delete).toHaveBeenCalledWith('task-123');
     });
@@ -731,9 +771,9 @@ describe('TasksController', () => {
         new NotFoundException('Task not found'),
       );
 
-      await expect(
-        controller.delete('nonexistent', mockAdminUser),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.delete('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -746,7 +786,7 @@ describe('TasksController', () => {
     });
 
     it('should successfully takeover task control', async () => {
-      const result = await controller.takeOver('task-123', mockAdminUser);
+      const result = await controller.takeOver('task-123');
 
       expect(result.control).toBe(MessageRole.USER);
       expect(tasksService.takeOver).toHaveBeenCalledWith('task-123');
@@ -757,9 +797,9 @@ describe('TasksController', () => {
         new NotFoundException('Task not found'),
       );
 
-      await expect(
-        controller.takeOver('nonexistent', mockAdminUser),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.takeOver('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should handle invalid task state for takeover', async () => {
@@ -767,9 +807,9 @@ describe('TasksController', () => {
         new BadRequestException('Task is not under agent control'),
       );
 
-      await expect(
-        controller.takeOver('task-123', mockAdminUser),
-      ).rejects.toThrow(BadRequestException);
+      await expect(controller.takeOver('task-123')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -782,7 +822,7 @@ describe('TasksController', () => {
     });
 
     it('should successfully resume task', async () => {
-      const result = await controller.resume('task-123', mockAdminUser);
+      const result = await controller.resume('task-123');
 
       expect(result.status).toBe(TaskStatus.RUNNING);
       expect(tasksService.resume).toHaveBeenCalledWith('task-123');
@@ -793,9 +833,9 @@ describe('TasksController', () => {
         new NotFoundException('Task not found'),
       );
 
-      await expect(
-        controller.resume('nonexistent', mockAdminUser),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.resume('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should handle invalid task state for resume', async () => {
@@ -803,9 +843,9 @@ describe('TasksController', () => {
         new BadRequestException('Task is not under user control'),
       );
 
-      await expect(
-        controller.resume('task-123', mockAdminUser),
-      ).rejects.toThrow(BadRequestException);
+      await expect(controller.resume('task-123')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -818,7 +858,7 @@ describe('TasksController', () => {
     });
 
     it('should successfully cancel task', async () => {
-      const result = await controller.cancel('task-123', mockAdminUser);
+      const result = await controller.cancel('task-123');
 
       expect(result.status).toBe(TaskStatus.CANCELLED);
       expect(tasksService.cancel).toHaveBeenCalledWith('task-123');
@@ -829,9 +869,9 @@ describe('TasksController', () => {
         new NotFoundException('Task not found'),
       );
 
-      await expect(
-        controller.cancel('nonexistent', mockAdminUser),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.cancel('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should handle already completed task cancellation', async () => {
@@ -841,9 +881,9 @@ describe('TasksController', () => {
         ),
       );
 
-      await expect(
-        controller.cancel('task-123', mockAdminUser),
-      ).rejects.toThrow(BadRequestException);
+      await expect(controller.cancel('task-123')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -853,11 +893,11 @@ describe('TasksController', () => {
 
       const requests = Array.from({ length: 10 }, () =>
         controller.findAll(
-          undefined,
-          undefined,
-          undefined,
-          undefined,
           mockUser,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
         ),
       );
 
@@ -876,11 +916,11 @@ describe('TasksController', () => {
 
       await expect(
         controller.findAll(
-          undefined,
-          undefined,
-          undefined,
-          undefined,
           mockUser,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
         ),
       ).rejects.toThrow('Service timeout');
     });
@@ -905,9 +945,9 @@ describe('TasksController', () => {
         new UnauthorizedException('Insufficient permissions'),
       );
 
-      await expect(
-        controller.delete('task-123', unauthorizedUser),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(controller.delete('task-123')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should validate input data thoroughly', async () => {

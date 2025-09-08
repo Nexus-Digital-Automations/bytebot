@@ -38,7 +38,6 @@ import Redis from 'ioredis';
           port: configService.get('REDIS_PORT', 6379),
           password: configService.get('REDIS_PASSWORD'),
           db: configService.get('REDIS_DB', 2), // Separate DB for BytebotD
-          retryDelayOnFailover: 100,
           maxRetriesPerRequest: 3,
           lazyConnect: true,
           keyPrefix: 'bytebotd:',

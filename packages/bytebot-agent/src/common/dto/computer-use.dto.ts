@@ -29,12 +29,7 @@ import {
 } from 'class-validator';
 import { Type, Transform, Expose } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  BaseResponseDto,
-  BaseEntityDto,
-  PaginationDto,
-  FilterDto,
-} from './base.dto';
+import { BaseResponseDto, BaseEntityDto } from './base.dto';
 
 /**
  * Computer action types enumeration
@@ -202,7 +197,9 @@ export abstract class BaseComputerActionDto {
   @IsOptional()
   @IsString()
   @Length(0, 200, { message: 'Description cannot exceed 200 characters' })
-  @Transform(({ value }) => value?.trim())
+  @Transform(({ value }: { value: string | undefined }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @Expose()
   description?: string;
 }
@@ -373,4 +370,457 @@ export class TypeActionDto extends BaseComputerActionDto {
     maxLength: 10000,
   })
   @IsString({ message: 'Text must be a string' })
-  @Length(1, 10000, { message: 'Text must be between 1 and 10000 characters' })\n  @IsNotEmpty({ message: 'Text cannot be empty' })\n  // Security: Prevent potentially dangerous characters\n  @Matches(/^[\\x20-\\x7E\\r\\n\\t\\u00A0-\\uFFFF]*$/, {\n    message: 'Text contains invalid characters',\n  })\n  @Expose()\n  text: string;\n\n  @ApiPropertyOptional({\n    description: 'Typing speed in characters per minute',\n    example: 300,\n    minimum: 50,\n    maximum: 1000,\n    default: 300,\n  })\n  @IsOptional()\n  @IsNumber()\n  @Min(50)\n  @Max(1000)\n  @Expose()\n  typingSpeed?: number = 300;\n\n  @ApiPropertyOptional({\n    description: 'Clear existing text before typing',\n    example: false,\n    default: false,\n  })\n  @IsOptional()\n  @IsBoolean()\n  @Expose()\n  clearFirst?: boolean = false;\n}\n\n/**\n * Key press action DTO\n */\nexport class KeyActionDto extends BaseComputerActionDto {\n  action: ComputerActionType.KEY = ComputerActionType.KEY;\n\n  @ApiProperty({\n    description: 'Key or key combination to press',\n    example: 'Enter',\n    maxLength: 50,\n  })\n  @IsString({ message: 'Key must be a string' })\n  @Length(1, 50, { message: 'Key must be between 1 and 50 characters' })\n  @IsNotEmpty({ message: 'Key cannot be empty' })\n  // Security: Restrict to known safe key names\n  @Matches(/^[a-zA-Z0-9_+\\-\\s]+$/, {\n    message: 'Invalid key format',\n  })\n  @Expose()\n  key: string;\n\n  @ApiPropertyOptional({\n    description: 'Modifier keys to hold',\n    enum: KeyModifier,\n    isArray: true,\n  })\n  @IsOptional()\n  @IsArray()\n  @IsEnum(KeyModifier, { each: true })\n  @ArrayMaxSize(4)\n  @Expose()\n  modifiers?: KeyModifier[];\n\n  @ApiPropertyOptional({\n    description: 'Hold duration for key press in milliseconds',\n    example: 100,\n    minimum: 10,\n    maximum: 5000,\n  })\n  @IsOptional()\n  @IsNumber()\n  @Min(10)\n  @Max(5000)\n  @Expose()\n  holdDuration?: number;\n}\n\n/**\n * Scroll action DTO\n */\nexport class ScrollActionDto extends BaseComputerActionDto {\n  action: ComputerActionType.SCROLL = ComputerActionType.SCROLL;\n\n  @ApiProperty({\n    description: 'Scroll direction',\n    enum: ScrollDirection,\n    example: ScrollDirection.DOWN,\n  })\n  @IsEnum(ScrollDirection, { message: 'Invalid scroll direction' })\n  @Expose()\n  direction: ScrollDirection;\n\n  @ApiPropertyOptional({\n    description: 'Number of scroll units (lines or pixels)',\n    example: 3,\n    minimum: 1,\n    maximum: 100,\n    default: 3,\n  })\n  @IsOptional()\n  @IsNumber()\n  @Min(1)\n  @Max(100)\n  @Expose()\n  amount?: number = 3;\n\n  @ApiPropertyOptional({\n    description: 'Coordinates to scroll at (default: center)',\n    type: ScreenCoordinatesDto,\n  })\n  @IsOptional()\n  @ValidateNested()\n  @Type(() => ScreenCoordinatesDto)\n  @Expose()\n  coordinates?: ScreenCoordinatesDto;\n}\n\n/**\n * Wait action DTO\n */\nexport class WaitActionDto extends BaseComputerActionDto {\n  action: ComputerActionType.WAIT = ComputerActionType.WAIT;\n\n  @ApiProperty({\n    description: 'Wait duration in milliseconds',\n    example: 1000,\n    minimum: 100,\n    maximum: 30000,\n  })\n  @IsNumber({}, { message: 'Duration must be a number' })\n  @Min(100, { message: 'Wait duration must be at least 100ms' })\n  @Max(30000, { message: 'Wait duration cannot exceed 30 seconds' })\n  @Expose()\n  duration: number;\n\n  @ApiPropertyOptional({\n    description: 'Reason for waiting (for logging)',\n    example: 'Waiting for page to load',\n    maxLength: 100,\n  })\n  @IsOptional()\n  @IsString()\n  @Length(0, 100)\n  @Transform(({ value }) => value?.trim())\n  @Expose()\n  reason?: string;\n}\n\n/**\n * OCR action DTO\n */\nexport class OcrActionDto extends BaseComputerActionDto {\n  action: ComputerActionType.OCR = ComputerActionType.OCR;\n\n  @ApiPropertyOptional({\n    description: 'Region to perform OCR on (default: full screen)',\n    type: ScreenRegionDto,\n  })\n  @IsOptional()\n  @ValidateNested()\n  @Type(() => ScreenRegionDto)\n  @Expose()\n  region?: ScreenRegionDto;\n\n  @ApiPropertyOptional({\n    description: 'Language for OCR recognition',\n    example: 'eng',\n    enum: ['eng', 'fra', 'deu', 'spa', 'ita', 'por', 'rus', 'chi_sim', 'jpn'],\n    default: 'eng',\n  })\n  @IsOptional()\n  @IsEnum(['eng', 'fra', 'deu', 'spa', 'ita', 'por', 'rus', 'chi_sim', 'jpn'])\n  @Expose()\n  language?: string = 'eng';\n\n  @ApiPropertyOptional({\n    description: 'OCR confidence threshold (0-100)',\n    example: 80,\n    minimum: 0,\n    maximum: 100,\n    default: 60,\n  })\n  @IsOptional()\n  @IsNumber()\n  @Min(0)\n  @Max(100)\n  @Expose()\n  confidenceThreshold?: number = 60;\n}\n\n/**\n * Computer action execution request DTO\n */\nexport class ExecuteComputerActionDto {\n  @ApiProperty({\n    description: 'Computer action to execute',\n    oneOf: [\n      { $ref: '#/components/schemas/ScreenshotActionDto' },\n      { $ref: '#/components/schemas/ClickActionDto' },\n      { $ref: '#/components/schemas/DragActionDto' },\n      { $ref: '#/components/schemas/TypeActionDto' },\n      { $ref: '#/components/schemas/KeyActionDto' },\n      { $ref: '#/components/schemas/ScrollActionDto' },\n      { $ref: '#/components/schemas/WaitActionDto' },\n      { $ref: '#/components/schemas/OcrActionDto' },\n    ],\n  })\n  @ValidateNested()\n  @Type(() => BaseComputerActionDto, {\n    discriminator: {\n      property: 'action',\n      subTypes: [\n        { value: ScreenshotActionDto, name: ComputerActionType.SCREENSHOT },\n        { value: ClickActionDto, name: ComputerActionType.CLICK },\n        { value: DragActionDto, name: ComputerActionType.DRAG },\n        { value: TypeActionDto, name: ComputerActionType.TYPE },\n        { value: KeyActionDto, name: ComputerActionType.KEY },\n        { value: ScrollActionDto, name: ComputerActionType.SCROLL },\n        { value: WaitActionDto, name: ComputerActionType.WAIT },\n        { value: OcrActionDto, name: ComputerActionType.OCR },\n      ],\n    },\n  })\n  @Expose()\n  action: BaseComputerActionDto;\n\n  @ApiPropertyOptional({\n    description: 'Execution context metadata',\n    type: 'object',\n    example: {\n      sessionId: 'session_123',\n      userId: 'user_456',\n      requestId: 'req_789',\n    },\n  })\n  @IsOptional()\n  @IsObject()\n  @Expose()\n  context?: Record<string, any>;\n\n  @ApiPropertyOptional({\n    description: 'Enable debug mode with detailed logging',\n    example: false,\n    default: false,\n  })\n  @IsOptional()\n  @IsBoolean()\n  @Expose()\n  debug?: boolean = false;\n}\n\n/**\n * Computer action execution result DTO\n */\nexport class ComputerActionResultDto extends BaseResponseDto {\n  @ApiProperty({\n    description: 'Executed action details',\n    type: 'object',\n  })\n  @IsObject()\n  @Expose()\n  action: Record<string, any>;\n\n  @ApiPropertyOptional({\n    description: 'Action execution result data',\n    type: 'object',\n    example: {\n      screenshot: 'base64-encoded-image',\n      text: 'extracted-text',\n      success: true,\n    },\n  })\n  @IsOptional()\n  @IsObject()\n  @Expose()\n  result?: Record<string, any>;\n\n  @ApiProperty({\n    description: 'Execution duration in milliseconds',\n    example: 1250,\n    minimum: 0,\n  })\n  @IsNumber()\n  @Min(0)\n  @Expose()\n  executionTime: number;\n\n  @ApiPropertyOptional({\n    description: 'Debug information if debug mode enabled',\n    type: 'object',\n  })\n  @IsOptional()\n  @IsObject()\n  @Expose()\n  debug?: Record<string, any>;\n\n  @ApiPropertyOptional({\n    description: 'Screen information at time of action',\n    type: 'object',\n    example: {\n      resolution: { width: 1920, height: 1080 },\n      colorDepth: 24,\n      scaleFactor: 1.0,\n    },\n  })\n  @IsOptional()\n  @IsObject()\n  @Expose()\n  screenInfo?: {\n    resolution: { width: number; height: number };\n    colorDepth: number;\n    scaleFactor: number;\n  };\n}\n\n/**\n * Batch computer actions DTO\n */\nexport class BatchComputerActionsDto {\n  @ApiProperty({\n    description: 'Array of computer actions to execute in sequence',\n    type: [ExecuteComputerActionDto],\n    minItems: 1,\n    maxItems: 50,\n  })\n  @IsArray()\n  @ArrayMinSize(1, { message: 'At least one action is required' })\n  @ArrayMaxSize(50, { message: 'Cannot execute more than 50 actions in batch' })\n  @ValidateNested({ each: true })\n  @Type(() => ExecuteComputerActionDto)\n  @Expose()\n  actions: ExecuteComputerActionDto[];\n\n  @ApiPropertyOptional({\n    description: 'Stop execution on first failure',\n    example: true,\n    default: true,\n  })\n  @IsOptional()\n  @IsBoolean()\n  @Expose()\n  stopOnError?: boolean = true;\n\n  @ApiPropertyOptional({\n    description: 'Maximum total execution time for all actions (milliseconds)',\n    example: 60000,\n    minimum: 1000,\n    maximum: 300000,\n    default: 60000,\n  })\n  @IsOptional()\n  @IsNumber()\n  @Min(1000)\n  @Max(300000)\n  @Expose()\n  maxTotalTime?: number = 60000;\n\n  @ApiPropertyOptional({\n    description: 'Batch execution context',\n    type: 'object',\n  })\n  @IsOptional()\n  @IsObject()\n  @Expose()\n  context?: Record<string, any>;\n}\n\n/**\n * Computer action history/audit DTO\n */\nexport class ComputerActionHistoryDto extends BaseEntityDto {\n  @ApiProperty({\n    description: 'Action type that was executed',\n    enum: ComputerActionType,\n  })\n  @IsEnum(ComputerActionType)\n  @Expose()\n  actionType: ComputerActionType;\n\n  @ApiProperty({\n    description: 'Action parameters used',\n    type: 'object',\n  })\n  @IsObject()\n  @Expose()\n  parameters: Record<string, any>;\n\n  @ApiProperty({\n    description: 'Whether the action succeeded',\n    example: true,\n  })\n  @IsBoolean()\n  @Expose()\n  success: boolean;\n\n  @ApiProperty({\n    description: 'Execution duration in milliseconds',\n    minimum: 0,\n  })\n  @IsNumber()\n  @Min(0)\n  @Expose()\n  executionTime: number;\n\n  @ApiPropertyOptional({\n    description: 'Error message if action failed',\n    maxLength: 500,\n  })\n  @IsOptional()\n  @IsString()\n  @Length(0, 500)\n  @Expose()\n  errorMessage?: string;\n\n  @ApiPropertyOptional({\n    description: 'User ID who executed the action',\n    format: 'uuid',\n  })\n  @IsOptional()\n  @IsString()\n  @Expose()\n  userId?: string;\n\n  @ApiPropertyOptional({\n    description: 'Session ID when action was executed',\n    maxLength: 100,\n  })\n  @IsOptional()\n  @IsString()\n  @Length(0, 100)\n  @Expose()\n  sessionId?: string;\n}\n\nexport default {\n  ComputerActionType,\n  MouseButton,\n  KeyModifier,\n  ScrollDirection,\n  ScreenCoordinatesDto,\n  ScreenRegionDto,\n  ExecuteComputerActionDto,\n  ComputerActionResultDto,\n  BatchComputerActionsDto,\n  ComputerActionHistoryDto,\n  // Individual action DTOs\n  ScreenshotActionDto,\n  ClickActionDto,\n  DragActionDto,\n  TypeActionDto,\n  KeyActionDto,\n  ScrollActionDto,\n  WaitActionDto,\n  OcrActionDto,\n};
+  @Length(1, 10000, { message: 'Text must be between 1 and 10000 characters' })
+  @IsNotEmpty({ message: 'Text cannot be empty' })
+  // Security: Prevent potentially dangerous characters
+  @Matches(/^[\x20-\x7E\r\n\t\u00A0-\uFFFF]*$/, {
+    message: 'Text contains invalid characters',
+  })
+  @Expose()
+  text: string;
+
+  @ApiPropertyOptional({
+    description: 'Typing speed in characters per minute',
+    example: 300,
+    minimum: 50,
+    maximum: 1000,
+    default: 300,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(50)
+  @Max(1000)
+  @Expose()
+  typingSpeed?: number = 300;
+
+  @ApiPropertyOptional({
+    description: 'Clear existing text before typing',
+    example: false,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Expose()
+  clearFirst?: boolean = false;
+}
+
+/**
+ * Key press action DTO
+ */
+export class KeyActionDto extends BaseComputerActionDto {
+  action: ComputerActionType.KEY = ComputerActionType.KEY;
+
+  @ApiProperty({
+    description: 'Key or key combination to press',
+    example: 'Enter',
+    maxLength: 50,
+  })
+  @IsString({ message: 'Key must be a string' })
+  @Length(1, 50, { message: 'Key must be between 1 and 50 characters' })
+  @IsNotEmpty({ message: 'Key cannot be empty' })
+  // Security: Restrict to known safe key names
+  @Matches(/^[a-zA-Z0-9_+\\-\\s]+$/, {
+    message: 'Invalid key format',
+  })
+  @Expose()
+  key: string;
+
+  @ApiPropertyOptional({
+    description: 'Modifier keys to hold',
+    enum: KeyModifier,
+    isArray: true,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(KeyModifier, { each: true })
+  @ArrayMaxSize(4)
+  @Expose()
+  modifiers?: KeyModifier[];
+
+  @ApiPropertyOptional({
+    description: 'Hold duration for key press in milliseconds',
+    example: 100,
+    minimum: 10,
+    maximum: 5000,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(10)
+  @Max(5000)
+  @Expose()
+  holdDuration?: number;
+}
+
+/**
+ * Scroll action DTO
+ */
+export class ScrollActionDto extends BaseComputerActionDto {
+  action: ComputerActionType.SCROLL = ComputerActionType.SCROLL;
+
+  @ApiProperty({
+    description: 'Scroll direction',
+    enum: ScrollDirection,
+    example: ScrollDirection.DOWN,
+  })
+  @IsEnum(ScrollDirection, { message: 'Invalid scroll direction' })
+  @Expose()
+  direction: ScrollDirection;
+
+  @ApiPropertyOptional({
+    description: 'Number of scroll units (lines or pixels)',
+    example: 3,
+    minimum: 1,
+    maximum: 100,
+    default: 3,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  @Expose()
+  amount?: number = 3;
+
+  @ApiPropertyOptional({
+    description: 'Coordinates to scroll at (default: center)',
+    type: ScreenCoordinatesDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ScreenCoordinatesDto)
+  @Expose()
+  coordinates?: ScreenCoordinatesDto;
+}
+
+/**
+ * Wait action DTO
+ */
+export class WaitActionDto extends BaseComputerActionDto {
+  action: ComputerActionType.WAIT = ComputerActionType.WAIT;
+
+  @ApiProperty({
+    description: 'Wait duration in milliseconds',
+    example: 1000,
+    minimum: 100,
+    maximum: 30000,
+  })
+  @IsNumber({}, { message: 'Duration must be a number' })
+  @Min(100, { message: 'Wait duration must be at least 100ms' })
+  @Max(30000, { message: 'Wait duration cannot exceed 30 seconds' })
+  @Expose()
+  duration: number;
+
+  @ApiPropertyOptional({
+    description: 'Reason for waiting (for logging)',
+    example: 'Waiting for page to load',
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @Length(0, 100)
+  @Transform(({ value }: { value: string | undefined }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @Expose()
+  reason?: string;
+}
+
+/**
+ * OCR action DTO
+ */
+export class OcrActionDto extends BaseComputerActionDto {
+  action: ComputerActionType.OCR = ComputerActionType.OCR;
+
+  @ApiPropertyOptional({
+    description: 'Region to perform OCR on (default: full screen)',
+    type: ScreenRegionDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ScreenRegionDto)
+  @Expose()
+  region?: ScreenRegionDto;
+
+  @ApiPropertyOptional({
+    description: 'Language for OCR recognition',
+    example: 'eng',
+    enum: ['eng', 'fra', 'deu', 'spa', 'ita', 'por', 'rus', 'chi_sim', 'jpn'],
+    default: 'eng',
+  })
+  @IsOptional()
+  @IsEnum(['eng', 'fra', 'deu', 'spa', 'ita', 'por', 'rus', 'chi_sim', 'jpn'])
+  @Expose()
+  language?: string = 'eng';
+
+  @ApiPropertyOptional({
+    description: 'OCR confidence threshold (0-100)',
+    example: 80,
+    minimum: 0,
+    maximum: 100,
+    default: 60,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  @Expose()
+  confidenceThreshold?: number = 60;
+}
+
+/**
+ * Computer action execution request DTO
+ */
+export class ExecuteComputerActionDto {
+  @ApiProperty({
+    description: 'Computer action to execute',
+    oneOf: [
+      { $ref: '#/components/schemas/ScreenshotActionDto' },
+      { $ref: '#/components/schemas/ClickActionDto' },
+      { $ref: '#/components/schemas/DragActionDto' },
+      { $ref: '#/components/schemas/TypeActionDto' },
+      { $ref: '#/components/schemas/KeyActionDto' },
+      { $ref: '#/components/schemas/ScrollActionDto' },
+      { $ref: '#/components/schemas/WaitActionDto' },
+      { $ref: '#/components/schemas/OcrActionDto' },
+    ],
+  })
+  @ValidateNested()
+  @Type(() => BaseComputerActionDto, {
+    discriminator: {
+      property: 'action',
+      subTypes: [
+        { value: ScreenshotActionDto, name: ComputerActionType.SCREENSHOT },
+        { value: ClickActionDto, name: ComputerActionType.CLICK },
+        { value: DragActionDto, name: ComputerActionType.DRAG },
+        { value: TypeActionDto, name: ComputerActionType.TYPE },
+        { value: KeyActionDto, name: ComputerActionType.KEY },
+        { value: ScrollActionDto, name: ComputerActionType.SCROLL },
+        { value: WaitActionDto, name: ComputerActionType.WAIT },
+        { value: OcrActionDto, name: ComputerActionType.OCR },
+      ],
+    },
+  })
+  @Expose()
+  action: BaseComputerActionDto;
+
+  @ApiPropertyOptional({
+    description: 'Execution context metadata',
+    example: {
+      sessionId: 'session_123',
+      userId: 'user_456',
+      requestId: 'req_789',
+    },
+  })
+  @IsOptional()
+  @IsObject()
+  @Expose()
+  context?: Record<string, any>;
+
+  @ApiPropertyOptional({
+    description: 'Enable debug mode with detailed logging',
+    example: false,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Expose()
+  debug?: boolean = false;
+}
+
+/**
+ * Computer action execution result DTO
+ */
+export class ComputerActionResultDto extends BaseResponseDto {
+  @ApiProperty({
+    description: 'Executed action details',
+  })
+  @IsObject()
+  @Expose()
+  action: Record<string, any>;
+
+  @ApiPropertyOptional({
+    description: 'Action execution result data',
+    example: {
+      screenshot: 'base64-encoded-image',
+      text: 'extracted-text',
+      success: true,
+    },
+  })
+  @IsOptional()
+  @IsObject()
+  @Expose()
+  result?: Record<string, any>;
+
+  @ApiProperty({
+    description: 'Execution duration in milliseconds',
+    example: 1250,
+    minimum: 0,
+  })
+  @IsNumber()
+  @Min(0)
+  @Expose()
+  executionTime: number;
+
+  @ApiPropertyOptional({
+    description: 'Debug information if debug mode enabled',
+  })
+  @IsOptional()
+  @IsObject()
+  @Expose()
+  debug?: Record<string, any>;
+
+  @ApiPropertyOptional({
+    description: 'Screen information at time of action',
+    example: {
+      resolution: { width: 1920, height: 1080 },
+      colorDepth: 24,
+      scaleFactor: 1.0,
+    },
+  })
+  @IsOptional()
+  @IsObject()
+  @Expose()
+  screenInfo?: {
+    resolution: { width: number; height: number };
+    colorDepth: number;
+    scaleFactor: number;
+  };
+}
+
+/**
+ * Batch computer actions DTO
+ */
+export class BatchComputerActionsDto {
+  @ApiProperty({
+    description: 'Array of computer actions to execute in sequence',
+    type: [ExecuteComputerActionDto],
+    minItems: 1,
+    maxItems: 50,
+  })
+  @IsArray()
+  @ArrayMinSize(1, { message: 'At least one action is required' })
+  @ArrayMaxSize(50, { message: 'Cannot execute more than 50 actions in batch' })
+  @ValidateNested({ each: true })
+  @Type(() => ExecuteComputerActionDto)
+  @Expose()
+  actions: ExecuteComputerActionDto[];
+
+  @ApiPropertyOptional({
+    description: 'Stop execution on first failure',
+    example: true,
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Expose()
+  stopOnError?: boolean = true;
+
+  @ApiPropertyOptional({
+    description: 'Maximum total execution time for all actions (milliseconds)',
+    example: 60000,
+    minimum: 1000,
+    maximum: 300000,
+    default: 60000,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1000)
+  @Max(300000)
+  @Expose()
+  maxTotalTime?: number = 60000;
+
+  @ApiPropertyOptional({
+    description: 'Batch execution context',
+  })
+  @IsOptional()
+  @IsObject()
+  @Expose()
+  context?: Record<string, any>;
+}
+
+/**
+ * Computer action history/audit DTO
+ */
+export class ComputerActionHistoryDto extends BaseEntityDto {
+  @ApiProperty({
+    description: 'Action type that was executed',
+    enum: ComputerActionType,
+  })
+  @IsEnum(ComputerActionType)
+  @Expose()
+  actionType: ComputerActionType;
+
+  @ApiProperty({
+    description: 'Action parameters used',
+  })
+  @IsObject()
+  @Expose()
+  parameters: Record<string, any>;
+
+  @ApiProperty({
+    description: 'Whether the action succeeded',
+    example: true,
+  })
+  @IsBoolean()
+  @Expose()
+  success: boolean;
+
+  @ApiProperty({
+    description: 'Execution duration in milliseconds',
+    minimum: 0,
+  })
+  @IsNumber()
+  @Min(0)
+  @Expose()
+  executionTime: number;
+
+  @ApiPropertyOptional({
+    description: 'Error message if action failed',
+    maxLength: 500,
+  })
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  @Expose()
+  errorMessage?: string;
+
+  @ApiPropertyOptional({
+    description: 'User ID who executed the action',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsString()
+  @Expose()
+  userId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Session ID when action was executed',
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @Length(0, 100)
+  @Expose()
+  sessionId?: string;
+}
+
+export default {
+  ComputerActionType,
+  MouseButton,
+  KeyModifier,
+  ScrollDirection,
+  ScreenCoordinatesDto,
+  ScreenRegionDto,
+  ExecuteComputerActionDto,
+  ComputerActionResultDto,
+  BatchComputerActionsDto,
+  ComputerActionHistoryDto,
+  // Individual action DTOs
+  ScreenshotActionDto,
+  ClickActionDto,
+  DragActionDto,
+  TypeActionDto,
+  KeyActionDto,
+  ScrollActionDto,
+  WaitActionDto,
+  OcrActionDto,
+};

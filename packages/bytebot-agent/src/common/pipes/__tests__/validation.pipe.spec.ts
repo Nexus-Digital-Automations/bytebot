@@ -131,14 +131,14 @@ class UserWithAddressDto {
 
 class QueryDto {
   @IsOptional()
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }: { value: string }) => parseInt(value, 10))
   @IsInt()
   @Min(1)
   @Max(100)
   readonly limit?: number;
 
   @IsOptional()
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }: { value: string }) => parseInt(value, 10))
   @IsInt()
   @Min(0)
   readonly offset?: number;

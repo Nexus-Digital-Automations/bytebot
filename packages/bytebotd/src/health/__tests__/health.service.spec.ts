@@ -864,10 +864,747 @@ describe('HealthService', () => {
       const healthResults = results.filter(
         (r) => r && typeof r === 'object' && 'status' in r,
       );
-      const allHealthy = healthResults.every((r) => r.status === 'healthy');
+      const allHealthy = healthResults.every(
+        (r) => (r as any).status === 'healthy',
+      );
       expect(allHealthy).toBe(true);
 
       console.log(`[${testId}] Thread safety test completed successfully`);
+    });
+  });
+
+  describe('Kubernetes Health Probe Methods', () => {
+    describe('Process Health Check (Liveness)', () => {
+      it('should pass process health check with valid metrics', async () => {
+        const testId = `${operationId}_process_health_valid`;
+        console.log(
+          `[${testId}] Testing process health check with valid metrics`,
+        );
+
+        // Mock healthy process state
+        jest.spyOn(process, 'uptime').mockReturnValue(300); // 5 minutes
+        jest.spyOn(process, 'memoryUsage').mockReturnValue({
+          rss: 134217728, // 128 MB
+          heapTotal: 67108864, // 64 MB
+          heapUsed: 33554432, // 32 MB
+          external: 1048576,
+          arrayBuffers: 0,
+        });
+
+        const result = await service.checkProcessHealth();
+
+        expect(result).toHaveProperty('process');
+        expect(result.process).toMatchObject({
+          status: 'up',
+          uptime: 300,
+          memoryMB: 128,
+        });
+
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringMatching(
+            /\[process_health_\d+\] Checking process health/,
+          ),
+        );
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringMatching(
+            /\[process_health_\d+\] Process health check passed/,
+          ),
+        );
+
+        console.log(`[${testId}] Process health valid metrics test completed`);
+      });
+
+      it('should fail process health check with invalid state', async () => {
+        const testId = `${operationId}_process_health_invalid`;
+        console.log(
+          `[${testId}] Testing process health check with invalid state`,
+        );
+
+        // Mock invalid process state
+        jest.spyOn(process, 'uptime').mockReturnValue(0);
+        jest.spyOn(process, 'memoryUsage').mockReturnValue({
+          rss: 0,
+          heapTotal: 0,
+          heapUsed: 0,
+          external: 0,
+          arrayBuffers: 0,
+        });
+
+        const result = await service.checkProcessHealth();
+
+        expect(result).toHaveProperty('process');
+        expect(result.process).toMatchObject({
+          status: 'down',
+          error: expect.stringContaining('Process health check failed'),
+        });
+
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringMatching(
+            /\[process_health_\d+\] Process health check failed/,
+          ),
+        );
+
+        console.log(`[${testId}] Process health invalid state test completed`);
+      });
+
+      it('should handle process health check errors gracefully', async () => {
+        const testId = `${operationId}_process_health_error`;
+        console.log(`[${testId}] Testing process health check error handling`);
+
+        // Mock process.uptime to throw error
+        jest.spyOn(process, 'uptime').mockImplementation(() => {
+          throw new Error('Process uptime unavailable');
+        });
+
+        const result = await service.checkProcessHealth();
+
+        expect(result).toHaveProperty('process');
+        expect(result.process).toMatchObject({
+          status: 'down',
+          error: 'Process uptime unavailable',
+        });
+
+        console.log(`[${testId}] Process health error handling test completed`);
+      });
+    });
+
+    describe('Database Health Check (Readiness)', () => {
+      it('should pass database health check with good connection', async () => {
+        const testId = `${operationId}_database_health_connected`;
+        console.log(
+          `[${testId}] Testing database health check with connection`,
+        );
+
+        // Mock successful database ping
+        jest
+          .spyOn(service as any, 'performDatabasePing')
+          .mockResolvedValue(true);
+
+        const result = await service.checkDatabaseHealth();
+
+        expect(result).toHaveProperty('database');
+        expect(result.database).toMatchObject({
+          status: 'up',
+          responseTime: expect.stringMatching(/\d+ms/),
+          connectionStatus: 'connected',
+        });
+
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringMatching(/\[db_health_\d+\] Checking database health/),
+        );
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringMatching(
+            /\[db_health_\d+\] Database health check passed/,
+          ),
+        );
+
+        console.log(`[${testId}] Database health connected test completed`);
+      });
+
+      it('should fail database health check with connection failure', async () => {
+        const testId = `${operationId}_database_health_disconnected`;
+        console.log(`[${testId}] Testing database health check with failure`);
+
+        // Mock failed database ping
+        jest
+          .spyOn(service as any, 'performDatabasePing')
+          .mockResolvedValue(false);
+
+        const result = await service.checkDatabaseHealth();
+
+        expect(result).toHaveProperty('database');
+        expect(result.database).toMatchObject({
+          status: 'down',
+          error: 'Database connection failed',
+          connectionStatus: 'disconnected',
+        });
+
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringMatching(
+            /\[db_health_\d+\] Database health check failed/,
+          ),
+        );
+
+        console.log(`[${testId}] Database health disconnected test completed`);
+      });
+
+      it('should handle database health check exceptions', async () => {
+        const testId = `${operationId}_database_health_exception`;
+        console.log(
+          `[${testId}] Testing database health check exception handling`,
+        );
+
+        // Mock database ping to throw exception
+        jest
+          .spyOn(service as any, 'performDatabasePing')
+          .mockRejectedValue(new Error('Database timeout'));
+
+        const result = await service.checkDatabaseHealth();
+
+        expect(result).toHaveProperty('database');
+        expect(result.database).toMatchObject({
+          status: 'down',
+          error: 'Database timeout',
+          connectionStatus: 'disconnected',
+        });
+
+        console.log(`[${testId}] Database health exception test completed`);
+      });
+
+      it('should measure database response time accurately', async () => {
+        const testId = `${operationId}_database_response_time`;
+        console.log(`[${testId}] Testing database response time measurement`);
+
+        // Mock database ping with delay
+        jest
+          .spyOn(service as any, 'performDatabasePing')
+          .mockImplementation(
+            () => new Promise((resolve) => setTimeout(() => resolve(true), 50)),
+          );
+
+        const result = await service.checkDatabaseHealth();
+
+        expect(result.database.responseTime).toMatch(/\d+ms/);
+        const responseTime = parseInt(
+          result.database.responseTime.replace('ms', ''),
+        );
+        expect(responseTime).toBeGreaterThan(40); // Should be at least 40ms due to delay
+
+        console.log(`[${testId}] Database response time test completed`);
+      });
+    });
+
+    describe('External Services Health Check', () => {
+      it('should check multiple external services successfully', async () => {
+        const testId = `${operationId}_external_services_success`;
+        console.log(
+          `[${testId}] Testing external services health check success`,
+        );
+
+        // Mock successful external service checks
+        jest
+          .spyOn(service as any, 'checkExternalService')
+          .mockResolvedValueOnce({ status: 'healthy', responseTime: '25ms' })
+          .mockResolvedValueOnce({ status: 'healthy', responseTime: '30ms' });
+
+        const result = await service.checkExternalServices();
+
+        expect(result).toHaveProperty('external_services');
+        expect(result.external_services.status).toBe('up');
+        expect(result.external_services).toHaveProperty('c_ua_framework');
+        expect(result.external_services).toHaveProperty('ane_bridge');
+
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringMatching(
+            /\[external_services_\d+\] Checking external services/,
+          ),
+        );
+
+        console.log(`[${testId}] External services success test completed`);
+      });
+
+      it('should handle external service failures gracefully', async () => {
+        const testId = `${operationId}_external_services_failure`;
+        console.log(`[${testId}] Testing external services failure handling`);
+
+        // Mock external service failures
+        jest
+          .spyOn(service as any, 'checkExternalService')
+          .mockRejectedValueOnce(new Error('Service unavailable'))
+          .mockResolvedValueOnce({ status: 'healthy', responseTime: '20ms' });
+
+        const result = await service.checkExternalServices();
+
+        expect(result.external_services.status).toBe('down');
+        expect(result.external_services.c_ua_framework).toMatchObject({
+          status: 'error',
+          error: 'Service unavailable',
+        });
+        expect(result.external_services.ane_bridge.status).toBe('healthy');
+
+        console.log(`[${testId}] External services failure test completed`);
+      });
+
+      it('should handle complete external services failure', async () => {
+        const testId = `${operationId}_external_services_complete_failure`;
+        console.log(`[${testId}] Testing complete external services failure`);
+
+        // Mock Promise.allSettled to throw error
+        const originalAllSettled = Promise.allSettled;
+        Promise.allSettled = jest
+          .fn()
+          .mockRejectedValue(new Error('Complete failure'));
+
+        const result = await service.checkExternalServices();
+
+        expect(result.external_services.status).toBe('down');
+        expect(result.external_services.error).toBe('Complete failure');
+
+        // Restore original Promise.allSettled
+        Promise.allSettled = originalAllSettled;
+
+        console.log(
+          `[${testId}] Complete external services failure test completed`,
+        );
+      });
+    });
+
+    describe('Startup Health Check', () => {
+      it('should pass startup check for well-established service', async () => {
+        const testId = `${operationId}_startup_established`;
+        console.log(
+          `[${testId}] Testing startup check for established service`,
+        );
+
+        // Mock service that has been running for sufficient time
+        (service as any).startTime = Date.now() - 30000; // 30 seconds ago
+
+        const result = await service.checkStartupComplete();
+
+        expect(result).toHaveProperty('startup');
+        expect(result.startup).toMatchObject({
+          status: 'up',
+          uptime: expect.stringMatching(/\d+s/),
+          initializationStatus: 'initialized',
+        });
+
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringMatching(/\[startup_\d+\] Startup check passed/),
+        );
+
+        console.log(`[${testId}] Startup established service test completed`);
+      });
+
+      it('should fail startup check for recently started service', async () => {
+        const testId = `${operationId}_startup_recent`;
+        console.log(
+          `[${testId}] Testing startup check for recently started service`,
+        );
+
+        // Mock service that was just started
+        (service as any).startTime = Date.now() - 5000; // 5 seconds ago
+
+        const result = await service.checkStartupComplete();
+
+        expect(result).toHaveProperty('startup');
+        expect(result.startup).toMatchObject({
+          status: 'down',
+          initializationStatus: 'initializing',
+          message: 'Service is still starting up',
+        });
+
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringMatching(/\[startup_\d+\] Startup still in progress/),
+        );
+
+        console.log(`[${testId}] Startup recent service test completed`);
+      });
+
+      it('should handle startup check errors', async () => {
+        const testId = `${operationId}_startup_error`;
+        console.log(`[${testId}] Testing startup check error handling`);
+
+        // Mock Date.now to throw error
+        const originalNow = Date.now;
+        Date.now = jest.fn(() => {
+          throw new Error('Time unavailable');
+        });
+
+        const result = await service.checkStartupComplete();
+
+        expect(result.startup.status).toBe('down');
+        expect(result.startup.error).toBe('Time unavailable');
+
+        // Restore Date.now
+        Date.now = originalNow;
+
+        console.log(`[${testId}] Startup error handling test completed`);
+      });
+    });
+
+    describe('Module Initialization Check', () => {
+      it('should validate all modules are initialized', async () => {
+        const testId = `${operationId}_module_initialization_complete`;
+        console.log(`[${testId}] Testing complete module initialization`);
+
+        const result = await service.checkModuleInitialization();
+
+        expect(result).toHaveProperty('modules');
+        expect(result.modules).toMatchObject({
+          status: 'up',
+          modules: {
+            'computer-use': true,
+            'input-tracking': true,
+            'cua-integration': true,
+            health: true,
+          },
+        });
+
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringMatching(
+            /\[modules_\d+\] Module initialization check completed/,
+          ),
+        );
+
+        console.log(
+          `[${testId}] Complete module initialization test completed`,
+        );
+      });
+
+      it('should handle module initialization check errors', async () => {
+        const testId = `${operationId}_module_initialization_error`;
+        console.log(`[${testId}] Testing module initialization error handling`);
+
+        // Mock Object.values to throw error
+        const originalValues = Object.values;
+        Object.values = jest.fn(() => {
+          throw new Error('Module check failed');
+        });
+
+        const result = await service.checkModuleInitialization();
+
+        expect(result.modules.status).toBe('down');
+        expect(result.modules.error).toBe('Module check failed');
+
+        // Restore Object.values
+        Object.values = originalValues;
+
+        console.log(`[${testId}] Module initialization error test completed`);
+      });
+    });
+
+    describe('Private Method Testing', () => {
+      it('should simulate database ping with realistic timing', async () => {
+        const testId = `${operationId}_database_ping_timing`;
+        console.log(`[${testId}] Testing database ping timing simulation`);
+
+        const startTime = Date.now();
+        const result = await (service as any).performDatabasePing();
+        const endTime = Date.now();
+
+        expect(result).toBe(true);
+        expect(endTime - startTime).toBeGreaterThan(0);
+        expect(endTime - startTime).toBeLessThan(200); // Should complete within 200ms
+
+        console.log(`[${testId}] Database ping timing test completed`);
+      });
+
+      it('should check individual external service with proper error handling', async () => {
+        const testId = `${operationId}_external_service_individual`;
+        console.log(`[${testId}] Testing individual external service check`);
+
+        const healthyResult = await (service as any).checkExternalService(
+          'test-service',
+          'http://test.com/health',
+        );
+
+        expect(healthyResult).toHaveProperty('status');
+        expect(healthyResult).toHaveProperty('responseTime');
+        expect(['healthy', 'unhealthy']).toContain(healthyResult.status);
+        expect(healthyResult.responseTime).toMatch(/\d+ms/);
+
+        console.log(`[${testId}] Individual external service test completed`);
+      });
+
+      it('should handle external service timeout scenarios', async () => {
+        const testId = `${operationId}_external_service_timeout`;
+        console.log(`[${testId}] Testing external service timeout scenarios`);
+
+        // Mock setTimeout to reject immediately for some calls
+        const originalSetTimeout = setTimeout;
+        let timeoutCallCount = 0;
+
+        global.setTimeout = jest.fn().mockImplementation((callback, delay) => {
+          timeoutCallCount++;
+          if (timeoutCallCount % 2 === 0) {
+            // Simulate timeout/rejection on every other call
+            originalSetTimeout(
+              () => callback(new Error('Service unavailable')),
+              1,
+            );
+          } else {
+            originalSetTimeout(() => callback(null, true), delay);
+          }
+        }) as any;
+
+        const results = await Promise.all([
+          (service as any).checkExternalService(
+            'service-1',
+            'http://test1.com',
+          ),
+          (service as any).checkExternalService(
+            'service-2',
+            'http://test2.com',
+          ),
+        ]);
+
+        expect(results).toHaveLength(2);
+        results.forEach((result) => {
+          expect(['healthy', 'unhealthy']).toContain(result.status);
+        });
+
+        // Restore setTimeout
+        global.setTimeout = originalSetTimeout;
+
+        console.log(`[${testId}] External service timeout test completed`);
+      });
+    });
+  });
+
+  describe('Integration and End-to-End Health Scenarios', () => {
+    it('should handle full health check workflow', async () => {
+      const testId = `${operationId}_full_health_workflow`;
+      console.log(`[${testId}] Testing full health check workflow`);
+
+      // Mock all dependencies for successful health checks
+      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+        rss: 134217728,
+        heapTotal: 67108864,
+        heapUsed: 33554432,
+        external: 1048576,
+        arrayBuffers: 0,
+      });
+
+      jest.spyOn(service as any, 'performDatabasePing').mockResolvedValue(true);
+      jest
+        .spyOn(service as any, 'checkExternalService')
+        .mockResolvedValue({ status: 'healthy', responseTime: '25ms' });
+
+      // Mock well-established service
+      (service as any).startTime = Date.now() - 60000; // 1 minute ago
+
+      // Execute all health checks
+      const [
+        basicHealth,
+        detailedStatus,
+        processHealth,
+        databaseHealth,
+        externalServices,
+        startupCheck,
+        moduleCheck,
+      ] = await Promise.all([
+        service.getBasicHealth(),
+        service.getDetailedStatus(),
+        service.checkProcessHealth(),
+        service.checkDatabaseHealth(),
+        service.checkExternalServices(),
+        service.checkStartupComplete(),
+        service.checkModuleInitialization(),
+      ]);
+
+      // Validate all health checks pass
+      expect(basicHealth.status).toBe('healthy');
+      expect(detailedStatus.status).toBe('healthy');
+      expect(processHealth.process.status).toBe('up');
+      expect(databaseHealth.database.status).toBe('up');
+      expect(externalServices.external_services.status).toBe('up');
+      expect(startupCheck.startup.status).toBe('up');
+      expect(moduleCheck.modules.status).toBe('up');
+
+      console.log(`[${testId}] Full health workflow test completed`);
+    });
+
+    it('should handle cascading health failures gracefully', async () => {
+      const testId = `${operationId}_cascading_failures`;
+      console.log(`[${testId}] Testing cascading health failures`);
+
+      // Mock system under stress
+      jest.spyOn(process, 'uptime').mockImplementation(() => {
+        throw new Error('System overload');
+      });
+
+      jest
+        .spyOn(service as any, 'performDatabasePing')
+        .mockRejectedValue(new Error('Database overloaded'));
+
+      jest
+        .spyOn(service as any, 'checkExternalService')
+        .mockRejectedValue(new Error('External services down'));
+
+      // Execute health checks that should fail gracefully
+      const basicHealthPromise = Promise.resolve(
+        service.getBasicHealth(),
+      ).catch((e) => ({ error: e.message }));
+      const detailedStatusPromise = Promise.resolve(
+        service.getDetailedStatus(),
+      ).catch((e) => ({ error: e.message }));
+      const processHealthPromise = service.checkProcessHealth();
+      const databaseHealthPromise = service.checkDatabaseHealth();
+      const externalServicesPromise = service.checkExternalServices();
+
+      const results = await Promise.all([
+        basicHealthPromise,
+        detailedStatusPromise,
+        processHealthPromise,
+        databaseHealthPromise,
+        externalServicesPromise,
+      ]);
+
+      // Validate that failures are handled gracefully
+      results.forEach((result) => {
+        expect(result).toBeDefined();
+        if ('error' in result) {
+          expect((result as any).error).toBeDefined();
+        } else {
+          expect(['up', 'down']).toContain(
+            (Object.values(result)[0] as any)?.status || (result as any).status,
+          );
+        }
+      });
+
+      console.log(`[${testId}] Cascading failures test completed`);
+    });
+
+    it('should maintain performance under concurrent health checks', async () => {
+      const testId = `${operationId}_concurrent_performance`;
+      console.log(`[${testId}] Testing concurrent health check performance`);
+
+      // Mock healthy system state
+      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+        rss: 134217728,
+        heapTotal: 67108864,
+        heapUsed: 33554432,
+        external: 1048576,
+        arrayBuffers: 0,
+      });
+
+      jest.spyOn(service as any, 'performDatabasePing').mockResolvedValue(true);
+      (service as any).startTime = Date.now() - 60000;
+
+      const startTime = Date.now();
+
+      // Execute 50 concurrent health checks
+      const concurrentChecks = Array(50)
+        .fill(null)
+        .map(async (_, i) => ({
+          index: i,
+          basicHealth: await service.getBasicHealth(),
+          processHealth: await service.checkProcessHealth(),
+          databaseHealth: await service.checkDatabaseHealth(),
+        }));
+
+      const results = await Promise.all(concurrentChecks);
+      const totalTime = Date.now() - startTime;
+
+      expect(results).toHaveLength(50);
+      expect(totalTime).toBeLessThan(5000); // Should complete within 5 seconds
+
+      // Validate all results are consistent
+      results.forEach((result, i) => {
+        expect(result.index).toBe(i);
+        expect(result.basicHealth.status).toBe('healthy');
+        expect(result.processHealth.process.status).toBe('up');
+        expect(result.databaseHealth.database.status).toBe('up');
+      });
+
+      console.log(
+        `[${testId}] Concurrent performance test completed (${totalTime}ms for 50 checks)`,
+      );
+    });
+
+    it('should validate health check response schemas', async () => {
+      const testId = `${operationId}_response_schema_validation`;
+      console.log(
+        `[${testId}] Testing health check response schema validation`,
+      );
+
+      // Mock healthy state
+      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+        rss: 134217728,
+        heapTotal: 67108864,
+        heapUsed: 33554432,
+        external: 1048576,
+        arrayBuffers: 0,
+      });
+
+      jest.spyOn(service as any, 'performDatabasePing').mockResolvedValue(true);
+      (service as any).startTime = Date.now() - 60000;
+
+      const healthChecks = await Promise.all([
+        service.getBasicHealth(),
+        service.getDetailedStatus(),
+        service.checkProcessHealth(),
+        service.checkDatabaseHealth(),
+        service.checkExternalServices(),
+        service.checkStartupComplete(),
+        service.checkModuleInitialization(),
+      ]);
+
+      // Validate response schemas
+      const [
+        basic,
+        detailed,
+        processHealth,
+        database,
+        external,
+        startup,
+        modules,
+      ] = healthChecks;
+
+      // Basic health schema
+      expect(basic).toMatchObject({
+        status: expect.stringMatching(/^(healthy|unhealthy)$/),
+        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+        uptime: expect.any(Number),
+        memory: expect.objectContaining({
+          used: expect.any(Number),
+          free: expect.any(Number),
+          total: expect.any(Number),
+        }),
+      });
+
+      // Detailed status schema
+      expect(detailed).toMatchObject({
+        status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/),
+        memory: expect.objectContaining({
+          heapUsed: expect.any(Number),
+          heapTotal: expect.any(Number),
+        }),
+        services: expect.any(Object),
+        performance: expect.any(Object),
+      });
+
+      // Process health schema
+      expect(processHealth.process).toMatchObject({
+        status: expect.stringMatching(/^(up|down)$/),
+        uptime: expect.any(Number),
+        memoryMB: expect.any(Number),
+      });
+
+      // Database health schema
+      expect(database.database).toMatchObject({
+        status: expect.stringMatching(/^(up|down)$/),
+        responseTime: expect.stringMatching(/\d+ms/),
+      });
+
+      console.log(`[${testId}] Response schema validation test completed`);
+    });
+
+    it('should handle service recovery scenarios', async () => {
+      const testId = `${operationId}_service_recovery`;
+      console.log(`[${testId}] Testing service recovery scenarios`);
+
+      // Initial failure state
+      jest
+        .spyOn(service as any, 'performDatabasePing')
+        .mockRejectedValueOnce(new Error('Database connection failed'))
+        .mockResolvedValueOnce(true) // Recovery
+        .mockResolvedValue(true); // Stable recovery
+
+      // Test failure -> recovery pattern
+      const failedCheck = await service.checkDatabaseHealth();
+      expect(failedCheck.database.status).toBe('down');
+
+      const recoveredCheck = await service.checkDatabaseHealth();
+      expect(recoveredCheck.database.status).toBe('up');
+
+      const stableCheck = await service.checkDatabaseHealth();
+      expect(stableCheck.database.status).toBe('up');
+
+      console.log(`[${testId}] Service recovery test completed`);
     });
   });
 });

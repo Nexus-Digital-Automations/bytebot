@@ -42,7 +42,7 @@ describe('HealthService', () => {
   describe('Basic Health Checks', () => {
     it('should return basic health information', () => {
       const health = service.getBasicHealth();
-      
+
       expect(health).toHaveProperty('status', 'healthy');
       expect(health).toHaveProperty('timestamp');
       expect(health).toHaveProperty('uptime');
@@ -54,14 +54,14 @@ describe('HealthService', () => {
 
     it('should return detailed status information', () => {
       const status = service.getDetailedStatus();
-      
+
       expect(status).toHaveProperty('status');
       expect(status).toHaveProperty('timestamp');
       expect(status).toHaveProperty('uptime');
       expect(status).toHaveProperty('memory');
       expect(status).toHaveProperty('services');
       expect(status).toHaveProperty('performance');
-      
+
       expect(['healthy', 'degraded', 'unhealthy']).toContain(status.status);
     });
   });
@@ -70,7 +70,7 @@ describe('HealthService', () => {
     describe('Process Health (Liveness Probe)', () => {
       it('should pass process health check', async () => {
         const result = await service.checkProcessHealth();
-        
+
         expect(result).toHaveProperty('process');
         expect(result.process).toHaveProperty('status', 'up');
         expect(result.process).toHaveProperty('uptime');
@@ -82,10 +82,10 @@ describe('HealthService', () => {
         const originalMemoryUsage = process.memoryUsage;
         process.memoryUsage = jest.fn(() => {
           throw new Error('Memory error');
-        });
+        }) as any;
 
         const result = await service.checkProcessHealth();
-        
+
         expect(result).toHaveProperty('process');
         expect(result.process).toHaveProperty('status', 'down');
         expect(result.process).toHaveProperty('error');
@@ -98,7 +98,7 @@ describe('HealthService', () => {
     describe('Database Health (Readiness Probe)', () => {
       it('should pass database health check', async () => {
         const result = await service.checkDatabaseHealth();
-        
+
         expect(result).toHaveProperty('database');
         expect(result.database).toHaveProperty('status', 'up');
         expect(result.database).toHaveProperty('responseTime');
@@ -106,10 +106,12 @@ describe('HealthService', () => {
 
       it('should handle database connection failures', async () => {
         // Mock performDatabasePing to return false
-        jest.spyOn(service as any, 'performDatabasePing').mockResolvedValueOnce(false);
+        jest
+          .spyOn(service as any, 'performDatabasePing')
+          .mockResolvedValueOnce(false);
 
         const result = await service.checkDatabaseHealth();
-        
+
         expect(result).toHaveProperty('database');
         expect(result.database).toHaveProperty('status', 'down');
       });
@@ -118,17 +120,19 @@ describe('HealthService', () => {
     describe('External Services Health', () => {
       it('should check external services', async () => {
         const result = await service.checkExternalServices();
-        
+
         expect(result).toHaveProperty('external_services');
         expect(result.external_services).toHaveProperty('status');
       });
 
       it('should handle external service check errors', async () => {
         // Mock checkExternalService to throw error
-        jest.spyOn(service as any, 'checkExternalService').mockRejectedValue(new Error('Service error'));
+        jest
+          .spyOn(service as any, 'checkExternalService')
+          .mockRejectedValue(new Error('Service error'));
 
         const result = await service.checkExternalServices();
-        
+
         expect(result).toHaveProperty('external_services');
       });
     });
@@ -137,20 +141,23 @@ describe('HealthService', () => {
       it('should fail startup check for new service', async () => {
         // Create a new service instance (will have recent start time)
         const newService = new HealthService();
-        
+
         const result = await newService.checkStartupComplete();
-        
+
         expect(result).toHaveProperty('startup');
         expect(result.startup).toHaveProperty('status', 'down');
-        expect(result.startup).toHaveProperty('message', 'Service is still starting up');
+        expect(result.startup).toHaveProperty(
+          'message',
+          'Service is still starting up',
+        );
       });
 
       it('should pass startup check after sufficient uptime', async () => {
         // Mock the start time to be old enough
         (service as any).startTime = Date.now() - 15000; // 15 seconds ago
-        
+
         const result = await service.checkStartupComplete();
-        
+
         expect(result).toHaveProperty('startup');
         expect(result.startup).toHaveProperty('status', 'up');
       });
@@ -159,11 +166,11 @@ describe('HealthService', () => {
     describe('Module Initialization Check', () => {
       it('should check module initialization', async () => {
         const result = await service.checkModuleInitialization();
-        
+
         expect(result).toHaveProperty('modules');
         expect(result.modules).toHaveProperty('status', 'up');
         expect(result.modules).toHaveProperty('modules');
-        
+
         const modules = result.modules.modules;
         expect(modules).toHaveProperty('computer-use', true);
         expect(modules).toHaveProperty('input-tracking', true);
@@ -177,7 +184,7 @@ describe('HealthService', () => {
     it('should check service stability with default threshold', () => {
       // Mock start time to be 35 seconds ago
       (service as any).startTime = Date.now() - 35000;
-      
+
       const isStable = service.isServiceStable();
       expect(isStable).toBe(true);
     });
@@ -185,7 +192,7 @@ describe('HealthService', () => {
     it('should check service stability with custom threshold', () => {
       // Mock start time to be 25 seconds ago
       (service as any).startTime = Date.now() - 25000;
-      
+
       const isStable = service.isServiceStable(60); // 60 second threshold
       expect(isStable).toBe(false);
     });
@@ -207,8 +214,11 @@ describe('HealthService', () => {
 
     describe('External Service Check', () => {
       it('should check individual external service', async () => {
-        const result = await (service as any).checkExternalService('test-service', 'http://test.com/health');
-        
+        const result = await (service as any).checkExternalService(
+          'test-service',
+          'http://test.com/health',
+        );
+
         expect(result).toHaveProperty('status');
         expect(result).toHaveProperty('responseTime');
         expect(['healthy', 'unhealthy']).toContain(result.status);
@@ -218,7 +228,7 @@ describe('HealthService', () => {
     describe('Legacy Service Health Check', () => {
       it('should return legacy service health status', () => {
         const services = (service as any).checkServiceHealth();
-        
+
         expect(services).toHaveProperty('database', 'unknown');
         expect(services).toHaveProperty('cache', 'unknown');
         expect(services).toHaveProperty('external', 'unknown');
@@ -261,7 +271,7 @@ describe('HealthService', () => {
       });
 
       const result = await service.checkStartupComplete();
-      
+
       expect(result).toHaveProperty('startup');
       expect(result.startup).toHaveProperty('status', 'down');
       expect(result.startup).toHaveProperty('error');
@@ -278,7 +288,7 @@ describe('HealthService', () => {
       });
 
       const result = await service.checkModuleInitialization();
-      
+
       expect(result).toHaveProperty('modules');
       expect(result.modules).toHaveProperty('status', 'down');
       expect(result.modules).toHaveProperty('error');
@@ -291,7 +301,7 @@ describe('HealthService', () => {
   describe('Performance Metrics', () => {
     it('should include performance metrics in detailed status', () => {
       const status = service.getDetailedStatus();
-      
+
       expect(status.performance).toHaveProperty('requestsPerSecond');
       expect(status.performance).toHaveProperty('averageResponseTime');
       expect(typeof status.performance.requestsPerSecond).toBe('number');
@@ -302,7 +312,7 @@ describe('HealthService', () => {
   describe('Memory Metrics', () => {
     it('should provide accurate memory measurements', () => {
       const health = service.getBasicHealth();
-      
+
       expect(health.memory.used).toBeGreaterThan(0);
       expect(health.memory.total).toBeGreaterThan(0);
       expect(health.memory.free).toBeGreaterThanOrEqual(0);
@@ -311,7 +321,7 @@ describe('HealthService', () => {
 
     it('should provide detailed memory info in status', () => {
       const status = service.getDetailedStatus();
-      
+
       expect(status.memory).toHaveProperty('heapUsed');
       expect(status.memory).toHaveProperty('heapTotal');
       expect(status.memory.heapUsed).toBeGreaterThan(0);

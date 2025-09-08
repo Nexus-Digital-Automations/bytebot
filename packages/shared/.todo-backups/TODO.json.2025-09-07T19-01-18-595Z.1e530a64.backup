@@ -1,0 +1,517 @@
+{
+  "project": "unknown",
+  "tasks": [
+    {
+      "id": "error_1757271576960_yjta1m8vp",
+      "title": "Fix ESLint violations in shared package audit logging services",
+      "description": "Fix ESLint violations in audit-logger.service.ts and security-logger.service.ts. Targets include unsafe any operations, unused variables, missing await expressions in async methods, and type safety issues.",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/audit/logging/audit-logger.service.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/audit/logging/security-logger.service.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T18:59:36.960Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "error_1757271531261_tt267efwa",
+      "title": "Fix ESLint violations in shared package authentication services",
+      "description": "Fix authentication type safety issues in auth services including JWT handling types, unused parameters, unsafe any operations, and missing await in async auth methods while preserving security functionality",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/auth/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T18:58:51.261Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757271504735_1_general_fc49b569",
+      "started_at": "2025-09-07T18:59:19.219Z",
+      "claimed_by": "development_session_1757271504735_1_general_fc49b569",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757271504735_1_general_fc49b569",
+          "role": "primary",
+          "assignedAt": "2025-09-07T18:59:19.219Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757216544934_wv8mv8vwn",
+      "title": "Fix critical TypeScript compilation errors in bytebotd package",
+      "description": "Fix 14 TypeScript compilation errors preventing build: security exception filter, security sanitization pipe, Redis configuration, version interceptor type issues, and deployment configuration errors",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/src/common/filters/security-exception.filter.ts",
+        "bytebot/packages/bytebotd/src/common/pipes/security-sanitization.pipe.ts",
+        "bytebot/packages/bytebotd/src/common/security/security.module.ts",
+        "bytebot/packages/bytebotd/src/common/versioning/version.interceptor.ts",
+        "bytebot/packages/bytebotd/src/security/security-config.deployment.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:42:24.934Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757255331944_1_general_f4f66032",
+      "started_at": "2025-09-07T14:53:55.066Z",
+      "claimed_by": "development_session_1757255331944_1_general_f4f66032",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757255331944_1_general_f4f66032",
+          "role": "primary",
+          "assignedAt": "2025-09-07T14:53:55.066Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "error_1757179900234_eg5op2sij",
+      "title": "Complete elimination of TypeScript ESLint violations in configuration and environment handling",
+      "description": "Achieve perfect type safety in configuration management layer including environment variable validation, configuration schema definitions, secrets management with Kubernetes integration, database configuration, and API configuration with versioning support.",
+      "priority": "critical",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/src/config/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T17:31:40.235Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT",
+      "assigned_agent": "--agent-id",
+      "started_at": "2025-09-07T17:14:02.816Z",
+      "claimed_by": "--agent-id",
+      "agent_assignment_history": [
+        {
+          "agentId": "--agent-id",
+          "role": "primary",
+          "assignedAt": "2025-09-07T17:14:02.816Z",
+          "reassignReason": null,
+          "claimPriority": "development_session_1757265218586_1_general_3f7b294d"
+        }
+      ]
+    },
+    {
+      "id": "error_1757208180670_inrb9cxgr",
+      "title": "CRITICAL: Restore 100% ESLint compliance - fix 4 remaining violations",
+      "description": "Fix the 4 ESLint violations that have reappeared: 1) Unsafe argument in main.ts, 2) Unexpected await in prisma.service.spec.ts, 3) Unused variable in agent.mock.ts, 4) Unsafe assignment in agent.mock.ts. Restore our historic 100% ESLint compliance achievement.",
+      "priority": "medium",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "src/main.ts",
+        "src/prisma/__tests__/prisma.service.spec.ts",
+        "src/test-utils/mocks/agent.mock.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "30 minutes",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T01:23:00.670Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    }
+  ],
+  "agents": {
+    "development_session_1757112834756_1_general_001f0ac7": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-05T22:53:54.756Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-05T22:53:54.756Z",
+      "sessionId": "session_1757112834756",
+      "metadata": {}
+    },
+    "linter-fix-specialist_session_1757145713874_1_eslint_59e52cc7": {
+      "name": "linter-fix-specialist Agent",
+      "role": "linter-fix-specialist",
+      "specialization": [
+        "eslint",
+        "typescript",
+        "type-safety"
+      ],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-06T08:01:53.875Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-06T08:01:53.875Z",
+      "sessionId": "session_1757145713874",
+      "metadata": {}
+    },
+    "development_session_1757146382086_1_recovery_4d727960": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [
+        "recovery",
+        "typescript",
+        "build-fixing",
+        "linting"
+      ],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-06T08:13:02.087Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-06T08:13:02.087Z",
+      "sessionId": "session_1757146382086",
+      "metadata": {
+        "recovery_session": true,
+        "previous_work": "eslint_services_cleanup"
+      }
+    },
+    "development_session_1757146511397_1_typescript_b0f5dc46": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [
+        "typescript",
+        "security",
+        "debugging"
+      ],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-06T08:15:11.397Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-06T08:15:11.397Z",
+      "sessionId": "session_1757146511397",
+      "metadata": {}
+    },
+    "security-headers-specialist_session_1757146591232_1_typescript_9e141bd7": {
+      "name": "security-headers-specialist Agent",
+      "role": "security-headers-specialist",
+      "specialization": [
+        "typescript",
+        "helmet",
+        "security-middleware"
+      ],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-06T08:16:31.232Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-06T08:16:31.232Z",
+      "sessionId": "session_1757146591232",
+      "metadata": {}
+    },
+    "development_session_1757179852814_1_general_e53a54f5": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-06T17:30:52.818Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-06T17:30:52.818Z",
+      "sessionId": "session_1757179852814",
+      "metadata": {}
+    },
+    "development_session_1757216569003_1_error-fixing_dfba0a95": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [
+        "error-fixing"
+      ],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T03:42:49.004Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T03:42:49.004Z",
+      "sessionId": "session_1757216569003",
+      "metadata": {}
+    },
+    "development_session_1757218310071_1_general_4ef2d7f9": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T04:11:50.072Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T04:11:50.072Z",
+      "sessionId": "session_1757218310071",
+      "metadata": {}
+    },
+    "development_session_1757218422930_1_general_b78c3336": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T04:13:42.933Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T04:13:42.933Z",
+      "sessionId": "session_1757218422930",
+      "metadata": {}
+    },
+    "development_session_1757218424990_1_general_c37f6fc0": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T04:13:44.991Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T04:13:44.991Z",
+      "sessionId": "session_1757218424990",
+      "metadata": {}
+    },
+    "development_session_1757256121215_1_general_5a2b5fe2": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T14:42:01.216Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T14:42:01.216Z",
+      "sessionId": "session_1757256121215",
+      "metadata": {}
+    },
+    "development_session_1757256660149_1_general_73f526f8": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T14:51:00.151Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T14:51:00.151Z",
+      "sessionId": "session_1757256660149",
+      "metadata": {}
+    },
+    "development_session_1757265311591_1_general_0d88d322": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T17:15:11.592Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T17:15:11.592Z",
+      "sessionId": "session_1757265311591",
+      "metadata": {}
+    },
+    "development_session_1757271504735_1_general_fc49b569": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T18:58:24.738Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T18:58:24.739Z",
+      "sessionId": "session_1757271504735",
+      "metadata": {}
+    },
+    "development_session_1757271526685_1_general_f34353b4": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T18:58:46.687Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T18:58:46.687Z",
+      "sessionId": "session_1757271526685",
+      "metadata": {
+        "renewedAt": "2025-09-07T19:00:41.939Z",
+        "renewalReason": "Agent reinitialization requested"
+      },
+      "lastRenewal": "2025-09-07T19:00:41.939Z",
+      "renewalCount": 1,
+      "agentId": "development_session_1757271526685_1_general_f34353b4"
+    }
+  },
+  "settings": {
+    "auto_sort_enabled": true,
+    "sort_criteria": {
+      "primary": "category",
+      "secondary": "created_at"
+    },
+    "priority_values": {
+      "critical": 4,
+      "high": 3,
+      "medium": 2,
+      "low": 1
+    },
+    "category_enabled": true,
+    "category_ranks": {
+      "linter-error": 1,
+      "build-error": 2,
+      "start-error": 3,
+      "error": 4,
+      "missing-feature": 5,
+      "bug": 6,
+      "enhancement": 7,
+      "refactor": 8,
+      "missing-test": 15,
+      "test-linter-failure": 16,
+      "test-failure": 17,
+      "documentation": 12,
+      "chore": 13,
+      "research": 14
+    }
+  },
+  "review_strikes": 0,
+  "strikes_completed_last_run": false,
+  "current_task_index": 0
+}

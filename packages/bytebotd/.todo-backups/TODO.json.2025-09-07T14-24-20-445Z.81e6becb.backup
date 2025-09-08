@@ -1,0 +1,920 @@
+{
+  "project": "unknown",
+  "tasks": [
+    {
+      "id": "task_1757122372905_jwfufnbyn",
+      "title": "Standardize Security Middleware Across All Bytebot Services",
+      "description": "Deploy comprehensive security middleware (SecurityHeadersMiddleware, GlobalValidationPipe, RateLimitGuard, CORS) consistently across bytebot-agent, bytebotd, and bytebot-ui with service-specific security configurations",
+      "category": "linter-error",
+      "priority": "critical",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "packages/bytebotd/src/main.ts",
+        "packages/bytebot-agent/src/main.ts",
+        "packages/bytebot-ui/src/main.ts",
+        "packages/shared/src/middleware/",
+        "packages/shared/src/guards/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T01:32:52.905Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757126308042_1_general_50497713",
+      "started_at": "2025-09-06T02:40:28.163Z",
+      "claimed_by": "development_session_1757126308042_1_general_50497713",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757126308042_1_general_50497713",
+          "role": "primary",
+          "assignedAt": "2025-09-06T02:40:28.163Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "task_1757131758297_dox8zhoz8",
+      "title": "Fix shared package TypeScript build errors - environment-security.config.ts type mismatches",
+      "description": "Resolve critical TypeScript build errors in shared package environment-security.config.ts: missing properties in rateLimiting config (enabled, strictMode, windowMs, etc.) and performance config (memoryLimit, cpuThreshold, diskSpaceThreshold) preventing successful builds",
+      "category": "build-error",
+      "priority": "critical",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "packages/shared/src/config/environment-security.config.ts",
+        "packages/shared/src/types/security.types.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T04:09:18.297Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757131356572_1_general_dd947d55",
+      "started_at": "2025-09-06T04:09:26.331Z",
+      "claimed_by": "development_session_1757131356572_1_general_dd947d55",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757131356572_1_general_dd947d55",
+          "role": "primary",
+          "assignedAt": "2025-09-06T04:09:26.331Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "error_1757215808151_nm9drifh2",
+      "title": "Fix Python import and undefined name errors in orchestrator package",
+      "description": "CRITICAL: Fix 151 Python F821 undefined name errors in orchestrator package that are blocking test execution: Missing asyncio import, ControlType, ControlImplementation, ThreatLevel, MonitoringEvent, ResponseAction, ThreatIntelligence imports in security test files",
+      "mode": "DEVELOPMENT",
+      "priority": "critical",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/security_test_utilities.py",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/tests/security/test_compliance.py",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/tests/security/test_monitoring.py"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:30:08.151Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757215923147_1_testing_5c1815ee",
+      "started_at": "2025-09-07T03:32:23.333Z",
+      "claimed_by": "development_session_1757215923147_1_testing_5c1815ee",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757215923147_1_testing_5c1815ee",
+          "role": "primary",
+          "assignedAt": "2025-09-07T03:32:23.333Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757215806884_78dq5e5dc",
+      "title": "Fix TypeScript error in main.ts - expectCt property does not exist",
+      "description": "Fix TS2353 error at main.ts:119,9 where expectCt does not exist in security policy configuration type. This is a build-blocking error preventing compilation.",
+      "mode": "DEVELOPMENT",
+      "priority": "critical",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:30:06.884Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757254802536_1_general_af3e41f1",
+      "started_at": "2025-09-07T14:20:21.113Z",
+      "claimed_by": "development_session_1757254802536_1_general_af3e41f1",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757254802536_1_general_af3e41f1",
+          "role": "primary",
+          "assignedAt": "2025-09-07T14:20:21.113Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757215805892_w2e933v3b",
+      "title": "Fix remaining TypeScript errors in tasks.controller.spec.ts - property and argument issues",
+      "description": "Fix multiple TypeScript compilation errors in tasks.controller.spec.ts including: missing files property on task objects (lines 451-453), missing messages property on GroupedMessages type (line 679), and incorrect argument counts in function calls (lines 718, 729, 743, 755, 765, 779)",
+      "mode": "DEVELOPMENT",
+      "priority": "critical",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:30:05.892Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757217367515_1_general_9d873894",
+      "started_at": "2025-09-07T03:56:54.319Z",
+      "claimed_by": "development_session_1757217367515_1_general_9d873894",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757217367515_1_general_9d873894",
+          "role": "primary",
+          "assignedAt": "2025-09-07T03:56:54.319Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757215804816_f65n6kd58",
+      "title": "Fix critical TypeScript compilation errors - interceptors and test files",
+      "description": "Fix multiple critical TypeScript compilation errors preventing build: 1) sanitization.interceptor.ts line 200 - expression not callable, 2) health.controller.spec.ts - multiple expression not callable errors (lines 130, 151, 166, 180, 192, 209, 223), 3) tasks.controller.spec.ts - missing files property on task objects (lines 451-452). These are build-blocking errors.",
+      "mode": "DEVELOPMENT",
+      "priority": "critical",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:30:04.816Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757217120659_1_general_b87e43f5",
+      "started_at": "2025-09-07T03:52:56.583Z",
+      "claimed_by": "development_session_1757217120659_1_general_b87e43f5",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757217120659_1_general_b87e43f5",
+          "role": "primary",
+          "assignedAt": "2025-09-07T03:52:56.583Z",
+          "reassignReason": null,
+          "claimPriority": "critical"
+        }
+      ]
+    },
+    {
+      "id": "error_1757220191434_1fkumyski",
+      "title": "Fix TypeScript compilation errors in tasks.controller.spec.ts",
+      "description": "Fix multiple TypeScript errors including missing files property on task objects, missing messages property on GroupedMessages type, and incorrect function argument counts at multiple line numbers (718, 729, 743, 755, 765, 779). Ensure proper type definitions and mock data structures.",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/src/tasks/__tests__/tasks.controller.spec.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T04:43:11.434Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "test_1757215839386_q08t1ssc5",
+      "title": "CRITICAL: Fix bytebotd test coverage from 45% to 100% for production readiness",
+      "description": "Immediately improve bytebotd package test coverage from current 45% to required 100% for critical modules. Multiple modules have 0% coverage including health, input-tracking, and mcp modules. This is a CRITICAL FAILURE blocking production deployment.",
+      "mode": "DEVELOPMENT",
+      "priority": "critical",
+      "category": "test",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/src/health/",
+        "bytebot/packages/bytebotd/src/input-tracking/",
+        "bytebot/packages/bytebotd/src/mcp/",
+        "bytebot/packages/bytebotd/src/cua-integration/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:30:39.386Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "test_1757215838386_c4bqhwvrk",
+      "title": "CRITICAL: Create complete test suite for bytebot-agent (0% → 100% coverage)",
+      "description": "URGENT: bytebot-agent has NO TESTS WHATSOEVER (0% coverage). This is a complete failure of production readiness standards. Must implement comprehensive unit and integration tests for all 41 source files to achieve required 100% coverage.",
+      "mode": "DEVELOPMENT",
+      "priority": "critical",
+      "category": "test",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebot-agent/src/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:30:38.386Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "error_1757184058993_wfuj1o0xb",
+      "title": "Fix remaining ESLint violations in database and health modules",
+      "description": "Fix 2 critical ESLint violations blocking build process:\n\n1. **database/database.service.ts:546:75**: @typescript-eslint/require-await - Async arrow function has no await expression\n2. **health/health.controller.ts:403:19**: @typescript-eslint/no-unnecessary-type-assertion - Unnecessary type assertion\n\nThese linting errors are preventing the build from passing and must be resolved.",
+      "mode": "DEVELOPMENT",
+      "priority": "critical",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "src/database/database.service.ts",
+        "src/health/health.controller.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-06T18:40:58.993Z",
+      "auto_research_created": false,
+      "assigned_agent": "--agent-id",
+      "started_at": "2025-09-06T18:41:05.952Z",
+      "claimed_by": "--agent-id",
+      "agent_assignment_history": [
+        {
+          "agentId": "--agent-id",
+          "role": "primary",
+          "assignedAt": "2025-09-06T18:41:05.952Z",
+          "reassignReason": null,
+          "claimPriority": "development_session_1757183378269_1_linting_6ef85a40"
+        }
+      ]
+    },
+    {
+      "id": "feature_1757217096067_mjvi1rjl6",
+      "title": "Implement pnpm workspace monorepo configuration for unified package management",
+      "description": "Convert the current multi-package architecture to a unified pnpm workspace monorepo to resolve dependency conflicts, streamline builds, and improve developer experience.\n\n**IMPLEMENTATION REQUIREMENTS:**\n\n**Phase 1: Workspace Setup**\n- Create root pnpm-workspace.yaml with all package definitions\n- Add root package.json with unified scripts and shared devDependencies\n- Configure workspace protocols for internal package references\n- Set up consistent TypeScript configuration inheritance\n\n**Phase 2: Dependency Management**\n- Consolidate shared dependencies to root level\n- Update package.json files to use workspace: protocol for internal deps\n- Remove duplicate dependencies across packages\n- Standardize Node.js and package manager versions\n\n**Phase 3: Build System Integration**\n- Create unified build scripts with proper dependency ordering\n- Configure concurrent builds where possible\n- Set up watch mode for development workflow\n- Integrate linting and testing at workspace level\n\n**Phase 4: Development Workflow**\n- Add root scripts for: build-all, test-all, lint-all, dev\n- Configure VS Code workspace settings\n- Update CI/CD to use pnpm workspace commands\n- Create development documentation\n\n**SUCCESS CRITERIA:**\n- Single pnpm install command installs all dependencies\n- Consistent versioning across all packages\n- Unified build/test/lint commands from root\n- Proper dependency resolution without conflicts\n- Faster install and build times\n- Clear dependency graph visualization\n\n**PACKAGES TO CONFIGURE:**\n- bytebot/packages/shared (base library)\n- bytebot/packages/bytebotd (NestJS service)\n- bytebot/packages/bytebot-agent (NestJS service)\n- bytebot/packages/bytebot-agent-cc (NestJS service)\n- bytebot/packages/bytebot-ui (Next.js frontend)\n- orchestrator (Python - separate but documented)\n- huginn (separate but documented)",
+      "priority": "high",
+      "category": "feature",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/package.json",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/package.json",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/package.json",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-ui/package.json"
+      ],
+      "success_criteria": [],
+      "estimate": "2-3 hours",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:51:36.068Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "test_1757215872958_508p4x7ig",
+      "title": "Create comprehensive test suite for bytebotd input-tracking module to achieve 100% coverage",
+      "description": "Create complete test files (.spec.ts) in __tests__ directory for input-tracking components including controller, gateway, service, helpers, and module with NestJS testing patterns, 100% coverage, and comprehensive edge case testing.",
+      "mode": "DEVELOPMENT",
+      "priority": "high",
+      "category": "test",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/src/input-tracking/",
+        "bytebot/packages/bytebotd/src/auth/__tests__/auth.service.spec.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:31:12.958Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "test_1757215871872_o8sk26n0k",
+      "title": "Implement Comprehensive Security Testing Framework for Enterprise-Grade Validation",
+      "description": "Design and implement a comprehensive security testing framework that provides automated security validation, penetration testing capabilities, vulnerability scanning, and continuous security monitoring for the entire AIgent ecosystem including Bytebot, Orchestrator, and all microservices.",
+      "mode": "DEVELOPMENT",
+      "priority": "high",
+      "category": "test",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/security/test_security_comprehensive.py",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/development/research-reports/api-security-best-practices-bytebot-research.md"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:31:11.872Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "feature_1757215836393_6ien8jk6m",
+      "title": "Research comprehensive API authentication and authorization security for AI automation systems",
+      "description": "Comprehensive research on API authentication and authorization security best practices specifically for AI automation systems like Bytebot covering multi-factor authentication, JWT security, OAuth 2.0, RBAC/ABAC, API key management, session management, identity federation, SSO, rate limiting, and certificate-based authentication. Provide detailed technical implementation examples and compliance considerations.",
+      "mode": "DEVELOPMENT",
+      "priority": "high",
+      "category": "feature",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "development/research-reports/",
+        "orchestrator/security/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:30:36.393Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "test_1757215874971_qbqbu8k8f",
+      "title": "Fix orchestrator test coverage from 41% to 90%+ production standard",
+      "description": "CRITICAL ORCHESTRATOR TEST COVERAGE IMPROVEMENT: Fix broken test imports and dependencies, implement comprehensive unit tests for core modules, add integration tests for MCP server functionality, create mock services for external dependencies, and achieve 90%+ coverage with performance benchmarks.",
+      "mode": "DEVELOPMENT",
+      "priority": "medium",
+      "category": "test",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/ai/coordination.py",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/ai/orchestration.py",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/server.py"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:31:14.971Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "test_1757215873964_q6gpmht99",
+      "title": "Enhance Bytebotd Health Module Test Suite for 100% Coverage and Production Readiness",
+      "description": "Complete comprehensive test suite enhancement for the bytebotd health monitoring module to achieve 100% test coverage and production-ready reliability. Includes enhancing existing tests and adding missing test scenarios for enterprise deployment readiness.",
+      "mode": "DEVELOPMENT",
+      "priority": "medium",
+      "category": "test",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/health/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:31:13.964Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "feature_1757215837358_abvxknxhm",
+      "title": "Research comprehensive data protection and privacy security for AI automation systems",
+      "description": "Conduct thorough research on data protection and privacy security practices specifically for AI automation systems covering encryption, data anonymization, secure storage, GDPR/CCPA compliance, data retention policies, database security hardening, backup security, data leak prevention, secure data sharing, and privacy-preserving AI training techniques.",
+      "mode": "DEVELOPMENT",
+      "priority": "medium",
+      "category": "feature",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "development/research-reports/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:30:37.358Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "test_1757214991822_kifit0go9",
+      "title": "SUBAGENT 10: Final comprehensive test validation and coverage reporting",
+      "description": "Run complete test suite validation, generate final coverage reports with 100% coverage achievement, perform final quality assessment of test implementations, and provide production readiness certification for bytebotd package.",
+      "priority": "medium",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:16:31.822Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "test_1757214990760_gf2i8knmd",
+      "title": "SUBAGENT 9: Generate comprehensive coverage improvement report",
+      "description": "Generate detailed coverage analysis report with before/after metrics, specific coverage gaps identified with line numbers, recommendations for test suite maintenance and monitoring, and comprehensive coverage improvement roadmap.",
+      "priority": "medium",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "development/reports/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:16:30.760Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "test_1757214989019_iprud1esf",
+      "title": "SUBAGENT 8: Validate test quality and prevent false positive coverage",
+      "description": "Analyze existing test suites for test quality, meaningful assertions, proper error handling test coverage, edge case validation, and ensure no false positive coverage reporting. Validate test isolation and independence.",
+      "priority": "medium",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/src/**/__tests__/",
+        "bytebot/packages/bytebotd/src/test-utils/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:16:29.019Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "test_1757214987948_hz9vm5mim",
+      "title": "SUBAGENT 7: Performance and load testing validation for test execution",
+      "description": "Create performance analysis for test execution including test execution time monitoring, memory usage analysis during test runs, test parallelization optimization, and resource utilization assessment. Identify potential test flakiness or timing issues.",
+      "priority": "medium",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/jest.config.js",
+        "bytebot/packages/bytebotd/package.json"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:16:27.948Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "test_1757214986874_zup1c5dq4",
+      "title": "SUBAGENT 6: Enhance cua-integration module test coverage",
+      "description": "Analyze existing cua-integration test suites and identify coverage gaps. Enhance test coverage for cua-integration controller, service, bridge, performance, and vision services to achieve 100% coverage. Focus on CUA framework integration and performance optimization.",
+      "priority": "medium",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/src/cua-integration/",
+        "bytebot/packages/bytebotd/src/cua-integration/__tests__/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:16:26.874Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "test_1757214985789_znvys4808",
+      "title": "SUBAGENT 5: Enhance computer-use module test coverage",
+      "description": "Analyze existing computer-use test suites and identify coverage gaps. Enhance test coverage for computer-use controller, service, and DTOs to achieve 100% coverage. Focus on computer action validation, file operations, and security validation.",
+      "priority": "medium",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/src/computer-use/",
+        "bytebot/packages/bytebotd/src/computer-use/__tests__/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:16:25.790Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "test_1757214984742_no13mwt6h",
+      "title": "SUBAGENT 4: Create comprehensive test suites for cache module",
+      "description": "Analyze cache directory modules (cache.service, cache.module, cache-key.generator) and create comprehensive unit tests to achieve 100% coverage. Focus on cache operations, key generation algorithms, and module configuration.",
+      "priority": "medium",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/src/cache/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:16:24.743Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "test_1757214983779_16878ib67",
+      "title": "SUBAGENT 3: Create comprehensive test suites for mcp module",
+      "description": "Analyze mcp directory modules (bytebot-mcp.module, compressor, computer-use.tools, index) and enhance existing test suites to achieve 100% coverage. Focus on MCP protocol handling, compression algorithms, and tool integration.",
+      "priority": "medium",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/src/mcp/",
+        "bytebot/packages/bytebotd/src/mcp/__tests__/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:16:23.779Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "test_1757214982732_ly668tfud",
+      "title": "SUBAGENT 2: Create comprehensive test suites for input-tracking module",
+      "description": "Analyze input-tracking directory modules (controller, service, gateway, helpers) and create comprehensive unit and integration tests to achieve 100% coverage. Focus on input event handling, websocket functionality, and helper utilities.",
+      "priority": "medium",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/src/input-tracking/",
+        "bytebot/packages/bytebotd/src/input-tracking/__tests__/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:16:22.732Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    },
+    {
+      "id": "test_1757214981634_7b54cydbv",
+      "title": "SUBAGENT 1: Analyze current test coverage reports and extract detailed coverage metrics for bytebotd",
+      "description": "Parse existing lcov.info and coverage-final.json reports to extract current coverage statistics including line coverage, branch coverage, function coverage, and identify specific uncovered code paths. Generate detailed analysis of coverage gaps with line numbers and files.",
+      "priority": "medium",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/coverage/lcov.info",
+        "bytebot/packages/bytebotd/coverage/coverage-final.json",
+        "bytebot/packages/bytebotd/coverage/lcov-report/index.html"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-07T03:16:21.634Z",
+      "auto_research_created": false,
+      "mode": "DEVELOPMENT"
+    }
+  ],
+  "agents": {
+    "development_session_1757122364516_1_general_a4a408b8": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-06T01:32:44.516Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-06T01:32:44.516Z",
+      "sessionId": "session_1757122364516",
+      "metadata": {}
+    },
+    "development_session_1757131356572_1_general_dd947d55": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-06T04:02:36.572Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-06T04:02:36.572Z",
+      "sessionId": "session_1757131356572",
+      "metadata": {}
+    },
+    "development_session_1757138909941_1_general_7f3f2320": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-06T06:08:29.942Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-06T06:08:29.942Z",
+      "sessionId": "session_1757138909941",
+      "metadata": {}
+    },
+    "development_session_1757215923147_1_testing_5c1815ee": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [
+        "testing",
+        "linting",
+        "build-fixes"
+      ],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T03:32:03.147Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T03:32:03.147Z",
+      "sessionId": "session_1757215923147",
+      "metadata": {}
+    },
+    "development_session_1757217067995_1_monorepo_8914100d": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [
+        "monorepo",
+        "build-systems"
+      ],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T03:51:07.996Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T03:51:07.996Z",
+      "sessionId": "session_1757217067995",
+      "metadata": {}
+    },
+    "development_session_1757217120659_1_general_b87e43f5": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [
+        "general"
+      ],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T03:52:00.660Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T03:52:00.660Z",
+      "sessionId": "session_1757217120659",
+      "metadata": {
+        "renewedAt": "2025-09-07T03:52:41.865Z",
+        "renewalReason": "Agent reinitialization requested"
+      },
+      "lastRenewal": "2025-09-07T03:52:10.191Z",
+      "renewalCount": 1,
+      "agentId": "development_session_1757217120659_1_general_b87e43f5"
+    },
+    "development_session_1757217367515_1_general_9d873894": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T03:56:07.517Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T03:56:07.517Z",
+      "sessionId": "session_1757217367515",
+      "metadata": {
+        "renewedAt": "2025-09-07T03:56:16.209Z",
+        "renewalReason": "Agent reinitialization requested"
+      },
+      "lastRenewal": "2025-09-07T03:56:16.209Z",
+      "renewalCount": 1,
+      "agentId": "development_session_1757217367515_1_general_9d873894"
+    },
+    "development_session_1757220182310_1_general_7656a317": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T04:43:02.311Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T04:43:02.311Z",
+      "sessionId": "session_1757220182310",
+      "metadata": {}
+    },
+    "development_session_1757221576008_1_general_769f3092": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T05:06:16.010Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T05:06:16.010Z",
+      "sessionId": "session_1757221576008",
+      "metadata": {}
+    },
+    "development_session_1757222561003_1_general_d7e5f567": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T05:22:41.010Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T05:22:41.010Z",
+      "sessionId": "session_1757222561003",
+      "metadata": {}
+    },
+    "development_session_1757222594906_1_general_2eae1998": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T05:23:14.909Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T05:23:14.909Z",
+      "sessionId": "session_1757222594906",
+      "metadata": {}
+    },
+    "development_session_1757254953373_1_general_a5c8a96e": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-07T14:22:33.374Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-07T14:22:33.374Z",
+      "sessionId": "session_1757254953373",
+      "metadata": {}
+    }
+  },
+  "settings": {
+    "auto_sort_enabled": true,
+    "sort_criteria": {
+      "primary": "category",
+      "secondary": "created_at"
+    },
+    "priority_values": {
+      "critical": 4,
+      "high": 3,
+      "medium": 2,
+      "low": 1
+    },
+    "category_enabled": true,
+    "category_ranks": {
+      "linter-error": 1,
+      "build-error": 2,
+      "start-error": 3,
+      "error": 4,
+      "missing-feature": 5,
+      "missing-test": 6,
+      "test-linter-error": 7,
+      "test-error": 8,
+      "bug": 9,
+      "enhancement": 10,
+      "refactor": 11,
+      "documentation": 12,
+      "chore": 13,
+      "research": 14
+    }
+  },
+  "review_strikes": 0,
+  "strikes_completed_last_run": false,
+  "current_task_index": 0
+}

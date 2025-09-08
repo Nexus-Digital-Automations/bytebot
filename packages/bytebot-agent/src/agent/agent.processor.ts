@@ -293,7 +293,15 @@ export class AgentProcessor {
           );
         } catch (error: unknown) {
           const errorMessage =
-            error instanceof Error ? error.message : String(error);
+            error instanceof Error
+              ? error.message
+              : (() => {
+                  try {
+                    return JSON.stringify(error);
+                  } catch {
+                    return '[Unserializable Error Object]';
+                  }
+                })();
           const errorStack = error instanceof Error ? error.stack : undefined;
           this.logger.error(
             `Error summarizing messages for task ID: ${taskId}: ${errorMessage}`,
@@ -396,7 +404,15 @@ export class AgentProcessor {
         this.logger.warn(`Processing aborted for task ID: ${taskId}`);
       } else {
         const errorMessage =
-          error instanceof Error ? error.message : String(error);
+          error instanceof Error
+            ? error.message
+            : (() => {
+                try {
+                  return JSON.stringify(error);
+                } catch {
+                  return '[Unserializable Error Object]';
+                }
+              })();
         const errorStack = error instanceof Error ? error.stack : undefined;
         this.logger.error(
           `Error during task processing iteration for task ID: ${taskId} - ${errorMessage}`,

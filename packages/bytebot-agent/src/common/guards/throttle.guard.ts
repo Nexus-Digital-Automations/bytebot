@@ -26,7 +26,7 @@ import {
   UserRole,
   SecurityEventType,
   createSecurityEvent,
-  RateLimitPreset,
+  // RateLimitPreset, // Unused import - commented out
 } from '@bytebot/shared';
 
 /**
@@ -119,8 +119,27 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
   private readonly requestCounts = new Map<string, number>();
   private readonly suspiciousActivities = new Map<string, number>();
 
-  constructor(private reflector: Reflector) {
-    super();
+  constructor(protected readonly reflector: Reflector) {
+    super(
+      {
+        throttlers: [
+          {
+            ttl: 60000, // 1 minute
+            limit: 100, // 100 requests per minute
+          },
+        ],
+      },
+      {
+        increment: () =>
+          Promise.resolve({
+            totalHits: 0,
+            timeToExpire: 0,
+            timeToBlockExpire: 0,
+            isBlocked: false,
+          }),
+      },
+      reflector,
+    );
 
     this.logger.log('Advanced throttle guard initialized', {
       defaultRoleLimits: DEFAULT_ROLE_LIMITS,
@@ -136,12 +155,14 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
    * Enhanced throttle check with role-based and adaptive limiting
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const operationId = `throttle-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const operationId = `throttle-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const startTime = Date.now();
 
     try {
       const request = context.switchToHttp().getRequest<Request>();
-      const user = (request as any).user;
+      const user = (
+        request as Request & { user?: { id?: string; role?: UserRole } }
+      ).user;
 
       // Get throttle configuration
       const throttleConfig = this.getThrottleConfig(context);
@@ -178,7 +199,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
       const limits = this.getEffectiveLimits(user, throttleConfig, throttleKey);
 
       // Check throttle limits
-      const allowed = await this.checkThrottleLimits(
+      const allowed = this.checkThrottleLimits(
         throttleKey,
         limits,
         request,
@@ -187,7 +208,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
 
       if (!allowed) {
         // Log security event for throttling
-        await this.logThrottleEvent(request, limits, operationId);
+        this.logThrottleEvent(request, limits, operationId);
 
         throw new HttpException(
           {
@@ -226,10 +247,14 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
         throw error;
       }
 
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
       this.logger.error(`[${operationId}] Advanced throttle error`, {
         operationId,
-        error: error.message,
-        stack: error.stack,
+        error: errorMessage,
+        stack: errorStack,
         processingTimeMs: processingTime,
       });
 
@@ -297,7 +322,11 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
     request: Request,
     config: DynamicThrottleConfig,
   ): string {
-    const user = (request as any).user;
+    const extendedRequest = request as Request & {
+      user?: { id?: string; role?: UserRole };
+      route?: { path?: string };
+    };
+    const user = extendedRequest.user;
     const ip = request.ip || request.connection.remoteAddress || 'unknown';
 
     switch (config.keyStrategy) {
@@ -312,8 +341,10 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
           ? `throttle:ip-user:${ip}:${user.id}`
           : `throttle:ip:${ip}`;
 
-      case 'endpoint':
-        return `throttle:endpoint:${request.method}:${request.route?.path || request.url}:${ip}`;
+      case 'endpoint': {
+        const pathSegment = request.url; // Default to URL if route not available
+        return `throttle:endpoint:${request.method}:${pathSegment}:${ip}`;
+      }
 
       case 'custom':
         return config.customKeyGen
@@ -329,7 +360,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
    * Get effective throttle limits for user and configuration
    */
   private getEffectiveLimits(
-    user: any,
+    user: { id?: string; role?: UserRole } | undefined,
     config: DynamicThrottleConfig,
     throttleKey: string,
   ): RoleThrottleConfig {
@@ -392,15 +423,13 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
   /**
    * Check if request is within throttle limits
    */
-  private async checkThrottleLimits(
+  private checkThrottleLimits(
     throttleKey: string,
     limits: RoleThrottleConfig,
     request: Request,
     operationId: string,
-  ): Promise<boolean> {
-    const now = Date.now();
+  ): boolean {
     const windowMs = 60000; // 1 minute window
-    const burstWindowMs = 10000; // 10 second burst window
 
     try {
       // Update request count
@@ -455,9 +484,12 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
 
       return true;
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
       this.logger.error(`[${operationId}] Error checking throttle limits`, {
         operationId,
-        error: error.message,
+        error: errorMessage,
         throttleKey: throttleKey.substring(0, 30) + '...',
       });
 
@@ -490,13 +522,15 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
   /**
    * Log security event for throttle violation
    */
-  private async logThrottleEvent(
+  private logThrottleEvent(
     request: Request,
     limits: RoleThrottleConfig,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     try {
-      const user = (request as any).user;
+      const user = (
+        request as Request & { user?: { id?: string; role?: UserRole } }
+      ).user;
 
       const securityEvent = createSecurityEvent(
         SecurityEventType.RATE_LIMIT_EXCEEDED,
@@ -528,9 +562,12 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
         },
       );
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
       this.logger.error('Failed to log advanced throttle security event', {
         operationId,
-        error: error.message,
+        error: errorMessage,
       });
     }
   }
@@ -544,7 +581,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
     ttl: number,
   ): string {
     const request = context.switchToHttp().getRequest<Request>();
-    const user = (request as any).user;
+    const user = (request as Request & { user?: { role?: UserRole } }).user;
 
     return `Advanced rate limiting exceeded for ${user?.role || 'anonymous'} user. Try again in ${ttl} seconds.`;
   }

@@ -25,7 +25,6 @@ import {
   UseGuards,
   Request,
   Logger,
-  ValidationPipe,
   Get,
 } from '@nestjs/common';
 import {
@@ -106,7 +105,7 @@ export class AuthController {
     },
   })
   async login(
-    @Body(ValidationPipe) loginDto: LoginDto,
+    @Body() loginDto: LoginDto,
     @Request() request: AuthenticatedRequest,
   ): Promise<TokenPair> {
     const operationId = `auth-login-controller-${Date.now()}`;
@@ -198,7 +197,7 @@ export class AuthController {
     description: 'Email or username already exists',
   })
   async register(
-    @Body(ValidationPipe) registerDto: RegisterDto,
+    @Body() registerDto: RegisterDto,
   ): Promise<{ message: string; user: Omit<User, 'passwordHash'> }> {
     const operationId = `auth-register-controller-${Date.now()}`;
     const startTime = Date.now();
@@ -277,9 +276,7 @@ export class AuthController {
     status: 401,
     description: 'Invalid or expired refresh token',
   })
-  async refresh(
-    @Body(ValidationPipe) refreshTokenDto: RefreshTokenDto,
-  ): Promise<TokenPair> {
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<TokenPair> {
     const operationId = `auth-refresh-controller-${Date.now()}`;
     const startTime = Date.now();
 
@@ -336,7 +333,7 @@ export class AuthController {
     },
   })
   async logout(
-    @Body(ValidationPipe) refreshTokenDto: RefreshTokenDto,
+    @Body() refreshTokenDto: RefreshTokenDto,
   ): Promise<{ message: string }> {
     const operationId = `auth-logout-controller-${Date.now()}`;
     const startTime = Date.now();
@@ -406,7 +403,7 @@ export class AuthController {
     description: 'Validation error or new passwords do not match',
   })
   async changePassword(
-    @Body(ValidationPipe) changePasswordDto: ChangePasswordDto,
+    @Body() changePasswordDto: ChangePasswordDto,
     @CurrentUser() user: User,
   ): Promise<{ message: string }> {
     const operationId = `auth-change-password-controller-${Date.now()}`;
@@ -481,9 +478,7 @@ export class AuthController {
     status: 401,
     description: 'Authentication required',
   })
-  async getProfile(
-    @CurrentUser() user: User,
-  ): Promise<Omit<User, 'passwordHash'>> {
+  getProfile(@CurrentUser() user: User): Omit<User, 'passwordHash'> {
     const operationId = `auth-profile-controller-${Date.now()}`;
 
     this.logger.debug(`[${operationId}] Profile request received`, {
@@ -492,8 +487,20 @@ export class AuthController {
       username: user.username,
     });
 
-    // Remove password hash from response
-    const { passwordHash: _, ...userProfile } = user;
+    // Remove password hash from response for security using TypeScript omit
+    const userProfile: Omit<User, 'passwordHash'> = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      isActive: user.isActive,
+      emailVerified: user.emailVerified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      lastLoginAt: user.lastLoginAt,
+    };
     return userProfile;
   }
 

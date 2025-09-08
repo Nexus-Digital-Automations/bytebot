@@ -20,9 +20,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SecurityMonitoringService } from './security-monitoring.service';
 import { SecurityAlertsService } from './security-alerts.service';
-import { ThreatIntelligenceService } from './threat-intelligence.service';
-import { SecurityMetricsService } from './security-metrics.service';
-import { SecurityMonitoringController } from './security-monitoring.controller';
+// import { ThreatIntelligenceService } from './threat-intelligence.service'; // TODO: Create this service
+// import { SecurityMetricsService } from './security-metrics.service'; // TODO: Create this service
+// import { SecurityMonitoringController } from './security-monitoring.controller'; // TODO: Create this controller
 import { PrismaModule } from '../prisma/prisma.module';
 
 /**
@@ -31,12 +31,14 @@ import { PrismaModule } from '../prisma/prisma.module';
  */
 @Module({
   imports: [ConfigModule, EventEmitterModule, ScheduleModule, PrismaModule],
-  controllers: [SecurityMonitoringController],
+  controllers: [
+    /* SecurityMonitoringController */
+  ], // TODO: Create this controller
   providers: [
     SecurityMonitoringService,
     SecurityAlertsService,
-    ThreatIntelligenceService,
-    SecurityMetricsService,
+    // ThreatIntelligenceService, // TODO: Create this service
+    // SecurityMetricsService, // TODO: Create this service
     {
       provide: 'SECURITY_CONFIG',
       useFactory: (configService: ConfigService) => {
@@ -49,72 +51,110 @@ import { PrismaModule } from '../prisma/prisma.module';
 
         const config = {
           monitoring: {
-            enabled: configService.get('SECURITY_MONITORING_ENABLED', true),
-            threatDetection: configService.get(
-              'THREAT_DETECTION_ENABLED',
-              true,
+            enabled: Boolean(
+              configService.get<boolean>('SECURITY_MONITORING_ENABLED', true),
             ),
-            anomalyDetection: configService.get(
-              'ANOMALY_DETECTION_ENABLED',
-              true,
+            threatDetection: Boolean(
+              configService.get<boolean>('THREAT_DETECTION_ENABLED', true),
             ),
-            automatedResponse: configService.get(
-              'AUTOMATED_RESPONSE_ENABLED',
-              false,
+            anomalyDetection: Boolean(
+              configService.get<boolean>('ANOMALY_DETECTION_ENABLED', true),
             ),
-            alerting: configService.get('SECURITY_ALERTING_ENABLED', true),
+            automatedResponse: Boolean(
+              configService.get<boolean>('AUTOMATED_RESPONSE_ENABLED', false),
+            ),
+            alerting: Boolean(
+              configService.get<boolean>('SECURITY_ALERTING_ENABLED', true),
+            ),
           },
           threatIntelligence: {
-            enabled: configService.get('THREAT_INTELLIGENCE_ENABLED', true),
-            sources: configService
-              .get('THREAT_INTEL_SOURCES', '')
+            enabled: Boolean(
+              configService.get<boolean>('THREAT_INTELLIGENCE_ENABLED', true),
+            ),
+            sources: String(
+              configService.get<string>('THREAT_INTEL_SOURCES', ''),
+            )
               .split(',')
               .filter(Boolean),
             updateInterval: parseInt(
-              configService.get('THREAT_INTEL_UPDATE_INTERVAL', '3600'),
+              String(
+                configService.get<string>(
+                  'THREAT_INTEL_UPDATE_INTERVAL',
+                  '3600',
+                ),
+              ),
               10,
             ),
           },
           metrics: {
-            collection: configService.get('SECURITY_METRICS_ENABLED', true),
+            collection: Boolean(
+              configService.get<boolean>('SECURITY_METRICS_ENABLED', true),
+            ),
             retentionDays: parseInt(
-              configService.get('SECURITY_METRICS_RETENTION', '30'),
+              String(
+                configService.get<string>('SECURITY_METRICS_RETENTION', '30'),
+              ),
               10,
             ),
             aggregationInterval: parseInt(
-              configService.get('METRICS_AGGREGATION_INTERVAL', '300'),
+              String(
+                configService.get<string>(
+                  'METRICS_AGGREGATION_INTERVAL',
+                  '300',
+                ),
+              ),
               10,
             ),
           },
           alerts: {
-            enabled: configService.get('SECURITY_ALERTS_ENABLED', true),
-            channels: configService
-              .get('ALERT_CHANNELS', 'email,webhook')
-              .split(','),
-            severity: configService.get('MIN_ALERT_SEVERITY', 'MEDIUM'),
+            enabled: Boolean(
+              configService.get<boolean>('SECURITY_ALERTS_ENABLED', true),
+            ),
+            channels: String(
+              configService.get<string>('ALERT_CHANNELS', 'email,webhook'),
+            ).split(','),
+            severity: String(
+              configService.get<string>('MIN_ALERT_SEVERITY', 'MEDIUM'),
+            ),
             throttling: {
-              enabled: configService.get('ALERT_THROTTLING_ENABLED', true),
+              enabled: Boolean(
+                configService.get<boolean>('ALERT_THROTTLING_ENABLED', true),
+              ),
               window: parseInt(
-                configService.get('ALERT_THROTTLE_WINDOW', '300'),
+                String(
+                  configService.get<string>('ALERT_THROTTLE_WINDOW', '300'),
+                ),
                 10,
               ),
               maxAlerts: parseInt(
-                configService.get('ALERT_THROTTLE_MAX', '10'),
+                String(configService.get<string>('ALERT_THROTTLE_MAX', '10')),
                 10,
               ),
             },
           },
           response: {
-            automated: configService.get('AUTOMATED_RESPONSE_ENABLED', false),
+            automated: Boolean(
+              configService.get<boolean>('AUTOMATED_RESPONSE_ENABLED', false),
+            ),
             actions: {
-              blockIp: configService.get('RESPONSE_BLOCK_IP', true),
-              lockAccount: configService.get('RESPONSE_LOCK_ACCOUNT', false),
-              alertTeam: configService.get('RESPONSE_ALERT_TEAM', true),
-              auditLog: configService.get('RESPONSE_AUDIT_LOG', true),
+              blockIp: Boolean(
+                configService.get<boolean>('RESPONSE_BLOCK_IP', true),
+              ),
+              lockAccount: Boolean(
+                configService.get<boolean>('RESPONSE_LOCK_ACCOUNT', false),
+              ),
+              alertTeam: Boolean(
+                configService.get<boolean>('RESPONSE_ALERT_TEAM', true),
+              ),
+              auditLog: Boolean(
+                configService.get<boolean>('RESPONSE_AUDIT_LOG', true),
+              ),
             },
-            confirmationRequired: configService.get(
-              'RESPONSE_CONFIRMATION_REQUIRED',
-              true,
+            confirmationRequired: Boolean(
+              configService.get<boolean>(
+                'RESPONSE_CONFIRMATION_REQUIRED',
+                true,
+              ),
             ),
           },
         };
@@ -158,8 +198,8 @@ import { PrismaModule } from '../prisma/prisma.module';
   exports: [
     SecurityMonitoringService,
     SecurityAlertsService,
-    ThreatIntelligenceService,
-    SecurityMetricsService,
+    // ThreatIntelligenceService, // TODO: Create this service
+    // SecurityMetricsService, // TODO: Create this service
   ],
 })
 export class SecurityMonitoringModule {
@@ -175,27 +215,24 @@ export class SecurityMonitoringModule {
 
     // Log module initialization status
     const securityConfig = {
-      monitoringEnabled: this.configService.get(
-        'SECURITY_MONITORING_ENABLED',
-        true,
+      monitoringEnabled: Boolean(
+        this.configService.get<boolean>('SECURITY_MONITORING_ENABLED', true),
       ),
-      threatDetectionEnabled: this.configService.get(
-        'THREAT_DETECTION_ENABLED',
-        true,
+      threatDetectionEnabled: Boolean(
+        this.configService.get<boolean>('THREAT_DETECTION_ENABLED', true),
       ),
-      anomalyDetectionEnabled: this.configService.get(
-        'ANOMALY_DETECTION_ENABLED',
-        true,
+      anomalyDetectionEnabled: Boolean(
+        this.configService.get<boolean>('ANOMALY_DETECTION_ENABLED', true),
       ),
-      automatedResponseEnabled: this.configService.get(
-        'AUTOMATED_RESPONSE_ENABLED',
-        false,
+      automatedResponseEnabled: Boolean(
+        this.configService.get<boolean>('AUTOMATED_RESPONSE_ENABLED', false),
       ),
-      alertingEnabled: this.configService.get(
-        'SECURITY_ALERTING_ENABLED',
-        true,
+      alertingEnabled: Boolean(
+        this.configService.get<boolean>('SECURITY_ALERTING_ENABLED', true),
       ),
-      metricsEnabled: this.configService.get('SECURITY_METRICS_ENABLED', true),
+      metricsEnabled: Boolean(
+        this.configService.get<boolean>('SECURITY_METRICS_ENABLED', true),
+      ),
     };
 
     const initTime = Date.now() - startTime;

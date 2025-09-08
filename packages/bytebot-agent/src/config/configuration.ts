@@ -1,24 +1,156 @@
 /**
- * Configuration Module - Enterprise-grade configuration management for Bytebot API Platform
- * Implements secure configuration loading with validation, type safety, and environment separation
+ * Configuration Module - 100% Local-Only Configuration Management for Bytebot API Platform
+ * Implements secure local configuration loading with validation, type safety, and environment separation
  *
  * Features:
  * - Environment-specific configurations (development, staging, production)
  * - Type-safe configuration validation with Joi schemas
- * - Secrets management integration with Kubernetes secrets
+ * - Local file-based secrets management with encrypted storage
  * - Feature flags for gradual rollout
  * - Performance monitoring and logging configuration
+ * - Docker Compose integration for local multi-service deployment
+ * - SQLite/PostgreSQL local database support
+ * - NO Kubernetes or cloud dependencies
  *
- * @author Configuration & Secrets Management Specialist
- * @version 1.0.0
- * @since Phase 1: Bytebot API Hardening
+ * @author Local Configuration Security Specialist
+ * @version 2.0.0 - Local-Only Architecture Implementation
+ * @since Phase 1: Bytebot API Hardening - Local Deployment
  */
 
 import { registerAs } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { completeConfigSchema } from './validation.schema';
+import * as Joi from 'joi';
 
 const logger = new Logger('Configuration');
+
+/**
+ * Raw environment configuration from validation
+ * Represents the shape of validated environment variables
+ */
+interface ValidatedEnvironmentConfig {
+  NODE_ENV: 'development' | 'staging' | 'production' | 'test';
+  PORT: number;
+  DATABASE_URL: string;
+  DATABASE_MAX_CONNECTIONS: number;
+  DATABASE_CONNECTION_TIMEOUT: number;
+  API_RATE_LIMIT_WINDOW: number;
+  API_RATE_LIMIT_MAX_REQUESTS: number;
+  API_CORS_ORIGINS: string | string[];
+  BODY_PARSER_LIMIT: string;
+  REQUEST_TIMEOUT: number;
+  JWT_SECRET: string;
+  JWT_EXPIRES_IN: string;
+  JWT_REFRESH_EXPIRES_IN: string;
+  ENCRYPTION_KEY: string;
+  ANTHROPIC_API_KEY?: string;
+  OPENAI_API_KEY?: string;
+  GEMINI_API_KEY?: string;
+  BYTEBOT_DESKTOP_BASE_URL: string;
+  BYTEBOT_LLM_PROXY_URL?: string;
+  BYTEBOT_ANALYTICS_ENDPOINT?: string;
+  ENABLE_AUTHENTICATION: boolean;
+  ENABLE_RATE_LIMITING: boolean;
+  ENABLE_METRICS_COLLECTION: boolean;
+  ENABLE_HEALTH_CHECKS: boolean;
+  ENABLE_CIRCUIT_BREAKER: boolean;
+  PROMETHEUS_METRICS_PORT: number;
+  LOG_LEVEL: 'error' | 'warn' | 'info' | 'debug' | 'verbose';
+  LOG_FORMAT: 'json' | 'text';
+  ENABLE_DISTRIBUTED_TRACING: boolean;
+  JAEGER_ENDPOINT?: string;
+  GRACEFUL_SHUTDOWN_TIMEOUT: number;
+  CIRCUIT_BREAKER_FAILURE_THRESHOLD: number;
+  CIRCUIT_BREAKER_TIMEOUT: number;
+  CIRCUIT_BREAKER_RESET_TIMEOUT: number;
+  HEALTH_CHECK_TIMEOUT: number;
+  HEALTH_CHECK_INTERVAL: number;
+  LOCAL_DEPLOYMENT_TYPE: 'standalone' | 'docker-compose';
+  LOCAL_DATA_DIRECTORY: string;
+  ENABLE_SWAGGER: boolean;
+  SWAGGER_PATH: string;
+  DEBUG_MODE: boolean;
+}
+
+/**
+ * Type guard to validate that an object conforms to ValidatedEnvironmentConfig
+ * Provides runtime type checking for configuration objects
+ */
+function isValidatedEnvironmentConfig(
+  obj: unknown,
+): obj is ValidatedEnvironmentConfig {
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+
+  const config = obj as Record<string, unknown>;
+
+  // Check required string properties
+  const requiredStrings = [
+    'NODE_ENV',
+    'DATABASE_URL',
+    'JWT_SECRET',
+    'JWT_EXPIRES_IN',
+    'JWT_REFRESH_EXPIRES_IN',
+    'ENCRYPTION_KEY',
+    'BYTEBOT_DESKTOP_BASE_URL',
+    'BODY_PARSER_LIMIT',
+    'LOG_LEVEL',
+    'LOG_FORMAT',
+    'LOCAL_DEPLOYMENT_TYPE',
+    'LOCAL_DATA_DIRECTORY',
+    'SWAGGER_PATH',
+  ];
+
+  for (const prop of requiredStrings) {
+    if (typeof config[prop] !== 'string') {
+      return false;
+    }
+  }
+
+  // Check required number properties
+  const requiredNumbers = [
+    'PORT',
+    'DATABASE_MAX_CONNECTIONS',
+    'DATABASE_CONNECTION_TIMEOUT',
+    'API_RATE_LIMIT_WINDOW',
+    'API_RATE_LIMIT_MAX_REQUESTS',
+    'REQUEST_TIMEOUT',
+    'PROMETHEUS_METRICS_PORT',
+    'GRACEFUL_SHUTDOWN_TIMEOUT',
+    'CIRCUIT_BREAKER_FAILURE_THRESHOLD',
+    'CIRCUIT_BREAKER_TIMEOUT',
+    'CIRCUIT_BREAKER_RESET_TIMEOUT',
+    'HEALTH_CHECK_TIMEOUT',
+    'HEALTH_CHECK_INTERVAL',
+  ];
+
+  for (const prop of requiredNumbers) {
+    if (typeof config[prop] !== 'number') {
+      return false;
+    }
+  }
+
+  // Check required boolean properties
+  const requiredBooleans = [
+    'ENABLE_AUTHENTICATION',
+    'ENABLE_RATE_LIMITING',
+    'ENABLE_METRICS_COLLECTION',
+    'ENABLE_HEALTH_CHECKS',
+    'ENABLE_CIRCUIT_BREAKER',
+    'ENABLE_DISTRIBUTED_TRACING',
+    'ENABLE_SWAGGER',
+    'DEBUG_MODE',
+  ];
+
+  for (const prop of requiredBooleans) {
+    if (typeof config[prop] !== 'boolean') {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 /**
  * Configuration interface defining the structure of validated configuration
@@ -92,9 +224,9 @@ export interface AppConfig {
     interval: number;
   };
 
-  kubernetes: {
-    namespace: string;
-    serviceName: string;
+  localDeployment: {
+    type: 'standalone' | 'docker-compose';
+    dataDirectory: string;
   };
 
   development: {
@@ -124,108 +256,132 @@ function loadConfiguration(): AppConfig {
     };
 
     // Validate configuration against schema
-    const { error, value: validatedConfig } = completeConfigSchema.validate(
-      envVars,
-      {
+    const validationResult: Joi.ValidationResult<ValidatedEnvironmentConfig> =
+      completeConfigSchema.validate(envVars, {
         allowUnknown: true, // Allow extra environment variables
         stripUnknown: false, // Keep extra variables for debugging
         abortEarly: false, // Get all validation errors
-      },
-    );
+      });
 
-    if (error) {
-      const errorDetails = error.details.map((detail) => ({
-        field: detail.path.join('.'),
-        message: detail.message,
-        value: detail.context?.value,
-      }));
+    const error = validationResult.error;
+    const validatedConfig = validationResult.value as
+      | ValidatedEnvironmentConfig
+      | undefined;
+
+    if (error || !validatedConfig) {
+      const errorDetails =
+        error?.details.map((detail) => ({
+          field: detail.path.join('.'),
+          message: detail.message,
+          value: detail.context?.value as
+            | string
+            | number
+            | boolean
+            | null
+            | undefined,
+        })) ?? [];
 
       logger.error('Configuration validation failed:', {
         errors: errorDetails,
-        errorCount: error.details.length,
+        errorCount: error?.details.length ?? 0,
       });
 
-      throw new Error(`Configuration validation failed: ${error.message}`);
+      throw new Error(
+        `Configuration validation failed: ${error?.message ?? 'Unknown validation error'}`,
+      );
+    }
+
+    // Type guard validation to ensure runtime type safety
+    if (!isValidatedEnvironmentConfig(validatedConfig)) {
+      logger.error(
+        'Configuration validation failed: Invalid configuration structure',
+      );
+      throw new Error(
+        'Configuration validation failed: Invalid configuration structure',
+      );
     }
 
     // Transform validated configuration to typed structure
+    // At this point, validatedConfig is guaranteed to be ValidatedEnvironmentConfig
+    const typedConfig = validatedConfig;
+
     const config: AppConfig = {
-      nodeEnv: validatedConfig.NODE_ENV,
-      port: validatedConfig.PORT,
+      nodeEnv: typedConfig.NODE_ENV,
+      port: typedConfig.PORT,
 
       database: {
-        url: validatedConfig.DATABASE_URL,
-        maxConnections: validatedConfig.DATABASE_MAX_CONNECTIONS,
-        connectionTimeout: validatedConfig.DATABASE_CONNECTION_TIMEOUT,
+        url: typedConfig.DATABASE_URL,
+        maxConnections: typedConfig.DATABASE_MAX_CONNECTIONS,
+        connectionTimeout: typedConfig.DATABASE_CONNECTION_TIMEOUT,
       },
 
       api: {
-        rateLimitWindow: validatedConfig.API_RATE_LIMIT_WINDOW,
-        rateLimitMaxRequests: validatedConfig.API_RATE_LIMIT_MAX_REQUESTS,
-        corsOrigins: validatedConfig.API_CORS_ORIGINS,
-        bodyParserLimit: validatedConfig.BODY_PARSER_LIMIT,
-        requestTimeout: validatedConfig.REQUEST_TIMEOUT,
+        rateLimitWindow: typedConfig.API_RATE_LIMIT_WINDOW,
+        rateLimitMaxRequests: typedConfig.API_RATE_LIMIT_MAX_REQUESTS,
+        corsOrigins: typedConfig.API_CORS_ORIGINS,
+        bodyParserLimit: typedConfig.BODY_PARSER_LIMIT,
+        requestTimeout: typedConfig.REQUEST_TIMEOUT,
       },
 
       security: {
-        jwtSecret: validatedConfig.JWT_SECRET,
-        jwtExpiresIn: validatedConfig.JWT_EXPIRES_IN,
-        jwtRefreshExpiresIn: validatedConfig.JWT_REFRESH_EXPIRES_IN,
-        encryptionKey: validatedConfig.ENCRYPTION_KEY,
+        jwtSecret: typedConfig.JWT_SECRET,
+        jwtExpiresIn: typedConfig.JWT_EXPIRES_IN,
+        jwtRefreshExpiresIn: typedConfig.JWT_REFRESH_EXPIRES_IN,
+        encryptionKey: typedConfig.ENCRYPTION_KEY,
       },
 
       llmApiKeys: {
-        anthropic: validatedConfig.ANTHROPIC_API_KEY,
-        openai: validatedConfig.OPENAI_API_KEY,
-        gemini: validatedConfig.GEMINI_API_KEY,
+        anthropic: typedConfig.ANTHROPIC_API_KEY,
+        openai: typedConfig.OPENAI_API_KEY,
+        gemini: typedConfig.GEMINI_API_KEY,
       },
 
       services: {
-        bytebotDesktopUrl: validatedConfig.BYTEBOT_DESKTOP_BASE_URL,
-        llmProxyUrl: validatedConfig.BYTEBOT_LLM_PROXY_URL,
-        analyticsEndpoint: validatedConfig.BYTEBOT_ANALYTICS_ENDPOINT,
+        bytebotDesktopUrl: typedConfig.BYTEBOT_DESKTOP_BASE_URL,
+        llmProxyUrl: typedConfig.BYTEBOT_LLM_PROXY_URL,
+        analyticsEndpoint: typedConfig.BYTEBOT_ANALYTICS_ENDPOINT,
       },
 
       features: {
-        authentication: validatedConfig.ENABLE_AUTHENTICATION,
-        rateLimiting: validatedConfig.ENABLE_RATE_LIMITING,
-        metricsCollection: validatedConfig.ENABLE_METRICS_COLLECTION,
-        healthChecks: validatedConfig.ENABLE_HEALTH_CHECKS,
-        circuitBreaker: validatedConfig.ENABLE_CIRCUIT_BREAKER,
+        authentication: typedConfig.ENABLE_AUTHENTICATION,
+        rateLimiting: typedConfig.ENABLE_RATE_LIMITING,
+        metricsCollection: typedConfig.ENABLE_METRICS_COLLECTION,
+        healthChecks: typedConfig.ENABLE_HEALTH_CHECKS,
+        circuitBreaker: typedConfig.ENABLE_CIRCUIT_BREAKER,
       },
 
       monitoring: {
-        prometheusMetricsPort: validatedConfig.PROMETHEUS_METRICS_PORT,
-        logLevel: validatedConfig.LOG_LEVEL,
-        logFormat: validatedConfig.LOG_FORMAT,
-        distributedTracing: validatedConfig.ENABLE_DISTRIBUTED_TRACING,
-        jaegerEndpoint: validatedConfig.JAEGER_ENDPOINT,
+        prometheusMetricsPort: typedConfig.PROMETHEUS_METRICS_PORT,
+        logLevel: typedConfig.LOG_LEVEL,
+        logFormat: typedConfig.LOG_FORMAT,
+        distributedTracing: typedConfig.ENABLE_DISTRIBUTED_TRACING,
+        jaegerEndpoint: typedConfig.JAEGER_ENDPOINT,
       },
 
       performance: {
-        gracefulShutdownTimeout: validatedConfig.GRACEFUL_SHUTDOWN_TIMEOUT,
+        gracefulShutdownTimeout: typedConfig.GRACEFUL_SHUTDOWN_TIMEOUT,
       },
 
       circuitBreaker: {
-        failureThreshold: validatedConfig.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
-        timeout: validatedConfig.CIRCUIT_BREAKER_TIMEOUT,
-        resetTimeout: validatedConfig.CIRCUIT_BREAKER_RESET_TIMEOUT,
+        failureThreshold: typedConfig.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+        timeout: typedConfig.CIRCUIT_BREAKER_TIMEOUT,
+        resetTimeout: typedConfig.CIRCUIT_BREAKER_RESET_TIMEOUT,
       },
 
       healthCheck: {
-        timeout: validatedConfig.HEALTH_CHECK_TIMEOUT,
-        interval: validatedConfig.HEALTH_CHECK_INTERVAL,
+        timeout: typedConfig.HEALTH_CHECK_TIMEOUT,
+        interval: typedConfig.HEALTH_CHECK_INTERVAL,
       },
 
-      kubernetes: {
-        namespace: validatedConfig.KUBERNETES_NAMESPACE,
-        serviceName: validatedConfig.KUBERNETES_SERVICE_NAME,
+      localDeployment: {
+        type: typedConfig.LOCAL_DEPLOYMENT_TYPE,
+        dataDirectory: typedConfig.LOCAL_DATA_DIRECTORY,
       },
 
       development: {
-        enableSwagger: validatedConfig.ENABLE_SWAGGER,
-        swaggerPath: validatedConfig.SWAGGER_PATH,
-        debugMode: validatedConfig.DEBUG_MODE,
+        enableSwagger: typedConfig.ENABLE_SWAGGER,
+        swaggerPath: typedConfig.SWAGGER_PATH,
+        debugMode: typedConfig.DEBUG_MODE,
       },
     };
 
@@ -258,7 +414,7 @@ function loadConfiguration(): AppConfig {
  *
  * @returns Environment-specific default configuration
  */
-function getEnvironmentDefaults(): Record<string, any> {
+function getEnvironmentDefaults(): Record<string, string | boolean> {
   const nodeEnv = process.env.NODE_ENV || 'development';
 
   const baseDefaults = {};

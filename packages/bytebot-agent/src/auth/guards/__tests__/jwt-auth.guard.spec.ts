@@ -150,16 +150,18 @@ describe('JwtAuthGuard', () => {
   describe('canActivate', () => {
     it('should allow access with valid JWT token', async () => {
       // Arrange
-      jwtService.verifyAsync.mockResolvedValue(validJwtPayload);
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(validJwtPayload);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
       const result = await guard.canActivate(mockExecutionContext);
 
       // Assert
       expect(result).toBe(true);
-      expect(jwtService.verifyAsync).toHaveBeenCalledWith('valid-jwt-token');
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+      expect(jest.mocked(jwtService.verifyAsync)).toHaveBeenCalledWith(
+        'valid-jwt-token',
+      );
+      expect(jest.mocked(prismaService.user.findUnique)).toHaveBeenCalledWith({
         where: { id: validJwtPayload.sub },
         include: { permissions: true },
       });
@@ -172,26 +174,26 @@ describe('JwtAuthGuard', () => {
     it('should allow access to public routes without token', async () => {
       // Arrange
       reflector.getAllAndOverride.mockReturnValue(true); // Public route
-      delete mockRequest.headers.authorization;
+      (mockRequest.headers as any).authorization = undefined;
 
       // Act
       const result = await guard.canActivate(mockExecutionContext);
 
       // Assert
       expect(result).toBe(true);
-      expect(jwtService.verifyAsync).not.toHaveBeenCalled();
-      expect(prismaService.user.findUnique).not.toHaveBeenCalled();
+      expect(jest.mocked(jwtService.verifyAsync)).not.toHaveBeenCalled();
+      expect(jest.mocked(prismaService.user.findUnique)).not.toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException when no authorization header', async () => {
       // Arrange
-      delete mockRequest.headers.authorization;
+      (mockRequest.headers as any).authorization = undefined;
 
       // Act & Assert
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
         UnauthorizedException,
       );
-      expect(jwtService.verifyAsync).not.toHaveBeenCalled();
+      expect(jest.mocked(jwtService.verifyAsync)).not.toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException when authorization header is malformed', async () => {
@@ -202,18 +204,22 @@ describe('JwtAuthGuard', () => {
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
         UnauthorizedException,
       );
-      expect(jwtService.verifyAsync).not.toHaveBeenCalled();
+      expect(jest.mocked(jwtService.verifyAsync)).not.toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException when JWT token is invalid', async () => {
       // Arrange
-      jwtService.verifyAsync.mockRejectedValue(new Error('Invalid token'));
+      (jwtService.verifyAsync as jest.Mock).mockRejectedValue(
+        new Error('Invalid token'),
+      );
 
       // Act & Assert
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
         UnauthorizedException,
       );
-      expect(jwtService.verifyAsync).toHaveBeenCalledWith('valid-jwt-token');
+      expect(jest.mocked(jwtService.verifyAsync)).toHaveBeenCalledWith(
+        'valid-jwt-token',
+      );
     });
 
     it('should throw UnauthorizedException when JWT token is expired', async () => {
@@ -222,7 +228,7 @@ describe('JwtAuthGuard', () => {
         ...validJwtPayload,
         exp: Math.floor(Date.now() / 1000) - 60, // Expired 1 minute ago
       };
-      jwtService.verifyAsync.mockResolvedValue(expiredPayload);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(expiredPayload);
 
       // Act & Assert
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
@@ -236,7 +242,9 @@ describe('JwtAuthGuard', () => {
         ...validJwtPayload,
         type: 'refresh',
       };
-      jwtService.verifyAsync.mockResolvedValue(refreshTokenPayload);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(
+        refreshTokenPayload,
+      );
 
       // Act & Assert
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
@@ -246,14 +254,14 @@ describe('JwtAuthGuard', () => {
 
     it('should throw UnauthorizedException when user not found in database', async () => {
       // Arrange
-      jwtService.verifyAsync.mockResolvedValue(validJwtPayload);
-      prismaService.user.findUnique.mockResolvedValue(null);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(validJwtPayload);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(null);
 
       // Act & Assert
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
         UnauthorizedException,
       );
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+      expect(jest.mocked(prismaService.user.findUnique)).toHaveBeenCalledWith({
         where: { id: validJwtPayload.sub },
         include: { permissions: true },
       });
@@ -262,8 +270,10 @@ describe('JwtAuthGuard', () => {
     it('should throw UnauthorizedException when user account is inactive', async () => {
       // Arrange
       const inactiveUser = { ...mockUser, isActive: false };
-      jwtService.verifyAsync.mockResolvedValue(validJwtPayload);
-      prismaService.user.findUnique.mockResolvedValue(inactiveUser);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(validJwtPayload);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(
+        inactiveUser,
+      );
 
       // Act & Assert
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
@@ -274,13 +284,15 @@ describe('JwtAuthGuard', () => {
     it('should handle different authorization header formats', async () => {
       // Test case: lowercase 'bearer'
       mockRequest.headers.authorization = 'bearer valid-jwt-token';
-      jwtService.verifyAsync.mockResolvedValue(validJwtPayload);
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(validJwtPayload);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
 
       const result = await guard.canActivate(mockExecutionContext);
 
       expect(result).toBe(true);
-      expect(jwtService.verifyAsync).toHaveBeenCalledWith('valid-jwt-token');
+      expect(jest.mocked(jwtService.verifyAsync)).toHaveBeenCalledWith(
+        'valid-jwt-token',
+      );
     });
 
     it('should handle missing sessionId in JWT payload', async () => {
@@ -289,8 +301,10 @@ describe('JwtAuthGuard', () => {
         ...validJwtPayload,
         sessionId: undefined,
       };
-      jwtService.verifyAsync.mockResolvedValue(payloadWithoutSession);
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(
+        payloadWithoutSession,
+      );
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
       const result = await guard.canActivate(mockExecutionContext);
@@ -309,7 +323,9 @@ describe('JwtAuthGuard', () => {
         ...validJwtPayload,
         aud: 'wrong-audience',
       };
-      jwtService.verifyAsync.mockResolvedValue(invalidAudPayload);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(
+        invalidAudPayload,
+      );
 
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
         UnauthorizedException,
@@ -320,7 +336,9 @@ describe('JwtAuthGuard', () => {
         ...validJwtPayload,
         iss: 'wrong-issuer',
       };
-      jwtService.verifyAsync.mockResolvedValue(invalidIssPayload);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(
+        invalidIssPayload,
+      );
 
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
         UnauthorizedException,
@@ -332,8 +350,8 @@ describe('JwtAuthGuard', () => {
       const loggerSpy = jest.spyOn(guard['logger'], 'log');
       const warnSpy = jest.spyOn(guard['logger'], 'warn');
 
-      jwtService.verifyAsync.mockResolvedValue(validJwtPayload);
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(validJwtPayload);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
       await guard.canActivate(mockExecutionContext);
@@ -348,7 +366,9 @@ describe('JwtAuthGuard', () => {
       );
 
       // Test failed authentication logging
-      jwtService.verifyAsync.mockRejectedValue(new Error('Invalid token'));
+      (jwtService.verifyAsync as jest.Mock).mockRejectedValue(
+        new Error('Invalid token'),
+      );
 
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow();
 
@@ -360,8 +380,8 @@ describe('JwtAuthGuard', () => {
 
     it('should handle concurrent authentication requests', async () => {
       // Arrange
-      jwtService.verifyAsync.mockResolvedValue(validJwtPayload);
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(validJwtPayload);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
 
       const context1 = { ...mockExecutionContext };
       const context2 = { ...mockExecutionContext };
@@ -375,8 +395,10 @@ describe('JwtAuthGuard', () => {
       // Assert
       expect(result1).toBe(true);
       expect(result2).toBe(true);
-      expect(jwtService.verifyAsync).toHaveBeenCalledTimes(2);
-      expect(prismaService.user.findUnique).toHaveBeenCalledTimes(2);
+      expect(jest.mocked(jwtService.verifyAsync)).toHaveBeenCalledTimes(2);
+      expect(jest.mocked(prismaService.user.findUnique)).toHaveBeenCalledTimes(
+        2,
+      );
     });
   });
 
@@ -389,14 +411,22 @@ describe('JwtAuthGuard', () => {
         'BEARER valid-token',
       ];
 
-      authHeaders.forEach(async (header) => {
-        mockRequest.headers.authorization = header;
-        jwtService.verifyAsync.mockResolvedValue(validJwtPayload);
-        prismaService.user.findUnique.mockResolvedValue(mockUser);
+      authHeaders.forEach((header) => {
+        void (async () => {
+          mockRequest.headers.authorization = header;
+          (jwtService.verifyAsync as jest.Mock).mockResolvedValue(
+            validJwtPayload,
+          );
+          (prismaService.user.findUnique as jest.Mock).mockResolvedValue(
+            mockUser,
+          );
 
-        const result = await guard.canActivate(mockExecutionContext);
-        expect(result).toBe(true);
-        expect(jwtService.verifyAsync).toHaveBeenCalledWith('valid-token');
+          const result = await guard.canActivate(mockExecutionContext);
+          expect(result).toBe(true);
+          expect(jest.mocked(jwtService.verifyAsync)).toHaveBeenCalledWith(
+            'valid-token',
+          );
+        })();
       });
     });
   });
@@ -404,8 +434,8 @@ describe('JwtAuthGuard', () => {
   describe('performance tests', () => {
     it('should complete authentication within performance threshold', async () => {
       // Arrange
-      jwtService.verifyAsync.mockResolvedValue(validJwtPayload);
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(validJwtPayload);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
       const startTime = Date.now();
@@ -418,8 +448,8 @@ describe('JwtAuthGuard', () => {
 
     it('should handle high load authentication requests', async () => {
       // Arrange
-      jwtService.verifyAsync.mockResolvedValue(validJwtPayload);
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      (jwtService.verifyAsync as jest.Mock).mockResolvedValue(validJwtPayload);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
 
       const requestCount = 100;
       const contexts = Array.from(

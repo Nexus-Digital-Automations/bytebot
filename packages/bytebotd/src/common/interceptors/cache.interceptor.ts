@@ -25,7 +25,7 @@ import {
   Logger,
   NestInterceptor,
 } from '@nestjs/common';
-import { Observable, of, tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Request, Response } from 'express';
 import { CacheService } from '../../cache/cache.service';
 import { CacheKeyGenerator } from '../../cache/cache-key.generator';
@@ -76,11 +76,14 @@ interface CacheInterceptorStats {
   cacheSkips: number;
   hitRate: number;
   averageResponseTime: number;
-  endpointStats: Map<string, {
-    hits: number;
-    misses: number;
-    hitRate: number;
-  }>;
+  endpointStats: Map<
+    string,
+    {
+      hits: number;
+      misses: number;
+      hitRate: number;
+    }
+  >;
 }
 
 /**
@@ -109,7 +112,7 @@ export class CacheInterceptor implements NestInterceptor {
       cacheableStatuses: [200],
       varyBy: ['Authorization'],
     },
-    
+
     // Task lists - cache for 2 minutes
     {
       pattern: /^\/api\/tasks(\?.*)?$/,
@@ -165,7 +168,7 @@ export class CacheInterceptor implements NestInterceptor {
   ) {
     this.logger.log('Cache Interceptor initialized');
     this.logger.log(`Configured ${this.cacheRules.length} cache rules`);
-    
+
     // Start periodic stats reporting
     this.startPeriodicReporting();
   }
@@ -176,7 +179,7 @@ export class CacheInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
-    
+
     // Only cache GET requests by default
     if (request.method !== 'GET') {
       // For non-GET requests, invalidate related cache entries
@@ -204,7 +207,7 @@ export class CacheInterceptor implements NestInterceptor {
 
     // Generate cache key
     const cacheKey = this.generateCacheKey(request, cacheRule);
-    
+
     return this.handleCachedRequest(
       cacheKey,
       cacheRule,
@@ -230,11 +233,17 @@ export class CacheInterceptor implements NestInterceptor {
   ): Observable<any> {
     return new Observable((observer) => {
       // Try to get from cache first
-      this.cacheService.get<CachedResponse>(cacheKey)
+      this.cacheService
+        .get<CachedResponse>(cacheKey)
         .then((cachedResponse) => {
           if (cachedResponse && this.isCacheValid(cachedResponse, request)) {
             // Cache hit - return cached response
-            this.handleCacheHit(cachedResponse, response, operationId, startTime);
+            this.handleCacheHit(
+              cachedResponse,
+              response,
+              operationId,
+              startTime,
+            );
             observer.next(cachedResponse.data);
             observer.complete();
           } else {
@@ -265,7 +274,7 @@ export class CacheInterceptor implements NestInterceptor {
           this.logger.error(
             `[${operationId}] Cache retrieval error: ${error instanceof Error ? error.message : 'Unknown error'}`,
           );
-          
+
           next.handle().subscribe({
             next: (data) => observer.next(data),
             error: (error) => observer.error(error),
@@ -285,7 +294,7 @@ export class CacheInterceptor implements NestInterceptor {
     startTime: number,
   ): void {
     const duration = Date.now() - startTime;
-    
+
     // Set cached headers
     Object.entries(cachedResponse.headers).forEach(([key, value]) => {
       response.set(key, value);
@@ -294,10 +303,10 @@ export class CacheInterceptor implements NestInterceptor {
     // Add cache headers
     response.set('X-Cache', 'HIT');
     response.set('X-Cache-Key', this.hashForLogging(operationId));
-    
+
     this.stats.cacheHits++;
     this.recordEndpointStats(cachedResponse.metadata.url, 'hit');
-    
+
     this.logger.debug(
       `[${operationId}] Cache HIT: ${cachedResponse.metadata.url} (${duration}ms)`,
       {
@@ -329,7 +338,7 @@ export class CacheInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(async (data) => {
         const duration = Date.now() - startTime;
-        
+
         this.stats.cacheMisses++;
         this.recordEndpointStats(request.url, 'miss');
 
@@ -384,13 +393,13 @@ export class CacheInterceptor implements NestInterceptor {
    */
   private findCacheRule(request: Request): CacheRule | null {
     const path = request.url.split('?')[0]; // Remove query string for pattern matching
-    
+
     for (const rule of this.cacheRules) {
       if (rule.pattern.test(path)) {
         return rule;
       }
     }
-    
+
     return null;
   }
 
@@ -398,10 +407,7 @@ export class CacheInterceptor implements NestInterceptor {
    * Generate cache key for request
    */
   private generateCacheKey(request: Request, cacheRule: CacheRule): string {
-    const keyParts: string[] = [
-      request.method,
-      request.url,
-    ];
+    const keyParts: string[] = [request.method, request.url];
 
     // Add user ID if required
     if (cacheRule.includeUserId) {
@@ -432,10 +438,13 @@ export class CacheInterceptor implements NestInterceptor {
   /**
    * Check if cached response is still valid
    */
-  private isCacheValid(cachedResponse: CachedResponse, request: Request): boolean {
+  private isCacheValid(
+    cachedResponse: CachedResponse,
+    request: Request,
+  ): boolean {
     const now = Date.now();
     const cacheAge = (now - cachedResponse.metadata.timestamp) / 1000;
-    
+
     // Check TTL expiration
     if (cacheAge > cachedResponse.metadata.ttl) {
       return false;
@@ -461,17 +470,25 @@ export class CacheInterceptor implements NestInterceptor {
   /**
    * Check if response should be cached
    */
-  private shouldCacheResponse(response: Response, cacheRule: CacheRule): boolean {
+  private shouldCacheResponse(
+    response: Response,
+    cacheRule: CacheRule,
+  ): boolean {
     // Check status code
-    if (cacheRule.cacheableStatuses && 
-        !cacheRule.cacheableStatuses.includes(response.statusCode)) {
+    if (
+      cacheRule.cacheableStatuses &&
+      !cacheRule.cacheableStatuses.includes(response.statusCode)
+    ) {
       return false;
     }
 
     // Check for cache-control directives
     const cacheControl = response.get('Cache-Control');
     if (cacheControl) {
-      if (cacheControl.includes('no-store') || cacheControl.includes('private')) {
+      if (
+        cacheControl.includes('no-store') ||
+        cacheControl.includes('private')
+      ) {
         return false;
       }
     }
@@ -508,7 +525,7 @@ export class CacheInterceptor implements NestInterceptor {
     ];
 
     const headers: Record<string, string> = {};
-    
+
     for (const header of cacheableHeaders) {
       const value = response.get(header);
       if (value) {
@@ -528,7 +545,7 @@ export class CacheInterceptor implements NestInterceptor {
       const resourcePattern = this.extractResourcePattern(request);
       if (resourcePattern) {
         await this.cacheService.invalidatePattern(resourcePattern, 'api-cache');
-        
+
         this.logger.debug(
           `Cache invalidation triggered by ${request.method} ${request.url}`,
           { pattern: resourcePattern },
@@ -577,7 +594,7 @@ export class CacheInterceptor implements NestInterceptor {
    */
   private recordEndpointStats(url: string, result: 'hit' | 'miss'): void {
     const normalizedUrl = this.normalizeUrlForStats(url);
-    
+
     if (!this.stats.endpointStats.has(normalizedUrl)) {
       this.stats.endpointStats.set(normalizedUrl, {
         hits: 0,
@@ -587,7 +604,7 @@ export class CacheInterceptor implements NestInterceptor {
     }
 
     const endpointStats = this.stats.endpointStats.get(normalizedUrl)!;
-    
+
     if (result === 'hit') {
       endpointStats.hits++;
     } else {
@@ -612,10 +629,12 @@ export class CacheInterceptor implements NestInterceptor {
    * Update overall cache statistics
    */
   private updateStats(): void {
-    this.stats.totalRequests = this.stats.cacheHits + this.stats.cacheMisses + this.stats.cacheSkips;
-    
+    this.stats.totalRequests =
+      this.stats.cacheHits + this.stats.cacheMisses + this.stats.cacheSkips;
+
     if (this.stats.totalRequests > 0) {
-      this.stats.hitRate = (this.stats.cacheHits / this.stats.totalRequests) * 100;
+      this.stats.hitRate =
+        (this.stats.cacheHits / this.stats.totalRequests) * 100;
     }
   }
 
@@ -641,7 +660,7 @@ export class CacheInterceptor implements NestInterceptor {
       hitRate: 0,
       averageResponseTime: 0,
     });
-    
+
     this.stats.endpointStats.clear();
     this.logger.log('Cache interceptor statistics cleared');
   }
@@ -660,7 +679,7 @@ export class CacheInterceptor implements NestInterceptor {
           cacheSkips: this.stats.cacheSkips,
           hitRate: `${this.stats.hitRate.toFixed(1)}%`,
           topEndpoints: Array.from(this.stats.endpointStats.entries())
-            .sort((a, b) => (b[1].hits + b[1].misses) - (a[1].hits + a[1].misses))
+            .sort((a, b) => b[1].hits + b[1].misses - (a[1].hits + a[1].misses))
             .slice(0, 5)
             .map(([url, stats]) => ({
               url,

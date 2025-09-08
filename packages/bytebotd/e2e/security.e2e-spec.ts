@@ -16,7 +16,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 
 // Mock App Module for security testing
 class MockSecurityModule {

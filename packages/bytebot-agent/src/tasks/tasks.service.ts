@@ -11,7 +11,6 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import {
   Task,
-  Role,
   Prisma,
   TaskStatus,
   TaskType,
@@ -52,80 +51,82 @@ export class TasksService {
       `Creating new task with description: ${createTaskDto.description}`,
     );
 
-    const task = await this.prisma.$transaction(async (prisma) => {
-      // Create the task first
-      this.logger.debug('Creating task record in database');
-      const task = await prisma.task.create({
-        data: {
-          description: createTaskDto.description,
-          type: createTaskDto.type || TaskType.IMMEDIATE,
-          priority: createTaskDto.priority || TaskPriority.MEDIUM,
-          status: TaskStatus.PENDING,
-          createdBy: createTaskDto.createdBy || MessageRole.USER,
-          ...(createTaskDto.model != null
-            ? {
-                model: JSON.stringify(
-                  createTaskDto.model,
-                ) as Prisma.InputJsonValue,
-              }
-            : { model: Prisma.JsonNull }),
-          ...(createTaskDto.scheduledFor
-            ? { scheduledFor: createTaskDto.scheduledFor }
-            : {}),
-        },
-      });
-      this.logger.log(`Task created successfully with ID: ${task.id}`);
-
-      let filesDescription = '';
-
-      // Save files if provided
-      if (createTaskDto.files && createTaskDto.files.length > 0) {
-        this.logger.debug(
-          `Saving ${createTaskDto.files.length} file(s) for task ID: ${task.id}`,
-        );
-        filesDescription += `\n`;
-
-        const filePromises = createTaskDto.files.map((file) => {
-          // Extract base64 data without the data URL prefix
-          const base64Data = file.base64.includes('base64,')
-            ? file.base64.split('base64,')[1]
-            : file.base64;
-
-          filesDescription += `\nFile ${file.name} written to desktop.`;
-
-          return prisma.file.create({
-            data: {
-              name: file.name,
-              type: file.type || 'application/octet-stream',
-              size: file.size,
-              data: base64Data,
-              taskId: task.id,
-            },
-          });
+    const task = await this.prisma.$transaction(
+      async (prisma: Prisma.TransactionClient) => {
+        // Create the task first
+        this.logger.debug('Creating task record in database');
+        const task = await prisma.task.create({
+          data: {
+            description: createTaskDto.description,
+            type: createTaskDto.type || TaskType.IMMEDIATE,
+            priority: createTaskDto.priority || TaskPriority.MEDIUM,
+            status: TaskStatus.PENDING,
+            createdBy: createTaskDto.createdBy || 'USER',
+            ...(createTaskDto.model != null
+              ? {
+                  model: JSON.stringify(
+                    createTaskDto.model,
+                  ) as Prisma.InputJsonValue,
+                }
+              : { model: Prisma.JsonNull }),
+            ...(createTaskDto.scheduledFor
+              ? { scheduledFor: createTaskDto.scheduledFor }
+              : {}),
+          },
         });
+        this.logger.log(`Task created successfully with ID: ${task.id}`);
 
-        await Promise.all(filePromises);
-        this.logger.debug(`Files saved successfully for task ID: ${task.id}`);
-      }
+        let filesDescription = '';
 
-      // Create the initial system message
-      this.logger.debug(`Creating initial message for task ID: ${task.id}`);
-      await prisma.message.create({
-        data: {
-          content: [
-            {
-              type: 'text',
-              text: `${createTaskDto.description} ${filesDescription}`,
-            },
-          ] as Prisma.InputJsonValue,
-          role: MessageRole.USER,
-          taskId: task.id,
-        },
-      });
-      this.logger.debug(`Initial message created for task ID: ${task.id}`);
+        // Save files if provided
+        if (createTaskDto.files && createTaskDto.files.length > 0) {
+          this.logger.debug(
+            `Saving ${createTaskDto.files.length} file(s) for task ID: ${task.id}`,
+          );
+          filesDescription += `\n`;
 
-      return task;
-    });
+          const filePromises = createTaskDto.files.map((file) => {
+            // Extract base64 data without the data URL prefix
+            const base64Data = file.base64.includes('base64,')
+              ? file.base64.split('base64,')[1]
+              : file.base64;
+
+            filesDescription += `\nFile ${file.name} written to desktop.`;
+
+            return prisma.file.create({
+              data: {
+                name: file.name,
+                type: file.type || 'application/octet-stream',
+                size: file.size,
+                data: base64Data,
+                taskId: task.id,
+              },
+            });
+          });
+
+          await Promise.all(filePromises);
+          this.logger.debug(`Files saved successfully for task ID: ${task.id}`);
+        }
+
+        // Create the initial system message
+        this.logger.debug(`Creating initial message for task ID: ${task.id}`);
+        await prisma.message.create({
+          data: {
+            content: [
+              {
+                type: 'text',
+                text: `${createTaskDto.description} ${filesDescription}`,
+              },
+            ] as Prisma.InputJsonValue,
+            role: 'USER',
+            taskId: task.id,
+          },
+        });
+        this.logger.debug(`Initial message created for task ID: ${task.id}`);
+
+        return task;
+      },
+    );
 
     this.tasksGateway.emitTaskCreated(task);
 
@@ -205,7 +206,7 @@ export class TasksService {
     return { tasks, total, totalPages };
   }
 
-  async findById(id: string): Promise<Task> {
+  async findById(id: string): Promise<Task & { files: File[] }> {
     this.logger.log(`Retrieving task by ID: ${id}`);
 
     try {
@@ -225,7 +226,16 @@ export class TasksService {
       return task;
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : String(error);
+        error instanceof Error
+          ? error.message
+          : (() => {
+              if (typeof error === 'string') return error;
+              try {
+                return JSON.stringify(error);
+              } catch {
+                return '[Unserializable Error]';
+              }
+            })();
       const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(`Error retrieving task ID: ${id} - ${errorMessage}`);
       if (errorStack) {
@@ -281,7 +291,10 @@ export class TasksService {
     return deletedTask;
   }
 
-  async addTaskMessage(taskId: string, addTaskMessageDto: AddTaskMessageDto) {
+  async addTaskMessage(
+    taskId: string,
+    addTaskMessageDto: AddTaskMessageDto,
+  ): Promise<Task> {
     const task = await this.findById(taskId);
     if (!task) {
       this.logger.warn(`Task with ID: ${taskId} not found for guiding`);
@@ -291,7 +304,7 @@ export class TasksService {
     const message = await this.prisma.message.create({
       data: {
         content: [{ type: 'text', text: addTaskMessageDto.message }],
-        role: MessageRole.USER,
+        role: 'USER',
         taskId,
       },
     });
@@ -308,14 +321,14 @@ export class TasksService {
       throw new NotFoundException(`Task with ID ${taskId} not found`);
     }
 
-    if (task.control !== MessageRole.USER) {
+    if (task.control !== 'USER') {
       throw new BadRequestException(`Task ${taskId} is not under user control`);
     }
 
     const updatedTask = await this.prisma.task.update({
       where: { id: taskId },
       data: {
-        control: MessageRole.ASSISTANT,
+        control: 'ASSISTANT',
         status: TaskStatus.RUNNING,
       },
     });
@@ -346,7 +359,7 @@ export class TasksService {
       throw new NotFoundException(`Task with ID ${taskId} not found`);
     }
 
-    if (task.control !== MessageRole.ASSISTANT) {
+    if (task.control !== 'ASSISTANT') {
       throw new BadRequestException(
         `Task ${taskId} is not under agent control`,
       );
@@ -355,7 +368,7 @@ export class TasksService {
     const updatedTask = await this.prisma.task.update({
       where: { id: taskId },
       data: {
-        control: MessageRole.USER,
+        control: 'USER',
       },
     });
 

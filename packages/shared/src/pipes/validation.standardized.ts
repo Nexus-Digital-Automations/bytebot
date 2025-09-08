@@ -21,7 +21,7 @@ import {
   PayloadTooLargeException,
 } from "@nestjs/common";
 import { validate, ValidationError } from "class-validator";
-import { plainToClass, Transform } from "class-transformer";
+import { plainToClass } from "class-transformer";
 import {
   sanitizeInput,
   sanitizeObject,
@@ -29,7 +29,6 @@ import {
   detectSQLInjection,
   createSecurityEvent,
   SecurityEventType,
-  ValidationResult,
   DEFAULT_SANITIZATION_OPTIONS,
   SanitizationOptions,
 } from "../utils/security.utils";
@@ -71,7 +70,7 @@ export enum ValidationServiceType {
 /**
  * Comprehensive validation pipe configuration
  */
-interface StandardizedValidationConfig {
+interface StandardizedValidationConfig extends Record<string, unknown> {
   /** Service type for profile selection */
   serviceType: ValidationServiceType;
 
@@ -438,18 +437,32 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
   /**
    * Deep merge configuration objects
    */
-  private deepMerge(target: any, source: any): any {
+  private deepMerge<T extends Record<string, unknown>>(
+    target: T,
+    source: Partial<T>,
+  ): T {
     const result = { ...target };
 
     for (const key in source) {
-      if (
-        source[key] &&
-        typeof source[key] === "object" &&
-        !Array.isArray(source[key])
-      ) {
-        result[key] = this.deepMerge(result[key] || {}, source[key]);
-      } else {
-        result[key] = source[key];
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        const sourceValue = source[key];
+        const targetValue = result[key];
+
+        if (
+          sourceValue &&
+          typeof sourceValue === "object" &&
+          !Array.isArray(sourceValue) &&
+          targetValue &&
+          typeof targetValue === "object" &&
+          !Array.isArray(targetValue)
+        ) {
+          result[key] = this.deepMerge(
+            targetValue as Record<string, unknown>,
+            sourceValue as Record<string, unknown>,
+          ) as T[Extract<keyof T, string>];
+        } else if (sourceValue !== undefined) {
+          result[key] = sourceValue as T[Extract<keyof T, string>];
+        }
       }
     }
 
@@ -459,7 +472,10 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
   /**
    * Transform and validate incoming data with comprehensive security checks
    */
-  async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
+  async transform(
+    value: unknown,
+    metadata: ArgumentMetadata,
+  ): Promise<unknown> {
     const operationId = `validation-${this.config.serviceType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -505,14 +521,14 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
       }
 
       // Sanitize input if enabled
-      let sanitizedValue = value;
+      let sanitizedValue: unknown = value;
       if (this.config.enableSanitization) {
         sanitizedValue = this.sanitizeValue(value, operationId);
       }
 
       // Transform to class instance
-      const transformedValue = this.config.transform
-        ? plainToClass(metadata.metatype, sanitizedValue)
+      const transformedValue: unknown = this.config.transform
+        ? plainToClass(metadata.metatype as new () => unknown, sanitizedValue)
         : sanitizedValue;
 
       // Perform class-validator validation
@@ -553,7 +569,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
           securityLevel: this.config.securityLevel,
           type: metadata.type,
           metatype: metadata.metatype?.name,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           processingTimeMs: processingTime,
         },
       );
@@ -573,15 +589,22 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
   /**
    * Check if the metatype is a basic JavaScript type
    */
-  private isBasicType(metatype: any): boolean {
+  private isBasicType(metatype: unknown): boolean {
     const basicTypes = [String, Boolean, Number, Array, Object];
-    return basicTypes.includes(metatype);
+    return basicTypes.includes(
+      metatype as
+        | StringConstructor
+        | BooleanConstructor
+        | NumberConstructor
+        | ArrayConstructor
+        | ObjectConstructor,
+    );
   }
 
   /**
    * Sanitize basic value (string, number, etc.)
    */
-  private sanitizeBasicValue(value: any, operationId: string): any {
+  private sanitizeBasicValue(value: unknown, operationId: string): unknown {
     if (typeof value === "string" && this.config.enableSanitization) {
       const sanitized = sanitizeInput(value, this.config.sanitizationOptions);
 
@@ -611,7 +634,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
   /**
    * Validate payload size against service-specific limits
    */
-  private validatePayloadSize(value: any, operationId: string): void {
+  private validatePayloadSize(value: object, operationId: string): void {
     try {
       const payloadSize = JSON.stringify(value).length;
 
@@ -659,7 +682,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
         {
           operationId,
           serviceType: this.config.serviceType,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         },
       );
     }
@@ -744,9 +767,9 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
   /**
    * Sanitize input value based on type
    */
-  private sanitizeValue(value: any, operationId: string): any {
+  private sanitizeValue(value: unknown, operationId: string): unknown {
     const startTime = Date.now();
-    let sanitized: any;
+    let sanitized: unknown;
 
     if (typeof value === "string") {
       sanitized = sanitizeInput(value, this.config.sanitizationOptions);
@@ -800,8 +823,8 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
    * Perform class-validator validation
    */
   private async validateValue(
-    value: any,
-    metatype: any,
+    value: unknown,
+    metatype: new () => unknown,
     operationId: string,
   ): Promise<void> {
     const startTime = Date.now();
@@ -813,6 +836,11 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
       groups: this.config.validationGroups,
       stopAtFirstError: this.config.stopAtFirstError,
     };
+
+    // Ensure value is an object for validation
+    if (typeof value !== "object" || value === null) {
+      throw new BadRequestException("Validation target must be an object");
+    }
 
     const errors: ValidationError[] = await validate(value, validationOptions);
 
@@ -836,7 +864,22 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
         },
       );
 
-      const errorResponse = {
+      const errorResponse: {
+        message: string;
+        timestamp: string;
+        operationId: string;
+        serviceType: string;
+        errors?: Array<{
+          property: string;
+          value: unknown;
+          constraints: Record<string, string> | undefined;
+          children?: Array<{
+            property: string;
+            value: unknown;
+            constraints: Record<string, string> | undefined;
+          }>;
+        }>;
+      } = {
         message: "Validation failed",
         timestamp: new Date().toISOString(),
         operationId,
@@ -845,7 +888,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
 
       // Include detailed errors only if not disabled
       if (!this.config.disableErrorMessages) {
-        (errorResponse as any).errors = formattedErrors;
+        errorResponse.errors = formattedErrors;
       }
 
       throw new BadRequestException(errorResponse);
@@ -868,14 +911,29 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
   /**
    * Format validation errors for consistent response structure
    */
-  private formatValidationErrors(errors: ValidationError[]): any[] {
+  private formatValidationErrors(errors: ValidationError[]): Array<{
+    property: string;
+    value: unknown;
+    constraints: Record<string, string> | undefined;
+    children?: Array<{
+      property: string;
+      value: unknown;
+      constraints: Record<string, string> | undefined;
+    }>;
+  }> {
     return errors.map((error) => ({
       property: error.property,
-      value: this.config.disableErrorMessages ? "[REDACTED]" : error.value,
+      value: this.config.disableErrorMessages
+        ? "[REDACTED]"
+        : (error.value as unknown),
       constraints: error.constraints,
       children:
-        error.children?.length > 0
-          ? this.formatValidationErrors(error.children)
+        error.children && error.children.length > 0
+          ? this.formatValidationErrors(error.children).map((child) => ({
+              property: child.property,
+              value: child.value,
+              constraints: child.constraints,
+            }))
           : undefined,
     }));
   }
@@ -885,16 +943,18 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
    */
   private logSecurityEvent(
     operationId: string,
-    error: any,
-    value: any,
+    error: unknown,
+    value: unknown,
     metadata: ArgumentMetadata,
   ): void {
     try {
       let eventType = SecurityEventType.VALIDATION_FAILED;
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
-      if (error.message?.includes("XSS")) {
+      if (errorMessage.includes("XSS")) {
         eventType = SecurityEventType.XSS_ATTEMPT_BLOCKED;
-      } else if (error.message?.includes("SQL")) {
+      } else if (errorMessage.includes("SQL")) {
         eventType = SecurityEventType.INJECTION_ATTEMPT_BLOCKED;
       }
 
@@ -903,14 +963,15 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
         `validation-pipe-${this.config.serviceType}-${metadata.type}`,
         "POST",
         false,
-        error.message || "Validation failed",
+        errorMessage || "Validation failed",
         {
           operationId,
           serviceType: this.config.serviceType,
           securityLevel: this.config.securityLevel,
           inputType: typeof value,
           metatype: metadata.metatype?.name,
-          errorType: error.constructor.name,
+          errorType:
+            error instanceof Error ? error.constructor.name : typeof error,
           threatDetection: this.config.enableThreatDetection,
           sanitizationEnabled: this.config.enableSanitization,
         },
@@ -947,8 +1008,11 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
         {
           operationId,
           serviceType: this.config.serviceType,
-          error: loggingError.message,
-          originalError: error.message,
+          error:
+            loggingError instanceof Error
+              ? loggingError.message
+              : String(loggingError),
+          originalError: error instanceof Error ? error.message : String(error),
         },
       );
     }

@@ -1,16 +1,19 @@
 /**
- * Configuration Validation Schema - Enterprise-grade validation rules for Bytebot configuration
- * Provides comprehensive validation schemas using Joi for all configuration options
+ * Configuration Validation Schema - 100% Local-Only Configuration Validation for Bytebot
+ * Provides comprehensive validation schemas using Joi for local deployment configurations
  *
  * Features:
- * - Environment-specific validation rules
- * - Security-focused validation for production environments
- * - Performance optimizations for development environments
+ * - Environment-specific validation rules for local deployment
+ * - Security-focused validation for local production environments
+ * - Performance optimizations for local development environments
+ * - SQLite/PostgreSQL local database validation
+ * - Docker Compose compatibility validation
+ * - Local secrets directory validation
  * - Custom validation messages for better debugging
  *
- * @author Configuration & Secrets Management Specialist
- * @version 1.0.0
- * @since Phase 1: Bytebot API Hardening
+ * @author Local Configuration Security Specialist
+ * @version 2.0.0 - Local-Only Architecture Implementation
+ * @since Phase 1: Bytebot API Hardening - Local Deployment
  */
 
 import * as Joi from 'joi';
@@ -33,11 +36,13 @@ export const environmentSchema = Joi.string()
  */
 export const databaseSchema = Joi.object({
   DATABASE_URL: Joi.string()
-    .uri({ scheme: ['postgres', 'postgresql'] })
+    .uri({ scheme: ['postgres', 'postgresql', 'sqlite'] })
     .required()
     .messages({
-      'string.uri': 'DATABASE_URL must be a valid PostgreSQL connection string',
-      'any.required': 'DATABASE_URL is required for database connectivity',
+      'string.uri':
+        'DATABASE_URL must be a valid local database connection string (PostgreSQL/SQLite)',
+      'any.required':
+        'DATABASE_URL is required for local database connectivity',
     }),
 
   DATABASE_MAX_CONNECTIONS: Joi.number()
@@ -370,25 +375,22 @@ export const healthCheckSchema = Joi.object({
 });
 
 /**
- * Kubernetes configuration validation schema
- * Validates Kubernetes-specific settings for deployment
+ * Local deployment configuration validation schema
+ * Validates local deployment settings for Docker Compose and standalone deployment
  */
-export const kubernetesSchema = Joi.object({
-  KUBERNETES_NAMESPACE: Joi.string()
-    .pattern(/^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/)
-    .default('default')
+export const localDeploymentSchema = Joi.object({
+  LOCAL_DEPLOYMENT_TYPE: Joi.string()
+    .valid('standalone', 'docker-compose')
+    .default('docker-compose')
     .messages({
-      'string.pattern.base':
-        'KUBERNETES_NAMESPACE must be a valid Kubernetes namespace name',
+      'any.only':
+        'LOCAL_DEPLOYMENT_TYPE must be either "standalone" or "docker-compose"',
     }),
 
-  KUBERNETES_SERVICE_NAME: Joi.string()
-    .pattern(/^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/)
-    .default('bytebot-agent')
-    .messages({
-      'string.pattern.base':
-        'KUBERNETES_SERVICE_NAME must be a valid Kubernetes service name',
-    }),
+  LOCAL_DATA_DIRECTORY: Joi.string().default('./data').messages({
+    'string.base':
+      'LOCAL_DATA_DIRECTORY must be a valid directory path for local data storage',
+  }),
 });
 
 /**
@@ -405,7 +407,7 @@ export const developmentSchema = Joi.object({
     }),
 
   SWAGGER_PATH: Joi.string()
-    .pattern(/^\/[a-zA-Z0-9\/\-_]*$/)
+    .pattern(/^\/[a-zA-Z0-9/-_]*$/)
     .default('/api/docs')
     .messages({
       'string.pattern.base':
@@ -438,7 +440,7 @@ export const completeConfigSchema = Joi.object({
   .concat(performanceSchema)
   .concat(circuitBreakerSchema)
   .concat(healthCheckSchema)
-  .concat(kubernetesSchema)
+  .concat(localDeploymentSchema)
   .concat(developmentSchema);
 
 /**
@@ -467,6 +469,11 @@ export const productionConfigSchema = completeConfigSchema.concat(
     // Disable debug features in production
     DEBUG_MODE: Joi.boolean().valid(false),
     ENABLE_SWAGGER: Joi.boolean().valid(false),
+
+    // Ensure local deployment type is set for production
+    LOCAL_DEPLOYMENT_TYPE: Joi.string()
+      .valid('standalone', 'docker-compose')
+      .required(),
   }),
 );
 
@@ -499,13 +506,13 @@ export const developmentConfigSchema = completeConfigSchema.concat(
  * @returns Validation result with validated config or error details
  */
 export function validateConfig(
-  config: Record<string, any>,
+  config: Record<string, unknown>,
   environment?: string,
 ): {
   error?: Joi.ValidationError;
-  value?: any;
+  value?: unknown;
 } {
-  const env = environment || config.NODE_ENV || 'development';
+  const env = environment || (config.NODE_ENV as string) || 'development';
 
   let schema: Joi.ObjectSchema;
 
@@ -537,11 +544,11 @@ export function validateConfig(
  * @returns Validation result for secrets
  */
 export function validateSecrets(
-  secrets: Record<string, any>,
+  secrets: Record<string, unknown>,
   environment?: string,
 ): {
   error?: Joi.ValidationError;
-  value?: any;
+  value?: unknown;
 } {
   const secretsValidationSchema = securitySchema.concat(llmApiKeysSchema);
 

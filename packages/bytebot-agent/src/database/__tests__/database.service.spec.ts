@@ -161,10 +161,10 @@ describe('DatabaseService Comprehensive Test Suite', () => {
   afterEach(async () => {
     // Clear intervals if they exist
     if ((service as any).healthCheckInterval) {
-      clearInterval((service as any).healthCheckInterval);
+      clearInterval((service as any).healthCheckInterval as NodeJS.Timeout);
     }
     if ((service as any).metricsInterval) {
-      clearInterval((service as any).metricsInterval);
+      clearInterval((service as any).metricsInterval as NodeJS.Timeout);
     }
     await module.close();
   });
@@ -234,7 +234,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
     });
 
     it('should get connection pool metrics', async () => {
-      const metrics = await service.getMetrics();
+      const metrics = service.getMetrics();
 
       expect(metrics.connectionPool).toBeDefined();
       expect(metrics.connectionPool).toHaveProperty('active');
@@ -263,7 +263,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
     it('should perform successful health check', async () => {
       mockPrismaClient.$queryRaw.mockResolvedValue([{ health_check: 1 }]);
 
-      const healthStatus = await service.getHealthStatus();
+      const healthStatus = service.getHealthStatus();
 
       expect(healthStatus.isHealthy).toBe(true);
       expect(healthStatus.lastHealthCheck).toBeInstanceOf(Date);
@@ -279,7 +279,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
       (service as any).isHealthy = false;
       (service as any).errorCount = 1;
 
-      const healthStatus = await service.getHealthStatus();
+      const healthStatus = service.getHealthStatus();
 
       expect(healthStatus.isHealthy).toBe(false);
       expect(healthStatus.connectionStatus).toBe('disconnected');
@@ -307,7 +307,9 @@ describe('DatabaseService Comprehensive Test Suite', () => {
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Health check timeout')), 50);
       });
-      mockPrismaClient.$queryRaw.mockImplementation(() => timeoutPromise);
+      mockPrismaClient.$queryRaw.mockImplementation(
+        () => timeoutPromise as any,
+      );
 
       // Trigger health check manually
       try {
@@ -317,7 +319,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
       }
 
       // Verify error handling
-      const healthStatus = await service.getHealthStatus();
+      const healthStatus = service.getHealthStatus();
       expect((service as any).errorCount).toBeGreaterThan(0);
     });
   });
@@ -335,7 +337,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
       (service as any).slowQueries = 5;
       (service as any).errorCount = 2;
 
-      const metrics: DatabaseMetrics = await service.getMetrics();
+      const metrics: DatabaseMetrics = service.getMetrics();
 
       expect(metrics.performance.totalQueries).toBe(100);
       expect(metrics.performance.averageQueryTime).toBe(50); // 5000/100
@@ -483,7 +485,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
         .fn()
         .mockReturnValue(mockCircuitMetrics);
 
-      const reliabilityMetrics = await service.getReliabilityMetrics();
+      const reliabilityMetrics = service.getReliabilityMetrics();
 
       expect(reliabilityMetrics.circuitBreakers).toHaveLength(2);
       expect(reliabilityMetrics.circuitBreakers[0].circuitName).toBe(
@@ -721,7 +723,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
         () =>
           new Promise((resolve) =>
             setTimeout(() => resolve([{ health_check: 1 }]), 100),
-          ),
+          ) as any,
       );
 
       // Trigger multiple concurrent health checks
@@ -737,7 +739,10 @@ describe('DatabaseService Comprehensive Test Suite', () => {
 
     it('should handle metrics collection errors', async () => {
       const metricsError = new Error('Metrics collection failed');
-      jest.spyOn(service, 'getMetrics').mockRejectedValue(metricsError);
+      // Mock a method that exists on the service
+      jest
+        .spyOn(service as any, 'performHealthCheck')
+        .mockRejectedValue(metricsError);
 
       const loggerErrorSpy = jest
         .spyOn(Logger.prototype, 'error')

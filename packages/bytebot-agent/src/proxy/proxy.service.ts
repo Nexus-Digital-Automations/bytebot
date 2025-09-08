@@ -96,7 +96,16 @@ export class ProxyService implements BytebotAgentService {
       }
 
       const errorMessage =
-        error instanceof Error ? error.message : String(error);
+        error instanceof Error
+          ? error.message
+          : (() => {
+              if (typeof error === 'string') return error;
+              try {
+                return JSON.stringify(error);
+              } catch {
+                return '[Unserializable Error]';
+              }
+            })();
       const errorStack = error instanceof Error ? error.stack : undefined;
 
       this.logger.error(

@@ -272,7 +272,7 @@ export function isMoveMouseToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_move_mouse";
 }
 
@@ -288,7 +288,7 @@ export function isTraceMouseToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_trace_mouse";
 }
 
@@ -304,7 +304,7 @@ export function isClickMouseToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_click_mouse";
 }
 
@@ -320,7 +320,7 @@ export function isCursorPositionToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_cursor_position";
 }
 
@@ -336,7 +336,7 @@ export function isPressMouseToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_press_mouse";
 }
 
@@ -352,7 +352,7 @@ export function isDragMouseToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_drag_mouse";
 }
 
@@ -366,7 +366,7 @@ export function isScrollToolUseBlock(obj: unknown): obj is ScrollToolUseBlock {
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_scroll";
 }
 
@@ -382,7 +382,7 @@ export function isTypeKeysToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_type_keys";
 }
 
@@ -398,7 +398,7 @@ export function isPressKeysToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_press_keys";
 }
 
@@ -414,7 +414,7 @@ export function isTypeTextToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_type_text";
 }
 
@@ -425,7 +425,7 @@ export function isPasteTextToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_paste_text";
 }
 
@@ -439,7 +439,7 @@ export function isWaitToolUseBlock(obj: unknown): obj is WaitToolUseBlock {
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_wait";
 }
 
@@ -455,7 +455,7 @@ export function isScreenshotToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_screenshot";
 }
 
@@ -466,7 +466,7 @@ export function isApplicationToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_application";
 }
 
@@ -477,7 +477,7 @@ export function isSetTaskStatusToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "set_task_status";
 }
 
@@ -488,7 +488,7 @@ export function isCreateTaskToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "create_task";
 }
 
@@ -499,7 +499,7 @@ export function isWriteFileToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_write_file";
 }
 
@@ -510,6 +510,6 @@ export function isReadFileToolUseBlock(
     return false;
   }
 
-  const block = obj as Record<string, any>;
+  const block = obj as Record<string, unknown>;
   return block.name === "computer_read_file";
 }

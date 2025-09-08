@@ -24,7 +24,6 @@ import {
   Counter,
   Histogram,
   Gauge,
-  Summary,
 } from 'prom-client';
 
 /**
@@ -561,7 +560,6 @@ export class MetricsService {
       this.logger.error(`Failed to update system metrics: ${errorMessage}`);
     }
   }
-
 
   /**
    * Clear all metrics (for testing)

@@ -14,12 +14,7 @@ import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
-import {
-  SecurityHeadersConfig,
-  CorsConfig,
-  SecurityEventType,
-  createSecurityEvent,
-} from '@bytebot/shared';
+import { SecurityEventType, createSecurityEvent } from '@bytebot/shared';
 
 /**
  * Security headers configuration interface
@@ -178,7 +173,10 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       enableSecurityLogging: environment !== 'development',
       ...SECURITY_CONFIGS[environment],
       // Override with specific config values
-      ...this.configService.get('security.headers', {}),
+      ...(this.configService.get(
+        'security.headers',
+        {},
+      ) as Partial<SecurityMiddlewareConfig>),
     };
 
     // Initialize helmet middleware
@@ -334,26 +332,11 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
         allow: false,
       },
 
-      // Expect-CT
-      expectCt:
-        this.config.environment === 'production'
-          ? {
-              maxAge: 86400,
-              enforce: true,
-            }
-          : false,
+      // Note: Expect-CT has been deprecated and removed from helmet v8.1.0
+      // CT (Certificate Transparency) is now handled by browsers automatically
 
-      // Permissions Policy (formerly Feature Policy)
-      permissionsPolicy: {
-        camera: [],
-        microphone: [],
-        geolocation: [],
-        payment: [],
-        usb: [],
-        magnetometer: [],
-        gyroscope: [],
-        accelerometer: [],
-      },
+      // Note: Permissions Policy is not directly supported by helmet v8.1.0
+      // It should be configured separately if needed via custom middleware
     };
 
     return helmet(helmetOptions);

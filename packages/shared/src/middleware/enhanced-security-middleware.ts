@@ -509,8 +509,18 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
       try {
         if (rule.pattern instanceof RegExp) {
           // Pattern-based detection
+          const regexPattern = rule.pattern;
           isMatch = Object.values(requestData).some(
-            (data) => typeof data === "string" && rule.pattern.test(data),
+            (data) => typeof data === "string" && regexPattern.test(data),
+          );
+        } else if (
+          typeof rule.pattern === "string" &&
+          rule.pattern.length > 0
+        ) {
+          // String-based detection
+          isMatch = Object.values(requestData).some(
+            (data) =>
+              typeof data === "string" && data.includes(rule.pattern as string),
           );
         } else if (rule.ruleId === "high-request-rate") {
           // Behavior-based detection for high request rates
@@ -749,9 +759,11 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     this.securityMetrics.eventsByType.set(event.type, typeCount + 1);
 
     // Update IP tracking
-    const ipData = this.ipTrackingData.get(event.ipAddress);
-    if (ipData) {
-      ipData.securityEvents++;
+    if (event.ipAddress) {
+      const ipData = this.ipTrackingData.get(event.ipAddress);
+      if (ipData) {
+        ipData.securityEvents++;
+      }
     }
 
     // Emit event for external processing
@@ -1048,7 +1060,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     );
 
     // Cleanup expired IP blocks
-    for (const [ip, blockInfo] of this.blockedIPs.entries()) {
+    for (const [ip, blockInfo] of Array.from(this.blockedIPs.entries())) {
       if (now > blockInfo.until) {
         this.blockedIPs.delete(ip);
       }
@@ -1056,7 +1068,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
 
     // Cleanup old IP tracking data (keep data for 7 days)
     const ipCutoffTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    for (const [ip, ipData] of this.ipTrackingData.entries()) {
+    for (const [ip, ipData] of Array.from(this.ipTrackingData.entries())) {
       if (ipData.lastSeen < ipCutoffTime) {
         this.ipTrackingData.delete(ip);
       }
@@ -1072,13 +1084,20 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
   /**
    * Get current security metrics for monitoring
    */
-  getSecurityMetrics(): SecurityMetrics & {
+  getSecurityMetrics(): Omit<
+    SecurityMetrics,
+    "eventsBySeverity" | "eventsByType" | "responseActionsTriggered"
+  > & {
     eventsBySeverity: Record<string, number>;
     eventsByType: Record<string, number>;
     responseActionsTriggered: Record<string, number>;
   } {
     return {
-      ...this.securityMetrics,
+      totalRequests: this.securityMetrics.totalRequests,
+      securityEvents: this.securityMetrics.securityEvents,
+      blockedRequests: this.securityMetrics.blockedRequests,
+      uniqueIPs: this.securityMetrics.uniqueIPs,
+      suspiciousIPs: this.securityMetrics.suspiciousIPs,
       eventsBySeverity: Object.fromEntries(
         this.securityMetrics.eventsBySeverity,
       ),
@@ -1101,7 +1120,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
   > {
     const result: any = {};
 
-    for (const [ip, data] of this.ipTrackingData.entries()) {
+    for (const [ip, data] of Array.from(this.ipTrackingData.entries())) {
       result[ip] = {
         ...data,
         userAgents: Array.from(data.userAgents),
@@ -1125,7 +1144,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
   getBlockedIPs(): Record<string, { until: string; reason: string }> {
     const result: any = {};
 
-    for (const [ip, blockInfo] of this.blockedIPs.entries()) {
+    for (const [ip, blockInfo] of Array.from(this.blockedIPs.entries())) {
       result[ip] = {
         until: blockInfo.until.toISOString(),
         reason: blockInfo.reason,

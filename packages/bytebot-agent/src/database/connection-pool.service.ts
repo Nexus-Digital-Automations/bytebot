@@ -11,6 +11,7 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PrismaClient } from '@prisma/client';
 import { ConnectionPoolConfig } from './connection-pool.config';
 
 export interface ConnectionPoolMetrics {
@@ -120,7 +121,7 @@ export class ConnectionPoolService implements OnModuleInit, OnModuleDestroy {
   /**
    * Register a new database connection for monitoring
    */
-  registerConnection(connectionId: string, prismaClient: PrismaClient) {
+  registerConnection(connectionId: string, _prismaClient: PrismaClient) {
     const connectionMetrics: ConnectionHealthMetrics = {
       connectionId,
       createdAt: new Date(),
@@ -182,11 +183,11 @@ export class ConnectionPoolService implements OnModuleInit, OnModuleDestroy {
   /**
    * Perform connection pool health assessment
    */
-  async performPoolHealthCheck(): Promise<{
+  performPoolHealthCheck(): {
     healthy: boolean;
     issues: string[];
     recommendations: string[];
-  }> {
+  } {
     const operationId = this.generateOperationId();
     const issues: string[] = [];
     const recommendations: string[] = [];
@@ -246,11 +247,11 @@ export class ConnectionPoolService implements OnModuleInit, OnModuleDestroy {
   /**
    * Force pool maintenance operations
    */
-  async performPoolMaintenance(): Promise<{
+  performPoolMaintenance(): {
     cleaned: number;
     recovered: number;
     errors: string[];
-  }> {
+  } {
     const operationId = this.generateOperationId();
     let cleaned = 0;
     let recovered = 0;
@@ -276,7 +277,7 @@ export class ConnectionPoolService implements OnModuleInit, OnModuleDestroy {
 
           // Attempt to recover unhealthy connections
           if (!connection.isHealthy && connection.isActive) {
-            const healthCheck = await this.testConnectionHealth(connectionId);
+            const healthCheck = this.testConnectionHealth(connectionId);
             if (healthCheck) {
               connection.isHealthy = true;
               connection.errors = 0; // Reset error count on recovery
@@ -361,7 +362,7 @@ export class ConnectionPoolService implements OnModuleInit, OnModuleDestroy {
     );
 
     this.maintenanceInterval = setInterval(() => {
-      this.performPoolMaintenance();
+      void this.performPoolMaintenance();
     }, maintenanceInterval);
 
     this.logger.debug('Pool maintenance started', { maintenanceInterval });
@@ -473,7 +474,7 @@ export class ConnectionPoolService implements OnModuleInit, OnModuleDestroy {
   /**
    * Test connection health with database ping
    */
-  private async testConnectionHealth(connectionId: string): Promise<boolean> {
+  private testConnectionHealth(connectionId: string): boolean {
     try {
       // This would require access to the actual connection
       // For now, return true as a placeholder

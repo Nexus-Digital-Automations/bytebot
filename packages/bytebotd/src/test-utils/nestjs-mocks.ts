@@ -204,6 +204,33 @@ export class MockTestingModuleBuilder {
   async build(): Promise<TestingModule> {
     return Test.createTestingModule(this.moduleMetadata).compile();
   }
+
+  /**
+   * Create a testing module (alias for backwards compatibility)
+   */
+  createTestingModule(metadata: ModuleMetadata) {
+    this.moduleMetadata = { ...this.moduleMetadata, ...metadata };
+    return {
+      overrideModule: (moduleToOverride: any) => ({
+        useValue: (overrideValue: any) => ({
+          compile: async () => {
+            return Test.createTestingModule({
+              ...this.moduleMetadata,
+              providers: [
+                ...(this.moduleMetadata.providers || []),
+                {
+                  provide: moduleToOverride,
+                  useValue: overrideValue,
+                },
+              ],
+            }).compile();
+          },
+        }),
+      }),
+      compile: async () =>
+        Test.createTestingModule(this.moduleMetadata).compile(),
+    };
+  }
 }
 
 /**
@@ -240,15 +267,17 @@ export const createMockRepository = <T = any>(): jest.Mocked<T> => {
 };
 
 /**
- * Mock logger implementation
+ * Mock logger implementation with all required NestJS Logger properties
  */
-export const createMockLogger = () => ({
+export const createMockLogger = (): jest.Mocked<any> => ({
   log: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
   debug: jest.fn(),
   verbose: jest.fn(),
+  fatal: jest.fn(), // Added missing fatal method
   setContext: jest.fn(),
+  localInstance: {} as any, // Added missing localInstance property
 });
 
 /**

@@ -36,6 +36,7 @@ export class MessagesService {
     const message = await this.prisma.message.create({
       data: {
         content: data.content as Prisma.InputJsonValue,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         role: data.role,
         taskId: data.taskId,
       },
@@ -164,10 +165,12 @@ export class MessagesService {
       const contentBlocks = message.content as MessageContentBlock[];
 
       // If the role is a user message and all the content blocks are tool result blocks or they are take over actions
-      if (message.role === Role.USER) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (message.role === (Role.USER as Role)) {
         if (contentBlocks.every((block) => isToolResultContentBlock(block))) {
           // Pure tool results should be shown as assistant messages
-          processedMessage.role = Role.ASSISTANT;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          processedMessage.role = Role.ASSISTANT as Role;
         } else if (
           contentBlocks.every((block) => isUserActionContentBlock(block))
         ) {
@@ -177,7 +180,8 @@ export class MessagesService {
               return block.content;
             })
             .filter((block) => isComputerToolUseContentBlock(block));
-          processedMessage.role = Role.ASSISTANT;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          processedMessage.role = Role.ASSISTANT as Role;
           processedMessage.take_over = true;
         }
         // If there are text blocks mixed with tool blocks, keep as user message

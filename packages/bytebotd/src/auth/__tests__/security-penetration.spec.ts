@@ -25,10 +25,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { JwtAuthGuard, ByteBotdUser } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { UserRole, Permission } from '@bytebot/shared';
-import { ByteBotdUser } from '../guards/jwt-auth.guard';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 
@@ -1347,50 +1346,56 @@ describe('Security Penetration Testing Suite', () => {
 
       for (const eventType of securityEventTypes) {
         switch (eventType.type) {
-          case 'auth-failure':
-            const authContext = createPentestExecutionContext(
-              undefined,
-              { authorization: `Bearer ${eventType.token}` },
-              { attackVector: eventType.type, ip: '192.168.100.100' },
-            );
+          case 'auth-failure': {
+            {
+              const authContext = createPentestExecutionContext(
+                undefined,
+                { authorization: `Bearer ${eventType.token}` },
+                { attackVector: eventType.type, ip: '192.168.100.100' },
+              );
 
-            jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-            jest
-              .spyOn(jwtService, 'verifyAsync')
-              .mockRejectedValue(new Error('Audit test failure'));
+              jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+              jest
+                .spyOn(jwtService, 'verifyAsync')
+                .mockRejectedValue(new Error('Audit test failure'));
 
-            try {
-              await jwtAuthGuard.canActivate(authContext);
-            } catch (error) {
-              // Expected failure
+              try {
+                await jwtAuthGuard.canActivate(authContext);
+              } catch (error) {
+                // Expected failure
+              }
             }
             break;
+          }
 
-          case 'role-escalation':
-            const escalationUser: ByteBotdUser = {
-              id: 'audit-user',
-              email: 'audit@test.com',
-              username: 'audituser',
-              role: eventType.user.role,
-              isActive: true,
-            };
+          case 'role-escalation': {
+            {
+              const escalationUser: ByteBotdUser = {
+                id: 'audit-user',
+                email: 'audit@test.com',
+                username: 'audituser',
+                role: eventType.user.role,
+                isActive: true,
+              };
 
-            const roleContext = createPentestExecutionContext(
-              escalationUser,
-              {},
-              { attackVector: eventType.type, ip: '10.0.100.100' },
-            );
+              const roleContext = createPentestExecutionContext(
+                escalationUser,
+                {},
+                { attackVector: eventType.type, ip: '10.0.100.100' },
+              );
 
-            jest
-              .spyOn(reflector, 'getAllAndOverride')
-              .mockReturnValue([eventType.requiredRole]);
+              jest
+                .spyOn(reflector, 'getAllAndOverride')
+                .mockReturnValue([eventType.requiredRole]);
 
-            try {
-              await rolesGuard.canActivate(roleContext);
-            } catch (error) {
-              // Expected failure
+              try {
+                await rolesGuard.canActivate(roleContext);
+              } catch (error) {
+                // Expected failure
+              }
             }
             break;
+          }
         }
       }
 

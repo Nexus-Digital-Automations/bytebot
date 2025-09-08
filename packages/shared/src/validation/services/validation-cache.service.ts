@@ -12,6 +12,10 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ArgumentMetadata } from "@nestjs/common";
 import { ValidationCacheEntry } from "./types";
+import {
+  ValidationServiceType,
+  ValidationSecurityLevel,
+} from "../../pipes/validation.standardized";
 import { hashData } from "../../utils/security.utils";
 
 /**
@@ -38,12 +42,12 @@ export class ValidationCacheService {
    * @param metadata Argument metadata
    * @returns Cached validation result or null
    */
-  async getCachedValidation(
+  getCachedValidation(
     value: unknown,
     metadata: ArgumentMetadata,
-  ): Promise<unknown | null> {
+  ): Promise<unknown> {
     if (!this.cachingEnabled) {
-      return null;
+      return Promise.resolve(null);
     }
 
     try {
@@ -55,7 +59,7 @@ export class ValidationCacheService {
         cacheEntry.accessCount++;
 
         this.logger.debug(`Cache hit for key: ${cacheKey}`);
-        return cacheEntry.validationResult;
+        return Promise.resolve(cacheEntry.validationResult);
       }
 
       // Remove expired entry
@@ -63,12 +67,12 @@ export class ValidationCacheService {
         this.cache.delete(cacheKey);
       }
 
-      return null;
+      return Promise.resolve(null);
     } catch (error) {
       this.logger.warn("Failed to retrieve cached validation result", {
         error: (error as Error).message,
       });
-      return null;
+      return Promise.resolve(null);
     }
   }
 
@@ -78,13 +82,13 @@ export class ValidationCacheService {
    * @param metadata Argument metadata
    * @param result Validation result
    */
-  async cacheValidationResult(
+  cacheValidationResult(
     value: unknown,
     metadata: ArgumentMetadata,
     result: unknown,
   ): Promise<void> {
     if (!this.cachingEnabled) {
-      return;
+      return Promise.resolve();
     }
 
     try {
@@ -100,17 +104,19 @@ export class ValidationCacheService {
         createdAt: now,
         expiresAt,
         accessCount: 0,
-        serviceType: "shared" as const,
-        securityLevel: "standard" as const,
+        serviceType: ValidationServiceType.SHARED,
+        securityLevel: ValidationSecurityLevel.STANDARD,
       };
 
       this.cache.set(cacheKey, cacheEntry);
 
       this.logger.debug(`Cached validation result for key: ${cacheKey}`);
+      return Promise.resolve();
     } catch (error) {
       this.logger.warn("Failed to cache validation result", {
         error: (error as Error).message,
       });
+      return Promise.resolve();
     }
   }
 

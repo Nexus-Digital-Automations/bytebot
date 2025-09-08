@@ -21,14 +21,8 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
-import { ValidationError } from 'class-validator';
 import { ThrottlerException } from '@nestjs/throttler';
-import {
-  SecurityEventType,
-  SecurityErrorCode,
-  createSecurityEvent,
-  generateEventId,
-} from '@bytebot/shared';
+import { SecurityEventType, createSecurityEvent } from '@bytebot/shared';
 
 /**
  * Error response structure
@@ -123,6 +117,73 @@ interface ErrorMetadata {
   };
 }
 
+/**
+ * Extended Request interface with additional properties
+ */
+interface ExtendedRequest extends Request {
+  correlationId?: string;
+  user?: {
+    id: string;
+  };
+  sessionId?: string;
+}
+
+/**
+ * Extended Response interface with request property
+ */
+interface ExtendedResponse extends Response {
+  req: ExtendedRequest;
+}
+
+/**
+ * Type guard to check if error is an Error instance
+ */
+function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
+/**
+ * Type guard to check if error is a structured error with message
+ */
+function isStructuredError(error: unknown): error is { message: string } {
+  return typeof error === 'object' && error !== null && 'message' in error;
+}
+
+/**
+ * Safely extract error message from unknown error type
+ */
+function getErrorMessage(error: unknown): string {
+  if (isError(error)) {
+    return error.message;
+  }
+  if (isStructuredError(error)) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'Unknown error occurred';
+}
+
+/**
+ * Safely extract error stack from unknown error type
+ */
+function getErrorStack(error: unknown): string | undefined {
+  if (isError(error)) {
+    return error.stack;
+  }
+  return undefined;
+}
+
+/**
+ * Generate event ID locally to avoid import type issues
+ */
+function safeGenerateEventId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substr(2, 8);
+  return `evt_${timestamp}_${random}`;
+}
+
 @Injectable()
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -156,14 +217,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
+    const request = ctx.getRequest<ExtendedRequest>();
 
-    const operationId = (request as any).correlationId || generateEventId();
+    const operationId: string = request.correlationId ?? safeGenerateEventId();
     const timestamp = new Date().toISOString();
 
     try {
       // Analyze the exception
-      const errorInfo = this.analyzeException(exception, request, operationId);
+      const errorInfo = this.analyzeException(exception, request);
 
       // Create structured error response
       const errorResponse = this.createErrorResponse(
@@ -189,16 +250,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
       // Send response
       response.status(errorInfo.statusCode).json(errorResponse);
-    } catch (filterError) {
+    } catch (filterError: unknown) {
       // Fallback error handling if the filter itself fails
       this.logger.error(
         `Exception filter failed for operation ${operationId}`,
         {
           operationId,
-          filterError: filterError.message,
-          originalException:
-            exception instanceof Error ? exception.message : String(exception),
-          stack: filterError.stack,
+          filterError: getErrorMessage(filterError),
+          originalException: getErrorMessage(exception),
+          stack: getErrorStack(filterError),
         },
       );
 
@@ -220,21 +280,20 @@ export class GlobalExceptionFilter implements ExceptionFilter {
    */
   private analyzeException(
     exception: unknown,
-    request: Request,
-    operationId: string,
+    request: ExtendedRequest,
   ): {
     statusCode: number;
     message: string | string[];
     error: string;
     metadata: ErrorMetadata;
     validationErrors?: ValidationErrorDetails[];
-    rateLimitInfo?: any;
+    rateLimitInfo?: Record<string, unknown>;
   } {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: string | string[] = 'Internal server error';
     let error = 'Internal Server Error';
     let validationErrors: ValidationErrorDetails[] | undefined;
-    let rateLimitInfo: any;
+    let rateLimitInfo: Record<string, unknown> | undefined;
 
     // Determine error type and extract information
     if (exception instanceof HttpException) {
@@ -244,18 +303,20 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       if (typeof response === 'string') {
         message = response;
         error = exception.constructor.name;
-      } else if (typeof response === 'object') {
-        message = (response as any).message || exception.message;
-        error = (response as any).error || exception.constructor.name;
+      } else if (typeof response === 'object' && response !== null) {
+        const responseObj = response as Record<string, unknown>;
+        message =
+          (responseObj.message as string | string[]) || exception.message;
+        error = (responseObj.error as string) || exception.constructor.name;
 
         // Extract validation errors
-        if ((response as any).errors || (response as any).validation) {
-          validationErrors = this.extractValidationErrors(response as any);
+        if (responseObj.errors || responseObj.validation) {
+          validationErrors = this.extractValidationErrors(responseObj);
         }
 
         // Extract rate limit info
-        if ((response as any).rateLimitInfo) {
-          rateLimitInfo = (response as any).rateLimitInfo;
+        if (responseObj.rateLimitInfo) {
+          rateLimitInfo = responseObj.rateLimitInfo as Record<string, unknown>;
         }
       }
     } else if (exception instanceof ThrottlerException) {
@@ -289,8 +350,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
    * Create structured error response
    */
   private createErrorResponse(
-    errorInfo: any,
-    request: Request,
+    errorInfo: {
+      statusCode: number;
+      message: string | string[];
+      error: string;
+      metadata: ErrorMetadata;
+      validationErrors?: ValidationErrorDetails[];
+      rateLimitInfo?: Record<string, unknown>;
+    },
+    request: ExtendedRequest,
     timestamp: string,
     operationId: string,
   ): ErrorResponse {
@@ -311,7 +379,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // Add rate limit info if present
     if (errorInfo.rateLimitInfo) {
-      baseResponse.rateLimit = errorInfo.rateLimitInfo;
+      baseResponse.rateLimit = errorInfo.rateLimitInfo as {
+        limit: number;
+        remaining: number;
+        resetTime: number;
+      };
     }
 
     // Add detailed information in development
@@ -333,19 +405,22 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   /**
    * Extract validation errors from response
    */
-  private extractValidationErrors(response: any): ValidationErrorDetails[] {
-    const errors = response.errors || response.validation || [];
+  private extractValidationErrors(
+    response: Record<string, unknown>,
+  ): ValidationErrorDetails[] {
+    const errors = (response.errors || response.validation || []) as unknown[];
 
-    return errors.map(
-      (error: any): ValidationErrorDetails => ({
-        field: error.property || error.field,
-        value: error.value,
-        constraints: error.constraints || {},
-        children: error.children
-          ? this.extractValidationErrors({ validation: error.children })
+    return errors.map((error: unknown): ValidationErrorDetails => {
+      const errorObj = error as Record<string, unknown>;
+      return {
+        field: (errorObj.property || errorObj.field) as string,
+        value: errorObj.value,
+        constraints: (errorObj.constraints || {}) as Record<string, string>,
+        children: errorObj.children
+          ? this.extractValidationErrors({ validation: errorObj.children })
           : undefined,
-      }),
-    );
+      };
+    });
   }
 
   /**
@@ -354,7 +429,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   private generateErrorMetadata(
     exception: unknown,
     statusCode: number,
-    request: Request,
+    request: ExtendedRequest,
   ): ErrorMetadata {
     let severity = ErrorSeverity.MEDIUM;
     let riskScore = 30;
@@ -375,9 +450,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // Security-related errors
     if (
-      statusCode === HttpStatus.UNAUTHORIZED ||
-      statusCode === HttpStatus.FORBIDDEN ||
-      statusCode === HttpStatus.TOO_MANY_REQUESTS
+      statusCode === (HttpStatus.UNAUTHORIZED as number) ||
+      statusCode === (HttpStatus.FORBIDDEN as number) ||
+      statusCode === (HttpStatus.TOO_MANY_REQUESTS as number)
     ) {
       isSecurityError = true;
       riskScore += 20;
@@ -387,10 +462,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     // Check for validation errors (potential security issue)
     if (exception instanceof HttpException) {
       const response = exception.getResponse();
-      if (typeof response === 'object' && (response as any).validation) {
-        isSecurityError = true;
-        category = 'validation';
-        riskScore += 15;
+      if (typeof response === 'object' && response !== null) {
+        const responseObj = response as Record<string, unknown>;
+        if (responseObj.validation) {
+          isSecurityError = true;
+          category = 'validation';
+          riskScore += 15;
+        }
       }
     }
 
@@ -430,8 +508,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
    */
   private logError(
     exception: unknown,
-    errorInfo: any,
-    request: Request,
+    errorInfo: {
+      statusCode: number;
+      message: string | string[];
+      error: string;
+      metadata: ErrorMetadata;
+      validationErrors?: ValidationErrorDetails[];
+    },
+    request: ExtendedRequest,
     operationId: string,
   ): void {
     const logData = {
@@ -443,7 +527,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       url: request.url,
       ip: request.ip,
       userAgent: request.get('User-Agent'),
-      userId: (request as any).user?.id,
+      userId: request.user?.id,
       severity: errorInfo.metadata.severity,
       category: errorInfo.metadata.category,
       riskScore: errorInfo.metadata.riskScore,
@@ -456,12 +540,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       exception instanceof Error &&
       errorInfo.statusCode >= 500
     ) {
-      (logData as any).stack = exception.stack;
+      (logData as Record<string, unknown>).stack = exception.stack;
     }
 
     // Add validation details if present
     if (errorInfo.validationErrors) {
-      (logData as any).validationErrors = errorInfo.validationErrors;
+      (logData as Record<string, unknown>).validationErrors =
+        errorInfo.validationErrors;
     }
 
     // Log with appropriate level
@@ -486,17 +571,26 @@ export class GlobalExceptionFilter implements ExceptionFilter {
    */
   private logSecurityEvent(
     exception: unknown,
-    errorInfo: any,
-    request: Request,
+    errorInfo: {
+      statusCode: number;
+      message: string | string[];
+      error: string;
+      metadata: ErrorMetadata;
+      validationErrors?: ValidationErrorDetails[];
+      rateLimitInfo?: Record<string, unknown>;
+    },
+    request: ExtendedRequest,
     operationId: string,
   ): void {
     try {
       let eventType = SecurityEventType.VALIDATION_FAILED;
 
       // Map error to security event type
-      if (errorInfo.statusCode === HttpStatus.UNAUTHORIZED) {
+      if (errorInfo.statusCode === (HttpStatus.UNAUTHORIZED as number)) {
         eventType = SecurityEventType.ACCESS_DENIED;
-      } else if (errorInfo.statusCode === HttpStatus.TOO_MANY_REQUESTS) {
+      } else if (
+        errorInfo.statusCode === (HttpStatus.TOO_MANY_REQUESTS as number)
+      ) {
         eventType = SecurityEventType.RATE_LIMIT_EXCEEDED;
       } else if (errorInfo.validationErrors) {
         eventType = SecurityEventType.VALIDATION_FAILED;
@@ -507,7 +601,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         request.url,
         request.method,
         false,
-        `Security error: ${errorInfo.message}`,
+        `Security error: ${Array.isArray(errorInfo.message) ? errorInfo.message.join('; ') : errorInfo.message}`,
         {
           operationId,
           statusCode: errorInfo.statusCode,
@@ -517,11 +611,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           hasSensitiveData: errorInfo.metadata.hasSensitiveData,
           validationErrors: errorInfo.validationErrors,
           rateLimitInfo: errorInfo.rateLimitInfo,
+          sessionId: request.sessionId,
         },
-        (request as any).user?.id,
+        request.user?.id,
         request.ip,
         request.get('User-Agent'),
-        (request as any).sessionId,
       );
 
       this.logger.warn(
@@ -533,10 +627,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           operationId,
         },
       );
-    } catch (error) {
+    } catch (securityEventError) {
       this.logger.error('Failed to log security event from exception filter', {
         operationId,
-        error: error.message,
+        error: (securityEventError as Error).message,
       });
     }
   }
@@ -544,7 +638,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   /**
    * Track error frequency for pattern analysis
    */
-  private trackErrorFrequency(errorInfo: any, operationId: string): void {
+  private trackErrorFrequency(
+    errorInfo: { error: string; statusCode: number },
+    operationId: string,
+  ): void {
     const errorKey = `${errorInfo.error}:${errorInfo.statusCode}`;
     const currentCount = this.errorCounts.get(errorKey) || 0;
     this.errorCounts.set(errorKey, currentCount + 1);
@@ -575,11 +672,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   /**
    * Set error response headers
    */
-  private setErrorHeaders(response: Response, errorInfo: any): void {
+  private setErrorHeaders(
+    response: Response,
+    errorInfo: {
+      metadata: ErrorMetadata;
+      statusCode: number;
+      rateLimitInfo?: Record<string, unknown> & { retryAfter?: number };
+    },
+  ): void {
     // Set correlation ID header
     response.setHeader(
       'X-Correlation-ID',
-      response.req?.correlationId || 'unknown',
+      (response as ExtendedResponse).req?.correlationId || 'unknown',
     );
 
     // Set error classification headers for monitoring

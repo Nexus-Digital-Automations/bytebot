@@ -87,15 +87,14 @@ export class ReliabilityModule {
    */
   private registerDefaultCleanupTasks(): void {
     // Circuit breaker cleanup
-    this.shutdownService.registerCleanupTask(
-      'circuit-breaker-cleanup',
-      async () => {
+    this.shutdownService.registerCleanupTask('circuit-breaker-cleanup', () =>
+      Promise.resolve().then(() => {
         // Clean up circuit breaker state
         const circuits = this.circuitBreakerService.getAllCircuitMetrics();
         for (const circuit of circuits) {
           this.circuitBreakerService.resetCircuit(circuit.circuitName);
         }
-      },
+      }),
     );
 
     // Retry service cleanup

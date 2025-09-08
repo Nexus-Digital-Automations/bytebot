@@ -1,0 +1,768 @@
+# Comprehensive Test Framework CI/CD Pipeline for Bytebot Monorepo
+#
+# This workflow provides enterprise-grade CI/CD integration for the complete
+# Bytebot ecosystem with comprehensive testing, coverage reporting, and quality gates.
+#
+# Features:
+# - Multi-package monorepo testing coordination
+# - Parallel test execution with cross-package dependency management
+# - Comprehensive coverage aggregation and reporting
+# - Integration and E2E testing with service orchestration
+# - Quality gates and automated validation
+# - Artifact collection and deployment readiness validation
+# - Performance monitoring and resource optimization
+#
+# @author Claude Code (DevOps & Test Infrastructure Specialist)
+# @version 1.0.0
+# @created 2025-09-06
+
+name: 🧪 Comprehensive Test Framework
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'packages/**'
+      - 'scripts/**'
+      - 'jest.*.config.js'
+      - 'package.json'
+      - '.github/workflows/test-framework.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'packages/**'
+      - 'scripts/**'
+      - 'jest.*.config.js'
+      - 'package.json'
+      - '.github/workflows/test-framework.yml'
+  schedule:
+    # Run comprehensive tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_level:
+        description: 'Test execution level'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - 'unit'
+          - 'integration'
+          - 'e2e'
+          - 'all'
+      coverage_threshold:
+        description: 'Coverage threshold percentage'
+        required: false
+        default: '75'
+        type: string
+      enable_performance_tests:
+        description: 'Enable performance testing'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  NODE_ENV: test
+  LOG_LEVEL: error
+  FORCE_COLOR: 1
+  CI: true
+
+# Concurrency control to prevent overlapping workflows
+concurrency:
+  group: test-framework-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ========================================
+  # SETUP AND VALIDATION
+  # ========================================
+  setup:
+    name: 🚀 Environment Setup & Validation
+    runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+      node-matrix: ${{ steps.node-versions.outputs.matrix }}
+      packages-changed: ${{ steps.changes.outputs.packages }}
+      test-strategy: ${{ steps.strategy.outputs.strategy }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Generate cache key
+        id: cache-key
+        run: |
+          echo "key=bytebot-workspace-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js version matrix
+        id: node-versions
+        run: |
+          echo "matrix=[\"18\", \"20\", \"21\"]" >> $GITHUB_OUTPUT
+
+      - name: Detect changed packages
+        id: changes
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.sha }})
+            CHANGED_PACKAGES=$(echo "$CHANGED_FILES" | grep "^packages/" | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n")[:-1]')
+          else
+            CHANGED_PACKAGES='["shared", "bytebot-agent", "bytebot-ui", "bytebotd"]'
+          fi
+          echo "packages=$CHANGED_PACKAGES" >> $GITHUB_OUTPUT
+
+      - name: Determine test strategy
+        id: strategy
+        run: |
+          if [[ "${{ github.event.inputs.test_level }}" != "" ]]; then
+            echo "strategy=${{ github.event.inputs.test_level }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "strategy=all" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "strategy=integration" >> $GITHUB_OUTPUT
+          else
+            echo "strategy=unit" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install root dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache workspace dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            ~/.npm
+          key: ${{ steps.cache-key.outputs.key }}
+          restore-keys: |
+            bytebot-workspace-${{ runner.os }}-
+
+      - name: Install package dependencies
+        run: pnpm run install:packages
+
+      - name: Validate environment
+        run: |
+          pnpm run validate:environment
+          echo "✅ Environment validation completed"
+
+  # ========================================
+  # LINTING AND CODE QUALITY
+  # ========================================
+  lint:
+    name: 🔍 Code Quality & Linting
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Run linting across all packages
+        run: pnpm run lint
+
+      - name: Run formatting check
+        run: pnpm run format
+
+      - name: TypeScript type checking
+        run: |
+          cd packages/shared && pnpm run type-check
+          cd packages/bytebot-agent && pnpm run type-check
+          cd packages/bytebotd && pnpm run type-check
+
+  # ========================================
+  # UNIT TESTS (PARALLEL BY PACKAGE)
+  # ========================================
+  unit-tests:
+    name: 🧪 Unit Tests - ${{ matrix.package }} (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    needs: [setup, lint]
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.setup.outputs.packages-changed) }}
+        node-version: ${{ fromJson(needs.setup.outputs.node-matrix) }}
+        exclude:
+          # Skip Node 21 for UI package due to potential compatibility issues
+          - package: bytebot-ui
+            node-version: '21'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Run unit tests for ${{ matrix.package }}
+        run: |
+          cd packages/${{ matrix.package }}
+          pnpm run test -- \
+            --coverage \
+            --coverageDirectory=../../coverage-workspace/${{ matrix.package }} \
+            --coverageReporters=lcov,json,text-summary \
+            --maxWorkers=2 \
+            --ci \
+            --watchAll=false \
+            --verbose \
+            --testTimeout=30000
+
+      - name: Upload unit test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-coverage-${{ matrix.package }}-node${{ matrix.node-version }}
+          path: coverage-workspace/${{ matrix.package }}/
+          retention-days: 7
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-results-${{ matrix.package }}-node${{ matrix.node-version }}
+          path: |
+            packages/${{ matrix.package }}/coverage/junit.xml
+            packages/${{ matrix.package }}/test-results/
+          retention-days: 7
+
+  # ========================================
+  # WORKSPACE INTEGRATION TESTS
+  # ========================================
+  workspace-tests:
+    name: 🔄 Workspace Integration Tests
+    runs-on: ubuntu-latest
+    needs: [setup, lint]
+    if: needs.setup.outputs.test-strategy == 'integration' || needs.setup.outputs.test-strategy == 'all'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Run workspace-level tests
+        run: |
+          pnpm run test:workspace -- \
+            --coverage \
+            --coverageDirectory=coverage-workspace \
+            --coverageReporters=lcov,json,html \
+            --maxWorkers=50% \
+            --ci \
+            --watchAll=false \
+            --verbose
+
+      - name: Upload workspace test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: workspace-coverage
+          path: coverage-workspace/
+          retention-days: 30
+
+  # ========================================
+  # INTEGRATION TESTS WITH SERVICES
+  # ========================================
+  integration-tests:
+    name: 🔗 Integration Tests with Services
+    runs-on: ubuntu-latest
+    needs: [setup, unit-tests]
+    if: needs.setup.outputs.test-strategy == 'integration' || needs.setup.outputs.test-strategy == 'all'
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: bytebot_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Setup test environment
+        run: |
+          export DATABASE_URL=postgresql://postgres:test@localhost:5432/bytebot_test
+          export REDIS_URL=redis://localhost:6379/15
+          pnpm run test:integration:prepare
+
+      - name: Run integration tests
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/bytebot_test
+          REDIS_URL: redis://localhost:6379/15
+        run: |
+          pnpm run test:integration -- \
+            --coverage \
+            --coverageDirectory=coverage-workspace/integration \
+            --coverageReporters=lcov,json,html \
+            --maxWorkers=1 \
+            --ci \
+            --watchAll=false \
+            --testTimeout=60000
+
+      - name: Upload integration test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-coverage
+          path: coverage-workspace/integration/
+          retention-days: 30
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: |
+            coverage-workspace/integration/junit.xml
+            test-artifacts/
+          retention-days: 30
+
+  # ========================================
+  # END-TO-END TESTS
+  # ========================================
+  e2e-tests:
+    name: 🌐 End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [setup, integration-tests]
+    if: needs.setup.outputs.test-strategy == 'e2e' || needs.setup.outputs.test-strategy == 'all'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Setup E2E test environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            xvfb \
+            x11-xserver-utils \
+            xfonts-100dpi \
+            xfonts-75dpi \
+            xfonts-scalable \
+            xfonts-cyrillic
+          pnpm run test:e2e:prepare
+
+      - name: Run E2E tests
+        env:
+          DISPLAY: ':99'
+          HEADLESS: 'true'
+          SCREENSHOT_ON_FAILURE: 'true'
+          VIDEO_RECORDING: 'true'
+        run: |
+          Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+          pnpm run test:e2e -- \
+            --maxWorkers=1 \
+            --ci \
+            --watchAll=false \
+            --testTimeout=120000
+
+      - name: Upload E2E test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-artifacts
+          path: |
+            coverage-workspace/e2e/
+            test-artifacts/screenshots/
+            test-artifacts/videos/
+          retention-days: 30
+
+  # ========================================
+  # COVERAGE AGGREGATION & REPORTING
+  # ========================================
+  coverage-aggregation:
+    name: 📊 Coverage Aggregation & Reporting
+    runs-on: ubuntu-latest
+    needs: [setup, unit-tests, workspace-tests, integration-tests]
+    if: always() && (needs.unit-tests.result == 'success' || needs.workspace-tests.result == 'success')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*coverage*'
+          path: coverage-artifacts
+          merge-multiple: true
+
+      - name: Aggregate coverage reports
+        run: |
+          pnpm run test:coverage:aggregate
+          
+      - name: Validate coverage thresholds
+        run: |
+          THRESHOLD="${{ github.event.inputs.coverage_threshold || '75' }}"
+          pnpm run test:validate -- --threshold=$THRESHOLD
+
+      - name: Upload aggregated coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: aggregated-coverage-report
+          path: |
+            coverage-workspace/
+            test-artifacts/
+          retention-days: 90
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          header: coverage-report
+          path: test-artifacts/coverage-summary.md
+
+  # ========================================
+  # PERFORMANCE TESTS
+  # ========================================
+  performance-tests:
+    name: ⚡ Performance Tests
+    runs-on: ubuntu-latest
+    needs: [setup, integration-tests]
+    if: github.event.inputs.enable_performance_tests == 'true' || github.event_name == 'schedule'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Run performance benchmarks
+        run: |
+          pnpm run test:performance
+          pnpm run monitor
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: |
+            test-artifacts/performance/
+            test-artifacts/benchmarks/
+          retention-days: 30
+
+  # ========================================
+  # QUALITY GATES & FINAL VALIDATION
+  # ========================================
+  quality-gates:
+    name: 🎯 Quality Gates & Validation
+    runs-on: ubuntu-latest
+    needs: [
+      setup,
+      lint,
+      unit-tests,
+      workspace-tests,
+      integration-tests,
+      coverage-aggregation
+    ]
+    if: always()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Download test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-artifacts
+
+      - name: Validate quality gates
+        run: |
+          echo "🔍 Validating quality gates..."
+          
+          # Check job results
+          LINT_RESULT="${{ needs.lint.result }}"
+          UNIT_RESULT="${{ needs.unit-tests.result }}"
+          WORKSPACE_RESULT="${{ needs.workspace-tests.result }}"
+          INTEGRATION_RESULT="${{ needs.integration-tests.result }}"
+          COVERAGE_RESULT="${{ needs.coverage-aggregation.result }}"
+          
+          echo "Lint: $LINT_RESULT"
+          echo "Unit Tests: $UNIT_RESULT"
+          echo "Workspace Tests: $WORKSPACE_RESULT"
+          echo "Integration Tests: $INTEGRATION_RESULT"
+          echo "Coverage: $COVERAGE_RESULT"
+          
+          # Enforce quality gates
+          FAILED_GATES=""
+          
+          if [[ "$LINT_RESULT" != "success" ]]; then
+            FAILED_GATES="$FAILED_GATES\n❌ Code quality checks failed"
+          fi
+          
+          if [[ "$UNIT_RESULT" != "success" ]]; then
+            FAILED_GATES="$FAILED_GATES\n❌ Unit tests failed"
+          fi
+          
+          if [[ "$WORKSPACE_RESULT" != "success" && "$WORKSPACE_RESULT" != "skipped" ]]; then
+            FAILED_GATES="$FAILED_GATES\n❌ Workspace tests failed"
+          fi
+          
+          if [[ "$INTEGRATION_RESULT" != "success" && "$INTEGRATION_RESULT" != "skipped" ]]; then
+            FAILED_GATES="$FAILED_GATES\n❌ Integration tests failed"
+          fi
+          
+          if [[ "$COVERAGE_RESULT" != "success" && "$COVERAGE_RESULT" != "skipped" ]]; then
+            FAILED_GATES="$FAILED_GATES\n❌ Coverage validation failed"
+          fi
+          
+          if [[ -n "$FAILED_GATES" ]]; then
+            echo -e "🚫 Quality gates failed:$FAILED_GATES"
+            exit 1
+          else
+            echo "✅ All quality gates passed!"
+          fi
+
+      - name: Generate final test report
+        run: |
+          pnpm run health
+          node scripts/generate-final-report.js
+
+      - name: Upload final test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-test-report
+          path: |
+            test-artifacts/final-report.html
+            test-artifacts/final-report.json
+            test-artifacts/quality-gates.json
+          retention-days: 90
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: 🧪 Bytebot Test Results
+          path: 'test-artifacts/**/junit.xml'
+          reporter: jest-junit
+          fail-on-error: true
+
+  # ========================================
+  # DEPLOYMENT READINESS CHECK
+  # ========================================
+  deployment-readiness:
+    name: 🚀 Deployment Readiness Validation
+    runs-on: ubuntu-latest
+    needs: [quality-gates]
+    if: github.ref == 'refs/heads/main' && needs.quality-gates.result == 'success'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Validate deployment readiness
+        run: |
+          echo "🎯 All quality gates passed - System ready for deployment"
+          echo "✅ Linting: Passed"
+          echo "✅ Unit Tests: Passed" 
+          echo "✅ Integration Tests: Passed"
+          echo "✅ Coverage: Validated"
+          echo "✅ Quality Gates: Passed"
+          
+          # Set deployment ready flag
+          echo "DEPLOYMENT_READY=true" >> $GITHUB_ENV
+
+      - name: Update deployment status
+        run: |
+          echo "🚀 System validated and ready for production deployment"

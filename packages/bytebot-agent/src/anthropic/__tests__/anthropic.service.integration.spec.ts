@@ -27,7 +27,6 @@ jest.mock('@anthropic-ai/sdk');
 
 describe('AnthropicService - Integration Tests', () => {
   let service: AnthropicService;
-  let configService: ConfigService;
   let mockAnthropic: jest.Mocked<Anthropic>;
   let module: TestingModule;
 
@@ -43,8 +42,8 @@ describe('AnthropicService - Integration Tests', () => {
       ],
       createdAt: new Date(),
       updatedAt: new Date(),
-      taskId: null,
-      userId: null,
+      taskId: 'task-1',
+      summaryId: null,
     },
   ];
 
@@ -59,9 +58,9 @@ describe('AnthropicService - Integration Tests', () => {
       },
     };
     (Anthropic as jest.MockedClass<typeof Anthropic>).mockImplementation(
-      () => mockAnthropicInstance as any,
+      () => mockAnthropicInstance as unknown as jest.Mocked<Anthropic>,
     );
-    mockAnthropic = mockAnthropicInstance as jest.Mocked<Anthropic>;
+    mockAnthropic = mockAnthropicInstance as unknown as jest.Mocked<Anthropic>;
 
     module = await Test.createTestingModule({
       providers: [
@@ -83,12 +82,11 @@ describe('AnthropicService - Integration Tests', () => {
     }).compile();
 
     service = module.get<AnthropicService>(AnthropicService);
-    configService = module.get<ConfigService>(ConfigService);
 
     // Suppress console warnings for tests
-    jest.spyOn(Logger.prototype, 'warn').mockImplementation();
-    jest.spyOn(Logger.prototype, 'error').mockImplementation();
-    jest.spyOn(Logger.prototype, 'log').mockImplementation();
+    jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
   });
 
   afterEach(async () => {
@@ -200,9 +198,9 @@ describe('AnthropicService - Integration Tests', () => {
               text: mockSystemPrompt,
               cache_control: { type: 'ephemeral' },
             }),
-          ]),
-          messages: expect.any(Array),
-          tools: expect.any(Array),
+          ]) as unknown[],
+          messages: expect.any(Array) as unknown[],
+          tools: expect.any(Array) as unknown[],
         }),
         { signal: undefined },
       );
@@ -221,7 +219,7 @@ describe('AnthropicService - Integration Tests', () => {
       expect(mockAnthropic.messages.create).toHaveBeenCalledWith(
         expect.objectContaining({
           model: customModel,
-          tools: [],
+          tools: [] as unknown[],
         }),
         { signal: undefined },
       );
@@ -336,7 +334,7 @@ describe('AnthropicService - Integration Tests', () => {
         service.generateMessage(mockSystemPrompt, mockMessages),
       ).rejects.toThrow(BytebotAgentInterrupt);
 
-      expect(Logger.prototype.log).toHaveBeenCalledWith(
+      expect(jest.spyOn(Logger.prototype, 'log')).toHaveBeenCalledWith(
         'Anthropic API call aborted',
       );
     });
@@ -349,7 +347,7 @@ describe('AnthropicService - Integration Tests', () => {
         service.generateMessage(mockSystemPrompt, mockMessages),
       ).rejects.toThrow('Request timeout');
 
-      expect(Logger.prototype.error).toHaveBeenCalledWith(
+      expect(jest.spyOn(Logger.prototype, 'error')).toHaveBeenCalledWith(
         'Error sending message to Anthropic: Request timeout',
         timeoutError.stack,
       );
@@ -414,8 +412,8 @@ describe('AnthropicService - Integration Tests', () => {
           ],
           createdAt: new Date(),
           updatedAt: new Date(),
-          taskId: null,
-          userId: null,
+          taskId: 'task-1',
+          summaryId: null,
         },
       ];
 
@@ -432,9 +430,9 @@ describe('AnthropicService - Integration Tests', () => {
                     'User performed action: screenshot',
                   ),
                 }),
-              ]),
+              ]) as unknown[],
             }),
-          ]),
+          ]) as unknown[],
         }),
         { signal: undefined },
       );
@@ -451,9 +449,9 @@ describe('AnthropicService - Integration Tests', () => {
                 expect.objectContaining({
                   cache_control: { type: 'ephemeral' },
                 }),
-              ]),
+              ]) as unknown[],
             }),
-          ]),
+          ]) as unknown[],
         }),
         { signal: undefined },
       );
@@ -472,8 +470,8 @@ describe('AnthropicService - Integration Tests', () => {
           ],
           createdAt: new Date(),
           updatedAt: new Date(),
-          taskId: null,
-          userId: null,
+          taskId: 'task-1',
+          summaryId: null,
         },
         {
           id: '2',
@@ -492,8 +490,8 @@ describe('AnthropicService - Integration Tests', () => {
           ],
           createdAt: new Date(),
           updatedAt: new Date(),
-          taskId: null,
-          userId: null,
+          taskId: 'task-1',
+          summaryId: null,
         },
       ];
 
@@ -504,13 +502,13 @@ describe('AnthropicService - Integration Tests', () => {
           messages: expect.arrayContaining([
             expect.objectContaining({
               role: 'user',
-              content: expect.any(Array),
+              content: expect.any(Array) as unknown[],
             }),
             expect.objectContaining({
               role: 'assistant',
-              content: expect.any(Array),
+              content: expect.any(Array) as unknown[],
             }),
-          ]),
+          ]) as unknown[],
         }),
         { signal: undefined },
       );
@@ -523,7 +521,7 @@ describe('AnthropicService - Integration Tests', () => {
       const abortSignal = abortController.signal;
 
       // Simulate API call abortion
-      mockAnthropic.messages.create = jest.fn().mockImplementation(async () => {
+      mockAnthropic.messages.create = jest.fn().mockImplementation(() => {
         abortController.abort();
         throw new APIUserAbortError();
       });
@@ -539,7 +537,7 @@ describe('AnthropicService - Integration Tests', () => {
       ).rejects.toThrow(BytebotAgentInterrupt);
 
       expect(mockAnthropic.messages.create).toHaveBeenCalledWith(
-        expect.any(Object),
+        expect.any(Object) as Record<string, unknown>,
         { signal: abortSignal },
       );
     });
@@ -564,7 +562,7 @@ describe('AnthropicService - Integration Tests', () => {
       const endTime = Date.now();
 
       expect(endTime - startTime).toBeGreaterThan(90);
-      expect(result.contentBlocks[0].text).toBe('Delayed response');
+      expect((result.contentBlocks[0] as any).text).toBe('Delayed response');
     });
 
     it('should measure and log API call duration', async () => {
@@ -574,7 +572,7 @@ describe('AnthropicService - Integration Tests', () => {
 
       // Verify that error logging captures the API call
       expect(mockAnthropic.messages.create).toHaveBeenCalled();
-      expect(logSpy).toHaveBeenCalled();
+      expect(jest.spyOn(Logger.prototype, 'log')).toHaveBeenCalled();
     });
   });
 
@@ -631,7 +629,7 @@ describe('AnthropicService - Integration Tests', () => {
 
       expect(mockAnthropic.messages.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          tools: expect.any(Array),
+          tools: expect.any(Array) as unknown[],
         }),
         { signal: undefined },
       );
@@ -647,7 +645,7 @@ describe('AnthropicService - Integration Tests', () => {
 
       expect(mockAnthropic.messages.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          tools: [],
+          tools: [] as unknown[],
         }),
         { signal: undefined },
       );
@@ -664,7 +662,7 @@ describe('AnthropicService - Integration Tests', () => {
       // Verify that cache control is added to tools
       expect(mockAnthropic.messages.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          tools: expect.any(Array),
+          tools: expect.any(Array) as unknown[],
         }),
         { signal: undefined },
       );
@@ -686,8 +684,8 @@ describe('AnthropicService - Integration Tests', () => {
           ],
           createdAt: new Date(),
           updatedAt: new Date(),
-          taskId: null,
-          userId: null,
+          taskId: 'task-1',
+          summaryId: null,
         }),
       );
 
@@ -711,7 +709,7 @@ describe('AnthropicService - Integration Tests', () => {
                 role: i % 2 === 0 ? 'user' : 'assistant',
               }),
             ),
-          ),
+          ) as unknown[],
         }),
         { signal: undefined },
       );

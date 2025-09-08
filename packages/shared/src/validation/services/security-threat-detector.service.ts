@@ -22,10 +22,9 @@ import {
   detectSQLInjection,
   detectMaliciousFileContent,
   generateEventId,
-  calculateRiskScore,
-  SecurityEventType,
 } from "../../utils/security.utils";
 import { ThreatAnalysisResult, SecurityThreatContext } from "./types";
+import { ValidationServiceType } from "../../pipes/validation.standardized";
 
 /**
  * Advanced threat patterns for enterprise security
@@ -50,21 +49,21 @@ const ENTERPRISE_THREAT_PATTERNS = {
   // Advanced SQL injection patterns
   SQL_INJECTION_PATTERNS: [
     // Union-based attacks with encoding
-    /(?:union|select|insert|update|delete|drop|create|alter|truncate|replace)[\s\/\*]*(?:\+|\|\||chr\(|char\(|ascii\(|length\(|substring\()/gi,
+    /(?:union|select|insert|update|delete|drop|create|alter|truncate|replace)[\s/*]*(?:\+|\|\||chr\(|char\(|ascii\(|length\(|substring\()/gi,
     // Blind SQL injection patterns
-    /(?:and|or)[\s\/*]*(?:1\s*=\s*1|1\s*=\s*0|true|false)[\s\/*]*(?:and|or|--|\#)/gi,
+    /(?:and|or)[\s/*]*(?:1\s*=\s*1|1\s*=\s*0|true|false)[\s/*]*(?:and|or|--|#)/gi,
     // Time-based blind attacks
     /(?:waitfor|delay|sleep|benchmark)\s*\([\d\s,]*\)/gi,
     // Database function exploitation
     /(?:information_schema|sys\.tables|pg_tables|sqlite_master|msysaccessobjects)\.[\w\s]*/gi,
     // SQL comment variations
-    /(?:--[\s\r\n]|\/\*[\s\S]*?\*\/|\#[\s\r\n]|;[\s]*(?:drop|delete|truncate|update))/gi,
+    /(?:--[\s\r\n]|\/\*[\s\S]*?\*\/|#[\s\r\n]|;[\s]*(?:drop|delete|truncate|update))/gi,
   ],
 
   // Command injection patterns
   COMMAND_INJECTION_PATTERNS: [
     // Shell command separators
-    /[;&|\`${}][\s]*(?:cat|ls|dir|type|rm|del|mkdir|rmdir|touch|chmod|chown|ps|kill|whoami|id|uname|pwd|cd|echo|wget|curl|nc|netcat|bash|sh|cmd|powershell)/gi,
+    /[;&|`${}][\s]*(?:cat|ls|dir|type|rm|del|mkdir|rmdir|touch|chmod|chown|ps|kill|whoami|id|uname|pwd|cd|echo|wget|curl|nc|netcat|bash|sh|cmd|powershell)/gi,
     // Path traversal with commands
     /(?:\.\.\/|\.\.\\)+[\s]*(?:etc\/passwd|windows\/system32|proc\/self|dev\/null)/gi,
     // System information gathering
@@ -78,11 +77,11 @@ const ENTERPRISE_THREAT_PATTERNS = {
     // Expression language injection
     /\$\{[\s\S]*?(?:java\.lang|System\.|Runtime\.|ProcessBuilder|Class\.forName)[\s\S]*?\}/gi,
     // Twig/Smarty template injection
-    /\{[%\{][\s\S]*?(?:system|exec|eval|file_get_contents|include|require)[\s\S]*?[%\}]\}/gi,
+    /{[%{][\s\S]*?(?:system|exec|eval|file_get_contents|include|require)[\s\S]*?[%}]}/gi,
   ],
 
   // LDAP injection patterns
-  LDAP_INJECTION_PATTERNS: [/[*\(\)\\\/\x00]|(?:\)\(|&\(|\|\()/gi],
+  LDAP_INJECTION_PATTERNS: [/[*()\\/]|(?:\)\(|&\(|\|\()/gi],
 
   // XML/XXE patterns
   XML_XXE_PATTERNS: [
@@ -104,12 +103,14 @@ const ENTERPRISE_THREAT_PATTERNS = {
 /**
  * Threat severity levels
  */
+/* eslint-disable no-unused-vars */
 enum ThreatSeverity {
   LOW = "low",
   MEDIUM = "medium",
   HIGH = "high",
   CRITICAL = "critical",
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Security Threat Detector Service
@@ -125,10 +126,10 @@ export class SecurityThreatDetector {
    * @param context Security context for analysis
    * @returns Comprehensive threat analysis result
    */
-  async analyzeThreat(
+  analyzeThreat(
     value: unknown,
     context: SecurityThreatContext,
-  ): Promise<ThreatAnalysisResult> {
+  ): ThreatAnalysisResult {
     const analysisId = generateEventId();
     const startTime = Date.now();
 
@@ -152,15 +153,15 @@ export class SecurityThreatDetector {
       const inputString = this.convertToAnalyzableString(value);
 
       // Perform basic threat detection
-      const basicThreats = await this.detectBasicThreats(inputString);
+      const basicThreats = this.detectBasicThreats(inputString);
       threats.push(...basicThreats);
 
       // Perform advanced pattern matching
-      const advancedThreats = await this.detectAdvancedThreats(inputString);
+      const advancedThreats = this.detectAdvancedThreats(inputString);
       threats.push(...advancedThreats);
 
       // Perform context-aware analysis
-      const contextualThreats = await this.detectContextualThreats(
+      const contextualThreats = this.detectContextualThreats(
         inputString,
         context,
       );
@@ -258,7 +259,20 @@ export class SecurityThreatDetector {
         error: (error as Error).message,
         valueType: typeof value,
       });
-      return String(value);
+      if (typeof value === "object" && value !== null) {
+        return "[object Object]";
+      }
+      if (value === null || value === undefined) {
+        return "";
+      }
+      if (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+      ) {
+        return String(value);
+      }
+      return "[object Object]";
     }
   }
 
@@ -267,16 +281,14 @@ export class SecurityThreatDetector {
    * @param input Input string to analyze
    * @returns Array of basic threats detected
    */
-  private async detectBasicThreats(input: string): Promise<
-    Array<{
-      type: string;
-      pattern?: string;
-      location?: string;
-      severity: ThreatSeverity;
-      confidence: number;
-      description: string;
-    }>
-  > {
+  private detectBasicThreats(input: string): Array<{
+    type: string;
+    pattern?: string;
+    location?: string;
+    severity: ThreatSeverity;
+    confidence: number;
+    description: string;
+  }> {
     const threats: Array<{
       type: string;
       pattern?: string;
@@ -324,16 +336,14 @@ export class SecurityThreatDetector {
    * @param input Input string to analyze
    * @returns Array of advanced threats detected
    */
-  private async detectAdvancedThreats(input: string): Promise<
-    Array<{
-      type: string;
-      pattern?: string;
-      location?: string;
-      severity: ThreatSeverity;
-      confidence: number;
-      description: string;
-    }>
-  > {
+  private detectAdvancedThreats(input: string): Array<{
+    type: string;
+    pattern?: string;
+    location?: string;
+    severity: ThreatSeverity;
+    confidence: number;
+    description: string;
+  }> {
     const threats: Array<{
       type: string;
       pattern?: string;
@@ -464,19 +474,17 @@ export class SecurityThreatDetector {
    * @param context Security context
    * @returns Array of contextual threats detected
    */
-  private async detectContextualThreats(
+  private detectContextualThreats(
     input: string,
     context: SecurityThreatContext,
-  ): Promise<
-    Array<{
-      type: string;
-      pattern?: string;
-      location?: string;
-      severity: ThreatSeverity;
-      confidence: number;
-      description: string;
-    }>
-  > {
+  ): Array<{
+    type: string;
+    pattern?: string;
+    location?: string;
+    severity: ThreatSeverity;
+    confidence: number;
+    description: string;
+  }> {
     const threats: Array<{
       type: string;
       pattern?: string;
@@ -488,7 +496,7 @@ export class SecurityThreatDetector {
 
     // Context-specific threat detection based on service type
     switch (context.serviceType) {
-      case "bytebotd":
+      case ValidationServiceType.BYTEBOTD:
         // Additional computer-use specific threats
         if (
           /(?:shutdown|reboot|halt|poweroff|kill|pkill|killall)/gi.test(input)
@@ -503,7 +511,7 @@ export class SecurityThreatDetector {
         }
         break;
 
-      case "bytebot-agent":
+      case ValidationServiceType.BYTEBOT_AGENT:
         // Task management specific threats
         if (
           /(?:__proto__|constructor\.prototype|Object\.prototype)/gi.test(input)
@@ -518,7 +526,7 @@ export class SecurityThreatDetector {
         }
         break;
 
-      case "bytebot-ui":
+      case ValidationServiceType.BYTEBOT_UI:
         // Frontend specific threats
         if (/(?:postMessage|origin|parent\.)/gi.test(input)) {
           threats.push({

@@ -58,15 +58,15 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   /**
-   * Determine if request can activate the route
-   * Validates JWT token and extracts authenticated user
+   * Enhanced JWT validation with comprehensive security checks
+   * Validates JWT token, extracts authenticated user, and performs additional security validations
    *
    * @param context - Execution context containing request information
    * @returns Promise<boolean> - Whether the request is authorized
    * @throws UnauthorizedException - When authentication fails
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const operationId = `bytebotd-jwt-auth-${Date.now()}`;
+    const operationId = `bytebotd-jwt-auth-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
     const startTime = Date.now();
 
     // Check if route is marked as public (skip authentication)
@@ -87,14 +87,24 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const clientIp = this.getClientIpAddress(request);
+    const userAgent = request.headers['user-agent']?.substring(0, 100);
 
-    this.logger.debug(`[${operationId}] JWT authentication attempt for computer control`, {
+    // Enhanced security logging with threat detection
+    this.logger.debug(`[${operationId}] Enhanced JWT authentication attempt for computer control`, {
       operationId,
       method: request.method,
       url: request.url,
-      userAgent: request.headers['user-agent']?.substring(0, 100),
-      ipAddress: this.getClientIpAddress(request),
+      userAgent,
+      ipAddress: clientIp,
+      timestamp: new Date().toISOString(),
+      securityContext: 'computer_control_access',
     });
+
+    // Pre-authentication security checks
+    if (!this.performPreAuthChecks(request, operationId)) {
+      throw new UnauthorizedException('Pre-authentication security check failed');
+    }
 
     try {
       // Call parent authentication logic (Passport JWT strategy)
@@ -104,7 +114,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         const authTime = Date.now() - startTime;
         const user = request.user;
 
-        this.logger.log(`[${operationId}] JWT authentication successful for computer control`, {
+        // Perform post-authentication security checks
+        if (user && !this.performPostAuthChecks(user, operationId)) {
+          throw new UnauthorizedException('Post-authentication security check failed');
+        }
+
+        this.logger.log(`[${operationId}] Enhanced JWT authentication successful for computer control`, {
           operationId,
           userId: user?.id,
           username: user?.username,
@@ -112,8 +127,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
           method: request.method,
           url: request.url,
           authTimeMs: authTime,
-          ipAddress: this.getClientIpAddress(request),
+          ipAddress: clientIp,
+          userAgent,
+          securityLevel: 'enhanced',
           securityEvent: 'computer_control_auth_success',
+          postAuthChecks: 'passed',
         });
       }
 
@@ -309,5 +327,218 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       default:
         return 'Authentication failed for computer control';
     }
+  }
+
+  /**
+   * Enhanced pre-authentication security checks
+   * Validates request headers, IP patterns, and potential security threats
+   *
+   * @param request - HTTP request object
+   * @param operationId - Operation tracking ID
+   * @returns boolean - Whether pre-auth checks passed
+   * @private
+   */
+  private performPreAuthChecks(request: Request, operationId: string): boolean {
+    // Check for suspicious user agent patterns
+    const userAgent = request.headers['user-agent'];
+    if (!userAgent || this.isSuspiciousUserAgent(userAgent)) {
+      this.logger.warn(`[${operationId}] Suspicious user agent detected`, {
+        operationId,
+        userAgent,
+        ipAddress: this.getClientIpAddress(request),
+        securityEvent: 'suspicious_user_agent',
+      });
+      return false;
+    }
+
+    // Check for excessive header count (potential attack)
+    const headerCount = Object.keys(request.headers).length;
+    if (headerCount > 50) {
+      this.logger.warn(`[${operationId}] Excessive headers detected`, {
+        operationId,
+        headerCount,
+        ipAddress: this.getClientIpAddress(request),
+        securityEvent: 'excessive_headers',
+      });
+      return false;
+    }
+
+    // Validate Authorization header format
+    const authHeader = request.headers.authorization;
+    if (authHeader && !this.isValidAuthHeaderFormat(authHeader)) {
+      this.logger.warn(`[${operationId}] Invalid authorization header format`, {
+        operationId,
+        authHeaderFormat: this.analyzeAuthHeader(authHeader),
+        ipAddress: this.getClientIpAddress(request),
+        securityEvent: 'invalid_auth_header',
+      });
+      return false;
+    }
+
+    // Check for potential token replay attacks (basic timing check)
+    if (authHeader && this.isPotentialReplayAttack(authHeader, operationId)) {
+      this.logger.warn(`[${operationId}] Potential token replay attack detected`, {
+        operationId,
+        ipAddress: this.getClientIpAddress(request),
+        securityEvent: 'potential_replay_attack',
+      });
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Check if user agent indicates suspicious activity
+   * Detects bots, scrapers, and automated tools
+   *
+   * @param userAgent - User agent string
+   * @returns boolean - Whether user agent is suspicious
+   * @private
+   */
+  private isSuspiciousUserAgent(userAgent: string): boolean {
+    const suspiciousPatterns = [
+      // Common bots and scrapers
+      /bot|crawler|spider|scraper/gi,
+      
+      // Automated tools
+      /curl|wget|httpie|postman|insomnia/gi,
+      
+      // Security scanners
+      /nmap|nikto|sqlmap|burp|zap|acunetix|nessus/gi,
+      
+      // Generic HTTP clients
+      /^(python|java|go|rust|php|ruby|perl)-/gi,
+      
+      // Empty or very short user agents
+      /^.{0,10}$/,
+      
+      // Common attack tools
+      /metasploit|exploit|payload|shell/gi,
+    ];
+
+    return suspiciousPatterns.some(pattern => pattern.test(userAgent));
+  }
+
+  /**
+   * Validate authorization header format
+   * Ensures proper Bearer token format
+   *
+   * @param authHeader - Authorization header value
+   * @returns boolean - Whether format is valid
+   * @private
+   */
+  private isValidAuthHeaderFormat(authHeader: string): boolean {
+    // Must be Bearer token format
+    if (!authHeader.startsWith('Bearer ')) {
+      return false;
+    }
+
+    const token = authHeader.substring(7);
+    
+    // Token must exist and be reasonable length
+    if (!token || token.length < 20 || token.length > 2048) {
+      return false;
+    }
+
+    // Basic JWT format check (3 parts separated by dots)
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return false;
+    }
+
+    // Each part should be base64url encoded (basic check)
+    return parts.every(part => 
+      /^[A-Za-z0-9_-]+$/.test(part) && part.length > 0
+    );
+  }
+
+  /**
+   * Basic replay attack detection using timing analysis
+   * This is a simplified approach - production systems should use nonces
+   *
+   * @param authHeader - Authorization header value
+   * @param operationId - Operation tracking ID
+   * @returns boolean - Whether this might be a replay attack
+   * @private
+   */
+  private isPotentialReplayAttack(authHeader: string, operationId: string): boolean {
+    try {
+      const token = authHeader.substring(7);
+      const tokenParts = token.split('.');
+      
+      if (tokenParts.length !== 3) {
+        return false;
+      }
+
+      // Decode JWT payload (without verification - just for timing check)
+      const payload = JSON.parse(
+        Buffer.from(tokenParts[1], 'base64url').toString('utf8')
+      );
+
+      const currentTime = Math.floor(Date.now() / 1000);
+      const tokenIssuedAt = payload.iat;
+      const tokenExpiry = payload.exp;
+
+      // Check if token is very close to expiry (potential replay)
+      if (tokenExpiry && currentTime > (tokenExpiry - 60)) {
+        return true;
+      }
+
+      // Check if token was issued very recently (less than 1 second ago)
+      // This could indicate rapid successive requests with the same token
+      if (tokenIssuedAt && (currentTime - tokenIssuedAt) < 1) {
+        return true;
+      }
+
+    } catch (error) {
+      // If we can't decode the token, let the main JWT validation handle it
+      this.logger.debug(`[${operationId}] Could not decode JWT for replay check: ${error.message}`);
+    }
+
+    return false;
+  }
+
+  /**
+   * Enhanced post-authentication user validation
+   * Performs additional security checks on authenticated user
+   *
+   * @param user - Authenticated user object
+   * @param operationId - Operation tracking ID
+   * @returns boolean - Whether user passed additional security checks
+   * @private
+   */
+  private performPostAuthChecks(user: ByteBotdUser, operationId: string): boolean {
+    // Check if user account is active
+    if (!user.isActive) {
+      this.logger.warn(`[${operationId}] Inactive user attempted access`, {
+        operationId,
+        userId: user.id,
+        username: user.username,
+        securityEvent: 'inactive_user_access',
+      });
+      return false;
+    }
+
+    // Check user role permissions for computer control
+    const allowedRoles: UserRole[] = [UserRole.ADMIN, UserRole.OPERATOR];
+    if (!allowedRoles.includes(user.role)) {
+      this.logger.warn(`[${operationId}] Unauthorized role attempted computer control access`, {
+        operationId,
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+        securityEvent: 'unauthorized_role_access',
+      });
+      return false;
+    }
+
+    // Additional security validations can be added here
+    // - Account lockout checks
+    // - Concurrent session limits
+    // - Geographic location validation
+    // - Time-based access controls
+
+    return true;
   }
 }

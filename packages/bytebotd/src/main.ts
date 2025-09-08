@@ -4,7 +4,12 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import * as express from 'express';
 import { json, urlencoded } from 'express';
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
+import {
+  StandardizedSecurityMiddleware,
+  ServiceType,
+} from '@bytebot/shared/dist/index-server';
 import type { Server, IncomingMessage } from 'http';
 import type { Socket } from 'net';
 
@@ -18,78 +23,88 @@ async function bootstrap(): Promise<void> {
   try {
     const app = await NestFactory.create(AppModule);
 
-    // Get environment configuration
+    // Get configuration service for standardized security
+    const configService = app.get(ConfigService);
     const environment = process.env.NODE_ENV || 'development';
-    
+
+    // Deploy standardized security middleware for BytebotD - MAXIMUM SECURITY
+    const securityMiddleware =
+      StandardizedSecurityMiddleware.createBytebotDMiddleware(configService);
+    app.use('/api', securityMiddleware.use.bind(securityMiddleware));
+
+    logger.log(
+      'BytebotD standardized security middleware deployed successfully',
+      {
+        serviceType: ServiceType.BYTEBOTD,
+        environment,
+        securityLevel: securityMiddleware.getSecurityConfig().securityLevel,
+      },
+    );
+
     // Configure security headers with helmet - SECURITY CRITICAL
-    app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: [
-            "'self'", 
-            "'unsafe-inline'", // Required for VNC viewer
-            "'unsafe-eval'",   // Required for noVNC client
-            "https://cdn.jsdelivr.net",
-          ],
-          styleSrc: ["'self'", "'unsafe-inline'"],  // Required for VNC viewer
-          fontSrc: ["'self'", "data:"],
-          imgSrc: ["'self'", "data:", "blob:", "http://localhost:*"],
-          connectSrc: [
-            "'self'", 
-            "ws:", 
-            "wss:",
-            "http://localhost:*",
-            "https://localhost:*",
-            ...(environment === 'production' ? [
-              "wss://app.bytebot.ai",
-              "https://api.bytebot.ai",
-            ] : [])
-          ],
-          objectSrc: ["'none'"],
-          mediaSrc: ["'self'", "blob:"],
-          frameSrc: ["'self'", "http://localhost:*"], // Allow framing for VNC
-          frameAncestors: ["'self'", "http://localhost:*", "https://localhost:*"],
-          baseUri: ["'self'"],
-          formAction: ["'self'"],
-          upgradeInsecureRequests: environment === 'production' ? [] : undefined,
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+              "'self'",
+              "'unsafe-inline'", // Required for VNC viewer
+              "'unsafe-eval'", // Required for noVNC client
+              'https://cdn.jsdelivr.net',
+            ],
+            styleSrc: ["'self'", "'unsafe-inline'"], // Required for VNC viewer
+            fontSrc: ["'self'", 'data:'],
+            imgSrc: ["'self'", 'data:', 'blob:', 'http://localhost:*'],
+            connectSrc: [
+              "'self'",
+              'ws:',
+              'wss:',
+              'http://localhost:*',
+              'https://localhost:*',
+              ...(environment === 'production'
+                ? ['wss://app.bytebot.ai', 'https://api.bytebot.ai']
+                : []),
+            ],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'", 'blob:'],
+            frameSrc: ["'self'", 'http://localhost:*'], // Allow framing for VNC
+            frameAncestors: [
+              "'self'",
+              'http://localhost:*',
+              'https://localhost:*',
+            ],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            upgradeInsecureRequests:
+              environment === 'production' ? [] : undefined,
+          },
+          reportOnly: environment === 'development',
         },
-        reportOnly: environment === 'development',
-      },
-      crossOriginEmbedderPolicy: false, // Disabled for WebSocket compatibility
-      crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
-      crossOriginResourcePolicy: { policy: "cross-origin" },
-      dnsPrefetchControl: { allow: false },
-      frameguard: { action: 'sameorigin' }, // Allow framing for VNC viewer
-      hidePoweredBy: true,
-      hsts: environment === 'production' ? {
-        maxAge: 31536000, // 1 year
-        includeSubDomains: true,
-        preload: true
-      } : false,
-      ieNoOpen: true,
-      noSniff: true,
-      originAgentCluster: true,
-      permittedCrossDomainPolicies: false,
-      referrerPolicy: { policy: "strict-origin-when-cross-origin" },
-      xssFilter: true,
-      expectCt: environment === 'production' ? {
-        maxAge: 86400,
-        enforce: true,
-      } : false,
-      permissionsPolicy: {
-        camera: [],
-        microphone: [],
-        geolocation: [],
-        payment: [],
-        usb: [],
-        magnetometer: [],
-        gyroscope: [],
-        accelerometer: [],
-        fullscreen: ['self'], // Allow fullscreen for VNC
-        screen: ['self'],     // Allow screen capture for computer use
-      },
-    }));
+        crossOriginEmbedderPolicy: false, // Disabled for WebSocket compatibility
+        crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+        dnsPrefetchControl: { allow: false },
+        frameguard: { action: 'sameorigin' }, // Allow framing for VNC viewer
+        hidePoweredBy: true,
+        hsts:
+          environment === 'production'
+            ? {
+                maxAge: 31536000, // 1 year
+                includeSubDomains: true,
+                preload: true,
+              }
+            : false,
+        ieNoOpen: true,
+        noSniff: true,
+        originAgentCluster: true,
+        permittedCrossDomainPolicies: false,
+        referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+        xssFilter: true,
+        // Note: expectCt has been removed in helmet v8.1.0
+        // Note: permissionsPolicy is not directly supported by helmet v8.1.0
+      }),
+    );
 
     // Configure body parser with increased payload size limit (50MB)
     app.use(json({ limit: '50mb' }));
@@ -97,24 +112,25 @@ async function bootstrap(): Promise<void> {
 
     // Enable CORS with strict origin validation - SECURITY CRITICAL
     const baseAllowedOrigins = [
-      'http://localhost:3000',     // Development frontend
-      'http://localhost:3001',     // Alternative dev port
-      'http://localhost:9990',     // BytebotD itself
-      'http://localhost:9991',     // Bytebot agent
-      'http://localhost:9992',     // Bytebot UI
-      'https://localhost:3000',    // HTTPS development
-      'https://localhost:3001',    // HTTPS alternative dev port
+      'http://localhost:3000', // Development frontend
+      'http://localhost:3001', // Alternative dev port
+      'http://localhost:9990', // BytebotD itself
+      'http://localhost:9991', // Bytebot agent
+      'http://localhost:9992', // Bytebot UI
+      'https://localhost:3000', // HTTPS development
+      'https://localhost:3001', // HTTPS alternative dev port
     ];
-    
+
     const productionOrigins = [
-      'https://app.bytebot.ai',    // Production frontend
-      'https://bytebot.ai',        // Production domain
-      'https://api.bytebot.ai',    // Production API
+      'https://app.bytebot.ai', // Production frontend
+      'https://bytebot.ai', // Production domain
+      'https://api.bytebot.ai', // Production API
     ];
-    
-    const allowedOrigins = environment === 'production' 
-      ? [...baseAllowedOrigins, ...productionOrigins]
-      : baseAllowedOrigins;
+
+    const allowedOrigins =
+      environment === 'production'
+        ? [...baseAllowedOrigins, ...productionOrigins]
+        : baseAllowedOrigins;
 
     app.enableCors({
       origin: (origin, callback) => {
@@ -127,13 +143,16 @@ async function bootstrap(): Promise<void> {
         if (allowedOrigins.includes(origin)) {
           return callback(null, true);
         }
-        
+
         // Allow any localhost in development
-        if (environment === 'development' && 
-            (origin.startsWith('http://localhost:') || origin.startsWith('https://localhost:'))) {
+        if (
+          environment === 'development' &&
+          (origin.startsWith('http://localhost:') ||
+            origin.startsWith('https://localhost:'))
+        ) {
           return callback(null, true);
         }
-        
+
         // Support wildcard subdomains for bytebot.ai in production
         if (environment === 'production' && origin.endsWith('.bytebot.ai')) {
           return callback(null, true);
@@ -147,8 +166,11 @@ async function bootstrap(): Promise<void> {
           userAgent: '',
           timestamp: new Date().toISOString(),
         });
-        
-        return callback(new Error(`Origin ${origin} not allowed by CORS policy`), false);
+
+        return callback(
+          new Error(`Origin ${origin} not allowed by CORS policy`),
+          false,
+        );
       },
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: [
@@ -172,18 +194,18 @@ async function bootstrap(): Promise<void> {
       preflightContinue: false,
       optionsSuccessStatus: 204,
     });
-    
+
     // Additional security headers for BytebotD
     app.use((req, res, next) => {
       res.setHeader('X-Service', 'BytebotD');
       res.setHeader('X-API-Version', '1.0');
       res.setHeader('X-Service-ID', 'computer-use-service');
-      
+
       if (environment === 'production') {
         res.removeHeader('X-Powered-By');
         res.removeHeader('Server');
       }
-      
+
       next();
     });
 

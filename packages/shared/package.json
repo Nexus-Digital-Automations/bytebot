@@ -10,22 +10,40 @@
     "build": "tsc -p tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\" --fix",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:coverage": "jest --config jest.config.js --coverage",
+    "test:ci": "jest --config jest.config.js --coverage --ci --watchAll=false",
     "prepublishOnly": "npm run build"
   },
   "exports": {
     ".": {
-      "import": "./dist/index.esm.js",
+      "types": "./dist/index.d.ts",
       "require": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/index-client.d.ts",
+      "require": "./dist/index-client.js"
+    },
+    "./server": {
+      "types": "./dist/index-server.d.ts",
+      "require": "./dist/index-server.js"
     }
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
+    "@jest/globals": "^30.1.2",
+    "@types/jest": "^30.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^15.14.0",
+    "jest": "^30.1.3",
+    "jest-html-reporters": "^3.1.7",
+    "jest-junit": "^16.0.0",
     "prettier": "^3.4.2",
+    "ts-jest": "^29.4.1",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },
@@ -33,15 +51,28 @@
     "dist"
   ],
   "dependencies": {
+    "@nestjs/cache-manager": "^3.0.1",
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/event-emitter": "^3.0.1",
+    "@nestjs/microservices": "^11.1.6",
     "@types/bcryptjs": "^2.4.6",
     "@types/dompurify": "^3.0.5",
+    "@types/express": "^5.0.3",
     "@types/jsdom": "^21.1.7",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
     "bcryptjs": "^3.0.2",
+    "cache-manager-redis-store": "^3.0.1",
+    "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "dompurify": "^3.2.6",
+    "helmet": "^8.1.0",
     "jsdom": "^26.1.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "rxjs": "^7.8.2",
     "sanitize-html": "^2.17.0"
   }
 }

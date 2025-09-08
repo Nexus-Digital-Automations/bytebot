@@ -1,4 +1,5 @@
 import { ChatCompletionTool, FunctionParameters } from 'openai/resources';
+import { Tool } from 'openai/resources/responses/responses';
 import { agentTools } from '../agent/agent.tools';
 
 /**
@@ -58,6 +59,29 @@ function agentToolToOpenAITool(agentTool: unknown): ChatCompletionTool {
 }
 
 /**
+ * Safely converts an agent tool to OpenAI Responses API tool format
+ * @param agentTool - The agent tool to convert
+ * @returns Tool for Responses API or throws error if invalid
+ * @throws Error if tool structure is invalid
+ */
+function agentToolToResponsesTool(agentTool: unknown): Tool {
+  if (!isValidAgentTool(agentTool)) {
+    throw new Error(
+      `Invalid agent tool structure: ${JSON.stringify(agentTool)}`,
+    );
+  }
+
+  // Convert to the Responses API Tool format
+  return {
+    type: 'function',
+    name: agentTool.name,
+    description: agentTool.description,
+    parameters: agentTool.input_schema,
+    strict: true, // Enable strict parameter validation for better type safety
+  };
+}
+
+/**
  * Convert tool name from snake_case to camelCase
  */
 function convertToCamelCase(name: string): string {
@@ -113,7 +137,10 @@ export const setTaskStatusTool = toolMap.setTaskStatusTool;
 export const createTaskTool = toolMap.createTaskTool;
 export const applicationTool = toolMap.applicationTool;
 
-// Array of all tools
-export const openaiTools: ChatCompletionTool[] = agentTools.map(
+// Array of all tools for Chat Completions API
+export const openaiChatTools: ChatCompletionTool[] = agentTools.map(
   agentToolToOpenAITool,
 );
+
+// Array of all tools for Responses API
+export const openaiTools: Tool[] = agentTools.map(agentToolToResponsesTool);

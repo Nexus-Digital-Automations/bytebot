@@ -268,6 +268,56 @@ helm install bytebot ./helm \
 - **Documentation**: Comprehensive guides at [docs.bytebot.ai](https://docs.bytebot.ai)
 - **GitHub Issues**: Report bugs and request features
 
+## Local Development
+
+### Prerequisites
+- Node.js 18+
+- pnpm 8+ (package manager)
+- Docker (for desktop environment)
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/bytebot-ai/bytebot.git
+cd bytebot
+
+# Install pnpm if you don't have it
+npm install -g pnpm
+
+# Install dependencies for all packages
+pnpm install
+
+# Start development environment
+pnpm run dev
+```
+
+### Package Scripts
+
+This project uses **pnpm workspaces** for efficient dependency management:
+
+```bash
+# Install dependencies
+pnpm install
+
+# Build all packages
+pnpm run build
+
+# Run tests
+pnpm run test
+
+# Lint code
+pnpm run lint
+
+# Development mode (all services)
+pnpm run dev
+
+# Individual package commands
+pnpm --filter @bytebot/agent run dev
+pnpm --filter @bytebot/ui run dev
+pnpm --filter @bytebot/shared run build
+```
+
 ## Contributing
 
 We welcome contributions! Whether it's:

@@ -108,7 +108,7 @@ export class PrismaService
    */
   async getHealthStatus() {
     if (this.databaseService) {
-      return await this.databaseService.getHealthStatus();
+      return this.databaseService.getHealthStatus();
     }
 
     // Basic health check fallback
@@ -134,9 +134,9 @@ export class PrismaService
   /**
    * Get database metrics through DatabaseService if available
    */
-  async getDatabaseMetrics() {
+  getDatabaseMetrics() {
     if (this.databaseService) {
-      return await this.databaseService.getMetrics();
+      return this.databaseService.getMetrics();
     }
 
     // Return basic metrics if DatabaseService not available

@@ -332,15 +332,18 @@ export interface CustomValidationRule {
   applicableEnvironments: string[];
 }
 
-export default {
-  ThreatAnalysisResult,
-  ValidationSuccessMetrics,
-  ValidationFailureMetrics,
-  ValidationAuditEntry,
-  ValidationCacheEntry,
-  ValidationProfile,
-  SecurityThreatContext,
-  ValidationFailureContext,
-  ValidationPerformanceMetrics,
-  CustomValidationRule,
-};
+// Export type names as strings for runtime usage
+export const ValidationTypeNames = {
+  ThreatAnalysisResult: "ThreatAnalysisResult",
+  ValidationSuccessMetrics: "ValidationSuccessMetrics",
+  ValidationFailureMetrics: "ValidationFailureMetrics",
+  ValidationAuditEntry: "ValidationAuditEntry",
+  ValidationCacheEntry: "ValidationCacheEntry",
+  ValidationProfile: "ValidationProfile",
+  SecurityThreatContext: "SecurityThreatContext",
+  ValidationFailureContext: "ValidationFailureContext",
+  ValidationPerformanceMetrics: "ValidationPerformanceMetrics",
+  CustomValidationRule: "CustomValidationRule",
+} as const;
+
+export default ValidationTypeNames;

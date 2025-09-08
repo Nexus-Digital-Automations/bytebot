@@ -82,7 +82,13 @@ const DEFAULT_SECURITY_OPTIONS: Required<SecuritySanitizationOptions> = {
 interface ThreatDetectionResult {
   hasThreats: boolean;
   threats: Array<{
-    type: 'XSS' | 'SQL_INJECTION' | 'MALICIOUS_INPUT' | 'SIZE_VIOLATION';
+    type:
+      | 'XSS'
+      | 'SQL_INJECTION'
+      | 'MALICIOUS_INPUT'
+      | 'SIZE_VIOLATION'
+      | 'ADVANCED_XSS'
+      | 'FILE_THREAT';
     field: string;
     description: string;
     sample: string;
@@ -325,10 +331,6 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
           return score + 6;
         case 'SIZE_VIOLATION':
           return score + 3;
-        case 'ADVANCED_XSS':
-          return score + 10;
-        case 'FILE_THREAT':
-          return score + 7;
         default:
           return score + 2;
       }

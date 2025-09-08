@@ -16,11 +16,9 @@ import {
   Injectable,
   Logger,
   ServiceUnavailableException,
-  HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Observable, throwError, of, timer, EMPTY } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { catchError, switchMap, timeout } from 'rxjs/operators';
 
 export enum CircuitBreakerState {
@@ -175,9 +173,9 @@ export class CircuitBreakerService {
         {
           circuitName,
           operationId,
-          state: metrics.state,
-          failureRate: metrics.failureRate,
-          nextAttemptTime: metrics.nextAttemptTime,
+          state: metrics?.state ?? 'UNKNOWN',
+          failureRate: metrics?.failureRate ?? 0,
+          nextAttemptTime: metrics?.nextAttemptTime ?? null,
         },
       );
 
@@ -275,7 +273,7 @@ export class CircuitBreakerService {
       timeout(circuit.config.timeout),
       catchError((error) => {
         this.recordFailure(circuitName, error, 0, operationId);
-        return throwError(() => error);
+        return throwError(() => error as Error);
       }),
       switchMap((result) => {
         this.recordSuccess(circuitName, 0, operationId);
@@ -445,7 +443,7 @@ export class CircuitBreakerService {
    */
   private recordFailure(
     circuitName: string,
-    error: any,
+    error: unknown,
     duration: number,
     operationId: string,
   ): void {
@@ -459,7 +457,16 @@ export class CircuitBreakerService {
     circuit.failedCalls++;
     circuit.lastFailureTime = new Date(now);
 
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : (() => {
+            try {
+              return JSON.stringify(error);
+            } catch {
+              return '[Unserializable Error]';
+            }
+          })();
 
     // Add to recent calls sliding window
     circuit.recentCalls.push({

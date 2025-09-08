@@ -17,7 +17,7 @@ import {
   IsNotXSS,
   IsNotSQLInjection,
   IsNotMaliciousFile,
-} from '@bytebot/shared/decorators/security-validation.decorators';
+} from '@bytebot/shared/dist/index-server';
 import {
   ButtonType,
   CoordinatesDto,

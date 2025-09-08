@@ -19,7 +19,7 @@ import {
   PayloadTooLargeException,
 } from '@nestjs/common';
 import { validate, ValidationError } from 'class-validator';
-import { plainToClass, Transform } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 import {
   sanitizeInput,
   sanitizeObject,
@@ -27,8 +27,6 @@ import {
   detectSQLInjection,
   createSecurityEvent,
   SecurityEventType,
-  ValidationResult,
-  DEFAULT_SANITIZATION_OPTIONS,
   SanitizationOptions,
 } from '@bytebot/shared';
 
@@ -60,6 +58,21 @@ interface GlobalValidationPipeOptions {
   /** Skip validation for certain metadata types */
   skipMissingProperties?: boolean;
 }
+
+/**
+ * Default sanitization options for validation pipe
+ */
+const DEFAULT_SANITIZATION_OPTIONS: SanitizationOptions = {
+  allowHtml: false,
+  stripHtml: true,
+  allowedTags: [],
+  allowedAttributes: {},
+  maxLength: 1000,
+  trim: true,
+  normalizeWhitespace: true,
+  removeControlChars: true,
+  escapeSpecialChars: true,
+};
 
 /**
  * Default validation pipe options
@@ -125,8 +138,12 @@ export class GlobalValidationPipe implements PipeTransform<any> {
       }
 
       // Check payload size if it's an object
-      if (typeof value === 'object' && value !== null) {
-        this.validatePayloadSize(value, operationId);
+      if (
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value)
+      ) {
+        this.validatePayloadSize(value as Record<string, any>, operationId);
       }
 
       // Perform security threat detection
@@ -135,18 +152,22 @@ export class GlobalValidationPipe implements PipeTransform<any> {
       }
 
       // Sanitize input if enabled
-      let sanitizedValue = value;
+      let sanitizedValue: unknown = value;
       if (this.options.enableSanitization) {
         sanitizedValue = this.sanitizeValue(value, operationId);
       }
 
       // Transform to class instance
-      const transformedValue = this.options.transform
-        ? plainToClass(metadata.metatype, sanitizedValue)
-        : sanitizedValue;
+      const transformedValue: unknown =
+        this.options.transform && metadata.metatype
+          ? plainToClass(
+              metadata.metatype,
+              sanitizedValue as Record<string, unknown>,
+            )
+          : sanitizedValue;
 
       // Perform class-validator validation
-      if (this.shouldValidate(metadata)) {
+      if (this.shouldValidate(metadata) && metadata.metatype) {
         await this.validateValue(
           transformedValue,
           metadata.metatype,
@@ -168,12 +189,14 @@ export class GlobalValidationPipe implements PipeTransform<any> {
       return transformedValue;
     } catch (error) {
       const processingTime = Date.now() - startTime;
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown validation error';
 
       this.logger.error(`[${operationId}] Validation failed`, {
         operationId,
         type: metadata.type,
         metatype: metadata.metatype?.name,
-        error: error.message,
+        error: errorMessage,
         processingTimeMs: processingTime,
       });
 
@@ -189,8 +212,14 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param metatype - The metatype to check
    * @returns True if it's a basic type
    */
-  private isBasicType(metatype: any): boolean {
-    const basicTypes = [String, Boolean, Number, Array, Object];
+  private isBasicType(metatype: new (...args: any[]) => any): boolean {
+    const basicTypes: (new (...args: any[]) => any)[] = [
+      String,
+      Boolean,
+      Number,
+      Array,
+      Object,
+    ];
     return basicTypes.includes(metatype);
   }
 
@@ -224,16 +253,19 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param value - Value to check size for
    * @param operationId - Operation tracking ID
    */
-  private validatePayloadSize(value: any, operationId: string): void {
+  private validatePayloadSize(
+    value: Record<string, any>,
+    operationId: string,
+  ): void {
     try {
       const payloadSize = JSON.stringify(value).length;
 
-      if (payloadSize > this.options.maxPayloadSize!) {
+      if (payloadSize > this.options.maxPayloadSize) {
         this.logger.warn(`[${operationId}] Payload size limit exceeded`, {
           operationId,
           payloadSize,
           maxPayloadSize: this.options.maxPayloadSize,
-          ratio: (payloadSize / this.options.maxPayloadSize!).toFixed(2),
+          ratio: (payloadSize / this.options.maxPayloadSize).toFixed(2),
         });
 
         throw new PayloadTooLargeException(
@@ -246,7 +278,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         payloadSize,
         maxPayloadSize: this.options.maxPayloadSize,
         utilizationPercent: (
-          (payloadSize / this.options.maxPayloadSize!) *
+          (payloadSize / this.options.maxPayloadSize) *
           100
         ).toFixed(1),
       });
@@ -256,9 +288,13 @@ export class GlobalValidationPipe implements PipeTransform<any> {
       }
 
       // If we can't stringify the value, it might be too large or contain circular references
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unknown payload validation error';
       this.logger.warn(`[${operationId}] Could not validate payload size`, {
         operationId,
-        error: error.message,
+        error: errorMessage,
       });
     }
   }
@@ -322,9 +358,9 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param operationId - Operation tracking ID
    * @returns Sanitized value
    */
-  private sanitizeValue(value: any, operationId: string): any {
+  private sanitizeValue(value: any, operationId: string): unknown {
     const startTime = Date.now();
-    let sanitized: any;
+    let sanitized: unknown;
 
     if (typeof value === 'string') {
       sanitized = sanitizeInput(value, this.options.sanitizationOptions);
@@ -335,7 +371,26 @@ export class GlobalValidationPipe implements PipeTransform<any> {
     }
 
     const sanitizationTime = Date.now() - startTime;
-    const hasChanges = JSON.stringify(sanitized) !== JSON.stringify(value);
+    let hasChanges = false;
+    try {
+      hasChanges = JSON.stringify(sanitized) !== JSON.stringify(value);
+    } catch {
+      // Fallback for objects that can't be stringified
+      hasChanges = sanitized !== value;
+    }
+
+    let originalSize = 0;
+    let sanitizedSize = 0;
+    try {
+      originalSize = JSON.stringify(value).length;
+    } catch {
+      originalSize = '[Unserializable Input]'.length;
+    }
+    try {
+      sanitizedSize = JSON.stringify(sanitized).length;
+    } catch {
+      sanitizedSize = '[Unserializable Object]'.length;
+    }
 
     this.logger.debug(`[${operationId}] Input sanitization completed`, {
       operationId,
@@ -343,8 +398,8 @@ export class GlobalValidationPipe implements PipeTransform<any> {
       isObject: typeof value === 'object',
       sanitizationTimeMs: sanitizationTime,
       hasChanges,
-      originalSize: JSON.stringify(value).length,
-      sanitizedSize: JSON.stringify(sanitized).length,
+      originalSize,
+      sanitizedSize,
     });
 
     return sanitized;
@@ -374,12 +429,12 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    */
   private async validateValue(
     value: any,
-    metatype: any,
+    metatype: new (...args: any[]) => any,
     operationId: string,
   ): Promise<void> {
     const startTime = Date.now();
 
-    const errors: ValidationError[] = await validate(value, {
+    const errors: ValidationError[] = await validate(value as object, {
       whitelist: this.options.whitelist,
       forbidNonWhitelisted: this.options.forbidNonWhitelisted,
       skipMissingProperties: this.options.skipMissingProperties,
@@ -419,13 +474,13 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param errors - Class-validator errors
    * @returns Formatted error array
    */
-  private formatValidationErrors(errors: ValidationError[]): any[] {
+  private formatValidationErrors(errors: ValidationError[]): unknown[] {
     return errors.map((error) => ({
       property: error.property,
-      value: error.value,
+      value: error.value as unknown,
       constraints: error.constraints,
       children:
-        error.children?.length > 0
+        error.children && error.children.length > 0
           ? this.formatValidationErrors(error.children)
           : undefined,
     }));
@@ -446,10 +501,12 @@ export class GlobalValidationPipe implements PipeTransform<any> {
   ): void {
     try {
       let eventType = SecurityEventType.VALIDATION_FAILED;
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
-      if (error.message?.includes('XSS')) {
+      if (errorMessage.includes('XSS')) {
         eventType = SecurityEventType.XSS_ATTEMPT_BLOCKED;
-      } else if (error.message?.includes('SQL')) {
+      } else if (errorMessage.includes('SQL')) {
         eventType = SecurityEventType.INJECTION_ATTEMPT_BLOCKED;
       }
 
@@ -458,15 +515,16 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         `validation-pipe-${metadata.type}`,
         'POST',
         false,
-        error.message || 'Validation failed',
+        errorMessage,
         {
           operationId,
           inputType: typeof value,
           metatype: metadata.metatype?.name,
-          errorType: error.constructor.name,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'Unknown',
           threatDetection: this.options.enableThreatDetection,
           sanitizationEnabled: this.options.enableSanitization,
-        },
+        } as Record<string, unknown>,
       );
 
       this.logger.warn(`Security event logged: ${securityEvent.eventId}`, {
@@ -476,10 +534,16 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         operationId,
       });
     } catch (loggingError) {
+      const originalErrorMessage =
+        error instanceof Error ? error.message : String(error);
+      const loggingErrorMessage =
+        loggingError instanceof Error
+          ? loggingError.message
+          : 'Unknown logging error';
       this.logger.error('Failed to log security event', {
         operationId,
-        originalError: error.message,
-        loggingError: loggingError.message,
+        originalError: originalErrorMessage,
+        loggingError: loggingErrorMessage,
       });
     }
   }
@@ -499,7 +563,12 @@ export function createValidationPipe(
 /**
  * Main ValidationPipe class for backward compatibility
  */
-export class ValidationPipe extends EnhancedValidationPipe {}
+export class ValidationPipe extends GlobalValidationPipe {}
+
+/**
+ * Legacy alias for compatibility
+ */
+export class EnhancedValidationPipe extends GlobalValidationPipe {}
 
 /**
  * Pre-configured validation pipes for different security levels

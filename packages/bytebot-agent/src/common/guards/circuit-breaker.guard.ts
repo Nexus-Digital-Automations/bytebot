@@ -47,7 +47,7 @@ export interface CircuitBreakerMetrics {
  */
 export const UseCircuitBreaker = (config?: Partial<CircuitBreakerConfig>) => {
   return (
-    target: any,
+    target: object,
     propertyKey?: string,
     descriptor?: PropertyDescriptor,
   ) => {
@@ -108,8 +108,12 @@ export class CircuitBreakerGuard implements CanActivate {
     this.startCleanupInterval();
   }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest<{
+      route?: { path?: string };
+      path?: string;
+      method?: string;
+    }>();
     const handler = context.getHandler();
     const controller = context.getClass();
 
@@ -133,7 +137,11 @@ export class CircuitBreakerGuard implements CanActivate {
       ...controllerConfig,
       ...handlerConfig,
     };
-    const circuitKey = this.generateCircuitKey(request, handler, controller);
+    const circuitKey = this.generateCircuitKey(
+      request,
+      handler as (...args: unknown[]) => unknown,
+      controller,
+    );
 
     // Get or create circuit metrics
     const circuit = this.getOrCreateCircuit(circuitKey, config);
@@ -196,7 +204,7 @@ export class CircuitBreakerGuard implements CanActivate {
 
     // Handle state transitions
     if (circuit.state === CircuitBreakerState.HALF_OPEN) {
-      const config = this.getConfigForCircuit(circuitKey);
+      const config = this.getConfigForCircuit();
       if (circuit.successCount >= config.successThreshold) {
         this.transitionToState(circuit, CircuitBreakerState.CLOSED, circuitKey);
         circuit.halfOpenAttempts = 0;
@@ -230,7 +238,7 @@ export class CircuitBreakerGuard implements CanActivate {
     // Update failure rate
     this.updateFailureRate(circuit);
 
-    const config = this.getConfigForCircuit(circuitKey);
+    const config = this.getConfigForCircuit();
 
     // Check if we should open the circuit
     if (circuit.state === CircuitBreakerState.CLOSED) {
@@ -405,14 +413,18 @@ export class CircuitBreakerGuard implements CanActivate {
    * Generate unique circuit key based on request context
    */
   private generateCircuitKey(
-    request: any,
-    handler: Function,
-    controller: Function,
+    request: {
+      route?: { path?: string };
+      path?: string;
+      method?: string;
+    },
+    handler: (...args: unknown[]) => unknown,
+    controller: new (...args: unknown[]) => unknown,
   ): string {
-    const controllerName = controller.name;
-    const handlerName = handler.name;
-    const path = request.route?.path || request.path || 'unknown';
-    const method = request.method || 'GET';
+    const controllerName: string = controller.name;
+    const handlerName: string = handler.name;
+    const path: string = request.route?.path || request.path || 'unknown';
+    const method: string = request.method || 'GET';
 
     return `${controllerName}.${handlerName}:${method}:${path}`;
   }
@@ -420,7 +432,7 @@ export class CircuitBreakerGuard implements CanActivate {
   /**
    * Get configuration for a specific circuit
    */
-  private getConfigForCircuit(circuitKey: string): CircuitBreakerConfig {
+  private getConfigForCircuit(): CircuitBreakerConfig {
     // In a more advanced implementation, this could return circuit-specific config
     // For now, return default config
     return this.defaultConfig;

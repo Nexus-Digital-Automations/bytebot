@@ -18,10 +18,7 @@
  */
 
 import { Module, Global, Logger } from '@nestjs/common';
-import {
-  CacheModule as NestCacheModule,
-  CacheStore,
-} from '@nestjs/cache-manager';
+import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
 import { CacheService } from './cache.service';
 import { CacheKeyGenerator } from './cache-key.generator';
 import * as redisStore from 'cache-manager-redis-store';
@@ -30,7 +27,7 @@ import * as redisStore from 'cache-manager-redis-store';
  * Cache configuration for enterprise-grade Redis caching
  */
 interface CacheConfig {
-  store: CacheStore;
+  store: any; // Redis store for cache manager
   host: string;
   port: number;
   ttl: number;
@@ -50,7 +47,7 @@ interface CacheConfig {
         const logger = new Logger('CacheModule');
 
         const config: CacheConfig = {
-          store: redisStore as unknown as CacheStore,
+          store: redisStore,
           host: process.env.REDIS_HOST || 'localhost',
           port: parseInt(process.env.REDIS_PORT || '6379', 10),
           ttl: parseInt(process.env.CACHE_TTL || '300', 10), // 5 minutes default

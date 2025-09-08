@@ -194,32 +194,8 @@ export function createHelmetConfig(
     // XSS Protection
     xssFilter: true,
 
-    // Certificate Transparency
-    expectCt:
-      environment === "production"
-        ? {
-            maxAge: 86400, // 24 hours
-            enforce: true,
-          }
-        : false,
-
-    // Permissions Policy
-    permissionsPolicy: {
-      camera: [],
-      microphone: [],
-      geolocation: [],
-      payment: [],
-      usb: [],
-      magnetometer: [],
-      gyroscope: [],
-      accelerometer: [],
-      ...(enableVNC
-        ? {
-            fullscreen: ["self"],
-            screen: ["self"],
-          }
-        : {}),
-    },
+    // Note: expectCt and permissionsPolicy have been removed from helmet v8+
+    // Cross-domain policies are already configured above with permittedCrossDomainPolicies: false
   };
 }
 
@@ -496,9 +472,6 @@ export function getSecurityConfig(
   return {
     environment,
     serviceName: serviceName,
-    enableSwagger: environment !== "production",
-    enableVNC: false,
-    enableHSTS: environment === "production",
     enableCSPReporting: environment !== "production",
     ...preset,
     ...overrides,

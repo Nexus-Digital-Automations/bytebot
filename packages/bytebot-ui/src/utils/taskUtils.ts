@@ -34,7 +34,7 @@ async function apiRequest<T>(
       );
     }
 
-    return await response.json();
+    return await response.json() as T;
   } catch (error) {
     console.error(`Error in API request to ${endpoint}:`, error);
     return null;
@@ -230,7 +230,7 @@ export async function fetchModels(): Promise<Model[]> {
     if (!response.ok) {
       throw new Error("Failed to fetch models");
     }
-    return await response.json();
+    return await response.json() as Model[];
   } catch (error) {
     console.error("Error fetching models:", error);
     return [];

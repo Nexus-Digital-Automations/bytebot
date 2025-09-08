@@ -23,13 +23,21 @@ import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import Redis from 'ioredis';
+
+/**
+ * Extended request interface with optional user
+ */
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    [key: string]: unknown;
+  };
+}
 import {
   RateLimitConfig,
   RateLimitPreset,
   SecurityEventType,
   createSecurityEvent,
-  generateRateLimitKey,
-  DEFAULT_RATE_LIMITS,
 } from '@bytebot/shared';
 
 /**
@@ -118,21 +126,67 @@ export class RateLimitGuard implements CanActivate {
         port: this.configService.get('REDIS_PORT', 6379),
         password: this.configService.get('REDIS_PASSWORD'),
         db: this.configService.get('REDIS_DB', 1),
-        retryDelayOnFailover: 100,
         maxRetriesPerRequest: 3,
         lazyConnect: true,
       });
 
-    // Set up default rate limits
-    this.defaultConfig = {
-      ...DEFAULT_RATE_LIMITS,
-      // Override with configuration if provided
-      ...this.configService.get('rateLimiting', {}),
-    };
+    // Set up default rate limits with proper typing
+    this.defaultConfig = {} as Record<RateLimitPreset, RateLimitConfig>;
+
+    // Initialize with available presets
+    try {
+      this.defaultConfig[RateLimitPreset.AUTH] = {
+        max: 5,
+        windowMs: 60000,
+        message: 'Auth rate limit exceeded',
+      };
+      this.defaultConfig[RateLimitPreset.READ_OPERATIONS] = {
+        max: 100,
+        windowMs: 60000,
+        message: 'Read operations rate limit exceeded',
+      };
+      this.defaultConfig[RateLimitPreset.COMPUTER_USE] = {
+        max: 10,
+        windowMs: 60000,
+        message: 'Computer use rate limit exceeded',
+      };
+      this.defaultConfig[RateLimitPreset.TASK_OPERATIONS] = {
+        max: 30,
+        windowMs: 60000,
+        message: 'Task operations rate limit exceeded',
+      };
+
+      // Skip WRITE_OPERATIONS preset if it doesn't exist
+    } catch (error) {
+      this.logger.warn('Error initializing rate limit config:', error);
+      // Fallback configuration
+      this.defaultConfig = {
+        [RateLimitPreset.AUTH]: {
+          max: 5,
+          windowMs: 60000,
+          message: 'Auth rate limit exceeded',
+        },
+        [RateLimitPreset.READ_OPERATIONS]: {
+          max: 100,
+          windowMs: 60000,
+          message: 'Read operations rate limit exceeded',
+        },
+        [RateLimitPreset.COMPUTER_USE]: {
+          max: 10,
+          windowMs: 60000,
+          message: 'Computer use rate limit exceeded',
+        },
+        [RateLimitPreset.TASK_OPERATIONS]: {
+          max: 30,
+          windowMs: 60000,
+          message: 'Task operations rate limit exceeded',
+        },
+      } as Record<RateLimitPreset, RateLimitConfig>;
+    }
 
     this.logger.log('Rate limit guard initialized', {
-      redisHost: this.configService.get('REDIS_HOST', 'localhost'),
-      redisPort: this.configService.get('REDIS_PORT', 6379),
+      redisHost: this.configService.get<string>('REDIS_HOST', 'localhost'),
+      redisPort: this.configService.get<number>('REDIS_PORT', 6379),
       defaultPresets: Object.keys(this.defaultConfig),
     });
   }
@@ -143,11 +197,11 @@ export class RateLimitGuard implements CanActivate {
    * @returns Promise<boolean> - Whether request is allowed
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const operationId = `rate-limit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const operationId = `rate-limit-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const startTime = Date.now();
 
     try {
-      const request = context.switchToHttp().getRequest<Request>();
+      const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
       const response = context.switchToHttp().getResponse<Response>();
 
       // Get rate limit configuration for this endpoint
@@ -213,7 +267,7 @@ export class RateLimitGuard implements CanActivate {
       });
 
       // Log security event
-      await this.logRateLimitEvent(request, rateLimitInfo, operationId);
+      this.logRateLimitEvent(request, rateLimitInfo, operationId);
 
       // Return rate limit error
       throw new HttpException(
@@ -240,8 +294,8 @@ export class RateLimitGuard implements CanActivate {
 
       this.logger.error(`[${operationId}] Rate limiting error`, {
         operationId,
-        error: error.message,
-        stack: error.stack,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
         processingTimeMs: processingTime,
       });
 
@@ -281,7 +335,7 @@ export class RateLimitGuard implements CanActivate {
     }
 
     // Default rate limiting based on endpoint type
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
     if (request.url.includes('/auth/')) {
       return this.defaultConfig[RateLimitPreset.AUTH];
@@ -313,7 +367,7 @@ export class RateLimitGuard implements CanActivate {
    * @returns Rate limiting key
    */
   private generateRateLimitKey(
-    request: Request,
+    request: AuthenticatedRequest,
     config: RateLimitConfig,
   ): string {
     // Use custom key generator if provided
@@ -323,8 +377,9 @@ export class RateLimitGuard implements CanActivate {
 
     // Default key generation
     const ip = request.ip || request.connection.remoteAddress || 'unknown';
-    const userId = (request as any).user?.id || 'anonymous';
-    const endpoint = request.route?.path || request.url;
+    const userId = request.user?.id || 'anonymous';
+    // Use URL fallback instead of accessing unsafe route property
+    const endpoint = request.url;
 
     return `rl:${ip}:${userId}:${endpoint}`;
   }
@@ -340,19 +395,19 @@ export class RateLimitGuard implements CanActivate {
   private async checkRateLimit(
     key: string,
     config: RateLimitConfig,
-    request: Request,
+    request: AuthenticatedRequest,
     operationId: string,
   ): Promise<RateLimitInfo> {
     const now = Date.now();
     const windowMs = config.windowMs;
     const limit = config.max;
-    const isAuthenticated = !!(request as any).user;
+    const isAuthenticated = !!request.user;
 
     try {
       // Get current state from Redis
       const stateData = await this.redis.get(key);
       let state: RateLimitState = stateData
-        ? JSON.parse(stateData)
+        ? (JSON.parse(stateData) as RateLimitState)
         : {
             count: 0,
             windowStart: now,
@@ -436,7 +491,10 @@ export class RateLimitGuard implements CanActivate {
     } catch (redisError) {
       this.logger.error(`[${operationId}] Redis error in rate limiting`, {
         operationId,
-        error: redisError.message,
+        error:
+          redisError instanceof Error
+            ? redisError.message
+            : 'Unknown Redis error',
         key: key.substring(0, 20) + '...',
       });
 
@@ -496,11 +554,11 @@ export class RateLimitGuard implements CanActivate {
    * @param rateLimitInfo - Rate limit info
    * @param operationId - Operation ID
    */
-  private async logRateLimitEvent(
-    request: Request,
+  private logRateLimitEvent(
+    request: AuthenticatedRequest,
     rateLimitInfo: RateLimitInfo,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     try {
       const securityEvent = createSecurityEvent(
         SecurityEventType.RATE_LIMIT_EXCEEDED,
@@ -519,7 +577,7 @@ export class RateLimitGuard implements CanActivate {
           endpoint: request.url,
           method: request.method,
         },
-        (request as any).user?.id,
+        request.user?.id,
         request.ip,
         request.get('User-Agent'),
       );
@@ -532,7 +590,7 @@ export class RateLimitGuard implements CanActivate {
     } catch (error) {
       this.logger.error('Failed to log rate limit security event', {
         operationId,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }

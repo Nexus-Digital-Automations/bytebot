@@ -23,8 +23,13 @@ import {
   MemoryHealthIndicator,
   DiskHealthIndicator,
   HealthCheck,
+  HealthCheckResult,
 } from '@nestjs/terminus';
-import { HealthService } from './health.service';
+import {
+  HealthService,
+  BasicHealthResponse,
+  DetailedStatusResponse,
+} from './health.service';
 
 /**
  * Health monitoring controller providing system status endpoints
@@ -53,7 +58,9 @@ export class HealthController {
    * @returns Simple health status response
    */
   @Get()
-  getHealth() {
+  getHealth():
+    | BasicHealthResponse
+    | { status: string; timestamp: string; error: string } {
     this.logger.debug('Health check requested');
 
     try {
@@ -84,7 +91,7 @@ export class HealthController {
    */
   @Get('live')
   @HealthCheck()
-  checkLiveness() {
+  checkLiveness(): Promise<HealthCheckResult> {
     const operationId = `liveness_${Date.now()}`;
     this.logger.debug(`[${operationId}] Liveness probe requested`);
 
@@ -107,7 +114,7 @@ export class HealthController {
    */
   @Get('ready')
   @HealthCheck()
-  checkReadiness() {
+  checkReadiness(): Promise<HealthCheckResult> {
     const operationId = `readiness_${Date.now()}`;
     this.logger.debug(`[${operationId}] Readiness probe requested`);
 
@@ -135,7 +142,7 @@ export class HealthController {
    */
   @Get('startup')
   @HealthCheck()
-  checkStartup() {
+  checkStartup(): Promise<HealthCheckResult> {
     const operationId = `startup_${Date.now()}`;
     this.logger.debug(`[${operationId}] Startup probe requested`);
 
@@ -156,7 +163,9 @@ export class HealthController {
    * @returns Comprehensive system status information
    */
   @Get('status')
-  getDetailedStatus() {
+  getDetailedStatus():
+    | DetailedStatusResponse
+    | { status: string; timestamp: string; error: string; services: {} } {
     this.logger.debug('Detailed status requested');
 
     try {

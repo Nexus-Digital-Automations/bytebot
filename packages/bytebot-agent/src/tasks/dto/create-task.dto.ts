@@ -8,7 +8,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { MessageRole, TaskPriority, TaskType } from '@prisma/client';
+import { TaskPriority, TaskType, MessageRole } from '@prisma/client';
 
 export class TaskFileDto {
   @IsNotEmpty()
@@ -47,7 +47,7 @@ export class CreateTaskDto {
 
   @IsOptional()
   @IsString()
-  createdBy?: Role;
+  createdBy?: MessageRole;
 
   @IsOptional()
   model?: any;

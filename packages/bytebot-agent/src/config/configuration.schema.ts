@@ -15,12 +15,22 @@
  */
 
 // Using basic JSON Schema type definition instead of AJV for compatibility
-interface JSONSchemaType<T> {
+interface JSONSchemaType {
   type: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, JSONSchemaProperty>;
   required?: string[];
   additionalProperties?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
+}
+
+interface JSONSchemaProperty {
+  type?: string;
+  enum?: string[];
+  description?: string;
+  properties?: Record<string, JSONSchemaProperty>;
+  required?: string[];
+  additionalProperties?: boolean;
+  [key: string]: unknown;
 }
 import { AppConfig } from './configuration';
 
@@ -28,7 +38,7 @@ import { AppConfig } from './configuration';
  * Complete application configuration JSON Schema
  * Defines the structure and validation rules for all configuration
  */
-export const appConfigSchema: JSONSchemaType<AppConfig> = {
+export const appConfigSchema: JSONSchemaType = {
   type: 'object',
   properties: {
     nodeEnv: {
@@ -393,7 +403,7 @@ export const appConfigSchema: JSONSchemaType<AppConfig> = {
  * Production-specific configuration schema
  * Applies stricter validation rules for production environments
  */
-export const productionConfigSchema: JSONSchemaType<AppConfig> = {
+export const productionConfigSchema: JSONSchemaType = {
   ...appConfigSchema,
   properties: {
     ...appConfigSchema.properties,
@@ -405,23 +415,23 @@ export const productionConfigSchema: JSONSchemaType<AppConfig> = {
     },
 
     security: {
-      ...appConfigSchema.properties.security,
+      ...appConfigSchema.properties?.security,
       properties: {
-        ...appConfigSchema.properties.security.properties,
+        ...appConfigSchema.properties?.security?.properties,
         jwtSecret: {
-          ...appConfigSchema.properties.security.properties.jwtSecret,
+          ...appConfigSchema.properties?.security?.properties?.jwtSecret,
           minLength: 64,
           description:
             'JWT signing secret (minimum 64 characters in production)',
         },
         encryptionKey: {
-          ...appConfigSchema.properties.security.properties.encryptionKey,
+          ...appConfigSchema.properties?.security?.properties?.encryptionKey,
           minLength: 64,
           description:
             'Data encryption key (minimum 64 characters in production)',
         },
         jwtExpiresIn: {
-          ...appConfigSchema.properties.security.properties.jwtExpiresIn,
+          ...appConfigSchema.properties?.security?.properties?.jwtExpiresIn,
           pattern: '^(15m|30m|1h)$',
           description:
             'JWT expiration must be short in production (15m, 30m, or 1h)',
@@ -430,26 +440,27 @@ export const productionConfigSchema: JSONSchemaType<AppConfig> = {
     },
 
     features: {
-      ...appConfigSchema.properties.features,
+      ...appConfigSchema.properties?.features,
       properties: {
-        ...appConfigSchema.properties.features.properties,
+        ...appConfigSchema.properties?.features?.properties,
         authentication: {
-          ...appConfigSchema.properties.features.properties.authentication,
+          ...appConfigSchema.properties?.features?.properties?.authentication,
           const: true,
           description: 'Authentication must be enabled in production',
         },
         rateLimiting: {
-          ...appConfigSchema.properties.features.properties.rateLimiting,
+          ...appConfigSchema.properties?.features?.properties?.rateLimiting,
           const: true,
           description: 'Rate limiting must be enabled in production',
         },
         metricsCollection: {
-          ...appConfigSchema.properties.features.properties.metricsCollection,
+          ...appConfigSchema.properties?.features?.properties
+            ?.metricsCollection,
           const: true,
           description: 'Metrics collection must be enabled in production',
         },
         healthChecks: {
-          ...appConfigSchema.properties.features.properties.healthChecks,
+          ...appConfigSchema.properties?.features?.properties?.healthChecks,
           const: true,
           description: 'Health checks must be enabled in production',
         },
@@ -457,16 +468,16 @@ export const productionConfigSchema: JSONSchemaType<AppConfig> = {
     },
 
     development: {
-      ...appConfigSchema.properties.development,
+      ...appConfigSchema.properties?.development,
       properties: {
-        ...appConfigSchema.properties.development.properties,
+        ...appConfigSchema.properties?.development?.properties,
         enableSwagger: {
-          ...appConfigSchema.properties.development.properties.enableSwagger,
+          ...appConfigSchema.properties?.development?.properties?.enableSwagger,
           const: false,
           description: 'Swagger must be disabled in production',
         },
         debugMode: {
-          ...appConfigSchema.properties.development.properties.debugMode,
+          ...appConfigSchema.properties?.development?.properties?.debugMode,
           const: false,
           description: 'Debug mode must be disabled in production',
         },
@@ -474,16 +485,16 @@ export const productionConfigSchema: JSONSchemaType<AppConfig> = {
     },
 
     monitoring: {
-      ...appConfigSchema.properties.monitoring,
+      ...appConfigSchema.properties?.monitoring,
       properties: {
-        ...appConfigSchema.properties.monitoring.properties,
+        ...appConfigSchema.properties?.monitoring?.properties,
         logLevel: {
-          ...appConfigSchema.properties.monitoring.properties.logLevel,
+          ...appConfigSchema.properties?.monitoring?.properties?.logLevel,
           enum: ['error', 'warn'],
           description: 'Log level must be error or warn in production',
         },
         logFormat: {
-          ...appConfigSchema.properties.monitoring.properties.logFormat,
+          ...appConfigSchema.properties?.monitoring?.properties?.logFormat,
           const: 'json',
           description: 'Log format must be JSON in production',
         },
@@ -542,23 +553,23 @@ export const productionConfigSchema: JSONSchemaType<AppConfig> = {
  * Development-specific configuration schema
  * Applies relaxed validation rules for development environments
  */
-export const developmentConfigSchema: JSONSchemaType<AppConfig> = {
+export const developmentConfigSchema: JSONSchemaType = {
   ...appConfigSchema,
   properties: {
     ...appConfigSchema.properties,
 
     security: {
-      ...appConfigSchema.properties.security,
+      ...appConfigSchema.properties?.security,
       properties: {
-        ...appConfigSchema.properties.security.properties,
+        ...appConfigSchema.properties?.security?.properties,
         jwtSecret: {
-          ...appConfigSchema.properties.security.properties.jwtSecret,
+          ...appConfigSchema.properties?.security?.properties?.jwtSecret,
           minLength: 16,
           description:
             'JWT signing secret (minimum 16 characters in development)',
         },
         encryptionKey: {
-          ...appConfigSchema.properties.security.properties.encryptionKey,
+          ...appConfigSchema.properties?.security?.properties?.encryptionKey,
           minLength: 16,
           description:
             'Data encryption key (minimum 16 characters in development)',
@@ -596,7 +607,7 @@ export const developmentConfigSchema: JSONSchemaType<AppConfig> = {
 export interface ConfigValidationError {
   field: string;
   message: string;
-  value?: any;
+  value?: unknown;
   suggestion?: string;
 }
 
@@ -631,8 +642,8 @@ export interface ConfigMigration {
     action: 'rename' | 'move' | 'transform' | 'add' | 'remove';
     from?: string;
     to?: string;
-    defaultValue?: any;
-    transformer?: (value: any) => any;
+    defaultValue?: unknown;
+    transformer?: (value: unknown) => unknown;
   }>;
 }
 

@@ -28,3 +28,6 @@ export * from './bytebot-mcp.module';
 // MCP tools and utilities
 export * from './computer-use.tools';
 export * from './compressor';
+
+// Explicitly export compression types for better compatibility
+export type { CompressionOptions, CompressionResult } from './compressor';

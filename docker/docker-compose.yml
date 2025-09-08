@@ -1,3 +1,7 @@
+# Bytebot Platform - 100% Local-Only Deployment Architecture
+# Enterprise-grade local deployment with encrypted secrets management
+# No Kubernetes or cloud dependencies - Docker Compose only
+
 name: bytebot
 
 services:
@@ -46,11 +50,39 @@ services:
     ports:
       - "9991:9991"
     environment:
+      # Core Configuration for Local Deployment
+      - NODE_ENV=${NODE_ENV:-production}
       - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/bytebotdb}
       - BYTEBOT_DESKTOP_BASE_URL=${BYTEBOT_DESKTOP_BASE_URL:-http://bytebot-desktop:9990}
+      
+      # Local Deployment Configuration
+      - LOCAL_DEPLOYMENT_TYPE=docker-compose
+      - LOCAL_DATA_DIRECTORY=/app/data
+      - LOCAL_SECRETS_DIR=/app/.env/secrets
+      - LOCAL_SECRETS_ENCRYPTION_KEY=${LOCAL_SECRETS_ENCRYPTION_KEY}
+      
+      # AI API Keys (will be stored in local encrypted storage)
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      
+      # Security Configuration
+      - JWT_SECRET=${JWT_SECRET:-change-this-jwt-secret-in-production}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-change-this-encryption-key-in-production}
+      
+      # Feature Flags for Local Deployment
+      - ENABLE_AUTHENTICATION=true
+      - ENABLE_RATE_LIMITING=true
+      - ENABLE_METRICS_COLLECTION=true
+      - ENABLE_HEALTH_CHECKS=true
+      - ENABLE_CIRCUIT_BREAKER=true
+    volumes:
+      # Local data persistence
+      - bytebot_data:/app/data
+      # Local secrets storage with proper permissions
+      - bytebot_secrets:/app/.env/secrets:rw
+      # Local configuration hot-reload
+      - ../packages/bytebot-agent/config:/app/config:ro
     depends_on:
       - postgres
     networks:
@@ -83,4 +115,14 @@ networks:
     driver: bridge
 
 volumes:
+  # Local data persistence volumes
   postgres_data:
+    driver: local
+  bytebot_data:
+    driver: local
+  bytebot_secrets:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./secrets
+      o: bind

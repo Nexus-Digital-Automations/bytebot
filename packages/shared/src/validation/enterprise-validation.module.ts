@@ -17,7 +17,12 @@
  * @author Enterprise Security Validation Team
  */
 
-import { Module, Global, DynamicModule } from "@nestjs/common";
+import {
+  Module,
+  Global,
+  DynamicModule,
+  ArgumentMetadata,
+} from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import {
   StandardizedValidationPipe,
@@ -198,9 +203,10 @@ export class EnterpriseValidationModule {
         threatSensitivity: "high",
         customThreatPatterns: [
           // Advanced pattern detection for enterprise environments
-          /(?:union|select|insert|update|delete|drop|create|alter|exec|execute)[\s\/*]*(?:[\[\(].*?[\]\)]|[^\s;]+)/gi,
+          /(?:union|select|insert|update|delete|drop|create|alter|exec|execute)[\s/*]*(?:[[()].*?[)\]]|[^\s;]+)/gi,
           /<(?:script|iframe|object|embed|applet|form|input|svg)[\s\S]*?>/gi,
           /(?:javascript|vbscript|data:text\/html|expression\(|@import|document\.|window\.|eval\()/gi,
+          // eslint-disable-next-line no-control-regex
           /(?:\${|<%|\{\{|__\w+__|\.\.\/|\.\.\\|\x00|\r\n\r\n)/g,
         ],
       },
@@ -313,7 +319,7 @@ export class EnterpriseValidationPipe extends StandardizedValidationPipe {
    */
   async transform(
     value: unknown,
-    metadata: import("class-validator").ArgumentMetadata,
+    metadata: ArgumentMetadata,
   ): Promise<unknown> {
     const operationId = `enterprise-validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
@@ -331,14 +337,11 @@ export class EnterpriseValidationPipe extends StandardizedValidationPipe {
       }
 
       // Perform advanced threat detection
-      const threatAnalysis = await this.options.threatDetector.analyzeThreat(
-        value,
-        {
-          serviceType: this.options.serviceType,
-          environment: this.options.environment,
-          operationId,
-        },
-      );
+      const threatAnalysis = this.options.threatDetector.analyzeThreat(value, {
+        serviceType: this.options.serviceType,
+        environment: this.options.environment,
+        operationId,
+      });
 
       if (threatAnalysis.isHighRisk) {
         await this.options.auditLogger.logSecurityThreat(threatAnalysis);

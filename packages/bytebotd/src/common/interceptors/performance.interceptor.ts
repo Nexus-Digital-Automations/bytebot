@@ -139,7 +139,7 @@ export class PerformanceInterceptor implements NestInterceptor {
     );
 
     return next.handle().pipe(
-      tap((data) => {
+      tap((_data) => {
         // Request completed successfully
         this.recordPerformanceMetrics({
           operationId,
@@ -366,7 +366,7 @@ export class PerformanceInterceptor implements NestInterceptor {
     if (this.responseTimes.length === 0) return;
 
     const sortedTimes = [...this.responseTimes].sort((a, b) => a - b);
-    const length = sortedTimes.length;
+    const _length = sortedTimes.length;
 
     this.stats.p50ResponseTime = this.getPercentile(sortedTimes, 50);
     this.stats.p90ResponseTime = this.getPercentile(sortedTimes, 90);

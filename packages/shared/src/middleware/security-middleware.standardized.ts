@@ -548,7 +548,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
   private readonly helmetMiddleware: any;
 
   constructor(
-    private configService: ConfigService,
+    private configService: ConfigService<Record<string, unknown>>,
     private serviceType: ServiceType = ServiceType.SHARED,
   ) {
     const environment = this.configService.get("NODE_ENV", "development");
@@ -1146,7 +1146,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
    * Factory methods for creating service-specific middleware instances
    */
   static createBytebotDMiddleware(
-    configService: ConfigService,
+    configService: ConfigService<Record<string, unknown>>,
   ): StandardizedSecurityMiddleware {
     return new StandardizedSecurityMiddleware(
       configService,
@@ -1155,7 +1155,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
   }
 
   static createBytebotAgentMiddleware(
-    configService: ConfigService,
+    configService: ConfigService<Record<string, unknown>>,
   ): StandardizedSecurityMiddleware {
     return new StandardizedSecurityMiddleware(
       configService,
@@ -1164,7 +1164,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
   }
 
   static createBytebotUIMiddleware(
-    configService: ConfigService,
+    configService: ConfigService<Record<string, unknown>>,
   ): StandardizedSecurityMiddleware {
     return new StandardizedSecurityMiddleware(
       configService,

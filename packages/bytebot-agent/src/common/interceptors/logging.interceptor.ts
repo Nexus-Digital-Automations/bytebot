@@ -30,6 +30,52 @@ import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
+ * User object interface from JWT token or session
+ */
+interface UserObject {
+  id?: string | number;
+  sub?: string | number;
+  userId?: string | number;
+  username?: string;
+  email?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Session object interface
+ */
+interface SessionObject {
+  id?: string;
+  userId?: string | number;
+  [key: string]: unknown;
+}
+
+/**
+ * Extended Request interface with user and session properties
+ */
+interface ExtendedRequest extends Request {
+  user?: UserObject;
+  session?: SessionObject;
+}
+
+/**
+ * Structured error object interface
+ */
+interface StructuredError {
+  message?: string;
+  stack?: string;
+  status?: number;
+  statusCode?: number;
+  code?: string;
+  details?: unknown;
+  response?: unknown;
+  constructor?: {
+    name?: string;
+  };
+  [key: string]: unknown;
+}
+
+/**
  * Structured log entry interface
  */
 interface LogEntry {
@@ -52,7 +98,7 @@ interface LogEntry {
     stack?: string;
     type: string;
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -80,8 +126,8 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Intercept requests and responses for logging
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest<Request>();
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    const request = context.switchToHttp().getRequest<ExtendedRequest>();
     const response = context.switchToHttp().getResponse<Response>();
 
     // Generate or extract correlation ID
@@ -114,7 +160,12 @@ export class LoggingInterceptor implements NestInterceptor {
       }),
       catchError((error) => {
         // Log error response
-        this.logErrorResponse(request, response, requestContext, error);
+        this.logErrorResponse(
+          request,
+          response,
+          requestContext,
+          error as StructuredError,
+        );
         return throwError(error);
       }),
     );
@@ -141,16 +192,17 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Extract user ID from request (JWT token, session, etc.)
    */
-  private extractUserId(request: Request): string | undefined {
+  private extractUserId(request: ExtendedRequest): string | undefined {
     // Extract from JWT token if available
     if (request.user && typeof request.user === 'object') {
-      const user = request.user as any;
-      return user.id || user.sub || user.userId;
+      const user = request.user;
+      const userId = user.id ?? user.sub ?? user.userId;
+      return userId ? String(userId) : undefined;
     }
 
     // Extract from session if available
-    if (request.session && (request.session as any).userId) {
-      return (request.session as any).userId;
+    if (request.session?.userId) {
+      return String(request.session.userId);
     }
 
     // Extract from custom header
@@ -165,8 +217,8 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Extract session ID from request
    */
-  private extractSessionId(request: Request): string | undefined {
-    if (request.session && request.session.id) {
+  private extractSessionId(request: ExtendedRequest): string | undefined {
+    if (request.session?.id) {
       return request.session.id;
     }
 
@@ -181,7 +233,7 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Calculate request payload size
    */
-  private calculateRequestSize(request: Request): number {
+  private calculateRequestSize(request: ExtendedRequest): number {
     if (request.body) {
       try {
         return JSON.stringify(request.body).length;
@@ -195,7 +247,7 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Calculate response payload size
    */
-  private calculateResponseSize(responseData: any): number {
+  private calculateResponseSize(responseData: unknown): number {
     if (responseData) {
       try {
         return JSON.stringify(responseData).length;
@@ -209,7 +261,7 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Extract client IP address
    */
-  private extractClientIP(request: Request): string {
+  private extractClientIP(request: ExtendedRequest): string {
     return (
       (request.headers['x-forwarded-for'] as string) ||
       (request.headers['x-real-ip'] as string) ||
@@ -222,7 +274,10 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Log incoming request
    */
-  private logIncomingRequest(request: Request, context: RequestContext): void {
+  private logIncomingRequest(
+    request: ExtendedRequest,
+    context: RequestContext,
+  ): void {
     const logEntry: LogEntry = {
       timestamp: new Date().toISOString(),
       correlationId: context.correlationId,
@@ -257,10 +312,10 @@ export class LoggingInterceptor implements NestInterceptor {
    * Log successful response
    */
   private logSuccessfulResponse(
-    request: Request,
+    request: ExtendedRequest,
     response: Response,
     context: RequestContext,
-    responseData: any,
+    responseData: unknown,
   ): void {
     const duration = Date.now() - context.startTime;
     const responseSize = this.calculateResponseSize(responseData);
@@ -301,12 +356,20 @@ export class LoggingInterceptor implements NestInterceptor {
    * Log error response
    */
   private logErrorResponse(
-    request: Request,
+    request: ExtendedRequest,
     response: Response,
     context: RequestContext,
-    error: any,
+    error: StructuredError,
   ): void {
     const duration = Date.now() - context.startTime;
+
+    // Safely extract error properties with defaults
+    const statusCode = error.status ?? error.statusCode ?? 500;
+    const errorMessage = error.message ?? 'Unknown error';
+    const errorStack = error.stack ?? '';
+    const errorType = error.constructor?.name ?? 'Error';
+    const errorCode = error.code ?? '';
+    const errorDetails = error.details ?? error.response;
 
     const logEntry: LogEntry = {
       timestamp: new Date().toISOString(),
@@ -316,19 +379,19 @@ export class LoggingInterceptor implements NestInterceptor {
       component: 'api',
       method: request.method,
       url: this.sanitizeUrl(request.url),
-      statusCode: error.status || error.statusCode || 500,
+      statusCode,
       userId: context.userId,
       duration,
       requestSize: context.requestSize,
       error: {
-        message: error.message || 'Unknown error',
-        stack: error.stack,
-        type: error.constructor?.name || 'Error',
+        message: errorMessage,
+        stack: errorStack,
+        type: errorType,
       },
       metadata: {
         sessionId: context.sessionId,
-        errorCode: error.code,
-        errorDetails: error.details || error.response,
+        errorCode,
+        errorDetails,
         requestBody: this.sanitizeRequestBody(request.body),
         userAgent: request.headers['user-agent'],
         ip: this.extractClientIP(request),
@@ -360,7 +423,9 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Sanitize headers to remove sensitive information
    */
-  private sanitizeHeaders(headers: any): Record<string, any> {
+  private sanitizeHeaders(
+    headers: Record<string, unknown> | NodeJS.Dict<string | string[]>,
+  ): Record<string, unknown> {
     const sensitiveHeaders = [
       'authorization',
       'cookie',
@@ -369,14 +434,15 @@ export class LoggingInterceptor implements NestInterceptor {
       'x-secret-key',
     ];
 
-    const sanitized: Record<string, any> = {};
+    const sanitized: Record<string, unknown> = {};
 
     Object.keys(headers).forEach((key) => {
       const lowerKey = key.toLowerCase();
       if (sensitiveHeaders.includes(lowerKey)) {
         sanitized[key] = '***';
       } else {
-        sanitized[key] = headers[key];
+        const headerValue = headers[key];
+        sanitized[key] = headerValue;
       }
     });
 
@@ -386,16 +452,17 @@ export class LoggingInterceptor implements NestInterceptor {
   /**
    * Sanitize request body to remove sensitive information
    */
-  private sanitizeRequestBody(body: any): any {
-    if (!body || typeof body !== 'object') {
+  private sanitizeRequestBody(body: unknown): unknown {
+    if (!body || typeof body !== 'object' || body === null) {
       return body;
     }
 
     const sensitiveFields = ['password', 'secret', 'token', 'key', 'auth'];
-    const sanitized = { ...body };
+    const bodyObj = body as Record<string, unknown>;
+    const sanitized = { ...bodyObj };
 
     sensitiveFields.forEach((field) => {
-      if (sanitized[field]) {
+      if (Object.prototype.hasOwnProperty.call(sanitized, field)) {
         sanitized[field] = '***';
       }
     });

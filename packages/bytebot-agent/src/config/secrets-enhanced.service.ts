@@ -1,21 +1,19 @@
 /**
- * Enhanced Secrets Service - Enterprise-grade secrets management with external integrations
- * Provides secure secrets loading, rotation, and management with support for multiple backends
+ * Enhanced Local Secrets Service - 100% Local-Only Architecture
+ * Enterprise-grade secrets management with comprehensive local file-based storage
  *
  * Features:
- * - Kubernetes secrets integration with automatic fallback
- * - HashiCorp Vault integration for enterprise deployments
- * - AWS Secrets Manager integration for cloud deployments
- * - Azure Key Vault integration for Azure deployments
- * - Google Secret Manager integration for GCP deployments
- * - Secrets rotation and hot-reloading capabilities
- * - Encrypted secrets storage and retrieval
+ * - Local file-based encrypted secrets storage using AES-256-GCM
+ * - Environment variable fallback with security validation
+ * - Secrets rotation and hot-reloading capabilities for local deployment
+ * - Encrypted secrets storage with proper file permissions (600/700)
  * - Performance monitoring, caching, and audit logging
- * - Integration with external secret management systems
+ * - Docker Compose compatibility for multi-service local deployment
+ * - No Kubernetes or cloud service dependencies
  *
- * @author Enhanced Secrets Management Specialist
- * @version 2.0.0
- * @since Phase 2: Enhanced Enterprise Secrets Management
+ * @author Local Secrets Service Architect
+ * @version 2.0.0 - Local-Only Architecture Implementation
+ * @since Phase 1: Bytebot API Hardening - Local Deployment
  */
 
 import {
@@ -25,25 +23,26 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { readFileSync, existsSync, watchFile, unwatchFile } from 'fs';
+import {
+  watchFile,
+  unwatchFile,
+  existsSync,
+  readFileSync,
+  mkdirSync,
+  chmodSync,
+} from 'fs';
 import { join } from 'path';
 import * as crypto from 'crypto';
 import { EventEmitter } from 'events';
 
 /**
- * Enhanced secret metadata interface with external source support
+ * Enhanced local secret metadata interface
+ * Designed for local file-based secrets management
  */
 interface EnhancedSecretMetadata {
   name: string;
   key: string;
-  source:
-    | 'kubernetes'
-    | 'environment'
-    | 'vault'
-    | 'aws-secrets'
-    | 'azure-keyvault'
-    | 'gcp-secrets'
-    | 'external';
+  source: 'local-file' | 'environment' | 'docker-compose';
   lastUpdated: Date;
   version: string;
   encrypted: boolean;
@@ -81,35 +80,25 @@ interface EnhancedRotationConfig {
 }
 
 /**
- * External secret provider configuration
+ * Local provider configuration for 100% local deployment
+ * No cloud or external service dependencies
  */
-interface ExternalProviderConfig {
-  vault?: {
+interface LocalProviderConfig {
+  localFileStorage: {
     enabled: boolean;
-    address: string;
-    token: string;
-    mountPath: string;
-    namespace?: string;
+    secretsPath: string;
+    encryptionEnabled: boolean;
+    filePermissions: number;
   };
-  awsSecrets?: {
+  environmentVariables: {
     enabled: boolean;
-    region: string;
-    accessKeyId?: string;
-    secretAccessKey?: string;
-    sessionToken?: string;
+    validateValues: boolean;
+    sanitizeValues: boolean;
   };
-  azureKeyVault?: {
+  dockerCompose: {
     enabled: boolean;
-    vaultUrl: string;
-    tenantId: string;
-    clientId: string;
-    clientSecret?: string;
-  };
-  gcpSecrets?: {
-    enabled: boolean;
-    projectId: string;
-    keyFilePath?: string;
-    credentials?: string;
+    composeFilePaths: string[];
+    environmentFiles: string[];
   };
 }
 
@@ -139,9 +128,10 @@ interface PerformanceMetrics {
 }
 
 /**
- * Enhanced secrets health response interface
+ * Local secrets health response interface
+ * Optimized for local deployment monitoring
  */
-interface EnhancedSecretsHealthResponse {
+interface LocalSecretsHealthResponse {
   summary: {
     healthy: number;
     expiring: number;
@@ -149,7 +139,7 @@ interface EnhancedSecretsHealthResponse {
     total: number;
   };
   performance: PerformanceMetrics;
-  externalProviders: Record<string, boolean>;
+  localProviders: Record<string, boolean>;
   details: Array<{
     name: string;
     key: string;
@@ -165,23 +155,28 @@ interface EnhancedSecretsHealthResponse {
     recentErrors: number;
     successRate: number;
   };
+  dockerComposeStatus?: {
+    filesMonitored: number;
+    lastCheck: Date;
+    healthyFiles: number;
+  };
 }
 
 /**
- * Enhanced Secrets Management Service
- * Provides enterprise-grade secrets management with multiple backend support
+ * Enhanced Local Secrets Management Service
+ * Provides enterprise-grade secrets management with 100% local-only architecture
  */
 @Injectable()
 export class EnhancedSecretsService
   extends EventEmitter
   implements OnModuleInit, OnModuleDestroy
 {
-  private readonly logger = new Logger('EnhancedSecretsService');
+  private readonly logger = new Logger('EnhancedLocalSecretsService');
   private readonly secretsCache = new Map<string, EnhancedSecretValue>();
-  private readonly secretsPath = '/etc/secrets';
+  private readonly secretsPath: string;
   private readonly encryptionKey: Buffer;
   private readonly rotationConfig: EnhancedRotationConfig;
-  private readonly externalProviders: ExternalProviderConfig;
+  private readonly localProviders: LocalProviderConfig;
   private rotationTimer?: NodeJS.Timeout;
   private fileWatchers = new Map<string, () => void>();
   private auditLog: SecretAuditEntry[] = [];
@@ -196,14 +191,18 @@ export class EnhancedSecretsService
   constructor(private readonly configService: ConfigService) {
     super();
 
-    // Initialize encryption key for secrets encryption
-    const encryptionKeyString = this.configService.get<string>(
-      'app.security.encryptionKey',
-    );
-    this.encryptionKey = Buffer.from(encryptionKeyString!, 'utf8').subarray(
-      0,
-      32,
-    );
+    // Initialize local secrets path
+    this.secretsPath =
+      process.env.LOCAL_SECRETS_DIR ||
+      this.configService.get<string>('app.secrets.localPath') ||
+      './.env/secrets';
+
+    // Initialize encryption key for local secrets encryption
+    const encryptionKeyString =
+      process.env.LOCAL_SECRETS_ENCRYPTION_KEY ||
+      this.configService.get<string>('app.security.encryptionKey') ||
+      'default-local-key-change-in-production';
+    this.encryptionKey = crypto.scryptSync(encryptionKeyString, 'salt', 32);
 
     // Configure enhanced secrets rotation
     this.rotationConfig = {
@@ -230,83 +229,57 @@ export class EnhancedSecretsService
       ),
     };
 
-    // Configure external secret providers
-    this.externalProviders = {
-      vault: {
+    // Configure local-only secret providers (no cloud dependencies)
+    this.localProviders = {
+      localFileStorage: {
         enabled:
-          this.configService.get<boolean>('app.secrets.vault.enabled') ?? false,
-        address:
-          this.configService.get<string>('app.secrets.vault.address') ?? '',
-        token: this.configService.get<string>('app.secrets.vault.token') ?? '',
-        mountPath:
-          this.configService.get<string>('app.secrets.vault.mountPath') ??
-          'secret',
-        namespace: this.configService.get<string>(
-          'app.secrets.vault.namespace',
-        ),
+          this.configService.get<boolean>('app.secrets.local.enabled') ?? true,
+        secretsPath: this.secretsPath,
+        encryptionEnabled:
+          this.configService.get<boolean>('app.secrets.local.encrypted') ??
+          true,
+        filePermissions: 0o600, // Owner read/write only
       },
-      awsSecrets: {
+      environmentVariables: {
         enabled:
-          this.configService.get<boolean>('app.secrets.aws.enabled') ?? false,
-        region:
-          this.configService.get<string>('app.secrets.aws.region') ??
-          'us-east-1',
-        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: this.configService.get<string>(
-          'AWS_SECRET_ACCESS_KEY',
-        ),
-        sessionToken: this.configService.get<string>('AWS_SESSION_TOKEN'),
+          this.configService.get<boolean>('app.secrets.env.enabled') ?? true,
+        validateValues:
+          this.configService.get<boolean>('app.secrets.env.validate') ?? true,
+        sanitizeValues:
+          this.configService.get<boolean>('app.secrets.env.sanitize') ?? true,
       },
-      azureKeyVault: {
+      dockerCompose: {
         enabled:
-          this.configService.get<boolean>('app.secrets.azure.enabled') ?? false,
-        vaultUrl:
-          this.configService.get<string>('app.secrets.azure.vaultUrl') ?? '',
-        tenantId:
-          this.configService.get<string>('app.secrets.azure.tenantId') ?? '',
-        clientId:
-          this.configService.get<string>('app.secrets.azure.clientId') ?? '',
-        clientSecret: this.configService.get<string>(
-          'app.secrets.azure.clientSecret',
-        ),
-      },
-      gcpSecrets: {
-        enabled:
-          this.configService.get<boolean>('app.secrets.gcp.enabled') ?? false,
-        projectId:
-          this.configService.get<string>('app.secrets.gcp.projectId') ?? '',
-        keyFilePath: this.configService.get<string>(
-          'app.secrets.gcp.keyFilePath',
-        ),
-        credentials: this.configService.get<string>(
-          'GOOGLE_APPLICATION_CREDENTIALS',
-        ),
+          this.configService.get<boolean>('app.secrets.docker.enabled') ??
+          false,
+        composeFilePaths: this.getDockerComposePaths(),
+        environmentFiles: this.getDockerEnvironmentFiles(),
       },
     };
   }
 
   /**
    * Initialize enhanced secrets service
-   * Sets up secret loading, caching, rotation, and external provider connections
+   * Sets up secret loading, caching, rotation, and local provider connections
    */
   async onModuleInit(): Promise<void> {
     const startTime = Date.now();
     this.logger.log('Initializing Enhanced Secrets Service...');
 
     try {
-      // Load critical secrets from all available sources
+      // Load critical secrets from local sources
       await this.loadCriticalSecrets();
 
-      // Initialize external secret providers
-      await this.initializeExternalProviders();
+      // Initialize local secret providers
+      await this.initializeLocalProviders();
 
       // Setup secrets rotation if enabled
       if (this.rotationConfig.enabled) {
         this.setupSecretsRotation();
       }
 
-      // Setup file watching for Kubernetes secrets hot-reloading
-      this.setupSecretsWatching();
+      // Setup file watching for local secrets hot-reloading
+      this.setupLocalSecretsWatching();
 
       // Setup audit log cleanup
       this.setupAuditLogCleanup();
@@ -317,14 +290,14 @@ export class EnhancedSecretsService
         cachedSecretsCount: this.secretsCache.size,
         rotationEnabled: this.rotationConfig.enabled,
         watchersCount: this.fileWatchers.size,
-        externalProviders: this.getEnabledProviders(),
+        localProviders: this.getEnabledLocalProviders(),
         auditLogEnabled: true,
       });
 
       this.emit('initialized', {
         initTime,
         cachedSecretsCount: this.secretsCache.size,
-        externalProviders: this.getEnabledProviders(),
+        localProviders: this.getEnabledLocalProviders(),
       });
     } catch (error) {
       const initTime = Date.now() - startTime;
@@ -394,18 +367,15 @@ export class EnhancedSecretsService
 
       this.performanceMetrics.cacheMisses++;
 
-      // Try loading from multiple sources in priority order
+      // Try loading from local sources in priority order
       const sources = [
-        () => this.loadFromKubernetes(secretName, key),
-        () => this.loadFromVault(),
-        () => this.loadFromAWSSecrets(),
-        () => this.loadFromAzureKeyVault(),
-        () => this.loadFromGCPSecrets(),
+        () => this.loadFromLocalFiles(secretName, key ?? secretName),
         () => this.loadFromEnvironment(key || secretName),
+        () => this.loadFromDockerCompose(key || secretName),
       ];
 
       let secretValue: string | null = null;
-      let source: EnhancedSecretMetadata['source'] = 'kubernetes';
+      let source: EnhancedSecretMetadata['source'] = 'local-file';
 
       for (let index = 0; index < sources.length; index++) {
         const loadMethod = sources[index];
@@ -455,6 +425,8 @@ export class EnhancedSecretsService
         tags: {
           environment: process.env.NODE_ENV || 'development',
           service: 'bytebot-agent',
+          deployment: 'local-only',
+          dockerCompose: String(Boolean(process.env.COMPOSE_PROJECT_NAME)),
         },
         auditInfo: {
           accessCount: 1,
@@ -507,9 +479,16 @@ export class EnhancedSecretsService
   }
 
   /**
-   * Get comprehensive secrets health status with external provider information
+   * Get enhanced secrets health (alias for getLocalSecretsHealth)
    */
-  getEnhancedSecretsHealth(): EnhancedSecretsHealthResponse {
+  getEnhancedSecretsHealth(): LocalSecretsHealthResponse {
+    return this.getLocalSecretsHealth();
+  }
+
+  /**
+   * Get comprehensive local secrets health status
+   */
+  getLocalSecretsHealth(): LocalSecretsHealthResponse {
     const now = Date.now();
     const details = Array.from(this.secretsCache.values()).map((secret) => {
       const age = now - secret.metadata.lastUpdated.getTime();
@@ -556,11 +535,12 @@ export class EnhancedSecretsService
         total: details.length,
       },
       performance: { ...this.performanceMetrics },
-      externalProviders: {
-        vault: this.externalProviders.vault?.enabled ?? false,
-        awsSecrets: this.externalProviders.awsSecrets?.enabled ?? false,
-        azureKeyVault: this.externalProviders.azureKeyVault?.enabled ?? false,
-        gcpSecrets: this.externalProviders.gcpSecrets?.enabled ?? false,
+      localProviders: {
+        localFileStorage:
+          this.localProviders.localFileStorage?.enabled ?? false,
+        environmentVariables:
+          this.localProviders.environmentVariables?.enabled ?? false,
+        dockerCompose: this.localProviders.dockerCompose?.enabled ?? false,
       },
       details,
       auditSummary: {
@@ -568,130 +548,93 @@ export class EnhancedSecretsService
         recentErrors,
         successRate,
       },
+      dockerComposeStatus: this.localProviders.dockerCompose?.enabled
+        ? {
+            filesMonitored:
+              this.localProviders.dockerCompose.composeFilePaths.length,
+            lastCheck: new Date(),
+            healthyFiles: this.countExistingFiles(
+              this.localProviders.dockerCompose.composeFilePaths,
+            ),
+          }
+        : undefined,
     };
   }
 
   /**
-   * Load secret from HashiCorp Vault
+   * Load secret from local encrypted file storage
    * @private
    */
-  private loadFromVault(): Promise<string | null> {
-    if (!this.externalProviders.vault?.enabled) {
-      return null;
-    }
-
-    try {
-      // This is a placeholder for HashiCorp Vault integration
-      // In a real implementation, you would use the vault client library
-      this.logger.debug(
-        'Vault integration placeholder - implement with vault client library',
-      );
-      return null;
-    } catch (error) {
-      this.logger.debug('Failed to load from Vault', {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return null;
-    }
-  }
-
-  /**
-   * Load secret from AWS Secrets Manager
-   * @private
-   */
-  private loadFromAWSSecrets(): Promise<string | null> {
-    if (!this.externalProviders.awsSecrets?.enabled) {
-      return null;
-    }
-
-    try {
-      // This is a placeholder for AWS Secrets Manager integration
-      // In a real implementation, you would use the AWS SDK
-      this.logger.debug(
-        'AWS Secrets Manager integration placeholder - implement with AWS SDK',
-      );
-      return null;
-    } catch (error) {
-      this.logger.debug('Failed to load from AWS Secrets Manager', {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return null;
-    }
-  }
-
-  /**
-   * Load secret from Azure Key Vault
-   * @private
-   */
-  private loadFromAzureKeyVault(): Promise<string | null> {
-    if (!this.externalProviders.azureKeyVault?.enabled) {
-      return null;
-    }
-
-    try {
-      // This is a placeholder for Azure Key Vault integration
-      // In a real implementation, you would use the Azure SDK
-      this.logger.debug(
-        'Azure Key Vault integration placeholder - implement with Azure SDK',
-      );
-      return null;
-    } catch (error) {
-      this.logger.debug('Failed to load from Azure Key Vault', {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return null;
-    }
-  }
-
-  /**
-   * Load secret from Google Cloud Secret Manager
-   * @private
-   */
-  private loadFromGCPSecrets(): Promise<string | null> {
-    if (!this.externalProviders.gcpSecrets?.enabled) {
-      return null;
-    }
-
-    try {
-      // This is a placeholder for Google Cloud Secret Manager integration
-      // In a real implementation, you would use the Google Cloud SDK
-      this.logger.debug(
-        'Google Cloud Secret Manager integration placeholder - implement with GCP SDK',
-      );
-      return null;
-    } catch (error) {
-      this.logger.debug('Failed to load from Google Cloud Secret Manager', {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return null;
-    }
-  }
-
-  /**
-   * Load secret from Kubernetes mounted volume (enhanced version)
-   * @private
-   */
-  private loadFromKubernetes(
+  private loadFromLocalFiles(
     secretName: string,
-    key?: string,
+    key: string,
   ): Promise<string | null> {
-    try {
-      const secretPath = key
-        ? join(this.secretsPath, secretName, key)
-        : join(this.secretsPath, secretName);
+    if (!this.localProviders.localFileStorage?.enabled) {
+      return Promise.resolve(null);
+    }
 
-      if (!existsSync(secretPath)) {
-        return null;
+    try {
+      const secretFilePath = join(this.secretsPath, `${secretName}.enc`);
+
+      if (!existsSync(secretFilePath)) {
+        this.logger.debug(`Local secret file not found: ${secretFilePath}`);
+        return Promise.resolve(null);
       }
 
-      return Promise.resolve(readFileSync(secretPath, 'utf8').trim());
+      // Read and decrypt the secret file
+      const encryptedData = readFileSync(secretFilePath, 'utf8');
+      const decryptedData = this.decryptSecret(encryptedData);
+      const secrets = JSON.parse(decryptedData) as Record<string, string>;
+
+      return Promise.resolve(secrets[key] ?? null);
     } catch (error) {
-      this.logger.debug('Failed to load from Kubernetes', {
+      this.logger.debug('Failed to load from local file storage', {
         secretName,
         key,
         error: error instanceof Error ? error.message : String(error),
       });
-      return null;
+      return Promise.resolve(null);
+    }
+  }
+
+  /**
+   * Load secret from Docker Compose environment files
+   * @private
+   */
+  private loadFromDockerCompose(key: string): Promise<string | null> {
+    if (!this.localProviders.dockerCompose?.enabled) {
+      return Promise.resolve(null);
+    }
+
+    try {
+      // Check Docker Compose environment files
+      for (const envFile of this.localProviders.dockerCompose
+        .environmentFiles) {
+        if (existsSync(envFile)) {
+          const envContent = readFileSync(envFile, 'utf8');
+          const lines = envContent.split('\n');
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith(`${key}=`)) {
+              const value = trimmedLine.substring(key.length + 1);
+              this.logger.debug(
+                `Found secret in Docker Compose environment file: ${envFile}`,
+                { key },
+              );
+              return Promise.resolve(value);
+            }
+          }
+        }
+      }
+
+      return Promise.resolve(null);
+    } catch (error) {
+      this.logger.debug('Failed to load from Docker Compose', {
+        key,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return Promise.resolve(null);
     }
   }
 
@@ -721,12 +664,17 @@ export class EnhancedSecretsService
       criticalSecrets.map(async ({ name, key }) => {
         try {
           const result = await this.getSecret(name, key);
-          return { name, key, loaded: !!result };
+          return { name, key, loaded: Boolean(result) };
         } catch (error) {
           this.logger.warn(`Failed to load critical secret: ${name}`, {
             error: error instanceof Error ? error.message : String(error),
           });
-          return { name, key, loaded: false, error: String(error) };
+          return {
+            name,
+            key,
+            loaded: false,
+            error: String(error),
+          };
         }
       }),
     );
@@ -755,63 +703,68 @@ export class EnhancedSecretsService
   }
 
   /**
-   * Initialize external secret providers
+   * Initialize local secret providers
    * @private
    */
-  private async initializeExternalProviders(): Promise<void> {
-    const enabledProviders = this.getEnabledProviders();
+  private async initializeLocalProviders(): Promise<void> {
+    const enabledProviders = this.getEnabledLocalProviders();
 
     if (enabledProviders.length === 0) {
-      this.logger.debug('No external secret providers enabled');
+      this.logger.debug('No local secret providers enabled');
       return;
     }
 
-    this.logger.log('Initializing external secret providers', {
+    this.logger.log('Initializing local secret providers', {
       providers: enabledProviders,
     });
 
     // Initialize each enabled provider
     for (const provider of enabledProviders) {
       try {
-        await this.initializeProvider(provider);
+        await this.initializeLocalProvider(provider);
         this.logger.log(
-          `External provider '${provider}' initialized successfully`,
+          `Local provider '${provider}' initialized successfully`,
         );
       } catch (error) {
-        this.logger.error(
-          `Failed to initialize external provider '${provider}'`,
-          {
-            error: error instanceof Error ? error.message : String(error),
-          },
-        );
+        this.logger.error(`Failed to initialize local provider '${provider}'`, {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
   }
 
   /**
-   * Initialize a specific external provider
+   * Initialize a specific local provider
    * @private
    */
-  private initializeProvider(provider: string): Promise<void> {
+  private initializeLocalProvider(provider: string): Promise<void> {
     switch (provider) {
-      case 'vault':
-        // Initialize Vault client
-        // Implementation would go here
+      case 'localFileStorage': {
+        // Ensure secrets directory exists with proper permissions
+        if (!existsSync(this.secretsPath)) {
+          mkdirSync(this.secretsPath, { recursive: true });
+          chmodSync(this.secretsPath, 0o700);
+          this.logger.debug(`Created secrets directory: ${this.secretsPath}`);
+        }
         break;
-      case 'awsSecrets':
-        // Initialize AWS Secrets Manager client
-        // Implementation would go here
+      }
+      case 'environmentVariables': {
+        // Validate environment variables access
+        this.logger.debug('Environment variables provider ready');
         break;
-      case 'azureKeyVault':
-        // Initialize Azure Key Vault client
-        // Implementation would go here
+      }
+      case 'dockerCompose': {
+        // Validate Docker Compose files exist
+        const validFiles =
+          this.localProviders.dockerCompose?.composeFilePaths.filter((path) =>
+            existsSync(path),
+          ) ?? [];
+        this.logger.debug(`Docker Compose files found: ${validFiles.length}`);
         break;
-      case 'gcpSecrets':
-        // Initialize Google Cloud Secret Manager client
-        // Implementation would go here
-        break;
-      default:
-        throw new Error(`Unknown provider: ${provider}`);
+      }
+      default: {
+        throw new Error(`Unknown local provider: ${provider}`);
+      }
     }
     return Promise.resolve();
   }
@@ -890,37 +843,33 @@ export class EnhancedSecretsService
   }
 
   /**
-   * Get enabled external providers
+   * Get enabled local providers
    * @private
    */
-  private getEnabledProviders(): string[] {
+  private getEnabledLocalProviders(): string[] {
     const providers: string[] = [];
 
-    if (this.externalProviders.vault?.enabled) providers.push('vault');
-    if (this.externalProviders.awsSecrets?.enabled)
-      providers.push('awsSecrets');
-    if (this.externalProviders.azureKeyVault?.enabled)
-      providers.push('azureKeyVault');
-    if (this.externalProviders.gcpSecrets?.enabled)
-      providers.push('gcpSecrets');
+    if (this.localProviders.localFileStorage?.enabled)
+      providers.push('localFileStorage');
+    if (this.localProviders.environmentVariables?.enabled)
+      providers.push('environmentVariables');
+    if (this.localProviders.dockerCompose?.enabled)
+      providers.push('dockerCompose');
 
     return providers;
   }
 
   /**
-   * Get source name by index
+   * Get source name by index for local providers
    * @private
    */
   private getSourceByIndex(index: number): EnhancedSecretMetadata['source'] {
     const sources: EnhancedSecretMetadata['source'][] = [
-      'kubernetes',
-      'vault',
-      'aws-secrets',
-      'azure-keyvault',
-      'gcp-secrets',
+      'local-file',
       'environment',
+      'docker-compose',
     ];
-    return sources[index] || 'external';
+    return sources[index] || 'local-file';
   }
 
   /**
@@ -933,7 +882,11 @@ export class EnhancedSecretsService
     }
 
     this.rotationTimer = setInterval(() => {
-      void this.performSecretsRotation();
+      this.performSecretsRotation().catch((error) => {
+        this.logger.error('Failed to perform secrets rotation', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
     }, this.rotationConfig.intervalMs);
 
     this.logger.log('Enhanced secrets rotation enabled', {
@@ -951,7 +904,7 @@ export class EnhancedSecretsService
   private async performSecretsRotation(): Promise<void> {
     this.logger.log('Starting enhanced automatic secrets rotation...');
 
-    const health = this.getEnhancedSecretsHealth();
+    const health = this.getLocalSecretsHealth();
     const secretsToRotate = health.details.filter(
       (secret) => secret.status === 'expired' && secret.rotationEnabled,
     );
@@ -970,7 +923,7 @@ export class EnhancedSecretsService
           await this.backupSecret(secret.name, secret.key);
         }
 
-        await this.rotateSecret(secret.name, secret.key);
+        this.rotateSecret(secret.name, secret.key);
 
         // Validate after rotation if enabled
         if (this.rotationConfig.validateAfterRotation) {
@@ -985,14 +938,12 @@ export class EnhancedSecretsService
   }
 
   /**
-   * Setup file watching for Kubernetes secrets hot-reloading (enhanced version)
+   * Setup file watching for local secrets hot-reloading
    * @private
    */
-  private setupSecretsWatching(): void {
+  private setupLocalSecretsWatching(): void {
     if (!existsSync(this.secretsPath)) {
-      this.logger.debug(
-        'Kubernetes secrets path not found, skipping file watching',
-      );
+      this.logger.debug('Local secrets path not found, skipping file watching');
       return;
     }
 
@@ -1001,33 +952,60 @@ export class EnhancedSecretsService
       'jwt-secret',
       'encryption-key',
       'database-url',
-      'anthropic-api-key',
-      'openai-api-key',
-      'gemini-api-key',
+      'api-keys', // Combined API keys file
+      'auth',
+      'security',
     ];
 
     criticalSecrets.forEach((secretName) => {
-      const secretDir = join(this.secretsPath, secretName);
-      if (existsSync(secretDir)) {
+      const secretFile = join(this.secretsPath, `${secretName}.enc`);
+      if (existsSync(secretFile)) {
         const watcher = () => {
-          this.logger.log(`Secret file changed: ${secretName}`);
-          void this.rotateSecret(secretName);
+          this.logger.log(`Local secret file changed: ${secretName}`);
+          try {
+            this.rotateSecret(secretName);
+          } catch (error) {
+            this.logger.error(
+              `Failed to rotate secret on file change: ${secretName}`,
+              {
+                error: error instanceof Error ? error.message : String(error),
+              },
+            );
+          }
         };
 
-        watchFile(secretDir, watcher);
+        watchFile(secretFile, watcher);
         this.fileWatchers.set(secretName, watcher);
       }
     });
 
-    this.logger.log('Enhanced file watching setup for secrets hot-reloading', {
+    // Also watch Docker Compose files if enabled
+    if (this.localProviders.dockerCompose?.enabled) {
+      this.localProviders.dockerCompose.composeFilePaths.forEach(
+        (composePath) => {
+          if (existsSync(composePath)) {
+            const watcher = () => {
+              this.logger.log(`Docker Compose file changed: ${composePath}`);
+              // Trigger configuration reload
+              this.emit('dockerComposeChanged', { path: composePath });
+            };
+            watchFile(composePath, watcher);
+            this.fileWatchers.set(composePath, watcher);
+          }
+        },
+      );
+    }
+
+    this.logger.log('Local file watching setup for secrets hot-reloading', {
       watchersCount: this.fileWatchers.size,
+      dockerComposeWatching: this.localProviders.dockerCompose?.enabled,
     });
   }
 
   /**
    * Rotate secret (enhanced version)
    */
-  async rotateSecret(secretName: string, key?: string): Promise<void> {
+  rotateSecret(secretName: string, key?: string): void {
     const operationId = `rotate-secret-${Date.now()}`;
     const cacheKey = key ? `${secretName}:${key}` : secretName;
 
@@ -1041,7 +1019,13 @@ export class EnhancedSecretsService
       this.secretsCache.delete(cacheKey);
 
       // Reload secret from sources
-      await this.getSecret(secretName, key);
+      this.getSecret(secretName, key).catch((error) => {
+        this.logger.error(`Failed to reload secret during rotation`, {
+          secretName,
+          key,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
 
       this.recordAuditEntry(
         'rotate',
@@ -1141,6 +1125,14 @@ export class EnhancedSecretsService
   }
 
   /**
+   * Count existing files helper
+   * @private
+   */
+  private countExistingFiles(paths: string[]): number {
+    return paths.filter((path) => existsSync(path)).length;
+  }
+
+  /**
    * Cleanup resources on module destroy
    */
   onModuleDestroy(): void {
@@ -1158,6 +1150,41 @@ export class EnhancedSecretsService
     });
     this.fileWatchers.clear();
 
-    this.logger.log('Enhanced Secrets Service destroyed');
+    this.logger.log('Enhanced Local Secrets Service destroyed');
+  }
+
+  /**
+   * Get Docker Compose file paths for monitoring
+   * @private
+   */
+  private getDockerComposePaths(): string[] {
+    const defaultPaths = [
+      './docker-compose.yml',
+      './docker-compose.yaml',
+      './docker-compose.override.yml',
+      './docker-compose.development.yml',
+      './docker-compose.production.yml',
+    ];
+
+    const customPaths = process.env.COMPOSE_FILE?.split(':') ?? [];
+    return [...defaultPaths, ...customPaths];
+  }
+
+  /**
+   * Get Docker environment files for secret loading
+   * @private
+   */
+  private getDockerEnvironmentFiles(): string[] {
+    const defaultEnvFiles = [
+      './.env',
+      './.env.local',
+      './.env.docker',
+      './docker.env',
+    ];
+
+    const customEnvFiles = process.env.COMPOSE_ENV_FILES?.split(',') ?? [];
+    return [...defaultEnvFiles, ...customEnvFiles].filter((path) =>
+      existsSync(path),
+    );
   }
 }

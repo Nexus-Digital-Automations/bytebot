@@ -334,7 +334,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
 
     return {
       name: exception.name,
-      cause: exception.cause || 'Unknown',
+      cause: (exception as any).cause || 'Unknown',
       // Don't include the full stack trace in JSON response
     };
   }

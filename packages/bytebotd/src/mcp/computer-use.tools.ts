@@ -150,7 +150,7 @@ export class ComputerUseTools {
         x: z.number().describe('The x-coordinate to move the mouse to.'),
         y: z.number().describe('The y-coordinate to move the mouse to.'),
       }),
-    }),
+    }) as any,
   })
   async moveMouse({ coordinates }: { coordinates: { x: number; y: number } }) {
     const operationId = this.generateOperationId();
@@ -225,7 +225,7 @@ export class ComputerUseTools {
         .array(z.string())
         .optional()
         .describe('Optional array of keys to hold during the trace.'),
-    }),
+    }) as any,
   })
   async traceMouse({
     path,
@@ -307,7 +307,7 @@ export class ComputerUseTools {
       clickCount: z
         .number()
         .describe('Number of clicks to perform (e.g., 2 for double-click).'),
-    }),
+    }) as any,
   })
   async clickMouse({
     coordinates,
@@ -363,7 +363,7 @@ export class ComputerUseTools {
       press: z
         .enum(['down', 'up'])
         .describe('The action to perform (press or release).'),
-    }),
+    }) as any,
   })
   async pressMouse({
     coordinates,
@@ -422,7 +422,7 @@ export class ComputerUseTools {
         .array(z.string())
         .optional()
         .describe('Optional array of keys to hold during the drag.'),
-    }),
+    }) as any,
   })
   async dragMouse({
     path,
@@ -486,7 +486,7 @@ export class ComputerUseTools {
         .array(z.string())
         .optional()
         .describe('Optional array of keys to hold during the scroll.'),
-    }),
+    }) as any,
   })
   async scroll({
     coordinates,
@@ -558,7 +558,7 @@ V, W, X, Y, Z`,
         .number()
         .optional()
         .describe('Optional delay in milliseconds between key presses.'),
-    }),
+    }) as any,
   })
   async typeKeys({ keys, delay }: { keys: string[]; delay?: number }) {
     try {
@@ -617,7 +617,7 @@ V, W, X, Y, Z
       press: z
         .enum(['down', 'up'])
         .describe('Whether to press the keys down or release them up.'),
-    }),
+    }) as any,
   })
   async pressKeys({ keys, press }: { keys: string[]; press: 'down' | 'up' }) {
     try {
@@ -649,7 +649,7 @@ V, W, X, Y, Z
         .number()
         .optional()
         .describe('Optional delay in milliseconds between key presses.'),
-    }),
+    }) as any,
   })
   async typeText({ text, delay }: { text: string; delay?: number }) {
     try {
@@ -677,7 +677,7 @@ V, W, X, Y, Z
       'Copies text to the clipboard and pastes it. Use this tool for typing long text strings or special characters not on the standard keyboard.',
     parameters: z.object({
       text: z.string().describe('The text string to paste.'),
-    }),
+    }) as any,
   })
   async pasteText({ text }: { text: string }) {
     try {
@@ -703,7 +703,7 @@ V, W, X, Y, Z
         .number()
         .default(500)
         .describe('The duration to wait in milliseconds.'),
-    }),
+    }) as any,
   })
   async wait({ duration }: { duration: number }) {
     try {
@@ -735,7 +735,7 @@ V, W, X, Y, Z
         'desktop',
         'directory',
       ]),
-    }),
+    }) as any,
   })
   async application({
     application,
@@ -900,7 +900,7 @@ V, W, X, Y, Z
         .string()
         .describe('The file path where the file should be written.'),
       data: z.string().describe('Base64 encoded file data to write.'),
-    }),
+    }) as any,
   })
   async writeFile({ path, data }: { path: string; data: string }) {
     try {
@@ -944,7 +944,7 @@ V, W, X, Y, Z
       'Reads a file from the specified path and returns it as a document content block with base64 encoded data.',
     parameters: z.object({
       path: z.string().describe('The file path to read from.'),
-    }),
+    }) as any,
   })
   async readFile({ path }: { path: string }) {
     try {

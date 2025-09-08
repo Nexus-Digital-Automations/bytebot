@@ -19,10 +19,8 @@ import {
 } from '@nestjs/common';
 import {
   sanitizeInput,
-  sanitizeObject,
   detectXSS,
   detectSQLInjection,
-  DEFAULT_SANITIZATION_OPTIONS,
   SanitizationOptions,
   createSecurityEvent,
   SecurityEventType,
@@ -105,6 +103,9 @@ const SANITIZATION_STRATEGIES: Record<
     allowedAttributes: {},
     maxLength: 1000,
     trim: true,
+    normalizeWhitespace: true,
+    removeControlChars: true,
+    escapeSpecialChars: true,
   },
 
   [SanitizationStrategy.MODERATE]: {
@@ -114,6 +115,9 @@ const SANITIZATION_STRATEGIES: Record<
     allowedAttributes: {},
     maxLength: 5000,
     trim: true,
+    normalizeWhitespace: true,
+    removeControlChars: true,
+    escapeSpecialChars: false,
   },
 
   [SanitizationStrategy.PERMISSIVE]: {
@@ -140,6 +144,9 @@ const SANITIZATION_STRATEGIES: Record<
     },
     maxLength: 10000,
     trim: true,
+    normalizeWhitespace: true,
+    removeControlChars: false,
+    escapeSpecialChars: false,
   },
 
   [SanitizationStrategy.TEXT_ONLY]: {
@@ -149,6 +156,9 @@ const SANITIZATION_STRATEGIES: Record<
     allowedAttributes: {},
     maxLength: 2000,
     trim: true,
+    normalizeWhitespace: true,
+    removeControlChars: true,
+    escapeSpecialChars: true,
   },
 
   [SanitizationStrategy.NONE]: {
@@ -158,6 +168,9 @@ const SANITIZATION_STRATEGIES: Record<
     allowedAttributes: undefined,
     maxLength: undefined,
     trim: false,
+    normalizeWhitespace: false,
+    removeControlChars: false,
+    escapeSpecialChars: false,
   },
 };
 
@@ -191,7 +204,7 @@ export class SanitizationPipe implements PipeTransform<any> {
    * @param metadata - Argument metadata
    * @returns Sanitized value
    */
-  async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
+  transform(value: any, metadata: ArgumentMetadata): any {
     const operationId = `sanitization-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -221,11 +234,16 @@ export class SanitizationPipe implements PipeTransform<any> {
       }
 
       // Sanitize the input
-      const sanitizedValue = this.sanitizeInput(value, operationId);
+      const sanitizedValue: unknown = this.sanitizeInput(value, operationId);
 
       const processingTime = Date.now() - startTime;
-      const hasChanges =
-        JSON.stringify(sanitizedValue) !== JSON.stringify(value);
+      let hasChanges = false;
+      try {
+        hasChanges = JSON.stringify(sanitizedValue) !== JSON.stringify(value);
+      } catch {
+        // Fallback for circular references or non-serializable objects
+        hasChanges = sanitizedValue !== value;
+      }
 
       this.logger.debug(`[${operationId}] Sanitization completed`, {
         operationId,
@@ -239,10 +257,12 @@ export class SanitizationPipe implements PipeTransform<any> {
       return sanitizedValue;
     } catch (error) {
       const processingTime = Date.now() - startTime;
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown sanitization error';
 
       this.logger.error(`[${operationId}] Sanitization failed`, {
         operationId,
-        error: error.message,
+        error: errorMessage,
         processingTimeMs: processingTime,
       });
 
@@ -398,23 +418,27 @@ export class SanitizationPipe implements PipeTransform<any> {
    * @param operationId - Operation tracking ID
    * @returns Sanitized object
    */
-  private sanitizeObject(value: any, operationId: string): any {
+  private sanitizeObject(value: any, operationId: string): unknown {
     if (Array.isArray(value)) {
       return value.map((item, index) => {
         if (typeof item === 'string') {
           return this.sanitizeString(item, `[${index}]`, operationId);
-        } else if (typeof item === 'object') {
+        } else if (typeof item === 'object' && item !== null) {
           return this.sanitizeObject(item, operationId);
         }
-        return item;
+        return item as unknown;
       });
     }
 
-    const sanitized: any = {};
+    if (value === null || typeof value !== 'object') {
+      return value;
+    }
+
+    const sanitized: Record<string, unknown> = {};
     let fieldsProcessed = 0;
     let fieldsModified = 0;
 
-    for (const [key, val] of Object.entries(value)) {
+    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
       fieldsProcessed++;
 
       if (typeof val === 'string') {
@@ -534,10 +558,12 @@ export class SanitizationPipe implements PipeTransform<any> {
   ): void {
     try {
       let eventType = SecurityEventType.VALIDATION_FAILED;
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
-      if (error.message?.includes('XSS')) {
+      if (errorMessage.includes('XSS')) {
         eventType = SecurityEventType.XSS_ATTEMPT_BLOCKED;
-      } else if (error.message?.includes('SQL')) {
+      } else if (errorMessage.includes('SQL')) {
         eventType = SecurityEventType.INJECTION_ATTEMPT_BLOCKED;
       }
 
@@ -546,7 +572,7 @@ export class SanitizationPipe implements PipeTransform<any> {
         `sanitization-pipe-${metadata.type}`,
         'POST',
         false,
-        error.message || 'Sanitization failed',
+        errorMessage,
         {
           operationId,
           defaultStrategy: this.options.defaultStrategy,
@@ -565,9 +591,13 @@ export class SanitizationPipe implements PipeTransform<any> {
         },
       );
     } catch (loggingError) {
+      const loggingErrorMessage =
+        loggingError instanceof Error
+          ? loggingError.message
+          : 'Unknown logging error';
       this.logger.error('Failed to log security event from sanitization pipe', {
         operationId,
-        error: loggingError.message,
+        error: loggingErrorMessage,
       });
     }
   }

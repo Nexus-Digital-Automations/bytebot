@@ -23,6 +23,11 @@ import { UserRole, Permission, User } from '@prisma/client';
 import { AuthenticatedRequest } from '../guards/jwt-auth.guard';
 
 /**
+ * Metadata key for roles decorator
+ */
+export const ROLES_KEY = 'roles';
+
+/**
  * Roles decorator - Specify required roles for route access
  * Use this decorator to protect routes that require specific user roles
  *
@@ -38,7 +43,7 @@ import { AuthenticatedRequest } from '../guards/jwt-auth.guard';
  * }
  * ```
  */
-export const Roles = (...roles: UserRole[]) => SetMetadata('roles', roles);
+export const Roles = (...roles: UserRole[]) => SetMetadata(ROLES_KEY, roles);
 
 /**
  * Permissions decorator - Specify required permissions for route access

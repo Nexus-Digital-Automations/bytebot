@@ -29,6 +29,36 @@ interface PerformanceMetrics {
   circuitBreakerTriggers: number;
 }
 
+interface QueryResult {
+  name: string;
+  executionTime: number;
+  resultCount: number;
+  success: boolean;
+  error?: string;
+}
+
+interface OperationResult {
+  operation: number;
+  executionTime: number;
+  success: boolean;
+  error?: string;
+}
+
+interface RequestResult {
+  request: number;
+  executionTime: number;
+  success: boolean;
+  error?: string;
+}
+
+interface TestResult {
+  name: string;
+  executionTime: number;
+  success: boolean;
+  result?: unknown;
+  error?: string;
+}
+
 class DatabasePerformanceTester {
   private prisma: PrismaClient;
   private testResults: TestResults[] = [];
@@ -248,7 +278,7 @@ class DatabasePerformanceTester {
         },
       ];
 
-      const queryResults = [];
+      const queryResults: QueryResult[] = [];
 
       for (const test of queryTests) {
         const queryStart = performance.now();
@@ -337,7 +367,7 @@ class DatabasePerformanceTester {
 
     try {
       const concurrentOperations = 50;
-      const operationPromises = [];
+      const operationPromises: Promise<OperationResult>[] = [];
 
       // Create concurrent read/write operations
       for (let i = 0; i < concurrentOperations; i++) {
@@ -529,7 +559,7 @@ class DatabasePerformanceTester {
     try {
       // Simulate rapid-fire requests that might trigger circuit breaker
       const rapidRequests = 30;
-      const requestPromises = [];
+      const requestPromises: Promise<RequestResult>[] = [];
 
       for (let i = 0; i < rapidRequests; i++) {
         const request = async () => {
@@ -659,7 +689,7 @@ class DatabasePerformanceTester {
         },
       ];
 
-      const testResults = [];
+      const testResults: TestResult[] = [];
 
       for (const test of reliabilityTests) {
         const testStart = performance.now();
@@ -897,7 +927,7 @@ class DatabasePerformanceTester {
             name: 'performance-test',
             title: 'Performance Test Model',
           },
-        }));
+        })) as any;
 
         await this.prisma.task.createMany({
           data: tasksToCreate,

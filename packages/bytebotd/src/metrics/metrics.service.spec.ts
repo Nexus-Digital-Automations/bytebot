@@ -47,7 +47,7 @@ describe('MetricsService', () => {
   describe('Prometheus Metrics Export', () => {
     it('should return Prometheus-formatted metrics', async () => {
       const metrics = await service.getPrometheusMetrics();
-      
+
       expect(metrics).toBeDefined();
       expect(typeof metrics).toBe('string');
       expect(metrics).toContain('bytebot_');
@@ -55,9 +55,13 @@ describe('MetricsService', () => {
 
     it('should handle metrics collection errors', async () => {
       // Mock register.metrics to throw error
-      jest.spyOn(register, 'metrics').mockRejectedValueOnce(new Error('Test error'));
+      jest
+        .spyOn(register, 'metrics')
+        .mockRejectedValueOnce(new Error('Test error'));
 
-      await expect(service.getPrometheusMetrics()).rejects.toThrow('Test error');
+      await expect(service.getPrometheusMetrics()).rejects.toThrow(
+        'Test error',
+      );
     });
   });
 
@@ -195,7 +199,12 @@ describe('MetricsService', () => {
       const duration = 10;
 
       expect(() => {
-        service.recordCompressionMetrics?.(originalSize, compressedSize, algorithm, duration);
+        service.recordCompressionMetrics?.(
+          algorithm,
+          originalSize,
+          compressedSize,
+          duration,
+        );
       }).not.toThrow();
     });
   });
@@ -212,26 +221,29 @@ describe('MetricsService', () => {
   describe('Metrics Cleanup', () => {
     it('should clear all metrics', () => {
       service.clearMetrics();
-      
+
       // Verify metrics registry is cleared
-      expect(register.getSingleMetric('bytebot_http_requests_total')).toBeUndefined();
+      expect(
+        register.getSingleMetric('bytebot_http_requests_total'),
+      ).toBeUndefined();
     });
   });
 
   describe('Error Handling', () => {
     it('should handle system metrics update errors gracefully', () => {
       // Mock process.memoryUsage to throw error
-      const originalMemoryUsage = process.memoryUsage;
-      process.memoryUsage = jest.fn(() => {
-        throw new Error('Memory usage error');
-      });
+      const mockMemoryUsage = jest
+        .spyOn(process, 'memoryUsage')
+        .mockImplementation(() => {
+          throw new Error('Memory usage error');
+        });
 
       expect(() => {
         (service as any).updateSystemMetrics();
       }).not.toThrow();
 
       // Restore original function
-      process.memoryUsage = originalMemoryUsage;
+      mockMemoryUsage.mockRestore();
     });
   });
 });

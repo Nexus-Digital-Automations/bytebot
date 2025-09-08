@@ -71,10 +71,10 @@ export class RolesGuard implements CanActivate {
    * Validates user has required roles or permissions for the requested resource
    *
    * @param context - Execution context containing request and user information
-   * @returns Promise<boolean> - Whether the request is authorized
+   * @returns boolean - Whether the request is authorized
    * @throws ForbiddenException - When user lacks required permissions
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const operationId = `roles-guard-${Date.now()}`;
     const startTime = Date.now();
 
@@ -130,14 +130,14 @@ export class RolesGuard implements CanActivate {
 
     try {
       // Check role-based authorization
-      const hasRequiredRole = await this.checkRoleAuthorization(
+      const hasRequiredRole = this.checkRoleAuthorization(
         user,
         requiredRoles,
         operationId,
       );
 
       // Check permission-based authorization
-      const hasRequiredPermission = await this.checkPermissionAuthorization(
+      const hasRequiredPermission = this.checkPermissionAuthorization(
         user,
         requiredPermissions,
         operationId,
@@ -217,14 +217,14 @@ export class RolesGuard implements CanActivate {
    * @param user - Authenticated user object
    * @param requiredRoles - Array of roles required for access
    * @param operationId - Operation ID for logging
-   * @returns Promise<boolean> - Whether user has required role
+   * @returns boolean - Whether user has required role
    * @private
    */
-  private async checkRoleAuthorization(
+  private checkRoleAuthorization(
     user: User,
     requiredRoles?: UserRole[],
     operationId?: string,
-  ): Promise<boolean> {
+  ): boolean {
     if (!requiredRoles || requiredRoles.length === 0) {
       return true; // No role requirements
     }
@@ -254,14 +254,14 @@ export class RolesGuard implements CanActivate {
    * @param user - Authenticated user object with permissions
    * @param requiredPermissions - Array of permissions required for access
    * @param operationId - Operation ID for logging
-   * @returns Promise<boolean> - Whether user has required permissions
+   * @returns boolean - Whether user has required permissions
    * @private
    */
-  private async checkPermissionAuthorization(
+  private checkPermissionAuthorization(
     user: User,
     requiredPermissions?: Permission[],
     operationId?: string,
-  ): Promise<boolean> {
+  ): boolean {
     if (!requiredPermissions || requiredPermissions.length === 0) {
       return true; // No permission requirements
     }

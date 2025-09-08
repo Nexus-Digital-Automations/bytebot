@@ -31,6 +31,37 @@ import { Request, Response } from 'express';
 import { MetricsService } from '../../metrics/metrics.service';
 
 /**
+ * User object interface from JWT token
+ */
+interface UserObject {
+  id?: string | number;
+  sub?: string | number;
+  userId?: string | number;
+  [key: string]: unknown;
+}
+
+/**
+ * Extended Request interface with user properties
+ */
+interface ExtendedRequest extends Request {
+  user?: UserObject;
+}
+
+/**
+ * Structured error object interface
+ */
+interface StructuredError {
+  message?: string;
+  stack?: string;
+  status?: number;
+  statusCode?: number;
+  constructor?: {
+    name?: string;
+  };
+  [key: string]: unknown;
+}
+
+/**
  * Request context for metrics collection
  */
 interface MetricsContext {
@@ -67,8 +98,8 @@ export class MetricsInterceptor implements NestInterceptor {
   /**
    * Intercept requests for metrics collection
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest<Request>();
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    const request = context.switchToHttp().getRequest<ExtendedRequest>();
     const response = context.switchToHttp().getResponse<Response>();
 
     // Create metrics context
@@ -103,7 +134,7 @@ export class MetricsInterceptor implements NestInterceptor {
       }),
       catchError((error) => {
         // Record error request metrics
-        this.recordErrorRequest(metricsContext, error);
+        this.recordErrorRequest(metricsContext, error as StructuredError);
         return throwError(error);
       }),
       finalize(() => {
@@ -116,15 +147,20 @@ export class MetricsInterceptor implements NestInterceptor {
   /**
    * Extract route pattern from execution context
    */
-  private extractRoute(context: ExecutionContext, request: Request): string {
+  private extractRoute(
+    context: ExecutionContext,
+    request: ExtendedRequest,
+  ): string {
     try {
       // Try to get route from NestJS handler
       const handler = context.getHandler();
       const controller = context.getClass();
 
       if (handler && controller) {
-        const controllerPath = Reflect.getMetadata('path', controller) || '';
-        const handlerPath = Reflect.getMetadata('path', handler) || '';
+        const controllerPath =
+          (Reflect.getMetadata('path', controller) as string) ?? '';
+        const handlerPath =
+          (Reflect.getMetadata('path', handler) as string) ?? '';
         const route = `${controllerPath}${handlerPath}`.replace(/\/+/g, '/');
 
         if (route && route !== '/') {
@@ -168,11 +204,12 @@ export class MetricsInterceptor implements NestInterceptor {
   /**
    * Extract user ID from request
    */
-  private extractUserId(request: Request): string | undefined {
+  private extractUserId(request: ExtendedRequest): string | undefined {
     // Extract from JWT token payload
     if (request.user && typeof request.user === 'object') {
-      const user = request.user as any;
-      return user.id || user.sub || user.userId;
+      const user = request.user;
+      const userId = user.id ?? user.sub ?? user.userId;
+      return userId ? String(userId) : undefined;
     }
 
     // Extract from headers
@@ -222,7 +259,7 @@ export class MetricsInterceptor implements NestInterceptor {
   private recordSuccessfulRequest(
     context: MetricsContext,
     statusCode: number,
-    responseData: any,
+    responseData: unknown,
   ): void {
     if (!this.metricsService) return;
 
@@ -246,6 +283,7 @@ export class MetricsInterceptor implements NestInterceptor {
           durationMs: duration,
           userId: context.userId,
           responseSize: this.calculateResponseSize(responseData),
+          hasResponseData: !!responseData,
         },
       );
     } catch (error) {
@@ -264,12 +302,16 @@ export class MetricsInterceptor implements NestInterceptor {
   /**
    * Record error request metrics
    */
-  private recordErrorRequest(context: MetricsContext, error: any): void {
+  private recordErrorRequest(
+    context: MetricsContext,
+    error: StructuredError,
+  ): void {
     if (!this.metricsService) return;
 
     try {
       const duration = Date.now() - context.startTime;
-      const statusCode = error.status || error.statusCode || 500;
+      const statusCode = error.status ?? error.statusCode ?? 500;
+      const errorType = error.constructor?.name ?? 'UnknownError';
 
       this.metricsService.recordApiRequest(
         context.method,
@@ -281,7 +323,7 @@ export class MetricsInterceptor implements NestInterceptor {
 
       // Record application error
       this.metricsService.recordApplicationError(
-        error.constructor?.name || 'UnknownError',
+        errorType,
         this.categorizeErrorSeverity(statusCode),
         'api',
       );
@@ -294,8 +336,8 @@ export class MetricsInterceptor implements NestInterceptor {
           statusCode,
           durationMs: duration,
           userId: context.userId,
-          errorType: error.constructor?.name || 'UnknownError',
-          errorMessage: error.message,
+          errorType,
+          errorMessage: error.message ?? 'Unknown error',
         },
       );
     } catch (metricsError) {
@@ -308,10 +350,22 @@ export class MetricsInterceptor implements NestInterceptor {
               : String(metricsError),
           method: context.method,
           route: context.route,
-          originalError: error.message,
+          originalError: error.message ?? 'Unknown error',
         },
       );
     }
+  }
+
+  /**
+   * Old error handling method for backward compatibility
+   * @deprecated Use recordErrorRequest instead
+   */
+  private recordErrorRequestOld(
+    context: MetricsContext,
+    error: StructuredError,
+  ): void {
+    // Delegate to new error handling method
+    this.recordErrorRequest(context, error);
   }
 
   /**
@@ -343,7 +397,7 @@ export class MetricsInterceptor implements NestInterceptor {
   /**
    * Calculate response payload size
    */
-  private calculateResponseSize(responseData: any): number {
+  private calculateResponseSize(responseData: unknown): number {
     if (!responseData) return 0;
 
     try {
@@ -355,7 +409,46 @@ export class MetricsInterceptor implements NestInterceptor {
         return JSON.stringify(responseData).length;
       }
 
-      return String(responseData).length;
+      // For primitive types (number, boolean, etc.), convert safely
+      if (
+        typeof responseData === 'number' ||
+        typeof responseData === 'boolean'
+      ) {
+        return String(responseData).length;
+      }
+
+      // For any other type, try JSON serialization first, then safe string conversion
+      try {
+        return JSON.stringify(responseData).length;
+      } catch {
+        // If JSON serialization fails, handle specific object types safely
+        if (responseData && typeof responseData === 'object') {
+          // Check if it's an Error object
+          if (responseData instanceof Error) {
+            return responseData.message.length || responseData.name.length;
+          }
+
+          // Check if it has a custom toString implementation (not Object.prototype.toString)
+          if (
+            'toString' in responseData &&
+            typeof responseData.toString === 'function' &&
+            responseData.toString !== Object.prototype.toString
+          ) {
+            try {
+              const stringified = (
+                responseData as { toString(): string }
+              ).toString();
+              return typeof stringified === 'string'
+                ? stringified.length
+                : '[object Unknown]'.length;
+            } catch {
+              return '[object Unknown]'.length;
+            }
+          }
+        }
+        // Fallback to a safe default
+        return '[object Unknown]'.length;
+      }
     } catch {
       return 0;
     }

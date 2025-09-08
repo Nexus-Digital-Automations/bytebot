@@ -9,23 +9,21 @@
  * @author API Versioning & Documentation Specialist
  */
 
-// Swagger/OpenAPI configuration
-export * from './swagger.config';
+// Swagger/OpenAPI configuration - individual function exports
 export {
   createSwaggerConfig,
   setupApiDocumentation,
   generateDocumentationMetadata,
-  SECURITY_SCHEMES,
-  CUSTOM_EXTENSIONS,
 } from './swagger.config';
 
-// Default export for convenience
+// Default export includes all configuration constants and functions
 export { default as SwaggerConfig } from './swagger.config';
 
-export default {
-  createSwaggerConfig,
-  setupApiDocumentation,
-  generateDocumentationMetadata,
-  SECURITY_SCHEMES,
-  CUSTOM_EXTENSIONS,
-};
+// Re-export all from swagger.config for convenience
+export * from './swagger.config';
+
+// Import the default export for our typed re-export
+import SwaggerConfigDefault from './swagger.config';
+
+// Type-safe default export object
+export default SwaggerConfigDefault;

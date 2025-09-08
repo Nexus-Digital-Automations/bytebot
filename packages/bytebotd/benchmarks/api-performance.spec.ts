@@ -22,7 +22,7 @@ import { AppModule } from '../src/app.module';
 import { MetricsService } from '../src/metrics/metrics.service';
 import { CacheService } from '../src/cache/cache.service';
 import { PerformanceInterceptor } from '../src/common/interceptors/performance.interceptor';
-import * as request from 'supertest';
+import request from 'supertest';
 
 describe('API Performance Benchmarks', () => {
   let app: INestApplication;
@@ -54,21 +54,25 @@ describe('API Performance Benchmarks', () => {
     app = moduleFixture.createNestApplication();
     metricsService = moduleFixture.get<MetricsService>(MetricsService);
     cacheService = moduleFixture.get<CacheService>(CacheService);
-    
+
     // Get performance interceptor instance for stats
     const interceptors = moduleFixture.get('APP_INTERCEPTOR');
-    performanceInterceptor = Array.isArray(interceptors) 
-      ? interceptors.find(i => i instanceof PerformanceInterceptor)
-      : interceptors instanceof PerformanceInterceptor ? interceptors : null;
+    performanceInterceptor = Array.isArray(interceptors)
+      ? interceptors.find((i) => i instanceof PerformanceInterceptor)
+      : interceptors instanceof PerformanceInterceptor
+        ? interceptors
+        : null;
 
     await app.init();
 
     // Clear any existing metrics
     performanceInterceptor?.clearStats();
     cacheService?.clearStats();
-    
+
     console.log('🚀 Starting API Performance Benchmarks');
-    console.log(`Targets: <${PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95}ms P95, >${PERFORMANCE_TARGETS.MIN_THROUGHPUT} RPS`);
+    console.log(
+      `Targets: <${PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95}ms P95, >${PERFORMANCE_TARGETS.MIN_THROUGHPUT} RPS`,
+    );
   });
 
   afterAll(async () => {
@@ -78,7 +82,7 @@ describe('API Performance Benchmarks', () => {
   describe('Response Time Benchmarks', () => {
     it('should meet response time targets for health endpoint', async () => {
       const responseTimes: number[] = [];
-      
+
       // Warm-up phase
       console.log('🔥 Warming up health endpoint...');
       for (let i = 0; i < LOAD_TEST_CONFIG.WARM_UP_REQUESTS; i++) {
@@ -88,18 +92,19 @@ describe('API Performance Benchmarks', () => {
       // Benchmark phase
       console.log('📊 Benchmarking health endpoint response times...');
       const startTime = Date.now();
-      
+
       for (let i = 0; i < LOAD_TEST_CONFIG.BENCHMARK_REQUESTS; i++) {
         const requestStart = Date.now();
         const response = await request(app.getHttpServer()).get('/health');
         const requestDuration = Date.now() - requestStart;
-        
+
         responseTimes.push(requestDuration);
         expect(response.status).toBe(200);
       }
 
       const totalDuration = Date.now() - startTime;
-      const throughput = (LOAD_TEST_CONFIG.BENCHMARK_REQUESTS / totalDuration) * 1000; // RPS
+      const throughput =
+        (LOAD_TEST_CONFIG.BENCHMARK_REQUESTS / totalDuration) * 1000; // RPS
 
       // Calculate percentiles
       const sortedTimes = responseTimes.sort((a, b) => a - b);
@@ -107,21 +112,28 @@ describe('API Performance Benchmarks', () => {
       const p90 = sortedTimes[Math.floor(sortedTimes.length * 0.9)];
       const p95 = sortedTimes[Math.floor(sortedTimes.length * 0.95)];
       const p99 = sortedTimes[Math.floor(sortedTimes.length * 0.99)];
-      const avg = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
+      const avg =
+        responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
 
       console.log('📈 Health Endpoint Performance Results:');
       console.log(`  Average: ${avg.toFixed(2)}ms`);
-      console.log(`  P50: ${p50}ms, P90: ${p90}ms, P95: ${p95}ms, P99: ${p99}ms`);
+      console.log(
+        `  P50: ${p50}ms, P90: ${p90}ms, P95: ${p95}ms, P99: ${p99}ms`,
+      );
       console.log(`  Throughput: ${throughput.toFixed(2)} RPS`);
-      
+
       // Validate performance targets
-      expect(p95).toBeLessThanOrEqual(PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95);
-      expect(throughput).toBeGreaterThanOrEqual(PERFORMANCE_TARGETS.MIN_THROUGHPUT);
+      expect(p95).toBeLessThanOrEqual(
+        PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95,
+      );
+      expect(throughput).toBeGreaterThanOrEqual(
+        PERFORMANCE_TARGETS.MIN_THROUGHPUT,
+      );
     });
 
     it('should meet response time targets for metrics endpoint', async () => {
       const responseTimes: number[] = [];
-      
+
       // Warm-up
       console.log('🔥 Warming up metrics endpoint...');
       for (let i = 0; i < LOAD_TEST_CONFIG.WARM_UP_REQUESTS; i++) {
@@ -131,51 +143,60 @@ describe('API Performance Benchmarks', () => {
       // Benchmark
       console.log('📊 Benchmarking metrics endpoint response times...');
       const startTime = Date.now();
-      
+
       for (let i = 0; i < LOAD_TEST_CONFIG.BENCHMARK_REQUESTS; i++) {
         const requestStart = Date.now();
         const response = await request(app.getHttpServer()).get('/metrics');
         const requestDuration = Date.now() - requestStart;
-        
+
         responseTimes.push(requestDuration);
         expect(response.status).toBe(200);
         expect(response.get('Content-Type')).toContain('text/plain');
       }
 
       const totalDuration = Date.now() - startTime;
-      const throughput = (LOAD_TEST_CONFIG.BENCHMARK_REQUESTS / totalDuration) * 1000;
+      const throughput =
+        (LOAD_TEST_CONFIG.BENCHMARK_REQUESTS / totalDuration) * 1000;
 
       const sortedTimes = responseTimes.sort((a, b) => a - b);
       const p95 = sortedTimes[Math.floor(sortedTimes.length * 0.95)];
-      const avg = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
+      const avg =
+        responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
 
       console.log('📈 Metrics Endpoint Performance Results:');
       console.log(`  Average: ${avg.toFixed(2)}ms, P95: ${p95}ms`);
       console.log(`  Throughput: ${throughput.toFixed(2)} RPS`);
-      
-      expect(p95).toBeLessThanOrEqual(PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95);
-      expect(throughput).toBeGreaterThanOrEqual(PERFORMANCE_TARGETS.MIN_THROUGHPUT);
+
+      expect(p95).toBeLessThanOrEqual(
+        PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95,
+      );
+      expect(throughput).toBeGreaterThanOrEqual(
+        PERFORMANCE_TARGETS.MIN_THROUGHPUT,
+      );
     });
   });
 
   describe('Concurrent Load Testing', () => {
     it('should handle concurrent requests without performance degradation', async () => {
       const results: Array<{ duration: number; status: number }> = [];
-      
-      console.log(`🔀 Testing concurrent load: ${LOAD_TEST_CONFIG.CONCURRENT_USERS} concurrent users`);
-      
+
+      console.log(
+        `🔀 Testing concurrent load: ${LOAD_TEST_CONFIG.CONCURRENT_USERS} concurrent users`,
+      );
+
       const concurrentPromises = Array(LOAD_TEST_CONFIG.CONCURRENT_USERS)
         .fill(null)
         .map(async (_, userIndex) => {
           const userResults: Array<{ duration: number; status: number }> = [];
-          
-          for (let i = 0; i < 20; i++) { // 20 requests per user
+
+          for (let i = 0; i < 20; i++) {
+            // 20 requests per user
             const start = Date.now();
             try {
               const response = await request(app.getHttpServer())
                 .get('/health')
                 .timeout(5000);
-              
+
               const duration = Date.now() - start;
               userResults.push({ duration, status: response.status });
             } catch (error) {
@@ -183,19 +204,20 @@ describe('API Performance Benchmarks', () => {
               userResults.push({ duration, status: 500 });
             }
           }
-          
+
           return userResults;
         });
 
       const allResults = await Promise.all(concurrentPromises);
-      allResults.forEach(userResults => results.push(...userResults));
+      allResults.forEach((userResults) => results.push(...userResults));
 
       // Analyze results
-      const successfulRequests = results.filter(r => r.status === 200);
+      const successfulRequests = results.filter((r) => r.status === 200);
       const successRate = (successfulRequests.length / results.length) * 100;
-      const responseTimes = successfulRequests.map(r => r.duration);
-      const avgResponseTime = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
-      
+      const responseTimes = successfulRequests.map((r) => r.duration);
+      const avgResponseTime =
+        responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
+
       const sortedTimes = responseTimes.sort((a, b) => a - b);
       const p95 = sortedTimes[Math.floor(sortedTimes.length * 0.95)];
 
@@ -207,8 +229,12 @@ describe('API Performance Benchmarks', () => {
 
       // Validate performance under load
       expect(successRate).toBeGreaterThanOrEqual(99); // 99% success rate
-      expect(avgResponseTime).toBeLessThanOrEqual(PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95);
-      expect(p95).toBeLessThanOrEqual(PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95 * 1.5); // Allow 50% degradation under load
+      expect(avgResponseTime).toBeLessThanOrEqual(
+        PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95,
+      );
+      expect(p95).toBeLessThanOrEqual(
+        PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95 * 1.5,
+      ); // Allow 50% degradation under load
     });
   });
 
@@ -223,13 +249,11 @@ describe('API Performance Benchmarks', () => {
       // Sustained load test
       console.log('🔄 Running sustained load test...');
       const sustainedLoadPromises = [];
-      
+
       for (let i = 0; i < 500; i++) {
+        sustainedLoadPromises.push(request(app.getHttpServer()).get('/health'));
         sustainedLoadPromises.push(
-          request(app.getHttpServer()).get('/health')
-        );
-        sustainedLoadPromises.push(
-          request(app.getHttpServer()).get('/metrics')
+          request(app.getHttpServer()).get('/metrics'),
         );
       }
 
@@ -256,15 +280,21 @@ describe('API Performance Benchmarks', () => {
       });
 
       // Validate memory usage is within acceptable limits
-      expect(memoryIncrease.rss).toBeLessThanOrEqual(PERFORMANCE_TARGETS.MAX_MEMORY_INCREASE);
-      expect(memoryIncrease.heapUsed).toBeLessThanOrEqual(PERFORMANCE_TARGETS.MAX_MEMORY_INCREASE);
+      expect(memoryIncrease.rss).toBeLessThanOrEqual(
+        PERFORMANCE_TARGETS.MAX_MEMORY_INCREASE,
+      );
+      expect(memoryIncrease.heapUsed).toBeLessThanOrEqual(
+        PERFORMANCE_TARGETS.MAX_MEMORY_INCREASE,
+      );
     });
   });
 
   describe('Performance Interceptor Validation', () => {
     it('should collect accurate performance metrics', async () => {
       if (!performanceInterceptor) {
-        console.warn('⚠️  Performance interceptor not available, skipping test');
+        console.warn(
+          '⚠️  Performance interceptor not available, skipping test',
+        );
         return;
       }
 
@@ -273,14 +303,16 @@ describe('API Performance Benchmarks', () => {
 
       // Generate some test traffic
       const testRequests = 100;
-      console.log(`📊 Generating ${testRequests} test requests for metrics validation...`);
-      
+      console.log(
+        `📊 Generating ${testRequests} test requests for metrics validation...`,
+      );
+
       for (let i = 0; i < testRequests; i++) {
         await request(app.getHttpServer()).get('/health');
       }
 
       const stats = performanceInterceptor.getStats();
-      
+
       console.log('📈 Performance Interceptor Stats:', {
         requestCount: stats.requestCount,
         averageResponseTime: `${stats.averageResponseTime.toFixed(2)}ms`,
@@ -301,12 +333,24 @@ describe('API Performance Benchmarks', () => {
       // Clear cache stats
       if (cacheService) {
         cacheService.clearStats();
-        
+
         // Prime the cache with some data
         console.log('💾 Priming cache for hit rate testing...');
-        await cacheService.set('test-key-1', { data: 'test-value-1' }, { ttl: 300 });
-        await cacheService.set('test-key-2', { data: 'test-value-2' }, { ttl: 300 });
-        await cacheService.set('test-key-3', { data: 'test-value-3' }, { ttl: 300 });
+        await cacheService.set(
+          'test-key-1',
+          { data: 'test-value-1' },
+          { ttl: 300 },
+        );
+        await cacheService.set(
+          'test-key-2',
+          { data: 'test-value-2' },
+          { ttl: 300 },
+        );
+        await cacheService.set(
+          'test-key-3',
+          { data: 'test-value-3' },
+          { ttl: 300 },
+        );
 
         // Generate cache hits and misses
         const cacheOperations = [];
@@ -331,7 +375,9 @@ describe('API Performance Benchmarks', () => {
         });
 
         // Validate cache performance
-        expect(cacheStats.hitRate).toBeGreaterThanOrEqual(PERFORMANCE_TARGETS.MIN_CACHE_HIT_RATE);
+        expect(cacheStats.hitRate).toBeGreaterThanOrEqual(
+          PERFORMANCE_TARGETS.MIN_CACHE_HIT_RATE,
+        );
         expect(cacheStats.totalOperations).toBeGreaterThan(0);
       }
     });
@@ -341,22 +387,27 @@ describe('API Performance Benchmarks', () => {
     it('should generate comprehensive performance report', async () => {
       console.log('\n🎯 PERFORMANCE BENCHMARK SUMMARY');
       console.log('=====================================');
-      
+
       if (performanceInterceptor) {
         const perfStats = performanceInterceptor.getStats();
         console.log('📊 API Performance:');
         console.log(`  Total Requests: ${perfStats.requestCount}`);
-        console.log(`  Average Response Time: ${perfStats.averageResponseTime.toFixed(2)}ms`);
+        console.log(
+          `  Average Response Time: ${perfStats.averageResponseTime.toFixed(2)}ms`,
+        );
         console.log(`  P95 Response Time: ${perfStats.p95ResponseTime}ms`);
         console.log(`  Slow Requests: ${perfStats.slowRequests}`);
         console.log(`  Memory Alerts: ${perfStats.memoryAlerts}`);
-        
+
         // Performance grade
-        const grade = perfStats.p95ResponseTime <= PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95 ? 
-          '🟢 EXCELLENT' : 
-          perfStats.p95ResponseTime <= PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95 * 1.5 ?
-            '🟡 GOOD' : '🔴 NEEDS IMPROVEMENT';
-        
+        const grade =
+          perfStats.p95ResponseTime <= PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95
+            ? '🟢 EXCELLENT'
+            : perfStats.p95ResponseTime <=
+                PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95 * 1.5
+              ? '🟡 GOOD'
+              : '🔴 NEEDS IMPROVEMENT';
+
         console.log(`  Performance Grade: ${grade}`);
       }
 
@@ -367,19 +418,30 @@ describe('API Performance Benchmarks', () => {
         console.log(`  Total Operations: ${cacheStats.totalOperations}`);
         console.log(`  Cache Hits: ${cacheStats.hits}`);
         console.log(`  Cache Misses: ${cacheStats.misses}`);
-        
-        const cacheGrade = cacheStats.hitRate >= PERFORMANCE_TARGETS.MIN_CACHE_HIT_RATE ?
-          '🟢 EXCELLENT' : 
-          cacheStats.hitRate >= 60 ? '🟡 GOOD' : '🔴 NEEDS IMPROVEMENT';
-        
+
+        const cacheGrade =
+          cacheStats.hitRate >= PERFORMANCE_TARGETS.MIN_CACHE_HIT_RATE
+            ? '🟢 EXCELLENT'
+            : cacheStats.hitRate >= 60
+              ? '🟡 GOOD'
+              : '🔴 NEEDS IMPROVEMENT';
+
         console.log(`  Cache Grade: ${cacheGrade}`);
       }
 
       console.log('\n🏆 Performance Targets:');
-      console.log(`  ✅ Response Time P95: <${PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95}ms`);
-      console.log(`  ✅ Throughput: >${PERFORMANCE_TARGETS.MIN_THROUGHPUT} RPS`);
-      console.log(`  ✅ Cache Hit Rate: >${PERFORMANCE_TARGETS.MIN_CACHE_HIT_RATE}%`);
-      console.log(`  ✅ Memory Stability: <${PERFORMANCE_TARGETS.MAX_MEMORY_INCREASE}MB increase`);
+      console.log(
+        `  ✅ Response Time P95: <${PERFORMANCE_TARGETS.MAX_RESPONSE_TIME_P95}ms`,
+      );
+      console.log(
+        `  ✅ Throughput: >${PERFORMANCE_TARGETS.MIN_THROUGHPUT} RPS`,
+      );
+      console.log(
+        `  ✅ Cache Hit Rate: >${PERFORMANCE_TARGETS.MIN_CACHE_HIT_RATE}%`,
+      );
+      console.log(
+        `  ✅ Memory Stability: <${PERFORMANCE_TARGETS.MAX_MEMORY_INCREASE}MB increase`,
+      );
       console.log('=====================================\n');
     });
   });

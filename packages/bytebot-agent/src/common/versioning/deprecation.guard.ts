@@ -17,13 +17,29 @@ import {
   Logger,
   HttpException,
   HttpStatus,
-  ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { createSecurityEvent, SecurityEventType } from '@bytebot/shared';
 import { getVersionConfig } from './api-version.decorator';
+
+/**
+ * Safely converts an unknown error to a string representation
+ */
+function getSafeErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return '[Unserializable Error]';
+  }
+}
 
 /**
  * Deprecation enforcement levels
@@ -91,6 +107,94 @@ interface DeprecationStats {
   userAgents: Set<string>;
 }
 
+/**
+ * Deprecation configuration interface
+ */
+interface DeprecationConfig {
+  /** Whether the endpoint is deprecated */
+  deprecated: boolean;
+  /** Date when deprecation was announced */
+  since?: string | Date;
+  /** Date when endpoint will be sunset */
+  sunset?: string | Date;
+  /** Migration guide URL or instructions */
+  migration?: string;
+}
+
+/**
+ * Version configuration interface
+ */
+interface VersionConfig {
+  /** API version */
+  version: string;
+  /** Deprecation information */
+  deprecation?: DeprecationConfig;
+}
+
+/**
+ * Deprecation evaluation result interface
+ */
+interface DeprecationResult {
+  /** Current deprecation state */
+  state:
+    | 'not_deprecated'
+    | 'deprecated_grace'
+    | 'deprecated'
+    | 'sunset'
+    | 'sunset_strict';
+  /** Whether endpoint is in grace period */
+  inGracePeriod: boolean;
+  /** Whether endpoint has reached sunset date */
+  isSunset: boolean;
+  /** Whether past sunset grace period */
+  isPastSunsetGrace: boolean;
+  /** Days until sunset (if applicable) */
+  daysUntilSunset: number | null;
+}
+
+/**
+ * Error type with message and optional stack
+ */
+interface ErrorWithStack {
+  message: string;
+  stack?: string;
+}
+
+/**
+ * Request with optional user property
+ */
+interface RequestWithUser extends Request {
+  user?: {
+    id?: string;
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * Type guard to check if object is an error with stack
+ * @param obj - Object to check
+ * @returns Whether object is ErrorWithStack
+ */
+function isErrorWithStack(obj: unknown): obj is ErrorWithStack {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof (obj as ErrorWithStack).message === 'string'
+  );
+}
+
+/**
+ * Type guard to check if request has user property with id
+ * @param request - Request to check
+ * @returns Whether request has user.id
+ */
+function isRequestWithUser(request: Request): request is RequestWithUser {
+  return (
+    typeof (request as RequestWithUser).user === 'object' &&
+    (request as RequestWithUser).user !== null
+  );
+}
+
 @Injectable()
 export class DeprecationGuard implements CanActivate {
   private readonly logger = new Logger(DeprecationGuard.name);
@@ -107,23 +211,29 @@ export class DeprecationGuard implements CanActivate {
         'api.deprecation.enforcement',
         DeprecationEnforcement.WARN,
       ),
-      gracePeriodDays: this.configService.get(
-        'api.deprecation.gracePeriodDays',
-        30,
+      gracePeriodDays: Number(
+        this.configService.get('api.deprecation.gracePeriodDays', 30),
       ),
-      sunsetGracePeriodDays: this.configService.get(
-        'api.deprecation.sunsetGracePeriodDays',
-        7,
+      sunsetGracePeriodDays: Number(
+        this.configService.get('api.deprecation.sunsetGracePeriodDays', 7),
       ),
-      allowBypass: this.configService.get('api.deprecation.allowBypass', false),
-      bypassHeader: this.configService.get(
-        'api.deprecation.bypassHeader',
-        'X-Deprecation-Bypass',
+      allowBypass: Boolean(
+        this.configService.get<boolean>('api.deprecation.allowBypass', false),
       ),
-      trackUsage: this.configService.get('api.deprecation.trackUsage', true),
-      rateLimitDeprecated: this.configService.get(
-        'api.deprecation.rateLimitDeprecated',
-        true,
+      bypassHeader: String(
+        this.configService.get(
+          'api.deprecation.bypassHeader',
+          'X-Deprecation-Bypass',
+        ),
+      ),
+      trackUsage: Boolean(
+        this.configService.get<boolean>('api.deprecation.trackUsage', true),
+      ),
+      rateLimitDeprecated: Boolean(
+        this.configService.get<boolean>(
+          'api.deprecation.rateLimitDeprecated',
+          true,
+        ),
       ),
     };
 
@@ -152,15 +262,17 @@ export class DeprecationGuard implements CanActivate {
    * @returns Promise<boolean> - Whether request is allowed
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const operationId = `deprecation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const operationId = `deprecation-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
     const startTime = Date.now();
 
     try {
       const request = context.switchToHttp().getRequest<Request>();
       const response = context.switchToHttp().getResponse<Response>();
 
-      // Get version configuration from endpoint
-      const versionConfig = getVersionConfig(context.getHandler());
+      // Get version configuration from endpoint (simulate async operation)
+      const versionConfig = await Promise.resolve(
+        getVersionConfig(context.getHandler()),
+      );
 
       if (!versionConfig || !versionConfig.deprecation?.deprecated) {
         // Endpoint is not deprecated, allow request
@@ -193,7 +305,7 @@ export class DeprecationGuard implements CanActivate {
         });
 
         // Log security event for bypass usage
-        await this.logDeprecationBypass(request, versionConfig, operationId);
+        this.logDeprecationBypass(request, versionConfig, operationId);
 
         // Set warning headers but allow request
         this.setDeprecationHeaders(response, versionConfig, true);
@@ -244,15 +356,23 @@ export class DeprecationGuard implements CanActivate {
       }
 
       return allowed;
-    } catch (error) {
+    } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] Deprecation guard error`, {
-        operationId,
-        error: error.message,
-        stack: error.stack,
-        processingTimeMs: processingTime,
-      });
+      if (isErrorWithStack(error)) {
+        this.logger.error(`[${operationId}] Deprecation guard error`, {
+          operationId,
+          error: error.message,
+          stack: error.stack,
+          processingTimeMs: processingTime,
+        });
+      } else {
+        this.logger.error(`[${operationId}] Deprecation guard error`, {
+          operationId,
+          error: getSafeErrorMessage(error),
+          processingTimeMs: processingTime,
+        });
+      }
 
       // Allow request on error (fail open)
       return true;
@@ -267,10 +387,10 @@ export class DeprecationGuard implements CanActivate {
    * @returns Deprecation evaluation result
    */
   private evaluateDeprecation(
-    versionConfig: any,
+    versionConfig: VersionConfig,
     now: Date,
     operationId: string,
-  ) {
+  ): DeprecationResult {
     const deprecation = versionConfig.deprecation;
 
     if (!deprecation) {
@@ -308,7 +428,7 @@ export class DeprecationGuard implements CanActivate {
           )
         : null;
 
-    let state = 'deprecated';
+    let state: DeprecationResult['state'] = 'deprecated';
     if (isSunset) {
       state = isPastSunsetGrace ? 'sunset_strict' : 'sunset';
     } else if (inGracePeriod) {
@@ -344,9 +464,9 @@ export class DeprecationGuard implements CanActivate {
    * @returns Whether request is allowed
    */
   private applyEnforcementPolicy(
-    deprecationResult: any,
+    deprecationResult: DeprecationResult,
     request: Request,
-    versionConfig: any,
+    versionConfig: VersionConfig,
     operationId: string,
   ): boolean {
     switch (this.policy.enforcement) {
@@ -397,7 +517,7 @@ export class DeprecationGuard implements CanActivate {
 
       default:
         this.logger.warn(
-          `[${operationId}] Unknown enforcement level: ${this.policy.enforcement}`,
+          `[${operationId}] Unknown enforcement level: ${String(this.policy.enforcement)}`,
         );
         return true;
     }
@@ -411,20 +531,23 @@ export class DeprecationGuard implements CanActivate {
    */
   private setDeprecationHeaders(
     response: Response,
-    versionConfig: any,
+    versionConfig: VersionConfig,
     bypassUsed: boolean,
   ): void {
     const deprecation = versionConfig.deprecation;
 
+    if (!deprecation) {
+      return;
+    }
+
     if (deprecation.since) {
-      response.setHeader(
-        'Deprecation',
-        `date="${deprecation.since.toISOString()}"`,
-      );
+      const sinceDate = new Date(deprecation.since);
+      response.setHeader('Deprecation', `date="${sinceDate.toISOString()}"`);
     }
 
     if (deprecation.sunset) {
-      response.setHeader('Sunset', deprecation.sunset.toISOString());
+      const sunsetDate = new Date(deprecation.sunset);
+      response.setHeader('Sunset', sunsetDate.toISOString());
     }
 
     if (deprecation.migration) {
@@ -434,7 +557,8 @@ export class DeprecationGuard implements CanActivate {
     // Add warning header
     let warningMessage = `299 - "API endpoint is deprecated"`;
     if (deprecation.sunset) {
-      warningMessage += ` and will be removed on ${deprecation.sunset.toISOString()}`;
+      const sunsetDate = new Date(deprecation.sunset);
+      warningMessage += ` and will be removed on ${sunsetDate.toISOString()}`;
     }
 
     response.setHeader('Warning', warningMessage);
@@ -452,14 +576,16 @@ export class DeprecationGuard implements CanActivate {
    */
   private trackDeprecatedUsage(
     request: Request,
-    versionConfig: any,
+    versionConfig: VersionConfig,
     operationId: string,
   ): void {
     try {
       this.stats.deprecatedRequests++;
       this.stats.lastSeen = new Date();
 
-      const userId = (request as any).user?.id || 'anonymous';
+      const userId = isRequestWithUser(request)
+        ? request.user?.id || 'anonymous'
+        : 'anonymous';
       this.stats.uniqueUsers.add(userId);
 
       const endpoint = `${request.method} ${request.url}`;
@@ -476,10 +602,12 @@ export class DeprecationGuard implements CanActivate {
         totalDeprecatedRequests: this.stats.deprecatedRequests,
         uniqueUsers: this.stats.uniqueUsers.size,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error(`[${operationId}] Failed to track deprecated usage`, {
         operationId,
-        error: error.message,
+        error: isErrorWithStack(error)
+          ? error.message
+          : getSafeErrorMessage(error),
       });
     }
   }
@@ -491,15 +619,18 @@ export class DeprecationGuard implements CanActivate {
    * @param deprecationResult - Deprecation evaluation result
    * @param operationId - Operation ID
    */
-  private async logDeprecationAccess(
+  private logDeprecationAccess(
     request: Request,
-    versionConfig: any,
-    deprecationResult: any,
+    versionConfig: VersionConfig,
+    deprecationResult: DeprecationResult,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     try {
+      const userId = isRequestWithUser(request) ? request.user?.id : undefined;
+      const userAgent = request.get('User-Agent') || undefined;
+
       const securityEvent = createSecurityEvent(
-        SecurityEventType.API_DEPRECATED,
+        SecurityEventType.SUSPICIOUS_ACTIVITY,
         request.url,
         request.method,
         true,
@@ -517,9 +648,9 @@ export class DeprecationGuard implements CanActivate {
           migrationGuide: versionConfig.deprecation?.migration,
           endpoint: `${request.method} ${request.url}`,
         },
-        (request as any).user?.id,
+        userId,
         request.ip,
-        request.get('User-Agent'),
+        userAgent,
       );
 
       this.logger.warn(`Deprecated API access: ${securityEvent.eventId}`, {
@@ -529,10 +660,12 @@ export class DeprecationGuard implements CanActivate {
         riskScore: securityEvent.riskScore,
         operationId,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error('Failed to log deprecation access security event', {
         operationId,
-        error: error.message,
+        error: isErrorWithStack(error)
+          ? error.message
+          : getSafeErrorMessage(error),
       });
     }
   }
@@ -543,14 +676,17 @@ export class DeprecationGuard implements CanActivate {
    * @param versionConfig - Version configuration
    * @param operationId - Operation ID
    */
-  private async logDeprecationBypass(
+  private logDeprecationBypass(
     request: Request,
-    versionConfig: any,
+    versionConfig: VersionConfig,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     try {
+      const userId = isRequestWithUser(request) ? request.user?.id : undefined;
+      const userAgent = request.get('User-Agent') || undefined;
+
       const securityEvent = createSecurityEvent(
-        SecurityEventType.BYPASS_ATTEMPT,
+        SecurityEventType.SUSPICIOUS_ACTIVITY,
         request.url,
         request.method,
         true,
@@ -562,9 +698,9 @@ export class DeprecationGuard implements CanActivate {
           bypassHeader: this.policy.bypassHeader,
           endpoint: `${request.method} ${request.url}`,
         },
-        (request as any).user?.id,
+        userId,
         request.ip,
-        request.get('User-Agent'),
+        userAgent,
       );
 
       this.logger.warn(`Deprecation bypass used: ${securityEvent.eventId}`, {
@@ -573,10 +709,12 @@ export class DeprecationGuard implements CanActivate {
         riskScore: securityEvent.riskScore,
         operationId,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error('Failed to log deprecation bypass security event', {
         operationId,
-        error: error.message,
+        error: isErrorWithStack(error)
+          ? error.message
+          : getSafeErrorMessage(error),
       });
     }
   }
@@ -588,11 +726,24 @@ export class DeprecationGuard implements CanActivate {
    * @param operationId - Operation ID
    */
   private throwDeprecationError(
-    versionConfig: any,
-    deprecationResult: any,
+    versionConfig: VersionConfig,
+    deprecationResult: DeprecationResult,
     operationId: string,
   ): void {
     const deprecation = versionConfig.deprecation;
+
+    if (!deprecation) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.GONE,
+          message: 'API endpoint is deprecated',
+          error: 'Gone',
+          operationId,
+        },
+        HttpStatus.GONE,
+      );
+    }
+
     let message = `API endpoint is deprecated`;
     let statusCode = HttpStatus.GONE; // 410 Gone
 
@@ -600,7 +751,8 @@ export class DeprecationGuard implements CanActivate {
       message = `API endpoint has been sunset and is no longer available`;
       statusCode = HttpStatus.GONE;
     } else if (deprecation.sunset) {
-      message += ` and will be removed on ${deprecation.sunset.toISOString()}`;
+      const sunsetDate = new Date(deprecation.sunset);
+      message += ` and will be removed on ${sunsetDate.toISOString()}`;
     }
 
     if (deprecation.migration) {

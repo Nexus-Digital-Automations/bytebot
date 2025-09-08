@@ -82,7 +82,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
     this.logger.log('Database health service fully operational');
   }
 
-  async onModuleDestroy() {
+  onModuleDestroy() {
     this.logger.log('Shutting down database health service');
 
     if (this.backgroundMonitoring) {
@@ -366,13 +366,12 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
     });
 
     // Connection pool health check
-    this.healthChecks.set('connection-pool', async (options) => {
+    this.healthChecks.set('connection-pool', (options) => {
       const startTime = Date.now();
 
       try {
         const poolMetrics = this.connectionPoolService.getPoolMetrics();
-        const poolHealth =
-          await this.connectionPoolService.performPoolHealthCheck();
+        const poolHealth = this.connectionPoolService.performPoolHealthCheck();
 
         const status = poolHealth.healthy
           ? 'healthy'
@@ -380,7 +379,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
             ? 'unhealthy'
             : 'degraded';
 
-        return {
+        return Promise.resolve({
           name: 'connection-pool',
           status,
           duration: Date.now() - startTime,
@@ -393,15 +392,15 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
                 issues: poolHealth.issues,
               }
             : undefined,
-        };
+        });
       } catch (error) {
-        return {
+        return Promise.resolve({
           name: 'connection-pool',
           status: 'unhealthy',
           duration: Date.now() - startTime,
           timestamp: new Date(),
           error: error instanceof Error ? error.message : String(error),
-        };
+        });
       }
     });
 
@@ -531,7 +530,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
           await this.delay(options.retryDelay);
         }
       } catch (error) {
-        lastError = error;
+        lastError = error as Error;
 
         if (attempt < options.retryAttempts) {
           await this.delay(options.retryDelay);
@@ -656,12 +655,14 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
       60000, // 1 minute
     );
 
-    this.backgroundMonitoring = setInterval(async () => {
-      try {
-        await this.performHealthCheck();
-      } catch (error) {
-        this.logger.error('Background health check failed', error);
-      }
+    this.backgroundMonitoring = setInterval(() => {
+      void (async () => {
+        try {
+          await this.performHealthCheck();
+        } catch (error) {
+          this.logger.error('Background health check failed', error);
+        }
+      })();
     }, interval);
 
     this.logger.debug('Background health monitoring started', { interval });

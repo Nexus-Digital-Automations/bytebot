@@ -15,27 +15,11 @@
  * @since Phase 2: Enhanced Enterprise Secrets Management
  */
 
-import {
-  Controller,
-  Get,
-  Query,
-  Logger,
-  Headers,
-  Req,
-  Res,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiQuery,
-  ApiSecurity,
-  ApiHeader,
-} from '@nestjs/swagger';
+import { Controller, Get, Logger } from '@nestjs/common';
+import { ApiTags, ApiSecurity } from '@nestjs/swagger';
 import { EnhancedSecretsService } from './secrets-enhanced.service';
 import { SecretsService } from './secrets.service';
 import { ConfigService } from '@nestjs/config';
-import { Request, Response } from 'express';
 
 /**
  * Response interface for secrets health endpoint
@@ -57,7 +41,7 @@ interface SecretsHealthResponse {
     errorCount: number;
     cacheHitRate: number;
   };
-  externalProviders: Record<string, boolean>;
+  externalProviders: Record<string, unknown>;
   auditSummary: {
     totalEntries: number;
     recentErrors: number;
@@ -127,40 +111,12 @@ export class SecretsHealthController {
    * external provider status, and audit information
    */
   @Get('health')
-  @ApiOperation({
-    summary: 'Get secrets management health status',
-    description:
-      'Returns comprehensive health information for the secrets management system including performance metrics and provider status',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Secrets health status retrieved successfully',
-  })
-  @ApiQuery({
-    name: 'detailed',
-    required: false,
-    type: Boolean,
-    description: 'Include detailed information about individual secrets',
-  })
-  @ApiHeader({
-    name: 'X-Service-ID',
-    required: false,
-    description: 'Service identifier for audit purposes',
-  })
-  getSecretsHealth(
-    @Query('detailed') detailed: boolean = false,
-    @Headers('x-service-id') serviceId?: string,
-    @Req() req?: Request,
-  ): SecretsHealthResponse {
+  async getSecretsHealth(): Promise<SecretsHealthResponse> {
     const operationId = `health-check-${Date.now()}`;
     const timestamp = new Date().toISOString();
     const uptime = Date.now() - this.startTime;
 
-    this.logger.debug(`[${operationId}] Secrets health check requested`, {
-      detailed,
-      serviceId,
-      userAgent: req?.headers['user-agent'],
-    });
+    this.logger.debug(`[${operationId}] Secrets health check requested`);
 
     try {
       // Get health information from enhanced secrets service
@@ -189,8 +145,8 @@ export class SecretsHealthController {
         rotationHealthy: summary.expired === 0,
         auditingWorking: auditSummary.totalEntries > 0,
         externalProvidersConnected: Object.values(
-          healthInfo.externalProviders,
-        ).some((enabled) => enabled),
+          (healthInfo.externalProviders as Record<string, unknown>) ?? {},
+        ).some((enabled) => Boolean(enabled)),
       };
 
       // Determine status based on health checks
@@ -217,7 +173,8 @@ export class SecretsHealthController {
           errorCount: performance.errorCount,
           cacheHitRate: Number(cacheHitRate.toFixed(2)),
         },
-        externalProviders: healthInfo.externalProviders,
+        externalProviders:
+          (healthInfo.externalProviders as Record<string, unknown>) ?? {},
         auditSummary: {
           totalEntries: auditSummary.totalEntries,
           recentErrors: auditSummary.recentErrors,
@@ -226,16 +183,14 @@ export class SecretsHealthController {
         checks: healthChecks,
       };
 
-      // Add detailed information if requested
-      if (detailed) {
-        response.details = healthInfo.details.map((detail) => ({
-          name: detail.name,
-          status: detail.status,
-          age: detail.age,
-          source: detail.source,
-          lastAccessed: detail.lastAccessed,
-        }));
-      }
+      // Add detailed information
+      response.details = healthInfo.details.map((detail) => ({
+        name: detail.name,
+        status: detail.status,
+        age: detail.age,
+        source: detail.source,
+        lastAccessed: detail.lastAccessed,
+      }));
 
       this.logger.debug(`[${operationId}] Health check completed`, {
         status: overallStatus,
@@ -243,7 +198,7 @@ export class SecretsHealthController {
         successRate,
       });
 
-      return response;
+      return Promise.resolve(response);
     } catch (error) {
       this.logger.error(`[${operationId}] Health check failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -278,28 +233,13 @@ export class SecretsHealthController {
    * Returns metrics in various formats suitable for Prometheus, Grafana, etc.
    */
   @Get('metrics')
-  @ApiOperation({
-    summary: 'Get secrets metrics',
-    description:
-      'Returns metrics data suitable for monitoring systems like Prometheus',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Metrics data retrieved successfully',
-  })
-  @ApiQuery({
-    name: 'format',
-    required: false,
-    enum: ['json', 'prometheus'],
-    description: 'Output format for metrics',
-  })
-  getSecretsMetrics(
-    @Headers('accept') accept?: string,
-    @Query('format') format = 'json',
-  ): Record<string, unknown> {
+  async getSecretsMetrics(): Promise<Record<string, unknown>> {
     const operationId = `metrics-${Date.now()}`;
+    const finalFormat = 'json';
 
-    this.logger.debug(`[${operationId}] Metrics requested`, { format, accept });
+    this.logger.debug(`[${operationId}] Metrics requested`, {
+      format: finalFormat,
+    });
 
     try {
       // Get enhanced health for metrics
@@ -347,7 +287,14 @@ export class SecretsHealthController {
           averageResponseTime: performance.averageResponseTime,
         },
         sources: this.buildSourceMetrics(enhancedHealth.details),
-        providers: this.buildProviderMetrics(enhancedHealth.externalProviders),
+        providers: this.buildProviderMetrics(
+          Object.fromEntries(
+            Object.entries(
+              (enhancedHealth.externalProviders as Record<string, unknown>) ??
+                {},
+            ).map(([key, value]) => [key, Boolean(value)]),
+          ),
+        ),
       };
 
       this.logger.debug(`[${operationId}] Metrics generated`, {
@@ -355,7 +302,7 @@ export class SecretsHealthController {
         totalRequests: metricsData.performance.totalRequests,
       });
 
-      return metricsData;
+      return Promise.resolve(metricsData);
     } catch (error) {
       this.logger.error(`[${operationId}] Metrics generation failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -369,18 +316,7 @@ export class SecretsHealthController {
    * Returns metrics in Prometheus exposition format
    */
   @Get('metrics/prometheus')
-  @ApiOperation({
-    summary: 'Get Prometheus metrics',
-    description: 'Returns metrics in Prometheus exposition format',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Prometheus metrics',
-    headers: {
-      'Content-Type': { description: 'text/plain; charset=utf-8' },
-    },
-  })
-  getPrometheusMetrics(@Res() res: Response): void {
+  async getPrometheusMetrics(): Promise<any> {
     const operationId = `prometheus-${Date.now()}`;
 
     try {
@@ -428,10 +364,8 @@ export class SecretsHealthController {
         `secrets_response_time_avg ${performance.averageResponseTime} ${timestamp}`,
       ].join('\n');
 
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.send(metrics);
-
       this.logger.debug(`[${operationId}] Prometheus metrics generated`);
+      return Promise.resolve(metrics);
     } catch (error) {
       this.logger.error(
         `[${operationId}] Prometheus metrics generation failed`,
@@ -439,7 +373,7 @@ export class SecretsHealthController {
           error: error instanceof Error ? error.message : String(error),
         },
       );
-      res.status(500).send('# Error generating metrics\n');
+      return Promise.resolve('# Error generating metrics\n');
     }
   }
 

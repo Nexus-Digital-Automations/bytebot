@@ -12,6 +12,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { OpenAIService } from '../openai.service';
+import { SecretsService } from '../../config/secrets.service';
 import { Logger } from '@nestjs/common';
 import { Message, MessageRole } from '@prisma/client';
 import {
@@ -44,8 +45,8 @@ describe('OpenAIService - Integration Tests', () => {
       ],
       createdAt: new Date(),
       updatedAt: new Date(),
-      taskId: null,
-      userId: null,
+      taskId: 'task-1',
+      summaryId: null,
     },
   ];
 
@@ -62,7 +63,7 @@ describe('OpenAIService - Integration Tests', () => {
     (OpenAI as jest.MockedClass<typeof OpenAI>).mockImplementation(
       () => mockOpenAIInstance as any,
     );
-    mockOpenAI = mockOpenAIInstance as jest.Mocked<OpenAI>;
+    mockOpenAI = mockOpenAIInstance as unknown as jest.Mocked<OpenAI>;
 
     module = await Test.createTestingModule({
       providers: [
@@ -78,6 +79,12 @@ describe('OpenAIService - Integration Tests', () => {
                   return undefined;
               }
             }),
+          },
+        },
+        {
+          provide: SecretsService,
+          useValue: {
+            getSecret: jest.fn().mockReturnValue(mockApiKey),
           },
         },
       ],
@@ -98,10 +105,10 @@ describe('OpenAIService - Integration Tests', () => {
   });
 
   describe('Service Initialization', () => {
-    it('should initialize with valid API key', () => {
+    it('should initialize with dummy key for deferred authentication', () => {
       expect(service).toBeDefined();
       expect(OpenAI).toHaveBeenCalledWith({
-        apiKey: mockApiKey,
+        apiKey: 'dummy-key-for-initialization',
       });
     });
 
@@ -114,6 +121,12 @@ describe('OpenAIService - Integration Tests', () => {
             provide: ConfigService,
             useValue: {
               get: jest.fn().mockReturnValue(undefined),
+            },
+          },
+          {
+            provide: SecretsService,
+            useValue: {
+              getSecret: jest.fn().mockReturnValue(undefined),
             },
           },
         ],
@@ -129,8 +142,8 @@ describe('OpenAIService - Integration Tests', () => {
       await testModule.close();
     });
 
-    it('should log warning when API key is not configured', async () => {
-      const loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn');
+    it('should log error when API key is not configured and generateMessage is called', async () => {
+      const loggerErrorSpy = jest.spyOn(Logger.prototype, 'error');
 
       const testModule = await Test.createTestingModule({
         providers: [
@@ -141,11 +154,26 @@ describe('OpenAIService - Integration Tests', () => {
               get: jest.fn().mockReturnValue(undefined),
             },
           },
+          {
+            provide: SecretsService,
+            useValue: {
+              getSecret: jest.fn().mockReturnValue(undefined),
+            },
+          },
         ],
       }).compile();
 
-      expect(loggerWarnSpy).toHaveBeenCalledWith(
-        'OPENAI_API_KEY is not set. OpenAIService will not work properly.',
+      const testService = testModule.get<OpenAIService>(OpenAIService);
+
+      // This should trigger the error when trying to get the API key
+      await expect(
+        testService.generateMessage('Test prompt', mockMessages),
+      ).rejects.toThrow('OPENAI_API_KEY is not configured');
+
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'OPENAI_API_KEY not found in secrets or configuration',
+        ),
       );
 
       await testModule.close();
@@ -201,14 +229,14 @@ describe('OpenAIService - Integration Tests', () => {
 
       expect(mockOpenAI.responses.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          model: expect.any(String),
+          model: 'o3-2025-04-16', // Default model is o-series which uses reasoning
           max_output_tokens: 8192,
           instructions: mockSystemPrompt,
           input: expect.any(Array),
           tools: expect.any(Array),
-          reasoning: null,
+          reasoning: { effort: 'medium' }, // o-series models use reasoning
           store: false,
-          include: [],
+          include: ['reasoning.encrypted_content'], // o-series models include reasoning
         }),
         { signal: undefined },
       );
@@ -363,7 +391,7 @@ describe('OpenAIService - Integration Tests', () => {
 
       await expect(
         service.generateMessage(mockSystemPrompt, mockMessages),
-      ).rejects.toThrow(BytebotAgentInterrupt);
+      ).rejects.toBeInstanceOf(BytebotAgentInterrupt);
 
       expect(Logger.prototype.log).toHaveBeenCalledWith(
         'OpenAI API call aborted',
@@ -449,8 +477,8 @@ describe('OpenAIService - Integration Tests', () => {
           ],
           createdAt: new Date(),
           updatedAt: new Date(),
-          taskId: null,
-          userId: null,
+          taskId: 'test-task-id',
+          summaryId: null,
         },
       ];
 
@@ -499,8 +527,8 @@ describe('OpenAIService - Integration Tests', () => {
           ],
           createdAt: new Date(),
           updatedAt: new Date(),
-          taskId: null,
-          userId: null,
+          taskId: 'test-task-id',
+          summaryId: null,
         },
       ];
 
@@ -546,8 +574,8 @@ describe('OpenAIService - Integration Tests', () => {
           ],
           createdAt: new Date(),
           updatedAt: new Date(),
-          taskId: null,
-          userId: null,
+          taskId: 'test-task-id',
+          summaryId: null,
         },
       ];
 
@@ -582,8 +610,8 @@ describe('OpenAIService - Integration Tests', () => {
           ],
           createdAt: new Date(),
           updatedAt: new Date(),
-          taskId: null,
-          userId: null,
+          taskId: 'test-task-id',
+          summaryId: null,
         },
       ];
 
@@ -618,8 +646,8 @@ describe('OpenAIService - Integration Tests', () => {
           ],
           createdAt: new Date(),
           updatedAt: new Date(),
-          taskId: null,
-          userId: null,
+          taskId: 'test-task-id',
+          summaryId: null,
         },
       ];
 
@@ -694,7 +722,7 @@ describe('OpenAIService - Integration Tests', () => {
       const endTime = Date.now();
 
       expect(endTime - startTime).toBeGreaterThan(90);
-      expect(result.contentBlocks[0].text).toBe('Delayed response');
+      expect((result.contentBlocks[0] as any).text).toBe('Delayed response');
     });
   });
 
@@ -841,8 +869,8 @@ describe('OpenAIService - Integration Tests', () => {
           ],
           createdAt: new Date(),
           updatedAt: new Date(),
-          taskId: null,
-          userId: null,
+          taskId: 'task-' + i.toString(),
+          summaryId: null,
         }),
       );
 

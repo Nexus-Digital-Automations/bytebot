@@ -87,11 +87,13 @@ describe('RolesGuard', () => {
     ],
   };
 
+  // Note: API_CONSUMER role removed as it doesn't exist in Prisma schema
+  // Using VIEWER role for API consumer tests
   const apiConsumerUser = {
     id: 'api-consumer-123',
     email: 'api@example.com',
     username: 'api-consumer',
-    role: UserRole.API_CONSUMER,
+    role: UserRole.VIEWER,
     isActive: true,
     permissions: [
       { id: 'perm-8', name: 'api:access', description: 'Access API' },
@@ -143,7 +145,7 @@ describe('RolesGuard', () => {
         reflector.getAllAndOverride.mockReturnValue([UserRole.ADMIN]);
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true);
@@ -162,7 +164,7 @@ describe('RolesGuard', () => {
         ]);
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true);
@@ -185,7 +187,7 @@ describe('RolesGuard', () => {
         reflector.getAllAndOverride.mockReturnValue(undefined);
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true);
@@ -197,7 +199,7 @@ describe('RolesGuard', () => {
         reflector.getAllAndOverride.mockReturnValue([]);
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true);
@@ -213,7 +215,7 @@ describe('RolesGuard', () => {
           .mockReturnValueOnce(['task:write']); // Permissions required
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true);
@@ -227,7 +229,7 @@ describe('RolesGuard', () => {
           .mockReturnValueOnce(['task:write', 'computer:view']); // One permission matches
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true);
@@ -254,7 +256,7 @@ describe('RolesGuard', () => {
           .mockReturnValueOnce(undefined); // No permissions required
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true);
@@ -282,7 +284,7 @@ describe('RolesGuard', () => {
           .mockReturnValueOnce(['system:admin']); // Has permission
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true);
@@ -295,18 +297,18 @@ describe('RolesGuard', () => {
         const adminContext = createMockExecutionContext(adminUser);
         reflector.getAllAndOverride.mockReturnValue([UserRole.OPERATOR]);
 
-        let result = await guard.canActivate(adminContext);
+        let result = guard.canActivate(adminContext);
         expect(result).toBe(true);
 
         // Admin can access viewer routes
         reflector.getAllAndOverride.mockReturnValue([UserRole.VIEWER]);
-        result = await guard.canActivate(adminContext);
+        result = guard.canActivate(adminContext);
         expect(result).toBe(true);
 
         // Operator can access viewer routes
         const operatorContext = createMockExecutionContext(operatorUser);
         reflector.getAllAndOverride.mockReturnValue([UserRole.VIEWER]);
-        result = await guard.canActivate(operatorContext);
+        result = guard.canActivate(operatorContext);
         expect(result).toBe(true);
       });
 
@@ -330,25 +332,25 @@ describe('RolesGuard', () => {
     });
 
     describe('API consumer role handling', () => {
-      it('should handle API_CONSUMER role with specific permissions', async () => {
-        // Arrange
+      it('should handle VIEWER role with specific permissions', async () => {
+        // Arrange: Using VIEWER role since API_CONSUMER doesn't exist in schema
         const context = createMockExecutionContext(apiConsumerUser);
         reflector.getAllAndOverride
-          .mockReturnValueOnce([UserRole.API_CONSUMER])
+          .mockReturnValueOnce([UserRole.VIEWER])
           .mockReturnValueOnce(['api:access']);
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true);
       });
 
-      it('should deny API_CONSUMER access to non-API permissions', async () => {
-        // Arrange
+      it('should deny VIEWER access to non-API permissions', async () => {
+        // Arrange: Using VIEWER role since API_CONSUMER doesn't exist in schema
         const context = createMockExecutionContext(apiConsumerUser);
         reflector.getAllAndOverride
-          .mockReturnValueOnce([UserRole.API_CONSUMER])
+          .mockReturnValueOnce([UserRole.VIEWER])
           .mockReturnValueOnce(['task:execute']);
 
         // Act & Assert
@@ -435,7 +437,7 @@ describe('RolesGuard', () => {
           .mockReturnValueOnce(['task:read']);
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true); // Should still work with valid permission
@@ -450,7 +452,7 @@ describe('RolesGuard', () => {
         reflector.getAllAndOverride.mockReturnValue([UserRole.ADMIN]);
 
         // Act
-        await guard.canActivate(context);
+        guard.canActivate(context);
 
         // Assert
         expect(loggerSpy).toHaveBeenCalledWith(
@@ -519,7 +521,7 @@ describe('RolesGuard', () => {
 
         // Act
         const startTime = Date.now();
-        await guard.canActivate(context);
+        guard.canActivate(context);
         const duration = Date.now() - startTime;
 
         // Assert - should complete within 50ms for unit test
@@ -563,7 +565,7 @@ describe('RolesGuard', () => {
 
         // Act
         const startTime = Date.now();
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
         const duration = Date.now() - startTime;
 
         // Assert

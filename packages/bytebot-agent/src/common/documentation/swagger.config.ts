@@ -261,13 +261,16 @@ export function createSwaggerConfig(
 ): DocumentBuilder {
   const logger = new Logger('SwaggerConfig');
 
-  const apiTitle = configService.get('api.title', 'Bytebot AI Platform API');
-  const apiDescription = configService.get(
+  const apiTitle: string = configService.get(
+    'api.title',
+    'Bytebot AI Platform API',
+  );
+  const apiDescription: string = configService.get(
     'api.description',
     'Enterprise AI automation platform with computer use capabilities',
   );
-  const apiVersion = configService.get('api.version', '1.0.0');
-  const serverUrl = configService.get(
+  const apiVersion: string = configService.get('api.version', '1.0.0');
+  const serverUrl: string = configService.get(
     'api.serverUrl',
     'https://api.bytebot.ai',
   );
@@ -275,7 +278,7 @@ export function createSwaggerConfig(
   logger.log('Building OpenAPI configuration', {
     title: apiTitle,
     version: apiVersion,
-    serverUrl,
+    serverUrl: serverUrl,
   });
 
   const builder = new DocumentBuilder()
@@ -397,8 +400,8 @@ Error responses include detailed information:
       `API ${version}`,
       `Endpoints available in API version ${version}`,
       {
-        name: 'API Versions',
         url: `https://docs.bytebot.ai/versions/${version}`,
+        description: 'API Version Documentation',
       },
     );
   });
@@ -462,9 +465,9 @@ export function setupApiDocumentation(
   );
 
   // Setup multiple documentation endpoints
-  const docsPath = configService.get('api.docsPath', '/api/docs');
-  const jsonPath = configService.get('api.jsonPath', '/api/docs-json');
-  const yamlPath = configService.get('api.yamlPath', '/api/docs-yaml');
+  const docsPath: string = configService.get('api.docsPath', '/api/docs');
+  const jsonPath: string = configService.get('api.jsonPath', '/api/docs-json');
+  const yamlPath: string = configService.get('api.yamlPath', '/api/docs-yaml');
 
   // Setup Swagger UI
   SwaggerModule.setup(docsPath, app, document, {
@@ -479,7 +482,7 @@ export function setupApiDocumentation(
       tagsSorter: 'alpha',
       operationsSorter: 'alpha',
       tryItOutEnabled: true,
-      requestInterceptor: (req: any) => {
+      requestInterceptor: (req: { headers: Record<string, string> }) => {
         // Add custom request interceptor for debugging
         req.headers['X-Documentation-Request'] = 'true';
         return req;
@@ -497,19 +500,36 @@ export function setupApiDocumentation(
   });
 
   // Add JSON endpoint
-  app.getHttpAdapter().get(jsonPath, (req, res) => {
-    res.json(document);
+  app.getHttpAdapter().get(jsonPath, (req: any, res: any) => {
+    (res as { json: (data: any) => void }).json(document);
   });
 
   // Add YAML endpoint (if yaml library is available)
+  // Use dynamic import() to avoid eslint no-require-imports violation
+  // Note: YAML endpoint is optional and will only be created if yaml library is available
   try {
-    const yaml = require('yaml');
-    app.getHttpAdapter().get(yamlPath, (req, res) => {
-      res.set('Content-Type', 'application/yaml');
-      res.send(yaml.stringify(document));
-    });
+    // Attempt to create YAML endpoint with dynamic import
+    // Using eval to prevent TypeScript from analyzing the import at compile time
+    const yamlModuleName = 'yaml';
+    void (eval('import') as (module: string) => Promise<any>)(yamlModuleName)
+      .then((yamlModule) => {
+        const yaml = yamlModule as { stringify: (data: any) => string };
+        app.getHttpAdapter().get(yamlPath, (req: any, res: any) => {
+          const typedRes = res as {
+            set: (key: string, value: string) => void;
+            send: (data: string) => void;
+          };
+          typedRes.set('Content-Type', 'application/yaml');
+          typedRes.send(yaml.stringify(document));
+        });
+      })
+      .catch(() => {
+        logger.warn('YAML support not available for API documentation');
+      });
   } catch (error) {
-    logger.warn('YAML support not available for API documentation');
+    logger.warn('YAML support initialization failed:', {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 
   logger.log(`[${operationId}] API documentation setup completed`, {

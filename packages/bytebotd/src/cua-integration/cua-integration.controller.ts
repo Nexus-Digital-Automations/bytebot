@@ -31,7 +31,12 @@ import {
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { OperatorOrAdmin, Authenticated, CurrentUser, ByteBotdUser } from '../auth/decorators/roles.decorator';
+import {
+  OperatorOrAdmin,
+  Authenticated,
+  CurrentUser,
+  ByteBotdUser,
+} from '../auth/decorators/roles.decorator';
 import { CuaIntegrationService } from './cua-integration.service';
 import {
   CuaVisionService,
@@ -155,7 +160,7 @@ export class CuaIntegrationController {
    */
   @Get('status')
   @Authenticated()
-  getFrameworkStatus(@CurrentUser() user: ByteBotdUser) {
+  getFrameworkStatus(@CurrentUser() _user: ByteBotdUser) {
     try {
       const frameworkStatus = this.cuaIntegrationService.getFrameworkStatus();
       const bridgeHealth = this.bridgeService.getHealthStatus();
@@ -200,7 +205,7 @@ export class CuaIntegrationController {
    */
   @Get('health')
   @Authenticated()
-  healthCheck(@CurrentUser() user: ByteBotdUser) {
+  healthCheck(@CurrentUser() _user: ByteBotdUser) {
     const frameworkEnabled = this.cuaIntegrationService.isFrameworkEnabled();
     const bridgeHealthy = this.bridgeService.isHealthy();
     const systemHealthy = this.performanceService.isSystemHealthy();
@@ -230,7 +235,10 @@ export class CuaIntegrationController {
    */
   @Post('vision/ocr')
   @OperatorOrAdmin()
-  async performOcr(@Body() request: OcrRequestDto, @CurrentUser() user: ByteBotdUser): Promise<{
+  async performOcr(
+    @Body() request: OcrRequestDto,
+    @CurrentUser() _user: ByteBotdUser,
+  ): Promise<{
     success: boolean;
     result?: OcrResult;
     error?: string;
@@ -319,7 +327,7 @@ export class CuaIntegrationController {
   @OperatorOrAdmin()
   getPerformanceMetrics(
     @Query('timeRange') timeRange: string = '60', // minutes
-    @CurrentUser() user: ByteBotdUser,
+    @CurrentUser() _user: ByteBotdUser,
   ) {
     try {
       const timeRangeMinutes = parseInt(timeRange, 10) || 60;
@@ -372,7 +380,7 @@ export class CuaIntegrationController {
    */
   @Get('capabilities')
   @Authenticated()
-  getCapabilities(@CurrentUser() user: ByteBotdUser) {
+  getCapabilities(@CurrentUser() _user: ByteBotdUser) {
     try {
       const frameworkConfig = this.cuaIntegrationService.getConfiguration();
       const visionCapabilities = this.visionService.getCapabilities();

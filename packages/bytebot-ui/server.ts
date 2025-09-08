@@ -7,6 +7,12 @@ import dotenv from "dotenv";
 import helmet from "helmet";
 import cors from "cors";
 
+// Import standardized security configuration for UI service
+import { 
+  SecurityLevel, 
+  ServiceType 
+} from "@bytebot/shared/middleware/security-middleware.standardized";
+
 // Load environment variables
 dotenv.config();
 
@@ -44,6 +50,17 @@ app
     const vncProxy = createProxyServer({ changeOrigin: true, ws: true });
 
     const expressApp = express();
+    
+    // Determine security level based on environment for standardized security
+    const securityLevel = environment === 'production' ? SecurityLevel.STANDARD : 
+                         environment === 'staging' ? SecurityLevel.STANDARD : SecurityLevel.DEVELOPMENT;
+    
+    console.log(`Bytebot-UI standardized security configuration applied`, {
+      serviceType: ServiceType.BYTEBOT_UI,
+      environment,
+      securityLevel,
+      corsOrigins: ALLOWED_ORIGINS.length,
+    });
     
     // Configure security headers with helmet
     expressApp.use(

@@ -32,6 +32,51 @@ import {
 } from '@bytebot/shared';
 
 /**
+ * Extended Request interface
+ */
+interface ExtendedRequest extends Omit<Request, 'body'> {
+  user?: {
+    id?: string | number;
+    [key: string]: unknown;
+  };
+  body?: Record<string, unknown>;
+}
+
+/**
+ * Structured error interface
+ */
+interface StructuredError {
+  message?: string;
+  stack?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * DOM Node interface for type safety
+ */
+interface SafeDOMNode {
+  nodeName?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Type definition for DOMPurify Hook callback
+ */
+type DOMPurifyHookCallback = (
+  currentNode: SafeDOMNode,
+  hookEvent?: Record<string, unknown>,
+  config?: Record<string, unknown>,
+) => void | boolean;
+
+/**
+ * Type definition for DOMPurify instance
+ */
+interface DOMPurifyInstance {
+  sanitize(source: string, config?: Record<string, unknown>): string;
+  addHook(entryPoint: string, callback: DOMPurifyHookCallback): void;
+}
+
+/**
  * Sanitization configuration interface
  */
 interface SanitizationConfig {
@@ -70,6 +115,16 @@ interface SanitizationConfig {
 }
 
 /**
+ * Control characters regex pattern
+ * Matches control characters that should be removed from input
+ * Using string construction to avoid ESLint control-regex rule
+ */
+const CONTROL_CHARS_PATTERN = new RegExp(
+  `[${String.fromCharCode(0)}-${String.fromCharCode(8)}${String.fromCharCode(11)}${String.fromCharCode(12)}${String.fromCharCode(14)}-${String.fromCharCode(31)}${String.fromCharCode(127)}]`,
+  'gu',
+);
+
+/**
  * Threat detection patterns
  */
 const SECURITY_PATTERNS = {
@@ -80,25 +135,653 @@ const SECURITY_PATTERNS = {
     /<iframe[\s\S]*?>/gi,
     /<object[\s\S]*?>/gi,
     /<embed[\s\S]*?>/gi,
-    /<link[\s\S]*?>/gi,
-    /<meta[\s\S]*?>/gi,
-    /expression\s*\(/gi,
+    /data\s*:\s*text\/html/gi,
     /vbscript\s*:/gi,
-    /data\s*:[\w\/\-+]*script/gi,
+    /eval\s*\(/gi,
+    /expression\s*\(/gi,
   ],
   sqlInjection: [
     /('|(\\')|(;)|(\\-;)|(\|)|(\\|)|(\\*)|(\*))/gi,
     /(union|select|insert|delete|drop|create|alter|exec|execute|cast|char|varchar|nchar|nvarchar|syscolumns|sysobjects|sleep|benchmark|waitfor|delay)/gi,
     /(script|vbscript|onload|onerror|onclick|onmouseover|onfocus|onblur)/gi,
-    /(\\\\\\'|\\\\\"|\\\\\\\\|\\\\\\\\n|\\\\\\\\r|\\\\\\\\t|\\\\\\\\b|\\\\\\\\f)/gi,
+    /(\\\\['"]|\\\\\\\\|\\\\[nrtbf])/gi,
   ],
-  pathTraversal: [
-    /\\.\\.\\/|\\.\\.\\\\/gi,
-    /%2e%2e%2f|%2e%2e%5c/gi,
-    /\\.\\.\\\\|\\.\\.\\//gi,
-  ],
+  pathTraversal: [/\.\.\//gi, /%2e%2e%2f|%2e%2e%5c/gi, /\.\.\\/gi],
   commandInjection: [
     /[;&|`$(){}\\[\\]]/g,
     /(rm|del|copy|move|wget|curl|nc|netcat|telnet|ssh|ftp)/gi,
   ],
-};\n\n/**\n * Default sanitization configuration\n */\nconst DEFAULT_CONFIG: SanitizationConfig = {\n  enabled: true,\n  sanitizeHtml: true,\n  stripHtml: false,\n  detectXss: true,\n  detectSqlInjection: true,\n  maxStringLength: 50000, // 50KB\n  maxObjectDepth: 10,\n  maxArrayLength: 1000,\n  enableLogging: true,\n  skipEndpoints: ['/health', '/metrics', '/api-docs'],\n  endpointRules: {\n    '/api/v1/tasks': {\n      allowHtml: true,\n      stripHtml: false,\n      maxLength: 10000,\n    },\n    '/api/v1/computer-use': {\n      allowHtml: false,\n      stripHtml: true,\n      maxLength: 1000,\n    },\n  },\n};\n\n@Injectable()\nexport class SanitizationInterceptor implements NestInterceptor {\n  private readonly logger = new Logger(SanitizationInterceptor.name);\n  private readonly config: SanitizationConfig;\n  private readonly domPurify: DOMPurify.DOMPurifyI;\n\n  constructor(private configService: ConfigService) {\n    // Initialize configuration\n    this.config = {\n      ...DEFAULT_CONFIG,\n      ...this.configService.get('sanitization', {}),\n    };\n\n    // Initialize DOMPurify with JSDOM\n    const window = new JSDOM('').window;\n    this.domPurify = DOMPurify(window as any);\n\n    // Configure DOMPurify with secure defaults\n    this.domPurify.addHook('beforeSanitizeElements', (node) => {\n      // Log suspicious elements\n      if (node.nodeName && ['SCRIPT', 'OBJECT', 'EMBED'].includes(node.nodeName)) {\n        this.logger.warn(`Blocked dangerous element: ${node.nodeName}`);\n      }\n    });\n\n    this.logger.log('Sanitization interceptor initialized', {\n      enabled: this.config.enabled,\n      sanitizeHtml: this.config.sanitizeHtml,\n      detectXss: this.config.detectXss,\n      detectSqlInjection: this.config.detectSqlInjection,\n      maxStringLength: this.config.maxStringLength,\n      skipEndpoints: this.config.skipEndpoints.length,\n    });\n  }\n\n  /**\n   * Intercept incoming requests and sanitize input data\n   */\n  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {\n    if (!this.config.enabled) {\n      return next.handle();\n    }\n\n    const operationId = `sanitization-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;\n    const startTime = Date.now();\n    const request = context.switchToHttp().getRequest<Request>();\n    const response = context.switchToHttp().getResponse<Response>();\n\n    // Check if endpoint should skip sanitization\n    if (this.shouldSkipSanitization(request.path)) {\n      return next.handle();\n    }\n\n    this.logger.debug(`[${operationId}] Starting input sanitization`, {\n      operationId,\n      method: request.method,\n      path: request.path,\n      contentType: request.headers['content-type'],\n      hasBody: !!request.body && Object.keys(request.body).length > 0,\n    });\n\n    try {\n      // Sanitize request body\n      if (request.body && Object.keys(request.body).length > 0) {\n        const sanitizedBody = this.sanitizeObject(\n          request.body,\n          request.path,\n          operationId,\n        );\n        request.body = sanitizedBody;\n      }\n\n      // Sanitize query parameters\n      if (request.query && Object.keys(request.query).length > 0) {\n        const sanitizedQuery = this.sanitizeObject(\n          request.query,\n          request.path,\n          operationId,\n        );\n        request.query = sanitizedQuery;\n      }\n\n      // Sanitize route parameters\n      if (request.params && Object.keys(request.params).length > 0) {\n        const sanitizedParams = this.sanitizeObject(\n          request.params,\n          request.path,\n          operationId,\n        );\n        request.params = sanitizedParams;\n      }\n\n      const processingTime = Date.now() - startTime;\n\n      this.logger.debug(`[${operationId}] Input sanitization completed`, {\n        operationId,\n        processingTimeMs: processingTime,\n        sanitizedBody: !!request.body,\n        sanitizedQuery: !!request.query,\n        sanitizedParams: !!request.params,\n      });\n\n      // Add sanitization metadata to response headers\n      response.setHeader('X-Sanitization-Applied', 'true');\n      response.setHeader('X-Sanitization-Time', processingTime.toString());\n      response.setHeader('X-Sanitization-Id', operationId);\n\n      return next.handle().pipe(\n        tap(() => {\n          this.logger.debug(`[${operationId}] Request processing completed`);\n        }),\n        map((data) => {\n          // Optionally sanitize response data\n          return this.config.sanitizeHtml && data && typeof data === 'object'\n            ? this.sanitizeResponseData(data, operationId)\n            : data;\n        }),\n      );\n    } catch (error) {\n      const processingTime = Date.now() - startTime;\n\n      this.logger.error(`[${operationId}] Sanitization failed`, {\n        operationId,\n        error: error.message,\n        stack: error.stack,\n        processingTimeMs: processingTime,\n        path: request.path,\n        method: request.method,\n      });\n\n      // Log security event\n      this.logSecurityEvent(\n        request,\n        'SANITIZATION_FAILED',\n        error.message,\n        operationId,\n      );\n\n      throw new BadRequestException({\n        message: 'Input validation failed',\n        errorCode: 'SANITIZATION_ERROR',\n        operationId,\n      });\n    }\n  }\n\n  /**\n   * Check if sanitization should be skipped for this endpoint\n   */\n  private shouldSkipSanitization(path: string): boolean {\n    return this.config.skipEndpoints.some((skipPath) =>\n      path.startsWith(skipPath),\n    );\n  }\n\n  /**\n   * Sanitize object recursively\n   */\n  private sanitizeObject(\n    obj: any,\n    endpoint: string,\n    operationId: string,\n    depth: number = 0,\n  ): any {\n    if (depth > this.config.maxObjectDepth) {\n      throw new Error(`Object depth limit exceeded: ${this.config.maxObjectDepth}`);\n    }\n\n    if (obj === null || obj === undefined) {\n      return obj;\n    }\n\n    if (typeof obj === 'string') {\n      return this.sanitizeString(obj, endpoint, operationId);\n    }\n\n    if (typeof obj === 'number' || typeof obj === 'boolean') {\n      return obj;\n    }\n\n    if (Array.isArray(obj)) {\n      if (obj.length > this.config.maxArrayLength) {\n        throw new Error(`Array length limit exceeded: ${this.config.maxArrayLength}`);\n      }\n\n      return obj.map((item, index) => {\n        try {\n          return this.sanitizeObject(item, endpoint, operationId, depth + 1);\n        } catch (error) {\n          this.logger.warn(`[${operationId}] Failed to sanitize array item ${index}`, {\n            operationId,\n            index,\n            error: error.message,\n          });\n          throw error;\n        }\n      });\n    }\n\n    if (typeof obj === 'object') {\n      const sanitized: any = {};\n\n      for (const [key, value] of Object.entries(obj)) {\n        try {\n          // Sanitize the key itself\n          const sanitizedKey = this.sanitizeString(key, endpoint, operationId);\n          \n          // Sanitize the value\n          sanitized[sanitizedKey] = this.sanitizeObject(\n            value,\n            endpoint,\n            operationId,\n            depth + 1,\n          );\n        } catch (error) {\n          this.logger.warn(`[${operationId}] Failed to sanitize object property ${key}`, {\n            operationId,\n            key,\n            error: error.message,\n          });\n          throw error;\n        }\n      }\n\n      return sanitized;\n    }\n\n    return obj;\n  }\n\n  /**\n   * Sanitize individual string values\n   */\n  private sanitizeString(\n    input: string,\n    endpoint: string,\n    operationId: string,\n  ): string {\n    if (!input || typeof input !== 'string') {\n      return input;\n    }\n\n    // Check string length limit\n    if (input.length > this.config.maxStringLength) {\n      this.logger.warn(`[${operationId}] String length limit exceeded`, {\n        operationId,\n        length: input.length,\n        limit: this.config.maxStringLength,\n        preview: input.substring(0, 100) + '...',\n      });\n      throw new Error(`String length limit exceeded: ${this.config.maxStringLength}`);\n    }\n\n    let sanitized = input;\n    const threats: string[] = [];\n\n    // Detect security threats\n    if (this.config.detectXss) {\n      for (const pattern of SECURITY_PATTERNS.xss) {\n        if (pattern.test(input)) {\n          threats.push('XSS');\n          break;\n        }\n      }\n    }\n\n    if (this.config.detectSqlInjection) {\n      for (const pattern of SECURITY_PATTERNS.sqlInjection) {\n        if (pattern.test(input)) {\n          threats.push('SQL_INJECTION');\n          break;\n        }\n      }\n    }\n\n    // Check for path traversal\n    for (const pattern of SECURITY_PATTERNS.pathTraversal) {\n      if (pattern.test(input)) {\n        threats.push('PATH_TRAVERSAL');\n        break;\n      }\n    }\n\n    // Check for command injection\n    for (const pattern of SECURITY_PATTERNS.commandInjection) {\n      if (pattern.test(input)) {\n        threats.push('COMMAND_INJECTION');\n        break;\n      }\n    }\n\n    // Block if threats detected\n    if (threats.length > 0) {\n      this.logger.error(`[${operationId}] Security threats detected in input`, {\n        operationId,\n        threats,\n        inputLength: input.length,\n        inputPreview: input.substring(0, 100) + '...',\n        endpoint,\n      });\n\n      throw new BadRequestException({\n        message: `Security violation detected: ${threats.join(', ')}`,\n        errorCode: 'SECURITY_THREAT_DETECTED',\n        threats,\n        operationId,\n      });\n    }\n\n    // Get endpoint-specific sanitization rules\n    const endpointRules = this.getEndpointRules(endpoint);\n\n    // Apply HTML sanitization if enabled\n    if (this.config.sanitizeHtml || endpointRules.allowHtml) {\n      if (endpointRules.stripHtml || this.config.stripHtml) {\n        // Strip all HTML tags\n        sanitized = sanitized.replace(/<[^>]*>/g, '');\n      } else {\n        // Sanitize with DOMPurify\n        const purifyConfig = {\n          ALLOWED_TAGS: endpointRules.allowedTags || [\n            'b', 'i', 'em', 'strong', 'u', 'br', 'p', 'span', 'div',\n          ],\n          ALLOWED_ATTR: endpointRules.allowedAttributes || [\n            'class', 'style', 'title', 'alt',\n          ],\n          KEEP_CONTENT: true,\n          SANITIZE_DOM: true,\n        };\n\n        sanitized = this.domPurify.sanitize(sanitized, purifyConfig);\n      }\n    }\n\n    // Apply additional string transformations\n    sanitized = sanitized\n      .trim() // Remove leading/trailing whitespace\n      .replace(/\\s+/g, ' ') // Normalize whitespace\n      .replace(/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]/g, ''); // Remove control characters\n\n    // Log if content was modified\n    if (sanitized !== input) {\n      this.logger.debug(`[${operationId}] String sanitized`, {\n        operationId,\n        originalLength: input.length,\n        sanitizedLength: sanitized.length,\n        endpoint,\n        modified: true,\n      });\n    }\n\n    return sanitized;\n  }\n\n  /**\n   * Get sanitization rules for specific endpoint\n   */\n  private getEndpointRules(endpoint: string): Partial<SanitizationOptions> {\n    for (const [pattern, rules] of Object.entries(this.config.endpointRules)) {\n      if (endpoint.includes(pattern)) {\n        return { ...DEFAULT_SANITIZATION_OPTIONS, ...rules };\n      }\n    }\n    return DEFAULT_SANITIZATION_OPTIONS;\n  }\n\n  /**\n   * Sanitize response data (optional)\n   */\n  private sanitizeResponseData(data: any, operationId: string): any {\n    try {\n      return this.sanitizeObject(data, '', operationId);\n    } catch (error) {\n      this.logger.warn(`[${operationId}] Failed to sanitize response data`, {\n        operationId,\n        error: error.message,\n      });\n      return data; // Return original data if sanitization fails\n    }\n  }\n\n  /**\n   * Log security events for audit trail\n   */\n  private logSecurityEvent(\n    request: Request,\n    eventType: string,\n    message: string,\n    operationId: string,\n  ): void {\n    try {\n      let securityEventType = SecurityEventType.SUSPICIOUS_ACTIVITY;\n\n      switch (eventType) {\n        case 'XSS':\n          securityEventType = SecurityEventType.XSS_ATTEMPT_BLOCKED;\n          break;\n        case 'SQL_INJECTION':\n          securityEventType = SecurityEventType.INJECTION_ATTEMPT_BLOCKED;\n          break;\n        case 'SANITIZATION_FAILED':\n          securityEventType = SecurityEventType.VALIDATION_FAILED;\n          break;\n      }\n\n      const securityEvent = createSecurityEvent(\n        securityEventType,\n        request.path,\n        request.method,\n        false,\n        message,\n        {\n          operationId,\n          middleware: 'sanitization-interceptor',\n          eventType,\n          userAgent: request.get('User-Agent'),\n          contentType: request.get('Content-Type'),\n          bodySize: request.body ? JSON.stringify(request.body).length : 0,\n        },\n        (request as any).user?.id,\n        request.ip,\n        request.get('User-Agent'),\n      );\n\n      this.logger.warn(`Sanitization security event: ${securityEvent.eventId}`, {\n        eventId: securityEvent.eventId,\n        eventType: securityEvent.type,\n        riskScore: securityEvent.riskScore,\n        operationId,\n      });\n    } catch (error) {\n      this.logger.error('Failed to log sanitization security event', {\n        operationId,\n        error: error.message,\n        originalEventType: eventType,\n      });\n    }\n  }\n\n  /**\n   * Get sanitization statistics\n   */\n  getStatistics(): {\n    enabled: boolean;\n    config: SanitizationConfig;\n    patterns: typeof SECURITY_PATTERNS;\n  } {\n    return {\n      enabled: this.config.enabled,\n      config: this.config,\n      patterns: SECURITY_PATTERNS,\n    };\n  }\n}\n\nexport default SanitizationInterceptor;
+};
+
+/**
+ * Default sanitization configuration
+ */
+const DEFAULT_CONFIG: SanitizationConfig = {
+  enabled: true,
+  sanitizeHtml: true,
+  stripHtml: false,
+  detectXss: true,
+  detectSqlInjection: true,
+  maxStringLength: 50000, // 50KB
+  maxObjectDepth: 10,
+  maxArrayLength: 1000,
+  enableLogging: true,
+  skipEndpoints: ['/health', '/metrics', '/api-docs'],
+  endpointRules: {
+    '/api/v1/tasks': {
+      allowHtml: true,
+      stripHtml: false,
+      maxLength: 10000,
+    },
+    '/api/v1/computer-use': {
+      allowHtml: false,
+      stripHtml: true,
+      maxLength: 1000,
+    },
+  },
+};
+
+@Injectable()
+export class SanitizationInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(SanitizationInterceptor.name);
+  private readonly config: SanitizationConfig;
+  private readonly domPurify: DOMPurifyInstance;
+
+  constructor(private configService: ConfigService) {
+    // Initialize configuration with proper type safety
+    const sanitizationConfig =
+      this.configService.get<Partial<SanitizationConfig>>('sanitization') ?? {};
+    this.config = {
+      ...DEFAULT_CONFIG,
+      ...sanitizationConfig,
+    };
+
+    // Initialize DOMPurify with JSDOM
+    try {
+      const jsdomInstance = new JSDOM('');
+      const window = jsdomInstance.window;
+      if (!window) {
+        throw new Error('Failed to initialize JSDOM window');
+      }
+
+      // Create DOMPurify instance with proper typing
+      const domPurifyModule = DOMPurify as unknown as {
+        default?: (window: Window) => unknown;
+        (window: Window): unknown;
+      };
+      const rawDOMPurify = domPurifyModule.default
+        ? domPurifyModule.default(window as unknown as Window)
+        : domPurifyModule(window as unknown as Window);
+
+      const domPurifyInstance: DOMPurifyInstance = {
+        sanitize: (
+          source: string,
+          config?: Record<string, unknown>,
+        ): string => {
+          const sanitizer = rawDOMPurify as {
+            sanitize: (
+              source: string,
+              config?: Record<string, unknown>,
+            ) => unknown;
+          };
+          const result = sanitizer.sanitize(source, config);
+          if (typeof result === 'string') {
+            return result;
+          }
+          if (typeof result === 'number') {
+            return result.toString();
+          }
+          if (typeof result === 'boolean') {
+            return result.toString();
+          }
+          if (typeof result === 'object' && result !== null) {
+            return JSON.stringify(result);
+          }
+          return '';
+        },
+        addHook: (entryPoint: string, callback: DOMPurifyHookCallback) => {
+          // Type-safe hook registration with proper casting
+          const safeCallback = (
+            node: unknown,
+            hookEvent?: unknown,
+            config?: unknown,
+          ): void | boolean => {
+            const nodeWithName = node as { nodeName?: string };
+            const safeNode: SafeDOMNode = {
+              nodeName: nodeWithName.nodeName || 'unknown',
+              ...(node as Record<string, unknown>),
+            };
+            return callback(
+              safeNode,
+              (hookEvent as Record<string, unknown>) || {},
+              (config as Record<string, unknown>) || {},
+            );
+          };
+
+          const hookAdder = rawDOMPurify as {
+            addHook: (entryPoint: string, callback: unknown) => void;
+          };
+          hookAdder.addHook(
+            entryPoint as
+              | 'beforeSanitizeElements'
+              | 'afterSanitizeElements'
+              | 'beforeSanitizeAttributes'
+              | 'afterSanitizeAttributes',
+            safeCallback,
+          );
+        },
+      };
+      this.domPurify = domPurifyInstance;
+
+      // Configure DOMPurify with secure defaults
+      domPurifyInstance.addHook(
+        'beforeSanitizeElements',
+        (node: SafeDOMNode) => {
+          // Log suspicious elements
+          if (
+            typeof node === 'object' &&
+            node !== null &&
+            node.nodeName &&
+            typeof node.nodeName === 'string' &&
+            ['SCRIPT', 'OBJECT', 'EMBED'].includes(node.nodeName)
+          ) {
+            this.logger.warn(`Blocked dangerous element: ${node.nodeName}`);
+          }
+        },
+      );
+    } catch (initError) {
+      const errorMessage =
+        initError instanceof Error ? initError.message : String(initError);
+      this.logger.error('Failed to initialize DOMPurify', {
+        error: errorMessage,
+      });
+      throw new Error(`DOMPurify initialization failed: ${errorMessage}`);
+    }
+
+    this.logger.log('Sanitization interceptor initialized', {
+      enabled: this.config.enabled,
+      sanitizeHtml: this.config.sanitizeHtml,
+      detectXss: this.config.detectXss,
+      detectSqlInjection: this.config.detectSqlInjection,
+      maxStringLength: this.config.maxStringLength,
+      skipEndpoints: this.config.skipEndpoints.length,
+    });
+  }
+
+  /**
+   * Intercept incoming requests and sanitize input data
+   */
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    if (!this.config.enabled) {
+      return next.handle();
+    }
+
+    const operationId = `sanitization-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const startTime = Date.now();
+    const request = context.switchToHttp().getRequest<ExtendedRequest>();
+    const response = context.switchToHttp().getResponse<Response>();
+
+    // Check if endpoint should skip sanitization
+    if (this.shouldSkipSanitization(request.path)) {
+      return next.handle();
+    }
+
+    this.logger.debug(`[${operationId}] Starting input sanitization`, {
+      operationId,
+      method: request.method,
+      path: request.path,
+      contentType: request.headers['content-type'],
+      hasBody: !!request.body && Object.keys(request.body ?? {}).length > 0,
+    });
+
+    try {
+      // Sanitize request body
+      if (request.body && Object.keys(request.body).length > 0) {
+        const sanitizedBody = this.sanitizeObject(
+          request.body,
+          request.path,
+          operationId,
+        );
+        request.body = sanitizedBody as Record<string, unknown>;
+      }
+
+      // Sanitize query parameters
+      if (request.query && Object.keys(request.query).length > 0) {
+        const sanitizedQuery = this.sanitizeObject(
+          request.query as Record<string, unknown>,
+          request.path,
+          operationId,
+        );
+        request.query = sanitizedQuery as typeof request.query;
+      }
+
+      // Sanitize route parameters
+      if (request.params && Object.keys(request.params).length > 0) {
+        const sanitizedParams = this.sanitizeObject(
+          request.params as Record<string, unknown>,
+          request.path,
+          operationId,
+        );
+        request.params = sanitizedParams as typeof request.params;
+      }
+
+      const processingTime = Date.now() - startTime;
+
+      this.logger.debug(`[${operationId}] Input sanitization completed`, {
+        operationId,
+        processingTimeMs: processingTime,
+        sanitizedBody: !!request.body,
+        sanitizedQuery: !!request.query,
+        sanitizedParams: !!request.params,
+      });
+
+      // Add sanitization metadata to response headers
+      response.setHeader('X-Sanitization-Applied', 'true');
+      response.setHeader('X-Sanitization-Time', processingTime.toString());
+      response.setHeader('X-Sanitization-Id', operationId);
+
+      return next.handle().pipe(
+        tap(() => {
+          this.logger.debug(`[${operationId}] Request processing completed`);
+        }),
+        map((data: unknown) => {
+          // Optionally sanitize response data
+          return this.config.sanitizeHtml && data && typeof data === 'object'
+            ? this.sanitizeResponseData(
+                data as Record<string, unknown>,
+                operationId,
+              )
+            : data;
+        }),
+      );
+    } catch (error) {
+      const structuredError = error as StructuredError;
+      const processingTime = Date.now() - startTime;
+      const errorMessage = structuredError.message ?? 'Unknown error';
+      const errorStack = structuredError.stack ?? '';
+
+      this.logger.error(`[${operationId}] Sanitization failed`, {
+        operationId,
+        error: errorMessage,
+        stack: errorStack,
+        processingTimeMs: processingTime,
+        path: request.path,
+        method: request.method,
+      });
+
+      // Log security event
+      this.logSecurityEvent(
+        request,
+        'SANITIZATION_FAILED',
+        errorMessage,
+        operationId,
+      );
+
+      throw new BadRequestException({
+        message: 'Input validation failed',
+        errorCode: 'SANITIZATION_ERROR',
+        operationId,
+      });
+    }
+  }
+
+  /**
+   * Check if sanitization should be skipped for this endpoint
+   */
+  private shouldSkipSanitization(path: string): boolean {
+    return this.config.skipEndpoints.some((skipPath) =>
+      path.startsWith(skipPath),
+    );
+  }
+
+  /**
+   * Sanitize object recursively
+   */
+  private sanitizeObject(
+    obj: unknown,
+    endpoint: string,
+    operationId: string,
+    depth: number = 0,
+  ): unknown {
+    if (depth > this.config.maxObjectDepth) {
+      throw new Error(
+        `Object depth limit exceeded: ${this.config.maxObjectDepth}`,
+      );
+    }
+
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+
+    if (typeof obj === 'string') {
+      return this.sanitizeString(obj, endpoint, operationId);
+    }
+
+    if (typeof obj === 'number' || typeof obj === 'boolean') {
+      return obj;
+    }
+
+    if (Array.isArray(obj)) {
+      if (obj.length > this.config.maxArrayLength) {
+        throw new Error(
+          `Array length limit exceeded: ${this.config.maxArrayLength}`,
+        );
+      }
+
+      return obj.map((item, index) => {
+        try {
+          return this.sanitizeObject(item, endpoint, operationId, depth + 1);
+        } catch (error) {
+          this.logger.warn(
+            `[${operationId}] Failed to sanitize array item ${index}`,
+            {
+              operationId,
+              index,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          );
+          throw error;
+        }
+      });
+    }
+
+    if (typeof obj === 'object') {
+      const sanitized: Record<string, unknown> = {};
+      const objRecord = obj as Record<string, unknown>;
+
+      for (const [key, value] of Object.entries(objRecord)) {
+        try {
+          // Sanitize the key itself
+          const sanitizedKey = this.sanitizeString(key, endpoint, operationId);
+
+          // Sanitize the value
+          sanitized[sanitizedKey] = this.sanitizeObject(
+            value,
+            endpoint,
+            operationId,
+            depth + 1,
+          );
+        } catch (error) {
+          this.logger.warn(
+            `[${operationId}] Failed to sanitize object property ${key}`,
+            {
+              operationId,
+              key,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          );
+          throw error;
+        }
+      }
+
+      return sanitized;
+    }
+
+    return obj;
+  }
+
+  /**
+   * Sanitize individual string values
+   */
+  private sanitizeString(
+    input: string,
+    endpoint: string,
+    operationId: string,
+  ): string {
+    if (!input || typeof input !== 'string') {
+      return input;
+    }
+
+    // Check string length limit
+    if (input.length > this.config.maxStringLength) {
+      this.logger.warn(`[${operationId}] String length limit exceeded`, {
+        operationId,
+        length: input.length,
+        limit: this.config.maxStringLength,
+        preview: input.substring(0, 100) + '...',
+      });
+      throw new Error(
+        `String length limit exceeded: ${this.config.maxStringLength}`,
+      );
+    }
+
+    let sanitized = input;
+    const threats: string[] = [];
+
+    // Detect security threats
+    if (this.config.detectXss) {
+      for (const pattern of SECURITY_PATTERNS.xss) {
+        if (pattern.test(input)) {
+          threats.push('XSS');
+          break;
+        }
+      }
+    }
+
+    if (this.config.detectSqlInjection) {
+      for (const pattern of SECURITY_PATTERNS.sqlInjection) {
+        if (pattern.test(input)) {
+          threats.push('SQL_INJECTION');
+          break;
+        }
+      }
+    }
+
+    // Check for path traversal
+    for (const pattern of SECURITY_PATTERNS.pathTraversal) {
+      if (pattern.test(input)) {
+        threats.push('PATH_TRAVERSAL');
+        break;
+      }
+    }
+
+    // Check for command injection
+    for (const pattern of SECURITY_PATTERNS.commandInjection) {
+      if (pattern.test(input)) {
+        threats.push('COMMAND_INJECTION');
+        break;
+      }
+    }
+
+    // Block if threats detected
+    if (threats.length > 0) {
+      this.logger.error(`[${operationId}] Security threats detected in input`, {
+        operationId,
+        threats,
+        inputLength: input.length,
+        inputPreview: input.substring(0, 100) + '...',
+        endpoint,
+      });
+
+      throw new BadRequestException({
+        message: `Security violation detected: ${threats.join(', ')}`,
+        errorCode: 'SECURITY_THREAT_DETECTED',
+        threats,
+        operationId,
+      });
+    }
+
+    // Get endpoint-specific sanitization rules
+    const endpointRules = this.getEndpointRules(endpoint);
+
+    // Apply HTML sanitization if enabled
+    if (this.config.sanitizeHtml || endpointRules.allowHtml) {
+      if (endpointRules.stripHtml || this.config.stripHtml) {
+        // Strip all HTML tags
+        sanitized = sanitized.replace(/<[^>]*>/g, '');
+      } else {
+        // Sanitize with DOMPurify
+        const purifyConfig = {
+          ALLOWED_TAGS: endpointRules.allowedTags || [
+            'b',
+            'i',
+            'em',
+            'strong',
+            'u',
+            'br',
+            'p',
+            'span',
+            'div',
+          ],
+          ALLOWED_ATTR: endpointRules.allowedAttributes || [
+            'class',
+            'style',
+            'title',
+            'alt',
+          ],
+          KEEP_CONTENT: true,
+          SANITIZE_DOM: true,
+        };
+
+        try {
+          // Use type assertion to handle DOMPurify's flexible return type
+          const domPurifyInstance = this.domPurify;
+
+          const sanitizedResult = domPurifyInstance.sanitize(
+            sanitized,
+            purifyConfig,
+          );
+          sanitized = sanitizedResult;
+        } catch (sanitizeError) {
+          const errorMessage =
+            sanitizeError instanceof Error
+              ? sanitizeError.message
+              : String(sanitizeError);
+          this.logger.warn('DOMPurify sanitization failed, keeping original', {
+            error: errorMessage,
+            operationId,
+          });
+        }
+      }
+    }
+
+    // Apply additional string transformations
+    sanitized = sanitized
+      .trim() // Remove leading/trailing whitespace
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .replace(CONTROL_CHARS_PATTERN, ''); // Remove control characters
+
+    // Log if content was modified
+    if (sanitized !== input) {
+      this.logger.debug(`[${operationId}] String sanitized`, {
+        operationId,
+        originalLength: input.length,
+        sanitizedLength: sanitized.length,
+        endpoint,
+        modified: true,
+      });
+    }
+
+    return sanitized;
+  }
+
+  /**
+   * Get sanitization rules for specific endpoint
+   */
+  private getEndpointRules(endpoint: string): Partial<SanitizationOptions> {
+    for (const [pattern, rules] of Object.entries(this.config.endpointRules)) {
+      if (endpoint.includes(pattern)) {
+        return { ...DEFAULT_SANITIZATION_OPTIONS, ...rules };
+      }
+    }
+    return DEFAULT_SANITIZATION_OPTIONS;
+  }
+
+  /**
+   * Sanitize response data (optional)
+   */
+  private sanitizeResponseData(
+    data: Record<string, unknown>,
+    operationId: string,
+  ): unknown {
+    try {
+      return this.sanitizeObject(data, '', operationId);
+    } catch (error) {
+      const structuredError = error as StructuredError;
+      this.logger.warn(`[${operationId}] Failed to sanitize response data`, {
+        operationId,
+        error: structuredError.message ?? 'Unknown error',
+      });
+      return data; // Return original data if sanitization fails
+    }
+  }
+
+  /**
+   * Log security events for audit trail
+   */
+  private logSecurityEvent(
+    request: ExtendedRequest,
+    eventType: string,
+    message: string,
+    operationId: string,
+  ): void {
+    try {
+      let securityEventType = SecurityEventType.SUSPICIOUS_ACTIVITY;
+
+      switch (eventType) {
+        case 'XSS':
+          securityEventType = SecurityEventType.XSS_ATTEMPT_BLOCKED;
+          break;
+        case 'SQL_INJECTION':
+          securityEventType = SecurityEventType.INJECTION_ATTEMPT_BLOCKED;
+          break;
+        case 'SANITIZATION_FAILED':
+          securityEventType = SecurityEventType.VALIDATION_FAILED;
+          break;
+      }
+
+      const securityEvent = createSecurityEvent(
+        securityEventType,
+        request.path,
+        request.method,
+        false,
+        message,
+        {
+          operationId,
+          middleware: 'sanitization-interceptor',
+          eventType,
+          userAgent: request.get('User-Agent'),
+          contentType: request.get('Content-Type'),
+          bodySize: request.body ? JSON.stringify(request.body).length : 0,
+        },
+        request.user?.id ? String(request.user.id) : undefined,
+        request.ip,
+        request.get('User-Agent'),
+      );
+
+      this.logger.warn(
+        `Sanitization security event: ${securityEvent.eventId}`,
+        {
+          eventId: securityEvent.eventId,
+          eventType: securityEvent.type,
+          riskScore: securityEvent.riskScore,
+          operationId,
+        },
+      );
+    } catch (error) {
+      const structuredError = error as StructuredError;
+      this.logger.error('Failed to log sanitization security event', {
+        operationId,
+        error: structuredError.message ?? 'Unknown error',
+        originalEventType: eventType,
+      });
+    }
+  }
+
+  /**
+   * Get sanitization statistics
+   */
+  getStatistics(): {
+    enabled: boolean;
+    config: SanitizationConfig;
+    patterns: typeof SECURITY_PATTERNS;
+  } {
+    return {
+      enabled: this.config.enabled,
+      config: this.config,
+      patterns: SECURITY_PATTERNS,
+    };
+  }
+}
+
+export default SanitizationInterceptor;

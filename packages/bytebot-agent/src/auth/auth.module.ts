@@ -43,7 +43,7 @@ import { AppConfig } from '../config/configuration';
     // JWT configuration with dynamic config injection
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService<AppConfig>) => {
+      useFactory: (configService: ConfigService<AppConfig>) => {
         const logger = new Logger('JwtModule');
         const operationId = `jwt-module-config-${Date.now()}`;
         const startTime = Date.now();

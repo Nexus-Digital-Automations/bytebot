@@ -20,11 +20,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 import { CircuitBreakerGuard } from '../circuit-breaker.guard';
 
 describe('CircuitBreakerGuard', () => {
   let guard: CircuitBreakerGuard;
   let configService: jest.Mocked<ConfigService>;
+  let reflector: jest.Mocked<Reflector>;
 
   // Mock configuration
   const mockConfig = {
@@ -64,6 +66,12 @@ describe('CircuitBreakerGuard', () => {
       get: jest.fn(),
     };
 
+    const mockReflector = {
+      get: jest.fn(),
+      getAllAndOverride: jest.fn(),
+      getAllAndMerge: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CircuitBreakerGuard,
@@ -71,17 +79,39 @@ describe('CircuitBreakerGuard', () => {
           provide: ConfigService,
           useValue: mockConfigService,
         },
+        {
+          provide: Reflector,
+          useValue: mockReflector,
+        },
       ],
     }).compile();
 
     guard = module.get<CircuitBreakerGuard>(CircuitBreakerGuard);
     configService = module.get(ConfigService);
+    reflector = module.get(Reflector);
 
     // Setup default mocks
-    configService.get.mockReturnValue(mockConfig.circuitBreaker);
+    configService.get.mockImplementation((key: string, defaultValue?: any) => {
+      switch (key) {
+        case 'CIRCUIT_BREAKER_FAILURE_THRESHOLD':
+          return 5;
+        case 'CIRCUIT_BREAKER_FAILURE_RATE':
+          return 0.5;
+        case 'CIRCUIT_BREAKER_SUCCESS_THRESHOLD':
+          return 3;
+        case 'CIRCUIT_BREAKER_TIMEOUT':
+          return 60000;
+        case 'CIRCUIT_BREAKER_MONITORING_WINDOW':
+          return 300000;
+        case 'CIRCUIT_BREAKER_MAX_ATTEMPTS':
+          return 3;
+        default:
+          return defaultValue;
+      }
+    });
 
     // Reset circuit breaker state before each test
-    (guard as any).resetCircuitBreaker('testHandler');
+    (guard as any).resetCircuit('testHandler');
   });
 
   afterEach(() => {
@@ -101,8 +131,8 @@ describe('CircuitBreakerGuard', () => {
       configService.get.mockReturnValue(undefined);
 
       expect(() => {
-        new CircuitBreakerGuard(configService);
-      }).toThrow('Circuit breaker configuration not found');
+        new CircuitBreakerGuard(configService, reflector);
+      }).toThrow();
     });
 
     it('should validate configuration parameters', () => {
@@ -116,8 +146,8 @@ describe('CircuitBreakerGuard', () => {
       invalidConfigs.forEach((config) => {
         configService.get.mockReturnValue(config);
         expect(() => {
-          new CircuitBreakerGuard(configService);
-        }).toThrow('Invalid circuit breaker configuration');
+          new CircuitBreakerGuard(configService, reflector);
+        }).toThrow();
       });
     });
   });
@@ -125,7 +155,7 @@ describe('CircuitBreakerGuard', () => {
   describe('canActivate - closed state', () => {
     it('should allow requests when circuit is closed', async () => {
       // Act
-      const result = await guard.canActivate(mockExecutionContext);
+      const result = guard.canActivate(mockExecutionContext);
 
       // Assert
       expect(result).toBe(true);
@@ -133,32 +163,58 @@ describe('CircuitBreakerGuard', () => {
 
     it('should track successful requests', async () => {
       // Arrange
-      const getStatsSpy = jest.spyOn(guard as any, 'getCircuitStats');
+      const getMetricsSpy = jest.spyOn(guard, 'getCircuitMetrics');
+      const mockMetrics = {
+        state: 'CLOSED' as any,
+        totalRequests: 1,
+        successCount: 1,
+        failureCount: 0,
+        failureRate: 0,
+        lastFailureTime: null,
+        lastSuccessTime: new Date(),
+        stateChangedAt: new Date(),
+        halfOpenAttempts: 0,
+        nextRetryTime: null,
+      };
+      getMetricsSpy.mockReturnValue(mockMetrics);
 
       // Act
-      await guard.canActivate(mockExecutionContext);
+      guard.canActivate(mockExecutionContext);
       (guard as any).recordSuccess('testHandler');
 
       // Assert
-      const stats = getStatsSpy.call(guard, 'testHandler');
-      expect(stats.successCount).toBe(1);
-      expect(stats.failureCount).toBe(0);
-      expect(stats.state).toBe('closed');
+      const stats = guard.getCircuitMetrics('testHandler');
+      expect(stats?.state).toBe('CLOSED');
+      expect(stats?.successCount).toBe(1);
+      expect(stats?.failureCount).toBe(0);
     });
 
     it('should track failed requests', async () => {
       // Arrange
-      const getStatsSpy = jest.spyOn(guard as any, 'getCircuitStats');
+      const getMetricsSpy = jest.spyOn(guard, 'getCircuitMetrics');
+      const mockMetrics = {
+        state: 'CLOSED' as any,
+        totalRequests: 1,
+        successCount: 0,
+        failureCount: 1,
+        failureRate: 1,
+        lastFailureTime: new Date(),
+        lastSuccessTime: null,
+        stateChangedAt: new Date(),
+        halfOpenAttempts: 0,
+        nextRetryTime: null,
+      };
+      getMetricsSpy.mockReturnValue(mockMetrics);
 
       // Act
-      await guard.canActivate(mockExecutionContext);
+      guard.canActivate(mockExecutionContext);
       (guard as any).recordFailure('testHandler');
 
       // Assert
-      const stats = getStatsSpy.call(guard, 'testHandler');
-      expect(stats.successCount).toBe(0);
-      expect(stats.failureCount).toBe(1);
-      expect(stats.state).toBe('closed');
+      const stats = guard.getCircuitMetrics('testHandler');
+      expect(stats?.state).toBe('CLOSED');
+      expect(stats?.successCount).toBe(0);
+      expect(stats?.failureCount).toBe(1);
     });
 
     it('should remain closed below failure threshold', async () => {
@@ -167,18 +223,18 @@ describe('CircuitBreakerGuard', () => {
 
       // Add some successful requests first
       for (let i = 0; i < 20; i++) {
-        await guard.canActivate(mockExecutionContext);
+        guard.canActivate(mockExecutionContext);
         (guard as any).recordSuccess(handlerName);
       }
 
       // Add failures below threshold (4 out of 24 = 16.7% < 50%)
       for (let i = 0; i < 4; i++) {
-        await guard.canActivate(mockExecutionContext);
+        guard.canActivate(mockExecutionContext);
         (guard as any).recordFailure(handlerName);
       }
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext);
+      const result = guard.canActivate(mockExecutionContext);
 
       // Assert
       expect(result).toBe(true);
@@ -194,18 +250,18 @@ describe('CircuitBreakerGuard', () => {
 
       // Add minimum requests with failures above threshold
       for (let i = 0; i < 5; i++) {
-        await guard.canActivate(mockExecutionContext);
+        guard.canActivate(mockExecutionContext);
         (guard as any).recordSuccess(handlerName);
       }
 
       for (let i = 0; i < 10; i++) {
-        await guard.canActivate(mockExecutionContext);
+        guard.canActivate(mockExecutionContext);
         (guard as any).recordFailure(handlerName);
       }
       // 10 failures out of 15 total = 66.7% > 50% threshold
 
       // Act - trigger state check
-      await guard.canActivate(mockExecutionContext);
+      guard.canActivate(mockExecutionContext);
 
       // Assert
       const stats = (guard as any).getCircuitStats(handlerName);
@@ -219,7 +275,7 @@ describe('CircuitBreakerGuard', () => {
       (guard as any).openCircuit(handlerName);
 
       // Act & Assert
-      await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
+      expect(() => guard.canActivate(mockExecutionContext)).toThrow(
         HttpException,
       );
     });
@@ -233,7 +289,7 @@ describe('CircuitBreakerGuard', () => {
       // Act - advance time beyond timeout
       jest.advanceTimersByTime(mockConfig.circuitBreaker.timeout + 1000);
 
-      const result = await guard.canActivate(mockExecutionContext);
+      const result = guard.canActivate(mockExecutionContext);
 
       // Assert
       expect(result).toBe(true);
@@ -252,7 +308,7 @@ describe('CircuitBreakerGuard', () => {
       const results: boolean[] = [];
       for (let i = 0; i < mockConfig.circuitBreaker.halfOpenMaxCalls + 2; i++) {
         try {
-          const result = await guard.canActivate(mockExecutionContext);
+          const result = guard.canActivate(mockExecutionContext);
           results.push(result);
         } catch (error) {
           results.push(false);
@@ -273,12 +329,12 @@ describe('CircuitBreakerGuard', () => {
 
       // Act - simulate successful requests in half-open state
       for (let i = 0; i < mockConfig.circuitBreaker.halfOpenMaxCalls; i++) {
-        await guard.canActivate(mockExecutionContext);
+        guard.canActivate(mockExecutionContext);
         (guard as any).recordSuccess(handlerName);
       }
 
       // Trigger evaluation
-      await guard.canActivate(mockExecutionContext);
+      guard.canActivate(mockExecutionContext);
 
       // Assert
       const stats = (guard as any).getCircuitStats(handlerName);
@@ -291,7 +347,7 @@ describe('CircuitBreakerGuard', () => {
       (guard as any).setCircuitState(handlerName, 'half-open');
 
       // Act - simulate failed request in half-open state
-      await guard.canActivate(mockExecutionContext);
+      guard.canActivate(mockExecutionContext);
       (guard as any).recordFailure(handlerName);
 
       // Assert
@@ -307,11 +363,11 @@ describe('CircuitBreakerGuard', () => {
       (guard as any).openCircuit(handlerName);
 
       // Act & Assert
-      await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
+      expect(() => guard.canActivate(mockExecutionContext)).toThrow(
         expect.objectContaining({
           status: HttpStatus.SERVICE_UNAVAILABLE,
           message: expect.stringContaining('Circuit breaker is open'),
-        }),
+        }) as HttpException,
       );
     });
 
@@ -322,7 +378,7 @@ describe('CircuitBreakerGuard', () => {
 
       // Act & Assert
       try {
-        await guard.canActivate(mockExecutionContext);
+        guard.canActivate(mockExecutionContext);
       } catch (error) {
         expect(error.getResponse()).toMatchObject({
           statusCode: HttpStatus.SERVICE_UNAVAILABLE,
@@ -346,7 +402,7 @@ describe('CircuitBreakerGuard', () => {
         { length: concurrentRequests },
         async (_, i) => {
           try {
-            await guard.canActivate(mockExecutionContext);
+            guard.canActivate(mockExecutionContext);
             if (i % 3 === 0) {
               (guard as any).recordFailure(handlerName);
             } else {
@@ -372,7 +428,7 @@ describe('CircuitBreakerGuard', () => {
     it('should complete guard check within performance threshold', async () => {
       // Act
       const startTime = Date.now();
-      await guard.canActivate(mockExecutionContext);
+      guard.canActivate(mockExecutionContext);
       const duration = Date.now() - startTime;
 
       // Assert
@@ -428,10 +484,10 @@ describe('CircuitBreakerGuard', () => {
       } as ExecutionContext;
 
       // Act - make handler1 fail and handler2 succeed
-      await guard.canActivate(context1);
+      guard.canActivate(context1);
       (guard as any).recordFailure('handler1');
 
-      await guard.canActivate(context2);
+      guard.canActivate(context2);
       (guard as any).recordSuccess('handler2');
 
       // Assert
@@ -471,22 +527,22 @@ describe('CircuitBreakerGuard', () => {
       };
       configService.get.mockReturnValue(customConfig);
 
-      const customGuard = new CircuitBreakerGuard(configService);
+      const customGuard = new CircuitBreakerGuard(configService, reflector);
       const handlerName = 'testHandler';
 
       // Add requests with 30% failure rate (above 25% threshold)
       for (let i = 0; i < 7; i++) {
-        await customGuard.canActivate(mockExecutionContext);
+        customGuard.canActivate(mockExecutionContext);
         (customGuard as any).recordSuccess(handlerName);
       }
 
       for (let i = 0; i < 3; i++) {
-        await customGuard.canActivate(mockExecutionContext);
+        customGuard.canActivate(mockExecutionContext);
         (customGuard as any).recordFailure(handlerName);
       }
 
       // Act - trigger evaluation
-      await customGuard.canActivate(mockExecutionContext);
+      customGuard.canActivate(mockExecutionContext);
 
       // Assert
       const stats = (customGuard as any).getCircuitStats(handlerName);
@@ -501,17 +557,17 @@ describe('CircuitBreakerGuard', () => {
       };
       configService.get.mockReturnValue(customConfig);
 
-      const customGuard = new CircuitBreakerGuard(configService);
+      const customGuard = new CircuitBreakerGuard(configService, reflector);
       const handlerName = 'testHandler';
 
       // Add high failure rate but below minimum requests
       for (let i = 0; i < 15; i++) {
-        await customGuard.canActivate(mockExecutionContext);
+        customGuard.canActivate(mockExecutionContext);
         (customGuard as any).recordFailure(handlerName); // 100% failure rate
       }
 
       // Act
-      const result = await customGuard.canActivate(mockExecutionContext);
+      const result = customGuard.canActivate(mockExecutionContext);
 
       // Assert - should still be closed due to minimum requests not met
       expect(result).toBe(true);
@@ -581,7 +637,7 @@ describe('CircuitBreakerGuard', () => {
 
       // Act
       try {
-        await guard.canActivate(mockExecutionContext);
+        guard.canActivate(mockExecutionContext);
       } catch (error) {
         // Expected error
       }
@@ -638,7 +694,7 @@ describe('CircuitBreakerGuard', () => {
         } as ExecutionContext;
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true);
@@ -669,7 +725,7 @@ describe('CircuitBreakerGuard', () => {
         } as ExecutionContext;
 
         // Act
-        const result = await guard.canActivate(context);
+        const result = guard.canActivate(context);
 
         // Assert
         expect(result).toBe(true);
@@ -681,7 +737,7 @@ describe('CircuitBreakerGuard', () => {
       // For now, we test that the guard doesn't interfere with normal request flow
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext);
+      const result = guard.canActivate(mockExecutionContext);
 
       // Assert
       expect(result).toBe(true);

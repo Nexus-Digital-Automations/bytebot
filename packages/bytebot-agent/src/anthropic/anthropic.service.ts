@@ -40,12 +40,12 @@ export class AnthropicService implements BytebotAgentService {
    * Get Anthropic API key securely from secrets management
    * @private
    */
-  private async getApiKey(): Promise<string> {
+  private getApiKey(): string {
     const operationId = `get-anthropic-key-${Date.now()}`;
 
     try {
       // Try to get from secrets service first (Kubernetes secrets)
-      const secretKey = await this.secretsService.getSecret(
+      const secretKey = this.secretsService.getSecret(
         'anthropic-api-key',
         'ANTHROPIC_API_KEY',
       );
@@ -90,7 +90,7 @@ export class AnthropicService implements BytebotAgentService {
     signal?: AbortSignal,
   ): Promise<BytebotAgentResponse> {
     // Ensure we have a valid API key before proceeding
-    const apiKey = await this.getApiKey();
+    const apiKey = this.getApiKey();
 
     // Update Anthropic client with actual API key if needed
     if (this.anthropic.apiKey === 'dummy-key-for-initialization') {
@@ -160,7 +160,8 @@ export class AnthropicService implements BytebotAgentService {
     const anthropicMessages: Anthropic.MessageParam[] = [];
 
     // Process each message content block
-    for (const [index, message] of messages.entries()) {
+    for (let index = 0; index < messages.length; index++) {
+      const message = messages[index];
       const messageContentBlocks = message.content as MessageContentBlock[];
 
       const content: Anthropic.ContentBlockParam[] = [];

@@ -26,7 +26,7 @@ import {
 } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { Message, Task } from '@prisma/client';
+import { Message, Task, File } from '@prisma/client';
 import { AddTaskMessageDto } from './dto/add-task-message.dto';
 import { MessagesService } from '../messages/messages.service';
 import { ANTHROPIC_MODELS } from '../anthropic/anthropic.constants';
@@ -39,7 +39,6 @@ import { RateLimitGuard } from '../common/guards/rate-limit.guard';
 import { VersionInterceptor } from '../common/versioning/version.interceptor';
 import { DeprecationGuard } from '../common/versioning/deprecation.guard';
 import {
-  ApiVersion,
   ForVersion,
   MultiVersion,
   SUPPORTED_API_VERSIONS,
@@ -47,14 +46,12 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import {
-  Roles,
-  Permissions,
   RequirePermission,
   OperatorOrAdmin,
   Authenticated,
   CurrentUser,
 } from '../auth/decorators/roles.decorator';
-import { User, UserRole, Permission } from '@prisma/client';
+import { User, Permission } from '@prisma/client';
 
 // Type definitions for proxy API responses
 interface ProxyModelData {
@@ -177,7 +174,7 @@ export class TasksController {
 
     this.logger.log(`[${operationId}] Creating task`, {
       operationId,
-      title: createTaskDto.title,
+      description: createTaskDto.description,
       userId: user.id,
       username: user.username,
       userRole: user.role,
@@ -202,7 +199,7 @@ export class TasksController {
       const processingTime = Date.now() - startTime;
       this.logger.error(`[${operationId}] Task creation failed`, {
         operationId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         processingTimeMs: processingTime,
       });
       throw error;
@@ -277,11 +274,11 @@ export class TasksController {
     description: 'Invalid query parameters',
   })
   async findAll(
+    @CurrentUser() user: User,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('status') status?: string,
     @Query('statuses') statuses?: string,
-    @CurrentUser() user: User,
   ): Promise<{ tasks: Task[]; total: number; totalPages: number }> {
     const operationId = `get-tasks-${Date.now()}`;
     const startTime = Date.now();
@@ -328,7 +325,7 @@ export class TasksController {
       const processingTime = Date.now() - startTime;
       this.logger.error(`[${operationId}] Task retrieval failed`, {
         operationId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         processingTimeMs: processingTime,
       });
       throw error;
@@ -457,7 +454,7 @@ export class TasksController {
   async findById(
     @Param('id') id: string,
     @CurrentUser() user: User,
-  ): Promise<Task> {
+  ): Promise<Task & { files: File[] }> {
     const operationId = `get-task-${Date.now()}`;
     const startTime = Date.now();
 
@@ -487,7 +484,7 @@ export class TasksController {
       this.logger.error(`[${operationId}] Task retrieval failed`, {
         operationId,
         taskId: id,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         processingTimeMs: processingTime,
       });
       throw error;
@@ -500,7 +497,6 @@ export class TasksController {
     @Param('id') taskId: string,
     @Query('limit') limit?: string,
     @Query('page') page?: string,
-    @CurrentUser() user: User,
   ): Promise<Message[]> {
     const options = {
       limit: limit ? parseInt(limit, 10) : undefined,
@@ -517,7 +513,6 @@ export class TasksController {
   async addTaskMessage(
     @Param('id') taskId: string,
     @Body() guideTaskDto: AddTaskMessageDto,
-    @CurrentUser() user: User,
   ): Promise<Task> {
     return this.tasksService.addTaskMessage(taskId, guideTaskDto);
   }
@@ -553,40 +548,28 @@ export class TasksController {
   @Delete(':id')
   @OperatorOrAdmin()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(
-    @Param('id') id: string,
-    @CurrentUser() user: User,
-  ): Promise<void> {
+  async delete(@Param('id') id: string): Promise<void> {
     await this.tasksService.delete(id);
   }
 
   @Post(':id/takeover')
   @OperatorOrAdmin()
   @HttpCode(HttpStatus.OK)
-  async takeOver(
-    @Param('id') taskId: string,
-    @CurrentUser() user: User,
-  ): Promise<Task> {
+  async takeOver(@Param('id') taskId: string): Promise<Task> {
     return this.tasksService.takeOver(taskId);
   }
 
   @Post(':id/resume')
   @OperatorOrAdmin()
   @HttpCode(HttpStatus.OK)
-  async resume(
-    @Param('id') taskId: string,
-    @CurrentUser() user: User,
-  ): Promise<Task> {
+  async resume(@Param('id') taskId: string): Promise<Task> {
     return this.tasksService.resume(taskId);
   }
 
   @Post(':id/cancel')
   @OperatorOrAdmin()
   @HttpCode(HttpStatus.OK)
-  async cancel(
-    @Param('id') taskId: string,
-    @CurrentUser() user: User,
-  ): Promise<Task> {
+  async cancel(@Param('id') taskId: string): Promise<Task> {
     return this.tasksService.cancel(taskId);
   }
 }

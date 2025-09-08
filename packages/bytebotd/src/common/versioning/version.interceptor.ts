@@ -106,7 +106,7 @@ export class VersionInterceptor implements NestInterceptor {
     });
   }
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const operationId = `bytebotd-version-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -146,7 +146,7 @@ export class VersionInterceptor implements NestInterceptor {
       // Validate version compatibility
       this.validateVersionCompatibility(
         versionResolution,
-        endpointVersionConfig,
+        endpointVersionConfig as unknown as Record<string, unknown>,
         operationId,
       );
 
@@ -183,11 +183,11 @@ export class VersionInterceptor implements NestInterceptor {
             },
           );
         }),
-        map((data) => {
+        map((data: unknown) => {
           // Add version metadata to response
           if (typeof data === 'object' && data !== null) {
             return {
-              ...data,
+              ...(data as Record<string, unknown>),
               _metadata: {
                 apiVersion: versionResolution.resolvedVersion,
                 service: 'BytebotD',
@@ -196,7 +196,7 @@ export class VersionInterceptor implements NestInterceptor {
                   versionResolution.desktopCompatibility.isDesktopClient,
                 operationId,
               },
-            };
+            } as unknown;
           }
           return data;
         }),
@@ -205,8 +205,8 @@ export class VersionInterceptor implements NestInterceptor {
       const processingTime = Date.now() - startTime;
       this.logger.error(`[${operationId}] BytebotD version interceptor error`, {
         operationId,
-        error: error.message,
-        stack: error.stack,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
         processingTimeMs: processingTime,
       });
 
@@ -429,9 +429,9 @@ export class VersionInterceptor implements NestInterceptor {
    * @returns Array of compatibility issues
    */
   private checkDesktopCompatibility(
-    desktopClientInfo: any,
+    desktopClientInfo: Record<string, unknown>,
     desktopCompatibility: DesktopCompatibility | null,
-    resolvedVersion: string,
+    _resolvedVersion: string,
   ): string[] {
     const issues: string[] = [];
 
@@ -441,14 +441,15 @@ export class VersionInterceptor implements NestInterceptor {
 
     // Check minimum desktop version
     if (desktopCompatibility.minDesktopVersion) {
+      const clientVersion = desktopClientInfo.clientVersion as string;
       const isCompatible = this.compareVersions(
-        desktopClientInfo.clientVersion,
+        clientVersion,
         desktopCompatibility.minDesktopVersion,
       );
 
       if (!isCompatible) {
         issues.push(
-          `Client version ${desktopClientInfo.clientVersion} below minimum ${desktopCompatibility.minDesktopVersion}`,
+          `Client version ${clientVersion} below minimum ${desktopCompatibility.minDesktopVersion}`,
         );
       }
     }
@@ -458,7 +459,7 @@ export class VersionInterceptor implements NestInterceptor {
       desktopCompatibility.vncRequirements &&
       desktopCompatibility.vncRequirements.length > 0
     ) {
-      const vncVersion = desktopClientInfo.vncClient;
+      const vncVersion = desktopClientInfo.vncClient as string;
       if (vncVersion === 'unknown') {
         issues.push('VNC client information not provided');
       } else {
@@ -471,7 +472,7 @@ export class VersionInterceptor implements NestInterceptor {
     if (
       desktopCompatibility.computerUseFeatures &&
       desktopCompatibility.computerUseFeatures.length > 0 &&
-      desktopClientInfo.isComputerUse
+      (desktopClientInfo.isComputerUse as boolean)
     ) {
       // Could implement feature capability checking here
       // For now, assume all features are supported if client is computer use capable
@@ -513,7 +514,7 @@ export class VersionInterceptor implements NestInterceptor {
    */
   private validateVersionCompatibility(
     versionResolution: VersionResolution,
-    endpointVersionConfig: any,
+    endpointVersionConfig: Record<string, unknown>,
     operationId: string,
   ): void {
     if (this.strictVersioning && !versionResolution.isSupported) {
