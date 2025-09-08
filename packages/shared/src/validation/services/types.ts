@@ -315,8 +315,8 @@ export interface CustomValidationRule {
 
   /** Rule validation function */
   validator: (
-    value: unknown,
-    context: Record<string, unknown>,
+    _value: unknown,
+    _context: Record<string, unknown>,
   ) => boolean | Promise<boolean>;
 
   /** Error message for rule violation */

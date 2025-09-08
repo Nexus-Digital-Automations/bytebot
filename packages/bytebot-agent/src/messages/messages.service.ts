@@ -769,13 +769,13 @@ export class MessagesService {
 
         // Calculate character count based on block type
         if (
-          block.type === MessageContentType.TEXT &&
+          block.type === MessageContentType.Text &&
           'text' in block &&
           typeof block.text === 'string'
         ) {
           totalCharacters += block.text.length;
         } else if (
-          block.type === MessageContentType.TOOL_RESULT &&
+          block.type === MessageContentType.ToolResult &&
           'content' in block &&
           typeof block.content === 'string'
         ) {
@@ -805,13 +805,13 @@ export class MessagesService {
             (contentTotal: number, block: MessageContentBlock): number => {
               if (isMessageContentBlock(block)) {
                 if (
-                  block.type === MessageContentType.TEXT &&
+                  block.type === MessageContentType.Text &&
                   'text' in block &&
                   typeof block.text === 'string'
                 ) {
                   return contentTotal + block.text.length;
                 } else if (
-                  block.type === MessageContentType.TOOL_RESULT &&
+                  block.type === MessageContentType.ToolResult &&
                   'content' in block &&
                   typeof block.content === 'string'
                 ) {

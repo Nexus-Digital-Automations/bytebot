@@ -503,8 +503,8 @@ export class TasksController {
       page: page ? parseInt(page, 10) : undefined,
     };
 
-    const messages = await this.messagesService.findAll(taskId, options);
-    return messages;
+    const result = await this.messagesService.findAll(taskId, options);
+    return result.messages;
   }
 
   @Post(':id/messages')
@@ -528,7 +528,8 @@ export class TasksController {
       page: page ? parseInt(page, 10) : undefined,
     };
 
-    return this.messagesService.findRawMessages(taskId, options);
+    const result = await this.messagesService.findRawMessages(taskId, options);
+    return result.messages;
   }
 
   @Get(':id/messages/processed')

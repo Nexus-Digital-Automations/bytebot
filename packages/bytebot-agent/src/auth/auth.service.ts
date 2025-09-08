@@ -291,7 +291,7 @@ export class AuthService {
 
       // Hash password with high security salt rounds
       const hashStartTime = Date.now();
-      const passwordHash = await bcrypt.hash(
+      const hashedPassword = await bcrypt.hash(
         registerDto.password,
         this.SALT_ROUNDS,
       );
@@ -304,7 +304,7 @@ export class AuthService {
           username: registerDto.username,
           firstName: registerDto.firstName,
           lastName: registerDto.lastName,
-          passwordHash,
+          passwordHash: hashedPassword,
           role: UserRole.VIEWER, // Default role for new users
           isActive: true,
           emailVerified: false, // Email verification required

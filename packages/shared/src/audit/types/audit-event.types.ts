@@ -4,11 +4,17 @@
  * Comprehensive type definitions for enterprise-grade audit logging system
  * supporting security events, compliance requirements, and SIEM integration.
  *
+ * NOTE: Many enum values are intentionally unused as they represent a complete
+ * API surface for enterprise audit requirements. ESLint warnings are disabled
+ * for comprehensive enum definitions that provide full industry-standard coverage.
+ *
  * @fileoverview Core audit event types and interfaces
  * @version 2.0.0
  * @author Enterprise Security Audit Team
  * @created 2025-09-07
  */
+
+/* eslint-disable no-unused-vars */
 
 /**
  * Audit event severity levels following industry standards
@@ -145,7 +151,7 @@ export interface AuditEventMetadata {
   /** Action being performed */
   action?: string;
   /** Additional custom metadata */
-  custom?: Record<string, any>;
+  custom?: Record<string, unknown>;
   /** Error information if applicable */
   error?: ErrorInfo;
   /** Correlation identifiers for distributed tracing */
@@ -255,7 +261,7 @@ export interface ErrorInfo {
   /** Error type */
   type?: string;
   /** Additional error context */
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -431,7 +437,7 @@ export interface AlertCondition {
     | "contains"
     | "regex";
   /** Value to compare against */
-  value: any;
+  value: string | number | boolean | Date | null;
   /** Logical operator for multiple conditions */
   logicalOperator?: "and" | "or";
 }
@@ -443,7 +449,7 @@ export interface AlertDestination {
   /** Destination type */
   type: "email" | "webhook" | "sms" | "slack" | "teams" | "syslog";
   /** Destination configuration */
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   /** Alert template */
   template?: string;
 }

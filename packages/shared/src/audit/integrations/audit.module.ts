@@ -21,7 +21,7 @@
  */
 
 import { Module, Global, DynamicModule } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ConfigModule } from "@nestjs/config";
 // TODO: Fix missing @nestjs/bull dependency - temporarily commented
 // import { BullModule } from "@nestjs/bull";
 
@@ -40,7 +40,9 @@ interface BullQueueOptions {
   }>;
 }
 
-const BullModule = {
+// Temporary stub for Bull Module (not used in current implementation)
+// Will be replaced when @nestjs/bull dependency is properly integrated
+const _BullModuleStub = {
   forRootAsync: (options: BullModuleOptions) => ({
     module: class BullModuleStub {},
     imports: options.imports || [],
@@ -111,7 +113,9 @@ export class AuditModule {
    * Configure audit module with options
    */
   static forRoot(options: AuditModuleOptions = {}): DynamicModule {
-    const { isGlobal = true, redis, config = {} } = options;
+    const { isGlobal = true, config = {} } = options;
+    // Redis configuration will be implemented when @nestjs/bull is properly integrated
+    const _redisConfig = options.redis;
 
     const imports = [
       // Configuration module

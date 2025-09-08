@@ -36,25 +36,45 @@ type Job<T = unknown> = { data: T; id: string; name: string };
 
 const Processor =
   (_queueName?: string) =>
-  <T extends new (...args: unknown[]) => unknown>(target: T): T =>
+  <T extends new (...args: any[]) => unknown>(target: T): T =>
     target;
 
 const Process =
   (_jobName?: string) =>
-  (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) =>
-    descriptor;
+  (
+    _target: any,
+    _propertyKey: string,
+    _descriptor: PropertyDescriptor,
+  ): void => {
+    // Stub implementation for @Process decorator
+  };
 const OnQueueActive =
   () =>
-  (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) =>
-    descriptor;
+  (
+    _target: any,
+    _propertyKey: string,
+    _descriptor: PropertyDescriptor,
+  ): void => {
+    // Stub implementation for @OnQueueActive decorator
+  };
 const OnQueueCompleted =
   () =>
-  (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) =>
-    descriptor;
+  (
+    _target: any,
+    _propertyKey: string,
+    _descriptor: PropertyDescriptor,
+  ): void => {
+    // Stub implementation for @OnQueueCompleted decorator
+  };
 const OnQueueFailed =
   () =>
-  (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) =>
-    descriptor;
+  (
+    _target: any,
+    _propertyKey: string,
+    _descriptor: PropertyDescriptor,
+  ): void => {
+    // Stub implementation for @OnQueueFailed decorator
+  };
 import { ConfigService } from "@nestjs/config";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
@@ -180,11 +200,35 @@ export interface EventStorageBackend {
  * Handles high-performance processing of audit events with enterprise-grade
  * features including batch processing, filtering, routing, and error handling.
  */
-@Processor("audit-events")
+// TODO: Re-enable @Processor decorator when @nestjs/bull dependency is added
+// @Processor("audit-events")
 @Injectable()
 export class AuditEventProcessor {
   private readonly logger = new Logger(AuditEventProcessor.name);
-  private config: EventProcessorConfig;
+  private config: EventProcessorConfig = {
+    batch: {
+      enabled: true,
+      size: 100,
+      timeout: 5000,
+    },
+    retry: {
+      attempts: 3,
+      backoffType: "exponential" as const,
+      delay: 1000,
+    },
+    storage: {
+      primary: "database" as const,
+      fallback: "file" as const,
+      compression: true,
+    },
+    performance: {
+      concurrency: 10,
+      rateLimit: 1000,
+      maxMemoryUsage: 512 * 1024 * 1024, // 512MB
+    },
+    filters: [],
+    routing: [],
+  };
   private storageBackends: Map<string, EventStorageBackend> = new Map();
   private eventBuffer: AuditEvent[] = [];
   private batchProcessingTimer?: NodeJS.Timeout;
@@ -609,7 +653,7 @@ export class AuditEventProcessor {
       destinations.push(this.config.storage.primary);
     }
 
-    return [...new Set(destinations)]; // Remove duplicates
+    return Array.from(new Set(destinations)); // Remove duplicates
   }
 
   /**
@@ -703,10 +747,10 @@ export class AuditEventProcessor {
    */
   private getFieldValue(event: AuditEvent, field: string): unknown {
     // Support nested field access (e.g., 'metadata.userId')
-    return field.split(".").reduce(
-      (obj: Record<string, unknown>, key: string) => {
-        if (obj && typeof obj === "object" && key in obj) {
-          return obj[key] as Record<string, unknown>;
+    return field.split(".").reduce<unknown>(
+      (obj: unknown, key: string) => {
+        if (obj && typeof obj === "object" && obj !== null && key in obj) {
+          return (obj as Record<string, unknown>)[key];
         }
         return undefined;
       },

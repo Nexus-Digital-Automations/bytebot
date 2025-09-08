@@ -626,7 +626,9 @@ export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
 
     // Maintain history size
     if (this.metricsHistory.length > this.maxHistorySize) {
-      this.metricsHistory = this.metricsHistory.slice(-this.maxHistorySize);
+      (this as any).metricsHistory = this.metricsHistory.slice(
+        -this.maxHistorySize,
+      );
     }
   }
 

@@ -2,6 +2,72 @@
   "project": "unknown",
   "tasks": [
     {
+      "id": "error_1757301242851_jg5y2jowc",
+      "title": "Fix critical TypeScript build failures in bytebot-agent package",
+      "description": "Systematically resolve all TypeScript compilation errors in bytebot-agent: 1) Run TypeScript compilation to identify specific build errors, 2) Fix import/export issues from shared package dependency, 3) Resolve Prisma client type generation issues, 4) Fix missing type declarations or interface problems, 5) Ensure all dependencies are properly installed and configured",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "package.json",
+        "tsconfig.json",
+        "src/",
+        "prisma/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-08T03:14:02.851Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757301227322_1_general_6c674920",
+      "started_at": "2025-09-08T03:14:37.960Z",
+      "claimed_by": "development_session_1757301227322_1_general_6c674920",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757301227322_1_general_6c674920",
+          "role": "primary",
+          "assignedAt": "2025-09-08T03:14:37.960Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757298572133_ryikpqrmo",
+      "title": "Comprehensive ESLint Validation - Verify Critical Violation Resolution",
+      "description": "Run comprehensive validation to verify all critical ESLint violations have been properly addressed. Focus on: 1) Confirm unsafe TypeScript assignments eliminated, 2) Verify explicit any types replaced with proper types, 3) Check test configuration issues resolved, 4) Validate bytebot-agent-cc package clean with no regressions, 5) Generate final summary report of violation counts before/after fixes. Run focused linting on: rbac-metadata.utils.ts, security.utils.ts, audit-event.types.ts, environment-security.config.ts, and test files. Provide concrete evidence of improvements.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "src/utils/rbac-metadata.utils.ts",
+        "src/utils/security.utils.ts",
+        "src/audit/types/audit-event.types.ts",
+        "src/config/environment-security.config.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-08T02:29:32.133Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757298558304_1_general_579acbdc",
+      "started_at": "2025-09-08T02:29:42.775Z",
+      "claimed_by": "development_session_1757298558304_1_general_579acbdc",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757298558304_1_general_579acbdc",
+          "role": "primary",
+          "assignedAt": "2025-09-08T02:29:42.775Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
       "id": "error_1757216544934_wv8mv8vwn",
       "title": "Fix critical TypeScript compilation errors in bytebotd package",
       "description": "Fix 14 TypeScript compilation errors preventing build: security exception filter, security sanitization pipe, Redis configuration, version interceptor type issues, and deployment configuration errors",
@@ -468,6 +534,111 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-08T01:02:18.155Z",
       "sessionId": "session_1757293338153",
+      "metadata": {}
+    },
+    "development_session_1757297576743_1_general_225faa17": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T02:12:56.744Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T02:12:56.744Z",
+      "sessionId": "session_1757297576743",
+      "metadata": {}
+    },
+    "development_session_1757297621085_1_general_4444a01f": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T02:13:41.087Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T02:13:41.087Z",
+      "sessionId": "session_1757297621085",
+      "metadata": {}
+    },
+    "development_session_1757298262891_1_general_f112914a": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T02:24:22.895Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T02:24:22.895Z",
+      "sessionId": "session_1757298262891",
+      "metadata": {}
+    },
+    "development_session_1757298558304_1_general_579acbdc": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T02:29:18.307Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T02:29:18.307Z",
+      "sessionId": "session_1757298558304",
+      "metadata": {}
+    },
+    "development_session_1757301227322_1_general_6c674920": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T03:13:47.324Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T03:13:47.324Z",
+      "sessionId": "session_1757301227322",
       "metadata": {}
     }
   },

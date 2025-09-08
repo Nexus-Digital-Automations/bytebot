@@ -64,10 +64,34 @@ class MetadataCache {
    */
   private generateKey(target: unknown, propertyKey?: string): string {
     const targetObj = target as Record<string, unknown>;
-    const targetConstructor = targetObj.constructor as any;
-    const className =
-      (targetObj.name as string) || targetConstructor?.name || "Unknown";
+    // Type-safe constructor access with proper type guards
+    const targetConstructor = targetObj.constructor as Function | undefined;
+    const className = this.getClassName(targetObj, targetConstructor);
     return propertyKey ? `${className}#${propertyKey}` : className;
+  }
+
+  /**
+   * Safely extract class name from target object and constructor
+   */
+  private getClassName(
+    targetObj: Record<string, unknown>,
+    targetConstructor?: Function,
+  ): string {
+    // First try to get name from the target object itself
+    if (typeof targetObj.name === "string" && targetObj.name) {
+      return targetObj.name;
+    }
+
+    // Then try constructor name with proper type checking
+    if (
+      targetConstructor &&
+      "name" in targetConstructor &&
+      typeof targetConstructor.name === "string"
+    ) {
+      return targetConstructor.name;
+    }
+
+    return "Unknown";
   }
 
   /**

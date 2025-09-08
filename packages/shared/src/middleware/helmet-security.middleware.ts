@@ -420,7 +420,7 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
 
   constructor(
     private readonly configService: ConfigService,
-    @Inject("SERVICE_TYPE") private readonly serviceType: RateLimitServiceType,
+    private readonly serviceType: RateLimitServiceType = RateLimitServiceType.SHARED,
   ) {
     // Initialize configuration
     this.config = {
@@ -480,10 +480,11 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
       const helmetConfig = this.buildHelmetConfiguration(operationId);
 
       // Apply helmet middleware
-      helmet(helmetConfig)(req, res, (error?: Error) => {
+      helmet(helmetConfig)(req, res, (err?: unknown) => {
         const processingTime = Date.now() - startTime;
 
-        if (error) {
+        if (err) {
+          const error = err instanceof Error ? err : new Error(String(err));
           this.logger.error(`[${operationId}] Helmet middleware error`, {
             operationId,
             error: error.message,

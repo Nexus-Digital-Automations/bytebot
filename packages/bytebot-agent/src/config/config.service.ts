@@ -572,7 +572,7 @@ export class BytebotConfigService implements OnModuleInit {
     this.logger.debug(`[${operationId}] Retrieving configuration`, { key });
 
     try {
-      const value = this.nestConfigService.get<T>(key, defaultValue);
+      const value = (this.nestConfigService as any).get(key, defaultValue) as T;
       const responseTime = Date.now() - startTime;
 
       // Update performance metrics
@@ -929,16 +929,13 @@ export class BytebotConfigService implements OnModuleInit {
    * @returns Features configuration object
    */
   getFeaturesConfig(): Record<string, boolean> {
-    const features = this.nestConfigService.get<AppConfig['features']>(
-      'app.features',
-      {
-        authentication: false,
-        rateLimiting: false,
-        metricsCollection: false,
-        healthChecks: true,
-        circuitBreaker: false,
-      },
-    );
+    const features = (this.nestConfigService as any).get('app.features', {
+      authentication: false,
+      rateLimiting: false,
+      metricsCollection: false,
+      healthChecks: true,
+      circuitBreaker: false,
+    }) as Record<string, boolean>;
 
     return (
       features || {
@@ -957,7 +954,10 @@ export class BytebotConfigService implements OnModuleInit {
    * @returns App configuration object
    */
   getAppConfig(): AppConfig {
-    return this.nestConfigService.get<AppConfig>('app', {} as AppConfig);
+    return (this.nestConfigService as any).get(
+      'app',
+      {} as AppConfig,
+    ) as AppConfig;
   }
 
   /**

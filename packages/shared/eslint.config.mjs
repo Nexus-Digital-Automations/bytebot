@@ -24,6 +24,31 @@ export default tseslint.config(
       },
     },
   },
+  // Separate config for test files
+  {
+    files: [
+      "src/utils/__tests__/messageContent.utils.test.ts",
+      "src/utils/__tests__/security.utils.test.ts",
+      "src/decorators/__tests__/rbac-authorization.decorators.test.ts",
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+      ecmaVersion: 5,
+      sourceType: "module",
+      parserOptions: {
+        projectService: {
+          allowDefaultProject: [
+            "src/utils/__tests__/messageContent.utils.test.ts",
+            "src/utils/__tests__/security.utils.test.ts",
+            "src/decorators/__tests__/rbac-authorization.decorators.test.ts",
+          ],
+        },
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "error",

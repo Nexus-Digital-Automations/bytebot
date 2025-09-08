@@ -258,8 +258,7 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
               scriptSrc: [
                 "'self'",
                 // Dynamic nonce will be added per request
-                (req: Request, res: Response) =>
-                  `'nonce-${(res as any).locals?.nonce || ""}'`,
+                (req: any, res: any) => `'nonce-${res.locals?.nonce || ""}'`,
                 ...(config.enableSwagger
                   ? ["'unsafe-inline'", "'unsafe-eval'"]
                   : []),

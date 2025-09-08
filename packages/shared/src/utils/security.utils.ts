@@ -16,6 +16,21 @@ import { createHash, randomBytes, createHmac } from "crypto";
 import DOMPurify, { Config } from "dompurify";
 import sanitizeHtml from "sanitize-html";
 import { JSDOM } from "jsdom";
+
+// Import proper WindowLike type from DOMPurify
+type WindowLikeWithDOMPurify = Pick<
+  typeof globalThis,
+  | "NodeFilter"
+  | "Node"
+  | "Element"
+  | "HTMLTemplateElement"
+  | "DocumentFragment"
+  | "HTMLFormElement"
+  | "DOMParser"
+  | "NamedNodeMap"
+> & {
+  document: Document;
+};
 import {
   UserRole,
   Permission,
@@ -36,8 +51,20 @@ let purify: ReturnType<typeof DOMPurify> | null = null;
 function getPurify(): ReturnType<typeof DOMPurify> {
   if (!purify) {
     try {
-      const window = new JSDOM("").window;
-      purify = DOMPurify(window as any);
+      const jsdomWindow = new JSDOM("").window;
+      // Create a compatible WindowLike object with required properties
+      const window = {
+        NodeFilter: jsdomWindow.NodeFilter,
+        Node: jsdomWindow.Node,
+        Element: jsdomWindow.Element,
+        HTMLTemplateElement: jsdomWindow.HTMLTemplateElement,
+        DocumentFragment: jsdomWindow.DocumentFragment,
+        HTMLFormElement: jsdomWindow.HTMLFormElement,
+        DOMParser: jsdomWindow.DOMParser,
+        NamedNodeMap: jsdomWindow.NamedNodeMap,
+        document: jsdomWindow.document,
+      } as WindowLikeWithDOMPurify;
+      purify = DOMPurify(window);
     } catch (error) {
       throw new Error(
         `Failed to initialize DOMPurify: ${(error as Error).message}`,
@@ -374,7 +401,7 @@ export function validatePassword(
   return {
     isValid: errors.length === 0,
     errors,
-    sanitizedData: errors.length === 0 ? password : null,
+    sanitizedData: errors.length === 0 ? { password } : undefined,
     timestamp,
   };
 }
@@ -2383,7 +2410,7 @@ export function validateFilePath(
       message: "File path must be a non-empty string",
       rejectedValue: filePath,
     });
-    return { isValid: false, errors, sanitizedData: null, timestamp };
+    return { isValid: false, errors, sanitizedData: {}, timestamp };
   }
 
   // Path length validation (prevent buffer overflow attacks)
@@ -2774,7 +2801,7 @@ export function validateFilePath(
   return {
     isValid: errors.length === 0,
     errors,
-    sanitizedData: sanitizedPath,
+    sanitizedData: sanitizedPath ? { path: sanitizedPath } : undefined,
     timestamp,
   };
 }
@@ -3188,11 +3215,13 @@ export function validateCoordinates(
   }
 
   // 11. Sanitize Coordinates (Enhanced)
-  let sanitizedData: {
-    x: number;
-    y: number;
-    originalPrecision: { x: number; y: number };
-  } | null = null;
+  let sanitizedData:
+    | {
+        x: number;
+        y: number;
+        originalPrecision: { x: number; y: number };
+      }
+    | undefined = undefined;
   if (errors.length === 0 && Number.isFinite(x) && Number.isFinite(y)) {
     sanitizedData = {
       x: Math.round(Math.max(minX, Math.min(maxCoordinate, x))),
@@ -4165,9 +4194,20 @@ export function sanitizeContentByContext(
   const rules = { ...contextRules[context], ...options };
 
   // Initialize DOMPurify if needed
-  const window = new JSDOM("").window;
+  const jsdomWindow = new JSDOM("").window;
+  const window = {
+    NodeFilter: jsdomWindow.NodeFilter,
+    Node: jsdomWindow.Node,
+    Element: jsdomWindow.Element,
+    HTMLTemplateElement: jsdomWindow.HTMLTemplateElement,
+    DocumentFragment: jsdomWindow.DocumentFragment,
+    HTMLFormElement: jsdomWindow.HTMLFormElement,
+    DOMParser: jsdomWindow.DOMParser,
+    NamedNodeMap: jsdomWindow.NamedNodeMap,
+    document: jsdomWindow.document,
+  } as WindowLikeWithDOMPurify;
 
-  const _purify = DOMPurify(window as any);
+  const _purify = DOMPurify(window);
 
   // Apply context-specific sanitization
   if (rules.stripHtml || !rules.allowHtml) {

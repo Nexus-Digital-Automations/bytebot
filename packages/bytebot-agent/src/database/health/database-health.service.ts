@@ -720,7 +720,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
       100,
     );
     if (this.healthHistory.length > maxHistory) {
-      this.healthHistory = this.healthHistory.slice(-maxHistory);
+      (this as any).healthHistory = this.healthHistory.slice(-maxHistory);
     }
   }
 

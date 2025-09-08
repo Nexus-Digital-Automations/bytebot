@@ -27,36 +27,44 @@ import { CSPNonceConfig } from "../middleware/csp-nonce.middleware";
  * Uses console logging to avoid NestJS dependency in shared package
  */
 const logger = {
-  log: (message: string, context?: any) => {
+  log: (message: string, context?: Record<string, unknown> | string) => {
     console.log(`[EnvironmentSecurityConfig] ${message}`, context || "");
   },
-  warn: (message: string, context?: any) => {
+  warn: (message: string, context?: Record<string, unknown> | string) => {
     console.warn(`[EnvironmentSecurityConfig] ${message}`, context || "");
   },
-  error: (message: string, context?: any) => {
+  error: (message: string, context?: Record<string, unknown> | string) => {
     console.error(`[EnvironmentSecurityConfig] ${message}`, context || "");
   },
 };
 
 /**
  * Environment types for security configuration
+ * ESLint disabled: Complete environment coverage for deployment flexibility
  */
+/* eslint-disable no-unused-vars */
+
 export enum SecurityEnvironment {
   DEVELOPMENT = "development",
   STAGING = "staging",
   PRODUCTION = "production",
   TEST = "test",
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Security levels with different policy strictness
+ * ESLint disabled: Complete security level coverage for flexible deployment
  */
+/* eslint-disable no-unused-vars */
+
 export enum SecurityLevel {
   MINIMAL = "minimal", // Development only
   STANDARD = "standard", // Staging
   HIGH = "high", // Production default
   MAXIMUM = "maximum", // High-security production
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Security feature flags for gradual rollout

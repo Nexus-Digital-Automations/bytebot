@@ -3140,6 +3140,27 @@
       "createdAt": "2025-09-08T00:43:40.225Z",
       "sessionId": "session_1757292220219",
       "metadata": {}
+    },
+    "development_session_1757297949970_1_general_e324ef49": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T02:19:09.976Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T02:19:09.976Z",
+      "sessionId": "session_1757297949970",
+      "metadata": {}
     }
   },
   "settings": {

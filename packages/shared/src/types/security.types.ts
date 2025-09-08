@@ -4,12 +4,31 @@
  * This module defines comprehensive security types for authentication, authorization,
  * validation, and security event tracking across all Bytebot microservices.
  *
+ * NOTE: Many enum values are intentionally unused as they represent a complete
+ * API surface for enterprise security requirements. ESLint warnings are disabled
+ * for comprehensive enum definitions that provide full industry-standard coverage.
+ *
  * @fileoverview Enterprise-grade security type definitions
  * @version 1.0.0
  * @author Bytebot Security Team
  */
 
+/* eslint-disable no-unused-vars */
+
 // import { IsEmail, IsString, IsEnum, MinLength } from "class-validator";
+
+/**
+ * Basic request interface for rate limiting and security functions
+ */
+interface RequestLike {
+  ip?: string;
+  method?: string;
+  url?: string;
+  headers?: Record<string, string | string[]>;
+  body?: unknown;
+  query?: Record<string, unknown>;
+  params?: Record<string, unknown>;
+}
 
 // ===========================
 // SECURITY EVENT TYPES
@@ -357,7 +376,7 @@ export interface ValidationError {
   message: string;
 
   /** Invalid value that was provided */
-  rejectedValue: any;
+  rejectedValue: unknown;
 }
 
 /**
@@ -371,7 +390,7 @@ export interface ValidationResult {
   errors: ValidationError[];
 
   /** Sanitized/transformed data */
-  sanitizedData?: any;
+  sanitizedData?: Record<string, unknown> | unknown[];
 
   /** Validation timestamp */
   timestamp: Date;
@@ -430,10 +449,10 @@ export interface RateLimitConfig {
   message: string;
 
   /** Custom skip function */
-  skip?: (req: any) => boolean;
+  skip?: (req: RequestLike) => boolean;
 
   /** Key generator for rate limiting */
-  keyGenerator?: (req: any) => string;
+  keyGenerator?: (req: RequestLike) => string;
 }
 
 /**

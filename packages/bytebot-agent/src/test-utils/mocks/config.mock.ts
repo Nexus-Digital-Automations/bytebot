@@ -200,9 +200,9 @@ export const MOCK_APP_CONFIGS: Record<string, AppConfig> = {
       timeout: 10000,
       interval: 30000,
     },
-    kubernetes: {
-      namespace: 'bytebot-dev',
-      serviceName: 'bytebot-agent-dev',
+    localDeployment: {
+      type: 'docker-compose',
+      dataDirectory: '/app/data',
     },
     development: {
       enableSwagger: true,
@@ -269,9 +269,9 @@ export const MOCK_APP_CONFIGS: Record<string, AppConfig> = {
       timeout: 3000,
       interval: 15000,
     },
-    kubernetes: {
-      namespace: 'production',
-      serviceName: 'bytebot-agent-prod',
+    localDeployment: {
+      type: 'standalone',
+      dataDirectory: '/var/app/data',
     },
     development: {
       enableSwagger: false,
@@ -831,14 +831,6 @@ export class MockBytebotConfigService {
   getHealthCheckConfig(): AppConfig['healthCheck'] {
     this.recordConfigAccess('app.config.healthCheck');
     return this.configService.get<AppConfig['healthCheck']>('app.healthCheck');
-  }
-
-  /**
-   * Get Kubernetes configuration
-   */
-  getKubernetesConfig(): AppConfig['kubernetes'] {
-    this.recordConfigAccess('app.config.kubernetes');
-    return this.configService.get<AppConfig['kubernetes']>('app.kubernetes');
   }
 
   /**

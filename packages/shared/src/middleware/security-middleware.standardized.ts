@@ -753,8 +753,8 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
         {
           operationId,
           serviceType: this.config.serviceType,
-          error: error.message,
-          stack: error.stack,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
           processingTimeMs: processingTime,
         },
       );
@@ -763,7 +763,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
       this.logSecurityEvent(
         req,
         "MIDDLEWARE_FAILURE",
-        error.message,
+        error instanceof Error ? error.message : String(error),
         operationId,
       );
 
@@ -1111,7 +1111,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
         {
           operationId,
           serviceType: this.config.serviceType,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           originalEventType: eventType,
         },
       );

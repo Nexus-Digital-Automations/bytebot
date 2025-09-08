@@ -90,8 +90,8 @@ export const RequireDatabaseHealth = (
 export class DatabaseHealthGuard implements CanActivate {
   private readonly logger = new Logger(DatabaseHealthGuard.name);
   private readonly defaultConfig: DatabaseHealthConfig;
-  private healthMetrics: DatabaseHealthMetrics;
-  private healthCheckInterval: NodeJS.Timeout;
+  private healthMetrics!: DatabaseHealthMetrics;
+  private healthCheckInterval?: NodeJS.Timeout;
   private readonly startTime = new Date();
 
   constructor(

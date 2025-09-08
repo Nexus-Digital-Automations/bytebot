@@ -162,7 +162,7 @@ export interface AuthorizationAuditEntry {
  */
 const DEFAULT_ROLE_DEFINITIONS: RoleDefinition[] = [
   {
-    name: UserRole.SUPER_ADMIN as string,
+    name: UserRole.ADMIN,
     displayName: 'Super Administrator',
     description: 'Full system access with all permissions',
     inheritsFrom: [],

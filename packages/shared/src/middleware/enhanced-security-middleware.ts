@@ -263,7 +263,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         userAgent,
         SecurityEventType.SECURITY_CONFIG_CHANGED,
         false,
-        `Security middleware error: ${error.message}`,
+        `Security middleware error: ${error instanceof Error ? error.message : String(error)}`,
         operationId,
       );
 
@@ -598,7 +598,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
       userAgent,
       SecurityEventType.SUSPICIOUS_ACTIVITY,
       false,
-      `Threat detected: ${threatAnalysis.threatsDetected.map((t) => t.name).join(", ")}`,
+      `Threat detected: ${threatAnalysis.threatsDetected.map((t: ThreatDetectionRule) => t.name).join(", ")}`,
       operationId,
     );
 
@@ -607,7 +607,9 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
       threatSeverity: this.calculateOverallThreatSeverity(
         threatAnalysis.threatsDetected,
       ),
-      rulesTrigggered: threatAnalysis.threatsDetected.map((r) => r.ruleId),
+      rulesTrigggered: threatAnalysis.threatsDetected.map(
+        (r: ThreatDetectionRule) => r.ruleId,
+      ),
       responseActions: [],
       correlationData: {
         relatedEvents: this.findCorrelatedEvents(clientIP),

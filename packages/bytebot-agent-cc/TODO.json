@@ -1,0 +1,180 @@
+{
+  "project": "unknown",
+  "tasks": [
+    {
+      "id": "error_1757296173710_ldf1ht06o",
+      "title": "Fix comprehensive ESLint violations in shared package (1303 violations)",
+      "description": "Systematically address 1303 ESLint violations in the shared package by category:\n\n**CRITICAL PRIORITY (Fix First):**\n1. **Unsafe TypeScript assignments/member access** (36 violations)\n   - Fix unsafe any value assignments in rbac-metadata.utils.ts (lines 67-70)\n   - Fix unsafe argument types in security.utils.ts (lines 40, 4170)\n   - Replace unsafe operations with proper type guards and assertions\n\n2. **Explicit any types** (40+ violations)\n   - Replace all @typescript-eslint/no-explicit-any violations with proper types\n   - Focus on audit-event.types.ts, environment-security.config.ts, security.types.ts\n   - Create proper interface definitions for complex objects\n\n3. **Test configuration issues** (2 violations)\n   - Fix TypeScript project configuration for test files\n   - Add test files to tsconfig.json or configure allowDefaultProject\n   - Files: messageContent.utils.test.ts, security.utils.test.ts\n\n**HIGH PRIORITY (Fix Second):**\n4. **Unused variables/parameters** (20+ violations)\n   - Remove genuinely unused imports and variables (ConfigService, BullModule, redis)\n   - Convert unused function parameters to underscore prefix for intentional unused\n   - Fix unused parameters in audit-event.processor.ts\n\n**ARCHITECTURAL DECISIONS (Handle Carefully):**\n5. **Unused enum values** (1200+ violations)\n   - Evaluate each enum for API design necessity:\n     * AuditEventSeverity (6 values) - Keep as part of audit API\n     * AuditEventCategory (12 values) - Keep as part of audit API\n     * ComplianceFramework (7 values) - Keep for compliance features\n     * AuditEventStatus (5 values) - Keep for audit workflow\n     * Environment (4 values) - Keep for environment config\n     * SecurityLevel (4 values) - Keep for security config\n     * SecurityErrorCode (22 values) - Keep as error catalog\n   - Add eslint-disable comments for intentionally unused enum values\n   - Create documentation explaining enum completeness for API design\n\n**IMPLEMENTATION APPROACH:**\n- Fix violations in order of criticality to maintain code safety\n- Preserve API design integrity while eliminating genuine issues\n- Add proper TypeScript types to replace any usage\n- Configure linting exceptions for intentional architectural choices\n- Validate each fix doesn't break existing functionality",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "../shared/src/audit/types/audit-event.types.ts",
+        "../shared/src/types/security.types.ts",
+        "../shared/src/config/environment-security.config.ts",
+        "../shared/src/utils/rbac-metadata.utils.ts",
+        "../shared/src/utils/security.utils.ts",
+        "../shared/eslint.config.mjs",
+        "../shared/tsconfig.json"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-08T01:49:33.710Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757295989004_1_general_d1354ff1",
+      "started_at": "2025-09-08T01:49:40.614Z",
+      "claimed_by": "development_session_1757295989004_1_general_d1354ff1",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757295989004_1_general_d1354ff1",
+          "role": "primary",
+          "assignedAt": "2025-09-08T01:49:40.614Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757295936290_6it1re5q8",
+      "title": "Fix comprehensive ESLint violations across shared package",
+      "description": "Address the remaining 1303 ESLint violations in the shared package including unused enum values, improper any types, unused imports, and test configuration issues. Systematically review each violation type and apply appropriate fixes while maintaining API design integrity.",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-08T01:45:36.290Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "feature_1757300209031_nco6murm8",
+      "title": "Create comprehensive ESLint implementation summary report",
+      "description": "Document all ESLint violations addressed across both packages including original 30 violations, additional 1303 discovered, architectural decisions about enum preservation, documentation created, and final validation results",
+      "priority": "medium",
+      "category": "feature",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-08T02:56:49.032Z",
+      "auto_research_created": false
+    }
+  ],
+  "agents": {
+    "development_session_1757295883844_1_general_bbf4bf10": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T01:44:43.844Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T01:44:43.844Z",
+      "sessionId": "session_1757295883844",
+      "metadata": {}
+    },
+    "development_session_1757295957340_1_general_e49e5be0": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T01:45:57.341Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T01:45:57.341Z",
+      "sessionId": "session_1757295957340",
+      "metadata": {}
+    },
+    "development_session_1757295989004_1_general_d1354ff1": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T01:46:29.005Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T01:46:29.005Z",
+      "sessionId": "session_1757295989004",
+      "metadata": {}
+    },
+    "development_session_1757300196157_1_general_794a51e2": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T02:56:36.160Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T02:56:36.160Z",
+      "sessionId": "session_1757300196157",
+      "metadata": {}
+    }
+  },
+  "settings": {
+    "auto_sort_enabled": true,
+    "sort_criteria": {
+      "primary": "category",
+      "secondary": "created_at"
+    },
+    "priority_values": {
+      "critical": 4,
+      "high": 3,
+      "medium": 2,
+      "low": 1
+    },
+    "category_enabled": true,
+    "category_ranks": {
+      "error": 1,
+      "feature": 2,
+      "subtask": 3,
+      "test": 4
+    }
+  },
+  "current_mode": "DEVELOPMENT"
+}

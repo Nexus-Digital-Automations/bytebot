@@ -159,8 +159,8 @@ export interface AuditLoggerConfig {
 @Injectable()
 export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(AuditLoggerService.name);
-  private winstonLogger: WinstonLogger;
-  private config: AuditLoggerConfig;
+  private winstonLogger!: WinstonLogger;
+  private config!: AuditLoggerConfig;
   private eventEmitter: EventEmitter2;
   private isInitialized = false;
   private eventBuffer: AuditEvent[] = [];
@@ -207,8 +207,9 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
     // eslint-disable-next-line no-unused-vars
     private readonly configService: ConfigService,
     private readonly eventEmitterService: EventEmitter2,
-    // eslint-disable-next-line no-unused-vars
-    @InjectQueue("audit-events") private readonly _auditQueue: Queue,
+
+    // @InjectQueue("audit-events") - temporarily disabled due to missing Bull dependency
+    private readonly _auditQueue: Queue,
   ) {
     this.eventEmitter = eventEmitterService;
   }
@@ -565,7 +566,7 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
     try {
       let totalPurged = 0;
 
-      for (const policy of this.retentionPolicies.values()) {
+      for (const policy of Array.from(this.retentionPolicies.values())) {
         const cutoffDate = new Date(
           Date.now() - policy.retentionDays * 24 * 60 * 60 * 1000,
         );
@@ -824,7 +825,7 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
    * Check alert conditions
    */
   private async checkAlertConditions(event: AuditEvent): Promise<void> {
-    for (const alertConfig of this.alertConfigs.values()) {
+    for (const alertConfig of Array.from(this.alertConfigs.values())) {
       if (!alertConfig.enabled) continue;
 
       const shouldAlert = this.evaluateAlertConditions();

@@ -225,9 +225,45 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/TODO.json"
+    },
+    {
+      "id": "feature_1757297604318_5oyrfox3t",
+      "title": "Create comprehensive ESLint configuration guide for enum preservation and architectural design choices",
+      "description": "Create documentation covering ESLint disable comment best practices, configuration for security framework enums, guidelines for eslint-disable vs code fixes, template comments for architectural decisions, and specific configurations for audit-event.types.ts and security.types.ts patterns",
+      "priority": "medium",
+      "category": "feature",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [
+        "development/essentials/",
+        "eslint.config.mjs",
+        "packages/shared/src/types/audit-event.types.ts",
+        "packages/shared/src/types/security.types.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-08T02:13:24.318Z",
+      "auto_research_created": false,
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-08T02:24:39.845Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "pending",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-08T02:24:39.845Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/TODO.json"
     }
   ],
-  "total_completed": 5,
-  "last_completion": "2025-09-07T19:43:56.142Z",
+  "total_completed": 6,
+  "last_completion": "2025-09-08T02:24:39.845Z",
   "created_at": "2025-09-06T08:07:58.068Z"
 }

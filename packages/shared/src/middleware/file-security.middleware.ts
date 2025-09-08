@@ -29,7 +29,7 @@ import {
   createSecurityEvent,
   SecurityEventType,
 } from "../utils/security.utils";
-import multer from "multer";
+import * as multer from "multer";
 import { promisify } from "util";
 
 // Import the File type from @types/multer
@@ -327,7 +327,11 @@ export class FileSecurityMiddleware implements NestMiddleware {
         fileSize: this.config.maxFileSize,
         files: this.config.maxFiles,
       },
-      fileFilter: (req, file, cb) => {
+      fileFilter: (
+        req: Request,
+        file: MulterFile,
+        cb: multer.FileFilterCallback,
+      ) => {
         this.validateFile(file, operationId)
           .then((result) => {
             if (result.safe) {
@@ -343,13 +347,13 @@ export class FileSecurityMiddleware implements NestMiddleware {
               );
             }
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             this.logger.error(`[${operationId}] File validation error`, {
               operationId,
-              error: error.message,
+              error: error instanceof Error ? error.message : String(error),
               fileName: file.originalname,
             });
-            cb(error);
+            cb(error instanceof Error ? error : new Error(String(error)));
           });
       },
     }).any();
@@ -715,7 +719,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
     } catch (error) {
       this.logger.error("Failed to log file security event", {
         operationId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         originalEventType: eventType,
       });
     }
