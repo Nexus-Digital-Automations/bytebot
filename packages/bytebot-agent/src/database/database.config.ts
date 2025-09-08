@@ -99,7 +99,7 @@ export interface DatabaseConfiguration {
 @Injectable()
 export class DatabaseConfig {
   private readonly logger = new Logger(DatabaseConfig.name);
-  private configuration: DatabaseConfiguration;
+  private configuration!: DatabaseConfiguration;
 
   constructor(
     private readonly configService: ConfigService,

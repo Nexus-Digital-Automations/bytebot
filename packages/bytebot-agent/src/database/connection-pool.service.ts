@@ -59,11 +59,11 @@ export interface ConnectionHealthMetrics {
 export class ConnectionPoolService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ConnectionPoolService.name);
   private readonly connectionPool = new Map<string, ConnectionHealthMetrics>();
-  private poolMetrics: ConnectionPoolMetrics;
-  private monitoringInterval: NodeJS.Timeout;
-  private maintenanceInterval: NodeJS.Timeout;
-  private leakDetectionInterval: NodeJS.Timeout;
-  private startTime: Date;
+  private poolMetrics!: ConnectionPoolMetrics;
+  private monitoringInterval?: NodeJS.Timeout;
+  private maintenanceInterval?: NodeJS.Timeout;
+  private leakDetectionInterval?: NodeJS.Timeout;
+  private readonly startTime: Date;
 
   constructor(
     private readonly configService: ConfigService,
@@ -97,9 +97,18 @@ export class ConnectionPoolService implements OnModuleInit, OnModuleDestroy {
     this.logger.log('Shutting down connection pool service');
 
     // Clean up intervals
-    if (this.monitoringInterval) clearInterval(this.monitoringInterval);
-    if (this.maintenanceInterval) clearInterval(this.maintenanceInterval);
-    if (this.leakDetectionInterval) clearInterval(this.leakDetectionInterval);
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval);
+      this.monitoringInterval = undefined;
+    }
+    if (this.maintenanceInterval) {
+      clearInterval(this.maintenanceInterval);
+      this.maintenanceInterval = undefined;
+    }
+    if (this.leakDetectionInterval) {
+      clearInterval(this.leakDetectionInterval);
+      this.leakDetectionInterval = undefined;
+    }
 
     this.logger.log('Connection pool service shutdown complete');
   }
@@ -263,33 +272,35 @@ export class ConnectionPoolService implements OnModuleInit, OnModuleDestroy {
       // Clean up stale connections
       const staleThreshold = Date.now() - 30 * 60 * 1000; // 30 minutes
 
-      for (const [connectionId, connection] of this.connectionPool.entries()) {
-        try {
-          // Remove stale connections
-          if (
-            connection.lastUsed.getTime() < staleThreshold &&
-            !connection.isActive
-          ) {
-            this.connectionPool.delete(connectionId);
-            cleaned++;
-            continue;
-          }
-
-          // Attempt to recover unhealthy connections
-          if (!connection.isHealthy && connection.isActive) {
-            const healthCheck = this.testConnectionHealth(connectionId);
-            if (healthCheck) {
-              connection.isHealthy = true;
-              connection.errors = 0; // Reset error count on recovery
-              recovered++;
+      Array.from(this.connectionPool.entries()).forEach(
+        ([connectionId, connection]) => {
+          try {
+            // Remove stale connections
+            if (
+              connection.lastUsed.getTime() < staleThreshold &&
+              !connection.isActive
+            ) {
+              this.connectionPool.delete(connectionId);
+              cleaned++;
+              return;
             }
+
+            // Attempt to recover unhealthy connections
+            if (!connection.isHealthy && connection.isActive) {
+              const healthCheck = this.testConnectionHealth(connectionId);
+              if (healthCheck) {
+                connection.isHealthy = true;
+                connection.errors = 0; // Reset error count on recovery
+                recovered++;
+              }
+            }
+          } catch (error) {
+            const errorMsg =
+              error instanceof Error ? error.message : String(error);
+            errors.push(`Connection ${connectionId}: ${errorMsg}`);
           }
-        } catch (error) {
-          const errorMsg =
-            error instanceof Error ? error.message : String(error);
-          errors.push(`Connection ${connectionId}: ${errorMsg}`);
-        }
-      }
+        },
+      );
 
       // Update pool metrics after maintenance
       this.updatePoolMetrics();

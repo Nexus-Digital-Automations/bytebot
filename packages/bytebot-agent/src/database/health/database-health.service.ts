@@ -57,9 +57,9 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
     string,
     (options: HealthCheckOptions) => Promise<HealthCheckResult>
   >();
-  private backgroundMonitoring: NodeJS.Timeout;
-  private lastHealthReport: HealthReport;
-  private healthHistory: HealthReport[] = [];
+  private backgroundMonitoring?: NodeJS.Timeout;
+  private lastHealthReport!: HealthReport;
+  private readonly healthHistory: HealthReport[] = [];
 
   constructor(
     private readonly configService: ConfigService,
@@ -87,6 +87,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
 
     if (this.backgroundMonitoring) {
       clearInterval(this.backgroundMonitoring);
+      this.backgroundMonitoring = undefined;
     }
 
     this.logger.log('Database health service shutdown complete');

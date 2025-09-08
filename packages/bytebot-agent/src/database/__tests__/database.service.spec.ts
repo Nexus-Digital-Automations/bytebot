@@ -80,7 +80,7 @@ describe('DatabaseService Comprehensive Test Suite', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn((key: string, defaultValue?: any) => {
-              const config = {
+              const config: Record<string, any> = {
                 NODE_ENV: 'test',
                 DB_HEALTH_CHECK_INTERVAL: 30000,
                 DATABASE_URL: 'postgresql://user:pass@localhost:5432/test',

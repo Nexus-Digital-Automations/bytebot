@@ -114,10 +114,10 @@ export interface PrometheusMetrics {
 @Injectable()
 export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseMetricsService.name);
-  private metricsCollectionInterval: NodeJS.Timeout;
-  private currentMetrics: DatabaseMetricsSnapshot;
-  private prometheusMetrics: PrometheusMetrics;
-  private metricsHistory: DatabaseMetricsSnapshot[] = [];
+  private metricsCollectionInterval?: NodeJS.Timeout;
+  private currentMetrics!: DatabaseMetricsSnapshot;
+  private prometheusMetrics!: PrometheusMetrics;
+  private readonly metricsHistory: DatabaseMetricsSnapshot[] = [];
   private readonly maxHistorySize: number = 1000;
 
   constructor(
@@ -151,6 +151,7 @@ export class DatabaseMetricsService implements OnModuleInit, OnModuleDestroy {
 
     if (this.metricsCollectionInterval) {
       clearInterval(this.metricsCollectionInterval);
+      this.metricsCollectionInterval = undefined;
     }
 
     this.logger.log('Database metrics service shutdown complete');

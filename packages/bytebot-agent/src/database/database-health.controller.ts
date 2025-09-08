@@ -42,7 +42,30 @@ export class DatabaseHealthController {
   @Get('health')
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
-  getHealthStatus() {
+  getHealthStatus():
+    | {
+        status: string;
+        timestamp: string;
+        database: {
+          connectionStatus: string;
+          isConnected: boolean;
+          uptime: number;
+          lastHealthCheck: Date;
+        };
+        healthGuard: {
+          status: string;
+          consecutiveFailures: number;
+          consecutiveSuccesses: number;
+          errorRate: number;
+          totalChecks: number;
+        };
+        checks: any;
+      }
+    | {
+        status: string;
+        error: string;
+        timestamp: string;
+      } {
     const operationId = this.generateOperationId();
 
     try {
@@ -107,7 +130,25 @@ export class DatabaseHealthController {
   @Get('metrics')
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-cache, max-age=30')
-  getDatabaseMetrics() {
+  getDatabaseMetrics(): {
+    timestamp: string;
+    connectionPool: {
+      utilization: number;
+      active: number;
+      idle: number;
+      waiting: number;
+      total: number;
+    };
+    performance: {
+      slowQueryRate: number;
+      averageQueryTime: number;
+      slowQueries: number;
+      totalQueries: number;
+      queriesPerSecond: number;
+    };
+    health: any;
+    operationId: string;
+  } {
     const operationId = this.generateOperationId();
 
     try {
@@ -318,7 +359,25 @@ export class DatabaseHealthController {
   @Get('connection-pool')
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-cache, max-age=10')
-  getConnectionPoolStatus() {
+  getConnectionPoolStatus(): {
+    timestamp: string;
+    connectionPool: {
+      active: number;
+      idle: number;
+      waiting: number;
+      total: number;
+    };
+    utilization: {
+      percentage: number;
+      status: string;
+    };
+    performance: {
+      averageQueryTime: number;
+      totalQueries: number;
+      queriesPerSecond: number;
+    };
+    operationId: string;
+  } {
     const operationId = this.generateOperationId();
 
     try {

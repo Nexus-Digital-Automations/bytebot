@@ -52,12 +52,12 @@ export interface QueryPerformanceMetrics {
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseService.name);
-  private prismaClient: PrismaClient;
-  private connectionPoolOptions: ConnectionPoolOptions;
-  private startTime: Date;
-  private queryMetrics: QueryPerformanceMetrics[] = [];
-  private healthCheckInterval: NodeJS.Timeout;
-  private metricsInterval: NodeJS.Timeout;
+  private prismaClient!: PrismaClient;
+  private connectionPoolOptions!: ConnectionPoolOptions;
+  private readonly startTime: Date;
+  private readonly queryMetrics: QueryPerformanceMetrics[] = [];
+  private healthCheckInterval?: NodeJS.Timeout;
+  private metricsInterval?: NodeJS.Timeout;
   private lastHealthCheck: Date;
   private isHealthy = false;
   private totalQueries = 0;
@@ -120,10 +120,12 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       // Clean up intervals
       if (this.healthCheckInterval) {
         clearInterval(this.healthCheckInterval);
+        this.healthCheckInterval = undefined;
       }
 
       if (this.metricsInterval) {
         clearInterval(this.metricsInterval);
+        this.metricsInterval = undefined;
       }
 
       // Disconnect Prisma client
@@ -529,9 +531,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         // Clear intervals first
         if (this.healthCheckInterval) {
           clearInterval(this.healthCheckInterval);
+          this.healthCheckInterval = undefined;
         }
         if (this.metricsInterval) {
           clearInterval(this.metricsInterval);
+          this.metricsInterval = undefined;
         }
 
         // Disconnect Prisma client

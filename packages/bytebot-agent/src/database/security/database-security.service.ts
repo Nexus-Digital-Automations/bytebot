@@ -83,11 +83,11 @@ export interface SecurityViolation {
 @Injectable()
 export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseSecurityService.name);
-  private securityConfig: DatabaseSecurityConfig;
-  private auditEvents: DatabaseAuditEvent[] = [];
-  private securityViolations: SecurityViolation[] = [];
-  private auditCleanupInterval: NodeJS.Timeout;
-  private connectionRegistry = new Map<
+  private securityConfig!: DatabaseSecurityConfig;
+  private readonly auditEvents: DatabaseAuditEvent[] = [];
+  private readonly securityViolations: SecurityViolation[] = [];
+  private auditCleanupInterval?: NodeJS.Timeout;
+  private readonly connectionRegistry = new Map<
     string,
     {
       connectionId: string;
@@ -129,6 +129,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
 
     if (this.auditCleanupInterval) {
       clearInterval(this.auditCleanupInterval);
+      this.auditCleanupInterval = undefined;
     }
 
     // Flush any pending audit events
