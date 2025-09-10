@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noEmitOnError": false,
+    "noImplicitAny": false
+  },
+  "include": [
+    "src/index.ts",
+    "src/index-client.ts",
+    "src/index-server.ts",
+    "src/index-minimal.ts",
+    "src/**/*"
+  ],
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/__tests__/**",
+    "**/test-utils/**",
+    "src/post-tool-linter-hook.log",
+    "src/**/post-tool-linter-hook.log",
+    "node_modules"
+  ]
+}

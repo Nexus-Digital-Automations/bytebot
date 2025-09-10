@@ -327,7 +327,9 @@ export class AuthTestHelper {
     };
 
     const mockContext = createMockExecutionContext({
-      switchToHttp: jest.fn(() => mockHttpContext as any),
+      switchToHttp: jest.fn(() => mockHttpContext) as jest.MockedFunction<
+        () => any
+      >,
       ...overrides,
     });
     return mockContext;
@@ -357,7 +359,9 @@ export class AuthTestHelper {
     };
 
     const mockContext = createMockExecutionContext({
-      switchToHttp: jest.fn(() => mockHttpContext as any),
+      switchToHttp: jest.fn(() => mockHttpContext) as jest.MockedFunction<
+        () => any
+      >,
       ...overrides,
     });
     return mockContext;
@@ -387,7 +391,9 @@ export class AuthTestHelper {
     };
 
     const mockContext = createMockExecutionContext({
-      switchToHttp: jest.fn(() => mockHttpContext as any),
+      switchToHttp: jest.fn(() => mockHttpContext) as jest.MockedFunction<
+        () => any
+      >,
       ...overrides,
     });
     return mockContext;
@@ -421,7 +427,9 @@ export class AuthTestHelper {
     };
 
     const mockContext = createMockExecutionContext({
-      switchToHttp: jest.fn(() => mockHttpContext as any),
+      switchToHttp: jest.fn(() => mockHttpContext) as jest.MockedFunction<
+        () => any
+      >,
       ...overrides,
     });
     return mockContext;

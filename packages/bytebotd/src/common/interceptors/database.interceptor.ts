@@ -26,6 +26,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable, tap, catchError } from 'rxjs';
+import { Request } from 'express';
 import { MetricsService } from '../../metrics/metrics.service';
 import { CacheService } from '../../cache/cache.service';
 import { CacheKeyGenerator } from '../../cache/cache-key.generator';
@@ -37,8 +38,8 @@ interface DatabaseOperation {
   operation: string;
   table: string;
   query?: string;
-  params?: any;
-  executionPlan?: any;
+  params?: Record<string, unknown>;
+  executionPlan?: Record<string, unknown>;
 }
 
 /**
@@ -152,7 +153,7 @@ export class DatabaseInterceptor implements NestInterceptor {
   /**
    * Intercept database operations for performance monitoring
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest();
     const operationId = request.operationId || `db_${Date.now()}`;
 
@@ -193,7 +194,7 @@ export class DatabaseInterceptor implements NestInterceptor {
     dbOperation: DatabaseOperation,
     startTime: number,
     next: CallHandler,
-  ): Observable<any> {
+  ): Observable<unknown> {
     this.logger.debug(
       `[${operationId}] Database operation: ${dbOperation.operation} on ${dbOperation.table}`,
     );
@@ -231,7 +232,7 @@ export class DatabaseInterceptor implements NestInterceptor {
     dbOperation: DatabaseOperation,
     startTime: number,
     next: CallHandler,
-  ): Observable<any> {
+  ): Observable<unknown> {
     if (!this.cacheService || !this.keyGenerator) {
       return this.handleDatabaseOperation(
         operationId,
@@ -308,7 +309,7 @@ export class DatabaseInterceptor implements NestInterceptor {
     startTime: number,
     cacheKey: string,
     next: CallHandler,
-  ): Observable<any> {
+  ): Observable<unknown> {
     return next.handle().pipe(
       tap(async (result) => {
         const duration = Date.now() - startTime;
@@ -354,7 +355,7 @@ export class DatabaseInterceptor implements NestInterceptor {
    */
   private extractDatabaseOperation(
     context: ExecutionContext,
-    _request: any,
+    _request: Request,
   ): DatabaseOperation | null {
     // This would need to be customized based on the ORM/database library used
     // For Prisma, we might extract from the handler name or method metadata
@@ -437,7 +438,7 @@ export class DatabaseInterceptor implements NestInterceptor {
   /**
    * Get result count from query result
    */
-  private getResultCount(result: any): number | undefined {
+  private getResultCount(result: unknown): number | undefined {
     if (result === null || result === undefined) {
       return 0;
     }
@@ -446,8 +447,8 @@ export class DatabaseInterceptor implements NestInterceptor {
       return result.length;
     }
 
-    if (typeof result === 'object' && result.count !== undefined) {
-      return result.count;
+    if (typeof result === 'object' && result !== null && 'count' in result) {
+      return (result as { count: number }).count;
     }
 
     return 1; // Single result

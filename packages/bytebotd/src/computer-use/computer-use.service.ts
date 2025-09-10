@@ -3,13 +3,12 @@
  *
  * Provides comprehensive computer control capabilities including:
  * - Mouse and keyboard automation with precise timing control
- * - Advanced screenshot capture with optional OCR integration
+ * - Screenshot capture for visual feedback
  * - File system operations with secure path handling
  * - Application lifecycle management with window control
- * - Enhanced vision processing through C/ua framework integration
  * - Performance monitoring and structured logging
  *
- * Dependencies: NutService (native automation), CUA framework (vision AI)
+ * Dependencies: NutService (native automation for Linux X11/XFCE desktop)
  * Security: All file operations use secure path resolution and permission handling
  * Performance: Includes comprehensive timing metrics and operation tracking
  */
@@ -20,12 +19,6 @@ import { promisify } from 'util';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { NutService } from '../nut/nut.service';
-import {
-  CuaVisionService,
-  OcrResult,
-} from '../cua-integration/cua-vision.service';
-import { CuaIntegrationService } from '../cua-integration/cua-integration.service';
-import { CuaPerformanceService } from '../cua-integration/cua-performance.service';
 import {
   ComputerAction,
   MoveMouseAction,
@@ -42,9 +35,6 @@ import {
   PasteTextAction,
   WriteFileAction,
   ReadFileAction,
-  OcrAction,
-  FindTextAction,
-  EnhancedScreenshotAction,
 } from '@bytebot/shared';
 
 // ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====
@@ -115,65 +105,6 @@ export interface FileReadResult {
   readonly operationId: string;
   readonly timestamp: Date;
   readonly message?: string;
-}
-
-/**
- * Text finding match result with precise location data
- */
-export interface TextMatch {
-  readonly text: string;
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-  readonly confidence: number;
-}
-
-/**
- * Text finding operation result with comprehensive match data
- */
-export interface FindTextResult {
-  readonly found: boolean;
-  readonly matches: ReadonlyArray<TextMatch>;
-  readonly processingTimeMs: number;
-  readonly operationId: string;
-  readonly searchCriteria: {
-    readonly text: string;
-    readonly caseSensitive: boolean;
-    readonly wholeWord: boolean;
-  };
-}
-
-/**
- * OCR operation result with detailed processing information
- */
-export interface OcrOperationResult {
-  readonly text: string;
-  readonly confidence: number;
-  readonly boundingBoxes?: ReadonlyArray<{
-    readonly text: string;
-    readonly x: number;
-    readonly y: number;
-    readonly width: number;
-    readonly height: number;
-    readonly confidence: number;
-  }>;
-  readonly processingTimeMs: number;
-  readonly method: string;
-  readonly operationId: string;
-  readonly language?: string;
-}
-
-/**
- * Enhanced screenshot result with optional AI-powered enhancements
- */
-export interface EnhancedScreenshotResult {
-  readonly image: string;
-  readonly ocr?: OcrResult;
-  readonly textDetection?: unknown;
-  readonly processingTimeMs: number;
-  readonly enhancementsApplied: ReadonlyArray<string>;
-  readonly operationId: string;
 }
 
 /**
@@ -291,57 +222,33 @@ export class ErrorHandler {
  * - Type-safe operation execution with comprehensive error handling
  * - Performance monitoring and structured logging for all operations
  * - Secure file operations with path validation and permission management
- * - Advanced vision processing integration through C/ua framework
  * - Robust application lifecycle management with window control
+ * - Linux X11/XFCE desktop automation via NutService
  */
 @Injectable()
 export class ComputerUseService {
   private readonly logger = new Logger(ComputerUseService.name);
-  private readonly cuaEnabled: boolean;
 
   /**
-   * Initialize Computer Use Service with dependency injection and framework detection
+   * Initialize Computer Use Service with dependency injection
    *
    * @param nutService - Native automation service for low-level computer control
-   * @param cuaIntegrationService - Optional C/ua framework integration service
-   * @param cuaVisionService - Optional C/ua vision processing service
-   * @param performanceService - Optional performance monitoring service
    */
-
-  constructor(
-    private readonly nutService: NutService,
-    private readonly cuaIntegrationService?: CuaIntegrationService,
-    private readonly cuaVisionService?: CuaVisionService,
-    private readonly performanceService?: CuaPerformanceService,
-  ) {
-    // Initialize C/ua framework availability detection
+  constructor(private readonly nutService: NutService) {
     const operationId = `init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     this.logger.log(`[${operationId}] Initializing Computer Use Service`, {
       hasNutService: !!this.nutService,
-      hasCuaIntegration: !!this.cuaIntegrationService,
-      hasCuaVision: !!this.cuaVisionService,
-      hasPerformanceService: !!this.performanceService,
     });
-
-    // Use injected services to initialize capabilities
-    if (this.performanceService) {
-      this.logger.debug(`[${operationId}] Performance monitoring enabled`);
-    }
-
-    // Check if C/ua framework is enabled and available with safe access
-    this.cuaEnabled = this.cuaIntegrationService?.isFrameworkEnabled() ?? false;
 
     this.logger.log(
       `[${operationId}] Computer Use Service initialized successfully`,
       {
-        cuaIntegrationStatus: this.cuaEnabled ? 'enabled' : 'disabled',
         availableFeatures: {
           basicAutomation: true,
           fileOperations: true,
           applicationControl: true,
-          advancedOcr: this.cuaEnabled && !!this.cuaVisionService,
-          performanceMonitoring: this.cuaEnabled && !!this.performanceService,
+          screenshotCapture: true,
         },
       },
     );
@@ -364,9 +271,6 @@ export class ComputerUseService {
     | CursorPositionResult
     | FileWriteResult
     | FileReadResult
-    | OcrOperationResult
-    | FindTextResult
-    | EnhancedScreenshotResult
     | void
   > {
     const operationId = `action_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -388,9 +292,6 @@ export class ComputerUseService {
         | CursorPositionResult
         | FileWriteResult
         | FileReadResult
-        | OcrOperationResult
-        | FindTextResult
-        | EnhancedScreenshotResult
         | void;
 
       switch (params.action) {
@@ -469,19 +370,6 @@ export class ComputerUseService {
         }
         case 'read_file': {
           result = await this.readFile(params);
-          break;
-        }
-        // === C/ua Enhanced Actions ===
-        case 'ocr': {
-          result = await this.performOcr(params);
-          break;
-        }
-        case 'find_text': {
-          result = await this.findText(params);
-          break;
-        }
-        case 'enhanced_screenshot': {
-          result = await this.enhancedScreenshot(params);
           break;
         }
         default: {
@@ -1221,22 +1109,6 @@ export class ComputerUseService {
       const image = buffer.toString('base64');
       const duration = Date.now() - startTime;
 
-      // Record performance metric if C/ua is enabled
-      if (this.cuaEnabled && this.performanceService) {
-        try {
-          this.performanceService.recordMetric('screenshot', {
-            duration,
-            success: true,
-            imageSize: image.length,
-            operationId,
-          });
-        } catch (metricError) {
-          this.logger.warn(
-            `[${operationId}] Failed to record performance metric: ${ErrorHandler.extractErrorMessage(metricError)}`,
-          );
-        }
-      }
-
       const result: ScreenshotResult = {
         image,
         metadata: {
@@ -1259,22 +1131,6 @@ export class ComputerUseService {
       const duration = Date.now() - startTime;
       const errorMessage = ErrorHandler.extractErrorMessage(error);
       const errorStack = ErrorHandler.extractErrorStack(error);
-
-      // Record error metric if C/ua is enabled
-      if (this.cuaEnabled && this.performanceService) {
-        try {
-          this.performanceService.recordMetric('screenshot', {
-            duration,
-            success: false,
-            error: errorMessage,
-            operationId,
-          });
-        } catch (metricError) {
-          this.logger.warn(
-            `[${operationId}] Failed to record error metric: ${ErrorHandler.extractErrorMessage(metricError)}`,
-          );
-        }
-      }
 
       this.logger.error(`[${operationId}] Screenshot failed: ${errorMessage}`, {
         operationId,
@@ -1865,597 +1721,6 @@ export class ComputerUseService {
       };
 
       return result;
-    }
-  }
-
-  // ===== C/UA ENHANCED METHODS - ADVANCED AI-POWERED OPERATIONS =====
-
-  /**
-   * Perform OCR (Optical Character Recognition) on current screen with AI-powered text extraction
-   *
-   * Utilizes C/ua framework integration for high-accuracy text recognition using Apple Neural Engine
-   * or fallback processing methods. Supports regional analysis and multiple languages.
-   *
-   * @param params - OCR action parameters with optional region and language specification
-   * @returns Promise<OcrOperationResult> Extracted text with confidence scores and metadata
-   * @throws Error when OCR processing fails or C/ua framework is unavailable
-   */
-  private async performOcr(params: OcrAction): Promise<OcrOperationResult> {
-    const startTime = Date.now();
-    const operationId = `ocr_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Starting OCR operation`, {
-      operationId,
-      hasRegion: !!params.region,
-      hasCoordinates: !!params.coordinates,
-      language: params.language || 'en',
-      cuaEnabled: this.cuaEnabled,
-      timestamp: new Date().toISOString(),
-    });
-
-    try {
-      // Validate C/ua framework availability
-      if (!this.cuaEnabled || !this.cuaVisionService) {
-        throw new Error(
-          'OCR requires C/ua framework integration. Ensure CuaVisionService is available and framework is enabled.',
-        );
-      }
-
-      // Capture current screen for OCR analysis
-      this.logger.log(
-        `[${operationId}] Capturing screenshot for OCR processing`,
-      );
-      const screenshot = await this.screenshot();
-      const imageData = screenshot.image;
-
-      // Handle region specification if provided
-      if (params.region) {
-        this.logger.warn(
-          `[${operationId}] Region cropping not yet implemented, using full screenshot`,
-          {
-            requestedRegion: params.region,
-            note: 'Full image will be processed with potential performance impact',
-          },
-        );
-        // TODO: Implement region cropping using image processing library
-        // This would involve cropping the base64 image data to the specified region
-        // before sending to OCR processing
-      }
-
-      // Configure OCR options with language and processing parameters
-      const ocrOptions = {
-        languages: params.language ? [params.language] : ['en'],
-        enableBoundingBoxes: true,
-        recognitionLevel: 'accurate' as const,
-      };
-
-      this.logger.log(
-        `[${operationId}] Performing OCR with C/ua Vision Service`,
-        {
-          imageSize: imageData.length,
-          options: ocrOptions,
-        },
-      );
-
-      // Perform OCR using C/ua Vision Service
-      const result = await this.cuaVisionService.performOcr(
-        imageData,
-        ocrOptions,
-      );
-
-      const duration = Date.now() - startTime;
-
-      // Record successful OCR metric
-      if (this.cuaEnabled && this.performanceService) {
-        try {
-          this.performanceService.recordMetric('ocr', {
-            duration,
-            success: true,
-            textLength: result.text.length,
-            confidence: result.confidence,
-            method: result.method,
-            language: params.language || 'en',
-            operationId,
-          });
-        } catch (metricError) {
-          this.logger.warn(
-            `[${operationId}] Failed to record OCR performance metric: ${ErrorHandler.extractErrorMessage(metricError)}`,
-          );
-        }
-      }
-
-      // Transform result to standardized interface
-      const ocrResult: OcrOperationResult = {
-        text: result.text,
-        confidence: result.confidence,
-        boundingBoxes: result.boundingBoxes?.map((box) => ({
-          text: box.text,
-          x: box.x,
-          y: box.y,
-          width: box.width,
-          height: box.height,
-          confidence: box.confidence,
-        })),
-        processingTimeMs: duration,
-        method: result.method,
-        operationId,
-        language: params.language,
-      };
-
-      this.logger.log(`[${operationId}] OCR operation completed successfully`, {
-        operationId,
-        textLength: result.text.length,
-        confidence: result.confidence,
-        method: result.method,
-        boundingBoxCount: result.boundingBoxes?.length || 0,
-        processingTimeMs: duration,
-        language: params.language || 'en',
-      });
-
-      return ocrResult;
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      const errorStack = ErrorHandler.extractErrorStack(error);
-
-      // Record error metric for monitoring
-      if (this.cuaEnabled && this.performanceService) {
-        try {
-          this.performanceService.recordMetric('ocr', {
-            duration,
-            success: false,
-            error: errorMessage,
-            operationId,
-            language: params.language || 'en',
-          });
-        } catch (metricError) {
-          this.logger.warn(
-            `[${operationId}] Failed to record OCR error metric: ${ErrorHandler.extractErrorMessage(metricError)}`,
-          );
-        }
-      }
-
-      this.logger.error(
-        `[${operationId}] OCR operation failed: ${errorMessage}`,
-        {
-          operationId,
-          processingTimeMs: duration,
-          hasRegion: !!params.region,
-          language: params.language || 'en',
-          error: errorMessage,
-          stack: errorStack,
-        },
-      );
-
-      throw new Error(`OCR processing failed: ${errorMessage}`);
-    }
-  }
-
-  /**
-   * Find text on screen using advanced OCR and return precise coordinates
-   *
-   * Performs intelligent text search on the current screen using C/ua framework OCR capabilities.
-   * Supports case sensitivity, whole word matching, and provides detailed match information
-   * including confidence scores and bounding box coordinates.
-   *
-   * @param params - Find text action with search text and matching options
-   * @returns Promise<FindTextResult> Search results with found matches and processing metadata
-   * @throws Error when text finding fails or C/ua framework is unavailable
-   */
-  private async findText(params: FindTextAction): Promise<FindTextResult> {
-    const startTime = Date.now();
-    const operationId = `find_text_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(`[${operationId}] Finding text on screen`, {
-      operationId,
-      searchText: params.text,
-      caseSensitive: params.caseSensitive ?? false,
-      wholeWord: params.wholeWord ?? false,
-      timestamp: new Date().toISOString(),
-    });
-
-    try {
-      // Validate C/ua framework availability
-      if (!this.cuaEnabled || !this.cuaVisionService) {
-        throw new Error(
-          'Text finding requires C/ua framework integration. Ensure CuaVisionService is available and framework is enabled.',
-        );
-      }
-
-      // Validate input parameters
-      if (
-        !params.text ||
-        typeof params.text !== 'string' ||
-        params.text.trim().length === 0
-      ) {
-        throw new Error(
-          'Search text parameter is required and must be a non-empty string',
-        );
-      }
-
-      const searchText = params.text.trim();
-
-      // Capture current screen for text analysis
-      this.logger.log(
-        `[${operationId}] Capturing screenshot for text analysis`,
-      );
-      const screenshot = await this.screenshot();
-
-      // Perform OCR with bounding boxes enabled for precise text location
-      this.logger.log(
-        `[${operationId}] Performing OCR with bounding box detection`,
-      );
-      const ocrResult = await this.cuaVisionService.performOcr(
-        screenshot.image,
-        {
-          enableBoundingBoxes: true,
-          recognitionLevel: 'accurate',
-        },
-      );
-
-      // Configure search parameters
-      const normalizedSearchText = params.caseSensitive
-        ? searchText
-        : searchText.toLowerCase();
-      const matches: TextMatch[] = [];
-
-      /**
-       * Compare extracted text with search criteria
-       * Handles case sensitivity and whole word matching options
-       */
-      const compareText = (sourceText: string, targetText: string): boolean => {
-        const normalizedSource = params.caseSensitive
-          ? sourceText
-          : sourceText.toLowerCase();
-
-        if (params.wholeWord) {
-          // Escape special regex characters in search text
-          const escapedTarget = targetText.replace(
-            /[.*+?^${}()|[\]\\]/g,
-            '\\$&',
-          );
-          const regex = new RegExp(
-            `\\b${escapedTarget}\\b`,
-            params.caseSensitive ? 'g' : 'gi',
-          );
-          return regex.test(normalizedSource);
-        } else {
-          return normalizedSource.includes(targetText);
-        }
-      };
-
-      // Search through OCR bounding boxes for text matches
-      if (ocrResult.boundingBoxes && ocrResult.boundingBoxes.length > 0) {
-        this.logger.log(
-          `[${operationId}] Searching through ${ocrResult.boundingBoxes.length} text regions`,
-        );
-
-        for (const box of ocrResult.boundingBoxes) {
-          if (compareText(box.text, normalizedSearchText)) {
-            const match: TextMatch = {
-              text: box.text,
-              x: box.x,
-              y: box.y,
-              width: box.width,
-              height: box.height,
-              confidence: box.confidence,
-            };
-            matches.push(match);
-
-            this.logger.debug(`[${operationId}] Text match found`, {
-              matchText: box.text,
-              coordinates: { x: box.x, y: box.y },
-              confidence: box.confidence,
-            });
-          }
-        }
-      } else {
-        // Fallback: search in full OCR text without precise coordinates
-        this.logger.warn(
-          `[${operationId}] No bounding boxes available, performing fallback text search`,
-        );
-
-        if (compareText(ocrResult.text, normalizedSearchText)) {
-          const fallbackMatch: TextMatch = {
-            text: searchText,
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0,
-            confidence: ocrResult.confidence,
-          };
-          matches.push(fallbackMatch);
-
-          this.logger.debug(
-            `[${operationId}] Fallback text match found with confidence ${ocrResult.confidence}`,
-          );
-        }
-      }
-
-      const duration = Date.now() - startTime;
-
-      // Record performance metric for monitoring
-      if (this.cuaEnabled && this.performanceService) {
-        try {
-          this.performanceService.recordMetric('find_text', {
-            duration,
-            success: true,
-            matchCount: matches.length,
-            searchText: params.text,
-            caseSensitive: params.caseSensitive ?? false,
-            wholeWord: params.wholeWord ?? false,
-            operationId,
-          });
-        } catch (metricError) {
-          this.logger.warn(
-            `[${operationId}] Failed to record find_text performance metric: ${ErrorHandler.extractErrorMessage(metricError)}`,
-          );
-        }
-      }
-
-      // Build comprehensive result
-      const result: FindTextResult = {
-        found: matches.length > 0,
-        matches,
-        processingTimeMs: duration,
-        operationId,
-        searchCriteria: {
-          text: searchText,
-          caseSensitive: params.caseSensitive ?? false,
-          wholeWord: params.wholeWord ?? false,
-        },
-      };
-
-      this.logger.log(`[${operationId}] Text search completed successfully`, {
-        operationId,
-        found: result.found,
-        matchCount: matches.length,
-        processingTimeMs: duration,
-        searchCriteria: result.searchCriteria,
-      });
-
-      return result;
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      const errorStack = ErrorHandler.extractErrorStack(error);
-
-      // Record error metric for monitoring
-      if (this.cuaEnabled && this.performanceService) {
-        try {
-          this.performanceService.recordMetric('find_text', {
-            duration,
-            success: false,
-            error: errorMessage,
-            searchText: params.text,
-            operationId,
-          });
-        } catch (metricError) {
-          this.logger.warn(
-            `[${operationId}] Failed to record find_text error metric: ${ErrorHandler.extractErrorMessage(metricError)}`,
-          );
-        }
-      }
-
-      this.logger.error(
-        `[${operationId}] Text finding operation failed: ${errorMessage}`,
-        {
-          operationId,
-          searchText: params.text,
-          processingTimeMs: duration,
-          error: errorMessage,
-          stack: errorStack,
-        },
-      );
-
-      throw new Error(`Text finding failed: ${errorMessage}`);
-    }
-  }
-
-  /**
-   * Enhanced screenshot with optional AI-powered enhancements
-   *
-   * Captures a screenshot with optional AI-powered enhancements including OCR text extraction
-   * and advanced text detection. Provides comprehensive processing metadata and performance monitoring.
-   *
-   * @param params - Enhanced screenshot action with optional enhancement flags and processing options
-   * @returns Promise<EnhancedScreenshotResult> Screenshot with optional enhancements and metadata
-   * @throws Error when enhanced screenshot processing fails
-   */
-  private async enhancedScreenshot(
-    params: EnhancedScreenshotAction & {
-      includeOcr?: boolean;
-      includeTextDetection?: boolean;
-      options?: Record<string, unknown>;
-    },
-  ): Promise<EnhancedScreenshotResult> {
-    const startTime = Date.now();
-    const operationId = `enhanced_screenshot_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    this.logger.log(
-      `[${operationId}] Taking enhanced screenshot with AI processing`,
-      {
-        operationId,
-        includeOcr: params.includeOcr ?? false,
-        includeTextDetection: params.includeTextDetection ?? false,
-        hasCustomOptions: !!params.options,
-        cuaEnabled: this.cuaEnabled,
-        timestamp: new Date().toISOString(),
-      },
-    );
-
-    try {
-      // Capture base screenshot
-      this.logger.log(`[${operationId}] Capturing base screenshot`);
-      const screenshot = await this.screenshot();
-      const enhancementsApplied: string[] = ['screenshot'];
-      let ocrResult: OcrResult | undefined;
-      let textDetectionResult: unknown;
-
-      // Apply OCR enhancement if requested and available
-      if (params.includeOcr && this.cuaEnabled && this.cuaVisionService) {
-        try {
-          this.logger.log(`[${operationId}] Applying OCR enhancement`);
-          ocrResult = await this.cuaVisionService.performOcr(screenshot.image, {
-            enableBoundingBoxes: true,
-            recognitionLevel: 'accurate',
-            languages: ['en'], // Default to English, could be parameterized
-          });
-          enhancementsApplied.push('ocr');
-
-          this.logger.log(`[${operationId}] OCR enhancement completed`, {
-            textLength: ocrResult.text.length,
-            confidence: ocrResult.confidence,
-            boundingBoxCount: ocrResult.boundingBoxes?.length || 0,
-          });
-        } catch (ocrError) {
-          const ocrErrorMessage = ErrorHandler.extractErrorMessage(ocrError);
-          this.logger.warn(
-            `[${operationId}] OCR enhancement failed, continuing without OCR: ${ocrErrorMessage}`,
-          );
-          // Continue processing without OCR rather than failing completely
-        }
-      } else if (params.includeOcr) {
-        this.logger.warn(
-          `[${operationId}] OCR enhancement requested but C/ua framework not available`,
-        );
-      }
-
-      // Apply text detection enhancement if requested and available
-      if (
-        params.includeTextDetection &&
-        this.cuaEnabled &&
-        this.cuaVisionService
-      ) {
-        try {
-          this.logger.log(
-            `[${operationId}] Applying text detection enhancement`,
-          );
-          textDetectionResult = await this.cuaVisionService.detectText(
-            screenshot.image,
-            params.options || {},
-          );
-          enhancementsApplied.push('text_detection');
-
-          // Safe logging of text detection results
-          const regionCount =
-            textDetectionResult &&
-            typeof textDetectionResult === 'object' &&
-            'regions' in textDetectionResult &&
-            Array.isArray(
-              (textDetectionResult as { regions: unknown[] }).regions,
-            )
-              ? (textDetectionResult as { regions: unknown[] }).regions.length
-              : 0;
-
-          this.logger.log(
-            `[${operationId}] Text detection enhancement completed`,
-            {
-              detectedRegions: regionCount,
-            },
-          );
-        } catch (textError) {
-          const textErrorMessage = ErrorHandler.extractErrorMessage(textError);
-          this.logger.warn(
-            `[${operationId}] Text detection enhancement failed, continuing without text detection: ${textErrorMessage}`,
-          );
-          // Continue processing without text detection rather than failing completely
-        }
-      } else if (params.includeTextDetection) {
-        this.logger.warn(
-          `[${operationId}] Text detection enhancement requested but C/ua framework not available`,
-        );
-      }
-
-      const duration = Date.now() - startTime;
-
-      // Safe calculation of text regions for logging
-      const textRegionCount =
-        textDetectionResult &&
-        typeof textDetectionResult === 'object' &&
-        'regions' in textDetectionResult &&
-        Array.isArray((textDetectionResult as { regions: unknown[] }).regions)
-          ? (textDetectionResult as { regions: unknown[] }).regions.length
-          : 0;
-
-      // Record performance metric for monitoring
-      if (this.cuaEnabled && this.performanceService) {
-        try {
-          this.performanceService.recordMetric('enhanced_screenshot', {
-            duration,
-            success: true,
-            enhancementsApplied: enhancementsApplied.join(','),
-            imageSize: screenshot.image.length,
-            ocrTextLength: ocrResult?.text?.length || 0,
-            textRegions: textRegionCount,
-            operationId,
-          });
-        } catch (metricError) {
-          this.logger.warn(
-            `[${operationId}] Failed to record enhanced_screenshot performance metric: ${ErrorHandler.extractErrorMessage(metricError)}`,
-          );
-        }
-      }
-
-      // Build comprehensive result
-      const result: EnhancedScreenshotResult = {
-        image: screenshot.image,
-        ocr: ocrResult,
-        textDetection: textDetectionResult,
-        processingTimeMs: duration,
-        enhancementsApplied,
-        operationId,
-      };
-
-      this.logger.log(
-        `[${operationId}] Enhanced screenshot completed successfully`,
-        {
-          operationId,
-          enhancementsApplied,
-          ocrTextLength: ocrResult?.text?.length || 0,
-          textRegions: textRegionCount,
-          processingTimeMs: duration,
-          imageSize: screenshot.image.length,
-        },
-      );
-
-      return result;
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      const errorStack = ErrorHandler.extractErrorStack(error);
-
-      // Record error metric for monitoring
-      if (this.cuaEnabled && this.performanceService) {
-        try {
-          this.performanceService.recordMetric('enhanced_screenshot', {
-            duration,
-            success: false,
-            error: errorMessage,
-            operationId,
-          });
-        } catch (metricError) {
-          this.logger.warn(
-            `[${operationId}] Failed to record enhanced_screenshot error metric: ${ErrorHandler.extractErrorMessage(metricError)}`,
-          );
-        }
-      }
-
-      this.logger.error(
-        `[${operationId}] Enhanced screenshot operation failed: ${errorMessage}`,
-        {
-          operationId,
-          processingTimeMs: duration,
-          requestedEnhancements: {
-            ocr: params.includeOcr ?? false,
-            textDetection: params.includeTextDetection ?? false,
-          },
-          error: errorMessage,
-          stack: errorStack,
-        },
-      );
-
-      throw new Error(`Enhanced screenshot failed: ${errorMessage}`);
     }
   }
 }

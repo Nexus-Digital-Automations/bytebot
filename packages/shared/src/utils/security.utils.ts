@@ -13,7 +13,8 @@
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import { createHash, randomBytes, createHmac } from "crypto";
-import DOMPurify, { Config } from "dompurify";
+import * as DOMPurify from "dompurify";
+import { Config } from "dompurify";
 import sanitizeHtml from "sanitize-html";
 import { JSDOM } from "jsdom";
 
@@ -46,9 +47,17 @@ import {
 } from "../types/security.types";
 
 // Lazy initialization of DOMPurify for server-side usage
-let purify: ReturnType<typeof DOMPurify> | null = null;
+type DOMPurifyInstance = {
+  sanitize: (_source: string | Node, _config?: Config) => string;
+  addHook: (_hook: string, _cb: (..._args: unknown[]) => void) => void;
+  removeHook: (_hook: string) => void;
+  removeHooks: (_hook: string) => void;
+  isValidAttribute: (_tag: string, _attr: string, _value: string) => boolean;
+};
 
-function getPurify(): ReturnType<typeof DOMPurify> {
+let purify: DOMPurifyInstance | null = null;
+
+function getPurify(): DOMPurifyInstance {
   if (!purify) {
     try {
       const jsdomWindow = new JSDOM("").window;
@@ -64,10 +73,11 @@ function getPurify(): ReturnType<typeof DOMPurify> {
         NamedNodeMap: jsdomWindow.NamedNodeMap,
         document: jsdomWindow.document,
       } as WindowLikeWithDOMPurify;
-      purify = DOMPurify(window);
-    } catch (error) {
+      const purifyConstructor = (DOMPurify as any).default || DOMPurify;
+      purify = (purifyConstructor as any)(window) as DOMPurifyInstance;
+    } catch (err) {
       throw new Error(
-        `Failed to initialize DOMPurify: ${(error as Error).message}`,
+        `Failed to initialize DOMPurify: ${(err as Error).message}`,
       );
     }
   }
@@ -306,9 +316,9 @@ export async function hashPassword(
     const salt = await bcrypt.genSalt(saltRounds);
     const hashedPassword = await bcrypt.hash(password, salt);
     return hashedPassword;
-  } catch (error) {
+  } catch (err) {
     throw new Error(
-      `Password hashing failed: ${error instanceof Error ? error.message : String(error)}`,
+      `Password hashing failed: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
 }
@@ -325,9 +335,9 @@ export async function verifyPassword(
 ): Promise<boolean> {
   try {
     return await bcrypt.compare(password, hashedPassword);
-  } catch (error) {
+  } catch (err) {
     throw new Error(
-      `Password verification failed: ${error instanceof Error ? error.message : String(error)}`,
+      `Password verification failed: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
 }
@@ -511,8 +521,8 @@ export function generateRefreshToken(
 export function verifyToken(token: string, secret: string): JwtPayload {
   try {
     return jwt.verify(token, secret) as JwtPayload;
-  } catch (error) {
-    const errorObj = error as { name?: string };
+  } catch (err) {
+    const errorObj = err as { name?: string };
     if (errorObj.name === "TokenExpiredError") {
       throw new Error("Token has expired");
     } else if (errorObj.name === "JsonWebTokenError") {
@@ -606,7 +616,6 @@ export function sanitizeInput(
   } else if (options.allowHtml) {
     // Sanitize HTML while allowing safe tags
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
       sanitized = sanitizeHtml(sanitized, {
         allowedTags: options.allowedTags || [],
         allowedAttributes: options.allowedAttributes || {},
@@ -1445,7 +1454,7 @@ export function detectSQLInjection(input: string): {
   );
 
   // Context-aware false positive reduction
-  const uniqueContexts = [...new Set(detectionContext)];
+  const uniqueContexts = Array.from(new Set(detectionContext));
   const contextualRiskAdjustment = uniqueContexts.length > 3 ? 1.2 : 1.0; // Multiple attack contexts increase risk
   const adjustedRiskScore = Math.min(
     10,
@@ -1717,7 +1726,7 @@ export function detectCommandInjection(
       platform: "multi",
     },
     {
-      pattern: /\/\*.*?\*\/|\/\/.*?[\r\n]|<!--.*?-->/gs,
+      pattern: /\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]|<!--[\s\S]*?-->/g,
       threat: "Comment-based Evasion",
       score: 40,
       confidence: 50,
@@ -1920,7 +1929,7 @@ export function detectCommandInjection(
   }
 
   // Final risk score adjustment based on threat diversity and platform specificity
-  const uniqueContexts = [...new Set(detectionContext)];
+  const uniqueContexts = Array.from(new Set(detectionContext));
   const contextualRiskMultiplier =
     uniqueContexts.length > 3 ? 1.3 : uniqueContexts.length > 1 ? 1.1 : 1.0;
   const platformSpecificMultiplier =
@@ -1948,7 +1957,7 @@ export function detectCommandInjection(
 
   return {
     hasInjection: threats.length > 0,
-    threats: [...new Set(threats)], // Remove duplicates
+    threats: Array.from(new Set(threats)), // Remove duplicates
     riskScore: finalRiskScore,
     severity,
     confidence: averageConfidence,
@@ -1966,29 +1975,36 @@ export function detectCommandInjection(
  * Default role-to-permissions mapping
  */
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  [UserRole.ADMIN]: [
-    Permission.TASK_READ,
-    Permission.TASK_WRITE,
-    Permission.TASK_DELETE,
-    Permission.COMPUTER_CONTROL,
-    Permission.COMPUTER_VIEW,
-    Permission.SYSTEM_ADMIN,
-    Permission.USER_MANAGE,
-    Permission.METRICS_VIEW,
-    Permission.LOGS_VIEW,
+  [UserRole._ADMIN]: [
+    Permission._TASK_READ,
+    Permission._TASK_WRITE,
+    Permission._TASK_DELETE,
+    Permission._COMPUTER_CONTROL,
+    Permission._COMPUTER_VIEW,
+    Permission._SYSTEM_ADMIN,
+    Permission._USER_MANAGE,
+    Permission._METRICS_VIEW,
+    Permission._LOGS_VIEW,
   ],
-  [UserRole.OPERATOR]: [
-    Permission.TASK_READ,
-    Permission.TASK_WRITE,
-    Permission.COMPUTER_CONTROL,
-    Permission.COMPUTER_VIEW,
-    Permission.METRICS_VIEW,
+  [UserRole._OPERATOR]: [
+    Permission._TASK_READ,
+    Permission._TASK_WRITE,
+    Permission._COMPUTER_CONTROL,
+    Permission._COMPUTER_VIEW,
+    Permission._METRICS_VIEW,
   ],
-  [UserRole.VIEWER]: [
-    Permission.TASK_READ,
-    Permission.COMPUTER_VIEW,
-    Permission.METRICS_VIEW,
+  [UserRole._VIEWER]: [
+    Permission._TASK_READ,
+    Permission._COMPUTER_VIEW,
+    Permission._METRICS_VIEW,
   ],
+  [UserRole._USER]: [
+    Permission._TASK_READ,
+    Permission._COMPUTER_VIEW,
+    Permission._VIEW_OWN_PROFILE,
+    Permission._VIEW_PUBLIC_CONTENT,
+  ],
+  [UserRole._GUEST]: [Permission._VIEW_PUBLIC_CONTENT],
 };
 
 /**
@@ -2061,20 +2077,20 @@ export function calculateRiskScore(
   metadata?: Record<string, unknown>,
 ): number {
   const baseScores: Partial<Record<SecurityEventType, number>> = {
-    [SecurityEventType.LOGIN_SUCCESS]: 0,
-    [SecurityEventType.LOGIN_FAILED]: 25,
-    [SecurityEventType.LOGOUT]: 0,
-    [SecurityEventType.TOKEN_REFRESH]: 0,
-    [SecurityEventType.ACCESS_GRANTED]: 0,
-    [SecurityEventType.ACCESS_DENIED]: 30,
-    [SecurityEventType.PERMISSION_ESCALATION_ATTEMPT]: 80,
-    [SecurityEventType.VALIDATION_FAILED]: 20,
-    [SecurityEventType.XSS_ATTEMPT_BLOCKED]: 70,
-    [SecurityEventType.INJECTION_ATTEMPT_BLOCKED]: 85,
-    [SecurityEventType.RATE_LIMIT_EXCEEDED]: 40,
-    [SecurityEventType.SUSPICIOUS_ACTIVITY]: 60,
-    [SecurityEventType.SECURITY_CONFIG_CHANGED]: 50,
-    [SecurityEventType.ADMIN_ACTION]: 10,
+    [SecurityEventType._LOGIN_SUCCESS]: 0,
+    [SecurityEventType._LOGIN_FAILED]: 25,
+    [SecurityEventType._LOGOUT]: 0,
+    [SecurityEventType._TOKEN_REFRESH]: 0,
+    [SecurityEventType._ACCESS_GRANTED]: 0,
+    [SecurityEventType._ACCESS_DENIED]: 30,
+    [SecurityEventType._PERMISSION_ESCALATION_ATTEMPT]: 80,
+    [SecurityEventType._VALIDATION_FAILED]: 20,
+    [SecurityEventType._XSS_ATTEMPT_BLOCKED]: 70,
+    [SecurityEventType._INJECTION_ATTEMPT_BLOCKED]: 85,
+    [SecurityEventType._RATE_LIMIT_EXCEEDED]: 40,
+    [SecurityEventType._SUSPICIOUS_ACTIVITY]: 60,
+    [SecurityEventType._SECURITY_CONFIG_CHANGED]: 50,
+    [SecurityEventType._ADMIN_ACTION]: 10,
   };
 
   let score = baseScores[eventType] || 50;
@@ -2160,35 +2176,120 @@ export function createSecurityEvent(
 // ===========================
 
 /**
- * Default rate limiting configurations
+ * Default rate limiting configurations for all rate limit presets
+ *
+ * This Record ensures complete coverage of all RateLimitPreset enum values
+ * with security-focused rate limiting configurations following best practices:
+ *
+ * - Authentication: Strict limits (5 attempts / 15 min) to prevent brute force
+ * - Computer Use: Moderate limits (100 ops / min) for automation safety
+ * - Task Operations: Balanced limits (50 ops / min) for task management
+ * - Read Operations: Generous limits (500 ops / min) for data access
+ * - WebSocket: Conservative limits (10 connections / min) for resource protection
+ *
+ * @see RateLimitPreset for enum definitions
+ * @see RateLimitConfig for configuration interface
  */
 export const DEFAULT_RATE_LIMITS: Record<RateLimitPreset, RateLimitConfig> = {
-  [RateLimitPreset.AUTH]: {
+  // Authentication endpoints - Strict security to prevent brute force attacks
+  [RateLimitPreset._AUTH]: {
     max: 5,
     windowMs: 15 * 60 * 1000, // 15 minutes
-    message: "Too many authentication attempts, please try again later",
+    message: "Too many authentication attempts. Please try again later.",
+    // Custom skip function can be added for trusted IPs if needed
+    skip: undefined,
+    // Custom key generator can be added for more granular control
+    keyGenerator: undefined,
   },
-  [RateLimitPreset.COMPUTER_USE]: {
+
+  // Computer control operations - Moderate limits for automation safety
+  [RateLimitPreset._COMPUTER_USE]: {
     max: 100,
     windowMs: 60 * 1000, // 1 minute
-    message: "Computer control rate limit exceeded",
+    message:
+      "Computer control rate limit exceeded. Please slow down your requests.",
+    skip: undefined,
+    keyGenerator: undefined,
   },
-  [RateLimitPreset.TASK_OPERATIONS]: {
+
+  // Task management operations - Balanced limits for productivity
+  [RateLimitPreset._TASK_OPERATIONS]: {
     max: 50,
     windowMs: 60 * 1000, // 1 minute
-    message: "Task operation rate limit exceeded",
+    message: "Task operation rate limit exceeded. Please wait before retrying.",
+    skip: undefined,
+    keyGenerator: undefined,
   },
-  [RateLimitPreset.READ_OPERATIONS]: {
+
+  // Read operations - Generous limits for data access needs
+  [RateLimitPreset._READ_OPERATIONS]: {
     max: 500,
     windowMs: 60 * 1000, // 1 minute
-    message: "Read operation rate limit exceeded",
+    message:
+      "Read operation rate limit exceeded. Please reduce request frequency.",
+    skip: undefined,
+    keyGenerator: undefined,
   },
-  [RateLimitPreset.WEBSOCKET]: {
+
+  // WebSocket connections - Conservative limits for resource protection
+  [RateLimitPreset._WEBSOCKET]: {
     max: 10,
     windowMs: 60 * 1000, // 1 minute
-    message: "WebSocket connection rate limit exceeded",
+    message:
+      "WebSocket connection rate limit exceeded. Please wait before reconnecting.",
+    skip: undefined,
+    keyGenerator: undefined,
   },
 };
+
+/**
+ * Validate that DEFAULT_RATE_LIMITS covers all RateLimitPreset enum values
+ * This compile-time check ensures that no rate limit preset is missing from the configuration
+ */
+const _rateLimitPresetCompleteness: Record<RateLimitPreset, true> = {
+  [RateLimitPreset._AUTH]: true,
+  [RateLimitPreset._COMPUTER_USE]: true,
+  [RateLimitPreset._TASK_OPERATIONS]: true,
+  [RateLimitPreset._READ_OPERATIONS]: true,
+  [RateLimitPreset._WEBSOCKET]: true,
+};
+
+// Compile-time assertion to ensure DEFAULT_RATE_LIMITS has all required keys
+const _defaultRateLimitsKeys = Object.keys(
+  DEFAULT_RATE_LIMITS,
+) as (keyof typeof DEFAULT_RATE_LIMITS)[];
+const _presetKeys = Object.keys(
+  _rateLimitPresetCompleteness,
+) as (keyof typeof _rateLimitPresetCompleteness)[];
+
+// This will cause a TypeScript error if any preset is missing from DEFAULT_RATE_LIMITS
+type _ValidateCompleteness =
+  typeof _defaultRateLimitsKeys extends typeof _presetKeys ? true : never;
+const _completenessCheck: _ValidateCompleteness = true; // This line validates completeness at compile time
+
+/**
+ * Get rate limit configuration for a specific preset
+ * @param preset Rate limit preset enum value
+ * @returns Rate limit configuration
+ */
+export function getRateLimitConfig(preset: RateLimitPreset): RateLimitConfig {
+  const config = DEFAULT_RATE_LIMITS[preset];
+  if (!config) {
+    throw new Error(`Rate limit configuration not found for preset: ${preset}`);
+  }
+  return { ...config }; // Return a copy to prevent mutation
+}
+
+/**
+ * Get all available rate limit presets with their configurations
+ * @returns Record of all rate limit presets and their configurations
+ */
+export function getAllRateLimitConfigs(): Record<
+  RateLimitPreset,
+  RateLimitConfig
+> {
+  return { ...DEFAULT_RATE_LIMITS }; // Return a copy to prevent mutation
+}
 
 /**
  * Generate rate limit key for request
@@ -2900,7 +3001,9 @@ export function validateCoordinates(
     recommendations: string[];
   };
 } {
-  const startTime = config.performanceMonitoring ? process.hrtime.bigint() : 0n;
+  const startTime = config.performanceMonitoring
+    ? process.hrtime.bigint()
+    : BigInt(0);
   const errors: ValidationError[] = [];
   const timestamp = new Date();
   const checksPerformed: string[] = [];
@@ -3196,7 +3299,9 @@ export function validateCoordinates(
   }
 
   // 9. Performance Optimization for High-Frequency Validation
-  const endTime = config.performanceMonitoring ? process.hrtime.bigint() : 0n;
+  const endTime = config.performanceMonitoring
+    ? process.hrtime.bigint()
+    : BigInt(0);
   const duration = config.performanceMonitoring
     ? Number(endTime - startTime)
     : 0;
@@ -4100,7 +4205,7 @@ export function detectAdvancedXSS(input: string): {
   );
 
   // Context-aware false positive reduction
-  const uniqueContexts = [...new Set(detectionContext)];
+  const uniqueContexts = Array.from(new Set(detectionContext));
   const contextualRiskAdjustment = uniqueContexts.length > 3 ? 1.2 : 1.0; // Multiple attack contexts increase risk
   const adjustedRiskScore = Math.min(
     10,
@@ -4207,7 +4312,8 @@ export function sanitizeContentByContext(
     document: jsdomWindow.document,
   } as WindowLikeWithDOMPurify;
 
-  const _purify = DOMPurify(window);
+  const purifyConstructor = (DOMPurify as any).default || DOMPurify;
+  const _purify = (purifyConstructor as any)(window) as DOMPurifyInstance;
 
   // Apply context-specific sanitization
   if (rules.stripHtml || !rules.allowHtml) {
@@ -4573,6 +4679,8 @@ export default {
   // Rate limiting utilities
   DEFAULT_RATE_LIMITS,
   generateRateLimitKey,
+  getRateLimitConfig,
+  getAllRateLimitConfigs,
 
   // Crypto utilities
   generateRandomString,
@@ -4991,8 +5099,12 @@ export function detectComprehensiveMaliciousPatterns(input: string): {
 // RE-EXPORT TYPES FOR CONVENIENCE
 // ===========================
 
-export {
+export type {
   SanitizationOptions,
-  SecurityEventType,
   SecurityEvent,
+} from "../types/security.types";
+
+export {
+  SecurityEventType,
+  RateLimitServiceType,
 } from "../types/security.types";

@@ -11,6 +11,7 @@ import {
 } from "@/utils/taskUtils";
 import { MessageContentType } from "@bytebot/shared";
 import { useWebSocket } from "./useWebSocket";
+import { logError, logDebug } from "@/utils/logger";
 
 interface UseChatSessionProps {
   initialTaskId?: string;
@@ -57,8 +58,8 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
         },
       );
       setGroupedMessages(processedMessages);
-    } catch (error) {
-      console.error("Error reloading grouped messages:", error);
+    } catch (_error) {
+      logError("Error reloading grouped messages", error, "useChatSession");
     }
   }, [currentTaskId]);
 
@@ -69,7 +70,11 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
         !processedMessageIds.current.has(message.id) &&
         message.taskId === currentTaskId
       ) {
-        console.log("Adding new message from WebSocket:", message);
+        logDebug(
+          "Adding new message from WebSocket",
+          { messageId: message.id, taskId: message.taskId },
+          "useChatSession",
+        );
         processedMessageIds.current.add(message.id);
         setMessages((prev) => [...prev, message]);
         // Reload grouped messages to reflect the new message
@@ -80,13 +85,17 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
   );
 
   const handleTaskCreated = useCallback((task: Task) => {
-    console.log("New task created:", task);
+    logDebug(
+      "New task created",
+      { taskId: task.id, title: task.title },
+      "useChatSession",
+    );
   }, []);
 
   const handleTaskDeleted = useCallback(
     (taskId: string) => {
       if (taskId === currentTaskId) {
-        console.log("Current task was deleted");
+        logDebug("Current task was deleted", { taskId }, "useChatSession");
         setCurrentTaskId(null);
         setMessages([]);
         processedMessageIds.current = new Set();
@@ -106,7 +115,8 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
   // Load more messages function for infinite scroll
   const loadMoreMessages = useCallback(async () => {
     if (!currentTaskId || isLoadingMoreMessages || !hasMoreMessages) {
-      console.log("loadMoreMessages early return");
+      // TODO: Add proper debug logging service
+      // console.log("loadMoreMessages early return");
       return;
     }
 
@@ -149,8 +159,9 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
           setHasMoreMessages(false);
         }
       }
-    } catch (error) {
-      console.error("Error loading more messages:", error);
+    } catch (_error) {
+      // TODO: Add proper error logging service
+      // console.error("Error loading more messages:", _error);
     } finally {
       setIsLoadingMoreMessages(false);
     }
@@ -163,7 +174,8 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
       try {
         if (initialTaskId) {
           // If we have an initial task ID (from URL), fetch that specific task
-          console.log(`Fetching specific task: ${initialTaskId}`);
+          // TODO: Add proper debug logging service
+          // console.log(`Fetching specific task: ${initialTaskId}`);
           const task = await fetchTaskById(initialTaskId);
           // Load raw messages for compatibility and processed messages for chat UI
           const messages = await fetchTaskMessages(initialTaskId, {
@@ -179,7 +191,8 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
           );
 
           if (task) {
-            console.log(`Found task: ${task.id}`);
+            // TODO: Add proper debug logging service
+            // console.log(`Found task: ${task.id}`);
             setCurrentTaskId(task.id);
             setTaskStatus(task.status); // Set the task status when loading
             setControl(task.control);
@@ -216,11 +229,13 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
               setHasMoreMessages(false);
             }
           } else {
-            console.log(`Task with ID ${initialTaskId} not found`);
+            // TODO: Add proper debug logging service
+            // console.log(`Task with ID ${initialTaskId} not found`);
           }
         }
-      } catch (error) {
-        console.error("Error loading session:", error);
+      } catch (_error) {
+        // TODO: Add proper error logging service
+        // console.error("Error loading session:", _error);
       } finally {
         setIsLoadingSession(false);
       }
@@ -232,10 +247,12 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
   // Join/leave WebSocket task rooms when task ID changes
   useEffect(() => {
     if (currentTaskId) {
-      console.log(`Joining WebSocket room for task: ${currentTaskId}`);
+      // TODO: Add proper debug logging service
+      // console.log(`Joining WebSocket room for task: ${currentTaskId}`);
       joinTask(currentTaskId);
     } else {
-      console.log("Leaving WebSocket task room");
+      // TODO: Add proper debug logging service
+      // console.log("Leaving WebSocket task room");
       leaveTask();
     }
   }, [currentTaskId, joinTask, leaveTask]);
@@ -258,11 +275,12 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
           id: Date.now().toString(),
           content: [
             {
-              type: MessageContentType.Text,
+              type: MessageContentType._Text,
               text: "Sorry, there was an error processing your request. Please try again.",
             },
           ],
           role: Role.ASSISTANT,
+          createdAt: new Date().toISOString(),
         };
 
         processedMessageIds.current.add(errorMessage.id);
@@ -281,8 +299,9 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
       if (updatedTask) {
         setControl(updatedTask.control);
       }
-    } catch (error) {
-      console.error("Error taking over task:", error);
+    } catch (_error) {
+      // TODO: Add proper error logging service
+      // console.error("Error taking over task:", _error);
     }
   };
 
@@ -294,8 +313,9 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
       if (updatedTask) {
         setControl(updatedTask.control);
       }
-    } catch (error) {
-      console.error("Error resuming task:", error);
+    } catch (_error) {
+      // TODO: Add proper error logging service
+      // console.error("Error resuming task:", _error);
     }
   };
 
@@ -308,8 +328,9 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
         setTaskStatus(updatedTask.status);
         setControl(updatedTask.control);
       }
-    } catch (error) {
-      console.error("Error cancelling task:", error);
+    } catch (_error) {
+      // TODO: Add proper error logging service
+      // console.error("Error cancelling task:", _error);
     }
   };
 

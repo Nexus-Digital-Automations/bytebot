@@ -18,6 +18,7 @@ import React from "react";
 import { screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { ChatContainer } from "../ChatContainer";
 import { Role, TaskStatus, GroupedMessages } from "@/types";
+import { MessageContentType } from "@bytebot/shared";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 
 // Mock child components
@@ -103,7 +104,7 @@ describe("ChatContainer Component", () => {
       messages: [
         {
           id: "msg-1",
-          content: [{ type: "text" as const, text: "Hello" }],
+          content: [{ type: MessageContentType._Text, text: "Hello" }],
           role: Role.USER,
           createdAt: new Date().toISOString(),
         },
@@ -114,7 +115,9 @@ describe("ChatContainer Component", () => {
       messages: [
         {
           id: "msg-2",
-          content: [{ type: "text" as const, text: "Hello! How can I help?" }],
+          content: [
+            { type: MessageContentType._Text, text: "Hello! How can I help?" },
+          ],
           role: Role.ASSISTANT,
           createdAt: new Date().toISOString(),
         },
@@ -534,7 +537,9 @@ describe("ChatContainer Component", () => {
           messages: [
             {
               id: `msg-${i}`,
-              content: [{ type: "text" as const, text: `Message ${i}` }],
+              content: [
+                { type: MessageContentType._Text, text: `Message ${i}` },
+              ],
               role: i % 2 === 0 ? Role.USER : Role.ASSISTANT,
               createdAt: new Date().toISOString(),
             },
@@ -688,7 +693,9 @@ describe("ChatContainer Component", () => {
           messages: [
             {
               id: "new-msg",
-              content: [{ type: "text" as const, text: "New message" }],
+              content: [
+                { type: MessageContentType._Text, text: "New message" },
+              ],
               role: Role.ASSISTANT,
               createdAt: new Date().toISOString(),
             },
@@ -723,7 +730,11 @@ describe("ChatContainer Component", () => {
 // Export test utilities for other chat-related tests
 export const ChatContainerTestUtils = {
   createMockGroupedMessages,
-  createMockScrollRef: () =>
-    ({ current: null }) as React.RefObject<HTMLDivElement>,
-  createMockProps: (overrides = {}) => ({ ...defaultProps, ...overrides }),
+  createMockScrollRef: (): React.RefObject<HTMLDivElement> => ({
+    current: null,
+  }),
+  createMockProps: (overrides: Partial<typeof defaultProps> = {}) => ({
+    ...defaultProps,
+    ...overrides,
+  }),
 };

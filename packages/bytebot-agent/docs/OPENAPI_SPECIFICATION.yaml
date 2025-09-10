@@ -1,0 +1,2995 @@
+openapi: 3.0.3
+info:
+  title: Browser-Use API
+  description: |
+    Enterprise-grade browser automation API with comprehensive session management, 
+    task orchestration, and real-time monitoring capabilities.
+    
+    ## Features
+    - **Local-Only Architecture**: 100% on-premises deployment with no cloud dependencies
+    - **Enterprise Security**: JWT authentication with role-based access control  
+    - **Real-time Monitoring**: Comprehensive health checks and performance metrics
+    - **Browser Automation**: Screenshots, DOM interaction, form automation, data extraction
+    - **Session Management**: Full lifecycle management of browser sessions
+    - **Circuit Breaker Patterns**: Built-in reliability and resilience
+    
+    ## Authentication
+    This API uses JWT Bearer token authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+    
+    ## Rate Limiting
+    Rate limits are enforced based on user roles:
+    - ADMIN: 1000 requests/minute
+    - OPERATOR: 500 requests/minute  
+    - VIEWER: 300 requests/minute
+    
+  version: 2.0.0
+  contact:
+    name: Bytebot API Team
+    url: https://docs.bytebot.ai/browser-use
+    email: browser-use-support@bytebot.ai
+  license:
+    name: Enterprise License
+    url: https://bytebot.ai/license
+  termsOfService: https://bytebot.ai/terms
+
+servers:
+  - url: https://api.bytebot.ai/v1/browser-use
+    description: Production Server
+  - url: https://api-staging.bytebot.ai/v1/browser-use
+    description: Staging Server
+  - url: http://localhost:3000/api/v1/browser-use
+    description: Development Server
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+tags:
+  - name: Tasks
+    description: Browser automation task management
+    externalDocs:
+      description: Task Management Guide
+      url: https://docs.bytebot.ai/browser-use/tasks
+  - name: Sessions
+    description: Browser session lifecycle management
+    externalDocs:
+      description: Session Management Guide
+      url: https://docs.bytebot.ai/browser-use/sessions
+  - name: Screenshots
+    description: Screenshot capture and retrieval
+  - name: DOM Operations
+    description: Browser DOM interaction and manipulation
+  - name: Form Automation
+    description: Automated form filling and submission
+  - name: Data Extraction
+    description: Structured data extraction from web pages
+  - name: Monitoring
+    description: Health checks and performance monitoring
+  - name: Results
+    description: Task results and export functionality
+
+paths:
+  # Task Management Endpoints
+  /tasks:
+    post:
+      tags: [Tasks]
+      summary: Create browser automation task
+      description: |
+        Create a new browser automation task with specified parameters and constraints.
+        Tasks can be configured with execution limits, domain restrictions, and automation settings.
+      operationId: createBrowserTask
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBrowserTaskRequest'
+            examples:
+              basic_task:
+                summary: Basic Data Extraction Task
+                value:
+                  name: "E-commerce Data Extraction"
+                  description: "Extract product information from online store"
+                  startUrl: "https://store.example.com/products"
+                  priority: "normal"
+                  autoStart: false
+              advanced_task:
+                summary: Advanced Task with Constraints
+                value:
+                  name: "Advanced Web Scraping"
+                  description: "Comprehensive data extraction with screenshots"
+                  startUrl: "https://example.com"
+                  priority: "high"
+                  constraints:
+                    maxExecutionTime: 300
+                    maxActions: 50
+                    allowedDomains: ["example.com", "cdn.example.com"]
+                    enableScreenshots: true
+                    enableVideoRecording: false
+                  tags: ["scraping", "data-extraction"]
+                  autoStart: true
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+    get:
+      tags: [Tasks]
+      summary: List browser automation tasks
+      description: |
+        Retrieve a paginated list of browser automation tasks with optional filtering by status.
+        Supports pagination and sorting options for efficient task management.
+      operationId: listBrowserTasks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter tasks by execution status
+          required: false
+          schema:
+            type: string
+            enum: [pending, running, completed, failed, cancelled]
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of tasks per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: sortBy
+          in: query
+          description: Sort field
+          required: false
+          schema:
+            type: string
+            enum: [createdAt, updatedAt, name, status, priority]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: Tasks retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tasks/{taskId}:
+    get:
+      tags: [Tasks]
+      summary: Get task details
+      description: Retrieve detailed information about a specific browser automation task
+      operationId: getBrowserTask
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Unique identifier of the browser task
+          schema:
+            type: string
+            pattern: '^task_[a-zA-Z0-9]{6,}$'
+          example: task_abc123
+      responses:
+        '200':
+          description: Task details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    put:
+      tags: [Tasks]
+      summary: Update task configuration
+      description: Update parameters or configuration of an existing browser automation task
+      operationId: updateBrowserTask
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Unique identifier of the browser task
+          schema:
+            type: string
+            pattern: '^task_[a-zA-Z0-9]{6,}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBrowserTaskRequest'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+    delete:
+      tags: [Tasks]
+      summary: Delete task
+      description: Delete a browser automation task and all associated data
+      operationId: deleteBrowserTask
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Unique identifier of the browser task
+          schema:
+            type: string
+            pattern: '^task_[a-zA-Z0-9]{6,}$'
+      responses:
+        '204':
+          description: Task deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cannot delete running task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/{taskId}/start:
+    post:
+      tags: [Tasks]
+      summary: Start task execution
+      description: Start execution of a previously created browser automation task
+      operationId: startBrowserTask
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Unique identifier of the browser task
+          schema:
+            type: string
+            pattern: '^task_[a-zA-Z0-9]{6,}$'
+      responses:
+        '200':
+          description: Task started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Task already running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/{taskId}/stop:
+    post:
+      tags: [Tasks]
+      summary: Stop task execution
+      description: Stop execution of a running browser automation task
+      operationId: stopBrowserTask
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Unique identifier of the browser task
+          schema:
+            type: string
+            pattern: '^task_[a-zA-Z0-9]{6,}$'
+      responses:
+        '200':
+          description: Task stopped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Session Management Endpoints
+  /sessions:
+    post:
+      tags: [Sessions]
+      summary: Create browser session
+      description: |
+        Create a new browser session with specified configuration and profile settings.
+        Sessions provide isolated browser contexts for automation tasks.
+      operationId: createBrowserSession
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBrowserSessionRequest'
+            examples:
+              basic_session:
+                summary: Basic Session
+                value:
+                  name: "Data Extraction Session"
+                  profile:
+                    browserType: "chromium"
+                    headless: true
+              advanced_session:
+                summary: Advanced Session with Custom Profile
+                value:
+                  name: "Advanced Automation Session"
+                  description: "Session for complex automation tasks"
+                  profile:
+                    browserType: "chromium"
+                    headless: false
+                    windowWidth: 1920
+                    windowHeight: 1080
+                    userAgent: "Mozilla/5.0 (Custom Browser)"
+                  timeoutSeconds: 900
+                  enableScreenshots: true
+                  enableVideoRecording: true
+                  initialUrl: "https://example.com"
+      responses:
+        '201':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserSessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+    get:
+      tags: [Sessions]
+      summary: List browser sessions
+      description: Retrieve a list of browser sessions with their status and activity information
+      operationId: listBrowserSessions
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: active
+          in: query
+          description: Filter by active status
+          required: false
+          schema:
+            type: boolean
+        - name: status
+          in: query
+          description: Filter by session status
+          required: false
+          schema:
+            type: string
+            enum: [initializing, active, idle, closing, closed, error]
+      responses:
+        '200':
+          description: Sessions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserSessionListResponse'
+
+    delete:
+      tags: [Sessions]
+      summary: Close all browser sessions
+      description: Close all active browser sessions and cleanup all resources
+      operationId: closeAllBrowserSessions
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: All sessions closed successfully
+
+  /sessions/{sessionId}:
+    get:
+      tags: [Sessions]
+      summary: Get session details
+      description: Retrieve detailed information about a specific browser session
+      operationId: getBrowserSession
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the browser session
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]{6,}$'
+      responses:
+        '200':
+          description: Session details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserSessionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Sessions]
+      summary: Close browser session
+      description: Close a specific browser session and cleanup all associated resources
+      operationId: closeBrowserSession
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the browser session
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]{6,}$'
+      responses:
+        '204':
+          description: Session closed successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Screenshot Endpoints
+  /sessions/{sessionId}/screenshot:
+    post:
+      tags: [Screenshots]
+      summary: Capture screenshot
+      description: Capture a screenshot of the current browser state in the specified session
+      operationId: captureScreenshot
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the browser session
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]{6,}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaptureScreenshotRequest'
+      responses:
+        '201':
+          description: Screenshot captured successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreenshotResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /screenshots/{screenshotId}:
+    get:
+      tags: [Screenshots]
+      summary: Get screenshot
+      description: Retrieve a specific screenshot by its identifier
+      operationId: getScreenshot
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: screenshotId
+          in: path
+          required: true
+          description: Unique identifier of the screenshot
+          schema:
+            type: string
+            pattern: '^screenshot_[a-zA-Z0-9]{6,}$'
+      responses:
+        '200':
+          description: Screenshot retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreenshotResponse'
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # DOM Interaction Endpoints
+  /sessions/{sessionId}/navigate:
+    post:
+      tags: [DOM Operations]
+      summary: Navigate to URL
+      description: Navigate the browser session to a specific URL
+      operationId: navigateToUrl
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the browser session
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]{6,}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NavigateRequest'
+      responses:
+        '200':
+          description: Navigation completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserStateResponse'
+
+  /sessions/{sessionId}/click:
+    post:
+      tags: [DOM Operations]
+      summary: Click element
+      description: Click on a DOM element identified by selector or coordinates
+      operationId: clickElement
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the browser session
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]{6,}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClickRequest'
+      responses:
+        '200':
+          description: Element clicked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserElementResponse'
+
+  /sessions/{sessionId}/type:
+    post:
+      tags: [DOM Operations]
+      summary: Type text
+      description: Type text into an input element identified by selector
+      operationId: typeText
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the browser session
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]{6,}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TypeRequest'
+      responses:
+        '200':
+          description: Text typed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserElementResponse'
+
+  /sessions/{sessionId}/scroll:
+    post:
+      tags: [DOM Operations]
+      summary: Scroll page
+      description: Scroll the page in the specified direction and amount
+      operationId: scrollPage
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the browser session
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]{6,}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScrollRequest'
+      responses:
+        '200':
+          description: Page scrolled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserStateResponse'
+
+  /sessions/{sessionId}/state:
+    get:
+      tags: [DOM Operations]
+      summary: Get browser state
+      description: |
+        Retrieve the current state of the browser session including DOM elements, 
+        page information, and optionally a screenshot
+      operationId: getBrowserState
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the browser session
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]{6,}$'
+        - name: includeScreenshot
+          in: query
+          description: Include screenshot in the response
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Browser state retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserStateResponse'
+
+  # Form Automation Endpoints
+  /sessions/{sessionId}/forms/fill:
+    post:
+      tags: [Form Automation]
+      summary: Fill form
+      description: Automatically fill a form with provided field data
+      operationId: fillForm
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the browser session
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]{6,}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FillFormRequest'
+      responses:
+        '200':
+          description: Form filled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormValidationResponse'
+
+  /sessions/{sessionId}/forms/submit:
+    post:
+      tags: [Form Automation]
+      summary: Submit form
+      description: Submit a form after validation and optional filling
+      operationId: submitForm
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the browser session
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]{6,}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitFormRequest'
+      responses:
+        '200':
+          description: Form submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserStateResponse'
+
+  # Data Extraction Endpoints
+  /sessions/{sessionId}/extract:
+    post:
+      tags: [Data Extraction]
+      summary: Extract structured data
+      description: |
+        Extract structured data from the current page based on specified selectors 
+        or AI-powered queries
+      operationId: extractData
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the browser session
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]{6,}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtractDataRequest'
+            examples:
+              simple_extraction:
+                summary: Simple CSS Selector Extraction
+                value:
+                  selectors:
+                    title: "h1.page-title"
+                    price: ".price-display"
+                    availability: ".stock-status"
+                  extractMode: "structured"
+              advanced_extraction:
+                summary: Advanced Multi-Element Extraction
+                value:
+                  selectors:
+                    products:
+                      selector: ".product-item"
+                      fields:
+                        name: ".product-name"
+                        price: ".product-price"
+                        image: "img.product-image@src"
+                  extractMode: "list"
+                  waitForContent: true
+                  timeout: 15000
+      responses:
+        '200':
+          description: Data extracted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataExtractionResponse'
+
+  # Monitoring Endpoints
+  /monitoring/health:
+    get:
+      tags: [Monitoring]
+      summary: Get service health
+      description: Check the health status of the browser-use service and all active sessions
+      operationId: getServiceHealth
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Service health status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserMonitoringResponse'
+
+  /monitoring/tasks/{taskId}/status:
+    get:
+      tags: [Monitoring]
+      summary: Get task execution status
+      description: Get real-time status and progress information for a specific browser task
+      operationId: getTaskStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Unique identifier of the browser task
+          schema:
+            type: string
+            pattern: '^task_[a-zA-Z0-9]{6,}$'
+      responses:
+        '200':
+          description: Task status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatusResponse'
+
+  /health/detailed:
+    get:
+      tags: [Monitoring]
+      summary: Get detailed health information
+      description: |
+        Comprehensive health check including system resources, browser processes, 
+        task queues, and integration status with local-only architecture validation
+      operationId: getDetailedHealth
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Detailed health information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedHealthResponse'
+
+  /metrics/performance:
+    get:
+      tags: [Monitoring]
+      summary: Get performance metrics
+      description: |
+        Retrieve comprehensive performance metrics including task execution statistics, 
+        resource utilization trends, and system performance analytics
+      operationId: getPerformanceMetrics
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: timeRange
+          in: query
+          description: Time range for metrics aggregation
+          required: false
+          schema:
+            type: string
+            enum: ['1h', '24h', '7d', '30d']
+            default: '24h'
+      responses:
+        '200':
+          description: Performance metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformanceMetricsResponse'
+
+  # Results and Export Endpoints
+  /results/{taskId}:
+    get:
+      tags: [Results]
+      summary: Get task results
+      description: Retrieve the results and outputs from a completed browser automation task
+      operationId: getTaskResults
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Unique identifier of the browser task
+          schema:
+            type: string
+            pattern: '^task_[a-zA-Z0-9]{6,}$'
+      responses:
+        '200':
+          description: Task results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserResultsResponse'
+
+  /results/{taskId}/export:
+    post:
+      tags: [Results]
+      summary: Export task results
+      description: |
+        Export task results in various formats (JSON, CSV, XLSX, PDF) for download or storage
+      operationId: exportTaskResults
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Unique identifier of the browser task
+          schema:
+            type: string
+            pattern: '^task_[a-zA-Z0-9]{6,}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportResultsRequest'
+      responses:
+        '200':
+          description: Results exported successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserResultsResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Bearer token authentication for user sessions
+    
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key authentication for service-to-service calls
+
+  schemas:
+    # Request Schemas
+    CreateBrowserTaskRequest:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Human-readable name for the task
+          example: "E-commerce Data Extraction"
+        description:
+          type: string
+          minLength: 10
+          maxLength: 2000
+          description: Detailed description of the task to be performed
+          example: "Extract product information from online store categories"
+        startUrl:
+          type: string
+          format: uri
+          description: Initial URL to start the task from
+          example: "https://store.example.com/products"
+        priority:
+          type: string
+          enum: [low, normal, high, urgent]
+          default: normal
+          description: Task priority level
+        constraints:
+          $ref: '#/components/schemas/BrowserTaskConstraints'
+        config:
+          type: object
+          additionalProperties: true
+          description: Additional configuration parameters
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags for organizing and filtering tasks
+          example: ["data-extraction", "e-commerce"]
+        autoStart:
+          type: boolean
+          default: false
+          description: Whether to start execution immediately upon creation
+
+    UpdateBrowserTaskRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Updated task name
+        description:
+          type: string
+          minLength: 10
+          maxLength: 2000
+          description: Updated task description
+        priority:
+          type: string
+          enum: [low, normal, high, urgent]
+          description: Updated task priority
+        constraints:
+          $ref: '#/components/schemas/BrowserTaskConstraints'
+        config:
+          type: object
+          additionalProperties: true
+          description: Updated configuration parameters
+        tags:
+          type: array
+          items:
+            type: string
+          description: Updated tags
+
+    BrowserTaskConstraints:
+      type: object
+      properties:
+        maxExecutionTime:
+          type: integer
+          minimum: 1
+          maximum: 3600
+          description: Maximum execution time in seconds
+          example: 300
+        maxActions:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: Maximum number of browser actions to perform
+          example: 50
+        allowedDomains:
+          type: array
+          items:
+            type: string
+          description: List of allowed domains for navigation
+          example: ["example.com", "cdn.example.com"]
+        blockedDomains:
+          type: array
+          items:
+            type: string
+          description: List of blocked domains
+        enableScreenshots:
+          type: boolean
+          description: Enable screenshot capture during execution
+          example: true
+        enableVideoRecording:
+          type: boolean
+          description: Enable video recording of task execution
+          example: false
+
+    CreateBrowserSessionRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Human-readable name for the session
+          example: "Data Extraction Session"
+        description:
+          type: string
+          maxLength: 1000
+          description: Description of the session purpose
+        profile:
+          $ref: '#/components/schemas/BrowserProfileConfig'
+        timeoutSeconds:
+          type: integer
+          minimum: 60
+          maximum: 3600
+          default: 600
+          description: Session timeout in seconds
+        enableScreenshots:
+          type: boolean
+          default: true
+          description: Enable screenshot capture capability
+        enableVideoRecording:
+          type: boolean
+          default: false
+          description: Enable video recording capability
+        enableNetworkLogging:
+          type: boolean
+          default: true
+          description: Enable request/response logging
+        enableConsoleLogging:
+          type: boolean
+          default: true
+          description: Enable console logging
+        tags:
+          type: array
+          items:
+            type: string
+          description: Session-specific tags for organization
+        initialUrl:
+          type: string
+          format: uri
+          description: Initial URL to navigate to after session creation
+        config:
+          type: object
+          additionalProperties: true
+          description: Additional configuration parameters
+
+    BrowserProfileConfig:
+      type: object
+      properties:
+        browserType:
+          type: string
+          enum: [chrome, chromium, firefox, webkit]
+          default: chromium
+          description: Browser type to use for the session
+        headless:
+          type: boolean
+          default: true
+          description: Run browser in headless mode
+        windowWidth:
+          type: integer
+          minimum: 400
+          maximum: 3840
+          default: 1920
+          description: Browser window width
+        windowHeight:
+          type: integer
+          minimum: 300
+          maximum: 2160
+          default: 1080
+          description: Browser window height
+        userAgent:
+          type: string
+          description: User agent string to use
+        chromeExecutablePath:
+          type: string
+          description: Custom Chrome executable path
+        userDataDir:
+          type: string
+          description: User data directory for browser profile
+        enableJavaScript:
+          type: boolean
+          default: true
+          description: Enable JavaScript execution
+        enableImages:
+          type: boolean
+          default: true
+          description: Enable images loading
+        enableCSS:
+          type: boolean
+          default: true
+          description: Enable CSS loading
+        additionalArgs:
+          type: array
+          items:
+            type: string
+          description: Additional browser launch arguments
+        proxy:
+          type: object
+          properties:
+            server:
+              type: string
+              description: Proxy server URL
+            username:
+              type: string
+              description: Proxy username
+            password:
+              type: string
+              description: Proxy password
+            bypass:
+              type: array
+              items:
+                type: string
+              description: Proxy bypass patterns
+
+    CaptureScreenshotRequest:
+      type: object
+      properties:
+        fullPage:
+          type: boolean
+          default: true
+          description: Capture full page or just viewport
+        quality:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 90
+          description: Image quality (1-100, only for JPEG)
+        format:
+          type: string
+          enum: [png, jpeg]
+          default: png
+          description: Screenshot format
+        clip:
+          type: object
+          properties:
+            x:
+              type: integer
+              minimum: 0
+              description: X coordinate of clip area
+            y:
+              type: integer
+              minimum: 0
+              description: Y coordinate of clip area
+            width:
+              type: integer
+              minimum: 1
+              description: Width of clip area
+            height:
+              type: integer
+              minimum: 1
+              description: Height of clip area
+          description: Optional clip area for partial screenshot
+
+    NavigateRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL to navigate to
+          example: "https://example.com/products"
+        waitForLoad:
+          type: boolean
+          default: true
+          description: Wait for page load completion
+        timeout:
+          type: integer
+          minimum: 1000
+          maximum: 60000
+          default: 30000
+          description: Navigation timeout in milliseconds
+
+    ClickRequest:
+      type: object
+      properties:
+        selector:
+          type: string
+          description: CSS selector for the element to click
+          example: "#submit-button"
+        coordinates:
+          type: object
+          properties:
+            x:
+              type: integer
+              minimum: 0
+              description: X coordinate for click
+            y:
+              type: integer
+              minimum: 0
+              description: Y coordinate for click
+          description: Alternative to selector - click at specific coordinates
+        waitForElement:
+          type: boolean
+          default: true
+          description: Wait for element to be present and visible
+        timeout:
+          type: integer
+          minimum: 1000
+          maximum: 30000
+          default: 10000
+          description: Element wait timeout in milliseconds
+        button:
+          type: string
+          enum: [left, right, middle]
+          default: left
+          description: Mouse button to use for click
+        clickCount:
+          type: integer
+          minimum: 1
+          maximum: 3
+          default: 1
+          description: Number of clicks (1=single, 2=double, 3=triple)
+
+    TypeRequest:
+      type: object
+      required:
+        - selector
+        - text
+      properties:
+        selector:
+          type: string
+          description: CSS selector for the input element
+          example: "#search-input"
+        text:
+          type: string
+          description: Text to type into the element
+          example: "search query"
+        clearFirst:
+          type: boolean
+          default: true
+          description: Clear existing text before typing
+        delay:
+          type: integer
+          minimum: 0
+          maximum: 1000
+          default: 0
+          description: Delay between keystrokes in milliseconds
+
+    ScrollRequest:
+      type: object
+      required:
+        - direction
+      properties:
+        direction:
+          type: string
+          enum: [up, down, left, right]
+          description: Scroll direction
+        pixels:
+          type: integer
+          minimum: 1
+          description: Number of pixels to scroll
+          example: 500
+        element:
+          type: string
+          description: CSS selector of element to scroll (defaults to page)
+        smooth:
+          type: boolean
+          default: true
+          description: Use smooth scrolling animation
+
+    FillFormRequest:
+      type: object
+      required:
+        - fields
+      properties:
+        formSelector:
+          type: string
+          description: CSS selector for the form container
+          example: "#contact-form"
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+          description: Field selectors and values to fill
+          example:
+            "#name": "John Doe"
+            "#email": "john@example.com"
+            "#message": "Hello from automation"
+        validateFields:
+          type: boolean
+          default: true
+          description: Validate field values after filling
+        submitAfterFill:
+          type: boolean
+          default: false
+          description: Automatically submit form after filling
+
+    SubmitFormRequest:
+      type: object
+      required:
+        - formSelector
+      properties:
+        formSelector:
+          type: string
+          description: CSS selector for the form to submit
+          example: "#contact-form"
+        submitButton:
+          type: string
+          description: CSS selector for submit button (optional)
+          example: "button[type='submit']"
+        waitForNavigation:
+          type: boolean
+          default: true
+          description: Wait for navigation after form submission
+        timeout:
+          type: integer
+          minimum: 1000
+          maximum: 60000
+          default: 30000
+          description: Submission timeout in milliseconds
+
+    ExtractDataRequest:
+      type: object
+      properties:
+        selectors:
+          type: object
+          additionalProperties: true
+          description: CSS selectors for data extraction
+          example:
+            title: "h1.product-title"
+            price: ".price-display"
+            description: ".product-description"
+        extractMode:
+          type: string
+          enum: [structured, list, single]
+          default: structured
+          description: Data extraction mode
+        waitForContent:
+          type: boolean
+          default: true
+          description: Wait for content to load before extraction
+        timeout:
+          type: integer
+          minimum: 1000
+          maximum: 60000
+          default: 15000
+          description: Content wait timeout in milliseconds
+        includeHtml:
+          type: boolean
+          default: false
+          description: Include raw HTML in extracted data
+        includeAttributes:
+          type: array
+          items:
+            type: string
+          description: HTML attributes to extract
+          example: ["href", "src", "alt"]
+
+    ExportResultsRequest:
+      type: object
+      required:
+        - format
+      properties:
+        format:
+          type: string
+          enum: [json, csv, xlsx, pdf, html]
+          description: Export format
+        includeScreenshots:
+          type: boolean
+          default: false
+          description: Include screenshots in export
+        includeLogs:
+          type: boolean
+          default: true
+          description: Include execution logs in export
+        filters:
+          type: object
+          additionalProperties: true
+          description: Data filters to apply during export
+        compression:
+          type: string
+          enum: [none, zip, gzip]
+          default: none
+          description: Compression format for export file
+
+    # Response Schemas
+    BrowserTaskResponse:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - status
+        - priority
+        - createdAt
+        - createdBy
+        - progress
+      properties:
+        id:
+          type: string
+          pattern: '^task_[a-zA-Z0-9]{6,}$'
+          description: Unique task identifier
+          example: "task_abc123"
+        name:
+          type: string
+          description: Task name
+          example: "E-commerce Data Extraction"
+        description:
+          type: string
+          description: Task description
+        status:
+          type: string
+          enum: [pending, running, completed, failed, cancelled]
+          description: Current task status
+        priority:
+          type: string
+          enum: [low, normal, high, urgent]
+          description: Task priority level
+        startUrl:
+          type: string
+          format: uri
+          description: Initial URL for the task
+        constraints:
+          $ref: '#/components/schemas/BrowserTaskConstraints'
+        config:
+          type: object
+          additionalProperties: true
+          description: Task configuration parameters
+        tags:
+          type: array
+          items:
+            type: string
+          description: Task tags
+        createdAt:
+          type: string
+          format: date-time
+          description: Task creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Task last updated timestamp
+        startedAt:
+          type: string
+          format: date-time
+          description: Task execution start timestamp
+        completedAt:
+          type: string
+          format: date-time
+          description: Task completion timestamp
+        createdBy:
+          type: string
+          description: User who created the task
+        sessionId:
+          type: string
+          description: Browser session ID associated with this task
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Current execution progress (0-100)
+        totalSteps:
+          type: integer
+          minimum: 0
+          description: Total number of execution steps
+        completedSteps:
+          type: integer
+          minimum: 0
+          description: Number of completed steps
+        executionSteps:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrowserTaskExecutionStep'
+          description: Detailed execution steps
+        result:
+          description: Final result of task execution
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: Error message
+            code:
+              type: string
+              description: Error code
+            details:
+              description: Additional error details
+            timestamp:
+              type: string
+              format: date-time
+              description: Error timestamp
+          description: Error information if task failed
+        metrics:
+          type: object
+          properties:
+            duration:
+              type: number
+              description: Total execution time in seconds
+            actionsPerformed:
+              type: integer
+              description: Number of actions performed
+            pagesVisited:
+              type: integer
+              description: Number of pages visited
+            screenshotsTaken:
+              type: integer
+              description: Number of screenshots taken
+            errorsEncountered:
+              type: integer
+              description: Number of errors encountered
+          description: Task execution metrics
+
+    BrowserTaskExecutionStep:
+      type: object
+      required:
+        - stepNumber
+        - action
+        - target
+        - result
+        - timestamp
+        - success
+      properties:
+        stepNumber:
+          type: integer
+          description: Step number in execution sequence
+        action:
+          type: string
+          description: Action performed in this step
+        target:
+          type: string
+          description: Target element or URL for the action
+        result:
+          type: string
+          description: Result of the action
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of step execution
+        screenshot:
+          type: string
+          description: Screenshot captured during this step (base64)
+        success:
+          type: boolean
+          description: Whether this step was successful
+        error:
+          type: string
+          description: Error message if step failed
+
+    BrowserTaskListResponse:
+      type: object
+      required:
+        - tasks
+        - total
+        - page
+        - limit
+        - totalPages
+        - hasNext
+        - hasPrevious
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrowserTaskResponse'
+          description: List of browser tasks
+        total:
+          type: integer
+          description: Total number of tasks
+        page:
+          type: integer
+          description: Current page number
+        limit:
+          type: integer
+          description: Number of tasks per page
+        totalPages:
+          type: integer
+          description: Total number of pages
+        hasNext:
+          type: boolean
+          description: Whether there are more pages
+        hasPrevious:
+          type: boolean
+          description: Whether there are previous pages
+
+    BrowserSessionResponse:
+      type: object
+      required:
+        - id
+        - name
+        - success
+        - status
+        - profile
+        - createdAt
+        - createdBy
+      properties:
+        id:
+          type: string
+          pattern: '^session_[a-zA-Z0-9]{6,}$'
+          description: Unique session identifier
+          example: "session_xyz789"
+        name:
+          type: string
+          description: Session name
+        description:
+          type: string
+          description: Session description
+        success:
+          type: boolean
+          description: Whether session operation was successful
+        status:
+          type: string
+          enum: [initializing, active, idle, closing, closed, error]
+          description: Current session status
+        profile:
+          $ref: '#/components/schemas/BrowserProfileConfig'
+        timeoutSeconds:
+          type: integer
+          description: Session timeout in seconds
+        enableScreenshots:
+          type: boolean
+          description: Screenshot capture enabled
+        enableVideoRecording:
+          type: boolean
+          description: Video recording enabled
+        enableNetworkLogging:
+          type: boolean
+          description: Network logging enabled
+        enableConsoleLogging:
+          type: boolean
+          description: Console logging enabled
+        tags:
+          type: array
+          items:
+            type: string
+          description: Session tags
+        createdAt:
+          type: string
+          format: date-time
+          description: Session creation timestamp
+        lastActivity:
+          type: string
+          format: date-time
+          description: Last activity timestamp
+        expiresAt:
+          type: string
+          format: date-time
+          description: Session expiration timestamp
+        createdBy:
+          type: string
+          description: User who created the session
+        currentUrl:
+          type: string
+          format: uri
+          description: Current URL in active tab
+        currentTitle:
+          type: string
+          description: Current page title
+        tabs:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrowserTabInfo'
+          description: Open browser tabs
+        activeTabsCount:
+          type: integer
+          description: Number of active tabs
+        metrics:
+          $ref: '#/components/schemas/BrowserSessionMetrics'
+        processId:
+          type: string
+          description: Browser process ID
+        websocketUrl:
+          type: string
+          format: uri
+          description: WebSocket connection for real-time updates
+        config:
+          type: object
+          additionalProperties: true
+          description: Additional configuration
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: Error message
+            code:
+              type: string
+              description: Error code
+            timestamp:
+              type: string
+              format: date-time
+              description: Error timestamp
+          description: Error information if session failed
+
+    BrowserTabInfo:
+      type: object
+      required:
+        - id
+        - title
+        - url
+        - active
+        - createdAt
+        - lastActivity
+        - loadingStatus
+      properties:
+        id:
+          type: string
+          description: Tab identifier
+        title:
+          type: string
+          description: Tab title
+        url:
+          type: string
+          format: uri
+          description: Tab URL
+        active:
+          type: boolean
+          description: Whether this tab is active
+        createdAt:
+          type: string
+          format: date-time
+          description: Tab creation timestamp
+        lastActivity:
+          type: string
+          format: date-time
+          description: Last activity timestamp
+        loadingStatus:
+          type: string
+          enum: [loading, complete, error]
+          description: Tab loading status
+
+    BrowserSessionMetrics:
+      type: object
+      required:
+        - totalDurationSeconds
+        - pagesVisited
+        - actionsPerformed
+        - screenshotsTaken
+        - errorsEncountered
+      properties:
+        totalDurationSeconds:
+          type: number
+          description: Total session duration in seconds
+        pagesVisited:
+          type: integer
+          description: Number of pages visited
+        actionsPerformed:
+          type: integer
+          description: Number of actions performed
+        screenshotsTaken:
+          type: integer
+          description: Number of screenshots taken
+        errorsEncountered:
+          type: integer
+          description: Number of errors encountered
+        networkRequests:
+          type: integer
+          description: Number of network requests
+        dataTransferredBytes:
+          type: integer
+          description: Total data transferred in bytes
+        averagePageLoadTime:
+          type: number
+          description: Average page load time in milliseconds
+        memoryUsageMB:
+          type: number
+          description: Memory usage in MB
+        cpuUsagePercent:
+          type: number
+          description: CPU usage percentage
+
+    BrowserSessionListResponse:
+      type: object
+      required:
+        - sessions
+        - total
+        - activeCount
+        - summary
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrowserSessionResponse'
+          description: List of browser sessions
+        total:
+          type: integer
+          description: Total number of sessions
+        activeCount:
+          type: integer
+          description: Number of active sessions
+        idleCount:
+          type: integer
+          description: Number of idle sessions
+        errorCount:
+          type: integer
+          description: Number of sessions with errors
+        totalMemoryUsageMB:
+          type: number
+          description: Total memory usage across all sessions in MB
+        summary:
+          type: object
+          properties:
+            totalSessions:
+              type: integer
+              description: Total sessions
+            activeSessions:
+              type: integer
+              description: Active sessions
+            idleSessions:
+              type: integer
+              description: Idle sessions
+            closedSessions:
+              type: integer
+              description: Closed sessions
+            averageSessionDuration:
+              type: number
+              description: Average session duration
+            peakMemoryUsage:
+              type: number
+              description: Peak memory usage
+          description: Summary statistics
+
+    ScreenshotResponse:
+      type: object
+      required:
+        - id
+        - sessionId
+        - format
+        - width
+        - height
+        - size
+        - capturedAt
+      properties:
+        id:
+          type: string
+          pattern: '^screenshot_[a-zA-Z0-9]{6,}$'
+          description: Unique screenshot identifier
+          example: "screenshot_def456"
+        sessionId:
+          type: string
+          description: Browser session ID
+        format:
+          type: string
+          enum: [png, jpeg]
+          description: Screenshot format
+        width:
+          type: integer
+          description: Screenshot width in pixels
+        height:
+          type: integer
+          description: Screenshot height in pixels
+        size:
+          type: integer
+          description: File size in bytes
+        data:
+          type: string
+          description: Base64 encoded screenshot data
+        url:
+          type: string
+          format: uri
+          description: URL to retrieve the screenshot
+        capturedAt:
+          type: string
+          format: date-time
+          description: Screenshot capture timestamp
+        metadata:
+          type: object
+          properties:
+            pageUrl:
+              type: string
+              format: uri
+              description: URL of the page when screenshot was taken
+            pageTitle:
+              type: string
+              description: Title of the page when screenshot was taken
+            viewportSize:
+              type: object
+              properties:
+                width:
+                  type: integer
+                height:
+                  type: integer
+              description: Viewport size when screenshot was taken
+          description: Additional screenshot metadata
+
+    BrowserElementResponse:
+      type: object
+      required:
+        - success
+        - selector
+        - action
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation was successful
+        selector:
+          type: string
+          description: CSS selector used for the operation
+        action:
+          type: string
+          description: Action performed (click, type, etc.)
+        result:
+          type: string
+          description: Result of the operation
+        element:
+          type: object
+          properties:
+            tagName:
+              type: string
+              description: HTML tag name
+            text:
+              type: string
+              description: Element text content
+            attributes:
+              type: object
+              additionalProperties:
+                type: string
+              description: Element attributes
+            boundingBox:
+              type: object
+              properties:
+                x:
+                  type: number
+                y:
+                  type: number
+                width:
+                  type: number
+                height:
+                  type: number
+              description: Element bounding box
+          description: Element information
+        timestamp:
+          type: string
+          format: date-time
+          description: Operation timestamp
+        executionTime:
+          type: number
+          description: Operation execution time in milliseconds
+
+    BrowserStateResponse:
+      type: object
+      required:
+        - sessionId
+        - success
+        - currentUrl
+        - title
+        - timestamp
+      properties:
+        sessionId:
+          type: string
+          description: Browser session ID
+        success:
+          type: boolean
+          description: Whether state retrieval was successful
+        currentUrl:
+          type: string
+          format: uri
+          description: Current page URL
+        title:
+          type: string
+          description: Current page title
+        loadingStatus:
+          type: string
+          enum: [loading, complete, error]
+          description: Page loading status
+        elements:
+          type: array
+          items:
+            type: object
+            properties:
+              selector:
+                type: string
+              tagName:
+                type: string
+              text:
+                type: string
+              attributes:
+                type: object
+                additionalProperties:
+                  type: string
+          description: DOM elements information
+        screenshot:
+          type: string
+          description: Base64 encoded screenshot (if requested)
+        performance:
+          type: object
+          properties:
+            loadTime:
+              type: number
+              description: Page load time in milliseconds
+            domContentLoaded:
+              type: number
+              description: DOM content loaded time in milliseconds
+            firstPaint:
+              type: number
+              description: First paint time in milliseconds
+          description: Page performance metrics
+        timestamp:
+          type: string
+          format: date-time
+          description: State capture timestamp
+        networkActivity:
+          type: object
+          properties:
+            requestCount:
+              type: integer
+              description: Number of network requests
+            responseCount:
+              type: integer
+              description: Number of responses received
+            pendingRequests:
+              type: integer
+              description: Number of pending requests
+          description: Network activity information
+
+    FormValidationResponse:
+      type: object
+      required:
+        - success
+        - fieldsProcessed
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          description: Whether form filling was successful
+        fieldsProcessed:
+          type: integer
+          description: Number of form fields processed
+        fieldResults:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              success:
+                type: boolean
+              value:
+                type: string
+              error:
+                type: string
+          description: Individual field processing results
+        validationErrors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+              code:
+                type: string
+          description: Form validation errors
+        formState:
+          type: object
+          properties:
+            valid:
+              type: boolean
+              description: Whether form is valid
+            canSubmit:
+              type: boolean
+              description: Whether form can be submitted
+            requiredFieldsFilled:
+              type: boolean
+              description: Whether all required fields are filled
+          description: Overall form state
+        timestamp:
+          type: string
+          format: date-time
+          description: Operation timestamp
+
+    DataExtractionResponse:
+      type: object
+      required:
+        - sessionId
+        - extractedAt
+        - data
+        - metadata
+      properties:
+        sessionId:
+          type: string
+          description: Browser session ID
+        extractedAt:
+          type: string
+          format: date-time
+          description: Data extraction timestamp
+        data:
+          description: Extracted structured data
+        metadata:
+          type: object
+          properties:
+            pageUrl:
+              type: string
+              format: uri
+              description: URL of the page where data was extracted
+            pageTitle:
+              type: string
+              description: Title of the page
+            extractionTimeMs:
+              type: number
+              description: Time taken for extraction in milliseconds
+            elementsFound:
+              type: integer
+              description: Number of elements found
+            selectorsUsed:
+              type: array
+              items:
+                type: string
+              description: CSS selectors used for extraction
+            extractionMethod:
+              type: string
+              enum: [css, xpath, ai]
+              description: Method used for extraction
+          description: Extraction metadata
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              selector:
+                type: string
+              message:
+                type: string
+              type:
+                type: string
+          description: Extraction errors encountered
+
+    BrowserMonitoringResponse:
+      type: object
+      required:
+        - serviceHealth
+        - timestamp
+      properties:
+        serviceHealth:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [healthy, degraded, unhealthy]
+              description: Overall service health status
+            timestamp:
+              type: string
+              format: date-time
+              description: Health check timestamp
+            uptime:
+              type: number
+              description: Service uptime in seconds
+            version:
+              type: string
+              description: Service version
+          description: Service health information
+        activeSessions:
+          type: integer
+          description: Number of active browser sessions
+        runningTasks:
+          type: integer
+          description: Number of running tasks
+        queuedTasks:
+          type: integer
+          description: Number of queued tasks
+        systemResources:
+          type: object
+          properties:
+            memoryUsagePercent:
+              type: number
+              description: Memory usage percentage
+            cpuUsagePercent:
+              type: number
+              description: CPU usage percentage
+            diskUsagePercent:
+              type: number
+              description: Disk usage percentage
+            availableMemoryMB:
+              type: number
+              description: Available memory in MB
+          description: System resource usage
+        browserProcesses:
+          type: object
+          properties:
+            total:
+              type: integer
+              description: Total browser processes
+            active:
+              type: integer
+              description: Active browser processes
+            idle:
+              type: integer
+              description: Idle browser processes
+            failed:
+              type: integer
+              description: Failed browser processes
+          description: Browser process information
+        timestamp:
+          type: string
+          format: date-time
+          description: Monitoring data timestamp
+
+    TaskStatusResponse:
+      type: object
+      required:
+        - success
+        - taskId
+        - found
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          description: Operation success status
+        taskId:
+          type: string
+          description: Task identifier
+        found:
+          type: boolean
+          description: Whether the task was found
+        status:
+          type: string
+          enum: [pending, running, completed, failed, cancelled]
+          description: Current task status
+        progress:
+          type: object
+          properties:
+            currentStep:
+              type: integer
+              description: Current step number
+            totalSteps:
+              type: integer
+              description: Total steps
+            percentComplete:
+              type: number
+              description: Completion percentage
+            estimatedRemainingMs:
+              type: number
+              description: Estimated remaining time in milliseconds
+          description: Task progress information
+        timing:
+          type: object
+          properties:
+            startedAt:
+              type: string
+              format: date-time
+              description: Task start timestamp
+            completedAt:
+              type: string
+              format: date-time
+              description: Task completion timestamp
+            lastActivityAt:
+              type: string
+              format: date-time
+              description: Last activity timestamp
+            totalDurationMs:
+              type: number
+              description: Total duration in milliseconds
+          description: Task timing information
+        sessionId:
+          type: string
+          description: Associated browser session ID
+        metrics:
+          type: object
+          properties:
+            executionTimeMs:
+              type: number
+              description: Execution time in milliseconds
+            memoryUsageMB:
+              type: number
+              description: Memory usage in MB
+            cpuUsagePercent:
+              type: number
+              description: CPU usage percentage
+            networkRequests:
+              type: integer
+              description: Number of network requests
+            screenshotsTaken:
+              type: integer
+              description: Number of screenshots taken
+            pagesVisited:
+              type: integer
+              description: Number of pages visited
+          description: Task execution metrics
+        result:
+          description: Task result data
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Error code
+            message:
+              type: string
+              description: Error message
+            stack:
+              type: string
+              description: Error stack trace
+            timestamp:
+              type: string
+              format: date-time
+              description: Error timestamp
+          description: Error information if task failed
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+
+    DetailedHealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+          description: Overall health status
+        timestamp:
+          type: string
+          format: date-time
+          description: Health check timestamp
+        uptime:
+          type: number
+          description: Service uptime in seconds
+        version:
+          type: string
+          description: Service version
+        localOnlyCompliance:
+          type: object
+          properties:
+            verified:
+              type: boolean
+              description: Whether local-only compliance is verified
+            cloudDependencies:
+              type: array
+              items:
+                type: string
+              description: List of cloud dependencies (should be empty)
+            localDatabaseConnected:
+              type: boolean
+              description: Whether local database is connected
+            workingDirectory:
+              type: string
+              description: Current working directory
+          description: Local-only architecture compliance status
+        browserProcesses:
+          type: object
+          properties:
+            total:
+              type: integer
+              description: Total browser processes
+            active:
+              type: integer
+              description: Active processes
+            idle:
+              type: integer
+              description: Idle processes
+            failed:
+              type: integer
+              description: Failed processes
+            memoryUsageMB:
+              type: number
+              description: Total memory usage in MB
+            cpuUsagePercent:
+              type: number
+              description: Total CPU usage percentage
+          description: Browser process metrics
+        taskMetrics:
+          type: object
+          properties:
+            totalTasks:
+              type: integer
+              description: Total number of tasks
+            activeTasks:
+              type: integer
+              description: Currently active tasks
+            queueLength:
+              type: integer
+              description: Task queue length
+            successRate:
+              type: number
+              description: Task success rate percentage
+            averageExecutionTime:
+              type: number
+              description: Average task execution time in seconds
+          description: Task execution metrics
+        systemResources:
+          type: object
+          properties:
+            memoryUsagePercent:
+              type: number
+              description: System memory usage percentage
+            diskUsagePercent:
+              type: number
+              description: Disk usage percentage
+            cpuUsagePercent:
+              type: number
+              description: CPU usage percentage
+            availableMemoryMB:
+              type: number
+              description: Available memory in MB
+          description: System resource utilization
+        integrations:
+          type: object
+          properties:
+            browserUseFramework:
+              type: string
+              enum: [online, offline, error]
+              description: Browser-use framework status
+            pythonRuntime:
+              type: string
+              enum: [online, offline, error]
+              description: Python runtime status
+            chromeDriver:
+              type: string
+              enum: [online, offline, error]
+              description: Chrome driver status
+            localStorage:
+              type: string
+              enum: [online, offline, error]
+              description: Local storage status
+            database:
+              type: string
+              enum: [online, offline, error]
+              description: Database connection status
+          description: Integration status
+
+    PerformanceMetricsResponse:
+      type: object
+      properties:
+        timeRange:
+          type: string
+          description: Time range for metrics
+          example: "24h"
+        timestamp:
+          type: string
+          format: date-time
+          description: Metrics timestamp
+        taskPerformance:
+          type: object
+          properties:
+            totalExecuted:
+              type: integer
+              description: Total tasks executed
+            successRate:
+              type: number
+              description: Task success rate percentage
+            averageExecutionTime:
+              type: number
+              description: Average execution time in seconds
+            failureReasons:
+              type: object
+              additionalProperties:
+                type: integer
+              description: Breakdown of failure reasons
+          description: Task performance metrics
+        resourceUtilization:
+          type: object
+          properties:
+            avgMemoryUsageMB:
+              type: number
+              description: Average memory usage in MB
+            peakMemoryUsageMB:
+              type: number
+              description: Peak memory usage in MB
+            avgCpuUsagePercent:
+              type: number
+              description: Average CPU usage percentage
+            peakCpuUsagePercent:
+              type: number
+              description: Peak CPU usage percentage
+          description: Resource utilization metrics
+        browserMetrics:
+          type: object
+          properties:
+            sessionsCreated:
+              type: integer
+              description: Number of sessions created
+            averageSessionDuration:
+              type: number
+              description: Average session duration in seconds
+            screenshotsCaptured:
+              type: integer
+              description: Number of screenshots captured
+            pagesVisited:
+              type: integer
+              description: Number of pages visited
+          description: Browser-specific metrics
+
+    BrowserResultsResponse:
+      type: object
+      required:
+        - taskId
+        - status
+        - taskName
+        - retrievedAt
+      properties:
+        taskId:
+          type: string
+          description: Task identifier
+        status:
+          type: string
+          enum: [success, failed, partial]
+          description: Task completion status
+        taskName:
+          type: string
+          description: Human-readable task name
+        startedAt:
+          type: string
+          format: date-time
+          description: Task start timestamp
+        executionTimeMs:
+          type: number
+          description: Total execution time in milliseconds
+        executionSteps:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrowserTaskExecutionStep'
+          description: Detailed execution steps
+        extractedData:
+          type: array
+          items:
+            type: object
+          description: Data extracted during task execution
+        screenshots:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScreenshotResponse'
+          description: Screenshots captured during execution
+        performanceMetrics:
+          type: object
+          properties:
+            totalExecutionTimeMs:
+              type: number
+            averageStepTimeMs:
+              type: number
+            sessionStartupTimeMs:
+              type: number
+            pageLoadTimes:
+              type: array
+              items:
+                type: number
+            memoryUsage:
+              type: object
+              properties:
+                peakMemoryMB:
+                  type: number
+                averageMemoryMB:
+                  type: number
+            cpuUsage:
+              type: object
+              properties:
+                peakCpuPercent:
+                  type: number
+                averageCpuPercent:
+                  type: number
+            networkActivity:
+              type: object
+              properties:
+                totalRequests:
+                  type: integer
+                totalDataTransferred:
+                  type: number
+          description: Task performance metrics
+        executionLogs:
+          type: array
+          items:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              level:
+                type: string
+                enum: [debug, info, warn, error]
+              message:
+                type: string
+              context:
+                type: object
+          description: Execution logs
+        sessionInfo:
+          type: object
+          properties:
+            sessionId:
+              type: string
+            browserType:
+              type: string
+            browserVersion:
+              type: string
+            viewportSize:
+              type: object
+              properties:
+                width:
+                  type: integer
+                height:
+                  type: integer
+            userAgent:
+              type: string
+            headless:
+              type: boolean
+          description: Browser session information
+        taskConfiguration:
+          type: object
+          description: Original task configuration
+        resultSummary:
+          type: object
+          properties:
+            totalSteps:
+              type: integer
+            successfulSteps:
+              type: integer
+            failedSteps:
+              type: integer
+            skippedSteps:
+              type: integer
+            dataExtracted:
+              type: integer
+            screenshotsCaptured:
+              type: integer
+            errorsEncountered:
+              type: integer
+            warnings:
+              type: array
+              items:
+                type: string
+          description: Result summary statistics
+        archived:
+          type: boolean
+          description: Whether results are archived
+        retrievedAt:
+          type: string
+          format: date-time
+          description: Results retrieval timestamp
+        exportInfo:
+          type: object
+          properties:
+            format:
+              type: string
+            filename:
+              type: string
+            fileSize:
+              type: number
+            exportedAt:
+              type: string
+              format: date-time
+            downloadUrl:
+              type: string
+              format: uri
+          description: Export information (if exported)
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+            recoverable:
+              type: boolean
+          description: Error information if task failed
+
+    # Error Response Schema
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+          description: Always false for error responses
+        error:
+          type: object
+          required:
+            - code
+            - message
+            - timestamp
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              description: Human-readable error message
+              example: "Invalid request parameters"
+            details:
+              description: Additional error details
+              example:
+                field: "startUrl"
+                reason: "URL must be valid HTTP/HTTPS URL"
+            timestamp:
+              type: string
+              format: date-time
+              description: Error timestamp
+            requestId:
+              type: string
+              description: Unique request identifier for tracing
+              example: "req_abc123"
+            correlationId:
+              type: string
+              description: Correlation ID for distributed tracing
+            retryAfter:
+              type: integer
+              description: Seconds to wait before retrying (for rate limiting)
+            documentation:
+              type: string
+              format: uri
+              description: Link to relevant documentation
+          description: Error details
+
+  responses:
+    BadRequest:
+      description: Bad Request - Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "BAD_REQUEST"
+              message: "Invalid request parameters"
+              timestamp: "2024-01-01T10:00:00Z"
+              requestId: "req_abc123"
+
+    Unauthorized:
+      description: Unauthorized - Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "AUTHENTICATION_REQUIRED"
+              message: "Valid authentication token required"
+              timestamp: "2024-01-01T10:00:00Z"
+
+    Forbidden:
+      description: Forbidden - Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "INSUFFICIENT_PERMISSIONS"
+              message: "User role does not have required permissions"
+              timestamp: "2024-01-01T10:00:00Z"
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "RESOURCE_NOT_FOUND"
+              message: "The requested resource was not found"
+              timestamp: "2024-01-01T10:00:00Z"
+
+    Conflict:
+      description: Conflict - Resource already exists or operation conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "RESOURCE_CONFLICT"
+              message: "Task is already running and cannot be modified"
+              timestamp: "2024-01-01T10:00:00Z"
+
+    ValidationError:
+      description: Unprocessable Entity - Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "VALIDATION_ERROR"
+              message: "Request validation failed"
+              details:
+                field: "startUrl"
+                reason: "Must be a valid HTTP or HTTPS URL"
+                value: "invalid-url"
+              timestamp: "2024-01-01T10:00:00Z"
+
+    RateLimited:
+      description: Too Many Requests - Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          description: Maximum requests per window
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          description: Requests remaining in current window
+          schema:
+            type: integer
+        X-RateLimit-Reset:
+          description: Rate limit reset timestamp
+          schema:
+            type: integer
+        Retry-After:
+          description: Seconds to wait before retrying
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "RATE_LIMIT_EXCEEDED"
+              message: "Rate limit exceeded. Please retry after 60 seconds."
+              retryAfter: 60
+              timestamp: "2024-01-01T10:00:00Z"
+
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "INTERNAL_SERVER_ERROR"
+              message: "An internal server error occurred"
+              correlationId: "corr_xyz789"
+              timestamp: "2024-01-01T10:00:00Z"
+
+    ServiceUnavailable:
+      description: Service Unavailable - Circuit breaker open or maintenance
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "SERVICE_UNAVAILABLE"
+              message: "Service temporarily unavailable due to circuit breaker"
+              retryAfter: 30
+              timestamp: "2024-01-01T10:00:00Z"
+
+  parameters:
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      description: Unique identifier of the browser task
+      schema:
+        type: string
+        pattern: '^task_[a-zA-Z0-9]{6,}$'
+      example: task_abc123
+
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      description: Unique identifier of the browser session
+      schema:
+        type: string
+        pattern: '^session_[a-zA-Z0-9]{6,}$'
+      example: session_xyz789
+
+    ScreenshotId:
+      name: screenshotId
+      in: path
+      required: true
+      description: Unique identifier of the screenshot
+      schema:
+        type: string
+        pattern: '^screenshot_[a-zA-Z0-9]{6,}$'
+      example: screenshot_def456
+
+  headers:
+    X-Request-ID:
+      description: Unique request identifier for tracing
+      schema:
+        type: string
+        format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+
+    X-API-Version:
+      description: API version that processed the request
+      schema:
+        type: string
+      example: "v1"
+
+    X-RateLimit-Limit:
+      description: Maximum requests allowed per window
+      schema:
+        type: integer
+      example: 1000
+
+    X-RateLimit-Remaining:
+      description: Requests remaining in current window
+      schema:
+        type: integer
+      example: 995
+
+    X-RateLimit-Reset:
+      description: Timestamp when rate limit window resets
+      schema:
+        type: integer
+      example: 1704067200

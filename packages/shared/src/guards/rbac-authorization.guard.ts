@@ -48,6 +48,7 @@ import {
   validateTimeBasedAccess,
   validateIPBasedAccess,
 } from "../decorators/rbac-authorization.decorators";
+import { RBACMetadata } from "../types/rbac.types";
 
 /**
  * Extended Request interface with user and security context
@@ -115,9 +116,12 @@ export class RBACAuthorizationGuard implements CanActivate {
   private readonly permissionCacheTimeout: number;
 
   constructor(
+    // eslint-disable-next-line no-unused-vars
     private readonly reflector: Reflector,
+    // eslint-disable-next-line no-unused-vars
     private readonly configService: ConfigService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+
+    @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
   ) {
     // Local configuration for file-based operations
     this.auditLogPath = this.configService.get(
@@ -264,23 +268,23 @@ export class RBACAuthorizationGuard implements CanActivate {
       });
 
       return true;
-    } catch (error) {
+    } catch (err) {
       const authTime = Date.now() - startTime;
 
       // Log error and security event
       this.logger.error(`[${operationId}] RBAC authorization error`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         authorizationTime: authTime,
         url: request.url,
         method: request.method,
       });
 
       if (
-        error instanceof ForbiddenException ||
-        error instanceof UnauthorizedException
+        err instanceof ForbiddenException ||
+        err instanceof UnauthorizedException
       ) {
-        throw error;
+        throw err;
       }
 
       throw new ForbiddenException("Authorization check failed");
@@ -311,9 +315,9 @@ export class RBACAuthorizationGuard implements CanActivate {
    */
   private extractRBACMetadata(
     context: ExecutionContext,
-    handler: Function,
-    controllerClass: Function,
-  ): any {
+    handler: CallableFunction,
+    controllerClass: CallableFunction,
+  ): RBACMetadata {
     return {
       roles: this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
         handler,
@@ -331,10 +335,10 @@ export class RBACAuthorizationGuard implements CanActivate {
         ALL_PERMISSIONS_KEY,
         [handler, controllerClass],
       ),
-      resource: this.reflector.getAllAndOverride<any>(RESOURCE_KEY, [
-        handler,
-        controllerClass,
-      ]),
+      resource: this.reflector.getAllAndOverride<{
+        action: string;
+        resource: string;
+      }>(RESOURCE_KEY, [handler, controllerClass]),
       ownership: this.reflector.getAllAndOverride<boolean>(OWNERSHIP_KEY, [
         handler,
         controllerClass,
@@ -374,7 +378,7 @@ export class RBACAuthorizationGuard implements CanActivate {
    * @returns True if no restrictions are defined
    * @private
    */
-  private isEmptyRBACMetadata(metadata: any): boolean {
+  private isEmptyRBACMetadata(metadata: RBACMetadata): boolean {
     return !Object.values(metadata).some(
       (value) => value !== undefined && value !== null && value !== false,
     );
@@ -393,7 +397,7 @@ export class RBACAuthorizationGuard implements CanActivate {
   private async performAuthorizationCheck(
     operationId: string,
     user: AuthenticatedRequest["user"],
-    metadata: any,
+    metadata: RBACMetadata,
     request: AuthenticatedRequest,
   ): Promise<AuthorizationResult> {
     const result: AuthorizationResult = {
@@ -506,7 +510,7 @@ export class RBACAuthorizationGuard implements CanActivate {
       // Check conditional access
       if (metadata.conditionalAccess) {
         result.evaluatedConditions.push("conditional");
-        const conditionResult = await this.validateConditionalAccess(
+        const conditionResult = this.validateConditionalAccess(
           operationId,
           metadata.conditionalAccess,
           user,
@@ -523,7 +527,7 @@ export class RBACAuthorizationGuard implements CanActivate {
       // Check resource ownership
       if (metadata.ownership) {
         result.evaluatedConditions.push("ownership");
-        const ownershipResult = await this.validateResourceOwnership(
+        const ownershipResult = this.validateResourceOwnership(
           operationId,
           user,
           request,
@@ -538,10 +542,10 @@ export class RBACAuthorizationGuard implements CanActivate {
       // All checks passed
       result.granted = true;
       return result;
-    } catch (error) {
+    } catch (err) {
       this.logger.error(`[${operationId}] Authorization check error`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         userId: user.id,
       });
 
@@ -560,7 +564,7 @@ export class RBACAuthorizationGuard implements CanActivate {
   private isAdmin(user: AuthenticatedRequest["user"]): boolean {
     const userRoles = this.getUserRoles(user);
     return (
-      userRoles.includes(Role.ADMIN) || userRoles.includes(Role.SUPER_ADMIN)
+      userRoles.includes(Role._ADMIN) || userRoles.includes(Role._SUPER_ADMIN)
     );
   }
 
@@ -583,7 +587,7 @@ export class RBACAuthorizationGuard implements CanActivate {
     }
 
     // Default to guest role
-    return [Role.GUEST];
+    return [Role._GUEST];
   }
 
   /**
@@ -602,7 +606,7 @@ export class RBACAuthorizationGuard implements CanActivate {
       // Check cache first for performance
       const cacheKey = `permissions:${user.id}`;
       const cachedPermissions =
-        await this.cacheManager.get<Permission[]>(cacheKey);
+        await this._cacheManager.get<Permission[]>(cacheKey);
 
       if (cachedPermissions) {
         this.logger.debug(`[${operationId}] Using cached permissions`, {
@@ -625,7 +629,7 @@ export class RBACAuthorizationGuard implements CanActivate {
       }
 
       // Cache permissions for performance
-      await this.cacheManager.set(
+      await this._cacheManager.set(
         cacheKey,
         permissions,
         this.permissionCacheTimeout,
@@ -638,10 +642,10 @@ export class RBACAuthorizationGuard implements CanActivate {
       });
 
       return permissions;
-    } catch (error) {
+    } catch (err) {
       this.logger.error(`[${operationId}] Error getting user permissions`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         userId: user.id,
       });
 
@@ -662,120 +666,120 @@ export class RBACAuthorizationGuard implements CanActivate {
 
     for (const role of roles) {
       switch (role) {
-        case Role.SUPER_ADMIN:
-        case Role.ADMIN:
+        case Role._SUPER_ADMIN:
+        case Role._ADMIN:
           permissions.push(
-            Permission.READ,
-            Permission.WRITE,
-            Permission.DELETE,
-            Permission.UPDATE,
-            Permission.CREATE,
-            Permission.EXECUTE,
-            Permission.ADMIN,
-            Permission.CONFIGURE,
-            Permission.MONITOR,
-            Permission.USER_MANAGEMENT,
-            Permission.TASK_MANAGEMENT,
-            Permission.SYSTEM_MANAGEMENT,
-            Permission.AUDIT_ACCESS,
-            Permission.SECURITY_MANAGEMENT,
-            Permission.API_ACCESS,
-            Permission.API_WRITE,
-            Permission.API_ADMIN,
-            Permission.COMPUTER_USE,
-            Permission.COMPUTER_ADMIN,
-            Permission.SCREEN_CAPTURE,
-            Permission.FILE_ACCESS,
+            Permission._READ,
+            Permission._WRITE,
+            Permission._DELETE,
+            Permission._UPDATE,
+            Permission._CREATE,
+            Permission._EXECUTE,
+            Permission._ADMIN,
+            Permission._CONFIGURE,
+            Permission._MONITOR,
+            Permission._USER_MANAGEMENT,
+            Permission._TASK_MANAGEMENT,
+            Permission._SYSTEM_MANAGEMENT,
+            Permission._AUDIT_ACCESS,
+            Permission._SECURITY_MANAGEMENT,
+            Permission._API_ACCESS,
+            Permission._API_WRITE,
+            Permission._API_ADMIN,
+            Permission._COMPUTER_USE,
+            Permission._COMPUTER_ADMIN,
+            Permission._SCREEN_CAPTURE,
+            Permission._FILE_ACCESS,
           );
           break;
 
-        case Role.OPERATOR:
+        case Role._OPERATOR:
           permissions.push(
-            Permission.READ,
-            Permission.WRITE,
-            Permission.UPDATE,
-            Permission.CREATE,
-            Permission.EXECUTE,
-            Permission.MONITOR,
-            Permission.TASK_MANAGEMENT,
-            Permission.API_ACCESS,
-            Permission.API_WRITE,
-            Permission.COMPUTER_USE,
-            Permission.SCREEN_CAPTURE,
-            Permission.FILE_ACCESS,
+            Permission._READ,
+            Permission._WRITE,
+            Permission._UPDATE,
+            Permission._CREATE,
+            Permission._EXECUTE,
+            Permission._MONITOR,
+            Permission._TASK_MANAGEMENT,
+            Permission._API_ACCESS,
+            Permission._API_WRITE,
+            Permission._COMPUTER_USE,
+            Permission._SCREEN_CAPTURE,
+            Permission._FILE_ACCESS,
           );
           break;
 
-        case Role.USER:
+        case Role._USER:
           permissions.push(
-            Permission.READ,
-            Permission.WRITE,
-            Permission.UPDATE,
-            Permission.CREATE,
-            Permission.API_ACCESS,
-            Permission.COMPUTER_USE,
-            Permission.FILE_ACCESS,
+            Permission._READ,
+            Permission._WRITE,
+            Permission._UPDATE,
+            Permission._CREATE,
+            Permission._API_ACCESS,
+            Permission._COMPUTER_USE,
+            Permission._FILE_ACCESS,
           );
           break;
 
-        case Role.DEVELOPER:
+        case Role._DEVELOPER:
           permissions.push(
-            Permission.READ,
-            Permission.WRITE,
-            Permission.UPDATE,
-            Permission.CREATE,
-            Permission.EXECUTE,
-            Permission.MONITOR,
-            Permission.API_ACCESS,
-            Permission.API_WRITE,
-            Permission.COMPUTER_USE,
-            Permission.FILE_ACCESS,
+            Permission._READ,
+            Permission._WRITE,
+            Permission._UPDATE,
+            Permission._CREATE,
+            Permission._EXECUTE,
+            Permission._MONITOR,
+            Permission._API_ACCESS,
+            Permission._API_WRITE,
+            Permission._COMPUTER_USE,
+            Permission._FILE_ACCESS,
           );
           break;
 
-        case Role.ANALYST:
+        case Role._ANALYST:
           permissions.push(
-            Permission.READ,
-            Permission.MONITOR,
-            Permission.AUDIT_ACCESS,
-            Permission.API_ACCESS,
+            Permission._READ,
+            Permission._MONITOR,
+            Permission._AUDIT_ACCESS,
+            Permission._API_ACCESS,
           );
           break;
 
-        case Role.AUDITOR:
+        case Role._AUDITOR:
           permissions.push(
-            Permission.READ,
-            Permission.AUDIT_ACCESS,
-            Permission.MONITOR,
-            Permission.API_ACCESS,
+            Permission._READ,
+            Permission._AUDIT_ACCESS,
+            Permission._MONITOR,
+            Permission._API_ACCESS,
           );
           break;
 
-        case Role.MODERATOR:
+        case Role._MODERATOR:
           permissions.push(
-            Permission.READ,
-            Permission.WRITE,
-            Permission.UPDATE,
-            Permission.DELETE,
-            Permission.USER_MANAGEMENT,
-            Permission.API_ACCESS,
+            Permission._READ,
+            Permission._WRITE,
+            Permission._UPDATE,
+            Permission._DELETE,
+            Permission._USER_MANAGEMENT,
+            Permission._API_ACCESS,
           );
           break;
 
-        case Role.GUEST:
-          permissions.push(Permission.READ, Permission.API_ACCESS);
+        case Role._GUEST:
+          permissions.push(Permission._READ, Permission._API_ACCESS);
           break;
 
-        case Role.SYSTEM:
+        case Role._SYSTEM:
           permissions.push(
-            Permission.READ,
-            Permission.WRITE,
-            Permission.UPDATE,
-            Permission.CREATE,
-            Permission.DELETE,
-            Permission.EXECUTE,
-            Permission.SYSTEM_MANAGEMENT,
-            Permission.API_ACCESS,
+            Permission._READ,
+            Permission._WRITE,
+            Permission._UPDATE,
+            Permission._CREATE,
+            Permission._DELETE,
+            Permission._EXECUTE,
+            Permission._SYSTEM_MANAGEMENT,
+            Permission._API_ACCESS,
           );
           break;
 
@@ -799,12 +803,12 @@ export class RBACAuthorizationGuard implements CanActivate {
    * @returns Promise<AuthorizationResult> - Validation result
    * @private
    */
-  private async validateConditionalAccess(
+  private validateConditionalAccess(
     operationId: string,
     config: ConditionalAccessConfig,
     user: AuthenticatedRequest["user"],
     request: AuthenticatedRequest,
-  ): Promise<{ granted: boolean; reason?: string }> {
+  ): { granted: boolean; reason?: string } {
     try {
       // Check required attributes
       if (config.requiredAttributes) {
@@ -874,12 +878,12 @@ export class RBACAuthorizationGuard implements CanActivate {
       }
 
       return { granted: true };
-    } catch (error) {
+    } catch (err) {
       this.logger.error(
         `[${operationId}] Conditional access validation error`,
         {
           operationId,
-          error: error instanceof Error ? error.message : String(error),
+          error: err instanceof Error ? err.message : String(err),
         },
       );
 
@@ -899,11 +903,11 @@ export class RBACAuthorizationGuard implements CanActivate {
    * @returns Promise<boolean> - True if user owns the resource
    * @private
    */
-  private async validateResourceOwnership(
+  private validateResourceOwnership(
     operationId: string,
     user: AuthenticatedRequest["user"],
     request: AuthenticatedRequest,
-  ): Promise<boolean> {
+  ): boolean {
     try {
       // Extract resource ID from request parameters
       const resourceId = this.extractResourceId(request);
@@ -932,12 +936,12 @@ export class RBACAuthorizationGuard implements CanActivate {
       });
 
       return isOwner;
-    } catch (error) {
+    } catch (err) {
       this.logger.error(
         `[${operationId}] Resource ownership validation error`,
         {
           operationId,
-          error: error instanceof Error ? error.message : String(error),
+          error: err instanceof Error ? err.message : String(err),
         },
       );
 
@@ -954,7 +958,8 @@ export class RBACAuthorizationGuard implements CanActivate {
    */
   private extractResourceId(request: AuthenticatedRequest): string | null {
     // Try to extract from common parameter names
-    const params = (request as any).params || {};
+    const params =
+      (request as unknown as { params?: Record<string, string> }).params || {};
 
     return (
       params.id || params.userId || params.resourceId || params.taskId || null
@@ -972,7 +977,7 @@ export class RBACAuthorizationGuard implements CanActivate {
     return (
       (request.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
       (request.headers["x-real-ip"] as string) ||
-      request.socket.remoteAddress ||
+      request.socket?.remoteAddress ||
       "unknown"
     );
   }
@@ -1011,19 +1016,20 @@ export class RBACAuthorizationGuard implements CanActivate {
       // Cache recent security events for analysis
       const recentEventsKey = `security_events:${event.userId}`;
       const recentEvents =
-        (await this.cacheManager.get<LocalAuditEvent[]>(recentEventsKey)) || [];
+        (await this._cacheManager.get<LocalAuditEvent[]>(recentEventsKey)) ||
+        [];
       recentEvents.push(event);
 
       // Keep only last 100 events per user
       const limitedEvents = recentEvents.slice(-100);
-      await this.cacheManager.set(
+      await this._cacheManager.set(
         recentEventsKey,
         limitedEvents,
         24 * 60 * 60 * 1000,
       ); // 24 hours
-    } catch (error) {
+    } catch (err) {
       this.logger.error("Failed to log security event", {
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         event: {
           type: event.type,
           userId: event.userId,

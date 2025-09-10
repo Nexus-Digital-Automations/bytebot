@@ -1,189 +1,182 @@
-# C/ua Framework Compatible Bytebot Desktop Container
-# Hybrid Architecture: Container + Native macOS Services
-# Apple Silicon M4 Optimized Runtime
-FROM --platform=linux/arm64 ghcr.io/bytebot-ai/bytebot-desktop:edge
+# Bytebot Desktop Container - Linux ARM64 with XFCE
+# Optimized for Linux containerized desktop automation
+FROM --platform=linux/arm64 ubuntu:22.04
 
-# === C/ua Framework Integration === 
+# === Container Metadata ===
 LABEL maintainer="Claude Code <noreply@anthropic.com>"
-LABEL description="C/ua-enabled Bytebot Desktop with Apple Neural Engine bridge"
+LABEL description="Bytebot Desktop automation container with XFCE desktop environment"
 LABEL version="1.0.0"
-LABEL cua.framework.version="latest"
-LABEL cua.ane.support="hybrid-bridge"
-LABEL apple.silicon.optimized="m4-neural-engine"
-LABEL platform.architecture="arm64"
-LABEL performance.target="low-latency"
+LABEL platform.architecture="linux/arm64"
+LABEL desktop.environment="xfce4"
 
-# === Apple Silicon M4 Optimization Environment ===
+# === Build Environment ===
 ENV DOCKER_BUILDKIT=1
 ENV COMPOSE_DOCKER_CLI_BUILD=1
 ENV BUILDKIT_PROGRESS=plain
 ENV DOCKER_PLATFORM=linux/arm64
+ENV DEBIAN_FRONTEND=noninteractive
 
-# === System Dependencies (ARM64 Optimized) ===
+# === System Dependencies ===
 RUN apt-get update && apt-get install -y \
-    # C/ua Framework Requirements
+    # Core system tools
     curl \
     wget \
+    git \
+    vim \
+    nano \
+    unzip \
+    software-properties-common \
+    # Python environment
     python3 \
     python3-pip \
     python3-venv \
-    # Apple Neural Engine Bridge Dependencies 
+    python3-dev \
+    # XFCE Desktop Environment
+    xfce4 \
+    xfce4-goodies \
+    xfce4-terminal \
+    # Display and VNC
+    xvfb \
+    x11vnc \
+    novnc \
+    websockify \
+    # Browser automation dependencies
+    chromium-browser \
+    firefox \
+    # Development tools
+    build-essential \
+    cmake \
+    pkg-config \
+    # Network tools
     socat \
     netcat-openbsd \
     jq \
-    # Performance Monitoring Tools
-    htop \
-    iotop \
-    nethogs \
-    # Network Communication Tools
     iproute2 \
     iputils-ping \
     telnet \
-    # Container Orchestration Tools
+    # System monitoring
+    htop \
+    iotop \
+    nethogs \
+    # Process management
     supervisor \
-    # Apple Silicon Performance Tools
+    # ARM64 optimization tools
     numactl \
     cpufrequtils \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean \
     && apt-get autoremove -y
 
-# Install Node.js 20 LTS from NodeSource to avoid dependency conflicts
+# === Node.js Installation ===
+# Install Node.js 20 LTS for modern JavaScript support
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# === C/ua Framework Installation ===
-# Install Lume CLI (C/ua Framework CLI)
-RUN npm install -g @lume/cli@latest
-
-# Create C/ua configuration directory
-RUN mkdir -p /opt/cua/{config,scripts,logs,shared}
-
-# === Apple Silicon Optimized Python Environment ===
-# Use Apple Silicon optimized Python packages where available
-RUN python3 -m venv /opt/cua/venv && \
-    /opt/cua/venv/bin/pip install --upgrade pip && \
-    /opt/cua/venv/bin/pip install --no-cache-dir \
+# === Python Environment Setup ===
+# Create optimized Python environment for automation tools
+RUN python3 -m venv /opt/bytebot/venv && \
+    /opt/bytebot/venv/bin/pip install --upgrade pip && \
+    /opt/bytebot/venv/bin/pip install --no-cache-dir \
+    # Web automation
+    selenium \
+    playwright \
     requests \
-    websockets \
+    beautifulsoup4 \
+    # Async frameworks
     aiohttp \
+    asyncio \
+    websockets \
+    # API frameworks
     fastapi \
     "uvicorn[standard]" \
     pydantic \
+    # Image processing
     pillow \
+    opencv-python-headless \
+    # Data processing
     numpy \
-    # Apple Silicon Performance Libraries
+    pandas \
+    # System monitoring
     psutil \
-    memory-profiler \
-    asyncio-pool
+    # Testing
+    pytest \
+    pytest-asyncio
 
-# === C/ua Agent Configuration ===
-COPY docker/cua-config/ /opt/cua/config/
-COPY docker/cua-scripts/ /opt/cua/scripts/
+# === Directory Structure ===
+RUN mkdir -p /opt/bytebot/{config,scripts,logs,data,shared} \
+    && mkdir -p /opt/monitoring/{scripts,logs,metrics} \
+    && mkdir -p /opt/desktop/{config,themes,scripts} \
+    && mkdir -p /var/log/bytebot
 
-# Make C/ua scripts executable
-RUN chmod +x /opt/cua/scripts/*.sh
+# === XFCE Configuration ===
+# Set up XFCE desktop environment for automation
+RUN mkdir -p /root/.config/xfce4/xfconf/xfce-perchannel-xml \
+    && mkdir -p /root/.config/autostart
 
-# === Apple Neural Engine Bridge Setup (M4 Optimized) ===
-# Create bridge service directory with shared memory support
-RUN mkdir -p /opt/ane-bridge/{service,logs,cache,shm,metrics} \
-    # Create shared memory mount points for zero-copy IPC
-    && mkdir -p /dev/shm/ane-bridge \
-    && mkdir -p /opt/ane-bridge/performance \
-    # Set optimal permissions for shared memory
-    && chmod 755 /dev/shm/ane-bridge
+# Copy XFCE configuration files
+COPY docker/desktop/xfce-config/ /root/.config/xfce4/ || true
 
-# Copy ANE Bridge configuration
-COPY docker/ane-bridge/ /opt/ane-bridge/
+# === VNC and Display Setup ===
+# Configure VNC server for remote desktop access
+RUN mkdir -p /root/.vnc \
+    && echo "bytebot123" | vncpasswd -f > /root/.vnc/passwd \
+    && chmod 600 /root/.vnc/passwd
 
-# === Apple Silicon M4 Performance Bridge ===
-# Create M4-specific optimization scripts
-COPY docker/apple-silicon-m4/ /opt/apple-silicon-m4/
-RUN find /opt/apple-silicon-m4/ -name "*.sh" -type f -exec chmod +x {} \; || true
+# === Browser Setup ===
+# Configure browsers for automation
+RUN mkdir -p /root/.config/chromium \
+    && mkdir -p /root/.mozilla/firefox
 
-# === Enhanced Supervisor Configuration ===
-# Copy enhanced supervisor config for C/ua integration
-COPY docker/supervisor/cua-supervisord.conf /etc/supervisor/conf.d/cua-supervisord.conf
+# === Supervisor Configuration ===
+# Configure supervisor for process management
+COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf || \
+    echo "[supervisord]\nnodaemon=true\n\n[program:xvfb]\ncommand=/usr/bin/Xvfb :1 -screen 0 1920x1080x24\nautorestart=true\n\n[program:x11vnc]\ncommand=/usr/bin/x11vnc -display :1 -nopw -listen localhost -xkb\nautorestart=true\n\n[program:novnc]\ncommand=/usr/share/novnc/utils/launch.sh --vnc localhost:5900 --listen 6080\nautorestart=true\n\n[program:xfce]\ncommand=/usr/bin/startxfce4\nenvironment=DISPLAY=\":1\"\nautorestart=true" > /etc/supervisor/conf.d/supervisord.conf
 
-# === Apple Silicon M4 Performance Monitoring Setup ===
-RUN mkdir -p /opt/monitoring/{scripts,logs,metrics,m4-metrics,shared-memory} \
-    # Create M4-specific monitoring directories
-    && mkdir -p /opt/monitoring/apple-silicon/{cpu,memory,neural-engine,performance-cores} \
-    # Create performance profiling directories
-    && mkdir -p /opt/monitoring/profiling/{latency,throughput,resource-usage}
+# === Environment Variables ===
+# Linux desktop automation environment
+ENV DISPLAY=:1
+ENV VNC_RESOLUTION=1920x1080
+ENV VNC_COLOR_DEPTH=24
+ENV VNC_PASSWORD=bytebot123
+ENV BYTEBOT_ENV=container
+ENV BYTEBOT_LOG_LEVEL=info
+ENV BYTEBOT_DATA_DIR=/opt/bytebot/data
+ENV BYTEBOT_CONFIG_DIR=/opt/bytebot/config
 
-COPY docker/monitoring/ /opt/monitoring/
-RUN find /opt/monitoring/scripts/ -name "*.sh" -type f -exec chmod +x {} \; || true
-
-# === C/ua Framework Environment Variables (M4 Optimized) ===
-ENV CUA_FRAMEWORK_ENABLED=true
-ENV CUA_CONTAINER_ID=bytebot-desktop-m4
-ENV CUA_ANE_BRIDGE_URL=http://host.docker.internal:8080
-ENV CUA_PERFORMANCE_MODE=apple_silicon_m4
-ENV CUA_LOG_LEVEL=info
-ENV CUA_SHARED_VOLUME=/opt/cua/shared
-# Apple Silicon M4 Specific Environment
-ENV APPLE_SILICON_OPTIMIZATION=enabled
-ENV M4_NEURAL_ENGINE_ACCESS=direct
-ENV UNIFIED_MEMORY_OPTIMIZATION=enabled
-ENV PERFORMANCE_CORE_PRIORITY=enabled
-
-# === Apple Neural Engine Bridge Environment ===
-ENV ANE_BRIDGE_ENABLED=true
-ENV ANE_BRIDGE_HOST=host.docker.internal
-ENV ANE_BRIDGE_PORT=8080
-ENV ANE_FALLBACK_ENABLED=true
-ENV ANE_CACHE_ENABLED=true
-ENV ANE_BATCH_SIZE=10
-ENV ANE_TIMEOUT_MS=5000
-
-# === Apple Silicon M4 Performance Optimization Environment ===
+# === Performance Optimization (Linux ARM64) ===
+# ARM64-specific optimizations for Linux containers
+ENV ARM64_NEON_ACCELERATION=enabled
+ENV CONTAINER_MEMORY_LIMIT=4G
+ENV CONTAINER_CPU_LIMIT=4
 ENV PERFORMANCE_MONITORING=enabled
-ENV METRICS_COLLECTION=enabled
-ENV RESOURCE_LIMITS_ENABLED=true
-ENV MEMORY_OPTIMIZATION=apple_silicon_unified
-# Apple Silicon M4 Performance Tuning
-ENV ARM64_SIMD_OPTIMIZATION=enabled
-ENV MEMORY_MAPPING_OPTIMIZATION=zero_copy
-ENV CPU_AFFINITY_OPTIMIZATION=performance_cores
-ENV CONTAINER_STARTUP_OPTIMIZATION=fast_boot
-# Performance Targets
-ENV TARGET_CPU_OVERHEAD=5
-ENV TARGET_MEMORY_USAGE=4G
-ENV TARGET_STARTUP_TIME=30s
 
-# === Network Configuration for C/ua Communication ===
-# Expose additional ports for C/ua services
-# 9990: Original bytebotd service
-# 9993: C/ua Agent API
-# 9994: ANE Bridge Communication
-# 9995: Performance Monitoring
-# 9996: WebSocket for real-time communication
-EXPOSE 9990 9993 9994 9995 9996
+# === Network Configuration ===
+# Expose ports for desktop automation services
+# 5900: VNC server
+# 6080: noVNC web interface
+# 9990: Bytebot API service
+EXPOSE 5900 6080 9990
 
-# === Volume Mounts for Apple Silicon M4 Hybrid Architecture ===
-# Shared volume for native-container communication
-# Optimized for Apple Silicon unified memory architecture
-VOLUME ["/opt/cua/shared", "/opt/ane-bridge/cache", "/opt/monitoring/logs", "/dev/shm/ane-bridge", "/opt/apple-silicon-m4/shared"]
+# === Volume Mounts ===
+# Persistent data and configuration volumes
+VOLUME ["/opt/bytebot/data", "/opt/bytebot/logs", "/opt/bytebot/shared"]
 
-# === Health Checks ===
-# Enhanced health check for C/ua integration
+# === Health Check ===
+# Basic health check for container services
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD /opt/cua/scripts/health-check.sh || exit 1
+    CMD pgrep -f Xvfb && pgrep -f x11vnc || exit 1
 
-# === Final Configuration ===
-# Copy startup script
-COPY docker/startup/cua-startup.sh /opt/startup/cua-startup.sh
-RUN chmod +x /opt/startup/cua-startup.sh
+# === Startup Script ===
+# Create simple startup script
+RUN echo '#!/bin/bash\n\
+echo "Starting Bytebot Desktop Container..."\n\
+# Start supervisor to manage all services\n\
+exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf\n\
+' > /opt/bytebot/startup.sh && chmod +x /opt/bytebot/startup.sh
 
-# Set working directory
-WORKDIR /opt/cua
+# === Working Directory ===
+WORKDIR /opt/bytebot
 
-# === Apple Silicon M4 Optimized Startup Command ===
-# Use Apple Silicon optimized startup with M4 performance tuning
-# Copy M4 optimization startup script
-COPY docker/startup/m4-optimized-startup.sh /opt/startup/m4-optimized-startup.sh
-RUN chmod +x /opt/startup/m4-optimized-startup.sh
-
-# Use Apple Silicon M4 optimized startup sequence
-CMD ["/opt/startup/m4-optimized-startup.sh"]
+# === Container Startup ===
+# Use supervisor to manage desktop environment and services
+CMD ["/opt/bytebot/startup.sh"]

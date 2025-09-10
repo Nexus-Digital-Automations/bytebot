@@ -27,33 +27,35 @@ import {
   createSecurityEvent,
   SecurityErrorCode,
 } from "../types/security.types";
+import { ExtendedRequest } from "../types/express-extensions";
 
 /**
  * Threat severity levels
  */
 export enum ThreatSeverity {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  CRITICAL = "critical",
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
 }
 
 /**
  * Security action types for automated response
  */
 export enum SecurityAction {
-  LOG_ONLY = "log_only",
-  RATE_LIMIT = "rate_limit",
-  TEMPORARY_BLOCK = "temporary_block",
-  PERMANENT_BLOCK = "permanent_block",
-  ALERT_SECURITY_TEAM = "alert_security_team",
-  EMERGENCY_LOCKDOWN = "emergency_lockdown",
+  _LOG_ONLY = "log_only",
+  _RATE_LIMIT = "rate_limit",
+  _TEMPORARY_BLOCK = "temporary_block",
+  _PERMANENT_BLOCK = "permanent_block",
+  _ALERT_SECURITY_TEAM = "alert_security_team",
+  _EMERGENCY_LOCKDOWN = "emergency_lockdown",
 }
 
 /**
- * Threat detection rule configuration
+ * Enhanced threat detection rule configuration
+ * (Renamed to avoid conflict with imported ThreatDetectionRule from express-extensions)
  */
-interface ThreatDetectionRule {
+interface EnhancedThreatDetectionRule {
   ruleId: string;
   name: string;
   description: string;
@@ -61,7 +63,16 @@ interface ThreatDetectionRule {
   severity: ThreatSeverity;
   action: SecurityAction;
   enabled: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Threat analysis result interface
+ */
+interface ThreatAnalysisResult {
+  threatsDetected: EnhancedThreatDetectionRule[];
+  riskScore: number;
+  analysisData: Record<string, unknown>;
 }
 
 /**
@@ -75,7 +86,7 @@ interface EnhancedSecurityEvent extends SecurityEvent {
     city: string;
   };
   deviceFingerprint?: string;
-  rulesTrigggered: string[];
+  rulesTriggered: string[];
   responseActions: SecurityAction[];
   correlationData?: {
     relatedEvents: string[];
@@ -92,6 +103,7 @@ interface IPTrackingData {
   firstSeen: Date;
   lastSeen: Date;
   requestCount: number;
+  requests: number; // Added for compatibility - tracks total requests (same as requestCount)
   securityEvents: number;
   reputation: number; // -100 to 100
   blockedUntil?: Date;
@@ -123,7 +135,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
   private readonly logger = new Logger(EnhancedSecurityMiddleware.name);
 
   /** Threat detection rules */
-  private threatDetectionRules: ThreatDetectionRule[] = [];
+  private threatDetectionRules: EnhancedThreatDetectionRule[] = [];
 
   /** IP tracking data for reputation and behavior analysis */
   private ipTrackingData = new Map<string, IPTrackingData>();
@@ -147,8 +159,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
   private blockedIPs = new Map<string, { until: Date; reason: string }>();
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly eventEmitter: EventEmitter2,
+    private readonly _configService: ConfigService,
+    private readonly _eventEmitter: EventEmitter2,
   ) {
     this.initializeThreatDetectionRules();
     this.startCleanupTasks();
@@ -162,12 +174,13 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
    * Main middleware handler with comprehensive security checks
    */
   use(req: Request, res: Response, next: NextFunction): void {
-    const operationId = `enhanced-security-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const operationId = `enhanced-security-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
     const startTime = Date.now();
 
     // Set correlation ID
-    (req as any).correlationId = operationId;
-    (req as any).securityContext = {};
+    const extendedReq = req as ExtendedRequest;
+    extendedReq.correlationId = operationId;
+    extendedReq.securityContext = {};
 
     // Update request metrics
     this.securityMetrics.totalRequests++;
@@ -221,8 +234,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
 
         // Block request if critical threat detected
         if (
-          responseActions.includes(SecurityAction.TEMPORARY_BLOCK) ||
-          responseActions.includes(SecurityAction.PERMANENT_BLOCK)
+          responseActions.includes(SecurityAction._TEMPORARY_BLOCK) ||
+          responseActions.includes(SecurityAction._PERMANENT_BLOCK)
         ) {
           return this.handleThreatResponse(
             req,
@@ -246,13 +259,13 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
       });
 
       next();
-    } catch (error) {
+    } catch (err) {
       const processingTime = Date.now() - startTime;
 
       this.logger.error(`[${operationId}] Security middleware error`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
+        error: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
         processingTimeMs: processingTime,
       });
 
@@ -261,15 +274,15 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         req,
         clientIP,
         userAgent,
-        SecurityEventType.SECURITY_CONFIG_CHANGED,
+        SecurityEventType._SECURITY_CONFIG_CHANGED,
         false,
-        `Security middleware error: ${error instanceof Error ? error.message : String(error)}`,
+        `Security middleware error: ${err instanceof Error ? err.message : String(err)}`,
         operationId,
       );
 
       this.logSecurityEvent(errorEvent);
 
-      next(error);
+      next(err);
     }
   }
 
@@ -285,8 +298,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
           "Detects SQL injection attempts in URL parameters and request body",
         pattern:
           /(union\s+select|select\s+.*from|insert\s+into|delete\s+from|update\s+.*set|drop\s+table|exec\s*\(|script\s*:|<script|javascript:|vbscript:)/i,
-        severity: ThreatSeverity.CRITICAL,
-        action: SecurityAction.PERMANENT_BLOCK,
+        severity: ThreatSeverity._CRITICAL,
+        action: SecurityAction._PERMANENT_BLOCK,
         enabled: true,
       },
       {
@@ -295,8 +308,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         description: "Detects XSS attack attempts",
         pattern:
           /(<script[^>]*>.*?<\/script>|javascript:|vbscript:|onload=|onerror=|onclick=|onmouseover=)/i,
-        severity: ThreatSeverity.HIGH,
-        action: SecurityAction.TEMPORARY_BLOCK,
+        severity: ThreatSeverity._HIGH,
+        action: SecurityAction._TEMPORARY_BLOCK,
         enabled: true,
       },
       {
@@ -304,8 +317,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         name: "Path Traversal Attack Detection",
         description: "Detects directory traversal attempts",
         pattern: /(\.\.\/|\.\.\\|%2e%2e%2f|%2e%2e\\|\.\.%2f|\.\.%5c)/i,
-        severity: ThreatSeverity.HIGH,
-        action: SecurityAction.TEMPORARY_BLOCK,
+        severity: ThreatSeverity._HIGH,
+        action: SecurityAction._TEMPORARY_BLOCK,
         enabled: true,
       },
       {
@@ -314,8 +327,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         description: "Detects command injection attempts",
         pattern:
           /(;|&&|\|\||`|\$\(|system\s*\(|exec\s*\(|eval\s*\(|passthru\s*\()/i,
-        severity: ThreatSeverity.CRITICAL,
-        action: SecurityAction.PERMANENT_BLOCK,
+        severity: ThreatSeverity._CRITICAL,
+        action: SecurityAction._PERMANENT_BLOCK,
         enabled: true,
       },
       {
@@ -324,8 +337,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         description: "Detects known malicious user agents",
         pattern:
           /(sqlmap|nmap|nikto|dirb|gobuster|masscan|zap|burpsuite|acunetix)/i,
-        severity: ThreatSeverity.MEDIUM,
-        action: SecurityAction.RATE_LIMIT,
+        severity: ThreatSeverity._MEDIUM,
+        action: SecurityAction._RATE_LIMIT,
         enabled: true,
       },
       {
@@ -333,8 +346,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         name: "High Request Rate Detection",
         description: "Detects unusually high request rates from single IP",
         pattern: "", // Handled by behavior analysis
-        severity: ThreatSeverity.MEDIUM,
-        action: SecurityAction.RATE_LIMIT,
+        severity: ThreatSeverity._MEDIUM,
+        action: SecurityAction._RATE_LIMIT,
         enabled: true,
       },
       {
@@ -343,8 +356,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         description: "Detects attempts to access sensitive files",
         pattern:
           /(\/etc\/passwd|\/etc\/shadow|web\.config|\.env|config\.php|wp-config\.php)/i,
-        severity: ThreatSeverity.HIGH,
-        action: SecurityAction.TEMPORARY_BLOCK,
+        severity: ThreatSeverity._HIGH,
+        action: SecurityAction._TEMPORARY_BLOCK,
         enabled: true,
       },
     ];
@@ -374,8 +387,14 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
       return xForwardedFor.split(",")[0].trim();
     }
 
+    const reqWithConnection = req as Request & {
+      connection?: { remoteAddress?: string };
+      socket?: { remoteAddress?: string };
+    };
     return (
-      req.connection.remoteAddress || req.socket.remoteAddress || "unknown"
+      reqWithConnection.connection?.remoteAddress ||
+      reqWithConnection.socket?.remoteAddress ||
+      "unknown"
     );
   }
 
@@ -411,6 +430,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         firstSeen: now,
         lastSeen: now,
         requestCount: 0,
+        requests: 0, // Initialize requests to match requestCount
         securityEvents: 0,
         reputation: 0,
         userAgents: new Set(),
@@ -422,6 +442,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
 
     ipData.lastSeen = now;
     ipData.requestCount++;
+    ipData.requests = ipData.requestCount; // Keep requests in sync with requestCount
     ipData.userAgents.add(userAgent);
     ipData.endpoints.add(endpoint);
 
@@ -481,14 +502,10 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     req: Request,
     clientIP: string,
     operationId: string,
-  ): {
-    threatsDetected: ThreatDetectionRule[];
-    riskScore: number;
-    analysisData: Record<string, any>;
-  } {
-    const threatsDetected: ThreatDetectionRule[] = [];
+  ): ThreatAnalysisResult {
+    const threatsDetected: EnhancedThreatDetectionRule[] = [];
     let riskScore = 0;
-    const analysisData: Record<string, any> = {};
+    const analysisData: Record<string, unknown> = {};
 
     // Get request data for analysis
     const requestData = {
@@ -518,9 +535,9 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
           rule.pattern.length > 0
         ) {
           // String-based detection
+          const stringPattern = rule.pattern;
           isMatch = Object.values(requestData).some(
-            (data) =>
-              typeof data === "string" && data.includes(rule.pattern as string),
+            (data) => typeof data === "string" && data.includes(stringPattern),
           );
         } else if (rule.ruleId === "high-request-rate") {
           // Behavior-based detection for high request rates
@@ -537,10 +554,10 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
 
           // Calculate risk score based on severity
           const severityScore = {
-            [ThreatSeverity.LOW]: 10,
-            [ThreatSeverity.MEDIUM]: 25,
-            [ThreatSeverity.HIGH]: 50,
-            [ThreatSeverity.CRITICAL]: 75,
+            [ThreatSeverity._LOW]: 10,
+            [ThreatSeverity._MEDIUM]: 25,
+            [ThreatSeverity._HIGH]: 50,
+            [ThreatSeverity._CRITICAL]: 75,
           };
 
           riskScore += severityScore[rule.severity];
@@ -554,13 +571,13 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
             url: req.url,
           });
         }
-      } catch (error) {
+      } catch (err) {
         this.logger.error(
           `[${operationId}] Error in threat detection rule: ${rule.ruleId}`,
           {
             operationId,
             ruleId: rule.ruleId,
-            error: error instanceof Error ? error.message : String(error),
+            error: err instanceof Error ? err.message : String(err),
           },
         );
       }
@@ -589,16 +606,16 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     req: Request,
     clientIP: string,
     userAgent: string,
-    threatAnalysis: any,
+    threatAnalysis: ThreatAnalysisResult,
     operationId: string,
   ): EnhancedSecurityEvent {
     const baseEvent = this.createSecurityEvent(
       req,
       clientIP,
       userAgent,
-      SecurityEventType.SUSPICIOUS_ACTIVITY,
+      SecurityEventType._SUSPICIOUS_ACTIVITY,
       false,
-      `Threat detected: ${threatAnalysis.threatsDetected.map((t: ThreatDetectionRule) => t.name).join(", ")}`,
+      `Threat detected: ${threatAnalysis.threatsDetected.map((t: EnhancedThreatDetectionRule) => t.name).join(", ")}`,
       operationId,
     );
 
@@ -607,8 +624,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
       threatSeverity: this.calculateOverallThreatSeverity(
         threatAnalysis.threatsDetected,
       ),
-      rulesTrigggered: threatAnalysis.threatsDetected.map(
-        (r: ThreatDetectionRule) => r.ruleId,
+      rulesTriggered: threatAnalysis.threatsDetected.map(
+        (r: EnhancedThreatDetectionRule) => r.ruleId,
       ),
       responseActions: [],
       correlationData: {
@@ -627,18 +644,18 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
    * Calculate overall threat severity from multiple detections
    */
   private calculateOverallThreatSeverity(
-    threats: ThreatDetectionRule[],
+    threats: EnhancedThreatDetectionRule[],
   ): ThreatSeverity {
-    if (threats.some((t) => t.severity === ThreatSeverity.CRITICAL)) {
-      return ThreatSeverity.CRITICAL;
+    if (threats.some((t) => t.severity === ThreatSeverity._CRITICAL)) {
+      return ThreatSeverity._CRITICAL;
     }
-    if (threats.some((t) => t.severity === ThreatSeverity.HIGH)) {
-      return ThreatSeverity.HIGH;
+    if (threats.some((t) => t.severity === ThreatSeverity._HIGH)) {
+      return ThreatSeverity._HIGH;
     }
-    if (threats.some((t) => t.severity === ThreatSeverity.MEDIUM)) {
-      return ThreatSeverity.MEDIUM;
+    if (threats.some((t) => t.severity === ThreatSeverity._MEDIUM)) {
+      return ThreatSeverity._MEDIUM;
     }
-    return ThreatSeverity.LOW;
+    return ThreatSeverity._LOW;
   }
 
   /**
@@ -657,7 +674,9 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
   /**
    * Identify attack patterns from threat detections
    */
-  private identifyAttackPatterns(threats: ThreatDetectionRule[]): string[] {
+  private identifyAttackPatterns(
+    threats: EnhancedThreatDetectionRule[],
+  ): string[] {
     const patterns = new Set<string>();
 
     threats.forEach((threat) => {
@@ -678,7 +697,10 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
   /**
    * Identify risk factors for enhanced analysis
    */
-  private identifyRiskFactors(ip: string, threatAnalysis: any): string[] {
+  private identifyRiskFactors(
+    ip: string,
+    threatAnalysis: ThreatAnalysisResult,
+  ): string[] {
     const riskFactors: string[] = [];
 
     const ipData = this.ipTrackingData.get(ip);
@@ -716,7 +738,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
       message,
       {
         operationId,
-        correlationId: (req as any).correlationId,
+        correlationId: (req as ExtendedRequest).correlationId,
         requestHeaders: this.sanitizeHeaders(req.headers),
         requestQuery: req.query,
         middleware: "enhanced-security",
@@ -727,8 +749,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     ) as EnhancedSecurityEvent;
 
     // Add enhanced properties
-    event.threatSeverity = ThreatSeverity.LOW;
-    event.rulesTrigggered = [];
+    event.threatSeverity = ThreatSeverity._LOW;
+    event.rulesTriggered = [];
     event.responseActions = [];
 
     return event;
@@ -769,32 +791,32 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     }
 
     // Emit event for external processing
-    this.eventEmitter.emit("security.threat.detected", event);
+    this._eventEmitter.emit("security.threat.detected", event);
 
     // Log based on severity
     const logData = {
       eventId: event.eventId,
       threatSeverity: event.threatSeverity,
-      rulesTrigggered: event.rulesTrigggered,
+      rulesTriggered: event.rulesTriggered,
       riskScore: event.riskScore,
       ipAddress: event.ipAddress,
       endpoint: event.resource,
     };
 
     switch (event.threatSeverity) {
-      case ThreatSeverity.CRITICAL:
+      case ThreatSeverity._CRITICAL:
         this.logger.error(
           `CRITICAL SECURITY THREAT: ${event.message}`,
           logData,
         );
         break;
-      case ThreatSeverity.HIGH:
+      case ThreatSeverity._HIGH:
         this.logger.error(`HIGH SECURITY THREAT: ${event.message}`, logData);
         break;
-      case ThreatSeverity.MEDIUM:
+      case ThreatSeverity._MEDIUM:
         this.logger.warn(`MEDIUM SECURITY THREAT: ${event.message}`, logData);
         break;
-      case ThreatSeverity.LOW:
+      case ThreatSeverity._LOW:
       default:
         this.logger.log(`LOW SECURITY THREAT: ${event.message}`, logData);
         break;
@@ -812,7 +834,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     const actions: SecurityAction[] = [];
 
     // Determine actions based on threat severity and rules triggered
-    for (const ruleId of event.rulesTrigggered) {
+    for (const ruleId of event.rulesTriggered) {
       const rule = this.threatDetectionRules.find((r) => r.ruleId === ruleId);
       if (rule && rule.enabled) {
         actions.push(rule.action);
@@ -846,18 +868,18 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     operationId: string,
   ): void {
     switch (action) {
-      case SecurityAction.LOG_ONLY:
+      case SecurityAction._LOG_ONLY:
         // Already logged above
         break;
 
-      case SecurityAction.RATE_LIMIT:
+      case SecurityAction._RATE_LIMIT:
         this.applyRateLimit(clientIP, 5 * 60 * 1000); // 5 minutes
         this.logger.warn(
           `[${operationId}] Applied rate limiting to ${clientIP}`,
         );
         break;
 
-      case SecurityAction.TEMPORARY_BLOCK:
+      case SecurityAction._TEMPORARY_BLOCK:
         this.blockIP(
           clientIP,
           15 * 60 * 1000,
@@ -868,7 +890,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         );
         break;
 
-      case SecurityAction.PERMANENT_BLOCK:
+      case SecurityAction._PERMANENT_BLOCK:
         this.blockIP(
           clientIP,
           24 * 60 * 60 * 1000,
@@ -879,20 +901,22 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         );
         break;
 
-      case SecurityAction.ALERT_SECURITY_TEAM:
+      case SecurityAction._ALERT_SECURITY_TEAM:
         this.alertSecurityTeam(event, operationId);
         this.logger.error(
           `[${operationId}] Security team alerted for critical threat`,
         );
         break;
 
-      case SecurityAction.EMERGENCY_LOCKDOWN:
+      case SecurityAction._EMERGENCY_LOCKDOWN:
         this.triggerEmergencyLockdown(event, operationId);
         this.logger.fatal(`[${operationId}] EMERGENCY LOCKDOWN TRIGGERED`);
         break;
 
       default:
-        this.logger.warn(`[${operationId}] Unknown security action: ${action}`);
+        this.logger.warn(
+          `[${operationId}] Unknown security action: ${String(action)}`,
+        );
     }
   }
 
@@ -923,7 +947,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     operationId: string,
   ): void {
     // Emit high-priority security alert event
-    this.eventEmitter.emit("security.alert.critical", {
+    this._eventEmitter.emit("security.alert.critical", {
       event,
       operationId,
       alertType: "SECURITY_TEAM_ALERT",
@@ -939,7 +963,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     operationId: string,
   ): void {
     // Emit emergency lockdown event
-    this.eventEmitter.emit("security.emergency.lockdown", {
+    this._eventEmitter.emit("security.emergency.lockdown", {
       event,
       operationId,
       alertType: "EMERGENCY_LOCKDOWN",
@@ -969,7 +993,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
 
     res.status(403).json({
       error: "Access Denied",
-      code: SecurityErrorCode.ACCESS_DENIED,
+      code: SecurityErrorCode._ACCESS_DENIED,
       message: "Your IP address has been blocked due to security concerns",
       timestamp: new Date().toISOString(),
       correlationId: operationId,
@@ -990,12 +1014,12 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
       eventId: event.eventId,
       threatSeverity: event.threatSeverity,
       clientIP: event.ipAddress,
-      rulesTrigggered: event.rulesTrigggered,
+      rulesTriggered: event.rulesTriggered,
     });
 
     res.status(403).json({
       error: "Security Threat Detected",
-      code: SecurityErrorCode.ACCESS_DENIED,
+      code: SecurityErrorCode._ACCESS_DENIED,
       message: "Request blocked due to security threat detection",
       timestamp: new Date().toISOString(),
       correlationId: operationId,
@@ -1015,7 +1039,9 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
   /**
    * Sanitize headers for logging
    */
-  private sanitizeHeaders(headers: any): Record<string, any> {
+  private sanitizeHeaders(
+    headers: Record<string, unknown>,
+  ): Record<string, string> {
     const sensitiveHeaders = [
       "authorization",
       "cookie",
@@ -1023,13 +1049,35 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
       "x-auth-token",
     ];
 
-    const sanitized: Record<string, any> = {};
+    const sanitized: Record<string, string> = {};
     Object.keys(headers).forEach((key) => {
       const lowerKey = key.toLowerCase();
       if (sensitiveHeaders.includes(lowerKey)) {
         sanitized[key] = "***";
       } else {
-        sanitized[key] = headers[key];
+        const value = headers[key];
+        if (typeof value === "object" && value !== null) {
+          try {
+            sanitized[key] = JSON.stringify(value);
+          } catch {
+            sanitized[key] = "[object]";
+          }
+        } else if (typeof value === "string") {
+          sanitized[key] = value;
+        } else if (typeof value === "number" || typeof value === "boolean") {
+          sanitized[key] = String(value);
+        } else {
+          sanitized[key] =
+            value && typeof value === "object"
+              ? JSON.stringify(value)
+              : value != null
+                ? typeof value === "string" ||
+                  typeof value === "number" ||
+                  typeof value === "boolean"
+                  ? String(value)
+                  : ""
+                : "";
+        }
       }
     });
 
@@ -1118,13 +1166,29 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     Omit<IPTrackingData, "userAgents" | "endpoints"> & {
       userAgents: string[];
       endpoints: string[];
+      requests: number;
     }
   > {
-    const result: any = {};
+    const result: Record<
+      string,
+      Omit<IPTrackingData, "userAgents" | "endpoints"> & {
+        userAgents: string[];
+        endpoints: string[];
+        requests: number;
+      }
+    > = {};
 
     for (const [ip, data] of Array.from(this.ipTrackingData.entries())) {
       result[ip] = {
-        ...data,
+        ip: data.ip,
+        firstSeen: data.firstSeen,
+        lastSeen: data.lastSeen,
+        requestCount: data.requestCount,
+        requests: data.requests, // Include the requests property for compatibility
+        securityEvents: data.securityEvents,
+        reputation: data.reputation,
+        blockedUntil: data.blockedUntil,
+        geoLocation: data.geoLocation,
         userAgents: Array.from(data.userAgents),
         endpoints: Array.from(data.endpoints),
       };
@@ -1144,7 +1208,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
    * Get blocked IPs list
    */
   getBlockedIPs(): Record<string, { until: string; reason: string }> {
-    const result: any = {};
+    const result: Record<string, { until: string; reason: string }> = {};
 
     for (const [ip, blockInfo] of Array.from(this.blockedIPs.entries())) {
       result[ip] = {

@@ -34,47 +34,61 @@ import { Injectable, Logger } from "@nestjs/common";
 // Temporary stubs for missing Bull dependencies
 type Job<T = unknown> = { data: T; id: string; name: string };
 
-const Processor =
+const _Processor =
   (_queueName?: string) =>
-  <T extends new (...args: any[]) => unknown>(target: T): T =>
-    target;
+  <T extends new (..._args: unknown[]) => unknown>(target: T): T => {
+    // Queue name parameter prefixed with _ to indicate it's part of the interface
+    // but not used in the current stub implementation
+    return target;
+  };
 
-const Process =
-  (_jobName?: string) =>
-  (
-    _target: any,
+const _Process = (_jobName?: string) => {
+  return function (
+    _target: unknown,
     _propertyKey: string,
     _descriptor: PropertyDescriptor,
-  ): void => {
+  ) {
     // Stub implementation for @Process decorator
+    // Parameters prefixed with _ to indicate they are part of the interface
+    // but not used in the current stub implementation
   };
-const OnQueueActive =
-  () =>
-  (
-    _target: any,
+};
+
+const _OnQueueActive = () => {
+  return function (
+    _target: unknown,
     _propertyKey: string,
     _descriptor: PropertyDescriptor,
-  ): void => {
+  ) {
     // Stub implementation for @OnQueueActive decorator
+    // Parameters prefixed with _ to indicate they are part of the interface
+    // but not used in the current stub implementation
   };
-const OnQueueCompleted =
-  () =>
-  (
-    _target: any,
+};
+
+const _OnQueueCompleted = () => {
+  return function (
+    _target: unknown,
     _propertyKey: string,
     _descriptor: PropertyDescriptor,
-  ): void => {
+  ) {
     // Stub implementation for @OnQueueCompleted decorator
+    // Parameters prefixed with _ to indicate they are part of the interface
+    // but not used in the current stub implementation
   };
-const OnQueueFailed =
-  () =>
-  (
-    _target: any,
+};
+
+const _OnQueueFailed = () => {
+  return function (
+    _target: unknown,
     _propertyKey: string,
     _descriptor: PropertyDescriptor,
-  ): void => {
+  ) {
     // Stub implementation for @OnQueueFailed decorator
+    // Parameters prefixed with _ to indicate they are part of the interface
+    // but not used in the current stub implementation
   };
+};
 import { ConfigService } from "@nestjs/config";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
@@ -179,18 +193,21 @@ export interface BatchProcessingResult {
 
 /**
  * Event storage backend interface
+ * Interface method parameters are prefixed with _ to indicate they are part of the contract
+ * but not used within the interface definition itself.
  */
+
 export interface EventStorageBackend {
   name: string;
-  // eslint-disable-next-line no-unused-vars
+
   store(_event: AuditEvent): Promise<void>;
-  // eslint-disable-next-line no-unused-vars
+
   storeBatch(_events: AuditEvent[]): Promise<void>;
-  // eslint-disable-next-line no-unused-vars
+
   retrieve(_eventId: string): Promise<AuditEvent | null>;
-  // eslint-disable-next-line no-unused-vars
+
   query(_query: unknown): Promise<AuditEvent[]>;
-  // eslint-disable-next-line no-unused-vars
+
   delete(_eventId: string): Promise<boolean>;
 }
 
@@ -199,9 +216,9 @@ export interface EventStorageBackend {
  *
  * Handles high-performance processing of audit events with enterprise-grade
  * features including batch processing, filtering, routing, and error handling.
+ *
+ * TODO: Add @Processor("audit-events") decorator when @nestjs/bull dependency is added
  */
-// TODO: Re-enable @Processor decorator when @nestjs/bull dependency is added
-// @Processor("audit-events")
 @Injectable()
 export class AuditEventProcessor {
   private readonly logger = new Logger(AuditEventProcessor.name);
@@ -241,11 +258,21 @@ export class AuditEventProcessor {
   };
 
   constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly configService: ConfigService,
-    // eslint-disable-next-line no-unused-vars
-    private readonly eventEmitter: EventEmitter2,
+    private readonly _configService: ConfigService,
+    private readonly _eventEmitter: EventEmitter2,
   ) {
+    // Validate dependencies are properly injected
+    if (!this._configService) {
+      throw new Error("ConfigService is required");
+    }
+    if (!this._eventEmitter) {
+      throw new Error("EventEmitter2 is required");
+    }
+
+    this.logger.debug(
+      "AuditEventProcessor constructor initialized with dependencies",
+    );
+
     this.initializeConfiguration();
     this.initializeStorageBackends();
     this.startBatchProcessing();
@@ -253,8 +280,8 @@ export class AuditEventProcessor {
 
   /**
    * Process individual audit event
+   * TODO: Add @Process("process-audit-event") when @nestjs/bull is installed
    */
-  @Process("process-audit-event")
   async processAuditEvent(job: Job<AuditEvent>): Promise<ProcessingResult> {
     const startTime = Date.now();
     const event = job.data;
@@ -289,7 +316,7 @@ export class AuditEventProcessor {
       this.updateProcessingMetrics(Date.now() - startTime, true);
 
       // Emit processing completed event
-      this.eventEmitter.emit("audit.event.processed", {
+      this._eventEmitter.emit("audit.event.processed", {
         event,
         processingTime: Date.now() - startTime,
       });
@@ -300,8 +327,8 @@ export class AuditEventProcessor {
         processingTime: Date.now() - startTime,
         destination: destinations.join(", "),
       };
-    } catch (error) {
-      this.logger.error(`Error processing audit event ${event.id}`, error);
+    } catch (err) {
+      this.logger.error(`Error processing audit event ${event.id}`, err);
 
       // Update event status
       event.status = AuditEventStatus.FAILED;
@@ -310,9 +337,9 @@ export class AuditEventProcessor {
       this.updateProcessingMetrics(Date.now() - startTime, false);
 
       // Emit processing failed event
-      this.eventEmitter.emit("audit.event.failed", {
+      this._eventEmitter.emit("audit.event.failed", {
         event,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         processingTime: Date.now() - startTime,
       });
 
@@ -320,15 +347,15 @@ export class AuditEventProcessor {
         eventId: event.id,
         status: "failure",
         processingTime: Date.now() - startTime,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
       };
     }
   }
 
   /**
    * Process batch of audit events
+   * TODO: Add @Process("process-audit-batch") when @nestjs/bull is installed
    */
-  @Process("process-audit-batch")
   async processAuditBatch(
     job: Job<{ events: AuditEvent[]; batchId: string }>,
   ): Promise<BatchProcessingResult> {
@@ -368,12 +395,12 @@ export class AuditEventProcessor {
             }
 
             return result;
-          } catch (error) {
+          } catch (err) {
             const failedResult: ProcessingResult = {
               eventId: event.id,
               status: "failure",
               processingTime: 0,
-              error: error instanceof Error ? error.message : String(error),
+              error: err instanceof Error ? err.message : String(err),
             };
             results.push(failedResult);
             failureCount++;
@@ -401,24 +428,24 @@ export class AuditEventProcessor {
         totalProcessingTime,
         results,
       };
-    } catch (error) {
-      this.logger.error(`Error processing audit event batch ${batchId}`, error);
-      throw error;
+    } catch (err) {
+      this.logger.error(`Error processing audit event batch ${batchId}`, err);
+      throw err;
     }
   }
 
   /**
    * Handle active job
+   * TODO: Add @OnQueueActive() when @nestjs/bull is installed
    */
-  @OnQueueActive()
   onActive(job: Job): void {
     this.logger.debug(`Processing job ${job.id} of type ${job.name}`);
   }
 
   /**
    * Handle completed job
+   * TODO: Add @OnQueueCompleted() when @nestjs/bull is installed
    */
-  @OnQueueCompleted()
   onCompleted(
     job: Job,
     result: ProcessingResult | BatchProcessingResult,
@@ -436,8 +463,8 @@ export class AuditEventProcessor {
 
   /**
    * Handle failed job
+   * TODO: Add @OnQueueFailed() when @nestjs/bull is installed
    */
-  @OnQueueFailed()
   onFailed(job: Job, err: Error): void {
     this.logger.error(
       `Failed job ${job.id} of type ${job.name}: ${err.message}`,
@@ -449,7 +476,7 @@ export class AuditEventProcessor {
     }
 
     // Emit failure event for monitoring
-    this.eventEmitter.emit("audit.processing.failed", {
+    this._eventEmitter.emit("audit.processing.failed", {
       jobId: job.id,
       jobType: job.name,
       error: err.message,
@@ -496,42 +523,42 @@ export class AuditEventProcessor {
   private initializeConfiguration(): void {
     this.config = {
       batch: {
-        enabled: this.configService.get<boolean>("audit.batch.enabled", true),
-        size: this.configService.get<number>("audit.batch.size", 100),
-        timeout: this.configService.get<number>("audit.batch.timeout", 5000),
+        enabled: this._configService.get<boolean>("audit.batch.enabled", true),
+        size: this._configService.get<number>("audit.batch.size", 100),
+        timeout: this._configService.get<number>("audit.batch.timeout", 5000),
       },
       retry: {
-        attempts: this.configService.get<number>("audit.retry.attempts", 3),
-        backoffType: this.configService.get<"fixed" | "exponential">(
+        attempts: this._configService.get<number>("audit.retry.attempts", 3),
+        backoffType: this._configService.get<"fixed" | "exponential">(
           "audit.retry.backoffType",
           "exponential",
         ),
-        delay: this.configService.get<number>("audit.retry.delay", 2000),
+        delay: this._configService.get<number>("audit.retry.delay", 2000),
       },
       storage: {
-        primary: this.configService.get<"database" | "file" | "elasticsearch">(
+        primary: this._configService.get<"database" | "file" | "elasticsearch">(
           "audit.storage.primary",
           "database",
         ),
-        fallback: this.configService.get<"file" | "memory">(
+        fallback: this._configService.get<"file" | "memory">(
           "audit.storage.fallback",
           "file",
         ),
-        compression: this.configService.get<boolean>(
+        compression: this._configService.get<boolean>(
           "audit.storage.compression",
           true,
         ),
       },
       performance: {
-        concurrency: this.configService.get<number>(
+        concurrency: this._configService.get<number>(
           "audit.performance.concurrency",
           5,
         ),
-        rateLimit: this.configService.get<number>(
+        rateLimit: this._configService.get<number>(
           "audit.performance.rateLimit",
           1000,
         ),
-        maxMemoryUsage: this.configService.get<number>(
+        maxMemoryUsage: this._configService.get<number>(
           "audit.performance.maxMemoryUsage",
           512 * 1024 * 1024,
         ),
@@ -560,21 +587,24 @@ export class AuditEventProcessor {
         );
         await Promise.resolve();
       },
-      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-      retrieve: async (_eventId: string) => {
+
+      retrieve: async (eventId: string) => {
         // Database retrieval implementation
+        this.logger.debug(`Retrieving event ${eventId} from database`);
         await Promise.resolve();
         return null;
       },
-      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-      query: async (_query: unknown) => {
+
+      query: async (query: unknown) => {
         // Database query implementation
+        this.logger.debug(`Executing database query`, { query });
         await Promise.resolve();
         return [];
       },
-      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-      delete: async (_eventId: string) => {
+
+      delete: async (eventId: string) => {
         // Database deletion implementation
+        this.logger.debug(`Deleting event ${eventId} from database`);
         await Promise.resolve();
         return true;
       },
@@ -593,21 +623,24 @@ export class AuditEventProcessor {
         this.logger.debug(`Storing batch of ${events.length} events to file`);
         await Promise.resolve();
       },
-      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-      retrieve: async (_eventId: string) => {
+
+      retrieve: async (eventId: string) => {
         // File retrieval implementation
+        this.logger.debug(`Retrieving event ${eventId} from file`);
         await Promise.resolve();
         return null;
       },
-      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-      query: async (_query: unknown) => {
+
+      query: async (query: unknown) => {
         // File query implementation
+        this.logger.debug(`Executing file query`, { query });
         await Promise.resolve();
         return [];
       },
-      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-      delete: async (_eventId: string) => {
+
+      delete: async (eventId: string) => {
         // File deletion implementation
+        this.logger.debug(`Deleting event ${eventId} from file`);
         await Promise.resolve();
         return true;
       },
@@ -710,13 +743,13 @@ export class AuditEventProcessor {
         processingTime: Date.now() - startTime,
         destination: destinations.join(", "),
       };
-    } catch (error) {
+    } catch (err) {
       event.status = AuditEventStatus.FAILED;
       return {
         eventId: event.id,
         status: "failure",
         processingTime: Date.now() - startTime,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
       };
     }
   }
@@ -853,7 +886,7 @@ export class AuditEventProcessor {
       {
         id: "debug-filter",
         name: "Debug Event Filter",
-        enabled: this.configService.get<string>("NODE_ENV") === "production",
+        enabled: this._configService.get<string>("NODE_ENV") === "production",
         conditions: [
           {
             field: "severity",

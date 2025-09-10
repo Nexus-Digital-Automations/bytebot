@@ -4,7 +4,7 @@ import React, { useEffect, useRef, ReactElement } from "react";
 
 interface TopicPopoverProps {
   children: React.ReactNode;
-  onOpenChange?: (isOpen: boolean) => void;
+  onOpenChange?: (open: boolean) => void;
   isActive?: boolean;
 }
 
@@ -24,7 +24,10 @@ export const TopicPopover: React.FC<TopicPopoverProps> = ({
   // Close popover when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+      if (
+        popoverRef.current &&
+        !popoverRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
         if (onOpenChange) {
           onOpenChange(false);
@@ -53,28 +56,34 @@ export const TopicPopover: React.FC<TopicPopoverProps> = ({
   const modifiedChildren = React.Children.map(children, (child) => {
     // Only process React elements (not strings, numbers, etc.)
     if (!React.isValidElement(child)) return child;
-    
+
     // Cast to ReactElement to access props properly
     const element = child as ReactElement<{ className?: string }>;
-    
+
     // Get the existing className
-    const existingClassName = element.props.className || '';
-    
+    const existingClassName = element.props.className || "";
+
     // Replace text-bytebot-bronze-light-11 with text-bytebot-bronze-light-12 when open
-    const updatedClassName = isOpen 
-      ? existingClassName.replace('text-bytebot-bronze-light-11', 'text-bytebot-bronze-light-12')
+    const updatedClassName = isOpen
+      ? existingClassName.replace(
+          "text-bytebot-bronze-light-11",
+          "text-bytebot-bronze-light-12",
+        )
       : existingClassName;
-    
+
     // Clone the element with the updated className
     return React.cloneElement(element, {
       ...element.props,
-      className: updatedClassName
+      className: updatedClassName,
     });
   });
 
   return (
     <div className="relative" ref={popoverRef}>
-      <div onClick={handleToggle} className={isOpen ? "bg-bytebot-bronze-light-1 rounded-full" : ""}>
+      <div
+        onClick={handleToggle}
+        className={isOpen ? "bg-bytebot-bronze-light-1 rounded-full" : ""}
+      >
         {modifiedChildren}
       </div>
     </div>

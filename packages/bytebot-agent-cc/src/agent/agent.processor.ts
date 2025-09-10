@@ -1,7 +1,8 @@
 import { TasksService } from '../tasks/tasks.service';
 import { MessagesService } from '../messages/messages.service';
 import { Injectable, Logger } from '@nestjs/common';
-import { Role, Task, TaskStatus } from '@prisma/client';
+import { Task, TaskStatus } from '@prisma/client';
+import { Role } from '@bytebot/shared';
 import {
   RedactedThinkingContentBlock,
   ThinkingContentBlock,
@@ -158,25 +159,25 @@ export class AgentProcessor {
       switch (block.type) {
         case 'text':
           return {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: block.text,
           } as TextContentBlock;
         case 'tool_use':
           return {
-            type: MessageContentType.ToolUse,
+            type: MessageContentType._ToolUse,
             id: block.id,
             name: block.name.replace('mcp__desktop__', ''),
             input: block.input,
           } as ToolUseContentBlock;
         case 'thinking':
           return {
-            type: MessageContentType.Thinking,
+            type: MessageContentType._Thinking,
             thinking: block.thinking,
             signature: block.signature,
           } as ThinkingContentBlock;
         case 'redacted_thinking':
           return {
-            type: MessageContentType.RedactedThinking,
+            type: MessageContentType._RedactedThinking,
             data: block.data,
           } as RedactedThinkingContentBlock;
       }
@@ -224,8 +225,8 @@ export class AgentProcessor {
         },
       })) {
         let messageContentBlocks: MessageContentBlock[] = [];
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        let role: Role = Role.ASSISTANT as Role;
+
+        let role: Role = Role._ASSISTANT as Role;
         switch (message.type) {
           case 'user': {
             const safeContent = getSafeMessageContent(message.message);
@@ -234,14 +235,13 @@ export class AgentProcessor {
             } else if (typeof safeContent === 'string') {
               messageContentBlocks = [
                 {
-                  type: MessageContentType.Text,
+                  type: MessageContentType._Text,
                   text: safeContent,
                 } as TextContentBlock,
               ];
             }
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-            role = Role.USER as Role;
+            role = Role._USER as Role;
             break;
           }
           case 'assistant': {
@@ -281,7 +281,7 @@ export class AgentProcessor {
         if (messageContentBlocks.length > 0) {
           await this.messagesService.create({
             content: messageContentBlocks,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
             role: role,
             taskId,
           });

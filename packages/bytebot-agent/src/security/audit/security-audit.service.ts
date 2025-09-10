@@ -791,9 +791,14 @@ export class SecurityAuditService {
       if (event.type.startsWith('authz.')) {
         const result =
           event.outcome === SecurityEventOutcome.ALLOWED ? 'granted' : 'denied';
-        // Remove unused result variable
-        void result;
-        // This would call a hypothetical authorization metrics method
+        // Log authorization metrics for future enhancement
+        this.logger.debug('Authorization event recorded', {
+          eventId: event.id,
+          result,
+          resourceType: event.target.resourceType,
+          operation: event.target.operation,
+        });
+        // This would call a hypothetical authorization metrics method when implemented
         // this.metricsService.recordAuthorizationCheck(event.target.resourceType, event.target.operation, result);
       }
     } catch (error) {

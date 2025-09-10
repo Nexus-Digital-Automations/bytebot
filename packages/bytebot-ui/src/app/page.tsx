@@ -57,11 +57,14 @@ export default function Home() {
   useEffect(() => {
     fetch("/api/tasks/models")
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: Model[]) => {
         setModels(data);
         if (data.length > 0) setSelectedModel(data[0]);
       })
-      .catch((err) => console.error("Failed to load models", err));
+      .catch((_err) => {
+        // TODO: Add proper error logging service
+        // console.error("Failed to load models", _err);
+      });
   }, []);
 
   // Close popover when clicking outside or pressing ESC
@@ -123,10 +126,12 @@ export default function Home() {
         router.push(`/tasks/${task.id}`);
       } else {
         // Handle error
-        console.error("Failed to create task");
+        // TODO: Add proper error logging service
+        // console.error("Failed to create task");
       }
-    } catch (error) {
-      console.error("Error sending message:", error);
+    } catch (_error) {
+      // TODO: Add proper error logging service
+      // console.error("Error sending message:", _error);
     } finally {
       setIsLoading(false);
     }

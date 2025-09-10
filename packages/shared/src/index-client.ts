@@ -12,7 +12,7 @@ export * from "./types/messageContent.types";
 export * from "./types/computerAction.types";
 export * from "./types/agent.types";
 
-// Client-safe utilities
+// Client-safe utilities - Re-export all functions
 export * from "./utils/messageContent.utils";
 export * from "./utils/computerAction.utils";
 

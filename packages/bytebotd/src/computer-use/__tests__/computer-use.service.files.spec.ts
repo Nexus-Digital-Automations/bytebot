@@ -15,10 +15,6 @@
  * @version 1.0.0
  */
 
- 
- 
- 
-
 import { WriteFileAction, ReadFileAction } from '@bytebot/shared';
 
 // Mock the nut-js library first to prevent module loading issues
@@ -117,9 +113,6 @@ import {
   FileReadResult,
 } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
-import { CuaVisionService } from '../../cua-integration/cua-vision.service';
-import { CuaIntegrationService } from '../../cua-integration/cua-integration.service';
-import { CuaPerformanceService } from '../../cua-integration/cua-performance.service';
 
 // Create mock implementations with proper typing
 const mockFs = fs as jest.Mocked<typeof fs>;
@@ -145,27 +138,6 @@ describe('ComputerUseService - File Operations', () => {
     getCursorPosition: jest.fn(),
   } as unknown as jest.Mocked<NutService>;
 
-  const mockCuaVisionService: jest.Mocked<CuaVisionService> = {
-    performOcr: jest.fn(),
-    detectText: jest.fn(),
-    batchOcr: jest.fn(),
-    getCapabilities: jest.fn(),
-  } as unknown as jest.Mocked<CuaVisionService>;
-
-  const mockCuaIntegrationService: jest.Mocked<CuaIntegrationService> = {
-    isFrameworkEnabled: jest.fn(),
-    isAneBridgeAvailable: jest.fn(),
-    getConfiguration: jest.fn(),
-    initialize: jest.fn(),
-    getNetworkTopology: jest.fn(),
-  } as unknown as jest.Mocked<CuaIntegrationService>;
-
-  const mockPerformanceService: jest.Mocked<CuaPerformanceService> = {
-    recordMetric: jest.fn(),
-    getMetrics: jest.fn(),
-    clearMetrics: jest.fn(),
-  } as unknown as jest.Mocked<CuaPerformanceService>;
-
   beforeEach(async () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -188,18 +160,13 @@ describe('ComputerUseService - File Operations', () => {
     mockFs.readFile.mockResolvedValue(Buffer.from('test content'));
     mockFs.unlink.mockResolvedValue(undefined);
 
-    // Mock service dependencies to return false for C/ua features (focusing on file ops)
-    mockCuaIntegrationService.isFrameworkEnabled.mockReturnValue(false);
-    mockCuaIntegrationService.isAneBridgeAvailable.mockReturnValue(false);
+    // Focus on file operations with standard mocking
 
     // Create testing module with comprehensive mocking
     testModule = await Test.createTestingModule({
       providers: [
         ComputerUseService,
         { provide: NutService, useValue: mockNutService },
-        { provide: CuaVisionService, useValue: mockCuaVisionService },
-        { provide: CuaIntegrationService, useValue: mockCuaIntegrationService },
-        { provide: CuaPerformanceService, useValue: mockPerformanceService },
         { provide: Logger, useValue: mockLogger },
       ],
     }).compile();

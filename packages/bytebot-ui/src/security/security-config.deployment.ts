@@ -22,8 +22,19 @@ import {
   StandardizedValidationPipe,
   StandardizedRateLimitGuard,
   StandardizedValidationPipes,
-} from "@bytebot/shared";
+} from "@bytebot/shared/server";
 import type { Reflector } from "@nestjs/core";
+
+// Type definitions for better type safety
+interface NestJSApp {
+  useGlobalPipes: (pipe: unknown) => void;
+  useGlobalGuards: (guard: unknown) => void;
+  get: (key: string) => unknown;
+}
+
+interface AppLogger {
+  log: (message: string, data?: Record<string, unknown>) => void;
+}
 
 /**
  * Bytebot-UI Security Configuration Service
@@ -46,9 +57,13 @@ export class BytebotUISecurityConfigService {
    * Create Bytebot-UI validation pipe with standard security settings
    */
   createValidationPipe(): StandardizedValidationPipe {
-    const environment = this.configService.get("NODE_ENV", "development");
+    const environment = this.configService.get(
+      "NODE_ENV",
+      "development",
+    ) as string;
 
     // Use standard security pipe for Bytebot-UI
+
     return StandardizedValidationPipes.STANDARD_SECURITY(environment);
   }
 
@@ -70,10 +85,14 @@ export class BytebotUISecurityConfigService {
    * Get security configuration for manual inspection
    */
   getSecurityConfig() {
-    const environment = this.configService.get("NODE_ENV", "development");
+    const environment = this.configService.get(
+      "NODE_ENV",
+      "development",
+    ) as string;
 
     return {
-      serviceType: ServiceType.BYTEBOT_UI,
+      serviceType: ServiceType._BYTEBOT_UI,
+
       environment,
       securityLevel: "STANDARD",
       description: "Frontend UI Service - Standard Security Configuration",
@@ -170,6 +189,7 @@ export class BytebotUISecurityConfigService {
     BytebotUISecurityConfigService,
     {
       provide: "BYTEBOT_UI_SECURITY_MIDDLEWARE",
+
       useFactory: (configService: ConfigService) =>
         StandardizedSecurityMiddleware.createBytebotUIMiddleware(configService),
       inject: [ConfigService],
@@ -177,7 +197,11 @@ export class BytebotUISecurityConfigService {
     {
       provide: "BYTEBOT_UI_VALIDATION_PIPE",
       useFactory: (configService: ConfigService) => {
-        const environment = configService.get("NODE_ENV", "development");
+        const environment = configService.get(
+          "NODE_ENV",
+          "development",
+        ) as string;
+
         return StandardizedValidationPipes.STANDARD_SECURITY(environment);
       },
       inject: [ConfigService],
@@ -209,6 +233,7 @@ export class BytebotUISecurityModule implements NestModule {
 
   configure(consumer: MiddlewareConsumer) {
     // Apply Bytebot-UI security middleware to all routes
+
     const securityMiddleware =
       StandardizedSecurityMiddleware.createBytebotUIMiddleware(
         this.configService,
@@ -231,47 +256,50 @@ export class BytebotUISecurityDeployment {
    * @param configService - Configuration service
    */
   static async applySecurityToApp(
-    app: {
-      useGlobalPipes: (pipe: unknown) => void;
-      useGlobalGuards: (guard: unknown) => void;
-      get: (key: string) => unknown;
-    },
+    app: NestJSApp,
     configService: ConfigService,
   ) {
-    const environment = configService.get("NODE_ENV", "development");
+    const environment = configService.get("NODE_ENV", "development") as string;
 
-    // Apply global validation pipe with standard security
-    app.useGlobalPipes(
-      StandardizedValidationPipes.STANDARD_SECURITY(environment),
-    );
+    try {
+      // Apply global validation pipe with standard security
 
-    // Apply global rate limiting guard
-    const reflector = app.get("Reflector");
-    const redisClient = app.get("REDIS_CLIENT", null);
-    const rateLimitGuard = StandardizedRateLimitGuard.createBytebotUIGuard(
-      reflector,
-      configService,
-      redisClient,
-    );
+      const validationPipe =
+        StandardizedValidationPipes.STANDARD_SECURITY(environment);
+      app.useGlobalPipes(validationPipe);
 
-    app.useGlobalGuards(rateLimitGuard);
+      // Apply global rate limiting guard
+      const reflector = app.get("Reflector") as Reflector;
+      const redisClient = app.get("REDIS_CLIENT", null) as unknown;
 
-    // Log security deployment
-    const logger = app.get("Logger");
-    if (logger) {
-      logger.log("Bytebot-UI security middleware deployed successfully", {
-        service: "Bytebot-UI",
-        securityLevel: "STANDARD",
-        environment,
-        features: {
-          ui: true,
-          nextjs: true,
-          rateLimiting: !!redisClient,
-          validation: true,
-          staticAssets: true,
-          realTimeUpdates: true,
-        },
-      });
+      const rateLimitGuard = StandardizedRateLimitGuard.createBytebotUIGuard(
+        reflector,
+        configService,
+        redisClient,
+      );
+
+      app.useGlobalGuards(rateLimitGuard);
+
+      // Log security deployment
+      const logger = app.get("Logger") as AppLogger | null;
+      if (logger && typeof logger.log === "function") {
+        logger.log("Bytebot-UI security middleware deployed successfully", {
+          service: "Bytebot-UI",
+          securityLevel: "STANDARD",
+          environment,
+          features: {
+            ui: true,
+            nextjs: true,
+            rateLimiting: !!redisClient,
+            validation: true,
+            staticAssets: true,
+            realTimeUpdates: true,
+          },
+        });
+      }
+    } catch (err: unknown) {
+      logError("Failed to apply security to app", err, "security-config");
+      throw new Error("Security application failed");
     }
   }
 
@@ -308,8 +336,8 @@ export class BytebotUISecurityDeployment {
    * Validate Bytebot-UI security configuration
    */
   static validateSecurityConfig(configService: ConfigService) {
-    const environment = configService.get("NODE_ENV", "development");
-    const corsOrigins = configService.get("CORS_ORIGINS", []);
+    const environment = configService.get("NODE_ENV", "development") as string;
+    const corsOrigins = configService.get("CORS_ORIGINS", []) as string[];
 
     const validationResults = {
       environment,
@@ -319,7 +347,11 @@ export class BytebotUISecurityDeployment {
     };
 
     // Check CORS configuration
-    if (environment === "production" && corsOrigins.includes("*")) {
+    if (
+      environment === "production" &&
+      Array.isArray(corsOrigins) &&
+      corsOrigins.includes("*")
+    ) {
       validationResults.errors.push(
         "Wildcard CORS origins not allowed in production",
       );
@@ -327,7 +359,7 @@ export class BytebotUISecurityDeployment {
     }
 
     // Check Next.js configuration
-    const nextConfig = configService.get("NEXT_CONFIG");
+    const nextConfig = configService.get("NEXT_CONFIG") as unknown;
     if (!nextConfig && environment === "production") {
       validationResults.warnings.push(
         "Next.js configuration not found - using defaults",
@@ -335,7 +367,10 @@ export class BytebotUISecurityDeployment {
     }
 
     // Check static file serving configuration
-    const staticPath = configService.get("STATIC_FILES_PATH", "./public");
+    const staticPath = configService.get(
+      "STATIC_FILES_PATH",
+      "./public",
+    ) as string;
     if (environment === "production" && !staticPath) {
       validationResults.errors.push(
         "Static files path not configured for production",
@@ -344,7 +379,7 @@ export class BytebotUISecurityDeployment {
     }
 
     // Check Redis configuration for session storage
-    const redisHost = configService.get("REDIS_HOST");
+    const redisHost = configService.get("REDIS_HOST") as string | undefined;
     if (!redisHost && environment === "production") {
       validationResults.warnings.push(
         "Redis not configured - sessions and caching will use fallbacks",
@@ -352,7 +387,9 @@ export class BytebotUISecurityDeployment {
     }
 
     // Check API proxy configuration
-    const apiProxyUrl = configService.get("API_PROXY_URL");
+    const apiProxyUrl = configService.get("API_PROXY_URL") as
+      | string
+      | undefined;
     if (!apiProxyUrl) {
       validationResults.warnings.push(
         "API proxy URL not configured - direct API calls will be used",
@@ -360,7 +397,10 @@ export class BytebotUISecurityDeployment {
     }
 
     // Check CSP configuration
-    const cspEnabled = configService.get("security.csp.enabled", true);
+    const cspEnabled = configService.get(
+      "security.csp.enabled",
+      true,
+    ) as boolean;
     if (!cspEnabled && environment === "production") {
       validationResults.errors.push(
         "Content Security Policy is disabled in production",
@@ -375,7 +415,7 @@ export class BytebotUISecurityDeployment {
    * Configure Next.js security middleware
    */
   static configureNextJsSecurity(configService: ConfigService) {
-    const environment = configService.get("NODE_ENV", "development");
+    const environment = configService.get("NODE_ENV", "development") as string;
 
     return {
       // Security headers for Next.js

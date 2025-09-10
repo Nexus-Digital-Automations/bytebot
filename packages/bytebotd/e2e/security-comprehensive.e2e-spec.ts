@@ -56,7 +56,7 @@ class SecurityE2EAuthService {
       {
         id: '1',
         email: 'admin@bytebot.ai',
-        role: UserRole.ADMIN,
+        role: UserRole._ADMIN,
         password: 'Admin123!@#',
       },
     ],
@@ -65,7 +65,7 @@ class SecurityE2EAuthService {
       {
         id: '2',
         email: 'operator@bytebot.ai',
-        role: UserRole.OPERATOR,
+        role: UserRole._OPERATOR,
         password: 'Operator123!@#',
       },
     ],
@@ -74,7 +74,7 @@ class SecurityE2EAuthService {
       {
         id: '3',
         email: 'viewer@bytebot.ai',
-        role: UserRole.VIEWER,
+        role: UserRole._VIEWER,
         password: 'Viewer123!@#',
       },
     ],
@@ -238,28 +238,28 @@ class SecurityE2EConfigService {
 class SecurityE2EUserService {
   getPermissions(role: UserRole): Permission[] {
     const rolePermissions = {
-      [UserRole.ADMIN]: [
-        Permission.TASK_READ,
-        Permission.TASK_WRITE,
-        Permission.TASK_DELETE,
-        Permission.COMPUTER_CONTROL,
-        Permission.COMPUTER_VIEW,
-        Permission.SYSTEM_ADMIN,
-        Permission.USER_MANAGE,
-        Permission.METRICS_VIEW,
-        Permission.LOGS_VIEW,
+      [UserRole._ADMIN]: [
+        Permission._TASK_READ,
+        Permission._TASK_WRITE,
+        Permission._TASK_DELETE,
+        Permission._COMPUTER_CONTROL,
+        Permission._COMPUTER_VIEW,
+        Permission._SYSTEM_ADMIN,
+        Permission._USER_MANAGE,
+        Permission._METRICS_VIEW,
+        Permission._LOGS_VIEW,
       ],
-      [UserRole.OPERATOR]: [
-        Permission.TASK_READ,
-        Permission.TASK_WRITE,
-        Permission.COMPUTER_CONTROL,
-        Permission.COMPUTER_VIEW,
-        Permission.METRICS_VIEW,
+      [UserRole._OPERATOR]: [
+        Permission._TASK_READ,
+        Permission._TASK_WRITE,
+        Permission._COMPUTER_CONTROL,
+        Permission._COMPUTER_VIEW,
+        Permission._METRICS_VIEW,
       ],
-      [UserRole.VIEWER]: [
-        Permission.TASK_READ,
-        Permission.COMPUTER_VIEW,
-        Permission.METRICS_VIEW,
+      [UserRole._VIEWER]: [
+        Permission._TASK_READ,
+        Permission._COMPUTER_VIEW,
+        Permission._METRICS_VIEW,
       ],
     };
 
@@ -395,9 +395,9 @@ class SecurityE2EAdminController {
   getUserList(user: any) {
     return {
       users: [
-        { id: '1', email: 'admin@bytebot.ai', role: UserRole.ADMIN },
-        { id: '2', email: 'operator@bytebot.ai', role: UserRole.OPERATOR },
-        { id: '3', email: 'viewer@bytebot.ai', role: UserRole.VIEWER },
+        { id: '1', email: 'admin@bytebot.ai', role: UserRole._ADMIN },
+        { id: '2', email: 'operator@bytebot.ai', role: UserRole._OPERATOR },
+        { id: '3', email: 'viewer@bytebot.ai', role: UserRole._VIEWER },
       ],
       total: 3,
       requestedBy: user.sub,
@@ -700,13 +700,13 @@ describe('Security E2E - Comprehensive Testing', () => {
 
         const userRole = req.user.role;
         const roleHierarchy = {
-          [UserRole.ADMIN]: [
-            UserRole.ADMIN,
-            UserRole.OPERATOR,
-            UserRole.VIEWER,
+          [UserRole._ADMIN]: [
+            UserRole._ADMIN,
+            UserRole._OPERATOR,
+            UserRole._VIEWER,
           ],
-          [UserRole.OPERATOR]: [UserRole.OPERATOR, UserRole.VIEWER],
-          [UserRole.VIEWER]: [UserRole.VIEWER],
+          [UserRole._OPERATOR]: [UserRole._OPERATOR, UserRole._VIEWER],
+          [UserRole._VIEWER]: [UserRole._VIEWER],
         };
 
         const allowedRoles = roleHierarchy[userRole] || [];
@@ -812,14 +812,14 @@ describe('Security E2E - Comprehensive Testing', () => {
     });
 
     app.getHttpAdapter().post('/api/tasks', (req, res) => {
-      const middleware = requireRole(UserRole.OPERATOR);
+      const middleware = requireRole(UserRole._OPERATOR);
       middleware(req, res, () => {
         res.json(protectedController.createTask(req.user, req.body));
       });
     });
 
     app.getHttpAdapter().put('/api/tasks/:id', (req, res) => {
-      const middleware = requireRole(UserRole.OPERATOR);
+      const middleware = requireRole(UserRole._OPERATOR);
       middleware(req, res, () => {
         res.json(
           protectedController.updateTask(req.user, req.params.id, req.body),
@@ -829,28 +829,28 @@ describe('Security E2E - Comprehensive Testing', () => {
 
     // Admin-only routes
     app.getHttpAdapter().get('/api/admin/users', (req, res) => {
-      const middleware = requireRole(UserRole.ADMIN);
+      const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
         res.json(adminController.getUserList(req.user));
       });
     });
 
     app.getHttpAdapter().get('/api/admin/metrics', (req, res) => {
-      const middleware = requireRole(UserRole.ADMIN);
+      const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
         res.json(adminController.getSystemMetrics(req.user));
       });
     });
 
     app.getHttpAdapter().delete('/api/admin/users/:id', (req, res) => {
-      const middleware = requireRole(UserRole.ADMIN);
+      const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
         res.json(adminController.deleteUser(req.user, req.params.id));
       });
     });
 
     app.getHttpAdapter().get('/api/admin/audit-logs', (req, res) => {
-      const middleware = requireRole(UserRole.ADMIN);
+      const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
         res.json(adminController.getAuditLogs(req.user));
       });
@@ -894,7 +894,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       expect(loginResponse.body.accessToken).toBeDefined();
       expect(loginResponse.body.refreshToken).toBeDefined();
-      expect(loginResponse.body.user.role).toBe(UserRole.ADMIN);
+      expect(loginResponse.body.user.role).toBe(UserRole._ADMIN);
 
       const { accessToken, refreshToken } = loginResponse.body;
 
@@ -905,7 +905,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         .expect(200);
 
       expect(profileResponse.body.email).toBe('admin@bytebot.ai');
-      expect(profileResponse.body.role).toBe(UserRole.ADMIN);
+      expect(profileResponse.body.role).toBe(UserRole._ADMIN);
 
       // Step 3: Refresh token
       const refreshResponse = await request(app.getHttpServer())
@@ -1001,7 +1001,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         {
           email: 'admin@bytebot.ai',
           password: 'Admin123!@#',
-          role: UserRole.ADMIN,
+          role: UserRole._ADMIN,
           shouldAccess: {
             '/api/user/profile': true,
             '/api/tasks': true, // POST
@@ -1012,7 +1012,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         {
           email: 'operator@bytebot.ai',
           password: 'Operator123!@#',
-          role: UserRole.OPERATOR,
+          role: UserRole._OPERATOR,
           shouldAccess: {
             '/api/user/profile': true,
             '/api/tasks': true, // POST
@@ -1023,7 +1023,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         {
           email: 'viewer@bytebot.ai',
           password: 'Viewer123!@#',
-          role: UserRole.VIEWER,
+          role: UserRole._VIEWER,
           shouldAccess: {
             '/api/user/profile': true,
             '/api/tasks': false, // POST
@@ -1119,7 +1119,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       // Should only return operator's data
       expect(profileResponse.body.email).toBe('operator@bytebot.ai');
-      expect(profileResponse.body.role).toBe(UserRole.OPERATOR);
+      expect(profileResponse.body.role).toBe(UserRole._OPERATOR);
 
       securityLogger.info(
         `[${testId}] Horizontal privilege escalation prevented`,

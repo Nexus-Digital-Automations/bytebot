@@ -25,10 +25,10 @@ enum UserRole {
 }
 
 enum Permission {
-  TASK_READ = 'task:read',
-  TASK_WRITE = 'task:write',
-  COMPUTER_CONTROL = 'computer:control',
-  SYSTEM_ADMIN = 'system:admin',
+  _TASK_READ = 'task:read',
+  _TASK_WRITE = 'task:write',
+  _COMPUTER_CONTROL = 'computer:control',
+  _SYSTEM_ADMIN = 'system:admin',
 }
 
 interface AuthenticatedUser {
@@ -148,17 +148,17 @@ class MockRolesGuard {
   getRolePermissions(role: UserRole): Permission[] {
     const rolePermissions: Record<UserRole, Permission[]> = {
       [UserRole.ADMIN]: [
-        Permission.TASK_READ,
-        Permission.TASK_WRITE,
-        Permission.COMPUTER_CONTROL,
-        Permission.SYSTEM_ADMIN,
+        Permission._TASK_READ,
+        Permission._TASK_WRITE,
+        Permission._COMPUTER_CONTROL,
+        Permission._SYSTEM_ADMIN,
       ],
       [UserRole.OPERATOR]: [
-        Permission.TASK_READ,
-        Permission.TASK_WRITE,
-        Permission.COMPUTER_CONTROL,
+        Permission._TASK_READ,
+        Permission._TASK_WRITE,
+        Permission._COMPUTER_CONTROL,
       ],
-      [UserRole.VIEWER]: [Permission.TASK_READ],
+      [UserRole.VIEWER]: [Permission._TASK_READ],
     };
 
     return rolePermissions[role] || [];
@@ -425,7 +425,7 @@ describe('RolesGuard', () => {
       jest
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce(undefined) // roles
-        .mockReturnValueOnce([Permission.TASK_READ]); // permissions
+        .mockReturnValueOnce([Permission._TASK_READ]); // permissions
 
       const result = await guard.canActivate(context);
 
@@ -446,7 +446,7 @@ describe('RolesGuard', () => {
       jest
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce(undefined) // roles
-        .mockReturnValueOnce([Permission.SYSTEM_ADMIN]); // permissions
+        .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         new ForbiddenException(
@@ -468,8 +468,8 @@ describe('RolesGuard', () => {
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce(undefined) // roles
         .mockReturnValueOnce([
-          Permission.TASK_WRITE,
-          Permission.COMPUTER_CONTROL,
+          Permission._TASK_WRITE,
+          Permission._COMPUTER_CONTROL,
         ]); // permissions
 
       const result = await guard.canActivate(context);
@@ -491,7 +491,10 @@ describe('RolesGuard', () => {
       jest
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce(undefined) // roles
-        .mockReturnValueOnce([Permission.TASK_WRITE, Permission.SYSTEM_ADMIN]); // permissions
+        .mockReturnValueOnce([
+          Permission._TASK_WRITE,
+          Permission._SYSTEM_ADMIN,
+        ]); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         ForbiddenException,
@@ -509,19 +512,19 @@ describe('RolesGuard', () => {
       const viewerPermissions = guard.getRolePermissions(UserRole.VIEWER);
 
       expect(adminPermissions).toEqual([
-        Permission.TASK_READ,
-        Permission.TASK_WRITE,
-        Permission.COMPUTER_CONTROL,
-        Permission.SYSTEM_ADMIN,
+        Permission._TASK_READ,
+        Permission._TASK_WRITE,
+        Permission._COMPUTER_CONTROL,
+        Permission._SYSTEM_ADMIN,
       ]);
 
       expect(operatorPermissions).toEqual([
-        Permission.TASK_READ,
-        Permission.TASK_WRITE,
-        Permission.COMPUTER_CONTROL,
+        Permission._TASK_READ,
+        Permission._TASK_WRITE,
+        Permission._COMPUTER_CONTROL,
       ]);
 
-      expect(viewerPermissions).toEqual([Permission.TASK_READ]);
+      expect(viewerPermissions).toEqual([Permission._TASK_READ]);
 
       console.log(`[${testId}] Default role permissions test completed`);
     });
@@ -538,7 +541,7 @@ describe('RolesGuard', () => {
       jest
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce([UserRole.ADMIN]) // roles
-        .mockReturnValueOnce([Permission.SYSTEM_ADMIN]); // permissions
+        .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
       const result = await guard.canActivate(context);
 
@@ -553,13 +556,13 @@ describe('RolesGuard', () => {
         `[${testId}] Testing role sufficient, permission insufficient`,
       );
 
-      const user = createMockUser(UserRole.OPERATOR, [Permission.TASK_READ]); // Custom limited permissions
+      const user = createMockUser(UserRole.OPERATOR, [Permission._TASK_READ]); // Custom limited permissions
       const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce([UserRole.OPERATOR]) // roles - should pass
-        .mockReturnValueOnce([Permission.SYSTEM_ADMIN]); // permissions - should fail
+        .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions - should fail
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         ForbiddenException,
@@ -574,13 +577,13 @@ describe('RolesGuard', () => {
         `[${testId}] Testing permission sufficient, role insufficient`,
       );
 
-      const user = createMockUser(UserRole.VIEWER, [Permission.SYSTEM_ADMIN]); // Custom elevated permissions
+      const user = createMockUser(UserRole.VIEWER, [Permission._SYSTEM_ADMIN]); // Custom elevated permissions
       const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce([UserRole.ADMIN]) // roles - should fail
-        .mockReturnValueOnce([Permission.SYSTEM_ADMIN]); // permissions - should pass
+        .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions - should pass
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         ForbiddenException,
@@ -659,7 +662,7 @@ describe('RolesGuard', () => {
       jest
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce(undefined) // roles
-        .mockReturnValueOnce([Permission.TASK_READ]); // permissions
+        .mockReturnValueOnce([Permission._TASK_READ]); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         ForbiddenException,
@@ -680,7 +683,7 @@ describe('RolesGuard', () => {
       jest
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce([UserRole.ADMIN])
-        .mockReturnValueOnce([Permission.SYSTEM_ADMIN]);
+        .mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
 
       const startTime = Date.now();
       await guard.canActivate(context);
@@ -701,7 +704,9 @@ describe('RolesGuard', () => {
       const users = Array(20)
         .fill(null)
         .map((_, i) =>
-          createMockUser(UserRole.OPERATOR, [], { id: `concurrent_user_${i}` }),
+          createMockUser(UserRole.OPERATOR, [], {
+            id: `concurrent_user_${i}`,
+          }),
         );
 
       jest
@@ -881,8 +886,8 @@ describe('RolesGuard', () => {
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce([UserRole.ADMIN, UserRole.OPERATOR])
         .mockReturnValueOnce([
-          Permission.SYSTEM_ADMIN,
-          Permission.COMPUTER_CONTROL,
+          Permission._SYSTEM_ADMIN,
+          Permission._COMPUTER_CONTROL,
         ]);
 
       try {
@@ -950,14 +955,14 @@ describe('RolesGuard', () => {
 
       // User with viewer role but admin permissions (inconsistent state)
       const spoofedUser = createMockUser(UserRole.VIEWER, [
-        Permission.SYSTEM_ADMIN,
+        Permission._SYSTEM_ADMIN,
       ]);
       const context = createMockExecutionContext(spoofedUser);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce(undefined)
-        .mockReturnValueOnce([Permission.SYSTEM_ADMIN]);
+        .mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
 
       // Guard should allow this based on permissions, regardless of role
       const result = await guard.canActivate(context);

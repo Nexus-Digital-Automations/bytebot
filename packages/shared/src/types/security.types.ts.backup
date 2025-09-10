@@ -1,0 +1,800 @@
+/**
+ * Security Types Module - Bytebot Platform Security Framework
+ *
+ * This module defines comprehensive security types for authentication, authorization,
+ * validation, and security event tracking across all Bytebot microservices.
+ *
+ * NOTE: Many enum values are intentionally unused as they represent a complete
+ * API surface for enterprise security requirements. ESLint warnings are disabled
+ * for comprehensive enum definitions that provide full industry-standard coverage.
+ *
+ * @fileoverview Enterprise-grade security type definitions
+ * @version 1.0.0
+ * @author Bytebot Security Team
+ */
+
+// import { IsEmail, IsString, IsEnum, MinLength } from "class-validator";
+
+/**
+ * Basic request interface for rate limiting and security functions
+ */
+interface RequestLike {
+  ip?: string;
+  method?: string;
+  url?: string;
+  headers?: Record<string, string | string[]>;
+  body?: unknown;
+  query?: Record<string, unknown>;
+  params?: Record<string, unknown>;
+}
+
+// ===========================
+// SECURITY EVENT TYPES
+// ===========================
+
+/**
+ * Security event types for comprehensive security monitoring
+ */
+export enum SecurityEventType {
+  // Authentication events
+  _AUTHENTICATION_FAILED = "authentication_failed",
+  _LOGIN_SUCCESS = "auth.login.success",
+  _LOGIN_FAILED = "auth.login.failed",
+  _LOGOUT = "auth.logout",
+  _TOKEN_REFRESH = "auth.token.refresh",
+
+  // Authorization events
+  _ACCESS_GRANTED = "authz.access.granted",
+  _ACCESS_DENIED = "access_denied",
+  _PERMISSION_ESCALATION_ATTEMPT = "authz.escalation.attempt",
+
+  // Security events
+  _SUSPICIOUS_ACTIVITY = "suspicious_activity",
+  _SECURITY_CONFIG_CHANGED = "security_config_changed",
+  _DATA_ACCESS_VIOLATION = "data_access_violation",
+  _CSP_VIOLATION = "csp_violation",
+  _ADMIN_ACTION = "security.admin.action",
+  _MALFORMED_REQUEST = "malformed_request",
+  _CORS_VIOLATION = "cors_violation",
+
+  // Validation events
+  _VALIDATION_FAILED = "validation_failed",
+  _XSS_ATTEMPT_BLOCKED = "xss_attempt_blocked",
+  _INJECTION_ATTEMPT_BLOCKED = "injection_attempt_blocked",
+
+  // Rate limiting events
+  _RATE_LIMIT_EXCEEDED = "rate_limit.exceeded",
+}
+
+/**
+ * Service types for rate limiting and security configuration
+ * Used across security middleware and configuration management
+ */
+export enum RateLimitServiceType {
+  /** BytebotD - Computer Control Service (Maximum Security) */
+  _BYTEBOTD = "bytebotd",
+
+  /** Bytebot Agent - Task Management Service (High Security) */
+  _BYTEBOT_AGENT = "bytebot-agent",
+
+  /** Bytebot UI - Frontend Service (Standard Security) */
+  _BYTEBOT_UI = "bytebot-ui",
+
+  /** Shared utilities and common services */
+  _SHARED = "shared",
+}
+
+/**
+ * Advanced XSS Detection Result
+ */
+export interface XSSDetectionResult {
+  hasXSS: boolean;
+  threats: string[];
+  riskScore: number;
+  severity: "low" | "medium" | "high" | "critical";
+  confidence: number;
+  detectionContext: string[];
+}
+
+/**
+ * SQL Injection Detection Result
+ */
+export interface SQLInjectionDetectionResult {
+  hasInjection: boolean;
+  threats: string[];
+  riskScore: number;
+  severity: "low" | "medium" | "high" | "critical";
+  confidence: number;
+  detectionContext: string[];
+  databaseType?: string;
+}
+
+/**
+ * Command Injection Detection Result
+ */
+export interface CommandInjectionDetectionResult {
+  hasInjection: boolean;
+  threats: string[];
+  riskScore: number;
+  severity: "low" | "medium" | "high" | "critical";
+  confidence: number;
+  detectionContext: string[];
+  attackVectors?: string[];
+  platform?: string;
+}
+
+/**
+ * File Path Validation Result
+ */
+export interface FilePathValidationResult {
+  isValid: boolean;
+  errors?: string[];
+  riskScore?: number;
+  severity?: "low" | "medium" | "high" | "critical";
+  detectionContext?: string[];
+}
+
+/**
+ * Coordinates Validation Result
+ */
+export interface CoordinatesValidationResult {
+  isValid: boolean;
+  errors?: string[];
+  riskScore?: number;
+  severity?: "low" | "medium" | "high" | "critical";
+  isOverflow?: boolean;
+  normalizedCoordinates?: { x: number; y: number };
+}
+
+/**
+ * Security event interface
+ */
+export interface SecurityEvent {
+  eventId: string;
+  type: SecurityEventType;
+  timestamp: Date;
+  riskScore: number;
+  userId?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  resource: string;
+  endpoint: string;
+  method: string;
+  success: boolean;
+  message?: string;
+  metadata?: Record<string, unknown>;
+  sessionId?: string;
+}
+
+/**
+ * Create a security event with standardized structure
+ */
+export function createSecurityEvent(
+  type: SecurityEventType,
+  endpoint: string,
+  method: string,
+  success: boolean,
+  message?: string,
+  metadata?: Record<string, unknown>,
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string,
+): SecurityEvent {
+  return {
+    eventId: `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    type,
+    timestamp: new Date(),
+    riskScore: calculateRiskScore(type, success),
+    userId,
+    ipAddress,
+    userAgent,
+    resource: endpoint,
+    endpoint,
+    method,
+    success,
+    message,
+    metadata,
+  };
+}
+
+/**
+ * Calculate risk score for security events
+ */
+function calculateRiskScore(type: SecurityEventType, success: boolean): number {
+  const baseScores: Record<SecurityEventType, number> = {
+    [SecurityEventType._AUTHENTICATION_FAILED]: 60,
+    [SecurityEventType._LOGIN_SUCCESS]: 10,
+    [SecurityEventType._LOGIN_FAILED]: 50,
+    [SecurityEventType._LOGOUT]: 5,
+    [SecurityEventType._TOKEN_REFRESH]: 15,
+    [SecurityEventType._ACCESS_GRANTED]: 10,
+    [SecurityEventType._ACCESS_DENIED]: 40,
+    [SecurityEventType._PERMISSION_ESCALATION_ATTEMPT]: 85,
+    [SecurityEventType._SUSPICIOUS_ACTIVITY]: 80,
+    [SecurityEventType._SECURITY_CONFIG_CHANGED]: 30,
+    [SecurityEventType._DATA_ACCESS_VIOLATION]: 90,
+    [SecurityEventType._CSP_VIOLATION]: 45,
+    [SecurityEventType._ADMIN_ACTION]: 25,
+    [SecurityEventType._VALIDATION_FAILED]: 35,
+    [SecurityEventType._XSS_ATTEMPT_BLOCKED]: 75,
+    [SecurityEventType._INJECTION_ATTEMPT_BLOCKED]: 85,
+    [SecurityEventType._RATE_LIMIT_EXCEEDED]: 30,
+    [SecurityEventType._MALFORMED_REQUEST]: 35,
+    [SecurityEventType._CORS_VIOLATION]: 45,
+  };
+
+  const baseScore = baseScores[type];
+  let score = baseScore;
+
+  // Increase risk for failed events
+  if (!success) {
+    score += 20;
+  }
+
+  return Math.min(100, score);
+}
+
+/**
+ * Default sanitization options
+ */
+export const DEFAULT_SANITIZATION_OPTIONS = {
+  stripHtml: true,
+  normalizeWhitespace: true,
+  maxLength: 10000,
+  allowedCharsets: ["utf8"],
+  removeControlChars: true,
+  escapeSpecialChars: true,
+};
+
+// ===========================
+// AUTHENTICATION TYPES
+// ===========================
+
+/**
+ * User authentication roles with hierarchical permissions
+ * - admin: Full system access including user management
+ * - operator: Task creation and computer control permissions
+ * - viewer: Read-only access to tasks and system status
+ */
+export enum UserRole {
+  _ADMIN = "admin",
+  _OPERATOR = "operator",
+  _VIEWER = "viewer",
+}
+
+/**
+ * Fine-grained permission system for RBAC
+ * Maps to specific API endpoints and operations
+ */
+export enum Permission {
+  // Task permissions
+  _TASK_READ = "task:read",
+  _TASK_WRITE = "task:write",
+  _TASK_DELETE = "task:delete",
+
+  // Computer control permissions
+  _COMPUTER_CONTROL = "computer:control",
+  _COMPUTER_VIEW = "computer:view",
+
+  // System administration
+  _SYSTEM_ADMIN = "system:admin",
+  _USER_MANAGE = "user:manage",
+
+  // Monitoring and metrics
+  _METRICS_VIEW = "metrics:view",
+  _LOGS_VIEW = "logs:view",
+
+  // Additional permissions for RBAC compatibility
+  _EXECUTE = "execute",
+  _ADMIN = "admin",
+  _CONFIGURE = "configure",
+  _MONITOR = "monitor",
+  _USER_MANAGEMENT = "user:management",
+  _TASK_MANAGEMENT = "task:management",
+  _SYSTEM_MANAGEMENT = "system:management",
+  _AUDIT_ACCESS = "audit:access",
+  _SECURITY_MANAGEMENT = "security:management",
+  _API_ACCESS = "api:access",
+  _API_WRITE = "api:write",
+  _API_ADMIN = "api:admin",
+  _COMPUTER_USE = "computer:use",
+  _COMPUTER_ADMIN = "computer:admin",
+  _SCREEN_CAPTURE = "screen:capture",
+  _FILE_ACCESS = "file:access",
+}
+
+/**
+ * JWT token payload structure with security metadata
+ */
+export interface JwtPayload {
+  /** Unique user identifier */
+  sub: string;
+
+  /** User email address */
+  email: string;
+
+  /** Assigned user role */
+  role: UserRole;
+
+  /** Array of specific permissions */
+  permissions: Permission[];
+
+  /** Token issued timestamp */
+  iat: number;
+
+  /** Token expiration timestamp */
+  exp: number;
+
+  /** Token issuer */
+  iss: string;
+
+  /** Session identifier for tracking */
+  sessionId: string;
+
+  /** Token type for validation */
+  type: "access" | "refresh" | "id";
+
+  /** IP address for security validation */
+  ipAddress?: string;
+}
+
+/**
+ * User registration/login DTO with validation
+ */
+export class AuthCredentialsDto {
+  // @IsEmail({}, { message: "Please provide a valid email address" })
+  email!: string;
+
+  // @IsString({ message: "Password must be a string" })
+  // @MinLength(8, { message: "Password must be at least 8 characters long" })
+  password!: string;
+}
+
+/**
+ * User registration DTO with additional fields
+ */
+export class RegisterUserDto extends AuthCredentialsDto {
+  // @IsString({ message: "First name must be a string" })
+  firstName!: string;
+
+  // @IsString({ message: "Last name must be a string" })
+  lastName!: string;
+
+  // @IsEnum(UserRole, { message: "Role must be admin, operator, or viewer" })
+  role!: UserRole;
+}
+
+/**
+ * JWT token response structure
+ */
+export interface AuthTokenResponse {
+  /** Access token (short-lived) */
+  accessToken: string;
+
+  /** Refresh token (long-lived) */
+  refreshToken: string;
+
+  /** Token type (always 'Bearer') */
+  tokenType: "Bearer";
+
+  /** Access token expiration in seconds */
+  expiresIn: number;
+
+  /** User information */
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: UserRole;
+    permissions: Permission[];
+  };
+}
+
+// ===========================
+// VALIDATION TYPES
+// ===========================
+
+/**
+ * Input validation error details
+ */
+export interface ValidationError {
+  /** Field that failed validation */
+  field: string;
+
+  /** Validation constraint that was violated */
+  constraint: string;
+
+  /** Human-readable error message */
+  message: string;
+
+  /** Invalid value that was provided */
+  rejectedValue: unknown;
+}
+
+/**
+ * Comprehensive validation result
+ */
+export interface ValidationResult {
+  /** Whether validation passed */
+  isValid: boolean;
+
+  /** Array of validation errors if any */
+  errors: ValidationError[];
+
+  /** Sanitized/transformed data */
+  sanitizedData?: Record<string, unknown> | unknown[];
+
+  /** Validation timestamp */
+  timestamp: Date;
+}
+
+/**
+ * Request sanitization options
+ */
+export interface SanitizationOptions {
+  /** Allow HTML content (sanitized) */
+  allowHtml?: boolean;
+
+  /** Strip HTML tags completely */
+  stripHtml: boolean;
+
+  /** Allowed HTML tags if HTML is allowed */
+  allowedTags?: string[];
+
+  /** Allowed HTML attributes */
+  allowedAttributes?: Record<string, string[]>;
+
+  /** Maximum string length */
+  maxLength?: number;
+
+  /** Normalize whitespace */
+  normalizeWhitespace: boolean;
+
+  /** Allowed character sets */
+  allowedCharsets?: string[];
+
+  /** Remove control characters */
+  removeControlChars: boolean;
+
+  /** Escape special characters */
+  escapeSpecialChars: boolean;
+
+  /** Trim whitespace */
+  trim?: boolean;
+}
+
+// ===========================
+// RATE LIMITING TYPES
+// ===========================
+
+/**
+ * Rate limiting configuration per endpoint
+ */
+export interface RateLimitConfig {
+  /** Maximum number of requests */
+  max: number;
+
+  /** Time window in milliseconds */
+  windowMs: number;
+
+  /** Message when rate limit exceeded */
+  message: string;
+
+  /** Custom skip function */
+  skip?: (_req: RequestLike) => boolean;
+
+  /** Key generator for rate limiting */
+  keyGenerator?: (_req: RequestLike) => string;
+}
+
+/**
+ * Rate limiting presets for different endpoint types
+ */
+export enum RateLimitPreset {
+  /** Authentication endpoints (strict) */
+  _AUTH = "auth",
+
+  /** Computer control operations (moderate) */
+  _COMPUTER_USE = "computer-use",
+
+  /** Task operations (moderate) */
+  _TASK_OPERATIONS = "task-operations",
+
+  /** Read operations (lenient) */
+  _READ_OPERATIONS = "read-operations",
+
+  /** WebSocket connections (strict) */
+  _WEBSOCKET = "websocket",
+}
+
+// ===========================
+// SECURITY CONFIGURATION
+// ===========================
+
+/**
+ * JWT configuration settings
+ */
+export interface JwtConfig {
+  /** Secret key for token signing */
+  secret: string;
+
+  /** Access token expiration (default: 15m) */
+  accessTokenExpiry: string;
+
+  /** Refresh token expiration (default: 7d) */
+  refreshTokenExpiry: string;
+
+  /** Token issuer */
+  issuer: string;
+
+  /** Token audience */
+  audience: string;
+
+  /** Algorithm for signing (default: HS256) */
+  algorithm: string;
+}
+
+/**
+ * Password security requirements
+ */
+export interface PasswordPolicy {
+  /** Minimum password length */
+  minLength: number;
+
+  /** Require uppercase characters */
+  requireUppercase: boolean;
+
+  /** Require lowercase characters */
+  requireLowercase: boolean;
+
+  /** Require numeric characters */
+  requireNumbers: boolean;
+
+  /** Require special characters */
+  requireSpecialChars: boolean;
+
+  /** Salt rounds for bcrypt hashing */
+  saltRounds: number;
+}
+
+/**
+ * Security headers configuration
+ */
+export interface SecurityHeadersConfig {
+  /** Enable Content Security Policy */
+  csp: boolean;
+
+  /** CSP directives */
+  cspDirectives?: Record<string, string[]>;
+
+  /** Enable HSTS */
+  hsts: boolean;
+
+  /** HSTS max age in seconds */
+  hstsMaxAge: number;
+
+  /** Enable X-Frame-Options */
+  frameOptions: boolean;
+
+  /** Frame options value */
+  frameOptionsValue: "DENY" | "SAMEORIGIN" | "ALLOW-FROM";
+
+  /** Enable X-Content-Type-Options */
+  noSniff: boolean;
+
+  /** Enable X-XSS-Protection */
+  xssFilter: boolean;
+}
+
+/**
+ * CORS configuration
+ */
+export interface CorsConfig {
+  /** Allowed origins */
+  origins: string[];
+
+  /** Allowed methods */
+  methods: string[];
+
+  /** Allowed headers */
+  allowedHeaders: string[];
+
+  /** Exposed headers */
+  exposedHeaders: string[];
+
+  /** Allow credentials */
+  credentials: boolean;
+
+  /** Max age for preflight requests */
+  maxAge: number;
+}
+
+/**
+ * Complete security configuration
+ */
+export interface SecurityConfig {
+  /** JWT configuration */
+  jwt: JwtConfig;
+
+  /** Password policy */
+  passwordPolicy: PasswordPolicy;
+
+  /** Rate limiting settings */
+  rateLimiting: Record<RateLimitPreset, RateLimitConfig>;
+
+  /** Security headers */
+  headers: SecurityHeadersConfig;
+
+  /** CORS settings */
+  cors: CorsConfig;
+
+  /** Request sanitization defaults */
+  sanitization: SanitizationOptions;
+
+  /** Enable security event logging */
+  auditLogging: boolean;
+
+  /** Session timeout in minutes */
+  sessionTimeout: number;
+
+  /** Maximum concurrent sessions per user */
+  maxSessionsPerUser: number;
+}
+
+// ===========================
+// API VERSIONING TYPES
+// ===========================
+
+/**
+ * API version information
+ */
+export interface ApiVersion {
+  /** Version number (e.g., "1.0", "2.1") */
+  version: string;
+
+  /** Version release date */
+  releaseDate: Date;
+
+  /** Whether this version is deprecated */
+  deprecated: boolean;
+
+  /** Deprecation date if applicable */
+  deprecationDate?: Date;
+
+  /** End of life date */
+  endOfLifeDate?: Date;
+
+  /** Breaking changes in this version */
+  breakingChanges: string[];
+
+  /** New features in this version */
+  features: string[];
+}
+
+/**
+ * API versioning strategy enum
+ */
+export enum VersioningStrategy {
+  /** Version in URL path (/api/v1/) */
+  _URI = "uri",
+
+  /** Version in custom header */
+  _HEADER = "header",
+
+  /** Version in query parameter */
+  _QUERY = "query",
+
+  /** Version in Accept header */
+  _MEDIA_TYPE = "media-type",
+}
+
+// ===========================
+// SECURITY DECORATORS DATA
+// ===========================
+
+/**
+ * Role-based access control decorator metadata
+ */
+export interface RoleMetadata {
+  /** Required roles */
+  roles: UserRole[];
+
+  /** Whether all roles are required (AND) or any (OR) */
+  requireAll: boolean;
+}
+
+/**
+ * Permission-based access control decorator metadata
+ */
+export interface PermissionMetadata {
+  /** Required permissions */
+  permissions: Permission[];
+
+  /** Whether all permissions are required (AND) or any (OR) */
+  requireAll: boolean;
+}
+
+/**
+ * Rate limiting decorator metadata
+ */
+export interface ThrottleMetadata {
+  /** Rate limit preset or custom config */
+  config: RateLimitPreset | RateLimitConfig;
+
+  /** Override global rate limiting */
+  override: boolean;
+}
+
+// ===========================
+// ERROR TYPES
+// ===========================
+
+/**
+ * Security-related error types
+ */
+export enum SecurityErrorCode {
+  // Authentication errors
+  _INVALID_CREDENTIALS = "AUTH_INVALID_CREDENTIALS",
+  _TOKEN_EXPIRED = "AUTH_TOKEN_EXPIRED",
+  _TOKEN_INVALID = "AUTH_TOKEN_INVALID",
+  _TOKEN_MALFORMED = "AUTH_TOKEN_MALFORMED",
+
+  // Authorization errors
+  _INSUFFICIENT_PERMISSIONS = "AUTHZ_INSUFFICIENT_PERMISSIONS",
+  _ROLE_REQUIRED = "AUTHZ_ROLE_REQUIRED",
+  _ACCESS_DENIED = "AUTHZ_ACCESS_DENIED",
+
+  // Validation errors
+  _VALIDATION_FAILED = "VALIDATION_FAILED",
+  _XSS_DETECTED = "VALIDATION_XSS_DETECTED",
+  _INJECTION_DETECTED = "VALIDATION_INJECTION_DETECTED",
+  _REQUEST_TOO_LARGE = "VALIDATION_REQUEST_TOO_LARGE",
+
+  // Rate limiting errors
+  _RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
+  _TOO_MANY_REQUESTS = "RATE_LIMIT_TOO_MANY_REQUESTS",
+
+  // System errors
+  _SECURITY_CONFIG_ERROR = "SECURITY_CONFIG_ERROR",
+  _INTERNAL_SECURITY_ERROR = "SECURITY_INTERNAL_ERROR",
+}
+
+/**
+ * Structured security error response
+ */
+export interface SecurityError {
+  /** Error code from enum */
+  code: SecurityErrorCode;
+
+  /** Human-readable error message */
+  message: string;
+
+  /** Detailed error description */
+  details?: string;
+
+  /** Timestamp when error occurred */
+  timestamp: Date;
+
+  /** Request path that caused error */
+  path: string;
+
+  /** Error correlation ID for tracking */
+  correlationId: string;
+
+  /** Additional error metadata */
+  metadata?: Record<string, unknown>;
+}
+
+// ===========================
+// EXPORT ALL TYPES
+// ===========================
+
+export default {
+  UserRole,
+  Permission,
+  SecurityEventType,
+  RateLimitPreset,
+  VersioningStrategy,
+  SecurityErrorCode,
+};

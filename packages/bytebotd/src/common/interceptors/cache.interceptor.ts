@@ -61,7 +61,7 @@ interface CacheMetadata {
  * Cached response data structure
  */
 interface CachedResponse {
-  data: any;
+  data: unknown;
   metadata: CacheMetadata;
   headers: Record<string, string>;
 }
@@ -176,7 +176,7 @@ export class CacheInterceptor implements NestInterceptor {
   /**
    * Intercept HTTP requests to implement caching
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
@@ -187,7 +187,9 @@ export class CacheInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const operationId = (request as any).operationId || `cache_${Date.now()}`;
+    const operationId =
+      (request as Request & { operationId?: string }).operationId ||
+      `cache_${Date.now()}`;
     const startTime = Date.now();
 
     // Find applicable cache rule
@@ -230,7 +232,7 @@ export class CacheInterceptor implements NestInterceptor {
     next: CallHandler,
     operationId: string,
     startTime: number,
-  ): Observable<any> {
+  ): Observable<unknown> {
     return new Observable((observer) => {
       // Try to get from cache first
       this.cacheService
@@ -334,7 +336,7 @@ export class CacheInterceptor implements NestInterceptor {
     next: CallHandler,
     operationId: string,
     startTime: number,
-  ): Observable<any> {
+  ): Observable<unknown> {
     return next.handle().pipe(
       tap(async (data) => {
         const duration = Date.now() - startTime;

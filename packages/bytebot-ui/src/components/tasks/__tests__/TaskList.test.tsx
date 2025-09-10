@@ -15,10 +15,22 @@
  */
 
 import React from "react";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { TaskList } from "../TaskList";
 import { TaskStatus, Role } from "@/types";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
+import { fetchTasks } from "@/utils/taskUtils";
+import { useWebSocket } from "@/hooks/useWebSocket";
+
+// Mock the utility functions
+jest.mock("@/utils/taskUtils", () => ({
+  fetchTasks: jest.fn(),
+}));
+
+// Mock the WebSocket hook
+jest.mock("@/hooks/useWebSocket", () => ({
+  useWebSocket: jest.fn(),
+}));
 
 // Mock child components
 jest.mock("../TaskItem", () => ({
@@ -203,38 +215,53 @@ describe("TaskList Component", () => {
   ];
 
   const defaultProps = {
-    tasks: mockTasks,
-    loading: false,
-    selectedTaskId: null,
-    onTaskSelect: jest.fn(),
-    onRefresh: jest.fn(),
-    onCreateTask: jest.fn(),
+    limit: 5,
+    className: "test-task-list",
+    title: "Test Tasks",
+    description: "Test task list description",
+    showHeader: true,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock fetchTasks to return our mock data - component expects { tasks: Task[] }
+    fetchTasks.mockResolvedValue({ tasks: mockTasks });
+    // Mock useWebSocket to not do anything
+    useWebSocket.mockImplementation(
+      () => ({}) as ReturnType<typeof useWebSocket>,
+    );
   });
 
   describe("Basic Rendering", () => {
-    it("renders task list correctly", () => {
+    it("renders task list correctly", async () => {
       TestUtils.renderComponent(<TaskList {...defaultProps} />);
 
-      expect(screen.getByTestId("task-item-task-1")).toBeInTheDocument();
+      // Wait for loading to complete and tasks to render
+      await waitFor(() => {
+        expect(screen.getByTestId("task-item-task-1")).toBeInTheDocument();
+      });
+
       expect(screen.getByTestId("task-item-task-2")).toBeInTheDocument();
       expect(screen.getByTestId("task-item-task-3")).toBeInTheDocument();
     });
 
     it("shows loading state", () => {
-      TestUtils.renderComponent(<TaskList {...defaultProps} loading={true} />);
+      TestUtils.renderComponent(<TaskList {...defaultProps} />);
 
-      expect(screen.getByTestId("loader")).toBeInTheDocument();
-      expect(screen.queryByTestId("task-item-task-1")).not.toBeInTheDocument();
+      // Initially should show loading state
+      expect(screen.getByText(/loading tasks/i)).toBeInTheDocument();
     });
 
-    it("shows empty state when no tasks", () => {
-      TestUtils.renderComponent(<TaskList {...defaultProps} tasks={[]} />);
+    it("shows empty state when no tasks", async () => {
+      fetchTasks.mockResolvedValue({ tasks: [] });
+      TestUtils.renderComponent(<TaskList {...defaultProps} />);
 
-      expect(screen.getByText(/no tasks found/i)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText(/loading tasks/i)).not.toBeInTheDocument();
+      });
+
+      // Should show empty state (this text needs to match actual component)
+      expect(screen.getByText(/no tasks available/i)).toBeInTheDocument();
     });
 
     it("applies correct CSS classes", () => {
@@ -767,7 +794,10 @@ describe("TaskList Component", () => {
       ];
 
       TestUtils.renderComponent(
-        <TaskList {...defaultProps} tasks={tasksWithMissingData as typeof mockTasks} />,
+        <TaskList
+          {...defaultProps}
+          tasks={tasksWithMissingData as typeof mockTasks}
+        />,
       );
 
       // Should not crash and should handle gracefully

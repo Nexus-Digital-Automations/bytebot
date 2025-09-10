@@ -55,6 +55,7 @@ import {
   AUDIT_ACCESS_KEY,
   SECURE_ENDPOINT_KEY,
   ADMIN_ONLY_KEY,
+  IPBasedAccessConfig,
 } from "../rbac-authorization.decorators";
 
 describe("RBAC Authorization Decorators", () => {
@@ -66,7 +67,7 @@ describe("RBAC Authorization Decorators", () => {
     describe("@RequireRole", () => {
       it("should set role metadata correctly", () => {
         class TestController {
-          @RequireRole([Role.ADMIN, Role.MODERATOR])
+          @RequireRole([Role._ADMIN, Role._MODERATOR])
           testMethod() {}
         }
 
@@ -75,12 +76,12 @@ describe("RBAC Authorization Decorators", () => {
           TestController.prototype,
           "testMethod",
         );
-        expect(metadata).toEqual([Role.ADMIN, Role.MODERATOR]);
+        expect(metadata).toEqual([Role._ADMIN, Role._MODERATOR]);
       });
 
       it("should work with single role", () => {
         class TestController {
-          @RequireRole([Role.USER])
+          @RequireRole([Role._USER])
           userMethod() {}
         }
 
@@ -89,14 +90,14 @@ describe("RBAC Authorization Decorators", () => {
           TestController.prototype,
           "userMethod",
         );
-        expect(metadata).toEqual([Role.USER]);
+        expect(metadata).toEqual([Role._USER]);
       });
     });
 
     describe("@RequirePermission", () => {
       it("should set permission metadata correctly", () => {
         class TestController {
-          @RequirePermission([Permission.READ, Permission.WRITE])
+          @RequirePermission([Permission._READ, Permission._WRITE])
           testMethod() {}
         }
 
@@ -105,12 +106,12 @@ describe("RBAC Authorization Decorators", () => {
           TestController.prototype,
           "testMethod",
         );
-        expect(metadata).toEqual([Permission.READ, Permission.WRITE]);
+        expect(metadata).toEqual([Permission._READ, Permission._WRITE]);
       });
 
       it("should work with single permission", () => {
         class TestController {
-          @RequirePermission([Permission.EXECUTE])
+          @RequirePermission([Permission._EXECUTE])
           executeMethod() {}
         }
 
@@ -119,14 +120,14 @@ describe("RBAC Authorization Decorators", () => {
           TestController.prototype,
           "executeMethod",
         );
-        expect(metadata).toEqual([Permission.EXECUTE]);
+        expect(metadata).toEqual([Permission._EXECUTE]);
       });
     });
 
     describe("@RequireAnyRole", () => {
       it("should set anyRole metadata correctly", () => {
         class TestController {
-          @RequireAnyRole([Role.USER, Role.GUEST])
+          @RequireAnyRole([Role._USER, Role._GUEST])
           publicMethod() {}
         }
 
@@ -135,7 +136,7 @@ describe("RBAC Authorization Decorators", () => {
           TestController.prototype,
           "publicMethod",
         );
-        expect(metadata).toEqual([Role.USER, Role.GUEST]);
+        expect(metadata).toEqual([Role._USER, Role._GUEST]);
       });
     });
 
@@ -143,9 +144,9 @@ describe("RBAC Authorization Decorators", () => {
       it("should set allPermissions metadata correctly", () => {
         class TestController {
           @RequireAllPermissions([
-            Permission.READ,
-            Permission.WRITE,
-            Permission.DELETE,
+            Permission._READ,
+            Permission._WRITE,
+            Permission._DELETE,
           ])
           powerUserMethod() {}
         }
@@ -156,9 +157,9 @@ describe("RBAC Authorization Decorators", () => {
           "powerUserMethod",
         );
         expect(metadata).toEqual([
-          Permission.READ,
-          Permission.WRITE,
-          Permission.DELETE,
+          Permission._READ,
+          Permission._WRITE,
+          Permission._DELETE,
         ]);
       });
     });
@@ -368,9 +369,9 @@ describe("RBAC Authorization Decorators", () => {
       it("should set secure endpoint metadata correctly", () => {
         class TestController {
           @SecureEndpoint({
-            roles: [Role.ADMIN],
-            permissions: [Permission.SYSTEM_MANAGEMENT],
-            resourceTypes: [ResourceType.SYSTEM],
+            roles: [Role._ADMIN],
+            permissions: [Permission._SYSTEM_MANAGEMENT],
+            resourceTypes: [ResourceType._SYSTEM],
             auditLogging: true,
             rateLimit: { requests: 10, windowMs: 60000 },
             requireEncryption: true,
@@ -385,9 +386,9 @@ describe("RBAC Authorization Decorators", () => {
           "criticalMethod",
         );
         expect(metadata).toEqual({
-          roles: [Role.ADMIN],
-          permissions: [Permission.SYSTEM_MANAGEMENT],
-          resourceTypes: [ResourceType.SYSTEM],
+          roles: [Role._ADMIN],
+          permissions: [Permission._SYSTEM_MANAGEMENT],
+          resourceTypes: [ResourceType._SYSTEM],
           auditLogging: true,
           rateLimit: { requests: 10, windowMs: 60000 },
           requireEncryption: true,
@@ -414,7 +415,7 @@ describe("RBAC Authorization Decorators", () => {
           TestController.prototype,
           "userMethod",
         );
-        expect(metadata).toEqual([Role.USER, Role.ADMIN, Role.MODERATOR]);
+        expect(metadata).toEqual([Role._USER, Role._ADMIN, Role._MODERATOR]);
       });
     });
 
@@ -430,7 +431,7 @@ describe("RBAC Authorization Decorators", () => {
           TestController.prototype,
           "modMethod",
         );
-        expect(metadata).toEqual([Role.MODERATOR, Role.ADMIN]);
+        expect(metadata).toEqual([Role._MODERATOR, Role._ADMIN]);
       });
     });
 
@@ -446,7 +447,7 @@ describe("RBAC Authorization Decorators", () => {
           TestController.prototype,
           "systemMethod",
         );
-        expect(metadata).toEqual([Role.SYSTEM, Role.ADMIN, Role.OPERATOR]);
+        expect(metadata).toEqual([Role._SYSTEM, Role._ADMIN, Role._OPERATOR]);
       });
     });
 
@@ -462,7 +463,7 @@ describe("RBAC Authorization Decorators", () => {
           TestController.prototype,
           "devMethod",
         );
-        expect(metadata).toEqual([Role.DEVELOPER, Role.ADMIN]);
+        expect(metadata).toEqual([Role._DEVELOPER, Role._ADMIN]);
       });
     });
 
@@ -478,7 +479,7 @@ describe("RBAC Authorization Decorators", () => {
           TestController.prototype,
           "auditMethod",
         );
-        expect(metadata).toEqual([Role.AUDITOR, Role.ADMIN]);
+        expect(metadata).toEqual([Role._AUDITOR, Role._ADMIN]);
       });
     });
   });
@@ -511,8 +512,12 @@ describe("RBAC Authorization Decorators", () => {
           "computerMethod",
         );
 
-        expect(rolesMetadata).toEqual([Role.USER, Role.ADMIN, Role.OPERATOR]);
-        expect(permissionsMetadata).toEqual([Permission.COMPUTER_USE]);
+        expect(rolesMetadata).toEqual([
+          Role._USER,
+          Role._ADMIN,
+          Role._OPERATOR,
+        ]);
+        expect(permissionsMetadata).toEqual([Permission._COMPUTER_USE]);
         expect(auditMetadata).toBe(true);
       });
     });
@@ -535,8 +540,12 @@ describe("RBAC Authorization Decorators", () => {
           "taskMethod",
         );
 
-        expect(rolesMetadata).toEqual([Role.USER, Role.ADMIN, Role.OPERATOR]);
-        expect(permissionsMetadata).toEqual([Permission.TASK_MANAGEMENT]);
+        expect(rolesMetadata).toEqual([
+          Role._USER,
+          Role._ADMIN,
+          Role._OPERATOR,
+        ]);
+        expect(permissionsMetadata).toEqual([Permission._TASK_MANAGEMENT]);
       });
     });
 
@@ -563,10 +572,10 @@ describe("RBAC Authorization Decorators", () => {
           "apiAdminMethod",
         );
 
-        expect(rolesMetadata).toEqual([Role.ADMIN, Role.SUPER_ADMIN]);
+        expect(rolesMetadata).toEqual([Role._ADMIN, Role._SUPER_ADMIN]);
         expect(permissionsMetadata).toEqual([
-          Permission.API_ADMIN,
-          Permission.ADMIN,
+          Permission._API_ADMIN,
+          Permission._ADMIN,
         ]);
         expect(auditMetadata).toBe(true);
       });
@@ -600,10 +609,10 @@ describe("RBAC Authorization Decorators", () => {
           "securityMethod",
         );
 
-        expect(rolesMetadata).toEqual([Role.ADMIN, Role.SUPER_ADMIN]);
+        expect(rolesMetadata).toEqual([Role._ADMIN, Role._SUPER_ADMIN]);
         expect(permissionsMetadata).toEqual([
-          Permission.SECURITY_MANAGEMENT,
-          Permission.ADMIN,
+          Permission._SECURITY_MANAGEMENT,
+          Permission._ADMIN,
         ]);
         expect(auditMetadata).toBe(true);
         expect(secureEndpointMetadata).toEqual({
@@ -623,8 +632,8 @@ describe("RBAC Authorization Decorators", () => {
     describe("extractRBACMetadata", () => {
       it("should extract complete metadata from a decorated method", () => {
         class TestController {
-          @RequireRole([Role.ADMIN])
-          @RequirePermission([Permission.READ, Permission.WRITE])
+          @RequireRole([Role._ADMIN])
+          @RequirePermission([Permission._READ, Permission._WRITE])
           @AuditAccess()
           @CanWrite("user")
           complexMethod() {}
@@ -635,10 +644,10 @@ describe("RBAC Authorization Decorators", () => {
           "complexMethod",
         );
 
-        expect(metadata.roles).toEqual([Role.ADMIN]);
+        expect(metadata.roles).toEqual([Role._ADMIN]);
         expect(metadata.permissions).toEqual([
-          Permission.READ,
-          Permission.WRITE,
+          Permission._READ,
+          Permission._WRITE,
         ]);
         expect(metadata.auditAccess).toBe(true);
         expect(metadata.resource).toEqual({
@@ -661,14 +670,14 @@ describe("RBAC Authorization Decorators", () => {
       });
 
       it("should handle class-level metadata", () => {
-        @RequireRole([Role.USER])
+        @RequireRole([Role._USER])
         class TestController {
           someMethod() {}
         }
 
         const metadata = extractRBACMetadata(TestController);
 
-        expect(metadata.roles).toEqual([Role.USER]);
+        expect(metadata.roles).toEqual([Role._USER]);
       });
     });
   });
@@ -680,29 +689,29 @@ describe("RBAC Authorization Decorators", () => {
   describe("Utility Functions", () => {
     describe("hasRequiredRoles", () => {
       it("should return true when user has required role", () => {
-        const userRoles = [Role.USER, Role.MODERATOR];
-        const requiredRoles = [Role.MODERATOR];
+        const userRoles = [Role._USER, Role._MODERATOR];
+        const requiredRoles = [Role._MODERATOR];
 
         expect(hasRequiredRoles(userRoles, requiredRoles)).toBe(true);
       });
 
       it("should return false when user does not have required role", () => {
-        const userRoles = [Role.USER];
-        const requiredRoles = [Role.ADMIN];
+        const userRoles = [Role._USER];
+        const requiredRoles = [Role._ADMIN];
 
         expect(hasRequiredRoles(userRoles, requiredRoles)).toBe(false);
       });
 
       it("should return true when user has any of the required roles", () => {
-        const userRoles = [Role.USER];
-        const requiredRoles = [Role.USER, Role.ADMIN];
+        const userRoles = [Role._USER];
+        const requiredRoles = [Role._USER, Role._ADMIN];
 
         expect(hasRequiredRoles(userRoles, requiredRoles)).toBe(true);
       });
 
       it("should handle requireAll parameter correctly", () => {
-        const userRoles = [Role.USER, Role.MODERATOR];
-        const requiredRoles = [Role.USER, Role.ADMIN];
+        const userRoles = [Role._USER, Role._MODERATOR];
+        const requiredRoles = [Role._USER, Role._ADMIN];
 
         expect(hasRequiredRoles(userRoles, requiredRoles, false)).toBe(true); // Any role
         expect(hasRequiredRoles(userRoles, requiredRoles, true)).toBe(false); // All roles
@@ -710,15 +719,15 @@ describe("RBAC Authorization Decorators", () => {
 
       it("should handle empty arrays", () => {
         expect(hasRequiredRoles([], [])).toBe(false);
-        expect(hasRequiredRoles([Role.USER], [])).toBe(false);
-        expect(hasRequiredRoles([], [Role.USER])).toBe(false);
+        expect(hasRequiredRoles([Role._USER], [])).toBe(false);
+        expect(hasRequiredRoles([], [Role._USER])).toBe(false);
       });
     });
 
     describe("hasRequiredPermissions", () => {
       it("should return true when user has required permission", () => {
-        const userPermissions = [Permission.READ, Permission.WRITE];
-        const requiredPermissions = [Permission.READ];
+        const userPermissions = [Permission._READ, Permission._WRITE];
+        const requiredPermissions = [Permission._READ];
 
         expect(
           hasRequiredPermissions(userPermissions, requiredPermissions),
@@ -726,8 +735,8 @@ describe("RBAC Authorization Decorators", () => {
       });
 
       it("should return false when user does not have required permission", () => {
-        const userPermissions = [Permission.READ];
-        const requiredPermissions = [Permission.ADMIN];
+        const userPermissions = [Permission._READ];
+        const requiredPermissions = [Permission._ADMIN];
 
         expect(
           hasRequiredPermissions(userPermissions, requiredPermissions),
@@ -735,8 +744,8 @@ describe("RBAC Authorization Decorators", () => {
       });
 
       it("should return true when user has any of the required permissions", () => {
-        const userPermissions = [Permission.READ];
-        const requiredPermissions = [Permission.READ, Permission.WRITE];
+        const userPermissions = [Permission._READ];
+        const requiredPermissions = [Permission._READ, Permission._WRITE];
 
         expect(
           hasRequiredPermissions(userPermissions, requiredPermissions),
@@ -744,8 +753,8 @@ describe("RBAC Authorization Decorators", () => {
       });
 
       it("should handle requireAll parameter correctly", () => {
-        const userPermissions = [Permission.READ, Permission.WRITE];
-        const requiredPermissions = [Permission.READ, Permission.DELETE];
+        const userPermissions = [Permission._READ, Permission._WRITE];
+        const requiredPermissions = [Permission._READ, Permission._DELETE];
 
         expect(
           hasRequiredPermissions(userPermissions, requiredPermissions, false),
@@ -757,8 +766,8 @@ describe("RBAC Authorization Decorators", () => {
 
       it("should handle empty arrays", () => {
         expect(hasRequiredPermissions([], [])).toBe(false);
-        expect(hasRequiredPermissions([Permission.READ], [])).toBe(false);
-        expect(hasRequiredPermissions([], [Permission.READ])).toBe(false);
+        expect(hasRequiredPermissions([Permission._READ], [])).toBe(false);
+        expect(hasRequiredPermissions([], [Permission._READ])).toBe(false);
       });
     });
 
@@ -845,7 +854,7 @@ describe("RBAC Authorization Decorators", () => {
       });
 
       it("should handle errors gracefully", () => {
-        const config = { allowedIPs: null as any };
+        const config = { allowedIPs: null as unknown } as IPBasedAccessConfig;
 
         expect(validateIPBasedAccess(config, "192.168.1.100")).toBe(true);
       });
@@ -859,10 +868,10 @@ describe("RBAC Authorization Decorators", () => {
   describe("Multiple Decorators Interaction", () => {
     it("should handle multiple role and permission decorators", () => {
       class TestController {
-        @RequireRole([Role.ADMIN])
-        @RequirePermission([Permission.READ])
-        @RequireAnyRole([Role.USER, Role.MODERATOR])
-        @RequireAllPermissions([Permission.WRITE, Permission.DELETE])
+        @RequireRole([Role._ADMIN])
+        @RequirePermission([Permission._READ])
+        @RequireAnyRole([Role._USER, Role._MODERATOR])
+        @RequireAllPermissions([Permission._WRITE, Permission._DELETE])
         multipleDecoratorsMethod() {}
       }
 
@@ -887,18 +896,18 @@ describe("RBAC Authorization Decorators", () => {
         "multipleDecoratorsMethod",
       );
 
-      expect(rolesMetadata).toEqual([Role.ADMIN]);
-      expect(permissionsMetadata).toEqual([Permission.READ]);
-      expect(anyRoleMetadata).toEqual([Role.USER, Role.MODERATOR]);
+      expect(rolesMetadata).toEqual([Role._ADMIN]);
+      expect(permissionsMetadata).toEqual([Permission._READ]);
+      expect(anyRoleMetadata).toEqual([Role._USER, Role._MODERATOR]);
       expect(allPermissionsMetadata).toEqual([
-        Permission.WRITE,
-        Permission.DELETE,
+        Permission._WRITE,
+        Permission._DELETE,
       ]);
     });
 
     it("should handle advanced access control with basic decorators", () => {
       class TestController {
-        @RequireRole([Role.ADMIN])
+        @RequireRole([Role._ADMIN])
         @TimeBasedAccess({ allowedHours: [9, 17] })
         @IPBasedAccess({ allowedIPs: ["192.168.1.0/24"] })
         @AuditAccess()
@@ -910,7 +919,7 @@ describe("RBAC Authorization Decorators", () => {
         "advancedMethod",
       );
 
-      expect(metadata.roles).toEqual([Role.ADMIN]);
+      expect(metadata.roles).toEqual([Role._ADMIN]);
       expect(metadata.timeAccess).toEqual({ allowedHours: [9, 17] });
       expect(metadata.ipAccess).toEqual({ allowedIPs: ["192.168.1.0/24"] });
       expect(metadata.auditAccess).toBe(true);
@@ -933,14 +942,21 @@ describe("RBAC Authorization Decorators", () => {
     });
 
     it("should handle null values in utility functions", () => {
-      expect(hasRequiredRoles(null as any, null as any)).toBe(false);
-      expect(hasRequiredPermissions(null as any, null as any)).toBe(false);
+      expect(
+        hasRequiredRoles(null as unknown as Role[], null as unknown as Role[]),
+      ).toBe(false);
+      expect(
+        hasRequiredPermissions(
+          null as unknown as Permission[],
+          null as unknown as Permission[],
+        ),
+      ).toBe(false);
     });
 
     it("should handle invalid decorator parameters gracefully", () => {
       expect(() => {
-        class TestController {
-          @RequireRole([] as any)
+        class _TestController {
+          @RequireRole([] as unknown as Role[])
           emptyRoleMethod() {}
         }
       }).not.toThrow();
@@ -953,7 +969,7 @@ describe("RBAC Authorization Decorators", () => {
 
   describe("Class Inheritance", () => {
     it("should inherit class-level metadata", () => {
-      @RequireRole([Role.USER])
+      @RequireRole([Role._USER])
       class BaseController {
         baseMethod() {}
       }
@@ -963,19 +979,22 @@ describe("RBAC Authorization Decorators", () => {
       }
 
       const baseMetadata = extractRBACMetadata(BaseController, "baseMethod");
-      const childMetadata = extractRBACMetadata(ChildController, "childMethod");
+      const _childMetadata = extractRBACMetadata(
+        ChildController,
+        "childMethod",
+      );
 
-      expect(baseMetadata.roles).toEqual([Role.USER]);
+      expect(baseMetadata.roles).toEqual([Role._USER]);
       // Child should inherit class-level metadata
       expect(Reflect.getMetadata(ROLES_KEY, BaseController)).toEqual([
-        Role.USER,
+        Role._USER,
       ]);
     });
 
     it("should allow method-level overrides of class-level metadata", () => {
-      @RequireRole([Role.USER])
+      @RequireRole([Role._USER])
       class BaseController {
-        @RequireRole([Role.ADMIN])
+        @RequireRole([Role._ADMIN])
         overriddenMethod() {}
       }
 
@@ -985,8 +1004,8 @@ describe("RBAC Authorization Decorators", () => {
         "overriddenMethod",
       );
 
-      expect(classMetadata.roles).toEqual([Role.USER]);
-      expect(methodMetadata.roles).toEqual([Role.ADMIN]);
+      expect(classMetadata.roles).toEqual([Role._USER]);
+      expect(methodMetadata.roles).toEqual([Role._ADMIN]);
     });
   });
 });

@@ -347,6 +347,39 @@ export class MetricsService {
   }
 
   /**
+   * Record job execution metrics for async jobs
+   *
+   * @param jobType Type of job being executed
+   * @param duration Execution duration in milliseconds
+   * @param success Job execution success status
+   * @param retryCount Number of retry attempts
+   * @param priority Job priority level
+   */
+  recordJobExecution(
+    jobType: string,
+    duration: number,
+    success: boolean,
+    retryCount: number,
+    priority: string,
+  ): void {
+    const durationSeconds = duration / 1000;
+    const status = success ? 'completed' : 'failed';
+
+    this.taskProcessingTotal.labels(jobType, status).inc();
+    this.taskProcessingDuration
+      .labels(jobType, status)
+      .observe(durationSeconds);
+
+    this.logger.debug('Job execution metrics recorded', {
+      jobType,
+      status,
+      durationMs: duration,
+      retryCount,
+      priority,
+    });
+  }
+
+  /**
    * Record computer-use operation metrics
    *
    * @param operationType Type of computer operation

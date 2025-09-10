@@ -13,23 +13,55 @@
  */
 
 import { MockConfig } from "./mock-config";
+import type { Request, Response, NextFunction } from "express";
+
+// Jest-agnostic mock function type
+type MockFunction<T extends (...args: unknown[]) => unknown> = T & {
+  mockImplementation?: (impl: T) => void;
+  mockReturnValue?: (value: ReturnType<T>) => void;
+  mockResolvedValue?: (value: Awaited<ReturnType<T>>) => void;
+  mockClear?: () => void;
+  mockReset?: () => void;
+  mockRestore?: () => void;
+};
+
+// Check if Jest is available
+const isJestAvailable = typeof jest !== "undefined";
+
+// Create mock function that works with or without Jest
+const createMockFn = <T extends (...args: unknown[]) => unknown>(
+  impl: T,
+): MockFunction<T> => {
+  if (isJestAvailable) {
+    return jest.fn(impl) as unknown as MockFunction<T>;
+  }
+
+  // Fallback implementation when Jest is not available
+  const mockFn = impl as MockFunction<T>;
+  mockFn.mockImplementation = () => {};
+  mockFn.mockReturnValue = () => {};
+  mockFn.mockResolvedValue = () => {};
+  mockFn.mockClear = () => {};
+  mockFn.mockReset = () => {};
+  mockFn.mockRestore = () => {};
+
+  return mockFn;
+};
 
 export interface SecurityMiddlewareMock {
-  validateCors: jest.MockedFunction<
-    (origin: string, method: string) => boolean
+  validateCors: MockFunction<(_origin: string, _method: string) => boolean>;
+  injectSecurityHeaders: MockFunction<
+    (_headers: Record<string, string>) => Record<string, string>
   >;
-  injectSecurityHeaders: jest.MockedFunction<
-    (headers: Record<string, string>) => Record<string, string>
+  sanitizeRequest: MockFunction<(_data: unknown) => unknown>;
+  validateContentType: MockFunction<(_contentType: string) => boolean>;
+  checkRateLimit: MockFunction<
+    (_identifier: string) => Promise<{ allowed: boolean; remaining: number }>
   >;
-  sanitizeRequest: jest.MockedFunction<(data: any) => any>;
-  validateContentType: jest.MockedFunction<(contentType: string) => boolean>;
-  checkRateLimit: jest.MockedFunction<
-    (identifier: string) => Promise<{ allowed: boolean; remaining: number }>
-  >;
-  generateNonce: jest.MockedFunction<() => string>;
-  validateCSP: jest.MockedFunction<(policy: string) => boolean>;
-  detectXSS: jest.MockedFunction<
-    (input: string) => { detected: boolean; threats: string[] }
+  generateNonce: MockFunction<() => string>;
+  validateCSP: MockFunction<(_policy: string) => boolean>;
+  detectXSS: MockFunction<
+    (_input: string) => { detected: boolean; threats: string[] }
   >;
 }
 
@@ -38,7 +70,7 @@ export interface SecurityMiddlewareMock {
  */
 export const createSecurityMiddlewareMock = (): SecurityMiddlewareMock => {
   return {
-    validateCors: jest.fn((origin: string, method: string): boolean => {
+    validateCors: createMockFn((origin: string, method: string): boolean => {
       const allowedOrigins = ["http://localhost:3000", "https://bytebot.app"];
       const allowedMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"];
 
@@ -48,7 +80,7 @@ export const createSecurityMiddlewareMock = (): SecurityMiddlewareMock => {
       );
     }),
 
-    injectSecurityHeaders: jest.fn(
+    injectSecurityHeaders: createMockFn(
       (headers: Record<string, string>): Record<string, string> => {
         const securityHeaders = {
           "X-Content-Type-Options": "nosniff",
@@ -65,7 +97,7 @@ export const createSecurityMiddlewareMock = (): SecurityMiddlewareMock => {
       },
     ),
 
-    sanitizeRequest: jest.fn((data: any): any => {
+    sanitizeRequest: createMockFn((data: unknown): unknown => {
       if (typeof data === "string") {
         return data
           .replace(/<script[^>]*>.*?<\/script>/gi, "")
@@ -77,7 +109,11 @@ export const createSecurityMiddlewareMock = (): SecurityMiddlewareMock => {
       }
 
       if (typeof data === "object" && data !== null) {
-        const sanitized: any = Array.isArray(data) ? [] : {};
+        const sanitized: Record<string, unknown> | unknown[] = Array.isArray(
+          data,
+        )
+          ? []
+          : {};
 
         for (const [key, value] of Object.entries(data)) {
           sanitized[key] =
@@ -90,7 +126,7 @@ export const createSecurityMiddlewareMock = (): SecurityMiddlewareMock => {
       return data;
     }),
 
-    validateContentType: jest.fn((contentType: string): boolean => {
+    validateContentType: createMockFn((contentType: string): boolean => {
       const allowedTypes = [
         "application/json",
         "application/x-www-form-urlencoded",
@@ -103,9 +139,9 @@ export const createSecurityMiddlewareMock = (): SecurityMiddlewareMock => {
       );
     }),
 
-    checkRateLimit: jest.fn(
+    checkRateLimit: createMockFn(
       async (
-        identifier: string,
+        _identifier: string,
       ): Promise<{ allowed: boolean; remaining: number }> => {
         // Simulate rate limiting logic
         const requestCount = Math.floor(Math.random() * 100);
@@ -118,7 +154,7 @@ export const createSecurityMiddlewareMock = (): SecurityMiddlewareMock => {
       },
     ),
 
-    generateNonce: jest.fn((): string => {
+    generateNonce: createMockFn((): string => {
       // Generate a mock nonce for CSP
       const chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -129,7 +165,7 @@ export const createSecurityMiddlewareMock = (): SecurityMiddlewareMock => {
       return nonce;
     }),
 
-    validateCSP: jest.fn((policy: string): boolean => {
+    validateCSP: createMockFn((policy: string): boolean => {
       // Basic CSP validation - check for required directives
       const requiredDirectives = ["default-src", "script-src"];
       const hasRequiredDirectives = requiredDirectives.every((directive) =>
@@ -145,7 +181,7 @@ export const createSecurityMiddlewareMock = (): SecurityMiddlewareMock => {
       return hasRequiredDirectives && !hasDangerousPatterns;
     }),
 
-    detectXSS: jest.fn(
+    detectXSS: createMockFn(
       (input: string): { detected: boolean; threats: string[] } => {
         const xssPatterns = [
           {
@@ -195,7 +231,7 @@ export const createMockMiddleware = (
     enforceRateLimit = true,
   } = options;
 
-  return jest.fn((req: any, res: any, next: any) => {
+  return createMockFn((req: Request, res: Response, next: NextFunction) => {
     const middleware = createSecurityMiddlewareMock();
 
     // Apply CORS validation

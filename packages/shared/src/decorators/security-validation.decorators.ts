@@ -399,7 +399,9 @@ export function IsSanitizedString(
             return true; // Let other validators handle type checking
           }
 
-          const options = (args.constraints?.[0] as SanitizationOptions) || {};
+          const options =
+            (args.constraints?.[0] as SanitizationOptions) ||
+            DEFAULT_SANITIZATION_OPTIONS;
           const sanitized = sanitizeInput(value, options);
 
           // The value should be identical to its sanitized version
@@ -428,6 +430,7 @@ export function IsBytebotDSecureText(validationOptions?: ValidationOptions) {
     IsNotXSS(validationOptions)(object, propertyName);
     IsNotSQLInjection(validationOptions)(object, propertyName);
     IsValidComputerActionText(5000, validationOptions)(object, propertyName); // Stricter length for computer actions
+    return undefined; // Explicitly return undefined for decorator
   };
 }
 
@@ -442,6 +445,7 @@ export function IsBytebotAgentSecureText(
     IsNotXSS(validationOptions)(object, propertyName);
     IsNotSQLInjection(validationOptions)(object, propertyName);
     IsSafeTextInput(true, validationOptions)(object, propertyName);
+    return undefined; // Explicitly return undefined for decorator
   };
 }
 
@@ -453,6 +457,7 @@ export function IsBytebotUISecureText(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     IsNotXSS(validationOptions)(object, propertyName);
     IsSafeTextInput(false, validationOptions)(object, propertyName); // Lighter checks for UI
+    return undefined; // Explicitly return undefined for decorator
   };
 }
 

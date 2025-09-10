@@ -194,7 +194,7 @@ export class OpenAIService implements BytebotAgentService {
         // Convert content blocks to OpenAI format
         for (const block of messageContentBlocks) {
           switch (block.type) {
-            case MessageContentType.Text: {
+            case MessageContentType._Text: {
               if (message.role === MessageRole.USER) {
                 openaiMessages.push({
                   type: 'message',
@@ -220,7 +220,7 @@ export class OpenAIService implements BytebotAgentService {
               }
               break;
             }
-            case MessageContentType.ToolUse:
+            case MessageContentType._ToolUse:
               // For assistant messages with tool use, convert to function call
               if (message.role === MessageRole.ASSISTANT) {
                 const toolBlock = block as ToolUseContentBlock;
@@ -233,7 +233,7 @@ export class OpenAIService implements BytebotAgentService {
               }
               break;
 
-            case MessageContentType.Thinking: {
+            case MessageContentType._Thinking: {
               const thinkingBlock = block;
               openaiMessages.push({
                 type: 'reasoning',
@@ -243,13 +243,13 @@ export class OpenAIService implements BytebotAgentService {
               } as OpenAI.Responses.ResponseReasoningItem);
               break;
             }
-            case MessageContentType.ToolResult: {
+            case MessageContentType._ToolResult: {
               // Handle tool results as function call outputs
               const toolResult = block;
               // Tool results should be added as separate items in the response
 
               toolResult.content.forEach((content) => {
-                if (content.type === MessageContentType.Text) {
+                if (content.type === MessageContentType._Text) {
                   openaiMessages.push({
                     type: 'function_call_output',
                     call_id: toolResult.tool_use_id,
@@ -257,7 +257,7 @@ export class OpenAIService implements BytebotAgentService {
                   } as OpenAI.Responses.ResponseInputItem.FunctionCallOutput);
                 }
 
-                if (content.type === MessageContentType.Image) {
+                if (content.type === MessageContentType._Image) {
                   openaiMessages.push({
                     type: 'function_call_output',
                     call_id: toolResult.tool_use_id,
@@ -314,13 +314,13 @@ export class OpenAIService implements BytebotAgentService {
             if ('text' in content) {
               // ResponseOutputText
               contentBlocks.push({
-                type: MessageContentType.Text,
+                type: MessageContentType._Text,
                 text: content.text,
               } as TextContentBlock);
             } else if ('refusal' in content) {
               // ResponseOutputRefusal
               contentBlocks.push({
-                type: MessageContentType.Text,
+                type: MessageContentType._Text,
                 text: `Refusal: ${content.refusal}`,
               } as TextContentBlock);
             }
@@ -332,7 +332,7 @@ export class OpenAIService implements BytebotAgentService {
           // Handle ResponseFunctionToolCall
           const toolCall = item;
           contentBlocks.push({
-            type: MessageContentType.ToolUse,
+            type: MessageContentType._ToolUse,
             id: toolCall.call_id,
             name: toolCall.name,
             input: JSON.parse(toolCall.arguments) as Record<string, unknown>,
@@ -347,7 +347,7 @@ export class OpenAIService implements BytebotAgentService {
           const reasoning = item as OpenAI.Responses.ResponseReasoningItem;
           if (reasoning.encrypted_content) {
             contentBlocks.push({
-              type: MessageContentType.Thinking,
+              type: MessageContentType._Thinking,
               thinking: reasoning.encrypted_content,
               signature: reasoning.id,
             } as ThinkingContentBlock);
@@ -365,7 +365,7 @@ export class OpenAIService implements BytebotAgentService {
             `Unsupported response output item type: ${item.type}`,
           );
           contentBlocks.push({
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: JSON.stringify(item),
           } as TextContentBlock);
           break;
@@ -376,7 +376,7 @@ export class OpenAIService implements BytebotAgentService {
             `Unknown response output item type: ${JSON.stringify(item)}`,
           );
           contentBlocks.push({
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: JSON.stringify(item),
           } as TextContentBlock);
       }

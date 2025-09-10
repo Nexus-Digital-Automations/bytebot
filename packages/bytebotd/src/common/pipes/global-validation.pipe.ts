@@ -455,12 +455,12 @@ export class GlobalValidationPipe implements PipeTransform<any> {
     metadata: ArgumentMetadata,
   ): void {
     try {
-      let eventType = SecurityEventType.VALIDATION_FAILED;
+      let eventType = SecurityEventType._VALIDATION_FAILED;
 
       if (error.message?.includes('XSS')) {
-        eventType = SecurityEventType.XSS_ATTEMPT_BLOCKED;
+        eventType = SecurityEventType._XSS_ATTEMPT_BLOCKED;
       } else if (error.message?.includes('SQL')) {
-        eventType = SecurityEventType.INJECTION_ATTEMPT_BLOCKED;
+        eventType = SecurityEventType._INJECTION_ATTEMPT_BLOCKED;
       }
 
       const securityEvent = createSecurityEvent(

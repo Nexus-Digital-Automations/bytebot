@@ -1,0 +1,108 @@
+# Prometheus Configuration for Bytebot Browser Automation Platform
+# Local-only monitoring with comprehensive metrics collection
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'bytebot-local'
+    environment: 'development'
+
+# Rule files for alerting
+rule_files:
+  - "alerts/*.yml"
+
+# Alerting configuration (local only)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []  # No external alerting for local setup
+
+# Scrape configuration
+scrape_configs:
+  # Bytebot Agent API metrics
+  - job_name: 'bytebot-agent'
+    static_configs:
+      - targets: ['bytebot-agent:9464']
+    scrape_interval: 10s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    honor_labels: false
+    labels:
+      service: 'bytebot-agent'
+      component: 'api'
+
+  # Browser-Use Service metrics
+  - job_name: 'browser-use-service'
+    static_configs:
+      - targets: ['browser-use:8081']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    honor_labels: false
+    labels:
+      service: 'browser-use'
+      component: 'automation'
+
+  # PostgreSQL metrics
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    labels:
+      service: 'postgres'
+      component: 'database'
+
+  # Redis metrics
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    labels:
+      service: 'redis'
+      component: 'cache'
+
+  # Nginx metrics
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:8080']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    metrics_path: /nginx_status
+    labels:
+      service: 'nginx'
+      component: 'proxy'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+    labels:
+      service: 'prometheus'
+      component: 'monitoring'
+
+  # Docker container metrics (if available)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: []  # Would add cadvisor if needed
+    scrape_interval: 30s
+    labels:
+      service: 'cadvisor'
+      component: 'container-metrics'
+
+# Storage configuration
+storage:
+  tsdb:
+    path: /prometheus
+    retention.time: 15d
+    retention.size: 10GB
+    wal-compression: true
+
+# Remote write configuration (disabled for local setup)
+# remote_write: []
+
+# Remote read configuration (disabled for local setup)  
+# remote_read: []

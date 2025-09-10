@@ -126,7 +126,7 @@ export interface ConfigurationDataSanitizationResult {
 export class CriticalAreaSanitizationService {
   private readonly logger = new Logger(CriticalAreaSanitizationService.name);
 
-  constructor(private readonly threatDetector: SecurityThreatDetector) {
+  constructor(private readonly _threatDetector: SecurityThreatDetector) {
     this.logger.log("Critical Area Sanitization Service initialized");
   }
 
@@ -233,7 +233,7 @@ export class CriticalAreaSanitizationService {
       let blockRiskScore = 0;
       let wasModified = false;
 
-      if (block.type === MessageContentType.Text && block.text) {
+      if (block.type === MessageContentType._Text && block.text) {
         const textResult = this.sanitizeString(
           block.text,
           "message_text",
@@ -460,12 +460,12 @@ export class CriticalAreaSanitizationService {
     try {
       // Use threat detector for analysis
       const threatContext: SecurityThreatContext = {
-        serviceType: ValidationServiceType.SHARED,
+        serviceType: ValidationServiceType._SHARED,
         environment: process.env.NODE_ENV || "development",
         operationId,
       };
 
-      const analysisResult = this.threatDetector.analyzeThreat(
+      const analysisResult = this._threatDetector.analyzeThreat(
         value,
         threatContext,
       );
@@ -485,9 +485,9 @@ export class CriticalAreaSanitizationService {
         threats: analysisResult.threatTypes.length,
         modified,
       };
-    } catch (error) {
+    } catch (err) {
       this.logger.warn(`String sanitization failed for context ${context}`, {
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         operationId,
       });
 

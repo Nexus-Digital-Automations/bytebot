@@ -5,7 +5,7 @@ import { json, urlencoded } from 'express';
 
 // Polyfill for crypto global (required by @nestjs/schedule)
 if (!globalThis.crypto) {
-  globalThis.crypto = webcrypto as Crypto;
+  globalThis.crypto = webcrypto as any;
 }
 
 async function bootstrap() {

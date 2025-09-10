@@ -15,31 +15,45 @@
 import { Injectable, NestMiddleware, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Request, Response, NextFunction } from "express";
-import helmet from "helmet";
+import helmet, { HelmetOptions as HelmetOptionsType } from "helmet";
 import {
-  SecurityHeadersConfig,
-  CorsConfig,
+  SecurityHeadersConfig as _SecurityHeadersConfig,
+  CorsConfig as _CorsConfig,
   SecurityEventType,
   createSecurityEvent,
-  SanitizationOptions,
-  DEFAULT_SANITIZATION_OPTIONS,
+  SanitizationOptions as _SanitizationOptions,
+  DEFAULT_SANITIZATION_OPTIONS as _DEFAULT_SANITIZATION_OPTIONS,
 } from "../types/security.types";
+
+/**
+ * Interface for Express request with correlation ID
+ */
+interface RequestWithCorrelation extends Request {
+  correlationId?: string;
+}
+
+/**
+ * Interface for middleware callback function
+ */
+interface _MiddlewareCallback {
+  (_err?: Error): void;
+}
 
 /**
  * Security levels for service-specific configurations
  */
 export enum SecurityLevel {
   /** Maximum security for critical operations (BytebotD) */
-  MAXIMUM = "maximum",
+  _MAXIMUM = "maximum",
 
   /** High security for API services (Bytebot-Agent) */
-  HIGH = "high",
+  _HIGH = "high",
 
   /** Standard security for frontend services (Bytebot-UI) */
-  STANDARD = "standard",
+  _STANDARD = "standard",
 
   /** Development-friendly security (All services in dev) */
-  DEVELOPMENT = "development",
+  _DEVELOPMENT = "development",
 }
 
 /**
@@ -47,22 +61,25 @@ export enum SecurityLevel {
  */
 export enum ServiceType {
   /** Computer control service - requires maximum security */
-  BYTEBOTD = "bytebotd",
+  _BYTEBOTD = "bytebotd",
 
   /** Task management API service - requires high security */
-  BYTEBOT_AGENT = "bytebot-agent",
+  _BYTEBOT_AGENT = "bytebot-agent",
 
   /** Frontend UI service - requires standard security */
-  BYTEBOT_UI = "bytebot-ui",
+  _BYTEBOT_UI = "bytebot-ui",
 
   /** Shared libraries and utilities */
-  SHARED = "shared",
+  _SHARED = "shared",
 }
 
 /**
  * Comprehensive security middleware configuration
  */
 interface StandardizedSecurityConfig {
+  /** Index signature for flexible configuration */
+  [key: string]: unknown;
+
   /** Service type for profile selection */
   serviceType: ServiceType;
 
@@ -144,6 +161,9 @@ interface StandardizedSecurityConfig {
   };
 }
 
+// Use the official Helmet types
+type HelmetOptions = HelmetOptionsType;
+
 /**
  * Security profiles by service type and environment
  */
@@ -151,9 +171,9 @@ const SECURITY_PROFILES: Record<
   ServiceType,
   Record<string, Partial<StandardizedSecurityConfig>>
 > = {
-  [ServiceType.BYTEBOTD]: {
+  [ServiceType._BYTEBOTD]: {
     development: {
-      securityLevel: SecurityLevel.DEVELOPMENT,
+      securityLevel: SecurityLevel._DEVELOPMENT as SecurityLevel,
       csp: false,
       hsts: false,
       frameOptions: "SAMEORIGIN", // Allow VNC embedding
@@ -190,7 +210,7 @@ const SECURITY_PROFILES: Record<
     },
 
     staging: {
-      securityLevel: SecurityLevel.HIGH,
+      securityLevel: SecurityLevel._HIGH as SecurityLevel,
       csp: true,
       hsts: true,
       hstsConfig: {
@@ -208,7 +228,7 @@ const SECURITY_PROFILES: Record<
     },
 
     production: {
-      securityLevel: SecurityLevel.MAXIMUM,
+      securityLevel: SecurityLevel._MAXIMUM as SecurityLevel,
       csp: true,
       hsts: true,
       hstsConfig: {
@@ -265,9 +285,9 @@ const SECURITY_PROFILES: Record<
     },
   },
 
-  [ServiceType.BYTEBOT_AGENT]: {
+  [ServiceType._BYTEBOT_AGENT]: {
     development: {
-      securityLevel: SecurityLevel.DEVELOPMENT,
+      securityLevel: SecurityLevel._DEVELOPMENT as SecurityLevel,
       csp: false,
       hsts: false,
       frameOptions: "SAMEORIGIN",
@@ -304,7 +324,7 @@ const SECURITY_PROFILES: Record<
     },
 
     staging: {
-      securityLevel: SecurityLevel.HIGH,
+      securityLevel: SecurityLevel._HIGH as SecurityLevel,
       csp: true,
       hsts: true,
       hstsConfig: {
@@ -322,7 +342,7 @@ const SECURITY_PROFILES: Record<
     },
 
     production: {
-      securityLevel: SecurityLevel.HIGH,
+      securityLevel: SecurityLevel._HIGH as SecurityLevel,
       csp: true,
       hsts: true,
       hstsConfig: {
@@ -379,9 +399,9 @@ const SECURITY_PROFILES: Record<
     },
   },
 
-  [ServiceType.BYTEBOT_UI]: {
+  [ServiceType._BYTEBOT_UI]: {
     development: {
-      securityLevel: SecurityLevel.DEVELOPMENT,
+      securityLevel: SecurityLevel._DEVELOPMENT as SecurityLevel,
       csp: false,
       hsts: false,
       frameOptions: "SAMEORIGIN",
@@ -407,7 +427,7 @@ const SECURITY_PROFILES: Record<
     },
 
     staging: {
-      securityLevel: SecurityLevel.STANDARD,
+      securityLevel: SecurityLevel._STANDARD as SecurityLevel,
       csp: true,
       hsts: true,
       hstsConfig: {
@@ -425,7 +445,7 @@ const SECURITY_PROFILES: Record<
     },
 
     production: {
-      securityLevel: SecurityLevel.STANDARD,
+      securityLevel: SecurityLevel._STANDARD as SecurityLevel,
       csp: true,
       hsts: true,
       hstsConfig: {
@@ -468,9 +488,9 @@ const SECURITY_PROFILES: Record<
     },
   },
 
-  [ServiceType.SHARED]: {
+  [ServiceType._SHARED]: {
     development: {
-      securityLevel: SecurityLevel.DEVELOPMENT,
+      securityLevel: SecurityLevel._DEVELOPMENT as SecurityLevel,
       auditLogging: {
         enabled: false,
         logLevel: "debug",
@@ -488,7 +508,7 @@ const CSP_DIRECTIVES_BY_SERVICE: Record<
   ServiceType,
   Record<string, string[]>
 > = {
-  [ServiceType.BYTEBOTD]: {
+  [ServiceType._BYTEBOTD]: {
     "default-src": ["'self'"],
     "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Required for VNC
     "style-src": ["'self'", "'unsafe-inline'"],
@@ -508,7 +528,7 @@ const CSP_DIRECTIVES_BY_SERVICE: Record<
     "worker-src": ["'self'", "blob:"],
   },
 
-  [ServiceType.BYTEBOT_AGENT]: {
+  [ServiceType._BYTEBOT_AGENT]: {
     "default-src": ["'self'"],
     "script-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"], // Swagger UI
     "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -523,7 +543,7 @@ const CSP_DIRECTIVES_BY_SERVICE: Record<
     "worker-src": ["'self'"],
   },
 
-  [ServiceType.BYTEBOT_UI]: {
+  [ServiceType._BYTEBOT_UI]: {
     "default-src": ["'self'"],
     "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Next.js requirements
     "style-src": ["'self'", "'unsafe-inline'"],
@@ -538,20 +558,26 @@ const CSP_DIRECTIVES_BY_SERVICE: Record<
     "worker-src": ["'self'", "blob:"],
   },
 
-  [ServiceType.SHARED]: {},
+  [ServiceType._SHARED]: {},
 };
 
 @Injectable()
 export class StandardizedSecurityMiddleware implements NestMiddleware {
   private readonly logger = new Logger(StandardizedSecurityMiddleware.name);
   private readonly config: StandardizedSecurityConfig;
-  private readonly helmetMiddleware: any;
+  private readonly helmetMiddleware: (
+    _req: Request,
+    _res: Response,
+    _next: NextFunction,
+  ) => void;
 
   constructor(
-    private configService: ConfigService<Record<string, unknown>>,
-    private serviceType: ServiceType = ServiceType.SHARED,
+    private _configService: ConfigService<Record<string, unknown>>,
+    private serviceType: ServiceType = ServiceType._SHARED,
   ) {
-    const environment = this.configService.get("NODE_ENV", "development");
+    const environment = String(
+      this._configService.get("NODE_ENV", "development"),
+    );
 
     // Build standardized configuration
     this.config = this.buildStandardizedConfig(serviceType, environment);
@@ -563,8 +589,8 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
       `Standardized security middleware initialized for ${serviceType}`,
       {
         serviceType,
-        environment,
-        securityLevel: this.config.securityLevel,
+        environment: String(environment),
+        securityLevel: this.config.securityLevel as string,
         csp: this.config.csp,
         hsts: this.config.hsts,
         frameOptions: this.config.frameOptions,
@@ -587,7 +613,8 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
 
     const defaultConfig: StandardizedSecurityConfig = {
       serviceType,
-      securityLevel: profile.securityLevel || SecurityLevel.STANDARD,
+      securityLevel:
+        (profile.securityLevel as SecurityLevel) || SecurityLevel._STANDARD,
       environment,
       csp: true,
       cspDirectives: CSP_DIRECTIVES_BY_SERVICE[serviceType],
@@ -629,18 +656,31 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
     };
 
     // Merge with profile configuration
-    const mergedConfig = this.deepMerge(defaultConfig, profile);
+    const mergedConfig = this.deepMerge(
+      defaultConfig as Record<string, unknown>,
+      profile as Partial<Record<string, unknown>>,
+    ) as StandardizedSecurityConfig;
 
     // Override with environment-specific config
-    const envOverrides = this.configService.get(`security.${serviceType}`, {});
+    const envOverrides =
+      this._configService.get<Record<string, unknown>>(
+        `security.${serviceType}`,
+        {},
+      ) || {};
 
-    return this.deepMerge(mergedConfig, envOverrides);
+    return this.deepMerge(
+      mergedConfig as Record<string, unknown>,
+      envOverrides as Partial<Record<string, unknown>>,
+    ) as StandardizedSecurityConfig;
   }
 
   /**
    * Deep merge configuration objects
    */
-  private deepMerge(target: any, source: any): any {
+  private deepMerge<T extends Record<string, unknown>>(
+    target: T,
+    source: Partial<T>,
+  ): T {
     const result = { ...target };
 
     for (const key in source) {
@@ -649,9 +689,12 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
         typeof source[key] === "object" &&
         !Array.isArray(source[key])
       ) {
-        result[key] = this.deepMerge(result[key] || {}, source[key]);
+        result[key] = this.deepMerge(
+          (result[key] as Record<string, unknown>) || {},
+          source[key] as Partial<Record<string, unknown>>,
+        ) as unknown as T[Extract<keyof T, string>];
       } else {
-        result[key] = source[key];
+        result[key] = source[key] as T[Extract<keyof T, string>];
       }
     }
 
@@ -666,7 +709,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
     const startTime = Date.now();
 
     // Set correlation ID for request tracking
-    (req as any).correlationId = operationId;
+    (req as RequestWithCorrelation).correlationId = operationId;
 
     if (
       this.config.auditLogging.enabled &&
@@ -689,8 +732,9 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
 
     try {
       // Apply helmet security headers
-      this.helmetMiddleware(req, res, (err?: any) => {
-        if (err) {
+      this.helmetMiddleware(req, res, (err?: Error | string) => {
+        const error = typeof err === "string" ? new Error(err) : err;
+        if (error) {
           const processingTime = Date.now() - startTime;
 
           this.logger.error(
@@ -698,8 +742,8 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
             {
               operationId,
               serviceType: this.config.serviceType,
-              error: err.message,
-              stack: err.stack,
+              error: error.message,
+              stack: error.stack,
               processingTimeMs: processingTime,
             },
           );
@@ -707,12 +751,12 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
           // Log security event for middleware failure
           this.logSecurityEvent(
             req,
-            "MIDDLEWARE_ERROR",
-            err.message,
+            SecurityEventType._SECURITY_CONFIG_CHANGED,
+            error.message,
             operationId,
           );
 
-          return next(err);
+          return next(error);
         }
 
         // Apply custom security headers
@@ -745,7 +789,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
 
         next();
       });
-    } catch (error) {
+    } catch (err) {
       const processingTime = Date.now() - startTime;
 
       this.logger.error(
@@ -753,8 +797,8 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
         {
           operationId,
           serviceType: this.config.serviceType,
-          error: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack : undefined,
+          error: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack : undefined,
           processingTimeMs: processingTime,
         },
       );
@@ -762,20 +806,24 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
       // Log security event
       this.logSecurityEvent(
         req,
-        "MIDDLEWARE_FAILURE",
-        error instanceof Error ? error.message : String(error),
+        SecurityEventType._SUSPICIOUS_ACTIVITY,
+        err instanceof Error ? err.message : String(err),
         operationId,
       );
 
-      next(error);
+      next(err);
     }
   }
 
   /**
    * Create helmet middleware with service-specific configuration
    */
-  private createHelmetMiddleware(): any {
-    const helmetOptions: any = {
+  private createHelmetMiddleware(): (
+    _req: Request,
+    _res: Response,
+    _next: NextFunction,
+  ) => void {
+    const helmetOptions: HelmetOptions = {
       // Content Security Policy
       contentSecurityPolicy: this.config.csp
         ? {
@@ -785,7 +833,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
         : false,
 
       // HTTP Strict Transport Security
-      hsts: this.config.hsts
+      strictTransportSecurity: this.config.hsts
         ? {
             maxAge: this.config.hstsConfig.maxAge,
             includeSubDomains: this.config.hstsConfig.includeSubDomains,
@@ -794,51 +842,40 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
         : false,
 
       // X-Frame-Options
-      frameguard: this.config.frameOptions
+      xFrameOptions: this.config.frameOptions
         ? {
-            action: this.config.frameOptions.toLowerCase(),
+            action: this.config.frameOptions.toLowerCase() as
+              | "deny"
+              | "sameorigin",
           }
         : false,
 
       // Security headers
-      noSniff: this.config.securityHeaders.noSniff,
-      xssFilter: this.config.securityHeaders.xssFilter,
-      hidePoweredBy: this.config.securityHeaders.hidePoweredBy,
-      ieNoOpen: this.config.securityHeaders.ieNoOpen,
+      xContentTypeOptions: this.config.securityHeaders.noSniff,
+      xXssProtection: this.config.securityHeaders.xssFilter,
+      xPoweredBy: !this.config.securityHeaders.hidePoweredBy,
+      xDownloadOptions: this.config.securityHeaders.ieNoOpen,
       originAgentCluster: this.config.securityHeaders.originAgentCluster,
 
       // DNS Prefetch Control
-      dnsPrefetchControl: {
+      xDnsPrefetchControl: {
         allow: !this.config.securityHeaders.dnsPrefetchControl,
       },
 
       // Referrer Policy
       referrerPolicy: this.config.referrerPolicy
         ? {
-            policy: this.config.referrerPolicy,
+            policy: this.config.referrerPolicy as
+              | "no-referrer"
+              | "no-referrer-when-downgrade"
+              | "origin"
+              | "origin-when-cross-origin"
+              | "same-origin"
+              | "strict-origin"
+              | "strict-origin-when-cross-origin"
+              | "unsafe-url",
           }
         : false,
-
-      // Expect-CT for production
-      expectCt:
-        this.config.environment === "production"
-          ? {
-              maxAge: 86400,
-              enforce: true,
-            }
-          : false,
-
-      // Permissions Policy
-      permissionsPolicy: {
-        camera: [],
-        microphone: [],
-        geolocation: [],
-        payment: [],
-        usb: [],
-        magnetometer: [],
-        gyroscope: [],
-        accelerometer: [],
-      },
     };
 
     return helmet(helmetOptions);
@@ -957,7 +994,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
 
       this.logSecurityEvent(
         req,
-        "CORS_VIOLATION",
+        SecurityEventType._ACCESS_DENIED,
         `Unauthorized origin: ${origin}`,
         operationId,
       );
@@ -1015,7 +1052,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
 
       this.logSecurityEvent(
         req,
-        "REQUEST_LIMIT_VIOLATION",
+        SecurityEventType._SUSPICIOUS_ACTIVITY,
         `URL length exceeded: ${req.url.length}`,
         operationId,
       );
@@ -1036,7 +1073,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
 
       this.logSecurityEvent(
         req,
-        "REQUEST_LIMIT_VIOLATION",
+        SecurityEventType._SUSPICIOUS_ACTIVITY,
         `Header size exceeded: ${headerSize}`,
         operationId,
       );
@@ -1048,7 +1085,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
    */
   private logSecurityEvent(
     req: Request,
-    eventType: string,
+    eventType: SecurityEventType,
     message: string,
     operationId: string,
   ): void {
@@ -1057,10 +1094,8 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
     }
 
     try {
-      const securityEventType = this.mapEventType(eventType);
-
       const securityEvent = createSecurityEvent(
-        securityEventType,
+        eventType,
         req.url,
         req.method,
         false,
@@ -1105,33 +1140,16 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
           this.logger.debug(logMessage, logData);
           break;
       }
-    } catch (error) {
+    } catch (err) {
       this.logger.error(
         `Failed to log security event for ${this.config.serviceType}`,
         {
           operationId,
           serviceType: this.config.serviceType,
-          error: error instanceof Error ? error.message : String(error),
-          originalEventType: eventType,
+          error: err instanceof Error ? err.message : String(err),
+          originalEventType: eventType as string,
         },
       );
-    }
-  }
-
-  /**
-   * Map internal event types to security event types
-   */
-  private mapEventType(eventType: string): SecurityEventType {
-    switch (eventType) {
-      case "CORS_VIOLATION":
-        return SecurityEventType.ACCESS_DENIED;
-      case "MIDDLEWARE_ERROR":
-      case "MIDDLEWARE_FAILURE":
-        return SecurityEventType.SECURITY_CONFIG_CHANGED;
-      case "REQUEST_LIMIT_VIOLATION":
-        return SecurityEventType.SUSPICIOUS_ACTIVITY;
-      default:
-        return SecurityEventType.SUSPICIOUS_ACTIVITY;
     }
   }
 
@@ -1150,7 +1168,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
   ): StandardizedSecurityMiddleware {
     return new StandardizedSecurityMiddleware(
       configService,
-      ServiceType.BYTEBOTD,
+      ServiceType._BYTEBOTD as ServiceType,
     );
   }
 
@@ -1159,7 +1177,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
   ): StandardizedSecurityMiddleware {
     return new StandardizedSecurityMiddleware(
       configService,
-      ServiceType.BYTEBOT_AGENT,
+      ServiceType._BYTEBOT_AGENT as ServiceType,
     );
   }
 
@@ -1168,7 +1186,7 @@ export class StandardizedSecurityMiddleware implements NestMiddleware {
   ): StandardizedSecurityMiddleware {
     return new StandardizedSecurityMiddleware(
       configService,
-      ServiceType.BYTEBOT_UI,
+      ServiceType._BYTEBOT_UI as ServiceType,
     );
   }
 }

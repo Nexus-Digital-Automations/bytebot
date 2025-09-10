@@ -20,16 +20,10 @@
  * @version 1.0.0
  */
 
- 
- 
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService, ErrorHandler } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
-import { CuaVisionService } from '../../cua-integration/cua-vision.service';
-import { CuaIntegrationService } from '../../cua-integration/cua-integration.service';
-import { CuaPerformanceService } from '../../cua-integration/cua-performance.service';
 import {
   ScrollAction,
   TypeKeysAction,
@@ -69,19 +63,6 @@ const mockNutService = {
   getCursorPosition: jest.fn(),
 };
 
-const mockCuaIntegrationService = {
-  isFrameworkEnabled: jest.fn(),
-};
-
-const mockCuaVisionService = {
-  performOcr: jest.fn(),
-  detectText: jest.fn(),
-};
-
-const mockCuaPerformanceService = {
-  recordMetric: jest.fn(),
-};
-
 /**
  * Test suite for ComputerUseService keyboard operations
  * Focuses on comprehensive testing of keyboard-related functionality
@@ -108,18 +89,6 @@ describe('ComputerUseService - Keyboard Operations', () => {
           provide: NutService,
           useValue: mockNutService,
         },
-        {
-          provide: CuaIntegrationService,
-          useValue: mockCuaIntegrationService,
-        },
-        {
-          provide: CuaVisionService,
-          useValue: mockCuaVisionService,
-        },
-        {
-          provide: CuaPerformanceService,
-          useValue: mockCuaPerformanceService,
-        },
       ],
     }).compile();
 
@@ -131,9 +100,6 @@ describe('ComputerUseService - Keyboard Operations', () => {
     loggerErrorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
     loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
     loggerDebugSpy = jest.spyOn(Logger.prototype, 'debug').mockImplementation();
-
-    // Configure C/ua framework as disabled by default
-    mockCuaIntegrationService.isFrameworkEnabled.mockReturnValue(false);
   });
 
   /**

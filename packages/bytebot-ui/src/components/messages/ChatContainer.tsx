@@ -26,6 +26,7 @@ interface ChatContainerProps {
 export function ChatContainer({
   scrollRef,
   messageIdToIndex,
+  taskId,
   input,
   setInput,
   isLoading,

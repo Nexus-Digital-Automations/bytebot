@@ -20,13 +20,15 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
-import { Cache } from "cache-manager";
+import type { Cache } from "cache-manager";
 import { Request } from "express";
 import * as fs from "fs/promises";
 import * as path from "path";
+import "reflect-metadata";
 
 /**
  * Extended Request interface with security context
+ * Provides type-safe access to user information and security context
  */
 export interface SecurityContextRequest extends Request {
   user?: {
@@ -43,35 +45,69 @@ export interface SecurityContextRequest extends Request {
 }
 
 /**
- * Security context interface
+ * Type guard to check if request has valid user
+ */
+export function hasValidUser(
+  request: SecurityContextRequest,
+): request is SecurityContextRequest & {
+  user: NonNullable<SecurityContextRequest["user"]>;
+} {
+  return !!request.user && typeof request.user.id === "string";
+}
+
+/**
+ * Security context interface with comprehensive session data
+ * Provides complete security context for authenticated requests
  */
 export interface SecurityContext {
+  /** Unique session identifier */
   sessionId: string;
+  /** User ID associated with this session */
   userId: string;
+  /** Username for display and logging */
   username: string;
+  /** Token version for rotation support */
   tokenVersion: number;
+  /** Risk score (0-100) based on request characteristics */
   riskScore: number;
+  /** Last activity timestamp */
   lastActivity: Date;
+  /** Device fingerprint for tracking */
   deviceFingerprint?: string;
+  /** Client IP address */
   ipAddress: string;
+  /** User agent string */
   userAgent?: string;
+  /** User permissions array */
   permissions: string[];
+  /** User roles array */
   roles: string[];
+  /** Additional metadata */
   metadata: Record<string, unknown>;
 }
 
 /**
  * Local session storage interface
+ * Represents a complete session record for local file-based storage
  */
 export interface LocalSession {
+  /** Unique session identifier */
   sessionId: string;
+  /** Associated user ID */
   userId: string;
+  /** Username for this session */
   username: string;
+  /** Session creation timestamp */
   createdAt: Date;
+  /** Last access timestamp */
   lastAccessedAt: Date;
+  /** Session expiration timestamp */
   expiresAt: Date;
+  /** Whether session is currently active */
   isActive: boolean;
+  /** Complete security context */
   securityContext: SecurityContext;
+  /** Additional session metadata */
   metadata: Record<string, unknown>;
 }
 
@@ -102,28 +138,28 @@ export class SecurityContextGuard implements CanActivate {
   private readonly enableContextSharing: boolean;
 
   constructor(
-    private readonly configService: ConfigService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly _configService: ConfigService,
+    @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
   ) {
     // Local configuration for file-based operations
-    this.sessionStoragePath = this.configService.get(
+    this.sessionStoragePath = this._configService.get(
       "security.sessionStoragePath",
       "./storage/sessions",
     );
-    this.sessionTimeout = this.configService.get(
+    this.sessionTimeout = this._configService.get(
       "security.sessionTimeout",
       24 * 60 * 60 * 1000, // 24 hours
     );
-    this.contextCacheTimeout = this.configService.get(
+    this.contextCacheTimeout = this._configService.get(
       "security.contextCacheTimeout",
       5 * 60 * 1000, // 5 minutes
     );
-    this.enableContextSharing = this.configService.get(
+    this.enableContextSharing = this._configService.get(
       "security.enableContextSharing",
       true,
     );
 
-    this.initializeStorage();
+    void this.initializeStorage();
 
     this.logger.log(
       "Security Context Guard initialized with local-only architecture",
@@ -160,7 +196,7 @@ export class SecurityContextGuard implements CanActivate {
 
     try {
       // Step 1: Extract user from request (should be set by authentication guard)
-      if (!request.user) {
+      if (!hasValidUser(request)) {
         throw new UnauthorizedException(
           "User authentication required for security context",
         );
@@ -212,20 +248,20 @@ export class SecurityContextGuard implements CanActivate {
       );
 
       return true;
-    } catch (error) {
+    } catch (err) {
       const contextTime = Date.now() - startTime;
 
       this.logger.error(`[${operationId}] Security context validation error`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         contextValidationTime: contextTime,
         url: request.url,
         method: request.method,
         userId: request.user?.id,
       });
 
-      if (error instanceof UnauthorizedException) {
-        throw error;
+      if (err instanceof UnauthorizedException) {
+        throw err;
       }
 
       throw new UnauthorizedException("Security context validation failed");
@@ -244,9 +280,9 @@ export class SecurityContextGuard implements CanActivate {
       this.logger.log("Local session storage initialized", {
         path: this.sessionStoragePath,
       });
-    } catch (error) {
+    } catch (err) {
       this.logger.error("Failed to initialize session storage", {
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         path: this.sessionStoragePath,
       });
     }
@@ -264,7 +300,7 @@ export class SecurityContextGuard implements CanActivate {
     operationId: string,
     request: SecurityContextRequest,
   ): Promise<SecurityContext> {
-    const user = request.user!;
+    const user = request.user;
 
     try {
       // Check if session ID is provided in headers or existing context
@@ -280,13 +316,13 @@ export class SecurityContextGuard implements CanActivate {
           operationId,
           sessionId,
         );
-        if (existingContext && existingContext.userId === user.id) {
+        if (existingContext && existingContext.userId === user!.id) {
           this.logger.debug(
             `[${operationId}] Loaded existing security context`,
             {
               operationId,
               sessionId,
-              userId: user.id,
+              userId: user!.id,
             },
           );
           return existingContext;
@@ -299,17 +335,17 @@ export class SecurityContextGuard implements CanActivate {
       this.logger.debug(`[${operationId}] Created new security context`, {
         operationId,
         sessionId: newContext.sessionId,
-        userId: user.id,
+        userId: user!.id,
       });
 
       return newContext;
-    } catch (error) {
+    } catch (err) {
       this.logger.error(
         `[${operationId}] Error loading/creating security context`,
         {
           operationId,
-          error: error instanceof Error ? error.message : String(error),
-          userId: user.id,
+          error: err instanceof Error ? err.message : String(err),
+          userId: user!.id,
         },
       );
 
@@ -333,8 +369,8 @@ export class SecurityContextGuard implements CanActivate {
     try {
       // Check cache first
       const cacheKey = `security_context:${sessionId}`;
-      const cachedContext =
-        await this.cacheManager.get<SecurityContext>(cacheKey);
+      const cachedContext: SecurityContext | undefined =
+        await this._cacheManager.get<SecurityContext>(cacheKey);
 
       if (cachedContext) {
         this.logger.debug(`[${operationId}] Using cached security context`, {
@@ -352,7 +388,7 @@ export class SecurityContextGuard implements CanActivate {
 
       try {
         const sessionData = await fs.readFile(sessionFilePath, "utf-8");
-        const session: LocalSession = JSON.parse(sessionData);
+        const session: LocalSession = JSON.parse(sessionData) as LocalSession;
 
         // Convert date strings back to Date objects
         session.createdAt = new Date(session.createdAt);
@@ -363,7 +399,7 @@ export class SecurityContextGuard implements CanActivate {
         );
 
         // Cache the context for performance
-        await this.cacheManager.set(
+        await this._cacheManager.set(
           cacheKey,
           session.securityContext,
           this.contextCacheTimeout,
@@ -379,7 +415,7 @@ export class SecurityContextGuard implements CanActivate {
         );
 
         return session.securityContext;
-      } catch (fileError) {
+      } catch (_fileError) {
         // File doesn't exist or is corrupted
         this.logger.debug(
           `[${operationId}] Security context file not found or corrupted`,
@@ -388,17 +424,17 @@ export class SecurityContextGuard implements CanActivate {
             sessionId,
             filePath: sessionFilePath,
             error:
-              fileError instanceof Error
-                ? fileError.message
-                : String(fileError),
+              _fileError instanceof Error
+                ? _fileError.message
+                : String(_fileError),
           },
         );
         return null;
       }
-    } catch (error) {
+    } catch (err) {
       this.logger.error(`[${operationId}] Error loading security context`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         sessionId,
       });
       return null;
@@ -417,35 +453,35 @@ export class SecurityContextGuard implements CanActivate {
     operationId: string,
     request: SecurityContextRequest,
   ): Promise<SecurityContext> {
-    const user = request.user!;
+    const user = request.user;
     const sessionId = this.generateSessionId();
     const now = new Date();
 
     const securityContext: SecurityContext = {
       sessionId,
-      userId: user.id,
-      username: user.username,
+      userId: user!.id,
+      username: user!.username,
       tokenVersion: 1,
       riskScore: this.calculateRiskScore(request),
       lastActivity: now,
       deviceFingerprint: this.generateDeviceFingerprint(request),
       ipAddress: this.getClientIP(request),
       userAgent: request.headers["user-agent"],
-      permissions: user.permissions || [],
-      roles: user.roles || [user.role],
+      permissions: user!.permissions || [],
+      roles: user!.roles || [user!.role],
       metadata: {
         createdAt: now,
         userAgent: request.headers["user-agent"],
         ipAddress: this.getClientIP(request),
-        ...user.metadata,
+        ...user!.metadata,
       },
     };
 
     // Create session record
     const session: LocalSession = {
       sessionId,
-      userId: user.id,
-      username: user.username,
+      userId: user!.id,
+      username: user!.username,
       createdAt: now,
       lastAccessedAt: now,
       expiresAt: new Date(now.getTime() + this.sessionTimeout),
@@ -462,7 +498,7 @@ export class SecurityContextGuard implements CanActivate {
 
     // Cache the context
     const cacheKey = `security_context:${sessionId}`;
-    await this.cacheManager.set(
+    await this._cacheManager.set(
       cacheKey,
       securityContext,
       this.contextCacheTimeout,
@@ -481,20 +517,20 @@ export class SecurityContextGuard implements CanActivate {
   private createBasicSecurityContext(
     request: SecurityContextRequest,
   ): SecurityContext {
-    const user = request.user!;
+    const user = request.user;
     const sessionId = this.generateSessionId();
 
     return {
       sessionId,
-      userId: user.id,
-      username: user.username,
+      userId: user!.id,
+      username: user!.username,
       tokenVersion: 1,
       riskScore: 0,
       lastActivity: new Date(),
       ipAddress: this.getClientIP(request),
       userAgent: request.headers["user-agent"],
-      permissions: user.permissions || [],
-      roles: user.roles || [user.role],
+      permissions: user!.permissions || [],
+      roles: user!.roles || [user!.role],
       metadata: {
         fallbackContext: true,
         createdAt: new Date(),
@@ -523,7 +559,7 @@ export class SecurityContextGuard implements CanActivate {
 
       try {
         const sessionData = await fs.readFile(sessionFilePath, "utf-8");
-        const session: LocalSession = JSON.parse(sessionData);
+        const session: LocalSession = JSON.parse(sessionData) as LocalSession;
 
         // Convert date strings back to Date objects
         session.expiresAt = new Date(session.expiresAt);
@@ -556,16 +592,16 @@ export class SecurityContextGuard implements CanActivate {
           isValid: true,
           session,
         };
-      } catch (fileError) {
+      } catch (_fileError) {
         // Session file doesn't exist, which is okay for new sessions
         return {
           isValid: true,
         };
       }
-    } catch (error) {
+    } catch (err) {
       this.logger.error(`[${operationId}] Error validating security context`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         sessionId: context.sessionId,
       });
 
@@ -595,7 +631,7 @@ export class SecurityContextGuard implements CanActivate {
 
       try {
         const sessionData = await fs.readFile(sessionFilePath, "utf-8");
-        const session: LocalSession = JSON.parse(sessionData);
+        const session: LocalSession = JSON.parse(sessionData) as LocalSession;
 
         // Update last activity
         const now = new Date();
@@ -607,7 +643,7 @@ export class SecurityContextGuard implements CanActivate {
 
         // Update cache
         const cacheKey = `security_context:${context.sessionId}`;
-        await this.cacheManager.set(
+        await this._cacheManager.set(
           cacheKey,
           session.securityContext,
           this.contextCacheTimeout,
@@ -618,7 +654,7 @@ export class SecurityContextGuard implements CanActivate {
           sessionId: context.sessionId,
           userId: context.userId,
         });
-      } catch (fileError) {
+      } catch (_fileError) {
         // Session file doesn't exist yet, which is normal for new sessions
         this.logger.debug(
           `[${operationId}] Session file not found for activity update`,
@@ -628,10 +664,10 @@ export class SecurityContextGuard implements CanActivate {
           },
         );
       }
-    } catch (error) {
+    } catch (err) {
       this.logger.error(`[${operationId}] Error updating session activity`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         sessionId: context.sessionId,
       });
     }
@@ -661,10 +697,10 @@ export class SecurityContextGuard implements CanActivate {
         userId: session.userId,
         filePath: sessionFilePath,
       });
-    } catch (error) {
+    } catch (err) {
       this.logger.error(`[${operationId}] Error saving session`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         sessionId: session.sessionId,
       });
     }
@@ -750,7 +786,7 @@ export class SecurityContextGuard implements CanActivate {
     return (
       (request.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
       (request.headers["x-real-ip"] as string) ||
-      request.socket.remoteAddress ||
+      request.socket?.remoteAddress ||
       "unknown"
     );
   }

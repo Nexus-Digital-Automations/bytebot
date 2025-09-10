@@ -1,7 +1,11 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowRight02Icon, Attachment01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import {
+  ArrowRight02Icon,
+  Attachment01Icon,
+  Cancel01Icon,
+} from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
 
 interface FileWithBase64 {
@@ -16,7 +20,7 @@ interface ChatInputProps {
   isLoading: boolean;
   onInputChange: (value: string) => void;
   onSend: () => void;
-  onFileUpload?: (files: FileWithBase64[]) => void;
+  onFileUpload?: (fileList: FileWithBase64[]) => void;
   minLines?: number;
   placeholder?: string;
 }
@@ -34,7 +38,7 @@ export function ChatInput({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<FileWithBase64[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>("");
-  
+
   const MAX_FILES = 5;
   const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB per file in bytes
 
@@ -46,16 +50,15 @@ export function ChatInput({
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
+
     setErrorMessage("");
 
     // Check max files limit
     if (selectedFiles.length + files.length > MAX_FILES) {
       setErrorMessage(`Maximum ${MAX_FILES} files allowed`);
-      e.target.value = '';
+      e.target.value = "";
       return;
     }
-    
 
     // Check individual file sizes
     const oversizedFiles: string[] = [];
@@ -65,10 +68,12 @@ export function ChatInput({
         oversizedFiles.push(`${file.name} (${formatFileSize(file.size)})`);
       }
     }
-    
+
     if (oversizedFiles.length > 0) {
-      setErrorMessage(`File(s) exceed 30MB limit: ${oversizedFiles.join(', ')}`);
-      e.target.value = '';
+      setErrorMessage(
+        `File(s) exceed 30MB limit: ${oversizedFiles.join(", ")}`,
+      );
+      e.target.value = "";
       return;
     }
 
@@ -77,7 +82,7 @@ export function ChatInput({
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const base64 = await convertToBase64(file);
-      
+
       newFiles.push({
         name: file.name,
         base64: base64,
@@ -88,13 +93,13 @@ export function ChatInput({
 
     const updatedFiles = [...selectedFiles, ...newFiles];
     setSelectedFiles(updatedFiles);
-    
+
     if (onFileUpload) {
       onFileUpload(updatedFiles);
     }
 
     // Reset the input
-    e.target.value = '';
+    e.target.value = "";
   };
 
   const convertToBase64 = (file: File): Promise<string> => {
@@ -110,7 +115,7 @@ export function ChatInput({
     const updatedFiles = selectedFiles.filter((_, i) => i !== index);
     setSelectedFiles(updatedFiles);
     setErrorMessage("");
-    
+
     if (onFileUpload) {
       onFileUpload(updatedFiles);
     }
@@ -121,11 +126,11 @@ export function ChatInput({
   };
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   // Auto-resize textarea based on content
@@ -159,17 +164,19 @@ export function ChatInput({
         className="hidden"
         accept="*/*"
       />
-      
+
       {errorMessage && (
         <div className="mb-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
           {errorMessage}
         </div>
       )}
-      
+
       {selectedFiles.length > 0 && (
         <div className="mb-2">
           <div className="mb-1 flex items-center justify-between text-xs text-gray-500">
-            <span>{selectedFiles.length} / {MAX_FILES} files</span>
+            <span>
+              {selectedFiles.length} / {MAX_FILES} files
+            </span>
             <span>Max 30MB per file</span>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -194,7 +201,7 @@ export function ChatInput({
           </div>
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="relative">
         <textarea
           ref={textareaRef}
@@ -216,7 +223,9 @@ export function ChatInput({
             }
           }}
         />
-        <div className={`absolute right-2 ${buttonPositionClass} flex items-center gap-1`}>
+        <div
+          className={`absolute right-2 ${buttonPositionClass} flex items-center gap-1`}
+        >
           <Button
             type="button"
             variant="ghost"
@@ -230,7 +239,7 @@ export function ChatInput({
               className="h-4 w-4 text-gray-600"
             />
           </Button>
-          
+
           {isLoading ? (
             <div className="border-bytebot-bronze-light-7 border-t-primary h-5 w-5 animate-spin rounded-full border-2" />
           ) : (

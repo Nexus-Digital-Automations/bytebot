@@ -171,14 +171,14 @@ export class ProxyService implements BytebotAgentService {
       } else {
         for (const block of messageContentBlocks) {
           switch (block.type) {
-            case MessageContentType.Text: {
+            case MessageContentType._Text: {
               chatMessages.push({
                 role: message.role === MessageRole.USER ? 'user' : 'assistant',
                 content: block.text,
               });
               break;
             }
-            case MessageContentType.Image: {
+            case MessageContentType._Image: {
               const imageBlock = block;
               chatMessages.push({
                 role: 'user',
@@ -194,7 +194,7 @@ export class ProxyService implements BytebotAgentService {
               });
               break;
             }
-            case MessageContentType.ToolUse: {
+            case MessageContentType._ToolUse: {
               const toolBlock = block as ToolUseContentBlock;
               chatMessages.push({
                 role: 'assistant',
@@ -211,7 +211,7 @@ export class ProxyService implements BytebotAgentService {
               });
               break;
             }
-            case MessageContentType.Thinking: {
+            case MessageContentType._Thinking: {
               const thinkingBlock = block;
               const message: ChatCompletionMessageParam = {
                 role: 'assistant',
@@ -221,12 +221,12 @@ export class ProxyService implements BytebotAgentService {
               chatMessages.push(message);
               break;
             }
-            case MessageContentType.ToolResult: {
+            case MessageContentType._ToolResult: {
               const toolResultBlock = block;
 
               if (
                 toolResultBlock.content.every(
-                  (content) => content.type === MessageContentType.Image,
+                  (content) => content.type === MessageContentType._Image,
                 )
               ) {
                 chatMessages.push({
@@ -237,7 +237,7 @@ export class ProxyService implements BytebotAgentService {
               }
 
               toolResultBlock.content.forEach((content) => {
-                if (content.type === MessageContentType.Text) {
+                if (content.type === MessageContentType._Text) {
                   chatMessages.push({
                     role: 'tool',
                     tool_call_id: toolResultBlock.tool_use_id,
@@ -245,7 +245,7 @@ export class ProxyService implements BytebotAgentService {
                   });
                 }
 
-                if (content.type === MessageContentType.Image) {
+                if (content.type === MessageContentType._Image) {
                   chatMessages.push({
                     role: 'user',
                     content: [
@@ -285,14 +285,14 @@ export class ProxyService implements BytebotAgentService {
     // Handle text content
     if (message.content) {
       contentBlocks.push({
-        type: MessageContentType.Text,
+        type: MessageContentType._Text,
         text: message.content,
       } as TextContentBlock);
     }
 
     if (message['reasoning_content']) {
       contentBlocks.push({
-        type: MessageContentType.Thinking,
+        type: MessageContentType._Thinking,
         thinking: String(message['reasoning_content']),
         signature: String(message['reasoning_content']),
       } as ThinkingContentBlock);
@@ -315,7 +315,7 @@ export class ProxyService implements BytebotAgentService {
           }
 
           contentBlocks.push({
-            type: MessageContentType.ToolUse,
+            type: MessageContentType._ToolUse,
             id: toolCall.id,
             name: toolCall.function.name,
             input: parsedInput,
@@ -327,7 +327,7 @@ export class ProxyService implements BytebotAgentService {
     // Handle refusal
     if (message.refusal) {
       contentBlocks.push({
-        type: MessageContentType.Text,
+        type: MessageContentType._Text,
         text: `Refusal: ${message.refusal}`,
       } as TextContentBlock);
     }

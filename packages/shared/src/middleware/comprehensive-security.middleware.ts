@@ -16,46 +16,20 @@
 import { Injectable, NestMiddleware, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Request, Response, NextFunction } from "express";
+import { IncomingMessage, ServerResponse } from "node:http";
 import helmet from "helmet";
-import { createHash, randomBytes } from "crypto";
+import { randomBytes } from "crypto";
 import {
   getEnvironmentConfig,
   validateOriginPattern,
   calculateCorsRiskScore,
   CorsSecurityEnvironmentConfig,
 } from "../config/cors-security.config";
+import { SecurityEventType, SecurityEvent } from "../types/security.types";
+import { ExtendedRequest, ExtendedResponse } from "../types/express-extensions";
 
-/**
- * Security event types for monitoring
- */
-export enum SecurityEventType {
-  CORS_VIOLATION = "cors_violation",
-  CSP_VIOLATION = "csp_violation",
-  RATE_LIMIT_EXCEEDED = "rate_limit_exceeded",
-  SUSPICIOUS_ORIGIN = "suspicious_origin",
-  MALFORMED_REQUEST = "malformed_request",
-  SECURITY_BYPASS_ATTEMPT = "security_bypass_attempt",
-}
-
-/**
- * Security event interface for structured logging
- */
-export interface SecurityEvent {
-  eventId: string;
-  type: SecurityEventType;
-  timestamp: Date;
-  serviceName: string;
-  environment: string;
-  origin?: string;
-  ipAddress?: string;
-  userAgent?: string;
-  endpoint: string;
-  method: string;
-  riskScore: number;
-  blocked: boolean;
-  reason: string;
-  metadata: Record<string, any>;
-}
+// Re-export SecurityEventType and SecurityEvent for easier imports
+export { SecurityEventType, SecurityEvent };
 
 /**
  * CSP violation report interface
@@ -97,12 +71,19 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
   private readonly logger = new Logger(ComprehensiveSecurityMiddleware.name);
   private readonly config: ComprehensiveSecurityConfig;
   private readonly envConfig: CorsSecurityEnvironmentConfig;
-  private readonly helmetMiddleware: any;
+  private readonly helmetMiddleware: (
+    _req: Request,
+    _res: Response,
+    _next: NextFunction,
+  ) => void;
   private readonly nonceMap = new Map<string, string>();
 
-  constructor(private configService: ConfigService) {
-    const environment = this.configService.get("NODE_ENV", "development");
-    const serviceName = this.configService.get(
+  constructor(private _configService: ConfigService) {
+    const environment = this._configService.get<string>(
+      "NODE_ENV",
+      "development",
+    );
+    const serviceName = this._configService.get<string>(
       "SERVICE_NAME",
       "Bytebot-Service",
     );
@@ -112,8 +93,8 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
 
     // Build comprehensive security configuration
     this.config = {
-      serviceName,
-      environment,
+      serviceName: serviceName,
+      environment: environment,
       enableCSP: this.envConfig.security.enableCSP,
       enableCSPReporting: this.envConfig.security.enableCSPReporting,
       cspReportEndpoint: "/api/security/csp-report",
@@ -122,8 +103,7 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       enableVNC: serviceName.toLowerCase().includes("bytebotd"),
       enableSwagger:
         environment !== "production" && serviceName.includes("Agent"),
-      customOrigins: this.configService
-        .get("CORS_ORIGINS", "")
+      customOrigins: (this._configService.get<string>("CORS_ORIGINS", "") || "")
         .split(",")
         .filter(Boolean),
       trustedProxies: this.envConfig.trustedProxies,
@@ -156,7 +136,8 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
     const startTime = Date.now();
 
     // Set correlation ID for request tracking
-    (req as any).correlationId = operationId;
+    const extendedReq = req as ExtendedRequest;
+    extendedReq.correlationId = operationId;
 
     this.logger.debug(`[${operationId}] Processing security middleware`, {
       method: req.method,
@@ -169,8 +150,12 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
     try {
       // Generate dynamic nonce for CSP
       const nonce = this.generateNonce(operationId);
-      (req as any).nonce = nonce;
-      (res as any).locals = { ...res.locals, nonce };
+      (req as ExtendedRequest).nonce = nonce;
+      const extendedRes = res as ExtendedResponse;
+      extendedRes.locals = {
+        ...extendedRes.locals,
+        nonce,
+      };
 
       // Apply CORS validation first
       const corsResult = this.validateCORS(req, res, operationId);
@@ -178,7 +163,7 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
         return this.handleSecurityViolation(
           req,
           res,
-          SecurityEventType.CORS_VIOLATION,
+          SecurityEventType._CORS_VIOLATION,
           corsResult.reason,
           operationId,
           corsResult.riskScore,
@@ -186,11 +171,11 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       }
 
       // Apply comprehensive helmet security headers
-      this.helmetMiddleware(req, res, (err?: any) => {
+      this.helmetMiddleware(req, res, (err?: unknown) => {
         if (err) {
           this.logger.error(`[${operationId}] Helmet middleware error`, {
             operationId,
-            error: err.message,
+            error: (err as Error).message,
             processingTimeMs: Date.now() - startTime,
           });
           return next(err);
@@ -213,17 +198,17 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
 
         next();
       });
-    } catch (error) {
+    } catch (err) {
       const processingTime = Date.now() - startTime;
       this.logger.error(`[${operationId}] Security middleware error`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         processingTimeMs: processingTime,
       });
 
       this.logSecurityEvent({
         eventId: operationId,
-        type: SecurityEventType.MALFORMED_REQUEST,
+        type: SecurityEventType._MALFORMED_REQUEST,
         timestamp: new Date(),
         serviceName: this.config.serviceName,
         environment: this.config.environment,
@@ -234,18 +219,23 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
         method: req.method,
         riskScore: 80,
         blocked: true,
-        reason: error instanceof Error ? error.message : String(error),
+        success: false,
+        reason: err instanceof Error ? err.message : String(err),
         metadata: { operationId, processingTimeMs: processingTime },
       });
 
-      next(error);
+      next(err);
     }
   }
 
   /**
    * Create comprehensive helmet configuration
    */
-  private createComprehensiveHelmetConfig(): any {
+  private createComprehensiveHelmetConfig(): (
+    _req: Request,
+    _res: Response,
+    _next: NextFunction,
+  ) => void {
     const { config, envConfig } = this;
 
     return helmet({
@@ -258,7 +248,11 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
               scriptSrc: [
                 "'self'",
                 // Dynamic nonce will be added per request
-                (req: any, res: any) => `'nonce-${res.locals?.nonce || ""}'`,
+                (req: IncomingMessage, res: ServerResponse) => {
+                  const extendedRes = res as ExtendedResponse;
+                  const nonce = extendedRes.locals?.nonce;
+                  return `'nonce-${typeof nonce === "string" ? nonce : ""}'`;
+                },
                 ...(config.enableSwagger
                   ? ["'unsafe-inline'", "'unsafe-eval'"]
                   : []),
@@ -446,7 +440,7 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
     // Log security event for blocked origin
     this.logSecurityEvent({
       eventId: operationId,
-      type: SecurityEventType.CORS_VIOLATION,
+      type: SecurityEventType._CORS_VIOLATION,
       timestamp: new Date(),
       serviceName: this.config.serviceName,
       environment: this.config.environment,
@@ -457,6 +451,7 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       method: req.method,
       riskScore,
       blocked: true,
+      success: false,
       reason: "Origin not allowed by CORS policy",
       metadata: {
         operationId,
@@ -560,10 +555,14 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
     }
 
     // Rate limiting information (if available from previous middleware)
-    if ((req as any).rateLimit) {
-      const rateLimit = (req as any).rateLimit;
-      res.setHeader("X-Rate-Limit-Remaining", rateLimit.remaining || 0);
-      res.setHeader("X-Rate-Limit-Reset", rateLimit.reset || 0);
+    const extendedReq = req as ExtendedRequest;
+    if (extendedReq.rateLimit) {
+      const { rateLimit } = extendedReq;
+      const remaining =
+        typeof rateLimit.remaining === "number" ? rateLimit.remaining : 0;
+      const reset = typeof rateLimit.reset === "number" ? rateLimit.reset : 0;
+      res.setHeader("X-Rate-Limit-Remaining", remaining.toString());
+      res.setHeader("X-Rate-Limit-Reset", reset.toString());
     }
 
     this.logger.debug(`[${operationId}] Additional security headers applied`);
@@ -603,7 +602,7 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       if (violation) {
         this.logSecurityEvent({
           eventId: operationId,
-          type: SecurityEventType.CSP_VIOLATION,
+          type: SecurityEventType._CSP_VIOLATION,
           timestamp: new Date(),
           serviceName: this.config.serviceName,
           environment: this.config.environment,
@@ -611,6 +610,7 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
           method: "CSP_REPORT",
           riskScore: this.calculateCSPViolationRisk(violation),
           blocked: true,
+          success: false,
           reason: `CSP violation: ${violation["violated-directive"]}`,
           metadata: {
             violatedDirective: violation["violated-directive"],
@@ -623,11 +623,11 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       }
 
       res.status(204).end();
-    } catch (error) {
+    } catch (err) {
       this.logger.error(
         `[${operationId}] Failed to process CSP violation report`,
         {
-          error: error instanceof Error ? error.message : String(error),
+          error: err instanceof Error ? err.message : String(err),
         },
       );
       res.status(400).end();
@@ -691,6 +691,7 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       method: req.method,
       riskScore,
       blocked: true,
+      success: false,
       reason,
       metadata: { operationId },
     });
@@ -776,7 +777,7 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       return realIP;
     }
 
-    return req.ip || req.socket.remoteAddress || "unknown";
+    return req.ip || req.socket?.remoteAddress || "unknown";
   }
 
   /**

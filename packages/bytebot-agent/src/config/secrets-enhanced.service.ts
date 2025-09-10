@@ -139,7 +139,7 @@ interface LocalSecretsHealthResponse {
     total: number;
   };
   performance: PerformanceMetrics;
-  localProviders: Record<string, boolean>;
+  externalProviders: Record<string, boolean>;
   details: Array<{
     name: string;
     key: string;
@@ -535,7 +535,7 @@ export class EnhancedSecretsService
         total: details.length,
       },
       performance: { ...this.performanceMetrics },
-      localProviders: {
+      externalProviders: {
         localFileStorage:
           this.localProviders.localFileStorage?.enabled ?? false,
         environmentVariables:

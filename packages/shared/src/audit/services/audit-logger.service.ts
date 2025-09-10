@@ -39,18 +39,40 @@ import { EventEmitter2 } from "@nestjs/event-emitter";
 // import { Queue } from "bull";
 // import { InjectQueue } from "@nestjs/bull";
 
-// Temporary stubs for missing dependencies
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, no-unused-vars */
+// Type definitions for logging functionality
+type LogLevel = "error" | "warn" | "info" | "debug";
+type LogMetadata = Record<string, string | number | boolean | null | undefined>;
+
+/**
+ * Convert AuditSeverity to LogLevel for winston logging
+ */
+function auditSeverityToLogLevel(severity: AuditSeverity): LogLevel {
+  switch (severity) {
+    case AuditSeverity.FATAL:
+    case AuditSeverity.CRITICAL:
+    case AuditSeverity.ERROR:
+      return "error";
+    case AuditSeverity.WARN:
+      return "warn";
+    case AuditSeverity.INFO:
+      return "info";
+    case AuditSeverity.DEBUG:
+    default:
+      return "debug";
+  }
+}
+
+// Winston Logger type definition with proper types
 type WinstonLogger = {
-  info: (message: string, ...args: any[]) => void;
-  error: (message: string, ...args: any[]) => void;
-  warn: (message: string, ...args: any[]) => void;
-  debug: (message: string, ...args: any[]) => void;
-  log: (level: string, message: string, ...args: any[]) => void;
-  close: (callback?: () => void) => void;
+  info: (_message: string, ..._args: LogMetadata[]) => void;
+  error: (_message: string, ..._args: LogMetadata[]) => void;
+  warn: (_message: string, ..._args: LogMetadata[]) => void;
+  debug: (_message: string, ..._args: LogMetadata[]) => void;
+  log: (_level: LogLevel, _message: string, ..._args: LogMetadata[]) => void;
+  close: (_callback?: () => void) => void;
 };
 type Queue<T = unknown> = {
-  add: (name: string, data: T, options?: unknown) => Promise<unknown>;
+  add: (_name: string, _data: T, _options?: unknown) => Promise<unknown>;
 };
 const createLogger = (_options?: unknown): WinstonLogger => ({
   info: () => {},
@@ -58,7 +80,7 @@ const createLogger = (_options?: unknown): WinstonLogger => ({
   warn: () => {},
   debug: () => {},
   log: () => {},
-  close: (callback?: () => void) => callback?.(),
+  close: (_callback?: () => void) => _callback?.(),
 });
 const format = {
   json: (_options?: unknown) => ({}),
@@ -66,7 +88,7 @@ const format = {
   errors: (_options?: { stack: boolean }) => ({}),
   combine: (..._args: unknown[]) => ({}),
   colorize: (_options?: unknown) => ({}),
-  printf: (_callback?: (info: any) => string) => ({}),
+  printf: (_callback?: (_info: LogMetadata) => string) => ({}),
 };
 const transports = {
   File: class {
@@ -76,14 +98,14 @@ const transports = {
     constructor(_options?: unknown) {}
   },
 };
-const InjectQueue =
+const _InjectQueue =
   (_name: string) =>
   (
     _target: unknown,
     _propertyKey: string | symbol | undefined,
     _parameterIndex: number,
   ) => {};
-/* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, no-unused-vars */
+// End of temporary stub definitions
 import {
   AuditEvent,
   AuditEventQuery,
@@ -204,14 +226,20 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
   };
 
   constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly configService: ConfigService,
-    private readonly eventEmitterService: EventEmitter2,
-
+    private readonly _configService: ConfigService,
+    private readonly _eventEmitterService: EventEmitter2,
     // @InjectQueue("audit-events") - temporarily disabled due to missing Bull dependency
     private readonly _auditQueue: Queue,
   ) {
-    this.eventEmitter = eventEmitterService;
+    // Validate that dependencies are properly injected
+    if (!this._configService) {
+      throw new Error("ConfigService is required");
+    }
+    if (!this._eventEmitterService) {
+      throw new Error("EventEmitter2 is required");
+    }
+
+    this.eventEmitter = this._eventEmitterService;
   }
 
   /**
@@ -232,9 +260,9 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
 
       // Start background processes
       this.startBackgroundProcesses();
-    } catch (error) {
-      this.logger.error("Failed to initialize Audit Logger Service", error);
-      throw error;
+    } catch (err) {
+      this.logger.error("Failed to initialize Audit Logger Service", err);
+      throw err;
     }
   }
 
@@ -257,8 +285,8 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
       }
 
       this.logger.log("Enterprise Audit Logger Service shutdown complete");
-    } catch (error) {
-      this.logger.error("Error during Audit Logger Service shutdown", error);
+    } catch (err) {
+      this.logger.error("Error during Audit Logger Service shutdown", err);
     }
   }
 
@@ -500,9 +528,9 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
       };
 
       return Promise.resolve(result);
-    } catch (error) {
-      this.logger.error("Error searching audit events", error);
-      throw error;
+    } catch (err) {
+      this.logger.error("Error searching audit events", err);
+      throw err;
     }
   }
 
@@ -553,9 +581,9 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
             `Unsupported export format: ${String(exportConfig.format)}`,
           );
       }
-    } catch (error) {
-      this.logger.error("Error exporting audit events", error);
-      throw error;
+    } catch (err) {
+      this.logger.error("Error exporting audit events", err);
+      throw err;
     }
   }
 
@@ -583,9 +611,9 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
       }
 
       return Promise.resolve(totalPurged);
-    } catch (error) {
-      this.logger.error("Error purging old audit events", error);
-      throw error;
+    } catch (err) {
+      this.logger.error("Error purging old audit events", err);
+      throw err;
     }
   }
 
@@ -611,81 +639,84 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
   private initializeConfiguration(): Promise<void> {
     return Promise.resolve().then(() => {
       this.config = {
-        enabled: this.configService.get<boolean>("audit.enabled", true),
-        level: this.configService.get<AuditSeverity>(
+        enabled: this._configService.get<boolean>("audit.enabled", true),
+        level: this._configService.get<AuditSeverity>(
           "audit.level",
           AuditSeverity.INFO,
         ),
         file: {
-          enabled: this.configService.get<boolean>("audit.file.enabled", true),
-          filename: this.configService.get<string>(
+          enabled: this._configService.get<boolean>("audit.file.enabled", true),
+          filename: this._configService.get<string>(
             "audit.file.filename",
             "./logs/audit.log",
           ),
-          maxsize: this.configService.get<number>(
+          maxsize: this._configService.get<number>(
             "audit.file.maxsize",
             10 * 1024 * 1024,
           ),
-          maxFiles: this.configService.get<number>("audit.file.maxFiles", 10),
-          compress: this.configService.get<boolean>(
+          maxFiles: this._configService.get<number>("audit.file.maxFiles", 10),
+          compress: this._configService.get<boolean>(
             "audit.file.compress",
             true,
           ),
         },
         database: {
-          enabled: this.configService.get<boolean>(
+          enabled: this._configService.get<boolean>(
             "audit.database.enabled",
             false,
           ),
-          connectionString: this.configService.get<string>(
+          connectionString: this._configService.get<string>(
             "audit.database.connectionString",
           ),
-          tableName: this.configService.get<string>(
+          tableName: this._configService.get<string>(
             "audit.database.tableName",
             "audit_events",
           ),
         },
         siem: {
-          enabled: this.configService.get<boolean>("audit.siem.enabled", false),
-          endpoint: this.configService.get<string>("audit.siem.endpoint"),
-          format: this.configService.get<"json" | "syslog" | "cef">(
+          enabled: this._configService.get<boolean>(
+            "audit.siem.enabled",
+            false,
+          ),
+          endpoint: this._configService.get<string>("audit.siem.endpoint"),
+          format: this._configService.get<"json" | "syslog" | "cef">(
             "audit.siem.format",
             "json",
           ),
-          apiKey: this.configService.get<string>("audit.siem.apiKey"),
+          apiKey: this._configService.get<string>("audit.siem.apiKey"),
         },
         alerting: {
-          enabled: this.configService.get<boolean>(
+          enabled: this._configService.get<boolean>(
             "audit.alerting.enabled",
             true,
           ),
-          webhook: this.configService.get<string>("audit.alerting.webhook"),
-          email: this.configService.get<string>("audit.alerting.email"),
+          webhook: this._configService.get<string>("audit.alerting.webhook"),
+          email: this._configService.get<string>("audit.alerting.email"),
           thresholds: {
-            errorRate: this.configService.get<number>(
+            errorRate: this._configService.get<number>(
               "audit.alerting.errorRate",
               5,
             ),
-            securityEvents: this.configService.get<number>(
+            securityEvents: this._configService.get<number>(
               "audit.alerting.securityEvents",
               10,
             ),
           },
         },
         performance: {
-          batchSize: this.configService.get<number>(
+          batchSize: this._configService.get<number>(
             "audit.performance.batchSize",
             100,
           ),
-          flushInterval: this.configService.get<number>(
+          flushInterval: this._configService.get<number>(
             "audit.performance.flushInterval",
             5000,
           ),
-          maxQueueSize: this.configService.get<number>(
+          maxQueueSize: this._configService.get<number>(
             "audit.performance.maxQueueSize",
             10000,
           ),
-          retentionDays: this.configService.get<number>(
+          retentionDays: this._configService.get<number>(
             "audit.performance.retentionDays",
             90,
           ),
@@ -702,27 +733,21 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
       const loggerTransports: unknown[] = [];
 
       // Console transport for development
-      if (this.configService.get<string>("NODE_ENV") !== "production") {
+      if (this._configService.get<string>("NODE_ENV") !== "production") {
         loggerTransports.push(
           new transports.Console({
             format: format.combine(
               format.colorize(),
               format.timestamp(),
-              format.printf(
-                ({
-                  timestamp,
-                  level,
-                  message,
-                  ...meta
-                }: {
+              format.printf((info: LogMetadata) => {
+                const { timestamp, level, message, ...meta } = info as {
                   timestamp: string;
                   level: string;
                   message: string;
                   [key: string]: unknown;
-                }) => {
-                  return `${timestamp} [${level}]: ${message} ${Object.keys(meta).length ? JSON.stringify(meta) : ""}`;
-                },
-              ),
+                };
+                return `${timestamp} [${level}]: ${message} ${Object.keys(meta).length ? JSON.stringify(meta) : ""}`;
+              }),
             ),
           }),
         );
@@ -777,10 +802,10 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
       });
 
       event.status = AuditEventStatus.PROCESSING;
-    } catch (error) {
-      this.logger.error("Failed to queue audit event", error);
+    } catch (err) {
+      this.logger.error("Failed to queue audit event", err);
       event.status = AuditEventStatus.FAILED;
-      throw error;
+      throw err;
     }
   }
 
@@ -796,7 +821,7 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
    */
   private determineSource(): string {
     // Implementation would determine the source service/component
-    return this.configService.get<string>("service.name", "bytebot-audit");
+    return this._configService.get<string>("service.name", "bytebot-audit");
   }
 
   /**
@@ -848,38 +873,47 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
    */
   private async sendAlert(
     alertConfig: AlertConfig,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-    _event: AuditEvent,
+    event: AuditEvent,
   ): Promise<void> {
     try {
       for (const destination of alertConfig.destinations) {
         switch (destination.type) {
           case "webhook":
-            await this.sendWebhookAlert();
+            await this.sendWebhookAlert(event, destination);
             break;
           case "email":
-            await this.sendEmailAlert();
+            await this.sendEmailAlert(event, destination);
             break;
           // Add other alert destination types
         }
       }
-    } catch (error) {
-      this.logger.error("Failed to send alert notification", error);
+    } catch (err) {
+      this.logger.error("Failed to send alert notification", err);
     }
   }
 
   /**
    * Send webhook alert
    */
-  private async sendWebhookAlert(): Promise<void> {
+  private async sendWebhookAlert(
+    _event: AuditEvent,
+    _destination: { type: string; url?: string },
+  ): Promise<void> {
     // Implementation for webhook alerts
+    // Parameters prefixed with _ to indicate they are part of the interface
+    // but not yet used in the current implementation
   }
 
   /**
    * Send email alert
    */
-  private async sendEmailAlert(): Promise<void> {
+  private async sendEmailAlert(
+    _event: AuditEvent,
+    _destination: { type: string; email?: string },
+  ): Promise<void> {
     // Implementation for email alerts
+    // Parameters prefixed with _ to indicate they are part of the interface
+    // but not yet used in the current implementation
   }
 
   /**
@@ -943,8 +977,8 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
       for (const event of eventsToProcess) {
         await this.processEvent(event);
       }
-    } catch (error) {
-      this.logger.error("Error flushing pending events", error);
+    } catch (err) {
+      this.logger.error("Error flushing pending events", err);
     }
   }
 
@@ -954,14 +988,19 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
   private processEvent(event: AuditEvent): Promise<void> {
     return Promise.resolve().then(() => {
       try {
-        // Log to Winston
+        // Log to Winston - convert AuditSeverity to LogLevel
         if (this.winstonLogger?.log) {
-          this.winstonLogger.log(event.severity, event.message, event);
+          const logLevel = auditSeverityToLogLevel(event.severity);
+          this.winstonLogger.log(
+            logLevel,
+            event.message,
+            event as unknown as LogMetadata,
+          );
         }
 
         event.status = AuditEventStatus.COMPLETED;
-      } catch (error) {
-        this.logger.error("Error processing audit event", error);
+      } catch (err) {
+        this.logger.error("Error processing audit event", err);
         event.status = AuditEventStatus.FAILED;
       }
     });

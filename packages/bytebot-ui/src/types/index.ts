@@ -77,6 +77,7 @@ export interface File {
 
 export interface Task {
   id: string;
+  title: string;
   description: string;
   type: TaskType;
   status: TaskStatus;

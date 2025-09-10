@@ -21,11 +21,11 @@ export class BytebotAgentInterrupt extends Error {
  * Agent operation status
  */
 export enum AgentStatus {
-  IDLE = "idle",
-  PROCESSING = "processing",
-  INTERRUPTED = "interrupted",
-  ERROR = "error",
-  COMPLETED = "completed",
+  _IDLE = "idle",
+  _PROCESSING = "processing",
+  _INTERRUPTED = "interrupted",
+  _ERROR = "error",
+  _COMPLETED = "completed",
 }
 
 /**
@@ -35,6 +35,6 @@ export interface AgentResponse {
   id: string;
   status: AgentStatus;
   message?: string;
-  data?: any;
+  data?: unknown;
   timestamp: Date;
 }

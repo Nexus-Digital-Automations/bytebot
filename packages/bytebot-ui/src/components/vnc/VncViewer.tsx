@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
+import { logError } from "@/utils/logger";
 
 interface VncViewerProps {
   viewOnly?: boolean;
@@ -8,15 +9,33 @@ interface VncViewerProps {
 
 export function VncViewer({ viewOnly = true }: VncViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [VncComponent, setVncComponent] = useState<any>(null);
+  const [VncComponent, setVncComponent] = useState<React.ComponentType<{
+    rfbOptions?: Record<string, unknown>;
+    url?: string;
+    scaleViewport?: boolean;
+    viewOnly?: boolean;
+    style?: React.CSSProperties;
+  }> | null>(null);
   const [wsUrl, setWsUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // Dynamically import the VncScreen component only on the client side
-    import("react-vnc").then(({ VncScreen }) => {
-      setVncComponent(() => VncScreen);
-    });
+    import("react-vnc")
+      .then(({ VncScreen }) => {
+        setVncComponent(
+          () =>
+            VncScreen as React.ComponentType<{
+              rfbOptions?: Record<string, unknown>;
+              url?: string;
+              scaleViewport?: boolean;
+              viewOnly?: boolean;
+              style?: React.CSSProperties;
+            }>,
+        );
+      })
+      .catch((_error: unknown) => {
+        logError("Failed to load VNC component", _error, "VncViewer");
+      });
   }, []);
 
   useEffect(() => {

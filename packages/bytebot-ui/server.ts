@@ -8,10 +8,7 @@ import helmet from "helmet";
 import cors from "cors";
 
 // Import standardized security configuration for UI service
-import { 
-  SecurityLevel, 
-  ServiceType 
-} from "@bytebot/shared/middleware/security-middleware.standardized";
+import { SecurityLevel, ServiceType } from "@bytebot/shared/server";
 
 // Load environment variables
 dotenv.config();
@@ -19,24 +16,26 @@ dotenv.config();
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOSTNAME || "localhost";
 const port = parseInt(process.env.PORT || "9992", 10);
-const environment = process.env.NODE_ENV || "development";
+const environment: string = process.env.NODE_ENV || "development";
 
-// Backend URLs
-const BYTEBOT_AGENT_BASE_URL = process.env.BYTEBOT_AGENT_BASE_URL;
-const BYTEBOT_DESKTOP_VNC_URL = process.env.BYTEBOT_DESKTOP_VNC_URL;
+// Backend URLs with defaults for development
+const BYTEBOT_AGENT_BASE_URL =
+  process.env.BYTEBOT_AGENT_BASE_URL || "http://localhost:9991";
+const BYTEBOT_DESKTOP_VNC_URL =
+  process.env.BYTEBOT_DESKTOP_VNC_URL || "http://localhost:9990";
 
 // Security configuration
 const ALLOWED_ORIGINS = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:9990', // BytebotD
-  'http://localhost:9991', // Bytebot Agent
-  'http://localhost:9992', // Bytebot UI
-  'https://app.bytebot.ai',
-  'https://bytebot.ai',
-  'https://localhost:3000',
-  'https://localhost:3001',
-  'https://localhost:9992'
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:9990", // BytebotD
+  "http://localhost:9991", // Bytebot Agent
+  "http://localhost:9992", // Bytebot UI
+  "https://app.bytebot.ai",
+  "https://bytebot.ai",
+  "https://localhost:3000",
+  "https://localhost:3001",
+  "https://localhost:9992",
 ];
 
 const app = next({ dev, hostname, port });
@@ -50,18 +49,22 @@ app
     const vncProxy = createProxyServer({ changeOrigin: true, ws: true });
 
     const expressApp = express();
-    
+
     // Determine security level based on environment for standardized security
-    const securityLevel = environment === 'production' ? SecurityLevel.STANDARD : 
-                         environment === 'staging' ? SecurityLevel.STANDARD : SecurityLevel.DEVELOPMENT;
-    
+    const securityLevel =
+      environment === "production"
+        ? SecurityLevel._STANDARD
+        : environment === "staging"
+          ? SecurityLevel._STANDARD
+          : SecurityLevel._MINIMAL;
+
     console.log(`Bytebot-UI standardized security configuration applied`, {
-      serviceType: ServiceType.BYTEBOT_UI,
+      serviceType: ServiceType._BYTEBOT_UI,
       environment,
       securityLevel,
       corsOrigins: ALLOWED_ORIGINS.length,
     });
-    
+
     // Configure security headers with helmet
     expressApp.use(
       helmet({
@@ -105,20 +108,23 @@ app
         dnsPrefetchControl: { allow: false },
         frameguard: { action: "deny" },
         hidePoweredBy: true,
-        hsts: environment === "production" ? {
-          maxAge: 31536000, // 1 year
-          includeSubDomains: true,
-          preload: true,
-        } : false,
+        hsts:
+          environment === "production"
+            ? {
+                maxAge: 31536000, // 1 year
+                includeSubDomains: true,
+                preload: true,
+              }
+            : false,
         ieNoOpen: true,
         noSniff: true,
         originAgentCluster: true,
         permittedCrossDomainPolicies: false,
         referrerPolicy: { policy: "no-referrer" },
         xssFilter: true,
-      })
+      }),
     );
-    
+
     // Configure CORS with production-grade origin validation
     expressApp.use(
       cors({
@@ -127,61 +133,68 @@ app
           if (!origin) {
             return callback(null, true);
           }
-          
+
           // Check if origin is in allowed list
           if (ALLOWED_ORIGINS.includes(origin)) {
             return callback(null, true);
           }
-          
+
           // Allow localhost with any port in development
-          if (dev && (origin.startsWith('http://localhost:') || origin.startsWith('https://localhost:'))) {
+          if (
+            dev &&
+            (origin.startsWith("http://localhost:") ||
+              origin.startsWith("https://localhost:"))
+          ) {
             return callback(null, true);
           }
-          
+
           // Block unauthorized origins
           console.warn(`CORS blocked unauthorized origin: ${origin}`, {
             blockedOrigin: origin,
             allowedOrigins: ALLOWED_ORIGINS,
             timestamp: new Date().toISOString(),
           });
-          
-          return callback(new Error(`Origin ${origin} not allowed by CORS policy`), false);
+
+          return callback(
+            new Error(`Origin ${origin} not allowed by CORS policy`),
+            false,
+          );
         },
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         allowedHeaders: [
-          'Content-Type',
-          'Authorization',
-          'X-Requested-With',
-          'Accept',
-          'Origin',
-          'Cache-Control',
-          'X-API-Key',
+          "Content-Type",
+          "Authorization",
+          "X-Requested-With",
+          "Accept",
+          "Origin",
+          "Cache-Control",
+          "X-API-Key",
         ],
         exposedHeaders: [
-          'X-Request-ID',
-          'X-Response-Time',
-          'X-Rate-Limit-Remaining',
+          "X-Request-ID",
+          "X-Response-Time",
+          "X-Rate-Limit-Remaining",
         ],
         credentials: true,
         maxAge: 86400, // 24 hours preflight cache
         preflightContinue: false,
         optionsSuccessStatus: 204,
-      })
+      }),
     );
-    
+
     // Security headers for custom responses
     expressApp.use((req, res, next) => {
-      res.setHeader('X-Service', 'Bytebot-UI');
-      res.setHeader('X-API-Version', '1.0');
-      
-      if (environment === 'production') {
-        res.removeHeader('X-Powered-By');
-        res.removeHeader('Server');
+      res.setHeader("X-Service", "Bytebot-UI");
+      res.setHeader("X-API-Version", "1.0");
+
+      if (environment === "production") {
+        res.removeHeader("X-Powered-By");
+        res.removeHeader("Server");
       }
-      
+
       next();
     });
-    
+
     const server = createServer(expressApp);
 
     // WebSocket proxy for Socket.IO connections to backend

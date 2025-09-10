@@ -42,24 +42,34 @@ interface BullQueueOptions {
 
 // Temporary stub for Bull Module (not used in current implementation)
 // Will be replaced when @nestjs/bull dependency is properly integrated
-const _BullModuleStub = {
-  forRootAsync: (options: BullModuleOptions) => ({
-    module: class BullModuleStub {},
-    imports: options.imports || [],
-    providers: [],
-    exports: [],
-  }),
-  registerQueue: (options: BullQueueOptions) => ({
-    module: class BullQueueStub {},
-    providers: [
-      {
-        provide: `BullQueue_${options.name}`,
-        useValue: {},
-      },
-    ],
-    exports: [`BullQueue_${options.name}`],
-  }),
-};
+
+class BullModuleStub {
+  static forRootAsync(options: BullModuleOptions) {
+    return {
+      module: BullModuleStub,
+      imports: options.imports || [],
+      providers: [],
+      exports: [],
+    };
+  }
+
+  static registerQueue(options: BullQueueOptions) {
+    return {
+      module: class BullQueueStub {},
+      providers: [
+        {
+          provide: `BullQueue_${options.name}`,
+          useValue: {},
+        },
+      ],
+      exports: [`BullQueue_${options.name}`],
+    };
+  }
+}
+
+// Ensure stub classes are referenced to avoid unused variable warnings
+// These will be replaced when @nestjs/bull dependency is properly integrated
+void BullModuleStub;
 
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ScheduleModule } from "@nestjs/schedule";
@@ -115,7 +125,15 @@ export class AuditModule {
   static forRoot(options: AuditModuleOptions = {}): DynamicModule {
     const { isGlobal = true, config = {} } = options;
     // Redis configuration will be implemented when @nestjs/bull is properly integrated
-    const _redisConfig = options.redis;
+    // Store redis config for future use
+    this.validateRedisConfig(options.redis);
+
+    // Log configuration for debugging
+    console.debug("AuditModule forRoot called with options:", {
+      isGlobal,
+      configKeys: Object.keys(config),
+      hasRedisConfig: !!options.redis,
+    });
 
     const imports = [
       // Configuration module
@@ -268,7 +286,7 @@ export class AuditModule {
 
     // TODO: Controllers - temporarily commented
     // const controllers = [AuditController, ComplianceController];
-    const controllers = [];
+    const controllers: Array<new (..._args: unknown[]) => unknown> = [];
 
     // TODO: Add interceptors if enabled - temporarily commented
     // if (autoInterceptors) {
@@ -314,6 +332,22 @@ export class AuditModule {
       controllers,
       exports,
     };
+  }
+
+  /**
+   * Validate Redis configuration
+   */
+  private static validateRedisConfig(
+    redisConfig?: AuditModuleOptions["redis"],
+  ): void {
+    if (redisConfig) {
+      if (!redisConfig.host || !redisConfig.port) {
+        throw new Error("Redis host and port are required");
+      }
+      if (redisConfig.port < 1 || redisConfig.port > 65535) {
+        throw new Error("Invalid Redis port number");
+      }
+    }
   }
 
   /**

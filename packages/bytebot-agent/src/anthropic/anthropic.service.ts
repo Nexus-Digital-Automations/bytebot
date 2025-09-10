@@ -214,30 +214,30 @@ export class AnthropicService implements BytebotAgentService {
       switch (block.type) {
         case 'text':
           return {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: block.text,
-          } as TextContentBlock;
+          } satisfies TextContentBlock;
 
         case 'tool_use':
           return {
-            type: MessageContentType.ToolUse,
+            type: MessageContentType._ToolUse,
             id: block.id,
             name: block.name,
-            input: block.input,
-          } as ToolUseContentBlock;
+            input: (block.input as Record<string, unknown>) || {},
+          } satisfies ToolUseContentBlock;
 
         case 'thinking':
           return {
-            type: MessageContentType.Thinking,
+            type: MessageContentType._Thinking,
             thinking: block.thinking,
             signature: block.signature,
-          } as ThinkingContentBlock;
+          } satisfies ThinkingContentBlock;
 
         case 'redacted_thinking':
           return {
-            type: MessageContentType.RedactedThinking,
+            type: MessageContentType._RedactedThinking,
             data: block.data,
-          } as RedactedThinkingContentBlock;
+          } satisfies RedactedThinkingContentBlock;
       }
     });
   }

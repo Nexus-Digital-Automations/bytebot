@@ -61,43 +61,43 @@ jest.mock('@bytebot/shared', () => {
   return {
     ...actual,
     convertClickMouseActionToToolUseBlock: jest.fn((action, id) => ({
-      type: actual.MessageContentType.ToolUse,
+      type: actual.MessageContentType._ToolUse,
       id,
       name: 'computer_click_mouse',
       input: action,
     })),
     convertDragMouseActionToToolUseBlock: jest.fn((action, id) => ({
-      type: actual.MessageContentType.ToolUse,
+      type: actual.MessageContentType._ToolUse,
       id,
       name: 'computer_drag_mouse',
       input: action,
     })),
     convertPressMouseActionToToolUseBlock: jest.fn((action, id) => ({
-      type: actual.MessageContentType.ToolUse,
+      type: actual.MessageContentType._ToolUse,
       id,
       name: 'computer_press_mouse',
       input: action,
     })),
     convertTypeKeysActionToToolUseBlock: jest.fn((action, id) => ({
-      type: actual.MessageContentType.ToolUse,
+      type: actual.MessageContentType._ToolUse,
       id,
       name: 'computer_type_keys',
       input: action,
     })),
     convertPressKeysActionToToolUseBlock: jest.fn((action, id) => ({
-      type: actual.MessageContentType.ToolUse,
+      type: actual.MessageContentType._ToolUse,
       id,
       name: 'computer_press_keys',
       input: action,
     })),
     convertTypeTextActionToToolUseBlock: jest.fn((action, id) => ({
-      type: actual.MessageContentType.ToolUse,
+      type: actual.MessageContentType._ToolUse,
       id,
       name: 'computer_type_text',
       input: action,
     })),
     convertScrollActionToToolUseBlock: jest.fn((action, id) => ({
-      type: actual.MessageContentType.ToolUse,
+      type: actual.MessageContentType._ToolUse,
       id,
       name: 'computer_scroll',
       input: action,
@@ -422,10 +422,10 @@ describe('InputCaptureService', () => {
         expect(messagesService.create).toHaveBeenCalledWith({
           content: [
             {
-              type: MessageContentType.UserAction,
+              type: MessageContentType._UserAction,
               content: [
                 {
-                  type: MessageContentType.Image,
+                  type: MessageContentType._Image,
                   source: {
                     data: mockScreenshotData,
                     media_type: 'image/png',
@@ -433,7 +433,7 @@ describe('InputCaptureService', () => {
                   },
                 },
                 {
-                  type: MessageContentType.ToolUse,
+                  type: MessageContentType._ToolUse,
                   id: mockUUID,
                   name: 'computer_click_mouse',
                   input: {
@@ -472,10 +472,10 @@ describe('InputCaptureService', () => {
           expect.objectContaining({
             content: expect.arrayContaining([
               expect.objectContaining({
-                type: MessageContentType.UserAction,
+                type: MessageContentType._UserAction,
                 content: expect.arrayContaining([
                   expect.objectContaining({
-                    type: MessageContentType.Image,
+                    type: MessageContentType._Image,
                     source: expect.objectContaining({
                       data: mockScreenshotData,
                     }),
@@ -582,10 +582,10 @@ describe('InputCaptureService', () => {
         expect(messagesService.create).toHaveBeenCalledWith({
           content: [
             {
-              type: MessageContentType.UserAction,
+              type: MessageContentType._UserAction,
               content: [
                 {
-                  type: MessageContentType.ToolUse,
+                  type: MessageContentType._ToolUse,
                   id: mockUUID,
                   name: 'computer_drag_mouse',
                   input: {
@@ -622,10 +622,10 @@ describe('InputCaptureService', () => {
           expect.objectContaining({
             content: expect.arrayContaining([
               expect.objectContaining({
-                type: MessageContentType.UserAction,
+                type: MessageContentType._UserAction,
                 content: expect.arrayContaining([
                   expect.objectContaining({
-                    type: MessageContentType.ToolUse,
+                    type: MessageContentType._ToolUse,
                     name: 'computer_press_mouse',
                   }),
                 ]),
@@ -975,7 +975,7 @@ describe('InputCaptureService', () => {
       expect(messagesService.create).toHaveBeenCalledWith({
         content: expect.arrayContaining([
           expect.objectContaining({
-            type: MessageContentType.UserAction,
+            type: MessageContentType._UserAction,
           }),
         ]),
         role: MessageRole.USER,

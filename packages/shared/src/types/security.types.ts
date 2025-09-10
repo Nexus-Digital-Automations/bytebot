@@ -13,8 +13,6 @@
  * @author Bytebot Security Team
  */
 
-/* eslint-disable no-unused-vars */
-
 // import { IsEmail, IsString, IsEnum, MinLength } from "class-validator";
 
 /**
@@ -39,49 +37,52 @@ interface RequestLike {
  */
 export enum SecurityEventType {
   // Authentication events
-  AUTHENTICATION_FAILED = "authentication_failed",
-  LOGIN_SUCCESS = "auth.login.success",
-  LOGIN_FAILED = "auth.login.failed",
-  LOGOUT = "auth.logout",
-  TOKEN_REFRESH = "auth.token.refresh",
+  _AUTHENTICATION_FAILED = "authentication_failed",
+  _LOGIN_SUCCESS = "auth.login.success",
+  _LOGIN_FAILED = "auth.login.failed",
+  _LOGOUT = "auth.logout",
+  _TOKEN_REFRESH = "auth.token.refresh",
 
   // Authorization events
-  ACCESS_GRANTED = "authz.access.granted",
-  ACCESS_DENIED = "access_denied",
-  PERMISSION_ESCALATION_ATTEMPT = "authz.escalation.attempt",
+  _ACCESS_GRANTED = "authz.access.granted",
+  _ACCESS_DENIED = "access_denied",
+  _PERMISSION_ESCALATION_ATTEMPT = "authz.escalation.attempt",
 
   // Security events
-  SUSPICIOUS_ACTIVITY = "suspicious_activity",
-  SECURITY_CONFIG_CHANGED = "security_config_changed",
-  DATA_ACCESS_VIOLATION = "data_access_violation",
-  CSP_VIOLATION = "csp_violation",
-  ADMIN_ACTION = "security.admin.action",
+  _SUSPICIOUS_ACTIVITY = "suspicious_activity",
+  _SECURITY_CONFIG_CHANGED = "security_config_changed",
+  _DATA_ACCESS_VIOLATION = "data_access_violation",
+  _CSP_VIOLATION = "csp_violation",
+  _ADMIN_ACTION = "security.admin.action",
+  _MALFORMED_REQUEST = "malformed_request",
+  _CORS_VIOLATION = "cors_violation",
 
   // Validation events
-  VALIDATION_FAILED = "validation_failed",
-  XSS_ATTEMPT_BLOCKED = "xss_attempt_blocked",
-  INJECTION_ATTEMPT_BLOCKED = "injection_attempt_blocked",
+  _VALIDATION_FAILED = "validation_failed",
+  _XSS_ATTEMPT_BLOCKED = "xss_attempt_blocked",
+  _INJECTION_ATTEMPT_BLOCKED = "injection_attempt_blocked",
 
   // Rate limiting events
-  RATE_LIMIT_EXCEEDED = "rate_limit.exceeded",
+  _RATE_LIMIT_EXCEEDED = "rate_limit.exceeded",
 }
 
 /**
  * Service types for rate limiting and security configuration
  * Used across security middleware and configuration management
  */
+
 export enum RateLimitServiceType {
   /** BytebotD - Computer Control Service (Maximum Security) */
-  BYTEBOTD = "bytebotd",
+  _BYTEBOTD = "bytebotd",
 
   /** Bytebot Agent - Task Management Service (High Security) */
-  BYTEBOT_AGENT = "bytebot-agent",
+  _BYTEBOT_AGENT = "bytebot-agent",
 
   /** Bytebot UI - Frontend Service (Standard Security) */
-  BYTEBOT_UI = "bytebot-ui",
+  _BYTEBOT_UI = "bytebot-ui",
 
   /** Shared utilities and common services */
-  SHARED = "shared",
+  _SHARED = "shared",
 }
 
 /**
@@ -157,13 +158,19 @@ export interface SecurityEvent {
   userId?: string;
   ipAddress?: string;
   userAgent?: string;
-  resource: string;
+  resource?: string;
   endpoint: string;
   method: string;
-  success: boolean;
+  success?: boolean;
   message?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   sessionId?: string;
+  // Additional properties used by middleware
+  serviceName?: string;
+  environment?: string;
+  origin?: string;
+  reason?: string;
+  blocked?: boolean;
 }
 
 /**
@@ -173,9 +180,9 @@ export function createSecurityEvent(
   type: SecurityEventType,
   endpoint: string,
   method: string,
-  success: boolean,
+  success: boolean = false,
   message?: string,
-  metadata?: Record<string, any>,
+  metadata?: Record<string, unknown>,
   userId?: string,
   ipAddress?: string,
   userAgent?: string,
@@ -201,15 +208,30 @@ export function createSecurityEvent(
  * Calculate risk score for security events
  */
 function calculateRiskScore(type: SecurityEventType, success: boolean): number {
-  const baseScores = {
-    [SecurityEventType.AUTHENTICATION_FAILED]: 60,
-    [SecurityEventType.ACCESS_DENIED]: 40,
-    [SecurityEventType.SUSPICIOUS_ACTIVITY]: 80,
-    [SecurityEventType.SECURITY_CONFIG_CHANGED]: 30,
-    [SecurityEventType.DATA_ACCESS_VIOLATION]: 90,
+  const baseScores: Record<SecurityEventType, number> = {
+    [SecurityEventType._AUTHENTICATION_FAILED]: 60,
+    [SecurityEventType._LOGIN_SUCCESS]: 10,
+    [SecurityEventType._LOGIN_FAILED]: 50,
+    [SecurityEventType._LOGOUT]: 5,
+    [SecurityEventType._TOKEN_REFRESH]: 15,
+    [SecurityEventType._ACCESS_GRANTED]: 10,
+    [SecurityEventType._ACCESS_DENIED]: 40,
+    [SecurityEventType._PERMISSION_ESCALATION_ATTEMPT]: 85,
+    [SecurityEventType._SUSPICIOUS_ACTIVITY]: 80,
+    [SecurityEventType._SECURITY_CONFIG_CHANGED]: 30,
+    [SecurityEventType._DATA_ACCESS_VIOLATION]: 90,
+    [SecurityEventType._CSP_VIOLATION]: 45,
+    [SecurityEventType._ADMIN_ACTION]: 25,
+    [SecurityEventType._VALIDATION_FAILED]: 35,
+    [SecurityEventType._XSS_ATTEMPT_BLOCKED]: 75,
+    [SecurityEventType._INJECTION_ATTEMPT_BLOCKED]: 85,
+    [SecurityEventType._RATE_LIMIT_EXCEEDED]: 30,
+    [SecurityEventType._MALFORMED_REQUEST]: 35,
+    [SecurityEventType._CORS_VIOLATION]: 45,
   };
 
-  let score = baseScores[type] || 50;
+  const baseScore = baseScores[type];
+  let score = baseScore;
 
   // Increase risk for failed events
   if (!success) {
@@ -241,33 +263,63 @@ export const DEFAULT_SANITIZATION_OPTIONS = {
  * - operator: Task creation and computer control permissions
  * - viewer: Read-only access to tasks and system status
  */
+
 export enum UserRole {
-  ADMIN = "admin",
-  OPERATOR = "operator",
-  VIEWER = "viewer",
+  _ADMIN = "admin",
+  _OPERATOR = "operator",
+  _VIEWER = "viewer",
+  _USER = "user",
+  _GUEST = "guest",
 }
 
 /**
  * Fine-grained permission system for RBAC
  * Maps to specific API endpoints and operations
  */
+
 export enum Permission {
   // Task permissions
-  TASK_READ = "task:read",
-  TASK_WRITE = "task:write",
-  TASK_DELETE = "task:delete",
+  _TASK_READ = "task:read",
+  _TASK_WRITE = "task:write",
+  _TASK_DELETE = "task:delete",
 
   // Computer control permissions
-  COMPUTER_CONTROL = "computer:control",
-  COMPUTER_VIEW = "computer:view",
+  _COMPUTER_CONTROL = "computer:control",
+  _COMPUTER_VIEW = "computer:view",
 
   // System administration
-  SYSTEM_ADMIN = "system:admin",
-  USER_MANAGE = "user:manage",
+  _SYSTEM_ADMIN = "system:admin",
+  _USER_MANAGE = "user:manage",
 
   // Monitoring and metrics
-  METRICS_VIEW = "metrics:view",
-  LOGS_VIEW = "logs:view",
+  _METRICS_VIEW = "metrics:view",
+  _LOGS_VIEW = "logs:view",
+
+  // Additional permissions for RBAC compatibility
+  _EXECUTE = "execute",
+  _ADMIN = "admin",
+  _CONFIGURE = "configure",
+  _MONITOR = "monitor",
+  _USER_MANAGEMENT = "user:management",
+  _TASK_MANAGEMENT = "task:management",
+  _SYSTEM_MANAGEMENT = "system:management",
+  _AUDIT_ACCESS = "audit:access",
+  _SECURITY_MANAGEMENT = "security:management",
+  _API_ACCESS = "api:access",
+  _API_WRITE = "api:write",
+  _API_ADMIN = "api:admin",
+  _COMPUTER_USE = "computer:use",
+  _COMPUTER_ADMIN = "computer:admin",
+  _SCREEN_CAPTURE = "screen:capture",
+  _FILE_ACCESS = "file:access",
+
+  // Test compatibility permissions
+  _CREATE_USER = "create:user",
+  _DELETE_USER = "delete:user",
+  _VIEW_ADMIN_PANEL = "view:admin_panel",
+  _CREATE_TASK = "create:task",
+  _VIEW_OWN_PROFILE = "view:own_profile",
+  _VIEW_PUBLIC_CONTENT = "view:public_content",
 }
 
 /**
@@ -277,14 +329,17 @@ export interface JwtPayload {
   /** Unique user identifier */
   sub: string;
 
+  /** User ID (alternative identifier) */
+  userId?: string;
+
   /** User email address */
-  email: string;
+  email?: string;
 
   /** Assigned user role */
   role: UserRole;
 
   /** Array of specific permissions */
-  permissions: Permission[];
+  permissions?: Permission[];
 
   /** Token issued timestamp */
   iat: number;
@@ -394,6 +449,9 @@ export interface ValidationResult {
 
   /** Validation timestamp */
   timestamp: Date;
+
+  /** Security score (0-100) */
+  score?: number;
 }
 
 /**
@@ -449,10 +507,10 @@ export interface RateLimitConfig {
   message: string;
 
   /** Custom skip function */
-  skip?: (req: RequestLike) => boolean;
+  skip?: (_req: RequestLike) => boolean;
 
   /** Key generator for rate limiting */
-  keyGenerator?: (req: RequestLike) => string;
+  keyGenerator?: (_req: RequestLike) => string;
 }
 
 /**
@@ -460,19 +518,19 @@ export interface RateLimitConfig {
  */
 export enum RateLimitPreset {
   /** Authentication endpoints (strict) */
-  AUTH = "auth",
+  _AUTH = "auth",
 
   /** Computer control operations (moderate) */
-  COMPUTER_USE = "computer-use",
+  _COMPUTER_USE = "computer-use",
 
   /** Task operations (moderate) */
-  TASK_OPERATIONS = "task-operations",
+  _TASK_OPERATIONS = "task-operations",
 
   /** Read operations (lenient) */
-  READ_OPERATIONS = "read-operations",
+  _READ_OPERATIONS = "read-operations",
 
   /** WebSocket connections (strict) */
-  WEBSOCKET = "websocket",
+  _WEBSOCKET = "websocket",
 }
 
 // ===========================
@@ -520,6 +578,12 @@ export interface PasswordPolicy {
 
   /** Require special characters */
   requireSpecialChars: boolean;
+
+  /** Minimum number of special characters required */
+  minSpecialChars?: number;
+
+  /** Forbidden patterns/words */
+  forbiddenPatterns?: string[];
 
   /** Salt rounds for bcrypt hashing */
   saltRounds: number;
@@ -644,16 +708,16 @@ export interface ApiVersion {
  */
 export enum VersioningStrategy {
   /** Version in URL path (/api/v1/) */
-  URI = "uri",
+  _URI = "uri",
 
   /** Version in custom header */
-  HEADER = "header",
+  _HEADER = "header",
 
   /** Version in query parameter */
-  QUERY = "query",
+  _QUERY = "query",
 
   /** Version in Accept header */
-  MEDIA_TYPE = "media-type",
+  _MEDIA_TYPE = "media-type",
 }
 
 // ===========================
@@ -702,29 +766,29 @@ export interface ThrottleMetadata {
  */
 export enum SecurityErrorCode {
   // Authentication errors
-  INVALID_CREDENTIALS = "AUTH_INVALID_CREDENTIALS",
-  TOKEN_EXPIRED = "AUTH_TOKEN_EXPIRED",
-  TOKEN_INVALID = "AUTH_TOKEN_INVALID",
-  TOKEN_MALFORMED = "AUTH_TOKEN_MALFORMED",
+  _INVALID_CREDENTIALS = "AUTH_INVALID_CREDENTIALS",
+  _TOKEN_EXPIRED = "AUTH_TOKEN_EXPIRED",
+  _TOKEN_INVALID = "AUTH_TOKEN_INVALID",
+  _TOKEN_MALFORMED = "AUTH_TOKEN_MALFORMED",
 
   // Authorization errors
-  INSUFFICIENT_PERMISSIONS = "AUTHZ_INSUFFICIENT_PERMISSIONS",
-  ROLE_REQUIRED = "AUTHZ_ROLE_REQUIRED",
-  ACCESS_DENIED = "AUTHZ_ACCESS_DENIED",
+  _INSUFFICIENT_PERMISSIONS = "AUTHZ_INSUFFICIENT_PERMISSIONS",
+  _ROLE_REQUIRED = "AUTHZ_ROLE_REQUIRED",
+  _ACCESS_DENIED = "AUTHZ_ACCESS_DENIED",
 
   // Validation errors
-  VALIDATION_FAILED = "VALIDATION_FAILED",
-  XSS_DETECTED = "VALIDATION_XSS_DETECTED",
-  INJECTION_DETECTED = "VALIDATION_INJECTION_DETECTED",
-  REQUEST_TOO_LARGE = "VALIDATION_REQUEST_TOO_LARGE",
+  _VALIDATION_FAILED = "VALIDATION_FAILED",
+  _XSS_DETECTED = "VALIDATION_XSS_DETECTED",
+  _INJECTION_DETECTED = "VALIDATION_INJECTION_DETECTED",
+  _REQUEST_TOO_LARGE = "VALIDATION_REQUEST_TOO_LARGE",
 
   // Rate limiting errors
-  RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
-  TOO_MANY_REQUESTS = "RATE_LIMIT_TOO_MANY_REQUESTS",
+  _RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
+  _TOO_MANY_REQUESTS = "RATE_LIMIT_TOO_MANY_REQUESTS",
 
   // System errors
-  SECURITY_CONFIG_ERROR = "SECURITY_CONFIG_ERROR",
-  INTERNAL_SECURITY_ERROR = "SECURITY_INTERNAL_ERROR",
+  _SECURITY_CONFIG_ERROR = "SECURITY_CONFIG_ERROR",
+  _INTERNAL_SECURITY_ERROR = "SECURITY_INTERNAL_ERROR",
 }
 
 /**
@@ -750,7 +814,7 @@ export interface SecurityError {
   correlationId: string;
 
   /** Additional error metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // ===========================

@@ -55,6 +55,28 @@ enum TaskType {
   SCHEDULED
 }
 
+enum BrowserTaskStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum BrowserTaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum BrowserSessionStatus {
+  ACTIVE
+  IDLE
+  TERMINATED
+  ERROR
+}
+
 model Task {
   id            String        @id @default(uuid())
   description   String
@@ -147,6 +169,7 @@ model User {
   tasks         Task[]
   sessions      UserSession[]
   permissions   RolePermission[]
+  browserTasks  BrowserTask[]
   
   @@map("users")
 }
@@ -181,5 +204,185 @@ model RolePermission {
   
   @@unique([userId, role, permission])
   @@map("role_permissions")
+}
+
+// Browser Automation Models
+
+model BrowserSession {
+  id                String              @id @default(uuid())
+  processId         String?
+  status            BrowserSessionStatus @default(ACTIVE)
+  headless          Boolean             @default(true)
+  viewportWidth     Int                 @default(1280)
+  viewportHeight    Int                 @default(720)
+  userAgent         String?
+  workingDirectory  String?
+  screenshotsEnabled Boolean            @default(true)
+  videoRecording    Boolean             @default(false)
+  timeoutMs         Int                 @default(300000)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  terminatedAt      DateTime?
+  lastActivity      DateTime            @default(now())
+  error             String?
+  metadata          Json?
+  
+  // Relations
+  tasks             BrowserTask[]
+  screenshots       BrowserScreenshot[]
+  domSnapshots      BrowserDomSnapshot[]
+  
+  @@map("browser_sessions")
+}
+
+model BrowserTask {
+  id                String                @id @default(uuid())
+  externalTaskId    String?               // Reference to Task.id if needed
+  sessionId         String
+  type              String
+  status            BrowserTaskStatus     @default(PENDING)
+  priority          BrowserTaskPriority   @default(NORMAL)
+  startUrl          String?
+  actions           Json                  // Array of browser actions to perform
+  configuration     Json                  // Task-specific configuration
+  constraints       Json?                 // Security and validation constraints
+  validation        Json?                 // Success/failure criteria
+  options           Json?                 // Execution options
+  retryOptions      Json?                 // Retry configuration
+  timeoutSeconds    Int?                  @default(300)
+  tags              String[]              @default([])
+  customData        Json?
+  
+  // Execution tracking
+  currentStep       Int                   @default(0)
+  totalSteps        Int                   @default(1)
+  startedAt         DateTime?
+  completedAt       DateTime?
+  lastActivity      DateTime              @default(now())
+  estimatedRemainingMs Int?
+  
+  // Results and errors
+  result            Json?
+  error             Json?
+  
+  // Metadata and audit
+  userId            String?
+  agentId           String?
+  retryCount        Int                   @default(0)
+  maxRetries        Int                   @default(3)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  
+  // Relations
+  session           BrowserSession        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user              User?                 @relation(fields: [userId], references: [id])
+  executionSteps    BrowserTaskStep[]
+  screenshots       BrowserScreenshot[]
+  domSnapshots      BrowserDomSnapshot[]
+  formData          BrowserFormData[]
+  dataExtractions   BrowserDataExtraction[]
+  
+  @@map("browser_tasks")
+}
+
+model BrowserTaskStep {
+  id               String            @id @default(uuid())
+  taskId           String
+  stepNumber       Int
+  action           String
+  status           BrowserTaskStatus @default(PENDING)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  durationMs       Int?
+  result           String?
+  error            String?
+  metadata         Json?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  
+  // Relations
+  task             BrowserTask       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  @@unique([taskId, stepNumber])
+  @@map("browser_task_steps")
+}
+
+model BrowserScreenshot {
+  id               String         @id @default(uuid())
+  sessionId        String
+  taskId           String?
+  filename         String
+  filePath         String
+  url              String?
+  viewport         Json           // {width: number, height: number}
+  timestamp        DateTime       @default(now())
+  fileSize         Int
+  mimeType         String         @default("image/png")
+  metadata         Json?
+  
+  // Relations
+  session          BrowserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  task             BrowserTask?   @relation(fields: [taskId], references: [id])
+  
+  @@map("browser_screenshots")
+}
+
+model BrowserDomSnapshot {
+  id               String         @id @default(uuid())
+  sessionId        String
+  taskId           String?
+  url              String
+  title            String?
+  htmlContent      String?        // Compressed/truncated if too large
+  accessibilityTree Json?
+  interactiveElements Json?       // Clickable elements, form fields, etc.
+  extractedText    String?
+  metadata         Json?
+  timestamp        DateTime       @default(now())
+  fileSize         Int?
+  
+  // Relations
+  session          BrowserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  task             BrowserTask?   @relation(fields: [taskId], references: [id])
+  
+  @@map("browser_dom_snapshots")
+}
+
+model BrowserFormData {
+  id               String      @id @default(uuid())
+  taskId           String
+  formSelector     String
+  fieldName        String
+  fieldType        String
+  fieldValue       String?
+  isSubmitted      Boolean     @default(false)
+  submittedAt      DateTime?
+  validationResult Json?
+  metadata         Json?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  
+  // Relations
+  task             BrowserTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  @@map("browser_form_data")
+}
+
+model BrowserDataExtraction {
+  id               String      @id @default(uuid())
+  taskId           String
+  extractionType   String      // 'text', 'table', 'links', 'images', 'structured'
+  selector         String?
+  extractedData    Json
+  rawContent       String?
+  processedContent Json?
+  confidence       Float?      @default(1.0)
+  metadata         Json?
+  extractedAt      DateTime    @default(now())
+  
+  // Relations
+  task             BrowserTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  @@map("browser_data_extractions")
 }
 

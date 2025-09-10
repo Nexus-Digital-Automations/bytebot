@@ -41,7 +41,7 @@ export interface AuditLogEntry {
   userAgent?: string;
   resource?: string;
   action?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   stackTrace?: string;
   duration?: number;
   success?: boolean;
@@ -67,77 +67,77 @@ export interface AuditLogQuery {
 export interface AuditLoggerMock {
   log: jest.MockedFunction<
     (
-      level: LogLevel,
-      category: EventCategory,
-      event: string,
-      data?: Partial<AuditLogEntry>,
-    ) => Promise<void>
+      _level: LogLevel,
+      _category: EventCategory,
+      _event: string,
+      _data?: Partial<AuditLogEntry>,
+    ) => void
   >;
   info: jest.MockedFunction<
     (
-      category: EventCategory,
-      event: string,
-      data?: Partial<AuditLogEntry>,
-    ) => Promise<void>
+      _category: EventCategory,
+      _event: string,
+      _data?: Partial<AuditLogEntry>,
+    ) => void
   >;
   warn: jest.MockedFunction<
     (
-      category: EventCategory,
-      event: string,
-      data?: Partial<AuditLogEntry>,
-    ) => Promise<void>
+      _category: EventCategory,
+      _event: string,
+      _data?: Partial<AuditLogEntry>,
+    ) => void
   >;
   error: jest.MockedFunction<
     (
-      category: EventCategory,
-      event: string,
-      data?: Partial<AuditLogEntry>,
-    ) => Promise<void>
+      _category: EventCategory,
+      _event: string,
+      _data?: Partial<AuditLogEntry>,
+    ) => void
   >;
   critical: jest.MockedFunction<
     (
-      category: EventCategory,
-      event: string,
-      data?: Partial<AuditLogEntry>,
-    ) => Promise<void>
+      _category: EventCategory,
+      _event: string,
+      _data?: Partial<AuditLogEntry>,
+    ) => void
   >;
   logSecurityEvent: jest.MockedFunction<
     (
-      event: string,
-      severity: "low" | "medium" | "high" | "critical",
-      data?: Partial<AuditLogEntry>,
-    ) => Promise<void>
+      _event: string,
+      _severity: "low" | "medium" | "high" | "critical",
+      _data?: Partial<AuditLogEntry>,
+    ) => void
   >;
   logUserActivity: jest.MockedFunction<
     (
-      userId: string,
-      action: string,
-      resource: string,
-      data?: Partial<AuditLogEntry>,
-    ) => Promise<void>
+      _userId: string,
+      _action: string,
+      _resource: string,
+      _data?: Partial<AuditLogEntry>,
+    ) => void
   >;
   logDataAccess: jest.MockedFunction<
     (
-      userId: string,
-      resource: string,
-      operation: "read" | "write" | "delete",
-      data?: Partial<AuditLogEntry>,
-    ) => Promise<void>
+      _userId: string,
+      _resource: string,
+      _operation: "read" | "write" | "delete",
+      _data?: Partial<AuditLogEntry>,
+    ) => void
   >;
   logPerformanceMetric: jest.MockedFunction<
     (
-      operation: string,
-      duration: number,
-      metadata?: Record<string, any>,
-    ) => Promise<void>
+      _operation: string,
+      _duration: number,
+      _metadata?: Record<string, unknown>,
+    ) => void
   >;
   query: jest.MockedFunction<
     (
-      query: AuditLogQuery,
+      _query: AuditLogQuery,
     ) => Promise<{ logs: AuditLogEntry[]; totalCount: number }>
   >;
   getLogStats: jest.MockedFunction<
-    (timeframe: "hour" | "day" | "week" | "month") => Promise<{
+    (_timeframe: "hour" | "day" | "week" | "month") => Promise<{
       totalLogs: number;
       logsByLevel: Record<LogLevel, number>;
       logsByCategory: Record<EventCategory, number>;
@@ -146,13 +146,13 @@ export interface AuditLoggerMock {
     }>
   >;
   exportLogs: jest.MockedFunction<
-    (query: AuditLogQuery, format: "json" | "csv" | "xml") => Promise<string>
+    (_query: AuditLogQuery, _format: "json" | "csv" | "xml") => Promise<string>
   >;
   purgeLogs: jest.MockedFunction<
-    (olderThan: Date, category?: EventCategory[]) => Promise<number>
+    (_olderThan: Date, _category?: EventCategory[]) => Promise<number>
   >;
-  flush: jest.MockedFunction<() => Promise<void>>;
-  setLogLevel: jest.MockedFunction<(level: LogLevel) => void>;
+  flush: jest.MockedFunction<() => void>;
+  setLogLevel: jest.MockedFunction<(_level: LogLevel) => void>;
 }
 
 // Mock storage for audit logs
@@ -400,67 +400,67 @@ export const createAuditLoggerMock = (): AuditLoggerMock => {
 
   return {
     log: jest.fn(
-      async (
+      (
         level: LogLevel,
         category: EventCategory,
         event: string,
         data?: Partial<AuditLogEntry>,
-      ): Promise<void> => {
+      ): void => {
         const logEntry = createLogEntry(level, category, event, data);
         mockAuditStore.addLog(logEntry);
       },
     ),
 
     info: jest.fn(
-      async (
+      (
         category: EventCategory,
         event: string,
         data?: Partial<AuditLogEntry>,
-      ): Promise<void> => {
+      ): void => {
         const logEntry = createLogEntry("info", category, event, data);
         mockAuditStore.addLog(logEntry);
       },
     ),
 
     warn: jest.fn(
-      async (
+      (
         category: EventCategory,
         event: string,
         data?: Partial<AuditLogEntry>,
-      ): Promise<void> => {
+      ): void => {
         const logEntry = createLogEntry("warn", category, event, data);
         mockAuditStore.addLog(logEntry);
       },
     ),
 
     error: jest.fn(
-      async (
+      (
         category: EventCategory,
         event: string,
         data?: Partial<AuditLogEntry>,
-      ): Promise<void> => {
+      ): void => {
         const logEntry = createLogEntry("error", category, event, data);
         mockAuditStore.addLog(logEntry);
       },
     ),
 
     critical: jest.fn(
-      async (
+      (
         category: EventCategory,
         event: string,
         data?: Partial<AuditLogEntry>,
-      ): Promise<void> => {
+      ): void => {
         const logEntry = createLogEntry("critical", category, event, data);
         mockAuditStore.addLog(logEntry);
       },
     ),
 
     logSecurityEvent: jest.fn(
-      async (
+      (
         event: string,
         severity: "low" | "medium" | "high" | "critical",
         data?: Partial<AuditLogEntry>,
-      ): Promise<void> => {
+      ): void => {
         const levelMap = {
           low: "info" as const,
           medium: "warn" as const,
@@ -480,12 +480,12 @@ export const createAuditLoggerMock = (): AuditLoggerMock => {
     ),
 
     logUserActivity: jest.fn(
-      async (
+      (
         userId: string,
         action: string,
         resource: string,
         data?: Partial<AuditLogEntry>,
-      ): Promise<void> => {
+      ): void => {
         const logEntry = createLogEntry(
           "info",
           "authentication",
@@ -504,12 +504,12 @@ export const createAuditLoggerMock = (): AuditLoggerMock => {
     ),
 
     logDataAccess: jest.fn(
-      async (
+      (
         userId: string,
         resource: string,
         operation: "read" | "write" | "delete",
         data?: Partial<AuditLogEntry>,
-      ): Promise<void> => {
+      ): void => {
         const category: EventCategory =
           operation === "read" ? "data_access" : "data_modification";
         const riskScore =
@@ -529,11 +529,11 @@ export const createAuditLoggerMock = (): AuditLoggerMock => {
     ),
 
     logPerformanceMetric: jest.fn(
-      async (
+      (
         operation: string,
         duration: number,
         metadata?: Record<string, any>,
-      ): Promise<void> => {
+      ): void => {
         const level: LogLevel =
           duration > 5000 ? "warn" : duration > 10000 ? "error" : "info";
 
@@ -557,21 +557,19 @@ export const createAuditLoggerMock = (): AuditLoggerMock => {
     ),
 
     query: jest.fn(
-      async (
+      (
         query: AuditLogQuery,
       ): Promise<{ logs: AuditLogEntry[]; totalCount: number }> => {
-        return mockAuditStore.queryLogs(query);
+        return Promise.resolve(mockAuditStore.queryLogs(query));
       },
     ),
 
-    getLogStats: jest.fn(
-      async (timeframe: "hour" | "day" | "week" | "month") => {
-        return mockAuditStore.getStats(timeframe);
-      },
-    ),
+    getLogStats: jest.fn((timeframe: "hour" | "day" | "week" | "month") => {
+      return Promise.resolve(mockAuditStore.getStats(timeframe));
+    }),
 
     exportLogs: jest.fn(
-      async (
+      (
         query: AuditLogQuery,
         format: "json" | "csv" | "xml",
       ): Promise<string> => {
@@ -579,10 +577,10 @@ export const createAuditLoggerMock = (): AuditLoggerMock => {
 
         switch (format) {
           case "json":
-            return JSON.stringify(logs, null, 2);
+            return Promise.resolve(JSON.stringify(logs, null, 2));
 
-          case "csv":
-            if (logs.length === 0) return "";
+          case "csv": {
+            if (logs.length === 0) return Promise.resolve("");
 
             const headers = Object.keys(logs[0]).join(",");
             const rows = logs.map((log) =>
@@ -590,24 +588,28 @@ export const createAuditLoggerMock = (): AuditLoggerMock => {
                 .map((value) =>
                   typeof value === "string"
                     ? `"${value.replace(/"/g, '""')}"`
-                    : value,
+                    : String(value),
                 )
                 .join(","),
             );
 
-            return [headers, ...rows].join("\n");
+            return Promise.resolve([headers, ...rows].join("\n"));
+          }
 
-          case "xml":
+          case "xml": {
             const xmlLogs = logs
               .map((log) => {
                 const xmlFields = Object.entries(log)
-                  .map(([key, value]) => `<${key}>${value}</${key}>`)
+                  .map(([key, value]) => `<${key}>${String(value)}</${key}>`)
                   .join("");
                 return `<log>${xmlFields}</log>`;
               })
               .join("");
 
-            return `<?xml version="1.0" encoding="UTF-8"?><auditLogs>${xmlLogs}</auditLogs>`;
+            return Promise.resolve(
+              `<?xml version="1.0" encoding="UTF-8"?><auditLogs>${xmlLogs}</auditLogs>`,
+            );
+          }
 
           default:
             throw new Error(`Unsupported export format: ${format}`);
@@ -616,12 +618,12 @@ export const createAuditLoggerMock = (): AuditLoggerMock => {
     ),
 
     purgeLogs: jest.fn(
-      async (olderThan: Date, category?: EventCategory[]): Promise<number> => {
-        return mockAuditStore.purgeLogs(olderThan, category);
+      (olderThan: Date, category?: EventCategory[]): Promise<number> => {
+        return Promise.resolve(mockAuditStore.purgeLogs(olderThan, category));
       },
     ),
 
-    flush: jest.fn(async (): Promise<void> => {
+    flush: jest.fn((): void => {
       // In a real implementation, this would flush any pending logs to storage
       // For mock, we just acknowledge the call
     }),
@@ -771,7 +773,8 @@ export const AuditLogTestUtils = {
     ];
     return requiredFields.every(
       (field) =>
-        entry.hasOwnProperty(field) && (entry as any)[field] !== undefined,
+        Object.prototype.hasOwnProperty.call(entry, field) &&
+        (entry as unknown)[field] !== undefined,
     );
   },
 

@@ -1,0 +1,582 @@
+/**
+ * Critical Area Sanitization Service
+ *
+ * Specialized sanitization service for handling critical area data types
+ * with advanced threat detection and sanitization capabilities.
+ *
+ * This service provides sanitization methods for different types of critical data:
+ * - Task management data
+ * - Message content
+ * - Search queries
+ * - Configuration data
+ * - File data
+ *
+ * @fileoverview Critical area sanitization service
+ * @version 1.0.0
+ * @author Critical Security Automation Specialist
+ */
+
+import { Injectable, Logger } from "@nestjs/common";
+import { SecurityThreatDetector } from "../validation/services/security-threat-detector.service";
+import {
+  MessageContentBlock,
+  MessageContentType,
+} from "../types/messageContent.types";
+import { SecurityThreatContext } from "../validation/services/types";
+import { ValidationServiceType } from "../pipes/validation.standardized";
+
+// Define minimal types to avoid DTO compilation issues
+interface CreateTaskDto {
+  title: string;
+  description?: string;
+  tags?: string[];
+  [key: string]: unknown;
+}
+
+interface UpdateTaskDto {
+  title?: string;
+  description?: string;
+  tags?: string[];
+  status?: string;
+  [key: string]: unknown;
+}
+
+interface TaskSearchDto {
+  query?: string;
+  assignedTo?: string;
+  tags?: string[];
+  statuses?: string[];
+  categories?: string[];
+  [key: string]: unknown;
+}
+
+// interface TaskCommentDto {
+//   content: string;
+//   [key: string]: unknown;
+// }
+
+/**
+ * Sanitization result interface
+ */
+export interface SanitizationResult {
+  /** Sanitized data */
+  sanitized: unknown;
+  /** Total threats detected */
+  totalThreats: number;
+  /** Overall risk level */
+  overallRisk: "low" | "medium" | "high" | "critical";
+  /** Processing metadata */
+  metadata: {
+    processingTimeMs: number;
+    threatsRemoved: number;
+    dataModified: boolean;
+  };
+}
+
+/**
+ * Message content sanitization result
+ */
+export interface MessageContentSanitizationResult {
+  /** Sanitized message content blocks */
+  sanitized: MessageContentBlock[];
+  /** Safety score (0-100) */
+  safetyScore: number;
+  /** Block-level results */
+  blockResults: Array<{
+    blockIndex: number;
+    threatsDetected: string[];
+    riskScore: number;
+    wasModified: boolean;
+  }>;
+}
+
+/**
+ * File data sanitization result
+ */
+export interface FileDataSanitizationResult {
+  /** Sanitized file data */
+  sanitized: {
+    filename: string;
+    content: string;
+    mimetype?: string;
+  };
+  /** Malicious patterns detected */
+  maliciousPatterns: string[];
+  /** Security assessment */
+  securityAssessment: {
+    overallRisk: number;
+    contentRisk: number;
+    filenameRisk: number;
+  };
+}
+
+/**
+ * Configuration data sanitization result
+ */
+export interface ConfigurationDataSanitizationResult {
+  /** Sanitized configuration */
+  sanitized: Record<string, unknown>;
+  /** Blocked configuration keys */
+  blockedConfigurations: string[];
+  /** Risk assessment per key */
+  keyRiskAssessment: Record<string, number>;
+}
+
+@Injectable()
+export class CriticalAreaSanitizationService {
+  private readonly logger = new Logger(CriticalAreaSanitizationService.name);
+
+  constructor(private readonly _threatDetector: SecurityThreatDetector) {
+    this.logger.log("Critical Area Sanitization Service initialized");
+  }
+
+  /**
+   * Sanitize task data (CreateTaskDto, UpdateTaskDto)
+   */
+  sanitizeTaskData(
+    data: CreateTaskDto | UpdateTaskDto,
+    operationId: string,
+  ): SanitizationResult {
+    const startTime = Date.now();
+    let totalThreats = 0;
+    let threatsRemoved = 0;
+    let dataModified = false;
+
+    this.logger.debug(`Starting task data sanitization: ${operationId}`);
+
+    const sanitized = { ...data };
+
+    // Sanitize title
+    if (sanitized.title) {
+      const titleResult = this.sanitizeString(
+        sanitized.title,
+        "task_title",
+        operationId,
+      );
+      sanitized.title = titleResult.sanitized;
+      totalThreats += titleResult.threats;
+      if (titleResult.modified) {
+        threatsRemoved++;
+        dataModified = true;
+      }
+    }
+
+    // Sanitize description
+    if (sanitized.description) {
+      const descResult = this.sanitizeString(
+        sanitized.description,
+        "task_description",
+        operationId,
+      );
+      sanitized.description = descResult.sanitized;
+      totalThreats += descResult.threats;
+      if (descResult.modified) {
+        threatsRemoved++;
+        dataModified = true;
+      }
+    }
+
+    // Sanitize tags
+    if (sanitized.tags && Array.isArray(sanitized.tags)) {
+      for (let i = 0; i < sanitized.tags.length; i++) {
+        const tagResult = this.sanitizeString(
+          sanitized.tags[i],
+          "task_tag",
+          operationId,
+        );
+        sanitized.tags[i] = tagResult.sanitized;
+        totalThreats += tagResult.threats;
+        if (tagResult.modified) {
+          threatsRemoved++;
+          dataModified = true;
+        }
+      }
+    }
+
+    const processingTimeMs = Date.now() - startTime;
+    const overallRisk = this.calculateOverallRisk(totalThreats);
+
+    return {
+      sanitized,
+      totalThreats,
+      overallRisk,
+      metadata: {
+        processingTimeMs,
+        threatsRemoved,
+        dataModified,
+      },
+    };
+  }
+
+  /**
+   * Sanitize message content blocks
+   */
+  sanitizeMessageContent(
+    content: MessageContentBlock[],
+    operationId: string,
+  ): MessageContentSanitizationResult {
+    this.logger.debug(`Starting message content sanitization: ${operationId}`);
+
+    const sanitized = [...content];
+    const blockResults: Array<{
+      blockIndex: number;
+      threatsDetected: string[];
+      riskScore: number;
+      wasModified: boolean;
+    }> = [];
+
+    let totalThreats = 0;
+
+    for (let i = 0; i < sanitized.length; i++) {
+      const block = sanitized[i];
+      const blockThreats: string[] = [];
+      let blockRiskScore = 0;
+      let wasModified = false;
+
+      if (block.type === MessageContentType._Text && block.text) {
+        const textResult = this.sanitizeString(
+          block.text,
+          "message_text",
+          operationId,
+        );
+        if (textResult.modified) {
+          sanitized[i] = { ...block, text: textResult.sanitized };
+          wasModified = true;
+        }
+        blockThreats.push(
+          ...Array.from({ length: textResult.threats }, () => "text_threat"),
+        );
+        blockRiskScore = textResult.threats * 10;
+        totalThreats += textResult.threats;
+      }
+
+      blockResults.push({
+        blockIndex: i,
+        threatsDetected: blockThreats,
+        riskScore: blockRiskScore,
+        wasModified,
+      });
+    }
+
+    const safetyScore = Math.max(0, 100 - totalThreats * 5);
+
+    return {
+      sanitized,
+      safetyScore,
+      blockResults,
+    };
+  }
+
+  /**
+   * Sanitize search query data
+   */
+  sanitizeSearchQuery(
+    data: TaskSearchDto,
+    operationId: string,
+  ): SanitizationResult {
+    const startTime = Date.now();
+    let totalThreats = 0;
+    let threatsRemoved = 0;
+    let dataModified = false;
+
+    this.logger.debug(`Starting search query sanitization: ${operationId}`);
+
+    const sanitized = { ...data };
+
+    // Sanitize query string
+    if (sanitized.query) {
+      const queryResult = this.sanitizeString(
+        sanitized.query,
+        "search_query",
+        operationId,
+      );
+      sanitized.query = queryResult.sanitized;
+      totalThreats += queryResult.threats;
+      if (queryResult.modified) {
+        threatsRemoved++;
+        dataModified = true;
+      }
+    }
+
+    // Sanitize tags if present
+    if (sanitized.tags && Array.isArray(sanitized.tags)) {
+      for (let i = 0; i < sanitized.tags.length; i++) {
+        const tagResult = this.sanitizeString(
+          sanitized.tags[i],
+          "search_tag",
+          operationId,
+        );
+        sanitized.tags[i] = tagResult.sanitized;
+        totalThreats += tagResult.threats;
+        if (tagResult.modified) {
+          threatsRemoved++;
+          dataModified = true;
+        }
+      }
+    }
+
+    const processingTimeMs = Date.now() - startTime;
+    const overallRisk = this.calculateOverallRisk(totalThreats);
+
+    return {
+      sanitized,
+      totalThreats,
+      overallRisk,
+      metadata: {
+        processingTimeMs,
+        threatsRemoved,
+        dataModified,
+      },
+    };
+  }
+
+  /**
+   * Sanitize configuration data
+   */
+  sanitizeConfigurationData(
+    data: Record<string, unknown>,
+    operationId: string,
+  ): ConfigurationDataSanitizationResult {
+    this.logger.debug(
+      `Starting configuration data sanitization: ${operationId}`,
+    );
+
+    const sanitized = { ...data };
+    const blockedConfigurations: string[] = [];
+    const keyRiskAssessment: Record<string, number> = {};
+
+    // Dangerous configuration keys that should be blocked
+    const dangerousKeys = [
+      "password",
+      "secret",
+      "key",
+      "token",
+      "credential",
+      "auth",
+      "database",
+      "connection",
+      "admin",
+      "root",
+      "system",
+    ];
+
+    for (const [key, value] of Object.entries(data)) {
+      let riskScore = 0;
+
+      // Check for dangerous keys
+      if (
+        dangerousKeys.some((dangerous) => key.toLowerCase().includes(dangerous))
+      ) {
+        blockedConfigurations.push(key);
+        delete sanitized[key];
+        riskScore = 90;
+      } else if (typeof value === "string") {
+        // Sanitize string values
+        const stringResult = this.sanitizeString(
+          value,
+          "config_value",
+          operationId,
+        );
+        sanitized[key] = stringResult.sanitized;
+        riskScore = stringResult.threats * 15;
+      }
+
+      keyRiskAssessment[key] = riskScore;
+    }
+
+    return {
+      sanitized,
+      blockedConfigurations,
+      keyRiskAssessment,
+    };
+  }
+
+  /**
+   * Sanitize file data
+   */
+  async sanitizeFileData(
+    filename: string,
+    content: string,
+    mimetype?: string,
+    operationId?: string,
+  ): Promise<FileDataSanitizationResult> {
+    this.logger.debug(
+      `Starting file data sanitization: ${operationId || "unknown"}`,
+    );
+
+    const maliciousPatterns: string[] = [];
+    let filenameRisk = 0;
+    let contentRisk = 0;
+
+    // Sanitize filename
+    const sanitizedFilename = this.sanitizeFilename(filename);
+
+    if (sanitizedFilename !== filename) {
+      maliciousPatterns.push("filename_sanitized");
+      filenameRisk = 30;
+    }
+
+    // Basic content sanitization
+    const sanitizedContent = content
+      .replace(/<script[\s\S]*?<\/script>/gi, "[SCRIPT_REMOVED]")
+      .replace(/javascript:/gi, "blocked:")
+      .replace(/on\w+\s*=/gi, "event=")
+      .replace(/eval\s*\(/gi, "blocked(");
+
+    if (sanitizedContent !== content) {
+      maliciousPatterns.push("content_sanitized");
+      contentRisk = 60;
+    }
+
+    const overallRisk = Math.max(filenameRisk, contentRisk);
+
+    return Promise.resolve({
+      sanitized: {
+        filename: sanitizedFilename,
+        content: sanitizedContent,
+        mimetype,
+      },
+      maliciousPatterns,
+      securityAssessment: {
+        overallRisk,
+        contentRisk,
+        filenameRisk,
+      },
+    });
+  }
+
+  /**
+   * Sanitize a string value using threat detection
+   */
+  private sanitizeString(
+    value: string,
+    context: string,
+    operationId: string,
+  ): {
+    sanitized: string;
+    threats: number;
+    modified: boolean;
+  } {
+    try {
+      // Use threat detector for analysis
+      const threatContext: SecurityThreatContext = {
+        serviceType: ValidationServiceType._SHARED,
+        environment: process.env.NODE_ENV || "development",
+        operationId,
+      };
+
+      const analysisResult = this._threatDetector.analyzeThreat(
+        value,
+        threatContext,
+      );
+
+      let sanitized = value;
+      let modified = false;
+
+      // Basic sanitization for detected threats
+      if (analysisResult.isHighRisk || analysisResult.riskScore > 50) {
+        sanitized = this.sanitizeStringContent(value);
+
+        modified = value !== sanitized;
+      }
+
+      return {
+        sanitized,
+        threats: analysisResult.threatTypes.length,
+        modified,
+      };
+    } catch (error) {
+      this.logger.warn(`String sanitization failed for context ${context}`, {
+        error: error instanceof Error ? error.message : String(error),
+        operationId,
+      });
+
+      // Fallback to basic sanitization
+      const sanitized = this.removeControlCharacters(value).replace(
+        /[<>]/g,
+        (match) => (match === "<" ? "&lt;" : "&gt;"),
+      );
+
+      return {
+        sanitized,
+        threats: 0,
+        modified: value !== sanitized,
+      };
+    }
+  }
+
+  /**
+   * Calculate overall risk level based on threat count
+   */
+  private calculateOverallRisk(
+    threatCount: number,
+  ): "low" | "medium" | "high" | "critical" {
+    if (threatCount === 0) return "low";
+    if (threatCount <= 2) return "medium";
+    if (threatCount <= 5) return "high";
+    return "critical";
+  }
+
+  /**
+   * Remove control characters from string without using regex
+   */
+  private removeControlCharacters(str: string): string {
+    let result = "";
+    for (let i = 0; i < str.length; i++) {
+      const charCode = str.charCodeAt(i);
+      // Skip control characters (0x00-0x1F, 0x7F) but allow normal whitespace
+      if (
+        (charCode < 32 &&
+          charCode !== 9 &&
+          charCode !== 10 &&
+          charCode !== 13) ||
+        charCode === 127
+      ) {
+        continue; // Skip this control character
+      }
+      result += str.charAt(i);
+    }
+    return result;
+  }
+
+  /**
+   * Sanitize filename without regex control characters
+   */
+  private sanitizeFilename(filename: string): string {
+    return filename
+      .replace(/[<>:"|?*]/g, "_")
+      .split("")
+      .map((char) => {
+        const code = char.charCodeAt(0);
+        return code >= 0 && code <= 31 ? "_" : char;
+      })
+      .join("")
+      .replace(/^\.+/, "")
+      .substring(0, 255);
+  }
+
+  /**
+   * Sanitize string content without regex control characters
+   */
+  private sanitizeStringContent(value: string): string {
+    return value
+      .replace(/<script[\s\S]*?<\/script>/gi, "[SCRIPT_REMOVED]")
+      .replace(/javascript:/gi, "blocked:")
+      .replace(/on\w+\s*=/gi, "event=")
+      .split("")
+      .filter((char) => {
+        const code = char.charCodeAt(0);
+        // Keep normal characters, skip control characters
+        return (
+          !(code >= 0 && code <= 8) &&
+          !(code === 11 || code === 12) &&
+          !(code >= 14 && code <= 31) &&
+          code !== 127
+        );
+      })
+      .join("")
+      .replace(/[<>]/g, (match) => (match === "<" ? "&lt;" : "&gt;"));
+  }
+}
+
+export default CriticalAreaSanitizationService;

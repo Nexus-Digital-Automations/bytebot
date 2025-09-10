@@ -29,11 +29,21 @@ import {
   createSecurityEvent,
   SecurityEventType,
 } from "../utils/security.utils";
-import * as multer from "multer";
+import multer from "multer";
 import { promisify } from "util";
 
 // Import the File type from @types/multer
 type MulterFile = Express.Multer.File;
+
+/**
+ * Interface for Express request with user information
+ */
+interface RequestWithUser extends Request {
+  user?: {
+    id?: string;
+    [key: string]: unknown;
+  };
+}
 
 /**
  * File security configuration
@@ -66,10 +76,12 @@ interface FileSecurityConfig {
 
 /**
  * Enhanced malware signature patterns for advanced threat detection
+ * Reserved for future malware scanning functionality
  */
-const MALWARE_SIGNATURES = [
+export const _MALWARE_SIGNATURES = [
   // PE (Windows Executable) headers
   { signature: /MZ/, description: "PE Executable Header", risk: 9 },
+
   { signature: /\x7fELF/, description: "ELF Binary Header", risk: 8 },
 
   // Script-based malware patterns
@@ -119,9 +131,9 @@ const MALWARE_SIGNATURES = [
   },
   { signature: /Shell\s*\(/gi, description: "VBA Shell Command", risk: 8 },
 
-  // Archive bomb indicators
+  // Archive bomb indicators (ZIP header patterns)
   {
-    signature: /\x50\x4b\x03\x04.*\x50\x4b\x03\x04.*\x50\x4b\x03\x04/g,
+    signature: /PK.{1,1000}PK.{1,1000}PK/g,
     description: "Nested ZIP Structure",
     risk: 6,
   },
@@ -148,8 +160,9 @@ const MALWARE_SIGNATURES = [
 
 /**
  * Magic byte patterns for file type validation
+ * Reserved for future file type verification functionality
  */
-const MAGIC_BYTE_PATTERNS = {
+export const _MAGIC_BYTE_PATTERNS = {
   // Image formats
   PNG: { bytes: [0x89, 0x50, 0x4e, 0x47], mime: "image/png" },
   JPEG: { bytes: [0xff, 0xd8, 0xff], mime: "image/jpeg" },
@@ -347,13 +360,13 @@ export class FileSecurityMiddleware implements NestMiddleware {
               );
             }
           })
-          .catch((error: unknown) => {
+          .catch((err: unknown) => {
             this.logger.error(`[${operationId}] File validation error`, {
               operationId,
-              error: error instanceof Error ? error.message : String(error),
+              error: err instanceof Error ? err.message : String(err),
               fileName: file.originalname,
             });
-            cb(error instanceof Error ? error : new Error(String(error)));
+            cb(err instanceof Error ? err : new Error(String(err)));
           });
       },
     }).any();
@@ -381,30 +394,31 @@ export class FileSecurityMiddleware implements NestMiddleware {
 
         next();
       })
-      .catch((error) => {
+      .catch((err) => {
         const processingTime = Date.now() - startTime;
 
         this.logger.error(`[${operationId}] File security validation failed`, {
           operationId,
-          error: error.message,
+          error: err instanceof Error ? err.message : String(err),
           processingTimeMs: processingTime,
         });
 
         // Log security event
         this.logSecurityEvent(
           req,
-          "FILE_UPLOAD_BLOCKED",
-          error.message,
+          SecurityEventType._SUSPICIOUS_ACTIVITY,
+          err instanceof Error ? err.message : String(err),
           operationId,
         );
 
-        next(error);
+        next(err);
       });
   }
 
   /**
    * Validate individual file for security threats
    */
+
   private async validateFile(
     file: MulterFile,
     operationId: string,
@@ -513,6 +527,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
   /**
    * Perform malware scanning on file content
    */
+
   private async performMalwareScan(
     file: MulterFile,
     operationId: string,
@@ -520,6 +535,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
     const malwarePatterns = [
       // PE executable signatures
       /^MZ/,
+
       /^\x7fELF/,
 
       // Script patterns in binary files
@@ -533,7 +549,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
 
       // Suspicious encoding patterns
       /base64_decode/gi,
-      /\x00+/g, // Null bytes
+      /\0+/g, // Null bytes
     ];
 
     const content = file.buffer.toString(
@@ -564,6 +580,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
   /**
    * Scan for embedded threats in files
    */
+
   private async scanEmbeddedThreats(
     file: MulterFile,
     operationId: string,
@@ -693,7 +710,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
   ): void {
     try {
       const securityEvent = createSecurityEvent(
-        SecurityEventType.VALIDATION_FAILED,
+        SecurityEventType._VALIDATION_FAILED,
         request.path,
         request.method,
         false,
@@ -705,7 +722,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
           userAgent: request.get("User-Agent"),
           contentType: request.get("Content-Type"),
         },
-        (request as any).user?.id,
+        (request as RequestWithUser).user?.id,
         request.ip,
         request.get("User-Agent"),
       );
@@ -716,10 +733,10 @@ export class FileSecurityMiddleware implements NestMiddleware {
         riskScore: securityEvent.riskScore,
         operationId,
       });
-    } catch (error) {
+    } catch (err) {
       this.logger.error("Failed to log file security event", {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         originalEventType: eventType,
       });
     }

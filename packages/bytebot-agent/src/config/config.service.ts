@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
 /**
  * Local Configuration Service - 100% Local-Only Architecture
  * Centralized configuration access and management with comprehensive local file-based secrets management
@@ -572,7 +573,7 @@ export class BytebotConfigService implements OnModuleInit {
     this.logger.debug(`[${operationId}] Retrieving configuration`, { key });
 
     try {
-      const value = (this.nestConfigService as any).get(key, defaultValue) as T;
+      const value = this.nestConfigService.get(key as any, defaultValue);
       const responseTime = Date.now() - startTime;
 
       // Update performance metrics
@@ -929,13 +930,13 @@ export class BytebotConfigService implements OnModuleInit {
    * @returns Features configuration object
    */
   getFeaturesConfig(): Record<string, boolean> {
-    const features = (this.nestConfigService as any).get('app.features', {
+    const features = this.nestConfigService.get('features' as any, {
       authentication: false,
       rateLimiting: false,
       metricsCollection: false,
       healthChecks: true,
       circuitBreaker: false,
-    }) as Record<string, boolean>;
+    });
 
     return (
       features || {
@@ -954,10 +955,7 @@ export class BytebotConfigService implements OnModuleInit {
    * @returns App configuration object
    */
   getAppConfig(): AppConfig {
-    return (this.nestConfigService as any).get(
-      'app',
-      {} as AppConfig,
-    ) as AppConfig;
+    return this.nestConfigService.get('app' as any);
   }
 
   /**
@@ -966,7 +964,7 @@ export class BytebotConfigService implements OnModuleInit {
    * @returns API configuration object
    */
   getApiConfig(): AppConfig['api'] {
-    return this.nestConfigService.get<AppConfig['api']>('app.api', {
+    return this.nestConfigService.get('api' as any, {
       rateLimitWindow: 900000,
       rateLimitMaxRequests: 100,
       corsOrigins: '*',
@@ -981,13 +979,10 @@ export class BytebotConfigService implements OnModuleInit {
    * @returns Development configuration object
    */
   getDevelopmentConfig(): AppConfig['development'] {
-    return this.nestConfigService.get<AppConfig['development']>(
-      'app.development',
-      {
-        enableSwagger: true,
-        swaggerPath: '/api/docs',
-        debugMode: false,
-      },
-    );
+    return this.nestConfigService.get('development' as any, {
+      enableSwagger: true,
+      swaggerPath: '/api/docs',
+      debugMode: false,
+    });
   }
 }

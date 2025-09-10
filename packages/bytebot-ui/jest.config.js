@@ -56,6 +56,10 @@ const customJestConfig = {
     "^@types/(.*)$": "<rootDir>/src/types/$1",
     "^@bytebot/shared$": "<rootDir>/../shared/src",
     "^@bytebot/shared/(.*)$": "<rootDir>/../shared/src/$1",
+    // Next.js component mocks
+    "^next/image$": "<rootDir>/src/test-utils/__mocks__/next-image.js",
+    "^next/link$": "<rootDir>/src/test-utils/__mocks__/next-link.js",
+    "^next/router$": "<rootDir>/src/test-utils/mocks/next-router.ts",
     // Handle static imports
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
     "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$":

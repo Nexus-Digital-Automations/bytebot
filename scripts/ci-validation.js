@@ -1,15 +1,70 @@
 #!/usr/bin/env node
 
 /**
- * CI Validation Script for Bytebot Monorepo
+ * ===================================================================
+ * BYTEBOT MONOREPO CI/CD VALIDATION ENGINE
+ * Enterprise-Grade Pre-Flight Validation and Environment Readiness System
+ * ===================================================================
  *
- * Pre-flight validation for CI/CD pipeline execution. Ensures environment
- * readiness, dependency validation, and system requirements before running
- * comprehensive test suites.
+ * COMPREHENSIVE CI/CD ENVIRONMENT VALIDATION PLATFORM
+ *
+ * This critical infrastructure script orchestrates complete pre-flight validation
+ * for CI/CD pipeline execution, providing enterprise-grade environment readiness
+ * assessment, dependency validation, system requirement verification, and
+ * comprehensive quality gates before test suite execution.
+ *
+ * VALIDATION ORCHESTRATION SCOPE:
+ * - Environment Configuration: Required and optional environment variable validation
+ * - System Requirements: Node.js, NPM, and tooling version compatibility verification
+ * - Dependency Management: Workspace dependency integrity and availability assessment
+ * - Package Validation: Individual package structure and configuration verification
+ *
+ * ENTERPRISE FEATURES:
+ * - Quality Gate Enforcement: Multi-tier validation with severity-based failure logic
+ * - Comprehensive Reporting: JSON artifacts and markdown summaries for CI/CD integration
+ * - Flexible Configuration: Required vs optional component handling for different environments
+ * - Automated Recovery: Environment variable auto-configuration for missing CI settings
+ *
+ * VALIDATION ARCHITECTURE:
+ * - Environment Layer: NODE_ENV, CI flags, database connections, service URLs
+ * - System Layer: Runtime versions, tool availability, resource capacity
+ * - Dependency Layer: Package management, workspace configuration, dependency resolution
+ * - Package Layer: Individual package integrity, configuration, and test setup
+ *
+ * QUALITY GATE SYSTEM:
+ * - HIGH Severity: Blocks CI execution (missing required tools, invalid configurations)
+ * - MEDIUM Severity: Warning state (missing optional tools, configuration issues)
+ * - LOW Severity: Informational (optimization opportunities, recommendations)
+ *
+ * CI/CD INTEGRATION FEATURES:
+ * - GitHub Actions Compatible: Status reporting and artifact generation
+ * - Environment Detection: Automatic CI environment detection and configuration
+ * - Failure Reporting: Detailed issue classification with remediation guidance
+ * - Performance Metrics: System resource assessment and capacity planning
+ *
+ * VALIDATION CATEGORIES:
+ * - Environment Variables: CI, NODE_ENV, DATABASE_URL, REDIS_URL, JWT_SECRET
+ * - System Requirements: Node.js ≥18.0.0, NPM ≥8.0.0, PostgreSQL, Redis
+ * - Workspace Dependencies: Root package.json, workspaces config, node_modules
+ * - Package Structure: Individual package validation, scripts, configurations
+ *
+ * ERROR RECOVERY STRATEGIES:
+ * - Auto-Configuration: Missing CI and NODE_ENV variables automatically set
+ * - Graceful Degradation: Optional service failures don't block pipeline
+ * - Detailed Diagnostics: Comprehensive issue reporting with specific remediation
+ * - Resource Assessment: System capacity evaluation for test execution planning
+ *
+ * INTEGRATION BENEFITS:
+ * - CI/CD Pipeline: Automated environment readiness verification
+ * - Developer Workflow: Local development environment validation
+ * - Infrastructure Monitoring: System health and capacity assessment
+ * - Quality Assurance: Comprehensive pre-test validation and issue prevention
  *
  * @author Claude Code (DevOps & Test Infrastructure Specialist)
- * @version 1.0.0
+ * @version 2.0.0
  * @created 2025-09-06
+ * @lastModified 2025-09-10
+ * @classification Enterprise CI/CD Infrastructure
  */
 
 const fs = require("fs");

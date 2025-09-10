@@ -277,7 +277,7 @@ export class ResilienceInterceptor implements NestInterceptor {
       config.circuitName ||
       this.generateCircuitName(
         controller,
-        handler as (...args: any[]) => unknown,
+        handler as (...args: unknown[]) => unknown,
       );
 
     // Initialize metrics
@@ -601,8 +601,8 @@ export class ResilienceInterceptor implements NestInterceptor {
    * Generate circuit name from controller and handler
    */
   private generateCircuitName(
-    controller: new (...args: any[]) => any,
-    handler: (...args: any[]) => unknown,
+    controller: new (...args: unknown[]) => unknown,
+    handler: (...args: unknown[]) => unknown,
   ): string {
     return `${controller.name}.${handler.name}`;
   }

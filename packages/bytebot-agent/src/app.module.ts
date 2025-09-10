@@ -19,6 +19,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SummariesModule } from './summaries/summaries.module';
 import { ProxyModule } from './proxy/proxy.module';
+import { BrowserUseModule } from './browser-use/browser-use.module';
 import { ConfigurationModule } from './config/config.module';
 import { EnterpriseConfigModule } from './config/enterprise-config.module';
 import { ReliabilityModule } from './common/reliability/reliability.module';
@@ -59,6 +60,7 @@ import { ReliabilityModule } from './common/reliability/reliability.module';
     OpenAIModule,
     GoogleModule,
     ProxyModule,
+    BrowserUseModule,
   ],
   controllers: [AppController],
   providers: [

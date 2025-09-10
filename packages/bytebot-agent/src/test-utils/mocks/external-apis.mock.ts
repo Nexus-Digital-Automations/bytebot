@@ -539,7 +539,7 @@ export class MockAnthropicService implements BytebotAgentService {
         Math.floor(Math.random() * MOCK_RESPONSES.TEXT_RESPONSES.length)
       ];
     contentBlocks.push({
-      type: MessageContentType.Text,
+      type: MessageContentType._Text,
       text: textResponse,
     } as TextContentBlock);
 
@@ -550,7 +550,7 @@ export class MockAnthropicService implements BytebotAgentService {
           Math.floor(Math.random() * MOCK_RESPONSES.TOOL_USE_RESPONSES.length)
         ];
       contentBlocks.push({
-        type: MessageContentType.ToolUse,
+        type: MessageContentType._ToolUse,
         id: `tool_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: toolResponse.name,
         input: toolResponse.input,
@@ -564,7 +564,7 @@ export class MockAnthropicService implements BytebotAgentService {
           Math.floor(Math.random() * MOCK_RESPONSES.THINKING_RESPONSES.length)
         ];
       contentBlocks.push({
-        type: MessageContentType.Thinking,
+        type: MessageContentType._Thinking,
         thinking: thinkingResponse,
         signature: `thinking_${Date.now()}`,
       } as ThinkingContentBlock);
@@ -574,9 +574,9 @@ export class MockAnthropicService implements BytebotAgentService {
     const inputText = systemPrompt + JSON.stringify(messages);
     const outputText = contentBlocks
       .map((block) =>
-        block.type === MessageContentType.Text
+        block.type === MessageContentType._Text
           ? block.text
-          : block.type === MessageContentType.Thinking
+          : block.type === MessageContentType._Thinking
             ? block.thinking
             : JSON.stringify(block),
       )
@@ -655,7 +655,7 @@ export class MockOpenAIService implements BytebotAgentService {
           Math.floor(Math.random() * MOCK_RESPONSES.THINKING_RESPONSES.length)
         ];
       contentBlocks.push({
-        type: MessageContentType.Thinking,
+        type: MessageContentType._Thinking,
         thinking: thinkingResponse,
         signature: `reasoning_${Date.now()}`,
       } as ThinkingContentBlock);
@@ -667,7 +667,7 @@ export class MockOpenAIService implements BytebotAgentService {
         Math.floor(Math.random() * MOCK_RESPONSES.TEXT_RESPONSES.length)
       ];
     contentBlocks.push({
-      type: MessageContentType.Text,
+      type: MessageContentType._Text,
       text: textResponse,
     } as TextContentBlock);
 
@@ -678,7 +678,7 @@ export class MockOpenAIService implements BytebotAgentService {
           Math.floor(Math.random() * MOCK_RESPONSES.TOOL_USE_RESPONSES.length)
         ];
       contentBlocks.push({
-        type: MessageContentType.ToolUse,
+        type: MessageContentType._ToolUse,
         id: `call_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: toolResponse.name,
         input: toolResponse.input,
@@ -689,9 +689,9 @@ export class MockOpenAIService implements BytebotAgentService {
     const inputText = systemPrompt + JSON.stringify(messages);
     const outputText = contentBlocks
       .map((block) =>
-        block.type === MessageContentType.Text
+        block.type === MessageContentType._Text
           ? block.text
-          : block.type === MessageContentType.Thinking
+          : block.type === MessageContentType._Thinking
             ? block.thinking
             : JSON.stringify(block),
       )
@@ -770,7 +770,7 @@ export class MockGoogleService implements BytebotAgentService {
           Math.floor(Math.random() * MOCK_RESPONSES.THINKING_RESPONSES.length)
         ];
       contentBlocks.push({
-        type: MessageContentType.Thinking,
+        type: MessageContentType._Thinking,
         thinking: thinkingResponse,
         signature: `gemini_thinking_${Date.now()}`,
       } as ThinkingContentBlock);
@@ -782,7 +782,7 @@ export class MockGoogleService implements BytebotAgentService {
         Math.floor(Math.random() * MOCK_RESPONSES.TEXT_RESPONSES.length)
       ];
     contentBlocks.push({
-      type: MessageContentType.Text,
+      type: MessageContentType._Text,
       text: textResponse,
     } as TextContentBlock);
 
@@ -793,7 +793,7 @@ export class MockGoogleService implements BytebotAgentService {
           Math.floor(Math.random() * MOCK_RESPONSES.TOOL_USE_RESPONSES.length)
         ];
       contentBlocks.push({
-        type: MessageContentType.ToolUse,
+        type: MessageContentType._ToolUse,
         id: `gemini_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: toolResponse.name,
         input: toolResponse.input,
@@ -804,9 +804,9 @@ export class MockGoogleService implements BytebotAgentService {
     const inputText = systemPrompt + JSON.stringify(messages);
     const outputText = contentBlocks
       .map((block) =>
-        block.type === MessageContentType.Text
+        block.type === MessageContentType._Text
           ? block.text
-          : block.type === MessageContentType.Thinking
+          : block.type === MessageContentType._Thinking
             ? block.thinking
             : JSON.stringify(block),
       )

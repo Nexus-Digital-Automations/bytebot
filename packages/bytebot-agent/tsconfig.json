@@ -1,10 +1,13 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Bytebot Agent Package",
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "CommonJS", 
     "moduleResolution": "node",
     "declaration": true,
+    "declarationMap": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -13,12 +16,29 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "rootDir": "./src",
     "incremental": true,
+    "composite": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": false
-  }
+    "noFallthroughCasesInSwitch": false,
+    "types": ["node", "jest"]
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "**/*.js"
+  ],
+  "references": [
+    {
+      "path": "../shared"
+    }
+  ]
 }

@@ -1,15 +1,65 @@
 #!/usr/bin/env node
 
 /**
- * Jest Global Teardown for Bytebot Workspace
+ * ===================================================================
+ * BYTEBOT WORKSPACE GLOBAL TEST TEARDOWN ORCHESTRATOR
+ * Enterprise-Grade Test Environment Cleanup and Resource Management System
+ * ===================================================================
  *
- * Provides global cleanup and resource deallocation after all tests complete.
- * Handles service shutdown, database cleanup, temporary file removal,
- * and resource cleanup across all packages.
+ * COMPREHENSIVE TEST INFRASTRUCTURE CLEANUP
+ *
+ * This critical infrastructure script orchestrates the complete cleanup and
+ * resource deallocation of the Bytebot monorepo test environment, providing
+ * enterprise-grade teardown coordination, service shutdown management, and
+ * comprehensive resource cleanup across all testing packages.
+ *
+ * TEARDOWN ORCHESTRATION SCOPE:
+ * - Multi-Package Cleanup: Coordinated cleanup across shared, bytebot-agent, bytebot-ui, bytebotd
+ * - Service Shutdown: Database, Redis, and web server cleanup and termination
+ * - Resource Management: Temporary file cleanup, artifact collection, process termination
+ * - State Management: Setup state restoration and cleanup coordination
+ *
+ * ENTERPRISE FEATURES:
+ * - Configurable Cleanup: Environment-driven cleanup behavior control
+ * - Artifact Preservation: Selective preservation of test artifacts for analysis
+ * - Graceful Degradation: Robust cleanup even when services are unavailable
+ * - Performance Tracking: Teardown duration monitoring and reporting
+ *
+ * CLEANUP ARCHITECTURE:
+ * - PostgreSQL Test Database: Complete database cleanup and removal
+ * - Redis Test Cache: Test namespace cleanup and cache clearing
+ * - Process Management: Termination of lingering test processes
+ * - File System Cleanup: Temporary file and cache directory cleanup
+ *
+ * ARTIFACT MANAGEMENT:
+ * - Coverage Reports: Test coverage data preservation and archiving
+ * - Test Logs: Execution log collection and organization
+ * - State Files: Setup state and configuration preservation
+ * - Performance Data: Teardown metrics and timing information
+ *
+ * CONFIGURABLE CLEANUP OPTIONS:
+ * - removeTemporaryFiles: Control temporary file cleanup behavior
+ * - clearTestDatabase: Database cleanup enablement/disabling
+ * - clearRedis: Redis cache cleanup configuration
+ * - preserveArtifacts: Test artifact preservation for post-test analysis
+ *
+ * ERROR HANDLING STRATEGY:
+ * - Non-Blocking Failures: Teardown continues even when individual cleanup fails
+ * - Graceful Service Handling: Safe handling of unavailable services
+ * - Resource Protection: Prevents accidental cleanup of production resources
+ * - Comprehensive Logging: Detailed cleanup status and error reporting
+ *
+ * INTEGRATION BENEFITS:
+ * - CI/CD Pipeline: Clean environment restoration for subsequent runs
+ * - Development Workflow: Isolated test environment cleanup
+ * - Performance Optimization: Resource cleanup for system efficiency
+ * - Debugging Support: Artifact preservation for test failure analysis
  *
  * @author Claude Code (DevOps & Test Infrastructure Specialist)
- * @version 1.0.0
+ * @version 2.0.0
  * @created 2025-09-06
+ * @lastModified 2025-09-10
+ * @classification Enterprise Test Infrastructure
  */
 
 const fs = require("fs");
@@ -17,7 +67,32 @@ const path = require("path");
 const { execSync } = require("child_process");
 
 /**
- * Teardown configuration
+ * ENTERPRISE TEST TEARDOWN CONFIGURATION
+ *
+ * Comprehensive configuration object defining all aspects of the global
+ * test environment teardown process, including cleanup behavior, directory
+ * management, resource preservation, and artifact collection strategies.
+ *
+ * CONFIGURATION CATEGORIES:
+ * - cleanup: Behavioral flags controlling what resources get cleaned up
+ * - directories: Test workspace directory structure and organization
+ *
+ * CLEANUP BEHAVIOR CONTROL:
+ * - removeTemporaryFiles: Controls cleanup of temporary test files and caches
+ * - clearTestDatabase: Enables/disables test database cleanup and removal
+ * - clearRedis: Controls Redis test namespace cleanup behavior
+ * - preserveArtifacts: Enables artifact preservation for post-test analysis
+ *
+ * ENVIRONMENT ADAPTATION:
+ * - Configurable via environment variables for CI/CD pipeline flexibility
+ * - Graceful behavior when services are unavailable or cleanup fails
+ * - Safe defaults that prevent accidental production resource cleanup
+ *
+ * ARTIFACT PRESERVATION STRATEGY:
+ * - Coverage reports preserved for trend analysis and quality gates
+ * - Test logs preserved for debugging and failure analysis
+ * - State files preserved for setup/teardown coordination
+ * - Performance data preserved for optimization analysis
  */
 const TEARDOWN_CONFIG = {
   cleanup: {
@@ -34,9 +109,70 @@ const TEARDOWN_CONFIG = {
   },
 };
 
+/**
+ * ===================================================================
+ * GlobalTestTeardown Class - Enterprise Test Cleanup Orchestrator
+ * ===================================================================
+ *
+ * COMPREHENSIVE TEST CLEANUP COORDINATION ENGINE
+ *
+ * This class orchestrates the complete cleanup and resource deallocation
+ * of the Bytebot monorepo test environment, providing enterprise-grade
+ * teardown coordination across multiple packages, services, and infrastructure.
+ *
+ * TEARDOWN ORCHESTRATION RESPONSIBILITIES:
+ * - Service Lifecycle: Database, Redis, and web server cleanup and shutdown
+ * - Resource Deallocation: File cleanup, process termination, cache clearing
+ * - Artifact Management: Test result preservation and archival coordination
+ * - State Restoration: Environment restoration and cleanup verification
+ *
+ * ENTERPRISE FEATURES:
+ * - Multi-Service Coordination: PostgreSQL, Redis, and web server cleanup
+ * - Package Integration: Cross-package cleanup consistency and coordination
+ * - Artifact Preservation: Selective preservation for debugging and analysis
+ * - Performance Tracking: Teardown duration monitoring and optimization
+ *
+ * CLEANUP STRATEGY:
+ * - Non-Blocking: Individual cleanup failures don't prevent overall teardown
+ * - Configurable: Environment-driven cleanup behavior customization
+ * - Safe: Prevents accidental cleanup of production or development resources
+ * - Comprehensive: Covers all aspects of test environment resource cleanup
+ *
+ * ERROR HANDLING APPROACH:
+ * - Service Unavailability: Graceful handling of offline services
+ * - Resource Conflicts: Safe handling of locked or missing resources
+ * - Permission Issues: Robust handling of file system permission errors
+ * - Process Termination: Safe process cleanup with timeout protection
+ *
+ * @class GlobalTestTeardown
+ * @since 2025-09-06
+ * @version 2.0.0
+ */
 class GlobalTestTeardown {
+  /**
+   * Initialize Global Test Teardown Orchestrator
+   *
+   * Creates a new teardown instance with performance tracking and setup
+   * state restoration. Loads the setup state from global setup for
+   * coordinated cleanup of initialized resources.
+   *
+   * INITIALIZATION COMPONENTS:
+   * - startTime: Performance timing for teardown duration tracking
+   * - setupState: Loaded setup state for coordinated resource cleanup
+   *
+   * STATE COORDINATION:
+   * - Setup State Loading: Retrieves initialization state from global setup
+   * - Resource Registry: Identifies services and resources that need cleanup
+   * - Performance Tracking: Monitors teardown duration for optimization
+   *
+   * @constructor
+   * @memberof GlobalTestTeardown
+   */
   constructor() {
+    /** @type {number} Teardown start timestamp for performance tracking */
     this.startTime = Date.now();
+
+    /** @type {Object|null} Loaded setup state for coordinated cleanup */
     this.setupState = this.loadSetupState();
   }
 

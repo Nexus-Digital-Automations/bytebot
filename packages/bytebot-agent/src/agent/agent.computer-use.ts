@@ -163,11 +163,11 @@ export async function handleComputerToolUse(
       logger.debug('Screenshot captured successfully');
 
       return {
-        type: MessageContentType.ToolResult,
+        type: MessageContentType._ToolResult,
         tool_use_id: block.id,
         content: [
           {
-            type: MessageContentType.Image,
+            type: MessageContentType._Image,
             source: {
               data: image,
               media_type: 'image/png',
@@ -182,11 +182,11 @@ export async function handleComputerToolUse(
         getSafeErrorStack(error),
       );
       return {
-        type: MessageContentType.ToolResult,
+        type: MessageContentType._ToolResult,
         tool_use_id: block.id,
         content: [
           {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: 'ERROR: Failed to take screenshot',
           },
         ],
@@ -203,11 +203,11 @@ export async function handleComputerToolUse(
       logger.debug(`Cursor position obtained: ${position.x}, ${position.y}`);
 
       return {
-        type: MessageContentType.ToolResult,
+        type: MessageContentType._ToolResult,
         tool_use_id: block.id,
         content: [
           {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: `Cursor position: ${position.x}, ${position.y}`,
           },
         ],
@@ -218,11 +218,11 @@ export async function handleComputerToolUse(
         getSafeErrorStack(error),
       );
       return {
-        type: MessageContentType.ToolResult,
+        type: MessageContentType._ToolResult,
         tool_use_id: block.id,
         content: [
           {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: 'ERROR: Failed to get cursor position',
           },
         ],
@@ -275,11 +275,11 @@ export async function handleComputerToolUse(
       if (result.success && result.data) {
         // Return document content block
         return {
-          type: MessageContentType.ToolResult,
+          type: MessageContentType._ToolResult,
           tool_use_id: block.id,
           content: [
             {
-              type: MessageContentType.Document,
+              type: MessageContentType._Document,
               source: {
                 type: 'base64',
                 media_type: result.mediaType || 'application/octet-stream',
@@ -293,11 +293,11 @@ export async function handleComputerToolUse(
       } else {
         // Return error message
         return {
-          type: MessageContentType.ToolResult,
+          type: MessageContentType._ToolResult,
           tool_use_id: block.id,
           content: [
             {
-              type: MessageContentType.Text,
+              type: MessageContentType._Text,
               text: result.message || 'Error reading file',
             },
           ],
@@ -322,11 +322,11 @@ export async function handleComputerToolUse(
 
     logger.debug(`Tool execution successful for tool_use_id: ${block.id}`);
     const toolResult: ToolResultContentBlock = {
-      type: MessageContentType.ToolResult,
+      type: MessageContentType._ToolResult,
       tool_use_id: block.id,
       content: [
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: 'Tool executed successfully',
         },
       ],
@@ -334,7 +334,7 @@ export async function handleComputerToolUse(
 
     if (image) {
       toolResult.content.push({
-        type: MessageContentType.Image,
+        type: MessageContentType._Image,
         source: {
           data: image,
           media_type: 'image/png',
@@ -350,11 +350,11 @@ export async function handleComputerToolUse(
       getSafeErrorStack(error),
     );
     return {
-      type: MessageContentType.ToolResult,
+      type: MessageContentType._ToolResult,
       tool_use_id: block.id,
       content: [
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: `Error executing ${block.name} tool: ${getSafeErrorMessage(error)}`,
         },
       ],

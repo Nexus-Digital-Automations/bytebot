@@ -31,13 +31,15 @@ import { Type } from "class-transformer";
 import {
   IsBytebotAgentSecureText,
   IsNotXSS,
-  IsNotSQLInjection,
   IsSafeTextInput,
 } from "../decorators/security-validation.decorators";
 
 /**
  * Task status enumeration with security validation
+ *
+ * ARCHITECTURAL PRESERVATION: Complete task status coverage for enterprise workflows
  */
+/* eslint-disable no-unused-vars */
 export enum TaskStatus {
   PENDING = "pending",
   IN_PROGRESS = "in_progress",
@@ -45,20 +47,28 @@ export enum TaskStatus {
   FAILED = "failed",
   CANCELLED = "cancelled",
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Task priority enumeration with security validation
+ *
+ * ARCHITECTURAL PRESERVATION: Complete task priority coverage for enterprise workflows
  */
+/* eslint-disable no-unused-vars */
 export enum TaskPriority {
   LOW = "low",
   MEDIUM = "medium",
   HIGH = "high",
   CRITICAL = "critical",
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Task category enumeration with security validation
+ *
+ * ARCHITECTURAL PRESERVATION: Complete task category coverage for enterprise workflows
  */
+/* eslint-disable no-unused-vars */
 export enum TaskCategory {
   COMPUTER_USE = "computer_use",
   DATA_PROCESSING = "data_processing",
@@ -69,6 +79,7 @@ export enum TaskCategory {
   VALIDATION = "validation",
   TESTING = "testing",
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Task metadata DTO with enhanced security validation

@@ -34,6 +34,71 @@
       "mode": "DEVELOPMENT"
     },
     {
+      "id": "error_1757477906659_bvxkxu3qy",
+      "title": "CRITICAL: Fix TypeScript compilation errors in bytebotd test files",
+      "description": "Fix critical TypeScript compilation errors in bytebotd package test files preventing build: 1) Remove C/ua integration imports and references (cua-integration.service, cua-vision.service, cua-performance.service), 2) Fix missing exported members from @bytebot/shared (OcrAction, FindTextAction, EnhancedScreenshotAction), 3) Update action interfaces for proper typing (DragMouseAction, TraceMouseAction, PressKeysAction), 4) Fix InputTrackingGateway test mocks for missing methods (broadcastActionEvent, broadcastInputEvent, getConnectedClients), 5) Resolve type conflicts and property mismatches. Focus on: computer-use.service.desktop-automation.spec.ts, computer-use.service.spec.ts, input-tracking.realtime-comprehensive.spec.ts",
+      "priority": "critical",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/src/computer-use/__tests__/computer-use.service.desktop-automation.spec.ts",
+        "bytebot/packages/bytebotd/src/computer-use/__tests__/computer-use.service.spec.ts",
+        "bytebot/packages/bytebotd/src/input-tracking/__tests__/input-tracking.realtime-comprehensive.spec.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-10T04:18:26.659Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757477776666_1_general_b422bd30",
+      "started_at": "2025-09-10T04:18:54.422Z",
+      "claimed_by": "development_session_1757477776666_1_general_b422bd30",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757477776666_1_general_b422bd30",
+          "role": "primary",
+          "assignedAt": "2025-09-10T04:18:54.422Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757323050185_996c8rhk3",
+      "title": "Fix remaining TypeScript compilation errors in shared package",
+      "description": "Fix critical TypeScript compilation errors in shared package preventing successful builds:\n\n**Critical Issues Found:**\n1. **rbac-authorization.guard.ts** - Property naming inconsistencies:\n   - _cacheManager vs cacheManager property references\n   - Missing Permission enum values (TASK_READ, TASK_WRITE, TASK_DELETE need _ prefixes)\n   \n2. **comprehensive-security.middleware.ts** - SecurityEventType enum usage:\n   - CORS_VIOLATION should be _CORS_VIOLATION\n   - MALFORMED_REQUEST should be _MALFORMED_REQUEST\n   - CSP_VIOLATION should be _CSP_VIOLATION\n\n**Files Affected:**\n- src/guards/rbac-authorization.guard.ts (32 errors)\n- src/middleware/comprehensive-security.middleware.ts (4 errors)\n\n**Required Actions:**\n1. Fix property name inconsistencies (_cacheManager vs cacheManager)\n2. Update Permission enum references to use correct underscore-prefixed names\n3. Update SecurityEventType enum references to use correct underscore-prefixed names\n4. Verify all enum values exist in their respective type definitions\n5. Run final compilation check to ensure no errors remain\n\n**Success Criteria:**\n- All TypeScript compilation errors resolved\n- npx tsc --noEmit passes without errors\n- No breaking changes to existing functionality",
+      "priority": "critical",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/shared/src/guards/rbac-authorization.guard.ts",
+        "bytebot/packages/shared/src/middleware/comprehensive-security.middleware.ts",
+        "bytebot/packages/shared/src/types/security.types.ts",
+        "bytebot/packages/shared/src/types/rbac.types.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-08T09:17:30.186Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757322996303_1_general_33ccf863",
+      "started_at": "2025-09-08T09:17:39.286Z",
+      "claimed_by": "development_session_1757322996303_1_general_33ccf863",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757322996303_1_general_33ccf863",
+          "role": "primary",
+          "assignedAt": "2025-09-08T09:17:39.286Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
       "id": "error_1757215808151_nm9drifh2",
       "title": "Fix Python import and undefined name errors in orchestrator package",
       "description": "CRITICAL: Fix 151 Python F821 undefined name errors in orchestrator package that are blocking test execution: Missing asyncio import, ControlType, ControlImplementation, ThreatLevel, MonitoringEvent, ResponseAction, ThreatIntelligence imports in security test files",
@@ -121,6 +186,118 @@
           "assignedAt": "2025-09-07T03:52:56.583Z",
           "reassignReason": null,
           "claimPriority": "critical"
+        }
+      ]
+    },
+    {
+      "id": "error_1757482411835_2ldkkpquj",
+      "title": "CRITICAL: Complete CUA cleanup in computer-use.service.spec.ts",
+      "description": "Complete the remaining CUA integration cleanup in computer-use.service.spec.ts file. TypeScript compilation is failing due to remaining references to mockPerformanceService, mockCuaIntegrationService, mockCuaVisionService, and OcrAction types. These are blocking compilation and must be removed immediately.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-10T05:33:31.835Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757482357823_1_general_d3ddb19f",
+      "started_at": "2025-09-10T05:33:51.602Z",
+      "claimed_by": "development_session_1757482357823_1_general_d3ddb19f",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757482357823_1_general_d3ddb19f",
+          "role": "primary",
+          "assignedAt": "2025-09-10T05:33:51.602Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757468660300_8ulvoottu",
+      "title": "Clean up CUA integration references in test files",
+      "description": "Remove all remaining references to the removed CUA framework integration in test files that are causing TypeScript compilation errors. Multiple test files still import non-existent CUA services (CuaVisionService, CuaIntegrationService, CuaPerformanceService) and reference removed action types (OcrAction, FindTextAction, EnhancedScreenshotAction). Files affected: computer-use.service.desktop-automation.spec.ts and other test files. Clean up all imports, type references, and test mock setup for CUA services that were removed during architectural cleanup.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-10T01:44:20.301Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757481432317_1_general_ebb48af3",
+      "started_at": "2025-09-10T05:17:57.991Z",
+      "claimed_by": "development_session_1757481432317_1_general_ebb48af3",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757481432317_1_general_ebb48af3",
+          "role": "primary",
+          "assignedAt": "2025-09-10T05:17:57.991Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757467890573_8ec4p1s9x",
+      "title": "Build shared package to generate type definitions",
+      "description": "Navigate to shared package directory and run TypeScript compilation to generate type definitions and resolve build errors",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-10T01:31:30.573Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757467862900_1_general_b58d4a5f",
+      "started_at": "2025-09-10T01:31:49.295Z",
+      "claimed_by": "development_session_1757467862900_1_general_b58d4a5f",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757467862900_1_general_b58d4a5f",
+          "role": "primary",
+          "assignedAt": "2025-09-10T01:31:49.295Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757463678875_jyavhry23",
+      "title": "ESLint comprehensive scan and fix for all remaining bytebot packages",
+      "description": "Systematically scan and fix ESLint violations across all remaining bytebot packages including bytebot-ui, security-config-analyzer, bytebot-agent-cc, and any other discovered packages. Apply autofix where possible, manually resolve complex violations, ensure zero violations in entire ecosystem.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-10T00:21:18.875Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757465870099_1_general_a7710797",
+      "started_at": "2025-09-10T00:58:38.166Z",
+      "claimed_by": "development_session_1757465870099_1_general_a7710797",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757465870099_1_general_a7710797",
+          "role": "primary",
+          "assignedAt": "2025-09-10T00:58:38.166Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
         }
       ]
     },
@@ -287,26 +464,6 @@
       "requires_research": false,
       "subtasks": [],
       "created_at": "2025-09-07T03:31:11.872Z",
-      "auto_research_created": false
-    },
-    {
-      "id": "feature_1757215836393_6ien8jk6m",
-      "title": "Research comprehensive API authentication and authorization security for AI automation systems",
-      "description": "Comprehensive research on API authentication and authorization security best practices specifically for AI automation systems like Bytebot covering multi-factor authentication, JWT security, OAuth 2.0, RBAC/ABAC, API key management, session management, identity federation, SSO, rate limiting, and certificate-based authentication. Provide detailed technical implementation examples and compliance considerations.",
-      "mode": "DEVELOPMENT",
-      "priority": "high",
-      "category": "feature",
-      "status": "pending",
-      "dependencies": [],
-      "important_files": [
-        "development/research-reports/",
-        "orchestrator/security/"
-      ],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-07T03:30:36.393Z",
       "auto_research_created": false
     },
     {
@@ -857,6 +1014,241 @@
       "lastRenewal": "2025-09-07T18:00:05.640Z",
       "renewalCount": 1,
       "agentId": "development_session_1757267991842_1_general_13b9316a"
+    },
+    "development_session_1757322977821_1_general_a27240d9": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T09:16:17.824Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T09:16:17.824Z",
+      "sessionId": "session_1757322977821",
+      "metadata": {}
+    },
+    "development_session_1757322996303_1_general_33ccf863": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T09:16:36.305Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T09:16:36.305Z",
+      "sessionId": "session_1757322996303",
+      "metadata": {}
+    },
+    "development_session_1757351214870_1_general_af076580": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T17:06:54.873Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T17:06:54.873Z",
+      "sessionId": "session_1757351214870",
+      "metadata": {}
+    },
+    "validation_session_1757384074939_1_eslint_9e6a5b66": {
+      "name": "validation Agent",
+      "role": "validation",
+      "specialization": [
+        "eslint",
+        "coordination",
+        "final-validation"
+      ],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T02:14:34.944Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T02:14:34.944Z",
+      "sessionId": "session_1757384074939",
+      "metadata": {}
+    },
+    "development_session_1757463653079_1_general_932cb05d": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-10T00:20:53.081Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-10T00:20:53.081Z",
+      "sessionId": "session_1757463653079",
+      "metadata": {}
+    },
+    "development_session_1757465959236_1_general_109b044e": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-10T00:59:19.237Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-10T00:59:19.237Z",
+      "sessionId": "session_1757465959236",
+      "metadata": {}
+    },
+    "development_session_1757467862900_1_general_b58d4a5f": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-10T01:31:02.908Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-10T01:31:02.909Z",
+      "sessionId": "session_1757467862900",
+      "metadata": {}
+    },
+    "development_session_1757481432317_1_general_ebb48af3": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-10T05:17:12.319Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-10T05:17:12.319Z",
+      "sessionId": "session_1757481432317",
+      "metadata": {}
+    },
+    "development_session_1757482357823_1_general_d3ddb19f": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-10T05:32:37.824Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-10T05:32:37.825Z",
+      "sessionId": "session_1757482357823",
+      "metadata": {}
+    },
+    "development_session_1757482644233_1_general_181fbf1a": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-10T05:37:24.235Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-10T05:37:24.235Z",
+      "sessionId": "session_1757482644233",
+      "metadata": {}
+    },
+    "development_session_1757483045163_1_general_cd8c77ae": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-10T05:44:05.165Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-10T05:44:05.165Z",
+      "sessionId": "session_1757483045163",
+      "metadata": {}
     }
   },
   "settings": {
@@ -891,5 +1283,6 @@
   },
   "review_strikes": 0,
   "strikes_completed_last_run": false,
-  "current_task_index": 0
+  "current_task_index": 0,
+  "current_mode": "DEVELOPMENT"
 }

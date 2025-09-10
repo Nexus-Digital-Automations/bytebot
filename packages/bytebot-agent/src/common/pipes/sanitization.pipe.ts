@@ -557,14 +557,14 @@ export class SanitizationPipe implements PipeTransform<any> {
     metadata: ArgumentMetadata,
   ): void {
     try {
-      let eventType = SecurityEventType.VALIDATION_FAILED;
+      let eventType = SecurityEventType._VALIDATION_FAILED;
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
       if (errorMessage.includes('XSS')) {
-        eventType = SecurityEventType.XSS_ATTEMPT_BLOCKED;
+        eventType = SecurityEventType._XSS_ATTEMPT_BLOCKED;
       } else if (errorMessage.includes('SQL')) {
-        eventType = SecurityEventType.INJECTION_ATTEMPT_BLOCKED;
+        eventType = SecurityEventType._INJECTION_ATTEMPT_BLOCKED;
       }
 
       const securityEvent = createSecurityEvent(

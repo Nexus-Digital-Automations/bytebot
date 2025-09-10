@@ -16,9 +16,6 @@ import {
   PasteTextAction,
   WriteFileAction,
   ReadFileAction,
-  OcrAction,
-  FindTextAction,
-  EnhancedScreenshotAction,
 } from "../types/computerAction.types";
 import {
   ComputerToolUseContentBlock,
@@ -77,7 +74,7 @@ function createToolUseBlock(
   input: Record<string, unknown>,
 ): ComputerToolUseContentBlock {
   return {
-    type: MessageContentType.ToolUse,
+    type: MessageContentType._ToolUse,
     id: toolUseId,
     name: toolName,
     input,
@@ -296,54 +293,6 @@ export function convertReadFileActionToToolUseBlock(
   });
 }
 
-export function convertOcrActionToToolUseBlock(
-  action: OcrAction,
-  toolUseId: string,
-): ComputerToolUseContentBlock {
-  return createToolUseBlock(
-    "computer_ocr",
-    toolUseId,
-    conditionallyAdd({}, [
-      [action.coordinates !== undefined, "coordinates", action.coordinates],
-      [action.region !== undefined, "region", action.region],
-      [action.language !== undefined, "language", action.language],
-    ]),
-  );
-}
-
-export function convertFindTextActionToToolUseBlock(
-  action: FindTextAction,
-  toolUseId: string,
-): ComputerToolUseContentBlock {
-  return createToolUseBlock(
-    "computer_find_text",
-    toolUseId,
-    conditionallyAdd({ text: action.text }, [
-      [
-        action.caseSensitive !== undefined,
-        "caseSensitive",
-        action.caseSensitive,
-      ],
-      [action.wholeWord !== undefined, "wholeWord", action.wholeWord],
-    ]),
-  );
-}
-
-export function convertEnhancedScreenshotActionToToolUseBlock(
-  action: EnhancedScreenshotAction,
-  toolUseId: string,
-): ComputerToolUseContentBlock {
-  return createToolUseBlock(
-    "computer_enhanced_screenshot",
-    toolUseId,
-    conditionallyAdd({}, [
-      [action.region !== undefined, "region", action.region],
-      [action.format !== undefined, "format", action.format],
-      [action.quality !== undefined, "quality", action.quality],
-    ]),
-  );
-}
-
 /**
  * Generic converter that handles all action types
  */
@@ -384,12 +333,6 @@ export function convertComputerActionToToolUseBlock(
       return convertWriteFileActionToToolUseBlock(action, toolUseId);
     case "read_file":
       return convertReadFileActionToToolUseBlock(action, toolUseId);
-    case "ocr":
-      return convertOcrActionToToolUseBlock(action, toolUseId);
-    case "find_text":
-      return convertFindTextActionToToolUseBlock(action, toolUseId);
-    case "enhanced_screenshot":
-      return convertEnhancedScreenshotActionToToolUseBlock(action, toolUseId);
     default: {
       const exhaustiveCheck: never = action;
       throw new Error(

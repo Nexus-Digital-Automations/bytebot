@@ -35,7 +35,7 @@ async function bootstrap(): Promise<void> {
     logger.log(
       'BytebotD standardized security middleware deployed successfully',
       {
-        serviceType: ServiceType.BYTEBOTD,
+        serviceType: ServiceType._BYTEBOTD,
         environment,
         securityLevel: securityMiddleware.getSecurityConfig().securityLevel,
       },

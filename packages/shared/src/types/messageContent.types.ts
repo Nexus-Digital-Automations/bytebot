@@ -1,16 +1,25 @@
 import { Button, Coordinates, Press } from "./computerAction.types";
 
+/**
+ * Role enum matching Prisma schema for message/task roles
+ * Used in database models and API responses
+ */
+export enum Role {
+  _USER = "USER",
+  _ASSISTANT = "ASSISTANT",
+}
+
 // Content block types
 export enum MessageContentType {
-  Text = "text",
-  Image = "image",
-  Document = "document",
-  ToolUse = "tool_use",
-  ToolResult = "tool_result",
-  ComputerToolUse = "computer_tool_use",
-  Thinking = "thinking",
-  RedactedThinking = "redacted_thinking",
-  UserAction = "user_action",
+  _Text = "text",
+  _Image = "image",
+  _Document = "document",
+  _ToolUse = "tool_use",
+  _ToolResult = "tool_result",
+  _ComputerToolUse = "computer_tool_use",
+  _Thinking = "thinking",
+  _RedactedThinking = "redacted_thinking",
+  _UserAction = "user_action",
 }
 
 // Base type with only the discriminator
@@ -20,12 +29,12 @@ export type MessageContentBlockBase = {
 };
 
 export type TextContentBlock = {
-  type: MessageContentType.Text;
+  type: MessageContentType._Text;
   text: string;
 } & MessageContentBlockBase;
 
 export type ImageContentBlock = {
-  type: MessageContentType.Image;
+  type: MessageContentType._Image;
   source: {
     media_type: "image/png";
     type: "base64";
@@ -34,7 +43,7 @@ export type ImageContentBlock = {
 } & MessageContentBlockBase;
 
 export type DocumentContentBlock = {
-  type: MessageContentType.Document;
+  type: MessageContentType._Document;
   source: {
     type: "base64";
     media_type: string;
@@ -45,21 +54,21 @@ export type DocumentContentBlock = {
 } & MessageContentBlockBase;
 
 export type ThinkingContentBlock = {
-  type: MessageContentType.Thinking;
+  type: MessageContentType._Thinking;
   thinking: string;
   signature: string;
 } & MessageContentBlockBase;
 
 export type RedactedThinkingContentBlock = {
-  type: MessageContentType.RedactedThinking;
+  type: MessageContentType._RedactedThinking;
   data: string;
 } & MessageContentBlockBase;
 
 export type ToolUseContentBlock = {
-  type: MessageContentType.ToolUse;
+  type: MessageContentType._ToolUse;
   name: string;
   id: string;
-  input: Record<string, any>;
+  input: Record<string, unknown>;
 } & MessageContentBlockBase;
 
 export type MoveMouseToolUseBlock = ToolUseContentBlock & {
@@ -204,7 +213,7 @@ export type ComputerToolUseContentBlock =
   | ReadFileToolUseBlock;
 
 export type UserActionContentBlock = MessageContentBlockBase & {
-  type: MessageContentType.UserAction;
+  type: MessageContentType._UserAction;
   content: (
     | ImageContentBlock
     | MoveMouseToolUseBlock
@@ -239,7 +248,7 @@ export type CreateTaskToolUseBlock = ToolUseContentBlock & {
 };
 
 export type ToolResultContentBlock = {
-  type: MessageContentType.ToolResult;
+  type: MessageContentType._ToolResult;
   tool_use_id: string;
   content: MessageContentBlock[];
   is_error?: boolean;

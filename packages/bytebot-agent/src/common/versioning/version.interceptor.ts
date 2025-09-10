@@ -602,7 +602,7 @@ export class VersionInterceptor implements NestInterceptor {
     operationId: string,
   ): void {
     try {
-      const eventType = SecurityEventType.SUSPICIOUS_ACTIVITY;
+      const eventType = SecurityEventType._SUSPICIOUS_ACTIVITY;
 
       const userId = isRequestWithUser(request) ? request.user?.id : undefined;
       const userAgent = request.get('User-Agent') || undefined;
@@ -663,7 +663,7 @@ export class VersionInterceptor implements NestInterceptor {
       const userAgent = request.get('User-Agent') || undefined;
 
       const securityEvent = createSecurityEvent(
-        SecurityEventType.VALIDATION_FAILED,
+        SecurityEventType._VALIDATION_FAILED,
         request.url,
         request.method,
         false,

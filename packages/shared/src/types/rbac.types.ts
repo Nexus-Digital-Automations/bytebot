@@ -9,7 +9,6 @@
  * @author RBAC Decorators Specialist
  */
 
-import { ExecutionContext } from "@nestjs/common";
 import {
   Role,
   Permission,
@@ -45,7 +44,7 @@ export interface UserContext {
     title?: string;
 
     /** User attributes for conditional access */
-    attributes?: Record<string, any>;
+    attributes?: Record<string, unknown>;
 
     /** Multi-factor authentication status */
     mfaEnabled?: boolean;
@@ -95,7 +94,7 @@ export interface RequestContext {
     id: string;
 
     /** Session data */
-    data?: Record<string, any>;
+    data?: Record<string, unknown>;
 
     /** Session age in minutes */
     ageMinutes: number;
@@ -140,7 +139,7 @@ export interface SecurityContext {
     ownerId?: string;
 
     /** Resource metadata */
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   };
 
   /** Action being performed */
@@ -155,7 +154,7 @@ export interface SecurityContext {
     path?: string;
 
     /** Action metadata */
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   };
 
   /** Environment context */
@@ -268,14 +267,14 @@ export interface AccessControlEntry {
 
     /** Attribute-based conditions */
     attributeBasedAccess?: {
-      requiredAttributes?: Record<string, any>;
-      excludedAttributes?: Record<string, any>;
+      requiredAttributes?: Record<string, unknown>;
+      excludedAttributes?: Record<string, unknown>;
     };
 
     /** Custom conditions */
     customConditions?: {
       conditionFunction: string;
-      parameters?: Record<string, any>;
+      parameters?: Record<string, unknown>;
     }[];
   };
 
@@ -426,7 +425,7 @@ export interface RBACMetadata {
 
   /** Conditional access configuration */
   conditionalAccess?: {
-    requiredAttributes?: Record<string, any>;
+    requiredAttributes?: Record<string, unknown>;
     conditionFunction?: string;
     requireMFA?: boolean;
     minSessionAge?: number;
@@ -610,7 +609,7 @@ export interface AuthorizationEvent {
     category: string;
 
     /** Additional context */
-    additionalContext?: Record<string, any>;
+    additionalContext?: Record<string, unknown>;
   };
 }
 
@@ -626,62 +625,62 @@ export interface IRBACService {
    * Check if user has required roles
    */
   hasRoles(
-    userRoles: Role[],
-    requiredRoles: Role[],
-    requireAll?: boolean,
+    _userRoles: Role[],
+    _requiredRoles: Role[],
+    _requireAll?: boolean,
   ): boolean;
 
   /**
    * Check if user has required permissions
    */
   hasPermissions(
-    userPermissions: Permission[],
-    requiredPermissions: Permission[],
-    requireAll?: boolean,
+    _userPermissions: Permission[],
+    _requiredPermissions: Permission[],
+    _requireAll?: boolean,
   ): boolean;
 
   /**
    * Check resource ownership
    */
-  isResourceOwner(userId: string, resourceOwnerId: string): boolean;
+  isResourceOwner(_userId: string, _resourceOwnerId: string): boolean;
 
   /**
    * Validate time-based access
    */
   validateTimeBasedAccess(
-    config: RBACMetadata["timeAccess"],
-    currentTime?: Date,
+    _config: RBACMetadata["timeAccess"],
+    _currentTime?: Date,
   ): boolean;
 
   /**
    * Validate IP-based access
    */
   validateIPBasedAccess(
-    config: RBACMetadata["ipAccess"],
-    clientIP: string,
+    _config: RBACMetadata["ipAccess"],
+    _clientIP: string,
   ): boolean;
 
   /**
    * Validate conditional access
    */
   validateConditionalAccess(
-    config: RBACMetadata["conditionalAccess"],
-    context: SecurityContext,
+    _config: RBACMetadata["conditionalAccess"],
+    _context: SecurityContext,
   ): Promise<boolean>;
 
   /**
    * Perform comprehensive authorization check
    */
   authorize(
-    metadata: RBACMetadata,
-    context: SecurityContext,
+    _metadata: RBACMetadata,
+    _context: SecurityContext,
   ): Promise<AuthorizationResult>;
 
   /**
    * Batch authorization check
    */
   batchAuthorize(
-    requests: Array<{ metadata: RBACMetadata; context: SecurityContext }>,
+    _requests: Array<{ metadata: RBACMetadata; context: SecurityContext }>,
   ): Promise<BatchAuthorizationResult>;
 }
 
@@ -692,30 +691,33 @@ export interface IPermissionService {
   /**
    * Get user permissions
    */
-  getUserPermissions(userId: string): Promise<Permission[]>;
+  getUserPermissions(_userId: string): Promise<Permission[]>;
 
   /**
    * Get role permissions
    */
-  getRolePermissions(role: Role): Promise<Permission[]>;
+  getRolePermissions(_role: Role): Promise<Permission[]>;
 
   /**
    * Grant permission to user
    */
-  grantPermissionToUser(userId: string, permission: Permission): Promise<void>;
+  grantPermissionToUser(
+    _userId: string,
+    _permission: Permission,
+  ): Promise<void>;
 
   /**
    * Revoke permission from user
    */
   revokePermissionFromUser(
-    userId: string,
-    permission: Permission,
+    _userId: string,
+    _permission: Permission,
   ): Promise<void>;
 
   /**
    * Check effective permissions (includes role-based and direct permissions)
    */
-  getEffectivePermissions(userId: string): Promise<Permission[]>;
+  getEffectivePermissions(_userId: string): Promise<Permission[]>;
 }
 
 // ===========================

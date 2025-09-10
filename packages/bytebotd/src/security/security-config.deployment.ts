@@ -73,7 +73,7 @@ export class BytebotDSecurityConfigService {
     const environment = this.configService.get('NODE_ENV', 'development');
 
     return {
-      serviceType: ServiceType.BYTEBOTD,
+      serviceType: ServiceType._BYTEBOTD,
       environment,
       securityLevel: 'MAXIMUM',
       description: 'Computer Control Service - Maximum Security Configuration',

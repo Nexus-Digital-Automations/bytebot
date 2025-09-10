@@ -91,19 +91,24 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const userAgent = request.headers['user-agent']?.substring(0, 100);
 
     // Enhanced security logging with threat detection
-    this.logger.debug(`[${operationId}] Enhanced JWT authentication attempt for computer control`, {
-      operationId,
-      method: request.method,
-      url: request.url,
-      userAgent,
-      ipAddress: clientIp,
-      timestamp: new Date().toISOString(),
-      securityContext: 'computer_control_access',
-    });
+    this.logger.debug(
+      `[${operationId}] Enhanced JWT authentication attempt for computer control`,
+      {
+        operationId,
+        method: request.method,
+        url: request.url,
+        userAgent,
+        ipAddress: clientIp,
+        timestamp: new Date().toISOString(),
+        securityContext: 'computer_control_access',
+      },
+    );
 
     // Pre-authentication security checks
     if (!this.performPreAuthChecks(request, operationId)) {
-      throw new UnauthorizedException('Pre-authentication security check failed');
+      throw new UnauthorizedException(
+        'Pre-authentication security check failed',
+      );
     }
 
     try {
@@ -116,23 +121,28 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
         // Perform post-authentication security checks
         if (user && !this.performPostAuthChecks(user, operationId)) {
-          throw new UnauthorizedException('Post-authentication security check failed');
+          throw new UnauthorizedException(
+            'Post-authentication security check failed',
+          );
         }
 
-        this.logger.log(`[${operationId}] Enhanced JWT authentication successful for computer control`, {
-          operationId,
-          userId: user?.id,
-          username: user?.username,
-          role: user?.role,
-          method: request.method,
-          url: request.url,
-          authTimeMs: authTime,
-          ipAddress: clientIp,
-          userAgent,
-          securityLevel: 'enhanced',
-          securityEvent: 'computer_control_auth_success',
-          postAuthChecks: 'passed',
-        });
+        this.logger.log(
+          `[${operationId}] Enhanced JWT authentication successful for computer control`,
+          {
+            operationId,
+            userId: user?.id,
+            username: user?.username,
+            role: user?.role,
+            method: request.method,
+            url: request.url,
+            authTimeMs: authTime,
+            ipAddress: clientIp,
+            userAgent,
+            securityLevel: 'enhanced',
+            securityEvent: 'computer_control_auth_success',
+            postAuthChecks: 'passed',
+          },
+        );
       }
 
       return result as boolean;
@@ -140,26 +150,33 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const authTime = Date.now() - startTime;
 
       // Log authentication failure with enhanced security context
-      this.logger.warn(`[${operationId}] JWT authentication failed for computer control access`, {
-        operationId,
-        method: request.method,
-        url: request.url,
-        error: error instanceof Error ? error.message : String(error),
-        authTimeMs: authTime,
-        ipAddress: this.getClientIpAddress(request),
-        userAgent: request.headers['user-agent']?.substring(0, 100),
-        hasAuthHeader: !!request.headers.authorization,
-        authHeaderFormat: this.analyzeAuthHeader(request.headers.authorization),
-        securityEvent: 'computer_control_auth_failed',
-        riskScore: 85, // High risk for computer control access attempts
-      });
+      this.logger.warn(
+        `[${operationId}] JWT authentication failed for computer control access`,
+        {
+          operationId,
+          method: request.method,
+          url: request.url,
+          error: error instanceof Error ? error.message : String(error),
+          authTimeMs: authTime,
+          ipAddress: this.getClientIpAddress(request),
+          userAgent: request.headers['user-agent']?.substring(0, 100),
+          hasAuthHeader: !!request.headers.authorization,
+          authHeaderFormat: this.analyzeAuthHeader(
+            request.headers.authorization,
+          ),
+          securityEvent: 'computer_control_auth_failed',
+          riskScore: 85, // High risk for computer control access attempts
+        },
+      );
 
       // Re-throw as UnauthorizedException for consistent error handling
       if (error instanceof UnauthorizedException) {
         throw error;
       }
 
-      throw new UnauthorizedException('Authentication required for computer control');
+      throw new UnauthorizedException(
+        'Authentication required for computer control',
+      );
     }
   }
 
@@ -184,31 +201,39 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     // Handle authentication errors
     if (err) {
-      this.logger.error(`[${operationId}] Computer control authentication error`, {
-        operationId,
-        error: err instanceof Error ? err.message : String(err),
-        stack: err instanceof Error ? err.stack : undefined,
-        url: request.url,
-        method: request.method,
-        ipAddress: this.getClientIpAddress(request),
-        securityEvent: 'computer_control_auth_error',
-      });
-      throw new UnauthorizedException('Authentication failed for computer control');
+      this.logger.error(
+        `[${operationId}] Computer control authentication error`,
+        {
+          operationId,
+          error: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack : undefined,
+          url: request.url,
+          method: request.method,
+          ipAddress: this.getClientIpAddress(request),
+          securityEvent: 'computer_control_auth_error',
+        },
+      );
+      throw new UnauthorizedException(
+        'Authentication failed for computer control',
+      );
     }
 
     // Handle missing or invalid user
     if (!user) {
       const errorMessage = this.getAuthErrorMessage(info);
 
-      this.logger.warn(`[${operationId}] Computer control authentication failed - no user`, {
-        operationId,
-        info: info?.message || info?.name || String(info),
-        url: request.url,
-        method: request.method,
-        ipAddress: this.getClientIpAddress(request),
-        errorMessage,
-        securityEvent: 'computer_control_no_user',
-      });
+      this.logger.warn(
+        `[${operationId}] Computer control authentication failed - no user`,
+        {
+          operationId,
+          info: info?.message || info?.name || String(info),
+          url: request.url,
+          method: request.method,
+          ipAddress: this.getClientIpAddress(request),
+          errorMessage,
+          securityEvent: 'computer_control_no_user',
+        },
+      );
 
       throw new UnauthorizedException(errorMessage);
     }
@@ -377,11 +402,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     // Check for potential token replay attacks (basic timing check)
     if (authHeader && this.isPotentialReplayAttack(authHeader, operationId)) {
-      this.logger.warn(`[${operationId}] Potential token replay attack detected`, {
-        operationId,
-        ipAddress: this.getClientIpAddress(request),
-        securityEvent: 'potential_replay_attack',
-      });
+      this.logger.warn(
+        `[${operationId}] Potential token replay attack detected`,
+        {
+          operationId,
+          ipAddress: this.getClientIpAddress(request),
+          securityEvent: 'potential_replay_attack',
+        },
+      );
       return false;
     }
 
@@ -400,24 +428,24 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const suspiciousPatterns = [
       // Common bots and scrapers
       /bot|crawler|spider|scraper/gi,
-      
+
       // Automated tools
       /curl|wget|httpie|postman|insomnia/gi,
-      
+
       // Security scanners
       /nmap|nikto|sqlmap|burp|zap|acunetix|nessus/gi,
-      
+
       // Generic HTTP clients
       /^(python|java|go|rust|php|ruby|perl)-/gi,
-      
+
       // Empty or very short user agents
       /^.{0,10}$/,
-      
+
       // Common attack tools
       /metasploit|exploit|payload|shell/gi,
     ];
 
-    return suspiciousPatterns.some(pattern => pattern.test(userAgent));
+    return suspiciousPatterns.some((pattern) => pattern.test(userAgent));
   }
 
   /**
@@ -435,7 +463,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     const token = authHeader.substring(7);
-    
+
     // Token must exist and be reasonable length
     if (!token || token.length < 20 || token.length > 2048) {
       return false;
@@ -448,8 +476,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     // Each part should be base64url encoded (basic check)
-    return parts.every(part => 
-      /^[A-Za-z0-9_-]+$/.test(part) && part.length > 0
+    return parts.every(
+      (part) => /^[A-Za-z0-9_-]+$/.test(part) && part.length > 0,
     );
   }
 
@@ -462,18 +490,21 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * @returns boolean - Whether this might be a replay attack
    * @private
    */
-  private isPotentialReplayAttack(authHeader: string, operationId: string): boolean {
+  private isPotentialReplayAttack(
+    authHeader: string,
+    operationId: string,
+  ): boolean {
     try {
       const token = authHeader.substring(7);
       const tokenParts = token.split('.');
-      
+
       if (tokenParts.length !== 3) {
         return false;
       }
 
       // Decode JWT payload (without verification - just for timing check)
       const payload = JSON.parse(
-        Buffer.from(tokenParts[1], 'base64url').toString('utf8')
+        Buffer.from(tokenParts[1], 'base64url').toString('utf8'),
       );
 
       const currentTime = Math.floor(Date.now() / 1000);
@@ -481,19 +512,20 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const tokenExpiry = payload.exp;
 
       // Check if token is very close to expiry (potential replay)
-      if (tokenExpiry && currentTime > (tokenExpiry - 60)) {
+      if (tokenExpiry && currentTime > tokenExpiry - 60) {
         return true;
       }
 
       // Check if token was issued very recently (less than 1 second ago)
       // This could indicate rapid successive requests with the same token
-      if (tokenIssuedAt && (currentTime - tokenIssuedAt) < 1) {
+      if (tokenIssuedAt && currentTime - tokenIssuedAt < 1) {
         return true;
       }
-
     } catch (error) {
       // If we can't decode the token, let the main JWT validation handle it
-      this.logger.debug(`[${operationId}] Could not decode JWT for replay check: ${error.message}`);
+      this.logger.debug(
+        `[${operationId}] Could not decode JWT for replay check: ${error.message}`,
+      );
     }
 
     return false;
@@ -508,7 +540,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * @returns boolean - Whether user passed additional security checks
    * @private
    */
-  private performPostAuthChecks(user: ByteBotdUser, operationId: string): boolean {
+  private performPostAuthChecks(
+    user: ByteBotdUser,
+    operationId: string,
+  ): boolean {
     // Check if user account is active
     if (!user.isActive) {
       this.logger.warn(`[${operationId}] Inactive user attempted access`, {
@@ -521,15 +556,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     // Check user role permissions for computer control
-    const allowedRoles: UserRole[] = [UserRole.ADMIN, UserRole.OPERATOR];
+    const allowedRoles: UserRole[] = [UserRole._ADMIN, UserRole._OPERATOR];
     if (!allowedRoles.includes(user.role)) {
-      this.logger.warn(`[${operationId}] Unauthorized role attempted computer control access`, {
-        operationId,
-        userId: user.id,
-        username: user.username,
-        role: user.role,
-        securityEvent: 'unauthorized_role_access',
-      });
+      this.logger.warn(
+        `[${operationId}] Unauthorized role attempted computer control access`,
+        {
+          operationId,
+          userId: user.id,
+          username: user.username,
+          role: user.role,
+          securityEvent: 'unauthorized_role_access',
+        },
+      );
       return false;
     }
 

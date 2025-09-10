@@ -630,7 +630,7 @@ export class DeprecationGuard implements CanActivate {
       const userAgent = request.get('User-Agent') || undefined;
 
       const securityEvent = createSecurityEvent(
-        SecurityEventType.SUSPICIOUS_ACTIVITY,
+        SecurityEventType._SUSPICIOUS_ACTIVITY,
         request.url,
         request.method,
         true,
@@ -686,7 +686,7 @@ export class DeprecationGuard implements CanActivate {
       const userAgent = request.get('User-Agent') || undefined;
 
       const securityEvent = createSecurityEvent(
-        SecurityEventType.SUSPICIOUS_ACTIVITY,
+        SecurityEventType._SUSPICIOUS_ACTIVITY,
         request.url,
         request.method,
         true,

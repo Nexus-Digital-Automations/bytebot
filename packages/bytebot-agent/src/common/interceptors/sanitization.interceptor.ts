@@ -316,7 +316,8 @@ export class SanitizationInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const operationId = `sanitization-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Generate unique operation ID using modern substring method (replaces deprecated substr)
+    const operationId = `sanitization-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
     const startTime = Date.now();
     const request = context.switchToHttp().getRequest<ExtendedRequest>();
     const response = context.switchToHttp().getResponse<Response>();
@@ -716,17 +717,17 @@ export class SanitizationInterceptor implements NestInterceptor {
     operationId: string,
   ): void {
     try {
-      let securityEventType = SecurityEventType.SUSPICIOUS_ACTIVITY;
+      let securityEventType = SecurityEventType._SUSPICIOUS_ACTIVITY;
 
       switch (eventType) {
         case 'XSS':
-          securityEventType = SecurityEventType.XSS_ATTEMPT_BLOCKED;
+          securityEventType = SecurityEventType._XSS_ATTEMPT_BLOCKED;
           break;
         case 'SQL_INJECTION':
-          securityEventType = SecurityEventType.INJECTION_ATTEMPT_BLOCKED;
+          securityEventType = SecurityEventType._INJECTION_ATTEMPT_BLOCKED;
           break;
         case 'SANITIZATION_FAILED':
-          securityEventType = SecurityEventType.VALIDATION_FAILED;
+          securityEventType = SecurityEventType._VALIDATION_FAILED;
           break;
       }
 

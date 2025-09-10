@@ -1,4 +1,12 @@
-import { Message, Task, Model, GroupedMessages, FileWithBase64, TaskStatus } from "@/types";
+import {
+  Message,
+  Task,
+  Model,
+  GroupedMessages,
+  FileWithBase64,
+  TaskStatus,
+} from "@/types";
+import { logError } from "@/utils/logger";
 
 /**
  * Base configuration for API requests
@@ -34,9 +42,9 @@ async function apiRequest<T>(
       );
     }
 
-    return await response.json() as T;
+    return (await response.json()) as T;
   } catch (error) {
-    console.error(`Error in API request to ${endpoint}:`, error);
+    logError(`Error in API request to ${endpoint}`, error, "taskUtils");
     return null;
   }
 }
@@ -155,19 +163,21 @@ export async function fetchTasks(options?: {
   statuses?: string[];
 }): Promise<{ tasks: Task[]; total: number; totalPages: number }> {
   const params: Record<string, string | number> = {};
-  
+
   if (options?.page) params.page = options.page;
   if (options?.limit) params.limit = options.limit;
   if (options?.status) params.status = options.status;
   if (options?.statuses && options.statuses.length > 0) {
-    params.statuses = options.statuses.join(',');
+    params.statuses = options.statuses.join(",");
   }
-  
-  const queryString = Object.keys(params).length > 0 ? buildQueryString(params) : "";
-  const result = await apiRequest<{ tasks: Task[]; total: number; totalPages: number }>(
-    `/tasks${queryString}`,
-    { method: "GET" }
-  );
+
+  const queryString =
+    Object.keys(params).length > 0 ? buildQueryString(params) : "";
+  const result = await apiRequest<{
+    tasks: Task[];
+    total: number;
+    totalPages: number;
+  }>(`/tasks${queryString}`, { method: "GET" });
   return result || { tasks: [], total: 0, totalPages: 0 };
 }
 
@@ -177,11 +187,16 @@ export async function fetchTasks(options?: {
 export async function fetchTaskCounts(): Promise<Record<string, number>> {
   try {
     const allTasksResult = await fetchTasks();
-    
+
     // Define the status groups
     const statusGroups = {
       ALL: Object.values(TaskStatus),
-      ACTIVE: [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.NEEDS_HELP, TaskStatus.NEEDS_REVIEW],
+      ACTIVE: [
+        TaskStatus.PENDING,
+        TaskStatus.RUNNING,
+        TaskStatus.NEEDS_HELP,
+        TaskStatus.NEEDS_REVIEW,
+      ],
       COMPLETED: [TaskStatus.COMPLETED],
       CANCELLED_FAILED: [TaskStatus.CANCELLED, TaskStatus.FAILED],
     };
@@ -194,14 +209,16 @@ export async function fetchTaskCounts(): Promise<Record<string, number>> {
     };
 
     // Fetch counts for each group
-    const groupPromises = Object.entries(statusGroups).map(async ([groupKey, statuses]) => {
-      if (groupKey === 'ALL') {
-        return { groupKey, count: allTasksResult.total };
-      }
-      
-      const result = await fetchTasks({ statuses, limit: 1 });
-      return { groupKey, count: result.total };
-    });
+    const groupPromises = Object.entries(statusGroups).map(
+      async ([groupKey, statuses]) => {
+        if (groupKey === "ALL") {
+          return { groupKey, count: allTasksResult.total };
+        }
+
+        const result = await fetchTasks({ statuses, limit: 1 });
+        return { groupKey, count: result.total };
+      },
+    );
 
     const groupCounts = await Promise.all(groupPromises);
     groupCounts.forEach(({ groupKey, count }) => {
@@ -210,7 +227,7 @@ export async function fetchTaskCounts(): Promise<Record<string, number>> {
 
     return counts;
   } catch (error) {
-    console.error("Failed to fetch task counts:", error);
+    logError("Failed to fetch task counts", error, "taskUtils");
     return {
       ALL: 0,
       ACTIVE: 0,
@@ -230,9 +247,9 @@ export async function fetchModels(): Promise<Model[]> {
     if (!response.ok) {
       throw new Error("Failed to fetch models");
     }
-    return await response.json() as Model[];
+    return (await response.json()) as Model[];
   } catch (error) {
-    console.error("Error fetching models:", error);
+    logError("Error fetching models", error, "taskUtils");
     return [];
   }
 }

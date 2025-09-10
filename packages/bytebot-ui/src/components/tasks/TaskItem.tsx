@@ -16,8 +16,7 @@ interface TaskItemProps {
 }
 
 interface StatusIconConfig {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon?: any; // HugeIcons IconSvgObject type
+  icon?: React.ComponentType; // HugeIcons IconSvgObject type
   color?: string;
   useLoader?: boolean;
 }
@@ -72,7 +71,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
     const config = STATUS_CONFIGS[status];
     if (!config) return null;
 
-    const { icon, color, useLoader } = config;
+    const { icon: IconComponent, color, useLoader } = config;
 
     if (useLoader) {
       return (
@@ -84,7 +83,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
 
     return (
       <div className="flex items-center justify-center">
-        <HugeiconsIcon icon={icon} className={`h-5 w-5 ${color}`} />
+        {IconComponent && <HugeiconsIcon icon={IconComponent} className={`h-5 w-5 ${color || ''}`} />}
       </div>
     );
   };

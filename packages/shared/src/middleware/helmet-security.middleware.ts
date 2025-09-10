@@ -19,10 +19,10 @@
  * @author Helmet Security Headers Specialist
  */
 
-import { Injectable, NestMiddleware, Logger, Inject } from "@nestjs/common";
+import { Injectable, NestMiddleware, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Request, Response, NextFunction } from "express";
-import helmet, { HelmetOptions } from "helmet";
+import helmet from "helmet";
 import { randomBytes } from "crypto";
 import {
   generateEventId,
@@ -34,6 +34,47 @@ import { RateLimitServiceType } from "../types/security.types";
 // Extended request type for nonce
 interface RequestWithNonce extends Request {
   nonce?: string;
+}
+
+/**
+ * Interface for security event metadata
+ */
+interface SecurityEventMetadata {
+  [key: string]: string | number | boolean | undefined;
+}
+
+/**
+ * Interface for helmet configuration
+ */
+interface _HelmetConfiguration {
+  contentSecurityPolicy?:
+    | boolean
+    | {
+        useDefaults?: boolean;
+        directives?: Record<string, string[]>;
+        reportOnly?: boolean;
+      };
+  hsts?:
+    | boolean
+    | {
+        maxAge?: number;
+        includeSubDomains?: boolean;
+        preload?: boolean;
+      };
+  frameguard?:
+    | boolean
+    | {
+        action?: string;
+        domain?: string;
+      };
+  noSniff?: boolean;
+  xssFilter?: boolean;
+  referrerPolicy?:
+    | boolean
+    | {
+        policy?: string | string[];
+      };
+  [key: string]: unknown;
 }
 
 /**
@@ -121,9 +162,9 @@ const DEFAULT_HELMET_CONFIGS: Record<
   RateLimitServiceType,
   HelmetSecurityConfig
 > = {
-  [RateLimitServiceType.BYTEBOTD]: {
+  [RateLimitServiceType._BYTEBOTD]: {
     enabled: true,
-    serviceType: RateLimitServiceType.BYTEBOTD,
+    serviceType: RateLimitServiceType._BYTEBOTD,
     contentSecurityPolicy: {
       enabled: true,
       useDefaults: false,
@@ -192,9 +233,9 @@ const DEFAULT_HELMET_CONFIGS: Record<
     },
   },
 
-  [RateLimitServiceType.BYTEBOT_AGENT]: {
+  [RateLimitServiceType._BYTEBOT_AGENT]: {
     enabled: true,
-    serviceType: RateLimitServiceType.BYTEBOT_AGENT,
+    serviceType: RateLimitServiceType._BYTEBOT_AGENT,
     contentSecurityPolicy: {
       enabled: true,
       useDefaults: false,
@@ -265,9 +306,9 @@ const DEFAULT_HELMET_CONFIGS: Record<
     },
   },
 
-  [RateLimitServiceType.BYTEBOT_UI]: {
+  [RateLimitServiceType._BYTEBOT_UI]: {
     enabled: true,
-    serviceType: RateLimitServiceType.BYTEBOT_UI,
+    serviceType: RateLimitServiceType._BYTEBOT_UI,
     contentSecurityPolicy: {
       enabled: true,
       useDefaults: false,
@@ -336,9 +377,9 @@ const DEFAULT_HELMET_CONFIGS: Record<
     },
   },
 
-  [RateLimitServiceType.SHARED]: {
+  [RateLimitServiceType._SHARED]: {
     enabled: true,
-    serviceType: RateLimitServiceType.SHARED,
+    serviceType: RateLimitServiceType._SHARED,
     contentSecurityPolicy: {
       enabled: true,
       useDefaults: true,
@@ -419,13 +460,13 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
   private nonceGeneratedAt: number = 0;
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly serviceType: RateLimitServiceType = RateLimitServiceType.SHARED,
+    private readonly _configService: ConfigService,
+    private readonly serviceType: RateLimitServiceType = RateLimitServiceType._SHARED,
   ) {
     // Initialize configuration
     this.config = {
       ...DEFAULT_HELMET_CONFIGS[serviceType],
-      ...this.configService.get<Partial<HelmetSecurityConfig>>(
+      ...this._configService.get<Partial<HelmetSecurityConfig>>(
         `helmet.${serviceType}`,
         {},
       ),
@@ -484,7 +525,21 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
         const processingTime = Date.now() - startTime;
 
         if (err) {
-          const error = err instanceof Error ? err : new Error(String(err));
+          const error =
+            err instanceof Error
+              ? err
+              : (() => {
+                  if (typeof err === "object" && err !== null) {
+                    try {
+                      return new Error(JSON.stringify(err));
+                    } catch {
+                      return new Error("[object Object]");
+                    }
+                  }
+                  return new Error(
+                    typeof err === "string" ? err : "Unknown error",
+                  );
+                })();
           this.logger.error(`[${operationId}] Helmet middleware error`, {
             operationId,
             error: error.message,
@@ -517,13 +572,13 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
 
         next();
       });
-    } catch (error) {
+    } catch (err) {
       const processingTime = Date.now() - startTime;
 
       this.logger.error(`[${operationId}] Helmet middleware unexpected error`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
+        error: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
         processingTimeMs: processingTime,
       });
 
@@ -535,8 +590,10 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
   /**
    * Build helmet configuration based on service settings
    */
-  private buildHelmetConfiguration(operationId: string): any {
-    const helmetConfig: any = {};
+  private buildHelmetConfiguration(
+    operationId: string,
+  ): Parameters<typeof helmet>[0] {
+    const helmetConfig: Record<string, unknown> = {};
 
     // Content Security Policy
     if (this.config.contentSecurityPolicy.enabled) {
@@ -591,11 +648,20 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
 
     // Referrer Policy
     if (this.config.referrerPolicy.enabled) {
-      helmetConfig.referrerPolicy = {
-        policy: Array.isArray(this.config.referrerPolicy.policy)
-          ? this.config.referrerPolicy.policy[0]
-          : this.config.referrerPolicy.policy,
-      };
+      const policy = Array.isArray(this.config.referrerPolicy.policy)
+        ? this.config.referrerPolicy.policy[0]
+        : this.config.referrerPolicy.policy;
+      // Ensure policy is a valid ReferrerPolicyToken
+      const validPolicy = policy as
+        | "no-referrer"
+        | "no-referrer-when-downgrade"
+        | "origin"
+        | "origin-when-cross-origin"
+        | "same-origin"
+        | "strict-origin"
+        | "strict-origin-when-cross-origin"
+        | "unsafe-url";
+      helmetConfig.referrerPolicy = { policy: validPolicy };
     } else {
       helmetConfig.referrerPolicy = false;
     }
@@ -613,7 +679,7 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
       serviceType: this.config.serviceType,
     });
 
-    return helmetConfig;
+    return helmetConfig as Parameters<typeof helmet>[0];
   }
 
   /**
@@ -678,7 +744,7 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
     req: Request,
     operationId: string,
     eventType: string,
-    metadata: Record<string, any>,
+    metadata: SecurityEventMetadata,
   ): void {
     if (!this.config.monitoring.enabled) {
       return;
@@ -686,7 +752,7 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
 
     try {
       const securityEvent = createSecurityEvent(
-        SecurityEventType.SECURITY_CONFIG_CHANGED,
+        SecurityEventType._SECURITY_CONFIG_CHANGED,
         req.url,
         req.method,
         false, // Helmet errors are not successful requests
@@ -708,10 +774,10 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
         operationId,
         serviceType: this.config.serviceType,
       });
-    } catch (error) {
+    } catch (err) {
       this.logger.error("Failed to log security event", {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
       });
     }
   }
@@ -724,7 +790,7 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
   ): HelmetSecurityMiddleware {
     return new HelmetSecurityMiddleware(
       configService,
-      RateLimitServiceType.BYTEBOTD,
+      RateLimitServiceType._BYTEBOTD,
     );
   }
 
@@ -733,7 +799,7 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
   ): HelmetSecurityMiddleware {
     return new HelmetSecurityMiddleware(
       configService,
-      RateLimitServiceType.BYTEBOT_AGENT,
+      RateLimitServiceType._BYTEBOT_AGENT,
     );
   }
 
@@ -742,7 +808,7 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
   ): HelmetSecurityMiddleware {
     return new HelmetSecurityMiddleware(
       configService,
-      RateLimitServiceType.BYTEBOT_UI,
+      RateLimitServiceType._BYTEBOT_UI,
     );
   }
 }

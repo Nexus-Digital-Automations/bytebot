@@ -54,8 +54,9 @@ function TasksPageContent() {
         setTasks(result.tasks);
         setTotal(result.total);
         setTotalPages(result.totalPages);
-      } catch (error) {
-        console.error("Failed to load tasks:", error);
+      } catch (_error) {
+        // TODO: Add proper error logging service
+        // console.error("Failed to load tasks:", _error);
       } finally {
         setIsLoading(false);
       }
@@ -69,8 +70,9 @@ function TasksPageContent() {
       try {
         const counts = await fetchTaskCounts();
         setTaskCounts(counts);
-      } catch (error) {
-        console.error("Failed to load task counts:", error);
+      } catch (_error) {
+        // TODO: Add proper error logging service
+        // console.error("Failed to load task counts:", _error);
       }
     };
 

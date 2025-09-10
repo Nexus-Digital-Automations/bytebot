@@ -19,7 +19,7 @@ import {
   TypeTextAction,
   ScrollAction,
 } from '@bytebot/shared';
-import { Role } from '@prisma/client';
+import { Role } from '@bytebot/shared';
 import { MessagesService } from '../messages/messages.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -144,10 +144,10 @@ export class InputCaptureService {
         if (actionType !== 'click_mouse' && actionType !== 'drag_mouse') return;
 
         const userActionBlock: UserActionContentBlock = {
-          type: MessageContentType.UserAction,
+          type: MessageContentType._UserAction,
           content: [
             {
-              type: MessageContentType.Image,
+              type: MessageContentType._Image,
               source: {
                 data: shot.image,
                 media_type: 'image/png',
@@ -193,8 +193,8 @@ export class InputCaptureService {
 
         await this.messagesService.create({
           content: [userActionBlock],
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          role: Role.USER as Role,
+
+          role: Role._USER as Role,
           taskId,
         });
       },
@@ -211,7 +211,7 @@ export class InputCaptureService {
 
       const toolUseId = randomUUID();
       const userActionBlock: UserActionContentBlock = {
-        type: MessageContentType.UserAction,
+        type: MessageContentType._UserAction,
         content: [],
       };
 
@@ -302,8 +302,8 @@ export class InputCaptureService {
       if (userActionBlock.content.length > 0) {
         await this.messagesService.create({
           content: [userActionBlock],
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          role: Role.USER as Role,
+
+          role: Role._USER as Role,
           taskId,
         });
       }

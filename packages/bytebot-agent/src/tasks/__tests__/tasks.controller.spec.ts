@@ -614,7 +614,15 @@ describe('TasksController', () => {
 
   describe('Task Messages - GET /tasks/:id/messages', () => {
     beforeEach(() => {
-      messagesService.findAll.mockResolvedValue([mockMessage]);
+      messagesService.findAll.mockResolvedValue({
+        messages: [mockMessage],
+        operationId: 'test-op-id',
+        retrievalMetrics: {
+          totalCount: 1,
+          retrievalTimeMs: 10,
+          databaseResponseTimeMs: 5,
+        },
+      });
     });
 
     it('should retrieve task messages with default options', async () => {
@@ -681,7 +689,15 @@ describe('TasksController', () => {
 
   describe('Raw Messages - GET /tasks/:id/messages/raw', () => {
     beforeEach(() => {
-      messagesService.findRawMessages.mockResolvedValue([mockMessage]);
+      messagesService.findRawMessages.mockResolvedValue({
+        messages: [mockMessage],
+        operationId: 'test-op-id',
+        retrievalMetrics: {
+          totalCount: 1,
+          retrievalTimeMs: 10,
+          databaseResponseTimeMs: 5,
+        },
+      });
     });
 
     it('should retrieve raw messages with default options', async () => {
@@ -710,13 +726,23 @@ describe('TasksController', () => {
 
   describe('Processed Messages - GET /tasks/:id/messages/processed', () => {
     beforeEach(() => {
-      messagesService.findProcessedMessages.mockResolvedValue([
-        {
-          role: mockMessage.role,
-          messages: [mockMessage],
-          take_over: false,
+      messagesService.findProcessedMessages.mockResolvedValue({
+        groupedMessages: [
+          {
+            role: mockMessage.role,
+            messages: [mockMessage],
+            take_over: false,
+          },
+        ],
+        operationId: 'test-op-id',
+        processingMetrics: {
+          totalMessages: 1,
+          groupCount: 1,
+          processingTimeMs: 15,
+          filteringTimeMs: 5,
+          groupingTimeMs: 3,
         },
-      ]);
+      });
     });
 
     it('should retrieve processed messages with default options', async () => {

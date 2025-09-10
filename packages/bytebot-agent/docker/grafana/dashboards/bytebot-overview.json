@@ -1,0 +1,319 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Bytebot Browser Automation Platform - Overview",
+    "tags": ["bytebot", "browser-automation", "overview"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h"],
+      "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"bytebot-agent\"}",
+            "legendFormat": "API Status",
+            "refId": "A"
+          },
+          {
+            "expr": "up{job=\"browser-use-service\"}",
+            "legendFormat": "Browser Service Status",
+            "refId": "B"
+          },
+          {
+            "expr": "up{job=\"postgres-exporter\"}",
+            "legendFormat": "Database Status",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "color": "red",
+                    "text": "DOWN"
+                  },
+                  "1": {
+                    "color": "green",
+                    "text": "UP"
+                  }
+                },
+                "type": "value"
+              }
+            ]
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Browser Sessions",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "browser_sessions_active{job=\"browser-use-service\"}",
+            "legendFormat": "Active Sessions",
+            "refId": "A"
+          },
+          {
+            "expr": "browser_sessions_total{job=\"browser-use-service\"}",
+            "legendFormat": "Total Sessions",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "API Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"bytebot-agent\"}[5m])",
+            "legendFormat": "Requests/sec - {{method}} {{route}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"bytebot-agent\"}[5m]))",
+            "legendFormat": "50th percentile",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"bytebot-agent\"}[5m]))",
+            "legendFormat": "95th percentile",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Response Time (seconds)",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "process_resident_memory_bytes{job=\"bytebot-agent\"} / 1024 / 1024",
+            "legendFormat": "Bytebot Agent (MB)",
+            "refId": "A"
+          },
+          {
+            "expr": "process_resident_memory_bytes{job=\"browser-use-service\"} / 1024 / 1024",
+            "legendFormat": "Browser Service (MB)",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Memory (MB)",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(process_cpu_seconds_total{job=\"bytebot-agent\"}[5m]) * 100",
+            "legendFormat": "Bytebot Agent (%)",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(process_cpu_seconds_total{job=\"browser-use-service\"}[5m]) * 100",
+            "legendFormat": "Browser Service (%)",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "CPU Usage (%)",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        }
+      },
+      {
+        "id": 7,
+        "title": "Database Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends{job=\"postgres-exporter\"}",
+            "legendFormat": "Active Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "pg_settings_max_connections{job=\"postgres-exporter\"}",
+            "legendFormat": "Max Connections",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Connections",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 24
+        }
+      },
+      {
+        "id": 8,
+        "title": "Browser Automation Tasks",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(browser_tasks_completed_total{job=\"browser-use-service\"}[5m])",
+            "legendFormat": "Completed Tasks/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(browser_tasks_failed_total{job=\"browser-use-service\"}[5m])",
+            "legendFormat": "Failed Tasks/sec",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Tasks/sec",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 24
+        }
+      },
+      {
+        "id": 9,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"bytebot-agent\",status=~\"5..\"}[5m])",
+            "legendFormat": "5xx Errors/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"bytebot-agent\",status=~\"4..\"}[5m])",
+            "legendFormat": "4xx Errors/sec",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Errors/sec",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 32
+        }
+      },
+      {
+        "id": 10,
+        "title": "Storage Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "pg_database_size_bytes{job=\"postgres-exporter\"} / 1024 / 1024",
+            "legendFormat": "Database Size (MB)",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_memory_used_bytes{job=\"redis-exporter\"} / 1024 / 1024",
+            "legendFormat": "Redis Memory (MB)",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Storage (MB)",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 32
+        }
+      }
+    ],
+    "schemaVersion": 30,
+    "version": 1,
+    "editable": true
+  }
+}

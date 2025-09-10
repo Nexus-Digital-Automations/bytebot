@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import { Message, Task } from "@/types";
+import { logDebug, logInfo } from "@/utils/logger";
 
 interface UseWebSocketProps {
   onTaskUpdate?: (task: Task) => void;
@@ -34,30 +35,42 @@ export function useWebSocket({
     });
 
     socket.on("connect", () => {
-      console.log("Connected to WebSocket server");
+      logInfo("Connected to WebSocket server", null, "useWebSocket");
     });
 
     socket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket server");
+      logInfo("Disconnected from WebSocket server", null, "useWebSocket");
     });
 
     socket.on("task_updated", (task: Task) => {
-      console.log("Task updated:", task);
+      logDebug(
+        "Task updated",
+        { taskId: task.id, status: task.status },
+        "useWebSocket",
+      );
       onTaskUpdate?.(task);
     });
 
     socket.on("new_message", (message: Message) => {
-      console.log("New message:", message);
+      logDebug(
+        "New message received",
+        { messageId: message.id, taskId: message.taskId },
+        "useWebSocket",
+      );
       onNewMessage?.(message);
     });
 
     socket.on("task_created", (task: Task) => {
-      console.log("Task created:", task);
+      logDebug(
+        "Task created",
+        { taskId: task.id, title: task.title },
+        "useWebSocket",
+      );
       onTaskCreated?.(task);
     });
 
     socket.on("task_deleted", (taskId: string) => {
-      console.log("Task deleted:", taskId);
+      logDebug("Task deleted", { taskId }, "useWebSocket");
       onTaskDeleted?.(taskId);
     });
 
@@ -73,7 +86,7 @@ export function useWebSocket({
       }
       socket.emit("join_task", taskId);
       currentTaskIdRef.current = taskId;
-      console.log(`Joined task room: ${taskId}`);
+      logDebug("Joined task room", { taskId }, "useWebSocket");
     },
     [connect],
   );
@@ -82,7 +95,8 @@ export function useWebSocket({
     const socket = socketRef.current;
     if (socket && currentTaskIdRef.current) {
       socket.emit("leave_task", currentTaskIdRef.current);
-      console.log(`Left task room: ${currentTaskIdRef.current}`);
+      // TODO: Add proper debug logging service
+      // console.log(`Left task room: ${currentTaskIdRef.current}`);
       currentTaskIdRef.current = null;
     }
   }, []);

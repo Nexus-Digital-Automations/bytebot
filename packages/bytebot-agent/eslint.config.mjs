@@ -1,4 +1,22 @@
 // @ts-check
+// ===================================================================
+// BYTEBOT-AGENT PACKAGE ESLINT CONFIGURATION
+// Enhanced with comprehensive documentation following critical fixes
+// Last Updated: September 8, 2025
+// ===================================================================
+
+/**
+ * Critical Infrastructure Fix Documentation:
+ * This configuration was part of the major ESLint violation resolution that
+ * eliminated production code violations while maintaining test flexibility.
+ *
+ * Key features:
+ * - Relaxed 'any' usage for development flexibility
+ * - Strict unsafe assignment prevention
+ * - Comprehensive test file exception handling
+ * - Jest and Node.js environment support
+ */
+
 import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
@@ -42,9 +60,14 @@ export default tseslint.config(
       ],
     },
   },
-  // Test file specific rules
+  // Test file specific rules (including setup files)
   {
-    files: ['**/*.spec.ts', '**/*.test.ts', '**/*.template.ts'],
+    files: [
+      '**/*.spec.ts',
+      '**/*.test.ts',
+      '**/*.template.ts',
+      '**/test-utils/**/*.ts',
+    ],
     rules: {
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',

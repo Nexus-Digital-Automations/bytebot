@@ -8,15 +8,11 @@
  * - Cross-module integration validation
  * - Performance and resource management testing
  * - Error handling and recovery scenarios
- * - C/ua framework integration testing
+ * - Integration testing for computer use workflows
  *
  * @author Claude Code
  * @version 1.0.0
  */
-
- 
- 
- 
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
@@ -25,24 +21,15 @@ import {
   ScreenshotResult,
   FileWriteResult,
   FileReadResult,
-  OcrOperationResult,
-  FindTextResult,
-  EnhancedScreenshotResult,
 } from '../computer-use.service';
 import { ComputerUseModule } from '../computer-use.module';
 import { NutService } from '../../nut/nut.service';
-import { CuaIntegrationModule } from '../../cua-integration/cua-integration.module';
-import { CuaIntegrationService } from '../../cua-integration/cua-integration.service';
-import { CuaVisionService } from '../../cua-integration/cua-vision.service';
-import { CuaPerformanceService } from '../../cua-integration/cua-performance.service';
 import {
   MoveMouseAction,
   ClickMouseAction,
   ScreenshotAction,
   WriteFileAction,
   ReadFileAction,
-  OcrAction,
-  FindTextAction,
   ApplicationAction,
 } from '@bytebot/shared';
 import * as fs from 'fs/promises';
@@ -52,9 +39,6 @@ import * as path from 'path';
 interface IntegrationTestContext {
   service: ComputerUseService;
   nutService: NutService;
-  cuaIntegrationService?: CuaIntegrationService;
-  cuaVisionService?: CuaVisionService;
-  performanceService?: CuaPerformanceService;
   testDataDir: string;
 }
 
@@ -78,16 +62,10 @@ describe('ComputerUseService Integration Tests', () => {
   beforeAll(async () => {
     // Initialize comprehensive test module with real services
     testModule = await Test.createTestingModule({
-      imports: [ComputerUseModule, CuaIntegrationModule],
+      imports: [ComputerUseModule],
     })
       .overrideProvider(NutService)
       .useValue(createMockNutService())
-      .overrideProvider(CuaIntegrationService)
-      .useValue(createMockCuaIntegrationService())
-      .overrideProvider(CuaVisionService)
-      .useValue(createMockCuaVisionService())
-      .overrideProvider(CuaPerformanceService)
-      .useValue(createMockPerformanceService())
       .compile();
 
     // Create NestJS application for full integration testing
@@ -98,13 +76,6 @@ describe('ComputerUseService Integration Tests', () => {
     context = {
       service: testModule.get<ComputerUseService>(ComputerUseService),
       nutService: testModule.get<NutService>(NutService),
-      cuaIntegrationService: testModule.get<CuaIntegrationService>(
-        CuaIntegrationService,
-      ),
-      cuaVisionService: testModule.get<CuaVisionService>(CuaVisionService),
-      performanceService: testModule.get<CuaPerformanceService>(
-        CuaPerformanceService,
-      ),
       testDataDir,
     };
 
@@ -128,31 +99,21 @@ describe('ComputerUseService Integration Tests', () => {
     it('should initialize all services with proper dependency injection', () => {
       expect(context.service).toBeDefined();
       expect(context.nutService).toBeDefined();
-      expect(context.cuaIntegrationService).toBeDefined();
-      expect(context.cuaVisionService).toBeDefined();
-      expect(context.performanceService).toBeDefined();
     });
 
     it('should have proper service lifecycle management', async () => {
-      // Verify services are properly initialized and ready
-      expect(context.cuaIntegrationService.isFrameworkEnabled()).toBe(true);
-
       // Test service interaction
       const screenshot = await context.service.action({ action: 'screenshot' });
       expect(screenshot).toBeDefined();
       expect((screenshot as ScreenshotResult).image).toBeDefined();
     });
 
-    it('should handle service dependency failures gracefully', async () => {
-      // Test with disabled C/ua framework
-      jest
-        .spyOn(context.cuaIntegrationService, 'isFrameworkEnabled')
-        .mockReturnValue(false);
+    it('should handle unsupported actions gracefully', async () => {
+      // Test with unsupported action
+      const invalidAction = { action: 'invalid_action' } as any;
 
-      const ocrAction: OcrAction = { action: 'ocr' };
-
-      await expect(context.service.action(ocrAction)).rejects.toThrow(
-        'OCR requires C/ua framework integration',
+      await expect(context.service.action(invalidAction)).rejects.toThrow(
+        'Unsupported computer action',
       );
     });
   });
@@ -200,38 +161,6 @@ describe('ComputerUseService Integration Tests', () => {
 
       // Verify application launch sequence
       // Note: spawn calls are mocked in createMockNutService
-    });
-
-    it('should execute screenshot and OCR workflow integration', async () => {
-      const screenshotAction: ScreenshotAction = { action: 'screenshot' };
-      const ocrAction: OcrAction = {
-        action: 'ocr',
-        language: 'en',
-      };
-
-      // Execute screenshot first
-      const screenshotResult = (await context.service.action(
-        screenshotAction,
-      )) as ScreenshotResult;
-      expect(screenshotResult.image).toBeDefined();
-
-      // Execute OCR on screenshot
-      const ocrResult = (await context.service.action(
-        ocrAction,
-      )) as OcrOperationResult;
-      expect(ocrResult.text).toBeDefined();
-      expect(ocrResult.confidence).toBeGreaterThan(0);
-      expect(ocrResult.method).toBeDefined();
-
-      // Verify performance metrics were recorded
-      expect(context.performanceService.recordMetric).toHaveBeenCalledWith(
-        'screenshot',
-        expect.objectContaining({ success: true }),
-      );
-      expect(context.performanceService.recordMetric).toHaveBeenCalledWith(
-        'ocr',
-        expect.objectContaining({ success: true }),
-      );
     });
   });
 
@@ -337,73 +266,6 @@ describe('ComputerUseService Integration Tests', () => {
     });
   });
 
-  describe('C/ua Framework Integration', () => {
-    it('should integrate OCR and text finding workflows', async () => {
-      const findTextAction: FindTextAction = {
-        action: 'find_text',
-        text: 'Integration Test',
-        caseSensitive: false,
-        wholeWord: true,
-      };
-
-      const findResult = (await context.service.action(
-        findTextAction,
-      )) as FindTextResult;
-      expect(findResult.found).toBe(true);
-      expect(findResult.matches).toHaveLength(1);
-      expect(findResult.matches[0].text).toBe('Integration Test');
-      expect(findResult.searchCriteria.text).toBe('Integration Test');
-      expect(findResult.searchCriteria.caseSensitive).toBe(false);
-      expect(findResult.searchCriteria.wholeWord).toBe(true);
-    });
-
-    it('should handle enhanced screenshot with all enhancements', async () => {
-      const enhancedAction = {
-        action: 'enhanced_screenshot' as const,
-        includeOcr: true,
-        includeTextDetection: true,
-        options: { threshold: 0.8 },
-      };
-
-      const result = (await context.service.action(
-        enhancedAction,
-      )) as EnhancedScreenshotResult;
-
-      expect(result.image).toBeDefined();
-      expect(result.ocr).toBeDefined();
-      expect(result.ocr.text).toBe('Mocked OCR text');
-      expect(result.textDetection).toBeDefined();
-      expect(result.enhancementsApplied).toContain('screenshot');
-      expect(result.enhancementsApplied).toContain('ocr');
-      expect(result.enhancementsApplied).toContain('text_detection');
-      expect(result.processingTimeMs).toBeGreaterThan(0);
-    });
-
-    it('should gracefully degrade when C/ua enhancements fail', async () => {
-      // Mock OCR failure
-      jest
-        .spyOn(context.cuaVisionService, 'performOcr')
-        .mockRejectedValue(new Error('OCR service unavailable'));
-
-      const enhancedAction = {
-        action: 'enhanced_screenshot' as const,
-        includeOcr: true,
-        includeTextDetection: true,
-      };
-
-      const result = (await context.service.action(
-        enhancedAction,
-      )) as EnhancedScreenshotResult;
-
-      expect(result.image).toBeDefined();
-      expect(result.ocr).toBeUndefined();
-      expect(result.textDetection).toBeDefined();
-      expect(result.enhancementsApplied).toContain('screenshot');
-      expect(result.enhancementsApplied).toContain('text_detection');
-      expect(result.enhancementsApplied).not.toContain('ocr');
-    });
-  });
-
   describe('Performance and Resource Management', () => {
     it('should handle concurrent operations efficiently', async () => {
       const concurrentActions = Array.from({ length: 5 }, () => ({
@@ -478,41 +340,28 @@ describe('ComputerUseService Integration Tests', () => {
       expect(memoryGrowth).toBeLessThan(50 * 1024 * 1024); // Less than 50MB growth
     });
 
-    it('should record comprehensive performance metrics', async () => {
+    it('should handle multiple actions successfully', async () => {
       const actions = [
         { action: 'screenshot' as const },
-        { action: 'ocr' as const },
-        { action: 'find_text' as const, text: 'test' },
+        { action: 'move_mouse' as const, coordinates: { x: 100, y: 200 } },
+        {
+          action: 'click_mouse' as const,
+          coordinates: { x: 100, y: 200 },
+          button: 'left' as const,
+          clickCount: 1,
+        },
       ];
 
+      // Execute actions sequentially
       for (const action of actions) {
-        await context.service.action(action);
+        const result = await context.service.action(action);
+        expect(result).toBeDefined();
       }
 
-      // Verify metrics were recorded for each action
-      expect(context.performanceService.recordMetric).toHaveBeenCalledWith(
-        'screenshot',
-        expect.objectContaining({
-          duration: expect.any(Number),
-          success: true,
-        }),
-      );
-
-      expect(context.performanceService.recordMetric).toHaveBeenCalledWith(
-        'ocr',
-        expect.objectContaining({
-          duration: expect.any(Number),
-          success: true,
-        }),
-      );
-
-      expect(context.performanceService.recordMetric).toHaveBeenCalledWith(
-        'find_text',
-        expect.objectContaining({
-          duration: expect.any(Number),
-          success: true,
-        }),
-      );
+      // Verify service calls were made
+      expect(context.nutService.screendump).toHaveBeenCalled();
+      expect(context.nutService.mouseMoveEvent).toHaveBeenCalled();
+      expect(context.nutService.mouseClickEvent).toHaveBeenCalled();
     });
   });
 
@@ -583,7 +432,7 @@ describe('ComputerUseService Integration Tests', () => {
   });
 
   describe('Real-world Integration Scenarios', () => {
-    it('should handle typical automation workflow: navigate → screenshot → OCR → interaction', async () => {
+    it('should handle typical automation workflow: screenshot → navigate → interact', async () => {
       const workflow = async () => {
         // 1. Take initial screenshot
         const screenshot = await context.service.action({
@@ -591,36 +440,21 @@ describe('ComputerUseService Integration Tests', () => {
         });
         expect((screenshot as ScreenshotResult).image).toBeDefined();
 
-        // 2. Perform OCR to find text
-        const ocr = await context.service.action({
-          action: 'ocr',
-          language: 'en',
+        // 2. Move mouse to target location
+        await context.service.action({
+          action: 'move_mouse',
+          coordinates: { x: 200, y: 300 },
         });
-        expect((ocr as OcrOperationResult).text).toBeDefined();
 
-        // 3. Find specific text
-        const findText = await context.service.action({
-          action: 'find_text',
-          text: 'Integration Test',
+        // 3. Click on target location
+        await context.service.action({
+          action: 'click_mouse',
+          coordinates: { x: 200, y: 300 },
+          button: 'left',
+          clickCount: 1,
         });
-        const findResult = findText as FindTextResult;
-        expect(findResult.found).toBe(true);
 
-        // 4. Click on found text
-        if (findResult.matches.length > 0) {
-          const match = findResult.matches[0];
-          await context.service.action({
-            action: 'click_mouse',
-            coordinates: {
-              x: match.x + match.width / 2,
-              y: match.y + match.height / 2,
-            },
-            button: 'left',
-            clickCount: 1,
-          });
-        }
-
-        // 5. Take final screenshot
+        // 4. Take final screenshot to verify state
         const finalScreenshot = await context.service.action({
           action: 'screenshot',
         });
@@ -630,7 +464,7 @@ describe('ComputerUseService Integration Tests', () => {
       await expect(workflow()).resolves.not.toThrow();
     });
 
-    it('should handle document processing workflow: read → OCR → save results', async () => {
+    it('should handle document processing workflow: read → process → save results', async () => {
       // Create test document
       const testDoc = createTestFile(
         'document.txt',
@@ -648,33 +482,34 @@ describe('ComputerUseService Integration Tests', () => {
       )) as FileWriteResult;
       expect(writeResult.success).toBe(true);
 
-      // Take screenshot for OCR
+      // Read document back to verify
+      const readResult = (await context.service.action({
+        action: 'read_file',
+        path: writeResult.path,
+      })) as FileReadResult;
+      expect(readResult.success).toBe(true);
+
+      // Take screenshot to document the process
       const screenshot = await context.service.action({ action: 'screenshot' });
       expect((screenshot as ScreenshotResult).image).toBeDefined();
 
-      // Perform OCR
-      const ocrResult = (await context.service.action({
-        action: 'ocr',
-        language: 'en',
-      })) as OcrOperationResult;
-
-      // Save OCR results
-      const ocrData = JSON.stringify({
+      // Create processing results
+      const processingResults = JSON.stringify({
         originalFile: 'test-document.txt',
-        ocrText: ocrResult.text,
-        confidence: ocrResult.confidence,
-        processingTime: ocrResult.processingTimeMs,
-        timestamp: new Date().toISOString(),
+        fileSize: readResult.size,
+        mediaType: readResult.mediaType,
+        processedAt: new Date().toISOString(),
+        status: 'completed',
       });
 
-      const saveOcrAction: WriteFileAction = {
+      const saveResultsAction: WriteFileAction = {
         action: 'write_file',
-        path: path.join(testDataDir, 'ocr-results.json'),
-        data: Buffer.from(ocrData).toString('base64'),
+        path: path.join(testDataDir, 'processing-results.json'),
+        data: Buffer.from(processingResults).toString('base64'),
       };
 
       const saveResult = (await context.service.action(
-        saveOcrAction,
+        saveResultsAction,
       )) as FileWriteResult;
       expect(saveResult.success).toBe(true);
 
@@ -689,7 +524,7 @@ describe('ComputerUseService Integration Tests', () => {
         Buffer.from(readResults.data, 'base64').toString(),
       );
       expect(parsedResults.originalFile).toBe('test-document.txt');
-      expect(parsedResults.ocrText).toBeDefined();
+      expect(parsedResults.status).toBe('completed');
     });
   });
 
@@ -712,62 +547,6 @@ describe('ComputerUseService Integration Tests', () => {
         .fn()
         .mockResolvedValue(Buffer.from('mocked-screenshot-data')),
       getCursorPosition: jest.fn().mockResolvedValue({ x: 100, y: 200 }),
-    };
-  }
-
-  /**
-   * Create mock C/ua integration service
-   */
-  function createMockCuaIntegrationService(): Partial<CuaIntegrationService> {
-    return {
-      isFrameworkEnabled: jest.fn().mockReturnValue(true),
-      isAneBridgeAvailable: jest.fn().mockReturnValue(true),
-      getConfiguration: jest.fn().mockResolvedValue({}),
-    };
-  }
-
-  /**
-   * Create mock C/ua vision service with realistic responses
-   */
-  function createMockCuaVisionService(): Partial<CuaVisionService> {
-    return {
-      performOcr: jest.fn().mockResolvedValue({
-        text: 'Mocked OCR text with Integration Test content',
-        confidence: 0.95,
-        method: 'ANE',
-        boundingBoxes: [
-          {
-            text: 'Integration Test',
-            x: 100,
-            y: 200,
-            width: 120,
-            height: 25,
-            confidence: 0.98,
-          },
-        ],
-      }),
-      detectText: jest.fn().mockResolvedValue({
-        regions: [
-          {
-            text: 'Detected text region',
-            x: 50,
-            y: 75,
-            width: 200,
-            height: 30,
-            confidence: 0.92,
-          },
-        ],
-      }),
-      batchOcr: jest.fn().mockResolvedValue([]),
-    };
-  }
-
-  /**
-   * Create mock performance service
-   */
-  function createMockPerformanceService(): Partial<CuaPerformanceService> {
-    return {
-      recordMetric: jest.fn().mockImplementation(() => Promise.resolve()),
     };
   }
 

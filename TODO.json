@@ -1,6 +1,312 @@
 {
   "project": "unknown",
-  "tasks": [],
+  "tasks": [
+    {
+      "id": "error_1757389319302_r2nwsfpgw",
+      "title": "CRITICAL: Fix TypeScript build errors in shared package",
+      "description": "Multiple TypeScript compilation errors blocking build process in compliance-framework.service.ts. Properties like PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED and eventEmitter not found - need to fix property access issues preventing successful build.",
+      "priority": "critical",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/audit/compliance/compliance-framework.service.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T03:41:59.302Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757388350560_1_general_e66b76dd",
+      "started_at": "2025-09-09T03:42:20.434Z",
+      "claimed_by": "development_session_1757388350560_1_general_e66b76dd",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757388350560_1_general_e66b76dd",
+          "role": "primary",
+          "assignedAt": "2025-09-09T03:42:20.434Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757420515725_f4zujtc14",
+      "title": "Fix remaining 520 ESLint violations in shared package - TypeScript configuration optimization",
+      "description": "Fix TypeScript configuration and ESLint violations in shared package:\n\n1. **TypeScript Project Configuration Issues**:\n   - Test files showing compilation errors (TS2448, TS2454, TS2345, TS2339)\n   - Project service configuration not properly handling all test files\n   - Include/exclude patterns may need optimization\n   - TypeScript project references configuration\n\n2. **ESLint Rule Violations**:\n   - Prettier formatting violations (quote consistency, spacing)\n   - @typescript-eslint/unbound-method errors in test files\n   - Unused ESLint disable directives\n   - TypeScript strict type checking issues\n\n3. **Test File Configuration**:\n   - Root-level __tests__/ directory coverage\n   - Nested src/**/__tests__/ directory coverage\n   - Proper TypeScript compilation for all test patterns\n   - ESLint rule overrides for test files not applying correctly\n\n4. **Project Structure Optimization**:\n   - tsconfig.json include/exclude patterns\n   - eslint.config.mjs test file patterns\n   - TypeScript project service configuration\n   - Path mapping and module resolution\n\n**Target**: Zero ESLint violations with proper TypeScript type checking for all files including tests\n**Evidence**: Clean ESLint output with no violations\n**Files**: tsconfig.json, eslint.config.mjs, test files",
+      "priority": 1,
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/tsconfig.json",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/eslint.config.mjs"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T12:21:55.725Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757421315937_1_general_24a42c29",
+      "started_at": "2025-09-09T12:49:22.323Z",
+      "claimed_by": "development_session_1757421315937_1_general_24a42c29",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757421315937_1_general_24a42c29",
+          "role": "primary",
+          "assignedAt": "2025-09-09T12:49:22.323Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757403630694_hbrzxsc10",
+      "title": "AGENT-9: Final validation and coordination security-config-analyzer",
+      "description": "Perform final comprehensive ESLint validation after all fixes. Coordinate results from other agents, ensure no regressions, and verify complete resolution of all 1344 violations.",
+      "priority": 1,
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T07:40:30.694Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757466370448_1_general_1ca2d828",
+      "started_at": "2025-09-10T03:22:26.680Z",
+      "claimed_by": "development_session_1757466370448_1_general_1ca2d828",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757466370448_1_general_1ca2d828",
+          "role": "primary",
+          "assignedAt": "2025-09-10T03:22:26.680Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "feature_1757367914200_a5ubyqmsm",
+      "title": "Implement Enterprise-Grade Security Testing Framework",
+      "description": "Develop comprehensive security testing framework for enterprise deployment including automated security scan integration, vulnerability assessment, penetration testing automation, security policy validation, and compliance reporting. Must integrate with existing local-only architecture and provide comprehensive security validation for all Bytebot services.",
+      "priority": "high",
+      "category": "feature",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/shared/src/test-utils/",
+        "orchestrator/security/",
+        "development/essentials/local-only-architecture.md"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-08T21:45:14.200Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757367818906_1_general_a0a9cfd9",
+      "started_at": "2025-09-08T21:45:36.102Z",
+      "claimed_by": "development_session_1757367818906_1_general_a0a9cfd9",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757367818906_1_general_a0a9cfd9",
+          "role": "primary",
+          "assignedAt": "2025-09-08T21:45:36.102Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "feature_1757390050827_wbtd7l275",
+      "title": "Implement Performance Metrics and Reporting System",
+      "description": "Create metrics/accuracy-metrics-reporter.ts with comprehensive ML accuracy tracking, false positive rate monitoring, real-time dashboards, and analytics. Include detailed performance monitoring, A/B testing, trend analysis, comprehensive reporting capabilities, real-time event emission, data persistence, and enterprise-grade analytics.",
+      "priority": "medium",
+      "category": "feature",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/security/ml-accuracy/types/metrics.types.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/security/ml-accuracy/core/false-positive-reduction-engine.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T03:54:10.827Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "feature_1757390038478_hkfnwdgty",
+      "title": "Implement ML Security Integration Service",
+      "description": "Create integration/ml-accuracy-integration-service.ts for unified component coordination, cross-system accuracy optimization, and centralized ML security management. Include component orchestration, consensus algorithms, health monitoring, real-time optimization, event-driven architecture, performance tracking, and enterprise-grade error handling.",
+      "priority": "medium",
+      "category": "feature",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/security/ml-accuracy/types/integration.types.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/security/ml-accuracy/core/false-positive-reduction-engine.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T03:53:58.479Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "feature_1757390027197_ip8654smw",
+      "title": "Implement Advanced Pattern Classification System",
+      "description": "Create classification/advanced-pattern-classifier.ts with multi-dimensional feature extraction, behavioral pattern analysis, anomaly detection, and contextual pattern recognition. Include FeatureExtractor, BehavioralAnalyzer, AnomalyDetector, and ContextualAnalyzer classes with comprehensive TypeScript implementation, real-time processing, event emission, and enterprise-grade configuration.",
+      "priority": "medium",
+      "category": "feature",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/security/ml-accuracy/types/classification.types.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/security/ml-accuracy/core/false-positive-reduction-engine.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T03:53:47.198Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "feature_1757387235762_rfqaeuktv",
+      "title": "Implement ML-Based Security Event Correlation System for Advanced Threat Detection",
+      "description": "Create a comprehensive ML-based security event correlation system that can identify complex attack patterns, correlate events across time and systems, and adapt to new threat patterns. This system will integrate with existing security infrastructure and provide real-time correlation capabilities.\n\nKey Components to Implement:\n1. **Event Correlation Engine**: ML-driven correlation of security events across multiple sources\n2. **Temporal Analysis**: Multi-stage attack detection through temporal correlation\n3. **Adaptive Signature Learning**: Dynamic learning from local security scans and events\n4. **Pattern Classification**: Complex attack scenario classification and scoring\n5. **Real-time Processing**: Low-latency correlation for critical threats\n6. **Integration Layer**: Seamless integration with existing security event systems\n7. **Analytics Dashboard**: Visualization and management of correlation findings\n8. **Performance Optimization**: Efficient processing for high-volume event streams\n\nImplementation Requirements:\n- Create files in `/packages/shared/src/security/ml-correlation/`\n- Integrate with existing ML security services\n- Production-ready with comprehensive logging and documentation\n- Support for multiple event types and sources\n- Configurable correlation rules and thresholds\n- Export capabilities for SIEM integration\n- Comprehensive error handling and monitoring\n\nDeliverables:\n- Event correlation engine with ML algorithms\n- Temporal correlation analysis system\n- Adaptive learning components\n- Integration interfaces\n- Performance monitoring and metrics\n- Complete documentation and examples",
+      "priority": "medium",
+      "category": "feature",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/security/ml-integrated-security-service.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/security/ml-vulnerability-pattern-detector.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/security/ml-anomaly-detection-engine.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/security/ml-adaptive-learning-engine.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T03:07:15.762Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "feature_1757387214182_op1ggz5z2",
+      "title": "Implement ML-Based False Positive Reduction System for Security Accuracy Optimization",
+      "description": "Create comprehensive false positive reduction algorithms using ML techniques including pattern classification improvements, feedback learning systems, confidence scoring for security alerts, adaptive thresholds, integration with all ML security components, and performance metrics reporting for enterprise-grade detection accuracy",
+      "priority": 1,
+      "category": "feature",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "packages/shared/src/security/ml-accuracy/"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T03:06:54.183Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757387137197_1_general_5e2bda74",
+      "started_at": "2025-09-09T03:07:09.014Z",
+      "claimed_by": "development_session_1757387137197_1_general_5e2bda74",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757387137197_1_general_5e2bda74",
+          "role": "primary",
+          "assignedAt": "2025-09-09T03:07:09.014Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "feature_1757387211492_npdn0ha3s",
+      "title": "Implement ML-based vulnerability pattern recognition system for security threat detection",
+      "description": "Create comprehensive ML-based vulnerability pattern detection system including: 1) Training datasets for common vulnerability patterns (SQL injection, XSS, CSRF, etc.) 2) Pattern recognition algorithms using ML techniques 3) Signature learning systems that adapt to new vulnerability patterns 4) Classification models for different security threats 5) Pattern matching optimization for real-time analysis 6) Vulnerability signature database and management system 7) Integration with existing security detection. Target location: /packages/shared/src/security/ml-patterns/",
+      "priority": "medium",
+      "category": "feature",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T03:06:51.492Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "feature_1757384038479_5ku7n7fpr",
+      "title": "Implement ML-Based Vulnerability Pattern Detection System with Local Processing",
+      "description": "Design and implement a comprehensive machine learning-based vulnerability pattern detection system with local processing capabilities. Create ML models for vulnerability detection, training datasets for common vulnerability patterns, implement local ML processing (no cloud ML services), develop pattern recognition algorithms, network traffic anomaly detection, application behavior anomaly analysis, configuration drift detection, security event correlation analysis, adaptive vulnerability signature learning, false positive reduction algorithms, continuous learning from local scans, pattern classification improvements, TensorFlow.js or similar local ML frameworks, lightweight model implementations, local training and inference, and ensure no external ML API dependencies.",
+      "priority": "medium",
+      "category": "feature",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T02:13:58.479Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757385966637_1_general_55d73261",
+      "started_at": "2025-09-09T03:04:47.961Z",
+      "claimed_by": "development_session_1757385966637_1_general_55d73261",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757385966637_1_general_55d73261",
+          "role": "primary",
+          "assignedAt": "2025-09-09T03:04:47.961Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "feature_1757369017871_hv5t04dvp",
+      "title": "Develop Comprehensive Vulnerability Assessment Engine for Bytebot Security Framework",
+      "description": "Create automated vulnerability assessment engine for local Bytebot deployments that operates entirely within the local network. Components: 1) Automated vulnerability scanning engine with OWASP Top 10 detection, 2) Security configuration analysis tools for Docker/databases/services, 3) Common vulnerability pattern detection with ML-based analysis, 4) Risk scoring and prioritization system with detailed remediation guidance, 5) Integration with existing orchestrator security framework and shared test utilities. Implement pattern recognition for web applications, APIs, and service configurations. Generate comprehensive reports with actionable remediation steps.",
+      "priority": "medium",
+      "category": "feature",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/orchestrator/security/penetration_testing_engine.py",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/test-utils/mocks/vulnerability-scanner.mock.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/utils/security.utils.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-08T22:03:37.871Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757383817696_1_general_1a368163",
+      "started_at": "2025-09-09T02:10:47.592Z",
+      "claimed_by": "development_session_1757383817696_1_general_1a368163",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757383817696_1_general_1a368163",
+          "role": "primary",
+          "assignedAt": "2025-09-09T02:10:47.592Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    }
+  ],
   "agents": {
     "development_session_1757221462975_1_general_87002890": {
       "name": "development Agent",
@@ -64,6 +370,495 @@
       "createdAt": "2025-09-07T18:04:55.208Z",
       "sessionId": "session_1757268295207",
       "metadata": {}
+    },
+    "development_session_1757367818906_1_general_a0a9cfd9": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T21:43:38.907Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T21:43:38.907Z",
+      "sessionId": "session_1757367818906",
+      "metadata": {}
+    },
+    "development_session_1757368074691_1_general_7673a5da": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T21:47:54.692Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T21:47:54.692Z",
+      "sessionId": "session_1757368074691",
+      "metadata": {}
+    },
+    "development_session_1757368074801_1_general_3b7b76c1": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T21:47:54.802Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T21:47:54.802Z",
+      "sessionId": "session_1757368074801",
+      "metadata": {}
+    },
+    "development_session_1757368212591_1_general_3a27d2ee": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T21:50:12.600Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T21:50:12.600Z",
+      "sessionId": "session_1757368212591",
+      "metadata": {}
+    },
+    "development_session_1757368697235_1_general_39514492": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T21:58:17.239Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T21:58:17.239Z",
+      "sessionId": "session_1757368697235",
+      "metadata": {}
+    },
+    "development_session_1757369016901_1_general_16a83931": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T22:03:36.902Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T22:03:36.902Z",
+      "sessionId": "session_1757369016901",
+      "metadata": {}
+    },
+    "development_session_1757383817696_1_general_1a368163": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T02:10:17.698Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T02:10:17.698Z",
+      "sessionId": "session_1757383817696",
+      "metadata": {}
+    },
+    "development_session_1757383910428_1_general_1d1af88c": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T02:11:50.429Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T02:11:50.429Z",
+      "sessionId": "session_1757383910428",
+      "metadata": {}
+    },
+    "development_session_1757383912347_1_general_3efed006": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T02:11:52.350Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T02:11:52.350Z",
+      "sessionId": "session_1757383912347",
+      "metadata": {}
+    },
+    "development_session_1757383913589_1_general_b38ebeb4": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T02:11:53.601Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T02:11:53.602Z",
+      "sessionId": "session_1757383913589",
+      "metadata": {}
+    },
+    "development_session_1757383919012_1_general_4b145c44": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T02:11:59.013Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T02:11:59.014Z",
+      "sessionId": "session_1757383919012",
+      "metadata": {}
+    },
+    "development_session_1757384034232_1_general_6c0a8cac": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T02:13:54.235Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T02:13:54.235Z",
+      "sessionId": "session_1757384034232",
+      "metadata": {}
+    },
+    "development_session_1757387137197_1_general_5e2bda74": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T03:05:37.229Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T03:05:37.229Z",
+      "sessionId": "session_1757387137197",
+      "metadata": {}
+    },
+    "development_session_1757387165428_1_general_432d93db": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T03:06:05.432Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T03:06:05.432Z",
+      "sessionId": "session_1757387165428",
+      "metadata": {
+        "renewedAt": "2025-09-09T03:08:09.924Z",
+        "renewalReason": "Agent reinitialization requested"
+      },
+      "lastRenewal": "2025-09-09T03:08:09.924Z",
+      "renewalCount": 1,
+      "agentId": "development_session_1757387165428_1_general_432d93db"
+    },
+    "development_session_1757387168890_1_general_46916304": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T03:06:08.892Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T03:06:08.892Z",
+      "sessionId": "session_1757387168890",
+      "metadata": {}
+    },
+    "development_session_1757387168897_1_general_9dad65bf": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T03:06:08.898Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T03:06:08.898Z",
+      "sessionId": "session_1757387168897",
+      "metadata": {}
+    },
+    "development_session_1757387168989_1_general_382dbcc4": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T03:06:08.992Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T03:06:08.992Z",
+      "sessionId": "session_1757387168989",
+      "metadata": {}
+    },
+    "development_session_1757387169107_1_general_a5f8f4e1": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T03:06:09.109Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T03:06:09.109Z",
+      "sessionId": "session_1757387169107",
+      "metadata": {}
+    },
+    "development_session_1757388947534_1_general_73ba365c": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T03:35:47.536Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T03:35:47.536Z",
+      "sessionId": "session_1757388947534",
+      "metadata": {}
+    },
+    "development_session_1757389950767_1_general_874f05d0": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T03:52:30.770Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T03:52:30.770Z",
+      "sessionId": "session_1757389950767",
+      "metadata": {}
+    },
+    "development_session_1757403573170_1_general_3937d791": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T07:39:33.176Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T07:39:33.176Z",
+      "sessionId": "session_1757403573170",
+      "metadata": {}
+    },
+    "development_session_1757421315937_1_general_24a42c29": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T12:35:15.941Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T12:35:15.941Z",
+      "sessionId": "session_1757421315937",
+      "metadata": {}
     }
-  }
+  },
+  "settings": {
+    "auto_sort_enabled": true,
+    "sort_criteria": {
+      "primary": "category",
+      "secondary": "created_at"
+    },
+    "priority_values": {
+      "critical": 4,
+      "high": 3,
+      "medium": 2,
+      "low": 1
+    },
+    "category_enabled": true,
+    "category_ranks": {
+      "error": 1,
+      "feature": 2,
+      "subtask": 3,
+      "test": 4
+    }
+  },
+  "current_mode": "DEVELOPMENT"
 }

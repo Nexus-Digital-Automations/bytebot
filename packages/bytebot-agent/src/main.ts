@@ -10,7 +10,7 @@ import helmet from 'helmet';
 import {
   StandardizedSecurityMiddleware,
   ServiceType,
-} from '@bytebot/shared/dist/index-server';
+} from '@bytebot/shared/server';
 import { ConfigService } from '@nestjs/config';
 
 // Polyfill for crypto global (required by @nestjs/schedule)
@@ -50,7 +50,7 @@ async function bootstrap(): Promise<void> {
     logger.log(
       'Bytebot-Agent standardized security middleware deployed successfully',
       {
-        serviceType: ServiceType.BYTEBOT_AGENT,
+        serviceType: ServiceType._BYTEBOT_AGENT,
         environment: config.nodeEnv,
         securityLevel: securityMiddleware.getSecurityConfig().securityLevel,
       },

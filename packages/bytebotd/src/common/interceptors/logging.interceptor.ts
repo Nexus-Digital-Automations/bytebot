@@ -84,7 +84,7 @@ export class LoggingInterceptor implements NestInterceptor {
    * @param next Call handler
    * @returns Observable with logging side effects
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const httpContext = context.switchToHttp();
     const request = httpContext.getRequest<Request>();
     const response = httpContext.getResponse<Response>();
@@ -195,8 +195,9 @@ export class LoggingInterceptor implements NestInterceptor {
       userAgent: request.headers['user-agent'],
       remoteAddress: this.getClientIpAddress(request),
       timestamp: new Date().toISOString(),
-      userId: (request as any).user?.id, // If authentication is implemented
-      sessionId: (request as any).session?.id, // If sessions are used
+      userId: (request as Request & { user?: { id: string } }).user?.id, // If authentication is implemented
+      sessionId: (request as Request & { session?: { id: string } }).session
+        ?.id, // If sessions are used
     };
   }
 
@@ -226,12 +227,17 @@ export class LoggingInterceptor implements NestInterceptor {
    * @param error Error object
    * @returns Error context object
    */
-  private createErrorContext(error: any): ErrorContext {
+  private createErrorContext(error: Error): ErrorContext {
     return {
       name: error?.name || 'UnknownError',
       message: error?.message || 'An unknown error occurred',
       stack: error?.stack,
-      statusCode: error?.status || error?.statusCode,
+      statusCode:
+        'status' in error && typeof error.status === 'number'
+          ? error.status
+          : 'statusCode' in error && typeof error.statusCode === 'number'
+            ? error.statusCode
+            : undefined,
     };
   }
 
@@ -243,7 +249,8 @@ export class LoggingInterceptor implements NestInterceptor {
    */
   private extractRoute(request: Request): string {
     // Try to get route pattern from NestJS route info
-    const routePattern = (request as any).route?.path;
+    const routePattern = (request as Request & { route?: { path: string } })
+      .route?.path;
     if (routePattern) {
       return routePattern;
     }

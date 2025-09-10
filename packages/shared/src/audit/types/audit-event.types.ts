@@ -82,6 +82,10 @@ export enum ComplianceFramework {
   NIST_CSF = "nist_csf",
   /** Cloud Security Alliance */
   CSA = "csa",
+  /** Open Web Application Security Project */
+  OWASP = "owasp",
+  /** Service Organization Control 2 */
+  SOC2 = "soc2",
 }
 
 /**

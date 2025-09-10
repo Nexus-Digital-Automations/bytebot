@@ -245,7 +245,7 @@ export class ComputerActionValidationPipe
         // Log security event for validation failures
         this.logSecurityEvent(
           operationId,
-          SecurityEventType.VALIDATION_FAILED,
+          SecurityEventType._VALIDATION_FAILED,
           'Computer action validation failed',
           rawInput,
           formattedErrors,
@@ -299,7 +299,7 @@ export class ComputerActionValidationPipe
     if (!value || typeof value !== 'object') {
       this.logSecurityEvent(
         operationId,
-        SecurityEventType.VALIDATION_FAILED,
+        SecurityEventType._VALIDATION_FAILED,
         'Invalid request body structure',
         value,
         ['Request body must be a valid object'],
@@ -320,7 +320,7 @@ export class ComputerActionValidationPipe
     if (payloadSize > MAX_PAYLOAD_SIZE) {
       this.logSecurityEvent(
         operationId,
-        SecurityEventType.VALIDATION_FAILED,
+        SecurityEventType._VALIDATION_FAILED,
         'Payload size limit exceeded',
         { payloadSize, maxAllowed: MAX_PAYLOAD_SIZE },
         [
@@ -338,7 +338,7 @@ export class ComputerActionValidationPipe
     if (!input.action || typeof input.action !== 'string') {
       this.logSecurityEvent(
         operationId,
-        SecurityEventType.VALIDATION_FAILED,
+        SecurityEventType._VALIDATION_FAILED,
         'Missing or invalid action field',
         input,
         ['Missing or invalid action field - must be a string'],
@@ -719,7 +719,7 @@ export class ComputerActionValidationPipe
         // Log comprehensive security event with all detection details
         this.logSecurityEvent(
           operationId,
-          SecurityEventType.SUSPICIOUS_ACTIVITY,
+          SecurityEventType._SUSPICIOUS_ACTIVITY,
           `Multi-stage security threats detected: ${threatTypes}`,
           {
             ...rawInput,

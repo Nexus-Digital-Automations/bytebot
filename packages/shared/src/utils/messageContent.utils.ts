@@ -42,7 +42,7 @@ export function isTextContentBlock(obj: unknown): obj is TextContentBlock {
 
   const block = obj as Partial<TextContentBlock>;
   return (
-    block.type === MessageContentType.Text && typeof block.text === "string"
+    block.type === MessageContentType._Text && typeof block.text === "string"
   );
 }
 
@@ -55,7 +55,7 @@ export function isThinkingContentBlock(
 
   const block = obj as Partial<ThinkingContentBlock>;
   return (
-    block.type === MessageContentType.Thinking &&
+    block.type === MessageContentType._Thinking &&
     typeof block.thinking === "string" &&
     typeof block.signature === "string"
   );
@@ -70,7 +70,7 @@ export function isRedactedThinkingContentBlock(
 
   const block = obj as Partial<RedactedThinkingContentBlock>;
   return (
-    block.type === MessageContentType.RedactedThinking &&
+    block.type === MessageContentType._RedactedThinking &&
     typeof block.data === "string"
   );
 }
@@ -87,7 +87,7 @@ export function isImageContentBlock(obj: unknown): obj is ImageContentBlock {
 
   const block = obj as Partial<ImageContentBlock>;
   return (
-    block.type === MessageContentType.Image &&
+    block.type === MessageContentType._Image &&
     block.source !== undefined &&
     typeof block.source === "object" &&
     typeof block.source.media_type === "string" &&
@@ -105,7 +105,7 @@ export function isUserActionContentBlock(
 
   const block = obj as Partial<UserActionContentBlock>;
 
-  return block.type === MessageContentType.UserAction;
+  return block.type === MessageContentType._UserAction;
 }
 
 /**
@@ -122,7 +122,7 @@ export function isDocumentContentBlock(
 
   const block = obj as Partial<DocumentContentBlock>;
   return (
-    block.type === MessageContentType.Document &&
+    block.type === MessageContentType._Document &&
     block.source !== undefined &&
     typeof block.source === "object" &&
     typeof block.source.type === "string" &&
@@ -145,7 +145,7 @@ export function isToolUseContentBlock(
 
   const block = obj as Partial<ToolUseContentBlock>;
   return (
-    block.type === MessageContentType.ToolUse &&
+    block.type === MessageContentType._ToolUse &&
     typeof block.name === "string" &&
     typeof block.id === "string" &&
     block.input !== undefined &&
@@ -182,7 +182,7 @@ export function isToolResultContentBlock(
 
   const block = obj as Partial<ToolResultContentBlock>;
   return (
-    block.type === MessageContentType.ToolResult &&
+    block.type === MessageContentType._ToolResult &&
     typeof block.tool_use_id === "string"
   );
 }

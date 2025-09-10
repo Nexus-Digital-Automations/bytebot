@@ -9,7 +9,6 @@
  */
 
 import "reflect-metadata";
-import "@testing-library/jest-dom";
 
 // Set test environment for Bytebot UI
 process.env.NODE_ENV = "test";
@@ -25,34 +24,37 @@ process.env.NEXTAUTH_SECRET = "test-nextauth-secret-for-testing";
 // Mock global objects commonly used in browser environment
 Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(), // Deprecated
-    removeListener: jest.fn(), // Deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
+  value: function (query: string) {
+    return {
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: function () {}, // Deprecated
+      removeListener: function () {}, // Deprecated
+      addEventListener: function () {},
+      removeEventListener: function () {},
+      dispatchEvent: function () {},
+    };
+  },
 });
 
 // Mock ResizeObserver
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-}));
+(global as { ResizeObserver?: unknown }).ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
 
 // Mock IntersectionObserver
-global.IntersectionObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-  root: null,
-  rootMargin: "",
-  thresholds: [],
-}));
+(global as { IntersectionObserver?: unknown }).IntersectionObserver =
+  class IntersectionObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    root = null;
+    rootMargin = "";
+    thresholds: number[] = [];
+  };
 
 // Mock WebSocket for Socket.io testing
 class MockWebSocket {
@@ -61,10 +63,7 @@ class MockWebSocket {
   addEventListener() {}
   removeEventListener() {}
 }
-global.WebSocket = MockWebSocket as typeof WebSocket;
-
-// Global test timeout
-jest.setTimeout(30000);
+(global as { WebSocket?: unknown }).WebSocket = MockWebSocket;
 
 // Export for potential use in tests
 export const testEnvironment = {

@@ -13,7 +13,7 @@
  * @version 2.0.0
  */
 
-import { MockConfig } from "./mock-config";
+import { MockConfig as _MockConfig } from "./mock-config";
 import { JwtPayload } from "../../types/security.types";
 
 export type UserRole = "admin" | "moderator" | "user" | "guest";
@@ -85,63 +85,63 @@ export interface LoginResult {
 
 export interface AuthProviderMock {
   authenticate: jest.MockedFunction<
-    (credentials: LoginCredentials) => Promise<LoginResult>
+    (_credentials: LoginCredentials) => Promise<LoginResult>
   >;
   validateToken: jest.MockedFunction<
     (
-      token: string,
-      tokenType?: TokenType,
+      _token: string,
+      _tokenType?: TokenType,
     ) => Promise<{ valid: boolean; payload?: JwtPayload; error?: string }>
   >;
   refreshToken: jest.MockedFunction<
     (
-      refreshToken: string,
+      _refreshToken: string,
     ) => Promise<{ accessToken?: string; expiresIn?: number; error?: string }>
   >;
   logout: jest.MockedFunction<
-    (sessionId: string) => Promise<{ success: boolean; error?: string }>
+    (_sessionId: string) => Promise<{ success: boolean; error?: string }>
   >;
   logoutAll: jest.MockedFunction<
     (
-      userId: string,
+      _userId: string,
     ) => Promise<{ success: boolean; sessionsTerminated: number }>
   >;
   createUser: jest.MockedFunction<
     (
-      userData: Partial<User> & { password: string },
+      _userData: Partial<User> & { password: string },
     ) => Promise<{ user?: User; error?: string }>
   >;
-  getUserById: jest.MockedFunction<(userId: string) => Promise<User | null>>;
-  getUserByEmail: jest.MockedFunction<(email: string) => Promise<User | null>>;
+  getUserById: jest.MockedFunction<(_userId: string) => Promise<User | null>>;
+  getUserByEmail: jest.MockedFunction<(_email: string) => Promise<User | null>>;
   getUserByUsername: jest.MockedFunction<
-    (username: string) => Promise<User | null>
+    (_username: string) => Promise<User | null>
   >;
   updateUser: jest.MockedFunction<
     (
-      userId: string,
-      updates: Partial<User>,
+      _userId: string,
+      _updates: Partial<User>,
     ) => Promise<{ user?: User; error?: string }>
   >;
   changePassword: jest.MockedFunction<
     (
-      userId: string,
-      currentPassword: string,
-      newPassword: string,
+      _userId: string,
+      _currentPassword: string,
+      _newPassword: string,
     ) => Promise<{ success: boolean; error?: string }>
   >;
   resetPassword: jest.MockedFunction<
     (
-      email: string,
+      _email: string,
     ) => Promise<{ success: boolean; resetToken?: string; error?: string }>
   >;
   verifyEmail: jest.MockedFunction<
     (
-      userId: string,
-      verificationToken: string,
+      _userId: string,
+      _verificationToken: string,
     ) => Promise<{ success: boolean; error?: string }>
   >;
   enableMfa: jest.MockedFunction<
-    (userId: string) => Promise<{
+    (_userId: string) => Promise<{
       success: boolean;
       qrCode?: string;
       backupCodes?: string[];
@@ -150,35 +150,35 @@ export interface AuthProviderMock {
   >;
   disableMfa: jest.MockedFunction<
     (
-      userId: string,
-      mfaCode: string,
+      _userId: string,
+      _mfaCode: string,
     ) => Promise<{ success: boolean; error?: string }>
   >;
   verifyMfa: jest.MockedFunction<
     (
-      userId: string,
-      mfaCode: string,
+      _userId: string,
+      _mfaCode: string,
     ) => Promise<{ valid: boolean; error?: string }>
   >;
   hasPermission: jest.MockedFunction<
-    (userId: string, resource: string, action: string) => Promise<boolean>
+    (_userId: string, _resource: string, _action: string) => Promise<boolean>
   >;
   hasRole: jest.MockedFunction<
-    (userId: string, role: UserRole) => Promise<boolean>
+    (_userId: string, _role: UserRole) => Promise<boolean>
   >;
-  getSessions: jest.MockedFunction<(userId: string) => Promise<AuthSession[]>>;
+  getSessions: jest.MockedFunction<(_userId: string) => Promise<AuthSession[]>>;
   terminateSession: jest.MockedFunction<
-    (sessionId: string) => Promise<{ success: boolean; error?: string }>
+    (_sessionId: string) => Promise<{ success: boolean; error?: string }>
   >;
   generateApiKey: jest.MockedFunction<
     (
-      userId: string,
-      name: string,
-      permissions?: string[],
+      _userId: string,
+      _name: string,
+      _permissions?: string[],
     ) => Promise<{ apiKey?: string; error?: string }>
   >;
   validateApiKey: jest.MockedFunction<
-    (apiKey: string) => Promise<{
+    (_apiKey: string) => Promise<{
       valid: boolean;
       userId?: string;
       permissions?: string[];
@@ -410,7 +410,7 @@ export const createAuthProviderMock = (): AuthProviderMock => {
     return hashPassword(password) === hash;
   };
 
-  const generateMfaCode = (): string => {
+  const _generateMfaCode = (): string => {
     return Math.floor(100000 + Math.random() * 900000).toString();
   };
 
@@ -496,7 +496,11 @@ export const createAuthProviderMock = (): AuthProviderMock => {
         // Update last login
         mockAuthStore.updateUser(user.id, { lastLoginAt: new Date() });
 
-        const { passwordHash, mfaSecret, ...userWithoutSecrets } = user;
+        const {
+          passwordHash: _passwordHash,
+          mfaSecret: _mfaSecret,
+          ...userWithoutSecrets
+        } = user;
 
         return {
           success: true,
@@ -658,7 +662,7 @@ export const createAuthProviderMock = (): AuthProviderMock => {
 
         mockAuthStore.addUser(newUser);
 
-        const { passwordHash, ...userWithoutSecrets } = newUser;
+        const { passwordHash: _passwordHash, ...userWithoutSecrets } = newUser;
         return { user: userWithoutSecrets };
       },
     ),
@@ -667,7 +671,11 @@ export const createAuthProviderMock = (): AuthProviderMock => {
       const user = mockAuthStore.getUser(userId);
       if (!user) return null;
 
-      const { passwordHash, mfaSecret, ...userWithoutSecrets } = user;
+      const {
+        passwordHash: _passwordHash,
+        mfaSecret: _mfaSecret,
+        ...userWithoutSecrets
+      } = user;
       return userWithoutSecrets;
     }),
 
@@ -675,7 +683,11 @@ export const createAuthProviderMock = (): AuthProviderMock => {
       const user = mockAuthStore.getUserByEmail(email);
       if (!user) return null;
 
-      const { passwordHash, mfaSecret, ...userWithoutSecrets } = user;
+      const {
+        passwordHash: _passwordHash,
+        mfaSecret: _mfaSecret,
+        ...userWithoutSecrets
+      } = user;
       return userWithoutSecrets;
     }),
 
@@ -684,7 +696,11 @@ export const createAuthProviderMock = (): AuthProviderMock => {
         const user = mockAuthStore.getUserByUsername(username);
         if (!user) return null;
 
-        const { passwordHash, mfaSecret, ...userWithoutSecrets } = user;
+        const {
+          passwordHash: _passwordHash,
+          mfaSecret: _mfaSecret,
+          ...userWithoutSecrets
+        } = user;
         return userWithoutSecrets;
       },
     ),
@@ -704,7 +720,11 @@ export const createAuthProviderMock = (): AuthProviderMock => {
           return { error: "Failed to retrieve updated user" };
         }
 
-        const { passwordHash, mfaSecret, ...userWithoutSecrets } = updatedUser;
+        const {
+          passwordHash: _passwordHash,
+          mfaSecret: _mfaSecret,
+          ...userWithoutSecrets
+        } = updatedUser;
         return { user: userWithoutSecrets };
       },
     ),

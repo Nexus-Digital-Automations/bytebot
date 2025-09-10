@@ -24,7 +24,6 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
-  Inject,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { Observable, tap } from "rxjs";
@@ -37,14 +36,17 @@ import { CriticalAreaSanitizationService } from "../services/critical-area-sanit
 //   TaskSearchDto,
 //   TaskCommentDto,
 // } from "../dto/task-validation.dto";
-import { MessageContentBlock } from "../types/messageContent.types";
+import {
+  MessageContentBlock,
+  MessageContentType,
+} from "../types/messageContent.types";
 
 // Define minimal types to avoid DTO compilation issues
 interface CreateTaskDto {
   title: string;
   description?: string;
   tags?: string[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface UpdateTaskDto {
@@ -52,7 +54,7 @@ interface UpdateTaskDto {
   description?: string;
   tags?: string[];
   status?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface TaskSearchDto {
@@ -61,12 +63,7 @@ interface TaskSearchDto {
   tags?: string[];
   statuses?: string[];
   categories?: string[];
-  [key: string]: any;
-}
-
-interface TaskCommentDto {
-  content: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -78,13 +75,13 @@ export const CRITICAL_AREA_SANITIZATION_KEY = "critical_area_sanitization";
  * Critical area types for automatic detection
  */
 export enum CriticalAreaType {
-  TASK_DATA = "task_data",
-  MESSAGE_CONTENT = "message_content",
-  CONFIGURATION_DATA = "configuration_data",
-  SEARCH_QUERY = "search_query",
-  FILE_DATA = "file_data",
-  USER_INPUT = "user_input",
-  AUTO_DETECT = "auto_detect", // Automatically detect based on request data
+  _TASK_DATA = "task_data",
+  _MESSAGE_CONTENT = "message_content",
+  _CONFIGURATION_DATA = "configuration_data",
+  _SEARCH_QUERY = "search_query",
+  _FILE_DATA = "file_data",
+  _USER_INPUT = "user_input",
+  _AUTO_DETECT = "auto_detect",
 }
 
 /**
@@ -125,10 +122,10 @@ export const CriticalAreaSanitization = (
  */
 interface SanitizationProcessingResult {
   /** Original request data */
-  originalData: any;
+  originalData: unknown;
 
   /** Sanitized request data */
-  sanitizedData: any;
+  sanitizedData: unknown;
 
   /** Whether data was modified */
   wasModified: boolean;
@@ -156,9 +153,8 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
   );
 
   constructor(
-    private readonly reflector: Reflector,
-    @Inject(CriticalAreaSanitizationService)
-    private readonly sanitizationService: CriticalAreaSanitizationService,
+    private readonly _reflector: Reflector,
+    private readonly _sanitizationService: CriticalAreaSanitizationService,
   ) {
     this.logger.log("Critical area sanitization interceptor initialized", {
       serviceType: "automatic-xss-protection",
@@ -169,9 +165,9 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
   /**
    * Intercept requests and apply critical area sanitization
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const startTime = Date.now();
-    const operationId = `sanitize-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const operationId = `sanitize-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
     // Get sanitization configuration from decorator
     const config = this.getSanitizationConfig(context);
@@ -278,10 +274,10 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
             )
             .subscribe(observer);
         },
-        (error) => {
+        (_error) => {
           this.logger.error(`[${operationId}] Sanitization failed`, {
             operationId,
-            error: error instanceof Error ? error.message : String(error),
+            error: _error instanceof Error ? _error.message : String(_error),
           });
           // Continue with original request on error
           next.handle().subscribe(observer);
@@ -297,7 +293,7 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
     context: ExecutionContext,
   ): CriticalAreaSanitizationConfig | null {
     // Check method-level decorator first
-    const methodConfig = this.reflector.get<CriticalAreaSanitizationConfig>(
+    const methodConfig = this._reflector.get<CriticalAreaSanitizationConfig>(
       CRITICAL_AREA_SANITIZATION_KEY,
       context.getHandler(),
     );
@@ -307,7 +303,7 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
     }
 
     // Check class-level decorator
-    const classConfig = this.reflector.get<CriticalAreaSanitizationConfig>(
+    const classConfig = this._reflector.get<CriticalAreaSanitizationConfig>(
       CRITICAL_AREA_SANITIZATION_KEY,
       context.getClass(),
     );
@@ -334,13 +330,13 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
     if (url.includes("/tasks") || url.includes("/task")) {
       if (method === "GET" && (url.includes("/search") || url.includes("?"))) {
         return {
-          areaType: CriticalAreaType.SEARCH_QUERY,
+          areaType: CriticalAreaType._SEARCH_QUERY,
           securityLevel: "moderate",
           enableLogging: true,
         };
       } else if (method === "POST" || method === "PUT" || method === "PATCH") {
         return {
-          areaType: CriticalAreaType.TASK_DATA,
+          areaType: CriticalAreaType._TASK_DATA,
           securityLevel: "strict",
           enableLogging: true,
         };
@@ -350,7 +346,7 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
     // Message endpoints
     if (url.includes("/messages") || url.includes("/message")) {
       return {
-        areaType: CriticalAreaType.MESSAGE_CONTENT,
+        areaType: CriticalAreaType._MESSAGE_CONTENT,
         securityLevel: "strict",
         enableLogging: true,
       };
@@ -359,7 +355,7 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
     // Configuration endpoints
     if (url.includes("/config") || url.includes("/settings")) {
       return {
-        areaType: CriticalAreaType.CONFIGURATION_DATA,
+        areaType: CriticalAreaType._CONFIGURATION_DATA,
         securityLevel: "strict",
         enableLogging: true,
         blockHighRisk: true,
@@ -374,7 +370,7 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
       url.includes("/file")
     ) {
       return {
-        areaType: CriticalAreaType.FILE_DATA,
+        areaType: CriticalAreaType._FILE_DATA,
         securityLevel: "strict",
         enableLogging: true,
         blockHighRisk: true,
@@ -385,7 +381,7 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
     // Generic user input for other POST/PUT/PATCH endpoints
     if (["POST", "PUT", "PATCH"].includes(method) && request.body) {
       return {
-        areaType: CriticalAreaType.USER_INPUT,
+        areaType: CriticalAreaType._USER_INPUT,
         securityLevel: "moderate",
         enableLogging: false, // Reduce noise for generic endpoints
       };
@@ -409,15 +405,16 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
         | import("../services/critical-area-sanitization.service").SanitizationResult
         | import("../services/critical-area-sanitization.service").MessageContentSanitizationResult
         | import("../services/critical-area-sanitization.service").FileDataSanitizationResult
-        | import("../services/critical-area-sanitization.service").ConfigurationDataSanitizationResult;
-      let sanitizedData = request.body;
+        | import("../services/critical-area-sanitization.service").ConfigurationDataSanitizationResult
+        | null = null;
+      let sanitizedData: unknown = request.body;
       let threatsDetected = 0;
       let riskScore = 0;
       let wasModified = false;
 
       switch (config.areaType) {
-        case CriticalAreaType.TASK_DATA:
-          result = await this.sanitizeTaskData(request.body, operationId);
+        case CriticalAreaType._TASK_DATA:
+          result = this.sanitizeTaskData(request.body, operationId);
           // Type-safe property access for SanitizationResult
           if (this.isSanitizationResult(result)) {
             sanitizedData = result.sanitized;
@@ -428,24 +425,25 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
           }
           break;
 
-        case CriticalAreaType.MESSAGE_CONTENT:
-          result = await this.sanitizeMessageContent(request.body, operationId);
+        case CriticalAreaType._MESSAGE_CONTENT:
+          result = this.sanitizeMessageContent(request.body, operationId);
           // Type-safe property access for MessageContentSanitizationResult
           if (this.isMessageContentSanitizationResult(result)) {
-            sanitizedData = { ...request.body, content: result.sanitized };
+            const requestBodyObj = request.body as Record<string, unknown>;
+            sanitizedData = { ...requestBodyObj, content: result.sanitized };
             threatsDetected = result.blockResults.reduce(
               (total, block) => total + block.threatsDetected.length,
               0,
             );
             riskScore = 100 - result.safetyScore;
             wasModified =
-              JSON.stringify(request.body.content) !==
+              JSON.stringify(requestBodyObj.content) !==
               JSON.stringify(result.sanitized);
           }
           break;
 
-        case CriticalAreaType.SEARCH_QUERY:
-          result = await this.sanitizeSearchQuery(request.body, operationId);
+        case CriticalAreaType._SEARCH_QUERY:
+          result = this.sanitizeSearchQuery(request.body, operationId);
           // Type-safe property access for SanitizationResult
           if (this.isSanitizationResult(result)) {
             sanitizedData = result.sanitized;
@@ -456,9 +454,9 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
           }
           break;
 
-        case CriticalAreaType.CONFIGURATION_DATA:
-          result = await this.sanitizationService.sanitizeConfigurationData(
-            request.body,
+        case CriticalAreaType._CONFIGURATION_DATA:
+          result = this._sanitizationService.sanitizeConfigurationData(
+            request.body as Record<string, unknown>,
             operationId,
           );
           // Type-safe property access for ConfigurationDataSanitizationResult
@@ -474,7 +472,7 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
           }
           break;
 
-        case CriticalAreaType.FILE_DATA:
+        case CriticalAreaType._FILE_DATA:
           result = await this.sanitizeFileData(request.body, operationId);
           // Type-safe property access for FileDataSanitizationResult
           if (this.isFileDataSanitizationResult(result)) {
@@ -486,9 +484,9 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
           }
           break;
 
-        case CriticalAreaType.USER_INPUT:
-        case CriticalAreaType.AUTO_DETECT:
-        default:
+        case CriticalAreaType._USER_INPUT:
+        case CriticalAreaType._AUTO_DETECT:
+        default: {
           const genericResult = await this.sanitizeGenericUserInput(
             request.body,
             config,
@@ -509,6 +507,7 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
               JSON.stringify(request.body) !== JSON.stringify(sanitizedData);
           }
           break;
+        }
       }
 
       const processingTimeMs = Date.now() - startTime;
@@ -523,13 +522,13 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
         areaType: config.areaType,
         securityLevel: config.securityLevel || "moderate",
       };
-    } catch (error) {
+    } catch (err) {
       const processingTimeMs = Date.now() - startTime;
 
       this.logger.error(`[${operationId}] Sanitization processing failed`, {
         operationId,
         areaType: config.areaType,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         processingTimeMs,
       });
 
@@ -550,36 +549,52 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
   /**
    * Sanitize task data (CreateTaskDto, UpdateTaskDto)
    */
-  private async sanitizeTaskData(data: any, operationId: string) {
+  private sanitizeTaskData(data: unknown, operationId: string) {
     if (this.isCreateTaskDto(data) || this.isUpdateTaskDto(data)) {
-      return await this.sanitizationService.sanitizeTaskData(data, operationId);
+      return this._sanitizationService.sanitizeTaskData(data, operationId);
     }
 
     // Fallback for unknown task data structure
-    return await this.sanitizationService.sanitizeTaskData(data, operationId);
+    return this._sanitizationService.sanitizeTaskData(
+      data as CreateTaskDto | UpdateTaskDto,
+      operationId,
+    );
   }
 
   /**
    * Sanitize message content
    */
-  private async sanitizeMessageContent(data: any, operationId: string) {
-    if (data.content && Array.isArray(data.content)) {
-      return await this.sanitizationService.sanitizeMessageContent(
-        data.content as MessageContentBlock[],
+  private sanitizeMessageContent(data: unknown, operationId: string) {
+    // Type guard to ensure data is an object
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      return null;
+    }
+
+    const dataObj = data as Record<string, unknown>;
+    if (dataObj.content && Array.isArray(dataObj.content)) {
+      return this._sanitizationService.sanitizeMessageContent(
+        dataObj.content as MessageContentBlock[],
         operationId,
       );
     }
 
     // Fallback for single message or different structure
-    const content = data.message || data.text || data.content || "";
+    const content =
+      typeof dataObj.message === "string"
+        ? dataObj.message
+        : typeof dataObj.text === "string"
+          ? dataObj.text
+          : typeof dataObj.content === "string"
+            ? dataObj.content
+            : "";
     const blocks: MessageContentBlock[] = [
       {
-        type: "text" as any,
+        type: MessageContentType._Text,
         text: content,
-      } as any,
+      },
     ];
 
-    return await this.sanitizationService.sanitizeMessageContent(
+    return this._sanitizationService.sanitizeMessageContent(
       blocks,
       operationId,
     );
@@ -588,23 +603,30 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
   /**
    * Sanitize search query data
    */
-  private async sanitizeSearchQuery(data: any, operationId: string) {
+  private sanitizeSearchQuery(data: unknown, operationId: string) {
     if (this.isTaskSearchDto(data)) {
-      return await this.sanitizationService.sanitizeSearchQuery(
-        data,
-        operationId,
-      );
+      return this._sanitizationService.sanitizeSearchQuery(data, operationId);
     }
 
     // Convert generic search data to TaskSearchDto format
+    const dataObj = data as Record<string, unknown>;
     const searchDto: TaskSearchDto = {
-      query: data.query || data.search || data.q,
-      assignedTo: data.assignedTo,
-      tags: data.tags,
-      ...data,
+      query:
+        typeof dataObj.query === "string"
+          ? dataObj.query
+          : typeof dataObj.search === "string"
+            ? dataObj.search
+            : typeof dataObj.q === "string"
+              ? dataObj.q
+              : undefined,
+      assignedTo:
+        typeof dataObj.assignedTo === "string" ? dataObj.assignedTo : undefined,
+      tags: Array.isArray(dataObj.tags)
+        ? (dataObj.tags as string[])
+        : undefined,
     };
 
-    return await this.sanitizationService.sanitizeSearchQuery(
+    return this._sanitizationService.sanitizeSearchQuery(
       searchDto,
       operationId,
     );
@@ -613,16 +635,33 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
   /**
    * Sanitize file data
    */
-  private async sanitizeFileData(data: any, operationId: string) {
-    const filename =
-      data.filename || data.name || data.originalname || "unknown";
-    const content = data.content || data.data || data.buffer;
-    const mimeType = data.mimetype || data.type;
+  private async sanitizeFileData(data: unknown, operationId: string) {
+    // Type guard to ensure data is an object
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      return null;
+    }
 
-    return await this.sanitizationService.sanitizeFileData(
+    const dataObj = data as Record<string, unknown>;
+    const filename =
+      typeof dataObj.filename === "string"
+        ? dataObj.filename
+        : typeof dataObj.name === "string"
+          ? dataObj.name
+          : typeof dataObj.originalname === "string"
+            ? dataObj.originalname
+            : "unknown";
+    const content = dataObj.content || dataObj.data || dataObj.buffer;
+    const mimeType =
+      typeof dataObj.mimetype === "string"
+        ? dataObj.mimetype
+        : typeof dataObj.type === "string"
+          ? dataObj.type
+          : undefined;
+
+    return await this._sanitizationService.sanitizeFileData(
       filename,
-      content?.toString(),
-      mimeType,
+      content?.toString() ?? "",
+      mimeType ?? "text/plain",
       operationId,
     );
   }
@@ -631,20 +670,34 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
    * Sanitize generic user input
    */
   private async sanitizeGenericUserInput(
-    data: any,
+    data: unknown,
     config: CriticalAreaSanitizationConfig,
     operationId: string,
   ): Promise<{
-    sanitized: any;
+    sanitized: unknown;
     totalThreats: number;
     maxRiskScore: number;
   }> {
     let totalThreats = 0;
     let maxRiskScore = 0;
-    const sanitizedData = { ...data };
+    // Type guard to ensure data is an object
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      return {
+        sanitized: data,
+        totalThreats: 0,
+        maxRiskScore: 0,
+      };
+    }
+
+    const sanitizedData = { ...(data as Record<string, unknown>) } as Record<
+      string,
+      unknown
+    >;
 
     // Recursively sanitize string fields
-    for (const [key, value] of Object.entries(data)) {
+    for (const [key, value] of Object.entries(
+      data as Record<string, unknown>,
+    )) {
       if (config.excludeFields?.includes(key) || typeof value !== "string") {
         continue;
       }
@@ -652,22 +705,45 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
       if (!config.targetFields || config.targetFields.includes(key)) {
         try {
           // Use basic XSS sanitization for generic input
-          const result = await this.sanitizationService.sanitizeFileData(
+          const result = await this._sanitizationService.sanitizeFileData(
             key, // Use key as filename for basic sanitization
             value,
             "text/plain",
             operationId,
           );
 
-          sanitizedData[key] = result.sanitized.content || value;
-          totalThreats += result.maliciousPatterns.length;
-          maxRiskScore = Math.max(
-            maxRiskScore,
-            result.securityAssessment.contentRisk,
-          );
-        } catch (error) {
+          if (result && typeof result === "object" && "sanitized" in result) {
+            const sanitizedResult = result as {
+              sanitized: { content?: string };
+              maliciousPatterns?: unknown[];
+              securityAssessment?: { contentRisk?: number };
+            };
+            const sanitizedContent = sanitizedResult.sanitized.content;
+            sanitizedData[key] = sanitizedContent ?? value;
+
+            if (
+              sanitizedResult.maliciousPatterns &&
+              Array.isArray(sanitizedResult.maliciousPatterns)
+            ) {
+              totalThreats += sanitizedResult.maliciousPatterns.length;
+            }
+
+            if (
+              sanitizedResult.securityAssessment &&
+              typeof sanitizedResult.securityAssessment === "object" &&
+              typeof sanitizedResult.securityAssessment.contentRisk === "number"
+            ) {
+              maxRiskScore = Math.max(
+                maxRiskScore,
+                sanitizedResult.securityAssessment.contentRisk,
+              );
+            }
+          }
+        } catch (err: unknown) {
           // Keep original value on sanitization error
-          this.logger.warn(`Failed to sanitize field ${key}`, { error });
+          this.logger.warn(`Failed to sanitize field ${key}`, {
+            error: err instanceof Error ? err.message : String(err),
+          });
         }
       }
     }
@@ -682,26 +758,50 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
   /**
    * Type guards for different data structures
    */
-  private isCreateTaskDto(data: any): data is CreateTaskDto {
-    return data && typeof data.title === "string";
+  private isCreateTaskDto(data: unknown): data is CreateTaskDto {
+    return (
+      !!data &&
+      typeof data === "object" &&
+      !Array.isArray(data) &&
+      typeof (data as Record<string, unknown>).title === "string"
+    );
   }
 
-  private isUpdateTaskDto(data: any): data is UpdateTaskDto {
-    return data && (data.title || data.description || data.status);
+  private isUpdateTaskDto(data: unknown): data is UpdateTaskDto {
+    return (
+      !!data &&
+      typeof data === "object" &&
+      !Array.isArray(data) &&
+      !!(
+        (data as Record<string, unknown>).title ||
+        (data as Record<string, unknown>).description ||
+        (data as Record<string, unknown>).status
+      )
+    );
   }
 
-  private isTaskSearchDto(data: any): data is TaskSearchDto {
-    return data && (data.query || data.statuses || data.categories);
+  private isTaskSearchDto(data: unknown): data is TaskSearchDto {
+    return (
+      !!data &&
+      typeof data === "object" &&
+      !Array.isArray(data) &&
+      !!(
+        (data as Record<string, unknown>).query ||
+        (data as Record<string, unknown>).statuses ||
+        (data as Record<string, unknown>).categories
+      )
+    );
   }
 
   /**
    * Type guards for sanitization results
    */
   private isSanitizationResult(
-    result: any,
+    result: unknown,
   ): result is import("../services/critical-area-sanitization.service").SanitizationResult {
     return (
-      result &&
+      !!result &&
+      typeof result === "object" &&
       "sanitized" in result &&
       "totalThreats" in result &&
       "overallRisk" in result
@@ -709,10 +809,11 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
   }
 
   private isMessageContentSanitizationResult(
-    result: any,
+    result: unknown,
   ): result is import("../services/critical-area-sanitization.service").MessageContentSanitizationResult {
     return (
-      result &&
+      !!result &&
+      typeof result === "object" &&
       "sanitized" in result &&
       "safetyScore" in result &&
       "blockResults" in result
@@ -720,10 +821,11 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
   }
 
   private isFileDataSanitizationResult(
-    result: any,
+    result: unknown,
   ): result is import("../services/critical-area-sanitization.service").FileDataSanitizationResult {
     return (
-      result &&
+      !!result &&
+      typeof result === "object" &&
       "sanitized" in result &&
       "maliciousPatterns" in result &&
       "securityAssessment" in result
@@ -731,10 +833,11 @@ export class CriticalAreaSanitizationInterceptor implements NestInterceptor {
   }
 
   private isConfigurationDataSanitizationResult(
-    result: any,
+    result: unknown,
   ): result is import("../services/critical-area-sanitization.service").ConfigurationDataSanitizationResult {
     return (
-      result &&
+      !!result &&
+      typeof result === "object" &&
       "sanitized" in result &&
       "blockedConfigurations" in result &&
       "keyRiskAssessment" in result

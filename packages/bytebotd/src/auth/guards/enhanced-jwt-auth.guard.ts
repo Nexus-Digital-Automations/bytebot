@@ -375,7 +375,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       role: refreshPayload.role,
       permissions: refreshPayload.permissions,
       tokenType: 'access',
-      sessionId: refreshPayload.sessionId,
+      vncSessionId: refreshPayload.vncSessionId,
       clientIp: refreshPayload.clientIp,
       computerUsePermissions: refreshPayload.computerUsePermissions,
       screenAccessLevel: refreshPayload.screenAccessLevel,
@@ -566,7 +566,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     const user = request.user;
 
     // Check if user has minimum required role for computer control
-    const requiredRoles: UserRole[] = [UserRole.ADMIN, UserRole.OPERATOR];
+    const requiredRoles: UserRole[] = [UserRole._ADMIN, UserRole._OPERATOR];
     if (!requiredRoles.includes(user.role)) {
       throw new ForbiddenException(
         'Insufficient role for computer control access',
@@ -630,7 +630,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     }
 
     // For ADMIN users, grant full permissions
-    if (request.user.role === UserRole.ADMIN) {
+    if (request.user.role === UserRole._ADMIN) {
       request.securityContext.screenAccessGranted = true;
       return;
     }
@@ -638,7 +638,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     // TODO: In a real implementation, get user's computer use permissions from database
     // For now, grant view and basic control permissions to OPERATOR role
     const userPermissions =
-      request.user.role === UserRole.OPERATOR
+      request.user.role === UserRole._OPERATOR
         ? ComputerUsePermission.VIEW_SCREEN |
           ComputerUsePermission.MOUSE_CONTROL |
           ComputerUsePermission.KEYBOARD_CONTROL
@@ -710,7 +710,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     }
 
     // Increase risk for admin operations
-    if (request.user.role === UserRole.ADMIN) {
+    if (request.user.role === UserRole._ADMIN) {
       riskScore += 20;
     }
 
@@ -774,7 +774,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     const _fifteenMinutesAgo = now - 15 * 60 * 1000;
 
     // Clean up service auth cache (expired entries)
-    for (const [token, entry] of this.serviceAuthCache.entries()) {
+    for (const [token, entry] of Array.from(this.serviceAuthCache.entries())) {
       if (entry.expires < now) {
         this.serviceAuthCache.delete(token);
       }

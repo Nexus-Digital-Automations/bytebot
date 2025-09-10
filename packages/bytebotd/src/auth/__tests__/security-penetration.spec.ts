@@ -103,17 +103,17 @@ describe('Security Penetration Testing Suite', () => {
       return {
         prototypeInjection: JWTManipulator.createVulnerableJWT({
           ...basePayload,
-          __proto__: { role: UserRole.ADMIN, isAdmin: true },
+          __proto__: { role: UserRole._ADMIN, isAdmin: true },
         }),
         constructorInjection: JWTManipulator.createVulnerableJWT({
           ...basePayload,
-          constructor: { prototype: { role: UserRole.ADMIN } },
+          constructor: { prototype: { role: UserRole._ADMIN } },
         }),
         roleConfusion: JWTManipulator.createVulnerableJWT({
           ...basePayload,
-          role: UserRole.VIEWER,
+          role: UserRole._VIEWER,
           admin: true,
-          roles: [UserRole.ADMIN],
+          roles: [UserRole._ADMIN],
           privileges: ['admin'],
         }),
         xssInjection: JWTManipulator.createVulnerableJWT({
@@ -223,7 +223,7 @@ describe('Security Penetration Testing Suite', () => {
           // Simulate role modification during concurrent requests
           if (index === 10) {
             setTimeout(() => {
-              user.role = UserRole.ADMIN;
+              user.role = UserRole._ADMIN;
             }, 5);
           }
 
@@ -357,7 +357,7 @@ describe('Security Penetration Testing Suite', () => {
       const basePayload = {
         sub: 'attacker',
         email: 'attacker@malicious.com',
-        role: UserRole.ADMIN,
+        role: UserRole._ADMIN,
         exp: Math.floor(Date.now() / 1000) + 3600,
       };
 
@@ -416,7 +416,7 @@ describe('Security Penetration Testing Suite', () => {
 
       for (const headerInjection of headerInjectionPayloads) {
         const maliciousToken = JWTManipulator.createVulnerableJWT(
-          { sub: 'attacker', role: UserRole.ADMIN },
+          { sub: 'attacker', role: UserRole._ADMIN },
           { headerInjection },
         );
 
@@ -467,7 +467,7 @@ describe('Security Penetration Testing Suite', () => {
       const basePayload = {
         sub: 'low-privilege-user',
         email: 'user@test.com',
-        role: UserRole.VIEWER,
+        role: UserRole._VIEWER,
         exp: Math.floor(Date.now() / 1000) + 3600,
       };
 
@@ -499,9 +499,9 @@ describe('Security Penetration Testing Suite', () => {
           // Check if role escalation succeeded
           const escalationSuccess =
             request.user &&
-            (request.user.role === UserRole.ADMIN ||
+            (request.user.role === UserRole._ADMIN ||
               request.user.admin === true ||
-              request.user.roles?.includes(UserRole.ADMIN));
+              request.user.roles?.includes(UserRole._ADMIN));
 
           attackResults.push({
             attackType,
@@ -536,13 +536,13 @@ describe('Security Penetration Testing Suite', () => {
         id: 'escalation-target',
         email: 'target@test.com',
         username: 'target',
-        role: UserRole.VIEWER,
+        role: UserRole._VIEWER,
         isActive: true,
       };
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValue([UserRole.ADMIN]);
+        .mockReturnValue([UserRole._ADMIN]);
 
       const raceAttackResults =
         await AttackSimulator.simulateRaceConditionAttack(
@@ -579,9 +579,9 @@ describe('Security Penetration Testing Suite', () => {
             id: 'attacker-1',
             email: 'attacker1@malicious.com',
             username: 'attacker1',
-            role: UserRole.VIEWER,
+            role: UserRole._VIEWER,
             isActive: true,
-            __proto__: { role: UserRole.ADMIN, isAdmin: true },
+            __proto__: { role: UserRole._ADMIN, isAdmin: true },
           } as any,
         },
         {
@@ -590,12 +590,12 @@ describe('Security Penetration Testing Suite', () => {
             id: 'attacker-2',
             email: 'attacker2@malicious.com',
             username: 'attacker2',
-            role: UserRole.VIEWER,
+            role: UserRole._VIEWER,
             isActive: true,
             constructor: {
               prototype: {
-                role: UserRole.ADMIN,
-                permissions: [Permission.SYSTEM_ADMIN],
+                role: UserRole._ADMIN,
+                permissions: [Permission._SYSTEM_ADMIN],
               },
             },
           } as any,
@@ -606,10 +606,10 @@ describe('Security Penetration Testing Suite', () => {
             id: 'attacker-3',
             email: 'attacker3@malicious.com',
             username: 'attacker3',
-            role: UserRole.VIEWER,
+            role: UserRole._VIEWER,
             isActive: true,
-            roles: [UserRole.ADMIN],
-            permissions: [Permission.SYSTEM_ADMIN],
+            roles: [UserRole._ADMIN],
+            permissions: [Permission._SYSTEM_ADMIN],
             admin: true,
             superuser: true,
           } as any,
@@ -627,7 +627,7 @@ describe('Security Penetration Testing Suite', () => {
 
         jest
           .spyOn(reflector, 'getAllAndOverride')
-          .mockReturnValueOnce([UserRole.ADMIN])
+          .mockReturnValueOnce([UserRole._ADMIN])
           .mockReturnValueOnce(undefined);
 
         try {
@@ -705,7 +705,7 @@ describe('Security Penetration Testing Suite', () => {
           jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
             sub: 'user',
             email: 'user@test.com',
-            role: UserRole.VIEWER,
+            role: UserRole._VIEWER,
             exp: Math.floor(Date.now() / 1000) + 3600,
           });
         } else {
@@ -751,26 +751,26 @@ describe('Security Penetration Testing Suite', () => {
 
       const roleTestCases = [
         {
-          role: UserRole.ADMIN,
-          requiredRole: UserRole.ADMIN,
+          role: UserRole._ADMIN,
+          requiredRole: UserRole._ADMIN,
           shouldPass: true,
         },
         {
-          role: UserRole.OPERATOR,
-          requiredRole: UserRole.ADMIN,
+          role: UserRole._OPERATOR,
+          requiredRole: UserRole._ADMIN,
           shouldPass: false,
         },
         {
-          role: UserRole.VIEWER,
-          requiredRole: UserRole.ADMIN,
+          role: UserRole._VIEWER,
+          requiredRole: UserRole._ADMIN,
           shouldPass: false,
         },
         {
           role: 'invalid' as UserRole,
-          requiredRole: UserRole.ADMIN,
+          requiredRole: UserRole._ADMIN,
           shouldPass: false,
         },
-        { role: null as any, requiredRole: UserRole.ADMIN, shouldPass: false },
+        { role: null as any, requiredRole: UserRole._ADMIN, shouldPass: false },
       ];
 
       const authzTimingResults = [];
@@ -953,7 +953,7 @@ describe('Security Penetration Testing Suite', () => {
             jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
               sub: 'user123',
               email: 'user@test.com',
-              role: UserRole.VIEWER,
+              role: UserRole._VIEWER,
               exp: 9999999999,
             });
           } else {
@@ -1042,30 +1042,30 @@ describe('Security Penetration Testing Suite', () => {
           name: 'unicode-normalization',
           payload: {
             sub: 'admin\u0041\u0044\u004D\u0049\u004E',
-            role: UserRole.ADMIN,
+            role: UserRole._ADMIN,
           },
         },
         {
           name: 'null-byte-injection',
-          payload: { sub: 'user\x00admin', role: UserRole.VIEWER },
+          payload: { sub: 'user\x00admin', role: UserRole._VIEWER },
         },
         {
           name: 'homograph-attack',
           payload: {
             sub: 'admin',
             email: 'аdmin@test.com',
-            role: UserRole.ADMIN,
+            role: UserRole._ADMIN,
           }, // Cyrillic 'а'
         },
         {
           name: 'polyglot-payload',
-          payload: { sub: '/*admin*/viewer/*admin*/', role: UserRole.VIEWER },
+          payload: { sub: '/*admin*/viewer/*admin*/', role: UserRole._VIEWER },
         },
         {
           name: 'encoding-confusion',
           payload: {
             sub: Buffer.from('admin').toString('base64'),
-            role: UserRole.ADMIN,
+            role: UserRole._ADMIN,
           },
         },
       ];
@@ -1093,7 +1093,7 @@ describe('Security Penetration Testing Suite', () => {
 
           // Check if evasion led to privilege escalation
           const escalationSuccess =
-            request.user && request.user.role === UserRole.ADMIN;
+            request.user && request.user.role === UserRole._ADMIN;
 
           evasionResults.push({
             technique: technique.name,
@@ -1205,7 +1205,7 @@ describe('Security Penetration Testing Suite', () => {
           roundPromises.push(
             (async () => {
               const maliciousToken = JWTManipulator.createVulnerableJWT(
-                { sub: `attacker-${round}-${i}`, role: UserRole.ADMIN },
+                { sub: `attacker-${round}-${i}`, role: UserRole._ADMIN },
                 { algorithm: 'none' },
               );
 
@@ -1238,9 +1238,9 @@ describe('Security Penetration Testing Suite', () => {
                 id: `role-attacker-${round}-${i}`,
                 email: `attacker${round}${i}@malicious.com`,
                 username: `roleattacker${round}${i}`,
-                role: UserRole.VIEWER,
+                role: UserRole._VIEWER,
                 isActive: true,
-                __proto__: { role: UserRole.ADMIN },
+                __proto__: { role: UserRole._ADMIN },
               } as any;
 
               const context = createPentestExecutionContext(
@@ -1251,7 +1251,7 @@ describe('Security Penetration Testing Suite', () => {
 
               jest
                 .spyOn(reflector, 'getAllAndOverride')
-                .mockReturnValue([UserRole.ADMIN]);
+                .mockReturnValue([UserRole._ADMIN]);
 
               try {
                 await rolesGuard.canActivate(context);
@@ -1332,8 +1332,8 @@ describe('Security Penetration Testing Suite', () => {
         { type: 'auth-failure', token: 'invalid-token' },
         {
           type: 'role-escalation',
-          user: { role: UserRole.VIEWER },
-          requiredRole: UserRole.ADMIN,
+          user: { role: UserRole._VIEWER },
+          requiredRole: UserRole._ADMIN,
         },
         { type: 'timing-attack', tokens: ['token1', 'token2', 'token3'] },
         { type: 'brute-force', attempts: 50 },

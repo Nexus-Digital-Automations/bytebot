@@ -221,13 +221,13 @@ import { StandardizedRateLimit, RateLimitPreset, RateLimitServiceType } from '@b
 @Controller('auth')
 export class AuthController {
   @Post('login')
-  @StandardizedRateLimit(RateLimitPreset.AUTH, RateLimitServiceType.BYTEBOTD)
+  @StandardizedRateLimit("auth", "bytebotd")
   async login(@Body() credentials: AuthCredentialsDto) {
     // Login implementation
   }
 
   @Post('computer-control')
-  @StandardizedRateLimit(RateLimitPreset.COMPUTER_USE, RateLimitServiceType.BYTEBOTD)
+  @StandardizedRateLimit("computer-use", "bytebotd")
   async executeComputerAction(@Body() action: ComputerActionDto) {
     // Computer control implementation
   }

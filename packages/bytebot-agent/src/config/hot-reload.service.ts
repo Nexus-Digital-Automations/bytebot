@@ -35,7 +35,7 @@ import {
 } from 'fs';
 import * as crypto from 'crypto';
 import { AppConfig } from './configuration';
-import { ConfigService as LocalConfigService } from './config.service';
+import { BytebotConfigService } from './config.service';
 
 /**
  * Local configuration change event interface
@@ -127,7 +127,7 @@ export class ConfigurationHotReloadService
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly localConfigService: LocalConfigService,
+    private readonly localConfigService: BytebotConfigService,
   ) {
     super();
 

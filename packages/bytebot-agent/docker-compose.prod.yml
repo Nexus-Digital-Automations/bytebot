@@ -1,0 +1,212 @@
+# Docker Compose for Production Deployment
+# Optimized configuration for production environment with enhanced security
+
+version: '3.8'
+
+services:
+  # Main Bytebot Agent Service - Production
+  bytebot-agent:
+    build:
+      context: ../..
+      dockerfile: ./packages/bytebot-agent/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: bytebot-agent-prod
+    restart: unless-stopped
+    
+    environment:
+      NODE_ENV: production
+      PORT: 9991
+      DATABASE_URL: postgresql://bytebot_user:${POSTGRES_PASSWORD}@pgbouncer:6432/bytebot_production
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      BROWSER_USE_ENABLED: true
+      BROWSER_USE_SERVICE_URL: http://browser-use:8080
+      LOG_LEVEL: warn
+      LOG_FORMAT: json
+      
+      # Production security settings
+      FEATURES_AUTHENTICATION: true
+      FEATURES_RATE_LIMITING: true
+      FEATURES_METRICS_COLLECTION: true
+      FEATURES_HEALTH_CHECKS: true
+      FEATURES_CIRCUIT_BREAKER: true
+      
+      # Browser automation production config
+      BROWSER_USE_HEADLESS: true
+      BROWSER_USE_SCREENSHOTS: true
+      BROWSER_USE_VIDEO_RECORDING: false
+      BROWSER_USE_MAX_SESSIONS: 20
+      
+    ports:
+      - "9991:9991"
+    
+    volumes:
+      - bytebot_data_prod:/app/data
+      - bytebot_logs_prod:/app/logs
+    
+    networks:
+      - bytebot-prod-network
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9991/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '2.0'
+          memory: 2G
+
+  # Browser-Use Service - Production
+  browser-use:
+    build:
+      context: ./docker/browser-use
+      dockerfile: Dockerfile
+    container_name: browser-use-prod
+    restart: unless-stopped
+    
+    environment:
+      PORT: 8080
+      LOG_LEVEL: WARN
+      HEADLESS: true
+      MAX_CONCURRENT_SESSIONS: 20
+      SESSION_TIMEOUT: 600000
+      API_KEY: ${BROWSER_USE_API_KEY}
+    
+    ports:
+      - "8080:8080"
+    
+    volumes:
+      - browser_use_data_prod:/app/data/browser-use
+      - chrome_user_data_prod:/app/data/chrome-user-data
+      - /dev/shm:/dev/shm
+    
+    networks:
+      - bytebot-prod-network
+    
+    security_opt:
+      - seccomp:unconfined
+    
+    cap_add:
+      - SYS_ADMIN
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '2.0'
+          memory: 2G
+
+  # Production database configuration
+  postgres:
+    image: postgres:16-alpine
+    container_name: bytebot-postgres-prod
+    restart: unless-stopped
+    
+    environment:
+      POSTGRES_DB: bytebot_production
+      POSTGRES_USER: bytebot_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    
+    ports:
+      - "127.0.0.1:5432:5432"  # Bind to localhost only
+    
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '2.0'
+          memory: 2G
+    
+    networks:
+      - bytebot-prod-network
+
+  # Production Redis
+  redis:
+    image: redis:7-alpine
+    container_name: bytebot-redis-prod
+    restart: unless-stopped
+    
+    command: >
+      redis-server
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD}
+      --appendonly yes
+    
+    ports:
+      - "127.0.0.1:6379:6379"  # Bind to localhost only
+    
+    volumes:
+      - redis_data_prod:/data
+    
+    networks:
+      - bytebot-prod-network
+
+  # Nginx - Production with SSL
+  nginx:
+    image: nginx:alpine
+    container_name: bytebot-nginx-prod
+    restart: unless-stopped
+    
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro  # SSL certificates
+      - nginx_logs_prod:/var/log/nginx
+    
+    depends_on:
+      - bytebot-agent
+      - browser-use
+    
+    networks:
+      - bytebot-prod-network
+
+volumes:
+  postgres_data_prod:
+    driver: local
+  redis_data_prod:
+    driver: local
+  bytebot_data_prod:
+    driver: local
+  bytebot_logs_prod:
+    driver: local
+  chrome_user_data_prod:
+    driver: local
+  browser_use_data_prod:
+    driver: local
+  nginx_logs_prod:
+    driver: local
+
+networks:
+  bytebot-prod-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"

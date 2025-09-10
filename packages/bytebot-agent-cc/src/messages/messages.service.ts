@@ -1,6 +1,7 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Message, Role, Prisma } from '@prisma/client';
+import { Message, Prisma } from '@prisma/client';
+import { Role } from '@bytebot/shared';
 import {
   MessageContentBlock,
   isComputerToolUseContentBlock,
@@ -36,7 +37,7 @@ export class MessagesService {
     const message = await this.prisma.message.create({
       data: {
         content: data.content as Prisma.InputJsonValue,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         role: data.role,
         taskId: data.taskId,
       },
@@ -118,7 +119,7 @@ export class MessagesService {
     let currentGroup: GroupedMessages | null = null;
 
     for (const message of messages) {
-      const role = message.role;
+      const role = message.role as Role;
       const isTakeOver = message.take_over || false;
 
       // If this is the first message, role is different, or take_over status is different from the previous group
@@ -165,12 +166,12 @@ export class MessagesService {
       const contentBlocks = message.content as MessageContentBlock[];
 
       // If the role is a user message and all the content blocks are tool result blocks or they are take over actions
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (message.role === (Role.USER as Role)) {
+
+      if (message.role === (Role._USER as Role)) {
         if (contentBlocks.every((block) => isToolResultContentBlock(block))) {
           // Pure tool results should be shown as assistant messages
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          processedMessage.role = Role.ASSISTANT as Role;
+
+          processedMessage.role = Role._ASSISTANT as Role;
         } else if (
           contentBlocks.every((block) => isUserActionContentBlock(block))
         ) {
@@ -179,9 +180,9 @@ export class MessagesService {
             .flatMap((block) => {
               return block.content;
             })
-            .filter((block) => isComputerToolUseContentBlock(block));
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          processedMessage.role = Role.ASSISTANT as Role;
+            .filter((block) => isComputerToolUseContentBlock(block)) as any;
+
+          processedMessage.role = Role._ASSISTANT as Role;
           processedMessage.take_over = true;
         }
         // If there are text blocks mixed with tool blocks, keep as user message

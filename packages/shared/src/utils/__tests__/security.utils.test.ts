@@ -137,6 +137,18 @@ const SAFE_INPUTS = [
   "Multi-word search query",
 ];
 
+// Type definitions for test purposes
+interface JWTTestPayload {
+  userId: string;
+  role: UserRole;
+  iat: number;
+  exp: number;
+  [key: string]: unknown;
+}
+
+// Valid content contexts for sanitization
+type ContentContext = "html" | "text" | "json" | "xml";
+
 /**
  * Password Security Test Suite
  *
@@ -301,9 +313,9 @@ describe("Password Security Functions", () => {
       };
 
       const result = validatePassword("TestPassword123!", policy);
-      expect(result.errors.some((error) => error.includes("forbidden"))).toBe(
-        true,
-      );
+      expect(
+        result.errors.some((error) => error.message.includes("forbidden")),
+      ).toBe(true);
       console.log("✓ Forbidden patterns properly detected");
     });
 
@@ -396,7 +408,7 @@ describe("Password Security Functions", () => {
       const hasLowercase = /[a-z]/.test(password);
       const hasUppercase = /[A-Z]/.test(password);
       const hasNumbers = /[0-9]/.test(password);
-      const hasSpecialChars = /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password);
+      const hasSpecialChars = /[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/.test(password);
 
       expect(hasLowercase).toBe(true);
       expect(hasUppercase).toBe(true);
@@ -419,7 +431,7 @@ describe("JWT Token Management Functions", () => {
     test("should generate valid access tokens", () => {
       console.log("Testing access token generation...");
 
-      const payload = { userId: TEST_USER_ID, role: UserRole.ADMIN };
+      const payload = { userId: TEST_USER_ID, role: UserRole._ADMIN };
       const token = generateAccessToken(payload, TEST_SECRET);
 
       expect(token).toBeDefined();
@@ -432,16 +444,16 @@ describe("JWT Token Management Functions", () => {
     test("should generate tokens with custom expiration", () => {
       console.log("Testing access token with custom expiration...");
 
-      const payload = { userId: TEST_USER_ID, role: UserRole.USER };
+      const payload = { userId: TEST_USER_ID, role: UserRole._USER };
       const customExpiration = "30m";
       const token = generateAccessToken(payload, TEST_SECRET, customExpiration);
 
       expect(token).toBeDefined();
 
       // Verify token content
-      const decoded = jwt.decode(token) as any;
+      const decoded = jwt.decode(token) as JWTTestPayload;
       expect(decoded.userId).toBe(TEST_USER_ID);
-      expect(decoded.role).toBe(UserRole.USER);
+      expect(decoded.role).toBe(UserRole._USER);
 
       console.log("✓ Access token with custom expiration generated");
     });
@@ -449,10 +461,10 @@ describe("JWT Token Management Functions", () => {
     test("should include standard JWT claims", () => {
       console.log("Testing standard JWT claims inclusion...");
 
-      const payload = { userId: TEST_USER_ID, role: UserRole.USER };
+      const payload = { userId: TEST_USER_ID, role: UserRole._USER };
       const token = generateAccessToken(payload, TEST_SECRET);
 
-      const decoded = jwt.decode(token) as any;
+      const decoded = jwt.decode(token) as JWTTestPayload;
       expect(decoded.iat).toBeDefined(); // Issued at
       expect(decoded.exp).toBeDefined(); // Expires at
       expect(decoded.exp).toBeGreaterThan(decoded.iat);
@@ -482,8 +494,8 @@ describe("JWT Token Management Functions", () => {
       const refreshToken = generateRefreshToken(payload, TEST_SECRET);
       const accessToken = generateAccessToken(payload, TEST_SECRET);
 
-      const decodedRefresh = jwt.decode(refreshToken) as any;
-      const decodedAccess = jwt.decode(accessToken) as any;
+      const decodedRefresh = jwt.decode(refreshToken) as JWTTestPayload;
+      const decodedAccess = jwt.decode(accessToken) as JWTTestPayload;
 
       expect(decodedRefresh.exp).toBeGreaterThan(decodedAccess.exp);
       console.log("✓ Refresh token has longer expiration than access token");
@@ -494,14 +506,14 @@ describe("JWT Token Management Functions", () => {
     test("should verify valid tokens", () => {
       console.log("Testing token verification with valid token...");
 
-      const payload = { userId: TEST_USER_ID, role: UserRole.ADMIN };
+      const payload = { userId: TEST_USER_ID, role: UserRole._ADMIN };
       const token = generateAccessToken(payload, TEST_SECRET);
 
       const verified = verifyToken(token, TEST_SECRET);
 
       expect(verified).toBeDefined();
       expect(verified.userId).toBe(TEST_USER_ID);
-      expect(verified.role).toBe(UserRole.ADMIN);
+      expect(verified.role).toBe(UserRole._ADMIN);
 
       console.log("✓ Valid token successfully verified");
     });
@@ -509,7 +521,7 @@ describe("JWT Token Management Functions", () => {
     test("should reject tokens with wrong secret", () => {
       console.log("Testing token verification with wrong secret...");
 
-      const payload = { userId: TEST_USER_ID, role: UserRole.USER };
+      const payload = { userId: TEST_USER_ID, role: UserRole._USER };
       const token = generateAccessToken(payload, TEST_SECRET);
 
       expect(() => verifyToken(token, "wrong_secret")).toThrow();
@@ -537,7 +549,7 @@ describe("JWT Token Management Functions", () => {
     test("should reject expired tokens", () => {
       console.log("Testing expired token handling...");
 
-      const payload = { userId: TEST_USER_ID, role: UserRole.USER };
+      const payload = { userId: TEST_USER_ID, role: UserRole._USER };
       // Create token that expires immediately
       const expiredToken = jwt.sign(
         { ...payload, exp: Math.floor(Date.now() / 1000) - 10 },
@@ -556,7 +568,7 @@ describe("JWT Token Management Functions", () => {
         {
           payload: {
             userId: TEST_USER_ID,
-            role: UserRole.ADMIN,
+            role: UserRole._ADMIN,
             permissions: ["read", "write"],
           },
           description: "complex payload",
@@ -618,8 +630,8 @@ describe("Input Sanitization Functions", () => {
       console.log("Testing edge case inputs...");
 
       expect(sanitizeInput("")).toBe("");
-      expect(sanitizeInput(null as any)).toBe("");
-      expect(sanitizeInput(undefined as any)).toBe("");
+      expect(sanitizeInput(null as unknown)).toBe("");
+      expect(sanitizeInput(undefined as unknown)).toBe("");
 
       console.log("✓ Edge case inputs handled correctly");
     });
@@ -1016,12 +1028,12 @@ describe("Threat Detection Functions", () => {
         "<img src=x onerror=fetch('/api/admin?token='+document.cookie)>";
       const result = detectComprehensiveMaliciousPatterns(complexPayload);
 
-      expect(result.hasThreats).toBe(true);
-      expect(result.detectionContext.length).toBeGreaterThan(0);
-      expect(result.confidence).toBeGreaterThan(50);
+      expect(result.isDetected).toBe(true);
+      expect(result.totalRiskScore).toBeGreaterThan(0);
+      expect(result.recommendations.length).toBeGreaterThan(0);
 
       console.log(
-        `✓ Comprehensive analysis complete - Confidence: ${result.confidence}%`,
+        `✓ Comprehensive analysis complete - Risk Score: ${result.totalRiskScore}`,
       );
     });
   });
@@ -1130,11 +1142,15 @@ describe("Authorization and Role Management Functions", () => {
     test("should correctly check admin permissions", () => {
       console.log("Testing admin permission checks...");
 
-      const adminPermissions = ROLE_PERMISSIONS[UserRole.ADMIN];
+      const adminPermissions = ROLE_PERMISSIONS[UserRole._ADMIN];
 
-      expect(hasPermission(UserRole.ADMIN, Permission.CREATE_USER)).toBe(true);
-      expect(hasPermission(UserRole.ADMIN, Permission.DELETE_USER)).toBe(true);
-      expect(hasPermission(UserRole.ADMIN, Permission.VIEW_ADMIN_PANEL)).toBe(
+      expect(hasPermission(UserRole._ADMIN, Permission._CREATE_USER)).toBe(
+        true,
+      );
+      expect(hasPermission(UserRole._ADMIN, Permission._DELETE_USER)).toBe(
+        true,
+      );
+      expect(hasPermission(UserRole._ADMIN, Permission._VIEW_ADMIN_PANEL)).toBe(
         true,
       );
 
@@ -1146,12 +1162,14 @@ describe("Authorization and Role Management Functions", () => {
     test("should correctly check user permissions", () => {
       console.log("Testing user permission checks...");
 
-      expect(hasPermission(UserRole.USER, Permission.CREATE_TASK)).toBe(true);
-      expect(hasPermission(UserRole.USER, Permission.VIEW_OWN_PROFILE)).toBe(
+      expect(hasPermission(UserRole._USER, Permission._CREATE_TASK)).toBe(true);
+      expect(hasPermission(UserRole._USER, Permission._VIEW_OWN_PROFILE)).toBe(
         true,
       );
-      expect(hasPermission(UserRole.USER, Permission.DELETE_USER)).toBe(false);
-      expect(hasPermission(UserRole.USER, Permission.VIEW_ADMIN_PANEL)).toBe(
+      expect(hasPermission(UserRole._USER, Permission._DELETE_USER)).toBe(
+        false,
+      );
+      expect(hasPermission(UserRole._USER, Permission._VIEW_ADMIN_PANEL)).toBe(
         false,
       );
 
@@ -1162,10 +1180,12 @@ describe("Authorization and Role Management Functions", () => {
       console.log("Testing guest permission checks...");
 
       expect(
-        hasPermission(UserRole.GUEST, Permission.VIEW_PUBLIC_CONTENT),
+        hasPermission(UserRole._GUEST, Permission._VIEW_PUBLIC_CONTENT),
       ).toBe(true);
-      expect(hasPermission(UserRole.GUEST, Permission.CREATE_TASK)).toBe(false);
-      expect(hasPermission(UserRole.GUEST, Permission.VIEW_OWN_PROFILE)).toBe(
+      expect(hasPermission(UserRole._GUEST, Permission._CREATE_TASK)).toBe(
+        false,
+      );
+      expect(hasPermission(UserRole._GUEST, Permission._VIEW_OWN_PROFILE)).toBe(
         false,
       );
 
@@ -1177,7 +1197,7 @@ describe("Authorization and Role Management Functions", () => {
 
       const invalidRole = "INVALID_ROLE" as UserRole;
 
-      expect(hasPermission(invalidRole, Permission.VIEW_PUBLIC_CONTENT)).toBe(
+      expect(hasPermission(invalidRole, Permission._VIEW_PUBLIC_CONTENT)).toBe(
         false,
       );
       console.log("✓ Invalid role handled gracefully");
@@ -1188,12 +1208,12 @@ describe("Authorization and Role Management Functions", () => {
     test("should correctly identify user roles", () => {
       console.log("Testing role identification...");
 
-      expect(hasRole(UserRole.ADMIN, UserRole.ADMIN)).toBe(true);
-      expect(hasRole(UserRole.USER, UserRole.USER)).toBe(true);
-      expect(hasRole(UserRole.GUEST, UserRole.GUEST)).toBe(true);
+      expect(hasRole(UserRole._ADMIN, UserRole._ADMIN)).toBe(true);
+      expect(hasRole(UserRole._USER, UserRole._USER)).toBe(true);
+      expect(hasRole(UserRole._GUEST, UserRole._GUEST)).toBe(true);
 
-      expect(hasRole(UserRole.USER, UserRole.ADMIN)).toBe(false);
-      expect(hasRole(UserRole.GUEST, UserRole.USER)).toBe(false);
+      expect(hasRole(UserRole._USER, UserRole._ADMIN)).toBe(false);
+      expect(hasRole(UserRole._GUEST, UserRole._USER)).toBe(false);
 
       console.log("✓ Role identification working correctly");
     });
@@ -1203,8 +1223,8 @@ describe("Authorization and Role Management Functions", () => {
 
       // Admin should have access to lower-level roles' permissions
       const adminCanAccessUserFeatures =
-        hasPermission(UserRole.ADMIN, Permission.CREATE_TASK) &&
-        hasPermission(UserRole.ADMIN, Permission.VIEW_OWN_PROFILE);
+        hasPermission(UserRole._ADMIN, Permission._CREATE_TASK) &&
+        hasPermission(UserRole._ADMIN, Permission._VIEW_OWN_PROFILE);
 
       expect(adminCanAccessUserFeatures).toBe(true);
       console.log("✓ Role hierarchy properly implemented");
@@ -1230,9 +1250,9 @@ describe("Authorization and Role Management Functions", () => {
     test("should have appropriate permission distribution", () => {
       console.log("Testing permission distribution across roles...");
 
-      const adminPerms = ROLE_PERMISSIONS[UserRole.ADMIN];
-      const userPerms = ROLE_PERMISSIONS[UserRole.USER];
-      const guestPerms = ROLE_PERMISSIONS[UserRole.GUEST];
+      const adminPerms = ROLE_PERMISSIONS[UserRole._ADMIN];
+      const userPerms = ROLE_PERMISSIONS[UserRole._USER];
+      const guestPerms = ROLE_PERMISSIONS[UserRole._GUEST];
 
       // Admin should have the most permissions
       expect(adminPerms.length).toBeGreaterThan(userPerms.length);
@@ -1293,22 +1313,22 @@ describe("Security Event and Risk Management Functions", () => {
 
       const testEvents = [
         {
-          type: SecurityEventType.LOGIN_FAILED,
+          type: SecurityEventType._LOGIN_FAILED,
           context: { attempts: 1 },
           expectedRange: [10, 40],
         },
         {
-          type: SecurityEventType.XSS_ATTEMPT_BLOCKED,
+          type: SecurityEventType._XSS_ATTEMPT_BLOCKED,
           context: { severity: "high" },
           expectedRange: [60, 90],
         },
         {
-          type: SecurityEventType.ACCESS_DENIED,
+          type: SecurityEventType._ACCESS_DENIED,
           context: { resource: "admin_panel" },
           expectedRange: [40, 70],
         },
         {
-          type: SecurityEventType.RATE_LIMIT_EXCEEDED,
+          type: SecurityEventType._RATE_LIMIT_EXCEEDED,
           context: { requestCount: 100 },
           expectedRange: [50, 80],
         },
@@ -1334,12 +1354,12 @@ describe("Security Event and Risk Management Functions", () => {
 
       const edgeCases = [
         {
-          type: SecurityEventType.LOGIN_SUCCESS,
+          type: SecurityEventType._LOGIN_SUCCESS,
           context: {},
           description: "successful login",
         },
         {
-          type: SecurityEventType.AUTHENTICATION_FAILED,
+          type: SecurityEventType._AUTHENTICATION_FAILED,
           context: { attempts: 10 },
           description: "multiple failed attempts",
         },
@@ -1367,7 +1387,7 @@ describe("Security Event and Risk Management Functions", () => {
       console.log("Testing security event creation...");
 
       const eventData = {
-        type: SecurityEventType.LOGIN_FAILED,
+        type: SecurityEventType._LOGIN_FAILED,
         userId: TEST_USER_ID,
         context: {
           ipAddress: "192.168.1.1",
@@ -1380,7 +1400,7 @@ describe("Security Event and Risk Management Functions", () => {
 
       expect(event).toBeDefined();
       expect(event.id).toBeDefined();
-      expect(event.type).toBe(SecurityEventType.LOGIN_FAILED);
+      expect(event.type).toBe(SecurityEventType._LOGIN_FAILED);
       expect(event.userId).toBe(TEST_USER_ID);
       expect(event.timestamp).toBeInstanceOf(Date);
       expect(event.riskScore).toBeGreaterThan(0);
@@ -1415,10 +1435,10 @@ describe("Security Event and Risk Management Functions", () => {
       console.log("Testing security event creation with minimal data...");
 
       const minimalEvent = createSecurityEvent({
-        type: SecurityEventType.SUSPICIOUS_ACTIVITY,
+        type: SecurityEventType._SUSPICIOUS_ACTIVITY,
       });
 
-      expect(minimalEvent.type).toBe(SecurityEventType.SUSPICIOUS_ACTIVITY);
+      expect(minimalEvent.type).toBe(SecurityEventType._SUSPICIOUS_ACTIVITY);
       expect(minimalEvent.id).toBeDefined();
       expect(minimalEvent.timestamp).toBeInstanceOf(Date);
       expect(typeof minimalEvent.riskScore).toBe("number");
@@ -1589,11 +1609,11 @@ describe("Cryptographic and Utility Functions", () => {
       console.log("Testing rate limit key uniqueness...");
 
       const user1Key = generateRateLimitKey(
-        RateLimitServiceType.BYTEBOTD,
+        RateLimitServiceType._BYTEBOTD,
         "user1",
       );
       const user2Key = generateRateLimitKey(
-        RateLimitServiceType.BYTEBOTD,
+        RateLimitServiceType._BYTEBOTD,
         "user2",
       );
 
@@ -1605,11 +1625,11 @@ describe("Cryptographic and Utility Functions", () => {
       console.log("Testing rate limit key service differentiation...");
 
       const serviceAKey = generateRateLimitKey(
-        RateLimitServiceType.BYTEBOTD,
+        RateLimitServiceType._BYTEBOTD,
         TEST_USER_ID,
       );
       const serviceBKey = generateRateLimitKey(
-        RateLimitServiceType.BYTEBOT_AGENT,
+        RateLimitServiceType._BYTEBOT_AGENT,
         TEST_USER_ID,
       );
 
@@ -1642,13 +1662,13 @@ describe("Cryptographic and Utility Functions", () => {
     test("should have appropriate rate limit values", () => {
       console.log("Testing rate limit value appropriateness...");
 
-      const strict = DEFAULT_RATE_LIMITS[RateLimitPreset.STRICT];
-      const moderate = DEFAULT_RATE_LIMITS[RateLimitPreset.MODERATE];
-      const lenient = DEFAULT_RATE_LIMITS[RateLimitPreset.LENIENT];
+      const auth = DEFAULT_RATE_LIMITS["auth"];
+      const computerUse = DEFAULT_RATE_LIMITS["computer-use"];
+      const readOps = DEFAULT_RATE_LIMITS["read-operations"];
 
-      // Strict should be most restrictive
-      expect(strict.max).toBeLessThan(moderate.max);
-      expect(moderate.max).toBeLessThan(lenient.max);
+      // Auth should be most restrictive
+      expect(auth.max).toBeLessThan(computerUse.max);
+      expect(computerUse.max).toBeLessThan(readOps.max);
 
       console.log("✓ Rate limit hierarchy properly configured");
     });
@@ -1843,14 +1863,14 @@ describe("File Security Functions", () => {
 
       const result = scanFileContent(maliciousJs, "javascript");
 
-      expect(result.hasThreats).toBe(true);
+      expect(result.isSafe).toBe(false);
       expect(result.threats.length).toBeGreaterThan(1);
       expect(result.riskScore).toBeGreaterThan(70);
-      expect(result.confidence).toBeGreaterThan(50);
-      expect(Array.isArray(result.detectionContext)).toBe(true);
+      expect(result.metadata).toBeDefined();
+      expect(result.metadata.fileSize).toBeGreaterThan(0);
 
       console.log(
-        `✓ Comprehensive scan complete - Confidence: ${result.confidence}%, Context items: ${result.detectionContext.length}`,
+        `✓ Comprehensive scan complete - Risk Score: ${result.riskScore}, Threats: ${result.threats.length}`,
       );
     });
   });
@@ -1928,13 +1948,10 @@ describe("Content Security and CSP Functions", () => {
       const maliciousContent =
         "<script>alert('xss')</script><p>Safe content</p><img src=x onerror=alert('xss')>";
 
-      const contexts = ["html", "text", "json", "xml"];
+      const contexts: ContentContext[] = ["html", "text", "json", "xml"];
 
       contexts.forEach((context) => {
-        const sanitized = sanitizeContentByContext(
-          maliciousContent,
-          context as any,
-        );
+        const sanitized = sanitizeContentByContext(maliciousContent, context);
 
         expect(sanitized).toBeDefined();
         expect(sanitized).not.toContain("<script>");
@@ -1982,14 +1999,14 @@ describe("Integration and Edge Cases", () => {
       console.log("Testing null/undefined input handling...");
 
       // Test sanitization functions
-      expect(sanitizeInput(null as any)).toBe("");
-      expect(sanitizeInput(undefined as any)).toBe("");
-      expect(sanitizeObject(null as any)).toEqual({});
+      expect(sanitizeInput(null as unknown)).toBe("");
+      expect(sanitizeInput(undefined as unknown)).toBe("");
+      expect(sanitizeObject(null as unknown)).toEqual({});
 
       // Test detection functions
-      expect(detectXSS(null as any)).toBe(false);
-      expect(detectSQLInjection(null as any).hasInjection).toBe(false);
-      expect(detectCommandInjection(null as any).hasInjection).toBe(false);
+      expect(detectXSS(null as unknown)).toBe(false);
+      expect(detectSQLInjection(null as unknown).hasInjection).toBe(false);
+      expect(detectCommandInjection(null as unknown).hasInjection).toBe(false);
 
       console.log("✓ Null/undefined inputs handled gracefully");
     });
@@ -2156,7 +2173,7 @@ describe("Integration and Edge Cases", () => {
       expect(isValid).toBe(true);
 
       // Generate tokens
-      const payload = { userId, role: UserRole.USER };
+      const payload = { userId, role: UserRole._USER };
       const accessToken = generateAccessToken(payload, TEST_SECRET);
       const refreshToken = generateRefreshToken(payload, TEST_SECRET);
 
@@ -2169,12 +2186,12 @@ describe("Integration and Edge Cases", () => {
 
       // Create security event
       const loginEvent = createSecurityEvent({
-        type: SecurityEventType.LOGIN_SUCCESS,
+        type: SecurityEventType._LOGIN_SUCCESS,
         userId,
         context: { ipAddress: "192.168.1.1" },
       });
 
-      expect(loginEvent.type).toBe(SecurityEventType.LOGIN_SUCCESS);
+      expect(loginEvent.type).toBe(SecurityEventType._LOGIN_SUCCESS);
       expect(loginEvent.userId).toBe(userId);
 
       console.log("✓ Authentication flow integration successful");
@@ -2208,17 +2225,17 @@ describe("Integration and Edge Cases", () => {
 
       // Create security events for detected threats
       const xssEvent = createSecurityEvent({
-        type: SecurityEventType.XSS_ATTEMPT_BLOCKED,
+        type: SecurityEventType._XSS_ATTEMPT_BLOCKED,
         context: { input: userInput.name },
       });
 
       const sqlEvent = createSecurityEvent({
-        type: SecurityEventType.INJECTION_ATTEMPT_BLOCKED,
+        type: SecurityEventType._INJECTION_ATTEMPT_BLOCKED,
         context: { input: userInput.email },
       });
 
-      expect(xssEvent.type).toBe(SecurityEventType.XSS_ATTEMPT_BLOCKED);
-      expect(sqlEvent.type).toBe(SecurityEventType.INJECTION_ATTEMPT_BLOCKED);
+      expect(xssEvent.type).toBe(SecurityEventType._XSS_ATTEMPT_BLOCKED);
+      expect(sqlEvent.type).toBe(SecurityEventType._INJECTION_ATTEMPT_BLOCKED);
 
       console.log("✓ Input validation flow integration successful");
     });
@@ -2235,7 +2252,7 @@ describe("Integration and Edge Cases", () => {
 
       // Scan file content
       const contentScan = scanFileContent(fileContent, "php");
-      expect(contentScan.hasThreats).toBe(true);
+      expect(contentScan.isSafe).toBe(false);
 
       // Detect specific threats
       const maliciousContent = detectMaliciousFileContent(fileContent);
@@ -2243,7 +2260,7 @@ describe("Integration and Edge Cases", () => {
 
       // Create security event for file threat
       const fileSecurityEvent = createSecurityEvent({
-        type: SecurityEventType.SUSPICIOUS_ACTIVITY,
+        type: SecurityEventType._SUSPICIOUS_ACTIVITY,
         context: {
           fileName,
           threatType: "malicious_file_content",
@@ -2252,7 +2269,7 @@ describe("Integration and Edge Cases", () => {
       });
 
       expect(fileSecurityEvent.type).toBe(
-        SecurityEventType.SUSPICIOUS_ACTIVITY,
+        SecurityEventType._SUSPICIOUS_ACTIVITY,
       );
 
       console.log("✓ File security flow integration successful");

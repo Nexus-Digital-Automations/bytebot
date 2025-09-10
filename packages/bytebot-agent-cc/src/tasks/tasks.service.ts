@@ -11,13 +11,13 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import {
   Task,
-  Role,
   Prisma,
   TaskStatus,
   TaskType,
   TaskPriority,
   File,
 } from '@prisma/client';
+import { Role } from '@bytebot/shared';
 import { AddTaskMessageDto } from './dto/add-task-message.dto';
 import { TasksGateway } from './tasks.gateway';
 import { ConfigService } from '@nestjs/config';
@@ -67,8 +67,8 @@ export class TasksService {
         type: createTaskDto.type || TaskType.IMMEDIATE,
         priority: createTaskDto.priority || TaskPriority.MEDIUM,
         status: TaskStatus.PENDING,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        createdBy: createTaskDto.createdBy || (Role.USER as Role),
+
+        createdBy: createTaskDto.createdBy || (Role._USER as Role),
         model: createTaskDto.model
           ? (createTaskDto.model as Prisma.InputJsonValue)
           : Prisma.JsonNull,
@@ -124,8 +124,8 @@ export class TasksService {
               text: `${createTaskDto.description} ${filesDescription}`,
             },
           ] as Prisma.InputJsonValue,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          role: Role.USER as Role,
+
+          role: Role._USER as Role,
           taskId: task.id,
         },
       });
@@ -316,8 +316,8 @@ export class TasksService {
     const message = await this.prisma.message.create({
       data: {
         content: [{ type: 'text', text: addTaskMessageDto.message }],
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        role: Role.USER,
+
+        role: Role._USER,
         taskId,
       },
     });
@@ -334,16 +334,14 @@ export class TasksService {
       throw new NotFoundException(`Task with ID ${taskId} not found`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (task.control !== (Role.USER as Role)) {
+    if (task.control !== (Role._USER as Role)) {
       throw new BadRequestException(`Task ${taskId} is not under user control`);
     }
 
     const updatedTask = await this.prisma.task.update({
       where: { id: taskId },
       data: {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        control: Role.ASSISTANT as Role,
+        control: Role._ASSISTANT as Role,
         status: TaskStatus.RUNNING,
       },
     });
@@ -374,8 +372,7 @@ export class TasksService {
       throw new NotFoundException(`Task with ID ${taskId} not found`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (task.control !== (Role.ASSISTANT as Role)) {
+    if (task.control !== (Role._ASSISTANT as Role)) {
       throw new BadRequestException(
         `Task ${taskId} is not under agent control`,
       );
@@ -384,8 +381,7 @@ export class TasksService {
     const updatedTask = await this.prisma.task.update({
       where: { id: taskId },
       data: {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        control: Role.USER as Role,
+        control: Role._USER as Role,
       },
     });
 

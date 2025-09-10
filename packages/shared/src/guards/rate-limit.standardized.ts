@@ -145,14 +145,14 @@ export class StandardizedRateLimitGuard implements CanActivate {
       }
 
       return true;
-    } catch (error) {
+    } catch (err) {
       this.logger.error(
         `[${operationId}] Rate limiting error for ${this.config.serviceType}`,
         {
           operationId,
           serviceType: this.config.serviceType,
           clientIdentifier,
-          error: error instanceof Error ? error.message : String(error),
+          error: err instanceof Error ? err.message : String(err),
         },
       );
 
@@ -323,7 +323,7 @@ export class StandardizedRateLimitGuard implements CanActivate {
   ): void {
     try {
       const securityEvent = createSecurityEvent(
-        SecurityEventType.RATE_LIMIT_EXCEEDED,
+        SecurityEventType._RATE_LIMIT_EXCEEDED,
         request.path,
         request.method,
         false,
@@ -353,14 +353,14 @@ export class StandardizedRateLimitGuard implements CanActivate {
           requestCount,
         },
       );
-    } catch (error) {
+    } catch (err) {
       this.logger.error(
         `Failed to log rate limit security event for ${this.config.serviceType}`,
         {
           operationId,
           serviceType: this.config.serviceType,
           clientIdentifier,
-          error: error instanceof Error ? error.message : String(error),
+          error: err instanceof Error ? err.message : String(err),
         },
       );
     }
@@ -374,7 +374,7 @@ export class StandardizedRateLimitGuard implements CanActivate {
     customOptions?: Partial<StandardizedRateLimitConfig>,
   ): StandardizedRateLimitGuard {
     const config: StandardizedRateLimitConfig = {
-      serviceType: RateLimitServiceType.BYTEBOTD,
+      serviceType: RateLimitServiceType._BYTEBOTD,
       securityLevel:
         environment === "production"
           ? RateLimitSecurityLevel.MAXIMUM
@@ -396,7 +396,7 @@ export class StandardizedRateLimitGuard implements CanActivate {
     customOptions?: Partial<StandardizedRateLimitConfig>,
   ): StandardizedRateLimitGuard {
     const config: StandardizedRateLimitConfig = {
-      serviceType: RateLimitServiceType.BYTEBOT_AGENT,
+      serviceType: RateLimitServiceType._BYTEBOT_AGENT,
       securityLevel:
         environment === "production"
           ? RateLimitSecurityLevel.HIGH
@@ -418,7 +418,7 @@ export class StandardizedRateLimitGuard implements CanActivate {
     customOptions?: Partial<StandardizedRateLimitConfig>,
   ): StandardizedRateLimitGuard {
     const config: StandardizedRateLimitConfig = {
-      serviceType: RateLimitServiceType.BYTEBOT_UI,
+      serviceType: RateLimitServiceType._BYTEBOT_UI,
       securityLevel:
         environment === "production"
           ? RateLimitSecurityLevel.STANDARD
@@ -483,7 +483,7 @@ export const StandardizedRateLimitGuards = {
    * Development-friendly rate limiting for all services
    */
   DEVELOPMENT: (
-    serviceType: RateLimitServiceType = RateLimitServiceType.SHARED,
+    serviceType: RateLimitServiceType = RateLimitServiceType._SHARED,
   ) => {
     const config: StandardizedRateLimitConfig = {
       serviceType,

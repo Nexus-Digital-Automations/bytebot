@@ -31,7 +31,7 @@ import { AuthenticatedRequest, ByteBotdUser } from '../guards/jwt-auth.guard';
  *
  * @example
  * ```typescript
- * @Roles(UserRole.ADMIN, UserRole.OPERATOR)
+ * @Roles(UserRole._ADMIN, UserRole._OPERATOR)
  * @Post('/computer-use/action')
  * async executeComputerAction() {
  *   return this.computerUseService.executeAction();
@@ -49,7 +49,7 @@ export const Roles = (...roles: UserRole[]) => SetMetadata('roles', roles);
  *
  * @example
  * ```typescript
- * @Permissions(Permission.COMPUTER_CONTROL)
+ * @Permissions(Permission._COMPUTER_CONTROL)
  * @Post('/computer-use/action')
  * async executeComputerAction() {
  *   return this.computerUseService.executeAction();
@@ -120,7 +120,7 @@ export const CurrentUser = createParamDecorator(
  *
  * @example
  * ```typescript
- * @RequireRole(UserRole.ADMIN)
+ * @RequireRole(UserRole._ADMIN)
  * @Delete('/system/shutdown')
  * async shutdownSystem() {
  *   return this.systemService.shutdown();
@@ -138,7 +138,7 @@ export const RequireRole = (role: UserRole) => Roles(role);
  *
  * @example
  * ```typescript
- * @RequirePermission(Permission.COMPUTER_CONTROL)
+ * @RequirePermission(Permission._COMPUTER_CONTROL)
  * @Post('/computer-use/screenshot')
  * async takeScreenshot() {
  *   return this.computerUseService.takeScreenshot();
@@ -163,7 +163,7 @@ export const RequirePermission = (permission: Permission) =>
  * }
  * ```
  */
-export const AdminOnly = () => RequireRole(UserRole.ADMIN);
+export const AdminOnly = () => RequireRole(UserRole._ADMIN);
 
 /**
  * OperatorOrAdmin decorator - Restrict access to operators and admins
@@ -180,7 +180,7 @@ export const AdminOnly = () => RequireRole(UserRole.ADMIN);
  * }
  * ```
  */
-export const OperatorOrAdmin = () => Roles(UserRole.OPERATOR, UserRole.ADMIN);
+export const OperatorOrAdmin = () => Roles(UserRole._OPERATOR, UserRole._ADMIN);
 
 /**
  * ComputerControlRequired decorator - Require computer control permission
@@ -197,8 +197,8 @@ export const OperatorOrAdmin = () => Roles(UserRole.OPERATOR, UserRole.ADMIN);
  * }
  * ```
  */
-export const ComputerControlRequired = () => 
-  RequirePermission(Permission.COMPUTER_CONTROL);
+export const ComputerControlRequired = () =>
+  RequirePermission(Permission._COMPUTER_CONTROL);
 
 /**
  * ComputerViewRequired decorator - Require computer view permission
@@ -215,8 +215,8 @@ export const ComputerControlRequired = () =>
  * }
  * ```
  */
-export const ComputerViewRequired = () => 
-  RequirePermission(Permission.COMPUTER_VIEW);
+export const ComputerViewRequired = () =>
+  RequirePermission(Permission._COMPUTER_VIEW);
 
 /**
  * Authenticated decorator - Require any authenticated user (any role)
@@ -234,7 +234,7 @@ export const ComputerViewRequired = () =>
  * ```
  */
 export const Authenticated = () =>
-  Roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER);
+  Roles(UserRole._ADMIN, UserRole._OPERATOR, UserRole._VIEWER);
 
 /**
  * Re-export ByteBotdUser type for convenience

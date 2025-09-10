@@ -213,7 +213,6 @@ export class MetricsService {
 
     this.aneProcessingDuration = new Histogram({
       name: 'bytebot_agent_ane_processing_duration_seconds',
-      help: 'Apple Neural Engine processing duration in seconds',
       labelNames: ['operation_type', 'status'],
       buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.5, 1],
       registers: [this.registry],
@@ -657,7 +656,6 @@ export class MetricsService {
   }
 
   /**
-   * Record Apple Neural Engine processing metrics
    */
   recordANEProcessing(
     operationType: string,

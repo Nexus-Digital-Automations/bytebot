@@ -38,16 +38,16 @@ import {
  */
 export enum ValidationSecurityLevel {
   /** Maximum security - strict validation, aggressive sanitization */
-  MAXIMUM = "maximum",
+  _MAXIMUM = "maximum",
 
   /** High security - balanced validation and sanitization */
-  HIGH = "high",
+  _HIGH = "high",
 
   /** Standard security - moderate validation and sanitization */
-  STANDARD = "standard",
+  _STANDARD = "standard",
 
   /** Development security - relaxed validation for development */
-  DEVELOPMENT = "development",
+  _DEVELOPMENT = "development",
 }
 
 /**
@@ -55,16 +55,16 @@ export enum ValidationSecurityLevel {
  */
 export enum ValidationServiceType {
   /** Computer control service - requires maximum security */
-  BYTEBOTD = "bytebotd",
+  _BYTEBOTD = "bytebotd",
 
   /** Task management API service - requires high security */
-  BYTEBOT_AGENT = "bytebot-agent",
+  _BYTEBOT_AGENT = "bytebot-agent",
 
   /** Frontend UI service - requires standard security */
-  BYTEBOT_UI = "bytebot-ui",
+  _BYTEBOT_UI = "bytebot-ui",
 
   /** Shared libraries and utilities */
-  SHARED = "shared",
+  _SHARED = "shared",
 }
 
 /**
@@ -136,9 +136,9 @@ const VALIDATION_PROFILES: Record<
   ValidationServiceType,
   Record<string, Partial<StandardizedValidationConfig>>
 > = {
-  [ValidationServiceType.BYTEBOTD]: {
+  [ValidationServiceType._BYTEBOTD]: {
     development: {
-      securityLevel: ValidationSecurityLevel.DEVELOPMENT,
+      securityLevel: ValidationSecurityLevel._DEVELOPMENT,
       transform: true,
       whitelist: false,
       forbidNonWhitelisted: false,
@@ -157,7 +157,7 @@ const VALIDATION_PROFILES: Record<
     },
 
     staging: {
-      securityLevel: ValidationSecurityLevel.HIGH,
+      securityLevel: ValidationSecurityLevel._HIGH,
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
@@ -182,7 +182,7 @@ const VALIDATION_PROFILES: Record<
     },
 
     production: {
-      securityLevel: ValidationSecurityLevel.MAXIMUM,
+      securityLevel: ValidationSecurityLevel._MAXIMUM,
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
@@ -210,9 +210,9 @@ const VALIDATION_PROFILES: Record<
     },
   },
 
-  [ValidationServiceType.BYTEBOT_AGENT]: {
+  [ValidationServiceType._BYTEBOT_AGENT]: {
     development: {
-      securityLevel: ValidationSecurityLevel.DEVELOPMENT,
+      securityLevel: ValidationSecurityLevel._DEVELOPMENT,
       transform: true,
       whitelist: false,
       forbidNonWhitelisted: false,
@@ -231,7 +231,7 @@ const VALIDATION_PROFILES: Record<
     },
 
     staging: {
-      securityLevel: ValidationSecurityLevel.HIGH,
+      securityLevel: ValidationSecurityLevel._HIGH,
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
@@ -250,7 +250,7 @@ const VALIDATION_PROFILES: Record<
     },
 
     production: {
-      securityLevel: ValidationSecurityLevel.HIGH,
+      securityLevel: ValidationSecurityLevel._HIGH,
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
@@ -281,9 +281,9 @@ const VALIDATION_PROFILES: Record<
     },
   },
 
-  [ValidationServiceType.BYTEBOT_UI]: {
+  [ValidationServiceType._BYTEBOT_UI]: {
     development: {
-      securityLevel: ValidationSecurityLevel.DEVELOPMENT,
+      securityLevel: ValidationSecurityLevel._DEVELOPMENT,
       transform: true,
       whitelist: false,
       forbidNonWhitelisted: false,
@@ -302,7 +302,7 @@ const VALIDATION_PROFILES: Record<
     },
 
     staging: {
-      securityLevel: ValidationSecurityLevel.STANDARD,
+      securityLevel: ValidationSecurityLevel._STANDARD,
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: false, // Allow extra props for frontend flexibility
@@ -320,7 +320,7 @@ const VALIDATION_PROFILES: Record<
     },
 
     production: {
-      securityLevel: ValidationSecurityLevel.STANDARD,
+      securityLevel: ValidationSecurityLevel._STANDARD,
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: false, // Allow extra props for frontend flexibility
@@ -346,9 +346,9 @@ const VALIDATION_PROFILES: Record<
     },
   },
 
-  [ValidationServiceType.SHARED]: {
+  [ValidationServiceType._SHARED]: {
     development: {
-      securityLevel: ValidationSecurityLevel.DEVELOPMENT,
+      securityLevel: ValidationSecurityLevel._DEVELOPMENT,
       auditLogging: {
         enabled: false,
         logLevel: "debug",
@@ -361,12 +361,12 @@ const VALIDATION_PROFILES: Record<
 };
 
 @Injectable()
-export class StandardizedValidationPipe implements PipeTransform<any> {
+export class StandardizedValidationPipe implements PipeTransform<unknown> {
   private readonly logger = new Logger(StandardizedValidationPipe.name);
   private readonly config: StandardizedValidationConfig;
 
   constructor(
-    serviceType: ValidationServiceType = ValidationServiceType.SHARED,
+    serviceType: ValidationServiceType = ValidationServiceType._SHARED,
     environment: string = "development",
     customOptions?: Partial<StandardizedValidationConfig>,
   ) {
@@ -406,7 +406,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
 
     const defaultConfig: StandardizedValidationConfig = {
       serviceType,
-      securityLevel: ValidationSecurityLevel.STANDARD,
+      securityLevel: ValidationSecurityLevel._STANDARD,
       environment,
       transform: true,
       whitelist: true,
@@ -558,7 +558,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
       }
 
       return transformedValue;
-    } catch (error) {
+    } catch (err) {
       const processingTime = Date.now() - startTime;
 
       this.logger.error(
@@ -569,7 +569,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
           securityLevel: this.config.securityLevel,
           type: metadata.type,
           metatype: metadata.metatype?.name,
-          error: error instanceof Error ? error.message : String(error),
+          error: err instanceof Error ? err.message : String(err),
           processingTimeMs: processingTime,
         },
       );
@@ -579,10 +579,10 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
         this.config.auditLogging.enabled &&
         this.config.auditLogging.logFailedValidation
       ) {
-        this.logSecurityEvent(operationId, error, value, metadata);
+        this.logSecurityEvent(operationId, err, value, metadata);
       }
 
-      throw error;
+      throw err;
     }
   }
 
@@ -671,9 +671,9 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
           },
         );
       }
-    } catch (error) {
-      if (error instanceof PayloadTooLargeException) {
-        throw error;
+    } catch (err) {
+      if (err instanceof PayloadTooLargeException) {
+        throw err;
       }
 
       // If we can't stringify the value, it might be too large or contain circular references
@@ -682,7 +682,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
         {
           operationId,
           serviceType: this.config.serviceType,
-          error: error instanceof Error ? error.message : String(error),
+          error: err instanceof Error ? err.message : String(err),
         },
       );
     }
@@ -691,7 +691,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
   /**
    * Detect potential security threats in the input
    */
-  private detectSecurityThreats(value: any, operationId: string): void {
+  private detectSecurityThreats(value: unknown, operationId: string): void {
     const threats: string[] = [];
 
     // Convert value to string for pattern analysis
@@ -948,14 +948,14 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
     metadata: ArgumentMetadata,
   ): void {
     try {
-      let eventType = SecurityEventType.VALIDATION_FAILED;
+      let eventType = SecurityEventType._VALIDATION_FAILED;
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
       if (errorMessage.includes("XSS")) {
-        eventType = SecurityEventType.XSS_ATTEMPT_BLOCKED;
+        eventType = SecurityEventType._XSS_ATTEMPT_BLOCKED;
       } else if (errorMessage.includes("SQL")) {
-        eventType = SecurityEventType.INJECTION_ATTEMPT_BLOCKED;
+        eventType = SecurityEventType._INJECTION_ATTEMPT_BLOCKED;
       }
 
       const securityEvent = createSecurityEvent(
@@ -1033,7 +1033,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
     customOptions?: Partial<StandardizedValidationConfig>,
   ): StandardizedValidationPipe {
     return new StandardizedValidationPipe(
-      ValidationServiceType.BYTEBOTD,
+      ValidationServiceType._BYTEBOTD,
       environment,
       customOptions,
     );
@@ -1044,7 +1044,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
     customOptions?: Partial<StandardizedValidationConfig>,
   ): StandardizedValidationPipe {
     return new StandardizedValidationPipe(
-      ValidationServiceType.BYTEBOT_AGENT,
+      ValidationServiceType._BYTEBOT_AGENT,
       environment,
       customOptions,
     );
@@ -1055,7 +1055,7 @@ export class StandardizedValidationPipe implements PipeTransform<any> {
     customOptions?: Partial<StandardizedValidationConfig>,
   ): StandardizedValidationPipe {
     return new StandardizedValidationPipe(
-      ValidationServiceType.BYTEBOT_UI,
+      ValidationServiceType._BYTEBOT_UI,
       environment,
       customOptions,
     );
@@ -1071,7 +1071,7 @@ export const StandardizedValidationPipes = {
    */
   MAXIMUM_SECURITY: (environment: string = "production") =>
     StandardizedValidationPipe.createBytebotDPipe(environment, {
-      securityLevel: ValidationSecurityLevel.MAXIMUM,
+      securityLevel: ValidationSecurityLevel._MAXIMUM,
       enableSanitization: true,
       enableThreatDetection: true,
       maxPayloadSize: 10 * 1024 * 1024, // 10MB
@@ -1089,7 +1089,7 @@ export const StandardizedValidationPipes = {
    */
   HIGH_SECURITY: (environment: string = "production") =>
     StandardizedValidationPipe.createBytebotAgentPipe(environment, {
-      securityLevel: ValidationSecurityLevel.HIGH,
+      securityLevel: ValidationSecurityLevel._HIGH,
       enableSanitization: true,
       enableThreatDetection: true,
       maxPayloadSize: 25 * 1024 * 1024, // 25MB
@@ -1106,7 +1106,7 @@ export const StandardizedValidationPipes = {
    */
   STANDARD_SECURITY: (environment: string = "production") =>
     StandardizedValidationPipe.createBytebotUIPipe(environment, {
-      securityLevel: ValidationSecurityLevel.STANDARD,
+      securityLevel: ValidationSecurityLevel._STANDARD,
       enableSanitization: true,
       enableThreatDetection: true,
       maxPayloadSize: 5 * 1024 * 1024, // 5MB
@@ -1117,10 +1117,10 @@ export const StandardizedValidationPipes = {
    * Development-friendly validation for all services
    */
   DEVELOPMENT: (
-    serviceType: ValidationServiceType = ValidationServiceType.SHARED,
+    serviceType: ValidationServiceType = ValidationServiceType._SHARED,
   ) =>
     new StandardizedValidationPipe(serviceType, "development", {
-      securityLevel: ValidationSecurityLevel.DEVELOPMENT,
+      securityLevel: ValidationSecurityLevel._DEVELOPMENT,
       enableSanitization: false,
       enableThreatDetection: false,
       maxPayloadSize: 100 * 1024 * 1024, // 100MB

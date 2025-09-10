@@ -135,22 +135,22 @@ export class RateLimitGuard implements CanActivate {
 
     // Initialize with available presets
     try {
-      this.defaultConfig[RateLimitPreset.AUTH] = {
+      this.defaultConfig[RateLimitPreset._AUTH] = {
         max: 5,
         windowMs: 60000,
         message: 'Auth rate limit exceeded',
       };
-      this.defaultConfig[RateLimitPreset.READ_OPERATIONS] = {
+      this.defaultConfig[RateLimitPreset._READ_OPERATIONS] = {
         max: 100,
         windowMs: 60000,
         message: 'Read operations rate limit exceeded',
       };
-      this.defaultConfig[RateLimitPreset.COMPUTER_USE] = {
+      this.defaultConfig[RateLimitPreset._COMPUTER_USE] = {
         max: 10,
         windowMs: 60000,
         message: 'Computer use rate limit exceeded',
       };
-      this.defaultConfig[RateLimitPreset.TASK_OPERATIONS] = {
+      this.defaultConfig[RateLimitPreset._TASK_OPERATIONS] = {
         max: 30,
         windowMs: 60000,
         message: 'Task operations rate limit exceeded',
@@ -161,22 +161,22 @@ export class RateLimitGuard implements CanActivate {
       this.logger.warn('Error initializing rate limit config:', error);
       // Fallback configuration
       this.defaultConfig = {
-        [RateLimitPreset.AUTH]: {
+        [RateLimitPreset._AUTH]: {
           max: 5,
           windowMs: 60000,
           message: 'Auth rate limit exceeded',
         },
-        [RateLimitPreset.READ_OPERATIONS]: {
+        [RateLimitPreset._READ_OPERATIONS]: {
           max: 100,
           windowMs: 60000,
           message: 'Read operations rate limit exceeded',
         },
-        [RateLimitPreset.COMPUTER_USE]: {
+        [RateLimitPreset._COMPUTER_USE]: {
           max: 10,
           windowMs: 60000,
           message: 'Computer use rate limit exceeded',
         },
-        [RateLimitPreset.TASK_OPERATIONS]: {
+        [RateLimitPreset._TASK_OPERATIONS]: {
           max: 30,
           windowMs: 60000,
           message: 'Task operations rate limit exceeded',
@@ -338,23 +338,23 @@ export class RateLimitGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
     if (request.url.includes('/auth/')) {
-      return this.defaultConfig[RateLimitPreset.AUTH];
+      return this.defaultConfig[RateLimitPreset._AUTH];
     }
 
     if (
       request.url.includes('/computer-use/') ||
       request.url.includes('/computer/')
     ) {
-      return this.defaultConfig[RateLimitPreset.COMPUTER_USE];
+      return this.defaultConfig[RateLimitPreset._COMPUTER_USE];
     }
 
     if (request.url.includes('/tasks/')) {
-      return this.defaultConfig[RateLimitPreset.TASK_OPERATIONS];
+      return this.defaultConfig[RateLimitPreset._TASK_OPERATIONS];
     }
 
     // Default for read operations
     if (request.method === 'GET' || request.method === 'HEAD') {
-      return this.defaultConfig[RateLimitPreset.READ_OPERATIONS];
+      return this.defaultConfig[RateLimitPreset._READ_OPERATIONS];
     }
 
     return null;
@@ -561,7 +561,7 @@ export class RateLimitGuard implements CanActivate {
   ): void {
     try {
       const securityEvent = createSecurityEvent(
-        SecurityEventType.RATE_LIMIT_EXCEEDED,
+        SecurityEventType._RATE_LIMIT_EXCEEDED,
         request.url,
         request.method,
         false,

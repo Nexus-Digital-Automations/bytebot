@@ -71,7 +71,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @RateLimit(RateLimitPreset.AUTH) // Strict rate limiting for authentication
+  @RateLimit(RateLimitPreset._AUTH) // Strict rate limiting for authentication
   @ApiOperation({
     summary: 'User login',
     description: 'Authenticate user credentials and return JWT tokens',
@@ -159,7 +159,7 @@ export class AuthController {
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @RateLimit(RateLimitPreset.AUTH) // Strict rate limiting for registration
+  @RateLimit(RateLimitPreset._AUTH) // Strict rate limiting for registration
   @ApiOperation({
     summary: 'User registration',
     description: 'Create new user account with secure password hashing',
@@ -250,7 +250,7 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @RateLimit(RateLimitPreset.AUTH) // Rate limiting for token refresh
+  @RateLimit(RateLimitPreset._AUTH) // Rate limiting for token refresh
   @ApiOperation({
     summary: 'Refresh JWT tokens',
     description: 'Generate new access token using valid refresh token',

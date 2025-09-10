@@ -148,7 +148,11 @@ const DEFAULT_CSP_DIRECTIVES = {
 export class SecurityHeadersMiddleware implements NestMiddleware {
   private readonly logger = new Logger(SecurityHeadersMiddleware.name);
   private readonly config: SecurityMiddlewareConfig;
-  private readonly helmetMiddleware: any;
+  private readonly helmetMiddleware: (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => void;
 
   constructor(private configService: ConfigService) {
     const environment = this.configService.get('NODE_ENV', 'development');
@@ -202,7 +206,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     const startTime = Date.now();
 
     // Set correlation ID for request tracking
-    (req as any).correlationId = operationId;
+    (req as Request & { correlationId?: string }).correlationId = operationId;
 
     this.logger.debug(`[${operationId}] Applying BytebotD security headers`, {
       operationId,
@@ -215,7 +219,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
     try {
       // Apply helmet security headers
-      this.helmetMiddleware(req, res, (err?: any) => {
+      this.helmetMiddleware(req, res, (err) => {
         if (err) {
           const processingTime = Date.now() - startTime;
 
@@ -282,8 +286,12 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
   /**
    * Create helmet middleware with BytebotD-specific configuration
    */
-  private createHelmetMiddleware(): any {
-    const helmetOptions: any = {
+  private createHelmetMiddleware(): (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => void {
+    const helmetOptions: Parameters<typeof helmet>[0] = {
       // Content Security Policy optimized for desktop service
       contentSecurityPolicy: this.config.csp
         ? {
@@ -307,7 +315,9 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       // X-Frame-Options - Allow framing for VNC viewer
       frameguard: this.config.frameOptions
         ? {
-            action: this.config.frameOptions.toLowerCase(),
+            action: this.config.frameOptions.toLowerCase() as
+              | 'deny'
+              | 'sameorigin',
           }
         : false,
 
@@ -320,7 +330,15 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       // Referrer Policy
       referrerPolicy: this.config.referrerPolicy
         ? {
-            policy: this.config.referrerPolicy,
+            policy: this.config.referrerPolicy as
+              | 'same-origin'
+              | 'strict-origin'
+              | 'strict-origin-when-cross-origin'
+              | 'no-referrer'
+              | 'no-referrer-when-downgrade'
+              | 'origin'
+              | 'origin-when-cross-origin'
+              | 'unsafe-url',
           }
         : false,
 
@@ -532,12 +550,12 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
   private mapEventType(eventType: string): SecurityEventType {
     switch (eventType) {
       case 'CORS_VIOLATION':
-        return SecurityEventType.ACCESS_DENIED;
+        return SecurityEventType._ACCESS_DENIED;
       case 'MIDDLEWARE_ERROR':
       case 'MIDDLEWARE_FAILURE':
-        return SecurityEventType.SECURITY_CONFIG_CHANGED;
+        return SecurityEventType._SECURITY_CONFIG_CHANGED;
       default:
-        return SecurityEventType.SUSPICIOUS_ACTIVITY;
+        return SecurityEventType._SUSPICIOUS_ACTIVITY;
     }
   }
 

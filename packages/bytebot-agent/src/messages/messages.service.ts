@@ -635,18 +635,12 @@ export class MessagesService {
 
       // Filter messages with performance tracking
       const filteringStartTime = performance.now();
-      const filteredMessages = this.filterMessages(
-        messageResult.messages,
-        operationId,
-      );
+      const filteredMessages = this.filterMessages(messageResult.messages);
       const filteringTime = performance.now() - filteringStartTime;
 
       // Group messages with performance tracking
       const groupingStartTime = performance.now();
-      const groupedMessages = this.groupBackToBackMessages(
-        filteredMessages,
-        operationId,
-      );
+      const groupedMessages = this.groupBackToBackMessages(filteredMessages);
       const groupingTime = performance.now() - groupingStartTime;
 
       const processingTime = performance.now() - startTime;
@@ -769,13 +763,13 @@ export class MessagesService {
 
         // Calculate character count based on block type
         if (
-          block.type === MessageContentType.Text &&
+          block.type === MessageContentType._Text &&
           'text' in block &&
           typeof block.text === 'string'
         ) {
           totalCharacters += block.text.length;
         } else if (
-          block.type === MessageContentType.ToolResult &&
+          block.type === MessageContentType._ToolResult &&
           'content' in block &&
           typeof block.content === 'string'
         ) {
@@ -805,13 +799,13 @@ export class MessagesService {
             (contentTotal: number, block: MessageContentBlock): number => {
               if (isMessageContentBlock(block)) {
                 if (
-                  block.type === MessageContentType.Text &&
+                  block.type === MessageContentType._Text &&
                   'text' in block &&
                   typeof block.text === 'string'
                 ) {
                   return contentTotal + block.text.length;
                 } else if (
-                  block.type === MessageContentType.ToolResult &&
+                  block.type === MessageContentType._ToolResult &&
                   'content' in block &&
                   typeof block.content === 'string'
                 ) {

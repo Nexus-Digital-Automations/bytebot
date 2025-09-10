@@ -34,25 +34,31 @@ export interface RateLimitConfig {
 export interface RateLimiterMock {
   checkRateLimit: jest.MockedFunction<
     (
-      identifier: string,
-      config?: Partial<RateLimitConfig>,
+      _identifier: string,
+      _config?: Partial<RateLimitConfig>,
     ) => Promise<RateLimitResult>
   >;
   incrementCounter: jest.MockedFunction<
-    (identifier: string, amount?: number) => Promise<number>
+    (_identifier: string, _amount?: number) => Promise<number>
   >;
-  resetCounter: jest.MockedFunction<(identifier: string) => Promise<void>>;
+  resetCounter: jest.MockedFunction<(_identifier: string) => Promise<void>>;
   getRemainingRequests: jest.MockedFunction<
-    (identifier: string) => Promise<number>
+    (_identifier: string) => Promise<number>
   >;
-  getResetTime: jest.MockedFunction<(identifier: string) => Promise<Date>>;
-  isBlocked: jest.MockedFunction<(identifier: string) => Promise<boolean>>;
+  getResetTime: jest.MockedFunction<(_identifier: string) => Promise<Date>>;
+  isBlocked: jest.MockedFunction<(_identifier: string) => Promise<boolean>>;
   blockIdentifier: jest.MockedFunction<
-    (identifier: string, durationMs: number, reason?: string) => Promise<void>
+    (
+      _identifier: string,
+      _durationMs: number,
+      _reason?: string,
+    ) => Promise<void>
   >;
-  unblockIdentifier: jest.MockedFunction<(identifier: string) => Promise<void>>;
+  unblockIdentifier: jest.MockedFunction<
+    (_identifier: string) => Promise<void>
+  >;
   getUsageStats: jest.MockedFunction<
-    (identifier: string) => Promise<{
+    (_identifier: string) => Promise<{
       requestCount: number;
       firstRequest: Date;
       lastRequest: Date;
@@ -60,7 +66,7 @@ export interface RateLimiterMock {
     }>
   >;
   configureLimits: jest.MockedFunction<
-    (identifier: string, limits: Partial<RateLimitConfig>) => Promise<void>
+    (_identifier: string, _limits: Partial<RateLimitConfig>) => Promise<void>
   >;
 }
 
@@ -379,7 +385,7 @@ export const createMockRateLimiter = (
   // Force allow all requests
   if (alwaysAllow) {
     mock.checkRateLimit = jest.fn(
-      async (identifier): Promise<RateLimitResult> => {
+      async (_identifier): Promise<RateLimitResult> => {
         return {
           allowed: true,
           remaining: 999,
@@ -392,7 +398,7 @@ export const createMockRateLimiter = (
   // Force block all requests
   if (alwaysBlock) {
     mock.checkRateLimit = jest.fn(
-      async (identifier): Promise<RateLimitResult> => {
+      async (_identifier): Promise<RateLimitResult> => {
         return {
           allowed: false,
           remaining: 0,
@@ -412,9 +418,9 @@ export const createMockRateLimiter = (
     };
 
     Object.entries(originalMethods).forEach(([methodName, originalMethod]) => {
-      (mock as any)[methodName] = jest.fn(async (...args: unknown[]) => {
+      (mock as any)[methodName] = jest.fn(async (..._args: unknown[]) => {
         await new Promise((resolve) => setTimeout(resolve, simulateLatency));
-        return (originalMethod as (...args: unknown[]) => unknown)(...args);
+        return (originalMethod as (..._args: unknown[]) => unknown)(..._args);
       });
     });
   }

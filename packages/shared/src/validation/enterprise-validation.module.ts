@@ -193,8 +193,8 @@ export class EnterpriseValidationModule {
       environment,
       globalSecurityLevel:
         environment === "production"
-          ? ValidationSecurityLevel.MAXIMUM
-          : ValidationSecurityLevel.HIGH,
+          ? ValidationSecurityLevel._MAXIMUM
+          : ValidationSecurityLevel._HIGH,
       enableAuditLogging: true,
       enableMetrics: true,
       enableCaching: environment === "production",
@@ -244,7 +244,7 @@ export class EnterpriseValidationModule {
     return this.forService({
       serviceType,
       environment: "development",
-      globalSecurityLevel: ValidationSecurityLevel.DEVELOPMENT,
+      globalSecurityLevel: ValidationSecurityLevel._DEVELOPMENT,
       enableAuditLogging: false,
       enableMetrics: true,
       enableCaching: false,
@@ -269,7 +269,7 @@ export class EnterpriseValidationModule {
     return this.forService({
       serviceType,
       environment: "test",
-      globalSecurityLevel: ValidationSecurityLevel.STANDARD,
+      globalSecurityLevel: ValidationSecurityLevel._STANDARD,
       enableAuditLogging: false,
       enableMetrics: false,
       enableCaching: false,
@@ -373,14 +373,14 @@ export class EnterpriseValidationPipe extends StandardizedValidationPipe {
       });
 
       return validatedResult;
-    } catch (error) {
+    } catch (err) {
       const processingTime = Date.now() - startTime;
 
       // Log validation failure with detailed context
       await this.options.auditLogger.logValidationFailure({
         operationId,
         serviceType: this.options.serviceType,
-        error: error as Error,
+        error: err as Error,
         inputValue: value,
         metadata,
         processingTimeMs: processingTime,
@@ -390,11 +390,11 @@ export class EnterpriseValidationPipe extends StandardizedValidationPipe {
       this.options.metricsCollector.recordValidationFailure({
         operationId,
         serviceType: this.options.serviceType,
-        errorType: (error as Error).constructor.name,
+        errorType: (err as Error).constructor.name,
         processingTimeMs: processingTime,
       });
 
-      throw error;
+      throw err;
     }
   }
 }

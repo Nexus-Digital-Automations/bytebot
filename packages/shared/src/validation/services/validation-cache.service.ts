@@ -11,7 +11,7 @@
 
 import { Injectable, Logger } from "@nestjs/common";
 import { ArgumentMetadata } from "@nestjs/common";
-import { ValidationCacheEntry } from "./types";
+import { ValidationCacheEntry, ValidationResult } from "./types";
 import {
   ValidationServiceType,
   ValidationSecurityLevel,
@@ -68,9 +68,9 @@ export class ValidationCacheService {
       }
 
       return Promise.resolve(null);
-    } catch (error) {
+    } catch (err) {
       this.logger.warn("Failed to retrieve cached validation result", {
-        error: (error as Error).message,
+        error: (err as Error).message,
       });
       return Promise.resolve(null);
     }
@@ -100,21 +100,21 @@ export class ValidationCacheService {
       const cacheEntry: ValidationCacheEntry = {
         cacheKey,
         inputHash,
-        validationResult: result,
+        validationResult: result as ValidationResult,
         createdAt: now,
         expiresAt,
         accessCount: 0,
-        serviceType: ValidationServiceType.SHARED,
-        securityLevel: ValidationSecurityLevel.STANDARD,
+        serviceType: ValidationServiceType._SHARED,
+        securityLevel: ValidationSecurityLevel._STANDARD,
       };
 
       this.cache.set(cacheKey, cacheEntry);
 
       this.logger.debug(`Cached validation result for key: ${cacheKey}`);
       return Promise.resolve();
-    } catch (error) {
+    } catch (err) {
       this.logger.warn("Failed to cache validation result", {
-        error: (error as Error).message,
+        error: (err as Error).message,
       });
       return Promise.resolve();
     }

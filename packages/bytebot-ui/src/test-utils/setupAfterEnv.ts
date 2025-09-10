@@ -12,17 +12,21 @@
  * @version 2.0.0
  */
 
-import React from 'react';
-import { expect } from '@jest/globals';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import React from "react";
+import { expect } from "@jest/globals";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import "@testing-library/jest-dom";
 
 // Custom Jest matchers for Bytebot UI domain
 expect.extend({
   /**
    * Validates that a React element has specific Tailwind classes
    */
-  toHaveTailwindClass(received: HTMLElement, className: string): jest.CustomMatcherResult {
+  toHaveTailwindClass(
+    received: HTMLElement,
+    className: string,
+  ): jest.CustomMatcherResult {
     if (!received || !received.classList) {
       return {
         message: () => `Expected element to have classList property`,
@@ -34,12 +38,14 @@ expect.extend({
 
     if (pass) {
       return {
-        message: () => `Expected element not to have Tailwind class "${className}"`,
+        message: () =>
+          `Expected element not to have Tailwind class "${className}"`,
         pass: true,
       };
     } else {
       return {
-        message: () => `Expected element to have Tailwind class "${className}", but got classes: ${Array.from(received.classList).join(', ')}`,
+        message: () =>
+          `Expected element to have Tailwind class "${className}", but got classes: ${Array.from(received.classList).join(", ")}`,
         pass: false,
       };
     }
@@ -49,7 +55,7 @@ expect.extend({
    * Validates Socket.io event structure
    */
   toBeValidSocketEvent(received: unknown): jest.CustomMatcherResult {
-    if (typeof received !== 'object' || received === null) {
+    if (typeof received !== "object" || received === null) {
       return {
         message: () => `Expected ${received} to be an object`,
         pass: false,
@@ -57,9 +63,9 @@ expect.extend({
     }
 
     const event = received as Record<string, unknown>;
-    const hasEventType = 'type' in event && typeof event.type === 'string';
-    const hasPayload = 'payload' in event;
-    const hasTimestamp = 'timestamp' in event;
+    const hasEventType = "type" in event && typeof event.type === "string";
+    const hasPayload = "payload" in event;
+    const hasTimestamp = "timestamp" in event;
 
     const pass = hasEventType && hasPayload && hasTimestamp;
 
@@ -70,7 +76,8 @@ expect.extend({
       };
     } else {
       return {
-        message: () => `Expected event to be a valid Socket.io event with type, payload, and timestamp`,
+        message: () =>
+          `Expected event to be a valid Socket.io event with type, payload, and timestamp`,
         pass: false,
       };
     }
@@ -80,7 +87,7 @@ expect.extend({
    * Validates task UI representation
    */
   toBeValidTaskUI(received: unknown): jest.CustomMatcherResult {
-    if (typeof received !== 'object' || received === null) {
+    if (typeof received !== "object" || received === null) {
       return {
         message: () => `Expected ${received} to be an object`,
         pass: false,
@@ -88,17 +95,19 @@ expect.extend({
     }
 
     const task = received as Record<string, unknown>;
-    const requiredFields = ['id', 'title', 'status', 'createdAt'];
-    const missingFields = requiredFields.filter(field => !(field in task));
+    const requiredFields = ["id", "title", "status", "createdAt"];
+    const missingFields = requiredFields.filter((field) => !(field in task));
 
     if (missingFields.length === 0) {
       return {
-        message: () => `Expected task UI object not to have all required fields: ${requiredFields.join(', ')}`,
+        message: () =>
+          `Expected task UI object not to have all required fields: ${requiredFields.join(", ")}`,
         pass: true,
       };
     } else {
       return {
-        message: () => `Expected task UI object to have all required fields: ${requiredFields.join(', ')}, missing: ${missingFields.join(', ')}`,
+        message: () =>
+          `Expected task UI object to have all required fields: ${requiredFields.join(", ")}, missing: ${missingFields.join(", ")}`,
         pass: false,
       };
     }
@@ -116,13 +125,14 @@ expect.extend({
     }
 
     // Check for basic accessibility attributes
-    const hasAriaLabel = received.hasAttribute('aria-label');
-    const hasAriaLabelledBy = received.hasAttribute('aria-labelledby');
-    const hasRole = received.hasAttribute('role');
-    const hasTabIndex = received.hasAttribute('tabindex');
-    
+    const hasAriaLabel = received.hasAttribute("aria-label");
+    const hasAriaLabelledBy = received.hasAttribute("aria-labelledby");
+    const hasRole = received.hasAttribute("role");
+    const hasTabIndex = received.hasAttribute("tabindex");
+
     // Element should have at least one accessibility attribute
-    const hasAccessibilityAttrs = hasAriaLabel || hasAriaLabelledBy || hasRole || hasTabIndex;
+    const hasAccessibilityAttrs =
+      hasAriaLabel || hasAriaLabelledBy || hasRole || hasTabIndex;
 
     if (hasAccessibilityAttrs) {
       return {
@@ -131,7 +141,8 @@ expect.extend({
       };
     } else {
       return {
-        message: () => `Expected element to have accessibility attributes (aria-label, aria-labelledby, role, or tabindex)`,
+        message: () =>
+          `Expected element to have accessibility attributes (aria-label, aria-labelledby, role, or tabindex)`,
         pass: false,
       };
     }
@@ -140,9 +151,12 @@ expect.extend({
   /**
    * Validates component render performance
    */
-  toRenderWithinTime(received: () => unknown, maxMs: number = 100): jest.CustomMatcherResult {
+  toRenderWithinTime(
+    received: () => unknown,
+    maxMs: number = 100,
+  ): jest.CustomMatcherResult {
     const startTime = performance.now();
-    
+
     try {
       received();
       const endTime = performance.now();
@@ -151,18 +165,21 @@ expect.extend({
 
       if (pass) {
         return {
-          message: () => `Expected component not to render within ${maxMs}ms (took ${renderTime.toFixed(2)}ms)`,
+          message: () =>
+            `Expected component not to render within ${maxMs}ms (took ${renderTime.toFixed(2)}ms)`,
           pass: true,
         };
       } else {
         return {
-          message: () => `Expected component to render within ${maxMs}ms, but took ${renderTime.toFixed(2)}ms`,
+          message: () =>
+            `Expected component to render within ${maxMs}ms, but took ${renderTime.toFixed(2)}ms`,
           pass: false,
         };
       }
     } catch (error) {
       return {
-        message: () => `Expected component to render successfully, but threw error: ${error}`,
+        message: () =>
+          `Expected component to render successfully, but threw error: ${error}`,
         pass: false,
       };
     }
@@ -176,14 +193,28 @@ const performanceMonitor = {
   interactionThreshold: 50, // 50ms for user interactions
 
   logSlowRender(componentName: string, duration: number): void {
-    if (duration > this.slowRenderThreshold) {
-      console.warn(`⚠️ Slow render detected: "${componentName}" took ${duration.toFixed(2)}ms`);
+    if (
+      duration > this.slowRenderThreshold &&
+      process.env.NODE_ENV !== "test"
+    ) {
+      // Only log in development, not during tests
+      // eslint-disable-next-line no-console
+      console.warn(
+        `⚠️ Slow render detected: "${componentName}" took ${duration.toFixed(2)}ms`,
+      );
     }
   },
 
   logSlowInteraction(interactionType: string, duration: number): void {
-    if (duration > this.interactionThreshold) {
-      console.warn(`⚠️ Slow interaction: "${interactionType}" took ${duration.toFixed(2)}ms`);
+    if (
+      duration > this.interactionThreshold &&
+      process.env.NODE_ENV !== "test"
+    ) {
+      // Only log in development, not during tests
+      // eslint-disable-next-line no-console
+      console.warn(
+        `⚠️ Slow interaction: "${interactionType}" took ${duration.toFixed(2)}ms`,
+      );
     }
   },
 
@@ -193,7 +224,12 @@ const performanceMonitor = {
     after: NodeJS.MemoryUsage,
   ): void {
     const heapDelta = after.heapUsed - before.heapUsed;
-    if (heapDelta > this.memoryLeakThreshold) {
+    if (
+      heapDelta > this.memoryLeakThreshold &&
+      process.env.NODE_ENV !== "test"
+    ) {
+      // Only log in development, not during tests
+      // eslint-disable-next-line no-console
       console.warn(
         `⚠️ Memory leak detected in "${testName}": +${Math.round(heapDelta / 1024 / 1024)}MB heap`,
       );
@@ -211,7 +247,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  const testName = expect.getState().currentTestName || 'unknown';
+  const testName = expect.getState().currentTestName || "unknown";
   const duration = Date.now() - testStartTime;
   const endMemory = process.memoryUsage();
 
@@ -224,20 +260,22 @@ export const TestDataFactory = {
   /**
    * Creates a valid task for UI display
    */
-  createUITask(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  createUITask(
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> {
     return {
-      id: '550e8400-e29b-41d4-a716-446655440001',
-      title: 'Test Task',
-      description: 'This is a test task for UI validation',
-      status: 'pending',
-      priority: 'medium',
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      title: "Test Task",
+      description: "This is a test task for UI validation",
+      status: "pending",
+      priority: "medium",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      tags: ['test', 'ui'],
+      tags: ["test", "ui"],
       assignee: {
-        id: '550e8400-e29b-41d4-a716-446655440002',
-        name: 'Test User',
-        avatar: '/test-avatar.png',
+        id: "550e8400-e29b-41d4-a716-446655440002",
+        name: "Test User",
+        avatar: "/test-avatar.png",
       },
       ...overrides,
     };
@@ -246,7 +284,11 @@ export const TestDataFactory = {
   /**
    * Creates a valid Socket.io event
    */
-  createSocketEvent(type: string, payload: Record<string, unknown> = {}, overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  createSocketEvent(
+    type: string,
+    payload: Record<string, unknown> = {},
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> {
     return {
       type,
       payload,
@@ -259,18 +301,20 @@ export const TestDataFactory = {
   /**
    * Creates a valid chat message
    */
-  createChatMessage(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  createChatMessage(
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> {
     return {
-      id: '550e8400-e29b-41d4-a716-446655440003',
-      content: 'This is a test message',
+      id: "550e8400-e29b-41d4-a716-446655440003",
+      content: "This is a test message",
       sender: {
-        id: '550e8400-e29b-41d4-a716-446655440004',
-        name: 'Test Sender',
-        avatar: '/test-sender.png',
-        role: 'assistant',
+        id: "550e8400-e29b-41d4-a716-446655440004",
+        name: "Test Sender",
+        avatar: "/test-sender.png",
+        role: "assistant",
       },
       timestamp: new Date().toISOString(),
-      type: 'text',
+      type: "text",
       ...overrides,
     };
   },
@@ -278,16 +322,18 @@ export const TestDataFactory = {
   /**
    * Creates a valid user session
    */
-  createUserSession(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  createUserSession(
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> {
     return {
       user: {
-        id: '550e8400-e29b-41d4-a716-446655440005',
-        email: 'testuser@example.com',
-        name: 'Test User',
-        image: '/test-user.png',
+        id: "550e8400-e29b-41d4-a716-446655440005",
+        email: "testuser@example.com",
+        name: "Test User",
+        image: "/test-user.png",
       },
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
-      accessToken: 'test-access-token',
+      accessToken: "test-access-token",
       ...overrides,
     };
   },
@@ -301,13 +347,16 @@ export const TestUtils = {
   /**
    * Renders a component and returns testing utilities
    */
-  renderComponent: (component: React.ReactElement, options?: Record<string, unknown>) => {
+  renderComponent: (
+    component: React.ReactElement,
+    options?: Record<string, unknown>,
+  ) => {
     const startTime = performance.now();
     const result = render(component, options);
     const renderTime = performance.now() - startTime;
-    
-    performanceMonitor.logSlowRender('Component', renderTime);
-    
+
+    performanceMonitor.logSlowRender("Component", renderTime);
+
     return {
       ...result,
       renderTime,
@@ -319,20 +368,20 @@ export const TestUtils = {
    */
   createUserEvent: () => {
     const user = userEvent.setup();
-    
+
     return {
       ...user,
       click: async (element: Element) => {
         const startTime = performance.now();
         await user.click(element);
         const duration = performance.now() - startTime;
-        performanceMonitor.logSlowInteraction('click', duration);
+        performanceMonitor.logSlowInteraction("click", duration);
       },
       type: async (element: Element, text: string) => {
         const startTime = performance.now();
         await user.type(element, text);
         const duration = performance.now() - startTime;
-        performanceMonitor.logSlowInteraction('type', duration);
+        performanceMonitor.logSlowInteraction("type", duration);
       },
     };
   },
@@ -340,10 +389,7 @@ export const TestUtils = {
   /**
    * Waits for element to appear with timeout
    */
-  async waitForElement(
-    selector: string,
-    timeout = 5000,
-  ): Promise<HTMLElement> {
+  async waitForElement(selector: string, timeout = 5000): Promise<HTMLElement> {
     return screen.findByTestId(selector, {}, { timeout });
   },
 
@@ -357,7 +403,7 @@ export const TestUtils = {
     connect: jest.fn(),
     disconnect: jest.fn(),
     connected: true,
-    id: 'mock-socket-id',
+    id: "mock-socket-id",
   }),
 
   /**
@@ -369,10 +415,10 @@ export const TestUtils = {
     back: jest.fn(),
     forward: jest.fn(),
     refresh: jest.fn(),
-    pathname: '/',
+    pathname: "/",
     query: {},
-    asPath: '/',
-    route: '/',
+    asPath: "/",
+    route: "/",
     isReady: true,
     ...overrides,
   }),
@@ -381,16 +427,17 @@ export const TestUtils = {
    * Helper to test responsive behavior
    */
   testResponsive: (component: React.ReactElement, breakpoints: string[]) => {
-    return breakpoints.map(breakpoint => {
+    return breakpoints.map((breakpoint) => {
       // Mock different viewport sizes
-      Object.defineProperty(window, 'innerWidth', {
+      Object.defineProperty(window, "innerWidth", {
         writable: true,
         configurable: true,
-        value: breakpoint === 'mobile' ? 375 : breakpoint === 'tablet' ? 768 : 1024,
+        value:
+          breakpoint === "mobile" ? 375 : breakpoint === "tablet" ? 768 : 1024,
       });
-      
-      window.dispatchEvent(new Event('resize'));
-      
+
+      window.dispatchEvent(new Event("resize"));
+
       return TestUtils.renderComponent(component);
     });
   },
@@ -398,32 +445,13 @@ export const TestUtils = {
   /**
    * Helper to test dark/light mode
    */
-  testThemeMode: (component: React.ReactElement, mode: 'light' | 'dark') => {
-    document.documentElement.classList.toggle('dark', mode === 'dark');
+  testThemeMode: (component: React.ReactElement, mode: "light" | "dark") => {
+    document.documentElement.classList.toggle("dark", mode === "dark");
     return TestUtils.renderComponent(component);
   },
 };
 
-// Mock Next.js Image component
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
-    return React.createElement('img', props);
-  },
-}));
-
-// Mock Next.js Link component
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({ children, href, ...props }: { children: React.ReactNode; href: string } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-    return React.createElement('a', { href, ...props }, children);
-  },
-}));
-
-// Mock Next.js router
-jest.mock('next/router', () => ({
-  useRouter: () => TestUtils.createMockRouter(),
-}));
+// Note: Next.js mocks are moved to jest.config.js setupFiles to avoid circular dependencies
 
 // Export test configuration
 export const testConfig = {

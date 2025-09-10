@@ -97,7 +97,7 @@ describe('AgentProcessor', () => {
     id: 'message-123',
     content: [
       {
-        type: MessageContentType.Text,
+        type: MessageContentType._Text,
         text: 'Hello, please complete this task',
       },
     ],
@@ -119,7 +119,7 @@ describe('AgentProcessor', () => {
   const mockAgentResponse: BytebotAgentResponse = {
     contentBlocks: [
       {
-        type: MessageContentType.Text,
+        type: MessageContentType._Text,
         text: 'I understand the task and will complete it.',
       } as TextContentBlock,
     ],
@@ -288,11 +288,11 @@ describe('AgentProcessor', () => {
       beforeEach(() => {
         // Mock handleComputerToolUse for tool use tests
         (handleComputerToolUse as jest.Mock).mockResolvedValue({
-          type: MessageContentType.ToolResult,
+          type: MessageContentType._ToolResult,
           tool_use_id: 'tool-123',
           content: [
             {
-              type: MessageContentType.Text,
+              type: MessageContentType._Text,
               text: 'Computer action completed successfully',
             },
           ],
@@ -433,7 +433,7 @@ describe('AgentProcessor', () => {
               role: MessageRole.USER,
               content: [
                 {
-                  type: MessageContentType.Text,
+                  type: MessageContentType._Text,
                   text: mockSummary.content,
                 },
               ],
@@ -453,7 +453,7 @@ describe('AgentProcessor', () => {
         const computerToolUseResponse: BytebotAgentResponse = {
           contentBlocks: [
             {
-              type: MessageContentType.ToolUse,
+              type: MessageContentType._ToolUse,
               id: 'computer-tool-123',
               name: 'computer_click_mouse',
               input: { coordinates: [100, 200], button: 'left', clickCount: 1 },
@@ -480,7 +480,7 @@ describe('AgentProcessor', () => {
           expect.objectContaining({
             content: expect.arrayContaining([
               expect.objectContaining({
-                type: MessageContentType.ToolResult,
+                type: MessageContentType._ToolResult,
                 tool_use_id: 'tool-123',
               }),
             ]),
@@ -496,7 +496,7 @@ describe('AgentProcessor', () => {
         const createTaskResponse: BytebotAgentResponse = {
           contentBlocks: [
             {
-              type: MessageContentType.ToolUse,
+              type: MessageContentType._ToolUse,
               id: 'create-task-123',
               name: 'create_task',
               input: {
@@ -529,11 +529,11 @@ describe('AgentProcessor', () => {
           expect.objectContaining({
             content: expect.arrayContaining([
               expect.objectContaining({
-                type: MessageContentType.ToolResult,
+                type: MessageContentType._ToolResult,
                 tool_use_id: 'create-task-123',
                 content: [
                   {
-                    type: MessageContentType.Text,
+                    type: MessageContentType._Text,
                     text: 'The task has been created',
                   },
                 ],
@@ -550,7 +550,7 @@ describe('AgentProcessor', () => {
         const createTaskResponse: BytebotAgentResponse = {
           contentBlocks: [
             {
-              type: MessageContentType.ToolUse,
+              type: MessageContentType._ToolUse,
               id: 'create-task-scheduled-123',
               name: 'create_task',
               input: {
@@ -587,7 +587,7 @@ describe('AgentProcessor', () => {
         const setStatusResponse: BytebotAgentResponse = {
           contentBlocks: [
             {
-              type: MessageContentType.ToolUse,
+              type: MessageContentType._ToolUse,
               id: 'set-status-123',
               name: 'set_task_status',
               input: {
@@ -616,12 +616,12 @@ describe('AgentProcessor', () => {
           expect.objectContaining({
             content: expect.arrayContaining([
               expect.objectContaining({
-                type: MessageContentType.ToolResult,
+                type: MessageContentType._ToolResult,
                 tool_use_id: 'set-status-123',
                 is_error: false,
                 content: [
                   {
-                    type: MessageContentType.Text,
+                    type: MessageContentType._Text,
                     text: 'Task has been completed successfully',
                   },
                 ],
@@ -637,7 +637,7 @@ describe('AgentProcessor', () => {
         const setStatusResponse: BytebotAgentResponse = {
           contentBlocks: [
             {
-              type: MessageContentType.ToolUse,
+              type: MessageContentType._ToolUse,
               id: 'set-status-needs-help-123',
               name: 'set_task_status',
               input: {
@@ -666,7 +666,7 @@ describe('AgentProcessor', () => {
         const setStatusResponse: BytebotAgentResponse = {
           contentBlocks: [
             {
-              type: MessageContentType.ToolUse,
+              type: MessageContentType._ToolUse,
               id: 'set-status-failed-123',
               name: 'set_task_status',
               input: {
@@ -704,7 +704,7 @@ describe('AgentProcessor', () => {
       const highTokenResponse: BytebotAgentResponse = {
         contentBlocks: [
           {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: 'Response with high token usage',
           } as TextContentBlock,
         ],
@@ -718,7 +718,7 @@ describe('AgentProcessor', () => {
       const summaryResponse: BytebotAgentResponse = {
         contentBlocks: [
           {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: 'Generated summary of the conversation',
           } as TextContentBlock,
         ],
@@ -753,7 +753,7 @@ describe('AgentProcessor', () => {
       const lowTokenResponse: BytebotAgentResponse = {
         contentBlocks: [
           {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: 'Response with low token usage',
           } as TextContentBlock,
         ],
@@ -777,7 +777,7 @@ describe('AgentProcessor', () => {
       const highTokenResponse: BytebotAgentResponse = {
         contentBlocks: [
           {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: 'Response triggering summarization',
           } as TextContentBlock,
         ],
@@ -951,7 +951,7 @@ describe('AgentProcessor', () => {
       const computerToolUseResponse: BytebotAgentResponse = {
         contentBlocks: [
           {
-            type: MessageContentType.ToolUse,
+            type: MessageContentType._ToolUse,
             id: 'failing-computer-tool-123',
             name: 'computer_click_mouse',
             input: { coordinates: [100, 200], button: 'left', clickCount: 1 },
@@ -1033,13 +1033,13 @@ describe('AgentProcessor', () => {
       const multiToolResponse: BytebotAgentResponse = {
         contentBlocks: [
           {
-            type: MessageContentType.ToolUse,
+            type: MessageContentType._ToolUse,
             id: 'computer-tool-123',
             name: 'computer_click_mouse',
             input: { coordinates: [100, 200], button: 'left', clickCount: 1 },
           } as any,
           {
-            type: MessageContentType.ToolUse,
+            type: MessageContentType._ToolUse,
             id: 'set-status-123',
             name: 'set_task_status',
             input: { status: 'completed', description: 'Task completed' },

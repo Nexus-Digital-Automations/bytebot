@@ -128,8 +128,8 @@ describe("Security Headers Integration Tests", () => {
   // Test configurations for different environments
   const testConfigurations: SecurityHeaderTestConfig[] = [
     {
-      environment: SecurityEnvironment.DEVELOPMENT,
-      serviceType: RateLimitServiceType.BYTEBOT_UI,
+      environment: SecurityEnvironment._DEVELOPMENT,
+      serviceType: RateLimitServiceType._BYTEBOT_UI,
       expectedHeaders: {
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": /^(DENY|SAMEORIGIN)$/,
@@ -144,8 +144,8 @@ describe("Security Headers Integration Tests", () => {
       },
     },
     {
-      environment: SecurityEnvironment.PRODUCTION,
-      serviceType: RateLimitServiceType.BYTEBOTD,
+      environment: SecurityEnvironment._PRODUCTION,
+      serviceType: RateLimitServiceType._BYTEBOTD,
       expectedHeaders: {
         "Strict-Transport-Security": /^max-age=\d+/,
         "Content-Security-Policy": /script-src.*'nonce-/,
@@ -161,8 +161,8 @@ describe("Security Headers Integration Tests", () => {
       },
     },
     {
-      environment: SecurityEnvironment.STAGING,
-      serviceType: RateLimitServiceType.BYTEBOT_AGENT,
+      environment: SecurityEnvironment._STAGING,
+      serviceType: RateLimitServiceType._BYTEBOT_AGENT,
       expectedHeaders: {
         "Content-Security-Policy": /default-src.*'self'/,
         "X-Frame-Options": "DENY",
@@ -188,7 +188,7 @@ describe("Security Headers Integration Tests", () => {
     cspViolationService = new CSPViolationReportingService(
       configService,
       eventEmitter,
-      RateLimitServiceType.SHARED,
+      RateLimitServiceType._SHARED,
     );
   });
 
@@ -412,7 +412,7 @@ describe("Security Headers Integration Tests", () => {
           expect(cspHeader).toContain("script-src");
 
           // Test for security-focused directives
-          if (testConfig.environment === SecurityEnvironment.PRODUCTION) {
+          if (testConfig.environment === SecurityEnvironment._PRODUCTION) {
             expect(cspHeader).toContain("object-src 'none'");
             expect(cspHeader).toContain("base-uri 'self'");
           }
@@ -539,7 +539,7 @@ describe("Security Headers Integration Tests", () => {
         }
 
         // SOC 2 compliance checks (if in production)
-        if (testConfig.environment === SecurityEnvironment.PRODUCTION) {
+        if (testConfig.environment === SecurityEnvironment._PRODUCTION) {
           const requiredSoc2Headers = [
             "Strict-Transport-Security",
             "Content-Security-Policy",
@@ -576,7 +576,7 @@ describe("Security Headers Integration Tests", () => {
         testResults.compliance.overallScore = (complianceFactors / 3) * 100;
 
         expect(owaspCompliant).toBe(true);
-        if (testConfig.environment === SecurityEnvironment.PRODUCTION) {
+        if (testConfig.environment === SecurityEnvironment._PRODUCTION) {
           expect(soc2Compliant).toBe(true);
         }
 
@@ -745,29 +745,29 @@ describe("Security Headers Integration Tests", () => {
     it("should validate security configuration against industry benchmarks", async () => {
       // Test against security configuration benchmarks
       const environmentConfigs = [
-        SecurityEnvironment.DEVELOPMENT,
-        SecurityEnvironment.STAGING,
-        SecurityEnvironment.PRODUCTION,
+        SecurityEnvironment._DEVELOPMENT,
+        SecurityEnvironment._STAGING,
+        SecurityEnvironment._PRODUCTION,
       ];
 
       for (const env of environmentConfigs) {
         const config = getEnvironmentSecurityConfig(
-          RateLimitServiceType.SHARED,
+          RateLimitServiceType._SHARED,
         );
 
         // Validate security features are enabled appropriately
-        if (env === SecurityEnvironment.PRODUCTION) {
+        if (env === SecurityEnvironment._PRODUCTION) {
           expect(
             isSecurityFeatureEnabled(
               "comprehensiveHeaders",
-              RateLimitServiceType.SHARED,
+              RateLimitServiceType._SHARED,
               env,
             ),
           ).toBe(true);
           expect(
             isSecurityFeatureEnabled(
               "threatIntelligence",
-              RateLimitServiceType.SHARED,
+              RateLimitServiceType._SHARED,
               env,
             ),
           ).toBe(true);
@@ -775,7 +775,7 @@ describe("Security Headers Integration Tests", () => {
 
         // Validate CORS configuration
         expect(config.cors.enabled).toBe(true);
-        if (env === SecurityEnvironment.PRODUCTION) {
+        if (env === SecurityEnvironment._PRODUCTION) {
           expect(config.cors.strictMode).toBe(true);
           expect(config.cors.allowedOrigins).not.toContain("*");
         }
@@ -789,14 +789,14 @@ describe("Security Headers Integration Tests", () => {
     it("should maintain security posture across updates", async () => {
       // Test that security features remain enabled after configuration changes
       const baseConfig = getEnvironmentSecurityConfig(
-        RateLimitServiceType.SHARED,
+        RateLimitServiceType._SHARED,
       );
 
       // Simulate configuration update
       const configManager = EnvironmentSecurityConfigManager.getInstance();
       configManager.updateSecurityConfig(
-        SecurityEnvironment.PRODUCTION,
-        RateLimitServiceType.SHARED,
+        SecurityEnvironment._PRODUCTION,
+        RateLimitServiceType._SHARED,
         {
           features: {
             ...baseConfig.features,
@@ -806,8 +806,8 @@ describe("Security Headers Integration Tests", () => {
       );
 
       const updatedConfig = configManager.getSecurityConfig(
-        SecurityEnvironment.PRODUCTION,
-        RateLimitServiceType.SHARED,
+        SecurityEnvironment._PRODUCTION,
+        RateLimitServiceType._SHARED,
       );
 
       // Validate critical security features remain enabled
@@ -827,7 +827,7 @@ describe("Security Headers Integration Tests", () => {
       ];
 
       const productionConfig = getEnvironmentSecurityConfig(
-        RateLimitServiceType.SHARED,
+        RateLimitServiceType._SHARED,
       );
 
       for (const feature of expectedSecurityFeatures) {
@@ -843,12 +843,12 @@ describe("Security Headers Integration Tests", () => {
       // Validate security posture assessment
       const configManager = EnvironmentSecurityConfigManager.getInstance();
       const securityPosture = configManager.getSecurityPosture(
-        SecurityEnvironment.PRODUCTION,
-        RateLimitServiceType.SHARED,
+        SecurityEnvironment._PRODUCTION,
+        RateLimitServiceType._SHARED,
       );
 
       expect(securityPosture.score).toBeGreaterThan(80);
-      expect(securityPosture.level).toBe(SecurityLevel.HIGH);
+      expect(securityPosture.level).toBe(SecurityLevel._HIGH);
 
       console.log(`✅ Security configuration drift detection passed`);
       console.log(`   📊 Security Posture Score: ${securityPosture.score}/100`);
@@ -867,12 +867,12 @@ describe("Security Middleware Performance Tests", () => {
     // Apply all security middleware
     const helmetMiddleware = new HelmetSecurityMiddleware(
       new ConfigService(),
-      RateLimitServiceType.SHARED,
+      RateLimitServiceType._SHARED,
     );
 
     const cspNonceMiddleware = new CSPNonceMiddleware(
       new ConfigService(),
-      RateLimitServiceType.SHARED,
+      RateLimitServiceType._SHARED,
     );
 
     testApp.use((req, res, next) => {

@@ -13,7 +13,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { AnthropicService } from '../anthropic.service';
 import { Logger } from '@nestjs/common';
-import { Message, MessageRole } from '@prisma/client';
+import { Message, MessageRole, Prisma } from '@prisma/client';
 import {
   MessageContentType,
   TextContentBlock,
@@ -38,8 +38,8 @@ describe('AnthropicService - Integration Tests', () => {
       id: '1',
       role: MessageRole.USER,
       content: [
-        { type: MessageContentType.Text, text: 'Hello' } as TextContentBlock,
-      ],
+        { type: MessageContentType._Text, text: 'Hello' } as TextContentBlock,
+      ] as unknown as Prisma.JsonValue,
       createdAt: new Date(),
       updatedAt: new Date(),
       taskId: 'task-1',
@@ -177,7 +177,7 @@ describe('AnthropicService - Integration Tests', () => {
       expect(result).toEqual({
         contentBlocks: [
           {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: 'Hello! How can I help you?',
           },
         ],
@@ -252,7 +252,7 @@ describe('AnthropicService - Integration Tests', () => {
 
       expect(result.contentBlocks).toEqual([
         {
-          type: MessageContentType.ToolUse,
+          type: MessageContentType._ToolUse,
           id: 'tool_123',
           name: 'get_weather',
           input: { city: 'New York' },
@@ -286,7 +286,7 @@ describe('AnthropicService - Integration Tests', () => {
 
       expect(result.contentBlocks).toEqual([
         {
-          type: MessageContentType.Thinking,
+          type: MessageContentType._Thinking,
           thinking: 'Let me think about this...',
           signature: 'thinking_123',
         },
@@ -318,7 +318,7 @@ describe('AnthropicService - Integration Tests', () => {
 
       expect(result.contentBlocks).toEqual([
         {
-          type: MessageContentType.RedactedThinking,
+          type: MessageContentType._RedactedThinking,
           data: 'redacted_data_123',
         },
       ]);
@@ -400,10 +400,10 @@ describe('AnthropicService - Integration Tests', () => {
           role: MessageRole.USER,
           content: [
             {
-              type: MessageContentType.UserAction,
+              type: MessageContentType._UserAction,
               content: [
                 {
-                  type: MessageContentType.ComputerToolUse,
+                  type: MessageContentType._ComputerToolUse,
                   name: 'screenshot',
                   input: { display: 1 },
                 },
@@ -464,10 +464,10 @@ describe('AnthropicService - Integration Tests', () => {
           role: MessageRole.USER,
           content: [
             {
-              type: MessageContentType.Text,
+              type: MessageContentType._Text,
               text: 'Hello',
             } as TextContentBlock,
-          ],
+          ] as unknown as Prisma.JsonValue,
           createdAt: new Date(),
           updatedAt: new Date(),
           taskId: 'task-1',
@@ -478,16 +478,16 @@ describe('AnthropicService - Integration Tests', () => {
           role: MessageRole.ASSISTANT,
           content: [
             {
-              type: MessageContentType.Text,
+              type: MessageContentType._Text,
               text: 'Hi there!',
             } as TextContentBlock,
             {
-              type: MessageContentType.ToolUse,
+              type: MessageContentType._ToolUse,
               id: 'tool_1',
               name: 'search',
               input: { query: 'test' },
             } as ToolUseContentBlock,
-          ],
+          ] as unknown as Prisma.JsonValue,
           createdAt: new Date(),
           updatedAt: new Date(),
           taskId: 'task-1',
@@ -678,10 +678,10 @@ describe('AnthropicService - Integration Tests', () => {
           role: i % 2 === 0 ? MessageRole.USER : MessageRole.ASSISTANT,
           content: [
             {
-              type: MessageContentType.Text,
+              type: MessageContentType._Text,
               text: `Message ${i}`,
             } as TextContentBlock,
-          ],
+          ] as unknown as Prisma.JsonValue,
           createdAt: new Date(),
           updatedAt: new Date(),
           taskId: 'task-1',

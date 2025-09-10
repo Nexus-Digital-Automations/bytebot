@@ -597,7 +597,7 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
     // Maintain maximum audit log size in memory
     const maxInMemoryEvents = 10000;
     if (this.auditEvents.length > maxInMemoryEvents) {
-      this.auditEvents = this.auditEvents.slice(-maxInMemoryEvents);
+      this.auditEvents.splice(0, this.auditEvents.length - maxInMemoryEvents);
     }
   }
 
@@ -722,9 +722,11 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
     );
 
     const beforeCount = this.auditEvents.length;
-    this.auditEvents = this.auditEvents.filter(
+    const filteredEvents = this.auditEvents.filter(
       (event) => event.timestamp > cutoffDate,
     );
+    this.auditEvents.length = 0;
+    this.auditEvents.push(...filteredEvents);
 
     const afterCount = this.auditEvents.length;
     const cleaned = beforeCount - afterCount;

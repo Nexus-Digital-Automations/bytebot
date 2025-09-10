@@ -41,7 +41,7 @@ describe('OpenAIService - Integration Tests', () => {
       id: '1',
       role: MessageRole.USER,
       content: [
-        { type: MessageContentType.Text, text: 'Hello' } as TextContentBlock,
+        { type: MessageContentType._Text, text: 'Hello' } as TextContentBlock,
       ],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -216,7 +216,7 @@ describe('OpenAIService - Integration Tests', () => {
       expect(result).toEqual({
         contentBlocks: [
           {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: 'Hello! How can I help you?',
           },
         ],
@@ -287,12 +287,12 @@ describe('OpenAIService - Integration Tests', () => {
 
       expect(result.contentBlocks).toEqual([
         {
-          type: MessageContentType.Thinking,
+          type: MessageContentType._Thinking,
           thinking: 'Let me think about this step by step...',
           signature: 'reasoning_123',
         },
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: 'Based on my reasoning, here is the answer...',
         },
       ]);
@@ -341,7 +341,7 @@ describe('OpenAIService - Integration Tests', () => {
 
       expect(result.contentBlocks).toEqual([
         {
-          type: MessageContentType.ToolUse,
+          type: MessageContentType._ToolUse,
           id: 'call_123',
           name: 'get_weather',
           input: { city: 'New York' },
@@ -377,7 +377,7 @@ describe('OpenAIService - Integration Tests', () => {
 
       expect(result.contentBlocks).toEqual([
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: 'Refusal: I cannot help with that request.',
         },
       ]);
@@ -465,10 +465,10 @@ describe('OpenAIService - Integration Tests', () => {
           role: MessageRole.USER,
           content: [
             {
-              type: MessageContentType.UserAction,
+              type: MessageContentType._UserAction,
               content: [
                 {
-                  type: MessageContentType.ComputerToolUse,
+                  type: MessageContentType._ComputerToolUse,
                   name: 'screenshot',
                   input: { display: 1 },
                 },
@@ -512,10 +512,10 @@ describe('OpenAIService - Integration Tests', () => {
           role: MessageRole.USER,
           content: [
             {
-              type: MessageContentType.UserAction,
+              type: MessageContentType._UserAction,
               content: [
                 {
-                  type: MessageContentType.Image,
+                  type: MessageContentType._Image,
                   source: {
                     type: 'base64',
                     media_type: 'image/png',
@@ -561,12 +561,12 @@ describe('OpenAIService - Integration Tests', () => {
           role: MessageRole.USER,
           content: [
             {
-              type: MessageContentType.ToolResult,
+              type: MessageContentType._ToolResult,
               tool_use_id: 'tool_123',
               is_error: false,
               content: [
                 {
-                  type: MessageContentType.Text,
+                  type: MessageContentType._Text,
                   text: 'Tool execution result',
                 } as TextContentBlock,
               ],
@@ -602,7 +602,7 @@ describe('OpenAIService - Integration Tests', () => {
           role: MessageRole.ASSISTANT,
           content: [
             {
-              type: MessageContentType.ToolUse,
+              type: MessageContentType._ToolUse,
               id: 'tool_456',
               name: 'search',
               input: { query: 'test query' },
@@ -639,7 +639,7 @@ describe('OpenAIService - Integration Tests', () => {
           role: MessageRole.ASSISTANT,
           content: [
             {
-              type: MessageContentType.Thinking,
+              type: MessageContentType._Thinking,
               thinking: 'Let me think about this...',
               signature: 'thinking_456',
             },
@@ -755,7 +755,7 @@ describe('OpenAIService - Integration Tests', () => {
       );
 
       expect(result.contentBlocks[0]).toEqual({
-        type: MessageContentType.Text,
+        type: MessageContentType._Text,
         text: JSON.stringify(mockUnsupportedResponse.output[0]),
       });
     });
@@ -787,7 +787,7 @@ describe('OpenAIService - Integration Tests', () => {
       );
 
       expect(result.contentBlocks[0]).toEqual({
-        type: MessageContentType.Text,
+        type: MessageContentType._Text,
         text: JSON.stringify(mockUnknownResponse.output[0]),
       });
     });
@@ -863,7 +863,7 @@ describe('OpenAIService - Integration Tests', () => {
           role: i % 2 === 0 ? MessageRole.USER : MessageRole.ASSISTANT,
           content: [
             {
-              type: MessageContentType.Text,
+              type: MessageContentType._Text,
               text: `Message ${i}`,
             } as TextContentBlock,
           ],
@@ -926,7 +926,7 @@ describe('OpenAIService - Integration Tests', () => {
       );
 
       expect(result.contentBlocks[0]).toEqual({
-        type: MessageContentType.ToolUse,
+        type: MessageContentType._ToolUse,
         id: 'call_456',
         name: 'broken_function',
         input: {},

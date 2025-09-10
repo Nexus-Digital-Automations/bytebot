@@ -1100,7 +1100,7 @@ describe("Computer Tool Use Specific Type Guards", () => {
           input,
         };
 
-        const result = guard(block as any);
+        const result = guard(block as unknown);
         expect(result).toBe(true);
         console.log(`  ✓ ${name} correctly identified`);
       });
@@ -1165,7 +1165,7 @@ describe("Computer Tool Use Specific Type Guards", () => {
           input,
         };
 
-        const result = guard(block as any);
+        const result = guard(block as unknown);
         expect(result).toBe(true);
         console.log(`  ✓ ${name} correctly identified`);
       });
@@ -1191,7 +1191,7 @@ describe("Computer Tool Use Specific Type Guards", () => {
           input,
         };
 
-        const result = isTypeTextToolUseBlock(block as any);
+        const result = isTypeTextToolUseBlock(block as unknown);
         expect(result).toBe(true);
         console.log(
           `  ✓ Text variation ${index + 1}: "${input.text.substring(0, 30)}${input.text.length > 30 ? "..." : ""}"`,
@@ -1211,7 +1211,7 @@ describe("Computer Tool Use Specific Type Guards", () => {
         input: { display: 1, width: 1920, height: 1080 },
       };
 
-      const result = isScreenshotToolUseBlock(screenshotBlock as any);
+      const result = isScreenshotToolUseBlock(screenshotBlock as unknown);
 
       expect(result).toBe(true);
       console.log(
@@ -1248,7 +1248,7 @@ describe("Computer Tool Use Specific Type Guards", () => {
           input,
         };
 
-        const result = guard(block as any);
+        const result = guard(block as unknown);
         expect(result).toBe(true);
         console.log(`  ✓ ${name} correctly identified`);
       });
@@ -1278,7 +1278,7 @@ describe("Computer Tool Use Specific Type Guards", () => {
           input,
         };
 
-        const result = guard(block as any);
+        const result = guard(block as unknown);
         expect(result).toBe(true);
         console.log(`  ✓ ${name} correctly identified`);
       });
@@ -1310,7 +1310,7 @@ describe("Computer Tool Use Specific Type Guards", () => {
           input,
         };
 
-        const result = guard(block as any);
+        const result = guard(block as unknown);
         expect(result).toBe(true);
         console.log(`  ✓ ${name} correctly identified`);
       });
@@ -1415,7 +1415,7 @@ describe("Integration and Edge Cases", () => {
       ];
 
       // Create circular reference
-      const circular = { circular: null } as any;
+      const circular = { circular: null } as unknown;
       circular.circular = circular;
       malformedInputs.push(circular);
 
@@ -1437,7 +1437,7 @@ describe("Integration and Edge Cases", () => {
       console.log("Testing deeply nested object handling...");
 
       // Create deeply nested input object
-      const createDeepObject = (depth: number): any => {
+      const createDeepObject = (depth: number): Record<string, unknown> => {
         if (depth === 0) {
           return { value: "deep" };
         }
@@ -1452,7 +1452,7 @@ describe("Integration and Edge Cases", () => {
       };
 
       expect(() => {
-        const result = isComputerToolUseContentBlock(deepInput as any);
+        const result = isComputerToolUseContentBlock(deepInput as unknown);
         expect(typeof result).toBe("boolean");
       }).not.toThrow();
 
@@ -1500,7 +1500,7 @@ describe("Integration and Edge Cases", () => {
       ];
 
       coercionTestCases.forEach((testCase, index) => {
-        const result = isMessageContentBlock(testCase as any);
+        const result = isMessageContentBlock(testCase as unknown);
         // Should handle type mismatches gracefully
         expect(typeof result).toBe("boolean");
         console.log(`  ✓ Type coercion case ${index + 1} handled: ${result}`);
@@ -1530,8 +1530,8 @@ describe("Integration and Edge Cases", () => {
       ];
 
       propertyTestCases.forEach((testCase, index) => {
-        const isText = isTextContentBlock(testCase as any);
-        const isMessage = isMessageContentBlock(testCase as any);
+        const isText = isTextContentBlock(testCase as unknown);
+        const isMessage = isMessageContentBlock(testCase as unknown);
 
         // Should consistently validate based on required properties and types
         if (testCase.text === "valid") {

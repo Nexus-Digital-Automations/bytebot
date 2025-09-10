@@ -46,12 +46,12 @@ describe('MessagesService', () => {
   const mockSummaryId = 'summary-789';
 
   const mockTextContentBlock: TextContentBlock = {
-    type: MessageContentType.Text,
+    type: MessageContentType._Text,
     text: 'Hello, this is a test message',
   };
 
   const mockImageContentBlock: ImageContentBlock = {
-    type: MessageContentType.Image,
+    type: MessageContentType._Image,
     source: {
       media_type: 'image/png',
       type: 'base64',
@@ -60,18 +60,18 @@ describe('MessagesService', () => {
   };
 
   const mockToolResultContentBlock: ToolResultContentBlock = {
-    type: MessageContentType.ToolResult,
+    type: MessageContentType._ToolResult,
     tool_use_id: 'tool-123',
     content: [
       {
-        type: MessageContentType.Text,
+        type: MessageContentType._Text,
         text: 'Tool execution successful',
       },
     ],
   };
 
   const mockComputerToolUseContentBlock = {
-    type: MessageContentType.ToolUse,
+    type: MessageContentType._ToolUse,
     id: 'computer-tool-123',
     name: 'computer_click_mouse',
     input: {
@@ -82,7 +82,7 @@ describe('MessagesService', () => {
   } as any;
 
   const mockUserActionContentBlock = {
-    type: MessageContentType.UserAction,
+    type: MessageContentType._UserAction,
     content: [mockComputerToolUseContentBlock],
   } as any;
 
@@ -100,7 +100,7 @@ describe('MessagesService', () => {
     id: 'message-assistant-123',
     content: [
       {
-        type: MessageContentType.Text,
+        type: MessageContentType._Text,
         text: 'I understand your request. Let me help you with that.',
       },
     ],
@@ -475,7 +475,7 @@ describe('MessagesService', () => {
             ...mockUserMessage,
             id: 'user-2',
             content: [
-              { type: MessageContentType.Text, text: 'Another user message' },
+              { type: MessageContentType._Text, text: 'Another user message' },
             ],
             createdAt: new Date('2024-01-01T10:03:00.000Z'),
           },
@@ -486,11 +486,12 @@ describe('MessagesService', () => {
         const result = await service.findProcessedMessages(mockTaskId);
 
         expect(result).toBeDefined();
-        expect(Array.isArray(result)).toBe(true);
-        expect(result.length).toBeGreaterThan(0);
+        expect(result).toHaveProperty('groupedMessages');
+        expect(Array.isArray(result.groupedMessages)).toBe(true);
+        expect(result.groupedMessages.length).toBeGreaterThan(0);
 
         // Verify the structure of grouped messages
-        result.forEach((group) => {
+        result.groupedMessages.forEach((group) => {
           expect(group).toHaveProperty('role');
           expect(group).toHaveProperty('messages');
           expect(Array.isArray(group.messages)).toBe(true);
@@ -550,7 +551,7 @@ describe('MessagesService', () => {
             id: 'assistant-2',
             content: [
               {
-                type: MessageContentType.Text,
+                type: MessageContentType._Text,
                 text: 'Second assistant message',
               },
             ],
@@ -561,7 +562,7 @@ describe('MessagesService', () => {
             id: 'assistant-3',
             content: [
               {
-                type: MessageContentType.Text,
+                type: MessageContentType._Text,
                 text: 'Third assistant message',
               },
             ],
@@ -587,7 +588,7 @@ describe('MessagesService', () => {
             id: 'assistant-normal',
             content: [
               {
-                type: MessageContentType.Text,
+                type: MessageContentType._Text,
                 text: 'Normal assistant message',
               },
             ],
@@ -690,11 +691,11 @@ describe('MessagesService', () => {
           id: 'complex-user-action-123',
           content: [
             {
-              type: MessageContentType.UserAction,
+              type: MessageContentType._UserAction,
               content: [
                 mockComputerToolUseContentBlock,
                 {
-                  type: MessageContentType.ComputerToolUse,
+                  type: MessageContentType._ComputerToolUse,
                   id: 'computer-tool-456',
                   name: 'computer',
                   input: {
@@ -738,7 +739,7 @@ describe('MessagesService', () => {
       const createOperations = Array.from({ length: 10 }, (_, i) => ({
         content: [
           {
-            type: MessageContentType.Text,
+            type: MessageContentType._Text,
             text: `Message ${i}`,
           } as TextContentBlock,
         ],
@@ -789,7 +790,7 @@ describe('MessagesService', () => {
       const largeMessageSet = Array.from({ length: 1000 }, (_, i) => ({
         ...mockUserMessage,
         id: `message-${i}`,
-        content: [{ type: MessageContentType.Text, text: `Message ${i}` }],
+        content: [{ type: MessageContentType._Text, text: `Message ${i}` }],
         createdAt: new Date(2024, 0, 1, 10, i % 60, Math.floor(i / 60)),
       }));
 
@@ -856,7 +857,7 @@ describe('MessagesService', () => {
       // Attach summary
       prismaService.message.updateMany.mockResolvedValue({ count: 1 });
       await service.attachSummary(mockTaskId, mockSummaryId, [
-        createdMessage.id,
+        createdMessage.message.id,
       ]);
 
       // Verify operations

@@ -583,17 +583,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     operationId: string,
   ): void {
     try {
-      let eventType = SecurityEventType.VALIDATION_FAILED;
+      let eventType = SecurityEventType._VALIDATION_FAILED;
 
       // Map error to security event type
       if (errorInfo.statusCode === (HttpStatus.UNAUTHORIZED as number)) {
-        eventType = SecurityEventType.ACCESS_DENIED;
+        eventType = SecurityEventType._ACCESS_DENIED;
       } else if (
         errorInfo.statusCode === (HttpStatus.TOO_MANY_REQUESTS as number)
       ) {
-        eventType = SecurityEventType.RATE_LIMIT_EXCEEDED;
+        eventType = SecurityEventType._RATE_LIMIT_EXCEEDED;
       } else if (errorInfo.validationErrors) {
-        eventType = SecurityEventType.VALIDATION_FAILED;
+        eventType = SecurityEventType._VALIDATION_FAILED;
       }
 
       const securityEvent = createSecurityEvent(

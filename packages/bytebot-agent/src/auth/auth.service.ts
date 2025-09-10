@@ -96,7 +96,7 @@ export class AuthService {
 
     try {
       // Record login attempt for security monitoring
-      await this.securityMonitoring.recordLoginAttempt(
+      this.securityMonitoring.recordLoginAttempt(
         loginDto.email,
         ipAddress || 'unknown',
         userAgent,
@@ -176,7 +176,7 @@ export class AuthService {
       });
 
       // Record successful login for security monitoring
-      await this.securityMonitoring.recordLoginAttempt(
+      this.securityMonitoring.recordLoginAttempt(
         loginDto.email,
         ipAddress || 'unknown',
         userAgent,
@@ -323,6 +323,7 @@ export class AuthService {
       });
 
       // Return user without password hash for security
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { passwordHash, ...userWithoutPassword } = user;
       return userWithoutPassword;
     } catch (error) {

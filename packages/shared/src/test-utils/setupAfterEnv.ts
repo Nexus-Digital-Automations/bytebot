@@ -66,7 +66,7 @@ expect.extend({
       };
     }
 
-    const result = received as any;
+    const result = received as unknown;
     const hasIsValid =
       "isValid" in result && typeof result.isValid === "boolean";
     const hasThreats = "threats" in result && Array.isArray(result.threats);
@@ -168,7 +168,7 @@ expect.extend({
    * Validates utility function performance
    */
   toExecuteWithinTime(
-    received: () => any,
+    received: () => unknown,
     maxMs: number = 10,
   ): jest.CustomMatcherResult {
     const startTime = performance.now();
@@ -192,7 +192,7 @@ expect.extend({
           pass: false,
         };
       }
-    } catch (error) {
+    } catch (err) {
       return {
         message: () =>
           `Expected function to execute successfully, but threw error: ${error}`,
@@ -257,11 +257,44 @@ afterEach(() => {
 });
 
 // Test data factories for Shared utilities
+// Type definitions for test data
+interface SecurityTestData {
+  maliciousInputs: string[];
+  cleanInputs: string[];
+  [key: string]: unknown;
+}
+
+interface CryptoTestData {
+  plaintext: string;
+  keys: {
+    valid: string[];
+    invalid: string[];
+  };
+  algorithms: string[];
+  [key: string]: unknown;
+}
+
+interface ValidationTestData {
+  validEmails: string[];
+  invalidEmails: string[];
+  validUUIDs: string[];
+  invalidUUIDs: string[];
+  [key: string]: unknown;
+}
+
+interface TypeTestData {
+  validTypes: Record<string, unknown>;
+  invalidTypes: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 export const TestDataFactory = {
   /**
    * Creates test data for security validation
    */
-  createSecurityTestData(overrides: Partial<any> = {}): any {
+  createSecurityTestData(
+    overrides: Partial<SecurityTestData> = {},
+  ): SecurityTestData {
     return {
       maliciousInputs: [
         '<script>alert("xss")</script>',
@@ -285,7 +318,9 @@ export const TestDataFactory = {
   /**
    * Creates test encryption data
    */
-  createCryptoTestData(overrides: Partial<any> = {}): any {
+  createCryptoTestData(
+    overrides: Partial<CryptoTestData> = {},
+  ): CryptoTestData {
     return {
       plaintext: "This is a test message for encryption",
       key: "test-encryption-key-32-chars-long",
@@ -302,7 +337,9 @@ export const TestDataFactory = {
   /**
    * Creates validation test cases
    */
-  createValidationTestData(overrides: Partial<any> = {}): any {
+  createValidationTestData(
+    overrides: Partial<ValidationTestData> = {},
+  ): ValidationTestData {
     return {
       validEmails: [
         "user@example.com",
@@ -334,7 +371,7 @@ export const TestDataFactory = {
   /**
    * Creates type definition test data
    */
-  createTypeTestData(overrides: Partial<any> = {}): any {
+  createTypeTestData(overrides: Partial<TypeTestData> = {}): TypeTestData {
     return {
       validTypes: {
         string: "test string",
@@ -375,16 +412,16 @@ export const TestUtils = {
   /**
    * Tests function with multiple inputs
    */
-  testWithInputs: <T>(
-    fn: (input: any) => T,
-    inputs: any[],
-  ): Array<{ input: any; result: T; error?: Error }> => {
+  testWithInputs: <T, U = unknown>(
+    fn: (input: U) => T,
+    inputs: U[],
+  ): Array<{ input: U; result: T | null; error?: Error }> => {
     return inputs.map((input) => {
       try {
         const result = fn(input);
         return { input, result };
-      } catch (error) {
-        return { input, result: null as any, error: error as Error };
+      } catch (err) {
+        return { input, result: null, error: err as Error };
       }
     });
   },
@@ -392,8 +429,8 @@ export const TestUtils = {
   /**
    * Creates a mock implementation
    */
-  createMock: <T extends Record<string, any>>(obj: T): jest.Mocked<T> => {
-    const mock: any = {};
+  createMock: <T extends Record<string, unknown>>(obj: T): jest.Mocked<T> => {
+    const mock = {} as jest.Mocked<T>;
 
     for (const key in obj) {
       if (typeof obj[key] === "function") {

@@ -17,6 +17,9 @@ import { DatabaseMetricsService } from './metrics/database-metrics.service';
 import { DatabaseSecurityService } from './security/database-security.service';
 import { QueryLoggingInterceptor } from './interceptors/query-logging.interceptor';
 import { DatabaseHealthController } from './database-health.controller';
+import { CircuitBreakerService } from '../common/services/circuit-breaker.service';
+import { RetryService } from '../common/services/retry.service';
+import { ShutdownService } from '../common/services/shutdown.service';
 
 export type DatabaseProvider = 'postgresql' | 'sqlite';
 
@@ -130,33 +133,38 @@ export class HybridDatabaseModule {
           useFactory: (
             configService: ConfigService,
             connectionPoolConfig: ConnectionPoolConfig,
+            circuitBreakerService: CircuitBreakerService,
+            retryService: RetryService,
+            shutdownService: ShutdownService,
             databaseConfig: DatabaseConfig,
             sqliteConfig: SQLiteLocalConfig,
             databaseProvider: DatabaseProvider,
           ) => {
-            // Inject appropriate configuration based on provider
-            if (databaseProvider === 'postgresql') {
-              return new DatabaseService(
-                configService,
-                connectionPoolConfig,
-                // Inject other required dependencies...
-              );
-            } else if (databaseProvider === 'sqlite') {
-              // For SQLite, we might need a specialized service or adapter
-              return new DatabaseService(
-                configService,
-                connectionPoolConfig,
-                // Inject other required dependencies...
-              );
-            }
-
-            throw new Error(
-              `Unsupported database provider: ${String(databaseProvider)}`,
+            // Create DatabaseService instance with all required dependencies
+            const databaseService = new DatabaseService(
+              configService,
+              connectionPoolConfig,
+              circuitBreakerService,
+              retryService,
+              shutdownService,
             );
+
+            // Log initialization details
+            console.log(
+              `[HybridDatabaseModule] DatabaseService initialized with provider: ${databaseProvider}`,
+            );
+            console.log(
+              `[HybridDatabaseModule] Dependencies injected successfully: CircuitBreakerService, RetryService, ShutdownService`,
+            );
+
+            return databaseService;
           },
           inject: [
             ConfigService,
             ConnectionPoolConfig,
+            CircuitBreakerService,
+            RetryService,
+            ShutdownService,
             DatabaseConfig,
             SQLiteLocalConfig,
             'DATABASE_PROVIDER',
@@ -254,7 +262,38 @@ export class HybridDatabaseModule {
         SQLiteLocalConfig,
 
         // Core services with provider-specific configuration
-        DatabaseService,
+        {
+          provide: DatabaseService,
+          useFactory: (
+            configService: ConfigService,
+            connectionPoolConfig: ConnectionPoolConfig,
+            circuitBreakerService: CircuitBreakerService,
+            retryService: RetryService,
+            shutdownService: ShutdownService,
+          ) => {
+            // Create DatabaseService instance with all required dependencies
+            const databaseService = new DatabaseService(
+              configService,
+              connectionPoolConfig,
+              circuitBreakerService,
+              retryService,
+              shutdownService,
+            );
+
+            console.log(
+              `[HybridDatabaseModule] DatabaseService initialized for explicit provider`,
+            );
+
+            return databaseService;
+          },
+          inject: [
+            ConfigService,
+            ConnectionPoolConfig,
+            CircuitBreakerService,
+            RetryService,
+            ShutdownService,
+          ],
+        },
         ConnectionPoolService,
         DatabaseHealthService,
         DatabaseMetricsService,
@@ -346,7 +385,38 @@ export class HybridDatabaseModule {
         ConnectionPoolConfig,
         DatabaseConfig,
         SQLiteLocalConfig,
-        DatabaseService,
+        {
+          provide: DatabaseService,
+          useFactory: (
+            configService: ConfigService,
+            connectionPoolConfig: ConnectionPoolConfig,
+            circuitBreakerService: CircuitBreakerService,
+            retryService: RetryService,
+            shutdownService: ShutdownService,
+          ) => {
+            // Create DatabaseService instance with all required dependencies
+            const databaseService = new DatabaseService(
+              configService,
+              connectionPoolConfig,
+              circuitBreakerService,
+              retryService,
+              shutdownService,
+            );
+
+            console.log(
+              `[HybridDatabaseModule] DatabaseService initialized for fallback configuration`,
+            );
+
+            return databaseService;
+          },
+          inject: [
+            ConfigService,
+            ConnectionPoolConfig,
+            CircuitBreakerService,
+            RetryService,
+            ShutdownService,
+          ],
+        },
         ConnectionPoolService,
         DatabaseHealthService,
         DatabaseMetricsService,

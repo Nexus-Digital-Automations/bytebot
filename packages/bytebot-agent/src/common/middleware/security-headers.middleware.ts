@@ -537,12 +537,12 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
   private mapEventType(eventType: string): SecurityEventType {
     switch (eventType) {
       case 'CORS_VIOLATION':
-        return SecurityEventType.ACCESS_DENIED;
+        return SecurityEventType._ACCESS_DENIED;
       case 'MIDDLEWARE_ERROR':
       case 'MIDDLEWARE_FAILURE':
-        return SecurityEventType.SECURITY_CONFIG_CHANGED;
+        return SecurityEventType._SECURITY_CONFIG_CHANGED;
       default:
-        return SecurityEventType.SUSPICIOUS_ACTIVITY;
+        return SecurityEventType._SUSPICIOUS_ACTIVITY;
     }
   }
 

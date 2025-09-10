@@ -139,12 +139,14 @@ export class AgentMockDataFactory {
       id,
       taskId: 'test-task-id',
       role: MessageRole.USER,
-      content: [
-        {
-          type: MessageContentType.Text,
-          text: 'This is a test message content',
-        } as TextContentBlock,
-      ],
+      content: JSON.parse(
+        JSON.stringify([
+          {
+            type: MessageContentType._Text,
+            text: 'This is a test message content',
+          } as TextContentBlock,
+        ]),
+      ),
       createdAt: now,
       updatedAt: now,
       summaryId: null,
@@ -161,7 +163,7 @@ export class AgentMockDataFactory {
     return {
       contentBlocks: [
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: 'I understand your request and will help you with that task.',
         } as TextContentBlock,
       ],
@@ -182,7 +184,7 @@ export class AgentMockDataFactory {
     input: Record<string, any> = {},
   ): ToolUseContentBlock {
     return {
-      type: MessageContentType.ToolUse,
+      type: MessageContentType._ToolUse,
       id: `tool_use_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       name: toolName,
       input,
@@ -198,12 +200,12 @@ export class AgentMockDataFactory {
     content: string = 'Tool execution completed successfully',
   ): ToolResultContentBlock {
     return {
-      type: MessageContentType.ToolResult,
+      type: MessageContentType._ToolResult,
       tool_use_id: toolUseId,
       is_error: isError,
       content: [
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: content,
         } as TextContentBlock,
       ],
@@ -668,7 +670,7 @@ export class MockAgentAnthropicService extends MockAgentService {
     return AgentMockDataFactory.createMockAgentResponse({
       contentBlocks: [
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: `Mock Anthropic response using ${model}. System prompt: "${systemPrompt.substring(0, 50)}...". Tools enabled: ${useTools}`,
         } as TextContentBlock,
       ],
@@ -711,7 +713,7 @@ export class MockAgentOpenAIService extends MockAgentService {
     return AgentMockDataFactory.createMockAgentResponse({
       contentBlocks: [
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: `Mock OpenAI response using ${model}. System prompt processed. Tools: ${useTools ? 'enabled' : 'disabled'}`,
         } as TextContentBlock,
       ],
@@ -754,7 +756,7 @@ export class MockAgentGoogleService extends MockAgentService {
     return AgentMockDataFactory.createMockAgentResponse({
       contentBlocks: [
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: `Mock Google response using ${model}. Processing complete with ${useTools ? 'tool support' : 'text only'}.`,
         } as TextContentBlock,
       ],
@@ -797,7 +799,7 @@ export class MockProxyService extends MockAgentService {
     return AgentMockDataFactory.createMockAgentResponse({
       contentBlocks: [
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: `Mock Proxy response for ${model}. Proxy routing successful. Tools: ${useTools}`,
         } as TextContentBlock,
       ],
@@ -1222,12 +1224,14 @@ export const AgentMockPerformanceUtils = {
     // Simulate processing large messages and responses
     const largeMessages = Array.from({ length: 1000 }, () =>
       AgentMockDataFactory.createMockMessage({
-        content: [
-          {
-            type: MessageContentType.Text,
-            text: 'Large test message content '.repeat(100),
-          } as TextContentBlock,
-        ],
+        content: JSON.parse(
+          JSON.stringify([
+            {
+              type: MessageContentType._Text,
+              text: 'Large test message content '.repeat(100),
+            } as TextContentBlock,
+          ]),
+        ),
       }),
     );
 
@@ -1239,7 +1243,7 @@ export const AgentMockPerformanceUtils = {
             { length: 10 },
             () =>
               ({
-                type: MessageContentType.Text,
+                type: MessageContentType._Text,
                 text: 'Large response content '.repeat(50),
               }) as TextContentBlock,
           ),

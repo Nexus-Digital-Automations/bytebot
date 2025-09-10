@@ -1,12 +1,13 @@
 /**
- * Enterprise Validation Types and Interfaces
+ * Enterprise Validation Types and Interfaces - Type-Safe Implementation
  *
  * Comprehensive type definitions for the enterprise validation system
  * used across all Bytebot services for input validation and security.
+ * This file implements strict type safety to replace unsafe 'any' types.
  *
- * @fileoverview Enterprise validation type definitions
- * @version 1.0.0
- * @author Enterprise Security Validation Team
+ * @fileoverview Enterprise validation type definitions with type safety
+ * @version 2.0.0
+ * @author TypeScript Types Specialist Agent
  */
 
 import { ArgumentMetadata } from "@nestjs/common";
@@ -14,6 +15,67 @@ import {
   ValidationServiceType,
   ValidationSecurityLevel,
 } from "../../pipes/validation.standardized";
+
+/**
+ * Base validation result interface
+ * Provides consistent structure for all validation operations
+ */
+export interface ValidationResult {
+  /** Whether validation passed */
+  readonly isValid: boolean;
+
+  /** Validation errors if any */
+  readonly errors?: readonly string[];
+
+  /** Sanitized/transformed data */
+  readonly sanitizedData?: unknown;
+
+  /** Validation timestamp */
+  readonly timestamp: Date;
+}
+
+/**
+ * Type-safe alternative to Record<string, unknown>
+ * Provides better type inference for validation contexts
+ */
+export type TypedRecord<T = unknown> = {
+  readonly [_K in string]?: T;
+};
+
+/**
+ * Strict validation result type
+ * Replaces loose unknown types with specific validation outcomes
+ */
+export interface SecurityValidationResult {
+  /** Validation success status */
+  readonly isValid: boolean;
+
+  /** Sanitized/validated data */
+  readonly data?: unknown;
+
+  /** Validation errors if any */
+  readonly errors?: readonly string[];
+
+  /** Security threat information */
+  readonly threats?: readonly ThreatInfo[];
+}
+
+/**
+ * Security threat information with strict typing
+ */
+export interface ThreatInfo {
+  /** Threat type identifier */
+  readonly type: string;
+
+  /** Threat severity level */
+  readonly severity: "low" | "medium" | "high" | "critical";
+
+  /** Threat description */
+  readonly description: string;
+
+  /** Confidence score 0-1 */
+  readonly confidence: number;
+}
 
 /**
  * Threat analysis result from security detection
@@ -69,8 +131,8 @@ export interface ValidationSuccessMetrics {
   /** Threat risk score for the input */
   threatRiskScore: number;
 
-  /** Optional additional metadata */
-  metadata?: Record<string, unknown>;
+  /** Optional additional metadata with type safety */
+  metadata?: TypedRecord;
 }
 
 /**
@@ -89,8 +151,8 @@ export interface ValidationFailureMetrics {
   /** Processing time in milliseconds */
   processingTimeMs: number;
 
-  /** Optional additional metadata */
-  metadata?: Record<string, unknown>;
+  /** Optional additional metadata with type safety */
+  metadata?: TypedRecord;
 }
 
 /**
@@ -142,8 +204,8 @@ export interface ValidationCacheEntry {
   /** Hash of the input value */
   inputHash: string;
 
-  /** Cached validation result */
-  validationResult: unknown;
+  /** Cached validation result with type safety */
+  validationResult: ValidationResult;
 
   /** Cache creation timestamp */
   createdAt: Date;
@@ -313,10 +375,10 @@ export interface CustomValidationRule {
   /** Rule priority (higher number = higher priority) */
   priority: number;
 
-  /** Rule validation function */
-  validator: (
-    _value: unknown,
-    _context: Record<string, unknown>,
+  /** Rule validation function with typed parameters */
+  validator: <TValue = unknown, TContext extends TypedRecord = TypedRecord>(
+    _value: TValue,
+    _context: TContext,
   ) => boolean | Promise<boolean>;
 
   /** Error message for rule violation */

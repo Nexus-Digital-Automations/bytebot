@@ -1,0 +1,65 @@
+{
+  "name": "@bytebot/security-config-analyzer",
+  "version": "1.0.0",
+  "description": "Comprehensive security configuration analysis tools for Docker, databases, and services",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "npx eslint 'src/**/*.ts' --fix",
+    "security-scan": "node dist/cli.js scan --all",
+    "docker-scan": "node dist/cli.js docker --all",
+    "db-scan": "node dist/cli.js database --all",
+    "service-scan": "node dist/cli.js service --all"
+  },
+  "keywords": [
+    "security",
+    "configuration",
+    "docker",
+    "database",
+    "audit",
+    "vulnerability",
+    "scanner"
+  ],
+  "author": "ByteBot Security Team",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "fs-extra": "^11.2.0",
+    "glob": "^10.3.10",
+    "lodash": "^4.17.21",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/events": "^3.0.3",
+    "@types/fs-extra": "^11.0.4",
+    "@types/glob": "9.0.0",
+    "@types/jest": "^29.5.8",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.2",
+    "globals": "^15.14.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.21.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytebot/security-config-analyzer"
+  },
+  "bin": {
+    "security-analyzer": "./dist/cli.js"
+  }
+}

@@ -208,7 +208,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
     try {
       // Check circuit breaker state before attempting authentication
       if (this.metrics.state === CircuitBreakerState.OPEN) {
-        await this.handleOpenCircuit(operationId, request);
+        this.handleOpenCircuit(operationId, request);
         return false; // Will throw exception in handleOpenCircuit
       }
 
@@ -226,17 +226,12 @@ export class CircuitBreakerAuthGuard implements CanActivate {
       const authResult = await this.attemptAuthentication(operationId, request);
 
       // Record successful authentication
-      await this.recordSuccess(operationId, authResult, ipAddress, userAgent);
+      this.recordSuccess(operationId, authResult, ipAddress, userAgent);
 
       return authResult.success;
     } catch (error) {
       // Record authentication failure
-      await this.recordFailure(
-        operationId,
-        error as Error,
-        ipAddress,
-        userAgent,
-      );
+      this.recordFailure(operationId, error as Error, ipAddress, userAgent);
       throw error;
     } finally {
       // Cleanup concurrent request tracking
@@ -399,10 +394,10 @@ export class CircuitBreakerAuthGuard implements CanActivate {
   /**
    * Handle open circuit state
    */
-  private async handleOpenCircuit(
+  private handleOpenCircuit(
     operationId: string,
     request: ExtendedRequest,
-  ): Promise<void> {
+  ): void {
     const now = new Date();
     const timeSinceStateChange =
       now.getTime() - this.metrics.stateChangedAt.getTime();
@@ -418,7 +413,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
     const ipAddress = this.getClientIpAddress(request);
     const userAgent = request.headers['user-agent'];
 
-    await this.securityMonitoring.recordLoginAttempt(
+    this.securityMonitoring.recordLoginAttempt(
       'unknown',
       ipAddress,
       userAgent,
@@ -448,12 +443,12 @@ export class CircuitBreakerAuthGuard implements CanActivate {
   /**
    * Record successful authentication
    */
-  private async recordSuccess(
+  private recordSuccess(
     operationId: string,
     result: AuthAttemptResult,
     ipAddress: string,
     userAgent?: string,
-  ): Promise<void> {
+  ): void {
     this.metrics.successCount++;
     this.metrics.totalAttempts++;
     this.metrics.lastSuccessTime = new Date();
@@ -472,7 +467,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
 
     // Log security event if monitoring enabled
     if (this.config.monitoringEnabled) {
-      await this.securityMonitoring.recordLoginAttempt(
+      this.securityMonitoring.recordLoginAttempt(
         'authenticated-user',
         ipAddress,
         userAgent,
@@ -492,12 +487,12 @@ export class CircuitBreakerAuthGuard implements CanActivate {
   /**
    * Record authentication failure
    */
-  private async recordFailure(
+  private recordFailure(
     operationId: string,
     error: Error,
     ipAddress: string,
     userAgent?: string,
-  ): Promise<void> {
+  ): void {
     this.metrics.failureCount++;
     this.metrics.totalAttempts++;
     this.metrics.lastFailureTime = new Date();
@@ -514,7 +509,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
 
     // Log security event
     if (this.config.monitoringEnabled) {
-      await this.securityMonitoring.recordLoginAttempt(
+      this.securityMonitoring.recordLoginAttempt(
         'unknown',
         ipAddress,
         userAgent,

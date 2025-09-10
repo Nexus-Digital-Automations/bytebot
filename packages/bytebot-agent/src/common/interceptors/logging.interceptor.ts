@@ -265,8 +265,8 @@ export class LoggingInterceptor implements NestInterceptor {
     return (
       (request.headers['x-forwarded-for'] as string) ||
       (request.headers['x-real-ip'] as string) ||
-      request.connection.remoteAddress ||
-      request.socket.remoteAddress ||
+      request.connection?.remoteAddress ||
+      request.socket?.remoteAddress ||
       'unknown'
     );
   }

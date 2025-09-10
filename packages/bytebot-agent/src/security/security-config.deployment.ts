@@ -25,7 +25,7 @@ import {
   StandardizedValidationPipe,
   StandardizedRateLimitGuard,
   StandardizedValidationPipes,
-} from '@bytebot/shared/dist/index-server';
+} from '@bytebot/shared/server';
 
 /**
  * Bytebot-Agent Security Configuration Service
@@ -103,7 +103,7 @@ export class BytebotAgentSecurityConfigService {
     );
 
     return {
-      serviceType: ServiceType.BYTEBOT_AGENT,
+      serviceType: ServiceType._BYTEBOT_AGENT,
       environment,
       securityLevel: 'HIGH',
       description: 'Task Management API Service - High Security Configuration',

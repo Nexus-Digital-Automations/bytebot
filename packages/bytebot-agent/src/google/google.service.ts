@@ -275,12 +275,12 @@ export class GoogleService implements BytebotAgentService {
       } else {
         for (const block of messageContentBlocks) {
           switch (block.type) {
-            case MessageContentType.Text:
+            case MessageContentType._Text:
               parts.push({
                 text: block.text,
               });
               break;
-            case MessageContentType.ToolUse:
+            case MessageContentType._ToolUse:
               parts.push({
                 functionCall: {
                   id: block.id,
@@ -289,7 +289,7 @@ export class GoogleService implements BytebotAgentService {
                 },
               });
               break;
-            case MessageContentType.Image:
+            case MessageContentType._Image:
               parts.push({
                 inlineData: {
                   data: block.source.data,
@@ -297,9 +297,9 @@ export class GoogleService implements BytebotAgentService {
                 },
               });
               break;
-            case MessageContentType.ToolResult: {
+            case MessageContentType._ToolResult: {
               const toolResultContentBlock = block.content[0];
-              if (toolResultContentBlock.type === MessageContentType.Image) {
+              if (toolResultContentBlock.type === MessageContentType._Image) {
                 parts.push({
                   functionResponse: {
                     id: block.tool_use_id,
@@ -333,7 +333,7 @@ export class GoogleService implements BytebotAgentService {
               });
               break;
             }
-            case MessageContentType.Thinking:
+            case MessageContentType._Thinking:
               parts.push({
                 text: block.thinking,
                 thoughtSignature: block.signature,
@@ -367,7 +367,8 @@ export class GoogleService implements BytebotAgentService {
       const contentBlocks = message.content as MessageContentBlock[];
       return contentBlocks.some(
         (block) =>
-          block.type === MessageContentType.ToolUse && block.id === tool_use_id,
+          block.type === MessageContentType._ToolUse &&
+          block.id === tool_use_id,
       );
     });
 
@@ -380,7 +381,7 @@ export class GoogleService implements BytebotAgentService {
 
     const toolBlock = (toolMessage.content as MessageContentBlock[]).find(
       (block) =>
-        block.type === MessageContentType.ToolUse && block.id === tool_use_id,
+        block.type === MessageContentType._ToolUse && block.id === tool_use_id,
     ) as ToolUseContentBlock | undefined;
 
     if (!toolBlock) {
@@ -417,7 +418,7 @@ export class GoogleService implements BytebotAgentService {
       // Handle text content
       if (extendedPart.text && !extendedPart.thought) {
         return {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: extendedPart.text,
         } as TextContentBlock;
       }
@@ -425,7 +426,7 @@ export class GoogleService implements BytebotAgentService {
       // Handle thinking content
       if (extendedPart.thought && extendedPart.text) {
         return {
-          type: MessageContentType.Thinking,
+          type: MessageContentType._Thinking,
           signature: extendedPart.thoughtSignature ?? '',
           thinking: extendedPart.text,
         } as ThinkingContentBlock;
@@ -434,7 +435,7 @@ export class GoogleService implements BytebotAgentService {
       // Handle function calls
       if (extendedPart.functionCall) {
         return {
-          type: MessageContentType.ToolUse,
+          type: MessageContentType._ToolUse,
           id: extendedPart.functionCall.id || generateId(),
           name: extendedPart.functionCall.name || 'function_call',
           input: extendedPart.functionCall.args || {},
@@ -448,7 +449,7 @@ export class GoogleService implements BytebotAgentService {
       });
 
       return {
-        type: MessageContentType.Text,
+        type: MessageContentType._Text,
         text: JSON.stringify(extendedPart),
       } as TextContentBlock;
     });

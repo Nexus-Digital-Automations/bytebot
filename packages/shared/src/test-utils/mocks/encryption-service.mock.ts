@@ -12,19 +12,49 @@
  * @version 2.0.0
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
-
 import { MockConfig } from "./mock-config";
 
+// Jest-agnostic mock function type
+type MockFunction<T extends (...args: any[]) => any> = T & {
+  mockImplementation?: (impl: T) => void;
+  mockReturnValue?: (value: ReturnType<T>) => void;
+  mockResolvedValue?: (value: Awaited<ReturnType<T>>) => void;
+  mockClear?: () => void;
+  mockReset?: () => void;
+  mockRestore?: () => void;
+};
+
+// Check if Jest is available
+const isJestAvailable = typeof jest !== "undefined";
+
+// Create mock function that works with or without Jest
+const createMockFn = <T extends (...args: any[]) => any>(
+  impl: T,
+): MockFunction<T> => {
+  if (isJestAvailable) {
+    return jest.fn(impl) as unknown as MockFunction<T>;
+  }
+
+  // Fallback implementation when Jest is not available
+  const mockFn = impl as MockFunction<T>;
+  mockFn.mockImplementation = () => {};
+  mockFn.mockReturnValue = () => {};
+  mockFn.mockResolvedValue = () => {};
+  mockFn.mockClear = () => {};
+  mockFn.mockReset = () => {};
+  mockFn.mockRestore = () => {};
+
+  return mockFn;
+};
+
 export interface EncryptionServiceMock {
-  encrypt: jest.MockedFunction<
+  encrypt: MockFunction<
     (
       plaintext: string,
       key?: string,
     ) => Promise<{ encrypted: string; iv: string; tag: string }>
   >;
-  decrypt: jest.MockedFunction<
+  decrypt: MockFunction<
     (
       encrypted: string,
       iv: string,
@@ -32,20 +62,18 @@ export interface EncryptionServiceMock {
       key?: string,
     ) => Promise<string>
   >;
-  generateKey: jest.MockedFunction<() => Promise<string>>;
-  deriveKey: jest.MockedFunction<
+  generateKey: MockFunction<() => Promise<string>>;
+  deriveKey: MockFunction<
     (password: string, salt: string, iterations?: number) => Promise<string>
   >;
-  generateSalt: jest.MockedFunction<(length?: number) => string>;
-  generateIV: jest.MockedFunction<() => string>;
-  hash: jest.MockedFunction<(data: string, algorithm?: string) => string>;
-  hmac: jest.MockedFunction<
-    (data: string, key: string, algorithm?: string) => string
-  >;
-  verifySignature: jest.MockedFunction<
+  generateSalt: MockFunction<(length?: number) => string>;
+  generateIV: MockFunction<() => string>;
+  hash: MockFunction<(data: string, algorithm?: string) => string>;
+  hmac: MockFunction<(data: string, key: string, algorithm?: string) => string>;
+  verifySignature: MockFunction<
     (data: string, signature: string, publicKey: string) => boolean
   >;
-  generateKeyPair: jest.MockedFunction<
+  generateKeyPair: MockFunction<
     () => Promise<{ publicKey: string; privateKey: string }>
   >;
 }
@@ -55,7 +83,7 @@ export interface EncryptionServiceMock {
  */
 export const createEncryptionServiceMock = (): EncryptionServiceMock => {
   return {
-    encrypt: jest.fn(
+    encrypt: createMockFn(
       (
         plaintext: string,
         _key?: string,

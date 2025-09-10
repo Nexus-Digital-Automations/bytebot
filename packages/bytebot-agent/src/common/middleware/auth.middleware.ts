@@ -126,7 +126,7 @@ export class AuthMiddleware implements NestMiddleware {
     res: Response,
     next: NextFunction,
   ): Promise<void> {
-    const operationId = `auth-middleware-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const operationId = `auth-middleware-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     const startTime = Date.now();
 
     // Initialize request authentication state
@@ -456,10 +456,10 @@ export class AuthMiddleware implements NestMiddleware {
   private getClientIp(req: Request): string {
     const forwarded = req.get('X-Forwarded-For');
     if (forwarded) {
-      return forwarded.split(',')[0].trim();
+      return forwarded.split(',')[0]?.trim() ?? 'unknown';
     }
 
-    return req.get('X-Real-IP') || req.socket.remoteAddress || 'unknown';
+    return req.get('X-Real-IP') ?? req.socket?.remoteAddress ?? 'unknown';
   }
 
   /**

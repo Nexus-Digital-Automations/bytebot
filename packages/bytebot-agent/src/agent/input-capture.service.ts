@@ -165,10 +165,10 @@ export class InputCaptureService {
           return;
 
         const userActionBlock: UserActionContentBlock = {
-          type: MessageContentType.UserAction,
+          type: MessageContentType._UserAction,
           content: [
             {
-              type: MessageContentType.Image,
+              type: MessageContentType._Image,
               source: {
                 data: shot.image,
                 media_type: 'image/png',
@@ -224,7 +224,7 @@ export class InputCaptureService {
       if (!this.capturing || !taskId) return;
       const toolUseId = randomUUID();
       const userActionBlock: UserActionContentBlock = {
-        type: MessageContentType.UserAction,
+        type: MessageContentType._UserAction,
         content: [],
       };
 

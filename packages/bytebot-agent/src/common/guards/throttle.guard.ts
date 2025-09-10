@@ -70,19 +70,29 @@ interface DynamicThrottleConfig {
  * Default role-based throttle limits
  */
 const DEFAULT_ROLE_LIMITS: Record<UserRole, RoleThrottleConfig> = {
-  [UserRole.ADMIN]: {
+  [UserRole._ADMIN]: {
     rpm: 1000,
     burst: 100,
     skip: false,
   },
-  [UserRole.OPERATOR]: {
+  [UserRole._OPERATOR]: {
     rpm: 500,
     burst: 50,
     skip: false,
   },
-  [UserRole.VIEWER]: {
+  [UserRole._VIEWER]: {
     rpm: 100,
     burst: 20,
+    skip: false,
+  },
+  [UserRole._USER]: {
+    rpm: 200,
+    burst: 30,
+    skip: false,
+  },
+  [UserRole._GUEST]: {
+    rpm: 50,
+    burst: 10,
     skip: false,
   },
 };
@@ -533,7 +543,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
       ).user;
 
       const securityEvent = createSecurityEvent(
-        SecurityEventType.RATE_LIMIT_EXCEEDED,
+        SecurityEventType._RATE_LIMIT_EXCEEDED,
         request.url,
         request.method,
         false,
@@ -587,4 +597,6 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
   }
 }
 
+// Export both named and default exports for compatibility
+export { AdvancedThrottleGuard as ThrottleGuard };
 export default AdvancedThrottleGuard;

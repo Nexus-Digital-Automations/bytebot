@@ -128,22 +128,22 @@ export interface EnhancedCSPViolationReport extends CSPViolationReport {
  * Violation pattern types for classification
  */
 export enum ViolationPatternType {
-  INLINE_SCRIPT_INJECTION = "inline_script_injection",
-  EXTERNAL_SCRIPT_LOAD = "external_script_load",
-  INLINE_STYLE_VIOLATION = "inline_style_violation",
-  FRAME_SRC_VIOLATION = "frame_src_violation",
-  IMG_SRC_VIOLATION = "img_src_violation",
-  CONNECT_SRC_VIOLATION = "connect_src_violation",
-  FONT_SRC_VIOLATION = "font_src_violation",
-  OBJECT_SRC_VIOLATION = "object_src_violation",
-  MEDIA_SRC_VIOLATION = "media_src_violation",
-  EVAL_SCRIPT_VIOLATION = "eval_script_violation",
-  UNSAFE_INLINE_SCRIPT = "unsafe_inline_script",
-  UNSAFE_INLINE_STYLE = "unsafe_inline_style",
-  BASE_URI_VIOLATION = "base_uri_violation",
-  FORM_ACTION_VIOLATION = "form_action_violation",
-  PLUGIN_VIOLATION = "plugin_violation",
-  UNKNOWN_VIOLATION = "unknown_violation",
+  _INLINE_SCRIPT_INJECTION = "inline_script_injection",
+  _EXTERNAL_SCRIPT_LOAD = "external_script_load",
+  _INLINE_STYLE_VIOLATION = "inline_style_violation",
+  _FRAME_SRC_VIOLATION = "frame_src_violation",
+  _IMG_SRC_VIOLATION = "img_src_violation",
+  _CONNECT_SRC_VIOLATION = "connect_src_violation",
+  _FONT_SRC_VIOLATION = "font_src_violation",
+  _OBJECT_SRC_VIOLATION = "object_src_violation",
+  _MEDIA_SRC_VIOLATION = "media_src_violation",
+  _EVAL_SCRIPT_VIOLATION = "eval_script_violation",
+  _UNSAFE_INLINE_SCRIPT = "unsafe_inline_script",
+  _UNSAFE_INLINE_STYLE = "unsafe_inline_style",
+  _BASE_URI_VIOLATION = "base_uri_violation",
+  _FORM_ACTION_VIOLATION = "form_action_violation",
+  _PLUGIN_VIOLATION = "plugin_violation",
+  _UNKNOWN_VIOLATION = "unknown_violation",
 }
 
 /**
@@ -277,7 +277,7 @@ export interface CSPViolationReportingConfig {
 const DEFAULT_CSP_VIOLATION_CONFIGS = {
   bytebotd: {
     enabled: true,
-    serviceType: RateLimitServiceType.BYTEBOTD,
+    serviceType: RateLimitServiceType._BYTEBOTD,
     reportUri: "/security/csp-violations",
     realTimeProcessing: true,
     threatAnalysis: true,
@@ -313,7 +313,7 @@ const DEFAULT_CSP_VIOLATION_CONFIGS = {
 
   "bytebot-agent": {
     enabled: true,
-    serviceType: RateLimitServiceType.BYTEBOT_AGENT,
+    serviceType: RateLimitServiceType._BYTEBOT_AGENT,
     reportUri: "/api/security/csp-violations",
     realTimeProcessing: true,
     threatAnalysis: true,
@@ -349,7 +349,7 @@ const DEFAULT_CSP_VIOLATION_CONFIGS = {
 
   "bytebot-ui": {
     enabled: true,
-    serviceType: RateLimitServiceType.BYTEBOT_UI,
+    serviceType: RateLimitServiceType._BYTEBOT_UI,
     reportUri: "/ui/security/csp-violations",
     realTimeProcessing: false, // Less critical for UI
     threatAnalysis: true,
@@ -385,7 +385,7 @@ const DEFAULT_CSP_VIOLATION_CONFIGS = {
 
   shared: {
     enabled: true,
-    serviceType: RateLimitServiceType.SHARED,
+    serviceType: RateLimitServiceType._SHARED,
     reportUri: "/shared/security/csp-violations",
     realTimeProcessing: true,
     threatAnalysis: true,
@@ -450,17 +450,17 @@ export class CSPViolationReportingService {
   /**
    * Type-safe event emitter helper
    */
-  private emitEvent(event: string, data: unknown): boolean {
+  private emitEvent(_event: string, _data: unknown): boolean {
     return (
-      this.eventEmitter as unknown as {
-        emit(event: string, data: unknown): boolean;
+      this._eventEmitter as unknown as {
+        emit(_event: string, _data: unknown): boolean;
       }
-    ).emit(event, data);
+    ).emit(_event, _data);
   }
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly eventEmitter: EventEmitter2,
+    private readonly _configService: ConfigService,
+    private readonly _eventEmitter: EventEmitter2,
     @Inject("SERVICE_TYPE") private readonly serviceType: RateLimitServiceType,
   ) {
     // Initialize configuration
@@ -468,7 +468,7 @@ export class CSPViolationReportingService {
       ...DEFAULT_CSP_VIOLATION_CONFIGS[
         serviceType as keyof typeof DEFAULT_CSP_VIOLATION_CONFIGS
       ],
-      ...this.configService.get<Partial<CSPViolationReportingConfig>>(
+      ...this._configService.get<Partial<CSPViolationReportingConfig>>(
         `cspViolationReporting.${serviceType}`,
         {},
       ),
@@ -561,18 +561,18 @@ export class CSPViolationReportingService {
       );
 
       return enhancedReport;
-    } catch (error) {
+    } catch (err) {
       const processingTime = Date.now() - startTime;
 
       this.logger.error(`[${operationId}] CSP violation processing failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         processingTimeMs: processingTime,
         reportUri: report.documentUri,
         violatedDirective: report.violatedDirective,
       });
 
-      throw error;
+      throw err;
     }
   }
 
@@ -649,61 +649,61 @@ export class CSPViolationReportingService {
 
     if (directive.includes("script-src")) {
       if (blockedUri === "eval" || sample.includes("eval(")) {
-        return ViolationPatternType.EVAL_SCRIPT_VIOLATION;
+        return ViolationPatternType._EVAL_SCRIPT_VIOLATION;
       }
       if (blockedUri === "inline" || blockedUri === "'unsafe-inline'") {
-        return ViolationPatternType.UNSAFE_INLINE_SCRIPT;
+        return ViolationPatternType._UNSAFE_INLINE_SCRIPT;
       }
       if (blockedUri.startsWith("http")) {
-        return ViolationPatternType.EXTERNAL_SCRIPT_LOAD;
+        return ViolationPatternType._EXTERNAL_SCRIPT_LOAD;
       }
-      return ViolationPatternType.INLINE_SCRIPT_INJECTION;
+      return ViolationPatternType._INLINE_SCRIPT_INJECTION;
     }
 
     if (directive.includes("style-src")) {
       if (blockedUri === "inline" || blockedUri === "'unsafe-inline'") {
-        return ViolationPatternType.UNSAFE_INLINE_STYLE;
+        return ViolationPatternType._UNSAFE_INLINE_STYLE;
       }
-      return ViolationPatternType.INLINE_STYLE_VIOLATION;
+      return ViolationPatternType._INLINE_STYLE_VIOLATION;
     }
 
     if (directive.includes("frame-src")) {
-      return ViolationPatternType.FRAME_SRC_VIOLATION;
+      return ViolationPatternType._FRAME_SRC_VIOLATION;
     }
 
     if (directive.includes("img-src")) {
-      return ViolationPatternType.IMG_SRC_VIOLATION;
+      return ViolationPatternType._IMG_SRC_VIOLATION;
     }
 
     if (directive.includes("connect-src")) {
-      return ViolationPatternType.CONNECT_SRC_VIOLATION;
+      return ViolationPatternType._CONNECT_SRC_VIOLATION;
     }
 
     if (directive.includes("font-src")) {
-      return ViolationPatternType.FONT_SRC_VIOLATION;
+      return ViolationPatternType._FONT_SRC_VIOLATION;
     }
 
     if (directive.includes("object-src")) {
-      return ViolationPatternType.OBJECT_SRC_VIOLATION;
+      return ViolationPatternType._OBJECT_SRC_VIOLATION;
     }
 
     if (directive.includes("media-src")) {
-      return ViolationPatternType.MEDIA_SRC_VIOLATION;
+      return ViolationPatternType._MEDIA_SRC_VIOLATION;
     }
 
     if (directive.includes("base-uri")) {
-      return ViolationPatternType.BASE_URI_VIOLATION;
+      return ViolationPatternType._BASE_URI_VIOLATION;
     }
 
     if (directive.includes("form-action")) {
-      return ViolationPatternType.FORM_ACTION_VIOLATION;
+      return ViolationPatternType._FORM_ACTION_VIOLATION;
     }
 
     if (directive.includes("plugin-types")) {
-      return ViolationPatternType.PLUGIN_VIOLATION;
+      return ViolationPatternType._PLUGIN_VIOLATION;
     }
 
-    return ViolationPatternType.UNKNOWN_VIOLATION;
+    return ViolationPatternType._UNKNOWN_VIOLATION;
   }
 
   /**
@@ -720,21 +720,21 @@ export class CSPViolationReportingService {
 
     // Base risk by violation pattern
     switch (pattern) {
-      case ViolationPatternType.INLINE_SCRIPT_INJECTION:
-      case ViolationPatternType.EVAL_SCRIPT_VIOLATION:
+      case ViolationPatternType._INLINE_SCRIPT_INJECTION:
+      case ViolationPatternType._EVAL_SCRIPT_VIOLATION:
         riskScore += 80; // High risk for script injections
         break;
-      case ViolationPatternType.EXTERNAL_SCRIPT_LOAD:
+      case ViolationPatternType._EXTERNAL_SCRIPT_LOAD:
         riskScore += 60; // Medium-high risk
         break;
-      case ViolationPatternType.UNSAFE_INLINE_SCRIPT:
-      case ViolationPatternType.UNSAFE_INLINE_STYLE:
+      case ViolationPatternType._UNSAFE_INLINE_SCRIPT:
+      case ViolationPatternType._UNSAFE_INLINE_STYLE:
         riskScore += 40; // Medium risk
         break;
-      case ViolationPatternType.FRAME_SRC_VIOLATION:
+      case ViolationPatternType._FRAME_SRC_VIOLATION:
         riskScore += 50; // Medium risk (clickjacking)
         break;
-      case ViolationPatternType.CONNECT_SRC_VIOLATION:
+      case ViolationPatternType._CONNECT_SRC_VIOLATION:
         riskScore += 30; // Lower risk but still concerning
         break;
       default:
@@ -827,14 +827,14 @@ export class CSPViolationReportingService {
     const suggestions: string[] = [];
 
     switch (pattern) {
-      case ViolationPatternType.INLINE_SCRIPT_INJECTION:
-      case ViolationPatternType.UNSAFE_INLINE_SCRIPT:
+      case ViolationPatternType._INLINE_SCRIPT_INJECTION:
+      case ViolationPatternType._UNSAFE_INLINE_SCRIPT:
         suggestions.push("Move inline scripts to external files");
         suggestions.push("Use CSP nonces for necessary inline scripts");
         suggestions.push("Consider using hash-based CSP for static scripts");
         break;
 
-      case ViolationPatternType.EVAL_SCRIPT_VIOLATION:
+      case ViolationPatternType._EVAL_SCRIPT_VIOLATION:
         suggestions.push("Avoid using eval() function");
         suggestions.push(
           "Replace eval() with safer alternatives like JSON.parse()",
@@ -844,7 +844,7 @@ export class CSPViolationReportingService {
         );
         break;
 
-      case ViolationPatternType.EXTERNAL_SCRIPT_LOAD:
+      case ViolationPatternType._EXTERNAL_SCRIPT_LOAD:
         suggestions.push(
           `Add ${report.blockedUri} to script-src allowlist if trusted`,
         );
@@ -854,14 +854,14 @@ export class CSPViolationReportingService {
         );
         break;
 
-      case ViolationPatternType.INLINE_STYLE_VIOLATION:
-      case ViolationPatternType.UNSAFE_INLINE_STYLE:
+      case ViolationPatternType._INLINE_STYLE_VIOLATION:
+      case ViolationPatternType._UNSAFE_INLINE_STYLE:
         suggestions.push("Move inline styles to external stylesheets");
         suggestions.push("Use CSP nonces for necessary inline styles");
         suggestions.push("Consider using CSS variables for dynamic styling");
         break;
 
-      case ViolationPatternType.FRAME_SRC_VIOLATION:
+      case ViolationPatternType._FRAME_SRC_VIOLATION:
         suggestions.push(
           `Add ${report.blockedUri} to frame-src allowlist if trusted`,
         );
@@ -871,7 +871,7 @@ export class CSPViolationReportingService {
         );
         break;
 
-      case ViolationPatternType.CONNECT_SRC_VIOLATION:
+      case ViolationPatternType._CONNECT_SRC_VIOLATION:
         suggestions.push(
           `Add ${report.blockedUri} to connect-src allowlist if trusted`,
         );
@@ -948,11 +948,11 @@ export class CSPViolationReportingService {
       if (this.config.compliance.auditLogging) {
         this.logComplianceEvent(report, operationId);
       }
-    } catch (error) {
+    } catch (err) {
       this.logger.error(`[${operationId}] Violation analysis failed`, {
         operationId,
         violationId: report.violationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
       });
     }
   }
@@ -973,8 +973,8 @@ export class CSPViolationReportingService {
 
     // Create incidents for patterns indicating attacks
     const attackPatterns = [
-      ViolationPatternType.INLINE_SCRIPT_INJECTION,
-      ViolationPatternType.EVAL_SCRIPT_VIOLATION,
+      ViolationPatternType._INLINE_SCRIPT_INJECTION,
+      ViolationPatternType._EVAL_SCRIPT_VIOLATION,
     ];
 
     return attackPatterns.includes(report.violationPattern);
@@ -989,7 +989,7 @@ export class CSPViolationReportingService {
   ): void {
     try {
       const securityEvent = createSecurityEvent(
-        SecurityEventType.CSP_VIOLATION,
+        SecurityEventType._CSP_VIOLATION,
         report.documentUri,
         "CSP_VIOLATION",
         false, // CSP violations are blocked requests
@@ -1022,11 +1022,11 @@ export class CSPViolationReportingService {
           operationId,
         },
       );
-    } catch (error) {
+    } catch (err) {
       this.logger.error(`Failed to create security incident`, {
         operationId,
         violationId: report.violationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
       });
     }
   }
@@ -1124,10 +1124,10 @@ export class CSPViolationReportingService {
           totalViolations,
         });
       }
-    } catch (error) {
+    } catch (err) {
       this.logger.error(`Alert threshold check failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
       });
     }
   }
@@ -1186,11 +1186,11 @@ export class CSPViolationReportingService {
             batchSize: batch.length,
             remainingBuffer: this.violationBuffer.length,
           });
-        } catch (error) {
+        } catch (err) {
           this.logger.error(`Batch processing failed`, {
             operationId,
             batchSize: batch.length,
-            error: error instanceof Error ? error.message : String(error),
+            error: err instanceof Error ? err.message : String(err),
           });
         }
       })();
@@ -1283,7 +1283,7 @@ export class CSPViolationReportingService {
     return new CSPViolationReportingService(
       configService,
       eventEmitter,
-      RateLimitServiceType.BYTEBOTD,
+      RateLimitServiceType._BYTEBOTD,
     );
   }
 
@@ -1294,7 +1294,7 @@ export class CSPViolationReportingService {
     return new CSPViolationReportingService(
       configService,
       eventEmitter,
-      RateLimitServiceType.BYTEBOT_AGENT,
+      RateLimitServiceType._BYTEBOT_AGENT,
     );
   }
 
@@ -1305,7 +1305,7 @@ export class CSPViolationReportingService {
     return new CSPViolationReportingService(
       configService,
       eventEmitter,
-      RateLimitServiceType.BYTEBOT_UI,
+      RateLimitServiceType._BYTEBOT_UI,
     );
   }
 }

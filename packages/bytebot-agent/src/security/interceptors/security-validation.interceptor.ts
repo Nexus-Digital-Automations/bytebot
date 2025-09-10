@@ -291,7 +291,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
    */
   private validateRequestBasics(
     request: Request,
-    _metadata: RequestMetadata,
+    metadata: RequestMetadata,
     issues: ValidationResult['issues'],
   ): void {
     // Content-Type validation
@@ -318,10 +318,10 @@ export class SecurityValidationInterceptor implements NestInterceptor {
     }
 
     // Content-Length validation
-    if (_metadata.contentLength > this.config.maxRequestSize) {
+    if (metadata.contentLength > this.config.maxRequestSize) {
       issues.push({
         type: 'critical',
-        message: `Request size exceeds limit: ${_metadata.contentLength} > ${this.config.maxRequestSize}`,
+        message: `Request size exceeds limit: ${metadata.contentLength} > ${this.config.maxRequestSize}`,
         riskScore: 0.8,
       });
     }

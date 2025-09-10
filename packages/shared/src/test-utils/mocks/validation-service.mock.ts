@@ -29,42 +29,42 @@ export interface ValidationRule {
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
-  customValidator?: (value: any) => boolean;
+  customValidator?: (_value: any) => boolean;
 }
 
 export interface ValidationServiceMock {
   validate: jest.MockedFunction<
-    (data: any, rules: ValidationRule[]) => Promise<ValidationResult>
+    (_data: any, _rules: ValidationRule[]) => Promise<ValidationResult>
   >;
   validateSchema: jest.MockedFunction<
-    (data: any, schema: any) => Promise<ValidationResult>
+    (_data: any, _schema: any) => Promise<ValidationResult>
   >;
-  sanitizeInput: jest.MockedFunction<(input: string) => string>;
-  validateEmail: jest.MockedFunction<(email: string) => boolean>;
-  validateUrl: jest.MockedFunction<(url: string) => boolean>;
+  sanitizeInput: jest.MockedFunction<(_input: string) => string>;
+  validateEmail: jest.MockedFunction<(_email: string) => boolean>;
+  validateUrl: jest.MockedFunction<(_url: string) => boolean>;
   validatePassword: jest.MockedFunction<
-    (password: string) => {
+    (_password: string) => {
       isValid: boolean;
       strength: "weak" | "medium" | "strong";
       issues: string[];
     }
   >;
   detectSqlInjection: jest.MockedFunction<
-    (input: string) => {
+    (_input: string) => {
       detected: boolean;
       patterns: string[];
       severity: "low" | "medium" | "high";
     }
   >;
   validateFileUpload: jest.MockedFunction<
-    (file: { name: string; size: number; type: string }) => ValidationResult
+    (_file: { name: string; size: number; type: string }) => ValidationResult
   >;
-  validateApiKey: jest.MockedFunction<(apiKey: string) => boolean>;
+  validateApiKey: jest.MockedFunction<(_apiKey: string) => boolean>;
   validateJson: jest.MockedFunction<
-    (jsonString: string) => { isValid: boolean; parsed?: any; error?: string }
+    (_jsonString: string) => { isValid: boolean; parsed?: any; error?: string }
   >;
   validateBusinessRules: jest.MockedFunction<
-    (data: any, context: string) => Promise<ValidationResult>
+    (_data: any, _context: string) => Promise<ValidationResult>
   >;
 }
 
@@ -386,17 +386,17 @@ export const createValidationServiceMock = (): ValidationServiceMock => {
             name: "UNION_ATTACK",
           },
           {
-            pattern: /('|\"|`)\s*(OR|AND)\s*('|\"|`)/gi,
+            pattern: /('|"|`)\s*(OR|AND)\s*('|"|`)/gi,
             severity: "high" as const,
             name: "BOOLEAN_INJECTION",
           },
           {
-            pattern: /('|\")(\s*;\s*)/gi,
+            pattern: /('|")(\s*;\s*)/gi,
             severity: "medium" as const,
             name: "SEMICOLON_TERMINATION",
           },
           {
-            pattern: /(--|\#|\/\*)/gi,
+            pattern: /(--|#|\/\*)/gi,
             severity: "medium" as const,
             name: "COMMENT_INJECTION",
           },
@@ -526,11 +526,10 @@ export const createValidationServiceMock = (): ValidationServiceMock => {
         try {
           const parsed = JSON.parse(jsonString);
           return { isValid: true, parsed };
-        } catch (error) {
+        } catch (err) {
           return {
             isValid: false,
-            error:
-              error instanceof Error ? error.message : "Invalid JSON format",
+            error: err instanceof Error ? err.message : "Invalid JSON format",
           };
         }
       },
@@ -563,7 +562,7 @@ export const createValidationServiceMock = (): ValidationServiceMock => {
             }
             break;
 
-          case "content_moderation":
+          case "content_moderation": {
             const inappropriateWords = ["spam", "scam", "fraud"];
             if (
               data.content &&
@@ -574,6 +573,7 @@ export const createValidationServiceMock = (): ValidationServiceMock => {
               warnings.push("Content may require manual review");
             }
             break;
+          }
         }
 
         return {
@@ -600,7 +600,7 @@ export const createMockValidationService = (
 ) => {
   const {
     strictMode = MockConfig.validation.strictMode,
-    allowHtml = MockConfig.validation.allowHtml,
+    allowHtml: _allowHtml = MockConfig.validation.allowHtml,
     customRules = [],
     failureRate = 0,
   } = options;

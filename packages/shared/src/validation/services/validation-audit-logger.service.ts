@@ -35,7 +35,7 @@ export class ValidationAuditLogger {
       logId: generateEventId(),
       operationId: threatAnalysis.metadata.operationId,
       serviceType: threatAnalysis.metadata.serviceType,
-      securityLevel: ValidationSecurityLevel.MAXIMUM,
+      securityLevel: ValidationSecurityLevel._MAXIMUM,
       timestamp: new Date(),
       eventType: "security_threat",
       details: {
@@ -61,7 +61,7 @@ export class ValidationAuditLogger {
       logId: generateEventId(),
       operationId: context.operationId,
       serviceType: context.serviceType,
-      securityLevel: ValidationSecurityLevel.STANDARD,
+      securityLevel: ValidationSecurityLevel._STANDARD,
       timestamp: new Date(),
       eventType: "validation_failure",
       details: {

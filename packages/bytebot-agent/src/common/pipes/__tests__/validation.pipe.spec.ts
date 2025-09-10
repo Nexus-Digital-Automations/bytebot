@@ -67,9 +67,9 @@ class CreateUserDto {
 }
 
 enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  GUEST = 'guest',
+  _ADMIN = 'admin',
+  _USER = 'user',
+  _GUEST = 'guest',
 }
 
 class UpdateUserDto {
@@ -600,7 +600,7 @@ describe('ValidationPipe', () => {
       // Arrange
       const validRoleUpdate = {
         firstName: 'John',
-        role: UserRole.ADMIN,
+        role: UserRole._ADMIN,
       };
 
       const invalidRoleUpdate = {
@@ -612,7 +612,7 @@ describe('ValidationPipe', () => {
       const validResult = await pipe.transform(validRoleUpdate, updateMetadata);
 
       // Assert
-      expect(validResult.role).toBe(UserRole.ADMIN);
+      expect(validResult.role).toBe(UserRole._ADMIN);
 
       await expect(
         pipe.transform(invalidRoleUpdate, updateMetadata),

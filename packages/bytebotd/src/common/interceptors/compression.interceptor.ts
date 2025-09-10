@@ -130,7 +130,7 @@ export class CompressionInterceptor implements NestInterceptor {
   /**
    * Intercept HTTP responses to apply compression
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
@@ -181,12 +181,13 @@ export class CompressionInterceptor implements NestInterceptor {
    * Compress response data with optimal algorithm selection
    */
   private async compressResponse(
-    data: any,
+    data: unknown,
     request: Request,
     response: Response,
   ): Promise<CompressionResult> {
     const operationId =
-      (request as any).operationId || `compress_${Date.now()}`;
+      (request as Request & { operationId?: string }).operationId ||
+      `compress_${Date.now()}`;
     const startTime = Date.now();
 
     try {
@@ -330,7 +331,7 @@ export class CompressionInterceptor implements NestInterceptor {
   /**
    * Convert response data to buffer
    */
-  private dataToBuffer(data: any): Buffer {
+  private dataToBuffer(data: unknown): Buffer {
     if (Buffer.isBuffer(data)) {
       return data;
     }

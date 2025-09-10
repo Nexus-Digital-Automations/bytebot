@@ -14,14 +14,6 @@
  * - Mock verification and service integration
  */
 
- 
- 
- 
- 
- 
- 
- 
-
 // Mock child_process and fs operations BEFORE imports
 jest.mock('child_process', () => ({
   exec: jest.fn((cmd, opts, cb) => {
@@ -59,9 +51,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService, ErrorHandler } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
-import { CuaIntegrationService } from '../../cua-integration/cua-integration.service';
-import { CuaVisionService } from '../../cua-integration/cua-vision.service';
-import { CuaPerformanceService } from '../../cua-integration/cua-performance.service';
 import {
   ComputerAction,
   MoveMouseAction,
@@ -80,9 +69,6 @@ import {
   ApplicationAction,
   WriteFileAction,
   ReadFileAction,
-  OcrAction,
-  FindTextAction,
-  EnhancedScreenshotAction,
 } from '@bytebot/shared';
 
 // Mock dependencies
@@ -99,25 +85,9 @@ const mockNutService = {
   getCursorPosition: jest.fn(),
 };
 
-const mockCuaIntegrationService = {
-  isFrameworkEnabled: jest.fn().mockReturnValue(true),
-};
-
-const mockCuaVisionService = {
-  performOcr: jest.fn(),
-  detectText: jest.fn(),
-};
-
-const mockCuaPerformanceService = {
-  recordMetric: jest.fn(),
-};
-
 describe('ComputerUseService - Main Action Router and Error Handling', () => {
   let service: ComputerUseService;
   let nutService: NutService;
-  let cuaIntegrationService: CuaIntegrationService;
-  let cuaVisionService: CuaVisionService;
-  let performanceService: CuaPerformanceService;
 
   // Helper function to create test actions
   const createTestAction = <T extends ComputerAction>(
@@ -168,30 +138,11 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
           provide: NutService,
           useValue: mockNutService,
         },
-        {
-          provide: CuaIntegrationService,
-          useValue: mockCuaIntegrationService,
-        },
-        {
-          provide: CuaVisionService,
-          useValue: mockCuaVisionService,
-        },
-        {
-          provide: CuaPerformanceService,
-          useValue: mockCuaPerformanceService,
-        },
       ],
     }).compile();
 
     service = module.get<ComputerUseService>(ComputerUseService);
     nutService = module.get<NutService>(NutService);
-    cuaIntegrationService = module.get<CuaIntegrationService>(
-      CuaIntegrationService,
-    );
-    cuaVisionService = module.get<CuaVisionService>(CuaVisionService);
-    performanceService = module.get<CuaPerformanceService>(
-      CuaPerformanceService,
-    );
   });
 
   describe('Main Action Router', () => {
@@ -522,58 +473,6 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
       }, 5000);
     });
 
-    describe('C/ua Enhanced Action Routing', () => {
-      it('should route ocr action correctly when C/ua is enabled', async () => {
-        // Arrange
-        const action = createTestAction<OcrAction>({
-          action: 'ocr',
-          coordinates: { x: 100, y: 200 },
-          language: 'en',
-        });
-
-        // Act & Assert - OCR requires proper C/ua integration
-        await expect(service.action(action)).rejects.toThrow(
-          /OCR processing failed/,
-        );
-      });
-
-      it('should route find_text action correctly when C/ua is enabled', async () => {
-        // Arrange
-        const action = createTestAction<FindTextAction>({
-          action: 'find_text',
-          text: 'Search Text',
-          caseSensitive: true,
-          wholeWord: false,
-        });
-
-        // Act & Assert - Find text requires proper C/ua integration
-        await expect(service.action(action)).rejects.toThrow(
-          /Text finding failed/,
-        );
-      });
-
-      it('should route enhanced_screenshot action correctly when C/ua is enabled', async () => {
-        // Arrange
-        const action = createTestAction<EnhancedScreenshotAction>({
-          action: 'enhanced_screenshot',
-          region: { x: 0, y: 0, width: 800, height: 600 },
-          format: 'png',
-        });
-        const mockBuffer = Buffer.from('screenshot-data');
-        mockNutService.screendump.mockResolvedValue(mockBuffer);
-
-        // Act
-        const result = await service.action(action);
-
-        // Assert
-        expect(nutService.screendump).toHaveBeenCalled();
-        expect(result).toHaveProperty('image');
-        expect(result).toHaveProperty('processingTimeMs');
-        expect(result).toHaveProperty('enhancementsApplied');
-        expect(result).toHaveProperty('operationId');
-      });
-    });
-
     describe('Invalid Action Handling', () => {
       it('should throw error for unsupported action type', async () => {
         // Arrange - Create invalid action by type assertion
@@ -617,22 +516,20 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         );
       });
 
-      it('should handle C/ua service errors gracefully', async () => {
+      it('should handle service errors gracefully', async () => {
         // Arrange
-        const action = createTestAction<OcrAction>({
-          action: 'ocr',
-          language: 'en',
+        const action = createTestAction<ScreenshotAction>({
+          action: 'screenshot',
         });
         const mockBuffer = Buffer.from('screenshot-data');
         mockNutService.screendump.mockResolvedValue(mockBuffer);
-        mockCuaVisionService.performOcr.mockRejectedValue(
-          new Error('C/ua framework unavailable'),
-        );
 
-        // Act & Assert
-        await expect(service.action(action)).rejects.toThrow(
-          /OCR processing failed/,
-        );
+        // Act
+        const result = await service.action(action);
+
+        // Assert - Should successfully take screenshot
+        expect(result).toBeDefined();
+        expect(nutService.screendump).toHaveBeenCalled();
       });
 
       it('should log structured error information', async () => {

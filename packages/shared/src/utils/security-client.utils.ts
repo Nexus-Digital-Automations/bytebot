@@ -212,30 +212,37 @@ export function detectCommandInjection(
  * Role hierarchy for permission checking
  */
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  [UserRole.ADMIN]: [
-    Permission.TASK_READ,
-    Permission.TASK_WRITE,
-    Permission.TASK_DELETE,
-    Permission.COMPUTER_CONTROL,
-    Permission.COMPUTER_VIEW,
-    Permission.SYSTEM_ADMIN,
-    Permission.USER_MANAGE,
-    Permission.METRICS_VIEW,
-    Permission.LOGS_VIEW,
+  [UserRole._ADMIN]: [
+    Permission._TASK_READ,
+    Permission._TASK_WRITE,
+    Permission._TASK_DELETE,
+    Permission._COMPUTER_CONTROL,
+    Permission._COMPUTER_VIEW,
+    Permission._SYSTEM_ADMIN,
+    Permission._USER_MANAGE,
+    Permission._METRICS_VIEW,
+    Permission._LOGS_VIEW,
   ],
-  [UserRole.OPERATOR]: [
-    Permission.TASK_READ,
-    Permission.TASK_WRITE,
-    Permission.TASK_DELETE,
-    Permission.COMPUTER_CONTROL,
-    Permission.COMPUTER_VIEW,
-    Permission.METRICS_VIEW,
+  [UserRole._OPERATOR]: [
+    Permission._TASK_READ,
+    Permission._TASK_WRITE,
+    Permission._TASK_DELETE,
+    Permission._COMPUTER_CONTROL,
+    Permission._COMPUTER_VIEW,
+    Permission._METRICS_VIEW,
   ],
-  [UserRole.VIEWER]: [
-    Permission.TASK_READ,
-    Permission.COMPUTER_VIEW,
-    Permission.METRICS_VIEW,
+  [UserRole._VIEWER]: [
+    Permission._TASK_READ,
+    Permission._COMPUTER_VIEW,
+    Permission._METRICS_VIEW,
   ],
+  [UserRole._USER]: [
+    Permission._TASK_READ,
+    Permission._COMPUTER_VIEW,
+    Permission._VIEW_OWN_PROFILE,
+    Permission._VIEW_PUBLIC_CONTENT,
+  ],
+  [UserRole._GUEST]: [Permission._VIEW_PUBLIC_CONTENT],
 };
 
 /**
@@ -253,7 +260,7 @@ export function hasPermission(
  * Check if a user role is equal to or higher than the required role
  */
 export function hasRole(userRole: UserRole, requiredRole: UserRole): boolean {
-  const roleHierarchy = [UserRole.VIEWER, UserRole.OPERATOR, UserRole.ADMIN];
+  const roleHierarchy = [UserRole._VIEWER, UserRole._OPERATOR, UserRole._ADMIN];
 
   const userLevel = roleHierarchy.indexOf(userRole);
   const requiredLevel = roleHierarchy.indexOf(requiredRole);

@@ -151,9 +151,13 @@ export class VersionInterceptor implements NestInterceptor {
       );
 
       // Set version information in request for downstream use
-      (request as any).apiVersion = versionResolution.resolvedVersion;
-      (request as any).versionInfo = versionResolution;
-      (request as any).desktopClient = versionResolution.desktopCompatibility;
+      (request as Request & { apiVersion?: string }).apiVersion =
+        versionResolution.resolvedVersion;
+      (
+        request as Request & { versionInfo?: typeof versionResolution }
+      ).versionInfo = versionResolution;
+      (request as Request & { desktopClient?: boolean }).desktopClient =
+        versionResolution.desktopCompatibility.isDesktopClient;
 
       // Set response headers with version information
       this.setVersionHeaders(response, versionResolution);

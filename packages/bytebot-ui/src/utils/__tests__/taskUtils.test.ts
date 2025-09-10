@@ -24,6 +24,7 @@ import {
   cancelTask,
 } from "../taskUtils";
 import { Role, TaskStatus, Message, Task } from "@/types";
+import { MessageContentType } from "@bytebot/shared";
 // Import types for test utilities if needed
 // import { TestUtils, TestDataFactory } from "@/test-utils/setupAfterEnv";
 
@@ -193,13 +194,13 @@ describe("TaskUtils", () => {
     const mockMessages: Message[] = [
       {
         id: "msg-1",
-        content: [{ type: "text", text: "Hello" }],
+        content: [{ type: MessageContentType._Text, text: "Hello" }],
         role: Role.USER,
         createdAt: "2023-01-01T00:00:00Z",
       },
       {
         id: "msg-2",
-        content: [{ type: "text", text: "Hi there!" }],
+        content: [{ type: MessageContentType._Text, text: "Hi there!" }],
         role: Role.ASSISTANT,
         createdAt: "2023-01-01T00:01:00Z",
       },
@@ -306,7 +307,7 @@ describe("TaskUtils", () => {
         messages: [
           {
             id: "msg-1",
-            content: [{ type: "text", text: "Hello" }],
+            content: [{ type: MessageContentType._Text, text: "Hello" }],
             role: Role.USER,
             createdAt: "2023-01-01T00:00:00Z",
           },
@@ -789,7 +790,7 @@ export const TaskUtilsTestUtils = {
 
   createMockMessage: (overrides: Partial<Message> = {}): Message => ({
     id: "test-msg",
-    content: [{ type: "text", text: "Test message" }],
+    content: [{ type: MessageContentType._Text, text: "Test message" }],
     role: Role.USER,
     createdAt: new Date().toISOString(),
     ...overrides,

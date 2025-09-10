@@ -19,8 +19,6 @@
  * @version 1.0.0
  */
 
- 
-
 // Mock @nut-tree-fork/nut-js FIRST before any imports to avoid import issues
 jest.mock('@nut-tree-fork/nut-js', () => ({
   keyboard: {
@@ -139,9 +137,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
-import { CuaVisionService } from '../../cua-integration/cua-vision.service';
-import { CuaIntegrationService } from '../../cua-integration/cua-integration.service';
-import { CuaPerformanceService } from '../../cua-integration/cua-performance.service';
 import { ApplicationAction, Application } from '@bytebot/shared';
 import { spawn } from 'child_process';
 import { promisify } from 'util';
@@ -169,27 +164,7 @@ describe('ComputerUseService - Application Management', () => {
     getCursorPosition: jest.fn(),
   } as unknown as jest.Mocked<NutService>;
 
-  const mockCuaVisionService: jest.Mocked<CuaVisionService> = {
-    performOcr: jest.fn(),
-    detectText: jest.fn(),
-    batchOcr: jest.fn(),
-    getCapabilities: jest.fn(),
-  } as unknown as jest.Mocked<CuaVisionService>;
-
-  const mockCuaIntegrationService: jest.Mocked<CuaIntegrationService> = {
-    isFrameworkEnabled: jest.fn(),
-    isAneBridgeAvailable: jest.fn(),
-    getConfiguration: jest.fn(),
-    initialize: jest.fn(),
-    getNetworkTopology: jest.fn(),
-  } as unknown as jest.Mocked<CuaIntegrationService>;
-
-  const mockPerformanceService: jest.Mocked<CuaPerformanceService> = {
-    startTiming: jest.fn(),
-    endTiming: jest.fn(),
-    logPerformance: jest.fn(),
-    getMetrics: jest.fn(),
-  } as unknown as jest.Mocked<CuaPerformanceService>;
+  // Note: CUA framework integration services removed - no longer needed for Linux desktop automation
 
   // Mock process object for spawn return value
   const mockProcess = {
@@ -225,18 +200,7 @@ describe('ComputerUseService - Application Management', () => {
           provide: NutService,
           useValue: mockNutService,
         },
-        {
-          provide: CuaVisionService,
-          useValue: mockCuaVisionService,
-        },
-        {
-          provide: CuaIntegrationService,
-          useValue: mockCuaIntegrationService,
-        },
-        {
-          provide: CuaPerformanceService,
-          useValue: mockPerformanceService,
-        },
+        // Note: CUA framework service providers removed - no longer needed
         {
           provide: Logger,
           useValue: {

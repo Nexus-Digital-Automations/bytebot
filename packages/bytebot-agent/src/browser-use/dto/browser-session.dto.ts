@@ -1,0 +1,426 @@
+/**
+ * Browser Session DTOs
+ *
+ * Data Transfer Objects for browser session management operations.
+ * Defines the structure for creating, managing, and responding with session data.
+ */
+
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsObject,
+  IsArray,
+  IsNumber,
+  IsBoolean,
+  IsUrl,
+  ValidateNested,
+  Min,
+  Max,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export enum BrowserSessionStatus {
+  INITIALIZING = 'initializing',
+  ACTIVE = 'active',
+  IDLE = 'idle',
+  CLOSING = 'closing',
+  CLOSED = 'closed',
+  ERROR = 'error',
+}
+
+export enum BrowserType {
+  CHROME = 'chrome',
+  CHROMIUM = 'chromium',
+  FIREFOX = 'firefox',
+  WEBKIT = 'webkit',
+}
+
+export class BrowserProfileConfig {
+  @ApiPropertyOptional({
+    description: 'Browser type to use for the session',
+    enum: BrowserType,
+    default: BrowserType.CHROMIUM,
+  })
+  @IsOptional()
+  @IsEnum(BrowserType)
+  browserType?: BrowserType = BrowserType.CHROMIUM;
+
+  @ApiPropertyOptional({
+    description: 'Run browser in headless mode',
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  headless?: boolean = true;
+
+  @ApiPropertyOptional({
+    description: 'Browser window width',
+    minimum: 400,
+    maximum: 3840,
+    default: 1920,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(400)
+  @Max(3840)
+  windowWidth?: number = 1920;
+
+  @ApiPropertyOptional({
+    description: 'Browser window height',
+    minimum: 300,
+    maximum: 2160,
+    default: 1080,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(300)
+  @Max(2160)
+  windowHeight?: number = 1080;
+
+  @ApiPropertyOptional({
+    description: 'User agent string to use',
+  })
+  @IsOptional()
+  @IsString()
+  userAgent?: string;
+
+  @ApiPropertyOptional({
+    description: 'Custom Chrome executable path',
+  })
+  @IsOptional()
+  @IsString()
+  chromeExecutablePath?: string;
+
+  @ApiPropertyOptional({
+    description: 'User data directory for browser profile',
+  })
+  @IsOptional()
+  @IsString()
+  userDataDir?: string;
+
+  @ApiPropertyOptional({
+    description: 'Enable JavaScript execution',
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  enableJavaScript?: boolean = true;
+
+  @ApiPropertyOptional({
+    description: 'Enable images loading',
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  enableImages?: boolean = true;
+
+  @ApiPropertyOptional({
+    description: 'Enable CSS loading',
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  enableCSS?: boolean = true;
+
+  @ApiPropertyOptional({
+    description: 'Additional browser launch arguments',
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  additionalArgs?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Proxy configuration',
+  })
+  @IsOptional()
+  @IsObject()
+  proxy?: {
+    server?: string;
+    username?: string;
+    password?: string;
+    bypass?: string[];
+  };
+}
+
+export class CreateBrowserSessionDto {
+  @ApiProperty({
+    description: 'Human-readable name for the session',
+    minLength: 1,
+    maxLength: 255,
+  })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(255)
+  name: string;
+
+  @ApiPropertyOptional({
+    description: 'Description of the session purpose',
+    maxLength: 1000,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Browser profile configuration',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => BrowserProfileConfig)
+  profile?: BrowserProfileConfig;
+
+  @ApiPropertyOptional({
+    description: 'Session timeout in seconds',
+    minimum: 60,
+    maximum: 3600,
+    default: 600,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(60)
+  @Max(3600)
+  timeoutSeconds?: number = 600;
+
+  @ApiPropertyOptional({
+    description: 'Enable screenshot capture capability',
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  enableScreenshots?: boolean = true;
+
+  @ApiPropertyOptional({
+    description: 'Enable video recording capability',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  enableVideoRecording?: boolean = false;
+
+  @ApiPropertyOptional({
+    description: 'Enable request/response logging',
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  enableNetworkLogging?: boolean = true;
+
+  @ApiPropertyOptional({
+    description: 'Enable console logging',
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  enableConsoleLogging?: boolean = true;
+
+  @ApiPropertyOptional({
+    description: 'Session-specific tags for organization',
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Initial URL to navigate to after session creation',
+  })
+  @IsOptional()
+  @IsUrl()
+  initialUrl?: string;
+
+  @ApiPropertyOptional({
+    description: 'Additional configuration parameters',
+  })
+  @IsOptional()
+  @IsObject()
+  config?: Record<string, any>;
+}
+
+export class BrowserTabInfo {
+  @ApiProperty({ description: 'Tab identifier' })
+  id: string;
+
+  @ApiProperty({ description: 'Tab title' })
+  title: string;
+
+  @ApiProperty({ description: 'Tab URL' })
+  url: string;
+
+  @ApiProperty({ description: 'Whether this tab is active' })
+  active: boolean;
+
+  @ApiProperty({ description: 'Tab creation timestamp' })
+  createdAt: Date;
+
+  @ApiProperty({ description: 'Last activity timestamp' })
+  lastActivity: Date;
+
+  @ApiProperty({ description: 'Tab loading status' })
+  loadingStatus: 'loading' | 'complete' | 'error';
+}
+
+export class BrowserSessionMetrics {
+  @ApiProperty({ description: 'Total session duration in seconds' })
+  totalDurationSeconds: number;
+
+  @ApiProperty({ description: 'Number of pages visited' })
+  pagesVisited: number;
+
+  @ApiProperty({ description: 'Number of actions performed' })
+  actionsPerformed: number;
+
+  @ApiProperty({ description: 'Number of screenshots taken' })
+  screenshotsTaken: number;
+
+  @ApiProperty({ description: 'Number of errors encountered' })
+  errorsEncountered: number;
+
+  @ApiProperty({ description: 'Number of network requests' })
+  networkRequests: number;
+
+  @ApiProperty({ description: 'Total data transferred in bytes' })
+  dataTransferredBytes: number;
+
+  @ApiProperty({ description: 'Average page load time in milliseconds' })
+  averagePageLoadTime: number;
+
+  @ApiProperty({ description: 'Memory usage in MB' })
+  memoryUsageMB: number;
+
+  @ApiProperty({ description: 'CPU usage percentage' })
+  cpuUsagePercent: number;
+}
+
+export class BrowserSessionResponseDto {
+  @ApiProperty({ description: 'Unique session identifier' })
+  id: string;
+
+  @ApiProperty({ description: 'Session name' })
+  name: string;
+
+  @ApiProperty({ description: 'Session description' })
+  description?: string;
+
+  @ApiProperty({ description: 'Whether session operation was successful' })
+  success: boolean;
+
+  @ApiProperty({
+    description: 'Current session status',
+    enum: BrowserSessionStatus,
+  })
+  status: BrowserSessionStatus;
+
+  @ApiProperty({ description: 'Browser profile configuration' })
+  profile: BrowserProfileConfig;
+
+  @ApiProperty({ description: 'Session timeout in seconds' })
+  timeoutSeconds: number;
+
+  @ApiProperty({ description: 'Screenshot capture enabled' })
+  enableScreenshots: boolean;
+
+  @ApiProperty({ description: 'Video recording enabled' })
+  enableVideoRecording: boolean;
+
+  @ApiProperty({ description: 'Network logging enabled' })
+  enableNetworkLogging: boolean;
+
+  @ApiProperty({ description: 'Console logging enabled' })
+  enableConsoleLogging: boolean;
+
+  @ApiProperty({ description: 'Session tags', type: [String] })
+  tags?: string[];
+
+  @ApiProperty({ description: 'Session creation timestamp' })
+  createdAt: Date;
+
+  @ApiProperty({ description: 'Last activity timestamp' })
+  lastActivity: Date;
+
+  @ApiProperty({ description: 'Session expiration timestamp' })
+  expiresAt: Date;
+
+  @ApiProperty({ description: 'User who created the session' })
+  createdBy: string;
+
+  @ApiProperty({ description: 'Current URL in active tab' })
+  currentUrl?: string;
+
+  @ApiProperty({ description: 'Current page title' })
+  currentTitle?: string;
+
+  @ApiProperty({ description: 'Legacy page title property' })
+  pageTitle?: string;
+
+  @ApiProperty({ description: 'Open browser tabs', type: [BrowserTabInfo] })
+  tabs: BrowserTabInfo[];
+
+  @ApiProperty({ description: 'Number of active tabs' })
+  activeTabsCount: number;
+
+  @ApiProperty({ description: 'Session performance metrics' })
+  metrics: BrowserSessionMetrics;
+
+  @ApiProperty({ description: 'Browser process ID' })
+  processId?: string;
+
+  @ApiProperty({ description: 'WebSocket connection for real-time updates' })
+  websocketUrl?: string;
+
+  @ApiProperty({ description: 'Additional configuration' })
+  config?: Record<string, any>;
+
+  @ApiProperty({ description: 'Error information if session failed' })
+  error?: {
+    message: string;
+    code: string;
+    timestamp: Date;
+  };
+}
+
+export class BrowserSessionListResponseDto {
+  @ApiProperty({
+    description: 'List of browser sessions',
+    type: [BrowserSessionResponseDto],
+  })
+  sessions: BrowserSessionResponseDto[];
+
+  @ApiProperty({ description: 'Total number of sessions' })
+  total: number;
+
+  @ApiProperty({ description: 'Number of active sessions' })
+  activeCount: number;
+
+  @ApiProperty({ description: 'Number of idle sessions' })
+  idleCount: number;
+
+  @ApiProperty({ description: 'Number of sessions with errors' })
+  errorCount: number;
+
+  @ApiProperty({ description: 'Total memory usage across all sessions in MB' })
+  totalMemoryUsageMB: number;
+
+  @ApiProperty({ description: 'Summary statistics' })
+  summary: {
+    totalSessions: number;
+    activeSessions: number;
+    idleSessions: number;
+    closedSessions: number;
+    averageSessionDuration: number;
+    peakMemoryUsage: number;
+  };
+
+  @ApiProperty({ description: 'Filter function for legacy support' })
+  filter?: Function;
+
+  @ApiProperty({ description: 'Length property for legacy support' })
+  length?: number;
+}

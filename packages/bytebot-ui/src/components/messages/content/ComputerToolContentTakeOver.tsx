@@ -7,6 +7,7 @@ import {
   isPressKeysToolUseBlock,
   isWaitToolUseBlock,
   isScrollToolUseBlock,
+  Coordinates,
 } from "@bytebot/shared";
 import { getIcon, getLabel } from "./ComputerToolUtils";
 
@@ -46,9 +47,9 @@ function ToolDetailsTakeOver({ block }: { block: ComputerToolUseContentBlock }) 
       {/* Coordinates for click/mouse actions */}
       {block.input.coordinates && (
         <p className={baseClasses}>
-          {(block.input.coordinates as { x: number; y: number }).x},
+          {(block.input.coordinates as Coordinates).x},
           {" "}
-          {(block.input.coordinates as { x: number; y: number }).y}
+          {(block.input.coordinates as Coordinates).y}
         </p>
       )}
       
@@ -56,12 +57,18 @@ function ToolDetailsTakeOver({ block }: { block: ComputerToolUseContentBlock }) 
       {"path" in block.input &&
         Array.isArray(block.input.path) &&
         block.input.path.every(
-          (point) => point.x !== undefined && point.y !== undefined,
+          (point: unknown): point is Coordinates => 
+            typeof point === 'object' && 
+            point !== null && 
+            'x' in point && 
+            'y' in point &&
+            typeof (point as Coordinates).x === 'number' &&
+            typeof (point as Coordinates).y === 'number'
         ) && (
           <p className={baseClasses}>
-            From: {block.input.path[0].x}, {block.input.path[0].y} → To:{" "}
-            {block.input.path[block.input.path.length - 1].x},{" "}
-            {block.input.path[block.input.path.length - 1].y}
+            From: {(block.input.path as Coordinates[])[0].x}, {(block.input.path as Coordinates[])[0].y} → To:{" "}
+            {(block.input.path as Coordinates[])[(block.input.path as Coordinates[]).length - 1].x},{" "}
+            {(block.input.path as Coordinates[])[(block.input.path as Coordinates[]).length - 1].y}
           </p>
         )}
       

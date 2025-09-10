@@ -1,0 +1,100 @@
+{
+  "project": "unknown",
+  "tasks": [
+    {
+      "id": "error_1757390677591_7jlsxx9uu",
+      "title": "Fix TypeScript compilation errors in configuration-analyzer.ts",
+      "description": "Multiple TypeScript syntax errors in configuration-analyzer.ts are blocking the build process. Need to fix duplicate closing braces and syntax issues that prevent successful compilation.",
+      "priority": "critical",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/security/configuration-analyzer.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T04:04:37.591Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757390666328_1_general_be2ab562",
+      "started_at": "2025-09-09T04:04:59.047Z",
+      "claimed_by": "development_session_1757390666328_1_general_be2ab562",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757390666328_1_general_be2ab562",
+          "role": "primary",
+          "assignedAt": "2025-09-09T04:04:59.047Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    }
+  ],
+  "agents": {
+    "development_session_1757388031247_1_general_42dc4bbd": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T03:20:31.249Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T03:20:31.249Z",
+      "sessionId": "session_1757388031247",
+      "metadata": {}
+    },
+    "development_session_1757390666328_1_general_be2ab562": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T04:04:26.332Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T04:04:26.332Z",
+      "sessionId": "session_1757390666328",
+      "metadata": {}
+    }
+  },
+  "settings": {
+    "auto_sort_enabled": true,
+    "sort_criteria": {
+      "primary": "category",
+      "secondary": "created_at"
+    },
+    "priority_values": {
+      "critical": 4,
+      "high": 3,
+      "medium": 2,
+      "low": 1
+    },
+    "category_enabled": true,
+    "category_ranks": {
+      "error": 1,
+      "feature": 2,
+      "subtask": 3,
+      "test": 4
+    }
+  },
+  "current_mode": "DEVELOPMENT"
+}

@@ -1,0 +1,50 @@
+# Grafana Datasources Configuration
+# Connects Grafana to Prometheus and other data sources
+
+apiVersion: 1
+
+# List of datasources to insert/update
+datasources:
+  # Prometheus datasource
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: POST
+      queryTimeout: 60s
+      timeInterval: 5s
+      
+  # Optional: Direct PostgreSQL connection for custom queries
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: bytebot_production
+    user: bytebot_user
+    secureJsonData:
+      password: secure_database_password_2024
+    version: 1
+    editable: false
+    jsonData:
+      sslmode: disable
+      postgresVersion: 16
+      timescaledb: false
+
+  # Optional: Loki for logs (if enabled)
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    version: 1
+    editable: true
+    jsonData:
+      maxLines: 1000
+      
+# Delete existing datasources not present in this config
+deleteDatasources:
+  - name: TestData DB
+    orgId: 1

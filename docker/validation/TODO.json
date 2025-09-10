@@ -1,0 +1,27 @@
+{
+  "project": "unknown",
+  "tasks": [],
+  "agents": {
+    "development_session_1757322043763_1_general_98926dcb": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-08T09:00:43.764Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-08T09:00:43.764Z",
+      "sessionId": "session_1757322043763",
+      "metadata": {}
+    }
+  }
+}

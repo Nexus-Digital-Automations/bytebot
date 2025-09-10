@@ -79,11 +79,6 @@ export class MetricsService {
     help: 'Active database connections'
   });
 
-  private readonly aneProcessingDuration = new Histogram({
-    name: 'bytebot_ane_processing_duration_seconds',
-    help: 'Apple Neural Engine processing duration',
-    buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5]
-  });
 }
 ```
 

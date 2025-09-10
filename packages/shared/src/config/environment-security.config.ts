@@ -42,29 +42,25 @@ const logger = {
  * Environment types for security configuration
  * ESLint disabled: Complete environment coverage for deployment flexibility
  */
-/* eslint-disable no-unused-vars */
 
 export enum SecurityEnvironment {
-  DEVELOPMENT = "development",
-  STAGING = "staging",
-  PRODUCTION = "production",
-  TEST = "test",
+  _DEVELOPMENT = "development",
+  _STAGING = "staging",
+  _PRODUCTION = "production",
+  _TEST = "test",
 }
-/* eslint-enable no-unused-vars */
 
 /**
  * Security levels with different policy strictness
  * ESLint disabled: Complete security level coverage for flexible deployment
  */
-/* eslint-disable no-unused-vars */
 
 export enum SecurityLevel {
-  MINIMAL = "minimal", // Development only
-  STANDARD = "standard", // Staging
-  HIGH = "high", // Production default
-  MAXIMUM = "maximum", // High-security production
+  _MINIMAL = "minimal", // Development only
+  _STANDARD = "standard", // Staging
+  _HIGH = "high", // Production default
+  _MAXIMUM = "maximum", // High-security production
 }
-/* eslint-enable no-unused-vars */
 
 /**
  * Security feature flags for gradual rollout
@@ -212,9 +208,9 @@ const ENVIRONMENT_SECURITY_DEFAULTS: Record<
   SecurityEnvironment,
   Partial<EnvironmentSecurityConfig>
 > = {
-  [SecurityEnvironment.DEVELOPMENT]: {
-    environment: SecurityEnvironment.DEVELOPMENT,
-    securityLevel: SecurityLevel.MINIMAL,
+  [SecurityEnvironment._DEVELOPMENT]: {
+    environment: SecurityEnvironment._DEVELOPMENT,
+    securityLevel: SecurityLevel._MINIMAL,
     features: {
       advancedCors: false,
       dynamicCspNonce: false,
@@ -293,9 +289,9 @@ const ENVIRONMENT_SECURITY_DEFAULTS: Record<
     },
   },
 
-  [SecurityEnvironment.STAGING]: {
-    environment: SecurityEnvironment.STAGING,
-    securityLevel: SecurityLevel.STANDARD,
+  [SecurityEnvironment._STAGING]: {
+    environment: SecurityEnvironment._STAGING,
+    securityLevel: SecurityLevel._STANDARD,
     features: {
       advancedCors: true,
       dynamicCspNonce: true,
@@ -377,9 +373,9 @@ const ENVIRONMENT_SECURITY_DEFAULTS: Record<
     },
   },
 
-  [SecurityEnvironment.PRODUCTION]: {
-    environment: SecurityEnvironment.PRODUCTION,
-    securityLevel: SecurityLevel.HIGH,
+  [SecurityEnvironment._PRODUCTION]: {
+    environment: SecurityEnvironment._PRODUCTION,
+    securityLevel: SecurityLevel._HIGH,
     features: {
       advancedCors: true,
       dynamicCspNonce: true,
@@ -458,9 +454,9 @@ const ENVIRONMENT_SECURITY_DEFAULTS: Record<
     },
   },
 
-  [SecurityEnvironment.TEST]: {
-    environment: SecurityEnvironment.TEST,
-    securityLevel: SecurityLevel.MINIMAL,
+  [SecurityEnvironment._TEST]: {
+    environment: SecurityEnvironment._TEST,
+    securityLevel: SecurityLevel._MINIMAL,
     features: {
       advancedCors: false,
       dynamicCspNonce: false,
@@ -559,7 +555,7 @@ const SERVICE_SECURITY_OVERRIDES: Record<
   RateLimitServiceType,
   ServiceSecurityOverrides
 > = {
-  [RateLimitServiceType.BYTEBOTD]: {
+  [RateLimitServiceType._BYTEBOTD]: {
     rateLimiting: {
       enabled: true,
       strictMode: true,
@@ -580,7 +576,7 @@ const SERVICE_SECURITY_OVERRIDES: Record<
     },
   },
 
-  [RateLimitServiceType.BYTEBOT_AGENT]: {
+  [RateLimitServiceType._BYTEBOT_AGENT]: {
     rateLimiting: {
       enabled: true,
       strictMode: false,
@@ -601,7 +597,7 @@ const SERVICE_SECURITY_OVERRIDES: Record<
     },
   },
 
-  [RateLimitServiceType.BYTEBOT_UI]: {
+  [RateLimitServiceType._BYTEBOT_UI]: {
     cors: {
       enabled: true,
       strictMode: false,
@@ -632,7 +628,7 @@ const SERVICE_SECURITY_OVERRIDES: Record<
     },
   },
 
-  [RateLimitServiceType.SHARED]: {
+  [RateLimitServiceType._SHARED]: {
     // Use environment defaults - empty override
   },
 };
@@ -715,17 +711,17 @@ export class EnvironmentSecurityConfigManager {
 
     switch (nodeEnv.toLowerCase()) {
       case "production":
-        environment = SecurityEnvironment.PRODUCTION;
+        environment = SecurityEnvironment._PRODUCTION;
         break;
       case "staging":
-        environment = SecurityEnvironment.STAGING;
+        environment = SecurityEnvironment._STAGING;
         break;
       case "test":
-        environment = SecurityEnvironment.TEST;
+        environment = SecurityEnvironment._TEST;
         break;
       case "development":
       default:
-        environment = SecurityEnvironment.DEVELOPMENT;
+        environment = SecurityEnvironment._DEVELOPMENT;
         break;
     }
 
@@ -766,15 +762,15 @@ export class EnvironmentSecurityConfigManager {
 
     // Validate environment-security level compatibility
     if (
-      config.environment === SecurityEnvironment.PRODUCTION &&
-      config.securityLevel === SecurityLevel.MINIMAL
+      config.environment === SecurityEnvironment._PRODUCTION &&
+      config.securityLevel === SecurityLevel._MINIMAL
     ) {
       errors.push("Production environment cannot use minimal security level");
     }
 
     if (
-      config.environment === SecurityEnvironment.DEVELOPMENT &&
-      config.securityLevel === SecurityLevel.MAXIMUM
+      config.environment === SecurityEnvironment._DEVELOPMENT &&
+      config.securityLevel === SecurityLevel._MAXIMUM
     ) {
       errors.push(
         "Development environment should not use maximum security level",
@@ -847,7 +843,7 @@ export class EnvironmentSecurityConfigManager {
     }
     if (
       !config.features.threatIntelligence &&
-      environment === SecurityEnvironment.PRODUCTION
+      environment === SecurityEnvironment._PRODUCTION
     ) {
       recommendations.push("Enable threat intelligence in production");
     }
@@ -917,14 +913,14 @@ export function getSecurityLevelForEnvironment(
   environment: SecurityEnvironment,
 ): SecurityLevel {
   switch (environment) {
-    case SecurityEnvironment.PRODUCTION:
-      return SecurityLevel.HIGH;
-    case SecurityEnvironment.STAGING:
-      return SecurityLevel.STANDARD;
-    case SecurityEnvironment.DEVELOPMENT:
-    case SecurityEnvironment.TEST:
+    case SecurityEnvironment._PRODUCTION:
+      return SecurityLevel._HIGH;
+    case SecurityEnvironment._STAGING:
+      return SecurityLevel._STANDARD;
+    case SecurityEnvironment._DEVELOPMENT:
+    case SecurityEnvironment._TEST:
     default:
-      return SecurityLevel.MINIMAL;
+      return SecurityLevel._MINIMAL;
   }
 }
 

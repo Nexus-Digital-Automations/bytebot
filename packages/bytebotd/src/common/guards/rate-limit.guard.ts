@@ -29,13 +29,13 @@ import { Request } from 'express';
 interface RateLimitConfig {
   /** Maximum requests per time window */
   limit: number;
-  
+
   /** Time window in seconds */
   windowSeconds: number;
-  
+
   /** Rate limit tier (for logging/monitoring) */
   tier: 'strict' | 'moderate' | 'lenient';
-  
+
   /** Custom error message */
   message?: string;
 }
@@ -51,7 +51,7 @@ const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
     tier: 'moderate',
     message: 'Computer control rate limit exceeded. Please slow down.',
   },
-  
+
   // Authentication endpoints - strict limits
   auth: {
     limit: 10,
@@ -59,7 +59,7 @@ const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
     tier: 'strict',
     message: 'Authentication rate limit exceeded. Try again later.',
   },
-  
+
   // Screenshot/vision operations - moderate limits (resource intensive)
   vision: {
     limit: 30,
@@ -67,7 +67,7 @@ const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
     tier: 'moderate',
     message: 'Vision processing rate limit exceeded.',
   },
-  
+
   // File operations - strict limits (potential for abuse)
   file_operations: {
     limit: 20,
@@ -75,7 +75,7 @@ const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
     tier: 'strict',
     message: 'File operation rate limit exceeded.',
   },
-  
+
   // General API operations - lenient limits
   general: {
     limit: 200,
@@ -93,27 +93,35 @@ export const RATE_LIMIT_KEY = 'rate-limit';
 /**
  * Decorator to set custom rate limits for specific endpoints
  */
-export const RateLimit = (config: Partial<RateLimitConfig> & { type: string }) =>
+export const RateLimit = (
+  config: Partial<RateLimitConfig> & { type: string },
+) =>
   SetMetadata(RATE_LIMIT_KEY, {
     ...RATE_LIMIT_CONFIGS.general,
     ...config,
   });
 
 @Injectable()
-export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActivate {
+export class EnterpriseRateLimitGuard
+  extends ThrottlerGuard
+  implements CanActivate
+{
   private readonly logger = new Logger(EnterpriseRateLimitGuard.name);
 
   // In-memory tracking for suspicious activity
-  private suspiciousActivityTracker = new Map<string, {
-    violations: number;
-    firstViolation: Date;
-    blocked: boolean;
-  }>();
+  private suspiciousActivityTracker = new Map<
+    string,
+    {
+      violations: number;
+      firstViolation: Date;
+      blocked: boolean;
+    }
+  >();
 
   constructor(
-    options: any, 
-    storageService: any, 
-    protected reflector: Reflector
+    options: any,
+    storageService: any,
+    protected reflector: Reflector,
   ) {
     super(options, storageService, reflector);
   }
@@ -121,7 +129,7 @@ export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActiv
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const operationId = `rate-limit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     try {
       // Get rate limit configuration for this endpoint
       const rateLimitConfig = this.getRateLimitConfig(context);
@@ -139,12 +147,15 @@ export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActiv
 
       // Check if client is temporarily blocked for suspicious activity
       if (this.isClientBlocked(clientIdentifier)) {
-        this.logger.warn(`[${operationId}] Client blocked due to suspicious activity`, {
-          operationId,
-          clientIdentifier,
-          endpoint: request.path,
-          blocked: true,
-        });
+        this.logger.warn(
+          `[${operationId}] Client blocked due to suspicious activity`,
+          {
+            operationId,
+            clientIdentifier,
+            endpoint: request.path,
+            blocked: true,
+          },
+        );
 
         throw new ThrottlerException(
           'Access temporarily blocked due to suspicious activity',
@@ -165,15 +176,17 @@ export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActiv
 
         // Reset suspicious activity counter on successful request
         this.resetSuspiciousActivity(clientIdentifier);
-        
+
         return true;
       }
 
       // This shouldn't be reached if super.canActivate throws on failure
       return false;
-
     } catch (error) {
-      if (error instanceof ThrottlerException || error.status === HttpStatus.TOO_MANY_REQUESTS) {
+      if (
+        error instanceof ThrottlerException ||
+        error.status === HttpStatus.TOO_MANY_REQUESTS
+      ) {
         const clientIdentifier = this.getClientIdentifier(request);
         const rateLimitConfig = this.getRateLimitConfig(context);
 
@@ -215,10 +228,9 @@ export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActiv
    */
   private getRateLimitConfig(context: ExecutionContext): RateLimitConfig {
     // Try to get custom rate limit from decorator first
-    const customConfig = this.reflector.getAllAndOverride<RateLimitConfig & { type: string }>(
-      RATE_LIMIT_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const customConfig = this.reflector.getAllAndOverride<
+      RateLimitConfig & { type: string }
+    >(RATE_LIMIT_KEY, [context.getHandler(), context.getClass()]);
 
     if (customConfig) {
       return customConfig;
@@ -232,9 +244,17 @@ export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActiv
       return RATE_LIMIT_CONFIGS.computer_use;
     } else if (path.includes('auth') || path.includes('login')) {
       return RATE_LIMIT_CONFIGS.auth;
-    } else if (path.includes('screenshot') || path.includes('vision') || path.includes('ocr')) {
+    } else if (
+      path.includes('screenshot') ||
+      path.includes('vision') ||
+      path.includes('ocr')
+    ) {
       return RATE_LIMIT_CONFIGS.vision;
-    } else if (path.includes('file') || path.includes('read') || path.includes('write')) {
+    } else if (
+      path.includes('file') ||
+      path.includes('read') ||
+      path.includes('write')
+    ) {
       return RATE_LIMIT_CONFIGS.file_operations;
     }
 
@@ -247,16 +267,20 @@ export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActiv
    */
   private getClientIdentifier(request: Request): string {
     // Use combination of IP and User-Agent for better identification
-    const ip = request.ip || 
-               request.connection.remoteAddress || 
-               request.socket.remoteAddress ||
-               (request.headers['x-forwarded-for'] as string)?.split(',')[0] ||
-               'unknown';
-    
+    const ip =
+      request.ip ||
+      request.connection.remoteAddress ||
+      request.socket.remoteAddress ||
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+      'unknown';
+
     const userAgent = request.headers['user-agent'] || 'unknown';
-    
+
     // Create hash-like identifier without actually hashing (for performance)
-    return `${ip}:${userAgent.substring(0, 50)}`.replace(/[^a-zA-Z0-9:.-]/g, '_');
+    return `${ip}:${userAgent.substring(0, 50)}`.replace(
+      /[^a-zA-Z0-9:.-]/g,
+      '_',
+    );
   }
 
   /**
@@ -268,18 +292,22 @@ export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActiv
 
     if (existingEntry) {
       existingEntry.violations += 1;
-      
+
       // Block client if too many violations within time window
       const timeDiff = now.getTime() - existingEntry.firstViolation.getTime();
-      if (existingEntry.violations >= 10 && timeDiff < 300000) { // 5 minutes
+      if (existingEntry.violations >= 10 && timeDiff < 300000) {
+        // 5 minutes
         existingEntry.blocked = true;
-        
-        this.logger.error('Client blocked for suspicious rate limit violations', {
-          clientIdentifier,
-          violations: existingEntry.violations,
-          timePeriodMs: timeDiff,
-          blocked: true,
-        });
+
+        this.logger.error(
+          'Client blocked for suspicious rate limit violations',
+          {
+            clientIdentifier,
+            violations: existingEntry.violations,
+            timePeriodMs: timeDiff,
+            blocked: true,
+          },
+        );
       }
     } else {
       this.suspiciousActivityTracker.set(clientIdentifier, {
@@ -298,13 +326,13 @@ export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActiv
    */
   private isClientBlocked(clientIdentifier: string): boolean {
     const entry = this.suspiciousActivityTracker.get(clientIdentifier);
-    
+
     if (!entry) return false;
 
     // Unblock after 1 hour
     const blockDuration = 60 * 60 * 1000; // 1 hour
     const timeSinceFirstViolation = Date.now() - entry.firstViolation.getTime();
-    
+
     if (timeSinceFirstViolation > blockDuration) {
       this.suspiciousActivityTracker.delete(clientIdentifier);
       return false;
@@ -318,7 +346,7 @@ export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActiv
    */
   private resetSuspiciousActivity(clientIdentifier: string): void {
     const entry = this.suspiciousActivityTracker.get(clientIdentifier);
-    
+
     if (entry && entry.violations > 0) {
       // Reset violations but keep the entry for tracking
       entry.violations = 0;
@@ -333,7 +361,9 @@ export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActiv
     const now = Date.now();
     const maxAge = 60 * 60 * 1000; // 1 hour
 
-    for (const [clientId, entry] of this.suspiciousActivityTracker.entries()) {
+    for (const [clientId, entry] of Array.from(
+      this.suspiciousActivityTracker.entries(),
+    )) {
       if (now - entry.firstViolation.getTime() > maxAge) {
         this.suspiciousActivityTracker.delete(clientId);
       }
@@ -346,10 +376,15 @@ export class EnterpriseRateLimitGuard extends ThrottlerGuard implements CanActiv
   getSuspiciousActivityStats(): {
     totalTracked: number;
     currentlyBlocked: number;
-    topViolators: Array<{ client: string; violations: number; blocked: boolean }>;
+    topViolators: Array<{
+      client: string;
+      violations: number;
+      blocked: boolean;
+    }>;
   } {
-    const blocked = Array.from(this.suspiciousActivityTracker.entries())
-      .filter(([, entry]) => entry.blocked).length;
+    const blocked = Array.from(this.suspiciousActivityTracker.entries()).filter(
+      ([, entry]) => entry.blocked,
+    ).length;
 
     const topViolators = Array.from(this.suspiciousActivityTracker.entries())
       .sort(([, a], [, b]) => b.violations - a.violations)

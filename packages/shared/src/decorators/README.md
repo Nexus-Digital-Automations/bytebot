@@ -38,7 +38,7 @@ export class UsersController {
   }
 
   // Require specific permissions
-  @RequirePermission([Permission.READ, Permission.USER_MANAGEMENT])
+  @RequirePermission([Permission._READ, Permission._USER_MANAGEMENT])
   @Get('/:id')
   async getUser(@Param('id') id: string) {
     return this.userService.findById(id);
@@ -52,7 +52,7 @@ export class UsersController {
   }
 
   // Require ALL specified permissions
-  @RequireAllPermissions([Permission.WRITE, Permission.DELETE, Permission.USER_MANAGEMENT])
+  @RequireAllPermissions([Permission._WRITE, Permission._DELETE, Permission._USER_MANAGEMENT])
   @Delete('/:id')
   async deleteUser(@Param('id') id: string) {
     return this.userService.delete(id);
@@ -203,7 +203,7 @@ import { SecureEndpoint, AuditAccess } from '@bytebot/shared/server';
 export class SystemController {
   @SecureEndpoint({
     roles: [Role.ADMIN],
-    permissions: [Permission.SYSTEM_MANAGEMENT],
+    permissions: [Permission._SYSTEM_MANAGEMENT],
     resourceTypes: [ResourceType.SYSTEM],
     auditLogging: true,
     rateLimit: { requests: 10, windowMs: 60000 },
@@ -420,8 +420,8 @@ const hasAccess = hasRequiredRoles(
 
 // Check if user has required permissions
 const hasPermissions = hasRequiredPermissions(
-  [Permission.READ, Permission.WRITE],
-  [Permission.READ],
+  [Permission._READ, Permission._WRITE],
+  [Permission._READ],
   false
 );
 
@@ -533,7 +533,7 @@ describe('MyController', () => {
     const metadata = extractRBACMetadata(MyController.prototype, 'myMethod');
     
     expect(metadata.roles).toEqual([Role.ADMIN]);
-    expect(metadata.permissions).toEqual([Permission.READ]);
+    expect(metadata.permissions).toEqual([Permission._READ]);
     expect(metadata.auditAccess).toBe(true);
   });
 });

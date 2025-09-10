@@ -21,8 +21,8 @@ import { Request, Response } from "express";
 import {
   ComprehensiveSecurityMiddleware,
   SecurityEvent,
-  SecurityEventType,
 } from "../src/middleware/comprehensive-security.middleware";
+import { SecurityEventType } from "../src/types/security.types";
 import {
   SecurityMonitoringService,
   SecurityAlert,
@@ -42,33 +42,45 @@ const createMockRequest = (
   method: "GET",
   url: "/test",
   get: jest.fn((header: string) => {
-    const headers: Record<string, string> = {
+    const headers: Record<string, string | string[]> = {
       "user-agent": "Mozilla/5.0 (Test Browser)",
       accept: "application/json",
+      "set-cookie": ["test-cookie=value"],
       ...(overrides as any).headers,
     };
-    return headers[header.toLowerCase()];
-  }),
+    const value = headers[header.toLowerCase()];
+    if (header.toLowerCase() === "set-cookie" && Array.isArray(value)) {
+      return value;
+    }
+    return typeof value === "string" ? value : undefined;
+  }) as unknown as Request["get"],
   ip: "127.0.0.1",
   ...overrides,
 });
 
 const createMockResponse = (): Partial<Response> => {
   const headers: Record<string, string> = {};
+  const mockResponse: Partial<Response> = {};
 
-  return {
-    setHeader: jest.fn((name: string, value: string) => {
-      headers[name.toLowerCase()] = value;
-    }),
-    removeHeader: jest.fn((name: string) => {
-      delete headers[name.toLowerCase()];
-    }),
-    getHeaders: jest.fn(() => headers),
-    status: jest.fn().mockReturnThis(),
-    json: jest.fn().mockReturnThis(),
-    end: jest.fn().mockReturnThis(),
-    locals: {},
-  };
+  mockResponse.setHeader = jest.fn(
+    (name: string, value: string | number | readonly string[]): Response => {
+      headers[name.toLowerCase()] = String(value);
+      return mockResponse as Response;
+    },
+  );
+
+  mockResponse.removeHeader = jest.fn((name: string): Response => {
+    delete headers[name.toLowerCase()];
+    return mockResponse as Response;
+  });
+
+  mockResponse.getHeaders = jest.fn(() => headers);
+  mockResponse.status = jest.fn().mockReturnValue(mockResponse);
+  mockResponse.json = jest.fn().mockReturnValue(mockResponse);
+  mockResponse.end = jest.fn().mockReturnValue(mockResponse);
+  mockResponse.locals = {};
+
+  return mockResponse;
 };
 
 describe("Comprehensive Security System", () => {
@@ -213,8 +225,10 @@ describe("Comprehensive Security System", () => {
         const req = createMockRequest({
           get: jest.fn((header) => {
             if (header === "Origin") return "http://localhost:3000";
+            if (header.toLowerCase() === "set-cookie")
+              return ["test-cookie=value"];
             return undefined;
-          }),
+          }) as unknown as Request["get"],
         });
         const res = createMockResponse();
         const next = jest.fn();
@@ -263,8 +277,10 @@ describe("Comprehensive Security System", () => {
         const req = createMockRequest({
           get: jest.fn((header) => {
             if (header === "Origin") return "http://malicious.com";
+            if (header.toLowerCase() === "set-cookie")
+              return ["test-cookie=value"];
             return undefined;
-          }),
+          }) as unknown as Request["get"],
         });
         const res = createMockResponse();
         const next = jest.fn();
@@ -342,7 +358,7 @@ describe("Comprehensive Security System", () => {
     test("should process security events correctly", async () => {
       const testEvent: SecurityEvent = {
         eventId: "test-event-123",
-        type: SecurityEventType.CORS_VIOLATION,
+        type: SecurityEventType._CORS_VIOLATION,
         timestamp: new Date(),
         serviceName: "test-service",
         environment: "test",
@@ -353,6 +369,7 @@ describe("Comprehensive Security System", () => {
         method: "GET",
         riskScore: 85,
         blocked: true,
+        success: false,
         reason: "Origin not allowed by CORS policy",
         metadata: { test: true },
       };
@@ -387,7 +404,7 @@ describe("Comprehensive Security System", () => {
     test("should detect CORS flood attacks", async () => {
       const baseEvent: SecurityEvent = {
         eventId: "",
-        type: SecurityEventType.CORS_VIOLATION,
+        type: SecurityEventType._CORS_VIOLATION,
         timestamp: new Date(),
         serviceName: "test-service",
         environment: "test",
@@ -398,6 +415,7 @@ describe("Comprehensive Security System", () => {
         method: "GET",
         riskScore: 50,
         blocked: true,
+        success: false,
         reason: "Origin not allowed",
         metadata: {},
       };
@@ -418,7 +436,7 @@ describe("Comprehensive Security System", () => {
     test("should detect CSP bypass attempts", async () => {
       const cspEvents = Array.from({ length: 5 }, (_, i) => ({
         eventId: `csp-test-${i}`,
-        type: SecurityEventType.CSP_VIOLATION,
+        type: SecurityEventType._CSP_VIOLATION,
         timestamp: new Date(),
         serviceName: "test-service",
         environment: "test",
@@ -429,6 +447,7 @@ describe("Comprehensive Security System", () => {
         method: "CSP_REPORT",
         riskScore: 70,
         blocked: true,
+        success: false,
         reason: "CSP violation: script-src",
         metadata: {
           violatedDirective: "script-src",
@@ -455,7 +474,9 @@ describe("Comprehensive Security System", () => {
       const requests = Array.from({ length: requestCount }, (_, i) => {
         const req = createMockRequest({
           url: `/test/${i}`,
-          get: jest.fn(() => "http://localhost:3000"),
+          get: jest.fn(
+            () => "http://localhost:3000",
+          ) as unknown as Request["get"],
         });
         const res = createMockResponse();
         const next = jest.fn();
@@ -483,7 +504,9 @@ describe("Comprehensive Security System", () => {
         const batchRequests = Array.from({ length: 100 }, (_, i) => {
           const req = createMockRequest({
             url: `/load-test/${batch}-${i}`,
-            get: jest.fn(() => `http://localhost:300${i % 10}`),
+            get: jest.fn(
+              () => `http://localhost:300${i % 10}`,
+            ) as unknown as Request["get"],
           });
           const res = createMockResponse();
           const next = jest.fn();
@@ -522,10 +545,16 @@ describe("Comprehensive Security System", () => {
 
         await new Promise<void>((resolve) => {
           next.mockImplementation(() => {
-            const nonce = res.setHeader.mock.calls.find(
+            const setHeaderMock = res.setHeader as jest.MockedFunction<
+              (
+                name: string,
+                value: string | number | readonly string[],
+              ) => Response
+            >;
+            const nonce = setHeaderMock.mock.calls.find(
               (call) => call[0] === "X-CSP-Nonce",
             )?.[1];
-            if (nonce) {
+            if (nonce && typeof nonce === "string") {
               nonces.push(nonce);
             }
             resolve();
@@ -674,25 +703,37 @@ describe("Comprehensive Security System", () => {
       const events: SecurityEvent[] = [
         {
           eventId: "metric-test-1",
-          type: SecurityEventType.CORS_VIOLATION,
+          type: SecurityEventType._CORS_VIOLATION,
           timestamp: new Date(),
-          serviceName: "test-service",
-          environment: "test",
           riskScore: 60,
-          blocked: true,
-          reason: "Test violation",
-          metadata: {},
+          ipAddress: undefined,
+          userAgent: undefined,
+          endpoint: "/test-resource",
+          method: "GET",
+          success: false,
+          message: "Test violation",
+          metadata: {
+            serviceName: "test-service",
+            environment: "test",
+          },
+          sessionId: undefined,
         },
         {
           eventId: "metric-test-2",
-          type: SecurityEventType.CSP_VIOLATION,
+          type: SecurityEventType._CSP_VIOLATION,
           timestamp: new Date(),
-          serviceName: "test-service",
-          environment: "test",
           riskScore: 80,
-          blocked: true,
-          reason: "Test CSP violation",
-          metadata: {},
+          ipAddress: undefined,
+          userAgent: undefined,
+          endpoint: "/csp-resource",
+          method: "POST",
+          success: false,
+          message: "Test CSP violation",
+          metadata: {
+            serviceName: "test-service",
+            environment: "test",
+          },
+          sessionId: undefined,
         },
       ];
 
@@ -729,13 +770,16 @@ describe("Edge Cases and Advanced Scenarios", () => {
       // Phase 1: Reconnaissance
       ...Array.from({ length: 5 }, (_, i) => ({
         eventId: `recon-${i}`,
-        type: SecurityEventType.CORS_VIOLATION,
+        type: SecurityEventType._CORS_VIOLATION,
         timestamp: new Date(Date.now() - (5 - i) * 1000),
         serviceName: "test-service",
         environment: "production",
         ipAddress: `192.168.1.${100 + i}`,
         riskScore: 30,
         blocked: true,
+        success: false,
+        endpoint: "/api/reconnaissance",
+        method: "GET",
         reason: "Reconnaissance probe",
         metadata: { phase: "reconnaissance" },
       })),
@@ -743,13 +787,16 @@ describe("Edge Cases and Advanced Scenarios", () => {
       // Phase 2: Exploitation attempts
       ...Array.from({ length: 10 }, (_, i) => ({
         eventId: `exploit-${i}`,
-        type: SecurityEventType.SUSPICIOUS_ORIGIN,
+        type: SecurityEventType._SUSPICIOUS_ACTIVITY,
         timestamp: new Date(Date.now() - i * 500),
         serviceName: "test-service",
         environment: "production",
         ipAddress: "192.168.1.105",
         riskScore: 85,
         blocked: true,
+        success: false,
+        endpoint: "/api/exploit",
+        method: "POST",
         reason: "Exploitation attempt",
         metadata: { phase: "exploitation" },
       })),

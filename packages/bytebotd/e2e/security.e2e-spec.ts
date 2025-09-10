@@ -174,7 +174,7 @@ describe('Security E2E Tests', () => {
     });
 
     // Mock rate limiting middleware
-    let requestCounts = new Map();
+    const requestCounts = new Map();
     app.use((req, res, next) => {
       const ip = req.ip || '127.0.0.1';
       const count = requestCounts.get(ip) || 0;

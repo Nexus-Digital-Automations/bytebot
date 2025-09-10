@@ -7,7 +7,6 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BytebotMcpModule } from './mcp';
-import { CuaIntegrationModule } from './cua-integration/cua-integration.module';
 import { HealthModule } from './health/health.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { CacheModule } from './cache/cache.module';
@@ -31,7 +30,6 @@ import { CacheKeyGenerator } from './cache/cache-key.generator';
     ComputerUseModule,
     InputTrackingModule,
     BytebotMcpModule,
-    CuaIntegrationModule, // C/ua Framework Integration
     HealthModule, // Enterprise health monitoring with Kubernetes support
     MetricsModule, // Prometheus metrics collection
     CacheModule, // Redis-based caching infrastructure

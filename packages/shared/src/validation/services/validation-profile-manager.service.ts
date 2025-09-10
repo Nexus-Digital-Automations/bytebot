@@ -40,7 +40,7 @@ export class ValidationProfileManager {
       profileId: `${serviceType}-${environment}-${securityLevel || "default"}`,
       serviceType,
       environment,
-      securityLevel: securityLevel || ValidationSecurityLevel.STANDARD,
+      securityLevel: securityLevel || ValidationSecurityLevel._STANDARD,
       // Add profile logic here
     };
 

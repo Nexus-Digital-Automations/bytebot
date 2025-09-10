@@ -347,30 +347,39 @@ export class HealthService extends HealthIndicator {
 
     try {
       // Check multiple external service dependencies
+      // Type annotation ensures proper handling when array is empty
       const services = await Promise.allSettled([
-        this.checkExternalService(
-          'c_ua_framework',
-          'http://localhost:8080/health',
-        ),
-        this.checkExternalService('ane_bridge', 'http://localhost:8081/health'),
-      ]);
+        // External service checks can be added here as needed
+        // Example: this.checkExternalService('api', 'https://api.example.com/health')
+      ] as Array<Promise<{ status: string; responseTime?: string }>>);
 
-      const results: any = {};
+      const results: Record<string, any> = {};
       let allHealthy = true;
 
-      services.forEach((result, index) => {
-        const serviceName = index === 0 ? 'c_ua_framework' : 'ane_bridge';
+      services.forEach(
+        (
+          result: PromiseSettledResult<{
+            status: string;
+            responseTime?: string;
+          }>,
+          index: number,
+        ) => {
+          const serviceName = `service_${index}`;
 
-        if (result.status === 'fulfilled') {
-          results[serviceName] = result.value;
-        } else {
-          results[serviceName] = {
-            status: 'error',
-            error: result.reason?.message,
-          };
-          allHealthy = false;
-        }
-      });
+          if (result.status === 'fulfilled') {
+            results[serviceName] = result.value;
+          } else {
+            results[serviceName] = {
+              status: 'error',
+              error:
+                result.reason instanceof Error
+                  ? result.reason.message
+                  : String(result.reason),
+            };
+            allHealthy = false;
+          }
+        },
+      );
 
       this.logger.debug(`[${operationId}] External services check completed`, {
         allHealthy,
@@ -453,7 +462,6 @@ export class HealthService extends HealthIndicator {
       const modules = {
         'computer-use': true, // Assume initialized
         'input-tracking': true, // Assume initialized
-        'cua-integration': true, // Assume initialized
         health: true, // We know this is initialized since we're running
       };
 

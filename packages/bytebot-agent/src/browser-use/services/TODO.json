@@ -1,0 +1,90 @@
+{
+  "project": "unknown",
+  "tasks": [],
+  "agents": {
+    "development_session_1757417349699_1_general_5e9b3a26": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T11:29:09.700Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T11:29:09.700Z",
+      "sessionId": "session_1757417349699",
+      "metadata": {}
+    },
+    "development_session_1757417349709_1_general_4bb7cc80": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T11:29:09.711Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T11:29:09.712Z",
+      "sessionId": "session_1757417349709",
+      "metadata": {}
+    },
+    "development_session_1757417373658_1_general_c7608248": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T11:29:33.659Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T11:29:33.659Z",
+      "sessionId": "session_1757417373658",
+      "metadata": {}
+    },
+    "development_session_1757417373677_1_general_8085f744": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-09T11:29:33.678Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-09T11:29:33.678Z",
+      "sessionId": "session_1757417373677",
+      "metadata": {}
+    }
+  }
+}

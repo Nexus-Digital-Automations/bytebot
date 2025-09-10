@@ -1,6 +1,7 @@
 import React from "react";
 import {
   MessageContentBlock,
+  MessageContentType,
   isTextContentBlock,
   isImageContentBlock,
   isComputerToolUseContentBlock,
@@ -73,7 +74,7 @@ export function MessageContent({
           {isToolResultContentBlock(block) &&
             !block.is_error &&
             block.tool_use_id === "set_task_status" &&
-            block.content?.[0].type === "text" && (
+            block.content?.[0].type === MessageContentType._Text && (
               <TextContent block={block.content?.[0]} />
             )}
         </div>

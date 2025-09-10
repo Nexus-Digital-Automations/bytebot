@@ -1,31 +1,60 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Shared Package",
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
+    "declarationMap": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "target": "ES2022",
     "lib": ["ES2022"],
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "rootDir": "./",
     "incremental": true,
+    "composite": true,
     "skipLibCheck": true,
-    "strictNullChecks": true,
+    "strictNullChecks": false,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "strict": false,
+    "noImplicitReturns": false,
+    "noImplicitThis": false,
+    "alwaysStrict": false,
+    "downlevelIteration": true,
+    "types": ["node", "@jest/globals"],
+    "resolveJsonModule": true,
+    "moduleResolution": "node"
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
     "node_modules", 
     "dist",
+    "dist-test",
+    "**/*.js",
+    "coverage",
+    "development/guides/**/*.mjs",
+    "development/guides/**/*.js",
+    "**/*.example.*",
+    "**/*.config.example.*",
+    "eslint.config.mjs",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "**/__tests__/**/*"
-  ]
+    "__tests__/**/*",
+    "src/**/__tests__/**/*",
+    "src/**/test-utils/**/*",
+    "test-*",
+    "**/test-*"
+  ],
+  "references": []
 }

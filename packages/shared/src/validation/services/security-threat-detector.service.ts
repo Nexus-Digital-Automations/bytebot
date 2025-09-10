@@ -179,7 +179,7 @@ export class SecurityThreatDetector {
         analysisId,
         isHighRisk,
         riskScore,
-        threatTypes: [...new Set(threats.map((t) => t.type))],
+        threatTypes: Array.from(new Set(threats.map((t) => t.type))),
         threatDetails: threats.map((threat) => ({
           pattern: threat.pattern,
           location: threat.location,
@@ -205,12 +205,12 @@ export class SecurityThreatDetector {
       });
 
       return result;
-    } catch (error) {
+    } catch (err) {
       const analysisDurationMs = Date.now() - startTime;
 
       this.logger.error(`Threat analysis failed: ${analysisId}`, {
         analysisId,
-        error: (error as Error).message,
+        error: (err as Error).message,
         analysisDurationMs,
       });
 
@@ -224,7 +224,7 @@ export class SecurityThreatDetector {
           {
             severity: ThreatSeverity.CRITICAL,
             confidence: 1.0,
-            description: `Threat analysis failed: ${(error as Error).message}`,
+            description: `Threat analysis failed: ${(err as Error).message}`,
           },
         ],
         metadata: {
@@ -254,9 +254,9 @@ export class SecurityThreatDetector {
 
     try {
       return JSON.stringify(value);
-    } catch (error) {
+    } catch (err) {
       this.logger.warn("Failed to stringify input for analysis", {
-        error: (error as Error).message,
+        error: (err as Error).message,
         valueType: typeof value,
       });
       if (typeof value === "object" && value !== null) {
@@ -496,7 +496,7 @@ export class SecurityThreatDetector {
 
     // Context-specific threat detection based on service type
     switch (context.serviceType) {
-      case ValidationServiceType.BYTEBOTD:
+      case ValidationServiceType._BYTEBOTD:
         // Additional computer-use specific threats
         if (
           /(?:shutdown|reboot|halt|poweroff|kill|pkill|killall)/gi.test(input)
@@ -511,7 +511,7 @@ export class SecurityThreatDetector {
         }
         break;
 
-      case ValidationServiceType.BYTEBOT_AGENT:
+      case ValidationServiceType._BYTEBOT_AGENT:
         // Task management specific threats
         if (
           /(?:__proto__|constructor\.prototype|Object\.prototype)/gi.test(input)
@@ -526,7 +526,7 @@ export class SecurityThreatDetector {
         }
         break;
 
-      case ValidationServiceType.BYTEBOT_UI:
+      case ValidationServiceType._BYTEBOT_UI:
         // Frontend specific threats
         if (/(?:postMessage|origin|parent\.)/gi.test(input)) {
           threats.push({

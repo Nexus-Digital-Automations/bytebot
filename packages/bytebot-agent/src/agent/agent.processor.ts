@@ -169,7 +169,7 @@ export class AgentProcessor {
                 role: MessageRole.USER,
                 content: [
                   {
-                    type: MessageContentType.Text,
+                    type: MessageContentType._Text,
                     text: latestSummary.content,
                   },
                 ],
@@ -253,7 +253,7 @@ export class AgentProcessor {
                 role: MessageRole.USER,
                 content: [
                   {
-                    type: MessageContentType.Text,
+                    type: MessageContentType._Text,
                     text: 'Respond with a summary of the messages above. Do not include any additional information.',
                   },
                 ],
@@ -272,7 +272,7 @@ export class AgentProcessor {
           const summaryContent = summaryContentBlocks
             .filter(
               (block: MessageContentBlock) =>
-                block.type === MessageContentType.Text,
+                block.type === MessageContentType._Text,
             )
             .map((block: TextContentBlock) => block.text)
             .join('\n');
@@ -340,11 +340,11 @@ export class AgentProcessor {
           });
 
           generatedToolResults.push({
-            type: MessageContentType.ToolResult,
+            type: MessageContentType._ToolResult,
             tool_use_id: block.id,
             content: [
               {
-                type: MessageContentType.Text,
+                type: MessageContentType._Text,
                 text: 'The task has been created',
               },
             ],
@@ -355,12 +355,12 @@ export class AgentProcessor {
           setTaskStatusToolUseBlock = block;
 
           generatedToolResults.push({
-            type: MessageContentType.ToolResult,
+            type: MessageContentType._ToolResult,
             tool_use_id: block.id,
             is_error: block.input.status === 'failed',
             content: [
               {
-                type: MessageContentType.Text,
+                type: MessageContentType._Text,
                 text: block.input.description,
               },
             ],

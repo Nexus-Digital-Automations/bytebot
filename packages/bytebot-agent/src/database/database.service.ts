@@ -315,7 +315,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
     // Keep only recent metrics (last 1000 queries)
     if (this.queryMetrics.length > 1000) {
-      (this as any).queryMetrics = this.queryMetrics.slice(-1000);
+      this.queryMetrics.splice(0, this.queryMetrics.length - 1000);
     }
   }
 
@@ -549,7 +549,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     // Register metrics cleanup
     this.shutdownService.registerCleanupTask('database-metrics', () => {
       this.logger.log('Clearing database metrics');
-      (this as any).queryMetrics = [];
+      this.queryMetrics.length = 0;
       this.totalQueries = 0;
       this.totalQueryTime = 0;
       this.slowQueries = 0;

@@ -52,7 +52,6 @@ interface SecureErrorResponse {
 /**
  * Security metrics for error tracking
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface SecurityErrorMetrics {
   errorType: SecurityErrorType;
   statusCode: number;
@@ -491,7 +490,9 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     const now = Date.now();
     const maxAge = 60 * 60 * 1000; // 1 hour
 
-    for (const [key, pattern] of this.errorPatterns.entries()) {
+    // Convert to array to avoid iterator issues
+    const entries = Array.from(this.errorPatterns.entries());
+    for (const [key, pattern] of entries) {
       if (now - pattern.lastSeen.getTime() > maxAge) {
         this.errorPatterns.delete(key);
       }

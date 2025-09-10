@@ -9,6 +9,8 @@
  * @author CORS & Security Headers Specialist
  */
 
+import type { Request, Response, NextFunction } from "express";
+
 export interface SecurityConfig {
   /** Current environment (development, staging, production) */
   environment: "development" | "staging" | "production";
@@ -59,7 +61,9 @@ const DEFAULT_ORIGINS = {
  * @param config Security configuration
  * @returns Helmet options object
  */
-export function createHelmetConfig(config: SecurityConfig) {
+export function createHelmetConfig(
+  config: SecurityConfig,
+): Record<string, unknown> {
   const { environment, enableSwagger, enableVNC, enableHSTS } = config;
 
   return {
@@ -217,7 +221,9 @@ export function createHelmetConfig(config: SecurityConfig) {
  * @param config Security configuration
  * @returns CORS options object
  */
-export function createCorsConfig(config: SecurityConfig) {
+export function createCorsConfig(
+  config: SecurityConfig,
+): Record<string, unknown> {
   const { environment, customOrigins } = config;
 
   const baseOrigins =
@@ -229,7 +235,7 @@ export function createCorsConfig(config: SecurityConfig) {
   return {
     origin: (
       origin: string | undefined,
-      callback: (error: Error | null, success?: boolean) => void,
+      callback: (_error: Error | null, _success?: boolean) => void,
     ) => {
       // Allow requests with no origin (mobile apps, curl, postman, etc.)
       if (!origin) {
@@ -319,33 +325,41 @@ export function createCorsConfig(config: SecurityConfig) {
  * @param config Security configuration
  * @returns Express middleware function
  */
-export function createSecurityHeadersMiddleware(config: SecurityConfig) {
-  return (req: any, res: any, next: any) => {
+export function createSecurityHeadersMiddleware(
+  config: SecurityConfig,
+): (_req: Request, _res: Response, _next: NextFunction) => void {
+  return (_req: Request, _res: Response, _next: NextFunction): void => {
     // Set service identification headers
-    res.setHeader("X-Service", config.serviceName);
-    res.setHeader("X-API-Version", "1.0");
-    res.setHeader(
+    _res.setHeader("X-Service", config.serviceName);
+    _res.setHeader("X-API-Version", "1.0");
+    _res.setHeader(
       "X-Service-ID",
       config.serviceName.toLowerCase().replace(/[^a-z0-9]/g, "-"),
     );
 
     // Remove sensitive headers in production
     if (config.environment === "production") {
-      res.removeHeader("X-Powered-By");
-      res.removeHeader("Server");
+      _res.removeHeader("X-Powered-By");
+      _res.removeHeader("Server");
     }
 
     // Add custom security headers
-    res.setHeader("X-Frame-Options", config.enableVNC ? "SAMEORIGIN" : "DENY");
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("X-XSS-Protection", "1; mode=block");
+    _res.setHeader("X-Frame-Options", config.enableVNC ? "SAMEORIGIN" : "DENY");
+    _res.setHeader("X-Content-Type-Options", "nosniff");
+    _res.setHeader("X-XSS-Protection", "1; mode=block");
 
     // Rate limiting information (if available)
-    if (req.rateLimit) {
-      res.setHeader("X-Rate-Limit-Remaining", req.rateLimit.remaining || 0);
+    const reqWithRateLimit = _req as Request & {
+      rateLimit?: { remaining?: number };
+    };
+    if (reqWithRateLimit.rateLimit) {
+      _res.setHeader(
+        "X-Rate-Limit-Remaining",
+        reqWithRateLimit.rateLimit.remaining?.toString() ?? "0",
+      );
     }
 
-    next();
+    _next();
   };
 }
 
@@ -378,7 +392,7 @@ export const SECURITY_PRESETS = {
  * @returns Complete security configuration
  */
 export function getSecurityConfig(
-  serviceName: keyof typeof SECURITY_PRESETS | string,
+  serviceName: string,
   environment: SecurityConfig["environment"] = "development",
   overrides: Partial<SecurityConfig> = {},
 ): SecurityConfig {

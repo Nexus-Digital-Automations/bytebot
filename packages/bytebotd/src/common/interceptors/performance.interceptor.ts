@@ -122,7 +122,7 @@ export class PerformanceInterceptor implements NestInterceptor {
   /**
    * Intercept HTTP requests to monitor performance
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
@@ -132,7 +132,7 @@ export class PerformanceInterceptor implements NestInterceptor {
     const memoryBefore = process.memoryUsage();
 
     // Add operation ID to request for downstream services
-    (request as any).operationId = operationId;
+    (request as Request & { operationId?: string }).operationId = operationId;
 
     this.logger.debug(
       `[${operationId}] Performance monitoring started: ${request.method} ${request.url}`,

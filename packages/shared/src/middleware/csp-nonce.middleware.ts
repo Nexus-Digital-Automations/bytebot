@@ -19,9 +19,8 @@
  * @author CSP Nonce Generation Specialist
  */
 
-import { Injectable, NestMiddleware, Logger, Inject } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { Request, Response, NextFunction } from "express";
+import { ConfigService } from "@nestjs/config";
 import { randomBytes, createHash } from "crypto";
 import {
   generateEventId,
@@ -44,7 +43,7 @@ export interface RequestWithNonce extends Request {
   csrfToken?: string; // Integration with CSRF protection
   session?: {
     id?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -169,9 +168,9 @@ interface NonceMetrics {
  */
 const DEFAULT_CSP_NONCE_CONFIGS: Record<RateLimitServiceType, CSPNonceConfig> =
   {
-    [RateLimitServiceType.BYTEBOTD]: {
+    [RateLimitServiceType._BYTEBOTD]: {
       enabled: true,
-      serviceType: RateLimitServiceType.BYTEBOTD,
+      serviceType: RateLimitServiceType._BYTEBOTD,
       generation: {
         length: 32,
         algorithm: "random",
@@ -211,9 +210,9 @@ const DEFAULT_CSP_NONCE_CONFIGS: Record<RateLimitServiceType, CSPNonceConfig> =
       },
     },
 
-    [RateLimitServiceType.BYTEBOT_AGENT]: {
+    [RateLimitServiceType._BYTEBOT_AGENT]: {
       enabled: true,
-      serviceType: RateLimitServiceType.BYTEBOT_AGENT,
+      serviceType: RateLimitServiceType._BYTEBOT_AGENT,
       generation: {
         length: 32,
         algorithm: "hash-based",
@@ -253,9 +252,9 @@ const DEFAULT_CSP_NONCE_CONFIGS: Record<RateLimitServiceType, CSPNonceConfig> =
       },
     },
 
-    [RateLimitServiceType.BYTEBOT_UI]: {
+    [RateLimitServiceType._BYTEBOT_UI]: {
       enabled: true,
-      serviceType: RateLimitServiceType.BYTEBOT_UI,
+      serviceType: RateLimitServiceType._BYTEBOT_UI,
       generation: {
         length: 24,
         algorithm: "random",
@@ -295,9 +294,9 @@ const DEFAULT_CSP_NONCE_CONFIGS: Record<RateLimitServiceType, CSPNonceConfig> =
       },
     },
 
-    [RateLimitServiceType.SHARED]: {
+    [RateLimitServiceType._SHARED]: {
       enabled: true,
-      serviceType: RateLimitServiceType.SHARED,
+      serviceType: RateLimitServiceType._SHARED,
       generation: {
         length: 32,
         algorithm: "random",
@@ -342,9 +341,13 @@ const DEFAULT_CSP_NONCE_CONFIGS: Record<RateLimitServiceType, CSPNonceConfig> =
  * CSP Nonce Generation Middleware
  * Provides enterprise-grade nonce generation and management for Content Security Policies
  */
-@Injectable()
-export class CSPNonceMiddleware implements NestMiddleware {
-  private readonly logger = new Logger(CSPNonceMiddleware.name);
+export class CSPNonceMiddleware {
+  private readonly logger = {
+    log: (msg: string) => console.log(`[CSPNonceMiddleware] ${msg}`),
+    warn: (msg: string) => console.warn(`[CSPNonceMiddleware] ${msg}`),
+    error: (msg: string) => console.error(`[CSPNonceMiddleware] ${msg}`),
+    debug: (msg: string) => console.debug(`[CSPNonceMiddleware] ${msg}`),
+  };
   private readonly config: CSPNonceConfig;
   private readonly nonceCache = new Map<
     string,
@@ -364,26 +367,25 @@ export class CSPNonceMiddleware implements NestMiddleware {
   };
 
   constructor(
-    private readonly configService: ConfigService,
-    @Inject("SERVICE_TYPE") private readonly serviceType: RateLimitServiceType,
+    private readonly _configService: {
+      get?(_key: string, _defaultValue?: unknown): unknown;
+    }, // ConfigService interface compatible
+    private readonly serviceType: RateLimitServiceType,
   ) {
     // Initialize configuration
+    const defaultConfig = DEFAULT_CSP_NONCE_CONFIGS[serviceType];
+    const serviceConfig = this._configService.get
+      ? (this._configService.get(`cspNonce.${serviceType}`, {}) as Record<
+          string,
+          unknown
+        >)
+      : {};
     this.config = {
-      ...DEFAULT_CSP_NONCE_CONFIGS[serviceType],
-      ...this.configService.get<Partial<CSPNonceConfig>>(
-        `cspNonce.${serviceType}`,
-        {},
-      ),
-    };
+      ...defaultConfig,
+      ...(serviceConfig as Partial<CSPNonceConfig>),
+    } as CSPNonceConfig;
 
-    this.logger.log(`CSP nonce middleware initialized for ${serviceType}`, {
-      serviceType: this.config.serviceType,
-      enabled: this.config.enabled,
-      algorithm: this.config.generation.algorithm,
-      nonceLength: this.config.generation.length,
-      validityMs: this.config.lifecycle.validityMs,
-      strictMode: this.config.csp.strictMode,
-    });
+    this.logger.log(`CSP nonce middleware initialized for ${serviceType}`);
 
     // Set up cleanup interval if enabled
     if (this.config.memory.enableCleanup) {
@@ -444,31 +446,18 @@ export class CSPNonceMiddleware implements NestMiddleware {
 
       // Log nonce generation if enabled
       if (this.config.security.logGeneration) {
-        this.logger.debug(`[${operationId}] CSP nonce generated successfully`, {
-          operationId,
-          nonceLength: nonceResult.nonce.length,
-          algorithm: this.config.generation.algorithm,
-          validityMs: this.config.lifecycle.validityMs,
-          processingTimeMs: processingTime,
-          wasGenerated: nonceResult.wasGenerated,
-        });
+        this.logger.debug(`[${operationId}] CSP nonce generated successfully`);
       }
 
       next();
-    } catch (error) {
+    } catch (err) {
       const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] CSP nonce generation error`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        processingTimeMs: processingTime,
-        serviceType: this.config.serviceType,
-      });
+      this.logger.error(`[${operationId}] CSP nonce generation error`);
 
       // Log security event for nonce generation failure
       this.logSecurityEvent(req, operationId, "nonce_generation_error", {
-        error: error instanceof Error ? error.message : String(error),
+        error: err instanceof Error ? err.message : String(err),
         processingTimeMs: processingTime,
       });
 
@@ -489,7 +478,6 @@ export class CSPNonceMiddleware implements NestMiddleware {
     expiresAt: number;
     wasGenerated: boolean;
   } {
-    const startTime = Date.now();
     const sessionId = this.getSessionId(req);
 
     // Check for existing valid nonce
@@ -607,12 +595,7 @@ export class CSPNonceMiddleware implements NestMiddleware {
     }
 
     if (rateLimitEntry.count >= this.config.security.maxRequestsPerMinute) {
-      this.logger.warn(`[${operationId}] CSP nonce rate limit exceeded`, {
-        operationId,
-        ip,
-        currentCount: rateLimitEntry.count,
-        maxRequests: this.config.security.maxRequestsPerMinute,
-      });
+      this.logger.warn(`[${operationId}] CSP nonce rate limit exceeded`);
       return false;
     }
 
@@ -695,11 +678,7 @@ export class CSPNonceMiddleware implements NestMiddleware {
 
     // Log memory warning if approaching limit
     if (this.metrics.memoryUsage > this.config.memory.maxMemoryUsage * 0.8) {
-      this.logger.warn("CSP nonce memory usage approaching limit", {
-        currentUsage: this.metrics.memoryUsage.toFixed(2),
-        maxUsage: this.config.memory.maxMemoryUsage,
-        activeNonces: this.metrics.currentActive,
-      });
+      this.logger.warn("CSP nonce memory usage approaching limit");
     }
   }
 
@@ -711,7 +690,9 @@ export class CSPNonceMiddleware implements NestMiddleware {
     let cleanedCount = 0;
 
     // Clean expired nonces
-    for (const [sessionId, nonceData] of this.nonceCache.entries()) {
+    for (const [sessionId, nonceData] of Array.from(
+      this.nonceCache.entries(),
+    )) {
       if (nonceData.expiresAt <= now) {
         this.nonceCache.delete(sessionId);
         cleanedCount++;
@@ -720,7 +701,9 @@ export class CSPNonceMiddleware implements NestMiddleware {
 
     // Clean old rate limit entries
     const windowStart = Math.floor(now / 60000) * 60000;
-    for (const [ip, rateLimitData] of this.rateLimitTracker.entries()) {
+    for (const [ip, rateLimitData] of Array.from(
+      this.rateLimitTracker.entries(),
+    )) {
       if (rateLimitData.resetTime < windowStart - 60000) {
         this.rateLimitTracker.delete(ip);
       }
@@ -730,11 +713,7 @@ export class CSPNonceMiddleware implements NestMiddleware {
     this.metrics.currentActive = this.nonceCache.size;
 
     if (cleanedCount > 0) {
-      this.logger.debug(`CSP nonce memory cleanup completed`, {
-        cleanedNonces: cleanedCount,
-        remainingActive: this.metrics.currentActive,
-        memoryUsage: this.metrics.memoryUsage.toFixed(2),
-      });
+      this.logger.debug(`CSP nonce memory cleanup completed`);
     }
   }
 
@@ -745,7 +724,7 @@ export class CSPNonceMiddleware implements NestMiddleware {
     req: RequestWithNonce,
     operationId: string,
     eventType: string,
-    metadata: Record<string, any>,
+    metadata: Record<string, unknown>,
   ): void {
     if (!this.config.security.logViolations) {
       return;
@@ -753,7 +732,7 @@ export class CSPNonceMiddleware implements NestMiddleware {
 
     try {
       const securityEvent = createSecurityEvent(
-        SecurityEventType.CSP_VIOLATION,
+        SecurityEventType._CSP_VIOLATION,
         req.url,
         req.method,
         false,
@@ -764,22 +743,14 @@ export class CSPNonceMiddleware implements NestMiddleware {
           serviceType: this.config.serviceType,
           ...metadata,
         },
-        (req as any).user?.id,
+        (req as RequestWithNonce & { user?: { id?: string } }).user?.id,
         req.ip,
         req.get("User-Agent"),
       );
 
-      this.logger.warn(`CSP nonce security event: ${securityEvent.eventId}`, {
-        eventId: securityEvent.eventId,
-        eventType,
-        operationId,
-        serviceType: this.config.serviceType,
-      });
-    } catch (error) {
-      this.logger.error("Failed to log CSP nonce security event", {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.warn(`CSP nonce security event: ${securityEvent.eventId}`);
+    } catch (_err) {
+      this.logger.error("Failed to log CSP nonce security event");
     }
   }
 
@@ -819,7 +790,10 @@ export class CSPNonceMiddleware implements NestMiddleware {
   static createBytebotDMiddleware(
     configService: ConfigService,
   ): CSPNonceMiddleware {
-    return new CSPNonceMiddleware(configService, RateLimitServiceType.BYTEBOTD);
+    return new CSPNonceMiddleware(
+      configService,
+      RateLimitServiceType._BYTEBOTD,
+    );
   }
 
   static createBytebotAgentMiddleware(
@@ -827,7 +801,7 @@ export class CSPNonceMiddleware implements NestMiddleware {
   ): CSPNonceMiddleware {
     return new CSPNonceMiddleware(
       configService,
-      RateLimitServiceType.BYTEBOT_AGENT,
+      RateLimitServiceType._BYTEBOT_AGENT,
     );
   }
 
@@ -836,7 +810,7 @@ export class CSPNonceMiddleware implements NestMiddleware {
   ): CSPNonceMiddleware {
     return new CSPNonceMiddleware(
       configService,
-      RateLimitServiceType.BYTEBOT_UI,
+      RateLimitServiceType._BYTEBOT_UI,
     );
   }
 }
