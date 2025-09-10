@@ -112,6 +112,17 @@ export default tseslint.config(
     },
   },
 
+  // Special rules for TypeScript enum files
+  {
+    files: ["**/types/**/*.ts", "src/types/index.ts"],
+    rules: {
+      // Disable no-unused-vars for enum members - they are used via namespace access
+      // which ESLint cannot detect properly
+      "@typescript-eslint/no-unused-vars": "off",
+      "no-unused-vars": "off",
+    },
+  },
+
   // Special rules for test files
   {
     files: [

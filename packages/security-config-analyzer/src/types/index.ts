@@ -8,8 +8,9 @@
  * @version 1.0.0
  */
 
-// ESLint incorrectly flags enum members as unused - they are used via namespace access
-/* eslint-disable no-unused-vars */
+/**
+ * Security severity levels for categorizing findings
+ */
 export enum SecuritySeverity {
   CRITICAL = "critical",
   HIGH = "high",
@@ -17,10 +18,10 @@ export enum SecuritySeverity {
   LOW = "low",
   INFO = "info",
 }
-/* eslint-enable no-unused-vars */
 
-// ESLint incorrectly flags enum members as unused - they are used via namespace access
-/* eslint-disable no-unused-vars */
+/**
+ * Configuration types supported by the security analyzer
+ */
 export enum ConfigurationType {
   DOCKER_CONTAINER = "docker_container",
   DOCKER_COMPOSE = "docker_compose",
@@ -38,10 +39,10 @@ export enum ConfigurationType {
   FILE_PERMISSIONS = "file_permissions",
   ENVIRONMENT_VARS = "environment_vars",
 }
-/* eslint-enable no-unused-vars */
 
-// ESLint incorrectly flags enum members as unused - they are used via namespace access
-/* eslint-disable no-unused-vars */
+/**
+ * Security categories for classifying different types of security issues
+ */
 export enum SecurityCategory {
   VULNERABILITY = "vulnerability",
   MISCONFIGURATION = "misconfiguration",
@@ -55,7 +56,6 @@ export enum SecurityCategory {
   ACCESS_CONTROL = "access_control",
   NETWORK_CONFIG = "network_config",
 }
-/* eslint-enable no-unused-vars */
 
 /**
  * Core security finding interface representing a discovered security issue

@@ -644,7 +644,6 @@ export class DatabaseSecurityAnalyzer extends EventEmitter {
 
     // Parse MySQL configuration
     const lines = content.split("\n");
-    // Note: section tracking removed as it was unused, add back if needed for future section-specific parsing
 
     for (const line of lines) {
       const trimmedLine = line.trim();

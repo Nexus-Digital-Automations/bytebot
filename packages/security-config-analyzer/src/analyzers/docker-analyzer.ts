@@ -235,6 +235,162 @@ function toIPAMConfigArray(value: unknown[]): Array<{
 }
 
 /**
+ * Type-safe helper to get Docker Compose services from parsed YAML
+ */
+function safeDockerComposeServices(
+  obj: Record<string, unknown>,
+): Record<string, DockerComposeService> {
+  const services = safeObjectProperty(obj, "services");
+  if (!isObject(services)) {
+    return {};
+  }
+
+  const result: Record<string, DockerComposeService> = {};
+  for (const [key, value] of Object.entries(services)) {
+    if (isObject(value)) {
+      // Convert the object to DockerComposeService with type-safe property access
+      result[key] = {
+        image: safeStringProperty(value, "image", ""),
+        build: isObject(value.build) ? value.build : undefined,
+        ports: safeArrayProperty(value, "ports").map((p) => String(p)),
+        environment: safeArrayProperty(value, "environment").map((e) =>
+          String(e),
+        ),
+        volumes: safeArrayProperty(value, "volumes").map((v) => String(v)),
+        networks: safeArrayProperty(value, "networks").map((n) => String(n)),
+        depends_on: safeArrayProperty(value, "depends_on").map((d) =>
+          String(d),
+        ),
+        command: safeStringProperty(value, "command", undefined),
+        entrypoint: safeStringProperty(value, "entrypoint", undefined),
+        working_dir: safeStringProperty(value, "working_dir", undefined),
+        user: safeStringProperty(value, "user", undefined),
+        privileged: safeBooleanProperty(value, "privileged", false),
+        security_opt: safeArrayProperty(value, "security_opt").map((s) =>
+          String(s),
+        ),
+        cap_add: safeArrayProperty(value, "cap_add").map((c) => String(c)),
+        cap_drop: safeArrayProperty(value, "cap_drop").map((c) => String(c)),
+        restart: value.restart ? String(value.restart) : undefined,
+        labels: isObject(value.labels)
+          ? (value.labels as Record<string, string>)
+          : {},
+        logging: isObject(value.logging) ? value.logging : undefined,
+        healthcheck: isObject(value.healthcheck)
+          ? value.healthcheck
+          : undefined,
+      };
+    }
+  }
+  return result;
+}
+
+/**
+ * Type-safe helper to get Docker Compose networks from parsed YAML
+ */
+function safeDockerComposeNetworks(
+  obj: Record<string, unknown>,
+): Record<string, DockerComposeNetwork> {
+  const networks = safeObjectProperty(obj, "networks");
+  if (!isObject(networks)) {
+    return {};
+  }
+
+  const result: Record<string, DockerComposeNetwork> = {};
+  for (const [key, value] of Object.entries(networks)) {
+    if (isObject(value)) {
+      result[key] = {
+        driver: value.driver ? String(value.driver) : undefined,
+        driver_opts: isObject(value.driver_opts)
+          ? (value.driver_opts as Record<string, string>)
+          : undefined,
+        ipam: isObject(value.ipam) ? value.ipam : undefined,
+        external: safeBooleanProperty(value, "external", false),
+        labels: isObject(value.labels)
+          ? (value.labels as Record<string, string>)
+          : {},
+      };
+    }
+  }
+  return result;
+}
+
+/**
+ * Type-safe helper to get Docker Compose volumes from parsed YAML
+ */
+function safeDockerComposeVolumes(
+  obj: Record<string, unknown>,
+): Record<string, DockerComposeVolume> {
+  const volumes = safeObjectProperty(obj, "volumes");
+  if (!isObject(volumes)) {
+    return {};
+  }
+
+  const result: Record<string, DockerComposeVolume> = {};
+  for (const [key, value] of Object.entries(volumes)) {
+    if (isObject(value)) {
+      result[key] = {
+        driver: value.driver ? String(value.driver) : undefined,
+        driver_opts: isObject(value.driver_opts)
+          ? (value.driver_opts as Record<string, string>)
+          : undefined,
+        external: safeBooleanProperty(value, "external", false),
+        labels: isObject(value.labels)
+          ? (value.labels as Record<string, string>)
+          : {},
+      };
+    }
+  }
+  return result;
+}
+
+/**
+ * Type-safe helper to get Docker Compose secrets from parsed YAML
+ */
+function safeDockerComposeSecrets(
+  obj: Record<string, unknown>,
+): Record<string, DockerComposeSecret> {
+  const secrets = safeObjectProperty(obj, "secrets");
+  if (!isObject(secrets)) {
+    return {};
+  }
+
+  const result: Record<string, DockerComposeSecret> = {};
+  for (const [key, value] of Object.entries(secrets)) {
+    if (isObject(value)) {
+      result[key] = {
+        file: value.file ? String(value.file) : undefined,
+        external: safeBooleanProperty(value, "external", false),
+        labels: isObject(value.labels)
+          ? (value.labels as Record<string, string>)
+          : {},
+      };
+    }
+  }
+  return result;
+}
+
+/**
+ * Type-safe helper to get Docker Compose configs from parsed YAML
+ */
+function safeDockerComposeConfigs(
+  obj: Record<string, unknown>,
+): Record<string, Record<string, unknown>> {
+  const configs = safeObjectProperty(obj, "configs");
+  if (!isObject(configs)) {
+    return {};
+  }
+
+  const result: Record<string, Record<string, unknown>> = {};
+  for (const [key, value] of Object.entries(configs)) {
+    if (isObject(value)) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+/**
  * Docker Security Configuration Analyzer
  *
  * Provides comprehensive security analysis for Docker environments including:
@@ -250,8 +406,6 @@ export class DockerSecurityAnalyzer extends EventEmitter {
   private readonly findings: SecurityFinding[] = [];
   private readonly dockerSocketPath: string;
   private readonly enableImageScanning: boolean;
-  // Future use for vulnerability database integration - commented out to prevent unused variable error
-  // private readonly _vulnerabilityDatabase: Map<string, ImageVulnerability[]> = new Map();
 
   constructor(
     options: {
@@ -545,12 +699,22 @@ export class DockerSecurityAnalyzer extends EventEmitter {
     try {
       // Get container inspection data
       const { stdout } = await execAsync(`docker inspect ${containerId}`);
-      const inspectDataArray = JSON.parse(stdout) as unknown[];
-      const inspectData = inspectDataArray[0];
+      const parsedData: unknown = JSON.parse(stdout);
+
+      // Type-safe validation of the inspect data
+      if (!Array.isArray(parsedData) || parsedData.length === 0) {
+        throw new Error(
+          "Invalid container inspect data: expected non-empty array",
+        );
+      }
+
+      const inspectData: unknown = parsedData[0];
 
       if (!isObject(inspectData)) {
         throw new Error("Invalid container inspect data format");
       }
+
+      // After type guard, inspectData is Record<string, unknown>
 
       const config = safeObjectProperty(inspectData, "Config");
       const hostConfig = safeObjectProperty(inspectData, "HostConfig");
@@ -1327,26 +1491,11 @@ export class DockerSecurityAnalyzer extends EventEmitter {
 
     const config: DockerComposeConfig = {
       filePath,
-      services: safeObjectProperty(parsedData, "services") as Record<
-        string,
-        DockerComposeService
-      >,
-      networks: safeObjectProperty(parsedData, "networks") as Record<
-        string,
-        DockerComposeNetwork
-      >,
-      volumes: safeObjectProperty(parsedData, "volumes") as Record<
-        string,
-        DockerComposeVolume
-      >,
-      secrets: safeObjectProperty(parsedData, "secrets") as Record<
-        string,
-        DockerComposeSecret
-      >,
-      configs: safeObjectProperty(parsedData, "configs") as Record<
-        string,
-        DockerComposeConfig
-      >,
+      services: safeDockerComposeServices(parsedData),
+      networks: safeDockerComposeNetworks(parsedData),
+      volumes: safeDockerComposeVolumes(parsedData),
+      secrets: safeDockerComposeSecrets(parsedData),
+      configs: safeDockerComposeConfigs(parsedData),
     };
 
     // Analyze compose configuration for security issues
