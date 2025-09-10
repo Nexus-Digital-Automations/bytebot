@@ -12,9 +12,62 @@ export * from "./types/messageContent.types";
 export * from "./types/computerAction.types";
 export * from "./types/agent.types";
 
+// Additional type exports that are frequently imported individually
+export {
+  ThinkingContentBlock,
+  RedactedThinkingContentBlock,
+  ToolUseContentBlock,
+  ToolResultContentBlock,
+  TextContentBlock,
+  ImageContentBlock,
+  DocumentContentBlock,
+  ComputerToolUseContentBlock,
+  SetTaskStatusToolUseBlock,
+  CreateTaskToolUseBlock,
+  UserActionContentBlock,
+  MessageContentType,
+  MessageContentBlock,
+} from "./types/messageContent.types";
+
 // Client-safe utilities - Re-export all functions
 export * from "./utils/messageContent.utils";
 export * from "./utils/computerAction.utils";
+
+// Additional function exports that are frequently imported individually
+export {
+  isSetTaskStatusToolUseBlock,
+  isCreateTaskToolUseBlock,
+  isToolResultContentBlock,
+  isThinkingContentBlock,
+  isRedactedThinkingContentBlock,
+  isToolUseContentBlock,
+  isTextContentBlock,
+  isImageContentBlock,
+  isDocumentContentBlock,
+  isComputerToolUseContentBlock,
+  isUserActionContentBlock,
+  isMessageContentBlock,
+  getMessageContentBlockType,
+  // Mouse tool block functions
+  isMoveMouseToolUseBlock,
+  isTraceMouseToolUseBlock,
+  isClickMouseToolUseBlock,
+  isCursorPositionToolUseBlock,
+  isPressMouseToolUseBlock,
+  isDragMouseToolUseBlock,
+  isScrollToolUseBlock,
+  // Keyboard tool block functions
+  isTypeKeysToolUseBlock,
+  isPressKeysToolUseBlock,
+  isTypeTextToolUseBlock,
+  isPasteTextToolUseBlock,
+  // Utility tool block functions
+  isWaitToolUseBlock,
+  isScreenshotToolUseBlock,
+  isApplicationToolUseBlock,
+  isWriteFileToolUseBlock,
+  isReadFileToolUseBlock,
+} from "./utils/messageContent.utils";
 
 // Security Types (exported individually to avoid duplicates)
 export {
