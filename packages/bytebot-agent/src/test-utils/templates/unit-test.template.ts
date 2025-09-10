@@ -107,8 +107,8 @@ interface EnterpriseTestConfig {
  */
 class TestExecutionLogger {
   private readonly logger = new Logger('EnterpriseUnitTest');
-  private testStartTime: number;
-  private operationId: string;
+  private testStartTime: number = 0;
+  private operationId: string = '';
 
   /**
    * Initialize test execution with unique operation ID
@@ -308,29 +308,83 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
           },
         },
 
-        // Mock Redis service for caching operations
+        // Mock Redis service for caching operations with enterprise features
         {
           provide: 'REDIS_SERVICE',
           useValue: {
-            get: jest.fn(),
-            set: jest.fn(),
-            del: jest.fn(),
-            exists: jest.fn().mockResolvedValue(0),
-            expire: jest.fn(),
-            flushall: jest.fn(),
+            get: jest.fn().mockImplementation((key: string) => {
+              testLogger.logOperation(`Redis GET operation: ${key}`);
+              return Promise.resolve(null);
+            }),
+            set: jest.fn().mockImplementation((key: string, value: unknown) => {
+              testLogger.logOperation(`Redis SET operation: ${key}`, { value });
+              return Promise.resolve('OK');
+            }),
+            del: jest.fn().mockImplementation((key: string) => {
+              testLogger.logOperation(`Redis DEL operation: ${key}`);
+              return Promise.resolve(1);
+            }),
+            exists: jest.fn().mockImplementation((key: string) => {
+              testLogger.logOperation(`Redis EXISTS operation: ${key}`);
+              return Promise.resolve(0);
+            }),
+            expire: jest.fn().mockResolvedValue(1),
+            flushall: jest.fn().mockResolvedValue('OK'),
             keys: jest.fn().mockResolvedValue([]),
           },
         },
 
-        // Mock Logger service for comprehensive logging
+        // Mock Logger service for comprehensive enterprise logging
         {
           provide: 'LOGGER_SERVICE',
           useValue: {
-            log: jest.fn(),
-            error: jest.fn(),
-            warn: jest.fn(),
-            debug: jest.fn(),
-            verbose: jest.fn(),
+            log: jest
+              .fn()
+              .mockImplementation(
+                (message: string, context?: Record<string, unknown>) => {
+                  testLogger.logOperation(
+                    `Application LOG: ${message}`,
+                    context,
+                  );
+                },
+              ),
+            error: jest
+              .fn()
+              .mockImplementation((message: string, error?: Error) => {
+                testLogger.logOperation(`Application ERROR: ${message}`, {
+                  error,
+                });
+              }),
+            warn: jest
+              .fn()
+              .mockImplementation(
+                (message: string, context?: Record<string, unknown>) => {
+                  testLogger.logOperation(
+                    `Application WARN: ${message}`,
+                    context,
+                  );
+                },
+              ),
+            debug: jest
+              .fn()
+              .mockImplementation(
+                (message: string, context?: Record<string, unknown>) => {
+                  testLogger.logOperation(
+                    `Application DEBUG: ${message}`,
+                    context,
+                  );
+                },
+              ),
+            verbose: jest
+              .fn()
+              .mockImplementation(
+                (message: string, context?: Record<string, unknown>) => {
+                  testLogger.logOperation(
+                    `Application VERBOSE: ${message}`,
+                    context,
+                  );
+                },
+              ),
             setContext: jest.fn(),
           },
         },
@@ -347,7 +401,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
         // service = testingModule.get<[SERVICE_CLASS]>([SERVICE_CLASS]);
       } catch (error) {
         testLogger.logOperation('Service retrieval failed', {
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
         // Service might not be available in template - this is expected
       }
@@ -361,7 +415,7 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
         // mockPrismaService = testingModule.get(PrismaService);
       } catch (error) {
         testLogger.logOperation('Dependency retrieval failed', {
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
         // Dependencies might not be available in template - this is expected
       }
@@ -374,8 +428,14 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
 
       testLogger.completeTest('[SERVICE_NAME] Test Suite Setup', true);
     } catch (error) {
-      testLogger.completeTest('[SERVICE_NAME] Test Suite Setup', false, error);
-      throw error;
+      const typedError =
+        error instanceof Error ? error : new Error(String(error));
+      testLogger.completeTest(
+        '[SERVICE_NAME] Test Suite Setup',
+        false,
+        typedError,
+      );
+      throw typedError;
     }
   });
 
@@ -420,10 +480,12 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
 
       testLogger.completeTest('[SERVICE_NAME] Test Suite Cleanup', true);
     } catch (error) {
+      const typedError =
+        error instanceof Error ? error : new Error(String(error));
       testLogger.completeTest(
         '[SERVICE_NAME] Test Suite Cleanup',
         false,
-        error,
+        typedError,
       );
       // Don't rethrow cleanup errors - log them but allow test suite to complete
     }
@@ -487,11 +549,13 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
         testMetrics.totalTestsPassed++;
       } catch (error) {
         testMetrics.totalTestsFailed++;
+        const typedError =
+          error instanceof Error ? error : new Error(String(error));
         testLogger.logOperation('Service definition validation failed', {
           operationId,
-          error: error.message,
+          error: typedError.message,
         });
-        throw error;
+        throw typedError;
       } finally {
         const executionTime = performance.now() - testStartTime;
         testMetrics.averageExecutionTime =
@@ -531,11 +595,13 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
         testMetrics.totalTestsPassed++;
       } catch (error) {
         testMetrics.totalTestsFailed++;
+        const typedError =
+          error instanceof Error ? error : new Error(String(error));
         testLogger.logOperation('Dependency injection validation failed', {
           operationId,
-          error: error.message,
+          error: typedError.message,
         });
-        throw error;
+        throw typedError;
       } finally {
         const executionTime = performance.now() - testStartTime;
         testMetrics.averageExecutionTime =
@@ -576,11 +642,13 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
         testMetrics.totalTestsPassed++;
       } catch (error) {
         testMetrics.totalTestsFailed++;
+        const typedError =
+          error instanceof Error ? error : new Error(String(error));
         testLogger.logOperation('Architecture compliance validation failed', {
           operationId,
-          error: error.message,
+          error: typedError.message,
         });
-        throw error;
+        throw typedError;
       } finally {
         const executionTime = performance.now() - testStartTime;
         testMetrics.averageExecutionTime =
@@ -718,15 +786,17 @@ describe('[SERVICE_NAME] Enterprise Unit Tests', () => {
         testMetrics.totalTestsPassed++;
       } catch (error) {
         testMetrics.totalTestsFailed++;
+        const typedError =
+          error instanceof Error ? error : new Error(String(error));
         testLogger.logOperation(
           '[PRIMARY_METHOD] successful operation test failed',
           {
             operationId,
-            error: error.message,
-            stack: error.stack,
+            error: typedError.message,
+            stack: typedError.stack,
           },
         );
-        throw error;
+        throw typedError;
       } finally {
         const executionTime = performance.now() - testStartTime;
         testMetrics.averageExecutionTime =

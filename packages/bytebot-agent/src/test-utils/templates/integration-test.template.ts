@@ -35,6 +35,7 @@
 import { TestingModule } from '@nestjs/testing';
 import { INestApplication, Logger } from '@nestjs/common';
 import * as request from 'supertest';
+import type { Response } from 'supertest';
 
 /**
  * Enterprise Integration Test Logging Configuration
@@ -132,7 +133,7 @@ describe('Module Integration Tests', () => {
 
     const setupDuration = Date.now() - setupStartTime;
     logger.log(
-      `✅ [SETUP] Integration test environment initialized in ${setupDuration}ms`,
+      `✅ [SETUP] Integration test environment initialized in ${setupDuration.toString()}ms`,
     );
 
     // Create test user and authentication token
@@ -150,24 +151,18 @@ describe('Module Integration Tests', () => {
 
     try {
       // Cleanup in reverse order to prevent dependency issues
-      if (dbHelper) {
-        await dbHelper.runCleanup();
-        logger.log('✅ [CLEANUP] Database helper cleanup completed');
-      }
+      await dbHelper.runCleanup();
+      logger.log('✅ [CLEANUP] Database helper cleanup completed');
 
-      if (app) {
-        await app.close();
-        logger.log('✅ [CLEANUP] NestJS application closed');
-      }
+      await app.close();
+      logger.log('✅ [CLEANUP] NestJS application closed');
 
-      if (testingModule) {
-        await testingModule.close();
-        logger.log('✅ [CLEANUP] Testing module closed');
-      }
+      await testingModule.close();
+      logger.log('✅ [CLEANUP] Testing module closed');
 
       const cleanupDuration = Date.now() - cleanupStartTime;
       logger.log(
-        `✅ [CLEANUP] Complete test environment cleanup finished in ${cleanupDuration}ms`,
+        `✅ [CLEANUP] Complete test environment cleanup finished in ${cleanupDuration.toString()}ms`,
       );
     } catch (error) {
       logger.error(
@@ -204,7 +199,7 @@ describe('Module Integration Tests', () => {
 
       const resetDuration = Date.now() - testResetStartTime;
       logger.log(
-        `✅ [TEST-RESET] Test environment prepared in ${resetDuration}ms`,
+        `✅ [TEST-RESET] Test environment prepared in ${resetDuration.toString()}ms`,
       );
     } catch (error) {
       logger.error(
@@ -223,7 +218,7 @@ describe('Module Integration Tests', () => {
 
         const response = await TestPerformanceMonitor.measure(
           'get-endpoint-authenticated',
-          async () => {
+          async (): Promise<Response> => {
             logger.log(
               '🔗 [HTTP] Making authenticated GET request to /[endpoint]',
             );
@@ -233,7 +228,7 @@ describe('Module Integration Tests', () => {
               .expect(200);
 
             logger.log(
-              `✅ [HTTP] GET request completed successfully in ${Date.now() - testStartTime}ms`,
+              `✅ [HTTP] GET request completed successfully in ${(Date.now() - testStartTime).toString()}ms`,
             );
             return httpResponse;
           },
@@ -241,7 +236,7 @@ describe('Module Integration Tests', () => {
 
         // Comprehensive response validation with detailed logging
         logger.log('🔍 [VALIDATE] Validating response structure and content');
-        expect(response.body).toMatchObject({
+        expect(response.body as Record<string, unknown>).toMatchObject({
           success: true,
           data: expect.any(Array),
         });
@@ -254,7 +249,7 @@ describe('Module Integration Tests', () => {
         const responseTime = Date.now() - testStartTime;
         expect(responseTime).toBeLessThan(1000); // Should complete within 1 second
         logger.log(
-          `✅ [PERFORMANCE] Response time ${responseTime}ms meets enterprise standards (<1000ms)`,
+          `✅ [PERFORMANCE] Response time ${responseTime.toString()}ms meets enterprise standards (<1000ms)`,
         );
       });
 
@@ -268,10 +263,10 @@ describe('Module Integration Tests', () => {
 
         const responseTime = Date.now() - testStartTime;
         logger.log(
-          `✅ [SECURITY] Unauthenticated request properly rejected in ${responseTime}ms`,
+          `✅ [SECURITY] Unauthenticated request properly rejected in ${responseTime.toString()}ms`,
         );
 
-        expect(response.body).toMatchObject({
+        expect(response.body as Record<string, unknown>).toMatchObject({
           success: false,
           error: expect.objectContaining({
             message: expect.stringContaining('Authentication'),
@@ -304,12 +299,13 @@ describe('Module Integration Tests', () => {
 
         const responseTime = Date.now() - testStartTime;
         logger.log(
-          `✅ [QUERY] Query parameters processed successfully in ${responseTime}ms`,
+          `✅ [QUERY] Query parameters processed successfully in ${responseTime.toString()}ms`,
         );
 
-        expect(response.body.data.length).toBeLessThanOrEqual(10);
+        const responseBody = response.body as { data: unknown[] };
+        expect(responseBody.data.length).toBeLessThanOrEqual(10);
         logger.log(
-          `✅ [VALIDATE] Response data length (${response.body.data.length}) respects limit parameter`,
+          `✅ [VALIDATE] Response data length (${responseBody.data.length.toString()}) respects limit parameter`,
         );
         // Add specific assertions based on expected behavior
       });
@@ -326,7 +322,8 @@ describe('Module Integration Tests', () => {
           .set('Authorization', `Bearer ${authToken}`)
           .expect(400);
 
-        expect(response.body.error).toMatchObject({
+        const responseBody = response.body as { error: { message: string } };
+        expect(responseBody.error).toMatchObject({
           message: expect.stringContaining('validation'),
         });
       });
@@ -342,7 +339,7 @@ describe('Module Integration Tests', () => {
 
         const response = await TestPerformanceMonitor.measure(
           'post-endpoint-create',
-          async () => {
+          async (): Promise<Response> => {
             return request(app.getHttpServer())
               .post('/[endpoint]')
               .set('Authorization', `Bearer ${authToken}`)
@@ -352,7 +349,8 @@ describe('Module Integration Tests', () => {
         );
 
         // expect(response.body).toBeValidApiResponse();
-        expect(response.body.data).toMatchObject(createData);
+        const responseBody = response.body as { data: Record<string, unknown> };
+        expect(responseBody.data).toMatchObject(createData);
 
         // Verify data was persisted in database
         // const createdResource = await prismaService.[entity].findUnique({
@@ -373,7 +371,10 @@ describe('Module Integration Tests', () => {
           .send(incompleteData)
           .expect(400);
 
-        expect(response.body.error).toMatchObject({
+        const responseBody = response.body as {
+          error: { message: string; details: unknown[] };
+        };
+        expect(responseBody.error).toMatchObject({
           message: expect.stringContaining('validation'),
           details: expect.any(Array),
         });
@@ -399,7 +400,8 @@ describe('Module Integration Tests', () => {
           .send(createData)
           .expect(409);
 
-        expect(response.body.error.message).toContain('already exists');
+        const responseBody = response.body as { error: { message: string } };
+        expect(responseBody.error.message).toContain('already exists');
       });
     });
 
@@ -417,7 +419,10 @@ describe('Module Integration Tests', () => {
           })
           .expect(201);
 
-        resourceId = createResponse.body?.data?.id as string;
+        const createResponseBody = createResponse.body as {
+          data: { id: string };
+        };
+        resourceId = createResponseBody?.data?.id;
       });
 
       it('should update resource successfully', async () => {
@@ -432,8 +437,11 @@ describe('Module Integration Tests', () => {
           .send(updateData)
           .expect(200);
 
-        expect(response.body.data).toMatchObject(updateData);
-        expect(response.body.data.id).toBe(resourceId);
+        const responseBody = response.body as {
+          data: { id: string } & Record<string, unknown>;
+        };
+        expect(responseBody.data).toMatchObject(updateData);
+        expect(responseBody.data.id).toBe(resourceId);
 
         // Verify update persisted in database
         // const updatedResource = await prismaService.[entity].findUnique({
@@ -451,7 +459,8 @@ describe('Module Integration Tests', () => {
           .send({ name: 'Updated Name' })
           .expect(404);
 
-        expect(response.body.error.message).toContain('not found');
+        const responseBody = response.body as { error: { message: string } };
+        expect(responseBody.error.message).toContain('not found');
       });
     });
 
@@ -469,7 +478,10 @@ describe('Module Integration Tests', () => {
           })
           .expect(201);
 
-        resourceId = createResponse.body?.data?.id as string;
+        const createResponseBody = createResponse.body as {
+          data: { id: string };
+        };
+        resourceId = createResponseBody?.data?.id;
       });
 
       it('should delete resource successfully', async () => {
@@ -493,7 +505,8 @@ describe('Module Integration Tests', () => {
           .set('Authorization', `Bearer ${authToken}`)
           .expect(404);
 
-        expect(response.body.error.message).toContain('not found');
+        const responseBody = response.body as { error: { message: string } };
+        expect(responseBody.error.message).toContain('not found');
       });
     });
   });
@@ -541,7 +554,8 @@ describe('Module Integration Tests', () => {
         .set('Authorization', `Bearer ${expiredToken}`)
         .expect(401);
 
-      expect(response.body.error.message).toContain('expired');
+      const responseBody = response.body as { error: { message: string } };
+      expect(responseBody.error.message).toContain('expired');
     });
 
     it('should handle invalid tokens', async () => {

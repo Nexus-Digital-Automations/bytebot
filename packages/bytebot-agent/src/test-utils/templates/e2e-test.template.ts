@@ -328,9 +328,12 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           })
           .expect(201);
 
+        const adminRegBody = adminRegistration.body as ApiResponse;
+        const userRegBody = userRegistration.body as ApiResponse;
+
         logTestExecution('USER_REGISTRATION_SUCCESS', {
-          adminRegistered: !!adminRegistration.body.success,
-          userRegistered: !!userRegistration.body.success,
+          adminRegistered: !!adminRegBody.success,
+          userRegistered: !!userRegBody.success,
         });
       } catch (error) {
         logTestExecution('USER_REGISTRATION_ERROR', {
@@ -400,8 +403,10 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           userTokenLength: userToken.length,
           sessionId: testSession.sessionId,
           performanceMetrics: {
-            adminLoginTime: (adminLoginResponse as any)?.duration || 0,
-            userLoginTime: (userLoginResponse as any)?.duration || 0,
+            adminLoginTime:
+              (adminLoginResponse as { duration?: number })?.duration ?? 0,
+            userLoginTime:
+              (userLoginResponse as { duration?: number })?.duration ?? 0,
           },
         });
       } catch (error) {
@@ -599,22 +604,18 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const protectedBody = validateApiResponse(protectedResponse.body, [
-          'data',
-        ]);
-        expect((protectedBody as any)?.data?.user).toMatchObject({
+        const protectedBody = validateApiResponse<{
+          user: Record<string, unknown>;
+        }>(protectedResponse.body, ['data']);
+        expect(protectedBody?.data?.user).toMatchObject({
           email: newUser.email,
           firstName: newUser.firstName,
           lastName: newUser.lastName,
         });
 
         // Security validation: ensure sensitive data is not exposed
-        expect((protectedBody as any).data?.user).not.toHaveProperty(
-          'password',
-        );
-        expect((protectedBody as any).data?.user).not.toHaveProperty(
-          'passwordHash',
-        );
+        expect(protectedBody?.data?.user).not.toHaveProperty('password');
+        expect(protectedBody?.data?.user).not.toHaveProperty('passwordHash');
 
         logTestExecution('PROTECTED_ENDPOINT_VALIDATION_PASSED', {
           userDataMatch: true,
@@ -681,12 +682,13 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           .expect(401);
 
         // Validate error response structure
-        expect(invalidLoginResponse.body).toHaveProperty('success', false);
-        expect(invalidLoginResponse.body).toHaveProperty('message');
+        const invalidLoginBody = invalidLoginResponse.body as ApiResponse;
+        expect(invalidLoginBody).toHaveProperty('success', false);
+        expect(invalidLoginBody).toHaveProperty('message');
 
         logTestExecution('INVALID_CREDENTIALS_HANDLED', {
           statusCode: invalidLoginResponse.status,
-          errorMessagePresent: !!invalidLoginResponse.body.message,
+          errorMessagePresent: !!invalidLoginBody.message,
         });
 
         // Test malformed token with validation
@@ -776,10 +778,11 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const createResponseBody = validateApiResponse(createResponse.body, [
-          'success',
-          'data',
-        ]);
+        const createResponseBody = validateApiResponse<{
+          id: string;
+          createdAt: string;
+          updatedAt: string;
+        }>(createResponse.body, ['success', 'data']);
         const resourceId = createResponseBody?.data?.id;
 
         expect(resourceId).toBeDefined();
@@ -815,9 +818,11 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const readResponseBody = validateApiResponse(readResponse.body, [
-          'data',
-        ]);
+        const readResponseBody = validateApiResponse<{
+          id: string;
+          createdAt: string;
+          updatedAt: string;
+        }>(readResponse.body, ['data']);
         expect(readResponseBody?.data).toMatchObject({
           id: resourceId,
           ...createData,
@@ -869,9 +874,11 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const updateResponseBody = validateApiResponse(updateResponse.body, [
-          'data',
-        ]);
+        const updateResponseBody = validateApiResponse<{
+          id: string;
+          updatedAt: string;
+          createdAt: string;
+        }>(updateResponse.body, ['data']);
         expect(updateResponseBody?.data).toMatchObject({
           id: resourceId,
           ...updateData,
@@ -1246,7 +1253,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const adminCreateResponseBody = validateApiResponse(
+        const adminCreateResponseBody = validateApiResponse<{ id: string }>(
           adminCreateResponse.body,
           ['success', 'data'],
         );
@@ -1906,18 +1913,22 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           .expect(400);
 
         // Validate comprehensive error response
-        expect(invalidOrderResponse.body).toHaveProperty('success', false);
-        expect(invalidOrderResponse.body).toHaveProperty('message');
-        expect(invalidOrderResponse.body).toHaveProperty('errors');
+        const invalidOrderBody =
+          invalidOrderResponse.body as ApiResponse<never> & {
+            errors?: Array<{ message?: string; field?: string; code?: string }>;
+          };
+        expect(invalidOrderBody).toHaveProperty('success', false);
+        expect(invalidOrderBody).toHaveProperty('message');
+        expect(invalidOrderBody).toHaveProperty('errors');
 
         // Validate specific validation errors are reported
-        const errors = invalidOrderResponse.body.errors;
+        const errors = invalidOrderBody.errors ?? [];
         expect(Array.isArray(errors)).toBe(true);
         expect(errors.length).toBeGreaterThan(0);
 
         // Check for expected error types
         const errorMessages = errors
-          .map((e: any) => e.message || e.field || e.code)
+          .map((e) => e.message ?? e.field ?? e.code ?? '')
           .join(' ');
         expect(errorMessages.toLowerCase()).toContain('items');
         expect(errorMessages.toLowerCase()).toContain('name');
@@ -1958,18 +1969,16 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           .expect(404);
 
         // Validate error response for non-existent order
-        expect(invalidPaymentResponse.body).toHaveProperty('success', false);
-        expect(invalidPaymentResponse.body).toHaveProperty('message');
-        expect(invalidPaymentResponse.body.message.toLowerCase()).toContain(
-          'order',
-        );
-        expect(invalidPaymentResponse.body.message.toLowerCase()).toContain(
-          'not found',
-        );
+        const invalidPaymentBody = invalidPaymentResponse.body as ApiResponse;
+        expect(invalidPaymentBody).toHaveProperty('success', false);
+        expect(invalidPaymentBody).toHaveProperty('message');
+        const paymentErrorMessage = invalidPaymentBody.message ?? '';
+        expect(paymentErrorMessage.toLowerCase()).toContain('order');
+        expect(paymentErrorMessage.toLowerCase()).toContain('not found');
 
         // Ensure no payment processing occurred
-        expect(invalidPaymentResponse.body).not.toHaveProperty('transactionId');
-        expect(invalidPaymentResponse.body).not.toHaveProperty('paymentId');
+        expect(invalidPaymentBody).not.toHaveProperty('transactionId');
+        expect(invalidPaymentBody).not.toHaveProperty('paymentId');
 
         logTestExecution('INVALID_PAYMENT_VALIDATION_PASSED', {
           statusCode: 404,
@@ -2277,10 +2286,8 @@ export const E2ETestUtils = {
       })
       .expect(200);
 
-    const utilsLoginBody = loginResponse.body as {
-      data: { token: string };
-    };
-    return utilsLoginBody.data.token;
+    const utilsLoginBody = loginResponse.body as ApiResponse<{ token: string }>;
+    return utilsLoginBody.data?.token ?? '';
   },
 
   createTestResource: (overrides = {}) => ({

@@ -24,6 +24,9 @@ import request from 'supertest';
 import { Server } from 'http';
 import { HealthController } from '../health.controller';
 import { HealthService } from '../health.service';
+import { MetricsService } from '../../metrics/metrics.service';
+import { TracingService } from '../../observability/tracing.service';
+import { AlertingService } from '../../observability/alerting.service';
 
 /**
  * Helper function to safely get HTTP server with proper typing and logging
@@ -38,28 +41,24 @@ const getHttpServer = (app: INestApplication): Server => {
   const server = app.getHttpServer() as Server;
   const duration = Date.now() - startTime;
 
-  console.log(`[TEST-UTILS] HTTP server accessed in ${duration}ms`);
+  console.log(`[TEST-UTILS] HTTP server accessed in ${duration.toString()}ms`);
 
   if (!server) {
-    throw new Error('Failed to access HTTP server from NestJS application');
+    const errorMsg = 'Failed to access HTTP server from NestJS application';
+    console.error(`[TEST-UTILS] ${errorMsg}`);
+    throw new Error(errorMsg);
   }
 
   return server;
 };
 
 /**
- * Type-safe wrapper for Jest mock function call expectations
- * Prevents unbound method warnings by properly typing mock expectations
+ * Enhanced test utilities for comprehensive health controller testing
+ * Provides robust logging and validation for all test scenarios
  *
- * @param mockFn - Jest mock function to check
- * @param times - Expected number of calls
+ * Note: Direct usage of expect().toHaveBeenCalledTimes() is preferred
+ * over wrapper functions to avoid unbound method TypeScript warnings
  */
-const expectMockCallCount = (
-  mockFn: jest.MockedFunction<any>,
-  times: number,
-): void => {
-  expect(mockFn).toHaveBeenCalledTimes(times);
-};
 
 describe('HealthController', () => {
   let app: INestApplication;
@@ -175,6 +174,35 @@ describe('HealthController', () => {
           provide: HealthService,
           useValue: mockHealthService,
         },
+        {
+          provide: MetricsService,
+          useValue: {
+            recordHealthCheck: jest.fn(),
+            recordResponseTime: jest.fn(),
+            getMetrics: jest.fn().mockReturnValue({}),
+            incrementHealthCheckCounter: jest.fn(),
+            recordHealthCheckDuration: jest.fn(),
+          },
+        },
+        {
+          provide: TracingService,
+          useValue: {
+            createSpan: jest.fn(),
+            finishSpan: jest.fn(),
+            recordTrace: jest.fn(),
+            startTrace: jest.fn(),
+            endTrace: jest.fn(),
+          },
+        },
+        {
+          provide: AlertingService,
+          useValue: {
+            sendAlert: jest.fn(),
+            checkAlertThresholds: jest.fn(),
+            createAlert: jest.fn(),
+            resolveAlert: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -186,7 +214,7 @@ describe('HealthController', () => {
 
     const setupDuration = Date.now() - testStartTime;
     console.log(
-      `[TEST-SETUP] Test module setup completed in ${setupDuration}ms`,
+      `[TEST-SETUP] Test module setup completed in ${setupDuration.toString()}ms`,
     );
   });
 
@@ -201,16 +229,16 @@ describe('HealthController', () => {
     if (app) {
       try {
         await app.close();
-        console.log(`[TEST-CLEANUP] Application closed successfully`);
+        console.log('[TEST-CLEANUP] Application closed successfully');
       } catch (error) {
-        console.error(`[TEST-CLEANUP] Error closing application:`, error);
+        console.error('[TEST-CLEANUP] Error closing application:', error);
         throw error;
       }
     }
 
     const cleanupDuration = Date.now() - cleanupStartTime;
     console.log(
-      `[TEST-CLEANUP] Test cleanup completed in ${cleanupDuration}ms`,
+      `[TEST-CLEANUP] Test cleanup completed in ${cleanupDuration.toString()}ms`,
     );
   });
 
@@ -243,11 +271,11 @@ describe('HealthController', () => {
       expect(response.body).toHaveProperty('timestamp');
       expect(response.body).toHaveProperty('uptime');
       expect(response.body).toHaveProperty('memory');
-      expectMockCallCount(healthService.getBasicHealth, 1);
+      expect(healthService.getBasicHealth).toHaveBeenCalledTimes(1);
 
       const testDuration = Date.now() - testStartTime;
       console.log(
-        `[TEST] Basic health status test completed in ${testDuration}ms`,
+        `[TEST] Basic health status test completed in ${testDuration.toString()}ms`,
       );
     });
   });
@@ -274,13 +302,15 @@ describe('HealthController', () => {
         .expect(HttpStatus.OK);
 
       const responseTime = Date.now() - responseStartTime;
-      console.log(`[TEST] Liveness probe responded in ${responseTime}ms`);
+      console.log(
+        `[TEST] Liveness probe responded in ${responseTime.toString()}ms`,
+      );
 
       expect(responseTime).toBeLessThan(5000); // Should respond within 5 seconds
 
       const testDuration = Date.now() - testStartTime;
       console.log(
-        `[TEST] Liveness test (responsive) completed in ${testDuration}ms`,
+        `[TEST] Liveness test (responsive) completed in ${testDuration.toString()}ms`,
       );
     });
 
@@ -308,7 +338,7 @@ describe('HealthController', () => {
 
       const responseTime = Date.now() - responseStartTime;
       console.log(
-        `[TEST] Unhealthy liveness probe responded in ${responseTime}ms`,
+        `[TEST] Unhealthy liveness probe responded in ${responseTime.toString()}ms`,
       );
 
       // Validate error response structure
@@ -316,7 +346,7 @@ describe('HealthController', () => {
 
       const testDuration = Date.now() - testStartTime;
       console.log(
-        `[TEST] Liveness test (unresponsive) completed in ${testDuration}ms`,
+        `[TEST] Liveness test (unresponsive) completed in ${testDuration.toString()}ms`,
       );
     });
   });
@@ -347,17 +377,17 @@ describe('HealthController', () => {
 
       const responseTime = Date.now() - responseStartTime;
       console.log(
-        `[TEST] Readiness probe (healthy) responded in ${responseTime}ms`,
+        `[TEST] Readiness probe (healthy) responded in ${responseTime.toString()}ms`,
       );
 
       // Validate all health checks were called
-      expectMockCallCount(healthService.checkDatabaseHealth, 1);
-      expectMockCallCount(healthService.checkExternalServices, 1);
-      expectMockCallCount(healthService.checkAuthenticationService, 1);
+      expect(healthService.checkDatabaseHealth).toHaveBeenCalledTimes(1);
+      expect(healthService.checkExternalServices).toHaveBeenCalledTimes(1);
+      expect(healthService.checkAuthenticationService).toHaveBeenCalledTimes(1);
 
       const testDuration = Date.now() - testStartTime;
       console.log(
-        `[TEST] Readiness test (healthy) completed in ${testDuration}ms`,
+        `[TEST] Readiness test (healthy) completed in ${testDuration.toString()}ms`,
       );
     });
 
@@ -388,7 +418,7 @@ describe('HealthController', () => {
 
       const responseTime = Date.now() - responseStartTime;
       console.log(
-        `[TEST] Readiness probe (database unhealthy) responded in ${responseTime}ms`,
+        `[TEST] Readiness probe (database unhealthy) responded in ${responseTime.toString()}ms`,
       );
 
       // Validate error response includes database issue
@@ -396,7 +426,7 @@ describe('HealthController', () => {
 
       const testDuration = Date.now() - testStartTime;
       console.log(
-        `[TEST] Readiness test (database unhealthy) completed in ${testDuration}ms`,
+        `[TEST] Readiness test (database unhealthy) completed in ${testDuration.toString()}ms`,
       );
     });
   });
@@ -426,15 +456,19 @@ describe('HealthController', () => {
         .expect(HttpStatus.OK);
 
       const responseTime = Date.now() - responseStartTime;
-      console.log(`[TEST] Startup probe responded in ${responseTime}ms`);
+      console.log(
+        `[TEST] Startup probe responded in ${responseTime.toString()}ms`,
+      );
 
       // Validate all startup checks were called
-      expectMockCallCount(healthService.checkStartupComplete, 1);
-      expectMockCallCount(healthService.checkModuleInitialization, 1);
-      expectMockCallCount(healthService.checkConfigurationLoaded, 1);
+      expect(healthService.checkStartupComplete).toHaveBeenCalledTimes(1);
+      expect(healthService.checkModuleInitialization).toHaveBeenCalledTimes(1);
+      expect(healthService.checkConfigurationLoaded).toHaveBeenCalledTimes(1);
 
       const testDuration = Date.now() - testStartTime;
-      console.log(`[TEST] Startup test completed in ${testDuration}ms`);
+      console.log(
+        `[TEST] Startup test completed in ${testDuration.toString()}ms`,
+      );
     });
   });
 
@@ -457,7 +491,9 @@ describe('HealthController', () => {
         .expect(HttpStatus.OK);
 
       const responseTime = Date.now() - responseStartTime;
-      console.log(`[TEST] Detailed status responded in ${responseTime}ms`);
+      console.log(
+        `[TEST] Detailed status responded in ${responseTime.toString()}ms`,
+      );
 
       // Validate comprehensive response structure
       expect(response.body).toHaveProperty('status');
@@ -484,10 +520,12 @@ describe('HealthController', () => {
       expect(responseBody.performance).toHaveProperty('requestsPerSecond');
       expect(responseBody.performance).toHaveProperty('averageResponseTime');
 
-      expectMockCallCount(healthService.getDetailedStatus, 1);
+      expect(healthService.getDetailedStatus).toHaveBeenCalledTimes(1);
 
       const testDuration = Date.now() - testStartTime;
-      console.log(`[TEST] Detailed status test completed in ${testDuration}ms`);
+      console.log(
+        `[TEST] Detailed status test completed in ${testDuration.toString()}ms`,
+      );
     });
   });
 
@@ -502,7 +540,7 @@ describe('HealthController', () => {
 
       const validationDuration = Date.now() - validationStartTime;
       console.log(
-        `[TEST] Controller definition validated in ${validationDuration}ms`,
+        `[TEST] Controller definition validated in ${validationDuration.toString()}ms`,
       );
     });
 
@@ -515,7 +553,7 @@ describe('HealthController', () => {
 
       const validationDuration = Date.now() - validationStartTime;
       console.log(
-        `[TEST] Controller type validation completed in ${validationDuration}ms`,
+        `[TEST] Controller type validation completed in ${validationDuration.toString()}ms`,
       );
     });
 
@@ -534,7 +572,7 @@ describe('HealthController', () => {
 
       const validationDuration = Date.now() - validationStartTime;
       console.log(
-        `[TEST] Service dependency validation completed in ${validationDuration}ms`,
+        `[TEST] Service dependency validation completed in ${validationDuration.toString()}ms`,
       );
     });
   });
