@@ -251,7 +251,20 @@ function safeDockerComposeServices(
       // Convert the object to DockerComposeService with type-safe property access
       result[key] = {
         image: safeStringProperty(value, "image", ""),
-        build: isObject(value.build) ? value.build : undefined,
+        build: value.build
+          ? typeof value.build === "string"
+            ? value.build
+            : isObject(value.build)
+              ? {
+                  context: safeStringProperty(value.build, "context", "."),
+                  dockerfile: safeStringProperty(value.build, "dockerfile"),
+                  args: isObject(value.build.args)
+                    ? toStringRecord(value.build.args)
+                    : undefined,
+                  target: safeStringProperty(value.build, "target"),
+                }
+              : undefined
+          : undefined,
         ports: safeArrayProperty(value, "ports").map((p) => String(p)),
         environment: safeArrayProperty(value, "environment").map((e) =>
           String(e),
@@ -271,10 +284,8 @@ function safeDockerComposeServices(
         ),
         cap_add: safeArrayProperty(value, "cap_add").map((c) => String(c)),
         cap_drop: safeArrayProperty(value, "cap_drop").map((c) => String(c)),
-        restart: value.restart ? String(value.restart) : undefined,
-        labels: isObject(value.labels)
-          ? (value.labels as Record<string, string>)
-          : {},
+        restart: safeStringProperty(value, "restart", undefined),
+        labels: isObject(value.labels) ? toStringRecord(value.labels) : {},
         logging: isObject(value.logging) ? value.logging : undefined,
         healthcheck: isObject(value.healthcheck)
           ? value.healthcheck
@@ -300,15 +311,12 @@ function safeDockerComposeNetworks(
   for (const [key, value] of Object.entries(networks)) {
     if (isObject(value)) {
       result[key] = {
-        driver: value.driver ? String(value.driver) : undefined,
-        driver_opts: isObject(value.driver_opts)
-          ? (value.driver_opts as Record<string, string>)
+        driver: safeStringProperty(value, "driver", undefined),
+        driverOpts: isObject(value.driverOpts)
+          ? toStringRecord(value.driverOpts)
           : undefined,
-        ipam: isObject(value.ipam) ? value.ipam : undefined,
         external: safeBooleanProperty(value, "external", false),
-        labels: isObject(value.labels)
-          ? (value.labels as Record<string, string>)
-          : {},
+        labels: isObject(value.labels) ? toStringRecord(value.labels) : {},
       };
     }
   }
@@ -330,14 +338,12 @@ function safeDockerComposeVolumes(
   for (const [key, value] of Object.entries(volumes)) {
     if (isObject(value)) {
       result[key] = {
-        driver: value.driver ? String(value.driver) : undefined,
-        driver_opts: isObject(value.driver_opts)
-          ? (value.driver_opts as Record<string, string>)
+        driver: safeStringProperty(value, "driver", undefined),
+        driverOpts: isObject(value.driverOpts)
+          ? toStringRecord(value.driverOpts)
           : undefined,
         external: safeBooleanProperty(value, "external", false),
-        labels: isObject(value.labels)
-          ? (value.labels as Record<string, string>)
-          : {},
+        labels: isObject(value.labels) ? toStringRecord(value.labels) : {},
       };
     }
   }
@@ -359,11 +365,9 @@ function safeDockerComposeSecrets(
   for (const [key, value] of Object.entries(secrets)) {
     if (isObject(value)) {
       result[key] = {
-        file: value.file ? String(value.file) : undefined,
+        file: safeStringProperty(value, "file", undefined),
         external: safeBooleanProperty(value, "external", false),
-        labels: isObject(value.labels)
-          ? (value.labels as Record<string, string>)
-          : {},
+        labels: isObject(value.labels) ? toStringRecord(value.labels) : {},
       };
     }
   }
@@ -2266,11 +2270,16 @@ export class DockerSecurityAnalyzer extends EventEmitter {
   ): Promise<void> {
     // Check if volume mountpoint is accessible
     try {
-      const mountpoint = safeStringProperty(
-        inspectData as unknown,
-        "Mountpoint",
-        "",
-      );
+      // Type-safe way to access mountpoint from Docker volume inspect data
+      let mountpoint = "";
+      if (
+        inspectData &&
+        typeof inspectData === "object" &&
+        "Mountpoint" in inspectData &&
+        typeof inspectData.Mountpoint === "string"
+      ) {
+        mountpoint = inspectData.Mountpoint;
+      }
 
       if (!mountpoint) {
         return; // Skip analysis if no mountpoint

@@ -284,7 +284,7 @@ export interface DockerComposeConfig {
   secrets?: Record<string, DockerComposeSecret>;
 
   /** Configs defined */
-  configs?: Record<string, DockerComposeConfig>;
+  configs?: Record<string, Record<string, unknown>>;
 }
 
 // DockerComposeService interface moved to comprehensive definition below (line ~5455)
@@ -5591,7 +5591,7 @@ export interface DockerComposeService {
   entrypoint?: string | string[];
   environment?: string[] | Record<string, string>;
   ports?: string[] | DockerComposePort[];
-  volumes?: string[] | DockerComposeVolume[];
+  volumes?: string[] | DockerComposeVolumeMount[];
   networks?: string[] | Record<string, DockerComposeNetworkConfig>;
   depends_on?: string[] | Record<string, DockerComposeDependency>;
   privileged?: boolean;
@@ -5631,7 +5631,7 @@ export interface DockerComposePort {
   mode?: "host" | "ingress";
 }
 
-export interface DockerComposeVolume {
+export interface DockerComposeVolumeMount {
   type: "bind" | "volume" | "tmpfs";
   source: string;
   target: string;
