@@ -25,6 +25,7 @@ import { NeuralNetworkClassifier } from "./neural-network-classifier";
 import { FeatureExtractionEngine } from "./feature-extraction-engine";
 import { MLEnsembleCoordinator } from "./ml-ensemble-coordinator";
 import { MLPerformanceMetrics } from "./ml-performance-metrics";
+// import { MLAdaptiveLearningEngine } from "./ml-adaptive-learning-engine"; // TODO: Implement adaptive learning engine
 
 // ===========================
 // NAIVE BAYES CLASSIFIER
@@ -106,6 +107,23 @@ export {
 } from "./ml-performance-metrics";
 
 // ===========================
+// ML ADAPTIVE LEARNING ENGINE
+// ===========================
+
+// TODO: Implement adaptive learning engine
+// export {
+//   MLAdaptiveLearningEngine,
+//   type AdaptiveLearningFeatures,
+//   type AdaptiveLearningFeedback,
+//   type ConceptDriftMetrics,
+//   type OnlineLearningBatch,
+//   type AdaptiveLearningModel,
+//   type AdaptiveLearningConfig,
+//   type AdaptivePrediction,
+//   defaultMLAdaptiveLearningEngine,
+// } from "./ml-adaptive-learning-engine";
+
+// ===========================
 // UNIFIED ML ALGORITHM SUITE
 // ===========================
 
@@ -123,6 +141,7 @@ export class MLAlgorithmSuite {
   private featureExtractor: FeatureExtractionEngine;
   private ensembleCoordinator: MLEnsembleCoordinator;
   private performanceMetrics: MLPerformanceMetrics;
+  // private adaptiveLearningEngine: MLAdaptiveLearningEngine; // TODO: Implement adaptive learning engine
 
   constructor(config?: Partial<MLSuiteConfig>) {
     const _suiteConfig: MLSuiteConfig = {
@@ -156,6 +175,9 @@ export class MLAlgorithmSuite {
 
     // Initialize performance metrics system
     this.performanceMetrics = new MLPerformanceMetrics({});
+
+    // TODO: Initialize adaptive learning engine when implemented
+    // this.adaptiveLearningEngine = new MLAdaptiveLearningEngine({});
   }
 
   /**
