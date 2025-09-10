@@ -2,6 +2,22 @@
   "project": "unknown",
   "tasks": [
     {
+      "id": "error_1757547592190_5hwgz33mr",
+      "title": "Fix all unused variable violations in browser-use package",
+      "description": "Fix Python unused variables, remove unused imports, preserve browser automation functionality, maintain AIgent integration capabilities, apply underscore prefixes for intentionally unused parameters, achieve clean pylint/ruff output",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-10T23:39:52.191Z",
+      "auto_research_created": false
+    },
+    {
       "id": "error_1757383973243_yq2lfrvb8",
       "title": "Fix unused variable violations in decorators and processors",
       "description": "Systematically identify and resolve all unused variable violations in audit/compliance/, audit/integrations/, and audit/processors/ directories. Analyze each unused variable to determine if it should be removed, prefixed with underscore for intentionally unused parameters, or used appropriately if it serves an architectural purpose. Focus on maintaining decorator and processor functionality while following TypeScript best practices.",
