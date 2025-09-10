@@ -129,8 +129,17 @@ export {
 export * from "./validation/enterprise-validation.module";
 
 // Terminal Execution Enhancement System - server-only (Node.js child_process)
-// Temporarily disabled due to TypeScript compilation errors
-// export * from "./terminal";
+export * from "./terminal";
+
+// Audit System Types and Services - server-only
+export * from "./audit/types";
+export * from "./audit/services/audit-logger.service";
+export * from "./audit/processors/audit-event.processor";
+export * from "./audit/compliance/compliance-framework.service";
+export * from "./audit/integrations/audit.module";
+
+// Security Framework - server-only security services and ML algorithms
+export * from "./security";
 
 // Note: Test utilities are available but not exported by default
 // to avoid jest dependencies in production builds.
