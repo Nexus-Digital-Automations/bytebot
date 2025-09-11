@@ -26,6 +26,7 @@ import {
   AccessPattern,
   ContentAnalysis,
 } from '../models/browser-automation.models';
+import { Prisma } from '@prisma/client';
 import * as fs from 'fs/promises';
 import * as crypto from 'crypto';
 import * as zlib from 'zlib';
@@ -39,6 +40,93 @@ export interface CompressionConfig {
   type: CompressionType;
   level: number;
   enabled: boolean;
+}
+
+// Enhanced metadata interfaces for type safety
+export interface ScreenshotMetadata {
+  isTestData?: boolean;
+  isProductionData?: boolean;
+  isBusinessCritical?: boolean;
+  isUserData?: boolean;
+  isDebugData?: boolean;
+  isTemporary?: boolean;
+  dimensions?: {
+    width: number;
+    height: number;
+  };
+  [key: string]: unknown;
+}
+
+export interface DomSnapshotMetadata {
+  isTestData?: boolean;
+  isProductionData?: boolean;
+  containsUserData?: boolean;
+  isBusinessCritical?: boolean;
+  isDebugData?: boolean;
+  [key: string]: unknown;
+}
+
+// Prisma query result types
+export interface ScreenshotQueryResult {
+  id: string;
+  timestamp: Date;
+  fileSize: number;
+  sessionId: string;
+  accessCount?: number | null;
+  storageTier?: string | null;
+  metadata?: Prisma.JsonValue | null;
+  filePath: string;
+  compressionType?: string | null;
+  checksum?: string | null;
+  url?: string | null;
+}
+
+export interface DomSnapshotQueryResult {
+  id: string;
+  timestamp: Date;
+  sessionId: string;
+  url: string;
+  accessCount?: number | null;
+  storageTier?: string | null;
+  originalSize?: number | null;
+  htmlContent?: string | null;
+  metadata?: Prisma.JsonValue | null;
+  compressionType?: string | null;
+  textContentHash?: string | null;
+  formCount?: number | null;
+}
+
+export interface AccessPatternQueryResult {
+  accessCount: number;
+  lastAccessed: Date;
+  timestamp: Date;
+}
+
+// Error type for proper error handling
+type ErrorWithMessage = {
+  message: string;
+  stack?: string;
+};
+
+function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as Record<string, unknown>).message === 'string'
+  );
+}
+
+function getErrorMessage(error: unknown): string {
+  if (isErrorWithMessage(error)) return error.message;
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+function getErrorStack(error: unknown): string | undefined {
+  if (isErrorWithMessage(error)) return error.stack;
+  if (error instanceof Error) return error.stack;
+  return undefined;
 }
 
 export interface StorageTierConfig {
@@ -57,7 +145,7 @@ export interface OptimizationResult {
   compressionRatio: number;
   optimizationTimeMs: number;
   tier: StorageTier;
-  compressionType: CompressionType;
+  compressionType: CompressionType | string;
 }
 
 export interface DeduplicationResult {
@@ -70,42 +158,50 @@ export interface DeduplicationResult {
 export interface ArchivalRecommendation {
   id: string;
   entityType: string;
-  currentTier: StorageTier;
-  recommendedTier: StorageTier;
+  currentTier: StorageTier | string | undefined;
+  recommendedTier: StorageTier | string | undefined;
   estimatedSavings: number;
   confidence: number;
-  factors: {
-    isRedundant: boolean;
-    isLowQuality: boolean;
-    isTestData: boolean;
-    hasBusinessValue: boolean;
-    accessFrequency: 'high' | 'medium' | 'low';
-    ageInDays: number;
-  };
+  factors: ArchivalFactors;
   action: 'compress' | 'archive' | 'delete' | 'no-action';
+}
+
+export interface ArchivalFactors {
+  isRedundant: boolean;
+  isLowQuality: boolean;
+  isTestData: boolean;
+  hasBusinessValue: boolean;
+  accessFrequency: 'high' | 'medium' | 'low';
+  ageInDays: number;
 }
 
 export interface StorageAnalytics {
   totalStorageUsed: number;
   storageByTier: Map<StorageTier, number>;
   storageByType: Map<string, number>;
-  compressionStats: {
-    totalCompressed: number;
-    totalUncompressed: number;
-    averageCompressionRatio: number;
-    spaceSavedByCompression: number;
-  };
-  accessPatterns: {
-    hotDataPercentage: number;
-    warmDataPercentage: number;
-    coldDataPercentage: number;
-    archivedDataPercentage: number;
-  };
-  duplicateStats: {
-    totalDuplicates: number;
-    duplicateStorageWaste: number;
-    deduplicationPotential: number;
-  };
+  compressionStats: CompressionStats;
+  accessPatterns: AccessPatternStats;
+  duplicateStats: DuplicateStats;
+}
+
+export interface CompressionStats {
+  totalCompressed: number;
+  totalUncompressed: number;
+  averageCompressionRatio: number;
+  spaceSavedByCompression: number;
+}
+
+export interface AccessPatternStats {
+  hotDataPercentage: number;
+  warmDataPercentage: number;
+  coldDataPercentage: number;
+  archivedDataPercentage: number;
+}
+
+export interface DuplicateStats {
+  totalDuplicates: number;
+  duplicateStorageWaste: number;
+  deduplicationPotential: number;
 }
 
 @Injectable()
@@ -188,12 +284,24 @@ export class DataStorageOptimizationService {
 
     const screenshots = await this.prismaService.browserScreenshot.findMany({
       where: {
-        // Note: storageTier field not available in current schema
-        // storageTier: {
-        //   in: [StorageTier.HOT, StorageTier.WARM],
-        // },
+        storageTier: {
+          in: [StorageTier.HOT, StorageTier.WARM],
+        },
       },
-      orderBy: [{ timestamp: 'asc' }, { fileSize: 'desc' }], // Using timestamp instead of lastAccessed
+      select: {
+        id: true,
+        timestamp: true,
+        fileSize: true,
+        sessionId: true,
+        accessCount: true,
+        storageTier: true,
+        metadata: true,
+        filePath: true,
+        compressionType: true,
+        checksum: true,
+        url: true,
+      },
+      orderBy: [{ timestamp: 'asc' }, { fileSize: 'desc' }],
       take: limit,
     });
 
@@ -213,8 +321,8 @@ export class DataStorageOptimizationService {
         }
       } catch (error) {
         this.logger.error(
-          `Failed to optimize screenshot ${screenshot.id}: ${error.message}`,
-          error.stack,
+          `Failed to optimize screenshot ${screenshot.id}: ${getErrorMessage(error)}`,
+          getErrorStack(error),
         );
       }
     }
@@ -231,10 +339,23 @@ export class DataStorageOptimizationService {
 
     const domSnapshots = await this.prismaService.browserDomSnapshot.findMany({
       where: {
-        // Note: compressionType field not available in current schema
         htmlContent: { not: null },
       },
-      orderBy: [{ timestamp: 'asc' }, { fileSize: 'desc' }], // Using available fields instead of lastAccessed/originalSize
+      select: {
+        id: true,
+        timestamp: true,
+        sessionId: true,
+        url: true,
+        accessCount: true,
+        storageTier: true,
+        originalSize: true,
+        htmlContent: true,
+        metadata: true,
+        compressionType: true,
+        textContentHash: true,
+        formCount: true,
+      },
+      orderBy: [{ timestamp: 'asc' }, { originalSize: 'desc' }],
       take: limit,
     });
 
@@ -254,8 +375,8 @@ export class DataStorageOptimizationService {
         }
       } catch (error) {
         this.logger.error(
-          `Failed to optimize DOM snapshot ${domSnapshot.id}: ${error.message}`,
-          error.stack,
+          `Failed to optimize DOM snapshot ${domSnapshot.id}: ${getErrorMessage(error)}`,
+          getErrorStack(error),
         );
       }
     }
@@ -299,7 +420,7 @@ export class DataStorageOptimizationService {
           });
         } catch (error) {
           this.logger.warn(
-            `Failed to calculate checksum for screenshot ${screenshot.id}: ${error.message}`,
+            `Failed to calculate checksum for screenshot ${screenshot.id}: ${getErrorMessage(error)}`,
           );
           continue;
         }
@@ -351,7 +472,7 @@ export class DataStorageOptimizationService {
 
     for (const id of entityIds) {
       try {
-        let entity: any;
+        let entity: AccessPatternQueryResult | null;
 
         if (entityType === 'screenshot') {
           entity = await this.prismaService.browserScreenshot.findUnique({
@@ -375,19 +496,20 @@ export class DataStorageOptimizationService {
 
         if (entity) {
           const ageInDays = this.calculateAgeInDays(entity.timestamp);
+          const accessCount = entity.accessCount || 0;
 
           const averageAccessInterval =
-            ageInDays > 0 ? ageInDays / Math.max(entity.accessCount, 1) : 0;
+            ageInDays > 0 ? ageInDays / Math.max(accessCount, 1) : 0;
 
           let accessFrequency: 'high' | 'medium' | 'low' = 'low';
-          if (entity.accessCount > 10 && averageAccessInterval < 1) {
+          if (accessCount > 10 && averageAccessInterval < 1) {
             accessFrequency = 'high';
-          } else if (entity.accessCount > 3 && averageAccessInterval < 7) {
+          } else if (accessCount > 3 && averageAccessInterval < 7) {
             accessFrequency = 'medium';
           }
 
           patterns.set(id, {
-            totalAccesses: entity.accessCount,
+            totalAccesses: accessCount,
             lastAccessed: entity.lastAccessed,
             averageAccessInterval,
             accessFrequency,
@@ -395,7 +517,7 @@ export class DataStorageOptimizationService {
         }
       } catch (error) {
         this.logger.warn(
-          `Failed to analyze access pattern for ${entityType} ${id}: ${error.message}`,
+          `Failed to analyze access pattern for ${entityType} ${id}: ${getErrorMessage(error)}`,
         );
       }
     }
@@ -418,6 +540,19 @@ export class DataStorageOptimizationService {
 
     if (entityType === 'screenshot') {
       const screenshots = await this.prismaService.browserScreenshot.findMany({
+        select: {
+          id: true,
+          timestamp: true,
+          fileSize: true,
+          sessionId: true,
+          accessCount: true,
+          storageTier: true,
+          metadata: true,
+          filePath: true,
+          compressionType: true,
+          checksum: true,
+          url: true,
+        },
         orderBy: [{ lastAccessed: 'asc' }, { fileSize: 'desc' }],
         take: limit,
       });
@@ -430,6 +565,20 @@ export class DataStorageOptimizationService {
     } else {
       const domSnapshots = await this.prismaService.browserDomSnapshot.findMany(
         {
+          select: {
+            id: true,
+            timestamp: true,
+            sessionId: true,
+            url: true,
+            accessCount: true,
+            storageTier: true,
+            originalSize: true,
+            htmlContent: true,
+            metadata: true,
+            compressionType: true,
+            textContentHash: true,
+            formCount: true,
+          },
           orderBy: [{ lastAccessed: 'asc' }, { originalSize: 'desc' }],
           take: limit,
         },
@@ -486,13 +635,13 @@ export class DataStorageOptimizationService {
     for (const tier of Object.values(StorageTier)) {
       const screenshotTierStats =
         await this.prismaService.browserScreenshot.aggregate({
-          where: { storageTier: tier as any },
+          where: { storageTier: tier },
           _sum: { fileSize: true },
         });
 
       const domSnapshotTierStats =
         await this.prismaService.browserDomSnapshot.aggregate({
-          where: { storageTier: tier as any },
+          where: { storageTier: tier },
           _sum: { originalSize: true },
         });
 
@@ -610,15 +759,7 @@ export class DataStorageOptimizationService {
   // ===== PRIVATE METHODS =====
 
   private async analyzeScreenshotForOptimization(
-    screenshot: Partial<BrowserScreenshot> & {
-      id: string;
-      timestamp: Date;
-      fileSize: number;
-      sessionId: string;
-      accessCount?: number;
-      storageTier?: string;
-      metadata?: any;
-    },
+    screenshot: ScreenshotQueryResult,
   ): Promise<ArchivalRecommendation> {
     const ageInDays = this.calculateAgeInDays(screenshot.timestamp);
     const accessPattern = await this.analyzeAccessPatterns('screenshot', [
@@ -627,15 +768,17 @@ export class DataStorageOptimizationService {
     const pattern = accessPattern.get(screenshot.id);
 
     const contentAnalysis = await this.analyzeScreenshotContent(screenshot);
+    const metadata = this.parseScreenshotMetadata(screenshot.metadata);
 
-    let recommendedTier = screenshot.storageTier;
+    let recommendedTier: StorageTier | string | undefined = screenshot.storageTier || StorageTier.HOT;
     let estimatedSavings = 0;
     let action: 'compress' | 'archive' | 'delete' | 'no-action' = 'no-action';
+    const accessCount = screenshot.accessCount || 0;
 
     // Determine optimal storage tier
     if (
       ageInDays > 90 &&
-      (pattern?.accessFrequency === 'low' || (screenshot.accessCount || 0) < 2)
+      (pattern?.accessFrequency === 'low' || accessCount < 2)
     ) {
       recommendedTier = StorageTier.ARCHIVED;
       action = 'archive';
@@ -643,7 +786,7 @@ export class DataStorageOptimizationService {
     } else if (
       ageInDays > 30 &&
       pattern?.accessFrequency !== 'high' &&
-      (screenshot.accessCount || 0) < 10
+      accessCount < 10
     ) {
       recommendedTier = StorageTier.COLD;
       action = 'compress';
@@ -664,11 +807,11 @@ export class DataStorageOptimizationService {
       action = 'archive';
     }
 
-    const factors = {
+    const factors: ArchivalFactors = {
       isRedundant: contentAnalysis.similarScreenshotsCount > 3,
       isLowQuality: contentAnalysis.qualityScore < 0.5,
-      isTestData: screenshot.metadata?.isTestData === true,
-      hasBusinessValue: this.assessBusinessValue(screenshot),
+      isTestData: metadata.isTestData === true,
+      hasBusinessValue: this.assessBusinessValue({ ...screenshot, metadata }),
       accessFrequency: pattern?.accessFrequency || 'low',
       ageInDays,
     };
@@ -692,28 +835,19 @@ export class DataStorageOptimizationService {
   }
 
   private async analyzeDomSnapshotForOptimization(
-    domSnapshot: Partial<BrowserDomSnapshot> & {
-      id: string;
-      timestamp: Date;
-      sessionId: string;
-      url: string;
-      accessCount?: number;
-      storageTier?: string;
-      originalSize?: number;
-      htmlContent?: string;
-      metadata?: any;
-    },
+    domSnapshot: DomSnapshotQueryResult,
   ): Promise<ArchivalRecommendation> {
     const ageInDays = this.calculateAgeInDays(domSnapshot.timestamp);
     const accessPattern = await this.analyzeAccessPatterns('domSnapshot', [
       domSnapshot.id,
     ]);
     const pattern = accessPattern.get(domSnapshot.id);
+    const metadata = this.parseDomSnapshotMetadata(domSnapshot.metadata);
 
     const contentSize =
       domSnapshot.originalSize || domSnapshot.htmlContent?.length || 0;
 
-    let recommendedTier = domSnapshot.storageTier;
+    let recommendedTier: StorageTier | string | undefined = domSnapshot.storageTier || StorageTier.HOT;
     let estimatedSavings = 0;
     let action: 'compress' | 'archive' | 'delete' | 'no-action' = 'no-action';
 
@@ -732,13 +866,13 @@ export class DataStorageOptimizationService {
       estimatedSavings = contentSize * 0.4; // ~40% compression
     }
 
-    const factors = {
+    const factors: ArchivalFactors = {
       isRedundant: domSnapshot.textContentHash
         ? await this.checkForSimilarDomContent(domSnapshot.textContentHash)
         : false,
       isLowQuality: contentSize < 1024, // Very small HTML content
-      isTestData: domSnapshot.metadata?.isTestData === true,
-      hasBusinessValue: this.assessDomBusinessValue(domSnapshot),
+      isTestData: metadata.isTestData === true,
+      hasBusinessValue: this.assessDomBusinessValue({ ...domSnapshot, metadata }),
       accessFrequency: pattern?.accessFrequency || 'low',
       ageInDays,
     };
@@ -762,20 +896,19 @@ export class DataStorageOptimizationService {
   }
 
   private async optimizeScreenshot(
-    screenshot: Partial<BrowserScreenshot> & {
-      id: string;
-      fileSize: number;
-      filePath: string;
-      compressionType?: string;
-    },
+    screenshot: ScreenshotQueryResult,
     targetTier: StorageTier,
   ): Promise<OptimizationResult> {
     const startTime = Date.now();
     const originalSize = screenshot.fileSize;
     const tierConfig = this.storageTierConfigs.get(targetTier);
 
+    if (!tierConfig) {
+      throw new Error(`Invalid storage tier: ${targetTier}`);
+    }
+
     let optimizedSize = originalSize;
-    let newCompressionType = screenshot.compressionType;
+    let newCompressionType: string = screenshot.compressionType || CompressionType.NONE;
 
     // Apply compression if enabled for target tier
     if (
@@ -800,15 +933,15 @@ export class DataStorageOptimizationService {
         await this.prismaService.browserScreenshot.update({
           where: { id: screenshot.id },
           data: {
-            storageTier: targetTier as any,
-            compressionType: newCompressionType as any,
+            storageTier: targetTier,
+            compressionType: newCompressionType as CompressionType,
             compressedSize: optimizedSize,
             filePath: compressedPath,
           },
         });
       } catch (error) {
         this.logger.error(
-          `Failed to compress screenshot ${screenshot.id}: ${error.message}`,
+          `Failed to compress screenshot ${screenshot.id}: ${getErrorMessage(error)}`,
         );
         throw error;
       }
@@ -817,7 +950,7 @@ export class DataStorageOptimizationService {
       await this.prismaService.browserScreenshot.update({
         where: { id: screenshot.id },
         data: {
-          storageTier: targetTier as any,
+          storageTier: targetTier,
         },
       });
     }
@@ -839,12 +972,7 @@ export class DataStorageOptimizationService {
   }
 
   private async optimizeDomSnapshot(
-    domSnapshot: Partial<BrowserDomSnapshot> & {
-      id: string;
-      originalSize?: number;
-      htmlContent?: string;
-      compressionType?: string;
-    },
+    domSnapshot: DomSnapshotQueryResult,
     targetTier: StorageTier,
   ): Promise<OptimizationResult> {
     const startTime = Date.now();
@@ -852,8 +980,12 @@ export class DataStorageOptimizationService {
       domSnapshot.originalSize || domSnapshot.htmlContent?.length || 0;
     const tierConfig = this.storageTierConfigs.get(targetTier);
 
+    if (!tierConfig) {
+      throw new Error(`Invalid storage tier: ${targetTier}`);
+    }
+
     let optimizedSize = originalSize;
-    let newCompressionType = domSnapshot.compressionType;
+    let newCompressionType: string = domSnapshot.compressionType || CompressionType.NONE;
 
     // Apply compression to HTML content if available
     if (domSnapshot.htmlContent && tierConfig.compressionConfig.enabled) {
@@ -870,8 +1002,8 @@ export class DataStorageOptimizationService {
         await this.prismaService.browserDomSnapshot.update({
           where: { id: domSnapshot.id },
           data: {
-            storageTier: targetTier as any,
-            compressionType: newCompressionType as any,
+            storageTier: targetTier,
+            compressionType: newCompressionType as CompressionType,
             htmlCompressed: compressedData,
             compressedSize: optimizedSize,
             htmlContent: null, // Clear uncompressed content to save space
@@ -879,7 +1011,7 @@ export class DataStorageOptimizationService {
         });
       } catch (error) {
         this.logger.error(
-          `Failed to compress DOM snapshot ${domSnapshot.id}: ${error.message}`,
+          `Failed to compress DOM snapshot ${domSnapshot.id}: ${getErrorMessage(error)}`,
         );
         throw error;
       }
@@ -888,7 +1020,7 @@ export class DataStorageOptimizationService {
       await this.prismaService.browserDomSnapshot.update({
         where: { id: domSnapshot.id },
         data: {
-          storageTier: targetTier as any,
+          storageTier: targetTier,
         },
       });
     }
@@ -910,14 +1042,7 @@ export class DataStorageOptimizationService {
   }
 
   private async analyzeScreenshotContent(
-    screenshot: Partial<BrowserScreenshot> & {
-      id: string;
-      filePath?: string;
-      checksum?: string;
-      fileSize: number;
-      metadata?: any;
-      url?: string;
-    },
+    screenshot: ScreenshotQueryResult,
   ): Promise<ContentAnalysis> {
     // Calculate content hash if not present
     let contentHash = '';
@@ -944,7 +1069,7 @@ export class DataStorageOptimizationService {
     const duplicateContent = similarScreenshots > 0;
 
     // Assess business value
-    const businessValueScore = this.assessBusinessValue(screenshot) ? 0.8 : 0.3;
+    const businessValueScore = this.assessBusinessValue({ ...screenshot, metadata: screenshot.metadata }) ? 0.8 : 0.3;
 
     return {
       similarScreenshotsCount: similarScreenshots,
@@ -1004,7 +1129,7 @@ export class DataStorageOptimizationService {
       return hash;
     } catch (error) {
       this.logger.warn(
-        `Failed to calculate checksum for ${filePath}: ${error.message}`,
+        `Failed to calculate checksum for ${filePath}: ${getErrorMessage(error)}`,
       );
       throw error;
     }
@@ -1017,46 +1142,38 @@ export class DataStorageOptimizationService {
   }
 
   private calculateImageQualityScore(
-    screenshot: Partial<BrowserScreenshot> & {
-      fileSize: number;
-      metadata?: any;
-    },
+    screenshot: ScreenshotQueryResult,
   ): number {
     // Base quality assessment on file size and dimensions
     const sizeScore = Math.min(screenshot.fileSize / (100 * 1024), 1.0); // Up to 100KB = 1.0
+    const metadata = this.parseScreenshotMetadata(screenshot.metadata);
 
     let dimensionScore = 0.5;
-    if (screenshot.metadata && typeof screenshot.metadata === 'object') {
-      const metadata = screenshot.metadata;
-      if (metadata.dimensions) {
-        const { width, height } = metadata.dimensions;
-        dimensionScore = Math.min((width * height) / (1920 * 1080), 1.0); // Up to 1080p = 1.0
-      }
+    if (metadata.dimensions) {
+      const { width, height } = metadata.dimensions;
+      dimensionScore = Math.min((width * height) / (1920 * 1080), 1.0); // Up to 1080p = 1.0
     }
 
     return (sizeScore + dimensionScore) / 2;
   }
 
   private assessBusinessValue(
-    screenshot: Partial<BrowserScreenshot> & { metadata?: any; url?: string },
+    screenshot: { metadata?: Prisma.JsonValue | null; url?: string },
   ): boolean {
-    // Assess business value based on metadata and context
-    if (screenshot.metadata && typeof screenshot.metadata === 'object') {
-      const metadata = screenshot.metadata;
+    const metadata = this.parseScreenshotMetadata(screenshot.metadata);
 
-      // High business value indicators
-      if (
-        metadata.isProductionData ||
-        metadata.isBusinessCritical ||
-        metadata.isUserData
-      ) {
-        return true;
-      }
+    // High business value indicators
+    if (
+      metadata.isProductionData ||
+      metadata.isBusinessCritical ||
+      metadata.isUserData
+    ) {
+      return true;
+    }
 
-      // Low business value indicators
-      if (metadata.isTestData || metadata.isDebugData || metadata.isTemporary) {
-        return false;
-      }
+    // Low business value indicators
+    if (metadata.isTestData || metadata.isDebugData || metadata.isTemporary) {
+      return false;
     }
 
     // Default to moderate business value
@@ -1068,25 +1185,22 @@ export class DataStorageOptimizationService {
   }
 
   private assessDomBusinessValue(domSnapshot: {
-    metadata?: any;
+    metadata?: Prisma.JsonValue | null;
     url: string;
-    formCount?: number;
+    formCount?: number | null;
   }): boolean {
-    // Assess DOM snapshot business value
-    if (domSnapshot.metadata && typeof domSnapshot.metadata === 'object') {
-      const metadata = domSnapshot.metadata;
+    const metadata = this.parseDomSnapshotMetadata(domSnapshot.metadata);
 
-      if (
-        metadata.isProductionData ||
-        metadata.containsUserData ||
-        metadata.isBusinessCritical
-      ) {
-        return true;
-      }
+    if (
+      metadata.isProductionData ||
+      metadata.containsUserData ||
+      metadata.isBusinessCritical
+    ) {
+      return true;
+    }
 
-      if (metadata.isTestData || metadata.isDebugData) {
-        return false;
-      }
+    if (metadata.isTestData || metadata.isDebugData) {
+      return false;
     }
 
     // Check URL patterns
@@ -1112,7 +1226,7 @@ export class DataStorageOptimizationService {
   private calculateRecommendationConfidence(
     accessPattern: AccessPattern | undefined,
     contentAnalysis: ContentAnalysis | null,
-    factors: any,
+    factors: ArchivalFactors,
   ): number {
     let confidence = 0.5; // Base confidence
 
@@ -1141,5 +1255,20 @@ export class DataStorageOptimizationService {
     if (factors.isRedundant) confidence += 0.3;
 
     return Math.max(0, Math.min(1, confidence));
+  }
+
+  // Helper methods for parsing metadata
+  private parseScreenshotMetadata(metadata: Prisma.JsonValue | null | undefined): ScreenshotMetadata {
+    if (!metadata || typeof metadata !== 'object' || metadata === null) {
+      return {};
+    }
+    return metadata as ScreenshotMetadata;
+  }
+
+  private parseDomSnapshotMetadata(metadata: Prisma.JsonValue | null | undefined): DomSnapshotMetadata {
+    if (!metadata || typeof metadata !== 'object' || metadata === null) {
+      return {};
+    }
+    return metadata as DomSnapshotMetadata;
   }
 }

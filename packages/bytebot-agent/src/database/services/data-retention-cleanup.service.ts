@@ -22,14 +22,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   StorageTier,
-  BrowserSession,
-  BrowserTask,
-  BrowserScreenshot,
-  BrowserDomSnapshot,
-  BrowserDataExtraction,
+  BrowserSession as BrowserSessionModel,
+  BrowserTask as BrowserTaskModel,
+  BrowserScreenshot as BrowserScreenshotModel,
+  BrowserDomSnapshot as BrowserDomSnapshotModel,
+  BrowserDataExtraction as BrowserDataExtractionModel,
 } from '../models/browser-automation.models';
+import { Prisma } from '@prisma/client';
 import * as fs from 'fs/promises';
-import * as path from 'path';
 
 export interface RetentionPolicy {
   id: string;
@@ -110,6 +110,81 @@ export interface DataRetentionReport {
     spaceSaved: number;
     percentageSaved: number;
   };
+}
+
+// Prisma type definitions for cleanup operations
+type BrowserSessionWithIncludes = Prisma.BrowserSessionGetPayload<{
+  include: {
+    tasks: {
+      select: { id: true };
+    };
+    screenshots: {
+      select: { id: true; fileSize: true };
+    };
+  };
+}>;
+
+type BrowserSessionForDeletion = Prisma.BrowserSessionGetPayload<{
+  include: {
+    tasks: true;
+    screenshots: {
+      select: { id: true; fileSize: true; filePath: true };
+    };
+    domSnapshots: {
+      select: { id: true; fileSize: true };
+    };
+  };
+}>;
+
+type BrowserTaskForDeletion = Prisma.BrowserTaskGetPayload<{
+  include: {
+    screenshots: {
+      select: { id: true; fileSize: true; filePath: true };
+    };
+    domSnapshots: {
+      select: { id: true; fileSize: true };
+    };
+    dataExtractions: {
+      select: { id: true };
+    };
+  };
+}>;
+
+type BrowserScreenshotForDeletion = Prisma.BrowserScreenshotGetPayload<{}>;
+
+type BrowserDomSnapshotForDeletion = Prisma.BrowserDomSnapshotGetPayload<{}>;
+
+type BrowserDataExtractionForDeletion = Prisma.BrowserDataExtractionGetPayload<{}>;
+
+// Error handling interface
+interface ErrorWithMessage {
+  message: string;
+  stack?: string;
+}
+
+// Utility function to safely extract error message
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  if (error && typeof error === 'object' && 'message' in error && typeof (error as { message: unknown }).message === 'string') {
+    return (error as { message: string }).message;
+  }
+  return 'Unknown error occurred';
+}
+
+// Utility function to safely extract error stack
+function getErrorStack(error: unknown): string | undefined {
+  if (error instanceof Error && error.stack) {
+    return error.stack;
+  }
+  if (error && typeof error === 'object' && 'stack' in error && typeof (error as { stack: unknown }).stack === 'string') {
+    return (error as { stack: string }).stack;
+  }
+  return undefined;
 }
 
 @Injectable()
@@ -259,8 +334,8 @@ export class DataRetentionCleanupService {
           policy.lastExecuted = new Date();
         } catch (error) {
           this.logger.error(
-            `Failed to execute cleanup for ${entityType}: ${error.message}`,
-            error.stack,
+            `Failed to execute cleanup for ${entityType}: ${getErrorMessage(error)}`,
+            getErrorStack(error),
           );
         }
       }
@@ -409,13 +484,13 @@ export class DataRetentionCleanupService {
       result.errorsCount++;
       result.errorDetails?.push({
         entityId: 'policy_execution',
-        error: error.message,
+        error: getErrorMessage(error),
         timestamp: new Date(),
       });
 
       this.logger.error(
-        `Cleanup execution failed for policy ${policy.id}: ${error.message}`,
-        error.stack,
+        `Cleanup execution failed for policy ${policy.id}: ${getErrorMessage(error)}`,
+        getErrorStack(error),
       );
 
       return result;
@@ -442,7 +517,7 @@ export class DataRetentionCleanupService {
     };
 
     // Find sessions to archive
-    const sessionsToArchive = await this.prismaService.browserSession.findMany({
+    const sessionsToArchive: BrowserSessionWithIncludes[] = await this.prismaService.browserSession.findMany({
       where: {
         AND: [
           { updatedAt: { lt: archiveDate } },
@@ -450,7 +525,7 @@ export class DataRetentionCleanupService {
           ...(policy.policyConditions?.statusFilter
             ? [
                 {
-                  status: { in: policy.policyConditions.statusFilter as any[] },
+                  status: { in: policy.policyConditions.statusFilter as string[] },
                 },
               ]
             : []),
@@ -476,21 +551,21 @@ export class DataRetentionCleanupService {
         } catch (error) {
           result.errors.push({
             entityId: session.id,
-            error: error.message,
+            error: getErrorMessage(error),
           });
         }
       }
     }
 
     // Find sessions to delete
-    const sessionsToDelete = await this.prismaService.browserSession.findMany({
+    const sessionsToDelete: BrowserSessionForDeletion[] = await this.prismaService.browserSession.findMany({
       where: {
         AND: [
           { updatedAt: { lt: deleteDate } },
           ...(policy.policyConditions?.statusFilter
             ? [
                 {
-                  status: { in: policy.policyConditions.statusFilter as any[] },
+                  status: { in: policy.policyConditions.statusFilter as string[] },
                 },
               ]
             : []),
@@ -530,7 +605,7 @@ export class DataRetentionCleanupService {
             result.bytesFreed += screenshot.fileSize;
           } catch (error) {
             this.logger.warn(
-              `Failed to delete screenshot file ${screenshot.filePath}: ${error.message}`,
+              `Failed to delete screenshot file ${screenshot.filePath}: ${getErrorMessage(error)}`,
             );
           }
         }
@@ -545,7 +620,7 @@ export class DataRetentionCleanupService {
       } catch (error) {
         result.errors.push({
           entityId: session.id,
-          error: error.message,
+          error: getErrorMessage(error),
         });
       }
     }
@@ -573,14 +648,14 @@ export class DataRetentionCleanupService {
     };
 
     // Find tasks to delete
-    const tasksToDelete = await this.prismaService.browserTask.findMany({
+    const tasksToDelete: BrowserTaskForDeletion[] = await this.prismaService.browserTask.findMany({
       where: {
         AND: [
           { updatedAt: { lt: deleteDate } },
           ...(policy.policyConditions?.statusFilter
             ? [
                 {
-                  status: { in: policy.policyConditions.statusFilter as any[] },
+                  status: { in: policy.policyConditions.statusFilter as string[] },
                 },
               ]
             : []),
@@ -623,7 +698,7 @@ export class DataRetentionCleanupService {
             result.bytesFreed += screenshot.fileSize;
           } catch (error) {
             this.logger.warn(
-              `Failed to delete task screenshot file ${screenshot.filePath}: ${error.message}`,
+              `Failed to delete task screenshot file ${screenshot.filePath}: ${getErrorMessage(error)}`,
             );
           }
         }
@@ -641,7 +716,7 @@ export class DataRetentionCleanupService {
       } catch (error) {
         result.errors.push({
           entityId: task.id,
-          error: error.message,
+          error: getErrorMessage(error),
         });
       }
     }
@@ -668,7 +743,7 @@ export class DataRetentionCleanupService {
     };
 
     // Build where conditions based on policy
-    const whereConditions: any = {
+    const whereConditions: Prisma.BrowserScreenshotWhereInput = {
       AND: [
         { timestamp: { lt: deleteDate } },
         ...(policy.policyConditions?.maxAccessCount
@@ -700,7 +775,7 @@ export class DataRetentionCleanupService {
     };
 
     // Find screenshots to delete
-    const screenshotsToDelete =
+    const screenshotsToDelete: BrowserScreenshotForDeletion[] =
       await this.prismaService.browserScreenshot.findMany({
         where: whereConditions,
       });
@@ -713,7 +788,7 @@ export class DataRetentionCleanupService {
           await fs.unlink(screenshot.filePath);
         } catch (error) {
           this.logger.warn(
-            `Failed to delete screenshot file ${screenshot.filePath}: ${error.message}`,
+            `Failed to delete screenshot file ${screenshot.filePath}: ${getErrorMessage(error)}`,
           );
         }
 
@@ -727,7 +802,7 @@ export class DataRetentionCleanupService {
       } catch (error) {
         result.errors.push({
           entityId: screenshot.id,
-          error: error.message,
+          error: getErrorMessage(error),
         });
       }
     }
@@ -754,7 +829,7 @@ export class DataRetentionCleanupService {
     };
 
     // Find DOM snapshots to delete
-    const domSnapshotsToDelete =
+    const domSnapshotsToDelete: BrowserDomSnapshotForDeletion[] =
       await this.prismaService.browserDomSnapshot.findMany({
         where: {
           AND: [
@@ -815,7 +890,7 @@ export class DataRetentionCleanupService {
       } catch (error) {
         result.errors.push({
           entityId: domSnapshot.id,
-          error: error.message,
+          error: getErrorMessage(error),
         });
       }
     }
@@ -842,7 +917,7 @@ export class DataRetentionCleanupService {
     };
 
     // Find data extractions to delete
-    const extractionsToDelete =
+    const extractionsToDelete: BrowserDataExtractionForDeletion[] =
       await this.prismaService.browserDataExtraction.findMany({
         where: {
           AND: [
@@ -883,7 +958,7 @@ export class DataRetentionCleanupService {
       } catch (error) {
         result.errors.push({
           entityId: extraction.id,
-          error: error.message,
+          error: getErrorMessage(error),
         });
       }
     }
@@ -1185,7 +1260,7 @@ export class DataRetentionCleanupService {
       //   },
       // });
     } catch (error) {
-      this.logger.error(`Failed to log cleanup execution: ${error.message}`);
+      this.logger.error(`Failed to log cleanup execution: ${getErrorMessage(error)}`);
     }
   }
 }

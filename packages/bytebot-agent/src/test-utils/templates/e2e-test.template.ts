@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * E2E Test Template - Enterprise-grade end-to-end testing framework
  *
@@ -111,7 +110,7 @@ interface TimedResponse extends Response {
  * Timing wrapper for SuperTest requests
  * Handles both Promise<Response> and SuperTest Test objects
  */
-const withTiming = async (requestPromise: Promise<any> | any): Promise<any> => {
+const withTiming = async (requestPromise: Promise<Response>): Promise<any> => {
   const startTime = Date.now();
   const response = await requestPromise;
   const duration = Date.now() - startTime;

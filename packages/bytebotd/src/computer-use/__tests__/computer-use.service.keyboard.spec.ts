@@ -73,10 +73,10 @@ describe('ComputerUseService - Keyboard Operations', () => {
   let nutService: jest.Mocked<NutService>;
 
   // Spy on Logger methods for logging verification
-  let _loggerLogSpy: jest.SpyInstance;
-  let _loggerErrorSpy: jest.SpyInstance;
-  let _loggerWarnSpy: jest.SpyInstance;
-  let _loggerDebugSpy: jest.SpyInstance;
+  let __loggerLogSpy: jest.SpyInstance;
+  let __loggerErrorSpy: jest.SpyInstance;
+  let __loggerWarnSpy: jest.SpyInstance;
+  let __loggerDebugSpy: jest.SpyInstance;
 
   /**
    * Test module setup with comprehensive dependency mocking
@@ -97,10 +97,10 @@ describe('ComputerUseService - Keyboard Operations', () => {
     nutService = module.get(NutService);
 
     // Setup logger spies for comprehensive logging verification
-    loggerLogSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
-    loggerErrorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
-    loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
-    loggerDebugSpy = jest.spyOn(Logger.prototype, 'debug').mockImplementation();
+    __loggerLogSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
+    __loggerErrorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+    __loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+    __loggerDebugSpy = jest.spyOn(Logger.prototype, 'debug').mockImplementation();
   });
 
   /**
@@ -109,10 +109,10 @@ describe('ComputerUseService - Keyboard Operations', () => {
    */
   afterEach(() => {
     jest.clearAllMocks();
-    loggerLogSpy.mockRestore();
-    loggerErrorSpy.mockRestore();
-    loggerWarnSpy.mockRestore();
-    loggerDebugSpy.mockRestore();
+    __loggerLogSpy.mockRestore();
+    __loggerErrorSpy.mockRestore();
+    __loggerWarnSpy.mockRestore();
+    __loggerDebugSpy.mockRestore();
   });
 
   /**
@@ -142,7 +142,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       // Assert: Verify correct NutService calls and logging
       expect(nutService.mouseWheelEvent).toHaveBeenCalledTimes(3);
       expect(nutService.mouseWheelEvent).toHaveBeenCalledWith('down', 1);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[scroll_\d+_\w+\] Performing scroll operation/),
         expect.objectContaining({
           hasCoordinates: false,
@@ -151,7 +151,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
           hasHoldKeys: false,
         }),
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[scroll_\d+_\w+\] Scroll operation completed successfully/,
         ),
@@ -181,7 +181,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       expect(nutService.mouseMoveEvent).toHaveBeenCalledWith(mockCoordinates);
       expect(nutService.mouseWheelEvent).toHaveBeenCalledTimes(2);
       expect(nutService.mouseWheelEvent).toHaveBeenCalledWith('up', 1);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[scroll_\d+_\w+\] Moving to scroll coordinates/,
         ),
@@ -217,10 +217,10 @@ describe('ComputerUseService - Keyboard Operations', () => {
         ['ctrl', 'shift'],
         false,
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[scroll_\d+_\w+\] Holding keys: ctrl, shift/),
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[scroll_\d+_\w+\] Releasing held keys/),
       );
     });
@@ -244,7 +244,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify count was limited and warning logged
       expect(nutService.mouseWheelEvent).toHaveBeenCalledTimes(50);
-      expect(loggerWarnSpy).toHaveBeenCalledWith(
+      expect(_loggerWarnSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[scroll_\d+_\w+\] Scroll count adjusted from 100 to 50/,
         ),
@@ -276,7 +276,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       // Assert: Verify key cleanup was attempted
       expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], true);
       expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], false);
-      expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect(_loggerErrorSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[scroll_\d+_\w+\] Scroll operation failed: Mouse wheel event failed/,
         ),
@@ -339,7 +339,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         ['h', 'e', 'l', 'l', 'o'],
         undefined,
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_keys_\d+_\w+\] Typing key sequence/),
         expect.objectContaining({
           keyCount: 5,
@@ -348,7 +348,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
           keys: 'h, e, l, l, o',
         }),
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[type_keys_\d+_\w+\] Key typing completed successfully/,
         ),
@@ -374,7 +374,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify delay parameter passed
       expect(nutService.sendKeys).toHaveBeenCalledWith(['a', 'b', 'c'], 100);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_keys_\d+_\w+\] Typing key sequence/),
         expect.objectContaining({
           keyCount: 3,
@@ -428,7 +428,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       );
 
       // Assert: Verify error logging
-      expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect(_loggerErrorSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[type_keys_\d+_\w+\] Key typing failed: Key sending failed/,
         ),
@@ -458,7 +458,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify empty array is passed
       expect(nutService.sendKeys).toHaveBeenCalledWith([], undefined);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_keys_\d+_\w+\] Typing key sequence/),
         expect.objectContaining({
           keyCount: 0,
@@ -492,14 +492,14 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify correct NutService call and logging
       expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl', 'shift'], true);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[press_keys_\d+_\w+\] Pressing keys/),
         expect.objectContaining({
           keys: 'ctrl, shift',
           press: 'down',
         }),
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[press_keys_\d+_\w+\] Key down operation completed successfully/,
         ),
@@ -525,14 +525,14 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify correct release call
       expect(nutService.holdKeys).toHaveBeenCalledWith(['alt', 'f4'], false);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[press_keys_\d+_\w+\] Releasing keys/),
         expect.objectContaining({
           keys: 'alt, f4',
           press: 'up',
         }),
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[press_keys_\d+_\w+\] Key up operation completed successfully/,
         ),
@@ -581,7 +581,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       );
 
       // Assert: Verify error logging
-      expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect(_loggerErrorSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[press_keys_\d+_\w+\] Key down operation failed: Key press failed/,
         ),
@@ -612,7 +612,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify empty array is handled
       expect(nutService.holdKeys).toHaveBeenCalledWith([], true);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[press_keys_\d+_\w+\] Pressing keys/),
         expect.objectContaining({
           keys: '',
@@ -648,7 +648,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         'Hello, World!',
         undefined,
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_text_\d+_\w+\] Typing text/),
         expect.objectContaining({
           textLength: 13,
@@ -657,7 +657,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
           isSensitive: undefined,
         }),
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[type_text_\d+_\w+\] Text typing completed successfully/,
         ),
@@ -683,7 +683,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify delay parameter passed
       expect(nutService.typeText).toHaveBeenCalledWith('Slow typing', 200);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_text_\d+_\w+\] Typing text/),
         expect.objectContaining({
           textLength: 11,
@@ -715,7 +715,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         'secretpassword123',
         undefined,
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_text_\d+_\w+\] Typing text/),
         expect.objectContaining({
           textLength: 17,
@@ -769,7 +769,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         multilineText,
         undefined,
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_text_\d+_\w+\] Typing text/),
         expect.objectContaining({
           textLength: 20,
@@ -798,7 +798,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       );
 
       // Assert: Verify error logging (sensitive data excluded)
-      expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect(_loggerErrorSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[type_text_\d+_\w+\] Text typing failed: Text typing failed/,
         ),
@@ -828,7 +828,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify empty string is handled
       expect(nutService.typeText).toHaveBeenCalledWith('', undefined);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_text_\d+_\w+\] Typing text/),
         expect.objectContaining({
           textLength: 0,
@@ -860,13 +860,13 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify correct NutService call and logging
       expect(nutService.pasteText).toHaveBeenCalledWith('Clipboard content');
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[paste_text_\d+_\w+\] Pasting text/),
         expect.objectContaining({
           textLength: 17,
         }),
       );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[paste_text_\d+_\w+\] Text pasting completed successfully/,
         ),
@@ -892,7 +892,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify large text handling
       expect(nutService.pasteText).toHaveBeenCalledWith(largeText);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[paste_text_\d+_\w+\] Pasting text/),
         expect.objectContaining({
           textLength: 10000,
@@ -941,7 +941,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify multiline text handling
       expect(nutService.pasteText).toHaveBeenCalledWith(multilineText);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[paste_text_\d+_\w+\] Pasting text/),
         expect.objectContaining({
           textLength: 28,
@@ -969,7 +969,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       );
 
       // Assert: Verify error logging
-      expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect(_loggerErrorSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[paste_text_\d+_\w+\] Text pasting failed: Clipboard paste failed/,
         ),
@@ -998,7 +998,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify empty string is handled
       expect(nutService.pasteText).toHaveBeenCalledWith('');
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[paste_text_\d+_\w+\] Pasting text/),
         expect.objectContaining({
           textLength: 0,
@@ -1025,7 +1025,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify unicode text handling
       expect(nutService.pasteText).toHaveBeenCalledWith(unicodeText);
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[paste_text_\d+_\w+\] Pasting text/),
         expect.objectContaining({
           textLength: unicodeText.length,
@@ -1196,7 +1196,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       });
 
       // Assert: Verify timing is logged
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/Computer action completed successfully/),
         expect.objectContaining({
           processingTimeMs: expect.any(Number),
@@ -1238,7 +1238,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       }
 
       // Assert: Verify structured logging for all operations
-      expect(loggerLogSpy).toHaveBeenCalledWith(
+      expect(_loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[.+\] Executing computer action: /),
         expect.objectContaining({
           operationId: expect.any(String),

@@ -1,0 +1,135 @@
+=== COMPREHENSIVE ESLINT CHECK RESULTS ===
+Generated: Thu Sep 11 07:38:24 PM UTC 2025
+
+Directory: agent
+Files with errors: 0
+Total errors: 0
+
+Directory: anthropic
+Files with errors: 0
+Total errors: 0
+
+Directory: auth
+Files with errors: 0
+Total errors: 0
+
+Directory: browser-use
+Files with errors: 0
+Total errors: 0
+
+Directory: common
+Files with errors: 0
+Total errors: 0
+
+Directory: config
+Files with errors: 0
+Total errors: 0
+
+Directory: database
+Files with errors: 3
+Total errors: 200
+
+Directory: database
+Files with errors: 3
+Total errors: 136
+
+Directory: google
+Files with errors: 2
+Total errors: 33
+
+Directory: health
+Files with errors: 0
+Total errors: 0
+
+Directory: messages
+Files with errors: 0
+Total errors: 0
+
+Directory: metrics
+Files with errors: 2
+Total errors: 2
+
+Directory: observability
+Files with errors: 0
+Total errors: 0
+
+Directory: openai
+Files with errors: 0
+Total errors: 0
+
+Directory: prisma
+Files with errors: 0
+Total errors: 0
+
+Directory: proxy
+Files with errors: 0
+Total errors: 0
+
+Directory: root
+Files with errors: 0
+Total errors: 0
+
+Directory: security
+Files with errors: 0
+Total errors: 0
+
+Directory: summaries
+Files with errors: 0
+Total errors: 0
+
+Directory: tasks
+Files with errors: 0
+Total errors: 0
+
+Directory: test-utils
+Files with errors: 1
+Total errors: 2
+
+=== DETAILED ERROR BREAKDOWN ===
+
+DATABASE DIRECTORY ERRORS:
+File: /workspace/bytebot/packages/bytebot-agent/src/database/services/data-export-backup.service.ts
+Errors: 65
+First error: Unsafe assignment of an `any` value.
+
+File: /workspace/bytebot/packages/bytebot-agent/src/database/services/data-retention-cleanup.service.ts
+Errors: 85
+First error: 'BrowserSession' is defined but never used.
+
+File: /workspace/bytebot/packages/bytebot-agent/src/database/services/data-storage-optimization.service.ts
+Errors: 50
+First error: Unsafe member access .message on an `any` value.
+
+GOOGLE DIRECTORY ERRORS:
+File: /workspace/bytebot/packages/bytebot-agent/src/google/google.service.ts
+Errors: 15
+First error: 'any' overrides all other types in this union type.
+
+File: /workspace/bytebot/packages/bytebot-agent/src/google/google.tools.ts
+Errors: 18
+First error: Unsafe assignment of an `any` value.
+
+METRICS DIRECTORY ERRORS:
+File: /workspace/bytebot/packages/bytebot-agent/src/metrics/metrics.service.d.ts
+Errors: 1
+First error: Parsing error: /workspace/bytebot/packages/bytebot-agent/src/metrics/metrics.service.d.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject.
+
+File: /workspace/bytebot/packages/bytebot-agent/src/metrics/metrics.service.js
+Errors: 1
+First error: Parsing error: /workspace/bytebot/packages/bytebot-agent/src/metrics/metrics.service.js was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject.
+
+TEST-UTILS DIRECTORY ERRORS:
+File: /workspace/bytebot/packages/bytebot-agent/src/test-utils/templates/e2e-test.template.ts
+Errors: 2
+First error: Do not use "@ts-nocheck" because it alters compilation errors.
+
+
+=== FINAL SUMMARY ===
+Total ESLint errors across all directories: 173
+Status: ESLint compliance NOT achieved
+
+Major error categories:
+- Unsafe 'any' usage and type safety violations
+- Unused variables and imports
+- TypeScript configuration issues
+- Template directive issues

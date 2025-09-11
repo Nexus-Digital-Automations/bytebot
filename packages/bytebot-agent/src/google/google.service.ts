@@ -19,11 +19,64 @@ import {
 import { Message, MessageRole } from '@prisma/client';
 import { googleTools } from './google.tools';
 
-// Dynamic import types for @google/genai ES module
-type Content = any;
-type GenerateContentResponse = any;
-type GoogleGenAI = any;
-type Part = any;
+// Proper TypeScript interfaces for @google/genai ES module
+interface Content {
+  role: 'user' | 'model';
+  parts: Part[];
+}
+
+interface Part {
+  text?: string;
+  functionCall?: {
+    id?: string;
+    name: string;
+    args: Record<string, unknown>;
+  };
+  functionResponse?: {
+    id?: string;
+    name: string;
+    response: Record<string, unknown>;
+  };
+  inlineData?: {
+    data: string;
+    mimeType: string;
+  };
+}
+
+interface UsageMetadata {
+  promptTokenCount?: number;
+  candidatesTokenCount?: number;
+  totalTokenCount?: number;
+}
+
+interface GenerateContentResponse {
+  candidates: Array<{
+    content: {
+      parts: Part[];
+    };
+  }>;
+  usageMetadata?: UsageMetadata;
+}
+
+interface GoogleGenAI {
+  models: {
+    generateContent(config: {
+      model: string;
+      contents: Content[];
+      config: {
+        thinkingConfig?: {
+          thinkingBudget: number;
+        };
+        maxOutputTokens?: number;
+        systemInstruction?: string;
+        tools?: Array<{
+          functionDeclarations: unknown[];
+        }>;
+        abortSignal?: AbortSignal;
+      };
+    }): Promise<GenerateContentResponse>;
+  };
+}
 
 // Enhanced type definitions for better type safety
 interface GoogleApiError extends Error {
@@ -86,7 +139,10 @@ export class GoogleService implements BytebotAgentService {
       const { GoogleGenAI } = await import('@google/genai');
       const apiKey = this.getApiKey();
       this.currentApiKey = apiKey;
-      this.google = new GoogleGenAI({
+      // Type assertion for dynamic import - we know GoogleGenAI constructor signature
+      this.google = new (GoogleGenAI as new (config: {
+        apiKey: string;
+      }) => GoogleGenAI)({
         apiKey: apiKey,
       });
     }
@@ -154,7 +210,7 @@ export class GoogleService implements BytebotAgentService {
     signal?: AbortSignal,
   ): Promise<BytebotAgentResponse> {
     // Initialize Google client with dynamic import
-    const google = await this.initializeGoogleClient();
+    const google: GoogleGenAI = await this.initializeGoogleClient();
 
     try {
       const maxTokens = 8192;
@@ -399,6 +455,7 @@ export class GoogleService implements BytebotAgentService {
     response: GenerateContentResponse,
   ): response is ValidatedGenerateContentResponse {
     return (
+      response &&
       Array.isArray(response.candidates) &&
       response.candidates.length > 0 &&
       Boolean(response.candidates[0]?.content?.parts) &&

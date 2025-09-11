@@ -1,5 +1,9 @@
-// Dynamic import types for @google/genai ES module
-type FunctionDeclaration = any;
+// Define proper interface for Google GenAI FunctionDeclaration
+interface FunctionDeclaration {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+}
 
 // Type enum replacement for @google/genai
 const Type = {
@@ -105,24 +109,12 @@ function convertJsonSchemaToGoogleSchema(
 /**
  * Converts an agent tool definition to a Google FunctionDeclaration
  */
-function agentToolToGoogleTool(agentTool: unknown): FunctionDeclaration {
-  // Type guard for agent tool
-  if (typeof agentTool !== 'object' || agentTool === null) {
-    throw new Error('Invalid agent tool: must be an object');
-  }
-
-  const tool = agentTool as Record<string, unknown>;
-
-  if (typeof tool.name !== 'string' || typeof tool.description !== 'string') {
-    throw new Error('Invalid agent tool: name and description must be strings');
-  }
-
-  const typedTool = tool as unknown as AgentTool;
-  const parameters = convertJsonSchemaToGoogleSchema(typedTool.input_schema);
+function agentToolToGoogleTool(agentTool: AgentTool): FunctionDeclaration {
+  const parameters = convertJsonSchemaToGoogleSchema(agentTool.input_schema);
 
   return {
-    name: typedTool.name,
-    description: typedTool.description,
+    name: agentTool.name,
+    description: agentTool.description,
     parameters,
   };
 }
@@ -132,8 +124,9 @@ function agentToolToGoogleTool(agentTool: unknown): FunctionDeclaration {
  */
 const toolMap = agentTools.reduce(
   (acc, tool) => {
-    const googleTool = agentToolToGoogleTool(tool);
-    const camelCaseName = tool.name
+    const googleTool = agentToolToGoogleTool(tool as AgentTool);
+    const agentTool = tool as AgentTool;
+    const camelCaseName = agentTool.name
       .split('_')
       .map((part, index) => {
         if (index === 0) return part;
@@ -168,6 +161,6 @@ export const createTaskTool = toolMap.createTaskTool;
 export const applicationTool = toolMap.applicationTool;
 
 // Array of all tools
-export const googleTools: FunctionDeclaration[] = agentTools.map(
-  agentToolToGoogleTool,
+export const googleTools: FunctionDeclaration[] = agentTools.map((tool) =>
+  agentToolToGoogleTool(tool as AgentTool),
 );

@@ -832,7 +832,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
           expect(result).toBeDefined();
         } catch (error) {
           // If it fails, should be due to security reasons
-          expect(error.message).toMatch(
+          expect((error as Error).message).toMatch(
             /(security|permission|invalid|denied)/i,
           );
         }

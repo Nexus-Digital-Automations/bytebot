@@ -286,7 +286,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
           const result = await guard.canActivate(context);
           return { success: true, index: _index };
         } catch (error) {
-          return { success: false, index: _index, error: error.message };
+          return { success: false, index: _index, error: (error as Error).message };
         }
       });
 
@@ -596,7 +596,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
           const result = await guard.canActivate(context);
           return { success: true, userId: user.id };
         } catch (error) {
-          return { success: false, userId: user.id, error: error.message };
+          return { success: false, userId: user.id, error: (error as Error).message };
         }
       });
 

@@ -549,7 +549,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         await expect(service.action(action)).rejects.toThrow();
 
         // Assert
-        expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect(_loggerErrorSpy).toHaveBeenCalledWith(
           expect.stringContaining('Computer action failed'),
           expect.objectContaining({
             operationId: expect.any(String),
@@ -594,7 +594,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         await service.action(action);
 
         // Assert
-        expect(loggerLogSpy).toHaveBeenCalledWith(
+        expect(_loggerLogSpy).toHaveBeenCalledWith(
           expect.stringContaining('Executing computer action: move_mouse'),
           expect.objectContaining({
             operationId: expect.any(String),
@@ -618,7 +618,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         await service.action(action);
 
         // Assert
-        expect(loggerLogSpy).toHaveBeenCalledWith(
+        expect(_loggerLogSpy).toHaveBeenCalledWith(
           expect.stringContaining('Computer action completed successfully'),
           expect.objectContaining({
             operationId: expect.any(String),
@@ -742,7 +742,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
       await delayPromise;
 
       // Assert
-      expect(loggerWarnSpy).toHaveBeenCalledWith(
+      expect(_loggerWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('Delay adjusted from 400000ms to 300000ms'),
       );
     });
@@ -763,7 +763,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       // Assert
       expect(result).toBeUndefined();
-      expect(loggerWarnSpy).toHaveBeenCalledWith(
+      expect(_loggerWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('Delay adjusted from -1000ms to 0ms'),
       );
     });
@@ -783,10 +783,10 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
       await delayPromise;
 
       // Assert
-      expect(loggerDebugSpy).toHaveBeenCalledWith(
+      expect(_loggerDebugSpy).toHaveBeenCalledWith(
         expect.stringContaining('Starting delay of 1000ms'),
       );
-      expect(loggerDebugSpy).toHaveBeenCalledWith(
+      expect(_loggerDebugSpy).toHaveBeenCalledWith(
         expect.stringContaining('Delay of 1000ms completed'),
       );
     });

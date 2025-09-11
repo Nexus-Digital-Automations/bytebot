@@ -23,16 +23,16 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
-// import * as zlib from 'zlib'; // Unused import
-// import { promisify } from 'util'; // Unused import
 import {
   DatabaseProvider,
   getCurrentDatabaseProvider,
 } from '../hybrid-database.module';
+import {
+  BrowserSession,
+  BrowserTask,
+  SensitivityLevel,
+} from '../models/browser-automation.models';
 
-// Compression utilities - unused, will be implemented later
-// const gzip = promisify(zlib.gzip);
-// const gunzip = promisify(zlib.gunzip);
 
 export enum ExportFormat {
   JSON = 'json',
@@ -155,6 +155,124 @@ export interface RestoreResult {
       checksumValid: boolean;
       errors: string[];
     }>;
+  };
+}
+
+// ===== TYPE DEFINITIONS FOR ANONYMIZATION =====
+
+interface AnonymizedSession {
+  id: string;
+  processId?: string | null;
+  status: string;
+  headless: boolean;
+  viewportWidth: number;
+  viewportHeight: number;
+  userAgent?: string | null;
+  workingDirectory?: string | null;
+  screenshotsEnabled: boolean;
+  videoRecording: boolean;
+  timeoutMs: number;
+  createdAt: Date;
+  updatedAt: Date;
+  terminatedAt?: Date | null;
+  lastActivity: Date;
+  [key: string]: unknown;
+}
+
+interface AnonymizedTask {
+  id: string;
+  externalTaskId?: string | null;
+  sessionId: string;
+  type: string;
+  status: string;
+  priority: string;
+  startUrl?: string | null;
+  userId?: string | null;
+  agentId?: string | null;
+  actions: unknown;
+  configuration: unknown;
+  constraints?: unknown;
+  validation?: unknown;
+  options?: unknown;
+  retryOptions?: unknown;
+  timeoutSeconds?: number | null;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  startedAt?: Date | null;
+  completedAt?: Date | null;
+  durationMs?: number | null;
+  result?: string | null;
+  error?: string | null;
+  [key: string]: unknown;
+}
+
+interface ScreenshotWithMetadata {
+  id: string;
+  metadata?: {
+    containsSensitiveData?: boolean;
+    [key: string]: unknown;
+  } | null;
+  [key: string]: unknown;
+}
+
+interface DomSnapshotWithMetadata {
+  id: string;
+  metadata?: {
+    containsSensitiveData?: boolean;
+    [key: string]: unknown;
+  } | null;
+  [key: string]: unknown;
+}
+
+interface ExtractionWithSensitivity {
+  id: string;
+  sensitivityLevel?: SensitivityLevel | string;
+  [key: string]: unknown;
+}
+
+interface PrismaSessionsQuery {
+  where?: {
+    createdAt?: {
+      gte?: Date;
+      lte?: Date;
+    };
+  };
+}
+
+interface PrismaTasksQuery {
+  where?: {
+    createdAt?: {
+      gte?: Date;
+      lte?: Date;
+    };
+  };
+}
+
+interface PrismaScreenshotsQuery {
+  where?: {
+    timestamp?: {
+      gte?: Date;
+      lte?: Date;
+    };
+  };
+}
+
+interface PrismaDomSnapshotsQuery {
+  where?: {
+    timestamp?: {
+      gte?: Date;
+      lte?: Date;
+    };
+  };
+}
+
+interface PrismaDataExtractionsQuery {
+  where?: {
+    extractedAt?: {
+      gte?: Date;
+      lte?: Date;
+    };
   };
 }
 
@@ -317,7 +435,6 @@ export class DataExportBackupService {
    */
   async createBackup(config: BackupConfiguration): Promise<BackupResult> {
     const backupId = `backup_${config.backupType}_${Date.now()}`;
-    // const backupTimestamp = new Date(); // Unused variable
     const backupPath = path.join(this.backupDirectory, backupId);
 
     await fs.mkdir(backupPath, { recursive: true });
@@ -357,19 +474,19 @@ export class DataExportBackupService {
 
       // Apply compression if requested
       if (config.compression) {
-        await this.compressBackup(backupResult);
+        this.compressBackup(backupResult);
       }
 
       // Apply encryption if requested
       if (config.encryption) {
-        await this.encryptBackup(backupResult);
+        this.encryptBackup(backupResult);
       }
 
       // Store backup metadata
       await this.storeBackupMetadata(backupResult);
 
       // Cleanup old backups according to retention policy
-      await this.cleanupOldBackups(config.retention);
+      this.cleanupOldBackups(config.retention);
 
       this.logger.log(
         `Backup completed: ${backupId}, ${backupResult.size} bytes`,
@@ -411,28 +528,28 @@ export class DataExportBackupService {
       // Decrypt backup if needed
       let backupPath = backup.path;
       if (backup.encrypted) {
-        backupPath = await this.decryptBackup(backup);
+        backupPath = this.decryptBackup(backup);
       }
 
       // Decompress backup if needed
       if (backup.compressed) {
-        backupPath = await this.decompressBackup(backupPath);
+        backupPath = this.decompressBackup(backupPath);
       }
 
       // Restore based on backup type
       switch (backup.type) {
         case BackupType.FULL:
-          await this.restoreFullBackup(backupPath, options, result);
+          this.restoreFullBackup(backupPath, options, result);
           break;
         case BackupType.INCREMENTAL:
         case BackupType.DIFFERENTIAL:
-          await this.restoreIncrementalBackup(backup, options, result);
+          this.restoreIncrementalBackup(backup, options, result);
           break;
       }
 
       // Perform integrity validation if requested
       if (options.validateIntegrity) {
-        result.validationResults = await this.validateRestoredData(result);
+        result.validationResults = this.validateRestoredData(result);
       }
 
       result.completedAt = new Date();
@@ -850,7 +967,7 @@ export class DataExportBackupService {
     config: BackupConfiguration,
     backupPath: string,
   ): Promise<BackupResult> {
-    const lastBackup = await this.getLastBackup();
+    const lastBackup = this.getLastBackup();
     if (!lastBackup) {
       // No previous backup, create full backup instead
       return await this.createFullBackup(
@@ -863,7 +980,7 @@ export class DataExportBackupService {
       );
     }
 
-    const changedData = await this.getChangedDataSince(lastBackup.createdAt);
+    // const changedData = await this.getChangedDataSince(lastBackup.createdAt);
 
     const exportConfig: ExportConfiguration = {
       format: ExportFormat.JSON,
@@ -918,7 +1035,7 @@ export class DataExportBackupService {
     config: BackupConfiguration,
     backupPath: string,
   ): Promise<BackupResult> {
-    const lastFullBackup = await this.getLastFullBackup();
+    const lastFullBackup = this.getLastFullBackup();
     if (!lastFullBackup) {
       // No previous full backup, create one instead
       return await this.createFullBackup(
@@ -931,9 +1048,9 @@ export class DataExportBackupService {
       );
     }
 
-    const changedData = await this.getChangedDataSince(
-      lastFullBackup.createdAt,
-    );
+    // const changedData = await this.getChangedDataSince(
+    //   lastFullBackup.createdAt,
+    // );
 
     const exportConfig: ExportConfiguration = {
       format: ExportFormat.JSON,
@@ -1034,7 +1151,10 @@ export class DataExportBackupService {
     };
   }
 
-  private async formatData(data: any[], format: ExportFormat): Promise<string> {
+  private formatData(
+    data: Record<string, unknown>[],
+    format: ExportFormat,
+  ): string {
     switch (format) {
       case ExportFormat.JSON:
         return JSON.stringify(data, null, 2);
@@ -1047,7 +1167,7 @@ export class DataExportBackupService {
     }
   }
 
-  private convertToCSV(data: any[]): string {
+  private convertToCSV(data: Record<string, unknown>[]): string {
     if (data.length === 0) return '';
 
     const headers = Object.keys(data[0]);
@@ -1055,10 +1175,10 @@ export class DataExportBackupService {
 
     for (const item of data) {
       const values = headers.map((header) => {
-        const value = item[header];
+        const value = item[header] as unknown;
         if (value === null || value === undefined) return '';
         if (typeof value === 'object') return JSON.stringify(value);
-        return `"${String(value).replace(/"/g, '""')}"`;
+        return `"${(typeof value === 'number' || typeof value === 'boolean' ? String(value) : JSON.stringify(value)).replace(/"/g, '""')}"`;
       });
       csvLines.push(values.join(','));
     }
@@ -1066,7 +1186,7 @@ export class DataExportBackupService {
     return csvLines.join('\n');
   }
 
-  private convertToSQL(data: any[]): string {
+  private convertToSQL(data: Record<string, unknown>[]): string {
     if (data.length === 0) return '';
 
     const tableName = this.inferTableName(data[0]);
@@ -1081,7 +1201,9 @@ export class DataExportBackupService {
             return `'${JSON.stringify(value).replace(/'/g, "''")}'`;
           if (typeof value === 'string')
             return `'${value.replace(/'/g, "''")}'`;
-          return String(value);
+          return typeof value === 'number' || typeof value === 'boolean'
+            ? String(value)
+            : JSON.stringify(value);
         })
         .join(', ');
 
@@ -1093,7 +1215,7 @@ export class DataExportBackupService {
     return sqlStatements.join('\n');
   }
 
-  private inferTableName(item: any): string {
+  private inferTableName(item: Record<string, unknown>): string {
     // Infer table name from object structure
     if (item.sessionId) return 'browser_tasks';
     if (item.processId) return 'browser_sessions';
@@ -1108,11 +1230,11 @@ export class DataExportBackupService {
     return crypto.createHash('sha256').update(fileContent).digest('hex');
   }
 
-  private async compressExport(exportPath: string): Promise<{
+  private compressExport(exportPath: string): {
     filepath: string;
     originalSize: number;
     compressedSize: number;
-  }> {
+  } {
     // Implementation would compress the entire export directory
     const compressedPath = `${exportPath}.tar.gz`;
     // Placeholder - would use tar or zip compression
@@ -1123,11 +1245,11 @@ export class DataExportBackupService {
     };
   }
 
-  private async encryptExport(exportPath: string): Promise<{
+  private encryptExport(exportPath: string): {
     filepath: string;
     algorithm: string;
     keyId: string;
-  }> {
+  } {
     const encryptedPath = `${exportPath}.enc`;
     const algorithm = 'aes-256-gcm';
     const keyId = crypto.randomBytes(16).toString('hex');
@@ -1142,8 +1264,8 @@ export class DataExportBackupService {
 
   // ===== QUERY BUILDERS =====
 
-  private buildSessionsQuery(config: ExportConfiguration): any {
-    const query: any = {};
+  private buildSessionsQuery(config: ExportConfiguration): PrismaSessionsQuery {
+    const query: PrismaSessionsQuery = {};
 
     if (config.dateRange) {
       query.where = {
@@ -1157,8 +1279,8 @@ export class DataExportBackupService {
     return query;
   }
 
-  private buildTasksQuery(config: ExportConfiguration): any {
-    const query: any = {};
+  private buildTasksQuery(config: ExportConfiguration): PrismaTasksQuery {
+    const query: PrismaTasksQuery = {};
 
     if (config.dateRange) {
       query.where = {
@@ -1172,8 +1294,8 @@ export class DataExportBackupService {
     return query;
   }
 
-  private buildScreenshotsQuery(config: ExportConfiguration): any {
-    const query: any = {};
+  private buildScreenshotsQuery(config: ExportConfiguration): PrismaScreenshotsQuery {
+    const query: PrismaScreenshotsQuery = {};
 
     if (config.dateRange) {
       query.where = {
@@ -1187,8 +1309,8 @@ export class DataExportBackupService {
     return query;
   }
 
-  private buildDomSnapshotsQuery(config: ExportConfiguration): any {
-    const query: any = {};
+  private buildDomSnapshotsQuery(config: ExportConfiguration): PrismaDomSnapshotsQuery {
+    const query: PrismaDomSnapshotsQuery = {};
 
     if (config.dateRange) {
       query.where = {
@@ -1202,8 +1324,8 @@ export class DataExportBackupService {
     return query;
   }
 
-  private buildDataExtractionsQuery(config: ExportConfiguration): any {
-    const query: any = {};
+  private buildDataExtractionsQuery(config: ExportConfiguration): PrismaDataExtractionsQuery {
+    const query: PrismaDataExtractionsQuery = {};
 
     if (config.dateRange) {
       query.where = {
@@ -1217,52 +1339,155 @@ export class DataExportBackupService {
     return query;
   }
 
+  // ===== TYPE DEFINITIONS FOR ANONYMIZATION =====
+
+  // Type guards for runtime safety
+  private isValidSession(obj: unknown): obj is BrowserSession {
+    if (typeof obj !== 'object' || obj === null) {
+      return false;
+    }
+    const sessionObj = obj as Record<string, unknown>;
+    return (
+      typeof sessionObj.id === 'string' &&
+      typeof sessionObj.status === 'string' &&
+      typeof sessionObj.headless === 'boolean'
+    );
+  }
+
+  private isValidTask(obj: unknown): obj is BrowserTask {
+    if (typeof obj !== 'object' || obj === null) {
+      return false;
+    }
+    const taskObj = obj as Record<string, unknown>;
+    return (
+      typeof taskObj.id === 'string' &&
+      typeof taskObj.sessionId === 'string' &&
+      typeof taskObj.type === 'string' &&
+      typeof taskObj.status === 'string'
+    );
+  }
+
+  private isValidScreenshot(obj: unknown): obj is ScreenshotWithMetadata {
+    if (typeof obj !== 'object' || obj === null) {
+      return false;
+    }
+    const screenshotObj = obj as Record<string, unknown>;
+    return typeof screenshotObj.id === 'string';
+  }
+
+  private isDomSnapshotWithMetadata(obj: unknown): obj is DomSnapshotWithMetadata {
+    if (typeof obj !== 'object' || obj === null) {
+      return false;
+    }
+    const snapshotObj = obj as Record<string, unknown>;
+    return typeof snapshotObj.id === 'string';
+  }
+
+  private hasMetadataWithSensitivity(obj: DomSnapshotWithMetadata): obj is DomSnapshotWithMetadata & { metadata: { containsSensitiveData?: boolean } } {
+    return obj.metadata !== null && typeof obj.metadata === 'object';
+  }
+
+  private isExtractionWithSensitivity(obj: unknown): obj is ExtractionWithSensitivity {
+    if (typeof obj !== 'object' || obj === null) {
+      return false;
+    }
+    const extractionObj = obj as Record<string, unknown>;
+    return typeof extractionObj.id === 'string';
+  }
+
   // ===== PRIVACY TRANSFORMATION METHODS =====
 
-  private anonymizeSessions(sessions: any[]): any[] {
-    return sessions.map((session) => ({
-      ...session,
-      processId: session.processId
-        ? `process_${crypto.randomBytes(4).toString('hex')}`
-        : null,
-      workingDirectory: session.workingDirectory ? '/anonymized/path' : null,
-      userAgent: session.userAgent ? 'Mozilla/5.0 (Anonymized)' : null,
-    }));
-  }
-
-  private anonymizeTasks(tasks: any[]): any[] {
-    return tasks.map((task) => ({
-      ...task,
-      userId: task.userId
-        ? `user_${crypto.randomBytes(4).toString('hex')}`
-        : null,
-      agentId: task.agentId
-        ? `agent_${crypto.randomBytes(4).toString('hex')}`
-        : null,
-    }));
-  }
-
-  private excludeSensitiveScreenshots(screenshots: any[]): any[] {
-    return screenshots.filter((screenshot) => {
-      const metadata = screenshot.metadata;
-      return !metadata?.containsSensitiveData;
-    });
-  }
-
-  private excludeSensitiveDomSnapshots(domSnapshots: any[]): any[] {
-    return domSnapshots.filter((snapshot) => {
-      const metadata = snapshot.metadata;
-      return !metadata?.containsSensitiveData;
-    });
-  }
-
-  private excludeSensitiveExtractions(extractions: any[]): any[] {
-    return extractions.filter((extraction) => {
-      return (
-        extraction.sensitivityLevel !== 'critical' &&
-        extraction.sensitivityLevel !== 'high'
+  private anonymizeSessions(sessions: BrowserSession[]): AnonymizedSession[] {
+    return sessions
+      .filter((session): session is BrowserSession =>
+        this.isValidSession(session),
+      )
+      .map(
+        (session): AnonymizedSession => ({
+          ...session,
+          processId: session.processId
+            ? `process_${crypto.randomBytes(4).toString('hex')}`
+            : null,
+          workingDirectory: session.workingDirectory
+            ? '/anonymized/path'
+            : null,
+          userAgent: session.userAgent ? 'Mozilla/5.0 (Anonymized)' : null,
+        }),
       );
-    });
+  }
+
+  private anonymizeTasks(tasks: BrowserTask[]): AnonymizedTask[] {
+    return tasks
+      .filter((task): task is BrowserTask => this.isValidTask(task))
+      .map(
+        (task): AnonymizedTask => ({
+          ...task,
+          userId: task.userId
+            ? `user_${crypto.randomBytes(4).toString('hex')}`
+            : null,
+          agentId: task.agentId
+            ? `agent_${crypto.randomBytes(4).toString('hex')}`
+            : null,
+        }),
+      );
+  }
+
+  private excludeSensitiveScreenshots(
+    screenshots: unknown[],
+  ): ScreenshotWithMetadata[] {
+    return screenshots
+      .filter((screenshot): screenshot is ScreenshotWithMetadata =>
+        this.isValidScreenshot(screenshot),
+      )
+      .filter((screenshot) => {
+        if (!screenshot.metadata || typeof screenshot.metadata !== 'object') {
+          return true; // Include screenshots without metadata
+        }
+        const metadata = screenshot.metadata as Record<string, unknown>;
+        return !metadata.containsSensitiveData;
+      });
+  }
+
+  private excludeSensitiveDomSnapshots(
+    domSnapshots: unknown[],
+  ): Record<string, unknown>[] {
+    return domSnapshots.filter(
+      (snapshot): snapshot is Record<string, unknown> => {
+        if (!isDomSnapshotWithMetadata(snapshot)) {
+          return true; // Include items that don't have metadata structure
+        }
+
+        if (!hasMetadataWithSensitivity(snapshot)) {
+          return true; // Include items where metadata doesn't exist or isn't an object
+        }
+
+        // Safe access to containsSensitiveData property
+        return !snapshot.metadata.containsSensitiveData;
+      },
+    ) as Record<string, unknown>[];
+  }
+
+  private excludeSensitiveExtractions(
+    extractions: unknown[],
+  ): Record<string, unknown>[] {
+    return extractions.filter(
+      (extraction): extraction is Record<string, unknown> => {
+        if (!isExtractionWithSensitivity(extraction)) {
+          return true; // Include items that don't have the expected structure
+        }
+
+        // Safe access to sensitivityLevel property with type checking
+        const sensitivityLevel = extraction.sensitivityLevel;
+
+        // Return false for critical and high sensitivity levels
+        return (
+          sensitivityLevel !== SensitivityLevel.CRITICAL &&
+          sensitivityLevel !== SensitivityLevel.HIGH &&
+          sensitivityLevel !== 'critical' &&
+          sensitivityLevel !== 'high'
+        );
+      },
+    ) as Record<string, unknown>[];
   }
 
   // ===== BACKUP HELPER METHODS =====
@@ -1312,24 +1537,26 @@ export class DataExportBackupService {
     return counts;
   }
 
-  private async getLastBackup(): Promise<BackupResult | null> {
+  private getLastBackup(): BackupResult | null {
     // In a real implementation, this would query a backup metadata table
     return null;
   }
 
-  private async getLastFullBackup(): Promise<BackupResult | null> {
+  private getLastFullBackup(): BackupResult | null {
     // In a real implementation, this would query a backup metadata table for full backups
     return null;
   }
 
-  private async getChangedDataSince(date: Date): Promise<any> {
+  private getChangedDataSince(
+    _date: Date,
+  ): Record<string, unknown> {
     // In a real implementation, this would identify changed records since the date
     return {};
   }
 
-  private async getBackupMetadata(
-    backupId: string,
-  ): Promise<BackupResult | null> {
+  private getBackupMetadata(
+    _backupId: string,
+  ): BackupResult | null {
     // In a real implementation, this would retrieve backup metadata from storage
     return null;
   }
@@ -1340,31 +1567,31 @@ export class DataExportBackupService {
     await fs.writeFile(metadataPath, JSON.stringify(backup, null, 2));
   }
 
-  private async compressBackup(backup: BackupResult): Promise<void> {
+  private compressBackup(backup: BackupResult): void {
     // Implementation would compress the backup files
     backup.compressed = true;
   }
 
-  private async encryptBackup(backup: BackupResult): Promise<void> {
+  private encryptBackup(backup: BackupResult): void {
     // Implementation would encrypt the backup files
     backup.encrypted = true;
   }
 
-  private async decryptBackup(backup: BackupResult): Promise<string> {
+  private decryptBackup(backup: BackupResult): string {
     // Implementation would decrypt the backup
     return backup.path;
   }
 
-  private async decompressBackup(backupPath: string): Promise<string> {
+  private decompressBackup(backupPath: string): string {
     // Implementation would decompress the backup
     return backupPath;
   }
 
-  private async restoreFullBackup(
-    backupPath: string,
-    options: RestoreOptions,
+  private restoreFullBackup(
+    _backupPath: string,
+    _options: RestoreOptions,
     result: RestoreResult,
-  ): Promise<void> {
+  ): void {
     // Implementation would restore full backup data
     result.restoredTables = [
       'browser_sessions',
@@ -1374,17 +1601,24 @@ export class DataExportBackupService {
     result.restoredRecords = 1000; // Placeholder
   }
 
-  private async restoreIncrementalBackup(
-    backup: BackupResult,
-    options: RestoreOptions,
+  private restoreIncrementalBackup(
+    _backup: BackupResult,
+    _options: RestoreOptions,
     result: RestoreResult,
-  ): Promise<void> {
+  ): void {
     // Implementation would restore incremental backup data
     result.restoredTables = ['browser_tasks'];
     result.restoredRecords = 100; // Placeholder
   }
 
-  private async validateRestoredData(result: RestoreResult): Promise<any> {
+  private validateRestoredData(result: RestoreResult): {
+    integrityChecks: Array<{
+      table: string;
+      recordCount: number;
+      checksumValid: boolean;
+      errors: string[];
+    }>;
+  } {
     // Implementation would validate restored data integrity
     return {
       integrityChecks: result.restoredTables.map((table) => ({
@@ -1396,9 +1630,9 @@ export class DataExportBackupService {
     };
   }
 
-  private async cleanupOldBackups(
-    retention: BackupConfiguration['retention'],
-  ): Promise<void> {
+  private cleanupOldBackups(
+    _retention: BackupConfiguration['retention'],
+  ): void {
     // Implementation would clean up old backups based on retention policy
     this.logger.debug('Cleaning up old backups based on retention policy');
   }
