@@ -24,6 +24,7 @@ import {
   StandardizedValidationPipes,
 } from "@bytebot/shared/server";
 import type { Reflector } from "@nestjs/core";
+import { logError } from "@/utils/logger";
 
 // Type definitions for better type safety
 interface NestJSApp {
@@ -70,15 +71,13 @@ export class BytebotUISecurityConfigService {
   /**
    * Create Bytebot-UI rate limit guard with lenient rate limits for UI interactions
    */
-  createRateLimitGuard(
-    reflector: Reflector,
-    redisClient?: unknown,
-  ): StandardizedRateLimitGuard {
-    return StandardizedRateLimitGuard.createBytebotUIGuard(
-      reflector,
-      this.configService,
-      redisClient,
-    );
+  createRateLimitGuard(): StandardizedRateLimitGuard {
+    const environment = this.configService.get(
+      "NODE_ENV",
+      "development",
+    ) as string;
+
+    return StandardizedRateLimitGuard.createBytebotUIGuard(environment);
   }
 
   /**
@@ -208,17 +207,15 @@ export class BytebotUISecurityConfigService {
     },
     {
       provide: "BYTEBOT_UI_RATE_LIMIT_GUARD",
-      useFactory: (
-        reflector: Reflector,
-        configService: ConfigService,
-        redisClient?: unknown,
-      ) =>
-        StandardizedRateLimitGuard.createBytebotUIGuard(
-          reflector,
-          configService,
-          redisClient,
-        ),
-      inject: ["Reflector", ConfigService, "REDIS_CLIENT"],
+      useFactory: (configService: ConfigService) => {
+        const environment = configService.get(
+          "NODE_ENV",
+          "development",
+        ) as string;
+
+        return StandardizedRateLimitGuard.createBytebotUIGuard(environment);
+      },
+      inject: [ConfigService],
     },
   ],
   exports: [
@@ -269,14 +266,8 @@ export class BytebotUISecurityDeployment {
       app.useGlobalPipes(validationPipe);
 
       // Apply global rate limiting guard
-      const reflector = app.get("Reflector") as Reflector;
-      const redisClient = app.get("REDIS_CLIENT", null) as unknown;
-
-      const rateLimitGuard = StandardizedRateLimitGuard.createBytebotUIGuard(
-        reflector,
-        configService,
-        redisClient,
-      );
+      const rateLimitGuard =
+        StandardizedRateLimitGuard.createBytebotUIGuard(environment);
 
       app.useGlobalGuards(rateLimitGuard);
 
@@ -290,7 +281,7 @@ export class BytebotUISecurityDeployment {
           features: {
             ui: true,
             nextjs: true,
-            rateLimiting: !!redisClient,
+            rateLimiting: true,
             validation: true,
             staticAssets: true,
             realTimeUpdates: true,
