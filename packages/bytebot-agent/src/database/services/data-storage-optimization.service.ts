@@ -19,26 +19,21 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageTier, CompressionType } from '@prisma/client';
 import {
-  StorageTier,
-  CompressionType,
   BrowserScreenshot,
   BrowserDomSnapshot,
-  BrowserDataExtraction,
   AccessPattern,
   ContentAnalysis,
 } from '../models/browser-automation.models';
 import * as fs from 'fs/promises';
-import * as path from 'path';
 import * as crypto from 'crypto';
 import * as zlib from 'zlib';
 import { promisify } from 'util';
 
 // Compression utilities
 const gzip = promisify(zlib.gzip);
-const gunzip = promisify(zlib.gunzip);
 const brotliCompress = promisify(zlib.brotliCompress);
-const brotliDecompress = promisify(zlib.brotliDecompress);
 
 export interface CompressionConfig {
   type: CompressionType;
@@ -364,7 +359,7 @@ export class DataStorageOptimizationService {
             select: {
               accessCount: true,
               lastAccessed: true,
-              createdAt: true,
+              timestamp: true,
             },
           });
         } else {
@@ -379,9 +374,7 @@ export class DataStorageOptimizationService {
         }
 
         if (entity) {
-          const ageInDays = this.calculateAgeInDays(
-            entity.createdAt || entity.timestamp,
-          );
+          const ageInDays = this.calculateAgeInDays(entity.timestamp);
 
           const averageAccessInterval =
             ageInDays > 0 ? ageInDays / Math.max(entity.accessCount, 1) : 0;
@@ -493,13 +486,13 @@ export class DataStorageOptimizationService {
     for (const tier of Object.values(StorageTier)) {
       const screenshotTierStats =
         await this.prismaService.browserScreenshot.aggregate({
-          where: { storageTier: tier },
+          where: { storageTier: tier as any },
           _sum: { fileSize: true },
         });
 
       const domSnapshotTierStats =
         await this.prismaService.browserDomSnapshot.aggregate({
-          where: { storageTier: tier },
+          where: { storageTier: tier as any },
           _sum: { originalSize: true },
         });
 
@@ -617,7 +610,15 @@ export class DataStorageOptimizationService {
   // ===== PRIVATE METHODS =====
 
   private async analyzeScreenshotForOptimization(
-    screenshot: BrowserScreenshot,
+    screenshot: Partial<BrowserScreenshot> & {
+      id: string;
+      timestamp: Date;
+      fileSize: number;
+      sessionId: string;
+      accessCount?: number;
+      storageTier?: string;
+      metadata?: any;
+    },
   ): Promise<ArchivalRecommendation> {
     const ageInDays = this.calculateAgeInDays(screenshot.timestamp);
     const accessPattern = await this.analyzeAccessPatterns('screenshot', [
@@ -634,7 +635,7 @@ export class DataStorageOptimizationService {
     // Determine optimal storage tier
     if (
       ageInDays > 90 &&
-      (pattern?.accessFrequency === 'low' || screenshot.accessCount < 2)
+      (pattern?.accessFrequency === 'low' || (screenshot.accessCount || 0) < 2)
     ) {
       recommendedTier = StorageTier.ARCHIVED;
       action = 'archive';
@@ -642,7 +643,7 @@ export class DataStorageOptimizationService {
     } else if (
       ageInDays > 30 &&
       pattern?.accessFrequency !== 'high' &&
-      screenshot.accessCount < 10
+      (screenshot.accessCount || 0) < 10
     ) {
       recommendedTier = StorageTier.COLD;
       action = 'compress';
@@ -691,7 +692,17 @@ export class DataStorageOptimizationService {
   }
 
   private async analyzeDomSnapshotForOptimization(
-    domSnapshot: BrowserDomSnapshot,
+    domSnapshot: Partial<BrowserDomSnapshot> & {
+      id: string;
+      timestamp: Date;
+      sessionId: string;
+      url: string;
+      accessCount?: number;
+      storageTier?: string;
+      originalSize?: number;
+      htmlContent?: string;
+      metadata?: any;
+    },
   ): Promise<ArchivalRecommendation> {
     const ageInDays = this.calculateAgeInDays(domSnapshot.timestamp);
     const accessPattern = await this.analyzeAccessPatterns('domSnapshot', [
@@ -751,7 +762,12 @@ export class DataStorageOptimizationService {
   }
 
   private async optimizeScreenshot(
-    screenshot: BrowserScreenshot,
+    screenshot: Partial<BrowserScreenshot> & {
+      id: string;
+      fileSize: number;
+      filePath: string;
+      compressionType?: string;
+    },
     targetTier: StorageTier,
   ): Promise<OptimizationResult> {
     const startTime = Date.now();
@@ -784,8 +800,8 @@ export class DataStorageOptimizationService {
         await this.prismaService.browserScreenshot.update({
           where: { id: screenshot.id },
           data: {
-            storageTier: targetTier,
-            compressionType: newCompressionType,
+            storageTier: targetTier as any,
+            compressionType: newCompressionType as any,
             compressedSize: optimizedSize,
             filePath: compressedPath,
           },
@@ -801,7 +817,7 @@ export class DataStorageOptimizationService {
       await this.prismaService.browserScreenshot.update({
         where: { id: screenshot.id },
         data: {
-          storageTier: targetTier,
+          storageTier: targetTier as any,
         },
       });
     }
@@ -823,7 +839,12 @@ export class DataStorageOptimizationService {
   }
 
   private async optimizeDomSnapshot(
-    domSnapshot: BrowserDomSnapshot,
+    domSnapshot: Partial<BrowserDomSnapshot> & {
+      id: string;
+      originalSize?: number;
+      htmlContent?: string;
+      compressionType?: string;
+    },
     targetTier: StorageTier,
   ): Promise<OptimizationResult> {
     const startTime = Date.now();
@@ -849,8 +870,8 @@ export class DataStorageOptimizationService {
         await this.prismaService.browserDomSnapshot.update({
           where: { id: domSnapshot.id },
           data: {
-            storageTier: targetTier,
-            compressionType: newCompressionType,
+            storageTier: targetTier as any,
+            compressionType: newCompressionType as any,
             htmlCompressed: compressedData,
             compressedSize: optimizedSize,
             htmlContent: null, // Clear uncompressed content to save space
@@ -867,7 +888,7 @@ export class DataStorageOptimizationService {
       await this.prismaService.browserDomSnapshot.update({
         where: { id: domSnapshot.id },
         data: {
-          storageTier: targetTier,
+          storageTier: targetTier as any,
         },
       });
     }
@@ -889,14 +910,21 @@ export class DataStorageOptimizationService {
   }
 
   private async analyzeScreenshotContent(
-    screenshot: BrowserScreenshot,
+    screenshot: Partial<BrowserScreenshot> & {
+      id: string;
+      filePath?: string;
+      checksum?: string;
+      fileSize: number;
+      metadata?: any;
+      url?: string;
+    },
   ): Promise<ContentAnalysis> {
     // Calculate content hash if not present
     let contentHash = '';
-    if (!screenshot.checksum) {
+    if (!screenshot.checksum && screenshot.filePath) {
       contentHash = await this.calculateFileChecksum(screenshot.filePath);
     } else {
-      contentHash = screenshot.checksum;
+      contentHash = screenshot.checksum || '';
     }
 
     // Find similar screenshots
@@ -988,13 +1016,18 @@ export class DataStorageOptimizationService {
     return Math.floor(ageMs / (1000 * 60 * 60 * 24));
   }
 
-  private calculateImageQualityScore(screenshot: BrowserScreenshot): number {
+  private calculateImageQualityScore(
+    screenshot: Partial<BrowserScreenshot> & {
+      fileSize: number;
+      metadata?: any;
+    },
+  ): number {
     // Base quality assessment on file size and dimensions
     const sizeScore = Math.min(screenshot.fileSize / (100 * 1024), 1.0); // Up to 100KB = 1.0
 
     let dimensionScore = 0.5;
     if (screenshot.metadata && typeof screenshot.metadata === 'object') {
-      const metadata = screenshot.metadata as any;
+      const metadata = screenshot.metadata;
       if (metadata.dimensions) {
         const { width, height } = metadata.dimensions;
         dimensionScore = Math.min((width * height) / (1920 * 1080), 1.0); // Up to 1080p = 1.0
@@ -1004,10 +1037,12 @@ export class DataStorageOptimizationService {
     return (sizeScore + dimensionScore) / 2;
   }
 
-  private assessBusinessValue(screenshot: BrowserScreenshot): boolean {
+  private assessBusinessValue(
+    screenshot: Partial<BrowserScreenshot> & { metadata?: any; url?: string },
+  ): boolean {
     // Assess business value based on metadata and context
     if (screenshot.metadata && typeof screenshot.metadata === 'object') {
-      const metadata = screenshot.metadata as any;
+      const metadata = screenshot.metadata;
 
       // High business value indicators
       if (
@@ -1032,10 +1067,14 @@ export class DataStorageOptimizationService {
     );
   }
 
-  private assessDomBusinessValue(domSnapshot: BrowserDomSnapshot): boolean {
+  private assessDomBusinessValue(domSnapshot: {
+    metadata?: any;
+    url: string;
+    formCount?: number;
+  }): boolean {
     // Assess DOM snapshot business value
     if (domSnapshot.metadata && typeof domSnapshot.metadata === 'object') {
-      const metadata = domSnapshot.metadata as any;
+      const metadata = domSnapshot.metadata;
 
       if (
         metadata.isProductionData ||

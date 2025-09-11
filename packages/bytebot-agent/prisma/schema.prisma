@@ -77,6 +77,20 @@ enum BrowserSessionStatus {
   ERROR
 }
 
+enum StorageTier {
+  HOT
+  WARM
+  COLD
+  ARCHIVED
+}
+
+enum CompressionType {
+  NONE
+  GZIP
+  BROTLI
+  ZSTD
+}
+
 model Task {
   id            String        @id @default(uuid())
   description   String
@@ -320,6 +334,15 @@ model BrowserScreenshot {
   mimeType         String         @default("image/png")
   metadata         Json?
   
+  // Storage optimization properties
+  compressionType  CompressionType @default(NONE)
+  compressedSize   Int?
+  checksum         String?
+  storageTier      StorageTier     @default(HOT)
+  accessCount      Int             @default(0)
+  lastAccessed     DateTime        @default(now())
+  archivedAt       DateTime?
+  
   // Relations
   session          BrowserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   task             BrowserTask?   @relation(fields: [taskId], references: [id])
@@ -340,6 +363,26 @@ model BrowserDomSnapshot {
   metadata         Json?
   timestamp        DateTime       @default(now())
   fileSize         Int?
+  
+  // Storage optimization properties
+  htmlCompressed   Bytes?         // Compressed HTML content
+  compressionType  CompressionType @default(NONE)
+  originalSize     Int?
+  compressedSize   Int?
+  textContentHash  String?
+  storageTier      StorageTier     @default(HOT)
+  accessCount      Int             @default(0)
+  lastAccessed     DateTime        @default(now())
+  archivedAt       DateTime?
+  
+  // Content analysis properties
+  elementCount     Int?
+  formCount        Int?
+  linkCount        Int?
+  imageCount       Int?
+  scriptCount      Int?
+  pageLoadTimeMs   Int?
+  renderTimeMs     Int?
   
   // Relations
   session          BrowserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)

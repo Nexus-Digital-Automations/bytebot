@@ -18,12 +18,12 @@ import {
 } from '../agent/agent.types';
 import { Message, MessageRole } from '@prisma/client';
 import { googleTools } from './google.tools';
-import {
-  Content,
-  GenerateContentResponse,
-  GoogleGenAI,
-  Part,
-} from '@google/genai';
+
+// Dynamic import types for @google/genai ES module
+type Content = any;
+type GenerateContentResponse = any;
+type GoogleGenAI = any;
+type Part = any;
 
 // Enhanced type definitions for better type safety
 interface GoogleApiError extends Error {
@@ -70,7 +70,7 @@ const generateId = (): string => {
 
 @Injectable()
 export class GoogleService implements BytebotAgentService {
-  private google: GoogleGenAI;
+  private google: GoogleGenAI | null = null;
   private readonly logger = new Logger(GoogleService.name);
   private currentApiKey = 'dummy-key-for-initialization';
 
@@ -78,10 +78,19 @@ export class GoogleService implements BytebotAgentService {
     private readonly configService: ConfigService,
     private readonly secretsService: SecretsService,
   ) {
-    // Initialize with dummy key - actual key will be loaded dynamically
-    this.google = new GoogleGenAI({
-      apiKey: this.currentApiKey,
-    });
+    // Google client will be initialized dynamically when first used
+  }
+
+  private async initializeGoogleClient(): Promise<GoogleGenAI> {
+    if (!this.google) {
+      const { GoogleGenAI } = await import('@google/genai');
+      const apiKey = this.getApiKey();
+      this.currentApiKey = apiKey;
+      this.google = new GoogleGenAI({
+        apiKey: apiKey,
+      });
+    }
+    return this.google;
   }
 
   /**

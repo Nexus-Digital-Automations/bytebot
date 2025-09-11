@@ -16,44 +16,23 @@
  */
 
 import { Prisma } from '@prisma/client';
+import {
+  BrowserSessionStatus,
+  BrowserTaskStatus,
+  BrowserTaskPriority,
+  StorageTier,
+  CompressionType,
+} from '@prisma/client';
 
-// ===== ENUMS =====
+// ===== ENUMS (Re-exported from Prisma) =====
 
-export enum BrowserSessionStatus {
-  ACTIVE = 'ACTIVE',
-  IDLE = 'IDLE',
-  TERMINATED = 'TERMINATED',
-  ERROR = 'ERROR',
-}
-
-export enum BrowserTaskStatus {
-  PENDING = 'PENDING',
-  RUNNING = 'RUNNING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
-  CANCELLED = 'CANCELLED',
-}
-
-export enum BrowserTaskPriority {
-  LOW = 'LOW',
-  NORMAL = 'NORMAL',
-  HIGH = 'HIGH',
-  URGENT = 'URGENT',
-}
-
-export enum StorageTier {
-  HOT = 'hot', // Frequently accessed, uncompressed
-  WARM = 'warm', // Occasionally accessed, light compression
-  COLD = 'cold', // Rarely accessed, heavy compression
-  ARCHIVED = 'archived', // Long-term storage, maximum compression
-}
-
-export enum CompressionType {
-  NONE = 'none',
-  GZIP = 'gzip',
-  BROTLI = 'brotli',
-  ZSTD = 'zstd',
-}
+export {
+  BrowserSessionStatus,
+  BrowserTaskStatus,
+  BrowserTaskPriority,
+  StorageTier,
+  CompressionType,
+};
 
 export enum DataExtractionType {
   TEXT = 'text',
@@ -384,7 +363,7 @@ export interface BrowserDomSnapshot {
   url: string;
   title?: string;
   htmlContent?: string;
-  htmlCompressed?: Buffer;
+  htmlCompressed?: Buffer | Uint8Array;
   compressionType: CompressionType;
   originalSize?: number;
   compressedSize?: number;
@@ -437,7 +416,7 @@ export interface CreateBrowserDomSnapshotRequest {
 }
 
 export interface UpdateBrowserDomSnapshotRequest {
-  htmlCompressed?: Buffer;
+  htmlCompressed?: Buffer | Uint8Array;
   compressionType?: CompressionType;
   originalSize?: number;
   compressedSize?: number;

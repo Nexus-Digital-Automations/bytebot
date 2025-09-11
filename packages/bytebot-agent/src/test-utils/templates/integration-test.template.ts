@@ -34,7 +34,7 @@
 
 import { TestingModule } from '@nestjs/testing';
 import { INestApplication, Logger } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import type { Response } from 'supertest';
 
 /**
