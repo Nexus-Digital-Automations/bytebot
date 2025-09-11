@@ -12,6 +12,7 @@ import {
   BrowserMonitoringResponseDto,
   TaskStatusResponseDto,
 } from '../dto/browser-monitoring.dto';
+import { BrowserSessionStatus } from '../dto/browser-session.dto';
 import { BrowserUseService } from '../browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
 import { BrowserTaskService } from './browser-task.service';
@@ -272,7 +273,9 @@ export class BrowserMonitoringService {
               currentUrl: session.currentUrl ?? 'unknown',
               pageTitle: session.pageTitle ?? 'Untitled',
               loadingStatus:
-                session.status === 'active' ? 'complete' : 'loading',
+                session.status === BrowserSessionStatus.ACTIVE
+                  ? 'complete'
+                  : 'loading',
               tabsOpen: 1, // Simplified
             };
           }
