@@ -66,8 +66,7 @@ export function ChatInput({
 
     // Check individual file sizes
     const oversizedFiles: string[] = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    for (const file of files) {
       if (file.size > MAX_FILE_SIZE) {
         oversizedFiles.push(`${file.name} (${formatFileSize(file.size)})`);
       }
@@ -83,8 +82,7 @@ export function ChatInput({
 
     const newFiles: FileWithBase64[] = [];
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    for (const file of files) {
       const base64 = await convertToBase64(file);
 
       newFiles.push({

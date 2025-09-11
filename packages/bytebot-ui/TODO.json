@@ -58,34 +58,6 @@
       ]
     },
     {
-      "id": "error_1757574505806_e3dotxyeg",
-      "title": "Fix TypeScript and ESLint violations in bytebot-ui utility and library files",
-      "description": "Fix all TypeScript and ESLint violations in src/utils/ and src/lib/ directories: radix parameter errors (parseInt calls), prefer-nullish-coalescing violations (replace || with ??), strict boolean expressions, missing return types, magic number violations, and object conditionals",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-11T07:08:25.807Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757574481856_1_general_3ee6e63f",
-      "started_at": "2025-09-11T07:08:42.345Z",
-      "claimed_by": "development_session_1757574481856_1_general_3ee6e63f",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757574481856_1_general_3ee6e63f",
-          "role": "primary",
-          "assignedAt": "2025-09-11T07:08:42.345Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757574503390_myak6if7l",
       "title": "Fix remaining TypeScript and ESLint violations in bytebot-ui hooks and files",
       "description": "Complete TypeScript compliance by fixing all remaining violations in hooks directory and other files. Fix no-misused-promises, add missing return types, fix duplicate imports, handle strict boolean expressions, and resolve floating promises.",
