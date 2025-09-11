@@ -250,7 +250,7 @@ export class BrowserRateLimitingService {
     identifier: string,
     endpointType: BrowserEndpointType,
     tier: RateLimitTier = RateLimitTier.IP_BASED,
-    metadata?: {
+    _metadata?: {
       userAgent?: string;
       sessionId?: string;
       userId?: string;
@@ -266,18 +266,18 @@ export class BrowserRateLimitingService {
     reason?: string;
   }> {
     if (!this.config.enableRateLimiting) {
-      return {
+      return await Promise.resolve({
         allowed: true,
         limit: Number.MAX_SAFE_INTEGER,
         remaining: Number.MAX_SAFE_INTEGER,
         resetTime: new Date(Date.now() + 60000),
         blocked: false,
-      };
+      });
     }
 
     // Check circuit breaker
     if (this.isCircuitBreakerOpen()) {
-      await this.recordViolation(
+      this.recordViolation(
         identifier,
         endpointType,
         tier,
@@ -312,7 +312,7 @@ export class BrowserRateLimitingService {
         this.metrics.blockedRequests++;
         this.updateEndpointMetrics(endpointType, 'blocked');
 
-        await this.recordViolation(
+        this.recordViolation(
           identifier,
           endpointType,
           tier,
@@ -342,7 +342,7 @@ export class BrowserRateLimitingService {
           entry.resetTime = new Date(Date.now() + burstWindow);
           entry.violations++;
 
-          await this.recordViolation(
+          this.recordViolation(
             identifier,
             endpointType,
             tier,
@@ -366,7 +366,7 @@ export class BrowserRateLimitingService {
         entry.blocked = true;
         entry.violations++;
 
-        await this.recordViolation(
+        this.recordViolation(
           identifier,
           endpointType,
           tier,
@@ -375,7 +375,7 @@ export class BrowserRateLimitingService {
 
         // Check for DOS patterns
         if (this.config.enableDosProtection) {
-          await this.detectDosPatterns(identifier, entry);
+          this.detectDosPatterns(identifier, entry);
         }
 
         this.metrics.blockedRequests++;
@@ -478,11 +478,11 @@ export class BrowserRateLimitingService {
   /**
    * Reset rate limits for specific identifier (admin function)
    */
-  async resetRateLimit(
+  resetRateLimit(
     identifier: string,
     endpointType?: BrowserEndpointType,
     tier: RateLimitTier = RateLimitTier.IP_BASED,
-  ): Promise<void> {
+  ): void {
     if (endpointType) {
       const key = this.generateKey(identifier, endpointType, tier);
       this.store.delete(key);
@@ -676,12 +676,12 @@ export class BrowserRateLimitingService {
     return entry.count;
   }
 
-  private async recordViolation(
+  private recordViolation(
     identifier: string,
     endpointType: BrowserEndpointType,
     tier: RateLimitTier,
     reason: string,
-  ): Promise<void> {
+  ): void {
     const violation: RateLimitViolation = {
       identifier,
       endpointType,
@@ -738,10 +738,7 @@ export class BrowserRateLimitingService {
     }
   }
 
-  private async detectDosPatterns(
-    identifier: string,
-    entry: RateLimitEntry,
-  ): Promise<void> {
+  private detectDosPatterns(identifier: string, entry: RateLimitEntry): void {
     const patterns: DosPattern[] = [];
 
     // Burst pattern detection
