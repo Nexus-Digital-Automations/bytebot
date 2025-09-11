@@ -219,8 +219,8 @@ describe('InputTrackingController', () => {
       let callCount = 0;
       Date.now = jest.fn(() => originalDateNow() + callCount++);
 
-      const result1 = controller.start(mockAdminUser);
-      const result2 = controller.start(mockOperatorUser);
+      const _result1 = controller.start(mockAdminUser);
+      const _result2 = controller.start(mockOperatorUser);
 
       expect(logger.log).toHaveBeenCalledTimes(2);
       const firstCallArgs = (logger.log as jest.Mock).mock.calls[0];

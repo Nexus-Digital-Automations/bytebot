@@ -40,7 +40,7 @@ describe('Security Penetration Testing Suite', () => {
   let jwtAuthGuard: JwtAuthGuard;
   let rolesGuard: RolesGuard;
   let jwtService: JwtService;
-  let configService: ConfigService;
+  let _configService: ConfigService;
   let reflector: Reflector;
   let module: TestingModule;
 
@@ -230,11 +230,11 @@ describe('Security Penetration Testing Suite', () => {
 
           try {
             const _result = await targetFunction(user);
-            return { success: true, index, userRole: user.role };
+            return { success: true, index: _index, userRole: user.role };
           } catch (_error) {
             return {
               success: false,
-              index,
+              index: _index,
               _error: _error.message,
               userRole: user.role,
             };

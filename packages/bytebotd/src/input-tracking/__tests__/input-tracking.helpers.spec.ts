@@ -17,7 +17,7 @@
  * @coverage-target 100%
  */
 
-import { keyInfoMap, KeyInfo } from '../input-tracking.helpers';
+import { keyInfoMap, KeyInfo as _KeyInfo } from '../input-tracking.helpers';
 import { UiohookKey } from 'uiohook-napi';
 
 describe('InputTrackingHelpers', () => {
@@ -53,7 +53,7 @@ describe('InputTrackingHelpers', () => {
       const testId = `${operationId}_keyinfo_structure`;
       console.log(`[${testId}] Testing KeyInfo structure validation`);
 
-      Object.entries(keyInfoMap).forEach(([keyCode, keyInfo]) => {
+      Object.entries(keyInfoMap).forEach(([_keyCode, keyInfo]) => {
         expect(keyInfo).toHaveProperty('_name');
         expect(keyInfo).toHaveProperty('isPrintable');
         expect(typeof keyInfo._name).toBe('string');
@@ -508,7 +508,7 @@ describe('InputTrackingHelpers', () => {
       const testId = `${operationId}_consistent_data_types`;
       console.log(`[${testId}] Testing consistent data types`);
 
-      Object.entries(keyInfoMap).forEach(([keyCode, keyInfo]) => {
+      Object.entries(keyInfoMap).forEach(([_keyCode, keyInfo]) => {
         // Name should always be a non-empty string
         expect(typeof keyInfo._name).toBe('string');
         expect(keyInfo._name.length).toBeGreaterThan(0);

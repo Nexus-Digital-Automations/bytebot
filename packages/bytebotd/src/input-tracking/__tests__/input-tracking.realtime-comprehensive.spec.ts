@@ -171,14 +171,14 @@ import { InputTrackingService } from '../input-tracking.service';
 import { InputTrackingGateway } from '../input-tracking.gateway';
 import { ComputerUseService } from '../../computer-use/computer-use.service';
 import {
-  ComputerAction,
-  ClickMouseAction,
-  DragMouseAction,
-  ScrollAction,
-  TypeKeysAction,
-  TypeTextAction,
-  MoveMouseAction,
-  PressMouseAction,
+  ComputerAction as _ComputerAction,
+  ClickMouseAction as _ClickMouseAction,
+  DragMouseAction as _DragMouseAction,
+  ScrollAction as _ScrollAction,
+  TypeKeysAction as _TypeKeysAction,
+  TypeTextAction as _TypeTextAction,
+  MoveMouseAction as _MoveMouseAction,
+  PressMouseAction as _PressMouseAction,
 } from '@bytebot/shared';
 
 // Mock implementations

@@ -153,7 +153,7 @@ describe('Controller Security Integration Tests', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
   let jwtService: JwtService;
-  let configService: ConfigService;
+  let _configService: ConfigService;
 
   const operationId = `controller_security_test_${Date.now()}`;
   const securityLogger = {

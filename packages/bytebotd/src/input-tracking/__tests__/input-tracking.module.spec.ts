@@ -25,7 +25,7 @@ import { InputTrackingModule } from '../input-tracking.module';
 import { InputTrackingController } from '../input-tracking.controller';
 import { InputTrackingService } from '../input-tracking.service';
 import { InputTrackingGateway } from '../input-tracking.gateway';
-import { ComputerUseModule } from '../../computer-use/computer-use.module';
+import { ComputerUseModule as _ComputerUseModule } from '../../computer-use/computer-use.module';
 import { ComputerUseService } from '../../computer-use/computer-use.service';
 
 describe('InputTrackingModule', () => {
@@ -107,7 +107,7 @@ describe('InputTrackingModule', () => {
       const testId = `${operationId}_module_metadata`;
       console.log(`[${testId}] Testing module metadata structure`);
 
-      const moduleMetadata =
+      const _moduleMetadata =
         Reflect.getMetadata('imports', InputTrackingModule) ||
         Reflect.getMetadata('module', InputTrackingModule);
 
@@ -312,7 +312,7 @@ describe('InputTrackingModule', () => {
       console.log(`[${testId}] Testing service and gateway integration`);
 
       // Mock gateway methods
-      const emitActionSpy = jest.spyOn(inputTrackingGateway, 'emitAction');
+      const _emitActionSpy = jest.spyOn(inputTrackingGateway, 'emitAction');
 
       // Start tracking to enable communication
       inputTrackingService.startTracking();

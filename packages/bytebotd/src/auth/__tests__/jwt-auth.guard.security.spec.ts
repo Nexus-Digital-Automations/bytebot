@@ -31,7 +31,7 @@ import _crypto from 'crypto';
 describe('JwtAuthGuard - Advanced Security Tests', () => {
   let guard: JwtAuthGuard;
   let jwtService: JwtService;
-  let configService: ConfigService;
+  let _configService: ConfigService;
   let reflector: Reflector;
   let module: TestingModule;
 

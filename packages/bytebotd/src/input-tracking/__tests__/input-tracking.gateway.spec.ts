@@ -20,7 +20,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
-import { Server, Socket } from 'socket.io';
+import { Server as _Server, Socket as _Socket } from 'socket.io';
 import { ComputerAction } from '@bytebot/shared';
 import { InputTrackingGateway } from '../input-tracking.gateway';
 

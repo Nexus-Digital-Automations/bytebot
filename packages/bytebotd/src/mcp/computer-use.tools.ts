@@ -100,7 +100,7 @@ export class ComputerUseTools {
         operationId,
         toolName,
         executionTimeMs: executionTime,
-        _result,
+        result,
         timestamp: new Date().toISOString(),
       },
     );
@@ -911,8 +911,8 @@ V, W, X, Y, Z
       });
 
       const message = (() => {
-        if (result && typeof result === 'object' && 'message' in result) {
-          const msg = (result as { message: unknown }).message;
+        if (_result && typeof _result === 'object' && 'message' in _result) {
+          const msg = (_result as { message: unknown }).message;
           return typeof msg === 'string' ? msg : 'File operation completed';
         }
         return 'File written successfully';
@@ -955,15 +955,15 @@ V, W, X, Y, Z
 
       // Type guard to check if result has the expected structure
       const hasValidResult =
-        result &&
-        typeof result === 'object' &&
-        'success' in result &&
-        'data' in result &&
-        (result as { success: unknown; data: unknown }).success &&
-        (result as { success: unknown; data: unknown }).data;
+        _result &&
+        typeof _result === 'object' &&
+        'success' in _result &&
+        'data' in _result &&
+        (_result as { success: unknown; data: unknown }).success &&
+        (_result as { success: unknown; data: unknown }).data;
 
       if (hasValidResult) {
-        const fileResult = result as {
+        const fileResult = _result as {
           success: boolean;
           data: string;
           mediaType?: string;
@@ -988,8 +988,8 @@ V, W, X, Y, Z
         };
       } else {
         const errorMessage = (() => {
-          if (result && typeof result === 'object' && 'message' in result) {
-            const msg = (result as { message: unknown }).message;
+          if (_result && typeof _result === 'object' && 'message' in _result) {
+            const msg = (_result as { message: unknown }).message;
             return typeof msg === 'string' ? msg : 'Unknown error';
           }
           return 'Error reading file';

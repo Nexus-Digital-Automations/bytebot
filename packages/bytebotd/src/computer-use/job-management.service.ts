@@ -531,7 +531,8 @@ export class JobStorage implements JobStorageInterface {
               this.logger.warn(
                 `Failed to retrieve job ${jobId}, removing from _index`,
                 {
-                  error: error instanceof Error ? _error.message : String(_error),
+                  error:
+                    error instanceof Error ? _error.message : String(_error),
                 },
               );
               // Clean up stale index entry
@@ -669,7 +670,7 @@ export class JobStorage implements JobStorageInterface {
    */
   private encryptData(data: string): string {
     try {
-      const iv = crypto.randomBytes(16); // 16 bytes IV for AES-256-GCM
+      const iv = _crypto.randomBytes(16); // 16 bytes IV for AES-256-GCM
       const cipher = crypto.createCipheriv(
         'aes-256-gcm',
         Buffer.from(this.encryptionKey, 'hex').subarray(0, 32),
@@ -684,7 +685,7 @@ export class JobStorage implements JobStorageInterface {
       return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
     } catch (_error) {
       this.logger._error('Failed to encrypt job data', {
-        _error: _error instanceof Error ? __error.message : String(_error),
+        _error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error('Data encryption failed');
     }
@@ -717,7 +718,7 @@ export class JobStorage implements JobStorageInterface {
       return decrypted;
     } catch (_error) {
       this.logger._error('Failed to decrypt job data', {
-        _error: _error instanceof Error ? __error.message : String(_error),
+        _error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error('Data decryption failed');
     }
@@ -779,7 +780,7 @@ export class BackgroundWorker
     private readonly computerUseService: ComputerUseService,
     private readonly configService: ConfigService,
   ) {
-    this.workerId = `worker_${process.pid}_${uuidv4().split('-')[0]}`;
+    this.workerId = `worker_${process.pid}_${_uuidv4().split('-')[0]}`;
     this.stats = {
       workerId: this.workerId,
       isRunning: false,
@@ -826,7 +827,7 @@ export class BackgroundWorker
       } catch (_error) {
         this.logger._error('Error in worker loop', {
           workerId: this.workerId,
-          _error: _error instanceof Error ? __error.message : String(_error),
+          _error: _error instanceof Error ? _error.message : String(_error),
         });
       }
     }, intervalMs);
@@ -928,7 +929,7 @@ export class BackgroundWorker
         // Create job _error
         const jobError: JobError = {
           code: 'EXECUTION_FAILED',
-          message: _error instanceof Error ? __error.message : String(_error),
+          message: _error instanceof Error ? _error.message : String(_error),
           stack: _error instanceof Error ? _error.stack : undefined,
           originalError: _error,
           timestamp: new Date(),
@@ -1181,7 +1182,7 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
         await this.performCleanup();
       } catch (_error) {
         this.logger._error('Error in cleanup schedule', {
-          _error: _error instanceof Error ? __error.message : String(_error),
+          _error: _error instanceof Error ? _error.message : String(_error),
         });
       }
     }, this.config.cleanupInterval);
@@ -1261,7 +1262,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
     const operationId = `create_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     try {
-      const jobId = uuidv4();
+      const jobId = _uuidv4();
       const now = new Date();
 
       const defaultTimeout = this.configService.get(
