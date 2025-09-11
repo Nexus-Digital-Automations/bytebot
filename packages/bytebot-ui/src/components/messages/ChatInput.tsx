@@ -117,7 +117,7 @@ export function ChatInput({
     });
   };
 
-  const removeFile = (index: number) => {
+  const removeFile = (index: number): void => {
     const updatedFiles = selectedFiles.filter((_, i) => i !== index);
     setSelectedFiles(updatedFiles);
     setErrorMessage("");
