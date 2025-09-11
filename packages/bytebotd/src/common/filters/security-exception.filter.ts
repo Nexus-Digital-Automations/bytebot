@@ -64,7 +64,7 @@ interface _SecurityErrorMetrics {
 
 @Catch()
 export class SecurityExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(SecurityExceptionFilter._name);
+  private readonly logger = new Logger(SecurityExceptionFilter.name);
 
   // Track error patterns for security analysis
   private errorPatterns = new Map<

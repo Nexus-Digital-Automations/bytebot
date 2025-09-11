@@ -222,7 +222,7 @@ class Base64ImageCompressor {
       const compressionRatio = sizeBytes / inputBuffer.length;
       const totalTime = Date.now() - startTime;
 
-      let _result = {
+      const _result = {
         base64: outputBase64,
         sizeBytes,
         sizeKB: finalSizeKB,
@@ -389,7 +389,7 @@ class Base64ImageCompressor {
 export async function compressPngBase64Under1MB(
   base64String: string,
 ): Promise<string> {
-  let _result = await Base64ImageCompressor.compressToSize(base64String, {
+  const _result = await Base64ImageCompressor.compressToSize(base64String, {
     targetSizeKB: 1024,
     format: 'png',
     initialQuality: 95,

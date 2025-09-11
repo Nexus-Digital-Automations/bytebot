@@ -106,7 +106,7 @@ export class EnterpriseRateLimitGuard
   extends ThrottlerGuard
   implements CanActivate
 {
-  private readonly logger = new Logger(EnterpriseRateLimitGuard._name);
+  private readonly logger = new Logger(EnterpriseRateLimitGuard.name);
 
   // In-memory tracking for suspicious activity
   private suspiciousActivityTracker = new Map<

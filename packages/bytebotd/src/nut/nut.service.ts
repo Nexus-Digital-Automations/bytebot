@@ -165,7 +165,7 @@ const NutKeyMapLowercase: Record<string, Key> = Object.entries(Key)
 
 @Injectable()
 export class NutService {
-  private readonly logger = new Logger(NutService._name);
+  private readonly logger = new Logger(NutService.name);
   private screenshotDir: string;
 
   constructor() {
@@ -222,7 +222,7 @@ export class NutService {
       return { success: true };
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Key send operation failed: ${errorMessage}`,
       );
       throw new Error(`Failed to send keys: ${errorMessage}`);
@@ -249,7 +249,7 @@ export class NutService {
       return { success: true };
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
-      this.logger._error(`Failed to hold keys operation: ${errorMessage}`);
+      this.logger.error(`Failed to hold keys operation: ${errorMessage}`);
       throw new Error(`Failed to hold keys: ${errorMessage}`);
     }
   }
@@ -292,7 +292,7 @@ export class NutService {
     this.logger.log(`Typing text: ${text}`);
 
     try {
-      for (let i = 0; i < text.length; i++) {
+      for (let i = 0, len = text.length; i < len; i++) {
         const char = text[i];
         const keyInfo = this.charToKeyInfo(char);
         if (keyInfo) {
@@ -313,7 +313,7 @@ export class NutService {
       }
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
-      this.logger._error(`Failed to type text: ${errorMessage}`);
+      this.logger.error(`Failed to type text: ${errorMessage}`);
       throw new Error(`Failed to type text: ${errorMessage}`);
     }
   }
@@ -349,7 +349,7 @@ export class NutService {
       await keyboard.releaseKey(Key.LeftControl, Key.V);
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
-      this.logger._error(`Failed to paste text: ${errorMessage}`);
+      this.logger.error(`Failed to paste text: ${errorMessage}`);
       throw new Error(`Failed to paste text: ${errorMessage}`);
     }
   }
@@ -436,7 +436,7 @@ export class NutService {
       return { success: true };
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
-      this.logger._error(`Failed to move mouse: ${errorMessage}`);
+      this.logger.error(`Failed to move mouse: ${errorMessage}`);
       throw new Error(`Failed to move mouse: ${errorMessage}`);
     }
   }
@@ -464,7 +464,7 @@ export class NutService {
       return { success: true };
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
-      this.logger._error(`Failed to click mouse button: ${errorMessage}`);
+      this.logger.error(`Failed to click mouse button: ${errorMessage}`);
       throw new Error(`Failed to click mouse button: ${errorMessage}`);
     }
   }
@@ -548,7 +548,7 @@ export class NutService {
       return { success: true };
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
-      this.logger._error(`Failed to scroll: ${errorMessage}`);
+      this.logger.error(`Failed to scroll: ${errorMessage}`);
       throw new Error(`Failed to scroll: ${errorMessage}`);
     }
   }
@@ -678,7 +678,7 @@ export class NutService {
       };
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
-      this.logger._error(`Service status check failed: ${errorMessage}`);
+      this.logger.error(`Service status check failed: ${errorMessage}`);
       return {
         healthy: false,
         screenshotDir: this.screenshotDir || 'not set',

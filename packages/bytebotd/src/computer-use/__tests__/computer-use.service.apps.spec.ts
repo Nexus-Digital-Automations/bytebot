@@ -138,7 +138,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
-import { _ApplicationAction, Application } from '@bytebot/shared';
+import { _ApplicationActionDto, Application } from '@bytebot/shared';
+import { ApplicationActionDtoDto } from '../dto/computer-action.dto';
 import { spawn } from 'child_process';
 import { promisify } from 'util';
 
@@ -229,7 +230,7 @@ describe('ComputerUseService - Application Management', () => {
      * Desktop activation uses wmctrl -k on to show desktop
      */
     it('should activate desktop using wmctrl command', async () => {
-      const action: ApplicationAction = {
+      const action: ApplicationActionDto = {
         action: 'application',
         application: 'desktop',
       };
@@ -260,7 +261,7 @@ describe('ComputerUseService - Application Management', () => {
      * Should use wmctrl to check if running, fail, then launch new instance
      */
     it('should launch firefox when not running', async () => {
-      const action: ApplicationAction = {
+      const action: ApplicationActionDto = {
         action: 'application',
         application: 'firefox',
       };
@@ -309,7 +310,7 @@ describe('ComputerUseService - Application Management', () => {
         jest.clearAllMocks();
         mockExecAsync.mockRejectedValue({ code: 1 });
 
-        const action: ApplicationAction = {
+        const action: ApplicationActionDto = {
           action: 'application',
           application: app,
         };
@@ -349,7 +350,7 @@ describe('ComputerUseService - Application Management', () => {
       for (const [app, processName] of appConfigs) {
         jest.clearAllMocks();
 
-        const action: ApplicationAction = {
+        const action: ApplicationActionDto = {
           action: 'application',
           application: app,
         };
@@ -420,7 +421,7 @@ describe('ComputerUseService - Application Management', () => {
      * Test graceful handling of wmctrl timeout errors
      */
     it('should handle wmctrl timeout _error gracefully', async () => {
-      const action: ApplicationAction = {
+      const action: ApplicationActionDto = {
         action: 'application',
         application: 'firefox',
       };
@@ -447,7 +448,7 @@ describe('ComputerUseService - Application Management', () => {
      * Test handling of spawn errors
      */
     it('should handle spawn errors during application launch', async () => {
-      const action: ApplicationAction = {
+      const action: ApplicationActionDto = {
         action: 'application',
         application: 'terminal',
       };
@@ -468,7 +469,7 @@ describe('ComputerUseService - Application Management', () => {
      * Test proper process unreferencing for detached processes
      */
     it('should properly unref spawned processes', async () => {
-      const action: ApplicationAction = {
+      const action: ApplicationActionDto = {
         action: 'application',
         application: 'vscode',
       };
@@ -489,7 +490,7 @@ describe('ComputerUseService - Application Management', () => {
      * Test sudo user context for all operations
      */
     it('should run all operations with sudo user context', async () => {
-      const action: ApplicationAction = {
+      const action: ApplicationActionDto = {
         action: 'application',
         application: 'thunderbird',
       };
@@ -512,7 +513,7 @@ describe('ComputerUseService - Application Management', () => {
      * Test DISPLAY environment variable security
      */
     it('should set secure DISPLAY environment variable', async () => {
-      const action: ApplicationAction = {
+      const action: ApplicationActionDto = {
         action: 'application',
         application: '1password',
       };
@@ -538,7 +539,7 @@ describe('ComputerUseService - Application Management', () => {
      * Test timeout configuration for status checks
      */
     it('should apply timeout to application status checks', async () => {
-      const action: ApplicationAction = {
+      const action: ApplicationActionDto = {
         action: 'application',
         application: 'directory',
       };

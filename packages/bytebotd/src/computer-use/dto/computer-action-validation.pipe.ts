@@ -112,7 +112,7 @@ export class ComputerActionValidationPipe
    */
   private safeDetectAdvancedXSS(input: string): XSSDetectionResult {
     const _result = detectAdvancedXSS(input) as XSSDetectionResult;
-    return result;
+    return _result;
   }
 
   /**
@@ -120,7 +120,7 @@ export class ComputerActionValidationPipe
    */
   private safeDetectSQLInjection(input: string): SQLInjectionDetectionResult {
     const _result = detectSQLInjection(input) as SQLInjectionDetectionResult;
-    return result;
+    return _result;
   }
 
   /**
@@ -136,7 +136,7 @@ export class ComputerActionValidationPipe
     const _result = detectCommandInjection(
       input,
     ) as CommandInjectionDetectionResult;
-    return result;
+    return _result;
   }
 
   /**
@@ -149,7 +149,7 @@ export class ComputerActionValidationPipe
     const _result = validateFilePath(
       filePath,
     ) as unknown as FilePathValidationResult;
-    return result;
+    return _result;
   }
 
   /**
@@ -166,7 +166,7 @@ export class ComputerActionValidationPipe
       x,
       y,
     ) as unknown as CoordinatesValidationResult;
-    return result;
+    return _result;
   }
 
   /**
@@ -273,13 +273,13 @@ export class ComputerActionValidationPipe
     } catch (_error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger._error(`[${operationId}] Computer action validation failed`, {
+      this.logger.error(`[${operationId}] Computer action validation failed`, {
         operationId,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
         processingTimeMs: processingTime,
       });
 
-      throw error;
+      throw _error;
     }
   }
 
@@ -748,13 +748,13 @@ export class ComputerActionValidationPipe
       }
     } catch (_error) {
       const processingTime = Date.now() - startTime;
-      this.logger._error(`[${operationId}] Security validation pipeline error`, {
+      this.logger.error(`[${operationId}] Security validation pipeline error`, {
         operationId,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
         processingTimeMs: processingTime,
         completedStages: securityContext.validationStages,
       });
-      throw error;
+      throw _error;
     }
   }
 
@@ -898,12 +898,12 @@ export class ComputerActionValidationPipe
     }>;
   }> {
     return errors.map((_error) => ({
-      property: error.property,
-      value: error.value,
-      constraints: error.constraints,
+      property: _error.property,
+      value: _error.value,
+      constraints: _error.constraints,
       children:
-        error.children?.length > 0
-          ? this.formatValidationErrors(error.children)
+        _error.children?.length > 0
+          ? this.formatValidationErrors(_error.children)
           : undefined,
     }));
   }

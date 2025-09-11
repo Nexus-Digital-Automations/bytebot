@@ -55,7 +55,7 @@ interface CacheStats {
  */
 @Injectable()
 export class CacheService {
-  private readonly logger = new Logger(CacheService._name);
+  private readonly logger = new Logger(CacheService.name);
   private stats: CacheStats = {
     hits: 0,
     misses: 0,

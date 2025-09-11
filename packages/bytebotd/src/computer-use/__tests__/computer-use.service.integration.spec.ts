@@ -33,6 +33,11 @@ import {
   _ReadFileAction,
   _ApplicationAction,
 } from '@bytebot/shared';
+import {
+  ApplicationActionDto,
+  ScreenshotActionDto,
+  ReadFileActionDto,
+} from '../dto/computer-action.dto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 

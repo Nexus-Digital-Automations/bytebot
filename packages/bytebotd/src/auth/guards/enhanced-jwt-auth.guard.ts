@@ -96,7 +96,7 @@ enum ComputerUsePermission {
  */
 @Injectable()
 export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
-  private readonly logger = new Logger(EnhancedJwtAuthGuard._name);
+  private readonly logger = new Logger(EnhancedJwtAuthGuard.name);
 
   // Token refresh cache to prevent multiple refresh attempts
   private refreshAttempts = new Map<string, number>();
@@ -819,7 +819,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Enhanced authentication failed - no user`,
         {
           operationId,
-          info: info?.message || info?._name || String(info),
+          info: info?.message || info?.name || String(info),
           url: request.url,
           method: request.method,
           errorMessage,

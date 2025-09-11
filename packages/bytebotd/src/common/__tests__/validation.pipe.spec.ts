@@ -121,7 +121,7 @@ class MockValidationPipe {
 
     // Mock validation rules based on common patterns
     if (metatype._name === 'CreateUserDto') {
-      if (!instance.email || !instance.email.includes('@')) {
+      if (!instance.email?.includes('@')) {
         errors.push({
           property: 'email',
           constraints: { isEmail: 'email must be a valid email address' },

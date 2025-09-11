@@ -72,7 +72,7 @@ interface CacheConfig {
   exports: [CacheService, CacheKeyGenerator, NestCacheModule],
 })
 export class CacheModule {
-  private readonly logger = new Logger(CacheModule._name);
+  private readonly logger = new Logger(CacheModule.name);
 
   constructor() {
     this.logger.log('Redis Cache Module initialized');

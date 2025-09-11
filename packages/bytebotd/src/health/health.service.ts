@@ -89,7 +89,7 @@ export class HealthService extends HealthIndicator {
       const memoryUsage = process.memoryUsage();
       const uptime = process.uptime();
 
-      const response: BasicHealthResponse = {
+      const _response: BasicHealthResponse = {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: Math.round(uptime),
@@ -358,7 +358,7 @@ export class HealthService extends HealthIndicator {
 
       services.forEach(
         (
-          result: PromiseSettledResult<{
+          _result: PromiseSettledResult<{
             status: string;
             responseTime?: string;
           }>,
@@ -371,7 +371,7 @@ export class HealthService extends HealthIndicator {
           } else {
             results[serviceName] = {
               status: 'error',
-              error:
+              _error:
                 result.reason instanceof Error
                   ? result.reason.message
                   : String(result.reason),

@@ -58,7 +58,7 @@ interface KeyStats {
  */
 @Injectable()
 export class CacheKeyGenerator {
-  private readonly logger = new Logger(CacheKeyGenerator._name);
+  private readonly logger = new Logger(CacheKeyGenerator.name);
   private readonly keyRegistry = new Map<string, KeyMetadata>();
   private readonly stats: KeyStats = {
     totalGenerated: 0,

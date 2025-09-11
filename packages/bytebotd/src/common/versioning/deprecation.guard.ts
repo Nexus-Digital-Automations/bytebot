@@ -211,7 +211,7 @@ export class DeprecationGuard implements CanActivate {
         context.getHandler(),
       );
 
-      if (!versionConfig || !versionConfig.deprecation?.deprecated) {
+      if (!versionConfig?.deprecation?.deprecated) {
         // Endpoint is not deprecated, allow request
         return true;
       }

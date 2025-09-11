@@ -191,9 +191,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * @returns User object or throws UnauthorizedException
    */
   handleRequest<TUser = any>(
-    err: any,
-    user: any,
-    info: any,
+    err: unknown,
+    user: unknown,
+    info: unknown,
     context: ExecutionContext,
   ): TUser {
     const operationId = `bytebotd-jwt-handle-${Date.now()}`;
@@ -205,7 +205,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Computer control authentication error`,
         {
           operationId,
-          error: err instanceof Error ? err.message : String(err),
+          _error: err instanceof Error ? err.message : String(err),
           stack: err instanceof Error ? err.stack : undefined,
           url: request.url,
           method: request.method,
@@ -326,7 +326,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * @returns string - User-friendly error message
    * @private
    */
-  private getAuthErrorMessage(info: any): string {
+  private getAuthErrorMessage(info: unknown): string {
     if (!info) {
       return 'Authentication required for computer control';
     }

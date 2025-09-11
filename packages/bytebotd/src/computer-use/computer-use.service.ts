@@ -496,7 +496,7 @@ export class ComputerUseService {
       }
 
       // Move to each coordinate in the path
-      for (let i = 0; i < path.length; i++) {
+      for (let i = 0, len = path.length; i < len; i++) {
         const coordinates = path[i];
         this.logger.debug(
           `[${operationId}] Moving to path point ${i + 1}/${path.length}`,
@@ -753,7 +753,7 @@ export class ComputerUseService {
       mouseButtonPressed = true;
 
       // Move along the drag path
-      for (let i = 0; i < path.length; i++) {
+      for (let i = 0, len = path.length; i < len; i++) {
         const coordinates = path[i];
         this.logger.debug(
           `[${operationId}] Dragging to point ${i + 1}/${path.length}`,
@@ -1650,7 +1650,7 @@ export class ComputerUseService {
 
         const _result: FileReadResult = {
           success: true,
-          data: base64Data,
+          _data: base64Data,
           name: fileName,
           size: fileSize,
           mediaType,

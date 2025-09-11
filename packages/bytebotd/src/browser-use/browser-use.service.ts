@@ -88,7 +88,7 @@ export class BrowserUseService {
       const session = await this.getOrCreateSession(taskDto.sessionConfig);
 
       // Execute task actions sequentially
-      const result = await this.executeTaskActions(task, session);
+      const _result = await this.executeTaskActions(task, session);
 
       // Update task status
       await this.taskService.updateTaskStatus(taskId, {
@@ -348,7 +348,7 @@ export class BrowserUseService {
     });
 
     try {
-      const result = await this.captureScreenshot(sessionId, {
+      const _result = await this.captureScreenshot(sessionId, {
         fullPage: options.fullPage,
         quality: options.quality,
         format: 'png',
@@ -394,7 +394,7 @@ export class BrowserUseService {
       // Extract data for each selector
       for (const [key, selector] of Object.entries(config.selectors)) {
         try {
-          const result = await this.extractDomData(sessionId, {
+          const _result = await this.extractDomData(sessionId, {
             selector,
             includeText: true,
             includeAttributes: true,
@@ -464,10 +464,10 @@ export class BrowserUseService {
    * Execute task actions sequentially
    */
   private async executeTaskActions(
-    task: any,
-    session: any,
+    task: unknown,
+    session: unknown,
   ): Promise<BrowserTaskResultDto> {
-    const logs: any[] = [];
+    const logs: unknown[] = [];
     const screenshots: string[] = [];
     let extractedData: Record<string, any> = {};
     let actionsCompleted = 0;
@@ -560,7 +560,7 @@ export class BrowserUseService {
    */
   private async executeAction(
     sessionId: string,
-    action: any,
+    action: unknown,
     _actionIndex: number,
   ): Promise<{
     success: boolean;
@@ -644,7 +644,7 @@ export class BrowserUseService {
   /**
    * Get or create browser session
    */
-  private async getOrCreateSession(config?: any): Promise<any> {
+  private async getOrCreateSession(config?: unknown): Promise<any> {
     // Try to reuse existing idle session
     const existingSessions = await this.sessionService.getAllSessions();
     const idleSession = existingSessions.find((s) => s.status === 'idle');
@@ -734,7 +734,7 @@ export class BrowserUseService {
               resolve({
                 success: false,
                 output: stdout,
-                error: stderr || `Process exited with code ${code}`,
+                _error: stderr || `Process exited with code ${code}`,
               });
             }
           });
@@ -749,7 +749,7 @@ export class BrowserUseService {
             resolve({
               success: false,
               output: '',
-              error: err.message,
+              _error: err.message,
             });
           });
         })
@@ -860,7 +860,7 @@ if __name__ == "__main__":
   private generateScreenshotScript(
     sessionId: string,
     filepath?: string,
-    config?: any,
+    config?: unknown,
   ): string {
     return `
 import asyncio
@@ -945,7 +945,7 @@ if __name__ == "__main__":
 `;
   }
 
-  private generateDomExtractionScript(sessionId: string, config?: any): string {
+  private generateDomExtractionScript(sessionId: string, config?: unknown): string {
     return this.generateExtractionScript(sessionId, config?.selector);
   }
 

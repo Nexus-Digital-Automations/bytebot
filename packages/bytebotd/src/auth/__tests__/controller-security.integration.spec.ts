@@ -256,7 +256,7 @@ describe('Controller Security Integration Tests', () => {
     app.use('/api/*', (req, res, next) => {
       const authHeader = req.headers.authorization;
 
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      if (!authHeader?.startsWith('Bearer ')) {
         return res.status(401).json({
           message: 'Authentication required',
           error: 'UNAUTHORIZED',

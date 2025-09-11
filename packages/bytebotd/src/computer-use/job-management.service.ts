@@ -248,7 +248,7 @@ export interface RetentionPolicy {
  */
 @Injectable()
 export class JobStorage implements JobStorageInterface {
-  private readonly logger = new Logger(JobStorage._name);
+  private readonly logger = new Logger(JobStorage.name);
   private readonly redis: Redis;
   private readonly encryptionKey: string;
   private readonly keyPrefix = 'bytebot:jobs:';
@@ -271,7 +271,7 @@ export class JobStorage implements JobStorageInterface {
     // Initialize encryption key for job data
     this.encryptionKey =
       this.configService.get('JOB_ENCRYPTION_KEY') ||
-      crypto
+      _crypto
         .createHash('sha256')
         .update('bytebot-job-encryption')
         .digest('hex');
@@ -316,12 +316,12 @@ export class JobStorage implements JobStorageInterface {
         ttl,
       });
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to save job`, {
+      this.logger.error(`[${operationId}] Failed to save job`, {
         jobId: job.jobId,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to save job ${job.jobId}: ${error instanceof Error ? _error.message : String(_error)}`,
+        `Failed to save job ${job.jobId}: ${_error instanceof Error ? _error.message : String(_error)}`,
       );
     }
   }
@@ -369,12 +369,12 @@ export class JobStorage implements JobStorageInterface {
       });
       return restoredJob;
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to retrieve job`, {
+      this.logger.error(`[${operationId}] Failed to retrieve job`, {
         jobId,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to retrieve job ${jobId}: ${error instanceof Error ? _error.message : String(_error)}`,
+        `Failed to retrieve job ${jobId}: ${_error instanceof Error ? _error.message : String(_error)}`,
       );
     }
   }
@@ -453,13 +453,13 @@ export class JobStorage implements JobStorageInterface {
         queuedTimeMs,
       });
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to update job status`, {
+      this.logger.error(`[${operationId}] Failed to update job status`, {
         jobId,
         status,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to update job ${jobId}: ${error instanceof Error ? _error.message : String(_error)}`,
+        `Failed to update job ${jobId}: ${_error instanceof Error ? _error.message : String(_error)}`,
       );
     }
   }
@@ -495,12 +495,12 @@ export class JobStorage implements JobStorageInterface {
 
       this.logger.log(`[${operationId}] Job deleted successfully`, { jobId });
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to delete job`, {
+      this.logger.error(`[${operationId}] Failed to delete job`, {
         jobId,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to delete job ${jobId}: ${error instanceof Error ? _error.message : String(_error)}`,
+        `Failed to delete job ${jobId}: ${_error instanceof Error ? _error.message : String(_error)}`,
       );
     }
   }
@@ -522,7 +522,7 @@ export class JobStorage implements JobStorageInterface {
       // Batch retrieve jobs for efficiency
       const batchSize = 100;
       for (let i = 0; i < jobIds.length; i += batchSize) {
-        const batch = jobIds.slice(_i, i + batchSize);
+        const batch = jobIds.slice(i, i + batchSize);
         const batchJobs = await Promise.all(
           batch.map(async (jobId) => {
             try {
@@ -532,7 +532,7 @@ export class JobStorage implements JobStorageInterface {
                 `Failed to retrieve job ${jobId}, removing from _index`,
                 {
                   error:
-                    error instanceof Error ? _error.message : String(_error),
+                    _error instanceof Error ? _error.message : String(_error),
                 },
               );
               // Clean up stale index entry
@@ -552,12 +552,12 @@ export class JobStorage implements JobStorageInterface {
 
       return jobs;
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to get jobs by status`, {
+      this.logger.error(`[${operationId}] Failed to get jobs by status`, {
         status,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to get jobs by status ${status}: ${error instanceof Error ? _error.message : String(_error)}`,
+        `Failed to get jobs by status ${status}: ${_error instanceof Error ? _error.message : String(_error)}`,
       );
     }
   }
@@ -584,7 +584,8 @@ export class JobStorage implements JobStorageInterface {
             this.logger.warn(
               `Failed to retrieve job ${jobId}, removing from priority _index`,
               {
-                error: error instanceof Error ? _error.message : String(_error),
+                error:
+                  _error instanceof Error ? _error.message : String(_error),
               },
             );
             // Clean up stale index entry
@@ -606,12 +607,12 @@ export class JobStorage implements JobStorageInterface {
 
       return validJobs;
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to get jobs by priority`, {
+      this.logger.error(`[${operationId}] Failed to get jobs by priority`, {
         priority,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to get jobs by priority ${priority}: ${error instanceof Error ? _error.message : String(_error)}`,
+        `Failed to get jobs by priority ${priority}: ${_error instanceof Error ? _error.message : String(_error)}`,
       );
     }
   }
@@ -655,12 +656,12 @@ export class JobStorage implements JobStorageInterface {
 
       return deletedCount;
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to cleanup expired jobs`, {
+      this.logger.error(`[${operationId}] Failed to cleanup expired jobs`, {
         olderThanMs,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to cleanup expired jobs: ${error instanceof Error ? _error.message : String(_error)}`,
+        `Failed to cleanup expired jobs: ${_error instanceof Error ? _error.message : String(_error)}`,
       );
     }
   }
@@ -671,7 +672,7 @@ export class JobStorage implements JobStorageInterface {
   private encryptData(data: string): string {
     try {
       const iv = _crypto.randomBytes(16); // 16 bytes IV for AES-256-GCM
-      const cipher = crypto.createCipheriv(
+      const cipher = _crypto.createCipheriv(
         'aes-256-gcm',
         Buffer.from(this.encryptionKey, 'hex').subarray(0, 32),
         iv,
@@ -684,8 +685,8 @@ export class JobStorage implements JobStorageInterface {
 
       return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
     } catch (_error) {
-      this.logger._error('Failed to encrypt job data', {
-        _error: _error instanceof Error ? _error.message : String(_error),
+      this.logger.error('Failed to encrypt job data', {
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error('Data encryption failed');
     }
@@ -705,7 +706,7 @@ export class JobStorage implements JobStorageInterface {
       const iv = Buffer.from(ivHex, 'hex');
       const authTag = Buffer.from(authTagHex, 'hex');
 
-      const decipher = crypto.createDecipheriv(
+      const decipher = _crypto.createDecipheriv(
         'aes-256-gcm',
         Buffer.from(this.encryptionKey, 'hex').subarray(0, 32),
         iv,
@@ -717,8 +718,8 @@ export class JobStorage implements JobStorageInterface {
 
       return decrypted;
     } catch (_error) {
-      this.logger._error('Failed to decrypt job data', {
-        _error: _error instanceof Error ? _error.message : String(_error),
+      this.logger.error('Failed to decrypt job data', {
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error('Data decryption failed');
     }
@@ -769,7 +770,7 @@ export class JobStorage implements JobStorageInterface {
 export class BackgroundWorker
   implements BackgroundWorkerInterface, OnModuleInit, OnModuleDestroy
 {
-  private readonly logger = new Logger(BackgroundWorker._name);
+  private readonly logger = new Logger(BackgroundWorker.name);
   private readonly workerId: string;
   private isRunning = false;
   private workerInterval?: NodeJS.Timeout;
@@ -825,9 +826,9 @@ export class BackgroundWorker
       try {
         await this.processNextJob();
       } catch (_error) {
-        this.logger._error('Error in worker loop', {
+        this.logger.error('Error in worker loop', {
           workerId: this.workerId,
-          _error: _error instanceof Error ? _error.message : String(_error),
+          error: _error instanceof Error ? _error.message : String(_error),
         });
       }
     }, intervalMs);
@@ -906,7 +907,7 @@ export class BackgroundWorker
 
       try {
         // Execute the computer action
-        const _result = await this.computerUseService.action(job.action);
+        const result = await this.computerUseService.action(job.action);
         const executionTime = Date.now() - startTime;
 
         // Update job with success result
@@ -989,9 +990,9 @@ export class BackgroundWorker
         this.updateStats(false, executionTime);
       }
     } catch (_error) {
-      this.logger._error(`[${operationId}] Error processing job`, {
+      this.logger.error(`[${operationId}] Error processing job`, {
         workerId: this.workerId,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
     }
   }
@@ -1065,7 +1066,7 @@ export class BackgroundWorker
    * Check if error is retryable
    */
   private isRetryableError(error: any): boolean {
-    if (_error instanceof Error) {
+    if (error instanceof Error) {
       // Network errors, temporary service unavailability, etc.
       const retryableMessages = [
         'ECONNRESET',
@@ -1077,7 +1078,7 @@ export class BackgroundWorker
       ];
 
       return retryableMessages.some((msg) =>
-        _error.message.toLowerCase().includes(msg.toLowerCase()),
+        error.message.toLowerCase().includes(msg.toLowerCase()),
       );
     }
 
@@ -1127,7 +1128,7 @@ export class BackgroundWorker
  */
 @Injectable()
 export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(JobCleanupManager._name);
+  private readonly logger = new Logger(JobCleanupManager.name);
   private cleanupInterval?: NodeJS.Timeout;
   private readonly config: CleanupConfig;
 
@@ -1181,8 +1182,8 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
       try {
         await this.performCleanup();
       } catch (_error) {
-        this.logger._error('Error in cleanup schedule', {
-          _error: _error instanceof Error ? _error.message : String(_error),
+        this.logger.error('Error in cleanup schedule', {
+          error: _error instanceof Error ? _error.message : String(_error),
         });
       }
     }, this.config.cleanupInterval);
@@ -1217,8 +1218,8 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
         maxAgeMs: this.config.maxJobAge,
       });
     } catch (_error) {
-      this.logger._error(`[${operationId}] Job cleanup failed`, {
-        error: error instanceof Error ? _error.message : String(_error),
+      this.logger.error(`[${operationId}] Job cleanup failed`, {
+        error: _error instanceof Error ? _error.message : String(_error),
       });
     }
   }
@@ -1231,7 +1232,7 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
  */
 @Injectable()
 export class JobManagementService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(JobManagementService._name);
+  private readonly logger = new Logger(JobManagementService.name);
 
   constructor(
     private readonly jobStorage: JobStorage,
@@ -1309,12 +1310,12 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
 
       return jobId;
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to create job`, {
+      this.logger.error(`[${operationId}] Failed to create job`, {
         action: action.action,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to create job: ${error instanceof Error ? _error.message : String(_error)}`,
+        `Failed to create job: ${_error instanceof Error ? _error.message : String(_error)}`,
       );
     }
   }
@@ -1337,12 +1338,12 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
 
       return job;
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to get job status`, {
+      this.logger.error(`[${operationId}] Failed to get job status`, {
         jobId,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to get job status: ${error instanceof Error ? _error.message : String(_error)}`,
+        `Failed to get job status: ${_error instanceof Error ? _error.message : String(_error)}`,
       );
     }
   }
@@ -1381,11 +1382,11 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
 
       return job.result!;
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to get job result`, {
+      this.logger.error(`[${operationId}] Failed to get job result`, {
         jobId,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
-      throw error; // Re-throw to preserve original error
+      throw _error; // Re-throw to preserve original error
     }
   }
 
@@ -1435,11 +1436,11 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
 
       this.logger.log(`[${operationId}] Job cancelled successfully`, { jobId });
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to cancel job`, {
+      this.logger.error(`[${operationId}] Failed to cancel job`, {
         jobId,
-        error: error instanceof Error ? _error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
-      throw error; // Re-throw to preserve original error
+      throw _error; // Re-throw to preserve original error
     }
   }
 
@@ -1514,11 +1515,11 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
 
       return stats;
     } catch (_error) {
-      this.logger._error(`[${operationId}] Failed to get queue statistics`, {
-        error: error instanceof Error ? _error.message : String(_error),
+      this.logger.error(`[${operationId}] Failed to get queue statistics`, {
+        error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to get queue statistics: ${error instanceof Error ? _error.message : String(_error)}`,
+        `Failed to get queue statistics: ${_error instanceof Error ? _error.message : String(_error)}`,
       );
     }
   }

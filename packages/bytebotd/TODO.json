@@ -190,6 +190,118 @@
       ]
     },
     {
+      "id": "error_1757571361166_dj644ya89",
+      "title": "Fix all ESLint violations in bytebotd test files",
+      "description": "Comprehensive cleanup of ESLint violations in all test files (*.spec.ts, *.test.ts) across bytebotd package - focus on unused variables, undefined references, import/mock violations while maintaining test integrity",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:16:01.166Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757571334564_1_general_ea030e10",
+      "started_at": "2025-09-11T06:16:34.932Z",
+      "claimed_by": "development_session_1757571334564_1_general_ea030e10",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757571334564_1_general_ea030e10",
+          "role": "primary",
+          "assignedAt": "2025-09-11T06:16:34.932Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757571361093_bgigkrbyw",
+      "title": "Fix TypeScript unsafe assignments and type errors in bytebotd package",
+      "description": "Scan for and fix all @typescript-eslint/no-unsafe-* violations including unsafe member access, unsafe assignments, unsafe calls. Replace any types with proper interfaces, fix unsafe object property access, resolve unsafe function calls, and add proper type guards where needed.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:16:01.093Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757571335326_1_general_eff655ef",
+      "started_at": "2025-09-11T06:16:26.658Z",
+      "claimed_by": "development_session_1757571335326_1_general_eff655ef",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757571335326_1_general_eff655ef",
+          "role": "primary",
+          "assignedAt": "2025-09-11T06:16:26.658Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757571360192_4lp1qwsc5",
+      "title": "Fix ESLint violations in bytebotd services module",
+      "description": "Comprehensively resolve all ESLint violations in bytebot/packages/bytebotd/src/services/ directory including undefined variable references, naming mismatches, unsafe TypeScript assignments, performance warnings, and cross-platform compatibility issues",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:16:00.192Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757571333880_1_general_0e229069",
+      "started_at": "2025-09-11T06:16:26.683Z",
+      "claimed_by": "development_session_1757571333880_1_general_0e229069",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757571333880_1_general_0e229069",
+          "role": "primary",
+          "assignedAt": "2025-09-11T06:16:26.683Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757571360157_2tt55vhmg",
+      "title": "Fix all ESLint violations in bytebotd computer-use module",
+      "description": "TARGET: bytebot/packages/bytebotd/src/computer-use/ - Fix no-undef violations, unused variables (underscore prefix), TypeScript unsafe assignments, and CUA integration issues. Focus on computer-use.controller.ts, computer-use.service.ts, async-job.service.ts, job-management.service.ts, and all DTO/validation files.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:16:00.157Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757571334304_1_general_b9f9f3f6",
+      "started_at": "2025-09-11T06:16:26.704Z",
+      "claimed_by": "development_session_1757571334304_1_general_b9f9f3f6",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757571334304_1_general_b9f9f3f6",
+          "role": "primary",
+          "assignedAt": "2025-09-11T06:16:26.704Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
       "id": "error_1757569962789_z7asq9vry",
       "title": "Fix Critical TypeScript Build Errors in Bytebotd Package",
       "description": "Fix all variable naming conflicts and undefined variable references causing TypeScript compilation failures in bytebotd package",
@@ -2046,6 +2158,132 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-11T05:46:05.792Z",
       "sessionId": "session_1757569565788",
+      "metadata": {}
+    },
+    "development_session_1757571333880_1_general_0e229069": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:15:33.883Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:15:33.883Z",
+      "sessionId": "session_1757571333880",
+      "metadata": {}
+    },
+    "development_session_1757571334304_1_general_b9f9f3f6": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:15:34.305Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:15:34.305Z",
+      "sessionId": "session_1757571334304",
+      "metadata": {}
+    },
+    "development_session_1757571334347_1_general_d42c3eac": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:15:34.349Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:15:34.349Z",
+      "sessionId": "session_1757571334347",
+      "metadata": {}
+    },
+    "development_session_1757571334564_1_general_ea030e10": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:15:34.565Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:15:34.565Z",
+      "sessionId": "session_1757571334564",
+      "metadata": {}
+    },
+    "development_session_1757571335078_1_general_eb595bbb": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:15:35.082Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:15:35.082Z",
+      "sessionId": "session_1757571335078",
+      "metadata": {}
+    },
+    "development_session_1757571335326_1_general_eff655ef": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:15:35.328Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:15:35.328Z",
+      "sessionId": "session_1757571335326",
       "metadata": {}
     }
   },

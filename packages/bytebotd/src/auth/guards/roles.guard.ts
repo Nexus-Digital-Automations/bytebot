@@ -75,7 +75,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
  */
 @Injectable()
 export class RolesGuard implements CanActivate {
-  private readonly logger = new Logger(RolesGuard._name);
+  private readonly logger = new Logger(RolesGuard.name);
 
   constructor(private readonly reflector: Reflector) {}
 

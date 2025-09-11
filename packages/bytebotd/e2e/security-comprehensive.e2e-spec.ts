@@ -19,14 +19,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { JwtService as _JwtService } from '@nestjs/jwt';
+import { ConfigService as _ConfigService } from '@nestjs/config';
 import { UserRole, Permission } from '@bytebot/shared';
 
 /**
  * Comprehensive E2E Security Testing Module
  */
-class SecurityE2ETestModule {
+class _SecurityE2ETestModule {
   static forTesting() {
     return {
       module: SecurityE2ETestModule,
@@ -211,7 +211,7 @@ class SecurityE2EJwtService {
       }
 
       return decodedPayload;
-    } catch (error) {
+    } catch (_error) {
       throw new Error('Invalid token');
     }
   }
@@ -576,7 +576,7 @@ describe('Security E2E - Comprehensive Testing', () => {
     authService = moduleRef.get<SecurityE2EAuthService>(SecurityE2EAuthService);
     jwtService = moduleRef.get<SecurityE2EJwtService>(SecurityE2EJwtService);
 
-    const userService = moduleRef.get<SecurityE2EUserService>(
+    const _userService = moduleRef.get<SecurityE2EUserService>(
       SecurityE2EUserService,
     );
 
@@ -673,7 +673,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         const decoded = jwtService.verify(token);
         req.user = decoded;
         next();
-      } catch (error) {
+      } catch (_error) {
         securityMonitor.trackFailedAuthentication(
           'token_invalid',
           req.ip || 'unknown',

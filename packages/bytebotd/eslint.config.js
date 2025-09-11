@@ -32,6 +32,8 @@ module.exports = [
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: 'module',
+        project: './tsconfig.json',
+        tsconfigRootDir: __dirname,
       },
       globals: {
         // Node.js globals
@@ -72,8 +74,15 @@ module.exports = [
       // Disable base JS no-unused-vars in favor of TypeScript version
       'no-unused-vars': 'off',
 
-      // Relaxed TypeScript rules for better performance
-      '@typescript-eslint/no-explicit-any': 'off',
+      // Strict TypeScript rules for type safety and unsafe assignment detection
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unsafe-assignment': 'error',
+      '@typescript-eslint/no-unsafe-member-access': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+      '@typescript-eslint/no-unsafe-return': 'error',
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/restrict-template-expressions': 'error',
+      '@typescript-eslint/restrict-plus-operands': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -81,7 +90,11 @@ module.exports = [
           varsIgnorePattern: '^_',
           caughtErrorsIgnorePattern: '^_',
         },
-      ], // Enabled for cleanup with underscore prefix ignore
+      ],
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      '@typescript-eslint/prefer-optional-chain': 'error',
+      '@typescript-eslint/no-non-null-assertion': 'error',
+      '@typescript-eslint/no-non-null-asserted-optional-chain': 'error',
 
       // General code quality
       'prefer-const': 'error',
