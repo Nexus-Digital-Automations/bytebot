@@ -11,8 +11,8 @@ import {
   ClickMouseAction,
   ComputerAction,
   DragMouseAction,
-  _ScrollAction,
-  _TypeKeysAction,
+  ScrollAction,
+  TypeKeysAction,
   TypeTextAction,
 } from '@bytebot/shared';
 import { keyInfoMap } from './input-tracking.helpers';
@@ -21,7 +21,7 @@ import { InputTrackingGateway } from './input-tracking.gateway';
 
 @Injectable()
 export class InputTrackingService implements OnModuleDestroy {
-  private readonly logger = new Logger(InputTrackingService._name);
+  private readonly logger = new Logger(InputTrackingService.name);
 
   private isTracking = false;
 
@@ -121,11 +121,11 @@ export class InputTrackingService implements OnModuleDestroy {
                   image: string;
                 }>
               )();
-              this.screenshot = result;
+              this.screenshot = _result;
             } catch (_error) {
               const errorMessage =
-                _error instanceof Error ? __error.message : 'Unknown _error';
-              this.logger._error(
+                _error instanceof Error ? _error.message : 'Unknown _error';
+              this.logger.error(
                 'Failed to take screenshot for action',
                 errorMessage,
               );
