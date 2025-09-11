@@ -26,6 +26,7 @@ import {
   MEMORY_USAGE_THRESHOLD_MB,
   PAGINATION_DEFAULT_PAGE_SIZE,
   PERFORMANCE_TEST_TIMEOUT_MS,
+  TEST_TASK_COUNT_TINY,
   TEST_TIMESTAMP_INCREMENT_MS,
   BYTES_PER_KB as _BYTES_PER_KB,
   TEST_TASK_BATCH_SIZE as _TEST_TASK_BATCH_SIZE,
@@ -689,7 +690,9 @@ describe("TaskList Component", () => {
 
       rerender(<TaskList {...defaultProps} tasks={[...mockTasks, newTask]} />);
 
-      expect(screen.getAllByTestId(/task-item-/)).toHaveLength(4);
+      expect(screen.getAllByTestId(/task-item-/)).toHaveLength(
+        TEST_TASK_COUNT_MEDIUM,
+      );
       expect(screen.getByTestId("task-item-task-4")).toBeInTheDocument();
     });
 
@@ -698,11 +701,15 @@ describe("TaskList Component", () => {
         <TaskList {...defaultProps} />,
       );
 
-      expect(screen.getAllByTestId(/task-item-/)).toHaveLength(3);
+      expect(screen.getAllByTestId(/task-item-/)).toHaveLength(
+        TEST_TASK_COUNT_SMALL,
+      );
 
       rerender(<TaskList {...defaultProps} tasks={mockTasks.slice(0, 2)} />);
 
-      expect(screen.getAllByTestId(/task-item-/)).toHaveLength(2);
+      expect(screen.getAllByTestId(/task-item-/)).toHaveLength(
+        TEST_TASK_COUNT_TINY,
+      );
       expect(screen.queryByTestId("task-item-task-3")).not.toBeInTheDocument();
     });
   });

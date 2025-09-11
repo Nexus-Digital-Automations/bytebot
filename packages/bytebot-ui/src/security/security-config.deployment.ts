@@ -261,7 +261,7 @@ export class BytebotUISecurityDeployment {
     app: NestJSApp,
     configService: ConfigService,
   ): Promise<void> {
-    const environment = configService.get("NODE_ENV", "development");
+    const environment = configService.get<string>("NODE_ENV", "development");
 
     try {
       // Apply global validation pipe with standard security
@@ -357,16 +357,19 @@ export class BytebotUISecurityDeployment {
     }
 
     // Check Next.js configuration
-    const nextConfig = configService.get("NEXT_CONFIG");
-    if (!nextConfig && environment === "production") {
+    const nextConfig = configService.get<unknown>("NEXT_CONFIG");
+    if (nextConfig == null && environment === "production") {
       validationResults.warnings.push(
         "Next.js configuration not found - using defaults",
       );
     }
 
     // Check static file serving configuration
-    const staticPath = configService.get("STATIC_FILES_PATH", "./public");
-    if (environment === "production" && !staticPath) {
+    const staticPath = configService.get<string>(
+      "STATIC_FILES_PATH",
+      "./public",
+    );
+    if (environment === "production" && staticPath == null) {
       validationResults.errors.push(
         "Static files path not configured for production",
       );
@@ -374,23 +377,23 @@ export class BytebotUISecurityDeployment {
     }
 
     // Check Redis configuration for session storage
-    const redisHost = configService.get("REDIS_HOST");
-    if (!redisHost && environment === "production") {
+    const redisHost = configService.get<string>("REDIS_HOST");
+    if (redisHost == null && environment === "production") {
       validationResults.warnings.push(
         "Redis not configured - sessions and caching will use fallbacks",
       );
     }
 
     // Check API proxy configuration
-    const apiProxyUrl = configService.get("API_PROXY_URL");
-    if (!apiProxyUrl) {
+    const apiProxyUrl = configService.get<string>("API_PROXY_URL");
+    if (apiProxyUrl == null) {
       validationResults.warnings.push(
         "API proxy URL not configured - direct API calls will be used",
       );
     }
 
     // Check CSP configuration
-    const cspEnabled = configService.get("security.csp.enabled", true);
+    const cspEnabled = configService.get<boolean>("security.csp.enabled", true);
     if (!cspEnabled && environment === "production") {
       validationResults.errors.push(
         "Content Security Policy is disabled in production",
@@ -407,7 +410,7 @@ export class BytebotUISecurityDeployment {
   static configureNextJsSecurity(
     configService: ConfigService,
   ): Record<string, unknown> {
-    const environment = configService.get("NODE_ENV", "development");
+    const environment = configService.get<string>("NODE_ENV", "development");
 
     return {
       // Security headers for Next.js
