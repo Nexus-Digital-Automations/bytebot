@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { VirtualDesktopStatus } from "@/components/VirtualDesktopStatusHeader";
+import { logError } from "@/utils/logger";
 
 export default function TaskPage(): React.JSX.Element {
   const params = useParams();
@@ -93,9 +94,11 @@ export default function TaskPage(): React.JSX.Element {
   useEffect(() => {
     if (taskInactive && hasMoreMessages && !isLoadingMoreMessages) {
       loadMoreMessages().catch((error: unknown) => {
-        if (process.env.NODE_ENV === "development") {
-          console.error("Failed to load more messages:", error);
-        }
+        logError(
+          "Failed to load more messages during inactive task auto-load",
+          error,
+          "TaskPage",
+        );
       });
     }
   }, [
@@ -167,9 +170,7 @@ export default function TaskPage(): React.JSX.Element {
                 <Button
                   onClick={() => {
                     handleTakeOverTask().catch((error: unknown) => {
-                      if (process.env.NODE_ENV === "development") {
-                        console.error("Take over task error:", error);
-                      }
+                      logError("Failed to take over task", error, "TaskPage");
                     });
                   }}
                   variant="default"
@@ -188,9 +189,7 @@ export default function TaskPage(): React.JSX.Element {
                 <Button
                   onClick={() => {
                     handleResumeTask().catch((error: unknown) => {
-                      if (process.env.NODE_ENV === "development") {
-                        console.error("Resume task error:", error);
-                      }
+                      logError("Failed to resume task", error, "TaskPage");
                     });
                   }}
                   variant="default"
@@ -213,9 +212,7 @@ export default function TaskPage(): React.JSX.Element {
                     <DropdownMenuItem
                       onClick={() => {
                         handleCancelTask().catch((error: unknown) => {
-                          if (process.env.NODE_ENV === "development") {
-                            console.error("Cancel task error:", error);
-                          }
+                          logError("Failed to cancel task", error, "TaskPage");
                         });
                       }}
                       className="text-red-600 focus:bg-red-50"

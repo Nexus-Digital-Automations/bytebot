@@ -18,7 +18,9 @@ export const createMockPagesRouter = (
   overrides: Partial<NextRouter> = {},
 ): NextRouter => {
   const mockFn = (): Promise<boolean> => Promise.resolve(true);
-  const mockVoidFn = (): void => {};
+  const mockVoidFn = (): void => {
+    // Mock function for Next.js Pages Router - no operation needed in tests
+  };
 
   const mockRouter: NextRouter = {
     basePath: "",
@@ -54,7 +56,9 @@ export const createMockPagesRouter = (
 export const createMockAppRouter = (
   overrides: Partial<AppRouterInstance> = {},
 ): AppRouterInstance => {
-  const mockVoidFn = (): void => {};
+  const mockVoidFn = (): void => {
+    // Mock function for Next.js App Router - no operation needed in tests
+  };
 
   const mockRouter: AppRouterInstance = {
     push: mockVoidFn,

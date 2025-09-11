@@ -6,7 +6,7 @@ interface TextContentProps {
   block: TextContentBlock;
 }
 
-export function TextContent({ block }: TextContentProps) {
+export function TextContent({ block }: TextContentProps): React.JSX.Element {
   return (
     <div className="mb-3">
       <div className="text-bytebot-bronze-dark-8 prose prose-sm max-w-none text-sm">
@@ -46,19 +46,13 @@ export function TextContent({ block }: TextContentProps) {
               <p className="mb-2 leading-relaxed">{children}</p>
             ),
             ul: ({ children }) => (
-              <ul className="mb-2 ml-4 list-disc">
-                {children}
-              </ul>
+              <ul className="mb-2 ml-4 list-disc">{children}</ul>
             ),
             ol: ({ children }) => (
-              <ol className="mb-2 ml-4 list-decimal">
-                {children}
-              </ol>
+              <ol className="mb-2 ml-4 list-decimal">{children}</ol>
             ),
             li: ({ children }) => (
-              <li className="mb-1 text-sm leading-relaxed">
-                {children}
-              </li>
+              <li className="mb-1 text-sm leading-relaxed">{children}</li>
             ),
             blockquote: ({ children }) => (
               <blockquote className="border-bytebot-bronze-light-7 text-bytebot-bronze-dark-7 mb-2 border-l-4 pl-4 italic">
@@ -88,9 +82,7 @@ export function TextContent({ block }: TextContentProps) {
               </strong>
             ),
             em: ({ children }) => (
-              <em className="text-bytebot-bronze-dark-8 italic">
-                {children}
-              </em>
+              <em className="text-bytebot-bronze-dark-8 italic">{children}</em>
             ),
             a: ({ children, href }) => (
               <a

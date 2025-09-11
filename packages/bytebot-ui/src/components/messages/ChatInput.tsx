@@ -8,6 +8,14 @@ import {
 } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
 import { FileWithBase64 } from "@/types";
+import { logError } from "@/utils/logger";
+import {
+  BYTES_PER_MB,
+  MAX_FILE_SIZE_MB,
+  MAX_FILE_UPLOAD_COUNT,
+  TEXTAREA_HEIGHT_PADDING_PX,
+  TEXTAREA_LINE_HEIGHT_PX,
+} from "@/constants/ui";
 
 interface ChatInputProps {
   input: string;
@@ -33,8 +41,8 @@ export function ChatInput({
   const [selectedFiles, setSelectedFiles] = useState<FileWithBase64[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-  const MAX_FILES = 5;
-  const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB per file in bytes
+  const MAX_FILES = MAX_FILE_UPLOAD_COUNT;
+  const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * BYTES_PER_MB; // 30MB per file in bytes
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
@@ -74,18 +82,23 @@ export function ChatInput({
       return;
     }
 
-    const newFiles: FileWithBase64[] = [];
+    // Convert all files to base64 in parallel for better performance
+    const fileConversionPromises = files.map(
+      async (file): Promise<FileWithBase64> => {
+        const base64 = await convertToBase64(file);
 
-    for (const file of files) {
-      const base64 = await convertToBase64(file);
+        return {
+          name: file.name,
+          base64: base64 as `data:${string};base64,${string}`,
+          type: file.type as `${string}/${string}`,
+          size: file.size,
+        };
+      },
+    );
 
-      newFiles.push({
-        name: file.name,
-        base64: base64 as `data:${string};base64,${string}`,
-        type: file.type as `${string}/${string}`,
-        size: file.size,
-      });
-    }
+    const newFiles: FileWithBase64[] = await Promise.all(
+      fileConversionPromises,
+    );
 
     const updatedFiles = [...selectedFiles, ...newFiles];
     setSelectedFiles(updatedFiles);
@@ -102,10 +115,10 @@ export function ChatInput({
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => {
+      reader.onload = (): void => {
         resolve(reader.result as string);
       };
-      reader.onerror = (error) => {
+      reader.onerror = (error): void => {
         reject(error);
       };
     });
@@ -146,8 +159,8 @@ export function ChatInput({
     textarea.style.height = "auto";
 
     // Calculate minimum height based on minLines
-    const lineHeight = 24; // approximate line height in pixels
-    const minHeight = lineHeight * minLines + 12;
+    const lineHeight = TEXTAREA_LINE_HEIGHT_PX; // approximate line height in pixels
+    const minHeight = lineHeight * minLines + TEXTAREA_HEIGHT_PADDING_PX;
 
     // Set height to scrollHeight or minHeight, whichever is larger
     const newHeight = Math.max(textarea.scrollHeight, minHeight);
@@ -166,7 +179,7 @@ export function ChatInput({
         multiple
         onChange={(e) => {
           handleFileSelect(e).catch((error: unknown) => {
-            console.error("File selection error:", error);
+            logError("Failed to process file selection", error, "ChatInput");
           });
         }}
         className="hidden"

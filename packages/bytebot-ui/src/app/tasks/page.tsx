@@ -10,6 +10,7 @@ import { fetchTaskCounts, fetchTasks } from "@/utils/taskUtils";
 import { Task } from "@/types";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { logError } from "@/utils/logger";
 
 function TasksPageContent(): React.JSX.Element {
   const router = useRouter();
@@ -75,9 +76,7 @@ function TasksPageContent(): React.JSX.Element {
     };
 
     loadTasks().catch((error: unknown) => {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to load tasks:", error);
-      }
+      logError("Failed to load tasks for page", error, "TasksPage");
     });
   }, [currentPage, activeTab]);
 
@@ -93,9 +92,7 @@ function TasksPageContent(): React.JSX.Element {
     };
 
     loadTaskCounts().catch((error: unknown) => {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to load task counts:", error);
-      }
+      logError("Failed to load task counts", error, "TasksPage");
     });
   }, []);
 

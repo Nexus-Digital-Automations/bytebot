@@ -5,6 +5,7 @@ import { TextShimmer } from "../ui/text-shimmer";
 import { MessageAvatar } from "./MessageAvatar";
 import { Loader } from "../ui/loader";
 import { ChatInput } from "./ChatInput";
+import { logError } from "@/utils/logger";
 
 interface ChatContainerProps {
   scrollRef?: React.RefObject<HTMLDivElement | null>;
@@ -59,7 +60,11 @@ export function ChatContainer({
       !isLoadingMoreMessages
     ) {
       loadMoreMessages().catch((error: unknown) => {
-        console.error("Failed to load more messages:", error);
+        logError(
+          "Failed to load more messages via infinite scroll",
+          error,
+          "ChatContainer",
+        );
       });
     }
   }, [scrollRef, loadMoreMessages, hasMoreMessages, isLoadingMoreMessages]);
@@ -154,7 +159,11 @@ export function ChatContainer({
                     onInputChange={setInput}
                     onSend={() => {
                       handleAddMessage().catch((error: unknown) => {
-                        console.error("Failed to add message:", error);
+                        logError(
+                          "Failed to add message from chat input",
+                          error,
+                          "ChatContainer",
+                        );
                       });
                     }}
                     minLines={1}

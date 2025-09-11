@@ -201,11 +201,12 @@ describe("ChatContainer Component", () => {
     });
 
     it("applies correct CSS classes for styling", () => {
-      const { container } = TestUtils.renderComponent(
+      const renderResult = TestUtils.renderComponent(
         <ChatContainer {...defaultProps} />,
       );
+      const { container } = renderResult;
 
-      const chatContainer = container.firstChild as HTMLElement;
+      const chatContainer = container.firstChild as HTMLElement | null;
       expect(chatContainer).toHaveClass(
         "bg-bytebot-bronze-light-3",
         "flex",
@@ -532,12 +533,14 @@ describe("ChatContainer Component", () => {
 
   describe("Performance and Memory", () => {
     it("renders within performance threshold", () => {
-      const renderFunction = () =>
-        TestUtils.renderComponent(<ChatContainer {...defaultProps} />);
+      const renderFunction: () => ReturnType<
+        typeof TestUtils.renderComponent
+      > = () => TestUtils.renderComponent(<ChatContainer {...defaultProps} />);
 
       // Performance test - ensure render completes without errors
       expect(renderFunction).toBeDefined();
-      const { container } = renderFunction();
+      const renderResult = renderFunction();
+      const { container } = renderResult;
       expect(container).toBeInTheDocument();
     });
 
@@ -559,11 +562,12 @@ describe("ChatContainer Component", () => {
         }),
       );
 
-      const { renderTime } = TestUtils.renderComponent(
+      const renderResult = TestUtils.renderComponent(
         <ChatContainer {...defaultProps} groupedMessages={largeMessageList} />,
       );
+      const { renderTime } = renderResult;
 
-      expect(renderTime).toBeLessThan(200); // Should render large lists efficiently
+      expect(renderTime ?? 0).toBeLessThan(200); // Should render large lists efficiently
     });
 
     it("cleans up scroll event listeners properly", () => {
@@ -576,9 +580,10 @@ describe("ChatContainer Component", () => {
         current: mockElement,
       };
 
-      const { unmount } = TestUtils.renderComponent(
+      const renderResult = TestUtils.renderComponent(
         <ChatContainer {...defaultProps} scrollRef={mockContainer} />,
       );
+      const { unmount } = renderResult;
 
       unmount();
 
@@ -696,9 +701,10 @@ describe("ChatContainer Component", () => {
 
   describe("Integration with WebSocket Events", () => {
     it("handles real-time message updates correctly", () => {
-      const { rerender } = TestUtils.renderComponent(
+      const renderResult = TestUtils.renderComponent(
         <ChatContainer {...defaultProps} />,
       );
+      const { rerender } = renderResult;
 
       // Simulate new message arriving
       const updatedMessages: GroupedMessages[] = [
@@ -727,9 +733,10 @@ describe("ChatContainer Component", () => {
     });
 
     it("handles task status updates correctly", () => {
-      const { rerender } = TestUtils.renderComponent(
+      const renderResult = TestUtils.renderComponent(
         <ChatContainer {...defaultProps} taskStatus={TaskStatus.RUNNING} />,
       );
+      const { rerender } = renderResult;
 
       expect(screen.getByTestId("chat-input")).toBeInTheDocument();
 

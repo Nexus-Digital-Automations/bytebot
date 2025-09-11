@@ -80,7 +80,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         </div>
       )}
 
-      {(() => {
+      {((): React.JSX.Element => {
         if (isLoading) {
           return (
             <div className="p-4 text-center">

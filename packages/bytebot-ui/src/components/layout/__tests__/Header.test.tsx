@@ -18,6 +18,12 @@ import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import { Header } from "../Header";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
+import {
+  BYTES_PER_MB,
+  MAX_MEMORY_DELTA_MB,
+  MEMORY_LEAK_TEST_ITERATIONS,
+  PERFORMANCE_TEST_ITERATIONS,
+} from "@/constants/ui";
 // Import types only - actual functions are mocked below
 // import { useSession, signOut } from "next-auth/react";
 
@@ -190,9 +196,10 @@ describe("Header Component", () => {
     });
 
     it("applies correct CSS classes", () => {
-      const { container } = TestUtils.renderComponent(<Header />);
+      const renderResult = TestUtils.renderComponent(<Header />);
+      const { container } = renderResult;
 
-      const header = container.querySelector("header");
+      const header = container.querySelector("header") as HTMLElement | null;
       expect(header).toHaveClass("header", "sticky", "top-0");
     });
 
@@ -522,7 +529,7 @@ describe("Header Component", () => {
         ]);
         const renderResult = renderResults[0];
 
-        if (renderResult) {
+        if (renderResult != null) {
           // Should render without errors across all breakpoints
           expect(screen.getByRole("banner")).toBeInTheDocument();
           renderResult.unmount();
@@ -538,7 +545,8 @@ describe("Header Component", () => {
         value: 1024,
       });
 
-      const { rerender } = TestUtils.renderComponent(<Header />);
+      const renderResult = TestUtils.renderComponent(<Header />);
+      const { rerender } = renderResult;
 
       expect(screen.queryByTestId("menu-icon")).not.toBeInTheDocument();
       expect(screen.getByText("Tasks")).toBeInTheDocument();
@@ -642,7 +650,9 @@ describe("Header Component", () => {
 
   describe("Performance and Memory", () => {
     it("renders within performance threshold", () => {
-      const renderFunction = () => TestUtils.renderComponent(<Header />);
+      const renderFunction: () => ReturnType<
+        typeof TestUtils.renderComponent
+      > = () => TestUtils.renderComponent(<Header />);
 
       // Performance test - ensure render time is reasonable
       expect(renderFunction).toBeDefined();
@@ -651,15 +661,16 @@ describe("Header Component", () => {
     it("does not cause memory leaks on theme changes", () => {
       const initialMemory = process.memoryUsage();
 
-      for (let i = 0; i < 100; i++) {
-        const { unmount } = TestUtils.renderComponent(<Header />);
+      for (let i = 0; i < MEMORY_LEAK_TEST_ITERATIONS; i++) {
+        const renderResult = TestUtils.renderComponent(<Header />);
+        const { unmount } = renderResult;
         unmount();
       }
 
       const finalMemory = process.memoryUsage();
       const memoryDelta = finalMemory.heapUsed - initialMemory.heapUsed;
 
-      expect(memoryDelta).toBeLessThan(10 * 1024 * 1024);
+      expect(memoryDelta).toBeLessThan(MAX_MEMORY_DELTA_MB * BYTES_PER_MB);
     });
 
     it("efficiently renders header without performance issues", async () => {
@@ -671,9 +682,18 @@ describe("Header Component", () => {
       const homeLink = screen.getByText("Home");
       const tasksLink = screen.getByText("Tasks");
 
-      for (let i = 0; i < 5; i++) {
-        await user.hover(homeLink);
-        await user.hover(tasksLink);
+      // Create array of sequential hover operations and execute them
+      const hoverOperations = Array.from(
+        { length: PERFORMANCE_TEST_ITERATIONS },
+        (_, i) => async (): Promise<void> => {
+          await user.hover(homeLink);
+          await user.hover(tasksLink);
+        },
+      );
+
+      // Execute all hover operations sequentially
+      for (const operation of hoverOperations) {
+        await operation();
       }
 
       // Should not cause performance issues

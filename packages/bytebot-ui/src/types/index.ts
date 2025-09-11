@@ -1,4 +1,5 @@
 import { MessageContentBlock } from "@bytebot/shared";
+import { BYTES_PER_MB, MAX_TYPE_VALIDATION_FILE_SIZE_MB } from "@/constants/ui";
 
 export enum Role {
   USER = "USER",
@@ -60,7 +61,7 @@ export interface User {
 /**
  * Maximum file size in bytes (100MB)
  */
-const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
+const MAX_FILE_SIZE_BYTES = MAX_TYPE_VALIDATION_FILE_SIZE_MB * BYTES_PER_MB;
 
 /**
  * Enhanced file upload interface with comprehensive type safety and validation

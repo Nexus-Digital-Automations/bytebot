@@ -24,33 +24,55 @@ process.env.NEXTAUTH_SECRET = "test-nextauth-secret-for-testing";
 // Mock global objects commonly used in browser environment
 Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value (query: string) {
+  value(query: string): MediaQueryList {
     return {
       matches: false,
       media: query,
       onchange: null,
-      addListener () {}, // Deprecated
-      removeListener () {}, // Deprecated
-      addEventListener () {},
-      removeEventListener () {},
-      dispatchEvent () {},
-    };
+      addListener(): void {
+        // Deprecated MediaQueryList method - no operation needed in tests
+      }, // Deprecated
+      removeListener(): void {
+        // Deprecated MediaQueryList method - no operation needed in tests
+      }, // Deprecated
+      addEventListener(): void {
+        // MediaQueryList addEventListener mock - no operation needed in tests
+      },
+      removeEventListener(): void {
+        // MediaQueryList removeEventListener mock - no operation needed in tests
+      },
+      dispatchEvent(): boolean {
+        return false;
+      },
+    } as MediaQueryList;
   },
 });
 
 // Mock ResizeObserver
 (global as { ResizeObserver?: unknown }).ResizeObserver = class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  observe(): void {
+    // ResizeObserver observe mock - no operation needed in tests
+  }
+  unobserve(): void {
+    // ResizeObserver unobserve mock - no operation needed in tests
+  }
+  disconnect(): void {
+    // ResizeObserver disconnect mock - no operation needed in tests
+  }
 };
 
 // Mock IntersectionObserver
 (global as { IntersectionObserver?: unknown }).IntersectionObserver =
   class IntersectionObserver {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
+    observe(): void {
+      // IntersectionObserver observe mock - no operation needed in tests
+    }
+    unobserve(): void {
+      // IntersectionObserver unobserve mock - no operation needed in tests
+    }
+    disconnect(): void {
+      // IntersectionObserver disconnect mock - no operation needed in tests
+    }
     root = null;
     rootMargin = "";
     thresholds: number[] = [];
@@ -58,10 +80,18 @@ Object.defineProperty(window, "matchMedia", {
 
 // Mock WebSocket for Socket.io testing
 class MockWebSocket {
-  close() {}
-  send() {}
-  addEventListener() {}
-  removeEventListener() {}
+  close(): void {
+    // WebSocket close mock - no operation needed in tests
+  }
+  send(): void {
+    // WebSocket send mock - no operation needed in tests
+  }
+  addEventListener(): void {
+    // WebSocket addEventListener mock - no operation needed in tests
+  }
+  removeEventListener(): void {
+    // WebSocket removeEventListener mock - no operation needed in tests
+  }
 }
 (global as { WebSocket?: unknown }).WebSocket = MockWebSocket;
 

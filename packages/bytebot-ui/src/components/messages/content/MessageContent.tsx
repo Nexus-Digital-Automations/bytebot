@@ -20,7 +20,7 @@ interface MessageContentProps {
 export function MessageContent({
   content,
   isTakeOver = false,
-}: MessageContentProps) {
+}: MessageContentProps): React.JSX.Element | null {
   // Filter content blocks and check if any visible content remains
   const visibleBlocks = content.filter((block) => {
     // Filter logic from the original code

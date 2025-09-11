@@ -2,6 +2,174 @@
   "project": "unknown",
   "tasks": [
     {
+      "id": "error_1757576391901_pwfa8pse8",
+      "title": "Remove console statements and implement proper logging infrastructure",
+      "description": "Replace ALL console.log, console.error, console.warn statements with proper logging service in 4 specific files: /src/app/tasks/[id]/page.tsx (4 violations on lines 97,171,192,217), /src/app/tasks/page.tsx (2 violations on lines 79,97), /src/components/messages/ChatContainer.tsx (2 violations on lines 62,157), /src/components/messages/ChatInput.tsx (1 violation on line 169). Create structured logging service and maintain debugging functionality while achieving zero no-console ESLint violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:39:51.901Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757576333518_1_general_aa672b94",
+      "started_at": "2025-09-11T07:40:09.577Z",
+      "claimed_by": "development_session_1757576333518_1_general_aa672b94",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757576333518_1_general_aa672b94",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:40:09.577Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757576361177_p95x0ixqf",
+      "title": "Fix TypeScript type safety violations in bytebot-ui package",
+      "description": "Fix ALL TypeScript unsafe operations, assignments, calls, and member access violations in bytebot-ui package. Target violations: unsafe assignments, unsafe calls, unsafe member access, unsafe returns, strict boolean expressions. Primary files: Header.test.tsx, messages test files, and other TypeScript strict violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:39:21.177Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757576333332_1_general_e95cb1a2",
+      "started_at": "2025-09-11T07:39:40.131Z",
+      "claimed_by": "development_session_1757576333332_1_general_e95cb1a2",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757576333332_1_general_e95cb1a2",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:39:40.131Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757576358429_lj67sfynf",
+      "title": "Extract magic numbers into named constants to resolve no-magic-numbers ESLint violations",
+      "description": "Extract ALL magic numbers from ChatInput.tsx, types/index.ts, Header.test.tsx and other files into properly named constants with logical grouping (UI_CONSTANTS, FILE_CONSTANTS, etc.)",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:39:18.429Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757576334966_1_general_d974c943",
+      "started_at": "2025-09-11T07:39:37.054Z",
+      "claimed_by": "development_session_1757576334966_1_general_d974c943",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757576334966_1_general_d974c943",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:39:37.054Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757576358312_k3a79sbns",
+      "title": "Add explicit return type annotations to all functions in bytebot-ui package",
+      "description": "Add explicit TypeScript return type annotations to ALL functions missing them across the entire bytebot-ui package to resolve @typescript-eslint/explicit-function-return-type violations. Process src/ directory systematically and handle arrow functions, method signatures, and callback functions.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:39:18.313Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757576333026_1_general_bc384621",
+      "started_at": "2025-09-11T07:39:37.868Z",
+      "claimed_by": "development_session_1757576333026_1_general_bc384621",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757576333026_1_general_bc384621",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:39:37.868Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757576354284_mcwj893av",
+      "title": "Fix all empty function violations in bytebot-ui package",
+      "description": "Scan and fix all no-empty-function and @typescript-eslint/no-empty-function ESLint violations by implementing proper functionality for empty functions and methods",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:39:14.284Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757576332517_1_general_edecfba7",
+      "started_at": "2025-09-11T07:39:31.711Z",
+      "claimed_by": "development_session_1757576332517_1_general_edecfba7",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757576332517_1_general_edecfba7",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:39:31.711Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757576253951_53phr1ign",
+      "title": "Fix 324 ESLint violations in bytebot-ui package (40 errors, 284 warnings)",
+      "description": "Comprehensive ESLint violation resolution in bytebot-ui package including: console statements removal, TypeScript strict type safety fixes, return type annotations, magic number constants, empty function implementations, and test file type safety improvements. Must achieve zero ESLint violations before completion.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:37:33.951Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757576228047_1_general_0e46b2fa",
+      "started_at": "2025-09-11T07:37:50.391Z",
+      "claimed_by": "development_session_1757576228047_1_general_0e46b2fa",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757576228047_1_general_0e46b2fa",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:37:50.391Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
       "id": "error_1757572910207_2bu35blsl",
       "title": "Fix TypeScript compilation errors in test suite",
       "description": "Resolve ALL TypeScript compilation errors in bytebot-ui test files: Header.test.tsx (__mockUseSession undefined variables lines 420,470,744, missing toRenderWithinTime matcher line 707), ChatContainer.test.tsx (ref type conversion errors, mock assignments, GroupedMessages type incompatibilities), fix Jest mock type definitions and integration, add custom Jest matcher types, fix React Testing Library assignments. Run tsc --noEmit, npm run lint, npm test for validation.",
@@ -393,6 +561,153 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-11T07:29:50.848Z",
       "sessionId": "session_1757575790848",
+      "metadata": {}
+    },
+    "development_session_1757576228047_1_general_0e46b2fa": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:37:08.047Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:37:08.047Z",
+      "sessionId": "session_1757576228047",
+      "metadata": {}
+    },
+    "development_session_1757576332517_1_general_edecfba7": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:38:52.518Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:38:52.518Z",
+      "sessionId": "session_1757576332517",
+      "metadata": {}
+    },
+    "development_session_1757576333026_1_general_bc384621": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:38:53.026Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:38:53.026Z",
+      "sessionId": "session_1757576333026",
+      "metadata": {}
+    },
+    "development_session_1757576333104_1_general_524ff4bf": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:38:53.104Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:38:53.104Z",
+      "sessionId": "session_1757576333104",
+      "metadata": {}
+    },
+    "development_session_1757576333332_1_general_e95cb1a2": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:38:53.332Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:38:53.332Z",
+      "sessionId": "session_1757576333332",
+      "metadata": {}
+    },
+    "development_session_1757576333518_1_general_aa672b94": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:38:53.519Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:38:53.519Z",
+      "sessionId": "session_1757576333518",
+      "metadata": {}
+    },
+    "development_session_1757576334966_1_general_d974c943": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:38:54.966Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:38:54.966Z",
+      "sessionId": "session_1757576334966",
       "metadata": {}
     }
   },
