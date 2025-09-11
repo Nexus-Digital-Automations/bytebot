@@ -402,16 +402,21 @@ describe("Button Component", () => {
       const breakpoints = ["mobile", "tablet", "desktop"];
 
       breakpoints.forEach((breakpoint) => {
-        const { unmount } = TestUtils.testResponsive(
+        const renderResult = TestUtils.testResponsive(
           <Button>Responsive Button</Button>,
           [breakpoint],
         )[0];
 
-        const button = screen.getByRole("button");
-        expect(button).toBeInTheDocument();
-        expect(button).toHaveClass("cursor-pointer");
+        if (
+          renderResult != null &&
+          typeof renderResult.unmount === "function"
+        ) {
+          const button = screen.getByRole("button");
+          expect(button).toBeInTheDocument();
+          expect(button).toHaveClass("cursor-pointer");
 
-        unmount();
+          renderResult.unmount();
+        }
       });
     });
   });

@@ -23,7 +23,6 @@ import {
   StandardizedValidationPipe,
   StandardizedValidationPipes,
 } from "@bytebot/shared/server";
-import type { Reflector } from "@nestjs/core";
 import { logError } from "@/utils/logger";
 
 // Type definitions for better type safety
@@ -231,7 +230,13 @@ export class BytebotUISecurityModule implements NestModule {
  * Bytebot-UI Security Deployment Helper
  * Utility functions for deploying Bytebot-UI security configuration
  */
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class BytebotUISecurityDeployment {
+  // Private constructor to prevent instantiation - this is a utility class
+  private constructor() {
+    // Intentionally empty - utility class with static methods only
+  }
+
   /**
    * Apply Bytebot-UI security to NestJS application
    * @param app - NestJS application instance

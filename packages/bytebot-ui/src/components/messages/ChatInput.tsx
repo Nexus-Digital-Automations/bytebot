@@ -109,7 +109,7 @@ export function ChatInput({
     }
 
     // Reset the input - safe due to early capture
-    if (inputElement) {
+    if (inputElement !== null && inputElement !== undefined) {
       inputElement.value = "";
     }
   };

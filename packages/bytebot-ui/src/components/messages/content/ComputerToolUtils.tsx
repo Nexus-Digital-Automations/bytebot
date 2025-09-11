@@ -27,6 +27,7 @@ import {
   isTypeTextToolUseBlock,
   isWaitToolUseBlock,
 } from "@bytebot/shared";
+import { TRIPLE_CLICK_COUNT } from "@/constants/ui";
 
 // Define the IconType for proper type checking
 export type IconType =
@@ -132,7 +133,7 @@ export function getLabel(block: ComputerToolUseContentBlock): string {
         return "Double Click";
       }
 
-      if (block.input.clickCount === 3) {
+      if (block.input.clickCount === TRIPLE_CLICK_COUNT) {
         return "Triple Click";
       }
 

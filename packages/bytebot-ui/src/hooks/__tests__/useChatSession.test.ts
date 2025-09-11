@@ -77,10 +77,10 @@ describe("useChatSession Hook", () => {
     mockUseWebSocket.mockImplementation(
       ({ onTaskUpdate, onNewMessage, onTaskCreated, onTaskDeleted }) => {
         mockWebSocketHandlers = {
-          onTaskUpdate,
-          onNewMessage,
-          onTaskCreated,
-          onTaskDeleted,
+          onTaskUpdate: onTaskUpdate as (task: Task) => void,
+          onNewMessage: onNewMessage as (message: Message) => void,
+          onTaskCreated: onTaskCreated as (task: Task) => void,
+          onTaskDeleted: onTaskDeleted as (taskId: string) => void,
         };
         return {
           joinTask: mockJoinTask,
@@ -462,7 +462,7 @@ describe("useChatSession Hook", () => {
       expect(result.current.isLoading).toBe(true);
 
       act(() => {
-        if (resolveAddMessage) {
+        if (resolveAddMessage != null) {
           resolveAddMessage({ success: true });
         }
       });
@@ -846,16 +846,22 @@ describe("useChatSession Hook", () => {
       });
 
       // Simulate rapid message updates
-      for (let i = 0; i < 100; i++) {
+      const sendRapidMessage = (index: number): void => {
         act(() => {
           mockWebSocketHandlers.onNewMessage({
-            id: `rapid-msg-${i}`,
-            content: [{ type: MessageContentType._Text, text: `Message ${i}` }],
+            id: `rapid-msg-${index}`,
+            content: [
+              { type: MessageContentType._Text, text: `Message ${index}` },
+            ],
             role: Role.ASSISTANT,
             createdAt: new Date().toISOString(),
             taskId: "task-123",
           });
         });
+      };
+
+      for (let i = 0; i < 100; i++) {
+        sendRapidMessage(i);
       }
 
       // Hook should still be responsive

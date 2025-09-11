@@ -5,6 +5,7 @@ import { Button } from "./button";
 import { copyToClipboard } from "@/utils/clipboard";
 import { cn } from "@/lib/utils";
 import { logError } from "@/utils/logger";
+import { COPY_FEEDBACK_TIMEOUT_MS } from "@/constants/ui";
 
 interface CopyButtonProps {
   text: string;
@@ -31,7 +32,7 @@ export function CopyButton({
       // Reset the copied state after 2 seconds
       setTimeout(() => {
         setCopied(false);
-      }, 2000);
+      }, COPY_FEEDBACK_TIMEOUT_MS);
     }
   };
 

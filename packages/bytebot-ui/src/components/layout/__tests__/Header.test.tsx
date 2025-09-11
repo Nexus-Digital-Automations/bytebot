@@ -529,7 +529,10 @@ describe("Header Component", () => {
         ]);
         const renderResult = renderResults[0];
 
-        if (renderResult != null) {
+        if (
+          renderResult != null &&
+          typeof renderResult.unmount === "function"
+        ) {
           // Should render without errors across all breakpoints
           expect(screen.getByRole("banner")).toBeInTheDocument();
           renderResult.unmount();

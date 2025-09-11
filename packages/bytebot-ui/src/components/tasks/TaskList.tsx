@@ -6,6 +6,7 @@ import { fetchTasks } from "@/utils/taskUtils";
 import { Task } from "@/types";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { logError } from "@/utils/logger";
+import { DEFAULT_TASK_LIST_LIMIT } from "@/constants/ui";
 
 interface TaskListProps {
   limit?: number;
@@ -16,7 +17,7 @@ interface TaskListProps {
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
-  limit = 5,
+  limit = DEFAULT_TASK_LIST_LIMIT,
   className = "",
   title = "Latest Tasks",
   description,
