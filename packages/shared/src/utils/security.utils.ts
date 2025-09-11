@@ -15,7 +15,7 @@ import * as jwt from "jsonwebtoken";
 import { createHash, randomBytes, createHmac } from "crypto";
 import * as DOMPurify from "dompurify";
 import { Config } from "dompurify";
-import * as sanitizeHtml from "sanitize-html";
+import sanitizeHtml = require("sanitize-html");
 import { JSDOM } from "jsdom";
 
 // Import proper WindowLike type from DOMPurify
@@ -616,7 +616,7 @@ export function sanitizeInput(
   } else if (options.allowHtml) {
     // Sanitize HTML while allowing safe tags
     try {
-      sanitized = sanitizeHtml.default(sanitized, {
+      sanitized = sanitizeHtml(sanitized, {
         allowedTags: options.allowedTags || [],
         allowedAttributes: options.allowedAttributes || {},
         allowedSchemes: ["http", "https", "mailto"],

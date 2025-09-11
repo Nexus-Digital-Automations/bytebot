@@ -193,6 +193,34 @@
       ]
     },
     {
+      "id": "error_1757580035446_qhnk949cd",
+      "title": "CRITICAL: Fix 32 ESLint violations in accuracy-metrics-reporter.ts",
+      "description": "Emergency linter error resolution: 29 unused variable/import errors and 3 explicit-any warnings in accuracy-metrics-reporter.ts and pattern-matcher-integration.ts files",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T08:40:35.446Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757579847447_1_general_edc38463",
+      "started_at": "2025-09-11T08:40:52.074Z",
+      "claimed_by": "development_session_1757579847447_1_general_edc38463",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757579847447_1_general_edc38463",
+          "role": "primary",
+          "assignedAt": "2025-09-11T08:40:52.074Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
       "id": "error_1757573240791_9y43pn5b8",
       "title": "Fix TypeScript SuperTest compilation errors in bytebot-agent package",
       "description": "Fix SuperTest import statements and type issues causing TypeScript compilation errors. Fix incorrect destructured imports, update test templates to use proper supertest API, and ensure all test utilities work with installed supertest version.",
@@ -3384,6 +3412,69 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-11T06:46:56.083Z",
       "sessionId": "session_1757573216080",
+      "metadata": {}
+    },
+    "development_session_1757579847262_1_general_e9941291": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T08:37:27.264Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T08:37:27.264Z",
+      "sessionId": "session_1757579847262",
+      "metadata": {}
+    },
+    "development_session_1757579847447_1_general_edc38463": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T08:37:27.448Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T08:37:27.448Z",
+      "sessionId": "session_1757579847447",
+      "metadata": {}
+    },
+    "development_session_1757579847575_1_general_2b40b736": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T08:37:27.576Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T08:37:27.576Z",
+      "sessionId": "session_1757579847575",
       "metadata": {}
     }
   },

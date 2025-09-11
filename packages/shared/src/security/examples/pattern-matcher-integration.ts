@@ -533,19 +533,21 @@ class StreamingSecurityAnalyzer {
   private setupStreamingListeners(): void {
     this.streamingProcessor.on("matches_found", (event) => {
       // Add detected threats to buffer
-      const threats = event.results.filter((result: any) => result.matched);
+      const threats = event.results.filter(
+        (result: PatternMatchResult) => result.matched,
+      );
       this.threatBuffer.push(...threats);
 
       // Log high-risk threats immediately
       const criticalThreats = threats.filter(
-        (threat: any) =>
+        (threat: PatternMatchResult) =>
           threat.severity === "critical" || threat.riskScore >= 90,
       );
 
       if (criticalThreats.length > 0) {
         console.error("Critical threats detected in stream:", {
           count: criticalThreats.length,
-          threats: criticalThreats.map((t: any) => ({
+          threats: criticalThreats.map((t: PatternMatchResult) => ({
             type: t.patternType,
             severity: t.severity,
             riskScore: t.riskScore,

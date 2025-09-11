@@ -913,7 +913,7 @@ export class PenetrationTestingOrchestrator {
               riskScore: vuln.cvssScore || this.calculateRiskScore(vuln.severity),
               affectedAssets: [vuln.endpoint],
               mitigation: vuln.remediation,
-          });
+            });
         }
       }
     }
