@@ -79,7 +79,7 @@ interface PerformanceStats {
  */
 @Injectable()
 export class PerformanceInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(PerformanceInterceptor._name);
+  private readonly logger = new Logger(PerformanceInterceptor.name);
   private readonly responseTimes: number[] = [];
   private readonly stats: PerformanceStats = {
     requestCount: 0,

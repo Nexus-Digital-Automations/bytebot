@@ -32,7 +32,7 @@ import { MetricsService } from './metrics.service';
   exports: [MetricsService], // Export service for use by other modules
 })
 export class MetricsModule {
-  private readonly logger = new Logger(MetricsModule._name);
+  private readonly logger = new Logger(MetricsModule.name);
 
   constructor() {
     this.logger.log('Metrics Module initialized - Prometheus metrics enabled');

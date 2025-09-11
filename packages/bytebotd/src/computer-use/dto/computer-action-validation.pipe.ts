@@ -105,7 +105,7 @@ type ActionType =
 export class ComputerActionValidationPipe
   implements PipeTransform<unknown, Promise<ComputerActionDto>>
 {
-  private readonly logger = new Logger(ComputerActionValidationPipe._name);
+  private readonly logger = new Logger(ComputerActionValidationPipe.name);
 
   /**
    * Safely typed wrapper for XSS detection

@@ -74,7 +74,7 @@ interface JobStats {
 
 @Injectable()
 export class AsyncJobService {
-  private readonly logger = new Logger(AsyncJobService._name);
+  private readonly logger = new Logger(AsyncJobService.name);
   private readonly jobs = new Map<string, JobData>();
   private readonly queue: QueueItem[] = [];
   private readonly maxConcurrentJobs = 5;

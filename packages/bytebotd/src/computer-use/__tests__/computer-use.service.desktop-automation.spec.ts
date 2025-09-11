@@ -139,13 +139,13 @@ import {
   PressKeysAction,
   TypeTextAction,
   _PasteTextAction,
-  _ScreenshotAction,
+  _ScreenshotActionDto,
   _CursorPositionAction,
   _ApplicationAction,
   WriteFileAction,
   _ReadFileAction,
 } from '@bytebot/shared';
-import { ScreenshotActionDto } from '../dto/computer-action.dto';
+import { ScreenshotActionDtoDto } from '../dto/computer-action.dto';
 
 // Mock services for comprehensive testing
 const mockNutService = {
@@ -666,14 +666,14 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       // Mock a screenshot capture
       mockNutService.screendump.mockResolvedValue('base64-screenshot-data');
 
-      const screenshotAction: ScreenshotAction = {
+      const screenshotAction: ScreenshotActionDto = {
         action: 'screenshot',
       };
 
       const result = await service.action(screenshotAction);
 
       // Screenshot should return a result with image data
-      expect(_result).toBeDefined();
+      expect(result).toBeDefined();
       expect(nutService.screendump).toHaveBeenCalled();
     });
 
@@ -683,7 +683,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         new Error('Screenshot failed'),
       );
 
-      const screenshotAction: ScreenshotAction = {
+      const screenshotAction: ScreenshotActionDto = {
         action: 'screenshot',
       };
 
@@ -695,14 +695,14 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
 
     it('should provide fallback when advanced vision features are not available', async () => {
       // Test that the service handles missing vision capabilities gracefully
-      const screenshotAction: ScreenshotAction = {
+      const screenshotAction: ScreenshotActionDto = {
         action: 'screenshot',
       };
 
       const result = await service.action(screenshotAction);
 
       // Should still work with basic screenshot functionality
-      expect(_result).toBeDefined();
+      expect(result).toBeDefined();
       expect(nutService.screendump).toHaveBeenCalled();
     });
   });
@@ -768,7 +768,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
           const result = await service.action(action);
           results.push({ success: true, result });
         } catch (error) {
-          results.push({ success: false, _error });
+          results.push({ success: false, error });
         }
       }
 
@@ -829,10 +829,10 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         try {
           const result = await service.action(writeAction);
           // If it succeeds, it should be a FileWriteResult
-          expect(_result).toBeDefined();
+          expect(result).toBeDefined();
         } catch (error) {
           // If it fails, should be due to security reasons
-          expect(_error.message).toMatch(
+          expect(error.message).toMatch(
             /(security|permission|invalid|denied)/i,
           );
         }

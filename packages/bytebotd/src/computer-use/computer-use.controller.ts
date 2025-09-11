@@ -148,7 +148,7 @@ type ComputerActionResponse =
 @UseInterceptors(LoggingInterceptor)
 @ApiBearerAuth('bearer')
 export class ComputerUseController {
-  private readonly logger = new Logger(ComputerUseController._name);
+  private readonly logger = new Logger(ComputerUseController.name);
 
   constructor(
     private readonly computerUseService: ComputerUseService,

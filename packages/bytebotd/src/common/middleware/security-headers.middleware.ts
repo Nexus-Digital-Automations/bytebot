@@ -146,7 +146,7 @@ const DEFAULT_CSP_DIRECTIVES = {
 
 @Injectable()
 export class SecurityHeadersMiddleware implements NestMiddleware {
-  private readonly logger = new Logger(SecurityHeadersMiddleware._name);
+  private readonly logger = new Logger(SecurityHeadersMiddleware.name);
   private readonly config: SecurityMiddlewareConfig;
   private readonly helmetMiddleware: (
     _req: Request,

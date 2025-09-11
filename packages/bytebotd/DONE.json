@@ -1070,9 +1070,171 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/TODO.json"
+    },
+    {
+      "id": "error_1757571361093_bgigkrbyw",
+      "title": "Fix TypeScript unsafe assignments and type errors in bytebotd package",
+      "description": "Scan for and fix all @typescript-eslint/no-unsafe-* violations including unsafe member access, unsafe assignments, unsafe calls. Replace any types with proper interfaces, fix unsafe object property access, resolve unsafe function calls, and add proper type guards where needed.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:16:01.093Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757571335326_1_general_eff655ef",
+      "started_at": "2025-09-11T06:16:26.658Z",
+      "claimed_by": "development_session_1757571335326_1_general_eff655ef",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757571335326_1_general_eff655ef",
+          "role": "primary",
+          "assignedAt": "2025-09-11T06:16:26.658Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757571361093_bgigkrbyw",
+          "completedAt": "2025-09-11T06:26:32.932Z",
+          "completedBy": "development_session_1757571335326_1_general_eff655ef",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-11T06:26:32.932Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-11T06:26:32.932Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/TODO.json"
+    },
+    {
+      "id": "error_1757571361166_dj644ya89",
+      "title": "Fix all ESLint violations in bytebotd test files",
+      "description": "Comprehensive cleanup of ESLint violations in all test files (*.spec.ts, *.test.ts) across bytebotd package - focus on unused variables, undefined references, import/mock violations while maintaining test integrity",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:16:01.166Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757571334564_1_general_ea030e10",
+      "started_at": "2025-09-11T06:16:34.932Z",
+      "claimed_by": "development_session_1757571334564_1_general_ea030e10",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757571334564_1_general_ea030e10",
+          "role": "primary",
+          "assignedAt": "2025-09-11T06:16:34.932Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757571361166_dj644ya89",
+          "completedAt": "2025-09-11T06:27:02.243Z",
+          "completedBy": "development_session_1757571334564_1_general_ea030e10",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-11T06:27:02.243Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-11T06:27:02.243Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/TODO.json"
+    },
+    {
+      "id": "error_1757571360157_2tt55vhmg",
+      "title": "Fix all ESLint violations in bytebotd computer-use module",
+      "description": "TARGET: bytebot/packages/bytebotd/src/computer-use/ - Fix no-undef violations, unused variables (underscore prefix), TypeScript unsafe assignments, and CUA integration issues. Focus on computer-use.controller.ts, computer-use.service.ts, async-job.service.ts, job-management.service.ts, and all DTO/validation files.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:16:00.157Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757571334304_1_general_b9f9f3f6",
+      "started_at": "2025-09-11T06:16:26.704Z",
+      "claimed_by": "development_session_1757571334304_1_general_b9f9f3f6",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757571334304_1_general_b9f9f3f6",
+          "role": "primary",
+          "assignedAt": "2025-09-11T06:16:26.704Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757571360157_2tt55vhmg",
+          "completedAt": "2025-09-11T06:29:00.432Z",
+          "completedBy": "development_session_1757571334304_1_general_b9f9f3f6",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-11T06:29:00.433Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-11T06:29:00.433Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/TODO.json"
     }
   ],
-  "total_completed": 23,
-  "last_completion": "2025-09-11T05:44:14.269Z",
+  "total_completed": 26,
+  "last_completion": "2025-09-11T06:29:00.433Z",
   "created_at": "2025-09-06T03:52:57.066Z"
 }

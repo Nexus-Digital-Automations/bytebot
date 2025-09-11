@@ -91,7 +91,7 @@ interface CacheInterceptorStats {
  */
 @Injectable()
 export class CacheInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(CacheInterceptor._name);
+  private readonly logger = new Logger(CacheInterceptor.name);
   private readonly stats: CacheInterceptorStats = {
     totalRequests: 0,
     cacheHits: 0,

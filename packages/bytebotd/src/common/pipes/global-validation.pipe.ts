@@ -80,7 +80,7 @@ const DEFAULT_OPTIONS: GlobalValidationPipeOptions = {
 
 @Injectable()
 export class GlobalValidationPipe implements PipeTransform<any> {
-  private readonly logger = new Logger(GlobalValidationPipe._name);
+  private readonly logger = new Logger(GlobalValidationPipe.name);
   private readonly options: GlobalValidationPipeOptions;
 
   constructor(options?: Partial<GlobalValidationPipeOptions>) {
@@ -108,7 +108,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
     this.logger.debug(`[${operationId}] Starting BytebotD validation`, {
       operationId,
       type: metadata.type,
-      metatype: metadata.metatype?._name,
+      metatype: metadata.metatype?.name,
       hasValue: value !== undefined && value !== null,
       valueType: typeof value,
     });
@@ -121,7 +121,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
           {
             operationId,
             type: metadata.type,
-            metatype: metadata.metatype?._name,
+            metatype: metadata.metatype?.name,
           },
         );
         return this.sanitizeBasicValue(value, operationId);
@@ -164,7 +164,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         {
           operationId,
           type: metadata.type,
-          metatype: metadata.metatype?._name,
+          metatype: metadata.metatype?.name,
           processingTimeMs: processingTime,
           sanitized: this.options.enableSanitization,
           threatDetected: false,
@@ -264,7 +264,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
       // If we can't stringify the value, it might be too large or contain circular references
       this.logger.warn(`[${operationId}] Could not validate _payload size`, {
         operationId,
-        error: __error.message,
+        error: _error.message,
       });
     }
   }
@@ -401,7 +401,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
 
       this.logger.warn(`[${operationId}] BytebotD class validation failed`, {
         operationId,
-        metatype: metatype._name,
+        metatype: metatype.name,
         errorCount: errors.length,
         validationTimeMs: validationTime,
         errors: formattedErrors,
@@ -418,7 +418,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
 
     this.logger.debug(`[${operationId}] BytebotD class validation passed`, {
       operationId,
-      metatype: metatype._name,
+      metatype: metatype.name,
       validationTimeMs: validationTime,
       errorCount: 0,
     });
@@ -431,12 +431,12 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    */
   private formatValidationErrors(errors: ValidationError[]): any[] {
     return errors.map((_error) => ({
-      property: error.property,
-      value: error.value,
-      constraints: error.constraints,
+      property: _error.property,
+      value: _error.value,
+      constraints: _error.constraints,
       children:
-        error.children?.length > 0
-          ? this.formatValidationErrors(error.children)
+        _error.children?.length > 0
+          ? this.formatValidationErrors(_error.children)
           : undefined,
     }));
   }
@@ -474,7 +474,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
           service: 'BytebotD',
           inputType: typeof value,
           metatype: metadata.metatype?.name,
-          errorType: error.constructor._name,
+          errorType: _error.constructor.name,
           threatDetection: this.options.enableThreatDetection,
           sanitizationEnabled: this.options.enableSanitization,
         },
@@ -493,7 +493,10 @@ export class GlobalValidationPipe implements PipeTransform<any> {
       this.logger.error('Failed to log BytebotD security event', {
         operationId,
         originalError: _error.message,
-        loggingError: loggingError.message,
+        loggingError:
+          loggingError instanceof Error
+            ? loggingError.message
+            : String(loggingError),
       });
     }
   }

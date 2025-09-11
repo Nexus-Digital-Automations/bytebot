@@ -16,8 +16,8 @@
  * @version 1.0.0
  */
 
-import { WriteFileAction, _ReadFileActionDto } from '@bytebot/shared';
-import { ReadFileActionDtoDto } from '../dto/computer-action.dto';
+import { WriteFileAction, _ReadFileAction } from '@bytebot/shared';
+import { ReadFileActionDto } from '../dto/computer-action.dto';
 
 // Mock the nut-js library first to prevent module loading issues
 jest.mock('@nut-tree-fork/nut-js', () => ({

@@ -69,7 +69,7 @@ export interface ErrorContext {
  */
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(LoggingInterceptor._name);
+  private readonly logger = new Logger(LoggingInterceptor.name);
 
   constructor(private readonly metricsService?: MetricsService) {
     this.logger.log(

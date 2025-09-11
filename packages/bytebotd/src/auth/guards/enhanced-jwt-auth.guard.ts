@@ -309,10 +309,13 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       response.setHeader('X-New-Access-Token', newAccessToken);
 
       // Create user object for request context
+      // Ensure email exists, provide fallback if not available
+      const email =
+        refreshPayload.email || `user-${refreshPayload.sub}@unknown.local`;
       const user: ByteBotdUser = {
         id: refreshPayload.sub,
-        email: refreshPayload.email,
-        username: refreshPayload.email.split('@')[0], // Fallback username
+        email,
+        username: email.split('@')[0], // Fallback username from email
         role: refreshPayload.role,
         isActive: true, // Assuming active if refresh is valid
       };

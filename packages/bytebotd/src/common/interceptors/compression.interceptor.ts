@@ -82,7 +82,7 @@ interface CompressionResult {
  */
 @Injectable()
 export class CompressionInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(CompressionInterceptor._name);
+  private readonly logger = new Logger(CompressionInterceptor.name);
   private readonly stats: CompressionStats = {
     totalRequests: 0,
     compressedRequests: 0,

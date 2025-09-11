@@ -98,7 +98,7 @@ interface ThreatDetectionResult {
 
 @Injectable()
 export class SecuritySanitizationPipe implements PipeTransform<any> {
-  private readonly logger = new Logger(SecuritySanitizationPipe._name);
+  private readonly logger = new Logger(SecuritySanitizationPipe.name);
   private readonly options: Required<SecuritySanitizationOptions>;
 
   // Security metrics tracking
@@ -135,7 +135,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
     this.logger.debug(`[${operationId}] Security sanitization started`, {
       operationId,
       inputType: typeof value,
-      metatype: metadata.metatype?._name,
+      metatype: metadata.metatype?.name,
       hasValue: value !== undefined && value !== null,
     });
 

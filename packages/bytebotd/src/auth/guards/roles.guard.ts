@@ -22,7 +22,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserRole, _Permission as Permission } from '@bytebot/shared';
+import { UserRole, Permission } from '@bytebot/shared';
 import { AuthenticatedRequest, ByteBotdUser } from './jwt-auth.guard';
 
 /**

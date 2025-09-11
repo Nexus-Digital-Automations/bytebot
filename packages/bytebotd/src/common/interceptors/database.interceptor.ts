@@ -96,7 +96,7 @@ interface DatabaseConfig {
  */
 @Injectable()
 export class DatabaseInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(DatabaseInterceptor._name);
+  private readonly logger = new Logger(DatabaseInterceptor.name);
   private readonly stats: DatabaseStats = {
     totalQueries: 0,
     averageQueryTime: 0,
@@ -459,15 +459,15 @@ export class DatabaseInterceptor implements NestInterceptor {
    */
   private recordDatabaseMetrics(metrics: DatabasePerformanceMetrics): void {
     try {
-      const { operation, duration, _error, cacheHit } = metrics;
+      const { operation, duration, error, cacheHit } = metrics;
 
       // Update internal statistics
       this.stats.totalQueries++;
 
-      if (_error) {
+      if (error) {
         this.stats.failedQueries++;
         this.logger.error(
-          `[${metrics.operationId}] Database operation failed: ${_error.message}`,
+          `[${metrics.operationId}] Database operation failed: ${error.message}`,
           { operation: operation.operation, table: operation.table, duration },
         );
       } else {

@@ -45,7 +45,7 @@ import { compressPngBase64Under1MB } from './compressor';
  */
 @Injectable()
 export class ComputerUseTools {
-  private readonly logger = new Logger(ComputerUseTools._name);
+  private readonly logger = new Logger(ComputerUseTools.name);
   private operationCounter = 0;
 
   constructor(private readonly computerUseService: ComputerUseService) {

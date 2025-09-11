@@ -116,7 +116,7 @@ interface DeprecationStats {
 
 @Injectable()
 export class DeprecationGuard implements CanActivate {
-  private readonly logger = new Logger(DeprecationGuard._name);
+  private readonly logger = new Logger(DeprecationGuard.name);
   private readonly policy: DeprecationPolicy;
   private readonly stats: DeprecationStats;
 

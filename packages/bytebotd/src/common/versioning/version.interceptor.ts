@@ -85,7 +85,7 @@ interface DesktopCompatibility {
 
 @Injectable()
 export class VersionInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(VersionInterceptor._name);
+  private readonly logger = new Logger(VersionInterceptor.name);
   private readonly defaultVersion: string;
   private readonly strictVersioning: boolean;
 

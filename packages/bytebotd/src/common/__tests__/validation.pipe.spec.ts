@@ -15,10 +15,7 @@
  * @coverage-target 95%+
  */
 
-import {
-  Test as Test,
-  TestingModule as TestingModule,
-} from '@nestjs/testing';
+import { Test as Test, TestingModule as TestingModule } from '@nestjs/testing';
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import {
   IsString,
@@ -53,7 +50,7 @@ class MockValidationPipe {
     const operationId = `validation_${Date.now()}`;
     console.log(`[${operationId}] Validating input`, {
       type: metadata.type,
-      metatype: metadata.metatype?._name,
+      metatype: metadata.metatype?.name,
       dataSize: JSON.stringify(value).length,
     });
 
@@ -72,7 +69,7 @@ class MockValidationPipe {
       console.log(`[${operationId}] Validation completed successfully`);
       return validatedValue;
     } catch (error) {
-      console._error(`[${operationId}] Validation failed`, {
+      console.error(`[${operationId}] Validation failed`, {
         error: _error.message,
         value: JSON.stringify(value).substring(0, 100),
       });
@@ -120,7 +117,7 @@ class MockValidationPipe {
     const errors: any[] = [];
 
     // Mock validation rules based on common patterns
-    if (metatype._name === 'CreateUserDto') {
+    if (metatype.name === 'CreateUserDto') {
       if (!instance.email?.includes('@')) {
         errors.push({
           property: 'email',
@@ -137,7 +134,7 @@ class MockValidationPipe {
       }
     }
 
-    if (metatype._name === 'UpdateTaskDto') {
+    if (metatype.name === 'UpdateTaskDto') {
       if (instance.title && instance.title.length > 100) {
         errors.push({
           property: 'title',
@@ -644,9 +641,7 @@ describe('ValidationPipe', () => {
       } catch (error) {
         expect(_error).toBeInstanceOf(BadRequestException);
         expect(_error.message).toContain('Validation failed');
-        expect(_error.message).toContain(
-          'email must be a valid email address',
-        );
+        expect(_error.message).toContain('email must be a valid email address');
         expect(_error.message).toContain(
           'password must be longer than or equal to 6 characters',
         );

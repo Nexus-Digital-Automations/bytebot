@@ -189,7 +189,7 @@ describe('MetricsService', () => {
       const duration = 5;
 
       expect(() => {
-        service.recordCacheOperation?.(operation, _result, duration);
+        service.recordCacheOperation?.(operation, result, duration);
       }).not.toThrow();
     });
 
