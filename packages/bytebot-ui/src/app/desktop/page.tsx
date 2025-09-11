@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import { Header } from "@/components/layout/Header";
 import { DesktopContainer } from "@/components/ui/desktop-container";
 
