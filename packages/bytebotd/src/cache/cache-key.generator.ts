@@ -156,7 +156,7 @@ export class CacheKeyGenerator {
       return fullKey;
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
+        _error instanceof Error ? _error.message : 'Unknown _error';
       this.logger.error(
         `[${operationId}] Key generation failed: ${errorMessage}`,
       );

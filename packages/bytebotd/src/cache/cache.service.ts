@@ -110,7 +110,7 @@ export class CacheService {
         this.logger.debug(
           `[${operationId}] Cache HIT: ${fullKey} (${duration}ms)`,
         );
-        return result;
+        return _result;
       } else {
         // Cache miss
         this.stats.misses++;
@@ -124,7 +124,7 @@ export class CacheService {
     } catch (_error) {
       const duration = Date.now() - startTime;
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
+        _error instanceof Error ? _error.message : 'Unknown _error';
 
       this.logger.error(
         `[${operationId}] Cache GET error: ${errorMessage} (${duration}ms)`,
@@ -178,7 +178,7 @@ export class CacheService {
     } catch (_error) {
       const duration = Date.now() - startTime;
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
+        _error instanceof Error ? _error.message : 'Unknown _error';
 
       this.logger.error(
         `[${operationId}] Cache SET error: ${errorMessage} (${duration}ms)`,
@@ -215,7 +215,7 @@ export class CacheService {
     } catch (_error) {
       const duration = Date.now() - startTime;
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
+        _error instanceof Error ? _error.message : 'Unknown _error';
 
       this.logger.error(
         `[${operationId}] Cache DEL error: ${errorMessage} (${duration}ms)`,
@@ -264,7 +264,7 @@ export class CacheService {
     } catch (_error) {
       const duration = Date.now() - startTime;
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
+        _error instanceof Error ? _error.message : 'Unknown _error';
 
       this.logger.error(
         `[${operationId}] Cache MGET error: ${errorMessage} (${duration}ms)`,
@@ -309,7 +309,7 @@ export class CacheService {
     } catch (_error) {
       const duration = Date.now() - startTime;
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
+        _error instanceof Error ? _error.message : 'Unknown _error';
 
       this.logger.error(
         `[${operationId}] Cache MSET error: ${errorMessage} (${duration}ms)`,
@@ -347,7 +347,7 @@ export class CacheService {
           }
         } catch (_error) {
           this.logger.warn(
-            `Cache warming failed for key ${key}: ${error instanceof Error ? _error.message : 'Unknown error'}`,
+            `Cache warming failed for key ${key}: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
           );
         }
       });
@@ -363,7 +363,7 @@ export class CacheService {
     } catch (_error) {
       const duration = Date.now() - startTime;
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
+        _error instanceof Error ? _error.message : 'Unknown _error';
 
       this.logger.error(
         `[${operationId}] Cache warming error: ${errorMessage} (${duration}ms)`,
@@ -416,7 +416,7 @@ export class CacheService {
       // This would require direct Redis client access
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
+        _error instanceof Error ? _error.message : 'Unknown _error';
       this.logger.error(
         `[${operationId}] Pattern invalidation error: ${errorMessage}`,
       );
@@ -437,7 +437,7 @@ export class CacheService {
     } catch (_error) {
       // Ignore metrics errors to prevent cascading failures
       this.logger.debug(
-        `Failed to record cache metrics: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
+        `Failed to record cache metrics: ${_error instanceof Error ? _error.message : 'Unknown _error'}`,
       );
     }
   }
