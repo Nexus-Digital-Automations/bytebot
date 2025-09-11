@@ -13,6 +13,7 @@ import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';
 import { BrowserSessionService } from './browser-session.service';
 import { BrowserTaskService } from './browser-task.service';
 import { BrowserAsyncJobService } from './browser-async-job.service';
+import { BrowserSessionDto } from './dto/browser-session.dto';
 
 /**
  * Browser-Use Service - Core Python Integration Layer
@@ -464,8 +465,8 @@ export class BrowserUseService {
    * Execute task actions sequentially
    */
   private async executeTaskActions(
-    task: unknown,
-    session: unknown,
+    task: CreateBrowserTaskDto & { taskId: string },
+    session: BrowserSessionDto,
   ): Promise<BrowserTaskResultDto> {
     const logs: unknown[] = [];
     const screenshots: string[] = [];

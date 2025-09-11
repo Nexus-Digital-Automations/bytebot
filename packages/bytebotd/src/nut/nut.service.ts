@@ -294,6 +294,7 @@ export class NutService {
     try {
       for (let i = 0, len = text.length; i < len; i++) {
         const char = text[i];
+        if (!char) continue;
         const keyInfo = this.charToKeyInfo(char);
         if (keyInfo) {
           if (keyInfo.withShift) {
