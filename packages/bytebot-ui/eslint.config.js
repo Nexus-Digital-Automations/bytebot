@@ -42,6 +42,8 @@ export default tseslint.config(
       ".eslintrc*", // Legacy ESLint config files
       "tailwind.config.js", // Tailwind config (if needed)
       "next.config.js", // Next.js config (if needed)
+      "**/__mocks__/**/*.js", // Jest mock files (plain JS)
+      "**/mocks/**/*.js", // Additional mock directories
     ],
   },
 

@@ -26,7 +26,11 @@ import {
   MEMORY_USAGE_THRESHOLD_MB,
   PAGINATION_DEFAULT_PAGE_SIZE,
   PERFORMANCE_TEST_TIMEOUT_MS,
-  TEST_TASK_BATCH_SIZE,
+  TEST_TIMESTAMP_INCREMENT_MS,
+  BYTES_PER_KB as _BYTES_PER_KB,
+  TEST_TASK_BATCH_SIZE as _TEST_TASK_BATCH_SIZE,
+  TEST_TASK_COUNT_MEDIUM as _TEST_TASK_COUNT_MEDIUM,
+  TEST_TASK_COUNT_SMALL as _TEST_TASK_COUNT_SMALL,
 } from "@/constants/ui";
 import { fetchTasks } from "@/utils/taskUtils";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -510,8 +514,12 @@ describe("TaskList Component", () => {
         control: Role.ASSISTANT,
         priority: "medium",
         tags: [],
-        createdAt: new Date(Date.now() + i * 1000).toISOString(),
-        updatedAt: new Date(Date.now() + i * 1000).toISOString(),
+        createdAt: new Date(
+          Date.now() + i * TEST_TIMESTAMP_INCREMENT_MS,
+        ).toISOString(),
+        updatedAt: new Date(
+          Date.now() + i * TEST_TIMESTAMP_INCREMENT_MS,
+        ).toISOString(),
       }),
     );
 
@@ -663,7 +671,9 @@ describe("TaskList Component", () => {
         <TaskList {...defaultProps} />,
       );
 
-      expect(screen.getAllByTestId(/task-item-/)).toHaveLength(3);
+      expect(screen.getAllByTestId(/task-item-/)).toHaveLength(
+        TEST_TASK_COUNT_SMALL,
+      );
 
       const newTask = {
         id: "task-4",

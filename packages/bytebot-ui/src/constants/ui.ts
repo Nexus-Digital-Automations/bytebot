@@ -215,3 +215,14 @@ export const LARGE_DATASET_SIZE = 1000;
  * Test timeout threshold in milliseconds (500ms)
  */
 export const TEST_TIMEOUT_THRESHOLD_MS = 500;
+
+/**
+ * Test timestamp increment in milliseconds (1 second)
+ */
+export const TEST_TIMESTAMP_INCREMENT_MS = 1000;
+
+/**
+ * Test task count constants for various scenarios
+ */
+export const TEST_TASK_COUNT_SMALL = 3;
+export const TEST_TASK_COUNT_MEDIUM = 4;

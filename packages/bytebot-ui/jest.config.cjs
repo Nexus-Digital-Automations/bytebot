@@ -28,8 +28,7 @@ const customJestConfig = {
     color: "magenta",
   },
 
-  // Test environment for React components
-  testEnvironment: "jsdom",
+  // Test environment for React components (defined below with options)
 
   // Setup files and configuration
   setupFilesAfterEnv: ["<rootDir>/src/test-utils/setupAfterEnv.ts"],

@@ -57,7 +57,10 @@ export class BytebotUISecurityConfigService {
    * Create Bytebot-UI validation pipe with standard security settings
    */
   createValidationPipe(): StandardizedValidationPipe {
-    const environment = this.configService.get("NODE_ENV", "development");
+    const environment = this.configService.get<string>(
+      "NODE_ENV",
+      "development",
+    );
 
     // Use standard security pipe for Bytebot-UI
 
@@ -68,7 +71,10 @@ export class BytebotUISecurityConfigService {
    * Create Bytebot-UI rate limit guard with lenient rate limits for UI interactions
    */
   createRateLimitGuard(): StandardizedRateLimitGuard {
-    const environment = this.configService.get("NODE_ENV", "development");
+    const environment = this.configService.get<string>(
+      "NODE_ENV",
+      "development",
+    );
 
     return StandardizedRateLimitGuard.createBytebotUIGuard(environment);
   }
@@ -77,7 +83,10 @@ export class BytebotUISecurityConfigService {
    * Get security configuration for manual inspection
    */
   getSecurityConfig(): Record<string, unknown> {
-    const environment = this.configService.get("NODE_ENV", "development");
+    const environment = this.configService.get<string>(
+      "NODE_ENV",
+      "development",
+    );
 
     return {
       serviceType: ServiceType._BYTEBOT_UI,
@@ -186,7 +195,10 @@ export class BytebotUISecurityConfigService {
     {
       provide: "BYTEBOT_UI_VALIDATION_PIPE",
       useFactory: (configService: ConfigService): unknown => {
-        const environment = configService.get("NODE_ENV", "development");
+        const environment = configService.get<string>(
+          "NODE_ENV",
+          "development",
+        );
 
         return StandardizedValidationPipes.STANDARD_SECURITY(environment);
       },
@@ -195,7 +207,10 @@ export class BytebotUISecurityConfigService {
     {
       provide: "BYTEBOT_UI_RATE_LIMIT_GUARD",
       useFactory: (configService: ConfigService): unknown => {
-        const environment = configService.get("NODE_ENV", "development");
+        const environment = configService.get<string>(
+          "NODE_ENV",
+          "development",
+        );
 
         return StandardizedRateLimitGuard.createBytebotUIGuard(environment);
       },
@@ -319,8 +334,8 @@ export class BytebotUISecurityDeployment {
   static validateSecurityConfig(
     configService: ConfigService,
   ): Record<string, unknown> {
-    const environment = configService.get("NODE_ENV", "development");
-    const corsOrigins = configService.get("CORS_ORIGINS", []);
+    const environment = configService.get<string>("NODE_ENV", "development");
+    const corsOrigins = configService.get<string[]>("CORS_ORIGINS", []);
 
     const validationResults = {
       environment,
