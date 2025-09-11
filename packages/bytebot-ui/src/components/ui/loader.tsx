@@ -1,15 +1,16 @@
 import React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { DEFAULT_LOADER_SIZE_PX } from "@/constants/ui";
 
 interface LoaderProps {
   size?: number;
   className?: string;
 }
 
-export const Loader: React.FC<LoaderProps> = ({ 
-  size = 16, 
-  className 
+export const Loader: React.FC<LoaderProps> = ({
+  size = DEFAULT_LOADER_SIZE_PX,
+  className,
 }) => {
   return (
     <Image
@@ -20,4 +21,4 @@ export const Loader: React.FC<LoaderProps> = ({
       className={cn("animate-spin", className)}
     />
   );
-}; 
+};

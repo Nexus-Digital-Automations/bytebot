@@ -73,8 +73,8 @@ export function MessageContent({
           {isToolResultContentBlock(block) &&
             block.is_error === false &&
             block.tool_use_id === "set_task_status" &&
-            block.content?.[0].type === MessageContentType._Text && (
-              <TextContent block={block.content?.[0]} />
+            block.content?.[0]?.type === MessageContentType._Text && (
+              <TextContent block={block.content[0]} />
             )}
         </div>
       ))}

@@ -208,10 +208,10 @@ describe("useChatSession Hook", () => {
       renderHook(() => useChatSession());
 
       expect(mockUseWebSocket).toHaveBeenCalledWith({
-        onTaskUpdate: expect.any(Function),
-        onNewMessage: expect.any(Function),
-        onTaskCreated: expect.any(Function),
-        onTaskDeleted: expect.any(Function),
+        onTaskUpdate: expect.any(Function) as (task: Task) => void,
+        onNewMessage: expect.any(Function) as (message: Message) => void,
+        onTaskCreated: expect.any(Function) as (task: Task) => void,
+        onTaskDeleted: expect.any(Function) as (taskId: string) => void,
       });
     });
 

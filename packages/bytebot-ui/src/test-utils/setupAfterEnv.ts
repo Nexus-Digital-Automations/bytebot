@@ -17,6 +17,18 @@ import { expect } from "@jest/globals";
 import { type RenderResult, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import {
+  ASYNC_OPERATION_TIMEOUT_MS,
+  DESKTOP_BREAKPOINT_PX,
+  MEMORY_USAGE_THRESHOLD_MB,
+  MOBILE_BREAKPOINT_PX,
+  PERFORMANCE_RENDER_THRESHOLD_COMPLEX_MS,
+  PERFORMANCE_RENDER_THRESHOLD_MS,
+  SESSION_EXPIRY_MS,
+  TABLET_BREAKPOINT_PX,
+  TEST_COMPONENT_PERFORMANCE_LIMIT_MS,
+  USER_INTERACTION_TIMEOUT_MS,
+} from "@/constants/ui";
 
 // Custom Jest matchers for Bytebot UI domain
 expect.extend({
@@ -183,9 +195,9 @@ expect.extend({
 
 // Performance monitoring utilities for UI components
 const performanceMonitor = {
-  slowRenderThreshold: 100, // 100ms for component renders
-  memoryLeakThreshold: 50 * 1024 * 1024, // 50MB
-  interactionThreshold: 50, // 50ms for user interactions
+  slowRenderThreshold: PERFORMANCE_RENDER_THRESHOLD_COMPLEX_MS, // 100ms for component renders
+  memoryLeakThreshold: MEMORY_USAGE_THRESHOLD_MB * 1024 * 1024, // 50MB
+  interactionThreshold: USER_INTERACTION_TIMEOUT_MS, // 50ms for user interactions
 
   logSlowRender(componentName: string, duration: number): void {
     if (
