@@ -28,6 +28,14 @@ import { MessageContentType } from "@bytebot/shared";
 // Import types for test utilities if needed
 // import { TestUtils, TestDataFactory } from "@/test-utils/setupAfterEnv";
 
+// Test constants for magic numbers
+const LONG_MESSAGE_LENGTH = 10000;
+const RETRY_COUNT = 5;
+const API_TIMEOUT_MS = 100;
+const HTTP_OK = 200;
+const LARGE_DATA_SIZE = 1000000;
+const PERFORMANCE_THRESHOLD_MS = 1000;
+
 // Mock fetch globally
 global.fetch = jest.fn();
 
@@ -168,7 +176,7 @@ describe("TaskUtils", () => {
     });
 
     it("handles very long messages", async () => {
-      const longMessage = "A".repeat(10000);
+      const longMessage = "A".repeat(LONG_MESSAGE_LENGTH);
       const mockResponse = { success: true };
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -336,12 +344,12 @@ describe("TaskUtils", () => {
       } as Response);
 
       const result = await fetchTaskProcessedMessages("task-123", {
-        limit: 100,
+        limit: API_TIMEOUT_MS,
         page: 1,
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        "/api/tasks/task-123/messages/processed?limit=100&page=1",
+        `/api/tasks/task-123/messages/processed?limit=${API_TIMEOUT_MS}&page=1`,
       );
       expect(result).toEqual(mockGroupedMessages);
     });
@@ -596,18 +604,18 @@ describe("TaskUtils", () => {
 
       const results = await Promise.all(promises);
 
-      expect(results).toHaveLength(5);
-      expect(mockFetch).toHaveBeenCalledTimes(5);
+      expect(results).toHaveLength(RETRY_COUNT);
+      expect(mockFetch).toHaveBeenCalledTimes(RETRY_COUNT);
     });
 
     it("handles API timeouts gracefully", async () => {
-      jest.setTimeout(10000);
+      jest.setTimeout(LONG_MESSAGE_LENGTH);
 
       mockFetch.mockImplementationOnce(() => {
         return new Promise((_, reject) => {
           setTimeout(() => {
             reject(new Error("Timeout"));
-          }, 100);
+          }, API_TIMEOUT_MS);
         });
       });
 
@@ -621,7 +629,7 @@ describe("TaskUtils", () => {
     });
 
     it("efficiently handles large message payloads", async () => {
-      const largeMessage = "x".repeat(1000000); // 1MB message
+      const largeMessage = "x".repeat(LARGE_DATA_SIZE); // 1MB message
       const mockResponse = { success: true };
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -633,7 +641,7 @@ describe("TaskUtils", () => {
       const endTime = performance.now();
 
       expect(result).toEqual(mockResponse);
-      expect(endTime - startTime).toBeLessThan(1000); // Should handle efficiently
+      expect(endTime - startTime).toBeLessThan(PERFORMANCE_THRESHOLD_MS); // Should handle efficiently
     });
   });
 
@@ -719,11 +727,17 @@ describe("TaskUtils", () => {
         "task%00",
       ];
 
-      for (const invalidId of invalidTaskIds) {
-        const result = await fetchTaskById(invalidId);
+      // Test all invalid IDs with Promise.all to avoid await in loop
+      const results = await Promise.all(
+        invalidTaskIds.map(async (invalidId) => {
+          return fetchTaskById(invalidId);
+        }),
+      );
+
+      results.forEach((result) => {
         expect(result).toBeNull();
-        expect(mockFetch).not.toHaveBeenCalled();
-      }
+      });
+      expect(mockFetch).not.toHaveBeenCalled();
     });
 
     it("handles null and undefined parameters safely", async () => {
@@ -773,10 +787,14 @@ describe("TaskUtils", () => {
 
 // Export test utilities for other API-related tests
 export const TaskUtilsTestUtils = {
-  createMockFetchResponse: (data: unknown, ok = true, status = 200) => ({
+  createMockFetchResponse: (
+    data: unknown,
+    ok = true,
+    status = HTTP_OK,
+  ): Partial<Response> => ({
     ok,
     status,
-    json: async () => data,
+    json: async (): Promise<unknown> => data,
   }),
 
   createMockTask: (overrides: Partial<Task> = {}): Task => ({
@@ -800,17 +818,17 @@ export const TaskUtilsTestUtils = {
 
   setupMockFetch: (
     responses: { data: unknown; ok?: boolean; status?: number }[],
-  ) => {
+  ): void => {
     responses.forEach((response) => {
       mockFetch.mockResolvedValueOnce({
         ok: response.ok ?? true,
-        status: response.status ?? 200,
+        status: response.status ?? HTTP_OK,
         json: async () => response.data,
       } as Response);
     });
   },
 
-  verifyFetchCall: (url: string, options?: RequestInit) => {
+  verifyFetchCall: (url: string, options?: RequestInit): void => {
     expect(mockFetch).toHaveBeenCalledWith(url, options);
   },
 };

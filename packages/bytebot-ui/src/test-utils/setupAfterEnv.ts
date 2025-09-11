@@ -27,7 +27,7 @@ expect.extend({
     received: HTMLElement,
     className: string,
   ): jest.CustomMatcherResult {
-    if (!received?.classList) {
+    if (received?.classList == null) {
       return {
         message: () => `Expected element to have classList property`,
         pass: false,
@@ -114,7 +114,7 @@ expect.extend({
    * Validates that an element is accessible
    */
   toBeAccessible(received: HTMLElement): jest.CustomMatcherResult {
-    if (!received) {
+    if (received == null) {
       return {
         message: () => `Expected element to exist`,
         pass: false,
@@ -242,7 +242,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  const testName = expect.getState().currentTestName || "unknown";
+  const testName = expect.getState().currentTestName ?? "unknown";
   const duration = Date.now() - testStartTime;
   const endMemory = process.memoryUsage();
 

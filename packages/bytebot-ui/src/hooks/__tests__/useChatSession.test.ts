@@ -462,7 +462,9 @@ describe("useChatSession Hook", () => {
       expect(result.current.isLoading).toBe(true);
 
       act(() => {
-        resolveAddMessage!({ success: true });
+        if (resolveAddMessage) {
+          resolveAddMessage({ success: true });
+        }
       });
 
       await addMessagePromiseAct;

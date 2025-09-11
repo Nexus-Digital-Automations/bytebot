@@ -74,7 +74,7 @@ jest.mock("@/components/ui/button", () => ({
       data-testid="button"
       {...props}
     >
-      {icon && <span data-testid="button-icon">{icon}</span>}
+      {icon != null && <span data-testid="button-icon">{icon}</span>}
       {children}
     </button>
   ),

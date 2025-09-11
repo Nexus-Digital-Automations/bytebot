@@ -7,7 +7,7 @@ interface VncViewerProps {
   viewOnly?: boolean;
 }
 
-export function VncViewer({ viewOnly = true }: VncViewerProps) {
+export function VncViewer({ viewOnly = true }: VncViewerProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const [VncComponent, setVncComponent] = useState<React.ComponentType<{
     rfbOptions?: Record<string, unknown>;
@@ -39,14 +39,16 @@ export function VncViewer({ viewOnly = true }: VncViewerProps) {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") {return;} // SSR safety‑net
+    if (typeof window === "undefined") {
+      return;
+    } // SSR safety‑net
     const proto = window.location.protocol === "https:" ? "wss" : "ws";
     setWsUrl(`${proto}://${window.location.host}/api/proxy/websockify`);
   }, []);
 
   return (
     <div ref={containerRef} className="h-full w-full">
-      {VncComponent && wsUrl && (
+      {VncComponent != null && wsUrl != null && (
         <VncComponent
           rfbOptions={{
             secure: false,

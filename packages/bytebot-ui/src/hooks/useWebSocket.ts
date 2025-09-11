@@ -15,12 +15,18 @@ export function useWebSocket({
   onNewMessage,
   onTaskCreated,
   onTaskDeleted,
-}: UseWebSocketProps = {}) {
+}: UseWebSocketProps = {}): {
+  readonly socket: Socket | null;
+  readonly joinTask: (taskId: string) => void;
+  readonly leaveTask: () => void;
+  readonly disconnect: () => void;
+  readonly isConnected: boolean;
+} {
   const socketRef = useRef<Socket | null>(null);
   const currentTaskIdRef = useRef<string | null>(null);
 
-  const connect = useCallback(() => {
-    if (socketRef.current?.connected) {
+  const connect = useCallback((): Socket => {
+    if (socketRef.current?.connected === true) {
       return socketRef.current;
     }
 
@@ -79,9 +85,9 @@ export function useWebSocket({
   }, [onTaskUpdate, onNewMessage, onTaskCreated, onTaskDeleted]);
 
   const joinTask = useCallback(
-    (taskId: string) => {
-      const socket = socketRef.current || connect();
-      if (currentTaskIdRef.current) {
+    (taskId: string): void => {
+      const socket = socketRef.current ?? connect();
+      if (currentTaskIdRef.current != null && currentTaskIdRef.current !== "") {
         socket.emit("leave_task", currentTaskIdRef.current);
       }
       socket.emit("join_task", taskId);
@@ -91,9 +97,13 @@ export function useWebSocket({
     [connect],
   );
 
-  const leaveTask = useCallback(() => {
+  const leaveTask = useCallback((): void => {
     const socket = socketRef.current;
-    if (socket && currentTaskIdRef.current) {
+    if (
+      socket != null &&
+      currentTaskIdRef.current != null &&
+      currentTaskIdRef.current !== ""
+    ) {
       socket.emit("leave_task", currentTaskIdRef.current);
       // TODO: Add proper debug logging service
       // console.log(`Left task room: ${currentTaskIdRef.current}`);
@@ -101,7 +111,7 @@ export function useWebSocket({
     }
   }, []);
 
-  const disconnect = useCallback(() => {
+  const disconnect = useCallback((): void => {
     if (socketRef.current) {
       socketRef.current.disconnect();
       socketRef.current = null;
@@ -112,7 +122,7 @@ export function useWebSocket({
   // Initialize connection on mount
   useEffect(() => {
     connect();
-    return () => {
+    return (): void => {
       disconnect();
     };
   }, [connect, disconnect]);
@@ -122,6 +132,6 @@ export function useWebSocket({
     joinTask,
     leaveTask,
     disconnect,
-    isConnected: socketRef.current?.connected || false,
+    isConnected: socketRef.current?.connected ?? false,
   };
 }

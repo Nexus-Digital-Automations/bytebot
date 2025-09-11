@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { VirtualDesktopStatus } from "@/components/VirtualDesktopStatusHeader";
 
-export default function TaskPage() {
+export default function TaskPage(): JSX.Element {
   const params = useParams();
   const router = useRouter();
   const taskId = params.id as string;
@@ -92,7 +92,11 @@ export default function TaskPage() {
   const taskInactive = isTaskInactive();
   useEffect(() => {
     if (taskInactive && hasMoreMessages && !isLoadingMoreMessages) {
-      void loadMoreMessages();
+      loadMoreMessages().catch((error: unknown) => {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Failed to load more messages:", error);
+        }
+      });
     }
   }, [
     taskInactive,
@@ -113,7 +117,11 @@ export default function TaskPage() {
 
   // Redirect if task ID doesn't match current task
   useEffect(() => {
-    if (currentTaskId && currentTaskId !== taskId) {
+    if (
+      currentTaskId !== null &&
+      currentTaskId.length > 0 &&
+      currentTaskId !== taskId
+    ) {
       router.push(`/tasks/${currentTaskId}`);
     }
   }, [currentTaskId, taskId, router]);
@@ -129,37 +137,41 @@ export default function TaskPage() {
             <DesktopContainer
               screenshot={isTaskInactive() ? currentScreenshot : null}
               viewOnly={vncViewOnly()}
-              status={
-                (() => {
-                  if (
-                    taskStatus === TaskStatus.RUNNING &&
-                    control === Role.USER
-                  ) {
-                    return "user_control";
-                  }
-                  if (taskStatus === TaskStatus.RUNNING) {
-                    return "running";
-                  }
-                  if (taskStatus === TaskStatus.NEEDS_HELP) {
-                    return "needs_attention";
-                  }
-                  if (taskStatus === TaskStatus.FAILED) {
-                    return "failed";
-                  }
-                  if (taskStatus === TaskStatus.CANCELLED) {
-                    return "canceled";
-                  }
-                  if (taskStatus === TaskStatus.COMPLETED) {
-                    return "completed";
-                  }
-                  // You may want to add a scheduled state if you have that info
-                  return "pending";
-                })() as VirtualDesktopStatus
-              }
+              status={((): VirtualDesktopStatus => {
+                if (
+                  taskStatus === TaskStatus.RUNNING &&
+                  control === Role.USER
+                ) {
+                  return "user_control";
+                }
+                if (taskStatus === TaskStatus.RUNNING) {
+                  return "running";
+                }
+                if (taskStatus === TaskStatus.NEEDS_HELP) {
+                  return "needs_attention";
+                }
+                if (taskStatus === TaskStatus.FAILED) {
+                  return "failed";
+                }
+                if (taskStatus === TaskStatus.CANCELLED) {
+                  return "canceled";
+                }
+                if (taskStatus === TaskStatus.COMPLETED) {
+                  return "completed";
+                }
+                // You may want to add a scheduled state if you have that info
+                return "pending";
+              })()}
             >
               {canTakeOver() && (
                 <Button
-                  onClick={() => void handleTakeOverTask()}
+                  onClick={() => {
+                    handleTakeOverTask().catch((error: unknown) => {
+                      if (process.env.NODE_ENV === "development") {
+                        console.error("Take over task error:", error);
+                      }
+                    });
+                  }}
                   variant="default"
                   size="sm"
                   icon={
@@ -174,7 +186,13 @@ export default function TaskPage() {
               )}
               {hasUserControl() && (
                 <Button
-                  onClick={() => void handleResumeTask()}
+                  onClick={() => {
+                    handleResumeTask().catch((error: unknown) => {
+                      if (process.env.NODE_ENV === "development") {
+                        console.error("Resume task error:", error);
+                      }
+                    });
+                  }}
                   variant="default"
                   size="sm"
                 >
@@ -193,7 +211,13 @@ export default function TaskPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                      onClick={() => void handleCancelTask()}
+                      onClick={() => {
+                        handleCancelTask().catch((error: unknown) => {
+                          if (process.env.NODE_ENV === "development") {
+                            console.error("Cancel task error:", error);
+                          }
+                        });
+                      }}
                       className="text-red-600 focus:bg-red-50"
                     >
                       Cancel

@@ -46,7 +46,7 @@ jest.mock("@hugeicons/react", () => ({
     <div
       data-testid="huge-icon"
       className={className}
-      data-icon={icon?.name || "unknown"}
+      data-icon={icon?.name ?? "unknown"}
     >
       Icon
     </div>
@@ -97,7 +97,9 @@ describe("TaskItem Component", () => {
 
     // Ensure stringUtils mock is working
     (capitalizeFirstChar as jest.Mock).mockImplementation((str: string) => {
-      if (!str) {return str;}
+      if (!str) {
+        return str;
+      }
       return str.charAt(0).toUpperCase() + str.slice(1);
     });
   });

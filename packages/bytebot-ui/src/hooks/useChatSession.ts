@@ -210,8 +210,14 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
         setMessages((prev: Message[]) => [...prev, message]);
 
         // Reload grouped messages to reflect the new message
-        // Use void to explicitly ignore the promise return
-        void reloadGroupedMessages();
+        // Fire and forget - ignore promise return
+        reloadGroupedMessages().catch((error: unknown) => {
+          handleAsyncError(
+            "reloading grouped messages after new message",
+            error,
+            "handleNewMessage",
+          );
+        });
       } else {
         logDebug(
           "Message already processed or not for current task",
@@ -351,7 +357,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
         // Validate and format messages
         const validMessages = newMessages.filter((msg): msg is Message => {
           const isValid =
-            msg &&
+            msg != null &&
             typeof msg === "object" &&
             typeof msg.id === "string" &&
             msg.id.length > 0;
@@ -471,13 +477,13 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
 
         // Handle messages fetch result
         const messagesResult =
-          messages.status === "fulfilled" ? messages.value : [];
-        if (messages.status === "rejected") {
+          taskMessages.status === "fulfilled" ? taskMessages.value : [];
+        if (taskMessages.status === "rejected") {
           logError(
             "Failed to fetch messages",
             {
               taskId: initialTaskId,
-              error: messages.reason,
+              error: taskMessages.reason,
             },
             "useChatSession",
           );
@@ -525,7 +531,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
           // Validate and process all messages
           const validMessages = messagesResult.filter((msg): msg is Message => {
             const isValid =
-              msg &&
+              msg != null &&
               typeof msg === "object" &&
               typeof msg.id === "string" &&
               msg.id.length > 0;
@@ -570,8 +576,10 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
       }
     };
 
-    // Use void to explicitly handle the async call
-    void loadSession();
+    // Fire and forget - ignore promise return
+    loadSession().catch((error: unknown) => {
+      handleAsyncError("loading session", error, "useEffect loadSession");
+    });
   }, [initialTaskId]);
 
   /**

@@ -14,7 +14,11 @@ interface UseScrollScreenshotProps {
 export function useScrollScreenshot({
   messages,
   scrollContainerRef,
-}: UseScrollScreenshotProps) {
+}: UseScrollScreenshotProps): {
+  readonly currentScreenshot: ScreenshotData | null;
+  readonly allScreenshots: ScreenshotData[];
+  readonly hasScreenshots: boolean;
+} {
   const [currentScreenshot, setCurrentScreenshot] =
     useState<ScreenshotData | null>(null);
   const [allScreenshots, setAllScreenshots] = useState<ScreenshotData[]>([]);
@@ -54,7 +58,9 @@ export function useScrollScreenshot({
 
   // After initial render, force a re-check for screenshot markers using MutationObserver
   useEffect(() => {
-    if (!scrollContainerRef.current) {return;}
+    if (!scrollContainerRef.current) {
+      return;
+    }
 
     const container = scrollContainerRef.current;
     let mutationTimeout: NodeJS.Timeout;
@@ -68,7 +74,7 @@ export function useScrollScreenshot({
 
     observer.observe(container, { childList: true, subtree: true });
 
-    return () => {
+    return (): void => {
       clearTimeout(mutationTimeout);
       observer.disconnect();
     };
@@ -76,11 +82,15 @@ export function useScrollScreenshot({
 
   // Handle scroll events to update current screenshot
   const handleScroll = useCallback(
-    (scrollElement: HTMLElement) => {
-      if (allScreenshots.length === 0) {return;}
+    (scrollElement: HTMLElement): void => {
+      if (allScreenshots.length === 0) {
+        return;
+      }
 
       const now = Date.now();
-      if (now - lastScrollTime.current < 100) {return;}
+      if (now - lastScrollTime.current < 100) {
+        return;
+      }
       lastScrollTime.current = now;
 
       setTimeout(() => {
@@ -106,9 +116,11 @@ export function useScrollScreenshot({
   // Attach scroll listener
   useEffect(() => {
     const container = scrollContainerRef.current;
-    if (!container) {return;}
+    if (!container) {
+      return;
+    }
 
-    const scrollHandler = (e: Event) => {
+    const scrollHandler = (e: Event): void => {
       // Only handle scroll events from the actual container
       if (e.target === container) {
         handleScroll(container);
@@ -118,7 +130,9 @@ export function useScrollScreenshot({
     // Only attach to the container itself
     container.addEventListener("scroll", scrollHandler, { passive: true });
 
-    return () => { container.removeEventListener("scroll", scrollHandler); };
+    return (): void => {
+      container.removeEventListener("scroll", scrollHandler);
+    };
   }, [handleScroll, scrollContainerRef]);
 
   return {

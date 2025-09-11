@@ -28,7 +28,7 @@ export function AssistantMessage({
     >
       <MessageAvatar role={group.role} />
 
-      {group.take_over ? (
+      {(group.take_over ?? false) ? (
         <div className="border-bytebot-bronze-light-a6 bg-bytebot-bronze-light-a1 w-full rounded-2xl border p-2">
           <div className="flex items-center gap-2">
             <Image
@@ -51,7 +51,7 @@ export function AssistantMessage({
                 {message.content.map((block, blockIndex) => {
                   if (
                     isToolResultContentBlock(block) &&
-                    block.content &&
+                    block.content != null &&
                     block.content.length > 0
                   ) {
                     // Check ALL content items in the tool result, not just the first one
@@ -97,8 +97,8 @@ export function AssistantMessage({
               {message.content.map((block, blockIndex) => {
                 if (
                   isToolResultContentBlock(block) &&
-                  !block.is_error &&
-                  block.content &&
+                  !(block.is_error ?? false) &&
+                  block.content != null &&
                   block.content.length > 0
                 ) {
                   // Check ALL content items in the tool result, not just the first one

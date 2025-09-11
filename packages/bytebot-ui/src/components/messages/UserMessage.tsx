@@ -13,11 +13,14 @@ interface UserMessageProps {
   messageIdToIndex: Record<string, number>;
 }
 
-export function UserMessage({ group, messageIdToIndex }: UserMessageProps) {
+export function UserMessage({
+  group,
+  messageIdToIndex,
+}: UserMessageProps): JSX.Element {
   if (messageIdToIndex[group.messages[0].id] === 0) {
     return (
-      <div className="sticky top-0 z-10 bg-bytebot-bronze-light-4">
-        <div className="border-bytebot-bronze-light-7 flex items-start justify-start gap-2 border px-4 py-3 bg-bytebot-bronze-light-2 rounded-t-lg">
+      <div className="bg-bytebot-bronze-light-4 sticky top-0 z-10">
+        <div className="border-bytebot-bronze-light-7 bg-bytebot-bronze-light-2 flex items-start justify-start gap-2 rounded-t-lg border px-4 py-3">
           <MessageAvatar role={group.role} />
 
           <div>
@@ -30,7 +33,7 @@ export function UserMessage({ group, messageIdToIndex }: UserMessageProps) {
                 {message.content.map((block, blockIndex) => {
                   if (
                     isToolResultContentBlock(block) &&
-                    block.content &&
+                    block.content != null &&
                     block.content.length > 0
                   ) {
                     // Check ALL content items in the tool result, not just the first one
@@ -49,7 +52,7 @@ export function UserMessage({ group, messageIdToIndex }: UserMessageProps) {
                               height: 0,
                               overflow: "hidden",
                             }}
-                          />
+                          />,
                         );
                       }
                     });
@@ -78,7 +81,7 @@ export function UserMessage({ group, messageIdToIndex }: UserMessageProps) {
   }
 
   return (
-    <div className="bg-bytebot-bronze-light-3 flex items-start justify-end gap-2 px-4 py-3 border-x border-bytebot-bronze-light-7">
+    <div className="bg-bytebot-bronze-light-3 border-bytebot-bronze-light-7 flex items-start justify-end gap-2 border-x px-4 py-3">
       <div>
         {group.messages.map((message) => (
           <div
@@ -89,7 +92,7 @@ export function UserMessage({ group, messageIdToIndex }: UserMessageProps) {
             {message.content.map((block, blockIndex) => {
               if (
                 isToolResultContentBlock(block) &&
-                block.content &&
+                block.content != null &&
                 block.content.length > 0
               ) {
                 // Check ALL content items in the tool result, not just the first one
@@ -108,7 +111,7 @@ export function UserMessage({ group, messageIdToIndex }: UserMessageProps) {
                           height: 0,
                           overflow: "hidden",
                         }}
-                      />
+                      />,
                     );
                   }
                 });

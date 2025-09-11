@@ -182,7 +182,7 @@ export const VirtualDesktopStatusHeader: React.FC<
             {config.text}
           </span>
         </span>
-        {config.subtext !== "" && (
+        {config.subtext != null && config.subtext !== "" && (
           <span className="block text-[12px] text-zinc-400">
             {subtext ?? config.subtext}
           </span>

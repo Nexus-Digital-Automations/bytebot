@@ -53,7 +53,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   });
 
   useEffect(() => {
-    const loadTasks = async () => {
+    const loadTasks = async (): Promise<void> => {
       setIsLoading(true);
       try {
         const result = await fetchTasks({ limit });
@@ -66,7 +66,7 @@ export const TaskList: React.FC<TaskListProps> = ({
       }
     };
 
-    loadTasks();
+    void loadTasks();
   }, [limit]);
 
   return (

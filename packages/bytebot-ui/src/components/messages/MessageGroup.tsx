@@ -1,6 +1,5 @@
 import React from "react";
-import { Role, TaskStatus } from "@/types";
-import { GroupedMessages } from "@/types";
+import { GroupedMessages, Role, TaskStatus } from "@/types";
 import { AssistantMessage } from "./AssistantMessage";
 import { UserMessage } from "./UserMessage";
 

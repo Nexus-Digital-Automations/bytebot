@@ -58,7 +58,9 @@ export function ChatContainer({
       hasMoreMessages &&
       !isLoadingMoreMessages
     ) {
-      void loadMoreMessages();
+      loadMoreMessages().catch((error: unknown) => {
+        console.error("Failed to load more messages:", error);
+      });
     }
   }, [scrollRef, loadMoreMessages, hasMoreMessages, isLoadingMoreMessages]);
 
@@ -90,13 +92,18 @@ export function ChatContainer({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  return (
-    <div className="bg-bytebot-bronze-light-3 flex h-full flex-col">
-      {isLoadingSession ? (
+  // Determine what to render based on state
+  const renderContent = (): JSX.Element => {
+    if (isLoadingSession) {
+      return (
         <div className="bg-bytebot-bronze-light-3 border-bytebot-bronze-light-7 flex h-full min-h-80 items-center justify-center overflow-hidden rounded-lg border">
           <Loader size={32} />
         </div>
-      ) : groupedMessages.length > 0 ? (
+      );
+    }
+
+    if (groupedMessages.length > 0) {
+      return (
         <>
           {/* Content area - scrolling handled by parent */}
           <div className="flex-1">
@@ -145,7 +152,11 @@ export function ChatContainer({
                     input={input}
                     isLoading={isLoading}
                     onInputChange={setInput}
-                    onSend={handleAddMessage}
+                    onSend={() => {
+                      handleAddMessage().catch((error: unknown) => {
+                        console.error("Failed to add message:", error);
+                      });
+                    }}
                     minLines={1}
                     placeholder="Add more details to your task..."
                   />
@@ -154,11 +165,19 @@ export function ChatContainer({
             </div>
           )}
         </>
-      ) : (
-        <div className="flex h-full items-center justify-center">
-          <p className="">No messages yet...</p>
-        </div>
-      )}
+      );
+    }
+
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="">No messages yet...</p>
+      </div>
+    );
+  };
+
+  return (
+    <div className="bg-bytebot-bronze-light-3 flex h-full flex-col">
+      {renderContent()}
     </div>
   );
 }

@@ -7,6 +7,7 @@ export enum LogLevel {
   ERROR = 0,
   WARN = 1,
   INFO = 2,
+  // eslint-disable-next-line no-magic-numbers -- Enum values are acceptable magic numbers
   DEBUG = 3,
 }
 
@@ -29,9 +30,7 @@ class Logger {
   }
 
   public static getInstance(): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger();
-    }
+    Logger.instance ??= new Logger();
     return Logger.instance;
   }
 
@@ -55,7 +54,12 @@ class Logger {
   private formatMessage(entry: LogEntry): string {
     const timestamp = entry.timestamp.toISOString();
     const levelStr = LogLevel[entry.level];
-    const context = entry.context ? `[${entry.context}] ` : "";
+    const context =
+      entry.context !== undefined &&
+      entry.context !== null &&
+      entry.context.length > 0
+        ? `[${entry.context}] `
+        : "";
     return `${timestamp} ${levelStr}: ${context}${entry.message}`;
   }
 
@@ -65,7 +69,9 @@ class Logger {
     data?: unknown,
     context?: string,
   ): void {
-    if (!this.shouldLog(level)) {return;}
+    if (!this.shouldLog(level)) {
+      return;
+    }
 
     const entry: LogEntry = {
       level,
@@ -80,7 +86,7 @@ class Logger {
     // Use appropriate console method based on level
     switch (level) {
       case LogLevel.ERROR:
-        if (data) {
+        if (data !== undefined && data !== null) {
           // eslint-disable-next-line no-console
           console.error(formattedMessage, data);
         } else {
@@ -89,7 +95,7 @@ class Logger {
         }
         break;
       case LogLevel.WARN:
-        if (data) {
+        if (data !== undefined && data !== null) {
           // eslint-disable-next-line no-console
           console.warn(formattedMessage, data);
         } else {
@@ -98,7 +104,7 @@ class Logger {
         }
         break;
       case LogLevel.INFO:
-        if (data) {
+        if (data !== undefined && data !== null) {
           // eslint-disable-next-line no-console
           console.info(formattedMessage, data);
         } else {
@@ -107,7 +113,7 @@ class Logger {
         }
         break;
       case LogLevel.DEBUG:
-        if (data) {
+        if (data !== undefined && data !== null) {
           // eslint-disable-next-line no-console
           console.log(formattedMessage, data);
         } else {
@@ -143,18 +149,30 @@ export const logError = (
   message: string,
   error?: unknown,
   context?: string,
-) => {
+): void => {
   logger.error(message, error, context);
 };
 
-export const logWarn = (message: string, data?: unknown, context?: string) => {
+export const logWarn = (
+  message: string,
+  data?: unknown,
+  context?: string,
+): void => {
   logger.warn(message, data, context);
 };
 
-export const logInfo = (message: string, data?: unknown, context?: string) => {
+export const logInfo = (
+  message: string,
+  data?: unknown,
+  context?: string,
+): void => {
   logger.info(message, data, context);
 };
 
-export const logDebug = (message: string, data?: unknown, context?: string) => {
+export const logDebug = (
+  message: string,
+  data?: unknown,
+  context?: string,
+): void => {
   logger.debug(message, data, context);
 };

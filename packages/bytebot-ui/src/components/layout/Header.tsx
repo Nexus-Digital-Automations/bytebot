@@ -12,7 +12,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { usePathname } from "next/navigation";
 
-export function Header() {
+export function Header(): JSX.Element {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
@@ -23,15 +23,15 @@ export function Header() {
   }, []);
 
   // Function to determine if a link is active
-  const isActive = (path: string) => {
+  const isActive = (path: string): boolean => {
     if (path === "/") {
       return pathname === "/";
     }
-    return pathname?.startsWith(path);
+    return pathname?.startsWith(path) ?? false;
   };
 
   // Get classes for navigation links based on active state
-  const getLinkClasses = (path: string) => {
+  const getLinkClasses = (path: string): string => {
     const baseClasses =
       "flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-lg";
     const activeClasses =

@@ -80,7 +80,7 @@ export async function fetchTaskMessages(
     `/tasks/${taskId}/messages${queryString}`,
     { method: "GET" },
   );
-  return result || [];
+  return result ?? [];
 }
 
 /**
@@ -98,7 +98,7 @@ export async function fetchTaskRawMessages(
     `/tasks/${taskId}/messages/raw${queryString}`,
     { method: "GET" },
   );
-  return result || [];
+  return result ?? [];
 }
 
 /**
@@ -116,7 +116,7 @@ export async function fetchTaskProcessedMessages(
     `/tasks/${taskId}/messages/processed${queryString}`,
     { method: "GET" },
   );
-  return result || [];
+  return result ?? [];
 }
 
 /**
@@ -164,9 +164,15 @@ export async function fetchTasks(options?: {
 }): Promise<{ tasks: Task[]; total: number; totalPages: number }> {
   const params: Record<string, string | number> = {};
 
-  if (options?.page) {params.page = options.page;}
-  if (options?.limit) {params.limit = options.limit;}
-  if (options?.status) {params.status = options.status;}
+  if (options?.page !== undefined && options.page !== null) {
+    params.page = options.page;
+  }
+  if (options?.limit !== undefined && options.limit !== null) {
+    params.limit = options.limit;
+  }
+  if (options?.status !== undefined && options.status !== null) {
+    params.status = options.status;
+  }
   if (options?.statuses && options.statuses.length > 0) {
     params.statuses = options.statuses.join(",");
   }
@@ -178,7 +184,7 @@ export async function fetchTasks(options?: {
     total: number;
     totalPages: number;
   }>(`/tasks${queryString}`, { method: "GET" });
-  return result || { tasks: [], total: 0, totalPages: 0 };
+  return result ?? { tasks: [], total: 0, totalPages: 0 };
 }
 
 /**

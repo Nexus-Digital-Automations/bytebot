@@ -19,7 +19,8 @@ export function extractScreenshots(messages: Message[]): ScreenshotData[] {
       // Check if this is a tool result block with images
       if (
         isToolResultContentBlock(block) &&
-        block.content &&
+        block.content !== undefined &&
+        block.content !== null &&
         block.content.length > 0
       ) {
         // Check ALL content items in the tool result, not just the first one
@@ -42,6 +43,9 @@ export function extractScreenshots(messages: Message[]): ScreenshotData[] {
 /**
  * Gets the screenshot that should be displayed based on scroll position
  */
+// Minimum visibility threshold for element selection
+const MIN_VISIBILITY_THRESHOLD = 0.1;
+
 export function getScreenshotForScrollPosition(
   screenshots: ScreenshotData[],
   messages: Message[],
@@ -71,14 +75,10 @@ export function getScreenshotForScrollPosition(
   let lastMarkerBlockIndex = -1;
 
   screenshotElements.forEach((element) => {
-    const messageIndex = parseInt(
-      (element as HTMLElement).dataset.messageIndex ?? "0",
-      10,
-    );
-    const blockIndex = parseInt(
-      (element as HTMLElement).dataset.blockIndex ?? "0",
-      10,
-    );
+    const messageIndexStr = (element as HTMLElement).dataset.messageIndex;
+    const blockIndexStr = (element as HTMLElement).dataset.blockIndex;
+    const messageIndex = parseInt(messageIndexStr ?? "0", 10);
+    const blockIndex = parseInt(blockIndexStr ?? "0", 10);
     const elementTop = (element as HTMLElement).offsetTop;
     const elementHeight = (element as HTMLElement).offsetHeight;
     const elementBottom = elementTop + elementHeight;
@@ -119,7 +119,7 @@ export function getScreenshotForScrollPosition(
 
       // Prefer elements that are closer to our target position and more visible
       if (
-        visibility > 0.1 &&
+        visibility > MIN_VISIBILITY_THRESHOLD &&
         (distanceFromTarget < minDistanceFromTarget ||
           (distanceFromTarget === minDistanceFromTarget &&
             visibility > bestVisibility))
@@ -136,14 +136,10 @@ export function getScreenshotForScrollPosition(
   if (bestVisibleMessageIndex === -1 && lastMarkerMessageIndex !== -1) {
     // Check if we're scrolled past the last marker
     const lastMarker = Array.from(screenshotElements).find((element) => {
-      const msgIdx = parseInt(
-        (element as HTMLElement).dataset.messageIndex ?? "0",
-        10,
-      );
-      const blockIdx = parseInt(
-        (element as HTMLElement).dataset.blockIndex ?? "0",
-        10,
-      );
+      const msgIndexStr = (element as HTMLElement).dataset.messageIndex;
+      const blockIndexStr = (element as HTMLElement).dataset.blockIndex;
+      const msgIdx = parseInt(msgIndexStr ?? "0", 10);
+      const blockIdx = parseInt(blockIndexStr ?? "0", 10);
       return (
         msgIdx === lastMarkerMessageIndex && blockIdx === lastMarkerBlockIndex
       );
