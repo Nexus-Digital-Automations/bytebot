@@ -178,15 +178,15 @@ export class GlobalValidationPipe implements PipeTransform<any> {
       this.logger.error(`[${operationId}] BytebotD validation failed`, {
         operationId,
         type: metadata.type,
-        metatype: metadata.metatype?._name,
-        error: __error.message,
+        metatype: metadata.metatype?.name,
+        error: _error.message,
         processingTimeMs: processingTime,
       });
 
       // Log security event for validation failures
       this.logSecurityEvent(operationId, _error, value, metadata);
 
-      throw error;
+      throw _error;
     }
   }
 
