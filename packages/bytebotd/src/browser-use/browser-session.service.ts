@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { v4 as _uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   CreateBrowserSessionDto,
   BrowserSessionDto,
@@ -23,7 +23,7 @@ import {
  */
 @Injectable()
 export class BrowserSessionService {
-  private readonly logger = new Logger(BrowserSessionService._name);
+  private readonly logger = new Logger(BrowserSessionService.name);
   private readonly sessions: Map<string, BrowserSessionDto> = new Map();
   private readonly sessionCleanupInterval: NodeJS.Timeout;
 
@@ -47,35 +47,35 @@ export class BrowserSessionService {
 
     this.logger.log(`Creating new browser session: ${sessionId}`, {
       sessionId,
-      name: dto.name,
-      headless: dto.headless,
-      viewport: `${dto.viewportWidth}x${_dto.viewportHeight}`,
+      name: _dto.name,
+      headless: _dto.headless,
+      viewport: `${_dto.viewportWidth}x${_dto.viewportHeight}`,
     });
 
     try {
       // Create initial session object
       const session: BrowserSessionDto = {
         sessionId,
-        name: dto.name || `Browser Session ${Date.now()}`,
+        name: _dto.name || `Browser Session ${Date.now()}`,
         status: BrowserSessionStatus.CREATING,
         browserPid: 0, // Will be set when browser starts
         createdAt: now,
         lastActivityAt: now,
         viewport: {
-          width: dto.viewportWidth || 1920,
-          height: dto.viewportHeight || 1080,
+          width: _dto.viewportWidth || 1920,
+          height: _dto.viewportHeight || 1080,
         },
         config: {
-          headless: dto.headless || false,
-          devtools: dto.devtools || false,
-          userAgent: dto.userAgent,
-          proxy: dto.proxy
+          headless: _dto.headless || false,
+          devtools: _dto.devtools || false,
+          userAgent: _dto.userAgent,
+          proxy: _dto.proxy
             ? {
-                server: dto.proxy.server,
-                username: dto.proxy.username,
+                server: _dto.proxy.server,
+                username: _dto.proxy.username,
               }
             : undefined,
-          profilePath: dto.profilePath,
+          profilePath: _dto.profilePath,
         },
         tabs: [],
         activeTabId: '',
@@ -86,7 +86,7 @@ export class BrowserSessionService {
           totalActions: 0,
           upTimeMs: 0,
         },
-        metadata: dto.metadata,
+        metadata: _dto.metadata,
       };
 
       // Store session
@@ -96,7 +96,7 @@ export class BrowserSessionService {
       await this.initializeBrowserSession(session, _dto);
 
       // Create initial tabs if specified
-      if (dto.initialUrls && _dto.initialUrls.length > 0) {
+      if (_dto.initialUrls && _dto.initialUrls.length > 0) {
         for (const url of _dto.initialUrls) {
           await this.createTab(sessionId, { url, makeActive: false });
         }
@@ -127,24 +127,24 @@ export class BrowserSessionService {
 
       return session;
     } catch (_err) {
-      this.logger._err(`Failed to create browser session: ${sessionId}`, err);
+      this.logger.error(`Failed to create browser session: ${sessionId}`, _err);
 
       // Update session with error status
       const errorSession = this.sessions.get(sessionId);
       if (errorSession) {
         errorSession.status = BrowserSessionStatus.ERROR;
         errorSession.errorInfo = {
-          message: err instanceof Error ? err.message : String(err),
+          message: _err instanceof Error ? _err.message : String(_err),
           code: 'SESSION_CREATION_FAILED',
           timestamp: new Date(),
           details: {
-            error: err instanceof Error ? err.stack : String(err),
+            error: _err instanceof Error ? _err.stack : String(_err),
           },
         };
         this.sessions.set(sessionId, errorSession);
       }
 
-      throw err;
+      throw _err;
     }
   }
 
@@ -212,16 +212,16 @@ export class BrowserSessionService {
         tabsProcessed: session.statistics.totalTabs,
       });
     } catch (_err) {
-      this.logger._err(`Failed to close browser session: ${sessionId}`, err);
+      this.logger.error(`Failed to close browser session: ${sessionId}`, _err);
 
       session.status = BrowserSessionStatus.ERROR;
       session.errorInfo = {
-        message: err instanceof Error ? err.message : String(err),
+        message: _err instanceof Error ? _err.message : String(_err),
         code: 'SESSION_CLOSE_FAILED',
         timestamp: new Date(),
       };
 
-      throw err;
+      throw _err;
     }
   }
 
@@ -461,9 +461,9 @@ export class BrowserSessionService {
         await this.closeSession(sessionId);
         this.logger.log(`Cleaned up expired session: ${sessionId}`);
       } catch (_err) {
-        this.logger._err(
+        this.logger.error(
           `Failed to cleanup expired session: ${sessionId}`,
-          err,
+          _err,
         );
       }
     }

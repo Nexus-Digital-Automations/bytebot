@@ -1,17 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { v4 as _uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { BrowserUseService } from './browser-use.service';
 import { BrowserTaskService } from './browser-task.service';
 import {
   CreateAsyncJobDto,
   AsyncJobResultDto,
-  _AsyncJobStatus,
+  AsyncJobStatus,
   AsyncJobType,
   AsyncJobPriority,
 } from './dto/async-job.dto';
 import {
-  _CreateBrowserTaskDto,
-  _BrowserTaskStatus,
+  CreateBrowserTaskDto,
+  BrowserTaskStatus,
 } from './dto/browser-task.dto';
 
 /**
@@ -31,7 +31,7 @@ import {
  */
 @Injectable()
 export class BrowserAsyncJobService {
-  private readonly logger = new Logger(BrowserAsyncJobService._name);
+  private readonly logger = new Logger(BrowserAsyncJobService.name);
   private readonly jobs: Map<string, AsyncJobResultDto> = new Map();
   private readonly jobQueue: string[] = [];
   private readonly processingJobs = new Set<string>();
@@ -59,33 +59,33 @@ export class BrowserAsyncJobService {
     const jobId = uuidv4();
     const now = new Date();
 
-    this.logger.log(`Creating async job: ${dto.name}`, {
+    this.logger.log(`Creating async job: ${_dto.name}`, {
       jobId,
-      name: dto.name,
-      jobType: dto.jobType,
-      priority: dto.priority,
+      name: _dto.name,
+      jobType: _dto.jobType,
+      priority: _dto.priority,
       estimatedDurationMs: _dto.estimatedDurationMs,
     });
 
     try {
       const job: AsyncJobResultDto = {
         jobId,
-        name: dto.name,
-        description: dto.description,
-        jobType: dto.jobType,
+        name: _dto.name,
+        description: _dto.description,
+        jobType: _dto.jobType,
         status: AsyncJobStatus.QUEUED,
-        priority: dto.priority || AsyncJobPriority.NORMAL,
+        priority: _dto.priority || AsyncJobPriority.NORMAL,
         progress: {
           currentStep: 'Job queued for processing',
           completedSteps: 0,
           totalSteps: this.estimateTotalSteps(_dto),
           percentage: 0,
-          estimatedRemainingMs: dto.estimatedDurationMs || 300000,
+          estimatedRemainingMs: _dto.estimatedDurationMs || 300000,
         },
         createdAt: now,
         queuedAt: now,
-        estimatedDurationMs: dto.estimatedDurationMs || 300000,
-        configuration: dto.configuration,
+        estimatedDurationMs: _dto.estimatedDurationMs || 300000,
+        configuration: _dto.configuration,
         results: {
           tasksCompleted: 0,
           totalTasks: 0,
@@ -95,10 +95,10 @@ export class BrowserAsyncJobService {
         },
         metadata: {
           retryCount: 0,
-          maxRetries: dto.maxRetries || 3,
+          maxRetries: _dto.maxRetries || 3,
           createdBy: 'browser-automation-api',
-          tags: dto.tags || [],
-          ...dto.metadata,
+          tags: _dto.tags || [],
+          ..._dto.metadata,
         },
       };
 
@@ -116,8 +116,8 @@ export class BrowserAsyncJobService {
 
       return job;
     } catch (_err) {
-      this.logger._err(`Failed to create async job: ${dto._name}`, err);
-      throw err;
+      this.logger.error(`Failed to create async job: ${_dto.name}`, _err);
+      throw _err;
     }
   }
 
@@ -210,7 +210,7 @@ export class BrowserAsyncJobService {
         try {
           await this.taskService.cancelTask(taskId);
         } catch (_err) {
-          this.logger.warn(`Failed to cancel associated task: ${taskId}`, err);
+          this.logger.warn(`Failed to cancel associated task: ${taskId}`, _err);
         }
       }
     }
@@ -256,7 +256,7 @@ export class BrowserAsyncJobService {
         try {
           await this.taskService.deleteTask(taskId);
         } catch (_err) {
-          this.logger.warn(`Failed to delete associated task: ${taskId}`, err);
+          this.logger.warn(`Failed to delete associated task: ${taskId}`, _err);
         }
       }
     }
@@ -383,8 +383,8 @@ export class BrowserAsyncJobService {
     try {
       await this.processJob(job);
     } catch (_err) {
-      this.logger._err(`Job processing failed: ${jobId}`, err);
-      await this.handleJobFailure(jobId, err);
+      this.logger.error(`Job processing failed: ${jobId}`, _err);
+      await this.handleJobFailure(jobId, _err);
     } finally {
       this.processingJobs.delete(jobId);
     }
@@ -483,17 +483,17 @@ export class BrowserAsyncJobService {
       } catch (_err) {
         job.results.logs.push({
           timestamp: new Date(),
-          level: '_err',
+          level: 'error',
           message: `Task failed: ${taskConfig.name}`,
           metadata: {
             taskIndex: i,
-            error: err instanceof Error ? err.message : String(err),
+            error: _err instanceof Error ? _err.message : String(_err),
           },
         });
 
         // Continue with next task unless configured to stop on error
         if (!config.continueOnError) {
-          throw err;
+          throw _err;
         }
       }
     }
@@ -544,16 +544,16 @@ export class BrowserAsyncJobService {
       } catch (_err) {
         job.results.logs.push({
           timestamp: new Date(),
-          level: '_err',
+          level: 'error',
           message: `Data extraction failed for: ${url}`,
           metadata: {
             url,
-            error: err instanceof Error ? err.message : String(err),
+            error: _err instanceof Error ? _err.message : String(_err),
           },
         });
 
         if (!config.continueOnError) {
-          throw err;
+          throw _err;
         }
       }
     }
@@ -633,7 +633,7 @@ export class BrowserAsyncJobService {
 
     job.status = AsyncJobStatus.FAILED;
     job.completedAt = new Date();
-    job.errorMessage = error instanceof Error ? _error.message : String(_error);
+    job.errorMessage = error instanceof Error ? error.message : String(error);
     job.progress.currentStep = `Job failed: ${job.errorMessage}`;
 
     if (job.startedAt) {
@@ -762,9 +762,9 @@ export class BrowserAsyncJobService {
   private estimateTotalSteps(_dto: CreateAsyncJobDto): number {
     switch (_dto.jobType) {
       case AsyncJobType.BATCH_AUTOMATION:
-        return dto.configuration.tasks?.length || 1;
+        return _dto.configuration.tasks?.length || 1;
       case AsyncJobType.DATA_EXTRACTION:
-        return dto.configuration.urls?.length || 1;
+        return _dto.configuration.urls?.length || 1;
       default:
         return 1;
     }

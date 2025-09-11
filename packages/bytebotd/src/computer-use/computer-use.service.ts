@@ -26,15 +26,15 @@ import {
   ClickMouseAction,
   PressMouseAction,
   DragMouseAction,
-  _ScrollAction,
-  _TypeKeysAction,
+  ScrollAction,
+  TypeKeysAction,
   PressKeysAction,
   TypeTextAction,
-  _ApplicationAction,
+  ApplicationAction,
   Application,
-  _PasteTextAction,
+  PasteTextAction,
   WriteFileAction,
-  _ReadFileAction,
+  ReadFileAction,
 } from '@bytebot/shared';
 
 // ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====
@@ -154,19 +154,19 @@ export class ErrorHandler {
    * @returns Human-readable error message
    */
   static extractErrorMessage(error: unknown): string {
-    if (_error instanceof Error) {
-      return _error.message;
+    if (error instanceof Error) {
+      return error.message;
     }
-    if (typeof _error === 'string') {
+    if (typeof error === 'string') {
       return error;
     }
-    if (__error && typeof error === 'object' && 'message' in error) {
+    if (error && typeof error === 'object' && 'message' in error) {
       const errorObj = error as { message: unknown };
       return typeof errorObj.message === 'string'
         ? errorObj.message
-        : JSON.stringify(_error);
+        : JSON.stringify(error);
     }
-    return typeof error === 'string' ? error : JSON.stringify(_error);
+    return typeof error === 'string' ? error : JSON.stringify(error);
   }
 
   /**
@@ -175,10 +175,10 @@ export class ErrorHandler {
    * @returns Error stack trace or undefined
    */
   static extractErrorStack(error: unknown): string | undefined {
-    if (_error instanceof Error) {
+    if (error instanceof Error) {
       return error.stack;
     }
-    if (__error && typeof error === 'object' && 'stack' in error) {
+    if (error && typeof error === 'object' && 'stack' in error) {
       const errorObj = error as { stack: unknown };
       return typeof errorObj.stack === 'string' ? errorObj.stack : undefined;
     }
@@ -227,7 +227,7 @@ export class ErrorHandler {
  */
 @Injectable()
 export class ComputerUseService {
-  private readonly logger = new Logger(ComputerUseService._name);
+  private readonly logger = new Logger(ComputerUseService.name);
 
   /**
    * Initialize Computer Use Service with dependency injection
@@ -297,79 +297,79 @@ export class ComputerUseService {
       switch (params.action) {
         case 'move_mouse': {
           await this.moveMouse(params);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'trace_mouse': {
           await this.traceMouse(params);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'click_mouse': {
           await this.clickMouse(params);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'press_mouse': {
           await this.pressMouse(params);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'drag_mouse': {
           await this.dragMouse(params);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'scroll': {
           await this.scroll(params);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'type_keys': {
           await this.typeKeys(params);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'press_keys': {
           await this.pressKeys(params);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'type_text': {
           await this.typeText(params);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'paste_text': {
           await this.pasteText(params);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'wait': {
           const waitParams = params as WaitActionParams;
           await this.delay(waitParams.duration);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'screenshot': {
-          result = await this.screenshot();
+          _result = await this.screenshot();
           break;
         }
         case 'cursor_position': {
-          result = await this.cursor_position();
+          _result = await this.cursor_position();
           break;
         }
         case 'application': {
           await this.application(params);
-          result = undefined;
+          _result = undefined;
           break;
         }
         case 'write_file': {
-          result = await this.writeFile(params);
+          _result = await this.writeFile(params);
           break;
         }
         case 'read_file': {
-          result = await this.readFile(params);
+          _result = await this.readFile(params);
           break;
         }
         default: {
@@ -387,18 +387,18 @@ export class ComputerUseService {
           operationId,
           actionType: params.action,
           processingTimeMs: duration,
-          hasResult: !!result,
-          resultType: result ? typeof result : undefined,
+          hasResult: !!_result,
+          resultType: _result ? typeof _result : undefined,
         },
       );
 
-      return result;
+      return _result;
     } catch (_error) {
       const duration = Date.now() - startTime;
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
       const errorStack = ErrorHandler.extractErrorStack(_error);
 
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Computer action failed: ${errorMessage}`,
         {
           operationId,
@@ -447,7 +447,7 @@ export class ComputerUseService {
       this.logger.log(`[${operationId}] Mouse movement completed successfully`);
     } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Mouse movement failed: ${errorMessage}`,
         {
           operationId,
@@ -455,7 +455,7 @@ export class ComputerUseService {
           error: errorMessage,
         },
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -537,7 +537,7 @@ export class ComputerUseService {
           error: errorMessage,
         },
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -643,7 +643,7 @@ export class ComputerUseService {
           error: errorMessage,
         },
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -690,7 +690,7 @@ export class ComputerUseService {
       );
     } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Mouse button operation failed: ${errorMessage}`,
         {
           operationId,
@@ -700,7 +700,7 @@ export class ComputerUseService {
           error: errorMessage,
         },
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -815,7 +815,7 @@ export class ComputerUseService {
           error: errorMessage,
         },
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -914,7 +914,7 @@ export class ComputerUseService {
           error: errorMessage,
         },
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -941,13 +941,13 @@ export class ComputerUseService {
       this.logger.log(`[${operationId}] Key typing completed successfully`);
     } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
-      this.logger._error(`[${operationId}] Key typing failed: ${errorMessage}`, {
+      this.logger.error(`[${operationId}] Key typing failed: ${errorMessage}`, {
         operationId,
         keys,
         delay,
         error: errorMessage,
       });
-      throw error;
+      throw _error;
     }
   }
 
@@ -977,7 +977,7 @@ export class ComputerUseService {
       );
     } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Key ${press} operation failed: ${errorMessage}`,
         {
           operationId,
@@ -986,7 +986,7 @@ export class ComputerUseService {
           error: errorMessage,
         },
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -1014,7 +1014,7 @@ export class ComputerUseService {
       this.logger.log(`[${operationId}] Text typing completed successfully`);
     } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Text typing failed: ${errorMessage}`,
         {
           operationId,
@@ -1023,7 +1023,7 @@ export class ComputerUseService {
           error: errorMessage,
         },
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -1047,7 +1047,7 @@ export class ComputerUseService {
       this.logger.log(`[${operationId}] Text pasting completed successfully`);
     } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Text pasting failed: ${errorMessage}`,
         {
           operationId,
@@ -1055,7 +1055,7 @@ export class ComputerUseService {
           error: errorMessage,
         },
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -1126,13 +1126,13 @@ export class ComputerUseService {
         base64Length: image.length,
       });
 
-      return result;
+      return _result;
     } catch (_error) {
       const duration = Date.now() - startTime;
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
       const errorStack = ErrorHandler.extractErrorStack(_error);
 
-      this.logger._error(`[${operationId}] Screenshot failed: ${errorMessage}`, {
+      this.logger.error(`[${operationId}] Screenshot failed: ${errorMessage}`, {
         operationId,
         processingTimeMs: duration,
         error: errorMessage,
@@ -1172,14 +1172,14 @@ export class ComputerUseService {
         `[${operationId}] Cursor position retrieved successfully`,
         {
           operationId,
-          position: { x: result.x, y: result.y },
+          position: { x: _result.x, y: _result.y },
         },
       );
 
-      return result;
+      return _result;
     } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Failed to get cursor position: ${errorMessage}`,
         {
           operationId,
@@ -1341,7 +1341,7 @@ export class ComputerUseService {
       );
     } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Application management failed: ${errorMessage}`,
         {
           operationId,
@@ -1480,7 +1480,7 @@ export class ComputerUseService {
         },
       );
 
-      return result;
+      return _result;
     } catch (_error) {
       // Ensure temp file cleanup on _error
       if (tempFile) {
@@ -1513,7 +1513,7 @@ export class ComputerUseService {
         timestamp,
       };
 
-      return result;
+      return _result;
     }
   }
 
@@ -1670,7 +1670,7 @@ export class ComputerUseService {
           },
         );
 
-        return result;
+        return _result;
       } catch (fileError) {
         throw new Error(
           `Failed to read file: ${ErrorHandler.extractErrorMessage(fileError)}`,
@@ -1720,7 +1720,7 @@ export class ComputerUseService {
         timestamp,
       };
 
-      return result;
+      return _result;
     }
   }
 }

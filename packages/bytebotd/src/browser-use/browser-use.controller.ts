@@ -27,9 +27,9 @@ import { BrowserUseService } from './browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
 import { BrowserTaskService } from './browser-task.service';
 import {
-  _CreateBrowserTaskDto,
+  CreateBrowserTaskDto,
   BrowserTaskResultDto,
-  _BrowserTaskStatus,
+  BrowserTaskStatus,
   BrowserTaskPriority,
 } from './dto/browser-task.dto';
 import {
@@ -40,7 +40,7 @@ import {
 import {
   CreateAsyncJobDto,
   AsyncJobResultDto,
-  _AsyncJobStatus,
+  AsyncJobStatus,
 } from './dto/async-job.dto';
 // Note: ResponseInterceptor and SecurityLoggingInterceptor imports removed as they don't exist in shared package
 
@@ -70,7 +70,7 @@ import {
 @Controller('browser-use')
 // Note: Interceptors removed - ResponseInterceptor and SecurityLoggingInterceptor not available in shared package
 export class BrowserUseController {
-  private readonly logger = new Logger(BrowserUseController._name);
+  private readonly logger = new Logger(BrowserUseController.name);
 
   constructor(
     private readonly browserUseService: BrowserUseService,
@@ -115,14 +115,14 @@ export class BrowserUseController {
     @Body() createTaskDto: CreateBrowserTaskDto,
   ): Promise<BrowserTaskResultDto> {
     this.logger.log(`Executing browser task: ${createTaskDto.name}`, {
-      taskName: createTaskDto._name,
+      taskName: createTaskDto.name,
       actionsCount: createTaskDto.actions.length,
       sessionConfig: createTaskDto.sessionConfig?.headless,
       priority: createTaskDto.priority,
     });
 
     try {
-      const _result =
+      const result =
         await this.browserUseService.executeBrowserTask(createTaskDto);
 
       this.logger.log(`Task execution completed: ${result.taskId}`, {

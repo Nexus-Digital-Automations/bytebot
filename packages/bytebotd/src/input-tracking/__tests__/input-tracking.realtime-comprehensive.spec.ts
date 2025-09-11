@@ -164,7 +164,7 @@ jest.mock('uiohook-napi', () => ({
   Button: MouseButton,
 }));
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { InputTrackingService } from '../input-tracking.service';
 import { InputTrackingGateway } from '../input-tracking.gateway';
@@ -173,8 +173,8 @@ import {
   ComputerAction,
   ClickMouseAction,
   DragMouseAction,
-  _ScrollAction,
-  _TypeKeysAction,
+  ScrollAction,
+  TypeKeysAction,
   TypeTextAction,
   MoveMouseAction,
   PressMouseAction,
@@ -220,6 +220,10 @@ const mockInputTrackingGateway = {
   joinRoom: jest.fn(),
   leaveRoom: jest.fn(),
   getClientRooms: jest.fn().mockReturnValue(['desktop-session-1']),
+  emitAction: jest.fn(),
+  emitScreenshotAndAction: jest.fn(),
+  handleConnection: jest.fn(),
+  handleDisconnect: jest.fn(),
 };
 
 describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
@@ -807,7 +811,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
             setTimeout(() => {
               moveHandler(createMouseEvent({ x: i, y: i }));
               resolve(undefined);
-            }, _i);
+            }, i);
           }),
         );
 
@@ -816,7 +820,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
             setTimeout(() => {
               keydownHandler(createKeyboardEvent({ keycode: 65 + (i % 26) }));
               resolve(undefined);
-            }, _i);
+            }, i);
           }),
         );
       }

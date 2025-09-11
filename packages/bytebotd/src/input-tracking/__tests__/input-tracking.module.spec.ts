@@ -18,13 +18,13 @@
  * @coverage-target 100%
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { InputTrackingModule } from '../input-tracking.module';
 import { InputTrackingController } from '../input-tracking.controller';
 import { InputTrackingService } from '../input-tracking.service';
 import { InputTrackingGateway } from '../input-tracking.gateway';
-import { _ComputerUseModule } from '../../computer-use/computer-use.module';
+import { ComputerUseModule } from '../../computer-use/computer-use.module';
 import { ComputerUseService } from '../../computer-use/computer-use.service';
 
 describe('InputTrackingModule', () => {
@@ -37,7 +37,9 @@ describe('InputTrackingModule', () => {
   const operationId = `input_tracking_module_test_${Date.now()}`;
 
   beforeEach(async () => {
-    console.log(`[${operationId}] Setting up InputTrackingModule test environment`);
+    console.log(
+      `[${operationId}] Setting up InputTrackingModule test environment`,
+    );
 
     module = await Test.createTestingModule({
       imports: [
@@ -70,14 +72,12 @@ describe('InputTrackingModule', () => {
       .compile();
 
     inputTrackingController = module.get<InputTrackingController>(
-      InputTrackingController
+      InputTrackingController,
     );
-    inputTrackingService = module.get<InputTrackingService>(
-      InputTrackingService
-    );
-    inputTrackingGateway = module.get<InputTrackingGateway>(
-      InputTrackingGateway
-    );
+    inputTrackingService =
+      module.get<InputTrackingService>(InputTrackingService);
+    inputTrackingGateway =
+      module.get<InputTrackingGateway>(InputTrackingGateway);
     computerUseService = module.get<ComputerUseService>(ComputerUseService);
 
     console.log(`[${operationId}] InputTrackingModule test setup completed`);
@@ -106,12 +106,15 @@ describe('InputTrackingModule', () => {
       const testId = `${operationId}_module_metadata`;
       console.log(`[${testId}] Testing module metadata structure`);
 
-      const moduleMetadata = Reflect.getMetadata('imports', InputTrackingModule) ||
+      const moduleMetadata =
+        Reflect.getMetadata('imports', InputTrackingModule) ||
         Reflect.getMetadata('module', InputTrackingModule);
 
       // Module should have the @Module decorator
-      expect(Reflect.hasMetadata('module', InputTrackingModule) || 
-             Reflect.hasMetadata('imports', InputTrackingModule)).toBe(true);
+      expect(
+        Reflect.hasMetadata('module', InputTrackingModule) ||
+          Reflect.hasMetadata('imports', InputTrackingModule),
+      ).toBe(true);
 
       console.log(`[${testId}] Module metadata structure test completed`);
     });
@@ -134,22 +137,30 @@ describe('InputTrackingModule', () => {
   describe('Provider Registration', () => {
     it('should register InputTrackingService as a provider', () => {
       const testId = `${operationId}_service_provider_registration`;
-      console.log(`[${testId}] Testing InputTrackingService provider registration`);
+      console.log(
+        `[${testId}] Testing InputTrackingService provider registration`,
+      );
 
       expect(inputTrackingService).toBeDefined();
       expect(inputTrackingService).toBeInstanceOf(InputTrackingService);
 
-      console.log(`[${testId}] InputTrackingService provider registration test completed`);
+      console.log(
+        `[${testId}] InputTrackingService provider registration test completed`,
+      );
     });
 
     it('should register InputTrackingGateway as a provider', () => {
       const testId = `${operationId}_gateway_provider_registration`;
-      console.log(`[${testId}] Testing InputTrackingGateway provider registration`);
+      console.log(
+        `[${testId}] Testing InputTrackingGateway provider registration`,
+      );
 
       expect(inputTrackingGateway).toBeDefined();
       expect(inputTrackingGateway).toBeInstanceOf(InputTrackingGateway);
 
-      console.log(`[${testId}] InputTrackingGateway provider registration test completed`);
+      console.log(
+        `[${testId}] InputTrackingGateway provider registration test completed`,
+      );
     });
 
     it('should inject Logger into providers', () => {
@@ -172,7 +183,9 @@ describe('InputTrackingModule', () => {
       expect(inputTrackingService['gateway']).toBeDefined();
 
       // Verify the dependency chain
-      expect(inputTrackingService['computerUseService']).toBe(computerUseService);
+      expect(inputTrackingService['computerUseService']).toBe(
+        computerUseService,
+      );
       expect(inputTrackingService['gateway']).toBe(inputTrackingGateway);
 
       console.log(`[${testId}] Provider dependency resolution test completed`);
@@ -187,7 +200,9 @@ describe('InputTrackingModule', () => {
       expect(inputTrackingController).toBeDefined();
       expect(inputTrackingController).toBeInstanceOf(InputTrackingController);
 
-      console.log(`[${testId}] InputTrackingController registration test completed`);
+      console.log(
+        `[${testId}] InputTrackingController registration test completed`,
+      );
     });
 
     it('should inject InputTrackingService into controller', () => {
@@ -196,7 +211,9 @@ describe('InputTrackingModule', () => {
 
       // Verify that the controller has the service injected
       expect(inputTrackingController['inputTrackingService']).toBeDefined();
-      expect(inputTrackingController['inputTrackingService']).toBe(inputTrackingService);
+      expect(inputTrackingController['inputTrackingService']).toBe(
+        inputTrackingService,
+      );
 
       console.log(`[${testId}] Controller service injection test completed`);
     });
@@ -295,7 +312,7 @@ describe('InputTrackingModule', () => {
 
       // Mock gateway methods
       const emitActionSpy = jest.spyOn(inputTrackingGateway, 'emitAction');
-      
+
       // Start tracking to enable communication
       inputTrackingService.startTracking();
 
@@ -313,7 +330,9 @@ describe('InputTrackingModule', () => {
       console.log(`[${testId}] Testing ComputerUseService integration`);
 
       // Verify the service has access to ComputerUseService
-      expect(inputTrackingService['computerUseService']).toBe(computerUseService);
+      expect(inputTrackingService['computerUseService']).toBe(
+        computerUseService,
+      );
 
       // Test screenshot functionality
       const _result = await computerUseService.screenshot();
@@ -372,7 +391,10 @@ describe('InputTrackingModule', () => {
       inputTrackingService.startTracking();
 
       // Spy on the service's onModuleDestroy method
-      const onModuleDestroySpy = jest.spyOn(inputTrackingService, 'onModuleDestroy');
+      const onModuleDestroySpy = jest.spyOn(
+        inputTrackingService,
+        'onModuleDestroy',
+      );
 
       // Close the module
       await module.close();
@@ -438,7 +460,9 @@ describe('InputTrackingModule', () => {
       // (NestJS will handle most initialization errors)
       expect(module).toBeDefined();
 
-      console.log(`[${testId}] Provider initialization error handling test completed`);
+      console.log(
+        `[${testId}] Provider initialization error handling test completed`,
+      );
     });
 
     it('should handle missing imported modules gracefully', async () => {
@@ -451,7 +475,7 @@ describe('InputTrackingModule', () => {
           // Missing ComputerUseModule import
           controllers: [InputTrackingController],
           providers: [InputTrackingService, InputTrackingGateway],
-        }).compile()
+        }).compile(),
       ).rejects.toThrow();
 
       console.log(`[${testId}] Missing import handling test completed`);
@@ -459,7 +483,9 @@ describe('InputTrackingModule', () => {
 
     it('should handle malformed module configuration', async () => {
       const testId = `${operationId}_malformed_config`;
-      console.log(`[${testId}] Testing malformed module configuration handling`);
+      console.log(
+        `[${testId}] Testing malformed module configuration handling`,
+      );
 
       // Test with incomplete provider configuration
       await expect(
@@ -469,10 +495,12 @@ describe('InputTrackingModule', () => {
             // Invalid provider configuration
             { provide: 'InvalidProvider', useValue: null },
           ],
-        }).compile()
+        }).compile(),
       ).resolves.toBeDefined(); // Should still work
 
-      console.log(`[${testId}] Malformed configuration handling test completed`);
+      console.log(
+        `[${testId}] Malformed configuration handling test completed`,
+      );
     });
   });
 
@@ -517,7 +545,9 @@ describe('InputTrackingModule', () => {
   describe('Integration Testing', () => {
     it('should work in a complete application context', async () => {
       const testId = `${operationId}_complete_app_context`;
-      console.log(`[${testId}] Testing complete application context integration`);
+      console.log(
+        `[${testId}] Testing complete application context integration`,
+      );
 
       // Simulate a complete app module
       const appModule = await Test.createTestingModule({
@@ -538,7 +568,9 @@ describe('InputTrackingModule', () => {
 
       await app.close();
 
-      console.log(`[${testId}] Complete application context integration test completed`);
+      console.log(
+        `[${testId}] Complete application context integration test completed`,
+      );
     });
 
     it('should handle multiple module instances', async () => {
@@ -561,7 +593,9 @@ describe('InputTrackingModule', () => {
 
       await module2.close();
 
-      console.log(`[${testId}] Multiple module instance handling test completed`);
+      console.log(
+        `[${testId}] Multiple module instance handling test completed`,
+      );
     });
 
     it('should handle dynamic module imports', async () => {
@@ -605,7 +639,7 @@ describe('InputTrackingModule', () => {
       expect(modules).toHaveLength(5);
 
       // Clean up all modules
-      await Promise.all(modules.map(m => m.close()));
+      await Promise.all(modules.map((m) => m.close()));
 
       console.log(`[${testId}] Rapid module lifecycle test completed`);
     });
@@ -620,14 +654,14 @@ describe('InputTrackingModule', () => {
           const service = module.get(InputTrackingService);
           const gateway = module.get(InputTrackingGateway);
           return { service, gateway };
-        })
+        }),
       );
 
       const results = await Promise.all(promises);
 
       // All should succeed and return the same instances
       expect(results).toHaveLength(10);
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.service).toBe(inputTrackingService);
         expect(result.gateway).toBe(inputTrackingGateway);
       });

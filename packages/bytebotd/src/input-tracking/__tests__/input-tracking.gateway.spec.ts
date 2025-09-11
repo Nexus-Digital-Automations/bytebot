@@ -17,9 +17,9 @@
  * @coverage-target 100%
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
-import { _Server, _Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { ComputerAction } from '@bytebot/shared';
 import { InputTrackingGateway } from '../input-tracking.gateway';
 
@@ -44,7 +44,7 @@ interface MockServer {
 describe('InputTrackingGateway', () => {
   let gateway: InputTrackingGateway;
   let mockServer: MockServer;
-  let _logger: Logger;
+  let logger: Logger;
 
   const operationId = `input_tracking_gateway_test_${Date.now()}`;
 
@@ -203,16 +203,16 @@ describe('InputTrackingGateway', () => {
       const testId = `${operationId}_multiple_connections`;
       console.log(`[${testId}] Testing multiple simultaneous connections`);
 
-      const clients = Array.from({ length: 10 }, (_, _i) =>
+      const clients = Array.from({ length: 10 }, (_, i) =>
         createMockSocket(`client_${i}`),
       );
 
-      clients.forEach((_client) => {
+      clients.forEach((client) => {
         gateway.handleConnection(client as any);
       });
 
       expect(logger.log).toHaveBeenCalledTimes(10);
-      clients.forEach((_client, _i) => {
+      clients.forEach((client, i) => {
         expect(logger.log).toHaveBeenCalledWith(
           `Client connected: client_${i}`,
         );
@@ -461,9 +461,9 @@ describe('InputTrackingGateway', () => {
       expect(mockServer.emit).toHaveBeenCalledTimes(3);
 
       const emitCalls = (mockServer.emit as jest.Mock).mock.calls;
-      events.forEach((event, _index) => {
-        expect(emitCalls[_index][0]).toBe('action');
-        expect(emitCalls[_index][1]).toEqual(event);
+      events.forEach((event, index) => {
+        expect(emitCalls[index][0]).toBe('action');
+        expect(emitCalls[index][1]).toEqual(event);
       });
 
       console.log(
@@ -759,7 +759,7 @@ describe('InputTrackingGateway', () => {
       const startTime = Date.now();
 
       // Simulate concurrent connections
-      const connectionPromises = Array.from({ length: 10 }, (_, _i) =>
+      const connectionPromises = Array.from({ length: 10 }, (_, i) =>
         Promise.resolve().then(() => {
           const client = createMockSocket(`concurrent_client_${i}`);
           gateway.handleConnection(client as any);
@@ -767,7 +767,7 @@ describe('InputTrackingGateway', () => {
       );
 
       // Simulate concurrent emissions
-      const emissionPromises = Array.from({ length: 10 }, (_, _i) =>
+      const emissionPromises = Array.from({ length: 10 }, (_, i) =>
         Promise.resolve().then(() => {
           gateway.emitAction({
             action: 'move_mouse',

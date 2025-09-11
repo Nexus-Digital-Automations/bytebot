@@ -17,11 +17,11 @@
  */
 
 import { performance } from 'perf_hooks';
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { BytebotMcpModule } from '../bytebot-mcp.module';
 import { ComputerUseTools } from '../computer-use.tools';
-import { _ComputerUseModule } from '../../computer-use/computer-use.module';
+import { ComputerUseModule } from '../../computer-use/computer-use.module';
 import { McpModule } from '@rekog/mcp-nest';
 import {
   createMockService,
@@ -245,7 +245,7 @@ describe('BytebotMcpModule', () => {
 
       // We can't directly test the forRoot call since it happens during module import,
       // but we can verify the expected configuration structure
-      expect(expectedConfig._name).toBe('bytebotd');
+      expect(expectedConfig.name).toBe('bytebotd');
       expect(expectedConfig.version).toBe('0.0.1');
       expect(expectedConfig.sseEndpoint).toBe('/mcp');
     });
@@ -259,7 +259,7 @@ describe('BytebotMcpModule', () => {
         version: '0.0.1',
       };
 
-      expect(serverConfig._name).toBe('bytebotd');
+      expect(serverConfig.name).toBe('bytebotd');
       expect(serverConfig.version).toMatch(/^\d+\.\d+\.\d+$/);
     });
 
@@ -341,7 +341,7 @@ describe('BytebotMcpModule', () => {
       };
 
       // Test that configuration validation would catch issues
-      expect(invalidConfig._name).toBe('');
+      expect(invalidConfig.name).toBe('');
       expect(invalidConfig.version).not.toMatch(/^\d+\.\d+\.\d+$/);
       expect(invalidConfig.sseEndpoint).not.toMatch(/^\/[a-zA-Z0-9_-]+$/);
     });
@@ -377,7 +377,7 @@ describe('BytebotMcpModule', () => {
       const initialMemory = process.memoryUsage();
 
       // Create multiple instances
-      const _modules = Array(10)
+      const modules = Array(10)
         .fill(null)
         .map(() => new BytebotMcpModule());
 

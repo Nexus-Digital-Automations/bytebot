@@ -104,6 +104,7 @@ module.exports = {
       lines: 80,
       statements: 80,
     },
+    './src/auth/': {
       branches: 80,
       functions: 80,
       lines: 80,

@@ -190,6 +190,202 @@
       ]
     },
     {
+      "id": "error_1757560734125_9c097tvt9",
+      "title": "Fix ALL TypeScript compilation errors in computer-use module",
+      "description": "Fix all TypeScript errors in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/computer-use/computer-use.service.ts: 1) Remove underscores from shared imports (_ScrollAction to ScrollAction, _TypeKeysAction to TypeKeysAction, etc), 2) Change ComputerUseService._name to ComputerUseService.name, 3) Fix variable reference patterns (result, __error, error), 4) Change this.logger._error to this.logger.error, 5) Fix method parameters to use correct types. Must compile without TypeScript errors.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T03:18:54.125Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757560699373_1_general_a566d2a7",
+      "started_at": "2025-09-11T03:19:21.502Z",
+      "claimed_by": "development_session_1757560699373_1_general_a566d2a7",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757560699373_1_general_a566d2a7",
+          "role": "primary",
+          "assignedAt": "2025-09-11T03:19:21.502Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757560721959_zn3saftxt",
+      "title": "Fix TypeScript compilation errors in input-tracking test files",
+      "description": "Fix ALL TypeScript compilation errors in input-tracking test files including import fixes (_Test->Test, _TestingModule->TestingModule), shared import fixes (_ScrollAction->ScrollAction, _TypeKeysAction->TypeKeysAction), variable reference fixes, missing method mocks (broadcastActionEvent, broadcastInputEvent, getConnectedClients, getClientRooms, broadcastToRoom), and type compatibility issues",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T03:18:41.959Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757560700754_1_general_2cb01adb",
+      "started_at": "2025-09-11T03:18:58.790Z",
+      "claimed_by": "development_session_1757560700754_1_general_2cb01adb",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757560700754_1_general_2cb01adb",
+          "role": "primary",
+          "assignedAt": "2025-09-11T03:18:58.790Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757550522994_jh2ggzs9u",
+      "title": "Fix TypeScript errors in remaining bytebotd modules",
+      "description": "Fix ALL TypeScript compilation errors in cache/, common/, metrics/, nut/, and any remaining modules. Critical fixes needed: 1) Import fixes: _Test, _TestingModule → Test, TestingModule in test files, 2) Shared imports: Fix underscore-prefixed imports from @bytebot/shared, 3) Variable reference errors: Fix result vs _result and error vs _error patterns, 4) Logger method fixes: this.logger._error → this.logger.error, 5) Class name fixes: ClassName._name → ClassName.name. Requirements: Fix ALL TypeScript compilation errors, maintain module functionality, ensure proper imports and variable references, all test files run without TypeScript errors.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T00:28:42.994Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757550483800_1_general_211bb1ae",
+      "started_at": "2025-09-11T00:29:04.339Z",
+      "claimed_by": "development_session_1757550483800_1_general_211bb1ae",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757550483800_1_general_211bb1ae",
+          "role": "primary",
+          "assignedAt": "2025-09-11T00:29:04.339Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757550522833_k61f6f9z6",
+      "title": "Fix TypeScript errors in computer-use module",
+      "description": "Fix comprehensive TypeScript compilation errors in computer-use module including: 1) Fix _ActionType imports (remove underscores): _ScrollAction → ScrollAction, _TypeKeysAction → TypeKeysAction, _ApplicationAction → ApplicationAction, _PasteTextAction → PasteTextAction, _ReadFileAction → ReadFileAction. 2) Fix class name: ComputerUseService._name → ComputerUseService.name. 3) Fix variable references: result → _result, __error → _error, error → _error patterns. 4) Fix logger methods: this.logger._error → this.logger.error. 5) Fix undeclared variables throughout the file. Target files: src/computer-use/computer-use.service.ts and related test files.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T00:28:42.833Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757550483757_1_general_9003681c",
+      "started_at": "2025-09-11T00:29:03.270Z",
+      "claimed_by": "development_session_1757550483757_1_general_9003681c",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757550483757_1_general_9003681c",
+          "role": "primary",
+          "assignedAt": "2025-09-11T00:29:03.270Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757550516320_oimsdcsjb",
+      "title": "Fix TypeScript compilation errors in browser-use module",
+      "description": "Critical TypeScript error resolution in browser-use module: Fix import statements (_Test/_TestingModule → Test/TestingModule), resolve variable reference errors (result vs _result), fix logger method calls (this.logger._error → this.logger.error), correct class name references (ClassName._name → ClassName.name), and ensure proper shared package imports. Target files: src/browser-use/ directory and all test files. Must maintain browser automation functionality while achieving zero TypeScript compilation errors.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T00:28:36.320Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757550483993_1_general_c17f9a46",
+      "started_at": "2025-09-11T00:28:56.476Z",
+      "claimed_by": "development_session_1757550483993_1_general_c17f9a46",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757550483993_1_general_c17f9a46",
+          "role": "primary",
+          "assignedAt": "2025-09-11T00:28:56.476Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757550514020_nwycdfx46",
+      "title": "Fix TypeScript errors in MCP module",
+      "description": "Fix all TypeScript compilation errors in MCP module including import fixes (_Test -> Test, _TestingModule -> TestingModule), shared imports fixes, variable reference errors (result vs _result, error vs _error), logger method fixes (this.logger._error -> this.logger.error), and class name fixes (ClassName._name -> ClassName.name)",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T00:28:34.020Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757550483882_1_general_3f99864e",
+      "started_at": "2025-09-11T00:28:59.501Z",
+      "claimed_by": "development_session_1757550483882_1_general_3f99864e",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757550483882_1_general_3f99864e",
+          "role": "primary",
+          "assignedAt": "2025-09-11T00:28:59.501Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757550510372_n5fp0xkqa",
+      "title": "Fix TypeScript errors in input-tracking module",
+      "description": "Fix all TypeScript compilation errors in input-tracking service and test files including import fixes, variable references, logger methods, and missing method expectations",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T00:28:30.372Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757550484019_1_general_ea8ba00c",
+      "started_at": "2025-09-11T00:28:49.881Z",
+      "claimed_by": "development_session_1757550484019_1_general_ea8ba00c",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757550484019_1_general_ea8ba00c",
+          "role": "primary",
+          "assignedAt": "2025-09-11T00:28:49.881Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
       "id": "error_1757482411835_2ldkkpquj",
       "title": "CRITICAL: Complete CUA cleanup in computer-use.service.spec.ts",
       "description": "Complete the remaining CUA integration cleanup in computer-use.service.spec.ts file. TypeScript compilation is failing due to remaining references to mockPerformanceService, mockCuaIntegrationService, mockCuaVisionService, and OcrAction types. These are blocking compilation and must be removed immediately.",
@@ -339,7 +535,7 @@
       "mode": "DEVELOPMENT",
       "priority": "critical",
       "category": "test",
-      "status": "pending",
+      "status": "in_progress",
       "dependencies": [],
       "important_files": [
         "bytebot/packages/bytebotd/src/health/",
@@ -352,7 +548,19 @@
       "requires_research": false,
       "subtasks": [],
       "created_at": "2025-09-07T03:30:39.386Z",
-      "auto_research_created": false
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757549538851_1_general_573f84ab",
+      "started_at": "2025-09-11T00:13:49.927Z",
+      "claimed_by": "development_session_1757549538851_1_general_573f84ab",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757549538851_1_general_573f84ab",
+          "role": "primary",
+          "assignedAt": "2025-09-11T00:13:49.927Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "id": "test_1757215838386_c4bqhwvrk",
@@ -1269,6 +1477,321 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-11T00:04:45.437Z",
       "sessionId": "session_1757549085435",
+      "metadata": {}
+    },
+    "development_session_1757549538851_1_general_573f84ab": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T00:12:18.851Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T00:12:18.851Z",
+      "sessionId": "session_1757549538851",
+      "metadata": {}
+    },
+    "development_session_1757549979669_1_general_782fd9cb": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T00:19:39.671Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T00:19:39.671Z",
+      "sessionId": "session_1757549979669",
+      "metadata": {}
+    },
+    "development_session_1757549979791_1_general_19a85b49": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T00:19:39.792Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T00:19:39.792Z",
+      "sessionId": "session_1757549979791",
+      "metadata": {}
+    },
+    "development_session_1757549979954_1_general_e29d412c": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T00:19:39.955Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T00:19:39.955Z",
+      "sessionId": "session_1757549979954",
+      "metadata": {}
+    },
+    "development_session_1757549980037_1_general_f2e991c2": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T00:19:40.038Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T00:19:40.038Z",
+      "sessionId": "session_1757549980037",
+      "metadata": {}
+    },
+    "development_session_1757550483757_1_general_9003681c": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T00:28:03.759Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T00:28:03.759Z",
+      "sessionId": "session_1757550483757",
+      "metadata": {}
+    },
+    "development_session_1757550483800_1_general_211bb1ae": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T00:28:03.801Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T00:28:03.801Z",
+      "sessionId": "session_1757550483800",
+      "metadata": {}
+    },
+    "development_session_1757550483882_1_general_3f99864e": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T00:28:03.883Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T00:28:03.883Z",
+      "sessionId": "session_1757550483882",
+      "metadata": {}
+    },
+    "development_session_1757550483993_1_general_c17f9a46": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T00:28:03.994Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T00:28:03.994Z",
+      "sessionId": "session_1757550483993",
+      "metadata": {}
+    },
+    "development_session_1757550484019_1_general_ea8ba00c": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T00:28:04.020Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T00:28:04.020Z",
+      "sessionId": "session_1757550484019",
+      "metadata": {}
+    },
+    "development_session_1757560537688_1_general_45cc04f1": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T03:15:37.690Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T03:15:37.690Z",
+      "sessionId": "session_1757560537688",
+      "metadata": {}
+    },
+    "development_session_1757560699100_1_general_a365dac0": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T03:18:19.102Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T03:18:19.102Z",
+      "sessionId": "session_1757560699100",
+      "metadata": {}
+    },
+    "development_session_1757560699123_1_general_aab4e7cc": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T03:18:19.124Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T03:18:19.124Z",
+      "sessionId": "session_1757560699123",
+      "metadata": {}
+    },
+    "development_session_1757560699373_1_general_a566d2a7": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T03:18:19.374Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T03:18:19.374Z",
+      "sessionId": "session_1757560699373",
+      "metadata": {}
+    },
+    "development_session_1757560700754_1_general_2cb01adb": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T03:18:20.755Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T03:18:20.755Z",
+      "sessionId": "session_1757560700754",
       "metadata": {}
     }
   },

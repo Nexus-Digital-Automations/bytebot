@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { v4 as _uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   BrowserTaskResultDto,
-  _BrowserTaskStatus,
+  BrowserTaskStatus,
   BrowserTaskPriority,
 } from './dto/browser-task.dto';
 
@@ -21,7 +21,7 @@ import {
  */
 @Injectable()
 export class BrowserTaskService {
-  private readonly logger = new Logger(BrowserTaskService._name);
+  private readonly logger = new Logger(BrowserTaskService.name);
   private readonly tasks: Map<string, BrowserTaskResultDto> = new Map();
   private readonly taskQueue: string[] = [];
   private readonly taskMetrics = {
@@ -37,7 +37,7 @@ export class BrowserTaskService {
    */
   async createTask(taskData: {
     taskId: string;
-    _name: string;
+    name: string;
     description: string;
     actions: any[];
     priority?: BrowserTaskPriority;
@@ -86,7 +86,7 @@ export class BrowserTaskService {
 
     this.logger.log(`Created browser task: ${taskData.taskId}`, {
       taskId: taskData.taskId,
-      name: taskData._name,
+      name: taskData.name,
       totalActions: taskData.totalActions,
       priority: taskData.priority,
       status: taskData.status,

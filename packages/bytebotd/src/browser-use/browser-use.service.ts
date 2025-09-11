@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { spawn, _ChildProcess } from 'child_process';
+import { spawn, ChildProcess } from 'child_process';
 import { promises as fs } from 'fs';
 import * as path from 'path';
-import { v4 as _uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
-  _CreateBrowserTaskDto,
+  CreateBrowserTaskDto,
   BrowserTaskResultDto,
-  _BrowserTaskStatus,
+  BrowserTaskStatus,
   BrowserActionType,
 } from './dto/browser-task.dto';
 import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';
@@ -31,7 +31,7 @@ import { BrowserAsyncJobService } from './browser-async-job.service';
  */
 @Injectable()
 export class BrowserUseService {
-  private readonly logger = new Logger(BrowserUseService._name);
+  private readonly logger = new Logger(BrowserUseService.name);
   private readonly browserUsePath: string;
   private readonly workingDirectory: string;
   private readonly tempDirectory: string;

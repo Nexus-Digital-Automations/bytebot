@@ -16,7 +16,7 @@
  * @coverage-target 100%
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { InputTrackingController } from '../input-tracking.controller';
 import { InputTrackingService } from '../input-tracking.service';
@@ -37,7 +37,7 @@ interface MockByteBotdUser {
 describe('InputTrackingController', () => {
   let controller: InputTrackingController;
   let service: InputTrackingService;
-  let _logger: Logger;
+  let logger: Logger;
 
   const operationId = `input_tracking_controller_test_${Date.now()}`;
 
@@ -46,7 +46,7 @@ describe('InputTrackingController', () => {
     id: 'admin_user_1',
     username: 'admin',
     email: 'admin@bytebot.ai',
-    role: UserRole._ADMIN,
+    role: UserRole.ADMIN,
     permissions: [
       'task:read',
       'task:write',
@@ -60,7 +60,7 @@ describe('InputTrackingController', () => {
     id: 'operator_user_1',
     username: 'operator',
     email: 'operator@bytebot.ai',
-    role: UserRole._OPERATOR,
+    role: UserRole.OPERATOR,
     permissions: ['task:read', 'task:write', 'computer:control'],
     isActive: true,
   };
@@ -69,7 +69,7 @@ describe('InputTrackingController', () => {
     id: 'viewer_user_1',
     username: 'viewer',
     email: 'viewer@bytebot.ai',
-    role: UserRole._VIEWER,
+    role: UserRole.VIEWER,
     permissions: ['task:read'],
     isActive: true,
   };

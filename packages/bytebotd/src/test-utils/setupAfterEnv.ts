@@ -68,7 +68,7 @@ expect.extend({
     } catch (_error) {
       return {
         message: () =>
-          `Expected ${received} to be valid base64, but decoding failed: ${error}`,
+          `Expected ${received} to be valid base64, but decoding failed: ${_error}`,
         pass: false,
       };
     }
@@ -124,12 +124,13 @@ expect.extend({
     }
 
     const _result = received as any;
-    const hasImage = typeof result.image === 'string';
-    const hasMetadata = result.metadata && typeof result.metadata === 'object';
+    const hasImage = typeof _result.image === 'string';
+    const hasMetadata =
+      _result.metadata && typeof _result.metadata === 'object';
     const hasValidTimestamp =
-      hasMetadata && result.metadata.captureTime instanceof Date;
+      hasMetadata && _result.metadata.captureTime instanceof Date;
     const hasOperationId =
-      hasMetadata && typeof result.metadata.operationId === 'string';
+      hasMetadata && typeof _result.metadata.operationId === 'string';
 
     const pass = hasImage && hasMetadata && hasValidTimestamp && hasOperationId;
 
@@ -169,23 +170,23 @@ expect.extend({
     }
 
     const _result = received as any;
-    const hasSuccess = typeof result.success === 'boolean';
-    const hasOperationId = typeof result.operationId === 'string';
-    const hasTimestamp = result.timestamp instanceof Date;
-    const hasMessage = typeof result.message === 'string';
+    const hasSuccess = typeof _result.success === 'boolean';
+    const hasOperationId = typeof _result.operationId === 'string';
+    const hasTimestamp = _result.timestamp instanceof Date;
+    const hasMessage = typeof _result.message === 'string';
 
     let operationSpecificChecks = true;
     const issues = [];
 
     if (operation === 'read') {
-      const hasValidReadData = result.success
-        ? typeof result.data === 'string' && typeof result.name === 'string'
+      const hasValidReadData = _result.success
+        ? typeof _result.data === 'string' && typeof _result.name === 'string'
         : true;
       operationSpecificChecks = hasValidReadData;
       if (!hasValidReadData) issues.push('missing read-specific data');
     } else if (operation === 'write') {
-      const hasValidWriteData = result.success
-        ? typeof result.path === 'string' && typeof result.size === 'number'
+      const hasValidWriteData = _result.success
+        ? typeof _result.path === 'string' && typeof _result.size === 'number'
         : true;
       operationSpecificChecks = hasValidWriteData;
       if (!hasValidWriteData) issues.push('missing write-specific data');
@@ -195,7 +196,7 @@ expect.extend({
       hasSuccess &&
       hasOperationId &&
       hasTimestamp &&
-      (result.success || hasMessage) &&
+      (_result.success || hasMessage) &&
       operationSpecificChecks;
 
     if (pass) {
@@ -208,7 +209,7 @@ expect.extend({
       if (!hasSuccess) issues.push('missing or invalid success');
       if (!hasOperationId) issues.push('missing or invalid operationId');
       if (!hasTimestamp) issues.push('missing or invalid timestamp');
-      if (!result.success && !hasMessage) issues.push('missing error message');
+      if (!_result.success && !hasMessage) issues.push('missing error message');
 
       return {
         message: () =>
@@ -230,18 +231,18 @@ expect.extend({
     }
 
     const _result = received as any;
-    const hasText = typeof result.text === 'string';
+    const hasText = typeof _result.text === 'string';
     const hasConfidence =
-      typeof result.confidence === 'number' &&
-      result.confidence >= 0 &&
-      result.confidence <= 1;
+      typeof _result.confidence === 'number' &&
+      _result.confidence >= 0 &&
+      _result.confidence <= 1;
     const hasProcessingTime =
-      typeof result.processingTimeMs === 'number' &&
-      result.processingTimeMs > 0;
-    const hasMethod = typeof result.method === 'string';
-    const hasOperationId = typeof result.operationId === 'string';
+      typeof _result.processingTimeMs === 'number' &&
+      _result.processingTimeMs > 0;
+    const hasMethod = typeof _result.method === 'string';
+    const hasOperationId = typeof _result.operationId === 'string';
     const hasBoundingBoxes =
-      !result.boundingBoxes || Array.isArray(result.boundingBoxes);
+      !_result.boundingBoxes || Array.isArray(_result.boundingBoxes);
 
     const pass =
       hasText &&
