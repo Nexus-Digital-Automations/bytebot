@@ -26,7 +26,7 @@ export function MessageContent({
     // Filter logic from the original code
     if (
       isToolResultContentBlock(block) &&
-      block.content &&
+      block.content != null &&
       block.content.some((contentBlock) => isImageContentBlock(contentBlock))
     ) {
       return true;
@@ -34,7 +34,7 @@ export function MessageContent({
     if (
       isToolResultContentBlock(block) &&
       block.tool_use_id !== "set_task_status" &&
-      !block.is_error
+      block.is_error === false
     ) {
       return false;
     }
@@ -53,7 +53,7 @@ export function MessageContent({
           {isTextContentBlock(block) && <TextContent block={block} />}
 
           {isToolResultContentBlock(block) &&
-            !block.is_error &&
+            block.is_error === false &&
             block.content.map((contentBlock, contentBlockIndex) => {
               if (isImageContentBlock(contentBlock)) {
                 return (
@@ -67,12 +67,12 @@ export function MessageContent({
             <ComputerToolContent block={block} isTakeOver={isTakeOver} />
           )}
 
-          {isToolResultContentBlock(block) && block.is_error && (
+          {isToolResultContentBlock(block) && block.is_error === true && (
             <ErrorContent block={block} />
           )}
 
           {isToolResultContentBlock(block) &&
-            !block.is_error &&
+            block.is_error === false &&
             block.tool_use_id === "set_task_status" &&
             block.content?.[0].type === MessageContentType._Text && (
               <TextContent block={block.content?.[0]} />

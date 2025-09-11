@@ -21,7 +21,7 @@ export const DesktopContainer: React.FC<DesktopContainerProps> = ({
   viewOnly = false,
   className = "",
   status = "running",
-}) => {
+}): React.JSX.Element => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [isMounted, setIsMounted] = useState(false);
@@ -72,7 +72,7 @@ export const DesktopContainer: React.FC<DesktopContainerProps> = ({
 
     updateSize();
     window.addEventListener("resize", updateSize);
-    return () => {
+    return (): void => {
       window.removeEventListener("resize", updateSize);
     };
   }, [isMounted]);
