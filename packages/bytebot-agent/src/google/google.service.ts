@@ -153,18 +153,8 @@ export class GoogleService implements BytebotAgentService {
     useTools: boolean = true,
     signal?: AbortSignal,
   ): Promise<BytebotAgentResponse> {
-    // Ensure we have a valid API key before proceeding
-    const apiKey = this.getApiKey();
-
-    // Update Google client with actual API key if needed
-    // Note: GoogleGenAI client requires recreation for API key changes
-    if (this.currentApiKey === 'dummy-key-for-initialization') {
-      // Recreate client with actual API key
-      this.currentApiKey = apiKey;
-      this.google = new GoogleGenAI({
-        apiKey: apiKey,
-      });
-    }
+    // Initialize Google client with dynamic import
+    const google = await this.initializeGoogleClient();
 
     try {
       const maxTokens = 8192;
@@ -173,7 +163,7 @@ export class GoogleService implements BytebotAgentService {
       const googleMessages = this.formatMessagesForGoogle(messages);
 
       const response: GenerateContentResponse =
-        await this.google.models.generateContent({
+        await google.models.generateContent({
           model,
           contents: googleMessages,
           config: {

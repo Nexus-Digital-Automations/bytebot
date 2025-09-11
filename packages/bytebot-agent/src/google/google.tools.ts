@@ -1,4 +1,15 @@
-import { FunctionDeclaration, Type } from '@google/genai';
+// Dynamic import types for @google/genai ES module
+type FunctionDeclaration = any;
+
+// Type enum replacement for @google/genai
+const Type = {
+  STRING: 'string',
+  NUMBER: 'number',
+  INTEGER: 'integer',
+  BOOLEAN: 'boolean',
+  ARRAY: 'array',
+  OBJECT: 'object',
+} as const;
 import { agentTools } from '../agent/agent.tools';
 
 // Define interfaces for JSON Schema
@@ -29,7 +40,7 @@ interface AgentTool {
 /**
  * Converts JSON Schema type to Google Genai Type
  */
-function jsonSchemaTypeToGoogleType(type: string): Type {
+function jsonSchemaTypeToGoogleType(type: string): string {
   switch (type) {
     case 'string':
       return Type.STRING;
