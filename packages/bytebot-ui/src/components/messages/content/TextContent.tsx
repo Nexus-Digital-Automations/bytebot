@@ -60,7 +60,7 @@ export function TextContent({ block }: TextContentProps): React.JSX.Element {
               </blockquote>
             ),
             code: ({ children, className }) => {
-              const isInline = !className;
+              const isInline = className == null || className === "";
               return isInline ? (
                 <code className="text-bytebot-bronze-dark-9 rounded px-1 py-0.5 font-mono text-xs">
                   {children}
