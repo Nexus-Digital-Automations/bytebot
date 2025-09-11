@@ -37,6 +37,109 @@ import {
 // CORE TYPES AND INTERFACES
 // ===========================
 
+/**
+ * Type guard for validating VulnerabilitySeverity values
+ */
+function isValidVulnerabilitySeverity(
+  value: unknown,
+): value is VulnerabilitySeverity {
+  const validSeverities: VulnerabilitySeverity[] = [
+    VulnerabilitySeverity.INFO,
+    VulnerabilitySeverity.LOW,
+    VulnerabilitySeverity.MEDIUM,
+    VulnerabilitySeverity.HIGH,
+    VulnerabilitySeverity.CRITICAL,
+  ];
+  return (
+    typeof value === "string" &&
+    validSeverities.includes(value as VulnerabilitySeverity)
+  );
+}
+
+/**
+ * Type guard for validating VulnerabilityCategory values
+ */
+function isValidVulnerabilityCategory(
+  value: unknown,
+): value is VulnerabilityCategory {
+  return typeof value === "string" && value.length > 0;
+}
+
+/**
+ * Type guard for validating numeric features
+ */
+function isValidNumericFeature(value: unknown): value is number {
+  return typeof value === "number" && isFinite(value) && !isNaN(value);
+}
+
+/**
+ * Type guard for validating feature objects
+ */
+function isValidFeatureObject(
+  value: unknown,
+): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Comprehensive ML data validation utility
+ * Used for runtime validation of training data and features
+ */
+export class MLDataValidator {
+  /**
+   * Validates training data structure and types
+   * @param data - Unknown data to validate
+   * @returns Type guard confirming data is EnsembleTrainingData
+   */
+  static validateTrainingData(data: unknown): data is EnsembleTrainingData {
+    if (!isValidFeatureObject(data)) return false;
+
+    const sample = data as Record<string, unknown>;
+
+    return (
+      isValidFeatureObject(sample.features) &&
+      isValidVulnerabilitySeverity(sample.label) &&
+      isValidVulnerabilityCategory(sample.category) &&
+      isValidNumericFeature(sample.weight) &&
+      sample.weight > 0 &&
+      typeof sample.description === "string"
+    );
+  }
+
+  /**
+   * Validates feature object structure
+   * @param features - Unknown features to validate
+   * @returns Type guard confirming features are valid
+   */
+  static validateFeatures(
+    features: unknown,
+  ): features is Record<string, unknown> {
+    return isValidFeatureObject(features);
+  }
+
+  /**
+   * Validates numeric array structure
+   * @param array - Unknown array to validate
+   * @returns Type guard confirming array contains only numbers
+   */
+  static validateNumericArray(array: unknown): array is number[] {
+    return (
+      Array.isArray(array) && array.every((item) => isValidNumericFeature(item))
+    );
+  }
+
+  /**
+   * Validates string array structure
+   * @param array - Unknown array to validate
+   * @returns Type guard confirming array contains only strings
+   */
+  static validateStringArray(array: unknown): array is string[] {
+    return (
+      Array.isArray(array) && array.every((item) => typeof item === "string")
+    );
+  }
+}
+
 export interface EnsembleBaseModel {
   readonly id: string;
   readonly name: string;
@@ -454,7 +557,12 @@ export class MLEnsembleCoordinator {
    */
   public getEnsembleStats(): {
     readonly model: EnsembleModel | null;
-    readonly stats: typeof this.stats;
+    readonly stats: {
+      totalPredictions: number;
+      averagePredictionTime: number;
+      ensembleAccuracy: number;
+      modelAgreementRate: number;
+    };
     readonly modelPerformance: Record<
       string,
       Array<{ accuracy: number; timestamp: Date }>
@@ -737,11 +845,13 @@ export class MLEnsembleCoordinator {
     // Make predictions on validation data
     for (const sample of validationData) {
       try {
-        let prediction: {
-          predictedLabel?: string;
-          prediction?: string;
-          confidence?: number;
-        };
+        let prediction:
+          | {
+              predictedLabel?: string;
+              prediction?: string;
+              confidence?: number;
+            }
+          | undefined;
 
         if (modelId === "naive_bayes") {
           prediction = await (model as NaiveBayesClassifier).predict(
@@ -755,6 +865,11 @@ export class MLEnsembleCoordinator {
           prediction = await (model as NeuralNetworkClassifier).predict(
             this.convertToNeuralNetworkFeatures(sample.features),
           );
+        }
+
+        if (!prediction) {
+          this.logger.warn(`No prediction returned for model ${modelId}`);
+          continue;
         }
 
         const predicted = prediction.predictedLabel || prediction.prediction;
@@ -1266,35 +1381,112 @@ export class MLEnsembleCoordinator {
   private convertToNaiveBayesFeatures(
     features: Record<string, unknown>,
   ): NaiveBayesFeatures {
-    // Convert features to format expected by Naive Bayes
+    if (!MLDataValidator.validateFeatures(features)) {
+      throw new Error("Invalid features provided for Naive Bayes conversion");
+    }
+
+    // Safely convert features to format expected by Naive Bayes with validation
+    const safeExtractNumericRecord = (obj: unknown): Record<string, number> => {
+      if (!isValidFeatureObject(obj)) return {};
+      const result: Record<string, number> = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (isValidNumericFeature(value)) {
+          result[key] = value;
+        }
+      }
+      return result;
+    };
+
     return {
-      tfidf: (features.tfidf as Record<string, number>) || {},
-      ngrams: (features.ngrams as Record<string, number>) || {},
-      securityFeatures:
-        (features.securityFeatures as Record<string, number>) || {},
-      metadata: (features.metadata as Record<string, number>) || {},
+      tfidf: safeExtractNumericRecord(features.tfidf),
+      ngrams: safeExtractNumericRecord(features.ngrams),
+      securityFeatures: safeExtractNumericRecord(features.securityFeatures),
+      metadata: safeExtractNumericRecord(features.metadata),
     };
   }
 
   private convertToDecisionTreeFeatures(
     features: Record<string, unknown>,
   ): DecisionTreeFeatures {
-    // Convert features to format expected by Decision Tree
+    if (!MLDataValidator.validateFeatures(features)) {
+      throw new Error("Invalid features provided for Decision Tree conversion");
+    }
+
+    // Safely convert features to format expected by Decision Tree with validation
+    const safeExtractNumericRecord = (obj: unknown): Record<string, number> => {
+      if (!isValidFeatureObject(obj)) return {};
+      const result: Record<string, number> = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (isValidNumericFeature(value)) {
+          result[key] = value;
+        }
+      }
+      return result;
+    };
+
+    const safeExtractStringRecord = (obj: unknown): Record<string, string> => {
+      if (!isValidFeatureObject(obj)) return {};
+      const result: Record<string, string> = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (typeof value === "string") {
+          result[key] = value;
+        }
+      }
+      return result;
+    };
+
+    const safeExtractBooleanRecord = (
+      obj: unknown,
+    ): Record<string, boolean> => {
+      if (!isValidFeatureObject(obj)) return {};
+      const result: Record<string, boolean> = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (typeof value === "boolean") {
+          result[key] = value;
+        }
+      }
+      return result;
+    };
+
     return {
-      numerical: (features.numerical as Record<string, number>) || {},
-      categorical: (features.categorical as Record<string, string>) || {},
-      boolean: (features.boolean as Record<string, boolean>) || {},
-      securityMetrics:
-        (features.securityMetrics as Record<string, number>) || {},
+      numerical: safeExtractNumericRecord(features.numerical),
+      categorical: safeExtractStringRecord(features.categorical),
+      boolean: safeExtractBooleanRecord(features.boolean),
+      securityMetrics: safeExtractNumericRecord(features.securityMetrics),
     };
   }
 
   private convertToNeuralNetworkFeatures(
     features: Record<string, unknown>,
   ): NeuralNetworkFeatures {
-    // Convert features to format expected by Neural Network
-    const featureArray = (features.features as number[]) || [];
-    const featureNames = (features.featureNames as string[]) || [];
+    if (!MLDataValidator.validateFeatures(features)) {
+      throw new Error(
+        "Invalid features provided for Neural Network conversion",
+      );
+    }
+
+    // Safely convert features to format expected by Neural Network with validation
+    const featureArray = features.features;
+    const featureNames = features.featureNames;
+
+    if (!MLDataValidator.validateNumericArray(featureArray)) {
+      throw new Error(
+        "Invalid feature array provided for Neural Network - must be numeric array",
+      );
+    }
+
+    if (!MLDataValidator.validateStringArray(featureNames)) {
+      throw new Error(
+        "Invalid feature names provided for Neural Network - must be string array",
+      );
+    }
+
+    if (featureArray.length !== featureNames.length) {
+      throw new Error(
+        "Feature array and feature names must have the same length",
+      );
+    }
+
     return {
       features: featureArray,
       featureNames: featureNames,

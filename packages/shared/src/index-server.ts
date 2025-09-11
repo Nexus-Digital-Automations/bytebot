@@ -132,7 +132,28 @@ export * from "./validation/enterprise-validation.module";
 export * from "./terminal";
 
 // Audit System Types and Services - server-only
-export * from "./audit/types";
+export {
+  AuditSeverity,
+  SecurityEventCategory,
+  ComplianceFramework,
+  AuditEventStatus,
+  AuditEvent,
+  AuditEventMetadata,
+  PerformanceMetrics as AuditPerformanceMetrics,
+  SecurityContext as AuditSecurityContext,
+  TokenInfo,
+  ComplianceInfo,
+  GeolocationInfo,
+  ErrorInfo,
+  AuditEventQuery,
+  AuditEventSearchResult,
+  AuditStatistics,
+  AuditExportConfig,
+  RetentionPolicy,
+  AlertConfig,
+  AlertCondition,
+  AlertDestination,
+} from "./audit/types";
 export * from "./audit/services/audit-logger.service";
 export * from "./audit/processors/audit-event.processor";
 export * from "./audit/compliance/compliance-framework.service";

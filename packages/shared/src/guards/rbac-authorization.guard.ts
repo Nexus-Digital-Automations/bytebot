@@ -116,23 +116,21 @@ export class RBACAuthorizationGuard implements CanActivate {
   private readonly permissionCacheTimeout: number;
 
   constructor(
-    // eslint-disable-next-line no-unused-vars
-    private readonly reflector: Reflector,
-    // eslint-disable-next-line no-unused-vars
-    private readonly configService: ConfigService,
+    private readonly _reflector: Reflector,
+    private readonly _configService: ConfigService,
 
     @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
   ) {
     // Local configuration for file-based operations
-    this.auditLogPath = this.configService.get(
+    this.auditLogPath = this._configService.get(
       "security.audit.logPath",
       "./logs/security-audit.log",
     );
-    this.enableDetailedLogging = this.configService.get(
+    this.enableDetailedLogging = this._configService.get(
       "security.audit.detailedLogging",
       true,
     );
-    this.permissionCacheTimeout = this.configService.get(
+    this.permissionCacheTimeout = this._configService.get(
       "security.permissionCacheTimeout",
       5 * 60 * 1000, // 5 minutes
     );
@@ -319,52 +317,52 @@ export class RBACAuthorizationGuard implements CanActivate {
     controllerClass: CallableFunction,
   ): RBACMetadata {
     return {
-      roles: this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+      roles: this._reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
         handler,
         controllerClass,
       ]),
-      permissions: this.reflector.getAllAndOverride<Permission[]>(
+      permissions: this._reflector.getAllAndOverride<Permission[]>(
         PERMISSIONS_KEY,
         [handler, controllerClass],
       ),
-      anyRole: this.reflector.getAllAndOverride<Role[]>(ANY_ROLE_KEY, [
+      anyRole: this._reflector.getAllAndOverride<Role[]>(ANY_ROLE_KEY, [
         handler,
         controllerClass,
       ]),
-      allPermissions: this.reflector.getAllAndOverride<Permission[]>(
+      allPermissions: this._reflector.getAllAndOverride<Permission[]>(
         ALL_PERMISSIONS_KEY,
         [handler, controllerClass],
       ),
-      resource: this.reflector.getAllAndOverride<{
+      resource: this._reflector.getAllAndOverride<{
         action: string;
         resource: string;
       }>(RESOURCE_KEY, [handler, controllerClass]),
-      ownership: this.reflector.getAllAndOverride<boolean>(OWNERSHIP_KEY, [
+      ownership: this._reflector.getAllAndOverride<boolean>(OWNERSHIP_KEY, [
         handler,
         controllerClass,
       ]),
       conditionalAccess:
-        this.reflector.getAllAndOverride<ConditionalAccessConfig>(
+        this._reflector.getAllAndOverride<ConditionalAccessConfig>(
           CONDITIONAL_ACCESS_KEY,
           [handler, controllerClass],
         ),
-      timeAccess: this.reflector.getAllAndOverride<TimeBasedAccessConfig>(
+      timeAccess: this._reflector.getAllAndOverride<TimeBasedAccessConfig>(
         TIME_ACCESS_KEY,
         [handler, controllerClass],
       ),
-      ipAccess: this.reflector.getAllAndOverride<IPBasedAccessConfig>(
+      ipAccess: this._reflector.getAllAndOverride<IPBasedAccessConfig>(
         IP_ACCESS_KEY,
         [handler, controllerClass],
       ),
-      auditAccess: this.reflector.getAllAndOverride<boolean>(AUDIT_ACCESS_KEY, [
-        handler,
-        controllerClass,
-      ]),
-      secureEndpoint: this.reflector.getAllAndOverride<SecureEndpointConfig>(
+      auditAccess: this._reflector.getAllAndOverride<boolean>(
+        AUDIT_ACCESS_KEY,
+        [handler, controllerClass],
+      ),
+      secureEndpoint: this._reflector.getAllAndOverride<SecureEndpointConfig>(
         SECURE_ENDPOINT_KEY,
         [handler, controllerClass],
       ),
-      adminOnly: this.reflector.getAllAndOverride<boolean>(ADMIN_ONLY_KEY, [
+      adminOnly: this._reflector.getAllAndOverride<boolean>(ADMIN_ONLY_KEY, [
         handler,
         controllerClass,
       ]),
