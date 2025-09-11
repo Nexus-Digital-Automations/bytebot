@@ -127,7 +127,7 @@ export function ChatInput({
     }
   };
 
-  const triggerFileInput = () => {
+  const triggerFileInput = (): void => {
     fileInputRef.current?.click();
   };
 
@@ -170,7 +170,11 @@ export function ChatInput({
         ref={fileInputRef}
         type="file"
         multiple
-        onChange={(e) => void handleFileSelect(e)}
+        onChange={(e) => {
+          handleFileSelect(e).catch((error: unknown) => {
+            console.error("File selection error:", error);
+          });
+        }}
         className="hidden"
         accept="*/*"
       />

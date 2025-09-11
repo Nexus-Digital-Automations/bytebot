@@ -17,8 +17,8 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 export const createMockPagesRouter = (
   overrides: Partial<NextRouter> = {},
 ): NextRouter => {
-  const mockFn = () => Promise.resolve(true);
-  const mockVoidFn = () => {};
+  const mockFn = (): Promise<boolean> => Promise.resolve(true);
+  const mockVoidFn = (): void => {};
 
   const mockRouter: NextRouter = {
     basePath: "",

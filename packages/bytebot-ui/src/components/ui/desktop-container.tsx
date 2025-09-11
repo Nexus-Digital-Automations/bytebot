@@ -33,16 +33,20 @@ export const DesktopContainer: React.FC<DesktopContainerProps> = ({
 
   // Calculate the container size on mount and window resize
   useEffect(() => {
-    if (!isMounted) {return;}
+    if (!isMounted) {
+      return;
+    }
 
     const updateSize = () => {
-      if (!containerRef.current) {return;}
+      if (!containerRef.current) {
+        return;
+      }
 
       const parentWidth =
-        containerRef.current.parentElement?.offsetWidth ||
+        containerRef.current.parentElement?.offsetWidth ??
         containerRef.current.offsetWidth;
       const parentHeight =
-        containerRef.current.parentElement?.offsetHeight ||
+        containerRef.current.parentElement?.offsetHeight ??
         containerRef.current.offsetHeight;
 
       // Calculate the maximum size while maintaining 1280:960 aspect ratio
@@ -68,7 +72,9 @@ export const DesktopContainer: React.FC<DesktopContainerProps> = ({
 
     updateSize();
     window.addEventListener("resize", updateSize);
-    return () => { window.removeEventListener("resize", updateSize); };
+    return () => {
+      window.removeEventListener("resize", updateSize);
+    };
   }, [isMounted]);
 
   return (

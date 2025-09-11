@@ -30,34 +30,6 @@
       ]
     },
     {
-      "id": "error_1757574507567_89tax8pt5",
-      "title": "Fix TypeScript and ESLint violations in bytebot-ui page component files",
-      "description": "Add explicit function return types to all page.tsx default exports, fix strict boolean expressions, and ensure proper React component typing for Next.js App Router compatibility",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-11T07:08:27.567Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757574482206_1_general_aaad3bf3",
-      "started_at": "2025-09-11T07:08:50.540Z",
-      "claimed_by": "development_session_1757574482206_1_general_aaad3bf3",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757574482206_1_general_aaad3bf3",
-          "role": "primary",
-          "assignedAt": "2025-09-11T07:08:50.540Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757574460092_q35grua2s",
       "title": "Fix TypeScript strict-boolean-expressions warnings",
       "description": "Fix nullable values in conditionals using proper TypeScript patterns",
@@ -80,34 +52,6 @@
           "agentId": "development_session_1757574431139_1_general_598d191b",
           "role": "primary",
           "assignedAt": "2025-09-11T07:08:03.511Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "id": "error_1757574453475_uggmhich4",
-      "title": "Fix critical ESLint errors in bytebot-ui package",
-      "description": "Fix critical TypeScript ESLint errors: no-non-null-assertion, no-floating-promises, no-misused-promises, no-duplicate-imports in src/app/api/route.ts, src/app/tasks/[id]/page.tsx, and src/app/tasks/page.tsx",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-11T07:07:33.475Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757574430081_1_general_3e01078d",
-      "started_at": "2025-09-11T07:07:58.134Z",
-      "claimed_by": "development_session_1757574430081_1_general_3e01078d",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757574430081_1_general_3e01078d",
-          "role": "primary",
-          "assignedAt": "2025-09-11T07:07:58.134Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }

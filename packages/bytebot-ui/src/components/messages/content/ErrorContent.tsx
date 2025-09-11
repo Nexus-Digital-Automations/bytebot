@@ -7,7 +7,7 @@ interface ErrorContentProps {
   block: ToolResultContentBlock;
 }
 
-export function ErrorContent({ block }: ErrorContentProps) {
+export function ErrorContent({ block }: ErrorContentProps): JSX.Element {
   return (
     <div className="mb-3 rounded-md border border-red-200 bg-red-100 p-2">
       <div className="flex items-center justify-start gap-2">

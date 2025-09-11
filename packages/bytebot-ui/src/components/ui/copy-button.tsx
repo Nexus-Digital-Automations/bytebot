@@ -36,7 +36,11 @@ export function CopyButton({
 
   return (
     <Button
-      onClick={(e) => void handleCopy(e)}
+      onClick={(e) => {
+        handleCopy(e).catch((error: unknown) => {
+          console.error("Copy failed:", error);
+        });
+      }}
       variant={variant}
       size={size}
       className={cn(

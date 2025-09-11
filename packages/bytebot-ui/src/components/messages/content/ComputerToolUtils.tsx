@@ -88,7 +88,7 @@ export function getIcon(block: ComputerToolUseContentBlock): IconType {
   return User03Icon;
 }
 
-export function getLabel(block: ComputerToolUseContentBlock) {
+export function getLabel(block: ComputerToolUseContentBlock): string {
   if (isScreenshotToolUseBlock(block)) {
     return "Screenshot";
   }
