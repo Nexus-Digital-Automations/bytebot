@@ -59,8 +59,8 @@ export default function Home() {
       .then((res) => res.json())
       .then((data: Model[]) => {
         setModels(data);
-        if (data.length > 0) {
-          setSelectedModel(data[0]!);
+        if (data.length > 0 && data[0]) {
+          setSelectedModel(data[0]);
         }
       })
       .catch((_err) => {

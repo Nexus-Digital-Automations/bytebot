@@ -34,22 +34,6 @@
       "auto_research_created": false
     },
     {
-      "id": "error_1757572906399_oep8axczr",
-      "title": "Optimize TypeScript compiler configuration for bytebot-ui package with enterprise-grade type checking",
-      "description": "Configure tsconfig.json with strict TypeScript options, Next.js integration, path mapping, and incremental compilation. Enable all strict compiler options including noUncheckedIndexedAccess, exactOptionalPropertyTypes, noImplicitReturns, and noFallthroughCasesInSwitch. Set up proper path mapping for @/ imports, configure Next.js specific optimizations, and ensure zero TypeScript compilation errors across the entire package.",
-      "priority": "medium",
-      "category": "error",
-      "status": "pending",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-11T06:41:46.399Z",
-      "auto_research_created": false
-    },
-    {
       "id": "error_1757572904545_5bt10qwjp",
       "title": "Optimize ESLint Configuration for Enterprise-Grade TypeScript and React Rules",
       "description": "Optimize eslint.config.js with strict TypeScript rules, React Hook linting, security rules, and Next.js optimizations. Implement @typescript-eslint/strict rules, React performance linting, and comprehensive import/export organization rules for maximum code quality.",

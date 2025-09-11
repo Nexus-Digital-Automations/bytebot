@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { TaskItem } from "@/components/tasks/TaskItem";
-import { TaskTabs, TabKey, TAB_CONFIGS } from "@/components/tasks/TaskTabs";
+import { TAB_CONFIGS, TabKey, TaskTabs } from "@/components/tasks/TaskTabs";
 import { Pagination } from "@/components/ui/pagination";
-import { fetchTasks, fetchTaskCounts } from "@/utils/taskUtils";
+import { fetchTaskCounts, fetchTasks } from "@/utils/taskUtils";
 import { Task } from "@/types";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";

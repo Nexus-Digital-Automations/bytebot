@@ -27,7 +27,7 @@ expect.extend({
     received: HTMLElement,
     className: string,
   ): jest.CustomMatcherResult {
-    if (!received || !received.classList) {
+    if (!received?.classList) {
       return {
         message: () => `Expected element to have classList property`,
         pass: false,
@@ -42,13 +42,12 @@ expect.extend({
           `Expected element not to have Tailwind class "${className}"`,
         pass: true,
       };
-    } else {
-      return {
-        message: () =>
-          `Expected element to have Tailwind class "${className}", but got classes: ${Array.from(received.classList).join(", ")}`,
-        pass: false,
-      };
     }
+    return {
+      message: () =>
+        `Expected element to have Tailwind class "${className}", but got classes: ${Array.from(received.classList).join(", ")}`,
+      pass: false,
+    };
   },
 
   /**
@@ -74,13 +73,12 @@ expect.extend({
         message: () => `Expected event not to be a valid Socket.io event`,
         pass: true,
       };
-    } else {
-      return {
-        message: () =>
-          `Expected event to be a valid Socket.io event with type, payload, and timestamp`,
-        pass: false,
-      };
     }
+    return {
+      message: () =>
+        `Expected event to be a valid Socket.io event with type, payload, and timestamp`,
+      pass: false,
+    };
   },
 
   /**
@@ -104,13 +102,12 @@ expect.extend({
           `Expected task UI object not to have all required fields: ${requiredFields.join(", ")}`,
         pass: true,
       };
-    } else {
-      return {
-        message: () =>
-          `Expected task UI object to have all required fields: ${requiredFields.join(", ")}, missing: ${missingFields.join(", ")}`,
-        pass: false,
-      };
     }
+    return {
+      message: () =>
+        `Expected task UI object to have all required fields: ${requiredFields.join(", ")}, missing: ${missingFields.join(", ")}`,
+      pass: false,
+    };
   },
 
   /**
@@ -139,13 +136,12 @@ expect.extend({
         message: () => `Expected element not to have accessibility attributes`,
         pass: true,
       };
-    } else {
-      return {
-        message: () =>
-          `Expected element to have accessibility attributes (aria-label, aria-labelledby, role, or tabindex)`,
-        pass: false,
-      };
     }
+    return {
+      message: () =>
+        `Expected element to have accessibility attributes (aria-label, aria-labelledby, role, or tabindex)`,
+      pass: false,
+    };
   },
 
   /**
@@ -153,7 +149,7 @@ expect.extend({
    */
   toRenderWithinTime(
     received: () => unknown,
-    maxMs: number = 100,
+    maxMs = 100,
   ): jest.CustomMatcherResult {
     const startTime = performance.now();
 
@@ -169,13 +165,12 @@ expect.extend({
             `Expected component not to render within ${maxMs}ms (took ${renderTime.toFixed(2)}ms)`,
           pass: true,
         };
-      } else {
-        return {
-          message: () =>
-            `Expected component to render within ${maxMs}ms, but took ${renderTime.toFixed(2)}ms`,
-          pass: false,
-        };
       }
+      return {
+        message: () =>
+          `Expected component to render within ${maxMs}ms, but took ${renderTime.toFixed(2)}ms`,
+        pass: false,
+      };
     } catch (error) {
       return {
         message: () =>
@@ -448,6 +443,41 @@ export const TestUtils = {
   testThemeMode: (component: React.ReactElement, mode: "light" | "dark") => {
     document.documentElement.classList.toggle("dark", mode === "dark");
     return TestUtils.renderComponent(component);
+  },
+
+  /**
+   * Creates mock Task objects with default required properties
+   * Useful for testing components that require Task objects
+   */
+  createMockTask: (
+    overrides: Partial<import("@/types").Task> = {},
+  ): import("@/types").Task => {
+    const {
+      Task,
+      TaskStatus,
+      TaskPriority,
+      TaskType,
+      Role,
+    } = require("@/types");
+
+    return {
+      id: "mock-task-id",
+      title: "Mock Task",
+      description: "Mock task description",
+      type: TaskType.IMMEDIATE,
+      status: TaskStatus.PENDING,
+      priority: TaskPriority.MEDIUM,
+      control: Role.USER,
+      createdBy: Role.USER,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      model: {
+        provider: "mock-provider",
+        name: "mock-model",
+        title: "Mock Model",
+      },
+      ...overrides,
+    } as import("@/types").Task;
   },
 };
 

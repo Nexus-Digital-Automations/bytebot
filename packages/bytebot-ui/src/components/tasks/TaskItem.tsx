@@ -68,7 +68,7 @@ const STATUS_CONFIGS: Record<TaskStatus, StatusIconConfig> = {
  */
 const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
   // Format date to match the screenshot (e.g., "Today 9:13am" or "April 13, 2025, 12:01pm")
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const today = new Date();
 
@@ -92,15 +92,18 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
     const config = STATUS_CONFIGS[status];
 
     // Defensive programming - handle missing config gracefully
-    if (!config) {
-      console.warn(`No icon configuration found for status: ${status}`);
+    if (config == null) {
+      // Development warning for missing config
+      if (process.env.NODE_ENV === "development") {
+        console.warn(`No icon configuration found for status: ${status}`);
+      }
       return null;
     }
 
     const { icon: IconComponent, color, useLoader } = config;
 
     // Show loader for pending/running states
-    if (useLoader) {
+    if (useLoader === true) {
       return (
         <div
           className="flex items-center justify-center"
@@ -113,7 +116,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
     }
 
     // Render icon with proper accessibility
-    if (IconComponent) {
+    if (IconComponent != null) {
       return (
         <div
           className="flex items-center justify-center"
@@ -122,14 +125,16 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
         >
           <HugeiconsIcon
             icon={IconComponent}
-            className={`h-5 w-5 ${color || "text-gray-500"}`}
+            className={`h-5 w-5 ${color ?? "text-gray-500"}`}
           />
         </div>
       );
     }
 
     // Fallback for missing icon component
-    console.warn(`Icon component not found for status: ${status}`);
+    if (process.env.NODE_ENV === "development") {
+      console.warn(`Icon component not found for status: ${status}`);
+    }
     return null;
   };
 
@@ -151,7 +156,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
               <>
                 <span className="text-bytebot-bronze-light-10">•</span>
                 <span className="text-bytebot-bronze-light-10">
-                  {task.user.name || task.user.email}
+                  {task.user.name ?? task.user.email}
                 </span>
               </>
             )}
@@ -161,3 +166,23 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
     </Link>
   );
 };
+
+/**
+ * Memoized TaskItem component for optimized performance
+ * Only re-renders when task props change (deep comparison on task object)
+ */
+export const TaskItem = React.memo(
+  TaskItemComponent,
+  (prevProps, nextProps) => {
+    // Custom comparison function for better performance control
+    // Only re-render if task ID, status, description, or timestamp changes
+    return (
+      prevProps.task.id === nextProps.task.id &&
+      prevProps.task.status === nextProps.task.status &&
+      prevProps.task.description === nextProps.task.description &&
+      prevProps.task.createdAt === nextProps.task.createdAt &&
+      prevProps.task.updatedAt === nextProps.task.updatedAt &&
+      prevProps.task.user?.id === nextProps.task.user?.id
+    );
+  },
+);

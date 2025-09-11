@@ -18,7 +18,7 @@ import React from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { ChatContainer } from "../ChatContainer";
 import { GroupedMessages, Role, TaskStatus } from "@/types";
-import { MessageContentType } from "@bytebot/shared";
+import { MessageContentBlock, MessageContentType } from "@bytebot/shared";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 
 // Mock child components
@@ -95,55 +95,32 @@ jest.mock("../ui/loader", () => ({
   ),
 }));
 
+// Test data setup - moved outside describe block for export
+const mockScrollRef: React.RefObject<HTMLDivElement> = {
+  current: null as HTMLDivElement | null,
+} as React.RefObject<HTMLDivElement>;
+const mockMessageIdToIndex = { "msg-1": 0, "msg-2": 1 };
+
+// createMockGroupedMessages moved to bottom of file to avoid duplicate declaration
+
+const defaultProps = {
+  scrollRef: mockScrollRef,
+  messageIdToIndex: mockMessageIdToIndex,
+  taskId: "task-123",
+  input: "",
+  setInput: jest.fn(),
+  isLoading: false,
+  handleAddMessage: jest.fn(),
+  groupedMessages: createMockGroupedMessages(),
+  taskStatus: TaskStatus.RUNNING,
+  control: Role.ASSISTANT,
+  isLoadingSession: false,
+  isLoadingMoreMessages: false,
+  hasMoreMessages: true,
+  loadMoreMessages: jest.fn(),
+};
+
 describe("ChatContainer Component", () => {
-  // Test data setup
-  const mockScrollRef: React.RefObject<HTMLDivElement> = { current: null };
-  const mockMessageIdToIndex = { "msg-1": 0, "msg-2": 1 };
-
-  const createMockGroupedMessages = (): GroupedMessages[] => [
-    {
-      role: Role.USER,
-      messages: [
-        {
-          id: "msg-1",
-          content: [{ type: MessageContentType._Text, text: "Hello" }],
-          role: Role.USER,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    },
-    {
-      role: Role.ASSISTANT,
-      messages: [
-        {
-          id: "msg-2",
-          content: [
-            { type: MessageContentType._Text, text: "Hello! How can I help?" },
-          ],
-          role: Role.ASSISTANT,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    },
-  ];
-
-  const defaultProps = {
-    scrollRef: mockScrollRef,
-    messageIdToIndex: mockMessageIdToIndex,
-    taskId: "task-123",
-    input: "",
-    setInput: jest.fn(),
-    isLoading: false,
-    handleAddMessage: jest.fn(),
-    groupedMessages: createMockGroupedMessages(),
-    taskStatus: TaskStatus.RUNNING,
-    control: Role.ASSISTANT,
-    isLoadingSession: false,
-    isLoadingMoreMessages: false,
-    hasMoreMessages: true,
-    loadMoreMessages: jest.fn(),
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock scroll behavior
@@ -420,7 +397,9 @@ describe("ChatContainer Component", () => {
 
     beforeEach(() => {
       mockMessagesEndRef = { current: document.createElement("div") };
-      mockMessagesEndRef.current!.scrollIntoView = jest.fn();
+      if (mockMessagesEndRef.current) {
+        mockMessagesEndRef.current.scrollIntoView = jest.fn();
+      }
     });
 
     it("scrolls to bottom when task is running", async () => {
@@ -614,7 +593,9 @@ describe("ChatContainer Component", () => {
         .mockRejectedValue(new Error("Network error"));
       const consoleErrorSpy = jest
         .spyOn(console, "error")
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Intentionally empty - suppressing console errors for test
+        });
 
       TestUtils.renderComponent(
         <ChatContainer {...defaultProps} loadMoreMessages={loadMoreMessages} />,
@@ -731,13 +712,58 @@ describe("ChatContainer Component", () => {
 });
 
 // Export test utilities for other chat-related tests
+const createMockGroupedMessages = (): GroupedMessages[] => [
+  {
+    role: Role.USER,
+    messages: [
+      {
+        id: "msg-1",
+        content: [
+          { type: MessageContentType._Text, text: "Hello" },
+        ] as MessageContentBlock[],
+        role: Role.USER,
+        createdAt: new Date().toISOString(),
+      },
+    ],
+  },
+  {
+    role: Role.ASSISTANT,
+    messages: [
+      {
+        id: "msg-2",
+        content: [
+          { type: MessageContentType._Text, text: "Hello! How can I help?" },
+        ] as MessageContentBlock[],
+        role: Role.ASSISTANT,
+        createdAt: new Date().toISOString(),
+      },
+    ],
+  },
+];
+
 export const ChatContainerTestUtils = {
   createMockGroupedMessages,
-  createMockScrollRef: (): React.RefObject<HTMLDivElement> => ({
-    current: null,
-  }),
-  createMockProps: (overrides: Partial<typeof defaultProps> = {}) => ({
-    ...defaultProps,
+  createMockScrollRef: (): React.RefObject<HTMLDivElement> =>
+    ({
+      current: null as HTMLDivElement | null,
+    }) as React.RefObject<HTMLDivElement>,
+  createMockProps: (
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
+    scrollRef: { current: null },
+    messageIdToIndex: { "msg-1": 0, "msg-2": 1 },
+    taskId: "task-123",
+    input: "",
+    setInput: jest.fn(),
+    isLoading: false,
+    handleAddMessage: jest.fn(),
+    groupedMessages: createMockGroupedMessages(),
+    taskStatus: TaskStatus.RUNNING,
+    control: Role.ASSISTANT,
+    isLoadingSession: false,
+    isLoadingMoreMessages: false,
+    hasMoreMessages: true,
+    loadMoreMessages: jest.fn(),
     ...overrides,
   }),
 };
