@@ -138,7 +138,7 @@ import {
   DragMouseAction as _DragMouseAction,
   ScrollAction,
   TypeTextAction as _TypeTextAction,
-  TypeKeysAction,
+  TypeKeysAction as _TypeKeysAction,
 } from '@bytebot/shared';
 
 describe('InputTrackingService', () => {
