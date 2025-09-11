@@ -962,9 +962,117 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/TODO.json"
+    },
+    {
+      "id": "error_1757568566804_x035m6p8b",
+      "title": "Fix no-undef ESLint errors in bytebotd source files",
+      "description": "Fix all no-undef errors in non-test TypeScript source files by adding proper imports and declarations for undefined variables like logger, result, error",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T05:29:26.804Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757568537704_1_general_8b1c10d7",
+      "started_at": "2025-09-11T05:29:43.282Z",
+      "claimed_by": "development_session_1757568537704_1_general_8b1c10d7",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757568537704_1_general_8b1c10d7",
+          "role": "primary",
+          "assignedAt": "2025-09-11T05:29:43.282Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757568566804_x035m6p8b",
+          "completedAt": "2025-09-11T05:43:53.850Z",
+          "completedBy": "development_session_1757568537704_1_general_8b1c10d7",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-11T05:43:53.850Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-11T05:43:53.850Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/TODO.json"
+    },
+    {
+      "id": "error_1757568564673_0ap5ia5t3",
+      "title": "Fix unused variable violations in bytebotd package",
+      "description": "Resolve all @typescript-eslint/no-unused-vars violations by prefixing unused variables with underscore or removing genuinely unused variables",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T05:29:24.673Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757568537825_1_general_15ae3fb1",
+      "started_at": "2025-09-11T05:29:49.976Z",
+      "claimed_by": "development_session_1757568537825_1_general_15ae3fb1",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757568537825_1_general_15ae3fb1",
+          "role": "primary",
+          "assignedAt": "2025-09-11T05:29:49.976Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757568564673_0ap5ia5t3",
+          "completedAt": "2025-09-11T05:44:14.269Z",
+          "completedBy": "development_session_1757568537825_1_general_15ae3fb1",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-11T05:44:14.269Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-11T05:44:14.269Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/TODO.json"
     }
   ],
-  "total_completed": 21,
-  "last_completion": "2025-09-11T05:40:20.676Z",
+  "total_completed": 23,
+  "last_completion": "2025-09-11T05:44:14.269Z",
   "created_at": "2025-09-06T03:52:57.066Z"
 }

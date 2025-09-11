@@ -144,7 +144,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
     guard = module.get<JwtAuthGuard>(JwtAuthGuard);
     jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigService>(ConfigService);
+    _configService = module.get<ConfigService>(ConfigService);
     reflector = module.get<Reflector>(Reflector);
 
     securityLogger.info(`[${operationId}] JWT Security test setup completed`);

@@ -190,9 +190,25 @@
       ]
     },
     {
-      "id": "error_1757568566804_x035m6p8b",
-      "title": "Fix no-undef ESLint errors in bytebotd source files",
-      "description": "Fix all no-undef errors in non-test TypeScript source files by adding proper imports and declarations for undefined variables like logger, result, error",
+      "id": "error_1757569962789_z7asq9vry",
+      "title": "Fix Critical TypeScript Build Errors in Bytebotd Package",
+      "description": "Fix all variable naming conflicts and undefined variable references causing TypeScript compilation failures in bytebotd package",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T05:52:42.789Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "error_1757569596214_h5aoujjyr",
+      "title": "Fix broad-exception-caught (W0718) violations in orchestrator package",
+      "description": "Replace bare Exception catches with specific exception types in orchestrator/startup_test.py and other files. Target lines 40, 55, 96, 120 in startup_test.py and similar violations across test files.",
       "priority": "medium",
       "category": "error",
       "status": "in_progress",
@@ -202,25 +218,25 @@
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-11T05:29:26.804Z",
+      "created_at": "2025-09-11T05:46:36.214Z",
       "auto_research_created": false,
-      "assigned_agent": "development_session_1757568537704_1_general_8b1c10d7",
-      "started_at": "2025-09-11T05:29:43.282Z",
-      "claimed_by": "development_session_1757568537704_1_general_8b1c10d7",
+      "assigned_agent": "development_session_1757569565788_1_general_568f761b",
+      "started_at": "2025-09-11T05:47:30.739Z",
+      "claimed_by": "development_session_1757569565788_1_general_568f761b",
       "agent_assignment_history": [
         {
-          "agentId": "development_session_1757568537704_1_general_8b1c10d7",
+          "agentId": "development_session_1757569565788_1_general_568f761b",
           "role": "primary",
-          "assignedAt": "2025-09-11T05:29:43.282Z",
+          "assignedAt": "2025-09-11T05:47:30.739Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
       ]
     },
     {
-      "id": "error_1757568564673_0ap5ia5t3",
-      "title": "Fix unused variable violations in bytebotd package",
-      "description": "Resolve all @typescript-eslint/no-unused-vars violations by prefixing unused variables with underscore or removing genuinely unused variables",
+      "id": "error_1757569588744_zeaft3ec6",
+      "title": "Fix import-outside-toplevel pylint violations in orchestrator package",
+      "description": "Fix all C0415 violations by moving imports to module top-level. Target files: startup_test.py and other modules with conditional/function-scoped imports. Move importlib.util, models.config_models.OrchestratorConfig, agent_manager.AgentManager, fastmcp.FastMCP imports to top-level while handling circular dependencies properly.",
       "priority": "medium",
       "category": "error",
       "status": "in_progress",
@@ -230,16 +246,16 @@
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-11T05:29:24.673Z",
+      "created_at": "2025-09-11T05:46:28.744Z",
       "auto_research_created": false,
-      "assigned_agent": "development_session_1757568537825_1_general_15ae3fb1",
-      "started_at": "2025-09-11T05:29:49.976Z",
-      "claimed_by": "development_session_1757568537825_1_general_15ae3fb1",
+      "assigned_agent": "development_session_1757569565281_1_general_3381d63a",
+      "started_at": "2025-09-11T05:46:57.254Z",
+      "claimed_by": "development_session_1757569565281_1_general_3381d63a",
       "agent_assignment_history": [
         {
-          "agentId": "development_session_1757568537825_1_general_15ae3fb1",
+          "agentId": "development_session_1757569565281_1_general_3381d63a",
           "role": "primary",
-          "assignedAt": "2025-09-11T05:29:49.976Z",
+          "assignedAt": "2025-09-11T05:46:57.254Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
@@ -1988,6 +2004,48 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-11T05:35:23.199Z",
       "sessionId": "session_1757568923197",
+      "metadata": {}
+    },
+    "development_session_1757569565281_1_general_3381d63a": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T05:46:05.284Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T05:46:05.284Z",
+      "sessionId": "session_1757569565281",
+      "metadata": {}
+    },
+    "development_session_1757569565788_1_general_568f761b": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T05:46:05.792Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T05:46:05.792Z",
+      "sessionId": "session_1757569565788",
       "metadata": {}
     }
   },

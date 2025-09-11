@@ -202,7 +202,7 @@ describe("Header Component", () => {
     });
 
     it("renders without title when not provided", () => {
-      const { ...propsWithoutTitle } = defaultProps;
+      const { ..._propsWithoutTitle } = defaultProps;
       TestUtils.renderComponent(<Header />);
 
       expect(screen.queryByText("Bytebot UI")).not.toBeInTheDocument();
@@ -243,7 +243,7 @@ describe("Header Component", () => {
     });
 
     it("handles search keyboard shortcuts", async () => {
-      const onSearch = jest.fn();
+      const _onSearch = jest.fn();
       const user = TestUtils.createUserEvent();
 
       TestUtils.renderComponent(<Header />);

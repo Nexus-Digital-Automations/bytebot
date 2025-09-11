@@ -49,7 +49,7 @@ export const Roles = (...roles: UserRole[]) => SetMetadata('roles', roles);
  *
  * @example
  * ```typescript
- * @Permissions(Permission._COMPUTER_CONTROL)
+ * @Permissions(_Permission._COMPUTER_CONTROL)
  * @Post('/computer-use/action')
  * async executeComputerAction() {
  *   return this.computerUseService.executeAction();
@@ -138,7 +138,7 @@ export const RequireRole = (role: UserRole) => Roles(role);
  *
  * @example
  * ```typescript
- * @RequirePermission(Permission._COMPUTER_CONTROL)
+ * @RequirePermission(_Permission._COMPUTER_CONTROL)
  * @Post('/computer-use/screenshot')
  * async takeScreenshot() {
  *   return this.computerUseService.takeScreenshot();

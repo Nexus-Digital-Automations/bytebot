@@ -333,7 +333,7 @@ describe('Security Penetration Testing Suite', () => {
     jwtAuthGuard = module.get<JwtAuthGuard>(JwtAuthGuard);
     rolesGuard = module.get<RolesGuard>(RolesGuard);
     jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigService>(ConfigService);
+    _configService = module.get<ConfigService>(ConfigService);
     reflector = module.get<Reflector>(Reflector);
 
     pentestLogger.info(
@@ -596,7 +596,7 @@ describe('Security Penetration Testing Suite', () => {
             constructor: {
               prototype: {
                 role: UserRole._ADMIN,
-                permissions: [Permission._SYSTEM_ADMIN],
+                permissions: [_Permission._SYSTEM_ADMIN],
               },
             },
           } as any,
@@ -610,7 +610,7 @@ describe('Security Penetration Testing Suite', () => {
             role: UserRole._VIEWER,
             isActive: true,
             roles: [UserRole._ADMIN],
-            permissions: [Permission._SYSTEM_ADMIN],
+            permissions: [_Permission._SYSTEM_ADMIN],
             admin: true,
             superuser: true,
           } as any,

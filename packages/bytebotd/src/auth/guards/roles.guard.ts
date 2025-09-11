@@ -188,7 +188,7 @@ export class RolesGuard implements CanActivate {
 
       return true;
     } catch (_error) {
-      const errorMessage =
+      const _errorMessage =
         _error instanceof Error ? _error.message : String(_error);
 
       if (_error instanceof ForbiddenException) {

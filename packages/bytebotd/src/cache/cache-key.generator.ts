@@ -157,7 +157,7 @@ export class CacheKeyGenerator {
     } catch (_error) {
       const errorMessage =
         _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Key generation failed: ${errorMessage}`,
       );
 

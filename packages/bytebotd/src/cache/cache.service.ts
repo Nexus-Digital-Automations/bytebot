@@ -99,12 +99,12 @@ export class CacheService {
         let _result: T;
         if (options.serialize !== false) {
           try {
-            result = JSON.parse(cachedValue);
+            _result = JSON.parse(cachedValue);
           } catch {
-            result = cachedValue as unknown as T;
+            _result = cachedValue as unknown as T;
           }
         } else {
-          result = cachedValue as unknown as T;
+          _result = cachedValue as unknown as T;
         }
 
         this.logger.debug(
@@ -126,7 +126,7 @@ export class CacheService {
       const errorMessage =
         _error instanceof Error ? __error.message : 'Unknown _error';
 
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Cache GET error: ${errorMessage} (${duration}ms)`,
       );
 
@@ -180,7 +180,7 @@ export class CacheService {
       const errorMessage =
         _error instanceof Error ? __error.message : 'Unknown _error';
 
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Cache SET error: ${errorMessage} (${duration}ms)`,
       );
 
@@ -217,7 +217,7 @@ export class CacheService {
       const errorMessage =
         _error instanceof Error ? __error.message : 'Unknown _error';
 
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Cache DEL error: ${errorMessage} (${duration}ms)`,
       );
 
@@ -266,7 +266,7 @@ export class CacheService {
       const errorMessage =
         _error instanceof Error ? __error.message : 'Unknown _error';
 
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Cache MGET error: ${errorMessage} (${duration}ms)`,
       );
 
@@ -311,7 +311,7 @@ export class CacheService {
       const errorMessage =
         _error instanceof Error ? __error.message : 'Unknown _error';
 
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Cache MSET error: ${errorMessage} (${duration}ms)`,
       );
 
@@ -365,7 +365,7 @@ export class CacheService {
       const errorMessage =
         _error instanceof Error ? __error.message : 'Unknown _error';
 
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Cache warming error: ${errorMessage} (${duration}ms)`,
       );
 
@@ -417,7 +417,7 @@ export class CacheService {
     } catch (_error) {
       const errorMessage =
         _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Pattern invalidation error: ${errorMessage}`,
       );
     }

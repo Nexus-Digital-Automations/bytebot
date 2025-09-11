@@ -205,7 +205,7 @@ describe('Controller Security Integration Tests', () => {
 
     app = moduleRef.createNestApplication();
     jwtService = moduleRef.get<JwtService>(JwtService);
-    configService = moduleRef.get<ConfigService>(ConfigService);
+    _configService = moduleRef.get<ConfigService>(ConfigService);
 
     const controller = new MockSecureController();
     const _reflector = moduleRef.get<Reflector>(Reflector);
