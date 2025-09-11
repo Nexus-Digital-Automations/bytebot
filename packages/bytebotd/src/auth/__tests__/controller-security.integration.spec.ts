@@ -865,7 +865,7 @@ describe('Controller Security Integration Tests', () => {
         'User-Agent': 'Normal-Agent\r\nX-Evil-Header: injected',
       };
 
-      const response = await request(app.getHttpServer())
+      const _response = await request(app.getHttpServer())
         .get('/api/protected')
         .set(maliciousHeaders)
         .expect((res) => {
@@ -891,7 +891,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of splittingPayloads) {
-        const response = await request(app.getHttpServer())
+        const _response = await request(app.getHttpServer())
           .get('/api/users/search')
           .query({ q: _payload })
           .set('Authorization', 'Bearer operator-token')
