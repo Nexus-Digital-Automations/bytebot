@@ -527,7 +527,7 @@ describe('Base64ImageCompressor', () => {
       // Process multiple images
       const promises = Array(5)
         .fill(null)
-        .map((_, _i) => {
+        .map((_, i) => {
           const image = TestDataGenerator.generateBase64Image(1000 + i * 100);
           return Base64ImageCompressor.compressToSize(image, {
             targetSizeKB: 800,

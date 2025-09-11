@@ -186,7 +186,7 @@ export class ComputerUseTools {
         content: [
           {
             type: 'text',
-            text: `Error moving mouse: ${_err.message}`,
+            text: `Error moving mouse: ${_err instanceof Error ? _err.message : String(_err)}`,
           },
         ],
       };

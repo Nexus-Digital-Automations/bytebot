@@ -82,7 +82,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const request = ctx.getRequest<Request>();
-    const _response = ctx.getResponse<Response>();
+    const response = ctx.getResponse<Response>();
 
     // Generate request ID for tracking (use existing or create new)
     const requestId =
@@ -118,7 +118,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     response.setHeader('X-Frame-Options', 'DENY');
 
     // Send secure response
-    _response.response.status(secureResponse.statusCode).json(secureResponse);
+    response.response.status(secureResponse.statusCode).json(secureResponse);
   }
 
   /**
@@ -225,7 +225,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     const isDevelopment = process.env.NODE_ENV === 'development';
 
     // Base secure response
-    const _response: SecureErrorResponse = {
+    const response: SecureErrorResponse = {
       statusCode: errorAnalysis.statusCode,
       error: this.getSecureErrorName(errorAnalysis.statusCode),
       message: this.getSecureErrorMessage(exception, errorAnalysis),

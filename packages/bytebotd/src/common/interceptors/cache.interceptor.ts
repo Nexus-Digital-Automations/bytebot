@@ -178,7 +178,7 @@ export class CacheInterceptor implements NestInterceptor {
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
-    const _response = context.switchToHttp().getResponse<Response>();
+    const response = context.switchToHttp().getResponse<Response>();
 
     // Only cache GET requests by default
     if (request.method !== 'GET') {

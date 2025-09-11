@@ -334,11 +334,11 @@ describe('HealthController', () => {
 
       const result = await controller.getDetailedStatus();
 
-      expect(_result.status).toBe('degraded');
-      expect((_result as DetailedStatusResponse).services.cache).toBe(
+      expect(result.status).toBe('degraded');
+      expect((result as DetailedStatusResponse).services.cache).toBe(
         'unavailable',
       );
-      expect((_result as DetailedStatusResponse).services.external).toBe(
+      expect((result as DetailedStatusResponse).services.external).toBe(
         'unknown',
       );
 
@@ -365,8 +365,8 @@ describe('HealthController', () => {
 
       const result = await controller.getDetailedStatus();
 
-      expect(_result.status).toBe('unhealthy');
-      expect((_result as DetailedStatusResponse).services.database).toBe(
+      expect(result.status).toBe('unhealthy');
+      expect((result as DetailedStatusResponse).services.database).toBe(
         'disconnected',
       );
 
@@ -598,8 +598,8 @@ describe('HealthController', () => {
 
       const result = await controller.getDetailedStatus();
 
-      expect(_result.status).toBe('error');
-      expect((_result as { error: string }).error).toBe('Health check timeout');
+      expect(result.status).toBe('error');
+      expect((result as { error: string }).error).toBe('Health check timeout');
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Detailed status check failed: Health check timeout',
       );
@@ -755,12 +755,12 @@ describe('HealthController', () => {
       expect(result).toHaveProperty('status');
       expect(result).toHaveProperty('timestamp');
       expect(result).toHaveProperty('uptime');
-      expect(_result as BasicHealthResponse).toHaveProperty('memory');
+      expect(result as BasicHealthResponse).toHaveProperty('memory');
 
       // Memory object should have expected structure
-      expect((_result as BasicHealthResponse).memory).toHaveProperty('used');
-      expect((_result as BasicHealthResponse).memory).toHaveProperty('free');
-      expect((_result as BasicHealthResponse).memory).toHaveProperty('total');
+      expect((result as BasicHealthResponse).memory).toHaveProperty('used');
+      expect((result as BasicHealthResponse).memory).toHaveProperty('free');
+      expect((result as BasicHealthResponse).memory).toHaveProperty('total');
 
       console.log(`[${testId}] Backward compatibility test completed`);
     });
@@ -834,7 +834,7 @@ describe('HealthController', () => {
       const result = await controller.getDetailedStatus();
 
       // Ensure no sensitive data is exposed
-      const responseStr = JSON.stringify(_result);
+      const responseStr = JSON.stringify(result);
       expect(responseStr).not.toMatch(/password|secret|key|token/i);
 
       console.log(
@@ -850,17 +850,17 @@ describe('HealthController', () => {
 
       const result = await controller.getHealth();
 
-      expect(typeof _result.status).toBe('string');
-      expect(typeof _result.timestamp).toBe('string');
-      expect(typeof (_result as BasicHealthResponse).uptime).toBe('number');
-      expect(typeof (_result as BasicHealthResponse).memory).toBe('object');
-      expect(typeof (_result as BasicHealthResponse).memory.used).toBe(
+      expect(typeof result.status).toBe('string');
+      expect(typeof result.timestamp).toBe('string');
+      expect(typeof (result as BasicHealthResponse).uptime).toBe('number');
+      expect(typeof (result as BasicHealthResponse).memory).toBe('object');
+      expect(typeof (result as BasicHealthResponse).memory.used).toBe(
         'number',
       );
-      expect(typeof (_result as BasicHealthResponse).memory.free).toBe(
+      expect(typeof (result as BasicHealthResponse).memory.free).toBe(
         'number',
       );
-      expect(typeof (_result as BasicHealthResponse).memory.total).toBe(
+      expect(typeof (result as BasicHealthResponse).memory.total).toBe(
         'number',
       );
 
@@ -880,7 +880,7 @@ describe('HealthController', () => {
 
       const result = await controller.getHealth();
 
-      expect((_result as { error: string }).error).toBe(
+      expect((result as { error: string }).error).toBe(
         'Database error: <script>alert("XSS")</script>',
       );
       // In a real implementation, you might want to sanitize this further
@@ -899,8 +899,8 @@ describe('HealthController', () => {
 
       const result = await controller.getHealth();
 
-      expect((_result as { error: string }).error).toBeDefined();
-      expect((_result as { error: string }).error.length).toBeGreaterThan(0);
+      expect((result as { error: string }).error).toBeDefined();
+      expect((result as { error: string }).error.length).toBeGreaterThan(0);
 
       console.log(`[${testId}] Error message length test completed`);
     });
@@ -947,7 +947,7 @@ describe('HealthController', () => {
           expect.any(Function),
         ]);
         expect(result).toBeDefined();
-        expect(_result.status).toBe('ok');
+        expect(result.status).toBe('ok');
 
         console.log(`[${testId}] Liveness probe success test completed`);
       });
@@ -1065,7 +1065,7 @@ describe('HealthController', () => {
           expect.any(Function), // disk storage
           expect.any(Function), // memory heap
         ]);
-        expect(_result.status).toBe('ok');
+        expect(result.status).toBe('ok');
 
         console.log(`[${testId}] Readiness probe success test completed`);
       });
@@ -1243,7 +1243,7 @@ describe('HealthController', () => {
           expect.any(Function), // module initialization check
           expect.any(Function), // basic database check
         ]);
-        expect(_result.status).toBe('ok');
+        expect(result.status).toBe('ok');
 
         console.log(`[${testId}] Startup probe success test completed`);
       });
@@ -1575,7 +1575,7 @@ describe('HealthController', () => {
         expect(result).toHaveProperty('info');
         expect(result).toHaveProperty('error');
         expect(result).toHaveProperty('details');
-        expect(['ok', 'error', 'shutting_down'].includes(_result.status)).toBe(
+        expect(['ok', 'error', 'shutting_down'].includes(result.status)).toBe(
           true,
         );
 
@@ -1637,7 +1637,7 @@ describe('HealthController', () => {
 
         // Second call should succeed
         const result = await controller.checkLiveness();
-        expect(_result.status).toBe('ok');
+        expect(result.status).toBe('ok');
 
         console.log(`[${testId}] Probe failure recovery test completed`);
       });

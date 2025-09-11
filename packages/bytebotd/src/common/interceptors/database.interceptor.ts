@@ -502,7 +502,7 @@ export class DatabaseInterceptor implements NestInterceptor {
 
       // Record metrics with MetricsService
       if (this.metricsService) {
-        if (_error) {
+        if (error) {
           this.metricsService.recordDatabaseError(
             operation.operation,
             error.constructor.name,
@@ -527,7 +527,7 @@ export class DatabaseInterceptor implements NestInterceptor {
       }
     } catch (_error) {
       this.logger.error(
-        `Failed to record database metrics: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
+        `Failed to record database metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
       );
     }
   }

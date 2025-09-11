@@ -89,7 +89,7 @@ export class HealthService extends HealthIndicator {
       const memoryUsage = process.memoryUsage();
       const uptime = process.uptime();
 
-      const _response: BasicHealthResponse = {
+      const response: BasicHealthResponse = {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: Math.round(uptime),
@@ -150,7 +150,7 @@ export class HealthService extends HealthIndicator {
           : 'unhealthy';
       }
 
-      const _response: DetailedStatusResponse = {
+      const response: DetailedStatusResponse = {
         status,
         timestamp: new Date().toISOString(),
         uptime: Math.round(uptime),
@@ -171,13 +171,13 @@ export class HealthService extends HealthIndicator {
         `[${operationId}] Detailed status retrieved successfully`,
         {
           status,
-          memoryUsage: `${_response.memory.used}MB`,
-          uptime: `${_response.uptime}s`,
+          memoryUsage: `${response.memory.used}MB`,
+          uptime: `${response.uptime}s`,
           servicesCount: Object.keys(services).length,
         },
       );
 
-      return _response;
+      return response;
     } catch (_error) {
       const errorMessage =
         _error instanceof Error ? _error.message : 'Unknown _error';
@@ -358,7 +358,7 @@ export class HealthService extends HealthIndicator {
 
       services.forEach(
         (
-          _result: PromiseSettledResult<{
+          result: PromiseSettledResult<{
             status: string;
             responseTime?: string;
           }>,

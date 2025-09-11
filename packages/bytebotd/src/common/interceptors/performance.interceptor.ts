@@ -124,7 +124,7 @@ export class PerformanceInterceptor implements NestInterceptor {
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
-    const _response = context.switchToHttp().getResponse<Response>();
+    const response = context.switchToHttp().getResponse<Response>();
 
     // Generate unique operation ID for request tracking
     const operationId = `perf_${Date.now()}_${Math.random().toString(36).substring(7)}`;

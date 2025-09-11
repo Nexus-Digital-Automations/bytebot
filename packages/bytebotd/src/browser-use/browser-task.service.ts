@@ -495,6 +495,7 @@ export class BrowserTaskService {
     // Find correct insertion position
     for (let i = 0; i < this.taskQueue.length; i++) {
       const queuedTaskId = this.taskQueue[i];
+      if (!queuedTaskId) continue;
       const queuedTask = this.tasks.get(queuedTaskId);
 
       if (queuedTask?.metadata?.priority) {

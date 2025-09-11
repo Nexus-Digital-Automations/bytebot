@@ -710,9 +710,10 @@ export class BrowserAsyncJobService {
     // Insert based on priority
     const priorityOrder = {
       [AsyncJobPriority.CRITICAL]: 0,
-      [AsyncJobPriority.HIGH]: 1,
-      [AsyncJobPriority.NORMAL]: 2,
-      [AsyncJobPriority.LOW]: 3,
+      [AsyncJobPriority.URGENT]: 1,
+      [AsyncJobPriority.HIGH]: 2,
+      [AsyncJobPriority.NORMAL]: 3,
+      [AsyncJobPriority.LOW]: 4,
     };
 
     const jobPriorityValue = priorityOrder[job.priority];

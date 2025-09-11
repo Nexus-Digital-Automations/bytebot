@@ -209,7 +209,7 @@ describe('HealthService', () => {
     describe('Database Ping', () => {
       it('should simulate database ping successfully', async () => {
         const result = await (service as any).performDatabasePing();
-        expect(_result).toBe(true);
+        expect(result).toBe(true);
       });
     });
 
@@ -220,9 +220,9 @@ describe('HealthService', () => {
           'http://test.com/health',
         );
 
-        expect(_result).toHaveProperty('status');
-        expect(_result).toHaveProperty('responseTime');
-        expect(['healthy', 'unhealthy']).toContain(_result.status);
+        expect(result).toHaveProperty('status');
+        expect(result).toHaveProperty('responseTime');
+        expect(['healthy', 'unhealthy']).toContain(result.status);
       });
     });
 

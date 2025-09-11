@@ -387,7 +387,7 @@ describe('Security Validation Mock Tests', () => {
       const duration = Date.now() - startTime;
 
       expect(duration).toBeLessThan(100); // Should complete in under 100ms
-      expect(_result).toBeDefined();
+      expect(result).toBeDefined();
     });
 
     it('should handle multiple concurrent validations', async () => {

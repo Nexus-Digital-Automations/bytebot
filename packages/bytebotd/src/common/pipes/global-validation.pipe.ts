@@ -172,21 +172,21 @@ export class GlobalValidationPipe implements PipeTransform<any> {
       );
 
       return transformedValue;
-    } catch (_error) {
+    } catch (error) {
       const processingTime = Date.now() - startTime;
 
       this.logger.error(`[${operationId}] BytebotD validation failed`, {
         operationId,
         type: metadata.type,
         metatype: metadata.metatype?.name,
-        error: _error.message,
+        error: error.message,
         processingTimeMs: processingTime,
       });
 
       // Log security event for validation failures
-      this.logSecurityEvent(operationId, _error, value, metadata);
+      this.logSecurityEvent(operationId, error, value, metadata);
 
-      throw _error;
+      throw error;
     }
   }
 
@@ -256,15 +256,15 @@ export class GlobalValidationPipe implements PipeTransform<any> {
           100
         ).toFixed(1),
       });
-    } catch (_error) {
-      if (_error instanceof PayloadTooLargeException) {
-        throw _error;
+    } catch (error) {
+      if (error instanceof PayloadTooLargeException) {
+        throw error;
       }
 
       // If we can't stringify the value, it might be too large or contain circular references
       this.logger.warn(`[${operationId}] Could not validate _payload size`, {
         operationId,
-        error: _error.message,
+        error: error.message,
       });
     }
   }
@@ -430,13 +430,13 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @returns Formatted error array
    */
   private formatValidationErrors(errors: ValidationError[]): any[] {
-    return errors.map((_error) => ({
-      property: _error.property,
-      value: _error.value,
-      constraints: _error.constraints,
+    return errors.map((error) => ({
+      property: error.property,
+      value: error.value,
+      constraints: error.constraints,
       children:
-        _error.children?.length > 0
-          ? this.formatValidationErrors(_error.children)
+        error.children?.length > 0
+          ? this.formatValidationErrors(error.children)
           : undefined,
     }));
   }
@@ -457,9 +457,9 @@ export class GlobalValidationPipe implements PipeTransform<any> {
     try {
       let eventType = SecurityEventType._VALIDATION_FAILED;
 
-      if (_error.message?.includes('XSS')) {
+      if (error.message?.includes('XSS')) {
         eventType = SecurityEventType._XSS_ATTEMPT_BLOCKED;
-      } else if (_error.message?.includes('SQL')) {
+      } else if (error.message?.includes('SQL')) {
         eventType = SecurityEventType._INJECTION_ATTEMPT_BLOCKED;
       }
 
@@ -468,13 +468,13 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         `validation-pipe-${metadata.type}`,
         'POST',
         false,
-        _error.message || 'Validation failed',
+        error.message || 'Validation failed',
         {
           operationId,
           service: 'BytebotD',
           inputType: typeof value,
           metatype: metadata.metatype?.name,
-          errorType: _error.constructor.name,
+          errorType: error.constructor.name,
           threatDetection: this.options.enableThreatDetection,
           sanitizationEnabled: this.options.enableSanitization,
         },

@@ -42,7 +42,7 @@ class ComputerUseTestData {
   static generatePath(length: number = 3) {
     return Array(length)
       .fill(null)
-      .map((_, _i) => ({
+      .map((_, i) => ({
         x: i * 50,
         y: i * 50,
       }));
@@ -189,7 +189,7 @@ describe('ComputerUseTools', () => {
         const coordinates = ComputerUseTestData.generateCoordinates();
         const error = new Error('Mouse move failed');
 
-        mockComputerUseService.action.mockRejectedValue(_error);
+        mockComputerUseService.action.mockRejectedValue(error);
 
         const result = await computerUseTools.moveMouse({ coordinates });
 
@@ -426,7 +426,7 @@ describe('ComputerUseTools', () => {
        */
       it('should handle screenshot errors gracefully', async () => {
         const error = new Error('Screenshot capture failed');
-        mockComputerUseService.action.mockRejectedValue(_error);
+        mockComputerUseService.action.mockRejectedValue(error);
 
         const result = await computerUseTools.screenshot();
 
@@ -544,7 +544,7 @@ describe('ComputerUseTools', () => {
      */
     it('should handle service unavailable errors', async () => {
       const error = new Error('Service unavailable');
-      mockComputerUseService.action.mockRejectedValue(_error);
+      mockComputerUseService.action.mockRejectedValue(error);
 
       const result = await computerUseTools.moveMouse({
         coordinates: { x: 0, y: 0 },

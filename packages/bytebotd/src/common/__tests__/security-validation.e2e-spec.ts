@@ -118,7 +118,7 @@ describe('Security Validation E2E Tests', () => {
 
     sqlInjectionPayloads.forEach((_payload, _index) => {
       it(`should block SQL injection _payload #${_index + 1}`, async () => {
-        const _response = await request(server)
+        const response = await request(server)
           .post('/computer-use')
           .send({
             action: 'write_file',
@@ -146,7 +146,7 @@ describe('Security Validation E2E Tests', () => {
 
     commandInjectionPayloads.forEach((_payload, _index) => {
       it(`should block command injection _payload #${_index + 1}`, async () => {
-        const _response = await request(server)
+        const response = await request(server)
           .post('/computer-use')
           .send({
             action: 'application',
@@ -242,7 +242,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should validate coordinate ranges', async () => {
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({
           action: 'click_mouse',
@@ -295,8 +295,8 @@ describe('Security Validation E2E Tests', () => {
         .expect(400);
 
       expect(
-        _response.response.body.requestId ||
-          _response.response.headers['x-request-id'],
+        response.response.body.requestId ||
+          response.response.headers['x-request-id'],
       ).toBeDefined();
     });
 
@@ -446,9 +446,9 @@ describe('Security Validation E2E Tests', () => {
         .send({ action: 'screenshot' });
 
       expect(
-        _response.response.headers['x-request-id'] ||
-          _response.response.headers['x-correlation-id'] ||
-          _response.response.body.operationId,
+        response.response.headers['x-request-id'] ||
+          response.response.headers['x-correlation-id'] ||
+          response.response.body.operationId,
       ).toBeDefined();
     });
   });

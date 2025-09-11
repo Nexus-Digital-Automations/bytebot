@@ -202,7 +202,7 @@ export class DeprecationGuard implements CanActivate {
 
     try {
       const request = context.switchToHttp().getRequest<Request>();
-      const _response = context.switchToHttp().getResponse<Response>();
+      const response = context.switchToHttp().getResponse<Response>();
 
       // Get version configuration from endpoint
       const versionConfig = getVersionConfig(context.getHandler());

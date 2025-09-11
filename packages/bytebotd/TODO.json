@@ -274,34 +274,6 @@
       ]
     },
     {
-      "id": "error_1757571889852_96l5msn0s",
-      "title": "Fix TypeScript type safety errors in bytebotd package",
-      "description": "Resolve 362 TypeScript build errors including undefined assignments, property access on empty objects, and type string | undefined issues. Focus on auth guards and ensure proper null/undefined checks.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-11T06:24:49.852Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757571828309_1_general_ecca9040",
-      "started_at": "2025-09-11T06:25:53.947Z",
-      "claimed_by": "development_session_1757571828309_1_general_ecca9040",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757571828309_1_general_ecca9040",
-          "role": "primary",
-          "assignedAt": "2025-09-11T06:25:53.947Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757569962789_z7asq9vry",
       "title": "Fix Critical TypeScript Build Errors in Bytebotd Package",
       "description": "Fix all variable naming conflicts and undefined variable references causing TypeScript compilation failures in bytebotd package",

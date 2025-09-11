@@ -112,7 +112,7 @@ export class VersionInterceptor implements NestInterceptor {
 
     try {
       const request = context.switchToHttp().getRequest<Request>();
-      const _response = context.switchToHttp().getResponse<Response>();
+      const response = context.switchToHttp().getResponse<Response>();
 
       // Get endpoint version configuration
       const endpointVersionConfig = getVersionConfig(context.getHandler());

@@ -417,7 +417,7 @@ export class AsyncJobService {
       // Execute the action with timeout
       const executionPromise = this.computerUseService.action(jobData.action);
 
-      const _result = await Promise.race([executionPromise, timeoutPromise]);
+      const result = await Promise.race([executionPromise, timeoutPromise]);
 
       // Job completed successfully
       jobData.status = JobStatus.COMPLETED;
