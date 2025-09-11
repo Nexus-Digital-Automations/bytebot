@@ -141,7 +141,7 @@ describe('Base64ImageCompressor', () => {
       const inputImage = TestDataGenerator.generateBase64Image(2000); // 2MB
       const targetSizeKB = 1024;
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB,
         format: 'png',
       });
@@ -170,7 +170,7 @@ describe('Base64ImageCompressor', () => {
       async (format) => {
         const inputImage = TestDataGenerator.generateBase64Image(1500);
 
-        const result = await Base64ImageCompressor.compressToSize(inputImage, {
+        const _result = await Base64ImageCompressor.compressToSize(inputImage, {
           targetSizeKB: 1024,
           format,
         });
@@ -208,7 +208,7 @@ describe('Base64ImageCompressor', () => {
 
       const inputImage = TestDataGenerator.generateBase64Image(2000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 1024,
         initialQuality: 95,
         minQuality: 10,
@@ -227,7 +227,7 @@ describe('Base64ImageCompressor', () => {
       const inputImage = TestDataGenerator.generateBase64Image(500); // 500KB
       const targetSizeKB = 1024;
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB,
       });
 
@@ -242,7 +242,7 @@ describe('Base64ImageCompressor', () => {
     it('should respect quality constraints', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(2000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 1024,
         initialQuality: 80,
         minQuality: 20,
@@ -258,7 +258,7 @@ describe('Base64ImageCompressor', () => {
     it('should handle base64 strings with data URL prefix', async () => {
       const inputImage = TestDataGenerator.generateBase64ImageWithPrefix(1500);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 1024,
       });
 
@@ -277,7 +277,7 @@ describe('Base64ImageCompressor', () => {
       const inputImage = TestDataGenerator.generateBase64Image(2000);
       const maxIterations = 3;
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 1024,
         maxIterations,
       });
@@ -341,7 +341,7 @@ describe('Base64ImageCompressor', () => {
 
       const inputImage = TestDataGenerator.generateBase64Image(2000);
 
-      const result = await Base64ImageCompressor.compressWithResize(
+      const _result = await Base64ImageCompressor.compressWithResize(
         inputImage,
         {
           targetSizeKB: 1024,
@@ -394,7 +394,7 @@ describe('Base64ImageCompressor', () => {
 
       const inputImage = TestDataGenerator.generateBase64Image(5000);
 
-      const result = await Base64ImageCompressor.compressWithResize(
+      const _result = await Base64ImageCompressor.compressWithResize(
         inputImage,
         {
           targetSizeKB: 500,
@@ -467,7 +467,7 @@ describe('Base64ImageCompressor', () => {
     it('should compress PNG to under 1MB', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(2000);
 
-      const result = await compressPngBase64Under1MB(inputImage);
+      const _result = await compressPngBase64Under1MB(inputImage);
 
       expect(result).toBeDefined();
       expect(typeof result).toBe('string');
@@ -506,7 +506,7 @@ describe('Base64ImageCompressor', () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
       const startTime = performance.now();
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 800,
       });
 
@@ -526,7 +526,7 @@ describe('Base64ImageCompressor', () => {
       // Process multiple images
       const promises = Array(5)
         .fill(null)
-        .map((_, i) => {
+        .map((_, _i) => {
           const image = TestDataGenerator.generateBase64Image(1000 + i * 100);
           return Base64ImageCompressor.compressToSize(image, {
             targetSizeKB: 800,
@@ -549,7 +549,7 @@ describe('Base64ImageCompressor', () => {
       const largeImage = TestDataGenerator.generateBase64Image(10000); // 10MB
 
       const startTime = performance.now();
-      const result = await Base64ImageCompressor.compressToSize(largeImage, {
+      const _result = await Base64ImageCompressor.compressToSize(largeImage, {
         targetSizeKB: 1024,
         maxIterations: 5,
       });
@@ -574,7 +574,7 @@ describe('Base64ImageCompressor', () => {
     it('should handle very small target sizes', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 1, // Very small target
         minQuality: 1,
       });
@@ -589,7 +589,7 @@ describe('Base64ImageCompressor', () => {
     it('should handle very large target sizes', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(100);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 10000, // Much larger than input
       });
 
@@ -603,7 +603,7 @@ describe('Base64ImageCompressor', () => {
     it('should handle invalid quality ranges', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 800,
         initialQuality: 50,
         minQuality: 60, // Min greater than initial
@@ -619,7 +619,7 @@ describe('Base64ImageCompressor', () => {
     it('should handle zero max iterations', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 800,
         maxIterations: 0,
       });
@@ -666,7 +666,7 @@ describe('Base64ImageCompressor', () => {
     it('should produce valid base64 output', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 800,
       });
 
@@ -685,7 +685,7 @@ describe('Base64ImageCompressor', () => {
       );
 
       const inputImage = TestDataGenerator.generateBase64Image(1000);
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 800,
       });
 
@@ -700,7 +700,7 @@ describe('Base64ImageCompressor', () => {
     it('should maintain consistent metadata', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const _result = await Base64ImageCompressor.compressToSize(inputImage, {
         targetSizeKB: 800,
         format: 'jpeg',
       });

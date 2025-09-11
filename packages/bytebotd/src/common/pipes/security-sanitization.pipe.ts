@@ -98,7 +98,7 @@ interface ThreatDetectionResult {
 
 @Injectable()
 export class SecuritySanitizationPipe implements PipeTransform<any> {
-  private readonly logger = new Logger(SecuritySanitizationPipe.name);
+  private readonly logger = new Logger(SecuritySanitizationPipe._name);
   private readonly options: Required<SecuritySanitizationOptions>;
 
   // Security metrics tracking
@@ -135,7 +135,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
     this.logger.debug(`[${operationId}] Security sanitization started`, {
       operationId,
       inputType: typeof value,
-      metatype: metadata.metatype?.name,
+      metatype: metadata.metatype?._name,
       hasValue: value !== undefined && value !== null,
     });
 
@@ -154,7 +154,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
         this.securityMetrics.lastThreatAt = new Date();
 
         throw new BadRequestException({
-          error: 'Security Violation',
+          _error: 'Security Violation',
           message: 'Malicious input detected and blocked',
           threats: threatDetection.threats.map((threat) => ({
             type: threat.type,
@@ -222,12 +222,12 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
       });
 
       return transformedValue;
-    } catch (error) {
+    } catch (_error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] Security sanitization failed`, {
+      this.logger._error(`[${operationId}] Security sanitization failed`, {
         operationId,
-        error: error.message,
+        error: __error.message,
         processingTimeMs: processingTime,
         inputType: typeof value,
       });
@@ -430,10 +430,10 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
       }
 
       // Scan array elements
-      obj.forEach((item, index) => {
+      obj.forEach((item, _index) => {
         this.recursiveSecurityScan(
           item,
-          `${path}[${index}]`,
+          `${path}[${_index}]`,
           threats,
           depth + 1,
         );
@@ -458,7 +458,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
             threats.push({
               type: 'MALICIOUS_INPUT',
               field: `${path}.${key}`,
-              description: 'Malicious property name detected',
+              description: 'Malicious property _name detected',
               sample: key,
             });
           }
@@ -584,7 +584,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
         });
 
         throw new BadRequestException(
-          `Request payload too large: ${sizeInBytes} bytes (max: ${maxSizeBytes} bytes)`,
+          `Request _payload too large: ${sizeInBytes} bytes (max: ${maxSizeBytes} bytes)`,
         );
       }
 
@@ -596,16 +596,16 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
           utilizationPercent: ((sizeInBytes / maxSizeBytes) * 100).toFixed(1),
         },
       );
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
+    } catch (_error) {
+      if (_error instanceof BadRequestException) {
+        throw _error;
       }
 
       this.logger.warn(
         `[${operationId}] Could not validate object constraints`,
         {
           operationId,
-          error: error.message,
+          error: __error.message,
         },
       );
     }

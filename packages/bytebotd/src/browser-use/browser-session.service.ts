@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as _uuidv4 } from 'uuid';
 import {
   CreateBrowserSessionDto,
   BrowserSessionDto,
@@ -23,7 +23,7 @@ import {
  */
 @Injectable()
 export class BrowserSessionService {
-  private readonly logger = new Logger(BrowserSessionService.name);
+  private readonly logger = new Logger(BrowserSessionService._name);
   private readonly sessions: Map<string, BrowserSessionDto> = new Map();
   private readonly sessionCleanupInterval: NodeJS.Timeout;
 
@@ -40,7 +40,7 @@ export class BrowserSessionService {
    * Create a new browser session
    */
   async createSession(
-    dto: CreateBrowserSessionDto,
+    _dto: CreateBrowserSessionDto,
   ): Promise<BrowserSessionDto> {
     const sessionId = uuidv4();
     const now = new Date();
@@ -49,7 +49,7 @@ export class BrowserSessionService {
       sessionId,
       name: dto.name,
       headless: dto.headless,
-      viewport: `${dto.viewportWidth}x${dto.viewportHeight}`,
+      viewport: `${dto.viewportWidth}x${_dto.viewportHeight}`,
     });
 
     try {
@@ -93,11 +93,11 @@ export class BrowserSessionService {
       this.sessions.set(sessionId, session);
 
       // Initialize browser (mock implementation - in production would start actual browser)
-      await this.initializeBrowserSession(session, dto);
+      await this.initializeBrowserSession(session, _dto);
 
       // Create initial tabs if specified
-      if (dto.initialUrls && dto.initialUrls.length > 0) {
-        for (const url of dto.initialUrls) {
+      if (dto.initialUrls && _dto.initialUrls.length > 0) {
+        for (const url of _dto.initialUrls) {
           await this.createTab(sessionId, { url, makeActive: false });
         }
 
@@ -126,8 +126,8 @@ export class BrowserSessionService {
       });
 
       return session;
-    } catch (err) {
-      this.logger.error(`Failed to create browser session: ${sessionId}`, err);
+    } catch (_err) {
+      this.logger._err(`Failed to create browser session: ${sessionId}`, err);
 
       // Update session with error status
       const errorSession = this.sessions.get(sessionId);
@@ -211,8 +211,8 @@ export class BrowserSessionService {
         upTimeMs: session.statistics.upTimeMs,
         tabsProcessed: session.statistics.totalTabs,
       });
-    } catch (err) {
-      this.logger.error(`Failed to close browser session: ${sessionId}`, err);
+    } catch (_err) {
+      this.logger._err(`Failed to close browser session: ${sessionId}`, err);
 
       session.status = BrowserSessionStatus.ERROR;
       session.errorInfo = {
@@ -385,7 +385,7 @@ export class BrowserSessionService {
    */
   private async initializeBrowserSession(
     session: BrowserSessionDto,
-    dto: CreateBrowserSessionDto,
+    _dto: CreateBrowserSessionDto,
   ): Promise<void> {
     // In production, this would:
     // 1. Start browser process with specified configuration
@@ -460,8 +460,8 @@ export class BrowserSessionService {
       try {
         await this.closeSession(sessionId);
         this.logger.log(`Cleaned up expired session: ${sessionId}`);
-      } catch (err) {
-        this.logger.error(
+      } catch (_err) {
+        this.logger._err(
           `Failed to cleanup expired session: ${sessionId}`,
           err,
         );

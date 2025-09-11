@@ -74,7 +74,14 @@ module.exports = [
 
       // Relaxed TypeScript rules for better performance
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off', // Disabled for performance
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ], // Enabled for cleanup with underscore prefix ignore
 
       // General code quality
       'prefer-const': 'error',

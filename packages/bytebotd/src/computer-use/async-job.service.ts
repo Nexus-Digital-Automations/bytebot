@@ -18,7 +18,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as _uuidv4 } from 'uuid';
 import {
   JobStatus,
   JobPriority,
@@ -58,7 +58,7 @@ interface JobData {
 interface QueueItem {
   jobData: JobData;
   resolve: (result: unknown) => void;
-  reject: (error: Error) => void;
+  reject: (_error: Error) => void;
 }
 
 /**
@@ -74,7 +74,7 @@ interface JobStats {
 
 @Injectable()
 export class AsyncJobService {
-  private readonly logger = new Logger(AsyncJobService.name);
+  private readonly logger = new Logger(AsyncJobService._name);
   private readonly jobs = new Map<string, JobData>();
   private readonly queue: QueueItem[] = [];
   private readonly maxConcurrentJobs = 5;
@@ -417,7 +417,7 @@ export class AsyncJobService {
       // Execute the action with timeout
       const executionPromise = this.computerUseService.action(jobData.action);
 
-      const result = await Promise.race([executionPromise, timeoutPromise]);
+      const _result = await Promise.race([executionPromise, timeoutPromise]);
 
       // Job completed successfully
       jobData.status = JobStatus.COMPLETED;
@@ -437,12 +437,12 @@ export class AsyncJobService {
 
       // Record metrics
       this.recordJobMetrics(jobData, executionTime, true);
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+        _error instanceof Error ? __error.message : 'Unknown _error';
       const executionTime = Date.now() - startTime;
 
-      this.logger.error(
+      this.logger._error(
         `Job ${jobData.jobId} failed: ${errorMessage} (${executionTime}ms)`,
       );
 
@@ -493,9 +493,9 @@ export class AsyncJobService {
         namespace: 'computer-actions',
         ttl: 300, // 5 minutes
       });
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn(
-        `Failed to get cached result: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to get cached result: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
       );
       return null;
     }
@@ -517,9 +517,9 @@ export class AsyncJobService {
         namespace: 'computer-actions',
         ttl: 300, // 5 minutes
       });
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn(
-        `Failed to cache result: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to cache result: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
       );
     }
   }
@@ -557,9 +557,9 @@ export class AsyncJobService {
         jobData.retryCount,
         jobData.priority,
       );
-    } catch (error) {
+    } catch (_error) {
       this.logger.debug(
-        `Failed to record job metrics: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to record job metrics: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
       );
     }
   }

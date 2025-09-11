@@ -36,7 +36,7 @@ import {
  */
 @Controller('health')
 export class HealthController {
-  private readonly logger = new Logger(HealthController.name);
+  private readonly logger = new Logger(HealthController._name);
 
   constructor(
     private readonly healthService: HealthService,
@@ -67,10 +67,10 @@ export class HealthController {
       const healthData = this.healthService.getBasicHealth();
       this.logger.debug('Health check completed successfully');
       return healthData;
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Health check failed: ${errorMessage}`);
+        _error instanceof Error ? __error.message : 'Unknown _error';
+      this.logger._error(`Health check failed: ${errorMessage}`);
 
       return {
         status: 'unhealthy',
@@ -172,10 +172,10 @@ export class HealthController {
       const statusData = this.healthService.getDetailedStatus();
       this.logger.debug('Detailed status completed successfully');
       return statusData;
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Detailed status check failed: ${errorMessage}`);
+        _error instanceof Error ? __error.message : 'Unknown _error';
+      this.logger._error(`Detailed status check failed: ${errorMessage}`);
 
       return {
         status: 'error',

@@ -96,7 +96,7 @@ interface DatabaseConfig {
  */
 @Injectable()
 export class DatabaseInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(DatabaseInterceptor.name);
+  private readonly logger = new Logger(DatabaseInterceptor._name);
   private readonly stats: DatabaseStats = {
     totalQueries: 0,
     averageQueryTime: 0,
@@ -210,7 +210,7 @@ export class DatabaseInterceptor implements NestInterceptor {
           resultCount: this.getResultCount(result),
         });
       }),
-      catchError((error) => {
+      catchError((_error) => {
         this.recordDatabaseMetrics({
           operationId,
           operation: dbOperation,
@@ -276,14 +276,14 @@ export class DatabaseInterceptor implements NestInterceptor {
               next,
             ).subscribe({
               next: (result) => observer.next(result),
-              error: (error) => observer.error(error),
+              error: (_error) => observer.error(_error),
               complete: () => observer.complete(),
             });
           }
         })
-        .catch((error) => {
+        .catch((_error) => {
           this.logger.error(
-            `[${operationId}] Cache error, falling back to database: ${error.message}`,
+            `[${operationId}] Cache error, falling back to database: ${_error.message}`,
           );
 
           this.handleDatabaseOperation(
@@ -293,7 +293,7 @@ export class DatabaseInterceptor implements NestInterceptor {
             next,
           ).subscribe({
             next: (result) => observer.next(result),
-            error: (error) => observer.error(error),
+            error: (_error) => observer.error(_error),
             complete: () => observer.complete(),
           });
         });
@@ -336,7 +336,7 @@ export class DatabaseInterceptor implements NestInterceptor {
           `[${operationId}] Database cache MISS: ${dbOperation.operation} - cached result (${duration}ms)`,
         );
       }),
-      catchError((error) => {
+      catchError((_error) => {
         this.recordDatabaseMetrics({
           operationId,
           operation: dbOperation,
@@ -459,15 +459,15 @@ export class DatabaseInterceptor implements NestInterceptor {
    */
   private recordDatabaseMetrics(metrics: DatabasePerformanceMetrics): void {
     try {
-      const { operation, duration, error, cacheHit } = metrics;
+      const { operation, duration, _error, cacheHit } = metrics;
 
       // Update internal statistics
       this.stats.totalQueries++;
 
-      if (error) {
+      if (_error) {
         this.stats.failedQueries++;
         this.logger.error(
-          `[${metrics.operationId}] Database operation failed: ${error.message}`,
+          `[${metrics.operationId}] Database operation failed: ${_error.message}`,
           { operation: operation.operation, table: operation.table, duration },
         );
       } else {
@@ -502,10 +502,10 @@ export class DatabaseInterceptor implements NestInterceptor {
 
       // Record metrics with MetricsService
       if (this.metricsService) {
-        if (error) {
+        if (_error) {
           this.metricsService.recordDatabaseError(
             operation.operation,
-            error.constructor.name,
+            error.constructor._name,
           );
         } else {
           this.metricsService.recordDatabaseQuery(
@@ -525,9 +525,9 @@ export class DatabaseInterceptor implements NestInterceptor {
             cacheHits * 100) /
           totalCacheableQueries;
       }
-    } catch (error) {
-      this.logger.error(
-        `Failed to record database metrics: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    } catch (_error) {
+      this.logger._error(
+        `Failed to record database metrics: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
       );
     }
   }

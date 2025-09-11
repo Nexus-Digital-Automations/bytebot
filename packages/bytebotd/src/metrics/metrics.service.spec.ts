@@ -8,14 +8,14 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { MetricsService } from './metrics.service';
 import { register } from 'prom-client';
 
 describe('MetricsService', () => {
   let service: MetricsService;
-  let logger: jest.Mocked<Logger>;
+  let _logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
     // Clear all metrics before each test
@@ -184,7 +184,7 @@ describe('MetricsService', () => {
   describe('Placeholder Methods', () => {
     it('should handle cache operation recording', () => {
       const operation = 'get';
-      const result = 'hit';
+      const _result = 'hit';
       const duration = 5;
 
       expect(() => {

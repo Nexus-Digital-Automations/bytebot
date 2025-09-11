@@ -22,7 +22,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { UserRole, Permission } from "@bytebot/shared";
+import { UserRole, _Permission } from "@bytebot/shared";
 import { AuthenticatedRequest, ByteBotdUser } from "./jwt-auth.guard";
 
 /**
@@ -75,7 +75,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
  */
 @Injectable()
 export class RolesGuard implements CanActivate {
-  private readonly logger = new Logger(RolesGuard.name);
+  private readonly logger = new Logger(RolesGuard._name);
 
   constructor(private readonly reflector: Reflector) {}
 
@@ -187,12 +187,12 @@ export class RolesGuard implements CanActivate {
       });
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : String(error);
+        _error instanceof Error ? __error.message : String(_error);
 
-      if (error instanceof ForbiddenException) {
-        throw error;
+      if (_error instanceof ForbiddenException) {
+        throw _error;
       }
 
       this.logger.error(`[${operationId}] RBAC authorization error`, {

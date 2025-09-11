@@ -27,7 +27,7 @@ import {
 import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Request, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as _uuidv4 } from 'uuid';
 import { MetricsService } from '../../metrics/metrics.service';
 
 /**
@@ -69,7 +69,7 @@ export interface ErrorContext {
  */
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(LoggingInterceptor.name);
+  private readonly logger = new Logger(LoggingInterceptor._name);
 
   constructor(private readonly metricsService?: MetricsService) {
     this.logger.log(
@@ -87,7 +87,7 @@ export class LoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const httpContext = context.switchToHttp();
     const request = httpContext.getRequest<Request>();
-    const response = httpContext.getResponse<Response>();
+    const _response = httpContext.getResponse<Response>();
 
     // Generate correlation ID
     const correlationId = this.generateCorrelationId(request);
@@ -132,14 +132,14 @@ export class LoggingInterceptor implements NestInterceptor {
           this.metricsService.recordRequestEnd(request.method, route);
         }
       }),
-      catchError((error) => {
+      catchError((_error) => {
         // Handle error response
         const processingTime = Date.now() - startTime;
         const responseContext = this.createResponseContext(
           response,
           processingTime,
         );
-        const errorContext = this.createErrorContext(error);
+        const errorContext = this.createErrorContext(_error);
 
         this.logError(requestContext, responseContext, errorContext);
 
@@ -345,7 +345,7 @@ export class LoggingInterceptor implements NestInterceptor {
     errorContext: ErrorContext,
   ): void {
     this.logger.error({
-      message: `HTTP Request Failed - ${requestContext.method} ${requestContext.url} - ${errorContext.name}`,
+      message: `HTTP Request Failed - ${requestContext.method} ${requestContext.url} - ${errorContext._name}`,
       level: 'error',
       type: 'http_error',
       context: {

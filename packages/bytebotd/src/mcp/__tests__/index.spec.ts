@@ -49,7 +49,7 @@ class IndexTestUtils {
    */
   static validateExport(
     exportObj: any,
-    name: string,
+    _name: string,
     expectedType: string,
     expectedConstructor?: any,
   ): void {
@@ -80,9 +80,9 @@ class IndexTestUtils {
     let current = obj;
 
     do {
-      Object.getOwnPropertyNames(current).forEach((name) => {
-        if (!props.includes(name)) {
-          props.push(name);
+      Object.getOwnPropertyNames(current).forEach((_name) => {
+        if (!props.includes(_name)) {
+          props.push(_name);
         }
       });
       current = Object.getPrototypeOf(current);
@@ -366,12 +366,12 @@ describe('MCP Index Module', () => {
       const exports = McpIndex;
 
       // Classes should be PascalCase
-      expect(exports.BytebotMcpModule.name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
-      expect(exports.ComputerUseTools.name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
-      expect(exports.Base64ImageCompressor.name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
+      expect(exports.BytebotMcpModule._name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
+      expect(exports.ComputerUseTools._name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
+      expect(exports.Base64ImageCompressor._name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
 
       // Functions should be camelCase
-      expect(exports.compressPngBase64Under1MB.name).toMatch(
+      expect(exports.compressPngBase64Under1MB._name).toMatch(
         /^[a-z][a-zA-Z0-9]*$/,
       );
     });
@@ -433,7 +433,7 @@ describe('MCP Index Module', () => {
 
   describe('Performance and Memory Impact', () => {
     /**
-     * Test that importing the index doesn't cause excessive memory usage
+     * Test that importing the _index doesn't cause excessive memory usage
      */
     it('should have minimal memory footprint when imported', () => {
       const memoryBefore = process.memoryUsage();
@@ -526,8 +526,8 @@ describe('MCP Index Module', () => {
 
       // Each export should be directly accessible
       const exportNames = Object.keys(indexModule);
-      exportNames.forEach((name) => {
-        expect(indexModule[name as keyof typeof indexModule]).toBeDefined();
+      exportNames.forEach((_name) => {
+        expect(indexModule[_name as keyof typeof indexModule]).toBeDefined();
       });
     });
   });
@@ -582,7 +582,7 @@ describe('MCP Index Module', () => {
      * Test that exports are immutable from external access
      */
     it('should protect exports from external modification', () => {
-      const originalModule = McpIndex.BytebotMcpModule;
+      const _originalModule = McpIndex.BytebotMcpModule;
 
       // Attempt to modify export
       try {
@@ -602,7 +602,7 @@ describe('MCP Index Module', () => {
     it('should handle edge cases in export values', () => {
       // All exports should be properly defined
       const exportEntries = Object.entries(McpIndex);
-      exportEntries.forEach(([name, value]) => {
+      exportEntries.forEach(([_name, value]) => {
         expect(value).not.toBeNull();
         expect(value).not.toBeUndefined();
       });

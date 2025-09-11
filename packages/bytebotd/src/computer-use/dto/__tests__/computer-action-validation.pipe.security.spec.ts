@@ -15,7 +15,7 @@
  * @author Security Event Validation Pipeline Subagent
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { ComputerActionValidationPipe } from '../computer-action-validation.pipe';
 
@@ -150,7 +150,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
 
       // This should be detected and handled appropriately
       // The test depends on whether unicode normalization creates security risks
-      const result = await pipe.transform(unicodeAttack, {} as any);
+      const _result = await pipe.transform(unicodeAttack, {} as any);
       expect(result).toBeDefined();
     });
 
@@ -165,11 +165,11 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       try {
         await pipe.transform(multiThreatInput, {} as any);
         fail('Should have thrown BadRequestException');
-      } catch (error) {
-        expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.response.message).toContain('security threats detected');
-        expect(error.response.totalRiskScore).toBeGreaterThan(0);
-        expect(error.response.threatTypes).toEqual(
+      } catch (_error) {
+        expect(_error).toBeInstanceOf(BadRequestException);
+        expect(_error.response.message).toContain('security threats detected');
+        expect(_error.response.totalRiskScore).toBeGreaterThan(0);
+        expect(_error.response.threatTypes).toEqual(
           expect.arrayContaining([expect.stringMatching(/XSS|SQL|PATH/i)]),
         );
       }
@@ -181,7 +181,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         coordinates: { x: 100, y: 200 },
       };
 
-      const result = await pipe.transform(legitimateInput, {} as any);
+      const _result = await pipe.transform(legitimateInput, {} as any);
       expect(result).toBeDefined();
       expect(result.action).toBe('move_mouse');
     });
@@ -194,10 +194,10 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
 
       try {
         await pipe.transform(maliciousInput, {} as any);
-      } catch (error) {
-        expect(error.response.operationId).toBeDefined();
-        expect(error.response.timestamp).toBeDefined();
-        expect(error.response.validationStages).toEqual(
+      } catch (_error) {
+        expect(_error.response.operationId).toBeDefined();
+        expect(_error.response.timestamp).toBeDefined();
+        expect(_error.response.validationStages).toEqual(
           expect.arrayContaining([
             'input-preprocessing',
             'xss-detection',
@@ -209,7 +209,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       }
     });
 
-    it('should enforce payload size limits', async () => {
+    it('should enforce _payload size limits', async () => {
       const largePayload = {
         action: 'type_text',
         text: 'A'.repeat(2 * 1024 * 1024), // 2MB payload
@@ -228,7 +228,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         data: 'test content',
       };
 
-      const result = await pipe.transform(fileInput, {} as any);
+      const _result = await pipe.transform(fileInput, {} as any);
       expect(result).toBeDefined();
 
       // Form actions should use 'form' context
@@ -277,7 +277,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       }
     });
 
-    it('should maintain consistent error response format', async () => {
+    it('should maintain consistent _error response format', async () => {
       const maliciousInput = {
         action: 'type_text',
         text: '<script>alert("test")</script>',
@@ -286,14 +286,14 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       try {
         await pipe.transform(maliciousInput, {} as any);
         fail('Should have thrown BadRequestException');
-      } catch (error) {
-        expect(error.response).toHaveProperty('message');
-        expect(error.response).toHaveProperty('operationId');
-        expect(error.response).toHaveProperty('timestamp');
-        expect(error.response).toHaveProperty('threatTypes');
-        expect(error.response).toHaveProperty('totalRiskScore');
-        expect(error.response).toHaveProperty('threatLevel');
-        expect(error.response).toHaveProperty('validationStages');
+      } catch (_error) {
+        expect(_error.response).toHaveProperty('message');
+        expect(_error.response).toHaveProperty('operationId');
+        expect(_error.response).toHaveProperty('timestamp');
+        expect(_error.response).toHaveProperty('threatTypes');
+        expect(_error.response).toHaveProperty('totalRiskScore');
+        expect(_error.response).toHaveProperty('threatLevel');
+        expect(_error.response).toHaveProperty('validationStages');
       }
     });
   });

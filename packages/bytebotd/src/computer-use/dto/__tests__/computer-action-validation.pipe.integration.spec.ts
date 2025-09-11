@@ -6,7 +6,7 @@
  * @author Security Event Validation Pipeline Subagent
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { ComputerActionValidationPipe } from '../computer-action-validation.pipe';
 
@@ -101,7 +101,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: 'Hello World',
       };
 
-      const result = await pipe.transform(validInput, {} as any);
+      const _result = await pipe.transform(validInput, {} as any);
 
       expect(result).toBeDefined();
       expect(result.action).toBe('type_text');
@@ -196,7 +196,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
 
         try {
           await pipe.transform(input, {} as any);
-        } catch (error) {
+        } catch (_error) {
           // Ignore validation errors for incomplete inputs
         }
 
@@ -238,16 +238,16 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       try {
         await pipe.transform(maliciousInput, {} as any);
         fail('Should have thrown BadRequestException');
-      } catch (error) {
-        expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.response.message).toContain('security threats detected');
-        expect(error.response.threatTypes).toContain('ADVANCED_XSS');
-        expect(error.response.threatTypes).toContain('ADVANCED_SQL_INJECTION');
-        expect(error.response.totalRiskScore).toBeGreaterThan(0);
+      } catch (_error) {
+        expect(_error).toBeInstanceOf(BadRequestException);
+        expect(_error.response.message).toContain('security threats detected');
+        expect(_error.response.threatTypes).toContain('ADVANCED_XSS');
+        expect(_error.response.threatTypes).toContain('ADVANCED_SQL_INJECTION');
+        expect(_error.response.totalRiskScore).toBeGreaterThan(0);
       }
     });
 
-    it('should provide comprehensive error response structure', async () => {
+    it('should provide comprehensive _error response structure', async () => {
       // Mock threat detection
       mockDetectAdvancedXSS.mockReturnValueOnce({
         hasXSS: true,
@@ -266,20 +266,20 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       try {
         await pipe.transform(maliciousInput, {} as any);
         fail('Should have thrown BadRequestException');
-      } catch (error) {
-        expect(error.response).toHaveProperty('message');
-        expect(error.response).toHaveProperty('operationId');
-        expect(error.response).toHaveProperty('threatTypes');
-        expect(error.response).toHaveProperty('totalRiskScore');
-        expect(error.response).toHaveProperty('threatLevel');
-        expect(error.response).toHaveProperty('validationStages');
-        expect(error.response).toHaveProperty('detectionCount');
-        expect(error.response).toHaveProperty('timestamp');
+      } catch (_error) {
+        expect(_error.response).toHaveProperty('message');
+        expect(_error.response).toHaveProperty('operationId');
+        expect(_error.response).toHaveProperty('threatTypes');
+        expect(_error.response).toHaveProperty('totalRiskScore');
+        expect(_error.response).toHaveProperty('threatLevel');
+        expect(_error.response).toHaveProperty('validationStages');
+        expect(_error.response).toHaveProperty('detectionCount');
+        expect(_error.response).toHaveProperty('timestamp');
 
-        expect(Array.isArray(error.response.threatTypes)).toBe(true);
-        expect(Array.isArray(error.response.validationStages)).toBe(true);
-        expect(typeof error.response.totalRiskScore).toBe('number');
-        expect(error.response.detectionCount).toBeGreaterThan(0);
+        expect(Array.isArray(_error.response.threatTypes)).toBe(true);
+        expect(Array.isArray(_error.response.validationStages)).toBe(true);
+        expect(typeof _error.response.totalRiskScore).toBe('number');
+        expect(_error.response.detectionCount).toBeGreaterThan(0);
       }
     });
 
@@ -294,13 +294,13 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       ];
 
       for (const input of validInputs) {
-        const result = await pipe.transform(input, {} as any);
+        const _result = await pipe.transform(input, {} as any);
         expect(result).toBeDefined();
         expect(result.action).toBe(input.action);
       }
     });
 
-    it('should enforce payload size limits', async () => {
+    it('should enforce _payload size limits', async () => {
       const largePayload = {
         action: 'type_text',
         text: 'A'.repeat(2 * 1024 * 1024), // 2MB payload

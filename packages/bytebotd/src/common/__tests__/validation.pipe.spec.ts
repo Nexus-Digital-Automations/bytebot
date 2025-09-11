@@ -14,7 +14,7 @@
  * @coverage-target 95%+
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import {
   IsString,
@@ -49,7 +49,7 @@ class MockValidationPipe {
     const operationId = `validation_${Date.now()}`;
     console.log(`[${operationId}] Validating input`, {
       type: metadata.type,
-      metatype: metadata.metatype?.name,
+      metatype: metadata.metatype?._name,
       dataSize: JSON.stringify(value).length,
     });
 
@@ -67,9 +67,9 @@ class MockValidationPipe {
 
       console.log(`[${operationId}] Validation completed successfully`);
       return validatedValue;
-    } catch (error) {
-      console.error(`[${operationId}] Validation failed`, {
-        error: error.message,
+    } catch (_error) {
+      console._error(`[${operationId}] Validation failed`, {
+        error: __error.message,
         value: JSON.stringify(value).substring(0, 100),
       });
       throw error;
@@ -103,7 +103,7 @@ class MockValidationPipe {
 
     if (errors.length > 0) {
       const errorMessages = errors
-        .map((error) => Object.values(error.constraints || {}).join(', '))
+        .map((_error) => Object.values(error.constraints || {}).join(', '))
         .join('; ');
 
       throw new BadRequestException(`Validation failed: ${errorMessages}`);
@@ -116,7 +116,7 @@ class MockValidationPipe {
     const errors: any[] = [];
 
     // Mock validation rules based on common patterns
-    if (metatype.name === 'CreateUserDto') {
+    if (metatype._name === 'CreateUserDto') {
       if (!instance.email || !instance.email.includes('@')) {
         errors.push({
           property: 'email',
@@ -133,7 +133,7 @@ class MockValidationPipe {
       }
     }
 
-    if (metatype.name === 'UpdateTaskDto') {
+    if (metatype._name === 'UpdateTaskDto') {
       if (instance.title && instance.title.length > 100) {
         errors.push({
           property: 'title',
@@ -292,12 +292,12 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(validUserData, metadata);
+      const _result = await pipe.transform(validUserData, metadata);
 
       expect(result).toMatchObject({
         email: 'test@example.com',
         password: 'password123',
-        name: 'Test User',
+        _name: 'Test User',
         role: 'operator',
       });
 
@@ -387,7 +387,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(minimalUserData, metadata);
+      const _result = await pipe.transform(minimalUserData, metadata);
 
       expect(result.email).toBe('minimal@example.com');
       expect(result.password).toBe('password123');
@@ -413,10 +413,10 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(maliciousData, metadata);
+      const _result = await pipe.transform(maliciousData, metadata);
 
-      expect(result.name).toBe('Test User');
-      expect(result.name).not.toContain('<script>');
+      expect(result._name).toBe('Test User');
+      expect(result._name).not.toContain('<script>');
 
       console.log(`[${testId}] XSS sanitization test completed successfully`);
     });
@@ -433,7 +433,7 @@ describe('ValidationPipe', () => {
         data: 'url',
       };
 
-      const result = await pipe.transform(maliciousString, metadata);
+      const _result = await pipe.transform(maliciousString, metadata);
 
       expect(result).toBe('Click me');
       expect(result).not.toContain('javascript:');
@@ -453,7 +453,7 @@ describe('ValidationPipe', () => {
         data: 'message',
       };
 
-      const result = await pipe.transform(maliciousString, metadata);
+      const _result = await pipe.transform(maliciousString, metadata);
 
       expect(result).toBe('Hello  world ');
       expect(result).not.toContain('onclick');
@@ -481,7 +481,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(nestedMaliciousData, metadata);
+      const _result = await pipe.transform(nestedMaliciousData, metadata);
 
       expect(result.description).not.toContain('<script>');
       expect(result.description).toContain('Description');
@@ -506,7 +506,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(pollutionAttempt, metadata);
+      const _result = await pipe.transform(pollutionAttempt, metadata);
 
       expect(result).not.toHaveProperty('__proto__');
       expect(result).not.toHaveProperty('constructor');
@@ -533,7 +533,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(searchData, metadata);
+      const _result = await pipe.transform(searchData, metadata);
 
       expect(typeof result.limit).toBe('number');
       expect(typeof result.offset).toBe('number');
@@ -560,7 +560,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(searchData, metadata);
+      const _result = await pipe.transform(searchData, metadata);
 
       expect(result.query).toBe('padded search query');
       expect(result.query).not.toMatch(/^\s|\s$/); // No leading/trailing whitespace
@@ -585,7 +585,7 @@ describe('ValidationPipe', () => {
       };
 
       // Should not throw but may have undefined/NaN values
-      const result = await pipe.transform(searchData, metadata);
+      const _result = await pipe.transform(searchData, metadata);
 
       expect(result.query).toBe('test');
       // Transform behavior for invalid numbers may vary
@@ -608,7 +608,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(searchData, metadata);
+      const _result = await pipe.transform(searchData, metadata);
 
       expect(result.limit).toBe(10); // Default value
       expect(result.offset).toBe(0); // Default value
@@ -618,7 +618,7 @@ describe('ValidationPipe', () => {
   });
 
   describe('Error Handling and Reporting', () => {
-    it('should provide detailed validation error messages', async () => {
+    it('should provide detailed validation _error messages', async () => {
       const testId = `${operationId}_detailed_errors`;
       console.log(`[${testId}] Testing detailed validation error messages`);
 
@@ -637,11 +637,11 @@ describe('ValidationPipe', () => {
       try {
         await pipe.transform(invalidData, metadata);
         fail('Expected BadRequestException');
-      } catch (error) {
-        expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.message).toContain('Validation failed');
-        expect(error.message).toContain('email must be a valid email address');
-        expect(error.message).toContain(
+      } catch (_error) {
+        expect(_error).toBeInstanceOf(BadRequestException);
+        expect(__error.message).toContain('Validation failed');
+        expect(__error.message).toContain('email must be a valid email address');
+        expect(__error.message).toContain(
           'password must be longer than or equal to 6 characters',
         );
       }
@@ -668,11 +668,11 @@ describe('ValidationPipe', () => {
       try {
         await pipe.transform(multipleErrorData, metadata);
         fail('Expected BadRequestException');
-      } catch (error) {
-        expect(error.message).toContain(
+      } catch (_error) {
+        expect(__error.message).toContain(
           'title must be shorter than or equal to 100 characters',
         );
-        expect(error.message).toContain(
+        expect(__error.message).toContain(
           'priority must be one of: low, medium, high',
         );
       }
@@ -697,9 +697,9 @@ describe('ValidationPipe', () => {
       try {
         await pipe.transform(circularObj, metadata);
         // Should handle gracefully without throwing
-      } catch (error) {
-        // If it throws, it should be a proper validation error
-        expect(error).toBeInstanceOf(BadRequestException);
+      } catch (_error) {
+        // If it throws, it should be a proper validation _error
+        expect(_error).toBeInstanceOf(BadRequestException);
       }
 
       console.log(`[${testId}] Transformation errors test completed`);
@@ -744,7 +744,7 @@ describe('ValidationPipe', () => {
   describe('Security Edge Cases', () => {
     it('should handle extremely large payloads gracefully', async () => {
       const testId = `${operationId}_large_payloads`;
-      console.log(`[${testId}] Testing large payload handling`);
+      console.log(`[${testId}] Testing large _payload handling`);
 
       const largeString = 'A'.repeat(10000); // 10KB string
       const largeData = {
@@ -762,7 +762,7 @@ describe('ValidationPipe', () => {
       // Should handle large data without crashing
       await expect(pipe.transform(largeData, metadata)).resolves.toBeDefined();
 
-      console.log(`[${testId}] Large payload handling test completed`);
+      console.log(`[${testId}] Large _payload handling test completed`);
     });
 
     it('should handle deeply nested objects', async () => {
@@ -784,7 +784,7 @@ describe('ValidationPipe', () => {
       };
 
       // Should handle deep nesting without stack overflow
-      const result = await pipe.transform(deepObject, metadata);
+      const _result = await pipe.transform(deepObject, metadata);
       expect(result).toBeDefined();
 
       console.log(`[${testId}] Deep nesting handling test completed`);
@@ -802,7 +802,7 @@ describe('ValidationPipe', () => {
         data: 'search',
       };
 
-      const result = await pipe.transform(sqlInjectionAttempt, metadata);
+      const _result = await pipe.transform(sqlInjectionAttempt, metadata);
 
       // Basic sanitization should remove dangerous characters
       expect(typeof result).toBe('string');
@@ -823,7 +823,7 @@ describe('ValidationPipe', () => {
       };
 
       for (const testCase of testCases) {
-        const result = await pipe.transform(testCase, metadata);
+        const _result = await pipe.transform(testCase, metadata);
         expect(result).toBeDefined(); // Should not throw
       }
 
@@ -843,7 +843,7 @@ describe('ValidationPipe', () => {
       };
 
       // Should handle buffer gracefully
-      const result = await pipe.transform(overflowAttempt, metadata);
+      const _result = await pipe.transform(overflowAttempt, metadata);
       expect(result).toBeDefined();
 
       console.log(`[${testId}] Buffer overflow prevention test completed`);
@@ -885,10 +885,10 @@ describe('ValidationPipe', () => {
 
       const testData = Array(20)
         .fill(null)
-        .map((_, i) => ({
+        .map((_, _i) => ({
           email: `user${i}@example.com`,
           password: `password123_${i}`,
-          name: `User ${i}`,
+          _name: `User ${i}`,
         }));
 
       const metadata: ArgumentMetadata = {
@@ -901,8 +901,8 @@ describe('ValidationPipe', () => {
       const results = await Promise.all(promises);
 
       expect(results).toHaveLength(20);
-      results.forEach((result, index) => {
-        expect(result.email).toBe(`user${index}@example.com`);
+      results.forEach((result, _index) => {
+        expect(result.email).toBe(`user${_index}@example.com`);
       });
 
       console.log(

@@ -65,7 +65,7 @@ expect.extend({
           pass: false,
         };
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         message: () =>
           `Expected ${received} to be valid base64, but decoding failed: ${error}`,
@@ -123,7 +123,7 @@ expect.extend({
       };
     }
 
-    const result = received as any;
+    const _result = received as any;
     const hasImage = typeof result.image === 'string';
     const hasMetadata = result.metadata && typeof result.metadata === 'object';
     const hasValidTimestamp =
@@ -168,7 +168,7 @@ expect.extend({
       };
     }
 
-    const result = received as any;
+    const _result = received as any;
     const hasSuccess = typeof result.success === 'boolean';
     const hasOperationId = typeof result.operationId === 'string';
     const hasTimestamp = result.timestamp instanceof Date;
@@ -229,7 +229,7 @@ expect.extend({
       };
     }
 
-    const result = received as any;
+    const _result = received as any;
     const hasText = typeof result.text === 'string';
     const hasConfidence =
       typeof result.confidence === 'number' &&
@@ -542,8 +542,8 @@ export const TestUtils = {
     for (const path of paths) {
       try {
         await fs.rm(path, { recursive: true, force: true });
-      } catch (error) {
-        console.warn(`Failed to cleanup ${path}:`, error);
+      } catch (_error) {
+        console.warn(`Failed to cleanup ${path}:`, _error);
       }
     }
   },

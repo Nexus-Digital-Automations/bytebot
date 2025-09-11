@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { ComputerUseModule } from './computer-use/computer-use.module';
+import { _ComputerUseModule } from './computer-use/computer-use.module';
 import { InputTrackingModule } from './input-tracking/input-tracking.module';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';

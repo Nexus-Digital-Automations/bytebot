@@ -41,7 +41,7 @@ interface CacheRule {
   varyBy?: string[]; // Request headers/params to vary cache by
   includeUserId?: boolean; // Include user ID in cache key
   cacheableStatuses?: number[]; // HTTP status codes that should be cached
-  skipCacheIf?: (req: Request, res: Response) => boolean; // Dynamic cache skipping
+  skipCacheIf?: (_req: Request, res: Response) => boolean; // Dynamic cache skipping
 }
 
 /**
@@ -91,7 +91,7 @@ interface CacheInterceptorStats {
  */
 @Injectable()
 export class CacheInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(CacheInterceptor.name);
+  private readonly logger = new Logger(CacheInterceptor._name);
   private readonly stats: CacheInterceptorStats = {
     totalRequests: 0,
     cacheHits: 0,
@@ -120,7 +120,7 @@ export class CacheInterceptor implements NestInterceptor {
       includeUserId: true,
       cacheableStatuses: [200],
       varyBy: ['Authorization'],
-      skipCacheIf: (req) => {
+      skipCacheIf: (_req) => {
         // Skip cache if real-time data is requested
         return req.query.realtime === 'true';
       },
@@ -147,7 +147,7 @@ export class CacheInterceptor implements NestInterceptor {
       pattern: /^\/computer-use$/,
       ttl: 30,
       cacheableStatuses: [200],
-      skipCacheIf: (req) => {
+      skipCacheIf: (_req) => {
         // Only cache screenshot requests
         return req.body?.action !== 'screenshot';
       },
@@ -178,7 +178,7 @@ export class CacheInterceptor implements NestInterceptor {
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
-    const response = context.switchToHttp().getResponse<Response>();
+    const _response = context.switchToHttp().getResponse<Response>();
 
     // Only cache GET requests by default
     if (request.method !== 'GET') {
@@ -262,8 +262,8 @@ export class CacheInterceptor implements NestInterceptor {
               next: (data) => {
                 observer.next(data);
               },
-              error: (error) => {
-                observer.error(error);
+              error: (_error) => {
+                observer.error(_error);
               },
               complete: () => {
                 observer.complete();
@@ -271,15 +271,15 @@ export class CacheInterceptor implements NestInterceptor {
             });
           }
         })
-        .catch((error) => {
+        .catch((_error) => {
           // Cache error - proceed without cache
           this.logger.error(
-            `[${operationId}] Cache retrieval error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            `[${operationId}] Cache retrieval error: ${error instanceof Error ? _error.message : 'Unknown error'}`,
           );
 
           next.handle().subscribe({
             next: (data) => observer.next(data),
-            error: (error) => observer.error(error),
+            error: (_error) => observer.error(_error),
             complete: () => observer.complete(),
           });
         });
@@ -553,9 +553,9 @@ export class CacheInterceptor implements NestInterceptor {
           { pattern: resourcePattern },
         );
       }
-    } catch (error) {
-      this.logger.error(
-        `Cache invalidation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    } catch (_error) {
+      this.logger._error(
+        `Cache invalidation _error: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
       );
     }
   }

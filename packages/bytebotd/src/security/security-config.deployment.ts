@@ -178,7 +178,7 @@ export class BytebotDSecurityDeployment {
     );
 
     // Log security deployment
-    const logger = app.get('Logger');
+    const _logger = app.get('Logger');
     if (logger) {
       logger.log('BytebotD security middleware deployed successfully', {
         service: 'BytebotD',

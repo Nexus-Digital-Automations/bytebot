@@ -22,7 +22,7 @@
  * @coverage-target 100%
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
@@ -153,7 +153,7 @@ describe('HealthModule', () => {
       console.log(`[${testId}] Testing module initialization error handling`);
 
       // Mock Logger constructor to throw an error during module initialization
-      const originalLogger = Logger;
+      const _originalLogger = Logger;
       const errorMessage = 'Logger initialization failed';
 
       try {
@@ -173,9 +173,9 @@ describe('HealthModule', () => {
         expect(errorHealthModule).toBeDefined();
 
         await errorTestModule.close();
-      } catch (error) {
+      } catch (_error) {
         // If initialization fails, it should be handled gracefully
-        expect(error).toBeInstanceOf(Error);
+        expect(_error).toBeInstanceOf(Error);
       }
 
       console.log(`[${testId}] Initialization error handling test completed`);
@@ -230,9 +230,9 @@ describe('HealthModule', () => {
       try {
         const livenessResult = await healthController.checkLiveness();
         expect(livenessResult).toBeDefined();
-      } catch (error) {
+      } catch (_error) {
         // Health checks might fail in test environment, but they should be callable
-        expect(error).toBeInstanceOf(Error);
+        expect(_error).toBeInstanceOf(Error);
       }
 
       console.log(`[${testId}] Terminus integration test completed`);
@@ -246,7 +246,7 @@ describe('HealthModule', () => {
       try {
         const httpModule = module.get(HttpModule, { strict: false });
         expect(httpModule).toBeDefined();
-      } catch (error) {
+      } catch (_error) {
         // HttpModule might not be directly accessible, but functionality should work
         console.log(
           `HttpModule not directly accessible, testing functionality instead`,
@@ -257,9 +257,9 @@ describe('HealthModule', () => {
       try {
         const readinessResult = await healthController.checkReadiness();
         expect(readinessResult).toBeDefined();
-      } catch (error) {
+      } catch (_error) {
         // External service checks might fail in test environment
-        expect(error).toBeInstanceOf(Error);
+        expect(_error).toBeInstanceOf(Error);
       }
 
       console.log(`[${testId}] HttpModule integration test completed`);
@@ -354,7 +354,7 @@ describe('HealthModule', () => {
       // Test concurrent access to health service
       const promises = Array(10)
         .fill(null)
-        .map(async (_, i) => {
+        .map(async (_, _i) => {
           const health = await healthController.getHealth();
           expect(health.status).toBe('healthy');
           return health;
@@ -638,7 +638,7 @@ describe('HealthModule', () => {
       // Create concurrent requests to test thread safety
       const stressPromises = Array(50)
         .fill(null)
-        .map(async (_, i) => {
+        .map(async (_, _i) => {
           const health = await healthController.getHealth();
           const detailed = await healthController.getDetailedStatus();
           return { basic: health, detailed, index: i };
@@ -649,10 +649,10 @@ describe('HealthModule', () => {
       expect(stressResults).toHaveLength(50);
 
       // All requests should complete successfully
-      stressResults.forEach((result, i) => {
+      stressResults.forEach((result, _i) => {
         expect(result.basic.status).toBe('healthy');
         expect(result.detailed).toBeDefined();
-        expect(result.index).toBe(i);
+        expect(result._index).toBe(_i);
       });
 
       console.log(`[${testId}] Thread safety stress test completed`);
@@ -669,8 +669,8 @@ describe('HealthModule', () => {
           try {
             const health = await healthController.getHealth();
             return health;
-          } catch (error) {
-            return { status: 'error', error: error.message };
+          } catch (_error) {
+            return { status: '_error', _error: __error.message };
           }
         });
 
@@ -683,7 +683,7 @@ describe('HealthModule', () => {
       const successfulResults = exhaustionResults.filter(
         (r) => r.status === 'healthy',
       );
-      const errorResults = exhaustionResults.filter(
+      const _errorResults = exhaustionResults.filter(
         (r) => r.status === 'error',
       );
 

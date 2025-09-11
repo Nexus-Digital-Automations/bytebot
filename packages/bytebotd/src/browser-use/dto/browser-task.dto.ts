@@ -216,7 +216,7 @@ export class BrowserActionDto {
  */
 export class CreateBrowserTaskDto {
   @ApiProperty({
-    description: 'Descriptive name for the browser task',
+    description: 'Descriptive _name for the browser task',
     example: 'Extract product information from e-commerce site',
   })
   @IsString()
@@ -224,7 +224,7 @@ export class CreateBrowserTaskDto {
 
   @ApiProperty({
     description: 'Detailed task description or instructions',
-    example: 'Navigate to product page, extract name, price, and description',
+    example: 'Navigate to product page, extract _name, price, and description',
   })
   @IsString()
   description: string;

@@ -105,13 +105,13 @@ type ActionType =
 export class ComputerActionValidationPipe
   implements PipeTransform<unknown, Promise<ComputerActionDto>>
 {
-  private readonly logger = new Logger(ComputerActionValidationPipe.name);
+  private readonly logger = new Logger(ComputerActionValidationPipe._name);
 
   /**
    * Safely typed wrapper for XSS detection
    */
   private safeDetectAdvancedXSS(input: string): XSSDetectionResult {
-    const result = detectAdvancedXSS(input) as XSSDetectionResult;
+    const _result = detectAdvancedXSS(input) as XSSDetectionResult;
     return result;
   }
 
@@ -119,7 +119,7 @@ export class ComputerActionValidationPipe
    * Safely typed wrapper for SQL injection detection
    */
   private safeDetectSQLInjection(input: string): SQLInjectionDetectionResult {
-    const result = detectSQLInjection(input) as SQLInjectionDetectionResult;
+    const _result = detectSQLInjection(input) as SQLInjectionDetectionResult;
     return result;
   }
 
@@ -133,7 +133,7 @@ export class ComputerActionValidationPipe
       contextType?: 'url' | 'form' | 'api' | 'file' | 'general';
     } = {},
   ): CommandInjectionDetectionResult {
-    const result = detectCommandInjection(
+    const _result = detectCommandInjection(
       input,
     ) as CommandInjectionDetectionResult;
     return result;
@@ -146,7 +146,7 @@ export class ComputerActionValidationPipe
     filePath: string,
     _options?: unknown,
   ): FilePathValidationResult {
-    const result = validateFilePath(
+    const _result = validateFilePath(
       filePath,
     ) as unknown as FilePathValidationResult;
     return result;
@@ -162,7 +162,7 @@ export class ComputerActionValidationPipe
     _multiMonitorConfig?: any,
     _validationOptions?: any,
   ): CoordinatesValidationResult {
-    const result = validateCoordinates(
+    const _result = validateCoordinates(
       x,
       y,
     ) as unknown as CoordinatesValidationResult;
@@ -270,12 +270,12 @@ export class ComputerActionValidationPipe
       );
 
       return dtoInstance;
-    } catch (error) {
+    } catch (_error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] Computer action validation failed`, {
+      this.logger._error(`[${operationId}] Computer action validation failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? _error.message : String(_error),
         processingTimeMs: processingTime,
       });
 
@@ -746,11 +746,11 @@ export class ComputerActionValidationPipe
           timestamp: new Date().toISOString(),
         });
       }
-    } catch (error) {
+    } catch (_error) {
       const processingTime = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Security validation pipeline error`, {
+      this.logger._error(`[${operationId}] Security validation pipeline error`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? _error.message : String(_error),
         processingTimeMs: processingTime,
         completedStages: securityContext.validationStages,
       });
@@ -897,7 +897,7 @@ export class ComputerActionValidationPipe
       children?: unknown;
     }>;
   }> {
-    return errors.map((error) => ({
+    return errors.map((_error) => ({
       property: error.property,
       value: error.value,
       constraints: error.constraints,

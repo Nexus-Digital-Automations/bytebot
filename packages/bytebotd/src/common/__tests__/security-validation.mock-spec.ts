@@ -12,7 +12,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 import { SecuritySanitizationPipe } from '../pipes/security-sanitization.pipe';
-import { EnterpriseRateLimitGuard } from '../guards/rate-limit.guard';
+import { _EnterpriseRateLimitGuard } from '../guards/rate-limit.guard';
 import { SecurityExceptionFilter } from '../filters/security-exception.filter';
 
 describe('Security Validation Mock Tests', () => {
@@ -36,13 +36,13 @@ describe('Security Validation Mock Tests', () => {
       '<iframe src="javascript:alert(\'XSS\')"></iframe>',
     ];
 
-    xssPayloads.forEach((payload, index) => {
-      it(`should block XSS payload #${index + 1}: ${payload.substring(0, 30)}...`, () => {
+    xssPayloads.forEach((_payload, _index) => {
+      it(`should block XSS payload #${_index + 1}: ${_payload.substring(0, 30)}...`, () => {
         expect(() => {
           sanitizationPipe.transform(
             {
               action: 'type_text',
-              text: payload,
+              text: _payload,
             },
             { metatype: Object, type: 'body', data: undefined },
           );
@@ -86,13 +86,13 @@ describe('Security Validation Mock Tests', () => {
       "' OR 1=1#",
     ];
 
-    sqlInjectionPayloads.forEach((payload, index) => {
-      it(`should block SQL injection payload #${index + 1}`, () => {
+    sqlInjectionPayloads.forEach((_payload, _index) => {
+      it(`should block SQL injection _payload #${_index + 1}`, () => {
         expect(() => {
           sanitizationPipe.transform(
             {
               action: 'write_file',
-              path: `/tmp/test${payload}.txt`,
+              path: `/tmp/test${_payload}.txt`,
               data: 'dGVzdCBjb250ZW50', // base64 for 'test content'
             },
             null,
@@ -320,13 +320,13 @@ describe('Security Validation Mock Tests', () => {
       '&& cat /etc/passwd',
     ];
 
-    commandInjectionPayloads.forEach((payload, index) => {
-      it(`should block command injection payload #${index + 1}`, () => {
+    commandInjectionPayloads.forEach((_payload, _index) => {
+      it(`should block command injection _payload #${_index + 1}`, () => {
         expect(() => {
           sanitizationPipe.transform(
             {
               action: 'application',
-              application: `calculator${payload}`,
+              application: `calculator${_payload}`,
             },
             null,
           );
@@ -353,13 +353,13 @@ describe('Security Validation Mock Tests', () => {
       '....//....//....//etc/passwd',
     ];
 
-    pathTraversalPayloads.forEach((payload, index) => {
-      it(`should block path traversal payload #${index + 1}`, () => {
+    pathTraversalPayloads.forEach((_payload, _index) => {
+      it(`should block path traversal _payload #${_index + 1}`, () => {
         expect(() => {
           sanitizationPipe.transform(
             {
               action: 'read_file',
-              path: payload,
+              path: _payload,
             },
             null,
           );
@@ -383,7 +383,7 @@ describe('Security Validation Mock Tests', () => {
         text: 'Test input for performance validation',
       };
 
-      const result = sanitizationPipe.transform(validInput, null);
+      const _result = sanitizationPipe.transform(validInput, null);
       const duration = Date.now() - startTime;
 
       expect(duration).toBeLessThan(100); // Should complete in under 100ms
@@ -399,7 +399,7 @@ describe('Security Validation Mock Tests', () => {
 
       const validations = Array.from(
         { length: 10 },
-        (_, i) => () =>
+        (_, _i) => () =>
           sanitizationPipe.transform(
             {
               action: 'type_text',

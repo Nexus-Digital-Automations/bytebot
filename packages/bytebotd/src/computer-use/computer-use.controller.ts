@@ -19,7 +19,7 @@ import {
   ApiTags,
   ApiParam,
 } from '@nestjs/swagger';
-import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
+import { _EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
 import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import {
@@ -66,7 +66,7 @@ function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
 // Type guard to check if an error has a stack property
 function isErrorWithStack(error: unknown): error is ErrorWithStack {
   return (
-    isErrorWithMessage(error) &&
+    isErrorWithMessage(_error) &&
     'stack' in error &&
     (typeof (error as Record<string, unknown>).stack === 'string' ||
       (error as Record<string, unknown>).stack === undefined)
@@ -75,13 +75,13 @@ function isErrorWithStack(error: unknown): error is ErrorWithStack {
 
 // Extract error message safely from unknown error
 function getErrorMessage(error: unknown): string {
-  if (isErrorWithMessage(error)) return error.message;
-  return typeof error === 'string' ? error : JSON.stringify(error);
+  if (isErrorWithMessage(_error)) return error.message;
+  return typeof error === 'string' ? error : JSON.stringify(_error);
 }
 
 // Extract error stack safely from unknown error
 function getErrorStack(error: unknown): string | undefined {
-  if (isErrorWithStack(error)) return error.stack;
+  if (isErrorWithStack(_error)) return error.stack;
   return undefined;
 }
 
@@ -148,7 +148,7 @@ type ComputerActionResponse =
 @UseInterceptors(LoggingInterceptor)
 @ApiBearerAuth('bearer')
 export class ComputerUseController {
-  private readonly logger = new Logger(ComputerUseController.name);
+  private readonly logger = new Logger(ComputerUseController._name);
 
   constructor(
     private readonly computerUseService: ComputerUseService,
@@ -265,13 +265,13 @@ export class ComputerUseController {
       );
 
       return jobResponse;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = getErrorMessage(error);
+      const errorMessage = getErrorMessage(_error);
 
       this.logger.error(
         `[${operationId}] Error submitting async computer action: ${errorMessage} (${processingTime}ms)`,
-        getErrorStack(error),
+        getErrorStack(_error),
         {
           operationId,
           action: params.action,
@@ -320,7 +320,7 @@ export class ComputerUseController {
     operationId: 'getAsyncJobStatus',
   })
   @ApiParam({
-    name: 'jobId',
+    _name: 'jobId',
     description: 'Unique job identifier from async submission',
     example: 'job_1702983456789_abc123',
   })
@@ -373,13 +373,13 @@ export class ComputerUseController {
       );
 
       return jobStatus;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = getErrorMessage(error);
+      const errorMessage = getErrorMessage(_error);
 
       this.logger.error(
         `[${operationId}] Error retrieving job status: ${errorMessage} (${processingTime}ms)`,
-        getErrorStack(error),
+        getErrorStack(_error),
         {
           operationId,
           jobId,
@@ -424,7 +424,7 @@ export class ComputerUseController {
     operationId: 'getAsyncJobResult',
   })
   @ApiParam({
-    name: 'jobId',
+    _name: 'jobId',
     description: 'Unique job identifier from async submission',
     example: 'job_1702983456789_abc123',
   })
@@ -471,7 +471,7 @@ export class ComputerUseController {
       // Create safe copy for logging (avoid logging large base64 data)
       const resultCopy = { ...jobResult };
       if (resultCopy.result && typeof resultCopy.result === 'object') {
-        const result = resultCopy.result as any;
+        const _result = resultCopy.result as any;
         if (
           result.image &&
           typeof result.image === 'string' &&
@@ -503,13 +503,13 @@ export class ComputerUseController {
       );
 
       return jobResult;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = getErrorMessage(error);
+      const errorMessage = getErrorMessage(_error);
 
       this.logger.error(
         `[${operationId}] Error retrieving job result: ${errorMessage} (${processingTime}ms)`,
-        getErrorStack(error),
+        getErrorStack(_error),
         {
           operationId,
           jobId,
@@ -561,7 +561,7 @@ export class ComputerUseController {
     operationId: 'cancelAsyncJob',
   })
   @ApiParam({
-    name: 'jobId',
+    _name: 'jobId',
     description: 'Unique job identifier from async submission',
     example: 'job_1702983456789_abc123',
   })
@@ -631,13 +631,13 @@ export class ComputerUseController {
         message,
         jobId,
       };
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = getErrorMessage(error);
+      const errorMessage = getErrorMessage(_error);
 
       this.logger.error(
         `[${operationId}] Error cancelling job: ${errorMessage} (${processingTime}ms)`,
-        getErrorStack(error),
+        getErrorStack(_error),
         {
           operationId,
           jobId,
@@ -736,7 +736,7 @@ export class ComputerUseController {
 
       // Execute the computer action through the service
       // Cast to ComputerActionResponse since we know the service returns proper typed responses
-      const result = (await this.computerUseService.action(
+      const _result = (await this.computerUseService.action(
         params,
       )) as ComputerActionResponse;
 
@@ -753,10 +753,10 @@ export class ComputerUseController {
       );
 
       return result;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = getErrorMessage(error);
-      const errorStack = getErrorStack(error);
+      const errorMessage = getErrorMessage(_error);
+      const errorStack = getErrorStack(_error);
 
       // Log the error with comprehensive context for debugging
       this.logger.error(

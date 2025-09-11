@@ -58,7 +58,7 @@ interface KeyStats {
  */
 @Injectable()
 export class CacheKeyGenerator {
-  private readonly logger = new Logger(CacheKeyGenerator.name);
+  private readonly logger = new Logger(CacheKeyGenerator._name);
   private readonly keyRegistry = new Map<string, KeyMetadata>();
   private readonly stats: KeyStats = {
     totalGenerated: 0,
@@ -154,10 +154,10 @@ export class CacheKeyGenerator {
       );
 
       return fullKey;
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
+        _error instanceof Error ? __error.message : 'Unknown _error';
+      this.logger._error(
         `[${operationId}] Key generation failed: ${errorMessage}`,
       );
 

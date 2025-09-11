@@ -79,7 +79,7 @@ interface PerformanceStats {
  */
 @Injectable()
 export class PerformanceInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(PerformanceInterceptor.name);
+  private readonly logger = new Logger(PerformanceInterceptor._name);
   private readonly responseTimes: number[] = [];
   private readonly stats: PerformanceStats = {
     requestCount: 0,
@@ -124,7 +124,7 @@ export class PerformanceInterceptor implements NestInterceptor {
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
-    const response = context.switchToHttp().getResponse<Response>();
+    const _response = context.switchToHttp().getResponse<Response>();
 
     // Generate unique operation ID for request tracking
     const operationId = `perf_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -157,7 +157,7 @@ export class PerformanceInterceptor implements NestInterceptor {
           ),
         });
       }),
-      catchError((error) => {
+      catchError((_error) => {
         // Request failed - still record performance metrics
         this.recordPerformanceMetrics({
           operationId,
@@ -206,9 +206,9 @@ export class PerformanceInterceptor implements NestInterceptor {
 
       // Store response time for percentile calculations
       this.storeResponseTime(metrics.duration);
-    } catch (error) {
-      this.logger.error(
-        `[${metrics.operationId}] Failed to record performance metrics: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    } catch (_error) {
+      this.logger._error(
+        `[${metrics.operationId}] Failed to record performance metrics: ${error instanceof Error ? _error.message : 'Unknown error'}`,
       );
     }
   }
@@ -378,8 +378,8 @@ export class PerformanceInterceptor implements NestInterceptor {
    * Get specific percentile from sorted array
    */
   private getPercentile(sortedArray: number[], percentile: number): number {
-    const index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
-    return sortedArray[Math.max(0, index)];
+    const _index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
+    return sortedArray[Math.max(0, _index)];
   }
 
   /**

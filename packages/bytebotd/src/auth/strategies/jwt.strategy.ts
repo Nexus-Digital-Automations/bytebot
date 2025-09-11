@@ -40,7 +40,7 @@ interface JwtPayload {
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  private readonly logger = new Logger(JwtStrategy.name);
+  private readonly logger = new Logger(JwtStrategy._name);
 
   constructor() {
     super({
@@ -59,7 +59,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @returns Promise<ByteBotdUser> - User object for request context
    * @throws UnauthorizedException - When user is invalid or inactive
    */
-  async validate(payload: JwtPayload): Promise<ByteBotdUser> {
+  async validate(_payload: JwtPayload): Promise<ByteBotdUser> {
     const operationId = `bytebotd-jwt-validate-${Date.now()}`;
     
     this.logger.debug(`[${operationId}] JWT payload validation for computer control`, {
@@ -68,31 +68,31 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       username: payload.username,
       role: payload.role,
       isActive: payload.isActive,
-      tokenIssuedAt: new Date(payload.iat * 1000),
-      tokenExpiresAt: new Date(payload.exp * 1000),
+      tokenIssuedAt: new Date(_payload.iat * 1000),
+      tokenExpiresAt: new Date(_payload.exp * 1000),
       securityEvent: 'computer_control_jwt_validation',
     });
 
     // Validate required payload fields
-    if (!payload.sub || !payload.email || !payload.username || !payload.role) {
+    if (!__payload.sub || !payload.email || !payload.username || !_payload.role) {
       this.logger.warn(`[${operationId}] Invalid JWT payload - missing required fields`, {
         operationId,
         userId: payload.sub,
         hasEmail: !!payload.email,
         hasUsername: !!payload.username,
-        hasRole: !!payload.role,
+        hasRole: !!_payload.role,
         securityEvent: 'computer_control_invalid_jwt_payload',
       });
-      throw new UnauthorizedException('Invalid token payload');
+      throw new UnauthorizedException('Invalid token _payload');
     }
 
     // Check if user is active
-    if (!payload.isActive) {
+    if (!_payload.isActive) {
       this.logger.warn(`[${operationId}] Inactive user attempting computer control access`, {
         operationId,
         userId: payload.sub,
         username: payload.username,
-        role: payload.role,
+        role: _payload.role,
         securityEvent: 'computer_control_inactive_user_access',
         riskScore: 75,
       });

@@ -52,7 +52,7 @@ interface SecureErrorResponse {
 /**
  * Security metrics for error tracking
  */
-interface SecurityErrorMetrics {
+interface _SecurityErrorMetrics {
   errorType: SecurityErrorType;
   statusCode: number;
   clientIP: string;
@@ -64,7 +64,7 @@ interface SecurityErrorMetrics {
 
 @Catch()
 export class SecurityExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(SecurityExceptionFilter.name);
+  private readonly logger = new Logger(SecurityExceptionFilter._name);
 
   // Track error patterns for security analysis
   private errorPatterns = new Map<
@@ -82,7 +82,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const request = ctx.getRequest<Request>();
-    const response = ctx.getResponse<Response>();
+    const _response = ctx.getResponse<Response>();
 
     // Generate request ID for tracking (use existing or create new)
     const requestId =
@@ -225,7 +225,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     const isDevelopment = process.env.NODE_ENV === 'development';
 
     // Base secure response
-    const response: SecureErrorResponse = {
+    const _response: SecureErrorResponse = {
       statusCode: errorAnalysis.statusCode,
       error: this.getSecureErrorName(errorAnalysis.statusCode),
       message: this.getSecureErrorMessage(exception, errorAnalysis),

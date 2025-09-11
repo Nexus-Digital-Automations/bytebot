@@ -146,10 +146,10 @@ const DEFAULT_CSP_DIRECTIVES = {
 
 @Injectable()
 export class SecurityHeadersMiddleware implements NestMiddleware {
-  private readonly logger = new Logger(SecurityHeadersMiddleware.name);
+  private readonly logger = new Logger(SecurityHeadersMiddleware._name);
   private readonly config: SecurityMiddlewareConfig;
   private readonly helmetMiddleware: (
-    req: Request,
+    _req: Request,
     res: Response,
     next: NextFunction,
   ) => void;
@@ -201,25 +201,25 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
   /**
    * Apply security headers to request
    */
-  use(req: Request, res: Response, next: NextFunction): void {
+  use(_req: Request, res: Response, next: NextFunction): void {
     const operationId = `security-headers-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
     // Set correlation ID for request tracking
-    (req as Request & { correlationId?: string }).correlationId = operationId;
+    (_req as Request & { correlationId?: string }).correlationId = operationId;
 
     this.logger.debug(`[${operationId}] Applying BytebotD security headers`, {
       operationId,
       method: req.method,
       url: req.url,
       ip: req.ip,
-      userAgent: req.get('User-Agent'),
+      userAgent: _req.get('User-Agent'),
       origin: req.get('Origin'),
     });
 
     try {
       // Apply helmet security headers
-      this.helmetMiddleware(req, res, (err) => {
+      this.helmetMiddleware(_req, res, (err) => {
         if (err) {
           const processingTime = Date.now() - startTime;
 
@@ -232,7 +232,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
           // Log security event for middleware failure
           this.logSecurityEvent(
-            req,
+            _req,
             'MIDDLEWARE_ERROR',
             err.message,
             operationId,
@@ -245,7 +245,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
         this.applyCustomHeaders(res, operationId);
 
         // Apply CORS headers
-        this.applyCorsHeaders(req, res, operationId);
+        this.applyCorsHeaders(_req, res, operationId);
 
         // Log successful application
         const processingTime = Date.now() - startTime;
@@ -261,25 +261,25 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
         next();
       });
-    } catch (error) {
+    } catch (_error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] Security headers middleware error`, {
+      this.logger._error(`[${operationId}] Security headers middleware error`, {
         operationId,
-        error: error.message,
+        error: __error.message,
         stack: error.stack,
         processingTimeMs: processingTime,
       });
 
       // Log security event
       this.logSecurityEvent(
-        req,
+        _req,
         'MIDDLEWARE_FAILURE',
-        error.message,
+        _error.message,
         operationId,
       );
 
-      next(error);
+      next(_error);
     }
   }
 
@@ -287,7 +287,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
    * Create helmet middleware with BytebotD-specific configuration
    */
   private createHelmetMiddleware(): (
-    req: Request,
+    _req: Request,
     res: Response,
     next: NextFunction,
   ) => void {
@@ -395,7 +395,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
    * Apply CORS headers with BytebotD-specific origins
    */
   private applyCorsHeaders(
-    req: Request,
+    _req: Request,
     res: Response,
     operationId: string,
   ): void {
@@ -416,7 +416,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       }
 
       // Set other CORS headers for preflight
-      if (req.method === 'OPTIONS') {
+      if (_req.method === 'OPTIONS') {
         res.setHeader(
           'Access-Control-Allow-Methods',
           'GET, POST, PUT, DELETE, PATCH, OPTIONS',
@@ -433,7 +433,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
         origin,
         credentials: this.config.corsCredentials,
         method: req.method,
-        isPreflight: req.method === 'OPTIONS',
+        isPreflight: _req.method === 'OPTIONS',
       });
     } else {
       // Log potential security issue
@@ -444,12 +444,12 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
           origin,
           method: req.method,
           url: req.url,
-          ip: req.ip,
+          ip: _req.ip,
         },
       );
 
       this.logSecurityEvent(
-        req,
+        _req,
         'CORS_VIOLATION',
         `Unauthorized origin: ${origin}`,
         operationId,
@@ -494,7 +494,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
    * Log security events for audit purposes
    */
   private logSecurityEvent(
-    req: Request,
+    _req: Request,
     eventType: string,
     message: string,
     operationId: string,
@@ -517,7 +517,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
           middleware: 'security-headers',
           service: 'BytebotD',
           eventType,
-          userAgent: req.get('User-Agent'),
+          userAgent: _req.get('User-Agent'),
           origin: req.get('Origin'),
           referer: req.get('Referer'),
         },
@@ -535,10 +535,10 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
           operationId,
         },
       );
-    } catch (error) {
-      this.logger.error('Failed to log BytebotD security headers event', {
+    } catch (_error) {
+      this.logger._error('Failed to log BytebotD security headers event', {
         operationId,
-        error: error.message,
+        _error: __error.message,
         originalEventType: eventType,
       });
     }

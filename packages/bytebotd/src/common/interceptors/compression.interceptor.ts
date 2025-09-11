@@ -82,7 +82,7 @@ interface CompressionResult {
  */
 @Injectable()
 export class CompressionInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(CompressionInterceptor.name);
+  private readonly logger = new Logger(CompressionInterceptor._name);
   private readonly stats: CompressionStats = {
     totalRequests: 0,
     compressedRequests: 0,
@@ -132,7 +132,7 @@ export class CompressionInterceptor implements NestInterceptor {
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
-    const response = context.switchToHttp().getResponse<Response>();
+    const _response = context.switchToHttp().getResponse<Response>();
 
     return next.handle().pipe(
       map(async (data) => {
@@ -242,12 +242,12 @@ export class CompressionInterceptor implements NestInterceptor {
         compressionTime: Date.now() - startTime,
         applied: true,
       };
-    } catch (error) {
+    } catch (_error) {
       const compressionTime = Date.now() - startTime;
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+        _error instanceof Error ? __error.message : 'Unknown _error';
 
-      this.logger.error(
+      this.logger._error(
         `[${operationId}] Compression failed: ${errorMessage} (${compressionTime}ms)`,
       );
 
@@ -389,9 +389,9 @@ export class CompressionInterceptor implements NestInterceptor {
           result.compressionTime,
         );
       }
-    } catch (error) {
-      this.logger.error(
-        `Failed to update compression statistics: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    } catch (_error) {
+      this.logger._error(
+        `Failed to update compression statistics: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
       );
     }
   }

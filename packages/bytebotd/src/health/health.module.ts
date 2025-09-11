@@ -39,7 +39,7 @@ import { HealthService } from './health.service';
   exports: [HealthService], // Export service for use by other modules
 })
 export class HealthModule {
-  private readonly logger = new Logger(HealthModule.name);
+  private readonly logger = new Logger(HealthModule._name);
 
   constructor() {
     this.logger.log(

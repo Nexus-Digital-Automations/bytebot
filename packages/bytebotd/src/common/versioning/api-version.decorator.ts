@@ -118,7 +118,7 @@ export const ApiVersion = (config: string | ApiVersionConfig) => {
     SetMetadata(DESKTOP_VERSION_KEY, true),
     ApiTags(`BytebotD API ${versionConfig.version}`),
     ApiHeader({
-      name: 'Accept-Version',
+      _name: 'Accept-Version',
       description: `BytebotD desktop API version header (${versionConfig.version})`,
       required: false,
       schema: {
@@ -128,7 +128,7 @@ export const ApiVersion = (config: string | ApiVersionConfig) => {
       },
     }),
     ApiHeader({
-      name: 'X-Desktop-Client',
+      _name: 'X-Desktop-Client',
       description: 'Desktop client identifier for compatibility tracking',
       required: false,
       schema: {
@@ -154,7 +154,7 @@ export const DeprecatedApi = (config: {
     SetMetadata('deprecated', true),
     SetMetadata('deprecation_config', config),
     ApiHeader({
-      name: 'Deprecation',
+      _name: 'Deprecation',
       description: 'BytebotD API deprecation warning header',
       required: false,
       schema: {
@@ -164,7 +164,7 @@ export const DeprecatedApi = (config: {
     }),
     config.sunset
       ? ApiHeader({
-          name: 'Sunset',
+          _name: 'Sunset',
           description: 'BytebotD API sunset date header',
           required: false,
           schema: {
@@ -175,7 +175,7 @@ export const DeprecatedApi = (config: {
       : () => {},
     config.desktopMigrationNotes
       ? ApiHeader({
-          name: 'X-Desktop-Migration-Notes',
+          _name: 'X-Desktop-Migration-Notes',
           description: 'Desktop-specific migration guidance',
           required: false,
           schema: {
@@ -221,7 +221,7 @@ export const MultiVersion = (versions: SupportedVersion[]) => {
     SetMetadata(DESKTOP_VERSION_KEY, true),
     ApiTags(`BytebotD API ${versions.join(', ')}`),
     ApiHeader({
-      name: 'Accept-Version',
+      _name: 'Accept-Version',
       description: `BytebotD desktop API version header (supports: ${versions.join(', ')})`,
       required: false,
       schema: {
@@ -250,7 +250,7 @@ export const ExperimentalApi = (version: SupportedVersion) => {
     SetMetadata('experimental', true),
     SetMetadata('desktop_experimental', true),
     ApiHeader({
-      name: 'X-API-Experimental',
+      _name: 'X-API-Experimental',
       description: 'Accept experimental BytebotD desktop API features',
       required: true,
       schema: {
@@ -260,7 +260,7 @@ export const ExperimentalApi = (version: SupportedVersion) => {
       },
     }),
     ApiHeader({
-      name: 'X-Desktop-Experimental',
+      _name: 'X-Desktop-Experimental',
       description: 'Enable experimental desktop features',
       required: false,
       schema: {
@@ -288,7 +288,7 @@ export const BetaApi = (version: SupportedVersion) => {
     SetMetadata('beta', true),
     SetMetadata('desktop_beta', true),
     ApiHeader({
-      name: 'X-API-Beta',
+      _name: 'X-API-Beta',
       description: 'Accept beta BytebotD desktop API features',
       required: false,
       schema: {
@@ -325,7 +325,7 @@ export const ComputerUseApi = (
     SetMetadata('computer_use', true),
     ApiTags('Computer Use'),
     ApiHeader({
-      name: 'X-Computer-Use-Client',
+      _name: 'X-Computer-Use-Client',
       description: 'Computer use client identifier',
       required: false,
       schema: {

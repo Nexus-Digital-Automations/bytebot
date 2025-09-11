@@ -18,13 +18,13 @@
  * @coverage-target 100%
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { InputTrackingModule } from '../input-tracking.module';
 import { InputTrackingController } from '../input-tracking.controller';
 import { InputTrackingService } from '../input-tracking.service';
 import { InputTrackingGateway } from '../input-tracking.gateway';
-import { ComputerUseModule } from '../../computer-use/computer-use.module';
+import { _ComputerUseModule } from '../../computer-use/computer-use.module';
 import { ComputerUseService } from '../../computer-use/computer-use.service';
 
 describe('InputTrackingModule', () => {
@@ -316,7 +316,7 @@ describe('InputTrackingModule', () => {
       expect(inputTrackingService['computerUseService']).toBe(computerUseService);
 
       // Test screenshot functionality
-      const result = await computerUseService.screenshot();
+      const _result = await computerUseService.screenshot();
       expect(result).toEqual({ image: 'mock-screenshot-data' });
 
       console.log(`[${testId}] ComputerUseService integration test completed`);
@@ -591,7 +591,7 @@ describe('InputTrackingModule', () => {
       const testId = `${operationId}_rapid_module_lifecycle`;
       console.log(`[${testId}] Testing rapid module creation and destruction`);
 
-      const modules = [];
+      const _modules = [];
 
       // Create multiple modules rapidly
       for (let i = 0; i < 5; i++) {

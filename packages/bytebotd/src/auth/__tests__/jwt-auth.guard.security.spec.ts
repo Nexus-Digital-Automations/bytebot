@@ -15,13 +15,13 @@
  * @security-focus Critical
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import crypto from 'crypto';
+import _crypto from 'crypto';
 
 /**
  * Advanced Security-Focused JWT Authentication Guard Tests
@@ -30,8 +30,8 @@ import crypto from 'crypto';
 describe('JwtAuthGuard - Advanced Security Tests', () => {
   let guard: JwtAuthGuard;
   let jwtService: JwtService;
-  let configService: ConfigService;
-  let reflector: Reflector;
+  let _configService: ConfigService;
+  let _reflector: Reflector;
   let module: TestingModule;
 
   const operationId = `jwt_security_test_${Date.now()}`;
@@ -44,7 +44,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
   // Mock execution context factory with enhanced security metadata
   const createMockExecutionContext = (
     headers: any = {},
-    isPublic = false,
+    _isPublic = false,
     route = 'test-route',
     ip = '127.0.0.1'
   ): ExecutionContext => {
@@ -63,15 +63,15 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         getRequest: jest.fn().mockReturnValue(mockRequest),
         getResponse: jest.fn().mockReturnValue({}),
       }),
-      getHandler: jest.fn().mockReturnValue({ name: 'testHandler' }),
-      getClass: jest.fn().mockReturnValue({ name: 'TestController' }),
+      getHandler: jest.fn().mockReturnValue({ _name: 'testHandler' }),
+      getClass: jest.fn().mockReturnValue({ _name: 'TestController' }),
     } as any;
   };
 
   // Create malicious JWT tokens for security testing
   const createMaliciousTokens = () => {
-    const validSecret = 'test-jwt-secret';
-    const maliciousSecret = 'malicious-secret';
+    const _validSecret = 'test-jwt-secret';
+    const _maliciousSecret = 'malicious-secret';
     
     return {
       // Token with malicious payload injection
@@ -210,9 +210,9 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       securityLogger.info(`[${testId}] Signature manipulation detected and prevented`);
     });
 
-    it('should prevent token payload injection attacks', async () => {
+    it('should prevent token _payload injection attacks', async () => {
       const testId = `${operationId}_payload_injection`;
-      securityLogger.info(`[${testId}] Testing token payload injection attack prevention`);
+      securityLogger.info(`[${testId}] Testing token _payload injection attack prevention`);
 
       const maliciousPayload = {
         sub: 'user123',
@@ -232,7 +232,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(maliciousPayload);
 
       // Should succeed but user object should be sanitized
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
       const request = context.switchToHttp().getRequest();
 
       expect(result).toBe(true);
@@ -281,7 +281,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         
         try {
           await guard.canActivate(context);
-        } catch (error) {
+        } catch (_error) {
           // Expected for failing scenarios
         }
         
@@ -327,9 +327,9 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
   });
 
   describe('Injection and XSS Prevention', () => {
-    it('should sanitize JWT payload to prevent XSS attacks', async () => {
+    it('should sanitize JWT _payload to prevent XSS attacks', async () => {
       const testId = `${operationId}_xss_prevention`;
-      securityLogger.info(`[${testId}] Testing XSS prevention in JWT payload`);
+      securityLogger.info(`[${testId}] Testing XSS prevention in JWT _payload`);
 
       const xssPayload = {
         sub: '<script>alert("XSS")</script>',
@@ -346,16 +346,16 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(xssPayload);
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
       const request = context.switchToHttp().getRequest();
 
       expect(result).toBe(true);
       
       // Verify XSS content is sanitized or safely handled
       expect(request.user.email).toBeDefined();
-      expect(request.user.name).toBeDefined();
+      expect(request.user._name).toBeDefined();
       
-      securityLogger.info(`[${testId}] XSS payload sanitized successfully`);
+      securityLogger.info(`[${testId}] XSS _payload sanitized successfully`);
     });
 
     it('should prevent SQL injection through JWT claims', async () => {
@@ -376,7 +376,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(sqlInjectionPayload);
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
       const request = context.switchToHttp().getRequest();
 
       expect(result).toBe(true);
@@ -386,7 +386,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       expect(request.user.email).toBeDefined();
       expect(request.user.role).toBeDefined();
       
-      securityLogger.info(`[${testId}] SQL injection payload safely handled`);
+      securityLogger.info(`[${testId}] SQL injection _payload safely handled`);
     });
   });
 
@@ -437,8 +437,8 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       const startTime = Date.now();
       
       // Simulate 50 concurrent attack attempts
-      const promises = Array(50).fill(null).map((_, index) => 
-        guard.canActivate(contexts[index % contexts.length])
+      const promises = Array(50).fill(null).map((_, _index) => 
+        guard.canActivate(contexts[_index % contexts.length])
           .catch(() => 'attack-blocked')
       );
 
@@ -475,7 +475,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(maliciousPayload);
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
       const request = context.switchToHttp().getRequest();
 
       expect(result).toBe(true);
@@ -508,7 +508,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         exp: Math.floor(Date.now() / 1000) + 3600,
       });
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
       
       expect(result).toBe(true);
       

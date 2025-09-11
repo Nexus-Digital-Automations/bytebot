@@ -34,9 +34,9 @@ describe('Security Validation Tests', () => {
       '<iframe src="javascript:alert(\'XSS\')"></iframe>',
     ];
 
-    xssPayloads.forEach((payload, index) => {
-      it(`should detect XSS payload #${index + 1}: ${payload.substring(0, 30)}...`, () => {
-        expect(isXSSPayload(payload)).toBe(true);
+    xssPayloads.forEach((_payload, _index) => {
+      it(`should detect XSS payload #${_index + 1}: ${_payload.substring(0, 30)}...`, () => {
+        expect(isXSSPayload(_payload)).toBe(true);
       });
     });
 
@@ -67,9 +67,9 @@ describe('Security Validation Tests', () => {
       "' OR 1=1#",
     ];
 
-    sqlInjectionPayloads.forEach((payload, index) => {
-      it(`should detect SQL injection payload #${index + 1}`, () => {
-        expect(isSQLInjection(payload)).toBe(true);
+    sqlInjectionPayloads.forEach((_payload, _index) => {
+      it(`should detect SQL injection _payload #${_index + 1}`, () => {
+        expect(isSQLInjection(_payload)).toBe(true);
       });
     });
 
@@ -97,9 +97,9 @@ describe('Security Validation Tests', () => {
       '&& cat /etc/passwd',
     ];
 
-    commandInjectionPayloads.forEach((payload, index) => {
-      it(`should detect command injection payload #${index + 1}`, () => {
-        expect(isCommandInjection(payload)).toBe(true);
+    commandInjectionPayloads.forEach((_payload, _index) => {
+      it(`should detect command injection _payload #${_index + 1}`, () => {
+        expect(isCommandInjection(_payload)).toBe(true);
       });
     });
 
@@ -129,9 +129,9 @@ describe('Security Validation Tests', () => {
       '....//....//....//etc/passwd',
     ];
 
-    pathTraversalPayloads.forEach((payload, index) => {
-      it(`should detect path traversal payload #${index + 1}`, () => {
-        expect(isPathTraversal(payload)).toBe(true);
+    pathTraversalPayloads.forEach((_payload, _index) => {
+      it(`should detect path traversal _payload #${_index + 1}`, () => {
+        expect(isPathTraversal(_payload)).toBe(true);
       });
     });
 
@@ -227,7 +227,7 @@ describe('Security Validation Tests', () => {
         .substring(0, 200);
     };
 
-    it('should sanitize sensitive information in error messages', () => {
+    it('should sanitize sensitive information in _error messages', () => {
       const sensitiveError =
         '/secret/path/database.db connection failed with API_KEY exposed';
       const sanitized = sanitizeErrorMessage(sensitiveError);
@@ -322,7 +322,7 @@ describe('Security Validation Tests', () => {
     });
 
     it('should handle multiple concurrent validations efficiently', () => {
-      const inputs = Array.from({ length: 100 }, (_, i) => `Test input ${i}`);
+      const inputs = Array.from({ length: 100 }, (_, _i) => `Test input ${i}`);
 
       const startTime = Date.now();
       const results = inputs.map((text) => ({

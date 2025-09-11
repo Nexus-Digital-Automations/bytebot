@@ -18,13 +18,13 @@ import type { Socket } from 'net';
  * Initializes NestJS application with proxy middleware and WebSocket handling
  */
 async function bootstrap(): Promise<void> {
-  const logger = new Logger('Bootstrap');
+  const _logger = new Logger('Bootstrap');
 
   try {
     const app = await NestFactory.create(AppModule);
 
     // Get configuration service for standardized security
-    const configService = app.get(ConfigService);
+    const _configService = app.get(ConfigService);
     const environment = process.env.NODE_ENV || 'development';
 
     // Deploy standardized security middleware for BytebotD - MAXIMUM SECURITY
@@ -196,7 +196,7 @@ async function bootstrap(): Promise<void> {
     });
 
     // Additional security headers for BytebotD
-    app.use((req, res, next) => {
+    app.use((_req, res, next) => {
       res.setHeader('X-Service', 'BytebotD');
       res.setHeader('X-API-Version', '1.0');
       res.setHeader('X-Service-ID', 'computer-use-service');
@@ -222,12 +222,12 @@ async function bootstrap(): Promise<void> {
     // Selective upgrade routing with proper typing
     server.on(
       'upgrade',
-      (req: IncomingMessage, socket: Socket, head: Buffer) => {
-        if (req.url?.startsWith('/websockify')) {
+      (_req: IncomingMessage, socket: Socket, head: Buffer) => {
+        if (_req.url?.startsWith('/websockify')) {
           // Type-safe upgrade handling - http-proxy-middleware expects a Socket from 'net'
           if (wsProxy && typeof wsProxy.upgrade === 'function') {
             // Safe type assertion: socket parameter is guaranteed to be Socket from 'net' module
-            wsProxy.upgrade(req, socket, head);
+            wsProxy.upgrade(_req, socket, head);
           } else {
             logger.warn('WebSocket proxy upgrade method not available');
           }
@@ -238,10 +238,10 @@ async function bootstrap(): Promise<void> {
 
     logger.log('Application bootstrap completed successfully');
     logger.log('Server listening on port 9990');
-  } catch (error) {
-    logger.error(
+  } catch (_error) {
+    logger._error(
       'Failed to bootstrap application',
-      error instanceof Error ? error.stack : String(error),
+      _error instanceof Error ? _error.stack : String(_error),
     );
     process.exit(1);
   }

@@ -15,11 +15,11 @@
  * @security-focus Critical
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RolesGuard } from '../guards/roles.guard';
-import { UserRole, Permission } from '@bytebot/shared';
+import { UserRole, _Permission } from '@bytebot/shared';
 import { ByteBotdUser } from '../guards/jwt-auth.guard';
 
 /**
@@ -28,7 +28,7 @@ import { ByteBotdUser } from '../guards/jwt-auth.guard';
  */
 describe('RolesGuard - Advanced Security Tests', () => {
   let guard: RolesGuard;
-  let reflector: Reflector;
+  let _reflector: Reflector;
   let module: TestingModule;
 
   const operationId = `roles_security_test_${Date.now()}`;
@@ -66,8 +66,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
         getRequest: jest.fn().mockReturnValue(mockRequest),
         getResponse: jest.fn().mockReturnValue({}),
       }),
-      getHandler: jest.fn().mockReturnValue({ name: 'testHandler' }),
-      getClass: jest.fn().mockReturnValue({ name: 'TestController' }),
+      getHandler: jest.fn().mockReturnValue({ _name: 'testHandler' }),
+      getClass: jest.fn().mockReturnValue({ _name: 'TestController' }),
     } as any;
   };
 
@@ -211,9 +211,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
         // If it passes, verify it's because of proper role validation, not confusion
         const request = context.switchToHttp().getRequest();
         expect(request.user.role).toBe(UserRole._ADMIN);
-      } catch (error) {
+      } catch (_error) {
         // Should throw ForbiddenException if role validation is strict
-        expect(error).toBeInstanceOf(ForbiddenException);
+        expect(_error).toBeInstanceOf(ForbiddenException);
       }
 
       securityLogger.info(
@@ -275,17 +275,17 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .mockReturnValue([UserRole._ADMIN]); // All require admin
 
       // Simulate concurrent requests where user role might be modified
-      const promises = contexts.map(async (context, index) => {
+      const promises = contexts.map(async (context, _index) => {
         // Simulate role modification during concurrent requests
-        if (index === 5) {
+        if (_index === 5) {
           user.role = UserRole._ADMIN; // Simulate role escalation mid-flight
         }
 
         try {
-          const result = await guard.canActivate(context);
+          const _result = await guard.canActivate(context);
           return { success: true, index };
-        } catch (error) {
-          return { success: false, index, error: error.message };
+        } catch (_error) {
+          return { success: false, index, _error: __error.message };
         }
       });
 
@@ -324,7 +324,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
       // Attempt to manipulate permissions during request
-      const originalPermissions = Object.values(Permission);
+      const _originalPermissions = Object.values(Permission);
       const maliciousRequest = context.switchToHttp().getRequest();
 
       // Try to inject permissions
@@ -421,7 +421,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
         try {
           await guard.canActivate(context);
-        } catch (error) {
+        } catch (_error) {
           // Expected for non-admin users
         }
 
@@ -492,7 +492,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
     it('should handle XSS payloads in user properties safely', async () => {
       const testId = `${operationId}_xss_handling`;
       securityLogger.info(
-        `[${testId}] Testing XSS payload handling in user properties`,
+        `[${testId}] Testing XSS _payload handling in user properties`,
       );
 
       const maliciousUsers = createMaliciousUsers();
@@ -508,7 +508,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .mockReturnValueOnce(undefined);
 
       // Should allow access but safely handle XSS content
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
       expect(result).toBe(true);
 
       // Verify user properties are handled safely (no script execution)
@@ -541,7 +541,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .mockReturnValueOnce(undefined);
 
       // Should allow access but safely handle SQL injection content
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
       expect(result).toBe(true);
 
       // Verify SQL injection payloads are safely handled
@@ -566,11 +566,11 @@ describe('RolesGuard - Advanced Security Tests', () => {
       const attackUsers = Array(50)
         .fill(null)
         .map(
-          (_, index) =>
+          (_, _index) =>
             ({
               id: `attacker_${index}`,
-              email: `attacker${index}@malicious.com`,
-              username: `attacker${index}`,
+              email: `attacker${_index}@malicious.com`,
+              username: `attacker${_index}`,
               role: UserRole._VIEWER,
               isActive: true,
             }) as ByteBotdUser,
@@ -583,19 +583,19 @@ describe('RolesGuard - Advanced Security Tests', () => {
       const startTime = Date.now();
 
       // Launch concurrent attacks
-      const promises = attackUsers.map(async (user, index) => {
+      const promises = attackUsers.map(async (user, _index) => {
         const context = createMockExecutionContext(
           user,
-          `admin-endpoint-${index}`,
+          `admin-endpoint-${_index}`,
           'POST',
-          `192.168.1.${100 + (index % 155)}`, // Different IPs
+          `192.168.1.${100 + (_index % 155)}`, // Different IPs
         );
 
         try {
-          const result = await guard.canActivate(context);
+          const _result = await guard.canActivate(context);
           return { success: true, userId: user.id };
-        } catch (error) {
-          return { success: false, userId: user.id, error: error.message };
+        } catch (_error) {
+          return { success: false, userId: user.id, _error: __error.message };
         }
       });
 
@@ -635,27 +635,27 @@ describe('RolesGuard - Advanced Security Tests', () => {
       // Create multiple contexts sharing the same user object
       const contexts = Array(20)
         .fill(null)
-        .map((_, index) =>
+        .map((_, _index) =>
           createMockExecutionContext(
             sharedUser,
-            `race-endpoint-${index}`,
+            `race-endpoint-${_index}`,
             'GET',
           ),
         );
 
       // Simulate race condition by modifying user role during concurrent checks
-      const promises = contexts.map(async (context, index) => {
+      const promises = contexts.map(async (context, _index) => {
         // Simulate role modification during concurrent access
-        if (index === 10) {
+        if (_index === 10) {
           setTimeout(() => {
             sharedUser.role = UserRole._ADMIN;
           }, 10);
         }
 
         try {
-          const result = await guard.canActivate(context);
+          const _result = await guard.canActivate(context);
           return { success: true, index };
-        } catch (error) {
+        } catch (_error) {
           return { success: false, index };
         }
       });

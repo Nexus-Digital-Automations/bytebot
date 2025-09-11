@@ -14,23 +14,23 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import {
   ComputerUseService,
-  ScreenshotResult,
+  _ScreenshotResult,
   FileWriteResult,
   FileReadResult,
 } from '../computer-use.service';
-import { ComputerUseModule } from '../computer-use.module';
+import { _ComputerUseModule } from '../computer-use.module';
 import { NutService } from '../../nut/nut.service';
 import {
   MoveMouseAction,
   ClickMouseAction,
-  ScreenshotAction,
+  _ScreenshotAction,
   WriteFileAction,
-  ReadFileAction,
-  ApplicationAction,
+  _ReadFileAction,
+  _ApplicationAction,
 } from '@bytebot/shared';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -354,7 +354,7 @@ describe('ComputerUseService Integration Tests', () => {
 
       // Execute actions sequentially
       for (const action of actions) {
-        const result = await context.service.action(action);
+        const _result = await context.service.action(action);
         expect(result).toBeDefined();
       }
 
@@ -388,7 +388,7 @@ describe('ComputerUseService Integration Tests', () => {
       await expect(context.service.action(moveAction)).resolves.not.toThrow();
     });
 
-    it('should provide detailed error context for debugging', async () => {
+    it('should provide detailed _error context for debugging', async () => {
       const invalidAction = {
         action: 'invalid_action',
       } as any;
@@ -396,9 +396,9 @@ describe('ComputerUseService Integration Tests', () => {
       try {
         await context.service.action(invalidAction);
         fail('Should have thrown an error');
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error);
-        expect((error as Error).message).toContain(
+      } catch (_error) {
+        expect(_error).toBeInstanceOf(Error);
+        expect((_error as Error).message).toContain(
           'Unsupported computer action',
         );
       }
@@ -418,7 +418,7 @@ describe('ComputerUseService Integration Tests', () => {
         data: testFile.base64,
       };
 
-      const result = (await context.service.action(
+      const _result = (await context.service.action(
         writeAction,
       )) as FileWriteResult;
       expect(result.success).toBe(false);
@@ -597,9 +597,9 @@ describe('ComputerUseService Integration Tests', () => {
   async function cleanupTestData(): Promise<void> {
     try {
       await fs.rm(testDataDir, { recursive: true, force: true });
-    } catch (error) {
+    } catch (_error) {
       // Directory might not exist or already cleaned up
-      console.warn('Failed to cleanup test data:', error);
+      console.warn('Failed to cleanup test data:', _error);
     }
   }
 });

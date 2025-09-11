@@ -26,15 +26,15 @@ import {
   ClickMouseAction,
   PressMouseAction,
   DragMouseAction,
-  ScrollAction,
-  TypeKeysAction,
+  _ScrollAction,
+  _TypeKeysAction,
   PressKeysAction,
   TypeTextAction,
-  ApplicationAction,
+  _ApplicationAction,
   Application,
-  PasteTextAction,
+  _PasteTextAction,
   WriteFileAction,
-  ReadFileAction,
+  _ReadFileAction,
 } from '@bytebot/shared';
 
 // ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====
@@ -154,19 +154,19 @@ export class ErrorHandler {
    * @returns Human-readable error message
    */
   static extractErrorMessage(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
+    if (_error instanceof Error) {
+      return _error.message;
     }
-    if (typeof error === 'string') {
+    if (typeof _error === 'string') {
       return error;
     }
-    if (error && typeof error === 'object' && 'message' in error) {
+    if (__error && typeof error === 'object' && 'message' in error) {
       const errorObj = error as { message: unknown };
       return typeof errorObj.message === 'string'
         ? errorObj.message
-        : JSON.stringify(error);
+        : JSON.stringify(_error);
     }
-    return typeof error === 'string' ? error : JSON.stringify(error);
+    return typeof error === 'string' ? error : JSON.stringify(_error);
   }
 
   /**
@@ -175,10 +175,10 @@ export class ErrorHandler {
    * @returns Error stack trace or undefined
    */
   static extractErrorStack(error: unknown): string | undefined {
-    if (error instanceof Error) {
+    if (_error instanceof Error) {
       return error.stack;
     }
-    if (error && typeof error === 'object' && 'stack' in error) {
+    if (__error && typeof error === 'object' && 'stack' in error) {
       const errorObj = error as { stack: unknown };
       return typeof errorObj.stack === 'string' ? errorObj.stack : undefined;
     }
@@ -227,7 +227,7 @@ export class ErrorHandler {
  */
 @Injectable()
 export class ComputerUseService {
-  private readonly logger = new Logger(ComputerUseService.name);
+  private readonly logger = new Logger(ComputerUseService._name);
 
   /**
    * Initialize Computer Use Service with dependency injection
@@ -287,7 +287,7 @@ export class ComputerUseService {
     );
 
     try {
-      let result:
+      let _result:
         | ScreenshotResult
         | CursorPositionResult
         | FileWriteResult
@@ -393,12 +393,12 @@ export class ComputerUseService {
       );
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       const duration = Date.now() - startTime;
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      const errorStack = ErrorHandler.extractErrorStack(error);
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      const errorStack = ErrorHandler.extractErrorStack(_error);
 
-      this.logger.error(
+      this.logger._error(
         `[${operationId}] Computer action failed: ${errorMessage}`,
         {
           operationId,
@@ -419,7 +419,7 @@ export class ComputerUseService {
           processingTimeMs: duration,
           originalParams: params,
         },
-        error,
+        _error,
       );
 
       throw new Error(structuredError.message);
@@ -445,9 +445,9 @@ export class ComputerUseService {
       await this.nutService.mouseMoveEvent(action.coordinates);
 
       this.logger.log(`[${operationId}] Mouse movement completed successfully`);
-    } catch (error) {
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      this.logger.error(
+    } catch (_error) {
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      this.logger._error(
         `[${operationId}] Mouse movement failed: ${errorMessage}`,
         {
           operationId,
@@ -515,8 +515,8 @@ export class ComputerUseService {
       }
 
       this.logger.log(`[${operationId}] Mouse tracing completed successfully`);
-    } catch (error) {
-      // Ensure keys are released on error
+    } catch (_error) {
+      // Ensure keys are released on _error
       if (holdKeys && holdKeys.length > 0) {
         try {
           await this.nutService.holdKeys(holdKeys, false);
@@ -527,7 +527,7 @@ export class ComputerUseService {
         }
       }
 
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
         `[${operationId}] Mouse tracing failed: ${errorMessage}`,
         {
@@ -619,8 +619,8 @@ export class ComputerUseService {
       this.logger.log(
         `[${operationId}] Mouse click operation completed successfully`,
       );
-    } catch (error) {
-      // Ensure keys are released on error
+    } catch (_error) {
+      // Ensure keys are released on _error
       if (holdKeys && holdKeys.length > 0) {
         try {
           await this.nutService.holdKeys(holdKeys, false);
@@ -631,7 +631,7 @@ export class ComputerUseService {
         }
       }
 
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
         `[${operationId}] Mouse click operation failed: ${errorMessage}`,
         {
@@ -688,9 +688,9 @@ export class ComputerUseService {
       this.logger.log(
         `[${operationId}] Mouse button operation completed successfully`,
       );
-    } catch (error) {
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      this.logger.error(
+    } catch (_error) {
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      this.logger._error(
         `[${operationId}] Mouse button operation failed: ${errorMessage}`,
         {
           operationId,
@@ -781,8 +781,8 @@ export class ComputerUseService {
       this.logger.log(
         `[${operationId}] Mouse drag operation completed successfully`,
       );
-    } catch (error) {
-      // Cleanup on error - release mouse button if it was pressed
+    } catch (_error) {
+      // Cleanup on _error - release mouse button if it was pressed
       if (mouseButtonPressed) {
         try {
           await this.nutService.mouseButtonEvent(button, false);
@@ -804,7 +804,7 @@ export class ComputerUseService {
         }
       }
 
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
         `[${operationId}] Mouse drag operation failed: ${errorMessage}`,
         {
@@ -890,8 +890,8 @@ export class ComputerUseService {
       this.logger.log(
         `[${operationId}] Scroll operation completed successfully`,
       );
-    } catch (error) {
-      // Ensure keys are released on error
+    } catch (_error) {
+      // Ensure keys are released on _error
       if (holdKeys && holdKeys.length > 0) {
         try {
           await this.nutService.holdKeys(holdKeys, false);
@@ -902,7 +902,7 @@ export class ComputerUseService {
         }
       }
 
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
         `[${operationId}] Scroll operation failed: ${errorMessage}`,
         {
@@ -939,9 +939,9 @@ export class ComputerUseService {
     try {
       await this.nutService.sendKeys(keys, delay);
       this.logger.log(`[${operationId}] Key typing completed successfully`);
-    } catch (error) {
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      this.logger.error(`[${operationId}] Key typing failed: ${errorMessage}`, {
+    } catch (_error) {
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      this.logger._error(`[${operationId}] Key typing failed: ${errorMessage}`, {
         operationId,
         keys,
         delay,
@@ -975,9 +975,9 @@ export class ComputerUseService {
       this.logger.log(
         `[${operationId}] Key ${press} operation completed successfully`,
       );
-    } catch (error) {
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      this.logger.error(
+    } catch (_error) {
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      this.logger._error(
         `[${operationId}] Key ${press} operation failed: ${errorMessage}`,
         {
           operationId,
@@ -1012,9 +1012,9 @@ export class ComputerUseService {
     try {
       await this.nutService.typeText(text, delay);
       this.logger.log(`[${operationId}] Text typing completed successfully`);
-    } catch (error) {
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      this.logger.error(
+    } catch (_error) {
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      this.logger._error(
         `[${operationId}] Text typing failed: ${errorMessage}`,
         {
           operationId,
@@ -1045,9 +1045,9 @@ export class ComputerUseService {
     try {
       await this.nutService.pasteText(text);
       this.logger.log(`[${operationId}] Text pasting completed successfully`);
-    } catch (error) {
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      this.logger.error(
+    } catch (_error) {
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      this.logger._error(
         `[${operationId}] Text pasting failed: ${errorMessage}`,
         {
           operationId,
@@ -1109,7 +1109,7 @@ export class ComputerUseService {
       const image = buffer.toString('base64');
       const duration = Date.now() - startTime;
 
-      const result: ScreenshotResult = {
+      const _result: ScreenshotResult = {
         image,
         metadata: {
           captureTime,
@@ -1127,12 +1127,12 @@ export class ComputerUseService {
       });
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       const duration = Date.now() - startTime;
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      const errorStack = ErrorHandler.extractErrorStack(error);
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      const errorStack = ErrorHandler.extractErrorStack(_error);
 
-      this.logger.error(`[${operationId}] Screenshot failed: ${errorMessage}`, {
+      this.logger._error(`[${operationId}] Screenshot failed: ${errorMessage}`, {
         operationId,
         processingTimeMs: duration,
         error: errorMessage,
@@ -1161,7 +1161,7 @@ export class ComputerUseService {
     try {
       const position = await this.nutService.getCursorPosition();
 
-      const result: CursorPositionResult = {
+      const _result: CursorPositionResult = {
         x: position.x,
         y: position.y,
         timestamp,
@@ -1177,9 +1177,9 @@ export class ComputerUseService {
       );
 
       return result;
-    } catch (error) {
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      this.logger.error(
+    } catch (_error) {
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      this.logger._error(
         `[${operationId}] Failed to get cursor position: ${errorMessage}`,
         {
           operationId,
@@ -1261,14 +1261,14 @@ export class ComputerUseService {
         this.logger.log(
           `[${operationId}] Application ${application} running status: ${appOpen}`,
         );
-      } catch (error) {
+      } catch (_error) {
         // Handle wmctrl/grep errors safely with type checking
-        const errorMessage = ErrorHandler.extractErrorMessage(error);
+        const errorMessage = ErrorHandler.extractErrorMessage(_error);
 
-        // Extract error code safely
+        // Extract _error code safely
         const errorCode =
-          error && typeof error === 'object' && 'code' in error
-            ? (error as { code: unknown }).code
+          _error && typeof _error === 'object' && 'code' in _error
+            ? (_error as { code: unknown }).code
             : null;
 
         // grep returns exit code 1 when no match found (app not running)
@@ -1339,9 +1339,9 @@ export class ComputerUseService {
       this.logger.log(
         `[${operationId}] Application ${application} launched successfully`,
       );
-    } catch (error) {
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      this.logger.error(
+    } catch (_error) {
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      this.logger._error(
         `[${operationId}] Application management failed: ${errorMessage}`,
         {
           operationId,
@@ -1462,7 +1462,7 @@ export class ComputerUseService {
         }
       }
 
-      const result: FileWriteResult = {
+      const _result: FileWriteResult = {
         success: true,
         message: `File written successfully to: ${normalizedPath}`,
         path: normalizedPath,
@@ -1481,8 +1481,8 @@ export class ComputerUseService {
       );
 
       return result;
-    } catch (error) {
-      // Ensure temp file cleanup on error
+    } catch (_error) {
+      // Ensure temp file cleanup on _error
       if (tempFile) {
         try {
           await fs.unlink(tempFile);
@@ -1493,8 +1493,8 @@ export class ComputerUseService {
         }
       }
 
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      const errorStack = ErrorHandler.extractErrorStack(error);
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      const errorStack = ErrorHandler.extractErrorStack(_error);
 
       this.logger.error(
         `[${operationId}] File write operation failed: ${errorMessage}`,
@@ -1506,7 +1506,7 @@ export class ComputerUseService {
         },
       );
 
-      const result: FileWriteResult = {
+      const _result: FileWriteResult = {
         success: false,
         message: `File write failed: ${errorMessage}`,
         operationId,
@@ -1648,7 +1648,7 @@ export class ComputerUseService {
 
         const mediaType = mimeTypes[ext] || 'application/octet-stream';
 
-        const result: FileReadResult = {
+        const _result: FileReadResult = {
           success: true,
           data: base64Data,
           name: fileName,
@@ -1688,8 +1688,8 @@ export class ComputerUseService {
           }
         }
       }
-    } catch (error) {
-      // Ensure temp file cleanup on error
+    } catch (_error) {
+      // Ensure temp file cleanup on _error
       if (tempFile) {
         try {
           await fs.unlink(tempFile);
@@ -1700,8 +1700,8 @@ export class ComputerUseService {
         }
       }
 
-      const errorMessage = ErrorHandler.extractErrorMessage(error);
-      const errorStack = ErrorHandler.extractErrorStack(error);
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      const errorStack = ErrorHandler.extractErrorStack(_error);
 
       this.logger.error(
         `[${operationId}] File read operation failed: ${errorMessage}`,
@@ -1713,7 +1713,7 @@ export class ComputerUseService {
         },
       );
 
-      const result: FileReadResult = {
+      const _result: FileReadResult = {
         success: false,
         message: `File read failed: ${errorMessage}`,
         operationId,

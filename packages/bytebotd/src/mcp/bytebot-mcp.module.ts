@@ -33,11 +33,11 @@
 
 import { Module, Logger } from '@nestjs/common';
 import { McpModule } from '@rekog/mcp-nest';
-import { ComputerUseModule } from '../computer-use/computer-use.module';
+import { _ComputerUseModule } from '../computer-use/computer-use.module';
 import { ComputerUseTools } from './computer-use.tools';
 
 // Initialize module logger
-const logger = new Logger('BytebotMcpModule');
+const _logger = new Logger('BytebotMcpModule');
 
 /**
  * Bytebot MCP Module Configuration
@@ -57,7 +57,7 @@ const logger = new Logger('BytebotMcpModule');
 
     // MCP server configuration with Bytebot-specific settings
     McpModule.forRoot({
-      name: 'bytebotd', // MCP server identifier
+      _name: 'bytebotd', // MCP server identifier
       version: '0.0.1', // API version for compatibility
       sseEndpoint: '/mcp', // Server-Sent Events endpoint path
     }),

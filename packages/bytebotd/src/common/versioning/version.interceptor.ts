@@ -85,7 +85,7 @@ interface DesktopCompatibility {
 
 @Injectable()
 export class VersionInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(VersionInterceptor.name);
+  private readonly logger = new Logger(VersionInterceptor._name);
   private readonly defaultVersion: string;
   private readonly strictVersioning: boolean;
 
@@ -112,7 +112,7 @@ export class VersionInterceptor implements NestInterceptor {
 
     try {
       const request = context.switchToHttp().getRequest<Request>();
-      const response = context.switchToHttp().getResponse<Response>();
+      const _response = context.switchToHttp().getResponse<Response>();
 
       // Get endpoint version configuration
       const endpointVersionConfig = getVersionConfig(context.getHandler());
@@ -205,11 +205,11 @@ export class VersionInterceptor implements NestInterceptor {
           return data;
         }),
       );
-    } catch (error) {
+    } catch (_error) {
       const processingTime = Date.now() - startTime;
-      this.logger.error(`[${operationId}] BytebotD version interceptor error`, {
+      this.logger._error(`[${operationId}] BytebotD version interceptor error`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? _error.message : String(_error),
         stack: error instanceof Error ? error.stack : undefined,
         processingTimeMs: processingTime,
       });

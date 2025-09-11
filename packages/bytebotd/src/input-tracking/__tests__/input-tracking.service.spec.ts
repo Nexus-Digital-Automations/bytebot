@@ -17,7 +17,7 @@
  * @coverage-target 100%
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 
 // Define types that would come from uiohook-napi
@@ -135,16 +135,16 @@ import {
   ComputerAction,
   ClickMouseAction,
   DragMouseAction,
-  ScrollAction,
+  _ScrollAction,
   TypeTextAction,
-  TypeKeysAction,
+  _TypeKeysAction,
 } from '@bytebot/shared';
 
 describe('InputTrackingService', () => {
   let service: InputTrackingService;
   let computerUseService: ComputerUseService;
   let gateway: InputTrackingGateway;
-  let logger: Logger;
+  let _logger: Logger;
 
   const operationId = `input_tracking_service_test_${Date.now()}`;
 
@@ -606,14 +606,14 @@ describe('InputTrackingService', () => {
         ctrlKey: true,
       });
 
-      const result = service['isModifierKey'](modifierEvent);
+      const _result = service['isModifierKey'](modifierEvent);
       expect(result).toBe(true);
 
       const nonModifierEvent = createMockKeyboardEvent({
         keycode: 65, // A
       });
 
-      const result2 = service['isModifierKey'](nonModifierEvent);
+      const _result2 = service['isModifierKey'](nonModifierEvent);
       expect(result2).toBe(false);
 
       console.log(`[${testId}] Modifier key detection test completed`);

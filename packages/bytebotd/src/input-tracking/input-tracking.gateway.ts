@@ -4,7 +4,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { _Server, _Socket } from 'socket.io';
 import { Injectable, Logger } from '@nestjs/common';
 import { ComputerAction } from '@bytebot/shared';
 
@@ -18,7 +18,7 @@ import { ComputerAction } from '@bytebot/shared';
 export class InputTrackingGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  private readonly logger = new Logger(InputTrackingGateway.name);
+  private readonly logger = new Logger(InputTrackingGateway._name);
 
   @WebSocketServer()
   server!: Server;

@@ -27,9 +27,9 @@ import { BrowserUseService } from './browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
 import { BrowserTaskService } from './browser-task.service';
 import {
-  CreateBrowserTaskDto,
+  _CreateBrowserTaskDto,
   BrowserTaskResultDto,
-  BrowserTaskStatus,
+  _BrowserTaskStatus,
   BrowserTaskPriority,
 } from './dto/browser-task.dto';
 import {
@@ -40,7 +40,7 @@ import {
 import {
   CreateAsyncJobDto,
   AsyncJobResultDto,
-  AsyncJobStatus,
+  _AsyncJobStatus,
 } from './dto/async-job.dto';
 // Note: ResponseInterceptor and SecurityLoggingInterceptor imports removed as they don't exist in shared package
 
@@ -70,7 +70,7 @@ import {
 @Controller('browser-use')
 // Note: Interceptors removed - ResponseInterceptor and SecurityLoggingInterceptor not available in shared package
 export class BrowserUseController {
-  private readonly logger = new Logger(BrowserUseController.name);
+  private readonly logger = new Logger(BrowserUseController._name);
 
   constructor(
     private readonly browserUseService: BrowserUseService,
@@ -115,14 +115,14 @@ export class BrowserUseController {
     @Body() createTaskDto: CreateBrowserTaskDto,
   ): Promise<BrowserTaskResultDto> {
     this.logger.log(`Executing browser task: ${createTaskDto.name}`, {
-      taskName: createTaskDto.name,
+      taskName: createTaskDto._name,
       actionsCount: createTaskDto.actions.length,
       sessionConfig: createTaskDto.sessionConfig?.headless,
       priority: createTaskDto.priority,
     });
 
     try {
-      const result =
+      const _result =
         await this.browserUseService.executeBrowserTask(createTaskDto);
 
       this.logger.log(`Task execution completed: ${result.taskId}`, {
@@ -133,9 +133,9 @@ export class BrowserUseController {
       });
 
       return result;
-    } catch (err) {
-      this.logger.error(
-        `Task execution failed: ${createTaskDto.name}`,
+    } catch (_err) {
+      this.logger._err(
+        `Task execution failed: ${createTaskDto._name}`,
         err instanceof Error ? err.stack : String(err),
       );
 
@@ -157,7 +157,7 @@ export class BrowserUseController {
       'Retrieve the current status, progress, and results of a browser automation task.',
   })
   @ApiParam({
-    name: 'taskId',
+    _name: 'taskId',
     description: 'Unique task identifier',
     type: 'string',
   })
@@ -193,13 +193,13 @@ export class BrowserUseController {
       'Retrieve all browser automation tasks with optional status filtering.',
   })
   @ApiQuery({
-    name: 'status',
+    _name: 'status',
     required: false,
     enum: BrowserTaskStatus,
     description: 'Filter by task status',
   })
   @ApiQuery({
-    name: 'priority',
+    _name: 'priority',
     required: false,
     enum: BrowserTaskPriority,
     description: 'Filter by task priority',
@@ -239,7 +239,7 @@ export class BrowserUseController {
     description: 'Cancel a running or pending browser automation task.',
   })
   @ApiParam({
-    name: 'taskId',
+    _name: 'taskId',
     description: 'Unique task identifier',
     type: 'string',
   })
@@ -257,8 +257,8 @@ export class BrowserUseController {
     try {
       await this.taskService.cancelTask(taskId);
       this.logger.log(`Task cancelled successfully: ${taskId}`);
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('not found')) {
+    } catch (_err) {
+      if (_err instanceof Error && _err.message.includes('not found')) {
         throw new NotFoundException(`Task not found: ${taskId}`);
       }
       throw err;
@@ -327,7 +327,7 @@ export class BrowserUseController {
     @Body() createSessionDto: CreateBrowserSessionDto,
   ): Promise<BrowserSessionDto> {
     this.logger.log(`Creating browser session: ${createSessionDto.name}`, {
-      sessionName: createSessionDto.name,
+      sessionName: createSessionDto._name,
       headless: createSessionDto.headless,
       viewport: `${createSessionDto.viewportWidth}x${createSessionDto.viewportHeight}`,
       initialUrls: createSessionDto.initialUrls?.length || 0,
@@ -343,9 +343,9 @@ export class BrowserUseController {
       });
 
       return session;
-    } catch (err) {
-      this.logger.error(
-        `Session creation failed: ${createSessionDto.name}`,
+    } catch (_err) {
+      this.logger._err(
+        `Session creation failed: ${createSessionDto._name}`,
         err instanceof Error ? err.stack : String(err),
       );
 
@@ -367,7 +367,7 @@ export class BrowserUseController {
       'Retrieve detailed information about a browser session including tabs and statistics.',
   })
   @ApiParam({
-    name: 'sessionId',
+    _name: 'sessionId',
     description: 'Unique session identifier',
     type: 'string',
   })
@@ -403,7 +403,7 @@ export class BrowserUseController {
       'Retrieve all browser sessions with their current status and statistics.',
   })
   @ApiQuery({
-    name: 'status',
+    _name: 'status',
     required: false,
     enum: BrowserSessionStatus,
     description: 'Filter by session status',
@@ -438,7 +438,7 @@ export class BrowserUseController {
       'Close a browser session and terminate all associated tabs and processes.',
   })
   @ApiParam({
-    name: 'sessionId',
+    _name: 'sessionId',
     description: 'Unique session identifier',
     type: 'string',
   })
@@ -456,8 +456,8 @@ export class BrowserUseController {
     try {
       await this.sessionService.closeSession(sessionId);
       this.logger.log(`Session closed successfully: ${sessionId}`);
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('not found')) {
+    } catch (_err) {
+      if (_err instanceof Error && _err.message.includes('not found')) {
         throw new NotFoundException(`Session not found: ${sessionId}`);
       }
       throw err;
@@ -474,7 +474,7 @@ export class BrowserUseController {
     description: 'Create a new tab in an existing browser session.',
   })
   @ApiParam({
-    name: 'sessionId',
+    _name: 'sessionId',
     description: 'Unique session identifier',
     type: 'string',
   })
@@ -522,8 +522,8 @@ export class BrowserUseController {
         data: tab,
         timestamp: new Date().toISOString(),
       };
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('not found')) {
+    } catch (_err) {
+      if (_err instanceof Error && _err.message.includes('not found')) {
         throw new NotFoundException(`Session not found: ${sessionId}`);
       }
       throw err;
@@ -540,12 +540,12 @@ export class BrowserUseController {
     description: 'Close a specific tab in a browser session.',
   })
   @ApiParam({
-    name: 'sessionId',
+    _name: 'sessionId',
     description: 'Unique session identifier',
     type: 'string',
   })
   @ApiParam({
-    name: 'tabId',
+    _name: 'tabId',
     description: 'Unique tab identifier',
     type: 'string',
   })
@@ -562,8 +562,8 @@ export class BrowserUseController {
     try {
       await this.sessionService.closeTab(sessionId, tabId);
       this.logger.log(`Tab closed successfully: ${tabId}`);
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('not found')) {
+    } catch (_err) {
+      if (_err instanceof Error && _err.message.includes('not found')) {
         throw new NotFoundException(
           `Session or tab not found: ${sessionId}/${tabId}`,
         );
@@ -599,7 +599,7 @@ export class BrowserUseController {
     @Body() createJobDto: CreateAsyncJobDto,
   ): Promise<AsyncJobResultDto> {
     this.logger.log(`Creating async job: ${createJobDto.name}`, {
-      jobName: createJobDto.name,
+      jobName: createJobDto._name,
       jobType: createJobDto.jobType,
       priority: createJobDto.priority,
     });
@@ -614,9 +614,9 @@ export class BrowserUseController {
       });
 
       return job;
-    } catch (err) {
-      this.logger.error(
-        `Async job creation failed: ${createJobDto.name}`,
+    } catch (_err) {
+      this.logger._err(
+        `Async job creation failed: ${createJobDto._name}`,
         err instanceof Error ? err.stack : String(err),
       );
 
@@ -638,7 +638,7 @@ export class BrowserUseController {
       'Retrieve the current status, progress, and results of an async job.',
   })
   @ApiParam({
-    name: 'jobId',
+    _name: 'jobId',
     description: 'Unique job identifier',
     type: 'string',
   })
@@ -668,7 +668,7 @@ export class BrowserUseController {
     description: 'Cancel a running or queued async job.',
   })
   @ApiParam({
-    name: 'jobId',
+    _name: 'jobId',
     description: 'Unique job identifier',
     type: 'string',
   })
@@ -682,8 +682,8 @@ export class BrowserUseController {
     try {
       await this.browserUseService.cancelAsyncJob(jobId);
       this.logger.log(`Async job cancelled: ${jobId}`);
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('not found')) {
+    } catch (_err) {
+      if (_err instanceof Error && _err.message.includes('not found')) {
         throw new NotFoundException(`Async job not found: ${jobId}`);
       }
       throw err;
@@ -704,7 +704,7 @@ export class BrowserUseController {
       'Capture a screenshot of the current page in the specified session.',
   })
   @ApiParam({
-    name: 'sessionId',
+    _name: 'sessionId',
     description: 'Unique session identifier',
     type: 'string',
   })
@@ -757,8 +757,8 @@ export class BrowserUseController {
         data: screenshotData,
         timestamp: new Date().toISOString(),
       };
-    } catch (err) {
-      this.logger.error(
+    } catch (_err) {
+      this.logger._err(
         `Screenshot failed for session: ${sessionId}`,
         err instanceof Error ? err.stack : String(err),
       );
@@ -785,7 +785,7 @@ export class BrowserUseController {
       'Extract structured data from the current page using CSS selectors or XPath.',
   })
   @ApiParam({
-    name: 'sessionId',
+    _name: 'sessionId',
     description: 'Unique session identifier',
     type: 'string',
   })
@@ -840,8 +840,8 @@ export class BrowserUseController {
         data: extractedData,
         timestamp: new Date().toISOString(),
       };
-    } catch (err) {
-      this.logger.error(
+    } catch (_err) {
+      this.logger._err(
         `Data extraction failed for session: ${sessionId}`,
         err instanceof Error ? err.stack : String(err),
       );

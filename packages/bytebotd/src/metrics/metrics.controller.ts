@@ -29,7 +29,7 @@ import { MetricsService } from './metrics.service';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth('bearer')
 export class MetricsController {
-  private readonly logger = new Logger(MetricsController.name);
+  private readonly logger = new Logger(MetricsController._name);
 
   constructor(private readonly metricsService: MetricsService) {
     this.logger.log('Metrics Controller initialized');
@@ -87,10 +87,10 @@ export class MetricsController {
       );
 
       return metricsData;
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
+        _error instanceof Error ? __error.message : 'Unknown _error';
+      this.logger._error(
         `[${operationId}] Metrics collection failed: ${errorMessage}`,
       );
 

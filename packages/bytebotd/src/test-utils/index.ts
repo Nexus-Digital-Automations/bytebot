@@ -92,11 +92,11 @@ export const AssertionHelpers = {
    * Assert that an error has expected structure
    */
   expectValidError: (
-    error: any,
+    _error: any,
     expectedMessage?: string,
     expectedCode?: string,
   ) => {
-    expect(error).toBeInstanceOf(Error);
+    expect(_error).toBeInstanceOf(Error);
     if (expectedMessage) {
       expect(error.message).toContain(expectedMessage);
     }

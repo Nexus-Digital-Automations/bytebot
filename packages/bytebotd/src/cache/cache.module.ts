@@ -44,7 +44,7 @@ interface CacheConfig {
   imports: [
     NestCacheModule.registerAsync({
       useFactory: (): CacheConfig => {
-        const logger = new Logger('CacheModule');
+        const _logger = new Logger('CacheModule');
 
         const config: CacheConfig = {
           store: redisStore,
@@ -72,7 +72,7 @@ interface CacheConfig {
   exports: [CacheService, CacheKeyGenerator, NestCacheModule],
 })
 export class CacheModule {
-  private readonly logger = new Logger(CacheModule.name);
+  private readonly logger = new Logger(CacheModule._name);
 
   constructor() {
     this.logger.log('Redis Cache Module initialized');

@@ -45,7 +45,7 @@ import { compressPngBase64Under1MB } from './compressor';
  */
 @Injectable()
 export class ComputerUseTools {
-  private readonly logger = new Logger(ComputerUseTools.name);
+  private readonly logger = new Logger(ComputerUseTools._name);
   private operationCounter = 0;
 
   constructor(private readonly computerUseService: ComputerUseService) {
@@ -124,7 +124,7 @@ export class ComputerUseTools {
       operationId,
       toolName,
       executionTimeMs: executionTime,
-      errorMessage: error.message,
+      errorMessage: _error.message,
       errorStack: error.stack,
       timestamp: new Date().toISOString(),
     });
@@ -143,7 +143,7 @@ export class ComputerUseTools {
    * Error Handling: Validates coordinates and handles system-level failures
    */
   @Tool({
-    name: 'computer_move_mouse',
+    _name: 'computer_move_mouse',
     description: 'Moves the mouse cursor to the specified coordinates.',
     parameters: z.object({
       coordinates: z.object({
@@ -165,7 +165,7 @@ export class ComputerUseTools {
         coordinates,
       });
 
-      const result = `mouse moved to (${coordinates.x}, ${coordinates.y})`;
+      const _result = `mouse moved to (${coordinates.x}, ${coordinates.y})`;
       this.logOperationSuccess(
         operationId,
         'computer_move_mouse',
@@ -174,20 +174,20 @@ export class ComputerUseTools {
       );
 
       return { content: [{ type: 'text', text: 'mouse moved' }] };
-    } catch (err) {
-      const error = err as Error;
+    } catch (_err) {
+      const _err = _err as Error;
       this.logOperationError(
         operationId,
         'computer_move_mouse',
         startTime,
-        error,
+        _err,
       );
 
       return {
         content: [
           {
             type: 'text',
-            text: `Error moving mouse: ${error.message}`,
+            text: `Error moving mouse: ${_err.message}`,
           },
         ],
       };
@@ -209,7 +209,7 @@ export class ComputerUseTools {
    * Validation: Ensures path has valid coordinates and key names
    */
   @Tool({
-    name: 'computer_trace_mouse',
+    _name: 'computer_trace_mouse',
     description:
       'Moves the mouse cursor along a specified path of coordinates.',
     parameters: z.object({
@@ -252,7 +252,7 @@ export class ComputerUseTools {
         holdKeys,
       });
 
-      const result = `mouse traced along ${path.length} points${holdKeys ? ` with keys: ${holdKeys.join(', ')}` : ''}`;
+      const _result = `mouse traced along ${path.length} points${holdKeys ? ` with keys: ${holdKeys.join(', ')}` : ''}`;
       this.logOperationSuccess(
         operationId,
         'computer_trace_mouse',
@@ -263,20 +263,20 @@ export class ComputerUseTools {
       return {
         content: [{ type: 'text', text: 'mouse traced' }],
       };
-    } catch (err) {
-      const error = err as Error;
+    } catch (_err) {
+      const _err = _err as Error;
       this.logOperationError(
         operationId,
         'computer_trace_mouse',
         startTime,
-        error,
+        _err,
       );
 
       return {
         content: [
           {
             type: 'text',
-            text: `Error tracing mouse: ${error.message}`,
+            text: `Error tracing mouse: ${_err.message}`,
           },
         ],
       };
@@ -284,7 +284,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_click_mouse',
+    _name: 'computer_click_mouse',
     description:
       'Performs a mouse click at the specified coordinates or current position.',
     parameters: z.object({
@@ -331,12 +331,12 @@ export class ComputerUseTools {
       return {
         content: [{ type: 'text', text: 'mouse clicked' }],
       };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error clicking mouse: ${(err as Error).message}`,
+            text: `Error clicking mouse: ${(_err as Error).message}`,
           },
         ],
       };
@@ -344,7 +344,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_press_mouse',
+    _name: 'computer_press_mouse',
     description:
       'Presses or releases a specified mouse button at the given coordinates or current position.',
     parameters: z.object({
@@ -384,12 +384,12 @@ export class ComputerUseTools {
       return {
         content: [{ type: 'text', text: 'mouse pressed' }],
       };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error pressing mouse: ${(err as Error).message}`,
+            text: `Error pressing mouse: ${(_err as Error).message}`,
           },
         ],
       };
@@ -397,7 +397,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_drag_mouse',
+    _name: 'computer_drag_mouse',
     description:
       'Drags the mouse from a starting point along a path while holding a specified button.',
     parameters: z.object({
@@ -443,12 +443,12 @@ export class ComputerUseTools {
       return {
         content: [{ type: 'text', text: 'mouse dragged' }],
       };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error dragging mouse: ${(err as Error).message}`,
+            text: `Error dragging mouse: ${(_err as Error).message}`,
           },
         ],
       };
@@ -456,7 +456,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_scroll',
+    _name: 'computer_scroll',
     description: 'Scrolls the mouse wheel up, down, left, or right.',
     parameters: z.object({
       coordinates: z
@@ -508,12 +508,12 @@ export class ComputerUseTools {
         holdKeys,
       });
       return { content: [{ type: 'text', text: 'scrolled' }] };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error scrolling: ${(err as Error).message}`,
+            text: `Error scrolling: ${(_err as Error).message}`,
           },
         ],
       };
@@ -521,7 +521,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_type_keys',
+    _name: 'computer_type_keys',
     description: `Simulates typing a sequence of keys, often used for shortcuts involving modifier keys (e.g., Ctrl+C). Presses and releases each key in order.
     
 ────────────────────────
@@ -568,12 +568,12 @@ V, W, X, Y, Z`,
         delay,
       });
       return { content: [{ type: 'text', text: 'keys typed' }] };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error typing keys: ${(err as Error).message}`,
+            text: `Error typing keys: ${(_err as Error).message}`,
           },
         ],
       };
@@ -581,7 +581,7 @@ V, W, X, Y, Z`,
   }
 
   @Tool({
-    name: 'computer_press_keys',
+    _name: 'computer_press_keys',
     description: `Simulates pressing down or releasing specific keys. Useful for holding modifier keys.     
 ────────────────────────
 VALID KEYS
@@ -627,12 +627,12 @@ V, W, X, Y, Z
         press,
       });
       return { content: [{ type: 'text', text: 'keys pressed' }] };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error pressing keys: ${(err as Error).message}`,
+            text: `Error pressing keys: ${(_err as Error).message}`,
           },
         ],
       };
@@ -640,7 +640,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_type_text',
+    _name: 'computer_type_text',
     description:
       'Types a string of text character by character. Use this tool for strings less than 25 characters, or passwords/sensitive form fields.',
     parameters: z.object({
@@ -659,12 +659,12 @@ V, W, X, Y, Z
         delay,
       });
       return { content: [{ type: 'text', text: 'text typed' }] };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error typing text: ${(err as Error).message}`,
+            text: `Error typing text: ${(_err as Error).message}`,
           },
         ],
       };
@@ -672,7 +672,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_paste_text',
+    _name: 'computer_paste_text',
     description:
       'Copies text to the clipboard and pastes it. Use this tool for typing long text strings or special characters not on the standard keyboard.',
     parameters: z.object({
@@ -683,12 +683,12 @@ V, W, X, Y, Z
     try {
       await this.computerUseService.action({ action: 'paste_text', text });
       return { content: [{ type: 'text', text: 'text pasted' }] };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error pasting text: ${(err as Error).message}`,
+            text: `Error pasting text: ${(_err as Error).message}`,
           },
         ],
       };
@@ -696,7 +696,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_wait',
+    _name: 'computer_wait',
     description: 'Pauses execution for a specified duration.',
     parameters: z.object({
       duration: z
@@ -709,12 +709,12 @@ V, W, X, Y, Z
     try {
       await this.computerUseService.action({ action: 'wait', duration });
       return { content: [{ type: 'text', text: 'waiting done' }] };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error waiting: ${(err as Error).message}`,
+            text: `Error waiting: ${(_err as Error).message}`,
           },
         ],
       };
@@ -722,7 +722,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_application',
+    _name: 'computer_application',
     description:
       'Opens or switches to the specified application and maximizes it.',
     parameters: z.object({
@@ -755,12 +755,12 @@ V, W, X, Y, Z
         application,
       });
       return { content: [{ type: 'text', text: 'application opened' }] };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error opening application: ${(err as Error).message}`,
+            text: `Error opening application: ${(_err as Error).message}`,
           },
         ],
       };
@@ -786,7 +786,7 @@ V, W, X, Y, Z
    * Quality: Optimized compression balances file size and visual fidelity
    */
   @Tool({
-    name: 'computer_screenshot',
+    _name: 'computer_screenshot',
     description: 'Captures a screenshot of the current screen.',
   })
   async screenshot() {
@@ -825,7 +825,7 @@ V, W, X, Y, Z
         compressionPercentage: `${((1 - compressionRatio) * 100).toFixed(1)}%`,
       });
 
-      const result = `screenshot captured and compressed (${((1 - compressionRatio) * 100).toFixed(1)}% reduction)`;
+      const _result = `screenshot captured and compressed (${((1 - compressionRatio) * 100).toFixed(1)}% reduction)`;
       this.logOperationSuccess(
         operationId,
         'computer_screenshot',
@@ -842,20 +842,20 @@ V, W, X, Y, Z
           },
         ],
       };
-    } catch (err) {
-      const error = err as Error;
+    } catch (_err) {
+      const _err = _err as Error;
       this.logOperationError(
         operationId,
         'computer_screenshot',
         startTime,
-        error,
+        _err,
       );
 
       return {
         content: [
           {
             type: 'text',
-            text: `Error taking screenshot: ${error.message}`,
+            text: `Error taking screenshot: ${_err.message}`,
           },
         ],
       };
@@ -863,7 +863,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_cursor_position',
+    _name: 'computer_cursor_position',
     description: 'Gets the current (x, y) coordinates of the mouse cursor.',
   })
   async cursorPosition() {
@@ -879,12 +879,12 @@ V, W, X, Y, Z
           },
         ],
       };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error getting cursor position: ${(err as Error).message}`,
+            text: `Error getting cursor position: ${(_err as Error).message}`,
           },
         ],
       };
@@ -892,7 +892,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_write_file',
+    _name: 'computer_write_file',
     description:
       'Writes a file to the specified path with base64 encoded data.',
     parameters: z.object({
@@ -904,7 +904,7 @@ V, W, X, Y, Z
   })
   async writeFile({ path, data }: { path: string; data: string }) {
     try {
-      const result = await this.computerUseService.action({
+      const _result = await this.computerUseService.action({
         action: 'write_file',
         path,
         data,
@@ -926,12 +926,12 @@ V, W, X, Y, Z
           },
         ],
       };
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error writing file: ${(err as Error).message}`,
+            text: `Error writing file: ${(_err as Error).message}`,
           },
         ],
       };
@@ -939,7 +939,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_read_file',
+    _name: 'computer_read_file',
     description:
       'Reads a file from the specified path and returns it as a document content block with base64 encoded data.',
     parameters: z.object({
@@ -948,7 +948,7 @@ V, W, X, Y, Z
   })
   async readFile({ path }: { path: string }) {
     try {
-      const result = await this.computerUseService.action({
+      const _result = await this.computerUseService.action({
         action: 'read_file',
         path,
       });
@@ -1004,12 +1004,12 @@ V, W, X, Y, Z
           ],
         };
       }
-    } catch (err) {
+    } catch (_err) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error reading file: ${(err as Error).message}`,
+            text: `Error reading file: ${(_err as Error).message}`,
           },
         ],
       };

@@ -13,7 +13,7 @@
  * @coverage-target 95%+
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
@@ -167,7 +167,7 @@ class MockRolesGuard {
 
 describe('RolesGuard', () => {
   let guard: MockRolesGuard;
-  let reflector: Reflector;
+  let _reflector: Reflector;
 
   const operationId = `roles_guard_test_${Date.now()}`;
 
@@ -234,7 +234,7 @@ describe('RolesGuard', () => {
 
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(undefined);
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true);
 
@@ -255,7 +255,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([UserRole.ADMIN]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true);
 
@@ -293,7 +293,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([UserRole.OPERATOR]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true);
 
@@ -318,7 +318,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([UserRole.OPERATOR]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true);
 
@@ -341,7 +341,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([UserRole.VIEWER]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true);
 
@@ -364,7 +364,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([UserRole.VIEWER]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true);
 
@@ -427,7 +427,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined) // roles
         .mockReturnValueOnce([Permission._TASK_READ]); // permissions
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true);
 
@@ -472,7 +472,7 @@ describe('RolesGuard', () => {
           Permission._COMPUTER_CONTROL,
         ]); // permissions
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true);
 
@@ -543,7 +543,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([UserRole.ADMIN]) // roles
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true);
 
@@ -703,7 +703,7 @@ describe('RolesGuard', () => {
 
       const users = Array(20)
         .fill(null)
-        .map((_, i) =>
+        .map((_, _i) =>
           createMockUser(UserRole.OPERATOR, [], {
             id: `concurrent_user_${i}`,
           }),
@@ -795,9 +795,9 @@ describe('RolesGuard', () => {
               .mockReturnValueOnce(undefined);
 
             try {
-              const result = await guard.canActivate(context);
+              const _result = await guard.canActivate(context);
               return { success: result, expected: testCase.shouldPass };
-            } catch (error) {
+            } catch (_error) {
               return { success: false, expected: testCase.shouldPass };
             }
           }),
@@ -828,7 +828,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([UserRole.ADMIN, UserRole.OPERATOR]) // Multiple roles (OR)
         .mockReturnValueOnce(undefined); // permissions
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true); // Should pass because user is OPERATOR
 
@@ -849,7 +849,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([]) // Empty roles array
         .mockReturnValueOnce([]); // Empty permissions array
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true); // Should allow access when arrays are empty
 
@@ -875,7 +875,7 @@ describe('RolesGuard', () => {
       console.log(`[${testId}] Malformed user object test completed`);
     });
 
-    it('should provide detailed error messages for debugging', async () => {
+    it('should provide detailed _error messages for debugging', async () => {
       const testId = `${operationId}_detailed_errors`;
       console.log(`[${testId}] Testing detailed error messages`);
 
@@ -893,8 +893,8 @@ describe('RolesGuard', () => {
       try {
         await guard.canActivate(context);
         fail('Expected ForbiddenException');
-      } catch (error) {
-        expect(error.message).toContain('admin, operator');
+      } catch (_error) {
+        expect(__error.message).toContain('admin, operator');
       }
 
       console.log(`[${testId}] Detailed error messages test completed`);
@@ -919,7 +919,7 @@ describe('RolesGuard', () => {
 
       // This should still pass because we're testing the guard logic itself
       // In real implementation, token validation would prevent this
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true); // Guard trusts the authenticated user object
 
@@ -942,7 +942,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([UserRole.ADMIN])
         .mockReturnValueOnce(undefined);
 
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true);
 
@@ -965,7 +965,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
 
       // Guard should allow this based on permissions, regardless of role
-      const result = await guard.canActivate(context);
+      const _result = await guard.canActivate(context);
 
       expect(result).toBe(true);
 

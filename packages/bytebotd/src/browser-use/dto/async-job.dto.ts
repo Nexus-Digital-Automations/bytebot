@@ -49,7 +49,7 @@ export enum AsyncJobType {
  */
 export class CreateAsyncJobDto {
   @ApiProperty({
-    description: 'Human-readable job name',
+    description: 'Human-readable job _name',
     example: 'Data extraction from e-commerce site',
   })
   @IsString()
@@ -147,7 +147,7 @@ export class AsyncJobResultDto {
   jobId: string;
 
   @ApiProperty({
-    description: 'Human-readable job name',
+    description: 'Human-readable job _name',
     example: 'Data extraction from e-commerce site',
   })
   name: string;
@@ -739,7 +739,7 @@ export class AsyncBrowserJobSubmissionDto {
   maxExecutionTimeMs?: number = 600000;
 
   @ApiProperty({
-    description: 'Job payload containing task configuration',
+    description: 'Job _payload containing task configuration',
     type: 'object',
     additionalProperties: true,
   })

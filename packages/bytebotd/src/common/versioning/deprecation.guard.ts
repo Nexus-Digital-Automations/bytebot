@@ -116,7 +116,7 @@ interface DeprecationStats {
 
 @Injectable()
 export class DeprecationGuard implements CanActivate {
-  private readonly logger = new Logger(DeprecationGuard.name);
+  private readonly logger = new Logger(DeprecationGuard._name);
   private readonly policy: DeprecationPolicy;
   private readonly stats: DeprecationStats;
 
@@ -202,7 +202,7 @@ export class DeprecationGuard implements CanActivate {
 
     try {
       const request = context.switchToHttp().getRequest<Request>();
-      const response = context.switchToHttp().getResponse<Response>();
+      const _response = context.switchToHttp().getResponse<Response>();
 
       // Get version configuration from endpoint
       const versionConfig = getVersionConfig(context.getHandler());
@@ -327,12 +327,12 @@ export class DeprecationGuard implements CanActivate {
       }
 
       return allowed;
-    } catch (error) {
+    } catch (_error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] BytebotD deprecation guard error`, {
+      this.logger._error(`[${operationId}] BytebotD deprecation guard error`, {
         operationId,
-        error: error.message,
+        error: __error.message,
         stack: error.stack,
         processingTimeMs: processingTime,
       });
@@ -732,12 +732,12 @@ export class DeprecationGuard implements CanActivate {
           computerUseRequests: this.stats.computerUseDeprecatedRequests,
         },
       );
-    } catch (error) {
-      this.logger.error(
+    } catch (_error) {
+      this.logger._error(
         `[${operationId}] Failed to track BytebotD deprecated usage`,
         {
           operationId,
-          error: error.message,
+          error: __error.message,
         },
       );
     }
@@ -778,10 +778,10 @@ export class DeprecationGuard implements CanActivate {
         userAgent: request.get('User-Agent'),
         ip: request.ip,
       });
-    } catch (error) {
-      this.logger.error('Failed to log BytebotD deprecation access', {
+    } catch (_error) {
+      this.logger._error('Failed to log BytebotD deprecation access', {
         operationId,
-        error: error.message,
+        _error: __error.message,
       });
     }
   }
@@ -811,10 +811,10 @@ export class DeprecationGuard implements CanActivate {
         userAgent: request.get('User-Agent'),
         ip: request.ip,
       });
-    } catch (error) {
-      this.logger.error('Failed to log BytebotD deprecation bypass', {
+    } catch (_error) {
+      this.logger._error('Failed to log BytebotD deprecation bypass', {
         operationId,
-        error: error.message,
+        _error: __error.message,
       });
     }
   }

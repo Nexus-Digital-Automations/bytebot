@@ -96,7 +96,7 @@ enum ComputerUsePermission {
  */
 @Injectable()
 export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
-  private readonly logger = new Logger(EnhancedJwtAuthGuard.name);
+  private readonly logger = new Logger(EnhancedJwtAuthGuard._name);
 
   // Token refresh cache to prevent multiple refresh attempts
   private refreshAttempts = new Map<string, number>();
@@ -131,12 +131,12 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     const startTime = Date.now();
 
     // Check if route is public
-    const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
+    const _isPublic = this.reflector.getAllAndOverride<boolean>('_isPublic', [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (isPublic) {
+    if (_isPublic) {
       this.logger.debug(
         `[${operationId}] Public route, skipping authentication`,
       );
@@ -146,7 +146,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     const request = context
       .switchToHttp()
       .getRequest<EnhancedAuthenticatedRequest>();
-    const response = context.switchToHttp().getResponse<Response>();
+    const _response = context.switchToHttp().getResponse<Response>();
     const clientIp = this.getClientIpAddress(request);
 
     // Initialize security context
@@ -229,12 +229,12 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       }
 
       return authResult as boolean;
-    } catch (error) {
+    } catch (_error) {
       const authTime = Date.now() - startTime;
 
       this.logger.warn(`[${operationId}] Enhanced JWT authentication failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? error.message : String(_error),
         authTimeMs: authTime,
         clientIp,
         securityEvent: 'enhanced_jwt_auth_failed',
@@ -242,7 +242,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       });
 
       if (
-        error instanceof UnauthorizedException ||
+        __error instanceof UnauthorizedException ||
         error instanceof ForbiddenException
       ) {
         throw error;
@@ -330,10 +330,10 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       this.refreshAttempts.delete(clientId);
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn(`[${operationId}] Token refresh failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? error.message : String(_error),
         securityEvent: 'token_refresh_failed',
       });
 
@@ -447,7 +447,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync<EnhancedJwtPayload>(
+      const _payload = await this.jwtService.verifyAsync<EnhancedJwtPayload>(
         token,
         {
           secret: process.env.SERVICE_JWT_SECRET || process.env.JWT_SECRET,
@@ -458,7 +458,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       const isValid = !!(
         payload.tokenType === 'service' &&
         payload.serviceId &&
-        payload.serviceType
+        _payload.serviceType
       );
 
       // Cache result for 5 minutes
@@ -471,15 +471,15 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
         this.logger.debug(`[${operationId}] Service authentication validated`, {
           operationId,
           serviceId: payload.serviceId,
-          serviceType: payload.serviceType,
+          serviceType: _payload.serviceType,
         });
       }
 
       return isValid;
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn(`[${operationId}] Service token validation failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? error.message : String(_error),
       });
 
       // Cache negative result for 1 minute
@@ -819,7 +819,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Enhanced authentication failed - no user`,
         {
           operationId,
-          info: info?.message || info?.name || String(info),
+          info: info?.message || info?._name || String(info),
           url: request.url,
           method: request.method,
           errorMessage,

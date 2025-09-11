@@ -67,7 +67,7 @@ export interface DetailedStatusResponse {
  */
 @Injectable()
 export class HealthService extends HealthIndicator {
-  private readonly logger = new Logger(HealthService.name);
+  private readonly logger = new Logger(HealthService._name);
   private readonly startTime: number;
 
   constructor() {
@@ -89,7 +89,7 @@ export class HealthService extends HealthIndicator {
       const memoryUsage = process.memoryUsage();
       const uptime = process.uptime();
 
-      const response: BasicHealthResponse = {
+      const _response: BasicHealthResponse = {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: Math.round(uptime),
@@ -106,10 +106,10 @@ export class HealthService extends HealthIndicator {
         `[${operationId}] Basic health status retrieved successfully`,
       );
       return response;
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
+        _error instanceof Error ? __error.message : 'Unknown _error';
+      this.logger._error(
         `[${operationId}] Failed to get basic health: ${errorMessage}`,
       );
       throw error;
@@ -150,7 +150,7 @@ export class HealthService extends HealthIndicator {
           : 'unhealthy';
       }
 
-      const response: DetailedStatusResponse = {
+      const _response: DetailedStatusResponse = {
         status,
         timestamp: new Date().toISOString(),
         uptime: Math.round(uptime),
@@ -178,10 +178,10 @@ export class HealthService extends HealthIndicator {
       );
 
       return response;
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
+        _error instanceof Error ? __error.message : 'Unknown _error';
+      this.logger._error(
         `[${operationId}] Failed to get detailed status: ${errorMessage}`,
       );
       throw error;
@@ -281,10 +281,10 @@ export class HealthService extends HealthIndicator {
           'Process health check failed - invalid memory or uptime',
         );
       }
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
+        _error instanceof Error ? __error.message : 'Unknown _error';
+      this.logger._error(
         `[${operationId}] Process health check failed: ${errorMessage}`,
       );
 
@@ -322,10 +322,10 @@ export class HealthService extends HealthIndicator {
       } else {
         throw new Error('Database connection failed');
       }
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
+        _error instanceof Error ? __error.message : 'Unknown _error';
+      this.logger._error(
         `[${operationId}] Database health check failed: ${errorMessage}`,
       );
 
@@ -362,9 +362,9 @@ export class HealthService extends HealthIndicator {
             status: string;
             responseTime?: string;
           }>,
-          index: number,
+          _index: number,
         ) => {
-          const serviceName = `service_${index}`;
+          const serviceName = `service_${_index}`;
 
           if (result.status === 'fulfilled') {
             results[serviceName] = result.value;
@@ -387,10 +387,10 @@ export class HealthService extends HealthIndicator {
       });
 
       return this.getStatus('external_services', allHealthy, results);
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
+        _error instanceof Error ? __error.message : 'Unknown _error';
+      this.logger._error(
         `[${operationId}] External services check failed: ${errorMessage}`,
       );
 
@@ -436,10 +436,10 @@ export class HealthService extends HealthIndicator {
           message: 'Service is still starting up',
         });
       }
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
+        _error instanceof Error ? __error.message : 'Unknown _error';
+      this.logger._error(
         `[${operationId}] Startup check failed: ${errorMessage}`,
       );
 
@@ -459,7 +459,7 @@ export class HealthService extends HealthIndicator {
     try {
       // Check if core modules are initialized
       // This is a simplified check - in a real app you'd check actual module states
-      const modules = {
+      const _modules = {
         'computer-use': true, // Assume initialized
         'input-tracking': true, // Assume initialized
         health: true, // We know this is initialized since we're running
@@ -476,10 +476,10 @@ export class HealthService extends HealthIndicator {
       );
 
       return this.getStatus('modules', allInitialized, { modules });
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
+        _error instanceof Error ? __error.message : 'Unknown _error';
+      this.logger._error(
         `[${operationId}] Module initialization check failed: ${errorMessage}`,
       );
 

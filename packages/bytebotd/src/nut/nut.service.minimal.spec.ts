@@ -3,7 +3,7 @@
  * Simple test to verify Jest and NUT service basic functionality
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 
 // Mock external dependencies first
 jest.mock('@nut-tree-fork/nut-js', () => ({

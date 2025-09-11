@@ -13,11 +13,11 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import {
   ComputerUseService,
   ErrorHandler,
-  ScreenshotResult,
+  _ScreenshotResult,
   FileWriteResult,
   FileReadResult,
 } from './computer-use.service';
@@ -28,16 +28,16 @@ import {
   ClickMouseAction,
   PressMouseAction,
   DragMouseAction,
-  ScrollAction,
-  TypeKeysAction,
+  _ScrollAction,
+  _TypeKeysAction,
   PressKeysAction,
   TypeTextAction,
-  PasteTextAction,
-  ScreenshotAction,
-  CursorPositionAction,
-  ApplicationAction,
+  _PasteTextAction,
+  _ScreenshotAction,
+  _CursorPositionAction,
+  _ApplicationAction,
   WriteFileAction,
-  ReadFileAction,
+  _ReadFileAction,
 } from '@bytebot/shared';
 import * as fs from 'fs/promises';
 
@@ -123,7 +123,7 @@ describe('ComputerUseService', () => {
         });
       });
 
-      it('should handle mouse movement error', async () => {
+      it('should handle mouse movement _error', async () => {
         const action: MoveMouseAction = {
           action: 'move_mouse',
           coordinates: { x: 100, y: 200 },
@@ -194,7 +194,7 @@ describe('ComputerUseService', () => {
         );
       });
 
-      it('should handle empty path error', async () => {
+      it('should handle empty path _error', async () => {
         const action: TraceMouseAction = {
           action: 'trace_mouse',
           path: [],
@@ -205,7 +205,7 @@ describe('ComputerUseService', () => {
         );
       });
 
-      it('should release keys on error', async () => {
+      it('should release keys on _error', async () => {
         const action: TraceMouseAction = {
           action: 'trace_mouse',
           path: [{ x: 0, y: 0 }],
@@ -272,7 +272,7 @@ describe('ComputerUseService', () => {
         expect(mockNutService.mouseClickEvent).toHaveBeenCalledTimes(10);
       });
 
-      it('should handle click with hold keys and error cleanup', async () => {
+      it('should handle click with hold keys and _error cleanup', async () => {
         const action: ClickMouseAction = {
           action: 'click_mouse',
           button: 'left',
@@ -371,7 +371,7 @@ describe('ComputerUseService', () => {
         );
       });
 
-      it('should cleanup on drag error', async () => {
+      it('should cleanup on drag _error', async () => {
         const action: DragMouseAction = {
           action: 'drag_mouse',
           path: [{ x: 0, y: 0 }],
@@ -610,7 +610,7 @@ describe('ComputerUseService', () => {
         const fakeImageBuffer = Buffer.from('fake-image-data');
         mockNutService.screendump.mockResolvedValue(fakeImageBuffer);
 
-        const result = await service.action(action);
+        const _result = await service.action(action);
 
         expect(mockNutService.screendump).toHaveBeenCalled();
         expect(result).toMatchObject({
@@ -632,7 +632,7 @@ describe('ComputerUseService', () => {
 
         mockNutService.getCursorPosition.mockResolvedValue({ x: 150, y: 250 });
 
-        const result = await service.action(action);
+        const _result = await service.action(action);
 
         expect(result).toMatchObject({
           x: 150,
@@ -642,7 +642,7 @@ describe('ComputerUseService', () => {
         });
       });
 
-      it('should handle cursor position error', async () => {
+      it('should handle cursor position _error', async () => {
         const action: CursorPositionAction = {
           action: 'cursor_position',
         };
@@ -751,7 +751,7 @@ describe('ComputerUseService', () => {
         );
       });
 
-      it('should handle wmctrl timeout error gracefully', async () => {
+      it('should handle wmctrl timeout _error gracefully', async () => {
         const action: ApplicationAction = {
           action: 'application',
           application: 'firefox',
@@ -793,7 +793,7 @@ describe('ComputerUseService', () => {
         (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
         mockExecAsync.mockResolvedValue({ stdout: '' });
 
-        const result = await service.action(action);
+        const _result = await service.action(action);
 
         expect(result).toMatchObject({
           success: true,
@@ -815,7 +815,7 @@ describe('ComputerUseService', () => {
 
         (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
 
-        const result = (await service.action(action)) as FileWriteResult;
+        const _result = (await service.action(action)) as FileWriteResult;
 
         expect(result.path).toBe('/home/user/Desktop/relative/test.txt');
       });
@@ -828,7 +828,7 @@ describe('ComputerUseService', () => {
           data: testData,
         };
 
-        const result = (await service.action(action)) as FileWriteResult;
+        const _result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -843,13 +843,13 @@ describe('ComputerUseService', () => {
           data: 'invalid-base64-data',
         };
 
-        const result = (await service.action(action)) as FileWriteResult;
+        const _result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain('Invalid base64 data');
       });
 
-      it('should cleanup temporary file on error', async () => {
+      it('should cleanup temporary file on _error', async () => {
         const testData = Buffer.from('test').toString('base64');
         const action: WriteFileAction = {
           action: 'write_file',
@@ -860,7 +860,7 @@ describe('ComputerUseService', () => {
         (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
         mockExecAsync.mockRejectedValue(new Error('Copy failed'));
 
-        const result = (await service.action(action)) as FileWriteResult;
+        const _result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(fs.unlink).toHaveBeenCalled();
@@ -881,7 +881,7 @@ describe('ComputerUseService', () => {
           .mockResolvedValueOnce({ stdout: '' }) // chmod
           .mockResolvedValueOnce({ stdout: '17 1609459200' }); // stat
 
-        const result = await service.action(action);
+        const _result = await service.action(action);
 
         expect(result).toMatchObject({
           success: true,
@@ -907,7 +907,7 @@ describe('ComputerUseService', () => {
           .mockResolvedValueOnce({ stdout: '' })
           .mockResolvedValueOnce({ stdout: '4 1609459200' });
 
-        const result = (await service.action(action)) as FileReadResult;
+        const _result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(true);
       });
@@ -924,7 +924,7 @@ describe('ComputerUseService', () => {
           .mockResolvedValueOnce({ stdout: '' })
           .mockResolvedValueOnce({ stdout: '8 1609459200' });
 
-        const result = (await service.action(action)) as FileReadResult;
+        const _result = (await service.action(action)) as FileReadResult;
 
         expect(result.mediaType).toBe('image/png');
       });
@@ -935,7 +935,7 @@ describe('ComputerUseService', () => {
           path: '/etc/shadow',
         };
 
-        const result = (await service.action(action)) as FileReadResult;
+        const _result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -951,13 +951,13 @@ describe('ComputerUseService', () => {
 
         mockExecAsync.mockRejectedValue(new Error('File not found'));
 
-        const result = (await service.action(action)) as FileReadResult;
+        const _result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain('File read failed');
       });
 
-      it('should cleanup temporary file on error', async () => {
+      it('should cleanup temporary file on _error', async () => {
         const action: ReadFileAction = {
           action: 'read_file',
           path: '/home/user/test.txt',
@@ -974,51 +974,51 @@ describe('ComputerUseService', () => {
 
   describe('Error Handling', () => {
     describe('ErrorHandler utility', () => {
-      it('should extract error messages from Error objects', () => {
-        const error = new Error('Test error message');
-        const message = ErrorHandler.extractErrorMessage(error);
+      it('should extract _error messages from Error objects', () => {
+        const _error = new Error('Test error message');
+        const message = ErrorHandler.extractErrorMessage(_error);
         expect(message).toBe('Test error message');
       });
 
-      it('should extract error messages from string errors', () => {
+      it('should extract _error messages from string errors', () => {
         const message = ErrorHandler.extractErrorMessage('String error');
         expect(message).toBe('String error');
       });
 
-      it('should extract error messages from objects with message property', () => {
-        const error = { message: 'Object error message' };
-        const message = ErrorHandler.extractErrorMessage(error);
+      it('should extract _error messages from objects with message property', () => {
+        const _error = { message: 'Object error message' };
+        const message = ErrorHandler.extractErrorMessage(_error);
         expect(message).toBe('Object error message');
       });
 
-      it('should handle unknown error types', () => {
-        const error = { unknownProperty: 'value' };
-        const message = ErrorHandler.extractErrorMessage(error);
-        expect(message).toBe(JSON.stringify(error));
+      it('should handle unknown _error types', () => {
+        const _error = { unknownProperty: 'value' };
+        const message = ErrorHandler.extractErrorMessage(_error);
+        expect(message).toBe(JSON.stringify(_error));
       });
 
       it('should extract stack traces from Error objects', () => {
-        const error = new Error('Test error');
-        const stack = ErrorHandler.extractErrorStack(error);
+        const _error = new Error('Test error');
+        const stack = ErrorHandler.extractErrorStack(_error);
         expect(stack).toBeDefined();
         expect(stack).toContain('Error: Test error');
       });
 
       it('should extract stack traces from objects with stack property', () => {
-        const error = { stack: 'Custom stack trace' };
-        const stack = ErrorHandler.extractErrorStack(error);
+        const _error = { stack: 'Custom stack trace' };
+        const stack = ErrorHandler.extractErrorStack(_error);
         expect(stack).toBe('Custom stack trace');
       });
 
       it('should return undefined for objects without stack', () => {
-        const error = { message: 'No stack' };
-        const stack = ErrorHandler.extractErrorStack(error);
+        const _error = { message: 'No stack' };
+        const stack = ErrorHandler.extractErrorStack(_error);
         expect(stack).toBeUndefined();
       });
 
-      it('should create comprehensive error objects', () => {
+      it('should create comprehensive _error objects', () => {
         const originalError = new Error('Original error');
-        const error = ErrorHandler.createError(
+        const _error = ErrorHandler.createError(
           'TEST_ERROR',
           'Test message',
           'operation_123',
@@ -1026,7 +1026,7 @@ describe('ComputerUseService', () => {
           originalError,
         );
 
-        expect(error).toMatchObject({
+        expect(_error).toMatchObject({
           code: 'TEST_ERROR',
           message: 'Test message',
           operationId: 'operation_123',
@@ -1037,14 +1037,14 @@ describe('ComputerUseService', () => {
         });
       });
 
-      it('should create error objects without original error', () => {
-        const error = ErrorHandler.createError(
+      it('should create _error objects without original error', () => {
+        const _error = ErrorHandler.createError(
           'SIMPLE_ERROR',
           'Simple message',
           'operation_456',
         );
 
-        expect(error).toMatchObject({
+        expect(_error).toMatchObject({
           code: 'SIMPLE_ERROR',
           message: 'Simple message',
           operationId: 'operation_456',
@@ -1056,7 +1056,7 @@ describe('ComputerUseService', () => {
       });
     });
 
-    describe('Action error handling', () => {
+    describe('Action _error handling', () => {
       it('should handle unknown action types', async () => {
         const invalidAction = {
           action: 'invalid_action',
@@ -1067,7 +1067,7 @@ describe('ComputerUseService', () => {
         );
       });
 
-      it('should provide structured error information', async () => {
+      it('should provide structured _error information', async () => {
         const action: MoveMouseAction = {
           action: 'move_mouse',
           coordinates: { x: 100, y: 200 },
@@ -1078,10 +1078,10 @@ describe('ComputerUseService', () => {
 
         try {
           await service.action(action);
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-          expect(error.message).toContain('Failed to execute move_mouse');
-          expect(error.message).toContain('NUT service error');
+        } catch (_error) {
+          expect(_error).toBeInstanceOf(Error);
+          expect(__error.message).toContain('Failed to execute move_mouse');
+          expect(__error.message).toContain('NUT service _error');
         }
       });
     });
@@ -1118,14 +1118,14 @@ describe('ComputerUseService', () => {
       );
     });
 
-    it('should handle file operations with comprehensive error scenarios', async () => {
+    it('should handle file operations with comprehensive _error scenarios', async () => {
       const action: WriteFileAction = {
         action: 'write_file',
         path: '/home/user/test.txt',
         data: 'invalid-base64',
       };
 
-      const result = (await service.action(action)) as FileWriteResult;
+      const _result = (await service.action(action)) as FileWriteResult;
 
       expect(result.success).toBe(false);
       expect(result.message).toContain('Invalid base64 data');

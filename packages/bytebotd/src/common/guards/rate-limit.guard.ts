@@ -106,7 +106,7 @@ export class EnterpriseRateLimitGuard
   extends ThrottlerGuard
   implements CanActivate
 {
-  private readonly logger = new Logger(EnterpriseRateLimitGuard.name);
+  private readonly logger = new Logger(EnterpriseRateLimitGuard._name);
 
   // In-memory tracking for suspicious activity
   private suspiciousActivityTracker = new Map<
@@ -182,10 +182,10 @@ export class EnterpriseRateLimitGuard
 
       // This shouldn't be reached if super.canActivate throws on failure
       return false;
-    } catch (error) {
+    } catch (_error) {
       if (
-        error instanceof ThrottlerException ||
-        error.status === HttpStatus.TOO_MANY_REQUESTS
+        _error instanceof ThrottlerException ||
+        _error.status === HttpStatus.TOO_MANY_REQUESTS
       ) {
         const clientIdentifier = this.getClientIdentifier(request);
         const rateLimitConfig = this.getRateLimitConfig(context);

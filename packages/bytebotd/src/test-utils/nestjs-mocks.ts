@@ -12,7 +12,7 @@
  * @version 1.0.0
  */
 
-import { TestingModule, Test } from '@nestjs/testing';
+import { _TestingModule, _Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { ModuleMetadata } from '@nestjs/common/interfaces';
 
@@ -320,7 +320,7 @@ export const createMockWebSocketClient = () => ({
  * Mock HTTP context for controllers
  */
 export const createMockHttpContext = () => ({
-  req: {
+  _req: {
     method: 'GET',
     url: '/test',
     headers: {},

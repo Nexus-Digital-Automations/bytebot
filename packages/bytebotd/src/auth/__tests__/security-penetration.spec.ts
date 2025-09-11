@@ -16,20 +16,20 @@
  * @penetration-testing High-Risk
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import {
   ExecutionContext,
-  UnauthorizedException,
-  ForbiddenException,
+  _UnauthorizedException,
+  _ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard, ByteBotdUser } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
-import { UserRole, Permission } from '@bytebot/shared';
-import crypto from 'crypto';
-import jwt from 'jsonwebtoken';
+import { UserRole, _Permission } from '@bytebot/shared';
+import _crypto from 'crypto';
+import _jwt from 'jsonwebtoken';
 
 /**
  * Security Penetration Testing Suite
@@ -39,8 +39,8 @@ describe('Security Penetration Testing Suite', () => {
   let jwtAuthGuard: JwtAuthGuard;
   let rolesGuard: RolesGuard;
   let jwtService: JwtService;
-  let configService: ConfigService;
-  let reflector: Reflector;
+  let _configService: ConfigService;
+  let _reflector: Reflector;
   let module: TestingModule;
 
   const operationId = `penetration_test_${Date.now()}`;
@@ -58,7 +58,7 @@ describe('Security Penetration Testing Suite', () => {
   // Advanced JWT manipulation toolkit
   const JWTManipulator = {
     // Create JWT with specific vulnerabilities
-    createVulnerableJWT: (payload: any, options: any = {}) => {
+    createVulnerableJWT: (_payload: any, options: any = {}) => {
       const header = {
         alg: options.algorithm || 'HS256',
         typ: 'JWT',
@@ -68,7 +68,7 @@ describe('Security Penetration Testing Suite', () => {
       const encodedHeader = Buffer.from(JSON.stringify(header)).toString(
         'base64url',
       );
-      const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
+      const encodedPayload = Buffer.from(JSON.stringify(_payload)).toString(
         'base64url',
       );
 
@@ -81,18 +81,18 @@ describe('Security Penetration Testing Suite', () => {
     },
 
     // Algorithm confusion attack vectors
-    createAlgorithmConfusionTokens: (payload: any) => {
+    createAlgorithmConfusionTokens: (_payload: any) => {
       return {
-        noneAlgorithm: JWTManipulator.createVulnerableJWT(payload, {
+        noneAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
           algorithm: 'none',
         }),
-        rsaToHmac: JWTManipulator.createVulnerableJWT(payload, {
+        rsaToHmac: JWTManipulator.createVulnerableJWT(_payload, {
           algorithm: 'RS256',
         }),
-        weakAlgorithm: JWTManipulator.createVulnerableJWT(payload, {
+        weakAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
           algorithm: 'HS1',
         }),
-        invalidAlgorithm: JWTManipulator.createVulnerableJWT(payload, {
+        invalidAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
           algorithm: 'INVALID',
         }),
       };
@@ -132,7 +132,7 @@ describe('Security Penetration Testing Suite', () => {
       const startTime = process.hrtime.bigint();
       try {
         await verifyFunction(token);
-      } catch (error) {
+      } catch (_error) {
         // Ignore errors for timing measurement
       }
       const endTime = process.hrtime.bigint();
@@ -161,11 +161,11 @@ describe('Security Penetration Testing Suite', () => {
             token: attackToken,
             time: Date.now() - attackStart,
           });
-        } catch (error) {
+        } catch (_error) {
           results.push({
             success: false,
             token: attackToken,
-            error: error.message,
+            _error: __error.message,
             time: Date.now() - attackStart,
           });
         }
@@ -201,8 +201,8 @@ describe('Security Penetration Testing Suite', () => {
         try {
           await targetFunction(token);
           results.push({ token, success: true });
-        } catch (error) {
-          results.push({ token, success: false, error: error.message });
+        } catch (_error) {
+          results.push({ token, success: false, _error: __error.message });
         }
       }
 
@@ -219,22 +219,22 @@ describe('Security Penetration Testing Suite', () => {
 
       const promises = Array(concurrentRequests)
         .fill(null)
-        .map(async (_, index) => {
+        .map(async (_, _index) => {
           // Simulate role modification during concurrent requests
-          if (index === 10) {
+          if (_index === 10) {
             setTimeout(() => {
               user.role = UserRole._ADMIN;
             }, 5);
           }
 
           try {
-            const result = await targetFunction(user);
+            const _result = await targetFunction(user);
             return { success: true, index, userRole: user.role };
-          } catch (error) {
+          } catch (_error) {
             return {
               success: false,
               index,
-              error: error.message,
+              _error: __error.message,
               userRole: user.role,
             };
           }
@@ -284,8 +284,8 @@ describe('Security Penetration Testing Suite', () => {
         getRequest: jest.fn().mockReturnValue(mockRequest),
         getResponse: jest.fn().mockReturnValue({}),
       }),
-      getHandler: jest.fn().mockReturnValue({ name: 'pentestHandler' }),
-      getClass: jest.fn().mockReturnValue({ name: 'PentestController' }),
+      getHandler: jest.fn().mockReturnValue({ _name: 'pentestHandler' }),
+      getClass: jest.fn().mockReturnValue({ _name: 'PentestController' }),
     } as any;
   };
 
@@ -384,7 +384,7 @@ describe('Security Penetration Testing Suite', () => {
             success: true,
             vulnerability: 'CRITICAL',
           });
-        } catch (error) {
+        } catch (_error) {
           attackResults.push({ attackType, success: false, blocked: true });
         }
       }
@@ -440,7 +440,7 @@ describe('Security Penetration Testing Suite', () => {
             success: true,
             vulnerability: 'HIGH',
           });
-        } catch (error) {
+        } catch (_error) {
           attackResults.push({
             header: Object.keys(headerInjection)[0],
             success: false,
@@ -458,10 +458,10 @@ describe('Security Penetration Testing Suite', () => {
       );
     });
 
-    it('should resist payload injection attacks', async () => {
+    it('should resist _payload injection attacks', async () => {
       const testId = `${operationId}_payload_injection`;
       pentestLogger.warn(
-        `[${testId}] EXECUTING: JWT payload injection attack simulation`,
+        `[${testId}] EXECUTING: JWT _payload injection attack simulation`,
       );
 
       const basePayload = {
@@ -479,7 +479,7 @@ describe('Security Penetration Testing Suite', () => {
         const context = createPentestExecutionContext(
           undefined,
           { authorization: `Bearer ${token}` },
-          { attackVector: `payload-injection-${attackType}` },
+          { attackVector: `_payload-injection-${attackType}` },
         );
 
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
@@ -493,7 +493,7 @@ describe('Security Penetration Testing Suite', () => {
           .mockResolvedValue(maliciousPayload);
 
         try {
-          const result = await jwtAuthGuard.canActivate(context);
+          const _result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest();
 
           // Check if role escalation succeeded
@@ -508,7 +508,7 @@ describe('Security Penetration Testing Suite', () => {
             success: escalationSuccess,
             vulnerability: escalationSuccess ? 'CRITICAL' : 'NONE',
           });
-        } catch (error) {
+        } catch (_error) {
           attackResults.push({ attackType, success: false, blocked: true });
         }
       }
@@ -622,7 +622,7 @@ describe('Security Penetration Testing Suite', () => {
         const context = createPentestExecutionContext(
           attackVector.user,
           {},
-          { attackVector: attackVector.name },
+          { attackVector: attackVector._name },
         );
 
         jest
@@ -631,15 +631,15 @@ describe('Security Penetration Testing Suite', () => {
           .mockReturnValueOnce(undefined);
 
         try {
-          const result = await rolesGuard.canActivate(context);
+          const _result = await rolesGuard.canActivate(context);
           escalationResults.push({
-            attack: attackVector.name,
+            attack: attackVector._name,
             success: result,
             vulnerability: result ? 'CRITICAL' : 'NONE',
           });
-        } catch (error) {
+        } catch (_error) {
           escalationResults.push({
-            attack: attackVector.name,
+            attack: attackVector._name,
             success: false,
             blocked: true,
           });
@@ -696,7 +696,7 @@ describe('Security Penetration Testing Suite', () => {
               ? `Bearer ${testCase.token}`
               : undefined,
           },
-          { attackVector: `timing-${testCase.name}` },
+          { attackVector: `timing-${testCase._name}` },
         );
 
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
@@ -720,7 +720,7 @@ describe('Security Penetration Testing Suite', () => {
         );
 
         timingResults.push({
-          testCase: testCase.name,
+          testCase: testCase._name,
           time: processingTime,
           shouldSucceed: testCase.shouldSucceed,
         });
@@ -799,7 +799,7 @@ describe('Security Penetration Testing Suite', () => {
 
         try {
           await rolesGuard.canActivate(context);
-        } catch (error) {
+        } catch (_error) {
           // Expected for unauthorized cases
         }
 
@@ -904,7 +904,7 @@ describe('Security Penetration Testing Suite', () => {
             success: true,
             vulnerability: 'CRITICAL',
           });
-        } catch (error) {
+        } catch (_error) {
           stuffingResults.push({
             token: stuffingToken.substring(0, 20) + '...',
             success: false,
@@ -1012,7 +1012,7 @@ describe('Security Penetration Testing Suite', () => {
             success: true,
             vulnerability: 'CRITICAL',
           });
-        } catch (error) {
+        } catch (_error) {
           manipulationResults.push({ success: false, blocked: true });
         }
       }
@@ -1074,21 +1074,21 @@ describe('Security Penetration Testing Suite', () => {
 
       for (const technique of evasionTechniques) {
         const evasionToken = JWTManipulator.createVulnerableJWT(
-          technique.payload,
+          technique._payload,
         );
         const context = createPentestExecutionContext(
           undefined,
           { authorization: `Bearer ${evasionToken}` },
-          { attackVector: `apt-${technique.name}`, ip: '198.51.100.100' },
+          { attackVector: `apt-${technique._name}`, ip: '198.51.100.100' },
         );
 
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
-          .mockResolvedValue(technique.payload);
+          .mockResolvedValue(technique._payload);
 
         try {
-          const result = await jwtAuthGuard.canActivate(context);
+          const _result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest();
 
           // Check if evasion led to privilege escalation
@@ -1096,13 +1096,13 @@ describe('Security Penetration Testing Suite', () => {
             request.user && request.user.role === UserRole._ADMIN;
 
           evasionResults.push({
-            technique: technique.name,
+            technique: technique._name,
             success: escalationSuccess,
             vulnerability: escalationSuccess ? 'CRITICAL' : 'LOW',
           });
-        } catch (error) {
+        } catch (_error) {
           evasionResults.push({
-            technique: technique.name,
+            technique: technique._name,
             success: false,
             blocked: true,
           });
@@ -1151,7 +1151,7 @@ describe('Security Penetration Testing Suite', () => {
           try {
             await jwtAuthGuard.canActivate(context);
             attackResults.push({ attempt: attemptCount, success: true });
-          } catch (error) {
+          } catch (_error) {
             attackResults.push({ attempt: attemptCount, success: false });
           }
 
@@ -1223,7 +1223,7 @@ describe('Security Penetration Testing Suite', () => {
               try {
                 await jwtAuthGuard.canActivate(context);
                 return { success: true };
-              } catch (error) {
+              } catch (_error) {
                 return { success: false, blocked: true };
               }
             })(),
@@ -1256,7 +1256,7 @@ describe('Security Penetration Testing Suite', () => {
               try {
                 await rolesGuard.canActivate(context);
                 return { success: true };
-              } catch (error) {
+              } catch (_error) {
                 return { success: false, blocked: true };
               }
             })(),
@@ -1361,7 +1361,7 @@ describe('Security Penetration Testing Suite', () => {
 
               try {
                 await jwtAuthGuard.canActivate(authContext);
-              } catch (error) {
+              } catch (_error) {
                 // Expected failure
               }
             }
@@ -1390,7 +1390,7 @@ describe('Security Penetration Testing Suite', () => {
 
               try {
                 await rolesGuard.canActivate(roleContext);
-              } catch (error) {
+              } catch (_error) {
                 // Expected failure
               }
             }

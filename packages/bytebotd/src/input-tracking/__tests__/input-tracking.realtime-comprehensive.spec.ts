@@ -164,7 +164,7 @@ jest.mock('uiohook-napi', () => ({
   Button: MouseButton,
 }));
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { InputTrackingService } from '../input-tracking.service';
 import { InputTrackingGateway } from '../input-tracking.gateway';
@@ -173,8 +173,8 @@ import {
   ComputerAction,
   ClickMouseAction,
   DragMouseAction,
-  ScrollAction,
-  TypeKeysAction,
+  _ScrollAction,
+  _TypeKeysAction,
   TypeTextAction,
   MoveMouseAction,
   PressMouseAction,
@@ -807,7 +807,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
             setTimeout(() => {
               moveHandler(createMouseEvent({ x: i, y: i }));
               resolve(undefined);
-            }, i);
+            }, _i);
           }),
         );
 
@@ -816,7 +816,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
             setTimeout(() => {
               keydownHandler(createKeyboardEvent({ keycode: 65 + (i % 26) }));
               resolve(undefined);
-            }, i);
+            }, _i);
           }),
         );
       }

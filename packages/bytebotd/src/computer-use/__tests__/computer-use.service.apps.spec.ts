@@ -133,11 +133,11 @@ jest.mock('@nestjs/config', () => ({
   })),
 }));
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { _Test, _TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
-import { ApplicationAction, Application } from '@bytebot/shared';
+import { _ApplicationAction, Application } from '@bytebot/shared';
 import { spawn } from 'child_process';
 import { promisify } from 'util';
 
@@ -402,7 +402,7 @@ describe('ComputerUseService - Application Management', () => {
     /**
      * Test handling of unsupported applications
      */
-    it('should throw error for unsupported application', async () => {
+    it('should throw _error for unsupported application', async () => {
       const action = {
         action: 'application' as const,
         application: 'unsupported-app' as Application,
@@ -418,7 +418,7 @@ describe('ComputerUseService - Application Management', () => {
     /**
      * Test graceful handling of wmctrl timeout errors
      */
-    it('should handle wmctrl timeout error gracefully', async () => {
+    it('should handle wmctrl timeout _error gracefully', async () => {
       const action: ApplicationAction = {
         action: 'application',
         application: 'firefox',

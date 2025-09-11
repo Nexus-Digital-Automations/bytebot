@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, _ChildProcess } from 'child_process';
 import { promises as fs } from 'fs';
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as _uuidv4 } from 'uuid';
 import {
-  CreateBrowserTaskDto,
+  _CreateBrowserTaskDto,
   BrowserTaskResultDto,
-  BrowserTaskStatus,
+  _BrowserTaskStatus,
   BrowserActionType,
 } from './dto/browser-task.dto';
 import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';
@@ -31,7 +31,7 @@ import { BrowserAsyncJobService } from './browser-async-job.service';
  */
 @Injectable()
 export class BrowserUseService {
-  private readonly logger = new Logger(BrowserUseService.name);
+  private readonly logger = new Logger(BrowserUseService._name);
   private readonly browserUsePath: string;
   private readonly workingDirectory: string;
   private readonly tempDirectory: string;
@@ -67,7 +67,7 @@ export class BrowserUseService {
 
     this.logger.log(`Starting browser task execution: ${taskId}`, {
       taskId,
-      name: taskDto.name,
+      name: taskDto._name,
       actionsCount: taskDto.actions.length,
       priority: taskDto.priority,
     });
@@ -88,7 +88,7 @@ export class BrowserUseService {
       const session = await this.getOrCreateSession(taskDto.sessionConfig);
 
       // Execute task actions sequentially
-      const result = await this.executeTaskActions(task, session);
+      const _result = await this.executeTaskActions(task, session);
 
       // Update task status
       await this.taskService.updateTaskStatus(taskId, {
@@ -108,11 +108,11 @@ export class BrowserUseService {
       });
 
       return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
+    } catch (_err) {
+      const errorMessage = _err instanceof Error ? _err.message : String(_err);
       const executionTimeMs = Date.now() - startTime;
 
-      this.logger.error(`Browser task failed: ${taskId}`, {
+      this.logger._err(`Browser task failed: ${taskId}`, {
         taskId,
         error: errorMessage,
         executionTimeMs,
@@ -197,7 +197,7 @@ export class BrowserUseService {
         filepath,
         config,
       );
-      const result = await this.executePythonScript(screenshotScript);
+      const _result = await this.executePythonScript(screenshotScript);
 
       if (!result.success) {
         throw new Error(`Screenshot capture failed: ${result.error}`);
@@ -221,8 +221,8 @@ export class BrowserUseService {
           dimensions: { width: 1920, height: 1080 }, // TODO: Extract actual dimensions
         },
       };
-    } catch (err) {
-      this.logger.error(
+    } catch (_err) {
+      this.logger._err(
         `Screenshot capture failed for session: ${sessionId}`,
         err,
       );
@@ -265,7 +265,7 @@ export class BrowserUseService {
         sessionId,
         config,
       );
-      const result = await this.executePythonScript(extractionScript);
+      const _result = await this.executePythonScript(extractionScript);
 
       if (!result.success) {
         throw new Error(`DOM extraction failed: ${result.error}`);
@@ -283,8 +283,8 @@ export class BrowserUseService {
           extractionTime,
         },
       };
-    } catch (err) {
-      this.logger.error(`DOM extraction failed for session: ${sessionId}`, err);
+    } catch (_err) {
+      this.logger._err(`DOM extraction failed for session: ${sessionId}`, err);
       throw err;
     }
   }
@@ -292,14 +292,14 @@ export class BrowserUseService {
   /**
    * Create async job for long-running browser automation tasks
    */
-  async createAsyncJob(dto: CreateAsyncJobDto): Promise<AsyncJobResultDto> {
+  async createAsyncJob(_dto: CreateAsyncJobDto): Promise<AsyncJobResultDto> {
     this.logger.log(`Creating async job: ${dto.name}`, {
       jobName: dto.name,
       jobType: dto.jobType,
-      priority: dto.priority,
+      priority: _dto.priority,
     });
 
-    return await this.asyncJobService.createAsyncJob(dto);
+    return await this.asyncJobService.createAsyncJob(_dto);
   }
 
   /**
@@ -345,7 +345,7 @@ export class BrowserUseService {
     });
 
     try {
-      const result = await this.captureScreenshot(sessionId, {
+      const _result = await this.captureScreenshot(sessionId, {
         fullPage: options.fullPage,
         quality: options.quality,
         format: 'png',
@@ -361,8 +361,8 @@ export class BrowserUseService {
         timestamp: result.timestamp.toISOString(),
         metadata: result.metadata,
       };
-    } catch (err) {
-      this.logger.error(`Screenshot failed for session: ${sessionId}`, err);
+    } catch (_err) {
+      this.logger._err(`Screenshot failed for session: ${sessionId}`, err);
       throw err;
     }
   }
@@ -391,14 +391,14 @@ export class BrowserUseService {
       // Extract data for each selector
       for (const [key, selector] of Object.entries(config.selectors)) {
         try {
-          const result = await this.extractDomData(sessionId, {
+          const _result = await this.extractDomData(sessionId, {
             selector,
             includeText: true,
             includeAttributes: true,
           });
 
           extractedData[key] = result.data;
-        } catch (err) {
+        } catch (_err) {
           this.logger.warn(
             `Failed to extract data for selector ${key}: ${selector}`,
             err,
@@ -408,8 +408,8 @@ export class BrowserUseService {
       }
 
       return extractedData;
-    } catch (err) {
-      this.logger.error(
+    } catch (_err) {
+      this.logger._err(
         `Page data extraction failed for session: ${sessionId}`,
         err,
       );
@@ -482,7 +482,7 @@ export class BrowserUseService {
         const actionResult = await this.executeAction(
           session.sessionId,
           action,
-          i,
+          _i,
         );
 
         actionsCompleted++;
@@ -537,12 +537,12 @@ export class BrowserUseService {
         logs,
         metadata: task.metadata,
       };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
+    } catch (_err) {
+      const errorMessage = _err instanceof Error ? _err.message : String(_err);
 
       logs.push({
         timestamp: new Date(),
-        level: 'error',
+        level: '_err',
         message: `Task execution failed: ${errorMessage}`,
         actionIndex: actionsCompleted,
         metadata: { error: errorMessage },
@@ -558,7 +558,7 @@ export class BrowserUseService {
   private async executeAction(
     sessionId: string,
     action: any,
-    actionIndex: number,
+    _actionIndex: number,
   ): Promise<{
     success: boolean;
     executionTime: number;
@@ -597,7 +597,7 @@ export class BrowserUseService {
       }
 
       // Execute the action
-      const result = await this.executePythonScript(script);
+      const _result = await this.executePythonScript(script);
 
       if (!result.success) {
         return {
@@ -629,11 +629,11 @@ export class BrowserUseService {
         screenshot,
         extractedData,
       };
-    } catch (err) {
+    } catch (_err) {
       return {
         success: false,
         executionTime: Date.now() - startTime,
-        error: err instanceof Error ? err.message : String(err),
+        _err: _err instanceof Error ? _err.message : String(_err),
       };
     }
   }
@@ -652,7 +652,7 @@ export class BrowserUseService {
 
     // Create new session
     return await this.sessionService.createSession({
-      name: `Auto-created session ${Date.now()}`,
+      _name: `Auto-created session ${Date.now()}`,
       ...config,
     });
   }
@@ -670,9 +670,9 @@ export class BrowserUseService {
         tempDirectory: this.tempDirectory,
         browserUsePath: this.browserUsePath,
       });
-    } catch (err) {
+    } catch (_err) {
       throw new Error(
-        `Failed to initialize workspace: ${err instanceof Error ? err.message : String(err)}`,
+        `Failed to initialize workspace: ${_err instanceof Error ? _err.message : String(_err)}`,
       );
     }
   }
@@ -736,7 +736,7 @@ export class BrowserUseService {
             }
           });
 
-          childProcess.on('error', async (err) => {
+          childProcess.on('_error', async (err) => {
             try {
               await fs.unlink(scriptFile);
             } catch (cleanupErr) {

@@ -75,7 +75,7 @@ export class BrowserTabInfoDto {
  */
 export class CreateBrowserSessionDto {
   @ApiPropertyOptional({
-    description: 'Session name for identification',
+    description: 'Session _name for identification',
     example: 'E-commerce data extraction session',
   })
   @IsOptional()
@@ -219,7 +219,7 @@ export class BrowserSessionDto {
   sessionId: string;
 
   @ApiProperty({
-    description: 'Session name',
+    description: 'Session _name',
   })
   name: string;
 

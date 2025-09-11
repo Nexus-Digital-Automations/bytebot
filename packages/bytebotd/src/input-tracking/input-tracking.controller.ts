@@ -17,7 +17,7 @@ import { InputTrackingService } from './input-tracking.service';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth('bearer')
 export class InputTrackingController {
-  private readonly logger = new Logger(InputTrackingController.name);
+  private readonly logger = new Logger(InputTrackingController._name);
 
   constructor(private readonly inputTrackingService: InputTrackingService) {}
 
