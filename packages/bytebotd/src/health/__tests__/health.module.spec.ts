@@ -22,7 +22,7 @@
  * @coverage-target 100%
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
@@ -173,9 +173,9 @@ describe('HealthModule', () => {
         expect(errorHealthModule).toBeDefined();
 
         await errorTestModule.close();
-      } catch (_error) {
+      } catch (error) {
         // If initialization fails, it should be handled gracefully
-        expect(_error).toBeInstanceOf(Error);
+        expect(error).toBeInstanceOf(Error);
       }
 
       console.log(`[${testId}] Initialization error handling test completed`);
@@ -230,9 +230,9 @@ describe('HealthModule', () => {
       try {
         const livenessResult = await healthController.checkLiveness();
         expect(livenessResult).toBeDefined();
-      } catch (_error) {
+      } catch (error) {
         // Health checks might fail in test environment, but they should be callable
-        expect(_error).toBeInstanceOf(Error);
+        expect(error).toBeInstanceOf(Error);
       }
 
       console.log(`[${testId}] Terminus integration test completed`);
@@ -257,9 +257,9 @@ describe('HealthModule', () => {
       try {
         const readinessResult = await healthController.checkReadiness();
         expect(readinessResult).toBeDefined();
-      } catch (_error) {
+      } catch (error) {
         // External service checks might fail in test environment
-        expect(_error).toBeInstanceOf(Error);
+        expect(error).toBeInstanceOf(Error);
       }
 
       console.log(`[${testId}] HttpModule integration test completed`);
@@ -641,7 +641,7 @@ describe('HealthModule', () => {
         .map(async (_, _i) => {
           const health = await healthController.getHealth();
           const detailed = await healthController.getDetailedStatus();
-          return { basic: health, detailed, index: i };
+          return { basic: health, detailed, index: _i };
         });
 
       const stressResults = await Promise.all(stressPromises);
@@ -652,7 +652,7 @@ describe('HealthModule', () => {
       stressResults.forEach((result, _i) => {
         expect(result.basic.status).toBe('healthy');
         expect(result.detailed).toBeDefined();
-        expect(result._index).toBe(_i);
+        expect(result.index).toBe(_i);
       });
 
       console.log(`[${testId}] Thread safety stress test completed`);
@@ -669,8 +669,8 @@ describe('HealthModule', () => {
           try {
             const health = await healthController.getHealth();
             return health;
-          } catch (_error) {
-            return { status: '_error', _error: __error.message };
+          } catch (error) {
+            return { status: 'error', error: error.message };
           }
         });
 
