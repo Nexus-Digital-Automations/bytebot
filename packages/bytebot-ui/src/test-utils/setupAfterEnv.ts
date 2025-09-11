@@ -14,7 +14,7 @@
 
 import React from "react";
 import { expect } from "@jest/globals";
-import { render, screen } from "@testing-library/react";
+import { type RenderResult, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -345,7 +345,7 @@ export const TestUtils = {
   renderComponent: (
     component: React.ReactElement,
     options?: Record<string, unknown>,
-  ): RenderResult & { renderTime: number } => {
+  ): RenderResult & { renderTime?: number } => {
     const startTime = performance.now();
     const result = render(component, options);
     const renderTime = performance.now() - startTime;

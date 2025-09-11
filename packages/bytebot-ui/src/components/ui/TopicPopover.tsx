@@ -23,7 +23,7 @@ export const TopicPopover: React.FC<TopicPopoverProps> = ({
 
   // Close popover when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent): void => {
       if (
         popoverRef.current &&
         !popoverRef.current.contains(event.target as Node)
@@ -39,12 +39,12 @@ export const TopicPopover: React.FC<TopicPopoverProps> = ({
       document.addEventListener("mousedown", handleClickOutside);
     }
 
-    return () => {
+    return (): void => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onOpenChange]);
 
-  const handleToggle = () => {
+  const handleToggle = (): void => {
     const newState = !isOpen;
     setIsOpen(newState);
     if (onOpenChange) {

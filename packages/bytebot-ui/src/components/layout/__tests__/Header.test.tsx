@@ -199,7 +199,7 @@ describe("Header Component", () => {
       const renderResult = TestUtils.renderComponent(<Header />);
       const { container } = renderResult;
 
-      const header = container.querySelector("header") as HTMLElement | null;
+      const header = container.querySelector("header");
       expect(header).toHaveClass("header", "sticky", "top-0");
     });
 
@@ -682,19 +682,15 @@ describe("Header Component", () => {
       const homeLink = screen.getByText("Home");
       const tasksLink = screen.getByText("Tasks");
 
-      // Create array of sequential hover operations and execute them
-      const hoverOperations = Array.from(
-        { length: PERFORMANCE_TEST_ITERATIONS },
-        (_, i) => async (): Promise<void> => {
+      // Execute hover operations sequentially using reduce to avoid await-in-loop
+      await Array.from({ length: PERFORMANCE_TEST_ITERATIONS }).reduce(
+        async (previousPromise: Promise<void>, _current, index) => {
+          await previousPromise;
           await user.hover(homeLink);
           await user.hover(tasksLink);
         },
+        Promise.resolve(),
       );
-
-      // Execute all hover operations sequentially
-      for (const operation of hoverOperations) {
-        await operation();
-      }
 
       // Should not cause performance issues
       expect(homeLink).toBeInTheDocument();

@@ -83,7 +83,7 @@ export function ChatInput({
     }
 
     // Convert all files to base64 in parallel for better performance
-    const fileConversionPromises = files.map(
+    const fileConversionPromises = Array.from(files).map(
       async (file): Promise<FileWithBase64> => {
         const base64 = await convertToBase64(file);
 
