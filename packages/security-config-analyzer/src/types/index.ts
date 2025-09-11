@@ -10,7 +10,9 @@
 
 /**
  * Security severity levels for categorizing findings
+ * @public API - Used by orchestrator and other packages
  */
+
 export enum SecuritySeverity {
   CRITICAL = "critical",
   HIGH = "high",
@@ -21,7 +23,9 @@ export enum SecuritySeverity {
 
 /**
  * Configuration types supported by the security analyzer
+ * @public API - Used by docker-analyzer and other packages
  */
+
 export enum ConfigurationType {
   DOCKER_CONTAINER = "docker_container",
   DOCKER_COMPOSE = "docker_compose",
@@ -42,7 +46,9 @@ export enum ConfigurationType {
 
 /**
  * Security categories for classifying different types of security issues
+ * @public API - Used by service-analyzer and other packages
  */
+
 export enum SecurityCategory {
   VULNERABILITY = "vulnerability",
   MISCONFIGURATION = "misconfiguration",

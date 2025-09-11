@@ -180,7 +180,9 @@ export class MessagesService {
             .flatMap((block) => {
               return block.content;
             })
-            .filter((block) => isComputerToolUseContentBlock(block)) as any;
+            .filter((block) =>
+              isComputerToolUseContentBlock(block),
+            ) as MessageContentBlock[];
 
           processedMessage.role = Role._ASSISTANT as Role;
           processedMessage.take_over = true;

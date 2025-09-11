@@ -8,6 +8,7 @@ import {
   BrowserTaskResultDto,
   BrowserTaskStatus,
   BrowserActionType,
+  BrowserActionDto,
 } from './dto/browser-task.dto';
 import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';
 import { BrowserSessionService } from './browser-session.service';
@@ -469,16 +470,24 @@ export class BrowserUseService {
     taskDto: CreateBrowserTaskDto,
     session: BrowserSessionDto,
   ): Promise<BrowserTaskResultDto> {
-    const logs: unknown[] = [];
+    const logs: Array<{
+      timestamp: Date;
+      level: string;
+      message: string;
+      actionIndex?: number;
+      screenshot?: string;
+      metadata?: Record<string, any>;
+    }> = [];
     const screenshots: string[] = [];
     let extractedData: Record<string, any> = {};
     let actionsCompleted = 0;
 
     try {
-      for (let i = 0; i < task.actions.length; i++) {
-        const action = task.actions[i];
+      for (let i = 0; i < taskDto.actions.length; i++) {
+        const action = taskDto.actions[i];
+        if (!action) continue;
 
-        this.logger.log(`Executing action ${i + 1}/${task.actions.length}`, {
+        this.logger.log(`Executing action ${i + 1}/${taskDto.actions.length}`, {
           taskId: task.taskId,
           actionType: action.type,
           actionIndex: i,
@@ -507,7 +516,7 @@ export class BrowserUseService {
         });
 
         // Capture screenshot after each action if enabled
-        if (task.enableLogging && actionResult.screenshot) {
+        if (task.metadata?.enableLogging && actionResult.screenshot) {
           screenshots.push(actionResult.screenshot);
         }
 
@@ -520,11 +529,13 @@ export class BrowserUseService {
         await this.taskService.updateTaskProgress(task.taskId, {
           actionsCompleted,
           currentStep: `Completed: ${action.type}`,
-          progress: Math.round((actionsCompleted / task.actions.length) * 100),
+          progress: Math.round(
+            (actionsCompleted / taskDto.actions.length) * 100,
+          ),
         });
 
         // Break on error if not continuing
-        if (!actionResult.success && !task.continueOnError) {
+        if (!actionResult.success && !task.metadata?.continueOnError) {
           throw new Error(`Action failed: ${actionResult.error}`);
         }
       }
@@ -536,7 +547,7 @@ export class BrowserUseService {
         completedAt: new Date(),
         executionTimeMs: Date.now() - task.startedAt.getTime(),
         actionsCompleted,
-        totalActions: task.actions.length,
+        totalActions: taskDto.actions.length,
         extractedData,
         screenshots,
         logs,
@@ -562,7 +573,7 @@ export class BrowserUseService {
    */
   private async executeAction(
     sessionId: string,
-    action: unknown,
+    action: BrowserActionDto,
     _actionIndex: number,
   ): Promise<{
     success: boolean;
@@ -579,16 +590,16 @@ export class BrowserUseService {
 
       switch (action.type) {
         case BrowserActionType.NAVIGATE:
-          script = this.generateNavigationScript(sessionId, action.url);
+          script = this.generateNavigationScript(sessionId, action.url || '');
           break;
         case BrowserActionType.CLICK:
-          script = this.generateClickScript(sessionId, action.selector);
+          script = this.generateClickScript(sessionId, action.selector || '');
           break;
         case BrowserActionType.TYPE:
           script = this.generateTypeScript(
             sessionId,
-            action.selector,
-            action.text,
+            action.selector || '',
+            action.text || '',
           );
           break;
         case BrowserActionType.SCREENSHOT:
@@ -638,7 +649,7 @@ export class BrowserUseService {
       return {
         success: false,
         executionTime: Date.now() - startTime,
-        _err: _err instanceof Error ? _err.message : String(_err),
+        error: _err instanceof Error ? _err.message : String(_err),
       };
     }
   }
@@ -658,7 +669,7 @@ export class BrowserUseService {
     // Create new session
     return await this.sessionService.createSession({
       name: `Auto-created session ${Date.now()}`,
-      ...config,
+      ...(config || {}),
     });
   }
 
@@ -736,7 +747,7 @@ export class BrowserUseService {
               resolve({
                 success: false,
                 output: stdout,
-                _error: stderr || `Process exited with code ${code}`,
+                error: stderr || `Process exited with code ${code}`,
               });
             }
           });
@@ -751,7 +762,7 @@ export class BrowserUseService {
             resolve({
               success: false,
               output: '',
-              _error: err.message,
+              error: err.message,
             });
           });
         })
@@ -876,9 +887,9 @@ async def main():
         # Capture screenshot
         screenshot = await session.page.screenshot(
             path=${filepath ? JSON.stringify(filepath) : 'None'},
-            full_page=${config?.fullPage || false},
-            quality=${config?.quality || 85},
-            type=${JSON.stringify(config?.format || 'png')}
+            full_page=${(config as any)?.fullPage || false},
+            quality=${(config as any)?.quality || 85},
+            type=${JSON.stringify((config as any)?.format || 'png')}
         )
         
         if not ${filepath ? 'True' : 'False'}:

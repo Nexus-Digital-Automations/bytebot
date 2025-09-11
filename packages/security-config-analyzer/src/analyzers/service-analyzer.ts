@@ -219,7 +219,7 @@ export interface ServiceAnalysisOptions {
  */
 export class ServiceConfigurationSecurityAnalyzer extends EventEmitter {
   private findings: SecurityFinding[] = [];
-  private config: ServiceAnalyzerConfig;
+  private _config: ServiceAnalyzerConfig;
 
   constructor(config: ServiceAnalyzerConfig) {
     super();
@@ -229,7 +229,7 @@ export class ServiceConfigurationSecurityAnalyzer extends EventEmitter {
       throw new Error("ServiceAnalyzerConfig is required");
     }
 
-    this.config = config;
+    this._config = config;
 
     this.emit("analyzer_initialized", {
       analyzer: "ServiceConfigurationSecurityAnalyzer",
@@ -3123,7 +3123,7 @@ export class ServiceConfigurationSecurityAnalyzer extends EventEmitter {
   /**
    * Generate vulnerability assessment
    */
-  private generateVulnerabilityAssessment(): VulnerabilityAssessment {
+  private _generateVulnerabilityAssessment(): VulnerabilityAssessment {
     return {
       total_vulnerabilities: this.findings.length,
       exploitable_vulnerabilities: this.findings.filter(
@@ -3157,7 +3157,7 @@ export class ServiceConfigurationSecurityAnalyzer extends EventEmitter {
   /**
    * Generate compliance report
    */
-  private generateComplianceReport(): ComplianceReport {
+  private _generateComplianceReport(): ComplianceReport {
     const owaspFindings = this.findings.filter(
       (f) => f.compliance_mappings && f.compliance_mappings["OWASP"],
     ).length;
@@ -3209,7 +3209,7 @@ export class ServiceConfigurationSecurityAnalyzer extends EventEmitter {
   /**
    * Helper method to extract string records from unknown values
    */
-  private extractStringRecord(value: unknown): Record<string, string> {
+  private _extractStringRecord(value: unknown): Record<string, string> {
     if (typeof value === "object" && value !== null && !Array.isArray(value)) {
       const record: Record<string, string> = {};
       for (const [key, val] of Object.entries(value)) {

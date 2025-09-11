@@ -17,10 +17,10 @@ export function CopyButton({
   className,
   size = "icon",
   variant = "ghost",
-}: CopyButtonProps) {
+}: CopyButtonProps): JSX.Element {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async (e: React.MouseEvent) => {
+  const handleCopy = async (e: React.MouseEvent): Promise<void> => {
     e.preventDefault();
     e.stopPropagation();
 

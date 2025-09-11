@@ -2745,7 +2745,7 @@ export class SystemSecurityConfigurationAnalyzer extends EventEmitter {
   /**
    * Generate vulnerability assessment
    */
-  private generateVulnerabilityAssessment(): VulnerabilityAssessment {
+  private _generateVulnerabilityAssessment(): VulnerabilityAssessment {
     return {
       total_vulnerabilities: this.findings.length,
       exploitable_vulnerabilities: this.findings.filter(
@@ -2785,7 +2785,7 @@ export class SystemSecurityConfigurationAnalyzer extends EventEmitter {
   /**
    * Generate compliance report
    */
-  private generateComplianceReport(): ComplianceReport {
+  private _generateComplianceReport(): ComplianceReport {
     const owaspFindings = this.findings.filter(
       (f) => f.compliance_mappings && f.compliance_mappings["OWASP"],
     ).length;

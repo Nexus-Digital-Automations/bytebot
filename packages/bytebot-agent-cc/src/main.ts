@@ -5,7 +5,8 @@ import { json, urlencoded } from 'express';
 
 // Polyfill for crypto global (required by @nestjs/schedule)
 if (!globalThis.crypto) {
-  globalThis.crypto = webcrypto as any;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  globalThis.crypto = webcrypto as Crypto;
 }
 
 async function bootstrap() {

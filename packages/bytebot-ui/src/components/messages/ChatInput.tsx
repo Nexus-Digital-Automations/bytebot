@@ -47,7 +47,9 @@ export function ChatInput({
     onSend();
   };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ): Promise<void> => {
     const files = e.target.files;
     if (!files || files.length === 0) {
       return;

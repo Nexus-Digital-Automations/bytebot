@@ -193,6 +193,90 @@
       ]
     },
     {
+      "id": "error_1757573240791_9y43pn5b8",
+      "title": "Fix TypeScript SuperTest compilation errors in bytebot-agent package",
+      "description": "Fix SuperTest import statements and type issues causing TypeScript compilation errors. Fix incorrect destructured imports, update test templates to use proper supertest API, and ensure all test utilities work with installed supertest version.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:47:20.791Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757573216080_1_general_f7085a31",
+      "started_at": "2025-09-11T06:47:37.215Z",
+      "claimed_by": "development_session_1757573216080_1_general_f7085a31",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757573216080_1_general_f7085a31",
+          "role": "primary",
+          "assignedAt": "2025-09-11T06:47:37.215Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757573239982_h7a5yqgp2",
+      "title": "Fix remaining TypeScript compilation errors in bytebot-agent package",
+      "description": "Fix TypeScript compilation errors in modules, services, controllers and other TS files. Focus on import/export issues, type mismatches, property access errors, class constructors, method signatures, and interfaces. Validate with full TS compilation check.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:47:19.982Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757573215969_1_general_c3799dc7",
+      "started_at": "2025-09-11T06:47:43.107Z",
+      "claimed_by": "development_session_1757573215969_1_general_c3799dc7",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757573215969_1_general_c3799dc7",
+          "role": "primary",
+          "assignedAt": "2025-09-11T06:47:43.107Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757573231960_4ieysskkf",
+      "title": "Fix TypeScript compilation errors in bytebot-agent database schema types",
+      "description": "Fix TypeScript compilation errors related to BrowserScreenshot and BrowserDomSnapshot types. Missing properties: compressionType, storageTier, accessCount, lastAccessed, session. Fix unknown properties in selects/updates: checksum, accessCount, lastAccessed. Located in src/database/services/data-storage-optimization.service.ts",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:47:11.960Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757573215582_1_general_67f5da61",
+      "started_at": "2025-09-11T06:47:34.058Z",
+      "claimed_by": "development_session_1757573215582_1_general_67f5da61",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757573215582_1_general_67f5da61",
+          "role": "primary",
+          "assignedAt": "2025-09-11T06:47:34.058Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
       "id": "error_1757475675951_wgdtkl2t5",
       "title": "Fix VulnerabilitySeverity enum TS2693 errors in ML algorithm files",
       "description": "Fix TypeScript TS2693 errors where VulnerabilitySeverity enum is being used as a value instead of a type in ML algorithm files: ml-performance-metrics.ts, naive-bayes-classifier.ts, neural-network-classifier.ts. Replace Object.values() patterns with explicit arrays and fix enum imports.",
@@ -3237,6 +3321,69 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-10T05:10:47.967Z",
       "sessionId": "session_1757481047964",
+      "metadata": {}
+    },
+    "development_session_1757573215582_1_general_67f5da61": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:46:55.587Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:46:55.587Z",
+      "sessionId": "session_1757573215582",
+      "metadata": {}
+    },
+    "development_session_1757573215969_1_general_c3799dc7": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:46:55.977Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:46:55.977Z",
+      "sessionId": "session_1757573215969",
+      "metadata": {}
+    },
+    "development_session_1757573216080_1_general_f7085a31": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:46:56.083Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:46:56.083Z",
+      "sessionId": "session_1757573216080",
       "metadata": {}
     }
   },
