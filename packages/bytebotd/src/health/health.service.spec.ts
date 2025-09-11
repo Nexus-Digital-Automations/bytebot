@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Unit Tests for Enhanced Health Service
  *
@@ -9,7 +10,7 @@
  * @version 1.0.0
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { HealthService } from './health.service';
 
@@ -69,7 +70,7 @@ describe('HealthService', () => {
   describe('Kubernetes Health Probes', () => {
     describe('Process Health (Liveness Probe)', () => {
       it('should pass process health check', async () => {
-        const _result = await service.checkProcessHealth();
+        const result = await service.checkProcessHealth();
 
         expect(result).toHaveProperty('process');
         expect(result.process).toHaveProperty('status', 'up');
@@ -84,7 +85,7 @@ describe('HealthService', () => {
           throw new Error('Memory error');
         }) as any;
 
-        const _result = await service.checkProcessHealth();
+        const result = await service.checkProcessHealth();
 
         expect(result).toHaveProperty('process');
         expect(result.process).toHaveProperty('status', 'down');
@@ -97,7 +98,7 @@ describe('HealthService', () => {
 
     describe('Database Health (Readiness Probe)', () => {
       it('should pass database health check', async () => {
-        const _result = await service.checkDatabaseHealth();
+        const result = await service.checkDatabaseHealth();
 
         expect(result).toHaveProperty('database');
         expect(result.database).toHaveProperty('status', 'up');
@@ -110,7 +111,7 @@ describe('HealthService', () => {
           .spyOn(service as any, 'performDatabasePing')
           .mockResolvedValueOnce(false);
 
-        const _result = await service.checkDatabaseHealth();
+        const result = await service.checkDatabaseHealth();
 
         expect(result).toHaveProperty('database');
         expect(result.database).toHaveProperty('status', 'down');
@@ -119,7 +120,7 @@ describe('HealthService', () => {
 
     describe('External Services Health', () => {
       it('should check external services', async () => {
-        const _result = await service.checkExternalServices();
+        const result = await service.checkExternalServices();
 
         expect(result).toHaveProperty('external_services');
         expect(result.external_services).toHaveProperty('status');
@@ -131,7 +132,7 @@ describe('HealthService', () => {
           .spyOn(service as any, 'checkExternalService')
           .mockRejectedValue(new Error('Service error'));
 
-        const _result = await service.checkExternalServices();
+        const result = await service.checkExternalServices();
 
         expect(result).toHaveProperty('external_services');
       });
@@ -142,7 +143,7 @@ describe('HealthService', () => {
         // Create a new service instance (will have recent start time)
         const newService = new HealthService();
 
-        const _result = await newService.checkStartupComplete();
+        const result = await newService.checkStartupComplete();
 
         expect(result).toHaveProperty('startup');
         expect(result.startup).toHaveProperty('status', 'down');
@@ -156,7 +157,7 @@ describe('HealthService', () => {
         // Mock the start time to be old enough
         (service as any).startTime = Date.now() - 15000; // 15 seconds ago
 
-        const _result = await service.checkStartupComplete();
+        const result = await service.checkStartupComplete();
 
         expect(result).toHaveProperty('startup');
         expect(result.startup).toHaveProperty('status', 'up');
@@ -165,7 +166,7 @@ describe('HealthService', () => {
 
     describe('Module Initialization Check', () => {
       it('should check module initialization', async () => {
-        const _result = await service.checkModuleInitialization();
+        const result = await service.checkModuleInitialization();
 
         expect(result).toHaveProperty('modules');
         expect(result.modules).toHaveProperty('status', 'up');
@@ -270,7 +271,7 @@ describe('HealthService', () => {
         throw new Error('Date error');
       });
 
-      const _result = await service.checkStartupComplete();
+      const result = await service.checkStartupComplete();
 
       expect(result).toHaveProperty('startup');
       expect(result.startup).toHaveProperty('status', 'down');
@@ -287,7 +288,7 @@ describe('HealthService', () => {
         throw new Error('Module error');
       });
 
-      const _result = await service.checkModuleInitialization();
+      const result = await service.checkModuleInitialization();
 
       expect(result).toHaveProperty('modules');
       expect(result.modules).toHaveProperty('status', 'down');

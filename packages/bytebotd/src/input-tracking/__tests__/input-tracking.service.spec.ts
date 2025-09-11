@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Input Tracking Service Test Suite
  *
@@ -17,7 +18,7 @@
  * @coverage-target 100%
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 
 // Define types that would come from uiohook-napi
@@ -132,19 +133,19 @@ import { InputTrackingService } from '../input-tracking.service';
 import { ComputerUseService } from '../../computer-use/computer-use.service';
 import { InputTrackingGateway } from '../input-tracking.gateway';
 import {
-  ComputerAction,
+  ComputerAction as _ComputerAction,
   ClickMouseAction,
-  DragMouseAction,
-  _ScrollAction,
-  TypeTextAction,
-  _TypeKeysAction,
+  DragMouseAction as _DragMouseAction,
+  ScrollAction,
+  TypeTextAction as _TypeTextAction,
+  TypeKeysAction,
 } from '@bytebot/shared';
 
 describe('InputTrackingService', () => {
   let service: InputTrackingService;
   let computerUseService: ComputerUseService;
   let gateway: InputTrackingGateway;
-  let _logger: Logger;
+  let logger: Logger;
 
   const operationId = `input_tracking_service_test_${Date.now()}`;
 
@@ -606,14 +607,14 @@ describe('InputTrackingService', () => {
         ctrlKey: true,
       });
 
-      const _result = service['isModifierKey'](modifierEvent);
+      const result = service['isModifierKey'](modifierEvent);
       expect(result).toBe(true);
 
       const nonModifierEvent = createMockKeyboardEvent({
         keycode: 65, // A
       });
 
-      const _result2 = service['isModifierKey'](nonModifierEvent);
+      const result2 = service['isModifierKey'](nonModifierEvent);
       expect(result2).toBe(false);
 
       console.log(`[${testId}] Modifier key detection test completed`);

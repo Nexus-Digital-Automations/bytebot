@@ -12,7 +12,7 @@
  * @version 1.0.0
  */
 
-import { _TestingModule, _Test } from '@nestjs/testing';
+import { TestingModule, Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { ModuleMetadata } from '@nestjs/common/interfaces';
 

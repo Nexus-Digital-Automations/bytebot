@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Input Tracking Module Test Suite
  *
@@ -335,7 +336,7 @@ describe('InputTrackingModule', () => {
       );
 
       // Test screenshot functionality
-      const _result = await computerUseService.screenshot();
+      const result = await computerUseService.screenshot();
       expect(result).toEqual({ image: 'mock-screenshot-data' });
 
       console.log(`[${testId}] ComputerUseService integration test completed`);

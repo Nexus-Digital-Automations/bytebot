@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Security Penetration Testing Suite
  *
@@ -16,7 +17,7 @@
  * @penetration-testing High-Risk
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import {
   ExecutionContext,
   _UnauthorizedException,
@@ -493,7 +494,7 @@ describe('Security Penetration Testing Suite', () => {
           .mockResolvedValue(maliciousPayload);
 
         try {
-          const _result = await jwtAuthGuard.canActivate(context);
+          const result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest();
 
           // Check if role escalation succeeded
@@ -631,7 +632,7 @@ describe('Security Penetration Testing Suite', () => {
           .mockReturnValueOnce(undefined);
 
         try {
-          const _result = await rolesGuard.canActivate(context);
+          const result = await rolesGuard.canActivate(context);
           escalationResults.push({
             attack: attackVector._name,
             success: result,
@@ -1088,7 +1089,7 @@ describe('Security Penetration Testing Suite', () => {
           .mockResolvedValue(technique._payload);
 
         try {
-          const _result = await jwtAuthGuard.canActivate(context);
+          const result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest();
 
           // Check if evasion led to privilege escalation

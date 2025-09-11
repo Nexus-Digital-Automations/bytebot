@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Base64ImageCompressor Test Suite
  *

@@ -131,12 +131,12 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     const startTime = Date.now();
 
     // Check if route is public
-    const _isPublic = this.reflector.getAllAndOverride<boolean>('_isPublic', [
+    const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (_isPublic) {
+    if (isPublic) {
       this.logger.debug(
         `[${operationId}] Public route, skipping authentication`,
       );
@@ -146,7 +146,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     const request = context
       .switchToHttp()
       .getRequest<EnhancedAuthenticatedRequest>();
-    const _response = context.switchToHttp().getResponse<Response>();
+    const response = context.switchToHttp().getResponse<Response>();
     const clientIp = this.getClientIpAddress(request);
 
     // Initialize security context
@@ -234,7 +234,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
       this.logger.warn(`[${operationId}] Enhanced JWT authentication failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
         authTimeMs: authTime,
         clientIp,
         securityEvent: 'enhanced_jwt_auth_failed',
@@ -242,10 +242,10 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       });
 
       if (
-        __error instanceof UnauthorizedException ||
-        error instanceof ForbiddenException
+        _error instanceof UnauthorizedException ||
+        _error instanceof ForbiddenException
       ) {
-        throw error;
+        throw _error;
       }
 
       throw new UnauthorizedException(
@@ -333,7 +333,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     } catch (_error) {
       this.logger.warn(`[${operationId}] Token refresh failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
         securityEvent: 'token_refresh_failed',
       });
 
@@ -447,7 +447,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     }
 
     try {
-      const _payload = await this.jwtService.verifyAsync<EnhancedJwtPayload>(
+      const payload = await this.jwtService.verifyAsync<EnhancedJwtPayload>(
         token,
         {
           secret: process.env.SERVICE_JWT_SECRET || process.env.JWT_SECRET,
@@ -458,7 +458,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       const isValid = !!(
         payload.tokenType === 'service' &&
         payload.serviceId &&
-        _payload.serviceType
+        payload.serviceType
       );
 
       // Cache result for 5 minutes
@@ -471,7 +471,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
         this.logger.debug(`[${operationId}] Service authentication validated`, {
           operationId,
           serviceId: payload.serviceId,
-          serviceType: _payload.serviceType,
+          serviceType: payload.serviceType,
         });
       }
 
@@ -479,7 +479,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     } catch (_error) {
       this.logger.warn(`[${operationId}] Service token validation failed`, {
         operationId,
-        error: error instanceof Error ? error.message : String(_error),
+        error: _error instanceof Error ? _error.message : String(_error),
       });
 
       // Cache negative result for 1 minute

@@ -40,13 +40,14 @@ interface JwtPayload {
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  private readonly logger = new Logger(JwtStrategy._name);
+  private readonly logger = new Logger(JwtStrategy.name);
 
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'bytebot-default-secret-change-in-production',
+      secretOrKey:
+        process.env.JWT_SECRET || 'bytebot-default-secret-change-in-production',
       algorithms: ['HS256'],
     });
   }
@@ -59,43 +60,52 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @returns Promise<ByteBotdUser> - User object for request context
    * @throws UnauthorizedException - When user is invalid or inactive
    */
-  async validate(_payload: JwtPayload): Promise<ByteBotdUser> {
+  async validate(payload: JwtPayload): Promise<ByteBotdUser> {
     const operationId = `bytebotd-jwt-validate-${Date.now()}`;
-    
-    this.logger.debug(`[${operationId}] JWT payload validation for computer control`, {
-      operationId,
-      userId: payload.sub,
-      username: payload.username,
-      role: payload.role,
-      isActive: payload.isActive,
-      tokenIssuedAt: new Date(_payload.iat * 1000),
-      tokenExpiresAt: new Date(_payload.exp * 1000),
-      securityEvent: 'computer_control_jwt_validation',
-    });
 
-    // Validate required payload fields
-    if (!__payload.sub || !payload.email || !payload.username || !_payload.role) {
-      this.logger.warn(`[${operationId}] Invalid JWT payload - missing required fields`, {
-        operationId,
-        userId: payload.sub,
-        hasEmail: !!payload.email,
-        hasUsername: !!payload.username,
-        hasRole: !!_payload.role,
-        securityEvent: 'computer_control_invalid_jwt_payload',
-      });
-      throw new UnauthorizedException('Invalid token _payload');
-    }
-
-    // Check if user is active
-    if (!_payload.isActive) {
-      this.logger.warn(`[${operationId}] Inactive user attempting computer control access`, {
+    this.logger.debug(
+      `[${operationId}] JWT payload validation for computer control`,
+      {
         operationId,
         userId: payload.sub,
         username: payload.username,
-        role: _payload.role,
-        securityEvent: 'computer_control_inactive_user_access',
-        riskScore: 75,
-      });
+        role: payload.role,
+        isActive: payload.isActive,
+        tokenIssuedAt: new Date(payload.iat * 1000),
+        tokenExpiresAt: new Date(payload.exp * 1000),
+        securityEvent: 'computer_control_jwt_validation',
+      },
+    );
+
+    // Validate required payload fields
+    if (!payload.sub || !payload.email || !payload.username || !payload.role) {
+      this.logger.warn(
+        `[${operationId}] Invalid JWT payload - missing required fields`,
+        {
+          operationId,
+          userId: payload.sub,
+          hasEmail: !!payload.email,
+          hasUsername: !!payload.username,
+          hasRole: !!payload.role,
+          securityEvent: 'computer_control_invalid_jwt_payload',
+        },
+      );
+      throw new UnauthorizedException('Invalid token payload');
+    }
+
+    // Check if user is active
+    if (!payload.isActive) {
+      this.logger.warn(
+        `[${operationId}] Inactive user attempting computer control access`,
+        {
+          operationId,
+          userId: payload.sub,
+          username: payload.username,
+          role: payload.role,
+          securityEvent: 'computer_control_inactive_user_access',
+          riskScore: 75,
+        },
+      );
       throw new UnauthorizedException('Account is inactive');
     }
 
@@ -110,13 +120,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       isActive: payload.isActive,
     };
 
-    this.logger.debug(`[${operationId}] JWT validation successful for computer control`, {
-      operationId,
-      userId: user.id,
-      username: user.username,
-      role: user.role,
-      securityEvent: 'computer_control_jwt_validated',
-    });
+    this.logger.debug(
+      `[${operationId}] JWT validation successful for computer control`,
+      {
+        operationId,
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+        securityEvent: 'computer_control_jwt_validated',
+      },
+    );
 
     return user;
   }

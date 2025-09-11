@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Authentication Service Test Suite
  *
@@ -13,7 +14,7 @@
  * @coverage-target 95%+
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
@@ -201,7 +202,7 @@ describe('AuthService', () => {
       module.get<ConfigService>(ConfigService),
     );
     jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigService>(ConfigService);
+    _configService = module.get<ConfigService>(ConfigService);
 
     console.log(`[${operationId}] AuthService test setup completed`);
   });
@@ -222,7 +223,7 @@ describe('AuthService', () => {
 
       jest.spyOn(jwtService, 'sign').mockReturnValue('mocked-jwt-token');
 
-      const _result = await service.login(loginDto);
+      const result = await service.login(loginDto);
 
       expect(result).toBeDefined();
       expect(result.accessToken).toBe('mocked-jwt-token');
@@ -284,7 +285,7 @@ describe('AuthService', () => {
 
       jest.spyOn(jwtService, 'sign').mockReturnValue('mocked-jwt-token');
 
-      const _result = await service.register(registerDto);
+      const result = await service.register(registerDto);
 
       expect(result).toBeDefined();
       expect(result.accessToken).toBeDefined();
@@ -326,7 +327,7 @@ describe('AuthService', () => {
 
       jest.spyOn(jwtService, 'sign').mockReturnValue('mocked-jwt-token');
 
-      const _result = await service.register(registerDto);
+      const result = await service.register(registerDto);
 
       expect(result.user.role).toBe('viewer');
 
@@ -400,7 +401,7 @@ describe('AuthService', () => {
         .mockReturnValueOnce('new-access-token')
         .mockReturnValueOnce('new-refresh-token');
 
-      const _result = await service.refreshToken(refreshToken);
+      const result = await service.refreshToken(refreshToken);
 
       expect(result.accessToken).toBe('new-access-token');
       expect(result.refreshToken).toBe('new-refresh-token');
@@ -537,7 +538,7 @@ describe('AuthService', () => {
 
       // Mock expired token verification
       jest.spyOn(jwtService, 'verify').mockImplementation(() => {
-        const _error = new Error('Token expired');
+        const error = new Error('Token expired');
         error.name = 'TokenExpiredError';
         throw error;
       });
@@ -606,7 +607,7 @@ describe('AuthService', () => {
 
       jest.spyOn(jwtService, 'sign').mockReturnValue('format-test-token');
 
-      const _result = await service.login(loginDto);
+      const result = await service.login(loginDto);
 
       // Verify consistent response structure
       expect(result).toMatchObject({

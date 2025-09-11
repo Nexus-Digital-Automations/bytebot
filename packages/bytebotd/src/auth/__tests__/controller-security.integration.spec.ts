@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Controller Security Integration Test Suite
  *
@@ -15,7 +16,7 @@
  * @security-focus Critical
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { JwtService } from '@nestjs/jwt';
@@ -23,6 +24,13 @@ import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
+
+// Define UserRole enum for test suite
+enum UserRole {
+  ADMIN = 'admin',
+  OPERATOR = 'operator',
+  VIEWER = 'viewer',
+}
 
 /**
  * Mock Controller for Security Testing
@@ -115,15 +123,15 @@ class MockSecurityJwtService {
   private validTokens = new Map([
     [
       'admin-token',
-      { id: 'admin-1', email: 'admin@test.com', role: UserRole._ADMIN },
+      { id: 'admin-1', email: 'admin@test.com', role: UserRole.ADMIN },
     ],
     [
       'operator-token',
-      { id: 'op-1', email: 'operator@test.com', role: UserRole._OPERATOR },
+      { id: 'op-1', email: 'operator@test.com', role: UserRole.OPERATOR },
     ],
     [
       'viewer-token',
-      { id: 'viewer-1', email: 'viewer@test.com', role: UserRole._VIEWER },
+      { id: 'viewer-1', email: 'viewer@test.com', role: UserRole.VIEWER },
     ],
     ['expired-token', null], // Simulate expired token
     ['malicious-token', null], // Simulate invalid token
@@ -223,7 +231,7 @@ describe('Controller Security Integration Tests', () => {
 
     // Rate limiting middleware
     const requestCounts = new Map();
-    app.use((_req, res, next) => {
+    app.use((req, res, next) => {
       const ip = req.ip || req.connection.remoteAddress || '127.0.0.1';
       const count = requestCounts.get(ip) || 0;
 
@@ -249,7 +257,7 @@ describe('Controller Security Integration Tests', () => {
     });
 
     // Authentication middleware
-    app.use('/api/*', (_req, res, next) => {
+    app.use('/api/*', (req, res, next) => {
       const authHeader = req.headers.authorization;
 
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -275,8 +283,8 @@ describe('Controller Security Integration Tests', () => {
 
     // Authorization middleware
     const checkRole = (requiredRole: UserRole) => {
-      return (_req, res, next) => {
-        if (!_req.user) {
+      return (req, res, next) => {
+        if (!req.user) {
           return res.status(403).json({
             message: 'Access forbidden - authentication required',
             error: 'FORBIDDEN',
@@ -285,13 +293,13 @@ describe('Controller Security Integration Tests', () => {
 
         const userRole = req.user.role;
         const roleHierarchy = {
-          [UserRole._ADMIN]: [
-            UserRole._ADMIN,
-            UserRole._OPERATOR,
-            UserRole._VIEWER,
+          [UserRole.ADMIN]: [
+            UserRole.ADMIN,
+            UserRole.OPERATOR,
+            UserRole.VIEWER,
           ],
-          [UserRole._OPERATOR]: [UserRole._OPERATOR, UserRole._VIEWER],
-          [UserRole._VIEWER]: [UserRole._VIEWER],
+          [UserRole.OPERATOR]: [UserRole.OPERATOR, UserRole.VIEWER],
+          [UserRole.VIEWER]: [UserRole.VIEWER],
         };
 
         const allowedRoles = roleHierarchy[userRole] || [];
@@ -312,54 +320,54 @@ describe('Controller Security Integration Tests', () => {
       res.json(controller.getPublicData());
     });
 
-    app.getHttpAdapter().get('/api/protected', (_req, res) => {
-      res.json(controller.getProtectedData(_req.user));
+    app.getHttpAdapter().get('/api/protected', (req, res) => {
+      res.json(controller.getProtectedData(req.user));
     });
 
-    app.getHttpAdapter().get('/api/admin', (_req, res) => {
-      const middleware = checkRole(UserRole._ADMIN);
-      middleware(_req, res, () => {
-        res.json(controller.getAdminData(_req.user));
+    app.getHttpAdapter().get('/api/admin', (req, res) => {
+      const middleware = checkRole(UserRole.ADMIN);
+      middleware(req, res, () => {
+        res.json(controller.getAdminData(req.user));
       });
     });
 
-    app.getHttpAdapter().get('/api/system', (_req, res) => {
-      const middleware = checkRole(UserRole._ADMIN);
-      middleware(_req, res, () => {
-        res.json(controller.getSystemData(_req.user));
+    app.getHttpAdapter().get('/api/system', (req, res) => {
+      const middleware = checkRole(UserRole.ADMIN);
+      middleware(req, res, () => {
+        res.json(controller.getSystemData(req.user));
       });
     });
 
-    app.getHttpAdapter().post('/api/resources', (_req, res) => {
-      const middleware = checkRole(UserRole._OPERATOR);
-      middleware(_req, res, () => {
-        res.json(controller.createResource(req.user, _req.body));
+    app.getHttpAdapter().post('/api/resources', (req, res) => {
+      const middleware = checkRole(UserRole.OPERATOR);
+      middleware(req, res, () => {
+        res.json(controller.createResource(req.user, req.body));
       });
     });
 
-    app.getHttpAdapter().delete('/api/resources/:id', (_req, res) => {
-      const middleware = checkRole(UserRole._ADMIN);
-      middleware(_req, res, () => {
-        res.json(controller.deleteResource(req.user, _req.params.id));
+    app.getHttpAdapter().delete('/api/resources/:id', (req, res) => {
+      const middleware = checkRole(UserRole.ADMIN);
+      middleware(req, res, () => {
+        res.json(controller.deleteResource(req.user, req.params.id));
       });
     });
 
-    app.getHttpAdapter().post('/api/upload', (_req, res) => {
-      const middleware = checkRole(UserRole._OPERATOR);
-      middleware(_req, res, () => {
+    app.getHttpAdapter().post('/api/upload', (req, res) => {
+      const middleware = checkRole(UserRole.OPERATOR);
+      middleware(req, res, () => {
         // Simulate file upload
         const mockFile = {
           originalname: req.headers['x-filename'] || 'unknown',
-          size: parseInt(_req.headers['content-length']) || 0,
+          size: parseInt(req.headers['content-length']) || 0,
         };
-        res.json(controller.uploadFile(_req.user, mockFile));
+        res.json(controller.uploadFile(req.user, mockFile));
       });
     });
 
-    app.getHttpAdapter().get('/api/users/search', (_req, res) => {
-      const middleware = checkRole(UserRole._OPERATOR);
-      middleware(_req, res, () => {
-        res.json(controller.searchUsers(req.user, _req.query.q as string));
+    app.getHttpAdapter().get('/api/users/search', (req, res) => {
+      const middleware = checkRole(UserRole.OPERATOR);
+      middleware(req, res, () => {
+        res.json(controller.searchUsers(req.user, req.query.q as string));
       });
     });
 
@@ -381,7 +389,7 @@ describe('Controller Security Integration Tests', () => {
       const testId = `${operationId}_public_access`;
       securityLogger.info(`[${testId}] Testing public endpoint access`);
 
-      const _response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .get('/public/data')
         .expect(200);
 
@@ -395,7 +403,7 @@ describe('Controller Security Integration Tests', () => {
       const testId = `${operationId}_auth_required`;
       securityLogger.info(`[${testId}] Testing authentication requirement`);
 
-      const _response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .get('/api/protected')
         .expect(401);
 
@@ -410,7 +418,7 @@ describe('Controller Security Integration Tests', () => {
         `[${testId}] Testing valid authentication token acceptance`,
       );
 
-      const _response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .get('/api/protected')
         .set('Authorization', 'Bearer admin-token')
         .expect(200);
@@ -562,7 +570,7 @@ describe('Controller Security Integration Tests', () => {
         const expectedStatus = testCase.shouldPass ? 200 : 403;
 
         const requestObj = request(app.getHttpServer());
-        const _req = requestObj[method](testCase.endpoint).set(
+        let req = requestObj[method](testCase.endpoint).set(
           'Authorization',
           `Bearer ${testCase.token}`,
         );
@@ -593,7 +601,7 @@ describe('Controller Security Integration Tests', () => {
         },
       };
 
-      const _response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .send(xssPayloads)
@@ -620,7 +628,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const maliciousQuery of sqlInjectionQueries) {
-        const _response = await request(app.getHttpServer())
+        const response = await request(app.getHttpServer())
           .get('/api/users/search')
           .query({ q: maliciousQuery })
           .set('Authorization', 'Bearer operator-token')
@@ -651,7 +659,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const filename of maliciousFileNames) {
-        const _response = await request(app.getHttpServer())
+        const response = await request(app.getHttpServer())
           .post('/api/upload')
           .set('Authorization', 'Bearer operator-token')
           .set('X-Filename', filename)
@@ -684,7 +692,7 @@ describe('Controller Security Integration Tests', () => {
       };
 
       // Should either accept with limits or reject gracefully
-      const _response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .send(oversizedData);
@@ -702,7 +710,7 @@ describe('Controller Security Integration Tests', () => {
       const testId = `${operationId}_security_headers`;
       securityLogger.info(`[${testId}] Testing security headers inclusion`);
 
-      const _response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .get('/public/data')
         .expect(200);
 
@@ -857,7 +865,7 @@ describe('Controller Security Integration Tests', () => {
         'User-Agent': 'Normal-Agent\r\nX-Evil-Header: injected',
       };
 
-      const _response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .get('/api/protected')
         .set(maliciousHeaders)
         .expect((res) => {
@@ -883,7 +891,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of splittingPayloads) {
-        const _response = await request(app.getHttpServer())
+        const response = await request(app.getHttpServer())
           .get('/api/users/search')
           .query({ q: _payload })
           .set('Authorization', 'Bearer operator-token')
@@ -904,7 +912,7 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Testing request smuggling prevention`);
 
       // Attempt request smuggling with conflicting headers
-      const _response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .set('Content-Length', '100')
@@ -933,7 +941,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of traversalPayloads) {
-        const _response = await request(app.getHttpServer())
+        const response = await request(app.getHttpServer())
           .delete(`/api/resources/${encodeURIComponent(_payload)}`)
           .set('Authorization', 'Bearer admin-token')
           .expect((res) => {
@@ -1012,7 +1020,7 @@ describe('Controller Security Integration Tests', () => {
 
       for (const operation of sensitiveOperations) {
         const requestObj = request(app.getHttpServer());
-        const _req = requestObj[operation.method](operation.path).set(
+        let req = requestObj[operation.method](operation.path).set(
           'Authorization',
           `Bearer ${operation.token}`,
         );
@@ -1021,7 +1029,7 @@ describe('Controller Security Integration Tests', () => {
           req = req.send(operation.body);
         }
 
-        const _response = await req.expect((res) => {
+        const response = await req.expect((res) => {
           expect([200, 201, 204].includes(res.status)).toBe(true);
         });
 

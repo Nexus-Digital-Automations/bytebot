@@ -51,7 +51,7 @@ export interface AuthenticatedRequest extends Request {
  */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  private readonly logger = new Logger(JwtAuthGuard._name);
+  private readonly logger = new Logger(JwtAuthGuard.name);
 
   constructor(private readonly reflector: Reflector) {
     super();
@@ -70,12 +70,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const startTime = Date.now();
 
     // Check if route is marked as public (skip authentication)
-    const _isPublic = this.reflector.getAllAndOverride<boolean>('_isPublic', [
+    const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (_isPublic) {
+    if (isPublic) {
       this.logger.debug(
         `[${operationId}] Route marked as public, skipping authentication`,
         {
@@ -113,7 +113,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     try {
       // Call parent authentication logic (Passport JWT strategy)
-      const _result = await super.canActivate(context);
+      const result = await super.canActivate(context);
 
       if (result) {
         const authTime = Date.now() - startTime;
@@ -156,7 +156,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
           operationId,
           method: request.method,
           url: request.url,
-          error: error instanceof Error ? error.message : String(_error),
+          error: _error instanceof Error ? _error.message : String(_error),
           authTimeMs: authTime,
           ipAddress: this.getClientIpAddress(request),
           userAgent: request.headers['user-agent']?.substring(0, 100),
@@ -171,7 +171,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
       // Re-throw as UnauthorizedException for consistent error handling
       if (_error instanceof UnauthorizedException) {
-        throw error;
+        throw _error;
       }
 
       throw new UnauthorizedException(
@@ -226,7 +226,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Computer control authentication failed - no user`,
         {
           operationId,
-          info: info?.message || info?._name || String(info),
+          info: info?.message || info?.name || String(info),
           url: request.url,
           method: request.method,
           ipAddress: this.getClientIpAddress(request),
@@ -503,7 +503,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       }
 
       // Decode JWT payload (without verification - just for timing check)
-      const _payload = JSON.parse(
+      const payload = JSON.parse(
         Buffer.from(tokenParts[1], 'base64url').toString('utf8'),
       );
 
@@ -524,7 +524,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     } catch (_error) {
       // If we can't decode the token, let the main JWT validation handle it
       this.logger.debug(
-        `[${operationId}] Could not decode JWT for replay check: ${error.message}`,
+        `[${operationId}] Could not decode JWT for replay check: ${_error instanceof Error ? _error.message : String(_error)}`,
       );
     }
 
@@ -556,7 +556,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     // Check user role permissions for computer control
-    const allowedRoles: UserRole[] = [UserRole._ADMIN, UserRole._OPERATOR];
+    const allowedRoles: UserRole[] = [UserRole.ADMIN, UserRole.OPERATOR];
     if (!allowedRoles.includes(user.role)) {
       this.logger.warn(
         `[${operationId}] Unauthorized role attempted computer control access`,

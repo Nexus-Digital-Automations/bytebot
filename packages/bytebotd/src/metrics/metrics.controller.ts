@@ -19,7 +19,11 @@ import { Controller, Get, Logger, Header, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Authenticated, CurrentUser, ByteBotdUser } from '../auth/decorators/roles.decorator';
+import {
+  Authenticated,
+  CurrentUser,
+  ByteBotdUser,
+} from '../auth/decorators/roles.decorator';
 import { MetricsService } from './metrics.service';
 
 /**
@@ -29,7 +33,7 @@ import { MetricsService } from './metrics.service';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth('bearer')
 export class MetricsController {
-  private readonly logger = new Logger(MetricsController._name);
+  private readonly logger = new Logger(MetricsController.name);
 
   constructor(private readonly metricsService: MetricsService) {
     this.logger.log('Metrics Controller initialized');
@@ -51,7 +55,7 @@ export class MetricsController {
       userId: user.id,
       username: user.username,
       role: user.role,
-      securityEvent: 'metrics_access_requested'
+      securityEvent: 'metrics_access_requested',
     });
 
     try {
@@ -66,17 +70,14 @@ export class MetricsController {
           userId: user.id,
           username: user.username,
           processingTimeMs: processingTime,
-          securityEvent: 'metrics_access_completed'
-        }
-      );
-
-      this.logger.debug(
-        `[${operationId}] Metrics data size and timing`,
-        {
-          processingTimeMs: processingTime,
-          metricsSize: metricsData.length,
+          securityEvent: 'metrics_access_completed',
         },
       );
+
+      this.logger.debug(`[${operationId}] Metrics data size and timing`, {
+        processingTimeMs: processingTime,
+        metricsSize: metricsData.length,
+      });
 
       // Track metrics endpoint performance
       this.metricsService.recordApiRequestDuration(
@@ -89,8 +90,8 @@ export class MetricsController {
       return metricsData;
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(
+        _error instanceof Error ? _error.message : 'Unknown _error';
+      this.logger.error(
         `[${operationId}] Metrics collection failed: ${errorMessage}`,
       );
 

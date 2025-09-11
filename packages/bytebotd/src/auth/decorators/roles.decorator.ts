@@ -19,7 +19,7 @@ import {
   createParamDecorator,
   ExecutionContext,
 } from '@nestjs/common';
-import { UserRole, _Permission } from '@bytebot/shared';
+import { UserRole, _Permission as Permission } from '@bytebot/shared';
 import { AuthenticatedRequest, ByteBotdUser } from '../guards/jwt-auth.guard';
 
 /**

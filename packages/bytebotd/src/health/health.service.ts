@@ -89,7 +89,7 @@ export class HealthService extends HealthIndicator {
       const memoryUsage = process.memoryUsage();
       const uptime = process.uptime();
 
-      const _response: BasicHealthResponse = {
+      const response: BasicHealthResponse = {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: Math.round(uptime),
@@ -105,10 +105,10 @@ export class HealthService extends HealthIndicator {
       this.logger.debug(
         `[${operationId}] Basic health status retrieved successfully`,
       );
-      return _response;
+      return response;
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? _error.message : 'Unknown _error';
+        _error instanceof Error ? _error.message : 'Unknown error';
       this.logger.error(
         `[${operationId}] Failed to get basic health: ${errorMessage}`,
       );
@@ -362,9 +362,9 @@ export class HealthService extends HealthIndicator {
             status: string;
             responseTime?: string;
           }>,
-          _index: number,
+          index: number,
         ) => {
-          const serviceName = `service_${_index}`;
+          const serviceName = `service_${index}`;
 
           if (result.status === 'fulfilled') {
             results[serviceName] = result.value;

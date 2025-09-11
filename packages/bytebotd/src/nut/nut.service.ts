@@ -145,7 +145,7 @@ const NutKeyMap = Object.entries(Key)
   .filter(([_name]) => isNaN(Number(_name)))
   .reduce(
     (map, [_name, value]) => {
-      map[name] = value as Key;
+      map[_name] = value as Key;
       return map;
     },
     {} as Record<string, Key>,
@@ -157,7 +157,7 @@ const NutKeyMapLowercase: Record<string, Key> = Object.entries(Key)
   .filter(([_name]) => isNaN(Number(_name)))
   .reduce(
     (map, [_name, value]) => {
-      map[name.toLowerCase()] = value as Key;
+      map[_name.toLowerCase()] = value as Key;
       return map;
     },
     {} as Record<string, Key>,
@@ -512,7 +512,7 @@ export class NutService {
       return { success: true };
     } catch (_error) {
       throw new Error(
-        `Failed to send mouse ${button} button ${pressed ? 'press' : 'release'} event: ${error instanceof Error ? _error.message : 'Unknown error'}`,
+        `Failed to send mouse ${button} button ${pressed ? 'press' : 'release'} event: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
       );
     }
   }
@@ -571,8 +571,8 @@ export class NutService {
       return await import('fs').then((fs) => fs.promises.readFile(filepath));
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
-      this.logger._error(`Error taking screenshot: ${errorMessage}`);
-      throw error;
+      this.logger.error(`Error taking screenshot: ${errorMessage}`);
+      throw _error;
     } finally {
       // Clean up the temporary file
       try {
@@ -599,8 +599,8 @@ export class NutService {
       return { x: position.x, y: position.y };
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
-      this.logger._error(`Error getting cursor position: ${errorMessage}`);
-      throw error;
+      this.logger.error(`Error getting cursor position: ${errorMessage}`);
+      throw _error;
     }
   }
 
@@ -629,13 +629,13 @@ export class NutService {
    * @returns {string} Formatted error message
    */
   private getErrorMessage(error: unknown): string {
-    if (_error instanceof Error) {
-      return _error.message;
+    if (error instanceof Error) {
+      return error.message;
     }
-    if (typeof _error === 'string') {
+    if (typeof error === 'string') {
       return error;
     }
-    if (__error && typeof error === 'object' && 'message' in error) {
+    if (error && typeof error === 'object' && 'message' in error) {
       const errorObj = error as { message: unknown };
       return typeof errorObj.message === 'string'
         ? errorObj.message

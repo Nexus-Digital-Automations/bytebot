@@ -15,7 +15,7 @@
  * @author Security Event Validation Pipeline Subagent
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { ComputerActionValidationPipe } from '../computer-action-validation.pipe';
 
@@ -150,7 +150,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
 
       // This should be detected and handled appropriately
       // The test depends on whether unicode normalization creates security risks
-      const _result = await pipe.transform(unicodeAttack, {} as any);
+      const result = await pipe.transform(unicodeAttack, {} as any);
       expect(result).toBeDefined();
     });
 
@@ -181,7 +181,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         coordinates: { x: 100, y: 200 },
       };
 
-      const _result = await pipe.transform(legitimateInput, {} as any);
+      const result = await pipe.transform(legitimateInput, {} as any);
       expect(result).toBeDefined();
       expect(result.action).toBe('move_mouse');
     });
@@ -228,7 +228,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         data: 'test content',
       };
 
-      const _result = await pipe.transform(fileInput, {} as any);
+      const result = await pipe.transform(fileInput, {} as any);
       expect(result).toBeDefined();
 
       // Form actions should use 'form' context

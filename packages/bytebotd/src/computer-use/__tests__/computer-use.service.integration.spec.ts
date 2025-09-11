@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Comprehensive Integration Tests for ComputerUseService
  *
@@ -14,7 +15,7 @@
  * @version 1.0.0
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import {
   ComputerUseService,

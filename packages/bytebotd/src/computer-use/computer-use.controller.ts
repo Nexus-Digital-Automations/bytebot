@@ -19,7 +19,7 @@ import {
   ApiTags,
   ApiParam,
 } from '@nestjs/swagger';
-import { _EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
+import { _EnterpriseRateLimitGuard as EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
 import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import {
@@ -66,7 +66,7 @@ function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
 // Type guard to check if an error has a stack property
 function isErrorWithStack(error: unknown): error is ErrorWithStack {
   return (
-    isErrorWithMessage(_error) &&
+    isErrorWithMessage(error) &&
     'stack' in error &&
     (typeof (error as Record<string, unknown>).stack === 'string' ||
       (error as Record<string, unknown>).stack === undefined)
@@ -75,13 +75,13 @@ function isErrorWithStack(error: unknown): error is ErrorWithStack {
 
 // Extract error message safely from unknown error
 function getErrorMessage(error: unknown): string {
-  if (isErrorWithMessage(_error)) return error.message;
-  return typeof error === 'string' ? error : JSON.stringify(_error);
+  if (isErrorWithMessage(error)) return error.message;
+  return typeof error === 'string' ? error : JSON.stringify(error);
 }
 
 // Extract error stack safely from unknown error
 function getErrorStack(error: unknown): string | undefined {
-  if (isErrorWithStack(_error)) return error.stack;
+  if (isErrorWithStack(error)) return error.stack;
   return undefined;
 }
 

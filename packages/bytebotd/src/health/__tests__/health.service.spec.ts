@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Health Service Test Suite
  *

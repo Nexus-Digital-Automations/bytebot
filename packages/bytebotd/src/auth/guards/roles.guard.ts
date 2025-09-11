@@ -20,10 +20,10 @@ import {
   ExecutionContext,
   ForbiddenException,
   Logger,
-} from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { UserRole, _Permission } from "@bytebot/shared";
-import { AuthenticatedRequest, ByteBotdUser } from "./jwt-auth.guard";
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { UserRole, _Permission as Permission } from '@bytebot/shared';
+import { AuthenticatedRequest, ByteBotdUser } from './jwt-auth.guard';
 
 /**
  * Role hierarchy definition for permission inheritance
@@ -93,13 +93,13 @@ export class RolesGuard implements CanActivate {
 
     // Get required roles from metadata
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
-      "roles",
+      'roles',
       [context.getHandler(), context.getClass()],
     );
 
     // Get required permissions from metadata
     const requiredPermissions = this.reflector.getAllAndOverride<Permission[]>(
-      "permissions",
+      'permissions',
       [context.getHandler(), context.getClass()],
     );
 
@@ -126,7 +126,7 @@ export class RolesGuard implements CanActivate {
         },
       );
       throw new ForbiddenException(
-        "Authentication required for this operation",
+        'Authentication required for this operation',
       );
     }
 
@@ -147,9 +147,9 @@ export class RolesGuard implements CanActivate {
             userRole: user.role,
             requiredRoles: requiredRoles.map((r) => r.toString()),
             authTimeMs: authTime,
-            securityEvent: "role_authorization_failed",
+            securityEvent: 'role_authorization_failed',
           });
-          throw new ForbiddenException("Insufficient role for this operation");
+          throw new ForbiddenException('Insufficient role for this operation');
         }
       }
 
@@ -167,10 +167,10 @@ export class RolesGuard implements CanActivate {
             userRole: user.role,
             requiredPermissions: requiredPermissions.map((p) => p.toString()),
             authTimeMs: authTime,
-            securityEvent: "permission_authorization_failed",
+            securityEvent: 'permission_authorization_failed',
           });
           throw new ForbiddenException(
-            "Insufficient permissions for this operation",
+            'Insufficient permissions for this operation',
           );
         }
       }
@@ -183,13 +183,13 @@ export class RolesGuard implements CanActivate {
         requiredPermissions:
           requiredPermissions?.map((p) => p.toString()) || [],
         authTimeMs: authTime,
-        securityEvent: "rbac_authorization_success",
+        securityEvent: 'rbac_authorization_success',
       });
 
       return true;
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : String(_error);
+        _error instanceof Error ? _error.message : String(_error);
 
       if (_error instanceof ForbiddenException) {
         throw _error;
@@ -200,11 +200,11 @@ export class RolesGuard implements CanActivate {
         userId: user.id,
         error: errorMessage,
         authTimeMs: authTime,
-        securityEvent: "rbac_authorization_error",
+        securityEvent: 'rbac_authorization_error',
       });
 
       throw new ForbiddenException(
-        "Authorization failed for computer control operation",
+        'Authorization failed for computer control operation',
       );
     }
   }

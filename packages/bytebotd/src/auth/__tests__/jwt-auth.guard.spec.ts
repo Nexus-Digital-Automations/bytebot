@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * JWT Authentication Guard Test Suite
  *
@@ -13,7 +14,7 @@
  * @coverage-target 95%+
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -50,7 +51,7 @@ class MockJwtAuthGuard {
       });
 
       // Validate token payload structure
-      if (!__payload.sub || !payload.email || !_payload.role) {
+      if (!_payload.sub || !_payload.email || !_payload.role) {
         throw new UnauthorizedException('Invalid token _payload structure');
       }
 
@@ -62,10 +63,10 @@ class MockJwtAuthGuard {
 
       // Attach user information to request
       request.user = {
-        id: payload.sub,
-        email: payload.email,
-        role: payload.role,
-        permissions: payload.permissions || [],
+        id: _payload.sub,
+        email: _payload.email,
+        role: _payload.role,
+        permissions: _payload.permissions || [],
       };
 
       return true;
@@ -169,7 +170,7 @@ describe('JwtAuthGuard', () => {
       const context = createMockExecutionContext({});
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(true);
 
-      const _result = await guard.canActivate(context);
+      const result = await guard.canActivate(context);
 
       expect(result).toBe(true);
       expect(jwtService.verifyAsync).not.toHaveBeenCalled();
@@ -217,7 +218,7 @@ describe('JwtAuthGuard', () => {
         exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
       });
 
-      const _result = await guard.canActivate(context);
+      const result = await guard.canActivate(context);
 
       expect(result).toBe(true);
       expect(jwtService.verifyAsync).toHaveBeenCalledWith(validToken, {
@@ -309,7 +310,7 @@ describe('JwtAuthGuard', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(validPayload);
 
-      const _result = await guard.canActivate(context);
+      const result = await guard.canActivate(context);
       const request = context.switchToHttp().getRequest();
 
       expect(result).toBe(true);
@@ -710,7 +711,7 @@ describe('JwtAuthGuard', () => {
         exp: Math.floor(Date.now() / 1000) + 3600,
       });
 
-      const _result = await guard.canActivate(context);
+      const result = await guard.canActivate(context);
       expect(result).toBe(true);
 
       // Verify no persistent references or leaks

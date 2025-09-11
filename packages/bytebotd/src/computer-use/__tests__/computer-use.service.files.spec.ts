@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Comprehensive Unit Tests for ComputerUseService File Operations
  *
@@ -101,7 +102,7 @@ jest.mock('axios', () => ({
   },
 }));
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import { promisify } from 'util';

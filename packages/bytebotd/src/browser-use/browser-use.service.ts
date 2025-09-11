@@ -67,7 +67,7 @@ export class BrowserUseService {
 
     this.logger.log(`Starting browser task execution: ${taskId}`, {
       taskId,
-      name: taskDto._name,
+      name: taskDto.name,
       actionsCount: taskDto.actions.length,
       priority: taskDto.priority,
     });
@@ -88,7 +88,7 @@ export class BrowserUseService {
       const session = await this.getOrCreateSession(taskDto.sessionConfig);
 
       // Execute task actions sequentially
-      const _result = await this.executeTaskActions(task, session);
+      const result = await this.executeTaskActions(task, session);
 
       // Update task status
       await this.taskService.updateTaskStatus(taskId, {
@@ -112,7 +112,7 @@ export class BrowserUseService {
       const errorMessage = _err instanceof Error ? _err.message : String(_err);
       const executionTimeMs = Date.now() - startTime;
 
-      this.logger._err(`Browser task failed: ${taskId}`, {
+      this.logger.error(`Browser task failed: ${taskId}`, {
         taskId,
         error: errorMessage,
         executionTimeMs,
@@ -125,8 +125,8 @@ export class BrowserUseService {
         executionTimeMs,
         errorMessage,
         errorDetails: {
-          type: err instanceof Error ? err.constructor.name : 'UnknownError',
-          stack: err instanceof Error ? err.stack : undefined,
+          type: _err instanceof Error ? _err.constructor.name : 'UnknownError',
+          stack: _err instanceof Error ? _err.stack : undefined,
           timestamp: new Date(),
         },
       });
@@ -141,7 +141,7 @@ export class BrowserUseService {
         totalActions: taskDto.actions.length,
         errorMessage,
         errorDetails: {
-          type: err instanceof Error ? err.constructor.name : 'UnknownError',
+          type: _err instanceof Error ? _err.constructor.name : 'UnknownError',
           message: errorMessage,
           timestamp: new Date(),
         },
@@ -197,7 +197,7 @@ export class BrowserUseService {
         filepath,
         config,
       );
-      const _result = await this.executePythonScript(screenshotScript);
+      const result = await this.executePythonScript(screenshotScript);
 
       if (!result.success) {
         throw new Error(`Screenshot capture failed: ${result.error}`);
@@ -222,11 +222,11 @@ export class BrowserUseService {
         },
       };
     } catch (_err) {
-      this.logger._err(
+      this.logger.error(
         `Screenshot capture failed for session: ${sessionId}`,
-        err,
+        _err,
       );
-      throw err;
+      throw _err;
     }
   }
 
@@ -265,7 +265,7 @@ export class BrowserUseService {
         sessionId,
         config,
       );
-      const _result = await this.executePythonScript(extractionScript);
+      const result = await this.executePythonScript(extractionScript);
 
       if (!result.success) {
         throw new Error(`DOM extraction failed: ${result.error}`);
@@ -284,8 +284,11 @@ export class BrowserUseService {
         },
       };
     } catch (_err) {
-      this.logger._err(`DOM extraction failed for session: ${sessionId}`, err);
-      throw err;
+      this.logger.error(
+        `DOM extraction failed for session: ${sessionId}`,
+        _err,
+      );
+      throw _err;
     }
   }
 
@@ -293,9 +296,9 @@ export class BrowserUseService {
    * Create async job for long-running browser automation tasks
    */
   async createAsyncJob(_dto: CreateAsyncJobDto): Promise<AsyncJobResultDto> {
-    this.logger.log(`Creating async job: ${dto.name}`, {
-      jobName: dto.name,
-      jobType: dto.jobType,
+    this.logger.log(`Creating async job: ${_dto.name}`, {
+      jobName: _dto.name,
+      jobType: _dto.jobType,
       priority: _dto.priority,
     });
 
@@ -345,7 +348,7 @@ export class BrowserUseService {
     });
 
     try {
-      const _result = await this.captureScreenshot(sessionId, {
+      const result = await this.captureScreenshot(sessionId, {
         fullPage: options.fullPage,
         quality: options.quality,
         format: 'png',
@@ -362,8 +365,8 @@ export class BrowserUseService {
         metadata: result.metadata,
       };
     } catch (_err) {
-      this.logger._err(`Screenshot failed for session: ${sessionId}`, err);
-      throw err;
+      this.logger.error(`Screenshot failed for session: ${sessionId}`, _err);
+      throw _err;
     }
   }
 
@@ -391,7 +394,7 @@ export class BrowserUseService {
       // Extract data for each selector
       for (const [key, selector] of Object.entries(config.selectors)) {
         try {
-          const _result = await this.extractDomData(sessionId, {
+          const result = await this.extractDomData(sessionId, {
             selector,
             includeText: true,
             includeAttributes: true,
@@ -401,7 +404,7 @@ export class BrowserUseService {
         } catch (_err) {
           this.logger.warn(
             `Failed to extract data for selector ${key}: ${selector}`,
-            err,
+            _err,
           );
           extractedData[key] = null;
         }
@@ -409,11 +412,11 @@ export class BrowserUseService {
 
       return extractedData;
     } catch (_err) {
-      this.logger._err(
+      this.logger.error(
         `Page data extraction failed for session: ${sessionId}`,
-        err,
+        _err,
       );
-      throw err;
+      throw _err;
     }
   }
 
@@ -482,7 +485,7 @@ export class BrowserUseService {
         const actionResult = await this.executeAction(
           session.sessionId,
           action,
-          _i,
+          i,
         );
 
         actionsCompleted++;
@@ -548,7 +551,7 @@ export class BrowserUseService {
         metadata: { error: errorMessage },
       });
 
-      throw err;
+      throw _err;
     }
   }
 
@@ -597,7 +600,7 @@ export class BrowserUseService {
       }
 
       // Execute the action
-      const _result = await this.executePythonScript(script);
+      const result = await this.executePythonScript(script);
 
       if (!result.success) {
         return {

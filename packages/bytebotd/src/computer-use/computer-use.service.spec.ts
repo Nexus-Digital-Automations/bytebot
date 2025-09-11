@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Comprehensive Unit Tests for ComputerUseService
  *
@@ -13,7 +14,7 @@
  * @version 1.0.0
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import {
   ComputerUseService,
   ErrorHandler,
@@ -610,7 +611,7 @@ describe('ComputerUseService', () => {
         const fakeImageBuffer = Buffer.from('fake-image-data');
         mockNutService.screendump.mockResolvedValue(fakeImageBuffer);
 
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         expect(mockNutService.screendump).toHaveBeenCalled();
         expect(result).toMatchObject({
@@ -632,7 +633,7 @@ describe('ComputerUseService', () => {
 
         mockNutService.getCursorPosition.mockResolvedValue({ x: 150, y: 250 });
 
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         expect(result).toMatchObject({
           x: 150,
@@ -793,7 +794,7 @@ describe('ComputerUseService', () => {
         (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
         mockExecAsync.mockResolvedValue({ stdout: '' });
 
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         expect(result).toMatchObject({
           success: true,
@@ -881,7 +882,7 @@ describe('ComputerUseService', () => {
           .mockResolvedValueOnce({ stdout: '' }) // chmod
           .mockResolvedValueOnce({ stdout: '17 1609459200' }); // stat
 
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         expect(result).toMatchObject({
           success: true,
@@ -975,7 +976,7 @@ describe('ComputerUseService', () => {
   describe('Error Handling', () => {
     describe('ErrorHandler utility', () => {
       it('should extract _error messages from Error objects', () => {
-        const _error = new Error('Test error message');
+        const error = new Error('Test error message');
         const message = ErrorHandler.extractErrorMessage(_error);
         expect(message).toBe('Test error message');
       });
@@ -998,7 +999,7 @@ describe('ComputerUseService', () => {
       });
 
       it('should extract stack traces from Error objects', () => {
-        const _error = new Error('Test error');
+        const error = new Error('Test error');
         const stack = ErrorHandler.extractErrorStack(_error);
         expect(stack).toBeDefined();
         expect(stack).toContain('Error: Test error');

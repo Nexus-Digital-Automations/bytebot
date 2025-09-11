@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * RBAC Roles Guard Advanced Security Test Suite
  *
@@ -15,7 +16,7 @@
  * @security-focus Critical
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RolesGuard } from '../guards/roles.guard';
@@ -282,7 +283,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         }
 
         try {
-          const _result = await guard.canActivate(context);
+          const result = await guard.canActivate(context);
           return { success: true, index };
         } catch (_error) {
           return { success: false, index, _error: __error.message };
@@ -508,7 +509,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .mockReturnValueOnce(undefined);
 
       // Should allow access but safely handle XSS content
-      const _result = await guard.canActivate(context);
+      const result = await guard.canActivate(context);
       expect(result).toBe(true);
 
       // Verify user properties are handled safely (no script execution)
@@ -541,7 +542,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .mockReturnValueOnce(undefined);
 
       // Should allow access but safely handle SQL injection content
-      const _result = await guard.canActivate(context);
+      const result = await guard.canActivate(context);
       expect(result).toBe(true);
 
       // Verify SQL injection payloads are safely handled
@@ -592,7 +593,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         );
 
         try {
-          const _result = await guard.canActivate(context);
+          const result = await guard.canActivate(context);
           return { success: true, userId: user.id };
         } catch (_error) {
           return { success: false, userId: user.id, _error: __error.message };
@@ -653,7 +654,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         }
 
         try {
-          const _result = await guard.canActivate(context);
+          const result = await guard.canActivate(context);
           return { success: true, index };
         } catch (_error) {
           return { success: false, index };

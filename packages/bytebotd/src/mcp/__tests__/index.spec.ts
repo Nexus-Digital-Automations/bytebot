@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * MCP Index Module Test Suite
  *

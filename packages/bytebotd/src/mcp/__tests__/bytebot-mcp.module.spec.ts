@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * BytebotMcpModule Test Suite
  *

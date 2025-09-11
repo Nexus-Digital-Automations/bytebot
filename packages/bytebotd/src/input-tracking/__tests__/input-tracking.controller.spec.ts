@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Input Tracking Controller Test Suite
  *
@@ -65,7 +66,7 @@ describe('InputTrackingController', () => {
     isActive: true,
   };
 
-  const mockViewerUser: MockByteBotdUser = {
+  const _mockViewerUser: MockByteBotdUser = {
     id: 'viewer_user_1',
     username: 'viewer',
     email: 'viewer@bytebot.ai',
@@ -159,7 +160,7 @@ describe('InputTrackingController', () => {
       const testId = `${operationId}_start_admin`;
       console.log(`[${testId}] Testing start tracking with admin user`);
 
-      const _result = controller.start(mockAdminUser);
+      const result = controller.start(mockAdminUser);
 
       expect(service.startTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
@@ -185,7 +186,7 @@ describe('InputTrackingController', () => {
       const testId = `${operationId}_start_operator`;
       console.log(`[${testId}] Testing start tracking with operator user`);
 
-      const _result = controller.start(mockOperatorUser);
+      const result = controller.start(mockOperatorUser);
 
       expect(service.startTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
@@ -218,8 +219,8 @@ describe('InputTrackingController', () => {
       let callCount = 0;
       Date.now = jest.fn(() => originalDateNow() + callCount++);
 
-      const _result1 = controller.start(mockAdminUser);
-      const _result2 = controller.start(mockOperatorUser);
+      const result1 = controller.start(mockAdminUser);
+      const result2 = controller.start(mockOperatorUser);
 
       expect(logger.log).toHaveBeenCalledTimes(2);
       const firstCallArgs = (logger.log as jest.Mock).mock.calls[0];
@@ -240,7 +241,7 @@ describe('InputTrackingController', () => {
       const testId = `${operationId}_timestamp_format`;
       console.log(`[${testId}] Testing timestamp format validation`);
 
-      const _result = controller.start(mockAdminUser);
+      const result = controller.start(mockAdminUser);
       const timestamp = result.timestamp;
 
       // Verify it's a valid ISO string
@@ -258,7 +259,7 @@ describe('InputTrackingController', () => {
       const testId = `${operationId}_stop_admin`;
       console.log(`[${testId}] Testing stop tracking with admin user`);
 
-      const _result = controller.stop(mockAdminUser);
+      const result = controller.stop(mockAdminUser);
 
       expect(service.stopTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
@@ -284,7 +285,7 @@ describe('InputTrackingController', () => {
       const testId = `${operationId}_stop_operator`;
       console.log(`[${testId}] Testing stop tracking with operator user`);
 
-      const _result = controller.stop(mockOperatorUser);
+      const result = controller.stop(mockOperatorUser);
 
       expect(service.stopTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
@@ -347,7 +348,7 @@ describe('InputTrackingController', () => {
       const testId = `${operationId}_response_structure_start`;
       console.log(`[${testId}] Testing start response structure consistency`);
 
-      const _result = controller.start(mockAdminUser);
+      const result = controller.start(mockAdminUser);
 
       expect(result).toMatchObject({
         status: expect.any(String),
@@ -365,7 +366,7 @@ describe('InputTrackingController', () => {
       const testId = `${operationId}_response_structure_stop`;
       console.log(`[${testId}] Testing stop response structure consistency`);
 
-      const _result = controller.stop(mockOperatorUser);
+      const result = controller.stop(mockOperatorUser);
 
       expect(result).toMatchObject({
         status: expect.any(String),
@@ -491,7 +492,7 @@ describe('InputTrackingController', () => {
         // missing username, email, role
       } as any;
 
-      const _result = controller.start(incompleteUser);
+      const result = controller.start(incompleteUser);
 
       expect(result.userId).toBe('test_user');
       expect(result.status).toBe('started');
@@ -588,7 +589,7 @@ describe('InputTrackingController', () => {
       };
 
       // Controller should handle gracefully (guards would prevent this in real scenario)
-      const _result = controller.start(malformedUser as any);
+      const result = controller.start(malformedUser as any);
       expect(result.userId).toBe('test');
 
       console.log(
@@ -615,7 +616,7 @@ describe('InputTrackingController', () => {
       console.log(`[${testId}] Testing roles guard protection`);
 
       // Controller should work with properly authenticated users
-      const _result = controller.start(mockAdminUser);
+      const result = controller.start(mockAdminUser);
       expect(result.status).toBe('started');
 
       console.log(`[${testId}] Roles guard protection test completed`);
@@ -650,8 +651,8 @@ describe('InputTrackingController', () => {
       console.log(`[${testId}] Testing state consistency`);
 
       // Multiple operations should not interfere with each other
-      const _result1 = controller.start(mockAdminUser);
-      const _result2 = controller.start(mockOperatorUser);
+      const result1 = controller.start(mockAdminUser);
+      const result2 = controller.start(mockOperatorUser);
       const result3 = controller.stop(mockAdminUser);
 
       expect(result1.status).toBe('started');

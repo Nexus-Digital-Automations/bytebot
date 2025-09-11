@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Unit Tests for Metrics Service
  *
@@ -8,7 +9,7 @@
  * @version 1.0.0
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { MetricsService } from './metrics.service';
 import { register } from 'prom-client';
@@ -26,7 +27,7 @@ describe('MetricsService', () => {
     }).compile();
 
     service = module.get<MetricsService>(MetricsService);
-    logger = module.get<Logger>(Logger) as jest.Mocked<Logger>;
+    _logger = module.get<Logger>(Logger) as jest.Mocked<Logger>;
   });
 
   afterEach(() => {

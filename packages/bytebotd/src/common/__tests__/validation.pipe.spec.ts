@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Validation Pipe Test Suite
  *
@@ -14,7 +15,7 @@
  * @coverage-target 95%+
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import {
   IsString,
@@ -292,7 +293,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const _result = await pipe.transform(validUserData, metadata);
+      const result = await pipe.transform(validUserData, metadata);
 
       expect(result).toMatchObject({
         email: 'test@example.com',
@@ -387,7 +388,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const _result = await pipe.transform(minimalUserData, metadata);
+      const result = await pipe.transform(minimalUserData, metadata);
 
       expect(result.email).toBe('minimal@example.com');
       expect(result.password).toBe('password123');
@@ -413,7 +414,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const _result = await pipe.transform(maliciousData, metadata);
+      const result = await pipe.transform(maliciousData, metadata);
 
       expect(result._name).toBe('Test User');
       expect(result._name).not.toContain('<script>');
@@ -433,7 +434,7 @@ describe('ValidationPipe', () => {
         data: 'url',
       };
 
-      const _result = await pipe.transform(maliciousString, metadata);
+      const result = await pipe.transform(maliciousString, metadata);
 
       expect(result).toBe('Click me');
       expect(result).not.toContain('javascript:');
@@ -453,7 +454,7 @@ describe('ValidationPipe', () => {
         data: 'message',
       };
 
-      const _result = await pipe.transform(maliciousString, metadata);
+      const result = await pipe.transform(maliciousString, metadata);
 
       expect(result).toBe('Hello  world ');
       expect(result).not.toContain('onclick');
@@ -481,7 +482,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const _result = await pipe.transform(nestedMaliciousData, metadata);
+      const result = await pipe.transform(nestedMaliciousData, metadata);
 
       expect(result.description).not.toContain('<script>');
       expect(result.description).toContain('Description');
@@ -506,7 +507,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const _result = await pipe.transform(pollutionAttempt, metadata);
+      const result = await pipe.transform(pollutionAttempt, metadata);
 
       expect(result).not.toHaveProperty('__proto__');
       expect(result).not.toHaveProperty('constructor');
@@ -533,7 +534,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const _result = await pipe.transform(searchData, metadata);
+      const result = await pipe.transform(searchData, metadata);
 
       expect(typeof result.limit).toBe('number');
       expect(typeof result.offset).toBe('number');
@@ -560,7 +561,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const _result = await pipe.transform(searchData, metadata);
+      const result = await pipe.transform(searchData, metadata);
 
       expect(result.query).toBe('padded search query');
       expect(result.query).not.toMatch(/^\s|\s$/); // No leading/trailing whitespace
@@ -585,7 +586,7 @@ describe('ValidationPipe', () => {
       };
 
       // Should not throw but may have undefined/NaN values
-      const _result = await pipe.transform(searchData, metadata);
+      const result = await pipe.transform(searchData, metadata);
 
       expect(result.query).toBe('test');
       // Transform behavior for invalid numbers may vary
@@ -608,7 +609,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const _result = await pipe.transform(searchData, metadata);
+      const result = await pipe.transform(searchData, metadata);
 
       expect(result.limit).toBe(10); // Default value
       expect(result.offset).toBe(0); // Default value
@@ -784,7 +785,7 @@ describe('ValidationPipe', () => {
       };
 
       // Should handle deep nesting without stack overflow
-      const _result = await pipe.transform(deepObject, metadata);
+      const result = await pipe.transform(deepObject, metadata);
       expect(result).toBeDefined();
 
       console.log(`[${testId}] Deep nesting handling test completed`);
@@ -802,7 +803,7 @@ describe('ValidationPipe', () => {
         data: 'search',
       };
 
-      const _result = await pipe.transform(sqlInjectionAttempt, metadata);
+      const result = await pipe.transform(sqlInjectionAttempt, metadata);
 
       // Basic sanitization should remove dangerous characters
       expect(typeof result).toBe('string');
@@ -823,7 +824,7 @@ describe('ValidationPipe', () => {
       };
 
       for (const testCase of testCases) {
-        const _result = await pipe.transform(testCase, metadata);
+        const result = await pipe.transform(testCase, metadata);
         expect(result).toBeDefined(); // Should not throw
       }
 
@@ -843,7 +844,7 @@ describe('ValidationPipe', () => {
       };
 
       // Should handle buffer gracefully
-      const _result = await pipe.transform(overflowAttempt, metadata);
+      const result = await pipe.transform(overflowAttempt, metadata);
       expect(result).toBeDefined();
 
       console.log(`[${testId}] Buffer overflow prevention test completed`);

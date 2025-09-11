@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * NUT Service Unit Tests
  * Comprehensive test suite covering all methods, error handling, and edge cases
@@ -21,7 +22,7 @@
  * @version 1.0.0
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { NutService } from './nut.service';
 import { spawn, type ChildProcessWithoutNullStreams } from 'child_process';
@@ -282,7 +283,7 @@ describe('NutService', () => {
           .spyOn(service as any, 'generateOperationId')
           .mockReturnValue(operationId);
 
-        const _result = await service.sendKeys(['A', 'B', 'C'], 50);
+        const result = await service.sendKeys(['A', 'B', 'C'], 50);
 
         expect(result.success).toBe(true);
         expect(mockKeyboard.pressKey).toHaveBeenCalledWith('A', 'B', 'C');
@@ -298,7 +299,7 @@ describe('NutService', () => {
       });
 
       it('should handle empty keys array', async () => {
-        const _result = await service.sendKeys([]);
+        const result = await service.sendKeys([]);
 
         expect(result.success).toBe(true);
         expect(mockKeyboard.pressKey).toHaveBeenCalledWith();
@@ -321,14 +322,14 @@ describe('NutService', () => {
       });
 
       it('should use default delay when not specified', async () => {
-        const _result = await service.sendKeys(['Space']);
+        const result = await service.sendKeys(['Space']);
         expect(result.success).toBe(true);
       });
     });
 
     describe('holdKeys method', () => {
       it('should successfully hold keys down', async () => {
-        const _result = await service.holdKeys(['LeftShift', 'A'], true);
+        const result = await service.holdKeys(['LeftShift', 'A'], true);
 
         expect(result.success).toBe(true);
         expect(mockKeyboard.pressKey).toHaveBeenCalledWith('LeftShift');
@@ -336,7 +337,7 @@ describe('NutService', () => {
       });
 
       it('should successfully release keys', async () => {
-        const _result = await service.holdKeys(['LeftControl', 'V'], false);
+        const result = await service.holdKeys(['LeftControl', 'V'], false);
 
         expect(result.success).toBe(true);
         expect(mockKeyboard.releaseKey).toHaveBeenCalledWith('LeftControl');
@@ -363,17 +364,17 @@ describe('NutService', () => {
     describe('validateKey method', () => {
       it('should validate valid keys from XKeySymToNutKeyMap', async () => {
         // Test a key that exists in XKeySymToNutKeyMap
-        const _result = await service.sendKeys(['1']);
+        const result = await service.sendKeys(['1']);
         expect(result.success).toBe(true);
       });
 
       it('should validate valid keys from NutKeyMap', async () => {
-        const _result = await service.sendKeys(['A']);
+        const result = await service.sendKeys(['A']);
         expect(result.success).toBe(true);
       });
 
       it('should handle case-insensitive key matching', async () => {
-        const _result = await service.sendKeys(['a']);
+        const result = await service.sendKeys(['a']);
         expect(result.success).toBe(true);
       });
 
@@ -568,7 +569,7 @@ describe('NutService', () => {
     describe('mouseMoveEvent method', () => {
       it('should successfully move mouse to coordinates', async () => {
         const coordinates = { x: 500, y: 300 };
-        const _result = await service.mouseMoveEvent(coordinates);
+        const result = await service.mouseMoveEvent(coordinates);
 
         expect(result.success).toBe(true);
         expect(mockPoint).toHaveBeenCalledWith(500, 300);
@@ -578,7 +579,7 @@ describe('NutService', () => {
 
       it('should handle negative coordinates', async () => {
         const coordinates = { x: -10, y: -20 };
-        const _result = await service.mouseMoveEvent(coordinates);
+        const result = await service.mouseMoveEvent(coordinates);
 
         expect(result.success).toBe(true);
         expect(mockPoint).toHaveBeenCalledWith(-10, -20);
@@ -596,21 +597,21 @@ describe('NutService', () => {
 
     describe('mouseClickEvent method', () => {
       it('should click left mouse button', async () => {
-        const _result = await service.mouseClickEvent('left');
+        const result = await service.mouseClickEvent('left');
 
         expect(result.success).toBe(true);
         expect(mockMouse.click).toHaveBeenCalledWith('LEFT');
       });
 
       it('should click right mouse button', async () => {
-        const _result = await service.mouseClickEvent('right');
+        const result = await service.mouseClickEvent('right');
 
         expect(result.success).toBe(true);
         expect(mockMouse.click).toHaveBeenCalledWith('RIGHT');
       });
 
       it('should click middle mouse button', async () => {
-        const _result = await service.mouseClickEvent('middle');
+        const result = await service.mouseClickEvent('middle');
 
         expect(result.success).toBe(true);
         expect(mockMouse.click).toHaveBeenCalledWith('MIDDLE');
@@ -627,21 +628,21 @@ describe('NutService', () => {
 
     describe('mouseButtonEvent method', () => {
       it('should press left mouse button', async () => {
-        const _result = await service.mouseButtonEvent('left', true);
+        const result = await service.mouseButtonEvent('left', true);
 
         expect(result.success).toBe(true);
         expect(mockMouse.pressButton).toHaveBeenCalledWith('LEFT');
       });
 
       it('should release right mouse button', async () => {
-        const _result = await service.mouseButtonEvent('right', false);
+        const result = await service.mouseButtonEvent('right', false);
 
         expect(result.success).toBe(true);
         expect(mockMouse.releaseButton).toHaveBeenCalledWith('RIGHT');
       });
 
       it('should press middle mouse button', async () => {
-        const _result = await service.mouseButtonEvent('middle', true);
+        const result = await service.mouseButtonEvent('middle', true);
 
         expect(result.success).toBe(true);
         expect(mockMouse.pressButton).toHaveBeenCalledWith('MIDDLE');
@@ -660,28 +661,28 @@ describe('NutService', () => {
 
     describe('mouseWheelEvent method', () => {
       it('should scroll up', async () => {
-        const _result = await service.mouseWheelEvent('up', 3);
+        const result = await service.mouseWheelEvent('up', 3);
 
         expect(result.success).toBe(true);
         expect(mockMouse.scrollUp).toHaveBeenCalledWith(3);
       });
 
       it('should scroll down', async () => {
-        const _result = await service.mouseWheelEvent('down', 2);
+        const result = await service.mouseWheelEvent('down', 2);
 
         expect(result.success).toBe(true);
         expect(mockMouse.scrollDown).toHaveBeenCalledWith(2);
       });
 
       it('should scroll left', async () => {
-        const _result = await service.mouseWheelEvent('left', 1);
+        const result = await service.mouseWheelEvent('left', 1);
 
         expect(result.success).toBe(true);
         expect(mockMouse.scrollLeft).toHaveBeenCalledWith(1);
       });
 
       it('should scroll right', async () => {
-        const _result = await service.mouseWheelEvent('right', 4);
+        const result = await service.mouseWheelEvent('right', 4);
 
         expect(result.success).toBe(true);
         expect(mockMouse.scrollRight).toHaveBeenCalledWith(4);
@@ -701,7 +702,7 @@ describe('NutService', () => {
         const mockPosition = { x: 150, y: 250 };
         mockMouse.getPosition.mockResolvedValueOnce(mockPosition);
 
-        const _result = await service.getCursorPosition();
+        const result = await service.getCursorPosition();
 
         expect(result).toEqual({ x: 150, y: 250 });
         expect(mockMouse.getPosition).toHaveBeenCalled();
@@ -734,7 +735,7 @@ describe('NutService', () => {
         const mockBuffer = Buffer.from('mock-image-data');
         mockFs.readFile.mockResolvedValueOnce(mockBuffer);
 
-        const _result = await service.screendump();
+        const result = await service.screendump();
 
         expect(result).toEqual(mockBuffer);
         expect(mockScreen.capture).toHaveBeenCalledWith(
@@ -768,7 +769,7 @@ describe('NutService', () => {
 
         const warnSpy = jest.spyOn(Logger.prototype, 'warn');
 
-        const _result = await service.screendump();
+        const result = await service.screendump();
 
         expect(result).toEqual(mockBuffer);
         expect(warnSpy).toHaveBeenCalledWith(
@@ -817,12 +818,12 @@ describe('NutService', () => {
 
     describe('getErrorMessage method', () => {
       it('should extract message from Error objects', () => {
-        const _error = new Error('Test error message');
+        const error = new Error('Test error message');
         const getErrorMessage = service['getErrorMessage'] as (
           _error: unknown,
         ) => string;
         const _result = getErrorMessage.call(service, _error);
-        expect(result).toBe('Test error message');
+        expect(_result).toBe('Test error message');
       });
 
       it('should handle string errors', () => {
@@ -831,7 +832,7 @@ describe('NutService', () => {
           _error: unknown,
         ) => string;
         const _result = getErrorMessage.call(service, _error);
-        expect(result).toBe('String error message');
+        expect(_result).toBe('String error message');
       });
 
       it('should extract message from objects with message property', () => {
@@ -840,7 +841,7 @@ describe('NutService', () => {
           _error: unknown,
         ) => string;
         const _result = getErrorMessage.call(service, _error);
-        expect(result).toBe('Object error message');
+        expect(_result).toBe('Object error message');
       });
 
       it('should handle objects with non-string message', () => {
@@ -849,7 +850,7 @@ describe('NutService', () => {
           _error: unknown,
         ) => string;
         const _result = getErrorMessage.call(service, _error);
-        expect(result).toBe(JSON.stringify({ nested: 'error' }));
+        expect(_result).toBe(JSON.stringify({ nested: 'error' }));
       });
 
       it('should return default message for unknown _error types', () => {
@@ -858,7 +859,7 @@ describe('NutService', () => {
           _error: unknown,
         ) => string;
         const _result = getErrorMessage.call(service, _error);
-        expect(result).toBe('Unknown error occurred');
+        expect(_result).toBe('Unknown error occurred');
       });
 
       it('should handle null and undefined errors', () => {
@@ -918,19 +919,19 @@ describe('NutService', () => {
       it('should map lowercase letters correctly', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
         const _result = charToKeyInfo.call(service, 'a');
-        expect(result).toEqual({ keyCode: 'A', withShift: false });
+        expect(_result).toEqual({ keyCode: 'A', withShift: false });
       });
 
       it('should map uppercase letters with shift', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
         const _result = charToKeyInfo.call(service, 'A');
-        expect(result).toEqual({ keyCode: 'A', withShift: true });
+        expect(_result).toEqual({ keyCode: 'A', withShift: true });
       });
 
       it('should map numbers correctly', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
         const _result = charToKeyInfo.call(service, '5');
-        expect(result).toEqual({ keyCode: 'Num5', withShift: false });
+        expect(_result).toEqual({ keyCode: 'Num5', withShift: false });
       });
 
       it('should map special characters without shift', () => {
@@ -954,7 +955,7 @@ describe('NutService', () => {
       it('should return null for unmappable characters', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
         const _result = charToKeyInfo.call(service, '€');
-        expect(result).toBeNull();
+        expect(_result).toBeNull();
       });
     });
   });

@@ -31,7 +31,7 @@ import {
  */
 @Injectable()
 export class MetricsService {
-  private readonly logger = new Logger(MetricsService._name);
+  private readonly logger = new Logger(MetricsService.name);
 
   // API Request Metrics
   private readonly httpRequestsTotal: Counter<string>;
@@ -82,133 +82,133 @@ export class MetricsService {
 
     // Initialize API Request Metrics
     this.httpRequestsTotal = new Counter({
-      _name: 'bytebot_http_requests_total',
+      name: 'bytebot_http_requests_total',
       help: 'Total number of HTTP requests',
       labelNames: ['method', 'route', 'status_code'],
     });
 
     this.httpRequestDuration = new Histogram({
-      _name: 'bytebot_http_request_duration_seconds',
+      name: 'bytebot_http_request_duration_seconds',
       help: 'HTTP request duration in seconds',
       labelNames: ['method', 'route', 'status_code'],
       buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10],
     });
 
     this.httpRequestsInFlight = new Gauge({
-      _name: 'bytebot_http_requests_in_flight',
+      name: 'bytebot_http_requests_in_flight',
       help: 'Number of HTTP requests currently being processed',
       labelNames: ['method', 'route'],
     });
 
     // Initialize Task Processing Metrics
     this.taskProcessingDuration = new Histogram({
-      _name: 'bytebot_task_processing_duration_seconds',
+      name: 'bytebot_task_processing_duration_seconds',
       help: 'Task processing duration in seconds',
       labelNames: ['task_type', 'status'],
       buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 300],
     });
 
     this.taskProcessingTotal = new Counter({
-      _name: 'bytebot_task_processing_total',
+      name: 'bytebot_task_processing_total',
       help: 'Total number of processed tasks',
       labelNames: ['task_type', 'status'],
     });
 
     this.tasksInProgress = new Gauge({
-      _name: 'bytebot_tasks_in_progress',
+      name: 'bytebot_tasks_in_progress',
       help: 'Number of tasks currently being processed',
       labelNames: ['task_type'],
     });
 
     // Initialize Computer-use Operation Metrics
     this.computerUseOperationsTotal = new Counter({
-      _name: 'bytebot_computer_use_operations_total',
+      name: 'bytebot_computer_use_operations_total',
       help: 'Total number of computer-use operations',
       labelNames: ['operation_type', 'status'],
     });
 
     this.computerUseOperationDuration = new Histogram({
-      _name: 'bytebot_computer_use_operation_duration_seconds',
+      name: 'bytebot_computer_use_operation_duration_seconds',
       help: 'Computer-use operation duration in seconds',
       labelNames: ['operation_type', 'status'],
       buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2],
     });
 
     this.computerUseErrors = new Counter({
-      _name: 'bytebot_computer_use_errors_total',
+      name: 'bytebot_computer_use_errors_total',
       help: 'Total number of computer-use operation errors',
       labelNames: ['operation_type', 'error_type'],
     });
 
     // Initialize WebSocket Metrics
     this.websocketConnections = new Gauge({
-      _name: 'bytebot_websocket_connections',
+      name: 'bytebot_websocket_connections',
       help: 'Number of active WebSocket connections',
       labelNames: ['connection_type'],
     });
 
     this.websocketMessages = new Counter({
-      _name: 'bytebot_websocket_messages_total',
+      name: 'bytebot_websocket_messages_total',
       help: 'Total number of WebSocket messages',
       labelNames: ['direction', 'message_type'],
     });
 
     // Initialize Database Metrics
     this.databaseConnections = new Gauge({
-      _name: 'bytebot_database_connections',
+      name: 'bytebot_database_connections',
       help: 'Number of active database connections',
       labelNames: ['database', 'state'],
     });
 
     this.databaseQueryDuration = new Histogram({
-      _name: 'bytebot_database_query_duration_seconds',
+      name: 'bytebot_database_query_duration_seconds',
       help: 'Database query duration in seconds',
       labelNames: ['operation', 'table'],
       buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],
     });
 
     this.databaseErrors = new Counter({
-      _name: 'bytebot_database_errors_total',
+      name: 'bytebot_database_errors_total',
       help: 'Total number of database errors',
       labelNames: ['operation', 'error_type'],
     });
 
     // Initialize Cache Metrics
     this.cacheOperationsTotal = new Counter({
-      _name: 'bytebot_cache_operations_total',
+      name: 'bytebot_cache_operations_total',
       help: 'Total number of cache operations',
       labelNames: ['operation', 'result'],
     });
 
     this.cacheOperationDuration = new Histogram({
-      _name: 'bytebot_cache_operation_duration_seconds',
+      name: 'bytebot_cache_operation_duration_seconds',
       help: 'Cache operation duration in seconds',
       labelNames: ['operation', 'result'],
       buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
     });
 
     this.cacheHitRate = new Gauge({
-      _name: 'bytebot_cache_hit_rate',
+      name: 'bytebot_cache_hit_rate',
       help: 'Cache hit rate percentage',
       labelNames: ['namespace'],
     });
 
     // Initialize Compression Metrics
     this.compressionOperationsTotal = new Counter({
-      _name: 'bytebot_compression_operations_total',
+      name: 'bytebot_compression_operations_total',
       help: 'Total number of compression operations',
       labelNames: ['algorithm', 'result'],
     });
 
     this.compressionRatio = new Histogram({
-      _name: 'bytebot_compression_ratio',
+      name: 'bytebot_compression_ratio',
       help: 'Compression ratio (compressed_size / original_size)',
       labelNames: ['algorithm'],
       buckets: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
     });
 
     this.compressionDuration = new Histogram({
-      _name: 'bytebot_compression_duration_seconds',
+      name: 'bytebot_compression_duration_seconds',
       help: 'Compression operation duration in seconds',
       labelNames: ['algorithm'],
       buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
@@ -216,13 +216,13 @@ export class MetricsService {
 
     // Initialize System Metrics
     this.memoryUsage = new Gauge({
-      _name: 'bytebot_memory_usage_bytes',
+      name: 'bytebot_memory_usage_bytes',
       help: 'Memory usage in bytes',
       labelNames: ['type'],
     });
 
     this.cpuUsage = new Gauge({
-      _name: 'bytebot_cpu_usage_percent',
+      name: 'bytebot_cpu_usage_percent',
       help: 'CPU usage percentage',
     });
 
@@ -252,11 +252,11 @@ export class MetricsService {
       return metrics;
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(
+        _error instanceof Error ? _error.message : 'Unknown error';
+      this.logger.error(
         `[${operationId}] Failed to collect Prometheus metrics: ${errorMessage}`,
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -546,7 +546,7 @@ export class MetricsService {
   ): void {
     const durationSeconds = duration / 1000;
     const ratio = originalSize > 0 ? compressedSize / originalSize : 1;
-    const _result = ratio < 1 ? 'success' : 'skipped';
+    const result = ratio < 1 ? 'success' : 'skipped';
 
     this.compressionOperationsTotal.labels(algorithm, result).inc();
     this.compressionRatio.labels(algorithm).observe(ratio);
@@ -589,8 +589,8 @@ export class MetricsService {
       // For now, we'll skip CPU metrics to avoid complexity
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(`Failed to update system metrics: ${errorMessage}`);
+        _error instanceof Error ? _error.message : 'Unknown error';
+      this.logger.error(`Failed to update system metrics: ${errorMessage}`);
     }
   }
 

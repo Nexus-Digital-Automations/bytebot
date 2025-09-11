@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Computer Use Service - Main Action Router and Error Handling Unit Tests
  *
@@ -47,7 +48,7 @@ jest.mock('util', () => ({
   ),
 }));
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService, ErrorHandler } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
@@ -155,7 +156,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert
         expect(nutService.mouseMoveEvent).toHaveBeenCalledWith({
@@ -177,7 +178,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert - trace_mouse calls move to first coordinate + each path coordinate
         expect(nutService.mouseMoveEvent).toHaveBeenCalledTimes(3); // Initial + 2 path points
@@ -197,7 +198,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert
         expect(nutService.mouseMoveEvent).toHaveBeenCalledWith({
@@ -220,7 +221,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert
         expect(nutService.mouseMoveEvent).toHaveBeenCalledWith({
@@ -244,7 +245,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert
         expect(nutService.mouseMoveEvent).toHaveBeenCalledTimes(3); // Initial + path
@@ -266,7 +267,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert
         expect(nutService.mouseMoveEvent).toHaveBeenCalledWith({
@@ -290,7 +291,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert
         expect(nutService.sendKeys).toHaveBeenCalledWith(['ctrl', 'c'], 100);
@@ -306,7 +307,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert
         expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl', 'alt'], true);
@@ -323,7 +324,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert
         expect(nutService.typeText).toHaveBeenCalledWith('Hello World', 50);
@@ -338,7 +339,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert
         expect(nutService.pasteText).toHaveBeenCalledWith('Clipboard content');
@@ -378,7 +379,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         mockNutService.screendump.mockResolvedValue(mockBuffer);
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert
         expect(nutService.screendump).toHaveBeenCalled();
@@ -395,7 +396,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         mockNutService.getCursorPosition.mockResolvedValue({ x: 150, y: 250 });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert
         expect(nutService.getCursorPosition).toHaveBeenCalled();
@@ -423,7 +424,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert - Application management uses spawn, so we just verify no errors
         expect(result).toBeUndefined();
@@ -442,7 +443,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert - file operations may fail in test environment
         expect(result).toHaveProperty('success');
@@ -464,7 +465,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert - File operations may fail in test environment, check structure
         expect(result).toHaveProperty('success');
@@ -525,7 +526,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         mockNutService.screendump.mockResolvedValue(mockBuffer);
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert - Should successfully take screenshot
         expect(result).toBeDefined();
@@ -638,7 +639,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         mockNutService.screendump.mockResolvedValue(mockBuffer);
 
         // Act
-        const _result = await service.action(action);
+        const result = await service.action(action);
 
         // Assert - Performance service may not be available in test setup
         // This test validates the service doesn't crash when performance service is unavailable
@@ -795,7 +796,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     describe('extractErrorMessage', () => {
       it('should extract message from Error instances', () => {
         // Arrange
-        const _error = new Error('Test error message');
+        const error = new Error('Test error message');
 
         // Act
         const _result = ErrorHandler.extractErrorMessage(_error);
@@ -849,7 +850,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     describe('extractErrorStack', () => {
       it('should extract stack from Error instances', () => {
         // Arrange
-        const _error = new Error('Test error');
+        const error = new Error('Test error');
         error.stack = 'Error: Test error\n    at test.js:1:1';
 
         // Act

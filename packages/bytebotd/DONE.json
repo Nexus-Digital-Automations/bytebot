@@ -649,9 +649,52 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/TODO.json"
+    },
+    {
+      "id": "error_1757560734125_9c097tvt9",
+      "title": "Fix ALL TypeScript compilation errors in computer-use module",
+      "description": "Fix all TypeScript errors in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/computer-use/computer-use.service.ts: 1) Remove underscores from shared imports (_ScrollAction to ScrollAction, _TypeKeysAction to TypeKeysAction, etc), 2) Change ComputerUseService._name to ComputerUseService.name, 3) Fix variable reference patterns (result, __error, error), 4) Change this.logger._error to this.logger.error, 5) Fix method parameters to use correct types. Must compile without TypeScript errors.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T03:18:54.125Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757560699373_1_general_a566d2a7",
+      "started_at": "2025-09-11T03:19:21.502Z",
+      "claimed_by": "development_session_1757560699373_1_general_a566d2a7",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757560699373_1_general_a566d2a7",
+          "role": "primary",
+          "assignedAt": "2025-09-11T03:19:21.502Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-11T03:29:30.978Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-11T03:29:30.978Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/TODO.json"
     }
   ],
-  "total_completed": 15,
-  "last_completion": "2025-09-11T00:25:42.273Z",
+  "total_completed": 16,
+  "last_completion": "2025-09-11T03:29:30.978Z",
   "created_at": "2025-09-06T03:52:57.066Z"
 }

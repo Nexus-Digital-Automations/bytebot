@@ -1,9 +1,10 @@
+/* eslint-env jest */
 /**
  * Minimal NUT Service Test
  * Simple test to verify Jest and NUT service basic functionality
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 
 // Mock external dependencies first
 jest.mock('@nut-tree-fork/nut-js', () => ({

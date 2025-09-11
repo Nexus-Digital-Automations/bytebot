@@ -17,7 +17,7 @@
  * @coverage-target 100%
  */
 
-import { keyInfoMap, _KeyInfo } from '../input-tracking.helpers';
+import { keyInfoMap, KeyInfo } from '../input-tracking.helpers';
 import { UiohookKey } from 'uiohook-napi';
 
 describe('InputTrackingHelpers', () => {

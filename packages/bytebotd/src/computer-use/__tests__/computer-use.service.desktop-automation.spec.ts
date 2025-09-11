@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Computer Use Service - Advanced Desktop Automation Test Suite
  *
@@ -122,7 +123,7 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
 }));
 
 // Mock external dependencies after the above mocks
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
@@ -506,7 +507,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
           coordinates: { x: test.x, y: test.y },
         };
 
-        const _result = await service.action(moveAction);
+        const result = await service.action(moveAction);
 
         if (test.shouldSucceed) {
           // Action should complete without throwing errors
@@ -668,7 +669,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         action: 'screenshot',
       };
 
-      const _result = await service.action(screenshotAction);
+      const result = await service.action(screenshotAction);
 
       // Screenshot should return a result with image data
       expect(result).toBeDefined();
@@ -697,7 +698,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         action: 'screenshot',
       };
 
-      const _result = await service.action(screenshotAction);
+      const result = await service.action(screenshotAction);
 
       // Should still work with basic screenshot functionality
       expect(result).toBeDefined();
@@ -763,7 +764,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       const results = [];
       for (const action of mixedActions) {
         try {
-          const _result = await service.action(action);
+          const result = await service.action(action);
           results.push({ success: true, result });
         } catch (_error) {
           results.push({ success: false, _error });
@@ -825,7 +826,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
 
         // Should either reject dangerous paths or sanitize them
         try {
-          const _result = await service.action(writeAction);
+          const result = await service.action(writeAction);
           // If it succeeds, it should be a FileWriteResult
           expect(result).toBeDefined();
         } catch (_error) {
@@ -872,7 +873,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         button: 'left',
       };
 
-      const _result = await service.action(coordinatedAction);
+      const result = await service.action(coordinatedAction);
 
       // Action should complete without throwing errors
       await expect(service.action(coordinatedAction)).resolves.not.toThrow();

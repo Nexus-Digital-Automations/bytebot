@@ -19,7 +19,7 @@
 
 // Import utilities from setup files
 import { TestUtils as SetupTestUtils } from './setup';
-import { TestUtils as AfterEnvTestUtils, TestDataFactory } from './setupAfterEnv';
+import { TestDataFactory } from './setupAfterEnv';
 import { testUtils } from './nestjs-mocks';
 
 // Re-export setup utilities (use SetupTestUtils as the primary TestUtils export)
@@ -98,10 +98,10 @@ export const AssertionHelpers = {
   ) => {
     expect(_error).toBeInstanceOf(Error);
     if (expectedMessage) {
-      expect(error.message).toContain(expectedMessage);
+      expect(_error.message).toContain(expectedMessage);
     }
     if (expectedCode) {
-      expect(error.code).toBe(expectedCode);
+      expect(_error.code).toBe(expectedCode);
     }
   },
 

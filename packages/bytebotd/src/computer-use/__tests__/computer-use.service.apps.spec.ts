@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Comprehensive Application Management Unit Tests for ComputerUseService
  *
@@ -133,7 +134,7 @@ jest.mock('@nestjs/config', () => ({
   })),
 }));
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';

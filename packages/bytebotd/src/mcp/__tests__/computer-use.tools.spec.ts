@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * ComputerUseTools Test Suite
  *
@@ -19,7 +20,7 @@
  */
 
 import { performance } from 'perf_hooks';
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseTools } from '../computer-use.tools';
 import { ComputerUseService } from '../../computer-use/computer-use.service';
@@ -169,7 +170,7 @@ describe('ComputerUseTools', () => {
 
         mockComputerUseService.action.mockResolvedValue(undefined);
 
-        const _result = await computerUseTools.moveMouse({ coordinates });
+        const result = await computerUseTools.moveMouse({ coordinates });
 
         expect(mockComputerUseService.action).toHaveBeenCalledWith({
           action: 'move_mouse',
@@ -186,11 +187,11 @@ describe('ComputerUseTools', () => {
        */
       it('should handle mouse move errors gracefully', async () => {
         const coordinates = ComputerUseTestData.generateCoordinates();
-        const _error = new Error('Mouse move failed');
+        const error = new Error('Mouse move failed');
 
         mockComputerUseService.action.mockRejectedValue(_error);
 
-        const _result = await computerUseTools.moveMouse({ coordinates });
+        const result = await computerUseTools.moveMouse({ coordinates });
 
         expect(result).toEqual({
           content: [
@@ -213,7 +214,7 @@ describe('ComputerUseTools', () => {
 
         mockComputerUseService.action.mockResolvedValue(undefined);
 
-        const _result = await computerUseTools.traceMouse({ path, holdKeys });
+        const result = await computerUseTools.traceMouse({ path, holdKeys });
 
         expect(mockComputerUseService.action).toHaveBeenCalledWith({
           action: 'trace_mouse',
@@ -241,7 +242,7 @@ describe('ComputerUseTools', () => {
 
         mockComputerUseService.action.mockResolvedValue(undefined);
 
-        const _result = await computerUseTools.clickMouse(parameters);
+        const result = await computerUseTools.clickMouse(parameters);
 
         expect(mockComputerUseService.action).toHaveBeenCalledWith({
           action: 'click_mouse',
@@ -268,7 +269,7 @@ describe('ComputerUseTools', () => {
 
         mockComputerUseService.action.mockResolvedValue(undefined);
 
-        const _result = await computerUseTools.scroll(parameters);
+        const result = await computerUseTools.scroll(parameters);
 
         expect(mockComputerUseService.action).toHaveBeenCalledWith({
           action: 'scroll',
@@ -293,7 +294,7 @@ describe('ComputerUseTools', () => {
 
         mockComputerUseService.action.mockResolvedValue(undefined);
 
-        const _result = await computerUseTools.typeKeys(parameters);
+        const result = await computerUseTools.typeKeys(parameters);
 
         expect(mockComputerUseService.action).toHaveBeenCalledWith({
           action: 'type_keys',
@@ -316,7 +317,7 @@ describe('ComputerUseTools', () => {
 
         mockComputerUseService.action.mockResolvedValue(undefined);
 
-        const _result = await computerUseTools.typeText(parameters);
+        const result = await computerUseTools.typeText(parameters);
 
         expect(mockComputerUseService.action).toHaveBeenCalledWith({
           action: 'type_text',
@@ -336,7 +337,7 @@ describe('ComputerUseTools', () => {
 
         mockComputerUseService.action.mockResolvedValue(undefined);
 
-        const _result = await computerUseTools.pasteText({ text });
+        const result = await computerUseTools.pasteText({ text });
 
         expect(mockComputerUseService.action).toHaveBeenCalledWith({
           action: 'paste_text',
@@ -358,7 +359,7 @@ describe('ComputerUseTools', () => {
 
         mockComputerUseService.action.mockResolvedValue(undefined);
 
-        const _result = await computerUseTools.wait({ duration });
+        const result = await computerUseTools.wait({ duration });
 
         expect(mockComputerUseService.action).toHaveBeenCalledWith({
           action: 'wait',
@@ -376,7 +377,7 @@ describe('ComputerUseTools', () => {
       it('should open firefox application', async () => {
         mockComputerUseService.action.mockResolvedValue(undefined);
 
-        const _result = await computerUseTools.application({
+        const result = await computerUseTools.application({
           application: 'firefox',
         });
 
@@ -401,7 +402,7 @@ describe('ComputerUseTools', () => {
         mockComputerUseService.action.mockResolvedValue(screenshotData);
         mockCompressor.mockResolvedValue('compressed-image-data');
 
-        const _result = await computerUseTools.screenshot();
+        const result = await computerUseTools.screenshot();
 
         expect(mockComputerUseService.action).toHaveBeenCalledWith({
           action: 'screenshot',
@@ -424,10 +425,10 @@ describe('ComputerUseTools', () => {
        * Test screenshot error handling
        */
       it('should handle screenshot errors gracefully', async () => {
-        const _error = new Error('Screenshot capture failed');
+        const error = new Error('Screenshot capture failed');
         mockComputerUseService.action.mockRejectedValue(_error);
 
-        const _result = await computerUseTools.screenshot();
+        const result = await computerUseTools.screenshot();
 
         expect(result).toEqual({
           content: [
@@ -451,7 +452,7 @@ describe('ComputerUseTools', () => {
         );
         mockComputerUseService.action.mockResolvedValue(position);
 
-        const _result = await computerUseTools.cursorPosition();
+        const result = await computerUseTools.cursorPosition();
 
         expect(mockComputerUseService.action).toHaveBeenCalledWith({
           action: 'cursor_position',
@@ -483,7 +484,7 @@ describe('ComputerUseTools', () => {
         const writeResult = ComputerUseTestData.generateFileWriteResponse();
         mockComputerUseService.action.mockResolvedValue(writeResult);
 
-        const _result = await computerUseTools.writeFile(parameters);
+        const result = await computerUseTools.writeFile(parameters);
 
         expect(mockComputerUseService.action).toHaveBeenCalledWith({
           action: 'write_file',
@@ -510,7 +511,7 @@ describe('ComputerUseTools', () => {
           ComputerUseTestData.generateFileReadResponse('Hello World');
         mockComputerUseService.action.mockResolvedValue(readResult);
 
-        const _result = await computerUseTools.readFile({
+        const result = await computerUseTools.readFile({
           path: '/tmp/test.txt',
         });
 
@@ -542,10 +543,10 @@ describe('ComputerUseTools', () => {
      * Test with service errors
      */
     it('should handle service unavailable errors', async () => {
-      const _error = new Error('Service unavailable');
+      const error = new Error('Service unavailable');
       mockComputerUseService.action.mockRejectedValue(_error);
 
-      const _result = await computerUseTools.moveMouse({
+      const result = await computerUseTools.moveMouse({
         coordinates: { x: 0, y: 0 },
       });
 
@@ -565,7 +566,7 @@ describe('ComputerUseTools', () => {
       ];
 
       for (const coordinates of invalidCoords) {
-        const _result = await computerUseTools.moveMouse({ coordinates });
+        const result = await computerUseTools.moveMouse({ coordinates });
         expect(result).toBeDefined();
         expect(result.content[0].text).toBe('mouse moved');
       }
@@ -579,7 +580,7 @@ describe('ComputerUseTools', () => {
     it('should return MCP-compliant response formats', async () => {
       mockComputerUseService.action.mockResolvedValue(undefined);
 
-      const _result = await computerUseTools.moveMouse({
+      const result = await computerUseTools.moveMouse({
         coordinates: { x: 100, y: 100 },
       });
 

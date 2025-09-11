@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Comprehensive Unit Tests for ComputerUseService - Keyboard Operations Focus
  *
@@ -20,7 +21,7 @@
  * @version 1.0.0
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService, ErrorHandler } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
@@ -1042,7 +1043,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
      * Test error message extraction from Error objects
      */
     it('should extract _error message from Error object', () => {
-      const _error = new Error('Test error message');
+      const error = new Error('Test error message');
       const _result = ErrorHandler.extractErrorMessage(_error);
       expect(result).toBe('Test error message');
     });
@@ -1069,7 +1070,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
      * Test error stack extraction from Error objects
      */
     it('should extract _error stack from Error object', () => {
-      const _error = new Error('Test error');
+      const error = new Error('Test error');
       error.stack = 'Error stack trace';
       const _result = ErrorHandler.extractErrorStack(_error);
       expect(result).toBe('Error stack trace');

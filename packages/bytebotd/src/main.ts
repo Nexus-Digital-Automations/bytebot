@@ -29,10 +29,10 @@ async function bootstrap(): Promise<void> {
 
     // Deploy standardized security middleware for BytebotD - MAXIMUM SECURITY
     const securityMiddleware =
-      StandardizedSecurityMiddleware.createBytebotDMiddleware(configService);
+      StandardizedSecurityMiddleware.createBytebotDMiddleware(_configService);
     app.use('/api', securityMiddleware.use.bind(securityMiddleware));
 
-    logger.log(
+    _logger.log(
       'BytebotD standardized security middleware deployed successfully',
       {
         serviceType: ServiceType._BYTEBOTD,
@@ -159,7 +159,7 @@ async function bootstrap(): Promise<void> {
         }
 
         // Block unauthorized origins with detailed logging
-        logger.warn(`CORS blocked unauthorized origin: ${origin}`, {
+        _logger.warn(`CORS blocked unauthorized origin: ${origin}`, {
           blockedOrigin: origin,
           allowedOrigins,
           environment,
@@ -229,17 +229,17 @@ async function bootstrap(): Promise<void> {
             // Safe type assertion: socket parameter is guaranteed to be Socket from 'net' module
             wsProxy.upgrade(_req, socket, head);
           } else {
-            logger.warn('WebSocket proxy upgrade method not available');
+            _logger.warn('WebSocket proxy upgrade method not available');
           }
         }
         // else let Socket.IO/Nest handle it by not hijacking the socket
       },
     );
 
-    logger.log('Application bootstrap completed successfully');
-    logger.log('Server listening on port 9990');
+    _logger.log('Application bootstrap completed successfully');
+    _logger.log('Server listening on port 9990');
   } catch (_error) {
-    logger._error(
+    _logger.error(
       'Failed to bootstrap application',
       _error instanceof Error ? _error.stack : String(_error),
     );

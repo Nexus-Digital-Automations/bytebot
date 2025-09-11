@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Security Validation Pipeline Integration Tests
  * Tests the enhanced multi-stage security validation pipeline integration
@@ -6,7 +7,7 @@
  * @author Security Event Validation Pipeline Subagent
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { ComputerActionValidationPipe } from '../computer-action-validation.pipe';
 
@@ -101,7 +102,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: 'Hello World',
       };
 
-      const _result = await pipe.transform(validInput, {} as any);
+      const result = await pipe.transform(validInput, {} as any);
 
       expect(result).toBeDefined();
       expect(result.action).toBe('type_text');
@@ -294,7 +295,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       ];
 
       for (const input of validInputs) {
-        const _result = await pipe.transform(input, {} as any);
+        const result = await pipe.transform(input, {} as any);
         expect(result).toBeDefined();
         expect(result.action).toBe(input.action);
       }

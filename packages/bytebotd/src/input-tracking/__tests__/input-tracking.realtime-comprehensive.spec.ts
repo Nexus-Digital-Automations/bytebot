@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Input Tracking Service - Real-time Comprehensive Test Suite
  *
