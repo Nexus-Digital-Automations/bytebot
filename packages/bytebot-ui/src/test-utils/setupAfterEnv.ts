@@ -339,7 +339,7 @@ export const TestDataFactory = {
         name: "Test User",
         image: "/test-user.png",
       },
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
+      expires: new Date(Date.now() + SESSION_EXPIRY_MS).toISOString(), // 24 hours from now
       accessToken: "test-access-token",
       ...overrides,
     };
@@ -396,7 +396,7 @@ export const TestUtils = {
   /**
    * Waits for element to appear with timeout
    */
-  async waitForElement(selector: string, timeout = 5000): Promise<HTMLElement> {
+  async waitForElement(selector: string, timeout = ASYNC_OPERATION_TIMEOUT_MS): Promise<HTMLElement> {
     return screen.findByTestId(selector, {}, { timeout });
   },
 
@@ -443,11 +443,11 @@ export const TestUtils = {
       // Mock different viewport sizes
       let width: number;
       if (breakpoint === "mobile") {
-        width = 375;
+        width = MOBILE_BREAKPOINT_PX;
       } else if (breakpoint === "tablet") {
-        width = 768;
+        width = TABLET_BREAKPOINT_PX;
       } else {
-        width = 1024;
+        width = DESKTOP_BREAKPOINT_PX;
       }
 
       Object.defineProperty(window, "innerWidth", {
@@ -509,8 +509,8 @@ export const TestUtils = {
 
 // Export test configuration
 export const testConfig = {
-  slowRenderThreshold: 100,
-  memoryLeakThreshold: 50 * 1024 * 1024,
-  interactionThreshold: 50,
+  slowRenderThreshold: PERFORMANCE_RENDER_THRESHOLD_COMPLEX_MS,
+  memoryLeakThreshold: MEMORY_USAGE_THRESHOLD_MB * 1024 * 1024,
+  interactionThreshold: USER_INTERACTION_TIMEOUT_MS,
   timeout: 30000,
 };
