@@ -23,6 +23,28 @@ import reactHooksPlugin from "eslint-plugin-react-hooks";
 import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
 
 export default tseslint.config(
+  // Global ignore patterns - exclude build and generated files
+  {
+    ignores: [
+      ".next/**/*", // Next.js build output
+      "node_modules/**/*", // Node modules
+      "dist/**/*", // Distribution/build directories
+      "build/**/*", // Build directories
+      "coverage/**/*", // Test coverage reports
+      ".nyc_output/**/*", // NYC test coverage
+      "public/sw.js", // Service worker files
+      "public/workbox-*.js", // Workbox files
+      "**/*.min.js", // Minified JavaScript files
+      "**/*.bundle.js", // Bundle files
+      "**/*.map", // Source map files
+      ".env*", // Environment files
+      "*.config.js", // Configuration files (when needed)
+      ".eslintrc*", // Legacy ESLint config files
+      "tailwind.config.js", // Tailwind config (if needed)
+      "next.config.js", // Next.js config (if needed)
+    ],
+  },
+
   // Base configurations - foundational rules
   eslint.configs.recommended,
 
@@ -335,10 +357,18 @@ export default tseslint.config(
 
   // Configuration files - minimal rules
   {
-    files: ["**/*.config.{js,ts,mjs}", "**/.eslintrc.{js,cjs}"],
+    files: [
+      "**/*.config.{js,ts,mjs,cjs}",
+      "**/.eslintrc.{js,cjs}",
+      "jest.config.{js,ts,cjs}",
+      "*.d.ts",
+    ],
     rules: {
       "@typescript-eslint/no-var-requires": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/triple-slash-reference": "off",
       "no-undef": "off",
+      "no-dupe-keys": "error", // Keep duplicate key detection
     },
   },
 );

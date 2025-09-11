@@ -531,11 +531,12 @@ describe("Header Component", () => {
 
         if (
           renderResult != null &&
+          "unmount" in renderResult &&
           typeof renderResult.unmount === "function"
         ) {
           // Should render without errors across all breakpoints
           expect(screen.getByRole("banner")).toBeInTheDocument();
-          renderResult.unmount();
+          (renderResult.unmount as () => void)();
         }
       });
     });

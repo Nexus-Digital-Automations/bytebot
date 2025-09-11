@@ -19,6 +19,15 @@ import { screen, waitFor } from "@testing-library/react";
 import { TaskList } from "../TaskList";
 import { Role, TaskStatus } from "@/types";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
+import {
+  DEFAULT_TASK_LIST_LIMIT,
+  LARGE_DATASET_SIZE,
+  MEMORY_LEAK_TEST_ITERATIONS,
+  MEMORY_USAGE_THRESHOLD_MB,
+  PAGINATION_DEFAULT_PAGE_SIZE,
+  PERFORMANCE_TEST_TIMEOUT_MS,
+  TEST_TASK_BATCH_SIZE,
+} from "@/constants/ui";
 import { fetchTasks } from "@/utils/taskUtils";
 import { useWebSocket } from "@/hooks/useWebSocket";
 
@@ -227,7 +236,7 @@ describe("TaskList Component", () => {
   ];
 
   const defaultProps = {
-    limit: 5,
+    limit: DEFAULT_TASK_LIST_LIMIT,
     className: "test-task-list",
     title: "Test Tasks",
     description: "Test task list description",
@@ -491,17 +500,20 @@ describe("TaskList Component", () => {
   });
 
   describe("Pagination", () => {
-    const manyTasks = Array.from({ length: 50 }, (_, i) => ({
-      id: `task-${i}`,
-      title: `Task ${i}`,
-      description: `Task ${i} description`,
-      status: TaskStatus.PENDING,
-      control: Role.ASSISTANT,
-      priority: "medium",
-      tags: [],
-      createdAt: new Date(Date.now() + i * 1000).toISOString(),
-      updatedAt: new Date(Date.now() + i * 1000).toISOString(),
-    }));
+    const manyTasks = Array.from(
+      { length: PAGINATION_DEFAULT_PAGE_SIZE * DEFAULT_TASK_LIST_LIMIT },
+      (_, i) => ({
+        id: `task-${i}`,
+        title: `Task ${i}`,
+        description: `Task ${i} description`,
+        status: TaskStatus.PENDING,
+        control: Role.ASSISTANT,
+        priority: "medium",
+        tags: [],
+        createdAt: new Date(Date.now() + i * 1000).toISOString(),
+        updatedAt: new Date(Date.now() + i * 1000).toISOString(),
+      }),
+    );
 
     it("shows pagination controls for large task lists", () => {
       TestUtils.renderComponent(
@@ -540,7 +552,7 @@ describe("TaskList Component", () => {
       );
 
       const taskItems = screen.getAllByTestId(/task-item-/);
-      expect(taskItems).toHaveLength(10); // Default page size
+      expect(taskItems).toHaveLength(PAGINATION_DEFAULT_PAGE_SIZE); // Default page size
     });
   });
 
@@ -697,29 +709,32 @@ describe("TaskList Component", () => {
     });
 
     it("handles large task lists efficiently", () => {
-      const largeTaskList = Array.from({ length: 1000 }, (_, i) => ({
-        id: `task-${i}`,
-        title: `Task ${i}`,
-        description: `Task ${i} description`,
-        status: TaskStatus.PENDING,
-        control: Role.ASSISTANT,
-        priority: "medium",
-        tags: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }));
+      const largeTaskList = Array.from(
+        { length: LARGE_DATASET_SIZE },
+        (_, i) => ({
+          id: `task-${i}`,
+          title: `Task ${i}`,
+          description: `Task ${i} description`,
+          status: TaskStatus.PENDING,
+          control: Role.ASSISTANT,
+          priority: "medium",
+          tags: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }),
+      );
 
       const { renderTime } = TestUtils.renderComponent(
         <TaskList {...defaultProps} tasks={largeTaskList} />,
       );
 
-      expect(renderTime).toBeLessThan(500); // Should handle large lists efficiently
+      expect(renderTime).toBeLessThan(PERFORMANCE_TEST_TIMEOUT_MS); // Should handle large lists efficiently
     });
 
     it("does not cause memory leaks on frequent updates", () => {
       const initialMemory = process.memoryUsage();
 
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < MEMORY_LEAK_TEST_ITERATIONS; i++) {
         const { unmount } = TestUtils.renderComponent(
           <TaskList
             {...defaultProps}
@@ -732,7 +747,7 @@ describe("TaskList Component", () => {
       const finalMemory = process.memoryUsage();
       const memoryDelta = finalMemory.heapUsed - initialMemory.heapUsed;
 
-      expect(memoryDelta).toBeLessThan(50 * 1024 * 1024); // Less than 50MB increase
+      expect(memoryDelta).toBeLessThan(MEMORY_USAGE_THRESHOLD_MB * 1024 * 1024); // Less than 50MB increase
     });
   });
 

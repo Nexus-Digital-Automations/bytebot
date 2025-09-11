@@ -23,11 +23,11 @@ import {
   MEMORY_USAGE_THRESHOLD_MB,
   MOBILE_BREAKPOINT_PX,
   PERFORMANCE_RENDER_THRESHOLD_COMPLEX_MS,
-  PERFORMANCE_RENDER_THRESHOLD_MS,
   SESSION_EXPIRY_MS,
   TABLET_BREAKPOINT_PX,
-  TEST_COMPONENT_PERFORMANCE_LIMIT_MS,
   USER_INTERACTION_TIMEOUT_MS,
+  PERFORMANCE_RENDER_THRESHOLD_MS as _PERFORMANCE_RENDER_THRESHOLD_MS,
+  TEST_COMPONENT_PERFORMANCE_LIMIT_MS as _TEST_COMPONENT_PERFORMANCE_LIMIT_MS,
 } from "@/constants/ui";
 
 // Custom Jest matchers for Bytebot UI domain
@@ -396,7 +396,10 @@ export const TestUtils = {
   /**
    * Waits for element to appear with timeout
    */
-  async waitForElement(selector: string, timeout = ASYNC_OPERATION_TIMEOUT_MS): Promise<HTMLElement> {
+  async waitForElement(
+    selector: string,
+    timeout = ASYNC_OPERATION_TIMEOUT_MS,
+  ): Promise<HTMLElement> {
     return screen.findByTestId(selector, {}, { timeout });
   },
 

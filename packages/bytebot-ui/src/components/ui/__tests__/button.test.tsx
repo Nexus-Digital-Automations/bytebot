@@ -18,6 +18,12 @@ import React from "react";
 import { screen } from "@testing-library/react";
 import { Button, buttonVariants } from "../button";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
+import {
+  MAX_MEMORY_DELTA_MB,
+  MEMORY_LEAK_TEST_ITERATIONS,
+  PERFORMANCE_RENDER_THRESHOLD_MS,
+  PERFORMANCE_RENDER_THRESHOLD_COMPLEX_MS as _PERFORMANCE_RENDER_THRESHOLD_COMPLEX_MS,
+} from "@/constants/ui";
 
 // Test icon components
 const TestIcon = () => <span data-testid="test-icon">📄</span>;
@@ -37,7 +43,7 @@ describe("Button Component", () => {
         "inline-flex",
         "items-center",
       );
-      expect(renderTime).toBeLessThan(50); // Performance check
+      expect(renderTime).toBeLessThan(PERFORMANCE_RENDER_THRESHOLD_MS); // Performance check
     });
 
     it("renders with custom className", () => {
@@ -293,14 +299,16 @@ describe("Button Component", () => {
       const renderFunction = () =>
         TestUtils.renderComponent(<Button>Performance Test</Button>);
 
-      expect(renderFunction).toRenderWithinTime(50);
+      expect(renderFunction).toRenderWithinTime(
+        PERFORMANCE_RENDER_THRESHOLD_MS,
+      );
     });
 
     it("does not cause memory leaks on re-render", () => {
       const initialMemory = process.memoryUsage();
 
       // Render component multiple times
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < MEMORY_LEAK_TEST_ITERATIONS; i++) {
         const { unmount } = TestUtils.renderComponent(
           <Button key={i}>Button {i}</Button>,
         );
@@ -311,7 +319,7 @@ describe("Button Component", () => {
       const memoryDelta = finalMemory.heapUsed - initialMemory.heapUsed;
 
       // Should not increase memory by more than 10MB
-      expect(memoryDelta).toBeLessThan(10 * 1024 * 1024);
+      expect(memoryDelta).toBeLessThan(MAX_MEMORY_DELTA_MB * 1024 * 1024);
     });
   });
 
@@ -415,7 +423,7 @@ describe("Button Component", () => {
           expect(button).toBeInTheDocument();
           expect(button).toHaveClass("cursor-pointer");
 
-          renderResult.unmount();
+          (renderResult.unmount as () => void)();
         }
       });
     });

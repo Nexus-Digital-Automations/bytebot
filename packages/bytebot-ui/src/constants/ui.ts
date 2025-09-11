@@ -201,3 +201,17 @@ export const TEST_COMPONENT_PERFORMANCE_LIMIT_MS = 150;
  * Session expiry time in milliseconds (24 hours)
  */
 export const SESSION_EXPIRY_MS = 24 * 60 * 60 * 1000;
+
+// =============================================================================
+// ADDITIONAL TEST CONSTANTS
+// =============================================================================
+
+/**
+ * Large dataset size for performance testing (1000 items)
+ */
+export const LARGE_DATASET_SIZE = 1000;
+
+/**
+ * Test timeout threshold in milliseconds (500ms)
+ */
+export const TEST_TIMEOUT_THRESHOLD_MS = 500;
