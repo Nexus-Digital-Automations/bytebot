@@ -2,34 +2,6 @@
   "project": "unknown",
   "tasks": [
     {
-      "id": "error_1757576391901_pwfa8pse8",
-      "title": "Remove console statements and implement proper logging infrastructure",
-      "description": "Replace ALL console.log, console.error, console.warn statements with proper logging service in 4 specific files: /src/app/tasks/[id]/page.tsx (4 violations on lines 97,171,192,217), /src/app/tasks/page.tsx (2 violations on lines 79,97), /src/components/messages/ChatContainer.tsx (2 violations on lines 62,157), /src/components/messages/ChatInput.tsx (1 violation on line 169). Create structured logging service and maintain debugging functionality while achieving zero no-console ESLint violations.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-11T07:39:51.901Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757576333518_1_general_aa672b94",
-      "started_at": "2025-09-11T07:40:09.577Z",
-      "claimed_by": "development_session_1757576333518_1_general_aa672b94",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757576333518_1_general_aa672b94",
-          "role": "primary",
-          "assignedAt": "2025-09-11T07:40:09.577Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757576361177_p95x0ixqf",
       "title": "Fix TypeScript type safety violations in bytebot-ui package",
       "description": "Fix ALL TypeScript unsafe operations, assignments, calls, and member access violations in bytebot-ui package. Target violations: unsafe assignments, unsafe calls, unsafe member access, unsafe returns, strict boolean expressions. Primary files: Header.test.tsx, messages test files, and other TypeScript strict violations.",

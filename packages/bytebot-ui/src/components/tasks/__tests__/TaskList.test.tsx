@@ -32,6 +32,12 @@ jest.mock("@/hooks/useWebSocket", () => ({
   useWebSocket: jest.fn(),
 }));
 
+// Type the mocked functions
+const mockFetchTasks = fetchTasks as jest.MockedFunction<typeof fetchTasks>;
+const mockUseWebSocket = useWebSocket as jest.MockedFunction<
+  typeof useWebSocket
+>;
+
 // Mock child components
 jest.mock("../TaskItem", () => ({
   TaskItem: ({
@@ -231,9 +237,9 @@ describe("TaskList Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock fetchTasks to return our mock data - component expects { tasks: Task[] }
-    fetchTasks.mockResolvedValue({ tasks: mockTasks });
+    mockFetchTasks.mockResolvedValue({ tasks: mockTasks });
     // Mock useWebSocket to not do anything
-    useWebSocket.mockImplementation(
+    mockUseWebSocket.mockImplementation(
       () => ({}) as ReturnType<typeof useWebSocket>,
     );
   });
@@ -259,7 +265,7 @@ describe("TaskList Component", () => {
     });
 
     it("shows empty state when no tasks", async () => {
-      fetchTasks.mockResolvedValue({ tasks: [] });
+      mockFetchTasks.mockResolvedValue({ tasks: [] });
       TestUtils.renderComponent(<TaskList {...defaultProps} />);
 
       await waitFor(() => {
