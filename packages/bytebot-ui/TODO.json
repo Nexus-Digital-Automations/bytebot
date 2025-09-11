@@ -30,34 +30,6 @@
       ]
     },
     {
-      "id": "error_1757574460092_q35grua2s",
-      "title": "Fix TypeScript strict-boolean-expressions warnings",
-      "description": "Fix nullable values in conditionals using proper TypeScript patterns",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-11T07:07:40.092Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757574431139_1_general_598d191b",
-      "started_at": "2025-09-11T07:08:03.511Z",
-      "claimed_by": "development_session_1757574431139_1_general_598d191b",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757574431139_1_general_598d191b",
-          "role": "primary",
-          "assignedAt": "2025-09-11T07:08:03.511Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757574452937_pijzcruhl",
       "title": "Fix missing return type annotations in bytebot-ui package",
       "description": "Add return type annotations to functions to resolve @typescript-eslint/explicit-function-return-type and @typescript-eslint/explicit-module-boundary-types warnings. Focus on React components (JSX.Element), async functions (Promise<Type>), and utility functions with proper TypeScript types.",
@@ -107,7 +79,7 @@
       "description": "Optimize eslint.config.js with strict TypeScript rules, React Hook linting, security rules, and Next.js optimizations. Implement @typescript-eslint/strict rules, React performance linting, and comprehensive import/export organization rules for maximum code quality.",
       "priority": "medium",
       "category": "error",
-      "status": "pending",
+      "status": "in_progress",
       "dependencies": [],
       "important_files": [],
       "success_criteria": [],
@@ -115,7 +87,19 @@
       "requires_research": false,
       "subtasks": [],
       "created_at": "2025-09-11T06:41:44.545Z",
-      "auto_research_created": false
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757575498309_1_general_37b01874",
+      "started_at": "2025-09-11T07:25:56.386Z",
+      "claimed_by": "development_session_1757575498309_1_general_37b01874",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757575498309_1_general_37b01874",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:25:56.386Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -411,6 +395,27 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-11T07:08:02.303Z",
       "sessionId": "session_1757574482303",
+      "metadata": {}
+    },
+    "development_session_1757575498309_1_general_37b01874": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:24:58.310Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:24:58.310Z",
+      "sessionId": "session_1757575498309",
       "metadata": {}
     }
   },

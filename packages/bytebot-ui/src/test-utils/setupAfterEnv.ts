@@ -345,7 +345,7 @@ export const TestUtils = {
   renderComponent: (
     component: React.ReactElement,
     options?: Record<string, unknown>,
-  ) => {
+  ): RenderResult & { renderTime: number } => {
     const startTime = performance.now();
     const result = render(component, options);
     const renderTime = performance.now() - startTime;

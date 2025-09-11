@@ -66,7 +66,9 @@ export const TaskList: React.FC<TaskListProps> = ({
       }
     };
 
-    void loadTasks();
+    loadTasks().catch((error: unknown) => {
+      console.error("Failed to load tasks:", error);
+    });
   }, [limit]);
 
   return (
@@ -78,25 +80,35 @@ export const TaskList: React.FC<TaskListProps> = ({
         </div>
       )}
 
-      {isLoading ? (
-        <div className="p-4 text-center">
-          <div className="border-bytebot-bronze-light-5 border-t-bytebot-bronze mx-auto mb-2 h-6 w-6 animate-spin rounded-full border-4"></div>
-          <p className="text-sm text-gray-500">Loading tasks...</p>
-        </div>
-      ) : tasks.length === 0 ? (
-        <div className="border-bytebot-bronze-light-5 rounded-lg border border-dashed p-4 text-center">
-          <p className="text-sm text-gray-500">No tasks available</p>
-          <p className="mt-1 text-xs text-gray-400">
-            Your completed tasks will appear here
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {tasks.map((task) => (
-            <TaskItem key={task.id} task={task} />
-          ))}
-        </div>
-      )}
+      {(() => {
+        if (isLoading) {
+          return (
+            <div className="p-4 text-center">
+              <div className="border-bytebot-bronze-light-5 border-t-bytebot-bronze mx-auto mb-2 h-6 w-6 animate-spin rounded-full border-4"></div>
+              <p className="text-sm text-gray-500">Loading tasks...</p>
+            </div>
+          );
+        }
+
+        if (tasks.length === 0) {
+          return (
+            <div className="border-bytebot-bronze-light-5 rounded-lg border border-dashed p-4 text-center">
+              <p className="text-sm text-gray-500">No tasks available</p>
+              <p className="mt-1 text-xs text-gray-400">
+                Your completed tasks will appear here
+              </p>
+            </div>
+          );
+        }
+
+        return (
+          <div className="space-y-3">
+            {tasks.map((task) => (
+              <TaskItem key={task.id} task={task} />
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 };

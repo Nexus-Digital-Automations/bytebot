@@ -37,16 +37,16 @@ export const DesktopContainer: React.FC<DesktopContainerProps> = ({
       return;
     }
 
-    const updateSize = () => {
-      if (!containerRef.current) {
+    const updateSize = (): void => {
+      if (containerRef.current == null) {
         return;
       }
 
       const parentWidth =
-        containerRef.current.parentElement?.offsetWidth ??
+        (containerRef.current.parentElement?.offsetWidth ?? 0) ||
         containerRef.current.offsetWidth;
       const parentHeight =
-        containerRef.current.parentElement?.offsetHeight ??
+        (containerRef.current.parentElement?.offsetHeight ?? 0) ||
         containerRef.current.offsetHeight;
 
       // Calculate the maximum size while maintaining 1280:960 aspect ratio

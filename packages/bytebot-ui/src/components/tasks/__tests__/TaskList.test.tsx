@@ -46,7 +46,9 @@ jest.mock("../TaskItem", () => ({
     <div
       data-testid={`task-item-${task.id}`}
       className={selected ? "selected" : ""}
-      onClick={() => { onSelect(task); }}
+      onClick={() => {
+        onSelect(task);
+      }}
     >
       <span data-testid="task-title">{task.title}</span>
       <span data-testid="task-status">{task.status}</span>
@@ -158,7 +160,9 @@ jest.mock("@/components/ui/pagination", () => ({
   }) => (
     <div data-testid="pagination">
       <button
-        onClick={() => { onPageChange(currentPage - 1); }}
+        onClick={() => {
+          onPageChange(currentPage - 1);
+        }}
         disabled={currentPage <= 1}
         data-testid="prev-page"
       >
@@ -167,7 +171,9 @@ jest.mock("@/components/ui/pagination", () => ({
       <span data-testid="current-page">{currentPage}</span>
       <span data-testid="total-pages">{totalPages}</span>
       <button
-        onClick={() => { onPageChange(currentPage + 1); }}
+        onClick={() => {
+          onPageChange(currentPage + 1);
+        }}
         disabled={currentPage >= totalPages}
         data-testid="next-page"
       >
@@ -834,7 +840,9 @@ describe("TaskList Component", () => {
       });
       const consoleErrorSpy = jest
         .spyOn(console, "error")
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Empty implementation for error testing
+        });
       const user = TestUtils.createUserEvent();
 
       TestUtils.renderComponent(

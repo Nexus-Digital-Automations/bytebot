@@ -54,7 +54,7 @@ export const createMockPagesRouter = (
 export const createMockAppRouter = (
   overrides: Partial<AppRouterInstance> = {},
 ): AppRouterInstance => {
-  const mockVoidFn = () => {};
+  const mockVoidFn = (): void => {};
 
   const mockRouter: AppRouterInstance = {
     push: mockVoidFn,
@@ -80,7 +80,7 @@ export const RouterTestUtils = {
     router: NextRouter,
     url: string,
     options?: { shallow?: boolean; locale?: string; scroll?: boolean },
-  ) => {
+  ): Promise<void> => {
     await router.push(url, undefined, options);
 
     // Update router state
@@ -184,7 +184,7 @@ export const BytebotRouterScenarios = {
 
 // Export default mock for jest.mock()
 const DefaultRouterMock = {
-  useRouter: () => createMockPagesRouter(),
+  useRouter: (): NextRouter => createMockPagesRouter(),
 };
 
 export default DefaultRouterMock;
