@@ -471,7 +471,7 @@ export const TestUtils = {
   testThemeMode: (
     component: React.ReactElement,
     mode: "light" | "dark",
-  ): unknown => {
+  ): ReturnType<typeof TestUtils.renderComponent> => {
     document.documentElement.classList.toggle("dark", mode === "dark");
     return TestUtils.renderComponent(component);
   },

@@ -19,6 +19,7 @@ import { screen } from "@testing-library/react";
 import { Button, buttonVariants } from "../button";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 import {
+  BYTES_PER_MB,
   MAX_MEMORY_DELTA_MB,
   MEMORY_LEAK_TEST_ITERATIONS,
   PERFORMANCE_RENDER_THRESHOLD_MS,
@@ -319,7 +320,7 @@ describe("Button Component", () => {
       const memoryDelta = finalMemory.heapUsed - initialMemory.heapUsed;
 
       // Should not increase memory by more than 10MB
-      expect(memoryDelta).toBeLessThan(MAX_MEMORY_DELTA_MB * 1024 * 1024);
+      expect(memoryDelta).toBeLessThan(MAX_MEMORY_DELTA_MB * BYTES_PER_MB);
     });
   });
 

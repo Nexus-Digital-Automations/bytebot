@@ -20,6 +20,7 @@ import { TaskList } from "../TaskList";
 import { Role, TaskStatus } from "@/types";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 import {
+  BYTES_PER_MB,
   DEFAULT_TASK_LIST_LIMIT,
   LARGE_DATASET_SIZE,
   MEMORY_LEAK_TEST_ITERATIONS,
@@ -28,7 +29,6 @@ import {
   PERFORMANCE_TEST_TIMEOUT_MS,
   TEST_TASK_COUNT_TINY,
   TEST_TIMESTAMP_INCREMENT_MS,
-  BYTES_PER_KB as _BYTES_PER_KB,
   TEST_TASK_BATCH_SIZE as _TEST_TASK_BATCH_SIZE,
   TEST_TASK_COUNT_MEDIUM as _TEST_TASK_COUNT_MEDIUM,
   TEST_TASK_COUNT_SMALL as _TEST_TASK_COUNT_SMALL,
@@ -764,7 +764,9 @@ describe("TaskList Component", () => {
       const finalMemory = process.memoryUsage();
       const memoryDelta = finalMemory.heapUsed - initialMemory.heapUsed;
 
-      expect(memoryDelta).toBeLessThan(MEMORY_USAGE_THRESHOLD_MB * 1024 * 1024); // Less than 50MB increase
+      expect(memoryDelta).toBeLessThan(
+        MEMORY_USAGE_THRESHOLD_MB * BYTES_PER_MB,
+      ); // Less than 50MB increase
     });
   });
 
