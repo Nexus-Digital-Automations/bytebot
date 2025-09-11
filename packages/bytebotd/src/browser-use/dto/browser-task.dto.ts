@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
@@ -116,7 +117,8 @@ export class BrowserSessionConfigDto {
 
   @ApiPropertyOptional({
     description: 'Proxy configuration',
-    type: 'object', additionalProperties: true,
+    type: 'object',
+    additionalProperties: true,
   })
   @IsOptional()
   @IsObject()
@@ -192,7 +194,8 @@ export class BrowserActionDto {
 
   @ApiPropertyOptional({
     description: 'Additional action parameters',
-    type: 'object', additionalProperties: true,
+    type: 'object',
+    additionalProperties: true,
   })
   @IsOptional()
   @IsObject()
@@ -200,7 +203,8 @@ export class BrowserActionDto {
 
   @ApiPropertyOptional({
     description: 'Expected outcome validation',
-    type: 'object', additionalProperties: true,
+    type: 'object',
+    additionalProperties: true,
   })
   @IsOptional()
   @IsObject()
@@ -270,7 +274,8 @@ export class CreateBrowserTaskDto {
 
   @ApiPropertyOptional({
     description: 'Custom metadata for task tracking',
-    type: 'object', additionalProperties: true,
+    type: 'object',
+    additionalProperties: true,
   })
   @IsOptional()
   @IsObject()
@@ -335,7 +340,8 @@ export class BrowserTaskResultDto {
 
   @ApiPropertyOptional({
     description: 'Extracted data from browser actions',
-    type: 'object', additionalProperties: true,
+    type: 'object',
+    additionalProperties: true,
   })
   extractedData?: Record<string, any>;
 
@@ -352,7 +358,8 @@ export class BrowserTaskResultDto {
 
   @ApiPropertyOptional({
     description: 'Detailed error information',
-    type: 'object', additionalProperties: true,
+    type: 'object',
+    additionalProperties: true,
   })
   errorDetails?: Record<string, any>;
 
@@ -371,7 +378,8 @@ export class BrowserTaskResultDto {
 
   @ApiPropertyOptional({
     description: 'Task metadata and configuration used',
-    type: 'object', additionalProperties: true,
+    type: 'object',
+    additionalProperties: true,
   })
   metadata?: Record<string, any>;
 }

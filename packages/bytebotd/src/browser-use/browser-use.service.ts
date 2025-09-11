@@ -960,7 +960,12 @@ if __name__ == "__main__":
 
   private generateDomExtractionScript(
     sessionId: string,
-    config?: unknown,
+    config?: {
+      selector?: string;
+      includeAttributes?: boolean;
+      includeText?: boolean;
+      maxDepth?: number;
+    },
   ): string {
     return this.generateExtractionScript(sessionId, config?.selector);
   }

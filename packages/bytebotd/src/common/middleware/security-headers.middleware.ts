@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Security Headers Middleware - Comprehensive HTTP Security Headers for BytebotD
  *

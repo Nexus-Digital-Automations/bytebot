@@ -831,7 +831,8 @@ export class ServiceConfigurationSecurityAnalyzer extends EventEmitter {
     });
 
     // Simulated HTTP request - in real implementation would use http/https modules
-    const responseHeaders = this.makeHTTPRequest(options.target, options);
+    const response = this.makeHTTPRequest(options.target, options);
+    const responseHeaders = response.headers;
 
     // Check for essential security headers
     const securityHeaders = [
@@ -925,10 +926,7 @@ export class ServiceConfigurationSecurityAnalyzer extends EventEmitter {
     }
 
     // Check for information disclosure headers
-    this.analyzeInformationDisclosureHeaders(
-      responseHeaders.headers,
-      options.target,
-    );
+    this.analyzeInformationDisclosureHeaders(responseHeaders, options.target);
   }
 
   /**
