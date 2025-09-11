@@ -494,7 +494,7 @@ describe('Security Penetration Testing Suite', () => {
           .mockResolvedValue(maliciousPayload);
 
         try {
-          const result = await jwtAuthGuard.canActivate(context);
+          const _result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest();
 
           // Check if role escalation succeeded
@@ -1089,7 +1089,7 @@ describe('Security Penetration Testing Suite', () => {
           .mockResolvedValue(technique._payload);
 
         try {
-          const result = await jwtAuthGuard.canActivate(context);
+          const _result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest();
 
           // Check if evasion led to privilege escalation

@@ -115,7 +115,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       // Call parent authentication logic (Passport JWT strategy)
       const _result = await super.canActivate(context); // Note: const reassignment issue fixed
 
-      if (result) {
+      if (_result) {
         const authTime = Date.now() - startTime;
         const user = request.user;
 
@@ -145,7 +145,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         );
       }
 
-      return result as boolean;
+      return _result as boolean;
     } catch (_error) {
       const authTime = Date.now() - startTime;
 

@@ -198,7 +198,7 @@ export class RolesGuard implements CanActivate {
       this.logger.error(`[${operationId}] RBAC authorization error`, {
         operationId,
         userId: user.id,
-        error: errorMessage,
+        error: _errorMessage,
         authTimeMs: authTime,
         securityEvent: 'rbac_authorization_error',
       });
