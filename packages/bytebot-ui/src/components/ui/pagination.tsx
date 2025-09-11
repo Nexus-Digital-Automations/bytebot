@@ -18,12 +18,14 @@ export const Pagination: React.FC<PaginationProps> = ({
   total,
   pageSize,
 }) => {
-  if (totalPages <= 1) {return null;}
+  if (totalPages <= 1) {
+    return null;
+  }
 
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, total);
 
-  const getVisiblePages = () => {
+  const getVisiblePages = (): React.ReactNode[] => {
     const delta = 2;
     const range = [];
     const rangeWithDots = [];
@@ -56,16 +58,18 @@ export const Pagination: React.FC<PaginationProps> = ({
   const visiblePages = getVisiblePages();
 
   return (
-    <div className="flex items-center justify-between border-t border-bytebot-bronze-light-7 pt-6">
-      <div className="flex items-center text-sm text-bytebot-bronze-light-11">
+    <div className="border-bytebot-bronze-light-7 flex items-center justify-between border-t pt-6">
+      <div className="text-bytebot-bronze-light-11 flex items-center text-sm">
         Showing {startItem} to {endItem} of {total} results
       </div>
-      
+
       <div className="flex items-center space-x-2">
         <Button
           variant="outline"
           size="sm"
-          onClick={() => { onPageChange(currentPage - 1); }}
+          onClick={() => {
+            onPageChange(currentPage - 1);
+          }}
           disabled={currentPage === 1}
           className="flex items-center space-x-1"
         >
@@ -79,7 +83,7 @@ export const Pagination: React.FC<PaginationProps> = ({
               return (
                 <span
                   key={`ellipsis-${index}`}
-                  className="px-3 py-2 text-sm text-bytebot-bronze-light-11"
+                  className="text-bytebot-bronze-light-11 px-3 py-2 text-sm"
                 >
                   ...
                 </span>
@@ -94,7 +98,9 @@ export const Pagination: React.FC<PaginationProps> = ({
                 key={pageNum}
                 variant={isCurrentPage ? "default" : "outline"}
                 size="sm"
-                onClick={() => { onPageChange(pageNum); }}
+                onClick={() => {
+                  onPageChange(pageNum);
+                }}
                 className={`min-w-[40px] ${
                   isCurrentPage
                     ? "bg-bytebot-bronze-dark-7 text-white"
@@ -110,7 +116,9 @@ export const Pagination: React.FC<PaginationProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => { onPageChange(currentPage + 1); }}
+          onClick={() => {
+            onPageChange(currentPage + 1);
+          }}
           disabled={currentPage === totalPages}
           className="flex items-center space-x-1"
         >

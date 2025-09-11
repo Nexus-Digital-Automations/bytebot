@@ -15,6 +15,7 @@ import {
 import { startTask } from "@/utils/taskUtils";
 import { FileWithBase64, Model, validateUploadedFiles } from "@/types";
 import { TaskList } from "@/components/tasks/TaskList";
+import { logError, logInfo } from "@/utils/logger";
 
 interface StockPhotoProps {
   src: string;
@@ -144,10 +145,7 @@ export default function Home(): React.JSX.Element {
   const handleSend = (): void => {
     handleSendAsync().catch((error: unknown) => {
       // Handle async error
-      if (process.env.NODE_ENV === "development") {
-        // eslint-disable-next-line no-console
-        console.error("Send error:", error);
-      }
+      logError("Failed to send message from main page", error, "MainPage");
     });
   };
 
@@ -159,14 +157,12 @@ export default function Home(): React.JSX.Element {
     // Validate and sanitize uploaded files for security
     const validatedFiles = validateUploadedFiles(fileList);
 
-    // Log validation results for debugging (development only)
-    if (process.env.NODE_ENV === "development") {
-      // Development logging for file upload validation
-      // eslint-disable-next-line no-console
-      console.log(
-        `File upload: ${fileList.length} received, ${validatedFiles.length} valid`,
-      );
-    }
+    // Log validation results for debugging
+    logInfo(
+      `File upload validation: ${fileList.length} received, ${validatedFiles.length} valid`,
+      { receivedCount: fileList.length, validatedCount: validatedFiles.length },
+      "MainPage",
+    );
 
     setUploadedFiles(validatedFiles);
   };

@@ -5,6 +5,7 @@ import { TaskItem } from "@/components/tasks/TaskItem";
 import { fetchTasks } from "@/utils/taskUtils";
 import { Task } from "@/types";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { logError } from "@/utils/logger";
 
 interface TaskListProps {
   limit?: number;
@@ -67,7 +68,7 @@ export const TaskList: React.FC<TaskListProps> = ({
     };
 
     loadTasks().catch((error: unknown) => {
-      console.error("Failed to load tasks:", error);
+      logError("Failed to load tasks in TaskList component", error, "TaskList");
     });
   }, [limit]);
 

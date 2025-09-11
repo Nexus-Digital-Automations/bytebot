@@ -684,7 +684,7 @@ describe("Header Component", () => {
 
       // Execute hover operations sequentially using reduce to avoid await-in-loop
       await Array.from({ length: PERFORMANCE_TEST_ITERATIONS }).reduce(
-        async (previousPromise: Promise<void>, _current, index) => {
+        async (previousPromise: Promise<void>, _current, _index) => {
           await previousPromise;
           await user.hover(homeLink);
           await user.hover(tasksLink);

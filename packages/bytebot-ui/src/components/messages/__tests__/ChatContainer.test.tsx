@@ -21,6 +21,10 @@ import { GroupedMessages, Role, TaskStatus } from "@/types";
 import { MessageContentBlock, MessageContentType } from "@bytebot/shared";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 
+// Test constants
+const RENDER_TIME_THRESHOLD_MS = 200;
+const EXPECTED_MESSAGE_GROUP_COUNT = 3;
+
 // Mock child components
 jest.mock("../MessageGroup", () => ({
   MessageGroup: ({ group }: { group: GroupedMessages }) => (
@@ -567,7 +571,7 @@ describe("ChatContainer Component", () => {
       );
       const { renderTime } = renderResult;
 
-      expect(renderTime ?? 0).toBeLessThan(200); // Should render large lists efficiently
+      expect(renderTime ?? 0).toBeLessThan(RENDER_TIME_THRESHOLD_MS); // Should render large lists efficiently
     });
 
     it("cleans up scroll event listeners properly", () => {
@@ -729,7 +733,7 @@ describe("ChatContainer Component", () => {
       );
 
       const messageGroups = screen.getAllByTestId(/message-group-/);
-      expect(messageGroups).toHaveLength(3);
+      expect(messageGroups).toHaveLength(EXPECTED_MESSAGE_GROUP_COUNT);
     });
 
     it("handles task status updates correctly", () => {
