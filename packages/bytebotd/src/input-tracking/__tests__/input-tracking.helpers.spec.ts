@@ -56,7 +56,7 @@ describe('InputTrackingHelpers', () => {
       Object.entries(keyInfoMap).forEach(([_keyCode, keyInfo]) => {
         expect(keyInfo).toHaveProperty('_name');
         expect(keyInfo).toHaveProperty('isPrintable');
-        expect(typeof keyInfo._name).toBe('string');
+        expect(typeof keyInfo.name).toBe('string');
         expect(typeof keyInfo.isPrintable).toBe('boolean');
 
         // Optional properties should be strings if present
@@ -198,7 +198,7 @@ describe('InputTrackingHelpers', () => {
 
       const spaceKey = keyInfoMap[UiohookKey.Space];
 
-      expect(spaceKey._name).toBe('Space');
+      expect(spaceKey.name).toBe('Space');
       expect(spaceKey.isPrintable).toBe(true);
       expect(spaceKey.string).toBe(' ');
       expect(spaceKey.shiftString).toBe(' '); // Space with shift is still space
@@ -216,7 +216,7 @@ describe('InputTrackingHelpers', () => {
       for (let i = 1; i <= 12; i++) {
         const fKey = keyInfoMap[UiohookKey[`F${i}` as keyof typeof UiohookKey]];
         expect(fKey).toBeDefined();
-        expect(fKey._name).toBe(`F${i}`);
+        expect(fKey.name).toBe(`F${i}`);
         expect(fKey.isPrintable).toBe(false);
         expect(fKey.string).toBeUndefined();
         expect(fKey.shiftString).toBeUndefined();
@@ -227,12 +227,12 @@ describe('InputTrackingHelpers', () => {
       const f24Key = keyInfoMap[UiohookKey.F24];
 
       if (f13Key) {
-        expect(f13Key._name).toBe('F13');
+        expect(f13Key.name).toBe('F13');
         expect(f13Key.isPrintable).toBe(false);
       }
 
       if (f24Key) {
-        expect(f24Key._name).toBe('F24');
+        expect(f24Key.name).toBe('F24');
         expect(f24Key.isPrintable).toBe(false);
       }
 
@@ -253,10 +253,10 @@ describe('InputTrackingHelpers', () => {
         { key: UiohookKey.ArrowRight, name: 'Right' },
       ];
 
-      arrowKeys.forEach(({ key, _name }) => {
+      arrowKeys.forEach(({ key, name }) => {
         const keyInfo = keyInfoMap[key];
         expect(keyInfo).toBeDefined();
-        expect(keyInfo._name).toBe(_name);
+        expect(keyInfo.name).toBe(name);
         expect(keyInfo.isPrintable).toBe(false);
       });
 
@@ -266,10 +266,10 @@ describe('InputTrackingHelpers', () => {
       const homeKey = keyInfoMap[UiohookKey.Home];
       const endKey = keyInfoMap[UiohookKey.End];
 
-      expect(pageUpKey._name).toBe('PageUp');
-      expect(pageDownKey._name).toBe('PageDown');
-      expect(homeKey._name).toBe('Home');
-      expect(endKey._name).toBe('End');
+      expect(pageUpKey.name).toBe('PageUp');
+      expect(pageDownKey.name).toBe('PageDown');
+      expect(homeKey.name).toBe('Home');
+      expect(endKey.name).toBe('End');
 
       [pageUpKey, pageDownKey, homeKey, endKey].forEach((keyInfo) => {
         expect(keyInfo.isPrintable).toBe(false);
@@ -296,10 +296,10 @@ describe('InputTrackingHelpers', () => {
         { key: UiohookKey.MetaRight, name: 'RightMeta' },
       ];
 
-      modifierKeys.forEach(({ key, _name }) => {
+      modifierKeys.forEach(({ key, name }) => {
         const keyInfo = keyInfoMap[key];
         expect(keyInfo).toBeDefined();
-        expect(keyInfo._name).toBe(_name);
+        expect(keyInfo.name).toBe(name);
         expect(keyInfo.isPrintable).toBe(false);
         expect(keyInfo.string).toBeUndefined();
         expect(keyInfo.shiftString).toBeUndefined();
@@ -319,7 +319,7 @@ describe('InputTrackingHelpers', () => {
         const numpadKey =
           keyInfoMap[UiohookKey[`Numpad${i}` as keyof typeof UiohookKey]];
         expect(numpadKey).toBeDefined();
-        expect(numpadKey._name).toBe(`Numpad${i}`);
+        expect(numpadKey.name).toBe(`Numpad${i}`);
         expect(numpadKey.isPrintable).toBe(true);
         expect(numpadKey.string).toBe(i.toString());
         expect(numpadKey.shiftString).toBe(i.toString());
@@ -341,10 +341,10 @@ describe('InputTrackingHelpers', () => {
         { key: UiohookKey.NumpadDecimal, name: 'Decimal', char: '.' },
       ];
 
-      operatorKeys.forEach(({ key, _name, char }) => {
+      operatorKeys.forEach(({ key, name, char }) => {
         const keyInfo = keyInfoMap[key];
         expect(keyInfo).toBeDefined();
-        expect(keyInfo._name).toBe(_name);
+        expect(keyInfo.name).toBe(name);
         expect(keyInfo.isPrintable).toBe(true);
         expect(keyInfo.string).toBe(char);
         expect(keyInfo.shiftString).toBe(char);
@@ -371,10 +371,10 @@ describe('InputTrackingHelpers', () => {
         { key: UiohookKey.NumpadDelete, name: 'Delete' },
       ];
 
-      navKeys.forEach(({ key, _name }) => {
+      navKeys.forEach(({ key, name }) => {
         const keyInfo = keyInfoMap[key];
         expect(keyInfo).toBeDefined();
-        expect(keyInfo._name).toBe(_name);
+        expect(keyInfo.name).toBe(name);
         expect(keyInfo.isPrintable).toBe(false);
       });
 
@@ -401,10 +401,10 @@ describe('InputTrackingHelpers', () => {
         { key: UiohookKey.Escape, name: 'Escape' },
       ];
 
-      specialKeys.forEach(({ key, _name }) => {
+      specialKeys.forEach(({ key, name }) => {
         const keyInfo = keyInfoMap[key];
         expect(keyInfo).toBeDefined();
-        expect(keyInfo._name).toBe(_name);
+        expect(keyInfo.name).toBe(name);
         expect(keyInfo.isPrintable).toBe(false);
       });
 
@@ -421,12 +421,12 @@ describe('InputTrackingHelpers', () => {
       const leftBracket = keyInfoMap[UiohookKey.BracketLeft];
       const rightBracket = keyInfoMap[UiohookKey.BracketRight];
 
-      expect(leftBracket._name).toBe('LeftBracket');
+      expect(leftBracket.name).toBe('LeftBracket');
       expect(leftBracket.string).toBe('[');
       expect(leftBracket.shiftString).toBe('{');
       expect(leftBracket.isPrintable).toBe(true);
 
-      expect(rightBracket._name).toBe('RightBracket');
+      expect(rightBracket.name).toBe('RightBracket');
       expect(rightBracket.string).toBe(']');
       expect(rightBracket.shiftString).toBe('}');
       expect(rightBracket.isPrintable).toBe(true);
@@ -442,12 +442,12 @@ describe('InputTrackingHelpers', () => {
       const quote = keyInfoMap[UiohookKey.Quote];
       const backquote = keyInfoMap[UiohookKey.Backquote];
 
-      expect(quote._name).toBe('Quote');
+      expect(quote.name).toBe('Quote');
       expect(quote.string).toBe("'");
       expect(quote.shiftString).toBe('"');
       expect(quote.isPrintable).toBe(true);
 
-      expect(backquote._name).toBe('Grave');
+      expect(backquote.name).toBe('Grave');
       expect(backquote.string).toBe('`');
       expect(backquote.shiftString).toBe('~');
       expect(backquote.isPrintable).toBe(true);
@@ -462,12 +462,12 @@ describe('InputTrackingHelpers', () => {
       const slash = keyInfoMap[UiohookKey.Slash];
       const backslash = keyInfoMap[UiohookKey.Backslash];
 
-      expect(slash._name).toBe('Slash');
+      expect(slash.name).toBe('Slash');
       expect(slash.string).toBe('/');
       expect(slash.shiftString).toBe('?');
       expect(slash.isPrintable).toBe(true);
 
-      expect(backslash._name).toBe('Backslash');
+      expect(backslash.name).toBe('Backslash');
       expect(backslash.string).toBe('\\');
       expect(backslash.shiftString).toBe('|');
       expect(backslash.isPrintable).toBe(true);
@@ -499,7 +499,7 @@ describe('InputTrackingHelpers', () => {
       // Test with key code 0 (special case)
       const zeroKey = keyInfoMap[0];
       expect(zeroKey).toBeDefined();
-      expect(zeroKey._name).toBe('Alt');
+      expect(zeroKey.name).toBe('Alt');
 
       console.log(`[${testId}] Boundary key codes test completed`);
     });
@@ -510,8 +510,8 @@ describe('InputTrackingHelpers', () => {
 
       Object.entries(keyInfoMap).forEach(([_keyCode, keyInfo]) => {
         // Name should always be a non-empty string
-        expect(typeof keyInfo._name).toBe('string');
-        expect(keyInfo._name.length).toBeGreaterThan(0);
+        expect(typeof keyInfo.name).toBe('string');
+        expect(keyInfo.name.length).toBeGreaterThan(0);
 
         // isPrintable should always be boolean
         expect(typeof keyInfo.isPrintable).toBe('boolean');
@@ -574,7 +574,7 @@ describe('InputTrackingHelpers', () => {
 
       // Each entry should be reasonably sized
       Object.values(keyInfoMap).forEach((keyInfo) => {
-        expect(keyInfo._name.length).toBeLessThan(50); // Reasonable name length
+        expect(keyInfo.name.length).toBeLessThan(50); // Reasonable name length
         if (keyInfo.string) {
           expect(keyInfo.string.length).toBeLessThan(10); // Characters should be short
         }
@@ -596,13 +596,13 @@ describe('InputTrackingHelpers', () => {
 
       Object.values(keyInfoMap).forEach((keyInfo) => {
         // Name should be properly formatted (either starts with uppercase letter or digit)
-        expect(keyInfo._name[0]).toMatch(/[A-Z0-9]/);
+        expect(keyInfo.name[0]).toMatch(/[A-Z0-9]/);
 
         // Should not have trailing spaces
-        expect(keyInfo._name.trim()).toBe(keyInfo._name);
+        expect(keyInfo.name.trim()).toBe(keyInfo.name);
 
         // Should not be empty
-        expect(keyInfo._name.length).toBeGreaterThan(0);
+        expect(keyInfo.name.length).toBeGreaterThan(0);
       });
 
       console.log(`[${testId}] Naming conventions consistency test completed`);
@@ -654,7 +654,7 @@ describe('InputTrackingHelpers', () => {
 
       criticalKeys.forEach((_keyCode) => {
         expect(keyInfoMap[keyCode]).toBeDefined();
-        expect(keyInfoMap[keyCode]._name).toBeTruthy();
+        expect(keyInfoMap[keyCode].name).toBeTruthy();
       });
 
       console.log(`[${testId}] Critical keys coverage test completed`);
@@ -739,18 +739,18 @@ describe('InputTrackingHelpers', () => {
       // Function keys should be named F1, F2, etc.
       const functionKeyPattern = /^F\d{1,2}$/;
       [UiohookKey.F1, UiohookKey.F5, UiohookKey.F12].forEach((_keyCode) => {
-        expect(keyInfoMap[keyCode]._name).toMatch(functionKeyPattern);
+        expect(keyInfoMap[keyCode].name).toMatch(functionKeyPattern);
       });
 
       // Arrow keys should contain directional names
-      expect(keyInfoMap[UiohookKey.ArrowUp]._name).toContain('Up');
-      expect(keyInfoMap[UiohookKey.ArrowDown]._name).toContain('Down');
-      expect(keyInfoMap[UiohookKey.ArrowLeft]._name).toContain('Left');
-      expect(keyInfoMap[UiohookKey.ArrowRight]._name).toContain('Right');
+      expect(keyInfoMap[UiohookKey.ArrowUp].name).toContain('Up');
+      expect(keyInfoMap[UiohookKey.ArrowDown].name).toContain('Down');
+      expect(keyInfoMap[UiohookKey.ArrowLeft].name).toContain('Left');
+      expect(keyInfoMap[UiohookKey.ArrowRight].name).toContain('Right');
 
       // Modifier keys should indicate their position when applicable
-      expect(keyInfoMap[UiohookKey.Shift]._name).toContain('Left');
-      expect(keyInfoMap[UiohookKey.ShiftRight]._name).toContain('Right');
+      expect(keyInfoMap[UiohookKey.Shift].name).toContain('Left');
+      expect(keyInfoMap[UiohookKey.ShiftRight].name).toContain('Right');
 
       console.log(`[${testId}] Appropriate key names test completed`);
     });

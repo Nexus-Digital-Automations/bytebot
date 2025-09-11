@@ -518,21 +518,21 @@ describe('Controller Security Integration Tests', () => {
       await request(app.getHttpServer())
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
-        .send({ _name: 'Test Resource', type: 'document' })
+        .send({ name: 'Test Resource', type: 'document' })
         .expect(200);
 
       // Operator should have access
       await request(app.getHttpServer())
         .post('/api/resources')
         .set('Authorization', 'Bearer operator-token')
-        .send({ _name: 'Test Resource', type: 'document' })
+        .send({ name: 'Test Resource', type: 'document' })
         .expect(200);
 
       // Viewer should be denied
       await request(app.getHttpServer())
         .post('/api/resources')
         .set('Authorization', 'Bearer viewer-token')
-        .send({ _name: 'Test Resource', type: 'document' })
+        .send({ name: 'Test Resource', type: 'document' })
         .expect(403);
 
       securityLogger.info(
@@ -572,7 +572,7 @@ describe('Controller Security Integration Tests', () => {
         );
 
         if (method === 'post') {
-          req = req.send({ _name: 'Test', type: 'test' });
+          req = req.send({ name: 'Test', type: 'test' });
         }
 
         await req.expect(expectedStatus);
@@ -604,7 +604,7 @@ describe('Controller Security Integration Tests', () => {
         .expect(200);
 
       // Response should contain the data but safely handled
-      expect(response.body._name).toBeDefined();
+      expect(response.body.name).toBeDefined();
       expect(response.body.description).toBeDefined();
       expect(response.body.type).toBeDefined();
 
@@ -828,7 +828,7 @@ describe('Controller Security Integration Tests', () => {
             const _req = request(app.getHttpServer())
               .post('/api/resources')
               .set('Authorization', 'Bearer admin-token')
-              .send({ _name: 'Slow Request' })
+              .send({ name: 'Slow Request' })
               .timeout(5000) // 5 second timeout
               .end((err, res) => {
                 resolve({ error: !!err, status: res?.status });
@@ -913,7 +913,7 @@ describe('Controller Security Integration Tests', () => {
         .set('Authorization', 'Bearer admin-token')
         .set('Content-Length', '100')
         .set('Transfer-Encoding', 'chunked')
-        .send({ _name: 'Smuggled Request', type: 'attack' })
+        .send({ name: 'Smuggled Request', type: 'attack' })
         .expect((res) => {
           // Should handle gracefully without processing smuggled content
           expect([200, 400, 411].includes(res.status)).toBe(true);

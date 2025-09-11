@@ -529,7 +529,7 @@ describe('ComputerUseTools', () => {
                 media_type: readResult.mediaType,
                 data: readResult.data,
               },
-              name: readResult._name,
+              name: readResult.name,
               size: readResult.size,
             },
           ],

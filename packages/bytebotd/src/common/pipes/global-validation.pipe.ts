@@ -492,7 +492,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
     } catch (loggingError) {
       this.logger.error('Failed to log BytebotD security event', {
         operationId,
-        originalError: _error.message,
+        originalError: loggingError.message,
         loggingError:
           loggingError instanceof Error
             ? loggingError.message

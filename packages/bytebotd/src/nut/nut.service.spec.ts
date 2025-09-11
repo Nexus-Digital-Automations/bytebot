@@ -221,7 +221,7 @@ jest.mock('fs', () => ({
 
 describe('NutService', () => {
   let service: NutService;
-  let _loggerSpy: jest.SpyInstance;
+  let loggerSpy: jest.SpyInstance;
 
   const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
   const mockFs = fs.promises as jest.Mocked<typeof fs.promises>;
@@ -822,8 +822,8 @@ describe('NutService', () => {
         const getErrorMessage = service['getErrorMessage'] as (
           _error: unknown,
         ) => string;
-        const result = getErrorMessage.call(service, _error);
-        expect(_result).toBe('Test error message');
+        const result = getErrorMessage.call(service, error);
+        expect(result).toBe('Test error message');
       });
 
       it('should handle string errors', () => {
@@ -832,7 +832,7 @@ describe('NutService', () => {
           _error: unknown,
         ) => string;
         const result = getErrorMessage.call(service, _error);
-        expect(_result).toBe('String error message');
+        expect(result).toBe('String error message');
       });
 
       it('should extract message from objects with message property', () => {
@@ -841,7 +841,7 @@ describe('NutService', () => {
           _error: unknown,
         ) => string;
         const result = getErrorMessage.call(service, _error);
-        expect(_result).toBe('Object error message');
+        expect(result).toBe('Object error message');
       });
 
       it('should handle objects with non-string message', () => {
@@ -850,7 +850,7 @@ describe('NutService', () => {
           _error: unknown,
         ) => string;
         const result = getErrorMessage.call(service, _error);
-        expect(_result).toBe(JSON.stringify({ nested: 'error' }));
+        expect(result).toBe(JSON.stringify({ nested: 'error' }));
       });
 
       it('should return default message for unknown _error types', () => {
@@ -859,7 +859,7 @@ describe('NutService', () => {
           _error: unknown,
         ) => string;
         const result = getErrorMessage.call(service, _error);
-        expect(_result).toBe('Unknown error occurred');
+        expect(result).toBe('Unknown error occurred');
       });
 
       it('should handle null and undefined errors', () => {
@@ -919,19 +919,19 @@ describe('NutService', () => {
       it('should map lowercase letters correctly', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
         const result = charToKeyInfo.call(service, 'a');
-        expect(_result).toEqual({ keyCode: 'A', withShift: false });
+        expect(result).toEqual({ keyCode: 'A', withShift: false });
       });
 
       it('should map uppercase letters with shift', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
         const result = charToKeyInfo.call(service, 'A');
-        expect(_result).toEqual({ keyCode: 'A', withShift: true });
+        expect(result).toEqual({ keyCode: 'A', withShift: true });
       });
 
       it('should map numbers correctly', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
         const result = charToKeyInfo.call(service, '5');
-        expect(_result).toEqual({ keyCode: 'Num5', withShift: false });
+        expect(result).toEqual({ keyCode: 'Num5', withShift: false });
       });
 
       it('should map special characters without shift', () => {
@@ -955,7 +955,7 @@ describe('NutService', () => {
       it('should return null for unmappable characters', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
         const result = charToKeyInfo.call(service, '€');
-        expect(_result).toBeNull();
+        expect(result).toBeNull();
       });
     });
   });

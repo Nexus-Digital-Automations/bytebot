@@ -70,7 +70,7 @@ class MockValidationPipe {
       return validatedValue;
     } catch (error) {
       console.error(`[${operationId}] Validation failed`, {
-        error: _error.message,
+        error: error.message,
         value: JSON.stringify(value).substring(0, 100),
       });
       throw error;
@@ -298,7 +298,7 @@ describe('ValidationPipe', () => {
       expect(result).toMatchObject({
         email: 'test@example.com',
         password: 'password123',
-        _name: 'Test User',
+        name: 'Test User',
         role: 'operator',
       });
 
@@ -416,8 +416,8 @@ describe('ValidationPipe', () => {
 
       const result = await pipe.transform(maliciousData, metadata);
 
-      expect(result._name).toBe('Test User');
-      expect(result._name).not.toContain('<script>');
+      expect(result.name).toBe('Test User');
+      expect(result.name).not.toContain('<script>');
 
       console.log(`[${testId}] XSS sanitization test completed successfully`);
     });
@@ -639,10 +639,10 @@ describe('ValidationPipe', () => {
         await pipe.transform(invalidData, metadata);
         fail('Expected BadRequestException');
       } catch (error) {
-        expect(_error).toBeInstanceOf(BadRequestException);
-        expect(_error.message).toContain('Validation failed');
-        expect(_error.message).toContain('email must be a valid email address');
-        expect(_error.message).toContain(
+        expect(error).toBeInstanceOf(BadRequestException);
+        expect(error.message).toContain('Validation failed');
+        expect(error.message).toContain('email must be a valid email address');
+        expect(error.message).toContain(
           'password must be longer than or equal to 6 characters',
         );
       }
@@ -670,10 +670,10 @@ describe('ValidationPipe', () => {
         await pipe.transform(multipleErrorData, metadata);
         fail('Expected BadRequestException');
       } catch (error) {
-        expect(_error.message).toContain(
+        expect(error.message).toContain(
           'title must be shorter than or equal to 100 characters',
         );
-        expect(_error.message).toContain(
+        expect(error.message).toContain(
           'priority must be one of: low, medium, high',
         );
       }
@@ -699,8 +699,8 @@ describe('ValidationPipe', () => {
         await pipe.transform(circularObj, metadata);
         // Should handle gracefully without throwing
       } catch (error) {
-        // If it throws, it should be a proper validation _error
-        expect(_error).toBeInstanceOf(BadRequestException);
+        // If it throws, it should be a proper validation error
+        expect(error).toBeInstanceOf(BadRequestException);
       }
 
       console.log(`[${testId}] Transformation errors test completed`);
@@ -889,7 +889,7 @@ describe('ValidationPipe', () => {
         .map((_, _i) => ({
           email: `user${i}@example.com`,
           password: `password123_${i}`,
-          _name: `User ${i}`,
+          name: `User ${i}`,
         }));
 
       const metadata: ArgumentMetadata = {

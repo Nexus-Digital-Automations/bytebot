@@ -143,7 +143,7 @@ export class ComputerUseTools {
    * Error Handling: Validates coordinates and handles system-level failures
    */
   @Tool({
-    _name: 'computer_move_mouse',
+    name: 'computer_move_mouse',
     description: 'Moves the mouse cursor to the specified coordinates.',
     parameters: z.object({
       coordinates: z.object({
@@ -175,12 +175,11 @@ export class ComputerUseTools {
 
       return { content: [{ type: 'text', text: 'mouse moved' }] };
     } catch (_err) {
-      const _err = _err as Error;
       this.logOperationError(
         operationId,
         'computer_move_mouse',
         startTime,
-        _err,
+        _err as Error,
       );
 
       return {
@@ -209,7 +208,7 @@ export class ComputerUseTools {
    * Validation: Ensures path has valid coordinates and key names
    */
   @Tool({
-    _name: 'computer_trace_mouse',
+    name: 'computer_trace_mouse',
     description:
       'Moves the mouse cursor along a specified path of coordinates.',
     parameters: z.object({
@@ -264,19 +263,18 @@ export class ComputerUseTools {
         content: [{ type: 'text', text: 'mouse traced' }],
       };
     } catch (_err) {
-      const _err = _err as Error;
       this.logOperationError(
         operationId,
         'computer_trace_mouse',
         startTime,
-        _err,
+        _err as Error,
       );
 
       return {
         content: [
           {
             type: 'text',
-            text: `Error tracing mouse: ${_err.message}`,
+            text: `Error tracing mouse: ${(_err as Error).message}`,
           },
         ],
       };
@@ -284,7 +282,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    _name: 'computer_click_mouse',
+    name: 'computer_click_mouse',
     description:
       'Performs a mouse click at the specified coordinates or current position.',
     parameters: z.object({
@@ -344,7 +342,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    _name: 'computer_press_mouse',
+    name: 'computer_press_mouse',
     description:
       'Presses or releases a specified mouse button at the given coordinates or current position.',
     parameters: z.object({
@@ -397,7 +395,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    _name: 'computer_drag_mouse',
+    name: 'computer_drag_mouse',
     description:
       'Drags the mouse from a starting point along a path while holding a specified button.',
     parameters: z.object({
@@ -456,7 +454,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    _name: 'computer_scroll',
+    name: 'computer_scroll',
     description: 'Scrolls the mouse wheel up, down, left, or right.',
     parameters: z.object({
       coordinates: z
@@ -521,7 +519,7 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    _name: 'computer_type_keys',
+    name: 'computer_type_keys',
     description: `Simulates typing a sequence of keys, often used for shortcuts involving modifier keys (e.g., Ctrl+C). Presses and releases each key in order.
     
 ────────────────────────
@@ -581,7 +579,7 @@ V, W, X, Y, Z`,
   }
 
   @Tool({
-    _name: 'computer_press_keys',
+    name: 'computer_press_keys',
     description: `Simulates pressing down or releasing specific keys. Useful for holding modifier keys.     
 ────────────────────────
 VALID KEYS
@@ -640,7 +638,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    _name: 'computer_type_text',
+    name: 'computer_type_text',
     description:
       'Types a string of text character by character. Use this tool for strings less than 25 characters, or passwords/sensitive form fields.',
     parameters: z.object({
@@ -672,7 +670,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    _name: 'computer_paste_text',
+    name: 'computer_paste_text',
     description:
       'Copies text to the clipboard and pastes it. Use this tool for typing long text strings or special characters not on the standard keyboard.',
     parameters: z.object({
@@ -696,7 +694,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    _name: 'computer_wait',
+    name: 'computer_wait',
     description: 'Pauses execution for a specified duration.',
     parameters: z.object({
       duration: z
@@ -722,7 +720,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    _name: 'computer_application',
+    name: 'computer_application',
     description:
       'Opens or switches to the specified application and maximizes it.',
     parameters: z.object({
@@ -786,7 +784,7 @@ V, W, X, Y, Z
    * Quality: Optimized compression balances file size and visual fidelity
    */
   @Tool({
-    _name: 'computer_screenshot',
+    name: 'computer_screenshot',
     description: 'Captures a screenshot of the current screen.',
   })
   async screenshot() {
@@ -843,19 +841,19 @@ V, W, X, Y, Z
         ],
       };
     } catch (_err) {
-      const _err = _err as Error;
+      const error = _err as Error;
       this.logOperationError(
         operationId,
         'computer_screenshot',
         startTime,
-        _err,
+        error,
       );
 
       return {
         content: [
           {
             type: 'text',
-            text: `Error taking screenshot: ${_err.message}`,
+            text: `Error taking screenshot: ${(_err as Error).message}`,
           },
         ],
       };
@@ -863,7 +861,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    _name: 'computer_cursor_position',
+    name: 'computer_cursor_position',
     description: 'Gets the current (x, y) coordinates of the mouse cursor.',
   })
   async cursorPosition() {
@@ -892,7 +890,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    _name: 'computer_write_file',
+    name: 'computer_write_file',
     description:
       'Writes a file to the specified path with base64 encoded data.',
     parameters: z.object({
@@ -939,7 +937,7 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    _name: 'computer_read_file',
+    name: 'computer_read_file',
     description:
       'Reads a file from the specified path and returns it as a document content block with base64 encoded data.',
     parameters: z.object({

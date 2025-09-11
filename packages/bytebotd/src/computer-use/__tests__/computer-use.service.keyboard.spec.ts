@@ -1045,7 +1045,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
     it('should extract _error message from Error object', () => {
       const _error = new Error('Test error message');
       const result = ErrorHandler.extractErrorMessage(_error);
-      expect(_result).toBe('Test error message');
+      expect(result).toBe('Test error message');
     });
 
     /**

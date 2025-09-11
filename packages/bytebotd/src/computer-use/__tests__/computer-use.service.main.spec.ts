@@ -573,8 +573,8 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
           await service.action(action);
           fail('Expected error to be thrown');
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
-          expect((_error as Error).message).toContain(
+          expect(error).toBeInstanceOf(Error);
+          expect((error as Error).message).toContain(
             'Failed to execute type_text',
           );
         }
@@ -802,7 +802,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const result = ErrorHandler.extractErrorMessage(_error);
 
         // Assert
-        expect(_result).toBe('Test error message');
+        expect(result).toBe('Test error message');
       });
 
       it('should handle string errors', () => {

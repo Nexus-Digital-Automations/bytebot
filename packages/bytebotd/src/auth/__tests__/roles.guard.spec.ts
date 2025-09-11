@@ -892,7 +892,7 @@ describe('RolesGuard', () => {
         await guard.canActivate(context);
         fail('Expected ForbiddenException');
       } catch (error) {
-        expect(_error.message).toContain('admin, operator');
+        expect(error.message).toContain('admin, operator');
       }
 
       console.log(`[${testId}] Detailed error messages test completed`);

@@ -403,8 +403,8 @@ describe('ComputerUseService Integration Tests', () => {
         await context.service.action(invalidAction);
         fail('Should have thrown an error');
       } catch (error) {
-        expect(_error).toBeInstanceOf(Error);
-        expect((_error as Error).message).toContain(
+        expect(error).toBeInstanceOf(Error);
+        expect((error as Error).message).toContain(
           'Unsupported computer action',
         );
       }
@@ -605,7 +605,7 @@ describe('ComputerUseService Integration Tests', () => {
       await fs.rm(testDataDir, { recursive: true, force: true });
     } catch (error) {
       // Directory might not exist or already cleaned up
-      console.warn('Failed to cleanup test data:', _error);
+      console.warn('Failed to cleanup test data:', error);
     }
   }
 });

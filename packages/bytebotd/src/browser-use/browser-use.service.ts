@@ -655,7 +655,7 @@ export class BrowserUseService {
 
     // Create new session
     return await this.sessionService.createSession({
-      _name: `Auto-created session ${Date.now()}`,
+      name: `Auto-created session ${Date.now()}`,
       ...config,
     });
   }

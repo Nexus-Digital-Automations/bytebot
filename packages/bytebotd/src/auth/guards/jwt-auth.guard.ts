@@ -226,7 +226,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Computer control authentication failed - no user`,
         {
           operationId,
-          info: info?.message || info?.name || String(info),
+          info: (info as any)?.message || (info as any)?.name || String(info),
           url: request.url,
           method: request.method,
           ipAddress: this.getClientIpAddress(request),
@@ -243,16 +243,16 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       `[${operationId}] Computer control authentication request handled successfully`,
       {
         operationId,
-        userId: user.id,
-        username: user.username,
-        role: user.role,
+        userId: (user as ByteBotdUser).id,
+        username: (user as ByteBotdUser).username,
+        role: (user as ByteBotdUser).role,
         url: request.url,
         method: request.method,
         securityEvent: 'computer_control_auth_handled',
       },
     );
 
-    return user;
+    return user as TUser;
   }
 
   /**
@@ -331,7 +331,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return 'Authentication required for computer control';
     }
 
-    const message = info.message || info.name || String(info);
+    const message =
+      (info as any)?.message || (info as any)?.name || String(info);
 
     // Common JWT errors with user-friendly messages
     switch (message) {
@@ -503,8 +504,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       }
 
       // Decode JWT payload (without verification - just for timing check)
+      // Convert base64url to base64 and decode
+      const payloadPart = tokenParts[1];
+      if (!payloadPart) {
+        return false;
+      }
+      const base64Payload = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
       const payload = JSON.parse(
-        Buffer.from(tokenParts[1], 'base64url').toString('utf8'),
+        Buffer.from(base64Payload, 'base64').toString('utf8'),
       );
 
       const currentTime = Math.floor(Date.now() / 1000);

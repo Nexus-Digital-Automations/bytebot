@@ -20,15 +20,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   ExecutionContext,
-  _UnauthorizedException,
-  _ForbiddenException,
+  UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard, ByteBotdUser } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
-import { UserRole, _Permission } from '@bytebot/shared';
+import { UserRole, Permission } from '@bytebot/shared';
 import _crypto from 'crypto';
 import _jwt from 'jsonwebtoken';
 
@@ -166,7 +166,7 @@ describe('Security Penetration Testing Suite', () => {
           results.push({
             success: false,
             token: attackToken,
-            _error: _error.message,
+            error: error.message,
             time: Date.now() - attackStart,
           });
         }
@@ -203,7 +203,7 @@ describe('Security Penetration Testing Suite', () => {
           await targetFunction(token);
           results.push({ token, success: true });
         } catch (error) {
-          results.push({ token, success: false, _error: _error.message });
+          results.push({ token, success: false, error: error.message });
         }
       }
 
@@ -235,7 +235,7 @@ describe('Security Penetration Testing Suite', () => {
             return {
               success: false,
               index: _index,
-              _error: _error.message,
+              error: error.message,
               userRole: user.role,
             };
           }
@@ -285,8 +285,8 @@ describe('Security Penetration Testing Suite', () => {
         getRequest: jest.fn().mockReturnValue(mockRequest),
         getResponse: jest.fn().mockReturnValue({}),
       }),
-      getHandler: jest.fn().mockReturnValue({ _name: 'pentestHandler' }),
-      getClass: jest.fn().mockReturnValue({ _name: 'PentestController' }),
+      getHandler: jest.fn().mockReturnValue({ name: 'pentestHandler' }),
+      getClass: jest.fn().mockReturnValue({ name: 'PentestController' }),
     } as any;
   };
 
@@ -596,7 +596,7 @@ describe('Security Penetration Testing Suite', () => {
             constructor: {
               prototype: {
                 role: UserRole._ADMIN,
-                permissions: [_Permission._SYSTEM_ADMIN],
+                permissions: [Permission._SYSTEM_ADMIN],
               },
             },
           } as any,
@@ -610,7 +610,7 @@ describe('Security Penetration Testing Suite', () => {
             role: UserRole._VIEWER,
             isActive: true,
             roles: [UserRole._ADMIN],
-            permissions: [_Permission._SYSTEM_ADMIN],
+            permissions: [Permission._SYSTEM_ADMIN],
             admin: true,
             superuser: true,
           } as any,
@@ -623,7 +623,7 @@ describe('Security Penetration Testing Suite', () => {
         const context = createPentestExecutionContext(
           attackVector.user,
           {},
-          { attackVector: attackVector._name },
+          { attackVector: attackVector.name },
         );
 
         jest
@@ -634,13 +634,13 @@ describe('Security Penetration Testing Suite', () => {
         try {
           const result = await rolesGuard.canActivate(context);
           escalationResults.push({
-            attack: attackVector._name,
+            attack: attackVector.name,
             success: result,
             vulnerability: result ? 'CRITICAL' : 'NONE',
           });
         } catch (error) {
           escalationResults.push({
-            attack: attackVector._name,
+            attack: attackVector.name,
             success: false,
             blocked: true,
           });
@@ -697,7 +697,7 @@ describe('Security Penetration Testing Suite', () => {
               ? `Bearer ${testCase.token}`
               : undefined,
           },
-          { attackVector: `timing-${testCase._name}` },
+          { attackVector: `timing-${testCase.name}` },
         );
 
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
@@ -721,7 +721,7 @@ describe('Security Penetration Testing Suite', () => {
         );
 
         timingResults.push({
-          testCase: testCase._name,
+          testCase: testCase.name,
           time: processingTime,
           shouldSucceed: testCase.shouldSucceed,
         });
@@ -1080,7 +1080,7 @@ describe('Security Penetration Testing Suite', () => {
         const context = createPentestExecutionContext(
           undefined,
           { authorization: `Bearer ${evasionToken}` },
-          { attackVector: `apt-${technique._name}`, ip: '198.51.100.100' },
+          { attackVector: `apt-${technique.name}`, ip: '198.51.100.100' },
         );
 
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
@@ -1097,13 +1097,13 @@ describe('Security Penetration Testing Suite', () => {
             request.user && request.user.role === UserRole._ADMIN;
 
           evasionResults.push({
-            technique: technique._name,
+            technique: technique.name,
             success: escalationSuccess,
             vulnerability: escalationSuccess ? 'CRITICAL' : 'LOW',
           });
         } catch (error) {
           evasionResults.push({
-            technique: technique._name,
+            technique: technique.name,
             success: false,
             blocked: true,
           });

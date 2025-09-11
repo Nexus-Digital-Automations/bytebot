@@ -320,7 +320,7 @@ export class ComputerUseController {
     operationId: 'getAsyncJobStatus',
   })
   @ApiParam({
-    _name: 'jobId',
+    name: 'jobId',
     description: 'Unique job identifier from async submission',
     example: 'job_1702983456789_abc123',
   })
@@ -424,7 +424,7 @@ export class ComputerUseController {
     operationId: 'getAsyncJobResult',
   })
   @ApiParam({
-    _name: 'jobId',
+    name: 'jobId',
     description: 'Unique job identifier from async submission',
     example: 'job_1702983456789_abc123',
   })
@@ -561,7 +561,7 @@ export class ComputerUseController {
     operationId: 'cancelAsyncJob',
   })
   @ApiParam({
-    _name: 'jobId',
+    name: 'jobId',
     description: 'Unique job identifier from async submission',
     example: 'job_1702983456789_abc123',
   })

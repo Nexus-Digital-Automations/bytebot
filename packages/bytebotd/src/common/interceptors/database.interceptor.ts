@@ -505,7 +505,7 @@ export class DatabaseInterceptor implements NestInterceptor {
         if (_error) {
           this.metricsService.recordDatabaseError(
             operation.operation,
-            error.constructor._name,
+            error.constructor.name,
           );
         } else {
           this.metricsService.recordDatabaseQuery(

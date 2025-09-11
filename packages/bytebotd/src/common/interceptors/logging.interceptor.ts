@@ -345,7 +345,7 @@ export class LoggingInterceptor implements NestInterceptor {
     errorContext: ErrorContext,
   ): void {
     this.logger.error({
-      message: `HTTP Request Failed - ${requestContext.method} ${requestContext.url} - ${errorContext._name}`,
+      message: `HTTP Request Failed - ${requestContext.method} ${requestContext.url} - ${errorContext.name}`,
       level: 'error',
       type: 'http_error',
       context: {

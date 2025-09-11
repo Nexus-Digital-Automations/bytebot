@@ -17,7 +17,7 @@ import {
   GlobalValidationPipe,
   BytebotDValidationPipes,
 } from '../pipes/global-validation.pipe';
-import { _EnterpriseRateLimitGuard } from '../guards/rate-limit.guard';
+import { EnterpriseRateLimitGuard } from '../guards/rate-limit.guard';
 import { SecurityHeadersMiddleware } from '../middleware/security-headers.middleware';
 import { DeprecationGuard } from '../versioning/deprecation.guard';
 import { VersionInterceptor } from '../versioning/version.interceptor';

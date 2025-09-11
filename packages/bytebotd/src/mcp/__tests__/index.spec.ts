@@ -50,7 +50,7 @@ class IndexTestUtils {
    */
   static validateExport(
     exportObj: any,
-    _name: string,
+    name: string,
     expectedType: string,
     expectedConstructor?: any,
   ): void {
@@ -367,12 +367,12 @@ describe('MCP Index Module', () => {
       const exports = McpIndex;
 
       // Classes should be PascalCase
-      expect(exports.BytebotMcpModule._name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
-      expect(exports.ComputerUseTools._name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
-      expect(exports.Base64ImageCompressor._name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
+      expect(exports.BytebotMcpModule.name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
+      expect(exports.ComputerUseTools.name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
+      expect(exports.Base64ImageCompressor.name).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
 
       // Functions should be camelCase
-      expect(exports.compressPngBase64Under1MB._name).toMatch(
+      expect(exports.compressPngBase64Under1MB.name).toMatch(
         /^[a-z][a-zA-Z0-9]*$/,
       );
     });

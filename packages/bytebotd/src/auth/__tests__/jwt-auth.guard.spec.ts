@@ -71,8 +71,8 @@ class MockJwtAuthGuard {
 
       return true;
     } catch (error) {
-      if (_error instanceof UnauthorizedException) {
-        throw _error;
+      if (error instanceof UnauthorizedException) {
+        throw error;
       }
       throw new UnauthorizedException('Invalid authentication token');
     }

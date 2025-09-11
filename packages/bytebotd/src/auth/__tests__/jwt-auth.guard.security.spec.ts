@@ -67,8 +67,8 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         getRequest: jest.fn().mockReturnValue(mockRequest),
         getResponse: jest.fn().mockReturnValue({}),
       }),
-      getHandler: jest.fn().mockReturnValue({ _name: 'testHandler' }),
-      getClass: jest.fn().mockReturnValue({ _name: 'TestController' }),
+      getHandler: jest.fn().mockReturnValue({ name: 'testHandler' }),
+      getClass: jest.fn().mockReturnValue({ name: 'TestController' }),
     } as any;
   };
 
@@ -420,7 +420,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
       // Verify XSS content is sanitized or safely handled
       expect(request.user.email).toBeDefined();
-      expect(request.user._name).toBeDefined();
+      expect(request.user.name).toBeDefined();
 
       securityLogger.info(`[${testId}] XSS _payload sanitized successfully`);
     });

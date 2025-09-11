@@ -12,7 +12,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 import { SecuritySanitizationPipe } from '../pipes/security-sanitization.pipe';
-import { _EnterpriseRateLimitGuard } from '../guards/rate-limit.guard';
+import { EnterpriseRateLimitGuard } from '../guards/rate-limit.guard';
 import { SecurityExceptionFilter } from '../filters/security-exception.filter';
 
 describe('Security Validation Mock Tests', () => {

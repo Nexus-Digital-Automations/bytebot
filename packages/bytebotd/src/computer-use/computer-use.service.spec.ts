@@ -1080,9 +1080,9 @@ describe('ComputerUseService', () => {
         try {
           await service.action(action);
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
-          expect(_error.message).toContain('Failed to execute move_mouse');
-          expect(_error.message).toContain('NUT service _error');
+          expect(error).toBeInstanceOf(Error);
+          expect(error.message).toContain('Failed to execute move_mouse');
+          expect(error.message).toContain('NUT service error');
         }
       });
     });

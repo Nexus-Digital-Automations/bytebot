@@ -240,11 +240,11 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         await pipe.transform(maliciousInput, {} as any);
         fail('Should have thrown BadRequestException');
       } catch (error) {
-        expect(_error).toBeInstanceOf(BadRequestException);
-        expect(_error.response.message).toContain('security threats detected');
-        expect(_error.response.threatTypes).toContain('ADVANCED_XSS');
-        expect(_error.response.threatTypes).toContain('ADVANCED_SQL_INJECTION');
-        expect(_error.response.totalRiskScore).toBeGreaterThan(0);
+        expect(error).toBeInstanceOf(BadRequestException);
+        expect(error.response.message).toContain('security threats detected');
+        expect(error.response.threatTypes).toContain('ADVANCED_XSS');
+        expect(error.response.threatTypes).toContain('ADVANCED_SQL_INJECTION');
+        expect(error.response.totalRiskScore).toBeGreaterThan(0);
       }
     });
 
@@ -268,19 +268,19 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         await pipe.transform(maliciousInput, {} as any);
         fail('Should have thrown BadRequestException');
       } catch (error) {
-        expect(_error.response).toHaveProperty('message');
-        expect(_error.response).toHaveProperty('operationId');
-        expect(_error.response).toHaveProperty('threatTypes');
-        expect(_error.response).toHaveProperty('totalRiskScore');
-        expect(_error.response).toHaveProperty('threatLevel');
-        expect(_error.response).toHaveProperty('validationStages');
-        expect(_error.response).toHaveProperty('detectionCount');
-        expect(_error.response).toHaveProperty('timestamp');
+        expect(error.response).toHaveProperty('message');
+        expect(error.response).toHaveProperty('operationId');
+        expect(error.response).toHaveProperty('threatTypes');
+        expect(error.response).toHaveProperty('totalRiskScore');
+        expect(error.response).toHaveProperty('threatLevel');
+        expect(error.response).toHaveProperty('validationStages');
+        expect(error.response).toHaveProperty('detectionCount');
+        expect(error.response).toHaveProperty('timestamp');
 
-        expect(Array.isArray(_error.response.threatTypes)).toBe(true);
-        expect(Array.isArray(_error.response.validationStages)).toBe(true);
-        expect(typeof _error.response.totalRiskScore).toBe('number');
-        expect(_error.response.detectionCount).toBeGreaterThan(0);
+        expect(Array.isArray(error.response.threatTypes)).toBe(true);
+        expect(Array.isArray(error.response.validationStages)).toBe(true);
+        expect(typeof error.response.totalRiskScore).toBe('number');
+        expect(error.response.detectionCount).toBeGreaterThan(0);
       }
     });
 

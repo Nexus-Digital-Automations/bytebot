@@ -67,8 +67,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
         getRequest: jest.fn().mockReturnValue(mockRequest),
         getResponse: jest.fn().mockReturnValue({}),
       }),
-      getHandler: jest.fn().mockReturnValue({ _name: 'testHandler' }),
-      getClass: jest.fn().mockReturnValue({ _name: 'TestController' }),
+      getHandler: jest.fn().mockReturnValue({ name: 'testHandler' }),
+      getClass: jest.fn().mockReturnValue({ name: 'TestController' }),
     } as any;
   };
 
@@ -214,7 +214,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         expect(request.user.role).toBe(UserRole._ADMIN);
       } catch (error) {
         // Should throw ForbiddenException if role validation is strict
-        expect(_error).toBeInstanceOf(ForbiddenException);
+        expect(error).toBeInstanceOf(ForbiddenException);
       }
 
       securityLogger.info(
@@ -286,7 +286,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
           const result = await guard.canActivate(context);
           return { success: true, index: _index };
         } catch (error) {
-          return { success: false, index: _index, _error: _error.message };
+          return { success: false, index: _index, error: error.message };
         }
       });
 
@@ -596,7 +596,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
           const result = await guard.canActivate(context);
           return { success: true, userId: user.id };
         } catch (error) {
-          return { success: false, userId: user.id, _error: _error.message };
+          return { success: false, userId: user.id, error: error.message };
         }
       });
 

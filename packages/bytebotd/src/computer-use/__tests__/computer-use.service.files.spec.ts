@@ -1242,7 +1242,7 @@ describe('ComputerUseService - File Operations', () => {
       const result = (await service.action(action)) as FileReadResult;
 
       expect(result.success).toBe(true);
-      expect(result._name).toBe(
+      expect(result.name).toBe(
         'test file with spaces and "quotes" & symbols.txt',
       );
     });

@@ -186,7 +186,7 @@ describe('HealthController', () => {
 
       const result = await controller.getHealth();
 
-      expect(_result).toEqual(mockBasicHealthResponse);
+      expect(result).toEqual(mockBasicHealthResponse);
       expect(healthService.getBasicHealth).toHaveBeenCalledTimes(1);
       expect(mockLogger.debug).toHaveBeenCalledWith('Health check requested');
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -207,7 +207,7 @@ describe('HealthController', () => {
 
       const result = await controller.getHealth();
 
-      expect(_result).toEqual({
+      expect(result).toEqual({
         status: 'unhealthy',
         timestamp: expect.any(String),
         error: 'Database connection failed',
@@ -232,7 +232,7 @@ describe('HealthController', () => {
 
       const result = await controller.getHealth();
 
-      expect(_result).toEqual({
+      expect(result).toEqual({
         status: 'unhealthy',
         timestamp: expect.any(String),
         error: 'Unknown error',
@@ -254,7 +254,7 @@ describe('HealthController', () => {
       const result = await controller.getHealth();
 
       // Validate response structure
-      expect(_result).toMatchObject({
+      expect(result).toMatchObject({
         status: expect.stringMatching(/^(healthy|unhealthy)$/),
         timestamp: expect.stringMatching(
           /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
@@ -302,7 +302,7 @@ describe('HealthController', () => {
 
       const result = await controller.getDetailedStatus();
 
-      expect(_result).toEqual(mockDetailedStatusResponse);
+      expect(result).toEqual(mockDetailedStatusResponse);
       expect(healthService.getDetailedStatus).toHaveBeenCalledTimes(1);
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Detailed status requested',
@@ -384,7 +384,7 @@ describe('HealthController', () => {
 
       const result = await controller.getDetailedStatus();
 
-      expect(_result).toEqual({
+      expect(result).toEqual({
         status: 'error',
         timestamp: expect.any(String),
         error: 'Service monitoring failure',
@@ -408,7 +408,7 @@ describe('HealthController', () => {
 
       const result = await controller.getDetailedStatus();
 
-      expect(_result).toMatchObject({
+      expect(result).toMatchObject({
         status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/),
         timestamp: expect.stringMatching(
           /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
@@ -552,7 +552,7 @@ describe('HealthController', () => {
 
         const result = await controller.getHealth();
 
-        expect(_result).toMatchObject({
+        expect(result).toMatchObject({
           status: 'unhealthy',
           timestamp: expect.any(String),
           error: expect.any(String),
@@ -752,9 +752,9 @@ describe('HealthController', () => {
       const result = await controller.getHealth();
 
       // Ensure response contains expected fields for backward compatibility
-      expect(_result).toHaveProperty('status');
-      expect(_result).toHaveProperty('timestamp');
-      expect(_result).toHaveProperty('uptime');
+      expect(result).toHaveProperty('status');
+      expect(result).toHaveProperty('timestamp');
+      expect(result).toHaveProperty('uptime');
       expect(_result as BasicHealthResponse).toHaveProperty('memory');
 
       // Memory object should have expected structure
@@ -779,7 +779,7 @@ describe('HealthController', () => {
         healthService.getBasicHealth.mockReturnValue(variation);
 
         const result = await controller.getHealth();
-        expect(_result).toEqual(variation);
+        expect(result).toEqual(variation);
       }
 
       console.log(`[${testId}] Service response variations test completed`);
@@ -946,7 +946,7 @@ describe('HealthController', () => {
           expect.any(Function),
           expect.any(Function),
         ]);
-        expect(_result).toBeDefined();
+        expect(result).toBeDefined();
         expect(_result.status).toBe('ok');
 
         console.log(`[${testId}] Liveness probe success test completed`);
@@ -965,8 +965,8 @@ describe('HealthController', () => {
         try {
           await controller.checkLiveness();
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
-          expect((_error as Error).message).toBe('Memory limit exceeded');
+          expect(error).toBeInstanceOf(Error);
+          expect((error as Error).message).toBe('Memory limit exceeded');
         }
 
         expect(healthCheckService.check).toHaveBeenCalled();
@@ -1086,7 +1086,7 @@ describe('HealthController', () => {
         try {
           await controller.checkReadiness();
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
+          expect(error).toBeInstanceOf(Error);
         }
 
         expect(healthCheckService.check).toHaveBeenCalled();
@@ -1163,7 +1163,7 @@ describe('HealthController', () => {
         try {
           await controller.checkReadiness();
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
+          expect(error).toBeInstanceOf(Error);
         }
 
         console.log(`[${testId}] Partial failure handling test completed`);
@@ -1264,7 +1264,7 @@ describe('HealthController', () => {
         try {
           await controller.checkStartup();
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
+          expect(error).toBeInstanceOf(Error);
         }
 
         console.log(`[${testId}] Startup failure handling test completed`);
@@ -1335,8 +1335,8 @@ describe('HealthController', () => {
         try {
           await controller.checkStartup();
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
-          expect((_error as Error).message).toContain('still initializing');
+          expect(error).toBeInstanceOf(Error);
+          expect((error as Error).message).toContain('still initializing');
         }
 
         console.log(`[${testId}] Long startup duration test completed`);
@@ -1517,8 +1517,8 @@ describe('HealthController', () => {
         try {
           await controller.checkReadiness();
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
-          expect((_error as Error).name).toBe('TimeoutError');
+          expect(error).toBeInstanceOf(Error);
+          expect((error as Error).name).toBe('TimeoutError');
         }
 
         console.log(`[${testId}] Probe timeout handling test completed`);
@@ -1571,10 +1571,10 @@ describe('HealthController', () => {
         const result = await controller.checkLiveness();
 
         // Validate Kubernetes-compatible response structure
-        expect(_result).toHaveProperty('status');
-        expect(_result).toHaveProperty('info');
-        expect(_result).toHaveProperty('error');
-        expect(_result).toHaveProperty('details');
+        expect(result).toHaveProperty('status');
+        expect(result).toHaveProperty('info');
+        expect(result).toHaveProperty('error');
+        expect(result).toHaveProperty('details');
         expect(['ok', 'error', 'shutting_down'].includes(_result.status)).toBe(
           true,
         );
@@ -1598,8 +1598,8 @@ describe('HealthController', () => {
         try {
           await controller.checkLiveness();
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
-          expect((_error as Error).message).toContain('unavailable');
+          expect(error).toBeInstanceOf(Error);
+          expect((error as Error).message).toContain('unavailable');
         }
 
         console.log(`[${testId}] Service unavailability test completed`);
@@ -1632,7 +1632,7 @@ describe('HealthController', () => {
         try {
           await controller.checkLiveness();
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
+          expect(error).toBeInstanceOf(Error);
         }
 
         // Second call should succeed
@@ -1654,8 +1654,8 @@ describe('HealthController', () => {
         try {
           await controller.checkLiveness();
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
-          expect((_error as Error).message).toContain('Memory');
+          expect(error).toBeInstanceOf(Error);
+          expect((error as Error).message).toContain('Memory');
         }
 
         console.log(`[${testId}] Memory pressure liveness test completed`);
@@ -1673,8 +1673,8 @@ describe('HealthController', () => {
         try {
           await controller.checkReadiness();
         } catch (error) {
-          expect(_error).toBeInstanceOf(Error);
-          expect((_error as Error).message).toContain('disk');
+          expect(error).toBeInstanceOf(Error);
+          expect((error as Error).message).toContain('disk');
         }
 
         console.log(`[${testId}] Disk space readiness test completed`);

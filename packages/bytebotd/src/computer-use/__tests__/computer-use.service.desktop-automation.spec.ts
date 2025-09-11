@@ -134,18 +134,18 @@ import {
   ClickMouseAction,
   PressMouseAction,
   DragMouseAction,
-  _ScrollAction,
-  _TypeKeysAction,
+  ScrollAction,
+  TypeKeysAction,
   PressKeysAction,
   TypeTextAction,
-  _PasteTextAction,
-  _ScreenshotActionDto,
-  _CursorPositionAction,
-  _ApplicationAction,
+  PasteTextAction,
+  ScreenshotAction,
+  CursorPositionAction,
+  ApplicationAction,
   WriteFileAction,
-  _ReadFileAction,
+  ReadFileAction,
 } from '@bytebot/shared';
-import { ScreenshotActionDtoDto } from '../dto/computer-action.dto';
+import { ScreenshotActionDto } from '../dto/computer-action.dto';
 
 // Mock services for comprehensive testing
 const mockNutService = {
