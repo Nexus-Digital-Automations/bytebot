@@ -47,7 +47,7 @@ describe('InputTrackingController', () => {
     id: 'admin_user_1',
     username: 'admin',
     email: 'admin@bytebot.ai',
-    role: UserRole.ADMIN,
+    role: UserRole._ADMIN,
     permissions: [
       'task:read',
       'task:write',
@@ -61,7 +61,7 @@ describe('InputTrackingController', () => {
     id: 'operator_user_1',
     username: 'operator',
     email: 'operator@bytebot.ai',
-    role: UserRole.OPERATOR,
+    role: UserRole._OPERATOR,
     permissions: ['task:read', 'task:write', 'computer:control'],
     isActive: true,
   };
@@ -70,7 +70,7 @@ describe('InputTrackingController', () => {
     id: 'viewer_user_1',
     username: 'viewer',
     email: 'viewer@bytebot.ai',
-    role: UserRole.VIEWER,
+    role: UserRole._VIEWER,
     permissions: ['task:read'],
     isActive: true,
   };

@@ -912,7 +912,7 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Testing request smuggling prevention`);
 
       // Attempt request smuggling with conflicting headers
-      const response = await request(app.getHttpServer())
+      const _response = await request(app.getHttpServer())
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .set('Content-Length', '100')
@@ -941,7 +941,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of traversalPayloads) {
-        const response = await request(app.getHttpServer())
+        const _response = await request(app.getHttpServer())
           .delete(`/api/resources/${encodeURIComponent(_payload)}`)
           .set('Authorization', 'Bearer admin-token')
           .expect((res) => {

@@ -29,7 +29,7 @@ import { ByteBotdUser } from '../guards/jwt-auth.guard';
  */
 describe('RolesGuard - Advanced Security Tests', () => {
   let guard: RolesGuard;
-  let _reflector: Reflector;
+  let reflector: Reflector;
   let module: TestingModule;
 
   const operationId = `roles_security_test_${Date.now()}`;
@@ -284,9 +284,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
         try {
           const result = await guard.canActivate(context);
-          return { success: true, index };
+          return { success: true, index: _index };
         } catch (_error) {
-          return { success: false, index, _error: __error.message };
+          return { success: false, index: _index, _error: _error.message };
         }
       });
 

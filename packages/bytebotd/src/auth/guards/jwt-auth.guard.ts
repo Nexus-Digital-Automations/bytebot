@@ -556,7 +556,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     // Check user role permissions for computer control
-    const allowedRoles: UserRole[] = [UserRole.ADMIN, UserRole.OPERATOR];
+    const allowedRoles: UserRole[] = [UserRole._ADMIN, UserRole._OPERATOR];
     if (!allowedRoles.includes(user.role)) {
       this.logger.warn(
         `[${operationId}] Unauthorized role attempted computer control access`,

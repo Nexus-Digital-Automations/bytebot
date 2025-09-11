@@ -92,8 +92,8 @@ class MockJwtAuthGuard {
 describe('JwtAuthGuard', () => {
   let guard: MockJwtAuthGuard;
   let jwtService: JwtService;
-  let _configService: ConfigService;
-  let _reflector: Reflector;
+  let configService: ConfigService;
+  let reflector: Reflector;
 
   const operationId = `jwt_guard_test_${Date.now()}`;
 

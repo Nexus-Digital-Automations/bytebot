@@ -16,22 +16,10 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
-// TODO: Add UserRole import - check where UserRole is defined
 import { Reflector } from '@nestjs/core';
+import { UserRole, Permission } from '@bytebot/shared';
 
-// Define role and permission types for Phase 1 RBAC system
-enum UserRole {
-  ADMIN = 'admin',
-  OPERATOR = 'operator',
-  VIEWER = 'viewer',
-}
-
-enum Permission {
-  _TASK_READ = 'task:read',
-  _TASK_WRITE = 'task:write',
-  _COMPUTER_CONTROL = 'computer:control',
-  _SYSTEM_ADMIN = 'system:admin',
-}
+// UserRole and Permission are now imported from @bytebot/shared
 
 interface AuthenticatedUser {
   id: string;
@@ -114,9 +102,13 @@ class MockRolesGuard {
   ): boolean {
     // Role hierarchy: admin > operator > viewer
     const roleHierarchy: Record<UserRole, UserRole[]> = {
-      [UserRole.ADMIN]: [UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER],
-      [UserRole.OPERATOR]: [UserRole.OPERATOR, UserRole.VIEWER],
-      [UserRole.VIEWER]: [UserRole.VIEWER],
+      [UserRole._ADMIN]: [
+        UserRole._ADMIN,
+        UserRole._OPERATOR,
+        UserRole._VIEWER,
+      ],
+      [UserRole._OPERATOR]: [UserRole._OPERATOR, UserRole._VIEWER],
+      [UserRole._VIEWER]: [UserRole._VIEWER],
     };
 
     const userRoleAccess = roleHierarchy[userRole] || [];
@@ -140,27 +132,31 @@ class MockRolesGuard {
   // Helper method for testing role hierarchy
   getRoleHierarchy(): Record<UserRole, UserRole[]> {
     return {
-      [UserRole.ADMIN]: [UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER],
-      [UserRole.OPERATOR]: [UserRole.OPERATOR, UserRole.VIEWER],
-      [UserRole.VIEWER]: [UserRole.VIEWER],
+      [UserRole._ADMIN]: [
+        UserRole._ADMIN,
+        UserRole._OPERATOR,
+        UserRole._VIEWER,
+      ],
+      [UserRole._OPERATOR]: [UserRole._OPERATOR, UserRole._VIEWER],
+      [UserRole._VIEWER]: [UserRole._VIEWER],
     };
   }
 
   // Helper method for testing permission sets
   getRolePermissions(role: UserRole): Permission[] {
     const rolePermissions: Record<UserRole, Permission[]> = {
-      [UserRole.ADMIN]: [
+      [UserRole._ADMIN]: [
         Permission._TASK_READ,
         Permission._TASK_WRITE,
         Permission._COMPUTER_CONTROL,
         Permission._SYSTEM_ADMIN,
       ],
-      [UserRole.OPERATOR]: [
+      [UserRole._OPERATOR]: [
         Permission._TASK_READ,
         Permission._TASK_WRITE,
         Permission._COMPUTER_CONTROL,
       ],
-      [UserRole.VIEWER]: [Permission._TASK_READ],
+      [UserRole._VIEWER]: [Permission._TASK_READ],
     };
 
     return rolePermissions[role] || [];
@@ -231,7 +227,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_no_requirements`;
       console.log(`[${testId}] Testing unrestricted access`);
 
-      const user = createMockUser(UserRole.VIEWER);
+      const user = createMockUser(UserRole._VIEWER);
       const context = createMockExecutionContext(user);
 
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(undefined);
@@ -249,12 +245,12 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_admin_access`;
       console.log(`[${testId}] Testing admin role access`);
 
-      const adminUser = createMockUser(UserRole.ADMIN);
+      const adminUser = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(adminUser);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.ADMIN]) // roles
+        .mockReturnValueOnce([UserRole._ADMIN]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
@@ -268,12 +264,12 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_viewer_denied_admin`;
       console.log(`[${testId}] Testing viewer access denial to admin routes`);
 
-      const viewerUser = createMockUser(UserRole.VIEWER);
+      const viewerUser = createMockUser(UserRole._VIEWER);
       const context = createMockExecutionContext(viewerUser);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.ADMIN]) // roles
+        .mockReturnValueOnce([UserRole._ADMIN]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -287,12 +283,12 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_operator_access`;
       console.log(`[${testId}] Testing operator role access`);
 
-      const operatorUser = createMockUser(UserRole.OPERATOR);
+      const operatorUser = createMockUser(UserRole._OPERATOR);
       const context = createMockExecutionContext(operatorUser);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.OPERATOR]) // roles
+        .mockReturnValueOnce([UserRole._OPERATOR]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
@@ -312,12 +308,12 @@ describe('RolesGuard', () => {
         `[${testId}] Testing admin access to operator routes via hierarchy`,
       );
 
-      const adminUser = createMockUser(UserRole.ADMIN);
+      const adminUser = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(adminUser);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.OPERATOR]) // roles
+        .mockReturnValueOnce([UserRole._OPERATOR]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
@@ -335,12 +331,12 @@ describe('RolesGuard', () => {
         `[${testId}] Testing admin access to viewer routes via hierarchy`,
       );
 
-      const adminUser = createMockUser(UserRole.ADMIN);
+      const adminUser = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(adminUser);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.VIEWER]) // roles
+        .mockReturnValueOnce([UserRole._VIEWER]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
@@ -358,12 +354,12 @@ describe('RolesGuard', () => {
         `[${testId}] Testing operator access to viewer routes via hierarchy`,
       );
 
-      const operatorUser = createMockUser(UserRole.OPERATOR);
+      const operatorUser = createMockUser(UserRole._OPERATOR);
       const context = createMockExecutionContext(operatorUser);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.VIEWER]) // roles
+        .mockReturnValueOnce([UserRole._VIEWER]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
@@ -379,12 +375,12 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_operator_denied_admin`;
       console.log(`[${testId}] Testing operator access denial to admin routes`);
 
-      const operatorUser = createMockUser(UserRole.OPERATOR);
+      const operatorUser = createMockUser(UserRole._OPERATOR);
       const context = createMockExecutionContext(operatorUser);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.ADMIN]) // roles
+        .mockReturnValueOnce([UserRole._ADMIN]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -400,17 +396,17 @@ describe('RolesGuard', () => {
 
       const hierarchy = guard.getRoleHierarchy();
 
-      expect(hierarchy[UserRole.ADMIN]).toContain(UserRole.ADMIN);
-      expect(hierarchy[UserRole.ADMIN]).toContain(UserRole.OPERATOR);
-      expect(hierarchy[UserRole.ADMIN]).toContain(UserRole.VIEWER);
+      expect(hierarchy[UserRole._ADMIN]).toContain(UserRole._ADMIN);
+      expect(hierarchy[UserRole._ADMIN]).toContain(UserRole._OPERATOR);
+      expect(hierarchy[UserRole._ADMIN]).toContain(UserRole._VIEWER);
 
-      expect(hierarchy[UserRole.OPERATOR]).toContain(UserRole.OPERATOR);
-      expect(hierarchy[UserRole.OPERATOR]).toContain(UserRole.VIEWER);
-      expect(hierarchy[UserRole.OPERATOR]).not.toContain(UserRole.ADMIN);
+      expect(hierarchy[UserRole._OPERATOR]).toContain(UserRole._OPERATOR);
+      expect(hierarchy[UserRole._OPERATOR]).toContain(UserRole._VIEWER);
+      expect(hierarchy[UserRole._OPERATOR]).not.toContain(UserRole._ADMIN);
 
-      expect(hierarchy[UserRole.VIEWER]).toContain(UserRole.VIEWER);
-      expect(hierarchy[UserRole.VIEWER]).not.toContain(UserRole.OPERATOR);
-      expect(hierarchy[UserRole.VIEWER]).not.toContain(UserRole.ADMIN);
+      expect(hierarchy[UserRole._VIEWER]).toContain(UserRole._VIEWER);
+      expect(hierarchy[UserRole._VIEWER]).not.toContain(UserRole._OPERATOR);
+      expect(hierarchy[UserRole._VIEWER]).not.toContain(UserRole._ADMIN);
 
       console.log(`[${testId}] Role hierarchy structure test completed`);
     });
@@ -421,7 +417,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_exact_permission`;
       console.log(`[${testId}] Testing exact permission match`);
 
-      const user = createMockUser(UserRole.OPERATOR);
+      const user = createMockUser(UserRole._OPERATOR);
       const context = createMockExecutionContext(user);
 
       jest
@@ -442,7 +438,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_missing_permission`;
       console.log(`[${testId}] Testing access denial for missing permission`);
 
-      const user = createMockUser(UserRole.VIEWER); // Only has TASK_READ
+      const user = createMockUser(UserRole._VIEWER); // Only has TASK_READ
       const context = createMockExecutionContext(user);
 
       jest
@@ -463,7 +459,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_multiple_permissions`;
       console.log(`[${testId}] Testing multiple permission requirements`);
 
-      const user = createMockUser(UserRole.ADMIN); // Has all permissions
+      const user = createMockUser(UserRole._ADMIN); // Has all permissions
       const context = createMockExecutionContext(user);
 
       jest
@@ -487,7 +483,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_partial_permissions`;
       console.log(`[${testId}] Testing partial permission denial`);
 
-      const user = createMockUser(UserRole.OPERATOR); // Missing SYSTEM_ADMIN
+      const user = createMockUser(UserRole._OPERATOR); // Missing SYSTEM_ADMIN
       const context = createMockExecutionContext(user);
 
       jest
@@ -509,9 +505,9 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_default_permissions`;
       console.log(`[${testId}] Testing default role permission sets`);
 
-      const adminPermissions = guard.getRolePermissions(UserRole.ADMIN);
-      const operatorPermissions = guard.getRolePermissions(UserRole.OPERATOR);
-      const viewerPermissions = guard.getRolePermissions(UserRole.VIEWER);
+      const adminPermissions = guard.getRolePermissions(UserRole._ADMIN);
+      const operatorPermissions = guard.getRolePermissions(UserRole._OPERATOR);
+      const viewerPermissions = guard.getRolePermissions(UserRole._VIEWER);
 
       expect(adminPermissions).toEqual([
         Permission._TASK_READ,
@@ -537,12 +533,12 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_combined_access`;
       console.log(`[${testId}] Testing combined role and permission access`);
 
-      const user = createMockUser(UserRole.ADMIN);
+      const user = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.ADMIN]) // roles
+        .mockReturnValueOnce([UserRole._ADMIN]) // roles
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
       const result = await guard.canActivate(context);
@@ -558,12 +554,12 @@ describe('RolesGuard', () => {
         `[${testId}] Testing role sufficient, permission insufficient`,
       );
 
-      const user = createMockUser(UserRole.OPERATOR, [Permission._TASK_READ]); // Custom limited permissions
+      const user = createMockUser(UserRole._OPERATOR, [Permission._TASK_READ]); // Custom limited permissions
       const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.OPERATOR]) // roles - should pass
+        .mockReturnValueOnce([UserRole._OPERATOR]) // roles - should pass
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions - should fail
 
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -579,12 +575,12 @@ describe('RolesGuard', () => {
         `[${testId}] Testing permission sufficient, role insufficient`,
       );
 
-      const user = createMockUser(UserRole.VIEWER, [Permission._SYSTEM_ADMIN]); // Custom elevated permissions
+      const user = createMockUser(UserRole._VIEWER, [Permission._SYSTEM_ADMIN]); // Custom elevated permissions
       const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.ADMIN]) // roles - should fail
+        .mockReturnValueOnce([UserRole._ADMIN]) // roles - should fail
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions - should pass
 
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -604,7 +600,7 @@ describe('RolesGuard', () => {
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.VIEWER]) // roles
+        .mockReturnValueOnce([UserRole._VIEWER]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -618,14 +614,14 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_invalid_role`;
       console.log(`[${testId}] Testing invalid role handling`);
 
-      const user = createMockUser(UserRole.VIEWER, [], {
+      const user = createMockUser(UserRole._VIEWER, [], {
         role: 'invalid-role' as UserRole,
       });
       const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.VIEWER]) // roles
+        .mockReturnValueOnce([UserRole._VIEWER]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -639,12 +635,12 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_null_role`;
       console.log(`[${testId}] Testing null role handling`);
 
-      const user = createMockUser(UserRole.VIEWER, [], { role: null as any });
+      const user = createMockUser(UserRole._VIEWER, [], { role: null as any });
       const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.VIEWER]) // roles
+        .mockReturnValueOnce([UserRole._VIEWER]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -658,7 +654,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_null_permissions`;
       console.log(`[${testId}] Testing null permissions handling`);
 
-      const user = createMockUser(UserRole.OPERATOR, null as any);
+      const user = createMockUser(UserRole._OPERATOR, null as any);
       const context = createMockExecutionContext(user);
 
       jest
@@ -679,12 +675,12 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_performance_threshold`;
       console.log(`[${testId}] Testing authorization performance threshold`);
 
-      const user = createMockUser(UserRole.ADMIN);
+      const user = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.ADMIN])
+        .mockReturnValueOnce([UserRole._ADMIN])
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
 
       const startTime = Date.now();
@@ -706,14 +702,14 @@ describe('RolesGuard', () => {
       const users = Array(20)
         .fill(null)
         .map((_, _i) =>
-          createMockUser(UserRole.OPERATOR, [], {
+          createMockUser(UserRole._OPERATOR, [], {
             id: `concurrent_user_${i}`,
           }),
         );
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValue([UserRole.OPERATOR]);
+        .mockReturnValue([UserRole._OPERATOR]);
 
       const promises = users.map((user) => {
         const context = createMockExecutionContext(user);
@@ -733,11 +729,11 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_high_frequency`;
       console.log(`[${testId}] Testing high-frequency authorization checks`);
 
-      const user = createMockUser(UserRole.ADMIN);
+      const user = createMockUser(UserRole._ADMIN);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValue([UserRole.VIEWER]); // Should pass due to hierarchy
+        .mockReturnValue([UserRole._VIEWER]); // Should pass due to hierarchy
 
       const startTime = Date.now();
       const promises = Array(100)
@@ -765,23 +761,23 @@ describe('RolesGuard', () => {
       // Mix of different users and access patterns
       const testCases = [
         {
-          user: createMockUser(UserRole.ADMIN),
-          roles: [UserRole.ADMIN],
+          user: createMockUser(UserRole._ADMIN),
+          roles: [UserRole._ADMIN],
           shouldPass: true,
         },
         {
-          user: createMockUser(UserRole.OPERATOR),
-          roles: [UserRole.ADMIN],
+          user: createMockUser(UserRole._OPERATOR),
+          roles: [UserRole._ADMIN],
           shouldPass: false,
         },
         {
-          user: createMockUser(UserRole.VIEWER),
-          roles: [UserRole.VIEWER],
+          user: createMockUser(UserRole._VIEWER),
+          roles: [UserRole._VIEWER],
           shouldPass: true,
         },
         {
-          user: createMockUser(UserRole.ADMIN),
-          roles: [UserRole.VIEWER],
+          user: createMockUser(UserRole._ADMIN),
+          roles: [UserRole._VIEWER],
           shouldPass: true,
         },
       ];
@@ -822,12 +818,12 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_multiple_roles`;
       console.log(`[${testId}] Testing multiple role requirements (OR logic)`);
 
-      const operatorUser = createMockUser(UserRole.OPERATOR);
+      const operatorUser = createMockUser(UserRole._OPERATOR);
       const context = createMockExecutionContext(operatorUser);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.ADMIN, UserRole.OPERATOR]) // Multiple roles (OR)
+        .mockReturnValueOnce([UserRole._ADMIN, UserRole._OPERATOR]) // Multiple roles (OR)
         .mockReturnValueOnce(undefined); // permissions
 
       const result = await guard.canActivate(context);
@@ -843,7 +839,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_empty_arrays`;
       console.log(`[${testId}] Testing empty role and permission arrays`);
 
-      const user = createMockUser(UserRole.VIEWER);
+      const user = createMockUser(UserRole._VIEWER);
       const context = createMockExecutionContext(user);
 
       jest
@@ -867,7 +863,7 @@ describe('RolesGuard', () => {
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.VIEWER])
+        .mockReturnValueOnce([UserRole._VIEWER])
         .mockReturnValueOnce(undefined);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -881,12 +877,12 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_detailed_errors`;
       console.log(`[${testId}] Testing detailed error messages`);
 
-      const user = createMockUser(UserRole.VIEWER);
+      const user = createMockUser(UserRole._VIEWER);
       const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.ADMIN, UserRole.OPERATOR])
+        .mockReturnValueOnce([UserRole._ADMIN, UserRole._OPERATOR])
         .mockReturnValueOnce([
           Permission._SYSTEM_ADMIN,
           Permission._COMPUTER_CONTROL,
@@ -909,14 +905,14 @@ describe('RolesGuard', () => {
       console.log(`[${testId}] Testing role elevation attack prevention`);
 
       // Simulate an attack where user manipulates their role
-      const maliciousUser = createMockUser(UserRole.VIEWER, [], {
-        role: UserRole.ADMIN,
+      const maliciousUser = createMockUser(UserRole._VIEWER, [], {
+        role: UserRole._ADMIN,
       });
       const context = createMockExecutionContext(maliciousUser);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.ADMIN])
+        .mockReturnValueOnce([UserRole._ADMIN])
         .mockReturnValueOnce(undefined);
 
       // This should still pass because we're testing the guard logic itself
@@ -934,14 +930,14 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_case_sensitivity`;
       console.log(`[${testId}] Testing role case sensitivity`);
 
-      const user = createMockUser(UserRole.ADMIN, [], {
+      const user = createMockUser(UserRole._ADMIN, [], {
         role: 'ADMIN' as UserRole,
       });
       const context = createMockExecutionContext(user);
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValueOnce([UserRole.ADMIN])
+        .mockReturnValueOnce([UserRole._ADMIN])
         .mockReturnValueOnce(undefined);
 
       const result = await guard.canActivate(context);
@@ -956,7 +952,7 @@ describe('RolesGuard', () => {
       console.log(`[${testId}] Testing permission spoofing prevention`);
 
       // User with viewer role but admin permissions (inconsistent state)
-      const spoofedUser = createMockUser(UserRole.VIEWER, [
+      const spoofedUser = createMockUser(UserRole._VIEWER, [
         Permission._SYSTEM_ADMIN,
       ]);
       const context = createMockExecutionContext(spoofedUser);

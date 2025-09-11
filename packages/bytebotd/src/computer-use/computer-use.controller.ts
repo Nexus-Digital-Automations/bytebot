@@ -276,7 +276,7 @@ export class ComputerUseController {
           operationId,
           action: params.action,
           processingTime,
-          errorType: error?.constructor?.name || 'Unknown',
+          errorType: _error?.constructor?.name || 'Unknown',
           userId: user.id,
           username: user.username,
         },
@@ -384,7 +384,7 @@ export class ComputerUseController {
           operationId,
           jobId,
           processingTime,
-          errorType: error?.constructor?.name || 'Unknown',
+          errorType: _error?.constructor?.name || 'Unknown',
           userId: user.id,
           username: user.username,
         },
@@ -473,18 +473,18 @@ export class ComputerUseController {
       if (resultCopy.result && typeof resultCopy.result === 'object') {
         const _result = resultCopy.result as any;
         if (
-          result.image &&
-          typeof result.image === 'string' &&
-          result.image.length > 100
+          _result.image &&
+          typeof _result.image === 'string' &&
+          _result.image.length > 100
         ) {
-          result.image = `[base64 image data - ${result.image.length} chars]`;
+          _result.image = `[base64 image data - ${_result.image.length} chars]`;
         }
         if (
-          result.data &&
-          typeof result.data === 'string' &&
-          result.data.length > 100
+          _result.data &&
+          typeof _result.data === 'string' &&
+          _result.data.length > 100
         ) {
-          result.data = `[base64 file data - ${result.data.length} chars]`;
+          _result.data = `[base64 file data - ${_result.data.length} chars]`;
         }
       }
 
@@ -514,7 +514,7 @@ export class ComputerUseController {
           operationId,
           jobId,
           processingTime,
-          errorType: error?.constructor?.name || 'Unknown',
+          errorType: _error?.constructor?.name || 'Unknown',
           userId: user.id,
           username: user.username,
         },
@@ -642,7 +642,7 @@ export class ComputerUseController {
           operationId,
           jobId,
           processingTime,
-          errorType: error?.constructor?.name || 'Unknown',
+          errorType: _error?.constructor?.name || 'Unknown',
           userId: user.id,
           username: user.username,
         },
@@ -766,7 +766,7 @@ export class ComputerUseController {
           operationId,
           action: params.action,
           processingTime,
-          errorType: error?.constructor?.name || 'Unknown',
+          errorType: _error?.constructor?.name || 'Unknown',
         },
       );
 

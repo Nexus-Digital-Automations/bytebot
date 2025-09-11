@@ -274,34 +274,6 @@
       ]
     },
     {
-      "id": "error_1757568288345_w0n4x194z",
-      "title": "Fix missing imports ESLint violations in bytebotd test files",
-      "description": "Fix all not defined ESLint violations in bytebotd package test files caused by missing imports like TestingModule, Test, UserRole, etc. Target files in src/auth/__tests__, src/health/__tests__, src/nut, and src/test-utils directories.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-11T05:24:48.345Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757568265190_1_general_31a05745",
-      "started_at": "2025-09-11T05:25:05.582Z",
-      "claimed_by": "development_session_1757568265190_1_general_31a05745",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757568265190_1_general_31a05745",
-          "role": "primary",
-          "assignedAt": "2025-09-11T05:25:05.582Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757568286006_8538gszle",
       "title": "Fix unused variable ESLint violations in bytebotd service files",
       "description": "Search for @typescript-eslint/no-unused-vars violations and fix by: 1) Adding underscore prefix to unused parameters, 2) Removing unused imports/variables, 3) Fixing undefined variable references in metrics, health, auth service files",
