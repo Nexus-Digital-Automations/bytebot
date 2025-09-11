@@ -20,14 +20,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import {
-  StorageTier,
-  BrowserSession as BrowserSessionModel,
-  BrowserTask as BrowserTaskModel,
-  BrowserScreenshot as BrowserScreenshotModel,
-  BrowserDomSnapshot as BrowserDomSnapshotModel,
-  BrowserDataExtraction as BrowserDataExtractionModel,
-} from '../models/browser-automation.models';
+import { StorageTier } from '../models/browser-automation.models';
 import { Prisma } from '@prisma/client';
 import * as fs from 'fs/promises';
 
@@ -150,16 +143,35 @@ type BrowserTaskForDeletion = Prisma.BrowserTaskGetPayload<{
   };
 }>;
 
-type BrowserScreenshotForDeletion = Prisma.BrowserScreenshotGetPayload<{}>;
+type BrowserScreenshotForDeletion = Prisma.BrowserScreenshotGetPayload<
+  Record<string, never>
+>;
 
-type BrowserDomSnapshotForDeletion = Prisma.BrowserDomSnapshotGetPayload<{}>;
+type BrowserDomSnapshotForDeletion = Prisma.BrowserDomSnapshotGetPayload<
+  Record<string, never>
+>;
 
-type BrowserDataExtractionForDeletion = Prisma.BrowserDataExtractionGetPayload<{}>;
+type BrowserDataExtractionForDeletion = Prisma.BrowserDataExtractionGetPayload<
+  Record<string, never>
+>;
 
-// Error handling interface
-interface ErrorWithMessage {
-  message: string;
-  stack?: string;
+// Interface for cleanup execution log data
+interface CleanupExecutionLogData {
+  id: string;
+  policyId: string;
+  executionStartedAt: Date;
+  executionCompletedAt?: Date;
+  recordsProcessed: number;
+  recordsArchived: number;
+  recordsDeleted: number;
+  bytesFreed: number;
+  errorsCount: number;
+  errorDetails?: Array<{
+    entityId: string;
+    error: string;
+    timestamp: Date;
+  }>;
+  executionStatus: 'running' | 'completed' | 'failed' | 'cancelled';
 }
 
 // Utility function to safely extract error message
@@ -170,7 +182,12 @@ function getErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
-  if (error && typeof error === 'object' && 'message' in error && typeof (error as { message: unknown }).message === 'string') {
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof (error as { message: unknown }).message === 'string'
+  ) {
     return (error as { message: string }).message;
   }
   return 'Unknown error occurred';
@@ -181,7 +198,12 @@ function getErrorStack(error: unknown): string | undefined {
   if (error instanceof Error && error.stack) {
     return error.stack;
   }
-  if (error && typeof error === 'object' && 'stack' in error && typeof (error as { stack: unknown }).stack === 'string') {
+  if (
+    error &&
+    typeof error === 'object' &&
+    'stack' in error &&
+    typeof (error as { stack: unknown }).stack === 'string'
+  ) {
     return (error as { stack: string }).stack;
   }
   return undefined;
@@ -469,7 +491,7 @@ export class DataRetentionCleanupService {
       };
 
       // Log execution summary
-      await this.logCleanupExecution(result);
+      this.logCleanupExecution(result);
 
       this.logger.log(
         `Cleanup execution completed for policy ${policy.id}: ` +
@@ -517,29 +539,32 @@ export class DataRetentionCleanupService {
     };
 
     // Find sessions to archive
-    const sessionsToArchive: BrowserSessionWithIncludes[] = await this.prismaService.browserSession.findMany({
-      where: {
-        AND: [
-          { updatedAt: { lt: archiveDate } },
-          { updatedAt: { gte: deleteDate } },
-          ...(policy.policyConditions?.statusFilter
-            ? [
-                {
-                  status: { in: policy.policyConditions.statusFilter as string[] },
-                },
-              ]
-            : []),
-        ],
-      },
-      include: {
-        tasks: {
-          select: { id: true },
+    const sessionsToArchive: BrowserSessionWithIncludes[] =
+      await this.prismaService.browserSession.findMany({
+        where: {
+          AND: [
+            { updatedAt: { lt: archiveDate } },
+            { updatedAt: { gte: deleteDate } },
+            ...(policy.policyConditions?.statusFilter
+              ? [
+                  {
+                    status: {
+                      in: policy.policyConditions.statusFilter,
+                    },
+                  },
+                ]
+              : []),
+          ],
         },
-        screenshots: {
-          select: { id: true, fileSize: true },
+        include: {
+          tasks: {
+            select: { id: true },
+          },
+          screenshots: {
+            select: { id: true, fileSize: true },
+          },
         },
-      },
-    });
+      });
 
     // Archive sessions if enabled
     if (policy.archivePeriodDays && policy.compressionEnabled) {
@@ -558,39 +583,46 @@ export class DataRetentionCleanupService {
     }
 
     // Find sessions to delete
-    const sessionsToDelete: BrowserSessionForDeletion[] = await this.prismaService.browserSession.findMany({
-      where: {
-        AND: [
-          { updatedAt: { lt: deleteDate } },
-          ...(policy.policyConditions?.statusFilter
-            ? [
-                {
-                  status: { in: policy.policyConditions.statusFilter as string[] },
-                },
-              ]
-            : []),
-          ...(policy.policyConditions?.preserveProductionData
-            ? [
-                {
-                  OR: [
-                    { metadata: { path: ['isProductionData'], equals: false } },
-                    { metadata: { path: ['isProductionData'], equals: null } },
-                  ],
-                },
-              ]
-            : []),
-        ],
-      },
-      include: {
-        tasks: true,
-        screenshots: {
-          select: { id: true, fileSize: true, filePath: true },
+    const sessionsToDelete: BrowserSessionForDeletion[] =
+      await this.prismaService.browserSession.findMany({
+        where: {
+          AND: [
+            { updatedAt: { lt: deleteDate } },
+            ...(policy.policyConditions?.statusFilter
+              ? [
+                  {
+                    status: {
+                      in: policy.policyConditions.statusFilter,
+                    },
+                  },
+                ]
+              : []),
+            ...(policy.policyConditions?.preserveProductionData
+              ? [
+                  {
+                    OR: [
+                      {
+                        metadata: { path: ['isProductionData'], equals: false },
+                      },
+                      {
+                        metadata: { path: ['isProductionData'], equals: null },
+                      },
+                    ],
+                  },
+                ]
+              : []),
+          ],
         },
-        domSnapshots: {
-          select: { id: true, fileSize: true },
+        include: {
+          tasks: true,
+          screenshots: {
+            select: { id: true, fileSize: true, filePath: true },
+          },
+          domSnapshots: {
+            select: { id: true, fileSize: true },
+          },
         },
-      },
-    });
+      });
 
     // Delete sessions and cascade delete related data
     for (const session of sessionsToDelete) {
@@ -648,45 +680,54 @@ export class DataRetentionCleanupService {
     };
 
     // Find tasks to delete
-    const tasksToDelete: BrowserTaskForDeletion[] = await this.prismaService.browserTask.findMany({
-      where: {
-        AND: [
-          { updatedAt: { lt: deleteDate } },
-          ...(policy.policyConditions?.statusFilter
-            ? [
-                {
-                  status: { in: policy.policyConditions.statusFilter as string[] },
-                },
-              ]
-            : []),
-          ...(policy.policyConditions?.preserveProductionData
-            ? [
-                {
-                  OR: [
-                    {
-                      customData: { path: ['isProductionData'], equals: false },
+    const tasksToDelete: BrowserTaskForDeletion[] =
+      await this.prismaService.browserTask.findMany({
+        where: {
+          AND: [
+            { updatedAt: { lt: deleteDate } },
+            ...(policy.policyConditions?.statusFilter
+              ? [
+                  {
+                    status: {
+                      in: policy.policyConditions.statusFilter,
                     },
-                    {
-                      customData: { path: ['isProductionData'], equals: null },
-                    },
-                  ],
-                },
-              ]
-            : []),
-        ],
-      },
-      include: {
-        screenshots: {
-          select: { id: true, fileSize: true, filePath: true },
+                  },
+                ]
+              : []),
+            ...(policy.policyConditions?.preserveProductionData
+              ? [
+                  {
+                    OR: [
+                      {
+                        customData: {
+                          path: ['isProductionData'],
+                          equals: false,
+                        },
+                      },
+                      {
+                        customData: {
+                          path: ['isProductionData'],
+                          equals: null,
+                        },
+                      },
+                    ],
+                  },
+                ]
+              : []),
+          ],
         },
-        domSnapshots: {
-          select: { id: true, fileSize: true },
+        include: {
+          screenshots: {
+            select: { id: true, fileSize: true, filePath: true },
+          },
+          domSnapshots: {
+            select: { id: true, fileSize: true },
+          },
+          dataExtractions: {
+            select: { id: true },
+          },
         },
-        dataExtractions: {
-          select: { id: true },
-        },
-      },
-    });
+      });
 
     // Delete tasks and associated data
     for (const task of tasksToDelete) {
@@ -980,7 +1021,7 @@ export class DataRetentionCleanupService {
 
     // Note: cleanupExecutionLog model not available in current schema
     // Get cleanup execution logs for the period (using empty array as fallback)
-    const executionLogs: any[] = []; // await this.prismaService.cleanupExecutionLog.findMany({
+    const executionLogs: CleanupExecutionLogData[] = []; // await this.prismaService.cleanupExecutionLog.findMany({
     //   where: {
     //     executionStartedAt: {
     //       gte: startDate,
@@ -1117,7 +1158,7 @@ export class DataRetentionCleanupService {
   /**
    * Cancel a running cleanup operation
    */
-  async cancelCleanupOperation(executionId: string): Promise<boolean> {
+  cancelCleanupOperation(executionId: string): boolean {
     const operation = this.activeCleanupOperations.get(executionId);
 
     if (operation && operation.executionStatus === 'running') {
@@ -1133,14 +1174,16 @@ export class DataRetentionCleanupService {
 
   // ===== PRIVATE HELPER METHODS =====
 
-  private async archiveBrowserSession(session: any): Promise<void> {
+  private async archiveBrowserSession(
+    session: BrowserSessionWithIncludes,
+  ): Promise<void> {
     // In a full implementation, this would compress and archive the session data
     // For now, we'll just mark it as archived in metadata
     await this.prismaService.browserSession.update({
       where: { id: session.id },
       data: {
         metadata: {
-          ...session.metadata,
+          ...(session.metadata as object),
           archived: true,
           archivedAt: new Date(),
         },
@@ -1148,7 +1191,9 @@ export class DataRetentionCleanupService {
     });
   }
 
-  private calculateSessionSize(session: any): number {
+  private calculateSessionSize(
+    session: BrowserSessionWithIncludes | BrowserSessionForDeletion,
+  ): number {
     let size = 0;
 
     // Estimate base session size
@@ -1156,24 +1201,22 @@ export class DataRetentionCleanupService {
 
     // Add screenshot sizes
     if (session.screenshots) {
-      size += session.screenshots.reduce(
-        (sum: number, screenshot: any) => sum + (screenshot.fileSize || 0),
-        0,
-      );
+      for (const screenshot of session.screenshots) {
+        size += screenshot.fileSize ?? 0;
+      }
     }
 
     // Add DOM snapshot sizes
-    if (session.domSnapshots) {
-      size += session.domSnapshots.reduce(
-        (sum: number, snapshot: any) => sum + (snapshot.fileSize || 0),
-        0,
-      );
+    if ('domSnapshots' in session && session.domSnapshots) {
+      for (const snapshot of session.domSnapshots) {
+        size += snapshot.fileSize ?? 0;
+      }
     }
 
     return size;
   }
 
-  private calculateTaskSize(task: any): number {
+  private calculateTaskSize(task: BrowserTaskForDeletion): number {
     let size = 0;
 
     // Estimate base task size
@@ -1181,18 +1224,16 @@ export class DataRetentionCleanupService {
 
     // Add screenshot sizes
     if (task.screenshots) {
-      size += task.screenshots.reduce(
-        (sum: number, screenshot: any) => sum + (screenshot.fileSize || 0),
-        0,
-      );
+      for (const screenshot of task.screenshots) {
+        size += screenshot.fileSize ?? 0;
+      }
     }
 
     // Add DOM snapshot sizes
     if (task.domSnapshots) {
-      size += task.domSnapshots.reduce(
-        (sum: number, snapshot: any) => sum + (snapshot.fileSize || 0),
-        0,
-      );
+      for (const snapshot of task.domSnapshots) {
+        size += snapshot.fileSize ?? 0;
+      }
     }
 
     // Add data extraction sizes
@@ -1203,7 +1244,9 @@ export class DataRetentionCleanupService {
     return size;
   }
 
-  private calculateExtractionSize(extraction: any): number {
+  private calculateExtractionSize(
+    extraction: BrowserDataExtractionForDeletion,
+  ): number {
     // Estimate size based on extracted data content
     let size = 512; // Base record size
 
@@ -1240,9 +1283,7 @@ export class DataRetentionCleanupService {
     );
   }
 
-  private async logCleanupExecution(
-    result: CleanupExecutionResult,
-  ): Promise<void> {
+  private logCleanupExecution(_result: CleanupExecutionResult): void {
     try {
       // Note: cleanupExecutionLog model not available in current schema
       // await this.prismaService.cleanupExecutionLog.create({
@@ -1260,7 +1301,9 @@ export class DataRetentionCleanupService {
       //   },
       // });
     } catch (error) {
-      this.logger.error(`Failed to log cleanup execution: ${getErrorMessage(error)}`);
+      this.logger.error(
+        `Failed to log cleanup execution: ${getErrorMessage(error)}`,
+      );
     }
   }
 }

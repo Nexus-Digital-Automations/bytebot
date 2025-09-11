@@ -27,6 +27,8 @@ interface Content {
 
 interface Part {
   text?: string;
+  thought?: boolean;
+  thoughtSignature?: string;
   functionCall?: {
     id?: string;
     name: string;

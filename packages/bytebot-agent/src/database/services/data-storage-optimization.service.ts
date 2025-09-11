@@ -21,8 +21,6 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageTier, CompressionType } from '@prisma/client';
 import {
-  BrowserScreenshot,
-  BrowserDomSnapshot,
   AccessPattern,
   ContentAnalysis,
 } from '../models/browser-automation.models';
@@ -120,7 +118,11 @@ function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
 function getErrorMessage(error: unknown): string {
   if (isErrorWithMessage(error)) return error.message;
   if (error instanceof Error) return error.message;
-  return String(error);
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return 'Unknown error';
+  }
 }
 
 function getErrorStack(error: unknown): string | undefined {
@@ -145,7 +147,7 @@ export interface OptimizationResult {
   compressionRatio: number;
   optimizationTimeMs: number;
   tier: StorageTier;
-  compressionType: CompressionType | string;
+  compressionType: string;
 }
 
 export interface DeduplicationResult {
@@ -158,8 +160,8 @@ export interface DeduplicationResult {
 export interface ArchivalRecommendation {
   id: string;
   entityType: string;
-  currentTier: StorageTier | string | undefined;
-  recommendedTier: StorageTier | string | undefined;
+  currentTier: string | undefined;
+  recommendedTier: string | undefined;
   estimatedSavings: number;
   confidence: number;
   factors: ArchivalFactors;
@@ -770,7 +772,8 @@ export class DataStorageOptimizationService {
     const contentAnalysis = await this.analyzeScreenshotContent(screenshot);
     const metadata = this.parseScreenshotMetadata(screenshot.metadata);
 
-    let recommendedTier: StorageTier | string | undefined = screenshot.storageTier || StorageTier.HOT;
+    let recommendedTier: string | undefined =
+      screenshot.storageTier || StorageTier.HOT;
     let estimatedSavings = 0;
     let action: 'compress' | 'archive' | 'delete' | 'no-action' = 'no-action';
     const accessCount = screenshot.accessCount || 0;
@@ -847,7 +850,8 @@ export class DataStorageOptimizationService {
     const contentSize =
       domSnapshot.originalSize || domSnapshot.htmlContent?.length || 0;
 
-    let recommendedTier: StorageTier | string | undefined = domSnapshot.storageTier || StorageTier.HOT;
+    let recommendedTier: string | undefined =
+      domSnapshot.storageTier || StorageTier.HOT;
     let estimatedSavings = 0;
     let action: 'compress' | 'archive' | 'delete' | 'no-action' = 'no-action';
 
@@ -872,7 +876,10 @@ export class DataStorageOptimizationService {
         : false,
       isLowQuality: contentSize < 1024, // Very small HTML content
       isTestData: metadata.isTestData === true,
-      hasBusinessValue: this.assessDomBusinessValue({ ...domSnapshot, metadata }),
+      hasBusinessValue: this.assessDomBusinessValue({
+        ...domSnapshot,
+        metadata,
+      }),
       accessFrequency: pattern?.accessFrequency || 'low',
       ageInDays,
     };
@@ -908,7 +915,8 @@ export class DataStorageOptimizationService {
     }
 
     let optimizedSize = originalSize;
-    let newCompressionType: string = screenshot.compressionType || CompressionType.NONE;
+    let newCompressionType: string =
+      screenshot.compressionType || CompressionType.NONE;
 
     // Apply compression if enabled for target tier
     if (
@@ -985,7 +993,8 @@ export class DataStorageOptimizationService {
     }
 
     let optimizedSize = originalSize;
-    let newCompressionType: string = domSnapshot.compressionType || CompressionType.NONE;
+    let newCompressionType: string =
+      domSnapshot.compressionType || CompressionType.NONE;
 
     // Apply compression to HTML content if available
     if (domSnapshot.htmlContent && tierConfig.compressionConfig.enabled) {
@@ -1069,7 +1078,12 @@ export class DataStorageOptimizationService {
     const duplicateContent = similarScreenshots > 0;
 
     // Assess business value
-    const businessValueScore = this.assessBusinessValue({ ...screenshot, metadata: screenshot.metadata }) ? 0.8 : 0.3;
+    const businessValueScore = this.assessBusinessValue({
+      ...screenshot,
+      metadata: screenshot.metadata,
+    })
+      ? 0.8
+      : 0.3;
 
     return {
       similarScreenshotsCount: similarScreenshots,
@@ -1157,9 +1171,10 @@ export class DataStorageOptimizationService {
     return (sizeScore + dimensionScore) / 2;
   }
 
-  private assessBusinessValue(
-    screenshot: { metadata?: Prisma.JsonValue | null; url?: string },
-  ): boolean {
+  private assessBusinessValue(screenshot: {
+    metadata?: Prisma.JsonValue | null;
+    url?: string;
+  }): boolean {
     const metadata = this.parseScreenshotMetadata(screenshot.metadata);
 
     // High business value indicators
@@ -1258,14 +1273,18 @@ export class DataStorageOptimizationService {
   }
 
   // Helper methods for parsing metadata
-  private parseScreenshotMetadata(metadata: Prisma.JsonValue | null | undefined): ScreenshotMetadata {
+  private parseScreenshotMetadata(
+    metadata: Prisma.JsonValue | null | undefined,
+  ): ScreenshotMetadata {
     if (!metadata || typeof metadata !== 'object' || metadata === null) {
       return {};
     }
     return metadata as ScreenshotMetadata;
   }
 
-  private parseDomSnapshotMetadata(metadata: Prisma.JsonValue | null | undefined): DomSnapshotMetadata {
+  private parseDomSnapshotMetadata(
+    metadata: Prisma.JsonValue | null | undefined,
+  ): DomSnapshotMetadata {
     if (!metadata || typeof metadata !== 'object' || metadata === null) {
       return {};
     }

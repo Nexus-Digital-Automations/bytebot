@@ -33,7 +33,6 @@ import {
   SensitivityLevel,
 } from '../models/browser-automation.models';
 
-
 export enum ExportFormat {
   JSON = 'json',
   CSV = 'csv',
@@ -404,12 +403,12 @@ export class DataExportBackupService {
 
       // Apply compression if requested
       if (config.compression) {
-        result.compressedFile = await this.compressExport(exportPath);
+        result.compressedFile = this.compressExport(exportPath);
       }
 
       // Apply encryption if requested
       if (config.encryption) {
-        result.encryptedFile = await this.encryptExport(
+        result.encryptedFile = this.encryptExport(
           result.compressedFile?.filepath || exportPath,
         );
       }
@@ -505,13 +504,13 @@ export class DataExportBackupService {
   /**
    * Restore database from backup
    */
-  async restoreFromBackup(
+  restoreFromBackup(
     backupId: string,
     options: RestoreOptions = {},
-  ): Promise<RestoreResult> {
+  ): RestoreResult {
     this.logger.log(`Starting restore from backup: ${backupId}`);
 
-    const backup = await this.getBackupMetadata(backupId);
+    const backup = this.getBackupMetadata(backupId);
     if (!backup) {
       throw new Error(`Backup ${backupId} not found`);
     }
@@ -664,7 +663,7 @@ export class DataExportBackupService {
     const filename = `browser_sessions.${config.format}`;
     const filepath = path.join(exportPath, filename);
 
-    const fileContent = await this.formatData(processedSessions, config.format);
+    const fileContent = this.formatData(processedSessions, config.format);
     await fs.writeFile(filepath, fileContent, 'utf-8');
 
     const stats = await fs.stat(filepath);
@@ -704,7 +703,7 @@ export class DataExportBackupService {
     const filename = `browser_tasks.${config.format}`;
     const filepath = path.join(exportPath, filename);
 
-    const fileContent = await this.formatData(processedTasks, config.format);
+    const fileContent = this.formatData(processedTasks, config.format);
     await fs.writeFile(filepath, fileContent, 'utf-8');
 
     const stats = await fs.stat(filepath);
@@ -745,10 +744,7 @@ export class DataExportBackupService {
     const filename = `browser_screenshots.${config.format}`;
     const filepath = path.join(exportPath, filename);
 
-    const fileContent = await this.formatData(
-      processedScreenshots,
-      config.format,
-    );
+    const fileContent = this.formatData(processedScreenshots, config.format);
     await fs.writeFile(filepath, fileContent, 'utf-8');
 
     const stats = await fs.stat(filepath);
@@ -789,10 +785,7 @@ export class DataExportBackupService {
     const filename = `browser_dom_snapshots.${config.format}`;
     const filepath = path.join(exportPath, filename);
 
-    const fileContent = await this.formatData(
-      processedSnapshots,
-      config.format,
-    );
+    const fileContent = this.formatData(processedSnapshots, config.format);
     await fs.writeFile(filepath, fileContent, 'utf-8');
 
     const stats = await fs.stat(filepath);
@@ -833,10 +826,7 @@ export class DataExportBackupService {
     const filename = `browser_data_extractions.${config.format}`;
     const filepath = path.join(exportPath, filename);
 
-    const fileContent = await this.formatData(
-      processedExtractions,
-      config.format,
-    );
+    const fileContent = this.formatData(processedExtractions, config.format);
     await fs.writeFile(filepath, fileContent, 'utf-8');
 
     const stats = await fs.stat(filepath);
@@ -1175,7 +1165,7 @@ export class DataExportBackupService {
 
     for (const item of data) {
       const values = headers.map((header) => {
-        const value = item[header] as unknown;
+        const value = item[header];
         if (value === null || value === undefined) return '';
         if (typeof value === 'object') return JSON.stringify(value);
         return `"${(typeof value === 'number' || typeof value === 'boolean' ? String(value) : JSON.stringify(value)).replace(/"/g, '""')}"`;
@@ -1294,7 +1284,9 @@ export class DataExportBackupService {
     return query;
   }
 
-  private buildScreenshotsQuery(config: ExportConfiguration): PrismaScreenshotsQuery {
+  private buildScreenshotsQuery(
+    config: ExportConfiguration,
+  ): PrismaScreenshotsQuery {
     const query: PrismaScreenshotsQuery = {};
 
     if (config.dateRange) {
@@ -1309,7 +1301,9 @@ export class DataExportBackupService {
     return query;
   }
 
-  private buildDomSnapshotsQuery(config: ExportConfiguration): PrismaDomSnapshotsQuery {
+  private buildDomSnapshotsQuery(
+    config: ExportConfiguration,
+  ): PrismaDomSnapshotsQuery {
     const query: PrismaDomSnapshotsQuery = {};
 
     if (config.dateRange) {
@@ -1324,7 +1318,9 @@ export class DataExportBackupService {
     return query;
   }
 
-  private buildDataExtractionsQuery(config: ExportConfiguration): PrismaDataExtractionsQuery {
+  private buildDataExtractionsQuery(
+    config: ExportConfiguration,
+  ): PrismaDataExtractionsQuery {
     const query: PrismaDataExtractionsQuery = {};
 
     if (config.dateRange) {
@@ -1375,7 +1371,9 @@ export class DataExportBackupService {
     return typeof screenshotObj.id === 'string';
   }
 
-  private isDomSnapshotWithMetadata(obj: unknown): obj is DomSnapshotWithMetadata {
+  private isDomSnapshotWithMetadata(
+    obj: unknown,
+  ): obj is DomSnapshotWithMetadata {
     if (typeof obj !== 'object' || obj === null) {
       return false;
     }
@@ -1383,11 +1381,17 @@ export class DataExportBackupService {
     return typeof snapshotObj.id === 'string';
   }
 
-  private hasMetadataWithSensitivity(obj: DomSnapshotWithMetadata): obj is DomSnapshotWithMetadata & { metadata: { containsSensitiveData?: boolean } } {
+  private hasMetadataWithSensitivity(
+    obj: DomSnapshotWithMetadata,
+  ): obj is DomSnapshotWithMetadata & {
+    metadata: { containsSensitiveData?: boolean };
+  } {
     return obj.metadata !== null && typeof obj.metadata === 'object';
   }
 
-  private isExtractionWithSensitivity(obj: unknown): obj is ExtractionWithSensitivity {
+  private isExtractionWithSensitivity(
+    obj: unknown,
+  ): obj is ExtractionWithSensitivity {
     if (typeof obj !== 'object' || obj === null) {
       return false;
     }
@@ -1444,7 +1448,8 @@ export class DataExportBackupService {
           return true; // Include screenshots without metadata
         }
         const metadata = screenshot.metadata as Record<string, unknown>;
-        return !metadata.containsSensitiveData;
+        const sensitiveFlag = metadata.containsSensitiveData;
+        return typeof sensitiveFlag === 'boolean' ? !sensitiveFlag : true;
       });
   }
 
@@ -1453,18 +1458,19 @@ export class DataExportBackupService {
   ): Record<string, unknown>[] {
     return domSnapshots.filter(
       (snapshot): snapshot is Record<string, unknown> => {
-        if (!isDomSnapshotWithMetadata(snapshot)) {
+        if (!this.isDomSnapshotWithMetadata(snapshot)) {
           return true; // Include items that don't have metadata structure
         }
 
-        if (!hasMetadataWithSensitivity(snapshot)) {
+        if (!this.hasMetadataWithSensitivity(snapshot)) {
           return true; // Include items where metadata doesn't exist or isn't an object
         }
 
         // Safe access to containsSensitiveData property
-        return !snapshot.metadata.containsSensitiveData;
+        const sensitiveFlag = snapshot.metadata?.containsSensitiveData;
+        return typeof sensitiveFlag === 'boolean' ? !sensitiveFlag : true;
       },
-    ) as Record<string, unknown>[];
+    );
   }
 
   private excludeSensitiveExtractions(
@@ -1472,7 +1478,7 @@ export class DataExportBackupService {
   ): Record<string, unknown>[] {
     return extractions.filter(
       (extraction): extraction is Record<string, unknown> => {
-        if (!isExtractionWithSensitivity(extraction)) {
+        if (!this.isExtractionWithSensitivity(extraction)) {
           return true; // Include items that don't have the expected structure
         }
 
@@ -1480,14 +1486,24 @@ export class DataExportBackupService {
         const sensitivityLevel = extraction.sensitivityLevel;
 
         // Return false for critical and high sensitivity levels
-        return (
-          sensitivityLevel !== SensitivityLevel.CRITICAL &&
-          sensitivityLevel !== SensitivityLevel.HIGH &&
-          sensitivityLevel !== 'critical' &&
-          sensitivityLevel !== 'high'
-        );
+        if (sensitivityLevel === undefined || sensitivityLevel === null) {
+          return true;
+        }
+
+        // Handle enum values - skip complex enum checking
+        // if (
+        //   typeof sensitivityLevel === 'object' &&
+        //   'valueOf' in sensitivityLevel
+        // ) {
+        //   const enumValue = sensitivityLevel.valueOf() as string;
+        //   return enumValue !== 'CRITICAL' && enumValue !== 'HIGH';
+        // }
+
+        // Handle string values
+        const stringValue = String(sensitivityLevel).toLowerCase();
+        return stringValue !== 'critical' && stringValue !== 'high';
       },
-    ) as Record<string, unknown>[];
+    );
   }
 
   // ===== BACKUP HELPER METHODS =====
@@ -1502,7 +1518,7 @@ export class DataExportBackupService {
         LIMIT 1
       `;
       return result[0]?.version || 'unknown';
-    } catch (error) {
+    } catch {
       return 'unknown';
     }
   }
@@ -1528,9 +1544,8 @@ export class DataExportBackupService {
       const extractionCount =
         await this.prismaService.browserDataExtraction.count();
       counts.browser_data_extractions = extractionCount;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       this.logger.warn('Failed to get entity counts', errorMessage);
     }
 
@@ -1547,16 +1562,12 @@ export class DataExportBackupService {
     return null;
   }
 
-  private getChangedDataSince(
-    _date: Date,
-  ): Record<string, unknown> {
+  private getChangedDataSince(_date: Date): Record<string, unknown> {
     // In a real implementation, this would identify changed records since the date
     return {};
   }
 
-  private getBackupMetadata(
-    _backupId: string,
-  ): BackupResult | null {
+  private getBackupMetadata(_backupId: string): BackupResult | null {
     // In a real implementation, this would retrieve backup metadata from storage
     return null;
   }

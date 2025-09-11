@@ -65,7 +65,12 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
   };
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<{
+      correlationId?: string;
+      method?: string;
+      route?: { path?: string };
+      url?: string;
+    }>();
     const endpoint = `${request?.method || 'UNKNOWN'} ${request?.route?.path || request?.url || 'unknown'}`;
     const correlationId =
       request?.correlationId || this.generateCorrelationId();

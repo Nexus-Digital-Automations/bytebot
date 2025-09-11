@@ -22,11 +22,14 @@ export class ValidationExceptionFilter implements ExceptionFilter {
   catch(exception: BadRequestException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest();
+    const request = ctx.getRequest<{ correlationId?: string; url?: string }>();
 
     const correlationId =
       request?.correlationId || this.generateCorrelationId();
-    const exceptionResponse = exception.getResponse() as any;
+    const exceptionResponse = exception.getResponse() as Record<
+      string,
+      unknown
+    >;
 
     // Handle validation errors specifically
     if (this.isValidationError(exceptionResponse)) {
@@ -41,7 +44,7 @@ export class ValidationExceptionFilter implements ExceptionFilter {
     }
   }
 
-  private isValidationError(response: any): boolean {
+  private isValidationError(response: Record<string, unknown>): boolean {
     return (
       response &&
       Array.isArray(response.message) &&
@@ -50,13 +53,15 @@ export class ValidationExceptionFilter implements ExceptionFilter {
   }
 
   private handleValidationError(
-    exceptionResponse: any,
+    exceptionResponse: Record<string, unknown>,
     response: Response,
     correlationId: string,
-    request: any,
+    request: { correlationId?: string; url?: string },
   ) {
     const validationErrors = this.formatValidationErrors(
-      exceptionResponse?.message || [],
+      Array.isArray(exceptionResponse?.message)
+        ? (exceptionResponse.message as string[])
+        : [],
     );
 
     const errorResponse = {
@@ -85,7 +90,7 @@ export class ValidationExceptionFilter implements ExceptionFilter {
     exception: BadRequestException,
     response: Response,
     correlationId: string,
-    request: any,
+    request: { correlationId?: string; url?: string },
   ) {
     const exceptionResponse = exception.getResponse();
 
@@ -94,7 +99,7 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       message:
         typeof exceptionResponse === 'string'
           ? exceptionResponse
-          : (exceptionResponse as any).message,
+          : (exceptionResponse as Record<string, unknown>).message,
       error: 'Bad Request',
       timestamp: new Date().toISOString(),
       path: request?.url || 'unknown',
@@ -102,7 +107,7 @@ export class ValidationExceptionFilter implements ExceptionFilter {
     };
 
     this.logger.warn(
-      `Bad request: ${(exception as any)?.message || 'Unknown error'} [${correlationId}]`,
+      `Bad request: ${exception.message || 'Unknown error'} [${correlationId}]`,
       {
         path: request?.url || 'unknown',
       },

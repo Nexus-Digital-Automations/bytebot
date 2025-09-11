@@ -419,7 +419,7 @@ export class BrowserSessionListResponseDto {
   };
 
   @ApiProperty({ description: 'Filter function for legacy support' })
-  filter?: Function;
+  filter?: (...args: unknown[]) => unknown;
 
   @ApiProperty({ description: 'Length property for legacy support' })
   length?: number;

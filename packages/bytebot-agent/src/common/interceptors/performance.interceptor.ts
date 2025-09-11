@@ -244,7 +244,31 @@ export class PerformanceInterceptor implements NestInterceptor {
 
     // In a production environment, you would send these metrics to your
     // monitoring system (e.g., Prometheus, DataDog, CloudWatch, etc.)
-    this.sendToMonitoringSystem(metrics, stats as any); // Note: Interface mismatch between generated stats and expected PerformanceStatistics
+    // Convert the calculated stats to match PerformanceStatistics interface
+    const performanceStats: PerformanceStatistics = {
+      totalRequests: stats.totalRequests,
+      averageResponseTime: stats.averageDuration,
+      maxResponseTime: stats.p99Duration,
+      minResponseTime: Math.min(...metrics.map((m) => m.duration)),
+      errorRate: 0, // Would need to track error metrics separately
+      throughputPerSecond:
+        (stats.totalRequests /
+          (metrics.length > 0
+            ? metrics[metrics.length - 1].endTime - metrics[0].startTime
+            : 1)) *
+        1000,
+      memoryUsageMB: stats.averageMemoryUsage / (1024 * 1024),
+      performanceCategoryDistribution: stats.performanceDistribution,
+      statusCodeDistribution: {}, // Would need to track status codes separately
+      endpointMetrics: stats.topSlowEndpoints.map((endpoint) => ({
+        endpoint: endpoint.endpoint,
+        averageTime: endpoint.duration,
+        requestCount: 1, // Each entry represents one request
+        errorCount: 0, // Would need to track errors separately
+      })),
+    };
+
+    this.sendToMonitoringSystem(metrics, performanceStats);
   }
 
   private calculateAggregateStats(metrics: PerformanceMetrics[]) {

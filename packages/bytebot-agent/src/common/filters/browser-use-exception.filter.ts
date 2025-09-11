@@ -19,7 +19,7 @@ export class BrowserUseError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly details?: any,
+    public readonly details?: unknown,
     public readonly recoverable: boolean = true,
   ) {
     super(message);
@@ -36,23 +36,12 @@ export class BrowserUseExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<{ correlationId?: string; url?: string }>();
 
-    const correlationId =
-      (request as any)?.correlationId || this.generateCorrelationId();
+    const correlationId = request.correlationId || this.generateCorrelationId();
 
     if (exception instanceof BrowserUseError) {
-      this.handleBrowserUseError(
-        exception,
-        response,
-        correlationId,
-        request as any,
-      );
+      this.handleBrowserUseError(exception, response, correlationId, request);
     } else {
-      this.handleHttpException(
-        exception,
-        response,
-        correlationId,
-        request as any,
-      );
+      this.handleHttpException(exception, response, correlationId, request);
     }
   }
 
@@ -60,13 +49,13 @@ export class BrowserUseExceptionFilter implements ExceptionFilter {
     exception: BrowserUseError,
     response: Response,
     correlationId: string,
-    request: any,
+    request: { correlationId?: string; url?: string },
   ) {
     const statusCode = this.mapErrorCodeToStatus(exception.code);
 
     const errorResponse = {
       statusCode,
-      message: (exception as any)?.message || 'Unknown error',
+      message: exception.message || 'Unknown error',
       error: 'Browser Automation Error',
       code: exception.code,
       recoverable: exception.recoverable,
@@ -89,7 +78,7 @@ export class BrowserUseExceptionFilter implements ExceptionFilter {
     exception: HttpException,
     response: Response,
     correlationId: string,
-    request: any,
+    request: { correlationId?: string; url?: string },
   ) {
     const statusCode = exception.getStatus();
     const exceptionResponse = exception.getResponse();

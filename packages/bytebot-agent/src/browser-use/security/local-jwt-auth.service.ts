@@ -20,21 +20,10 @@
  * @author Security & Authentication Agent
  */
 
-import {
-  Injectable,
-  Logger,
-  UnauthorizedException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
-import {
-  createHash,
-  randomBytes,
-  generateKeyPairSync,
-  createSign,
-  createVerify,
-} from 'crypto';
+import { createHash, randomBytes, generateKeyPairSync } from 'crypto';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { UserRole } from '@prisma/client';
@@ -172,7 +161,7 @@ export class LocalJwtAuthService {
     private readonly configService: ConfigService,
   ) {
     this.config = this.loadConfiguration();
-    this.initializeKeys();
+    void this.initializeKeys();
     this.startKeyRotation();
     this.startSessionCleanup();
 
@@ -188,25 +177,25 @@ export class LocalJwtAuthService {
   /**
    * Authenticate user and generate JWT token with browser permissions
    */
-  async authenticateUser(
+  authenticateUser(
     userId: string,
     email: string,
     role: UserRole,
     ipAddress?: string,
     userAgent?: string,
-  ): Promise<{
+  ): {
     accessToken: string;
     refreshToken: string;
     sessionId: string;
     expiresIn: number;
     permissions: BrowserPermission[];
-  }> {
+  } {
     const sessionId = this.generateSessionId();
     const tokenId = this.generateTokenId();
 
     try {
       // Check concurrent session limits
-      await this.enforceSessionLimits(userId);
+      this.enforceSessionLimits(userId);
 
       // Generate permissions based on role
       const permissions = this.generatePermissions(role);
@@ -230,8 +219,8 @@ export class LocalJwtAuthService {
       };
 
       // Sign tokens
-      const accessToken = await this.signToken(payload);
-      const refreshToken = await this.generateRefreshToken(
+      const accessToken = this.signToken(payload);
+      const refreshToken = this.generateRefreshToken(
         userId,
         sessionId,
         tokenId,
@@ -252,7 +241,7 @@ export class LocalJwtAuthService {
       this.activeSessions.set(sessionId, session);
 
       // Audit logging
-      await this.logAuthEvent({
+      this.logAuthEvent({
         eventId: this.generateEventId(),
         type: 'LOGIN',
         userId,
@@ -285,7 +274,7 @@ export class LocalJwtAuthService {
       };
     } catch (error) {
       // Audit failed authentication
-      await this.logAuthEvent({
+      this.logAuthEvent({
         eventId: this.generateEventId(),
         type: 'LOGIN',
         userId,
@@ -317,7 +306,7 @@ export class LocalJwtAuthService {
     try {
       // Check token blacklist
       if (this.tokenBlacklist.has(token)) {
-        await this.logAuthEvent({
+        this.logAuthEvent({
           eventId: this.generateEventId(),
           type: 'INVALID_TOKEN',
           ipAddress,
@@ -340,7 +329,7 @@ export class LocalJwtAuthService {
       // Validate session
       const session = this.activeSessions.get(payload.sessionId);
       if (!session || session.tokenId !== payload.jti) {
-        await this.logAuthEvent({
+        this.logAuthEvent({
           eventId: this.generateEventId(),
           type: 'INVALID_TOKEN',
           userId: payload.sub,
@@ -369,7 +358,7 @@ export class LocalJwtAuthService {
       const needsRefresh = remainingTime < 900; // 15 minutes
 
       // Successful validation audit
-      await this.logAuthEvent({
+      this.logAuthEvent({
         eventId: this.generateEventId(),
         type: 'TOKEN_VALIDATION',
         userId: payload.sub,
@@ -391,7 +380,7 @@ export class LocalJwtAuthService {
         needsRefresh,
       };
     } catch (error) {
-      await this.logAuthEvent({
+      this.logAuthEvent({
         eventId: this.generateEventId(),
         type: 'TOKEN_VALIDATION',
         ipAddress,
@@ -412,7 +401,7 @@ export class LocalJwtAuthService {
   /**
    * Refresh JWT token using refresh token
    */
-  async refreshToken(
+  refreshToken(
     refreshToken: string,
     ipAddress?: string,
   ): Promise<{
@@ -423,7 +412,7 @@ export class LocalJwtAuthService {
     try {
       // Verify refresh token (implement your refresh token validation logic)
       const { userId, sessionId, tokenId } =
-        await this.validateRefreshToken(refreshToken);
+        this.validateRefreshToken(refreshToken);
 
       // Get active session
       const session = this.activeSessions.get(sessionId);
@@ -453,8 +442,8 @@ export class LocalJwtAuthService {
         jti: newTokenId,
       };
 
-      const accessToken = await this.signToken(payload);
-      const newRefreshToken = await this.generateRefreshToken(
+      const accessToken = this.signToken(payload);
+      const newRefreshToken = this.generateRefreshToken(
         userId,
         sessionId,
         newTokenId,
@@ -466,7 +455,7 @@ export class LocalJwtAuthService {
       this.activeSessions.set(sessionId, session);
 
       // Audit logging
-      await this.logAuthEvent({
+      this.logAuthEvent({
         eventId: this.generateEventId(),
         type: 'TOKEN_REFRESH',
         userId,
@@ -492,7 +481,7 @@ export class LocalJwtAuthService {
         expiresIn,
       };
     } catch (error) {
-      await this.logAuthEvent({
+      this.logAuthEvent({
         eventId: this.generateEventId(),
         type: 'TOKEN_REFRESH',
         ipAddress,
@@ -509,7 +498,7 @@ export class LocalJwtAuthService {
   /**
    * Logout user and invalidate session
    */
-  async logout(sessionId: string, ipAddress?: string): Promise<void> {
+  logout(sessionId: string, ipAddress?: string): void {
     try {
       const session = this.activeSessions.get(sessionId);
       if (session) {
@@ -520,7 +509,7 @@ export class LocalJwtAuthService {
         this.activeSessions.delete(sessionId);
 
         // Audit logging
-        await this.logAuthEvent({
+        this.logAuthEvent({
           eventId: this.generateEventId(),
           type: 'LOGOUT',
           userId: session.userId,
@@ -644,7 +633,7 @@ export class LocalJwtAuthService {
         this.publicKey = await fs.readFile(this.config.publicKeyPath);
         this.logger.log('JWT keys loaded successfully');
         return;
-      } catch (error) {
+      } catch {
         this.logger.warn('JWT keys not found, generating new keypair');
       }
 
@@ -681,7 +670,7 @@ export class LocalJwtAuthService {
     }
   }
 
-  private async signToken(payload: BrowserAuthPayload): Promise<string> {
+  private signToken(payload: BrowserAuthPayload): string {
     if (!this.privateKey) {
       throw new Error('Private key not initialized');
     }
@@ -697,7 +686,7 @@ export class LocalJwtAuthService {
     });
   }
 
-  private async verifyToken(token: string): Promise<any> {
+  private verifyToken(token: string): any {
     if (!this.publicKey) {
       throw new Error('Public key not initialized');
     }
@@ -754,7 +743,7 @@ export class LocalJwtAuthService {
     return permissions;
   }
 
-  private async enforceSessionLimits(userId: string): Promise<void> {
+  private enforceSessionLimits(userId: string): void {
     const userSessions = Array.from(this.activeSessions.values()).filter(
       (session) => session.userId === userId,
     );
@@ -765,7 +754,7 @@ export class LocalJwtAuthService {
         (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
       )[0];
 
-      await this.logout(oldestSession.sessionId);
+      this.logout(oldestSession.sessionId);
 
       this.logger.warn(
         `Session limit exceeded for user ${userId}, removed oldest session`,
@@ -785,11 +774,11 @@ export class LocalJwtAuthService {
     return `evt_${Date.now()}_${randomBytes(4).toString('hex')}`;
   }
 
-  private async generateRefreshToken(
+  private generateRefreshToken(
     userId: string,
     sessionId: string,
     tokenId: string,
-  ): Promise<string> {
+  ): string {
     const payload = {
       sub: userId,
       sessionId,
@@ -805,11 +794,11 @@ export class LocalJwtAuthService {
     return `refresh_${hashedPayload}`;
   }
 
-  private async validateRefreshToken(refreshToken: string): Promise<{
+  private validateRefreshToken(_refreshToken: string): {
     userId: string;
     sessionId: string;
     tokenId: string;
-  }> {
+  } {
     // Implement refresh token validation logic
     // This is a simplified version - in production, store refresh tokens securely
     throw new Error('Refresh token validation not implemented');
@@ -836,7 +825,7 @@ export class LocalJwtAuthService {
     }
   }
 
-  private async logAuthEvent(event: AuthAuditEvent): Promise<void> {
+  private logAuthEvent(event: AuthAuditEvent): void {
     if (!this.config.enableAuditLogging) return;
 
     this.auditEvents.push(event);
@@ -859,14 +848,16 @@ export class LocalJwtAuthService {
   private startKeyRotation(): void {
     const intervalMs = this.config.keyRotationInterval * 60 * 60 * 1000;
 
-    this.keyRotationTimer = setInterval(async () => {
-      try {
-        await this.rotateKeys();
-      } catch (error) {
-        this.logger.error('Key rotation failed', {
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
+    this.keyRotationTimer = setInterval(() => {
+      void (async () => {
+        try {
+          await this.rotateKeys();
+        } catch (error) {
+          this.logger.error('Key rotation failed', {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      })();
     }, intervalMs);
 
     this.logger.log(

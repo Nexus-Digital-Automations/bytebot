@@ -37,7 +37,6 @@ import {
   DataExtractionResponseDto,
   ExtractionMethod,
   OutputFormat,
-  ExtractionRule,
   ExtractedDataItem,
 } from '../dto/browser-data.dto';
 
@@ -50,12 +49,11 @@ interface ExtractionContext {
   outputFormat: OutputFormat;
 }
 
-interface PageStructuredData {
-  jsonLD: any[];
-  microdata: any[];
-  openGraph: Record<string, string>;
-  twitterTags: Record<string, string>;
-  metaTags: Record<string, string>;
+interface BrowserCommandResult {
+  success: boolean;
+  error?: string;
+  data?: unknown;
+  content?: string;
 }
 
 @Injectable()
@@ -117,7 +115,6 @@ export class BrowserDataService {
 
       // Extract data based on selected method
       let extractedData: ExtractedDataItem[] = [];
-      let statistics;
 
       switch (context.method) {
         case ExtractionMethod.AI_QUERY:
@@ -157,7 +154,7 @@ export class BrowserDataService {
           break;
         default:
           throw new BadRequestException(
-            `Unsupported extraction method: ${context.method}`,
+            `Unsupported extraction method: ${String(context.method)}`,
           );
       }
 
@@ -169,8 +166,11 @@ export class BrowserDataService {
       // Get page metadata
       const pageMetadata = await this.getPageMetadata(sessionId);
 
-      // Calculate statistics
-      statistics = this.calculateExtractionStatistics(extractedData, startTime);
+      // Update statistics with actual data
+      const finalStatistics = this.calculateExtractionStatistics(
+        extractedData,
+        startTime,
+      );
 
       // Extract links and images if requested
       const links = extractDto.includeLinks
@@ -208,7 +208,7 @@ export class BrowserDataService {
         extractedData,
         rawData,
         pageMetadata,
-        statistics,
+        statistics: finalStatistics,
         links,
         images,
         timestamp: context.timestamp,
@@ -245,9 +245,9 @@ export class BrowserDataService {
         },
         timestamp: context.timestamp,
         error: {
-          code: error.name || 'EXTRACTION_ERROR',
-          message: error.message,
-          details: error,
+          code: (error as Error).name || 'EXTRACTION_ERROR',
+          message: (error as Error).message,
+          details: error as Error,
         },
       };
 
@@ -328,8 +328,6 @@ export class BrowserDataService {
       );
     }
 
-    const extractedData: ExtractedDataItem[] = [];
-
     // Prepare extraction rules
     const cssRules = extractDto.rules.filter((rule) => rule.selector);
 
@@ -351,7 +349,8 @@ export class BrowserDataService {
       timestamp: context.timestamp.toISOString(),
     };
 
-    const result = await this.executeWithRetry(browserProcess.id, command);
+    const result: { success: boolean; error?: string; data?: unknown } =
+      await this.executeWithRetry(browserProcess.id, command);
 
     if (!result.success) {
       throw new InternalServerErrorException(
@@ -463,7 +462,8 @@ export class BrowserDataService {
       );
     }
 
-    const pageContent = contentResult.content || '';
+    const pageContent =
+      typeof contentResult.content === 'string' ? contentResult.content : '';
     const extractedData: ExtractedDataItem[] = [];
 
     // Apply regex rules
@@ -471,7 +471,7 @@ export class BrowserDataService {
 
     for (const rule of regexRules) {
       try {
-        const regex = new RegExp(rule.regex, 'gi');
+        const regex = new RegExp(rule.regex || '', 'gi');
         const matches = Array.from(pageContent.matchAll(regex));
 
         for (
@@ -480,13 +480,14 @@ export class BrowserDataService {
           i++
         ) {
           const match = matches[i];
+          const matchText = match[0] || '';
           const extractedItem: ExtractedDataItem = {
             data: {
-              [rule.fieldName]: this.transformValue(match[0], rule.transform),
+              [rule.fieldName]: this.transformValue(matchText, rule.transform),
             },
             source: {
               tagName: 'text',
-              textContent: match[0],
+              textContent: matchText,
               attributes: {},
             },
             confidence: 0.8, // Regex has good confidence
@@ -551,11 +552,27 @@ export class BrowserDataService {
    */
   private async executeWithRetry(
     processId: string,
-    command: any,
-  ): Promise<any> {
+    command: unknown,
+  ): Promise<BrowserCommandResult> {
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
-        return await this.browserUseService.sendCommand(processId, command);
+        const result = await this.browserUseService.sendCommand(
+          processId,
+          command,
+        );
+        // Type guard to ensure the result matches our expected interface
+        if (
+          typeof result === 'object' &&
+          result !== null &&
+          'success' in result
+        ) {
+          return result as BrowserCommandResult;
+        }
+        // If the result doesn't match expected format, treat as error
+        return {
+          success: false,
+          error: 'Invalid response format from browser service',
+        };
       } catch (error) {
         this.logger.warn(`Extraction attempt ${attempt} failed:`, error);
 
@@ -584,7 +601,20 @@ export class BrowserDataService {
   /**
    * Get comprehensive page metadata
    */
-  private async getPageMetadata(sessionId: string): Promise<any> {
+  private async getPageMetadata(sessionId: string): Promise<{
+    url: string;
+    title: string;
+    description?: string;
+    keywords?: string[];
+    author?: string;
+    publishedDate?: Date;
+    modifiedDate?: Date;
+    language?: string;
+    canonicalUrl?: string;
+    ogTags?: Record<string, string>;
+    twitterTags?: Record<string, string>;
+    structuredData?: any[];
+  }> {
     try {
       const pageState = await this.browserDomService.getState(sessionId);
 
@@ -602,14 +632,35 @@ export class BrowserDataService {
       };
     } catch (error) {
       this.logger.warn('Failed to get page metadata:', error);
-      return {};
+      return {
+        url: '',
+        title: '',
+        description: undefined,
+        keywords: undefined,
+        author: undefined,
+        publishedDate: undefined,
+        modifiedDate: undefined,
+        language: undefined,
+        canonicalUrl: undefined,
+        ogTags: undefined,
+        twitterTags: undefined,
+        structuredData: undefined,
+      };
     }
   }
 
   /**
    * Extract all links from the page
    */
-  private async extractLinks(sessionId: string): Promise<Array<any>> {
+  private async extractLinks(sessionId: string): Promise<
+    Array<{
+      text: string;
+      href: string;
+      title?: string;
+      rel?: string;
+      target?: string;
+    }>
+  > {
     try {
       const browserProcess =
         this.browserUseService.getProcessBySession(sessionId);
@@ -636,7 +687,15 @@ export class BrowserDataService {
   /**
    * Extract all images from the page
    */
-  private async extractImages(sessionId: string): Promise<Array<any>> {
+  private async extractImages(sessionId: string): Promise<
+    Array<{
+      src: string;
+      alt?: string;
+      title?: string;
+      width?: number;
+      height?: number;
+    }>
+  > {
     try {
       const browserProcess =
         this.browserUseService.getProcessBySession(sessionId);
@@ -666,7 +725,14 @@ export class BrowserDataService {
   private calculateExtractionStatistics(
     extractedData: ExtractedDataItem[],
     startTime: number,
-  ): any {
+  ): {
+    totalElements: number;
+    processedElements: number;
+    matchedElements: number;
+    extractionTimeMs: number;
+    aiProcessingTimeMs?: number;
+    dataQualityScore: number;
+  } {
     const endTime = Date.now();
     const extractionTimeMs = endTime - startTime;
 
@@ -780,7 +846,7 @@ export class BrowserDataService {
    */
   private normalizeAIResults(
     data: any,
-    context: ExtractionContext,
+    _context: ExtractionContext,
   ): ExtractedDataItem[] {
     if (!data || !Array.isArray(data)) {
       return [];
@@ -803,7 +869,7 @@ export class BrowserDataService {
    */
   private normalizeSelectorResults(
     data: any,
-    context: ExtractionContext,
+    _context: ExtractionContext,
   ): ExtractedDataItem[] {
     if (!data || !Array.isArray(data)) {
       return [];
@@ -828,7 +894,7 @@ export class BrowserDataService {
    */
   private normalizeStructuredData(
     data: any,
-    context: ExtractionContext,
+    _context: ExtractionContext,
   ): ExtractedDataItem[] {
     const items: ExtractedDataItem[] = [];
 
@@ -848,7 +914,7 @@ export class BrowserDataService {
     }
 
     if (data.microdata && Array.isArray(data.microdata)) {
-      data.microdata.forEach((item: any, index: number) => {
+      data.microdata.forEach((item: any, _index: number) => {
         items.push({
           data: item,
           source: {
