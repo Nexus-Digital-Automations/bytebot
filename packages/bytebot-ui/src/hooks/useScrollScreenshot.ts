@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Message } from "@/types";
 import {
+  ScreenshotData,
   extractScreenshots,
   getScreenshotForScrollPosition,
-  ScreenshotData,
 } from "@/utils/screenshotUtils";
 
 interface UseScrollScreenshotProps {
@@ -54,7 +54,7 @@ export function useScrollScreenshot({
 
   // After initial render, force a re-check for screenshot markers using MutationObserver
   useEffect(() => {
-    if (!scrollContainerRef.current) return;
+    if (!scrollContainerRef.current) {return;}
 
     const container = scrollContainerRef.current;
     let mutationTimeout: NodeJS.Timeout;
@@ -77,10 +77,10 @@ export function useScrollScreenshot({
   // Handle scroll events to update current screenshot
   const handleScroll = useCallback(
     (scrollElement: HTMLElement) => {
-      if (allScreenshots.length === 0) return;
+      if (allScreenshots.length === 0) {return;}
 
       const now = Date.now();
-      if (now - lastScrollTime.current < 100) return;
+      if (now - lastScrollTime.current < 100) {return;}
       lastScrollTime.current = now;
 
       setTimeout(() => {
@@ -106,7 +106,7 @@ export function useScrollScreenshot({
   // Attach scroll listener
   useEffect(() => {
     const container = scrollContainerRef.current;
-    if (!container) return;
+    if (!container) {return;}
 
     const scrollHandler = (e: Event) => {
       // Only handle scroll events from the actual container
@@ -118,7 +118,7 @@ export function useScrollScreenshot({
     // Only attach to the container itself
     container.addEventListener("scroll", scrollHandler, { passive: true });
 
-    return () => container.removeEventListener("scroll", scrollHandler);
+    return () => { container.removeEventListener("scroll", scrollHandler); };
   }, [handleScroll, scrollContainerRef]);
 
   return {

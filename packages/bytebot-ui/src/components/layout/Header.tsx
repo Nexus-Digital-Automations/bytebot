@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  DocumentCodeIcon,
-  TaskDaily01Icon,
-  Home01Icon,
   ComputerIcon,
+  DocumentCodeIcon,
+  Home01Icon,
+  TaskDaily01Icon,
 } from "@hugeicons/core-free-icons";
 import { usePathname } from "next/navigation";
 

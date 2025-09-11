@@ -14,9 +14,9 @@
  * @version 1.0.0
  */
 
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { useChatSession } from "../useChatSession";
-import { Role, TaskStatus, Message, Task } from "@/types";
+import { Message, Role, Task, TaskStatus } from "@/types";
 import { MessageContentType } from "@bytebot/shared";
 
 // Mock external dependencies
@@ -50,9 +50,7 @@ import * as logger from "@/utils/logger";
 
 // Type the mocked functions
 const mockTaskUtils = taskUtils as jest.Mocked<typeof taskUtils>;
-const mockUseWebSocket = useWebSocket as jest.MockedFunction<
-  typeof useWebSocket
->;
+const mockUseWebSocket = useWebSocket;
 const mockLogger = logger as jest.Mocked<typeof logger>;
 
 describe("useChatSession Hook", () => {

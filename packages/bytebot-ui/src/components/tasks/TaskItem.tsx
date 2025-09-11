@@ -10,6 +10,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Loader } from "@/components/ui/loader";
 import Link from "next/link";
+import { logError } from "@/utils/logger";
 
 interface TaskItemProps {
   task: Task;
@@ -95,7 +96,11 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
     if (config == null) {
       // Development warning for missing config
       if (process.env.NODE_ENV === "development") {
-        console.warn(`No icon configuration found for status: ${status}`);
+        logError(
+          `No icon configuration found for status: ${status}`,
+          { status },
+          "TaskItem",
+        );
       }
       return null;
     }
@@ -133,7 +138,11 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
 
     // Fallback for missing icon component
     if (process.env.NODE_ENV === "development") {
-      console.warn(`Icon component not found for status: ${status}`);
+      logError(
+        `Icon component not found for status: ${status}`,
+        { status },
+        "TaskItem",
+      );
     }
     return null;
   };

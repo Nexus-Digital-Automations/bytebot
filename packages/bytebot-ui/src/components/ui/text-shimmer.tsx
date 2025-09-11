@@ -1,15 +1,15 @@
 "use client";
-import React, { useMemo, type JSX } from "react";
+import React, { type JSX, useMemo } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
-export type TextShimmerProps = {
+export interface TextShimmerProps {
   children: string;
   as?: React.ElementType;
   className?: string;
   duration?: number;
   spread?: number;
-};
+}
 
 function TextShimmerComponent({
   children,

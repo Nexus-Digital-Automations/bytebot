@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -49,7 +49,7 @@ export function ChatInput({
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0) {return;}
 
     setErrorMessage("");
 
@@ -85,7 +85,7 @@ export function ChatInput({
 
       newFiles.push({
         name: file.name,
-        base64: base64,
+        base64,
         type: file.type,
         size: file.size,
       });
@@ -106,8 +106,8 @@ export function ChatInput({
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
+      reader.onload = () => { resolve(reader.result as string); };
+      reader.onerror = (error) => { reject(error); };
     });
   };
 
@@ -126,17 +126,17 @@ export function ChatInput({
   };
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
+    if (bytes === 0) {return "0 Bytes";}
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
   };
 
   // Auto-resize textarea based on content
   useEffect(() => {
     const textarea = textareaRef.current;
-    if (!textarea) return;
+    if (!textarea) {return;}
 
     // Reset height to auto to get the correct scrollHeight
     textarea.style.height = "auto";
@@ -188,7 +188,7 @@ export function ChatInput({
                 <span className="max-w-[200px] truncate">{file.name}</span>
                 <button
                   type="button"
-                  onClick={() => removeFile(index)}
+                  onClick={() => { removeFile(index); }}
                   className="ml-1 rounded-sm hover:bg-gray-200"
                 >
                   <HugeiconsIcon
@@ -207,7 +207,7 @@ export function ChatInput({
           ref={textareaRef}
           placeholder={placeholder}
           value={input}
-          onChange={(e) => onInputChange(e.target.value)}
+          onChange={(e) => { onInputChange(e.target.value); }}
           className={cn(
             "placeholder:text-bytebot-bronze-light-10 w-full rounded-lg py-2 pr-16 pl-3 placeholder:text-[13px]",
             "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-bytebot-bronze-light-7 flex min-w-0 border bg-transparent text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",

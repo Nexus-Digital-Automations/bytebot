@@ -3,9 +3,9 @@ import ReactMarkdown from "react-markdown";
 import { GroupedMessages } from "@/types";
 import { MessageAvatar } from "./MessageAvatar";
 import {
+  isImageContentBlock,
   isTextContentBlock,
   isToolResultContentBlock,
-  isImageContentBlock,
 } from "@bytebot/shared";
 
 interface UserMessageProps {

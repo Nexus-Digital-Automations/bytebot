@@ -2,10 +2,10 @@ import React from "react";
 import { TaskStatus } from "@/types";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  Tick02Icon,
   CursorProgress04Icon,
-  MultiplicationSignIcon,
   ListViewIcon,
+  MultiplicationSignIcon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 
 type TabKey = "ALL" | "ACTIVE" | "COMPLETED" | "CANCELLED_FAILED";
@@ -76,7 +76,7 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
           return (
             <button
               key={tabKey}
-              onClick={() => onTabChange(tabKey)}
+              onClick={() => { onTabChange(tabKey); }}
               className={`flex cursor-pointer items-center space-x-2 border-b-2 px-4 py-3 whitespace-nowrap transition-colors ${
                 isActive
                   ? "border-bytebot-bronze-dark-7 text-bytebot-bronze-dark-7"

@@ -65,7 +65,7 @@ class Logger {
     data?: unknown,
     context?: string,
   ): void {
-    if (!this.shouldLog(level)) return;
+    if (!this.shouldLog(level)) {return;}
 
     const entry: LogEntry = {
       level,

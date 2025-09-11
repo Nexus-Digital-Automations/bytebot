@@ -17,7 +17,7 @@
 import React from "react";
 import { screen } from "@testing-library/react";
 import { TaskItem } from "../TaskItem";
-import { TaskStatus, Role, Task } from "@/types";
+import { Role, Task, TaskStatus } from "@/types";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 import { format } from "date-fns";
 import { capitalizeFirstChar } from "@/utils/stringUtils";
@@ -97,7 +97,7 @@ describe("TaskItem Component", () => {
 
     // Ensure stringUtils mock is working
     (capitalizeFirstChar as jest.Mock).mockImplementation((str: string) => {
-      if (!str) return str;
+      if (!str) {return str;}
       return str.charAt(0).toUpperCase() + str.slice(1);
     });
   });

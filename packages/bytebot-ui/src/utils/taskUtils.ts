@@ -1,9 +1,9 @@
 import {
-  Message,
-  Task,
-  Model,
-  GroupedMessages,
   FileWithBase64,
+  GroupedMessages,
+  Message,
+  Model,
+  Task,
   TaskStatus,
 } from "@/types";
 import { logError } from "@/utils/logger";
@@ -164,9 +164,9 @@ export async function fetchTasks(options?: {
 }): Promise<{ tasks: Task[]; total: number; totalPages: number }> {
   const params: Record<string, string | number> = {};
 
-  if (options?.page) params.page = options.page;
-  if (options?.limit) params.limit = options.limit;
-  if (options?.status) params.status = options.status;
+  if (options?.page) {params.page = options.page;}
+  if (options?.limit) {params.limit = options.limit;}
+  if (options?.status) {params.status = options.status;}
   if (options?.statuses && options.statuses.length > 0) {
     params.statuses = options.statuses.join(",");
   }

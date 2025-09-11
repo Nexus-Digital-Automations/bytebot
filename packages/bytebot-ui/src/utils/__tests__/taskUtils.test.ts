@@ -16,14 +16,14 @@
 
 import {
   addMessage,
+  cancelTask,
+  fetchTaskById,
   fetchTaskMessages,
   fetchTaskProcessedMessages,
-  fetchTaskById,
-  takeOverTask,
   resumeTask,
-  cancelTask,
+  takeOverTask,
 } from "../taskUtils";
-import { Role, TaskStatus, Message, Task } from "@/types";
+import { Message, Role, Task, TaskStatus } from "@/types";
 import { MessageContentType } from "@bytebot/shared";
 // Import types for test utilities if needed
 // import { TestUtils, TestDataFactory } from "@/test-utils/setupAfterEnv";
@@ -605,7 +605,7 @@ describe("TaskUtils", () => {
 
       mockFetch.mockImplementationOnce(() => {
         return new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("Timeout")), 100);
+          setTimeout(() => { reject(new Error("Timeout")); }, 100);
         });
       });
 
@@ -797,7 +797,7 @@ export const TaskUtilsTestUtils = {
   }),
 
   setupMockFetch: (
-    responses: Array<{ data: unknown; ok?: boolean; status?: number }>,
+    responses: { data: unknown; ok?: boolean; status?: number }[],
   ) => {
     responses.forEach((response) => {
       mockFetch.mockResolvedValueOnce({

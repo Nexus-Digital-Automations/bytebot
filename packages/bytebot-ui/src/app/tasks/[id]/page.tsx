@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { Header } from "@/components/layout/Header";
 import { ChatContainer } from "@/components/messages/ChatContainer";
 import { DesktopContainer } from "@/components/ui/desktop-container";
@@ -15,9 +15,9 @@ import {
 } from "@hugeicons/core-free-icons";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { VirtualDesktopStatus } from "@/components/VirtualDesktopStatusHeader";
@@ -135,13 +135,13 @@ export default function TaskPage() {
                     taskStatus === TaskStatus.RUNNING &&
                     control === Role.USER
                   )
-                    return "user_control";
-                  if (taskStatus === TaskStatus.RUNNING) return "running";
+                    {return "user_control";}
+                  if (taskStatus === TaskStatus.RUNNING) {return "running";}
                   if (taskStatus === TaskStatus.NEEDS_HELP)
-                    return "needs_attention";
-                  if (taskStatus === TaskStatus.FAILED) return "failed";
-                  if (taskStatus === TaskStatus.CANCELLED) return "canceled";
-                  if (taskStatus === TaskStatus.COMPLETED) return "completed";
+                    {return "needs_attention";}
+                  if (taskStatus === TaskStatus.FAILED) {return "failed";}
+                  if (taskStatus === TaskStatus.CANCELLED) {return "canceled";}
+                  if (taskStatus === TaskStatus.COMPLETED) {return "completed";}
                   // You may want to add a scheduled state if you have that info
                   return "pending";
                 })() as VirtualDesktopStatus

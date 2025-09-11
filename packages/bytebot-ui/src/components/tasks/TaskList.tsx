@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { TaskItem } from "@/components/tasks/TaskItem";
 import { fetchTasks } from "@/utils/taskUtils";
 import { Task } from "@/types";

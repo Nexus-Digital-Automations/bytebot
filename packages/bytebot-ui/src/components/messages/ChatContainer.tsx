@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useCallback, Fragment } from "react";
-import { Role, TaskStatus, GroupedMessages } from "@/types";
+import React, { Fragment, useCallback, useEffect, useRef } from "react";
+import { GroupedMessages, Role, TaskStatus } from "@/types";
 import { MessageGroup } from "./MessageGroup";
 import { TextShimmer } from "../ui/text-shimmer";
 import { MessageAvatar } from "./MessageAvatar";
@@ -26,7 +26,7 @@ interface ChatContainerProps {
 export function ChatContainer({
   scrollRef,
   messageIdToIndex,
-  _taskId,
+  taskId: _taskId, // Renamed to indicate it's currently unused but may be needed for future features
   input,
   setInput,
   isLoading,
@@ -62,8 +62,12 @@ export function ChatContainer({
     const container = scrollRef?.current;
     if (container) {
       container.addEventListener("scroll", handleScroll);
-      return () => container.removeEventListener("scroll", handleScroll);
+      return () => {
+        container.removeEventListener("scroll", handleScroll);
+      };
     }
+    // Return undefined explicitly when container is null
+    return undefined;
   }, [handleScroll, scrollRef]);
 
   // This effect runs whenever the grouped messages array changes

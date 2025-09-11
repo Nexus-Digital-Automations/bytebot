@@ -361,7 +361,7 @@ describe("Button Component", () => {
 
   describe("Form Integration", () => {
     it('submits forms when type="submit"', async () => {
-      const handleSubmit = jest.fn((e: React.FormEvent) => e.preventDefault());
+      const handleSubmit = jest.fn((e: React.FormEvent) => { e.preventDefault(); });
       const user = TestUtils.createUserEvent();
 
       TestUtils.renderComponent(
@@ -377,7 +377,7 @@ describe("Button Component", () => {
     });
 
     it('does not submit forms when type="button"', async () => {
-      const handleSubmit = jest.fn((e: React.FormEvent) => e.preventDefault());
+      const handleSubmit = jest.fn((e: React.FormEvent) => { e.preventDefault(); });
       const user = TestUtils.createUserEvent();
 
       TestUtils.renderComponent(

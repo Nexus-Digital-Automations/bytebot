@@ -1,5 +1,5 @@
 import { Message } from "@/types";
-import { isToolResultContentBlock, isImageContentBlock } from "@bytebot/shared";
+import { isImageContentBlock, isToolResultContentBlock } from "@bytebot/shared";
 
 export interface ScreenshotData {
   id: string;

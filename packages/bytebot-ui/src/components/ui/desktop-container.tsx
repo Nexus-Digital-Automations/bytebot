@@ -1,10 +1,10 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { VncViewer } from "@/components/vnc/VncViewer";
 import { ScreenshotViewer } from "@/components/screenshot/ScreenshotViewer";
 import { ScreenshotData } from "@/utils/screenshotUtils";
 import {
-  VirtualDesktopStatusHeader,
   VirtualDesktopStatus,
+  VirtualDesktopStatusHeader,
 } from "@/components/VirtualDesktopStatusHeader";
 
 interface DesktopContainerProps {
@@ -33,10 +33,10 @@ export const DesktopContainer: React.FC<DesktopContainerProps> = ({
 
   // Calculate the container size on mount and window resize
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted) {return;}
 
     const updateSize = () => {
-      if (!containerRef.current) return;
+      if (!containerRef.current) {return;}
 
       const parentWidth =
         containerRef.current.parentElement?.offsetWidth ||
@@ -68,7 +68,7 @@ export const DesktopContainer: React.FC<DesktopContainerProps> = ({
 
     updateSize();
     window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
+    return () => { window.removeEventListener("resize", updateSize); };
   }, [isMounted]);
 
   return (

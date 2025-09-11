@@ -24,16 +24,16 @@ process.env.NEXTAUTH_SECRET = "test-nextauth-secret-for-testing";
 // Mock global objects commonly used in browser environment
 Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: function (query: string) {
+  value (query: string) {
     return {
       matches: false,
       media: query,
       onchange: null,
-      addListener: function () {}, // Deprecated
-      removeListener: function () {}, // Deprecated
-      addEventListener: function () {},
-      removeEventListener: function () {},
-      dispatchEvent: function () {},
+      addListener () {}, // Deprecated
+      removeListener () {}, // Deprecated
+      addEventListener () {},
+      removeEventListener () {},
+      dispatchEvent () {},
     };
   },
 });

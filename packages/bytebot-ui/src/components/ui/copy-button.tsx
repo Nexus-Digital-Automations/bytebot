@@ -28,7 +28,7 @@ export function CopyButton({
     if (success) {
       setCopied(true);
       // Reset the copied state after 2 seconds
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => { setCopied(false); }, 2000);
     }
   };
 

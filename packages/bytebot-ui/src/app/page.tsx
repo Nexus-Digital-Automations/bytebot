@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { startTask } from "@/utils/taskUtils";
-import { Model } from "@/types";
+import { FileWithBase64, Model, validateUploadedFiles } from "@/types";
 import { TaskList } from "@/components/tasks/TaskList";
 
 interface StockPhotoProps {
@@ -21,27 +21,25 @@ interface StockPhotoProps {
   alt?: string;
 }
 
-const StockPhoto: React.FC<StockPhotoProps> = ({
-  src,
-  alt = "Decorative image",
-}) => {
-  return (
-    <div className="h-full w-full overflow-hidden rounded-lg bg-white">
-      <div className="relative h-full w-full">
-        <Image src={src} alt={alt} fill className="object-cover" priority />
+/**
+ * Optimized stock photo component with React.memo for performance
+ * Only re-renders when src or alt props change
+ */
+const StockPhoto: React.FC<StockPhotoProps> = React.memo(
+  ({ src, alt = "Decorative image" }) => {
+    return (
+      <div className="h-full w-full overflow-hidden rounded-lg bg-white">
+        <div className="relative h-full w-full">
+          <Image src={src} alt={alt} fill className="object-cover" priority />
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  },
+);
 
-interface FileWithBase64 {
-  name: string;
-  base64: string;
-  type: string;
-  size: number;
-}
+// FileWithBase64 interface is imported from @/types - removing duplicate definition
 
-export default function Home() {
+export default function Home(): JSX.Element {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [models, setModels] = useState<Model[]>([]);
@@ -71,7 +69,7 @@ export default function Home() {
 
   // Close popover when clicking outside or pressing ESC
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent): void => {
       if (
         popoverRef.current &&
         !popoverRef.current.contains(event.target as Node) &&
@@ -82,7 +80,7 @@ export default function Home() {
       }
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === "Escape") {
         setActivePopoverIndex(null);
       }
@@ -93,13 +91,13 @@ export default function Home() {
       document.addEventListener("keydown", handleKeyDown);
     }
 
-    return () => {
+    return (): void => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [activePopoverIndex]);
 
-  const handleSend = async () => {
+  const handleSendAsync = async (): Promise<void> => {
     if (!input.trim()) {
       return;
     }
@@ -127,7 +125,7 @@ export default function Home() {
 
       const task = await startTask(taskData);
 
-      if (task && task.id) {
+      if (task?.id != null) {
         // Redirect to the task page
         router.push(`/tasks/${task.id}`);
       } else {
@@ -143,8 +141,34 @@ export default function Home() {
     }
   };
 
-  const handleFileUpload = (files: FileWithBase64[]) => {
-    setUploadedFiles(files);
+  const handleSend = (): void => {
+    handleSendAsync().catch((error: unknown) => {
+      // Handle async error
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.error("Send error:", error);
+      }
+    });
+  };
+
+  /**
+   * Enhanced file upload handler with comprehensive validation and security
+   * @param fileList - Array of uploaded file objects to validate
+   */
+  const handleFileUpload = (fileList: FileWithBase64[]): void => {
+    // Validate and sanitize uploaded files for security
+    const validatedFiles = validateUploadedFiles(fileList);
+
+    // Log validation results for debugging (development only)
+    if (process.env.NODE_ENV === "development") {
+      // Development logging for file upload validation
+      // eslint-disable-next-line no-console
+      console.log(
+        `File upload: ${fileList.length} received, ${validatedFiles.length} valid`,
+      );
+    }
+
+    setUploadedFiles(validatedFiles);
   };
 
   return (
@@ -174,10 +198,13 @@ export default function Home() {
                 />
                 <div className="mt-2">
                   <Select
-                    {...(selectedModel?.name && { value: selectedModel.name })}
+                    {...(selectedModel?.name != null &&
+                      selectedModel.name.length > 0 && {
+                        value: selectedModel.name,
+                      })}
                     onValueChange={(val) => {
                       setSelectedModel(
-                        models.find((m) => m.name === val) || null,
+                        models.find((m) => m.name === val) ?? null,
                       );
                     }}
                   >
@@ -232,10 +259,13 @@ export default function Home() {
                 />
                 <div className="mt-2">
                   <Select
-                    {...(selectedModel?.name && { value: selectedModel.name })}
+                    {...(selectedModel?.name != null &&
+                      selectedModel.name.length > 0 && {
+                        value: selectedModel.name,
+                      })}
                     onValueChange={(val) => {
                       setSelectedModel(
-                        models.find((m) => m.name === val) || null,
+                        models.find((m) => m.name === val) ?? null,
                       );
                     }}
                   >

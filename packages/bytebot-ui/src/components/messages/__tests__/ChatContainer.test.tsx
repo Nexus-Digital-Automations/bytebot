@@ -101,7 +101,35 @@ const mockScrollRef: React.RefObject<HTMLDivElement> = {
 } as React.RefObject<HTMLDivElement>;
 const mockMessageIdToIndex = { "msg-1": 0, "msg-2": 1 };
 
-// createMockGroupedMessages moved to bottom of file to avoid duplicate declaration
+// Create mock data function
+const createMockGroupedMessages = (): GroupedMessages[] => [
+  {
+    role: Role.USER,
+    messages: [
+      {
+        id: "msg-1",
+        content: [
+          { type: MessageContentType._Text, text: "Hello" },
+        ] as MessageContentBlock[],
+        role: Role.USER,
+        createdAt: new Date().toISOString(),
+      },
+    ],
+  },
+  {
+    role: Role.ASSISTANT,
+    messages: [
+      {
+        id: "msg-2",
+        content: [
+          { type: MessageContentType._Text, text: "Hello! How can I help?" },
+        ] as MessageContentBlock[],
+        role: Role.ASSISTANT,
+        createdAt: new Date().toISOString(),
+      },
+    ],
+  },
+];
 
 const defaultProps = {
   scrollRef: mockScrollRef,
@@ -712,35 +740,6 @@ describe("ChatContainer Component", () => {
 });
 
 // Export test utilities for other chat-related tests
-const createMockGroupedMessages = (): GroupedMessages[] => [
-  {
-    role: Role.USER,
-    messages: [
-      {
-        id: "msg-1",
-        content: [
-          { type: MessageContentType._Text, text: "Hello" },
-        ] as MessageContentBlock[],
-        role: Role.USER,
-        createdAt: new Date().toISOString(),
-      },
-    ],
-  },
-  {
-    role: Role.ASSISTANT,
-    messages: [
-      {
-        id: "msg-2",
-        content: [
-          { type: MessageContentType._Text, text: "Hello! How can I help?" },
-        ] as MessageContentBlock[],
-        role: Role.ASSISTANT,
-        createdAt: new Date().toISOString(),
-      },
-    ],
-  },
-];
-
 export const ChatContainerTestUtils = {
   createMockGroupedMessages,
   createMockScrollRef: (): React.RefObject<HTMLDivElement> =>

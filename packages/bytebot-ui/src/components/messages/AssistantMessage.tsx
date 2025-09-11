@@ -2,7 +2,7 @@ import React from "react";
 import { GroupedMessages, TaskStatus } from "@/types";
 import { MessageAvatar } from "./MessageAvatar";
 import { MessageContent } from "./content/MessageContent";
-import { isToolResultContentBlock, isImageContentBlock } from "@bytebot/shared";
+import { isImageContentBlock, isToolResultContentBlock } from "@bytebot/shared";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 

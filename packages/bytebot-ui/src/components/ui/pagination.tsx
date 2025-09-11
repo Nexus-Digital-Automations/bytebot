@@ -18,7 +18,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   total,
   pageSize,
 }) => {
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1) {return null;}
 
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, total);
@@ -65,7 +65,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onPageChange(currentPage - 1)}
+          onClick={() => { onPageChange(currentPage - 1); }}
           disabled={currentPage === 1}
           className="flex items-center space-x-1"
         >
@@ -94,7 +94,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                 key={pageNum}
                 variant={isCurrentPage ? "default" : "outline"}
                 size="sm"
-                onClick={() => onPageChange(pageNum)}
+                onClick={() => { onPageChange(pageNum); }}
                 className={`min-w-[40px] ${
                   isCurrentPage
                     ? "bg-bytebot-bronze-dark-7 text-white"
@@ -110,7 +110,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onPageChange(currentPage + 1)}
+          onClick={() => { onPageChange(currentPage + 1); }}
           disabled={currentPage === totalPages}
           className="flex items-center space-x-1"
         >

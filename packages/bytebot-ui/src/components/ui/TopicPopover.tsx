@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, ReactElement } from "react";
+import React, { ReactElement, useEffect, useRef } from "react";
 
 interface TopicPopoverProps {
   children: React.ReactNode;
@@ -55,7 +55,7 @@ export const TopicPopover: React.FC<TopicPopoverProps> = ({
   // Create a modified version of the button with updated text color
   const modifiedChildren = React.Children.map(children, (child) => {
     // Only process React elements (not strings, numbers, etc.)
-    if (!React.isValidElement(child)) return child;
+    if (!React.isValidElement(child)) {return child;}
 
     // Cast to ReactElement to access props properly
     const element = child as ReactElement<{ className?: string }>;

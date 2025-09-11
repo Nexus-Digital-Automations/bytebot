@@ -11,7 +11,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);
       return true;
-    } else {
+    } 
       // Fallback for older browsers or non-secure contexts
       const textArea = document.createElement("textarea");
       textArea.value = text;
@@ -25,7 +25,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       const successful = document.execCommand("copy");
       document.body.removeChild(textArea);
       return successful;
-    }
+    
   } catch (error) {
     logError("Failed to copy text to clipboard", error, "clipboard");
     return false;

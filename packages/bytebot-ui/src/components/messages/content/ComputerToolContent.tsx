@@ -8,10 +8,13 @@ interface ComputerToolContentProps {
   isTakeOver?: boolean;
 }
 
-export function ComputerToolContent({ block, isTakeOver = false }: ComputerToolContentProps) {
+export function ComputerToolContent({
+  block,
+  isTakeOver = false,
+}: ComputerToolContentProps): JSX.Element {
   if (isTakeOver) {
     return <ComputerToolContentTakeOver block={block} />;
   }
-  
+
   return <ComputerToolContentNormal block={block} />;
 }

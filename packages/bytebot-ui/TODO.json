@@ -18,22 +18,6 @@
       "auto_research_created": false
     },
     {
-      "id": "error_1757572907107_pi2bddid6",
-      "title": "Enhance React Component TypeScript Safety in bytebot-ui",
-      "description": "Comprehensive TypeScript enhancement for React components including TaskItem.tsx, page.tsx, and all component prop interfaces with error boundaries, performance optimization, and Next.js integration",
-      "priority": "medium",
-      "category": "error",
-      "status": "pending",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-11T06:41:47.107Z",
-      "auto_research_created": false
-    },
-    {
       "id": "error_1757572904545_5bt10qwjp",
       "title": "Optimize ESLint Configuration for Enterprise-Grade TypeScript and React Rules",
       "description": "Optimize eslint.config.js with strict TypeScript rules, React Hook linting, security rules, and Next.js optimizations. Implement @typescript-eslint/strict rules, React performance linting, and comprehensive import/export organization rules for maximum code quality.",

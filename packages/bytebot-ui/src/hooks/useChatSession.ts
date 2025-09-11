@@ -1,17 +1,17 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Message, Role, TaskStatus, Task, GroupedMessages } from "@/types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { GroupedMessages, Message, Role, Task, TaskStatus } from "@/types";
 import {
   addMessage,
+  cancelTask,
+  fetchTaskById,
   fetchTaskMessages,
   fetchTaskProcessedMessages,
-  fetchTaskById,
-  takeOverTask,
   resumeTask,
-  cancelTask,
+  takeOverTask,
 } from "@/utils/taskUtils";
 import { MessageContentType } from "@bytebot/shared";
 import { useWebSocket } from "./useWebSocket";
-import { logError, logDebug } from "@/utils/logger";
+import { logDebug, logError } from "@/utils/logger";
 
 /**
  * Configuration interface for the useChatSession hook

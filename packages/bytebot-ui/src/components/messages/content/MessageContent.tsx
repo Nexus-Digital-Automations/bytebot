@@ -2,9 +2,9 @@ import React from "react";
 import {
   MessageContentBlock,
   MessageContentType,
-  isTextContentBlock,
-  isImageContentBlock,
   isComputerToolUseContentBlock,
+  isImageContentBlock,
+  isTextContentBlock,
   isToolResultContentBlock,
 } from "@bytebot/shared";
 import { TextContent } from "./TextContent";

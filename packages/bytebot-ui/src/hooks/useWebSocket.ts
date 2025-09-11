@@ -1,5 +1,5 @@
-import { useEffect, useRef, useCallback } from "react";
-import { io, Socket } from "socket.io-client";
+import { useCallback, useEffect, useRef } from "react";
+import { Socket, io } from "socket.io-client";
 import { Message, Task } from "@/types";
 import { logDebug, logInfo } from "@/utils/logger";
 

@@ -1,17 +1,17 @@
 import React from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
+  Application,
   ComputerToolUseContentBlock,
+  Coordinates,
+  isApplicationToolUseBlock,
+  isPasteTextToolUseBlock,
+  isPressKeysToolUseBlock,
+  isReadFileToolUseBlock,
+  isScrollToolUseBlock,
   isTypeKeysToolUseBlock,
   isTypeTextToolUseBlock,
-  isPressKeysToolUseBlock,
   isWaitToolUseBlock,
-  isScrollToolUseBlock,
-  isApplicationToolUseBlock,
-  Application,
-  isPasteTextToolUseBlock,
-  isReadFileToolUseBlock,
-  Coordinates,
 } from "@bytebot/shared";
 import { getIcon, getLabel } from "./ComputerToolUtils";
 
@@ -29,7 +29,11 @@ const applicationMap: Record<Application, string> = {
   desktop: "Desktop",
 };
 
-function ToolDetailsNormal({ block }: { block: ComputerToolUseContentBlock }) {
+function ToolDetailsNormal({
+  block,
+}: {
+  block: ComputerToolUseContentBlock;
+}): JSX.Element {
   const baseClasses =
     "px-1 py-0.5 text-[12px] text-bytebot-bronze-light-11 bg-bytebot-red-light-1 border border-bytebot-bronze-light-7 rounded-md";
 
@@ -49,7 +53,7 @@ function ToolDetailsNormal({ block }: { block: ComputerToolUseContentBlock }) {
       {(isTypeTextToolUseBlock(block) || isPasteTextToolUseBlock(block)) && (
         <p className={baseClasses}>
           {String(
-            block.input.isSensitive
+            (block.input.isSensitive ?? false)
               ? "●".repeat(block.input.text.length)
               : block.input.text,
           )}
@@ -62,7 +66,7 @@ function ToolDetailsNormal({ block }: { block: ComputerToolUseContentBlock }) {
       )}
 
       {/* Coordinates for click/mouse actions */}
-      {block.input.coordinates && (
+      {block.input.coordinates != null && (
         <p className={baseClasses}>
           {(block.input.coordinates as Coordinates).x},{" "}
           {(block.input.coordinates as Coordinates).y}
@@ -73,18 +77,18 @@ function ToolDetailsNormal({ block }: { block: ComputerToolUseContentBlock }) {
       {"path" in block.input &&
         Array.isArray(block.input.path) &&
         block.input.path.every(
-          (point: unknown): point is Coordinates => 
-            typeof point === 'object' && 
-            point !== null && 
-            'x' in point && 
-            'y' in point &&
-            typeof (point as Coordinates).x === 'number' &&
-            typeof (point as Coordinates).y === 'number'
+          (point: unknown): point is Coordinates =>
+            typeof point === "object" &&
+            point !== null &&
+            "x" in point &&
+            "y" in point &&
+            typeof (point as Coordinates).x === "number" &&
+            typeof (point as Coordinates).y === "number",
         ) && (
           <p className={baseClasses}>
-            From: {(block.input.path as Coordinates[])[0].x}, {(block.input.path as Coordinates[])[0].y} → To:{" "}
-            {(block.input.path as Coordinates[])[(block.input.path as Coordinates[]).length - 1].x},{" "}
-            {(block.input.path as Coordinates[])[(block.input.path as Coordinates[]).length - 1].y}
+            From: {block.input.path[0].x}, {block.input.path[0].y} → To:{" "}
+            {block.input.path[block.input.path.length - 1].x},{" "}
+            {block.input.path[block.input.path.length - 1].y}
           </p>
         )}
 
@@ -105,7 +109,7 @@ function ToolDetailsNormal({ block }: { block: ComputerToolUseContentBlock }) {
 
 export function ComputerToolContentNormal({
   block,
-}: ComputerToolContentNormalProps) {
+}: ComputerToolContentNormalProps): JSX.Element | null {
   // Don't render screenshot tool use blocks here - they're handled separately
   if (getLabel(block) === "Screenshot") {
     return null;

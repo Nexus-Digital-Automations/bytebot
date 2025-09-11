@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { logError } from "@/utils/logger";
 
 interface VncViewerProps {
@@ -39,7 +39,7 @@ export function VncViewer({ viewOnly = true }: VncViewerProps) {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return; // SSR safety‑net
+    if (typeof window === "undefined") {return;} // SSR safety‑net
     const proto = window.location.protocol === "https:" ? "wss" : "ws";
     setWsUrl(`${proto}://${window.location.host}/api/proxy/websockify`);
   }, []);
