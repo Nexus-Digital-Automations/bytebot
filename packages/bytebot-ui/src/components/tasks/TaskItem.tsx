@@ -4,9 +4,9 @@ import { format } from "date-fns";
 import { capitalizeFirstChar } from "@/utils/stringUtils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  Tick02Icon,
-  CancelCircleIcon,
   AlertCircleIcon,
+  CancelCircleIcon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { Loader } from "@/components/ui/loader";
 import Link from "next/link";
@@ -15,11 +15,23 @@ interface TaskItemProps {
   task: Task;
 }
 
+/**
+ * Configuration interface for task status icons with strict TypeScript typing
+ * Supports both HugeIcons components and loader states
+ */
 interface StatusIconConfig {
-  icon?: React.ComponentType; // HugeIcons IconSvgObject type
+  /** HugeIcons icon component - must be compatible with HugeiconsIcon wrapper */
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  /** Tailwind CSS color class for the icon */
   color?: string;
+  /** Whether to show a loading spinner instead of an icon */
   useLoader?: boolean;
 }
+
+/**
+ * Type-safe status icon configuration mapping
+ * Ensures all TaskStatus enum values have corresponding icon configurations
+ */
 
 const STATUS_CONFIGS: Record<TaskStatus, StatusIconConfig> = {
   [TaskStatus.COMPLETED]: {
@@ -50,7 +62,11 @@ const STATUS_CONFIGS: Record<TaskStatus, StatusIconConfig> = {
   },
 };
 
-export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
+/**
+ * TaskItem component with performance optimization via React.memo
+ * Only re-renders when task data actually changes
+ */
+const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
   // Format date to match the screenshot (e.g., "Today 9:13am" or "April 13, 2025, 12:01pm")
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -67,25 +83,54 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
     return capitalizeFirstChar(formatted);
   };
 
-  const StatusIcon = ({ status }: { status: TaskStatus }) => {
+  /**
+   * Status icon component with comprehensive error handling and type safety
+   * @param status - TaskStatus enum value
+   * @returns React component displaying appropriate icon or loader
+   */
+  const StatusIcon: React.FC<{ status: TaskStatus }> = ({ status }) => {
     const config = STATUS_CONFIGS[status];
-    if (!config) return null;
+
+    // Defensive programming - handle missing config gracefully
+    if (!config) {
+      console.warn(`No icon configuration found for status: ${status}`);
+      return null;
+    }
 
     const { icon: IconComponent, color, useLoader } = config;
 
+    // Show loader for pending/running states
     if (useLoader) {
       return (
-        <div className="flex items-center justify-center">
+        <div
+          className="flex items-center justify-center"
+          role="status"
+          aria-label="Loading"
+        >
           <Loader size={16} />
         </div>
       );
     }
 
-    return (
-      <div className="flex items-center justify-center">
-        {IconComponent && <HugeiconsIcon icon={IconComponent} className={`h-5 w-5 ${color || ''}`} />}
-      </div>
-    );
+    // Render icon with proper accessibility
+    if (IconComponent) {
+      return (
+        <div
+          className="flex items-center justify-center"
+          role="img"
+          aria-label={`Status: ${status.toLowerCase()}`}
+        >
+          <HugeiconsIcon
+            icon={IconComponent}
+            className={`h-5 w-5 ${color || "text-gray-500"}`}
+          />
+        </div>
+      );
+    }
+
+    // Fallback for missing icon component
+    console.warn(`Icon component not found for status: ${status}`);
+    return null;
   };
 
   return (

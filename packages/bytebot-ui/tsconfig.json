@@ -1,41 +1,124 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Bytebot UI Package",
+  "display": "Bytebot UI Package - Enterprise TypeScript Configuration",
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
+    // Target and Module Settings - Modern JS for optimal performance
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
     "module": "esnext",
     "moduleResolution": "bundler",
+    
+    // JavaScript Interop and Processing
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    
+    // JSX Configuration for React/Next.js
     "jsx": "preserve",
+    "jsxImportSource": "react",
+    
+    // Compilation and Build Settings
+    "noEmit": true,
     "incremental": true,
     "composite": false,
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
+    
+    // ENTERPRISE-GRADE STRICT TYPE CHECKING (Maximum Safety)
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    
+    // Additional Strict Checks for Enterprise Code Quality
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    
+    // Case Sensitivity and Module Resolution
     "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true,
+    "moduleDetection": "auto",
+    
+    // Decorator Support for NestJS and other frameworks
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    
+    // Type Definitions and Plugins
     "types": ["node", "jest"],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "plugins": [
       {
         "name": "next"
       }
     ],
+    
+    // Path Mapping for Clean Imports
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@bytebot/shared": ["../shared/src"]
-    }
+      "@/components/*": ["./src/components/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/constants/*": ["./src/constants/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/security/*": ["./src/security/*"],
+      "@bytebot/shared": ["../shared/src"],
+      "@bytebot/shared/*": ["../shared/src/*"]
+    },
+    
+    // Source Map and Debugging
+    "sourceMap": false,
+    "declaration": false,
+    "declarationMap": false,
+    
+    // Import/Export Handling
+    "allowImportingTsExtensions": false,
+    "allowArbitraryExtensions": false,
+    
+    // Performance Optimizations
+    "assumeChangesOnlyAffectDirectDependencies": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", ".next", "coverage"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.mts",
+    "**/*.cts",
+    ".next/types/**/*.ts",
+    "src/**/*",
+    "server.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "coverage",
+    "dist",
+    "build",
+    "out",
+    "**/*.js",
+    "**/*.jsx",
+    "jest.config.js",
+    "postcss.config.mjs",
+    "tailwind.config.*"
+  ],
   "references": [
     {
       "path": "../shared"
     }
-  ]
+  ],
+  "compileOnSave": false
 }

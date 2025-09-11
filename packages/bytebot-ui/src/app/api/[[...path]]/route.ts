@@ -9,18 +9,20 @@ async function proxy(req: NextRequest, path: string[]): Promise<Response> {
   const url = `${BASE_URL}/api${subPath}${req.nextUrl.search}`;
 
   // Extract cookies from the incoming request
-  const cookies = req.headers.get('cookie');
+  const cookies = req.headers.get("cookie");
+
+  const requestBody =
+    req.method === "GET" || req.method === "HEAD"
+      ? undefined
+      : await req.text();
 
   const init: RequestInit = {
     method: req.method,
-    headers: { 
+    headers: {
       "Content-Type": "application/json",
-      ...(cookies && { "Cookie": cookies })
+      ...(cookies && { Cookie: cookies }),
     },
-    body:
-      req.method === "GET" || req.method === "HEAD"
-        ? undefined
-        : await req.text(),
+    ...(requestBody !== undefined && { body: requestBody }),
   };
 
   const res = await fetch(url, init);
@@ -31,11 +33,11 @@ async function proxy(req: NextRequest, path: string[]): Promise<Response> {
 
   // Create response headers
   const responseHeaders = new Headers({
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
   });
 
   // Add Set-Cookie headers if they exist
-  setCookieHeaders.forEach(cookie => {
+  setCookieHeaders.forEach((cookie) => {
     responseHeaders.append("Set-Cookie", cookie);
   });
 

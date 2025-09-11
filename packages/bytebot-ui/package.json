@@ -8,10 +8,10 @@
     "build": "npx next build",
     "start": "tsx server.ts",
     "lint": "npx eslint 'src/**/*.{ts,tsx}' --fix --no-error-on-unmatched-pattern",
-    "test": "jest --config jest.config.js",
-    "test:watch": "jest --config jest.config.js --watch",
-    "test:coverage": "jest --config jest.config.js --coverage",
-    "test:ci": "jest --config jest.config.js --coverage --ci --watchAll=false"
+    "test": "jest --config jest.config.cjs",
+    "test:watch": "jest --config jest.config.cjs --watch",
+    "test:coverage": "jest --config jest.config.cjs --coverage",
+    "test:ci": "jest --config jest.config.cjs --coverage --ci --watchAll=false"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

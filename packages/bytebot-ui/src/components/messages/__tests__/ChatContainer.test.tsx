@@ -15,9 +15,9 @@
  */
 
 import React from "react";
-import { screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { ChatContainer } from "../ChatContainer";
-import { Role, TaskStatus, GroupedMessages } from "@/types";
+import { GroupedMessages, Role, TaskStatus } from "@/types";
 import { MessageContentType } from "@bytebot/shared";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 
@@ -54,7 +54,9 @@ jest.mock("../ChatInput", () => ({
       <input
         data-testid="chat-input-field"
         value={input}
-        onChange={(e) => onInputChange(e.target.value)}
+        onChange={(e) => {
+          onInputChange(e.target.value);
+        }}
         placeholder={placeholder}
         disabled={isLoading}
       />
@@ -95,7 +97,7 @@ jest.mock("../ui/loader", () => ({
 
 describe("ChatContainer Component", () => {
   // Test data setup
-  const mockScrollRef = { current: null } as React.RefObject<HTMLDivElement>;
+  const mockScrollRef: React.RefObject<HTMLDivElement> = { current: null };
   const mockMessageIdToIndex = { "msg-1": 0, "msg-2": 1 };
 
   const createMockGroupedMessages = (): GroupedMessages[] => [
@@ -556,11 +558,12 @@ describe("ChatContainer Component", () => {
 
     it("cleans up scroll event listeners properly", () => {
       const mockRemoveEventListener = jest.fn();
-      const mockContainer = {
-        current: {
-          addEventListener: jest.fn(),
-          removeEventListener: mockRemoveEventListener,
-        } as React.MutableRefObject<HTMLElement>,
+      const mockElement = {
+        addEventListener: jest.fn(),
+        removeEventListener: mockRemoveEventListener,
+      } as unknown as HTMLElement;
+      const mockContainer: React.RefObject<HTMLDivElement> = {
+        current: mockElement as unknown as HTMLDivElement,
       };
 
       const { unmount } = TestUtils.renderComponent(
@@ -617,7 +620,7 @@ describe("ChatContainer Component", () => {
         <ChatContainer {...defaultProps} loadMoreMessages={loadMoreMessages} />,
       );
 
-      const mockContainer = defaultProps.scrollRef.current!;
+      const mockContainer = defaultProps.scrollRef.current;
       act(() => {
         fireEvent.scroll(mockContainer);
       });
@@ -686,7 +689,7 @@ describe("ChatContainer Component", () => {
       );
 
       // Simulate new message arriving
-      const updatedMessages = [
+      const updatedMessages: GroupedMessages[] = [
         ...defaultProps.groupedMessages,
         {
           role: Role.ASSISTANT,
@@ -695,7 +698,7 @@ describe("ChatContainer Component", () => {
               id: "new-msg",
               content: [
                 { type: MessageContentType._Text, text: "New message" },
-              ],
+              ] as MessageContentBlock[],
               role: Role.ASSISTANT,
               createdAt: new Date().toISOString(),
             },

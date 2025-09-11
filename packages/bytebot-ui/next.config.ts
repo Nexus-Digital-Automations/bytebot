@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
    * @param config - Webpack configuration object
    * @param param1 - Build context containing buildId, dev, isServer flags
    */
-  webpack: (config, { buildId, dev, isServer }) => {
+  webpack: (config, { isServer }) => {
     // Only apply Node.js module fallbacks for client-side builds
     if (!isServer) {
       config.resolve.fallback = {

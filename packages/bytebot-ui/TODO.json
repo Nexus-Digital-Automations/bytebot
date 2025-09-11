@@ -1,0 +1,219 @@
+{
+  "project": "unknown",
+  "tasks": [
+    {
+      "id": "error_1757572910207_2bu35blsl",
+      "title": "Fix TypeScript compilation errors in test suite",
+      "description": "Resolve ALL TypeScript compilation errors in bytebot-ui test files: Header.test.tsx (__mockUseSession undefined variables lines 420,470,744, missing toRenderWithinTime matcher line 707), ChatContainer.test.tsx (ref type conversion errors, mock assignments, GroupedMessages type incompatibilities), fix Jest mock type definitions and integration, add custom Jest matcher types, fix React Testing Library assignments. Run tsc --noEmit, npm run lint, npm test for validation.",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:41:50.207Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "error_1757572907107_pi2bddid6",
+      "title": "Enhance React Component TypeScript Safety in bytebot-ui",
+      "description": "Comprehensive TypeScript enhancement for React components including TaskItem.tsx, page.tsx, and all component prop interfaces with error boundaries, performance optimization, and Next.js integration",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:41:47.107Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "error_1757572906399_oep8axczr",
+      "title": "Optimize TypeScript compiler configuration for bytebot-ui package with enterprise-grade type checking",
+      "description": "Configure tsconfig.json with strict TypeScript options, Next.js integration, path mapping, and incremental compilation. Enable all strict compiler options including noUncheckedIndexedAccess, exactOptionalPropertyTypes, noImplicitReturns, and noFallthroughCasesInSwitch. Set up proper path mapping for @/ imports, configure Next.js specific optimizations, and ensure zero TypeScript compilation errors across the entire package.",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:41:46.399Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "error_1757572904545_5bt10qwjp",
+      "title": "Optimize ESLint Configuration for Enterprise-Grade TypeScript and React Rules",
+      "description": "Optimize eslint.config.js with strict TypeScript rules, React Hook linting, security rules, and Next.js optimizations. Implement @typescript-eslint/strict rules, React performance linting, and comprehensive import/export organization rules for maximum code quality.",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T06:41:44.545Z",
+      "auto_research_created": false
+    }
+  ],
+  "agents": {
+    "development_session_1757572881816_1_general_1da59f5d": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:41:21.817Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:41:21.817Z",
+      "sessionId": "session_1757572881816",
+      "metadata": {}
+    },
+    "development_session_1757572882124_1_general_90e99d24": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:41:22.124Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:41:22.124Z",
+      "sessionId": "session_1757572882124",
+      "metadata": {}
+    },
+    "development_session_1757572882696_1_general_14b1ce0b": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:41:22.697Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:41:22.697Z",
+      "sessionId": "session_1757572882696",
+      "metadata": {}
+    },
+    "development_session_1757572882858_1_general_a5b323ff": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:41:22.858Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:41:22.858Z",
+      "sessionId": "session_1757572882858",
+      "metadata": {}
+    },
+    "development_session_1757572883145_1_general_c1f7dd46": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:41:23.145Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:41:23.145Z",
+      "sessionId": "session_1757572883145",
+      "metadata": {}
+    },
+    "development_session_1757572883146_1_general_da325870": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T06:41:23.146Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T06:41:23.146Z",
+      "sessionId": "session_1757572883146",
+      "metadata": {}
+    }
+  },
+  "settings": {
+    "auto_sort_enabled": true,
+    "sort_criteria": {
+      "primary": "category",
+      "secondary": "created_at"
+    },
+    "priority_values": {
+      "critical": 4,
+      "high": 3,
+      "medium": 2,
+      "low": 1
+    },
+    "category_enabled": true,
+    "category_ranks": {
+      "error": 1,
+      "feature": 2,
+      "subtask": 3,
+      "test": 4,
+      "quality": 5
+    }
+  },
+  "current_mode": "DEVELOPMENT"
+}

@@ -183,7 +183,7 @@ app
     );
 
     // Security headers for custom responses
-    expressApp.use((req, res, next) => {
+    expressApp.use((_req, res, next) => {
       res.setHeader("X-Service", "Bytebot-UI");
       res.setHeader("X-API-Version", "1.0");
 

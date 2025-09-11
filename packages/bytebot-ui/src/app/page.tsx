@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Header } from "@/components/layout/Header";
 import { ChatInput } from "@/components/messages/ChatInput";
@@ -59,7 +59,9 @@ export default function Home() {
       .then((res) => res.json())
       .then((data: Model[]) => {
         setModels(data);
-        if (data.length > 0) setSelectedModel(data[0]);
+        if (data.length > 0) {
+          setSelectedModel(data[0]!);
+        }
       })
       .catch((_err) => {
         // TODO: Add proper error logging service
@@ -98,12 +100,16 @@ export default function Home() {
   }, [activePopoverIndex]);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim()) {
+      return;
+    }
 
     setIsLoading(true);
 
     try {
-      if (!selectedModel) throw new Error("No model selected");
+      if (!selectedModel) {
+        throw new Error("No model selected");
+      }
       // Send request to start a new task
       const taskData: {
         description: string;
@@ -168,12 +174,12 @@ export default function Home() {
                 />
                 <div className="mt-2">
                   <Select
-                    value={selectedModel?.name}
-                    onValueChange={(val) =>
+                    {...(selectedModel?.name && { value: selectedModel.name })}
+                    onValueChange={(val) => {
                       setSelectedModel(
                         models.find((m) => m.name === val) || null,
-                      )
-                    }
+                      );
+                    }}
                   >
                     <SelectTrigger className="w-auto">
                       <SelectValue placeholder="Select a model" />
@@ -226,12 +232,12 @@ export default function Home() {
                 />
                 <div className="mt-2">
                   <Select
-                    value={selectedModel?.name}
-                    onValueChange={(val) =>
+                    {...(selectedModel?.name && { value: selectedModel.name })}
+                    onValueChange={(val) => {
                       setSelectedModel(
                         models.find((m) => m.name === val) || null,
-                      )
-                    }
+                      );
+                    }}
                   >
                     <SelectTrigger className="w-auto">
                       <SelectValue placeholder="Select a model" />
