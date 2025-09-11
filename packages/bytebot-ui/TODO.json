@@ -2,6 +2,230 @@
   "project": "unknown",
   "tasks": [
     {
+      "id": "error_1757574514879_7dgpa303y",
+      "title": "Fix TypeScript and ESLint violations in API route files",
+      "description": "Fix TypeScript and ESLint violations in route.ts files. Replace non-null assertions with proper null checking. Fix strict-boolean-expressions for nullable values. Add explicit function return types. Fix async/promise handling issues.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:08:34.879Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757574482303_1_general_027ba165",
+      "started_at": "2025-09-11T07:08:51.343Z",
+      "claimed_by": "development_session_1757574482303_1_general_027ba165",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757574482303_1_general_027ba165",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:08:51.343Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757574508731_yifdkas2g",
+      "title": "Fix TypeScript and ESLint violations in bytebot-ui component files",
+      "description": "Fix all TypeScript and ESLint violations focusing on: 1) Add missing return types (@typescript-eslint/explicit-function-return-type), 2) Fix strict boolean expressions (@typescript-eslint/strict-boolean-expressions), 3) Handle async/promise issues (@typescript-eslint/no-misused-promises, @typescript-eslint/no-floating-promises), 4) Fix unsafe assignments/type issues in src/components/ directory",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:08:28.731Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757574482195_1_general_b3cfe9d8",
+      "started_at": "2025-09-11T07:08:45.936Z",
+      "claimed_by": "development_session_1757574482195_1_general_b3cfe9d8",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757574482195_1_general_b3cfe9d8",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:08:45.936Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757574507567_89tax8pt5",
+      "title": "Fix TypeScript and ESLint violations in bytebot-ui page component files",
+      "description": "Add explicit function return types to all page.tsx default exports, fix strict boolean expressions, and ensure proper React component typing for Next.js App Router compatibility",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:08:27.567Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757574482206_1_general_aaad3bf3",
+      "started_at": "2025-09-11T07:08:50.540Z",
+      "claimed_by": "development_session_1757574482206_1_general_aaad3bf3",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757574482206_1_general_aaad3bf3",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:08:50.540Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757574505806_e3dotxyeg",
+      "title": "Fix TypeScript and ESLint violations in bytebot-ui utility and library files",
+      "description": "Fix all TypeScript and ESLint violations in src/utils/ and src/lib/ directories: radix parameter errors (parseInt calls), prefer-nullish-coalescing violations (replace || with ??), strict boolean expressions, missing return types, magic number violations, and object conditionals",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:08:25.807Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757574481856_1_general_3ee6e63f",
+      "started_at": "2025-09-11T07:08:42.345Z",
+      "claimed_by": "development_session_1757574481856_1_general_3ee6e63f",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757574481856_1_general_3ee6e63f",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:08:42.345Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757574503390_myak6if7l",
+      "title": "Fix remaining TypeScript and ESLint violations in bytebot-ui hooks and files",
+      "description": "Complete TypeScript compliance by fixing all remaining violations in hooks directory and other files. Fix no-misused-promises, add missing return types, fix duplicate imports, handle strict boolean expressions, and resolve floating promises.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:08:23.390Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757574481072_1_general_c6c14b0c",
+      "started_at": "2025-09-11T07:08:40.578Z",
+      "claimed_by": "development_session_1757574481072_1_general_c6c14b0c",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757574481072_1_general_c6c14b0c",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:08:40.578Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757574460092_q35grua2s",
+      "title": "Fix TypeScript strict-boolean-expressions warnings",
+      "description": "Fix nullable values in conditionals using proper TypeScript patterns",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:07:40.092Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757574431139_1_general_598d191b",
+      "started_at": "2025-09-11T07:08:03.511Z",
+      "claimed_by": "development_session_1757574431139_1_general_598d191b",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757574431139_1_general_598d191b",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:08:03.511Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757574453475_uggmhich4",
+      "title": "Fix critical ESLint errors in bytebot-ui package",
+      "description": "Fix critical TypeScript ESLint errors: no-non-null-assertion, no-floating-promises, no-misused-promises, no-duplicate-imports in src/app/api/route.ts, src/app/tasks/[id]/page.tsx, and src/app/tasks/page.tsx",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:07:33.475Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757574430081_1_general_3e01078d",
+      "started_at": "2025-09-11T07:07:58.134Z",
+      "claimed_by": "development_session_1757574430081_1_general_3e01078d",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757574430081_1_general_3e01078d",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:07:58.134Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757574452937_pijzcruhl",
+      "title": "Fix missing return type annotations in bytebot-ui package",
+      "description": "Add return type annotations to functions to resolve @typescript-eslint/explicit-function-return-type and @typescript-eslint/explicit-module-boundary-types warnings. Focus on React components (JSX.Element), async functions (Promise<Type>), and utility functions with proper TypeScript types.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:07:32.937Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757574430615_1_general_0ee319eb",
+      "started_at": "2025-09-11T07:07:49.518Z",
+      "claimed_by": "development_session_1757574430615_1_general_0ee319eb",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757574430615_1_general_0ee319eb",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:07:49.518Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
       "id": "error_1757572910207_2bu35blsl",
       "title": "Fix TypeScript compilation errors in test suite",
       "description": "Resolve ALL TypeScript compilation errors in bytebot-ui test files: Header.test.tsx (__mockUseSession undefined variables lines 420,470,744, missing toRenderWithinTime matcher line 707), ChatContainer.test.tsx (ref type conversion errors, mock assignments, GroupedMessages type incompatibilities), fix Jest mock type definitions and integration, add custom Jest matcher types, fix React Testing Library assignments. Run tsc --noEmit, npm run lint, npm test for validation.",
@@ -159,6 +383,174 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-11T06:41:23.146Z",
       "sessionId": "session_1757572883146",
+      "metadata": {}
+    },
+    "development_session_1757574430081_1_general_3e01078d": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:07:10.082Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:07:10.082Z",
+      "sessionId": "session_1757574430081",
+      "metadata": {}
+    },
+    "development_session_1757574430615_1_general_0ee319eb": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:07:10.615Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:07:10.616Z",
+      "sessionId": "session_1757574430615",
+      "metadata": {}
+    },
+    "development_session_1757574431139_1_general_598d191b": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:07:11.139Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:07:11.139Z",
+      "sessionId": "session_1757574431139",
+      "metadata": {}
+    },
+    "development_session_1757574481072_1_general_c6c14b0c": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:08:01.073Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:08:01.073Z",
+      "sessionId": "session_1757574481072",
+      "metadata": {}
+    },
+    "development_session_1757574481856_1_general_3ee6e63f": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:08:01.856Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:08:01.856Z",
+      "sessionId": "session_1757574481856",
+      "metadata": {}
+    },
+    "development_session_1757574482195_1_general_b3cfe9d8": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:08:02.196Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:08:02.196Z",
+      "sessionId": "session_1757574482195",
+      "metadata": {}
+    },
+    "development_session_1757574482206_1_general_aaad3bf3": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:08:02.206Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:08:02.206Z",
+      "sessionId": "session_1757574482206",
+      "metadata": {}
+    },
+    "development_session_1757574482303_1_general_027ba165": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:08:02.303Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:08:02.303Z",
+      "sessionId": "session_1757574482303",
       "metadata": {}
     }
   },

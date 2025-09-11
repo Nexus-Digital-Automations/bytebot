@@ -10,9 +10,19 @@ interface MessageGroupProps {
   messageIdToIndex: Record<string, number>;
 }
 
-export function MessageGroup({ group, taskStatus, messageIdToIndex }: MessageGroupProps) {
+export function MessageGroup({
+  group,
+  taskStatus,
+  messageIdToIndex,
+}: MessageGroupProps): JSX.Element {
   if (group.role === Role.ASSISTANT) {
-    return <AssistantMessage group={group} taskStatus={taskStatus} messageIdToIndex={messageIdToIndex} />;
+    return (
+      <AssistantMessage
+        group={group}
+        taskStatus={taskStatus}
+        messageIdToIndex={messageIdToIndex}
+      />
+    );
   }
 
   return <UserMessage group={group} messageIdToIndex={messageIdToIndex} />;

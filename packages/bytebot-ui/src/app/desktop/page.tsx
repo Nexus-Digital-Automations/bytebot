@@ -3,7 +3,7 @@
 import { Header } from "@/components/layout/Header";
 import { DesktopContainer } from "@/components/ui/desktop-container";
 
-export default function DesktopPage() {
+export default function DesktopPage(): JSX.Element {
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <Header />

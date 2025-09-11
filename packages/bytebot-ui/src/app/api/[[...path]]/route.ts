@@ -4,7 +4,20 @@ import { NextRequest } from "next/server";
 /* generic proxy helper                                                 */
 /* -------------------------------------------------------------------- */
 async function proxy(req: NextRequest, path: string[]): Promise<Response> {
-  const BASE_URL = process.env.BYTEBOT_AGENT_BASE_URL!;
+  const BASE_URL = process.env.BYTEBOT_AGENT_BASE_URL;
+
+  // Validate that the required environment variable is set
+  if (BASE_URL == null || BASE_URL === "") {
+    return new Response(
+      JSON.stringify({
+        error: "BYTEBOT_AGENT_BASE_URL environment variable is not configured",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
   const subPath = path.length ? `/${path.join("/")}` : "";
   const url = `${BASE_URL}/api${subPath}${req.nextUrl.search}`;
 
@@ -20,7 +33,7 @@ async function proxy(req: NextRequest, path: string[]): Promise<Response> {
     method: req.method,
     headers: {
       "Content-Type": "application/json",
-      ...(cookies && { Cookie: cookies }),
+      ...(cookies != null && { Cookie: cookies }),
     },
     ...(requestBody !== undefined && { body: requestBody }),
   };
@@ -29,7 +42,9 @@ async function proxy(req: NextRequest, path: string[]): Promise<Response> {
   const body = await res.text();
 
   // Extract Set-Cookie headers from the backend response
-  const setCookieHeaders = res.headers.getSetCookie?.() || [];
+  const getSetCookieMethod = res.headers.getSetCookie;
+  const setCookieHeaders =
+    getSetCookieMethod != null ? getSetCookieMethod() : [];
 
   // Create response headers
   const responseHeaders = new Headers({
@@ -52,7 +67,10 @@ async function proxy(req: NextRequest, path: string[]): Promise<Response> {
 /* -------------------------------------------------------------------- */
 type PathParams = Promise<{ path?: string[] }>; // <- Promise is the key
 
-async function handler(req: NextRequest, { params }: { params: PathParams }) {
+async function handler(
+  req: NextRequest,
+  { params }: { params: PathParams },
+): Promise<Response> {
   const { path } = await params;
   return proxy(req, path ?? []);
 }

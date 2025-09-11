@@ -38,12 +38,12 @@ export function ChatContainer({
   isLoadingMoreMessages,
   hasMoreMessages,
   loadMoreMessages,
-}: ChatContainerProps) {
+}: ChatContainerProps): JSX.Element {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Infinite scroll handler
-  const handleScroll = useCallback(() => {
-    if (!scrollRef?.current || !loadMoreMessages) {
+  const handleScroll = useCallback((): void => {
+    if (scrollRef?.current == null || loadMoreMessages == null) {
       return;
     }
 
@@ -51,9 +51,14 @@ export function ChatContainer({
     // Check if user scrolled to the bottom (within 20px - much more sensitive)
     const { scrollTop, scrollHeight, clientHeight } = container;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    const SCROLL_THRESHOLD = 20;
 
-    if (distanceFromBottom <= 20 && hasMoreMessages && !isLoadingMoreMessages) {
-      loadMoreMessages();
+    if (
+      distanceFromBottom <= SCROLL_THRESHOLD &&
+      hasMoreMessages &&
+      !isLoadingMoreMessages
+    ) {
+      void loadMoreMessages();
     }
   }, [scrollRef, loadMoreMessages, hasMoreMessages, isLoadingMoreMessages]);
 
@@ -62,7 +67,7 @@ export function ChatContainer({
     const container = scrollRef?.current;
     if (container) {
       container.addEventListener("scroll", handleScroll);
-      return () => {
+      return (): void => {
         container.removeEventListener("scroll", handleScroll);
       };
     }
@@ -81,7 +86,7 @@ export function ChatContainer({
   }, [taskStatus, groupedMessages]);
 
   // Function to scroll to the bottom of the messages
-  const scrollToBottom = () => {
+  const scrollToBottom = (): void => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 

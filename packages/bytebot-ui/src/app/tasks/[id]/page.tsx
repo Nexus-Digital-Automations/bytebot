@@ -92,7 +92,7 @@ export default function TaskPage() {
   const taskInactive = isTaskInactive();
   useEffect(() => {
     if (taskInactive && hasMoreMessages && !isLoadingMoreMessages) {
-      loadMoreMessages();
+      void loadMoreMessages();
     }
   }, [
     taskInactive,
@@ -134,14 +134,24 @@ export default function TaskPage() {
                   if (
                     taskStatus === TaskStatus.RUNNING &&
                     control === Role.USER
-                  )
-                    {return "user_control";}
-                  if (taskStatus === TaskStatus.RUNNING) {return "running";}
-                  if (taskStatus === TaskStatus.NEEDS_HELP)
-                    {return "needs_attention";}
-                  if (taskStatus === TaskStatus.FAILED) {return "failed";}
-                  if (taskStatus === TaskStatus.CANCELLED) {return "canceled";}
-                  if (taskStatus === TaskStatus.COMPLETED) {return "completed";}
+                  ) {
+                    return "user_control";
+                  }
+                  if (taskStatus === TaskStatus.RUNNING) {
+                    return "running";
+                  }
+                  if (taskStatus === TaskStatus.NEEDS_HELP) {
+                    return "needs_attention";
+                  }
+                  if (taskStatus === TaskStatus.FAILED) {
+                    return "failed";
+                  }
+                  if (taskStatus === TaskStatus.CANCELLED) {
+                    return "canceled";
+                  }
+                  if (taskStatus === TaskStatus.COMPLETED) {
+                    return "completed";
+                  }
                   // You may want to add a scheduled state if you have that info
                   return "pending";
                 })() as VirtualDesktopStatus
@@ -149,7 +159,7 @@ export default function TaskPage() {
             >
               {canTakeOver() && (
                 <Button
-                  onClick={handleTakeOverTask}
+                  onClick={() => void handleTakeOverTask()}
                   variant="default"
                   size="sm"
                   icon={
@@ -163,7 +173,11 @@ export default function TaskPage() {
                 </Button>
               )}
               {hasUserControl() && (
-                <Button onClick={handleResumeTask} variant="default" size="sm">
+                <Button
+                  onClick={() => void handleResumeTask()}
+                  variant="default"
+                  size="sm"
+                >
                   Proceed
                 </Button>
               )}
@@ -179,7 +193,7 @@ export default function TaskPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                      onClick={handleCancelTask}
+                      onClick={() => void handleCancelTask()}
                       className="text-red-600 focus:bg-red-50"
                     >
                       Cancel

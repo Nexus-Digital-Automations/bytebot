@@ -16,12 +16,14 @@ export function AssistantMessage({
   group,
   taskStatus,
   messageIdToIndex,
-}: AssistantMessageProps) {
+}: AssistantMessageProps): JSX.Element {
   return (
-    <div className={
-      cn(
-        "bg-bytebot-bronze-light-3 flex items-start justify-start gap-2 px-4 py-3 border-x border-bytebot-bronze-light-7",
-        ![TaskStatus.RUNNING, TaskStatus.NEEDS_HELP].includes(taskStatus) && !group.take_over && "border-b border-bytebot-bronze-light-7 rounded-b-lg"
+    <div
+      className={cn(
+        "bg-bytebot-bronze-light-3 border-bytebot-bronze-light-7 flex items-start justify-start gap-2 border-x px-4 py-3",
+        ![TaskStatus.RUNNING, TaskStatus.NEEDS_HELP].includes(taskStatus) &&
+          !(group.take_over ?? false) &&
+          "border-bytebot-bronze-light-7 rounded-b-lg border-b",
       )}
     >
       <MessageAvatar role={group.role} />
@@ -68,7 +70,7 @@ export function AssistantMessage({
                               height: 0,
                               overflow: "hidden",
                             }}
-                          />
+                          />,
                         );
                       }
                     });
@@ -115,7 +117,7 @@ export function AssistantMessage({
                             height: 0,
                             overflow: "hidden",
                           }}
-                        />
+                        />,
                       );
                     }
                   });

@@ -22,15 +22,6 @@ interface UseChatSessionProps {
 }
 
 /**
- * Response type for task operation functions
- */
-interface TaskOperationResponse {
-  success: boolean;
-  task?: Task;
-  error?: string;
-}
-
-/**
  * Type guard to check if a value is a valid string ID
  */
 function isValidTaskId(taskId: unknown): taskId is string {
@@ -66,7 +57,24 @@ function handleAsyncError(
  * @param props - Configuration options for the chat session
  * @returns Object containing all chat session state and handlers
  */
-export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
+export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
+  readonly messages: Message[];
+  readonly groupedMessages: GroupedMessages[];
+  readonly taskStatus: TaskStatus;
+  readonly control: Role;
+  readonly input: string;
+  readonly currentTaskId: string | null;
+  readonly isLoading: boolean;
+  readonly isLoadingSession: boolean;
+  readonly isLoadingMoreMessages: boolean;
+  readonly hasMoreMessages: boolean;
+  readonly setInput: (input: string) => void;
+  readonly loadMoreMessages: () => Promise<void>;
+  readonly handleAddMessage: () => Promise<void>;
+  readonly handleTakeOverTask: () => Promise<void>;
+  readonly handleResumeTask: () => Promise<void>;
+  readonly handleCancelTask: () => Promise<void>;
+} {
   // State management for task and chat functionality
   const [taskStatus, setTaskStatus] = useState<TaskStatus>(TaskStatus.PENDING);
   const [control, setControl] = useState<Role>(Role.ASSISTANT);
@@ -74,7 +82,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
   const [groupedMessages, setGroupedMessages] = useState<GroupedMessages[]>([]);
   const [input, setInput] = useState<string>("");
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(
-    initialTaskId || null,
+    initialTaskId ?? null,
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingSession, setIsLoadingSession] = useState<boolean>(true);
@@ -92,7 +100,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
    */
   const handleTaskUpdate = useCallback(
     (task: Task) => {
-      if (!task?.id || !currentTaskId) {
+      if (!task?.id || currentTaskId == null || currentTaskId === "") {
         logDebug(
           "Invalid task update received",
           { task, currentTaskId },
@@ -179,7 +187,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
   const handleNewMessage = useCallback(
     (message: Message) => {
       // Validate message structure
-      if (!message?.id || !message?.taskId) {
+      if (!message?.id || message.taskId == null || message.taskId === "") {
         logError(
           "Invalid message received from WebSocket",
           { message },
@@ -295,7 +303,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
       logDebug(
         "Skipping loadMoreMessages",
         {
-          currentTaskId: currentTaskId || "null",
+          currentTaskId: currentTaskId ?? "null",
           isLoadingMoreMessages,
           hasMoreMessages,
         },
@@ -439,11 +447,12 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
         );
 
         // Fetch task data, messages, and processed messages concurrently
-        const [task, messages, processedMessages] = await Promise.allSettled([
-          fetchTaskById(initialTaskId),
-          fetchTaskMessages(initialTaskId, { limit: 10, page: 1 }),
-          fetchTaskProcessedMessages(initialTaskId, { limit: 1000, page: 1 }),
-        ]);
+        const [task, taskMessages, processedMessages] =
+          await Promise.allSettled([
+            fetchTaskById(initialTaskId),
+            fetchTaskMessages(initialTaskId, { limit: 10, page: 1 }),
+            fetchTaskProcessedMessages(initialTaskId, { limit: 1000, page: 1 }),
+          ]);
 
         // Handle task fetch result
         const taskResult = task.status === "fulfilled" ? task.value : null;
@@ -587,7 +596,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
     }
 
     // Cleanup function to leave task when component unmounts or task changes
-    return () => {
+    return (): void => {
       if (isValidTaskId(currentTaskId)) {
         logDebug(
           "Cleanup: leaving WebSocket room",
@@ -632,7 +641,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}) {
         ],
         role: Role.ASSISTANT,
         createdAt: new Date().toISOString(),
-        taskId: currentTaskId || "",
+        taskId: currentTaskId ?? "",
       };
 
       processedMessageIds.current.add(errorMessage.id);

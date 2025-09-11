@@ -35,9 +35,9 @@ global.fetch = jest.fn();
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
 
 // Mock console methods
-const mockConsoleError = jest
-  .spyOn(console, "error")
-  .mockImplementation(() => {});
+const mockConsoleError = jest.spyOn(console, "error").mockImplementation(() => {
+  /* Mock implementation */
+});
 // Removed unused mockConsoleLog variable
 // const mockConsoleLog = jest.spyOn(console, "log").mockImplementation(() => {});
 
@@ -605,7 +605,9 @@ describe("TaskUtils", () => {
 
       mockFetch.mockImplementationOnce(() => {
         return new Promise((_, reject) => {
-          setTimeout(() => { reject(new Error("Timeout")); }, 100);
+          setTimeout(() => {
+            reject(new Error("Timeout"));
+          }, 100);
         });
       });
 
