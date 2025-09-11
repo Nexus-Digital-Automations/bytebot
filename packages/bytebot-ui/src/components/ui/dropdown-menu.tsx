@@ -6,6 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 
 import { cn } from "@/lib/utils";
+import { DROPDOWN_SIDE_OFFSET_PX } from "@/constants/ui";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -60,7 +61,7 @@ DropdownMenuSubContent.displayName =
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
+>(({ className, sideOffset = DROPDOWN_SIDE_OFFSET_PX, ...props }, ref) => (
   <DropdownMenuPrimitive.Portal>
     <DropdownMenuPrimitive.Content
       ref={ref}
