@@ -67,7 +67,7 @@ export interface DetailedStatusResponse {
  */
 @Injectable()
 export class HealthService extends HealthIndicator {
-  private readonly logger = new Logger(HealthService._name);
+  private readonly logger = new Logger(HealthService.name);
   private readonly startTime: number;
 
   constructor() {
@@ -105,14 +105,14 @@ export class HealthService extends HealthIndicator {
       this.logger.debug(
         `[${operationId}] Basic health status retrieved successfully`,
       );
-      return response;
+      return _response;
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(
+        _error instanceof Error ? _error.message : 'Unknown _error';
+      this.logger.error(
         `[${operationId}] Failed to get basic health: ${errorMessage}`,
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -171,20 +171,20 @@ export class HealthService extends HealthIndicator {
         `[${operationId}] Detailed status retrieved successfully`,
         {
           status,
-          memoryUsage: `${response.memory.used}MB`,
-          uptime: `${response.uptime}s`,
+          memoryUsage: `${_response.memory.used}MB`,
+          uptime: `${_response.uptime}s`,
           servicesCount: Object.keys(services).length,
         },
       );
 
-      return response;
+      return _response;
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(
+        _error instanceof Error ? _error.message : 'Unknown _error';
+      this.logger.error(
         `[${operationId}] Failed to get detailed status: ${errorMessage}`,
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -283,8 +283,8 @@ export class HealthService extends HealthIndicator {
       }
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(
+        _error instanceof Error ? _error.message : 'Unknown _error';
+      this.logger.error(
         `[${operationId}] Process health check failed: ${errorMessage}`,
       );
 
@@ -324,8 +324,8 @@ export class HealthService extends HealthIndicator {
       }
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(
+        _error instanceof Error ? _error.message : 'Unknown _error';
+      this.logger.error(
         `[${operationId}] Database health check failed: ${errorMessage}`,
       );
 
@@ -389,8 +389,8 @@ export class HealthService extends HealthIndicator {
       return this.getStatus('external_services', allHealthy, results);
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(
+        _error instanceof Error ? _error.message : 'Unknown _error';
+      this.logger.error(
         `[${operationId}] External services check failed: ${errorMessage}`,
       );
 
@@ -438,8 +438,8 @@ export class HealthService extends HealthIndicator {
       }
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(
+        _error instanceof Error ? _error.message : 'Unknown _error';
+      this.logger.error(
         `[${operationId}] Startup check failed: ${errorMessage}`,
       );
 
@@ -465,21 +465,21 @@ export class HealthService extends HealthIndicator {
         health: true, // We know this is initialized since we're running
       };
 
-      const allInitialized = Object.values(modules).every(Boolean);
+      const allInitialized = Object.values(_modules).every(Boolean);
 
       this.logger.debug(
         `[${operationId}] Module initialization check completed`,
         {
           allInitialized,
-          modules,
+          modules: _modules,
         },
       );
 
-      return this.getStatus('modules', allInitialized, { modules });
+      return this.getStatus('modules', allInitialized, { modules: _modules });
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
-      this.logger._error(
+        _error instanceof Error ? _error.message : 'Unknown _error';
+      this.logger.error(
         `[${operationId}] Module initialization check failed: ${errorMessage}`,
       );
 
