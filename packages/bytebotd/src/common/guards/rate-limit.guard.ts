@@ -219,7 +219,7 @@ export class EnterpriseRateLimitGuard
       }
 
       // Re-throw other errors
-      throw error;
+      throw _error;
     }
   }
 

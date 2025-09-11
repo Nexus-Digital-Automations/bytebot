@@ -18,7 +18,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   ComputerUseService,
   ErrorHandler,
-  _ScreenshotResult,
+  ScreenshotResult,
   FileWriteResult,
   FileReadResult,
 } from './computer-use.service';
@@ -29,16 +29,16 @@ import {
   ClickMouseAction,
   PressMouseAction,
   DragMouseAction,
-  _ScrollAction,
-  _TypeKeysAction,
+  ScrollAction,
+  TypeKeysAction,
   PressKeysAction,
   TypeTextAction,
-  _PasteTextAction,
-  _ScreenshotAction,
-  _CursorPositionAction,
-  _ApplicationAction,
+  PasteTextAction,
+  ScreenshotAction,
+  CursorPositionAction,
+  ApplicationAction,
   WriteFileAction,
-  _ReadFileAction,
+  ReadFileAction,
 } from '@bytebot/shared';
 import * as fs from 'fs/promises';
 

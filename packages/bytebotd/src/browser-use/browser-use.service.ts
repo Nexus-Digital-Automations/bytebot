@@ -89,7 +89,7 @@ export class BrowserUseService {
       const session = await this.getOrCreateSession(taskDto.sessionConfig);
 
       // Execute task actions sequentially
-      const _result = await this.executeTaskActions(task, session);
+      const _result = await this.executeTaskActions(task, taskDto, session);
 
       // Update task status
       await this.taskService.updateTaskStatus(taskId, {
@@ -465,7 +465,8 @@ export class BrowserUseService {
    * Execute task actions sequentially
    */
   private async executeTaskActions(
-    task: CreateBrowserTaskDto & { taskId: string },
+    task: BrowserTaskResultDto,
+    taskDto: CreateBrowserTaskDto,
     session: BrowserSessionDto,
   ): Promise<BrowserTaskResultDto> {
     const logs: unknown[] = [];

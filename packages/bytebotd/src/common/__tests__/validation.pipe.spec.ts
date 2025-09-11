@@ -104,7 +104,7 @@ class MockValidationPipe {
 
     if (errors.length > 0) {
       const errorMessages = errors
-        .map((_error) => Object.values(error.constraints || {}).join(', '))
+        .map((err) => Object.values(err.constraints || {}).join(', '))
         .join('; ');
 
       throw new BadRequestException(`Validation failed: ${errorMessages}`);
@@ -887,9 +887,9 @@ describe('ValidationPipe', () => {
       const testData = Array(20)
         .fill(null)
         .map((_, _i) => ({
-          email: `user${i}@example.com`,
-          password: `password123_${i}`,
-          name: `User ${i}`,
+          email: `user${_i}@example.com`,
+          password: `password123_${_i}`,
+          name: `User ${_i}`,
         }));
 
       const metadata: ArgumentMetadata = {

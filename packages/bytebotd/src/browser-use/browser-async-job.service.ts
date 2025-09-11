@@ -722,6 +722,7 @@ export class BrowserAsyncJobService {
     // Find correct insertion position
     for (let i = 0; i < this.jobQueue.length; i++) {
       const queuedJobId = this.jobQueue[i];
+      if (!queuedJobId) continue;
       const queuedJob = this.jobs.get(queuedJobId);
 
       if (queuedJob) {

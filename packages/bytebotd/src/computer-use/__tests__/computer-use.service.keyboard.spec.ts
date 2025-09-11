@@ -26,11 +26,11 @@ import { Logger } from '@nestjs/common';
 import { ComputerUseService, ErrorHandler } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
 import {
-  _ScrollAction,
-  _TypeKeysAction,
+  ScrollAction,
+  TypeKeysAction,
   PressKeysAction,
   TypeTextAction,
-  _PasteTextAction,
+  PasteTextAction,
   Coordinates,
 } from '@bytebot/shared';
 

@@ -19,7 +19,7 @@ import {
   ApiTags,
   ApiParam,
 } from '@nestjs/swagger';
-import { _EnterpriseRateLimitGuard as EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
+import { EnterpriseRateLimitGuard as EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
 import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import {

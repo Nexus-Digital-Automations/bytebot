@@ -19,24 +19,24 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import {
   ComputerUseService,
-  _ScreenshotResult,
+  ScreenshotResult,
   FileWriteResult,
   FileReadResult,
 } from '../computer-use.service';
-import { _ComputerUseModule } from '../computer-use.module';
+import { ComputerUseModule } from '../computer-use.module';
 import { NutService } from '../../nut/nut.service';
 import {
   MoveMouseAction,
   ClickMouseAction,
-  _ScreenshotActionDto,
+  ScreenshotAction,
   WriteFileAction,
-  _ReadFileActionDto,
-  _ApplicationActionDto,
+  ReadFileAction,
+  ApplicationAction,
 } from '@bytebot/shared';
 import {
-  ApplicationActionDtoDto,
-  ScreenshotActionDtoDto,
-  ReadFileActionDtoDto,
+  ApplicationActionDto,
+  ScreenshotActionDto,
+  ReadFileActionDto,
 } from '../dto/computer-action.dto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
