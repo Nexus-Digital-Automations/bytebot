@@ -871,7 +871,9 @@ describe("TaskList Component", () => {
 
 // Export test utilities for other task-related tests
 export const TaskListTestUtils = {
-  createMockTask: (overrides: Record<string, unknown> = {}) => ({
+  createMockTask: (
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
     id: "test-task",
     title: "Test Task",
     description: "Test Description",
@@ -884,7 +886,7 @@ export const TaskListTestUtils = {
     ...overrides,
   }),
 
-  createMockTaskList: (count: number) =>
+  createMockTaskList: (count: number): Record<string, unknown>[] =>
     Array.from({ length: count }, (_, i) =>
       TaskListTestUtils.createMockTask({
         id: `task-${i}`,
@@ -892,7 +894,7 @@ export const TaskListTestUtils = {
       }),
     ),
 
-  verifyTaskOrder: (expectedOrder: string[]) => {
+  verifyTaskOrder: (expectedOrder: string[]): void => {
     const taskItems = screen.getAllByTestId(/task-item-/);
     const actualOrder = taskItems.map((item) =>
       item.getAttribute("data-testid")?.replace("task-item-", ""),
@@ -900,7 +902,7 @@ export const TaskListTestUtils = {
     expect(actualOrder).toEqual(expectedOrder);
   },
 
-  verifyFilteredResults: (expectedTaskIds: string[]) => {
+  verifyFilteredResults: (expectedTaskIds: string[]): void => {
     const visibleTasks = screen.getAllByTestId(/task-item-/);
     expect(visibleTasks).toHaveLength(expectedTaskIds.length);
 

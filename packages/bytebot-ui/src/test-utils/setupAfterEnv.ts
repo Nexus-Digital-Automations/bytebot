@@ -361,18 +361,18 @@ export const TestUtils = {
   /**
    * Creates user event utility with performance monitoring
    */
-  createUserEvent: () => {
+  createUserEvent: (): Record<string, unknown> => {
     const user = userEvent.setup();
 
     return {
       ...user,
-      click: async (element: Element) => {
+      click: async (element: Element): Promise<void> => {
         const startTime = performance.now();
         await user.click(element);
         const duration = performance.now() - startTime;
         performanceMonitor.logSlowInteraction("click", duration);
       },
-      type: async (element: Element, text: string) => {
+      type: async (element: Element, text: string): Promise<void> => {
         const startTime = performance.now();
         await user.type(element, text);
         const duration = performance.now() - startTime;
@@ -391,7 +391,7 @@ export const TestUtils = {
   /**
    * Simulates Socket.io connection
    */
-  createMockSocket: () => ({
+  createMockSocket: (): Record<string, unknown> => ({
     emit: jest.fn(),
     on: jest.fn(),
     off: jest.fn(),
@@ -404,7 +404,9 @@ export const TestUtils = {
   /**
    * Creates mock Next.js router
    */
-  createMockRouter: (overrides: Record<string, unknown> = {}) => ({
+  createMockRouter: (
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
     push: jest.fn(),
     replace: jest.fn(),
     back: jest.fn(),
@@ -421,7 +423,10 @@ export const TestUtils = {
   /**
    * Helper to test responsive behavior
    */
-  testResponsive: (component: React.ReactElement, breakpoints: string[]) => {
+  testResponsive: (
+    component: React.ReactElement,
+    breakpoints: string[],
+  ): unknown[] => {
     return breakpoints.map((breakpoint) => {
       // Mock different viewport sizes
       Object.defineProperty(window, "innerWidth", {
@@ -440,7 +445,10 @@ export const TestUtils = {
   /**
    * Helper to test dark/light mode
    */
-  testThemeMode: (component: React.ReactElement, mode: "light" | "dark") => {
+  testThemeMode: (
+    component: React.ReactElement,
+    mode: "light" | "dark",
+  ): unknown => {
     document.documentElement.classList.toggle("dark", mode === "dark");
     return TestUtils.renderComponent(component);
   },

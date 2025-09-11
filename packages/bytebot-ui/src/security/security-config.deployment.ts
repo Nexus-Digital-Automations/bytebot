@@ -58,10 +58,7 @@ export class BytebotUISecurityConfigService {
    * Create Bytebot-UI validation pipe with standard security settings
    */
   createValidationPipe(): StandardizedValidationPipe {
-    const environment = this.configService.get(
-      "NODE_ENV",
-      "development",
-    );
+    const environment = this.configService.get("NODE_ENV", "development");
 
     // Use standard security pipe for Bytebot-UI
 
@@ -72,10 +69,7 @@ export class BytebotUISecurityConfigService {
    * Create Bytebot-UI rate limit guard with lenient rate limits for UI interactions
    */
   createRateLimitGuard(): StandardizedRateLimitGuard {
-    const environment = this.configService.get(
-      "NODE_ENV",
-      "development",
-    );
+    const environment = this.configService.get("NODE_ENV", "development");
 
     return StandardizedRateLimitGuard.createBytebotUIGuard(environment);
   }
@@ -83,11 +77,8 @@ export class BytebotUISecurityConfigService {
   /**
    * Get security configuration for manual inspection
    */
-  getSecurityConfig() {
-    const environment = this.configService.get(
-      "NODE_ENV",
-      "development",
-    );
+  getSecurityConfig(): Record<string, unknown> {
+    const environment = this.configService.get("NODE_ENV", "development");
 
     return {
       serviceType: ServiceType._BYTEBOT_UI,
@@ -189,17 +180,14 @@ export class BytebotUISecurityConfigService {
     {
       provide: "BYTEBOT_UI_SECURITY_MIDDLEWARE",
 
-      useFactory: (configService: ConfigService) =>
+      useFactory: (configService: ConfigService): unknown =>
         StandardizedSecurityMiddleware.createBytebotUIMiddleware(configService),
       inject: [ConfigService],
     },
     {
       provide: "BYTEBOT_UI_VALIDATION_PIPE",
-      useFactory: (configService: ConfigService) => {
-        const environment = configService.get(
-          "NODE_ENV",
-          "development",
-        );
+      useFactory: (configService: ConfigService): unknown => {
+        const environment = configService.get("NODE_ENV", "development");
 
         return StandardizedValidationPipes.STANDARD_SECURITY(environment);
       },
@@ -207,11 +195,8 @@ export class BytebotUISecurityConfigService {
     },
     {
       provide: "BYTEBOT_UI_RATE_LIMIT_GUARD",
-      useFactory: (configService: ConfigService) => {
-        const environment = configService.get(
-          "NODE_ENV",
-          "development",
-        );
+      useFactory: (configService: ConfigService): unknown => {
+        const environment = configService.get("NODE_ENV", "development");
 
         return StandardizedRateLimitGuard.createBytebotUIGuard(environment);
       },
@@ -228,7 +213,7 @@ export class BytebotUISecurityConfigService {
 export class BytebotUISecurityModule implements NestModule {
   constructor(private configService: ConfigService) {}
 
-  configure(consumer: MiddlewareConsumer) {
+  configure(consumer: MiddlewareConsumer): void {
     // Apply Bytebot-UI security middleware to all routes
 
     const securityMiddleware =
@@ -255,7 +240,7 @@ export class BytebotUISecurityDeployment {
   static async applySecurityToApp(
     app: NestJSApp,
     configService: ConfigService,
-  ) {
+  ): Promise<void> {
     const environment = configService.get("NODE_ENV", "development");
 
     try {
@@ -297,7 +282,7 @@ export class BytebotUISecurityDeployment {
   /**
    * Get security headers for Bytebot-UI with Next.js optimizations
    */
-  static getSecurityHeaders(environment: string) {
+  static getSecurityHeaders(environment: string): Record<string, unknown> {
     const isProd = environment === "production";
 
     return {
@@ -326,7 +311,9 @@ export class BytebotUISecurityDeployment {
   /**
    * Validate Bytebot-UI security configuration
    */
-  static validateSecurityConfig(configService: ConfigService) {
+  static validateSecurityConfig(
+    configService: ConfigService,
+  ): Record<string, unknown> {
     const environment = configService.get("NODE_ENV", "development");
     const corsOrigins = configService.get("CORS_ORIGINS", []);
 
@@ -358,10 +345,7 @@ export class BytebotUISecurityDeployment {
     }
 
     // Check static file serving configuration
-    const staticPath = configService.get(
-      "STATIC_FILES_PATH",
-      "./public",
-    );
+    const staticPath = configService.get("STATIC_FILES_PATH", "./public");
     if (environment === "production" && !staticPath) {
       validationResults.errors.push(
         "Static files path not configured for production",
@@ -386,10 +370,7 @@ export class BytebotUISecurityDeployment {
     }
 
     // Check CSP configuration
-    const cspEnabled = configService.get(
-      "security.csp.enabled",
-      true,
-    );
+    const cspEnabled = configService.get("security.csp.enabled", true);
     if (!cspEnabled && environment === "production") {
       validationResults.errors.push(
         "Content Security Policy is disabled in production",
@@ -403,7 +384,9 @@ export class BytebotUISecurityDeployment {
   /**
    * Configure Next.js security middleware
    */
-  static configureNextJsSecurity(configService: ConfigService) {
+  static configureNextJsSecurity(
+    configService: ConfigService,
+  ): Record<string, unknown> {
     const environment = configService.get("NODE_ENV", "development");
 
     return {
@@ -462,7 +445,7 @@ export class BytebotUISecurityDeployment {
   /**
    * Setup UI-specific rate limiting presets
    */
-  static getUIRateLimitPresets() {
+  static getUIRateLimitPresets(): Record<string, unknown> {
     return {
       // Lenient limits for UI interactions
       uiInteraction: {

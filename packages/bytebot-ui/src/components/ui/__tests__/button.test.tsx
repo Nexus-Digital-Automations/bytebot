@@ -422,7 +422,9 @@ export const ButtonTestUtils = {
   /**
    * Creates a button with all possible props for comprehensive testing
    */
-  createFullyProppedButton: (overrides: Record<string, unknown> = {}) => (
+  createFullyProppedButton: (
+    overrides: Record<string, unknown> = {},
+  ): React.JSX.Element => (
     <Button
       variant="default"
       size="default"
@@ -441,7 +443,7 @@ export const ButtonTestUtils = {
   /**
    * Tests all button variants systematically
    */
-  testAllVariants: (testFn: (variant: string) => void) => {
+  testAllVariants: (testFn: (variant: string) => void): void => {
     const variants = [
       "default",
       "destructive",
@@ -456,7 +458,7 @@ export const ButtonTestUtils = {
   /**
    * Tests all button sizes systematically
    */
-  testAllSizes: (testFn: (size: string) => void) => {
+  testAllSizes: (testFn: (size: string) => void): void => {
     const sizes = ["default", "sm", "lg", "icon"];
     sizes.forEach(testFn);
   },

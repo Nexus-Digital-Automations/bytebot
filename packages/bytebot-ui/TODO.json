@@ -2,34 +2,6 @@
   "project": "unknown",
   "tasks": [
     {
-      "id": "error_1757576361177_p95x0ixqf",
-      "title": "Fix TypeScript type safety violations in bytebot-ui package",
-      "description": "Fix ALL TypeScript unsafe operations, assignments, calls, and member access violations in bytebot-ui package. Target violations: unsafe assignments, unsafe calls, unsafe member access, unsafe returns, strict boolean expressions. Primary files: Header.test.tsx, messages test files, and other TypeScript strict violations.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-11T07:39:21.177Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757576333332_1_general_e95cb1a2",
-      "started_at": "2025-09-11T07:39:40.131Z",
-      "claimed_by": "development_session_1757576333332_1_general_e95cb1a2",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757576333332_1_general_e95cb1a2",
-          "role": "primary",
-          "assignedAt": "2025-09-11T07:39:40.131Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757576358312_k3a79sbns",
       "title": "Add explicit return type annotations to all functions in bytebot-ui package",
       "description": "Add explicit TypeScript return type annotations to ALL functions missing them across the entire bytebot-ui package to resolve @typescript-eslint/explicit-function-return-type violations. Process src/ directory systematically and handle arrow functions, method signatures, and callback functions.",
