@@ -70,7 +70,7 @@ class MockValidationPipe {
       return validatedValue;
     } catch (error) {
       console.error(`[${operationId}] Validation failed`, {
-        error: error.message,
+        error: (error as Error).message,
         value: JSON.stringify(value).substring(0, 100),
       });
       throw error;
@@ -640,9 +640,9 @@ describe('ValidationPipe', () => {
         fail('Expected BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.message).toContain('Validation failed');
-        expect(error.message).toContain('email must be a valid email address');
-        expect(error.message).toContain(
+        expect((error as Error).message).toContain('Validation failed');
+        expect((error as Error).message).toContain('email must be a valid email address');
+        expect((error as Error).message).toContain(
           'password must be longer than or equal to 6 characters',
         );
       }
@@ -670,10 +670,10 @@ describe('ValidationPipe', () => {
         await pipe.transform(multipleErrorData, metadata);
         fail('Expected BadRequestException');
       } catch (error) {
-        expect(error.message).toContain(
+        expect((error as Error).message).toContain(
           'title must be shorter than or equal to 100 characters',
         );
-        expect(error.message).toContain(
+        expect((error as Error).message).toContain(
           'priority must be one of: low, medium, high',
         );
       }
