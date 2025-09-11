@@ -10,8 +10,8 @@ import {
   AsyncJobPriority,
 } from './dto/async-job.dto';
 import {
-  CreateBrowserTaskDto,
-  BrowserTaskStatus,
+  CreateBrowserTaskDto as _CreateBrowserTaskDto,
+  BrowserTaskStatus as _BrowserTaskStatus,
 } from './dto/browser-task.dto';
 
 /**

@@ -24,13 +24,9 @@ import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
+import { UserRole } from '@bytebot/shared';
 
-// Define UserRole enum for test suite
-enum UserRole {
-  ADMIN = 'admin',
-  OPERATOR = 'operator',
-  VIEWER = 'viewer',
-}
+// UserRole is now imported from @bytebot/shared
 
 /**
  * Mock Controller for Security Testing
@@ -123,15 +119,15 @@ class MockSecurityJwtService {
   private validTokens = new Map([
     [
       'admin-token',
-      { id: 'admin-1', email: 'admin@test.com', role: UserRole.ADMIN },
+      { id: 'admin-1', email: 'admin@test.com', role: UserRole._ADMIN },
     ],
     [
       'operator-token',
-      { id: 'op-1', email: 'operator@test.com', role: UserRole.OPERATOR },
+      { id: 'op-1', email: 'operator@test.com', role: UserRole._OPERATOR },
     ],
     [
       'viewer-token',
-      { id: 'viewer-1', email: 'viewer@test.com', role: UserRole.VIEWER },
+      { id: 'viewer-1', email: 'viewer@test.com', role: UserRole._VIEWER },
     ],
     ['expired-token', null], // Simulate expired token
     ['malicious-token', null], // Simulate invalid token
@@ -293,13 +289,13 @@ describe('Controller Security Integration Tests', () => {
 
         const userRole = req.user.role;
         const roleHierarchy = {
-          [UserRole.ADMIN]: [
-            UserRole.ADMIN,
-            UserRole.OPERATOR,
-            UserRole.VIEWER,
+          [UserRole._ADMIN]: [
+            UserRole._ADMIN,
+            UserRole._OPERATOR,
+            UserRole._VIEWER,
           ],
-          [UserRole.OPERATOR]: [UserRole.OPERATOR, UserRole.VIEWER],
-          [UserRole.VIEWER]: [UserRole.VIEWER],
+          [UserRole._OPERATOR]: [UserRole._OPERATOR, UserRole._VIEWER],
+          [UserRole._VIEWER]: [UserRole._VIEWER],
         };
 
         const allowedRoles = roleHierarchy[userRole] || [];
@@ -325,35 +321,35 @@ describe('Controller Security Integration Tests', () => {
     });
 
     app.getHttpAdapter().get('/api/admin', (req, res) => {
-      const middleware = checkRole(UserRole.ADMIN);
+      const middleware = checkRole(UserRole._ADMIN);
       middleware(req, res, () => {
         res.json(controller.getAdminData(req.user));
       });
     });
 
     app.getHttpAdapter().get('/api/system', (req, res) => {
-      const middleware = checkRole(UserRole.ADMIN);
+      const middleware = checkRole(UserRole._ADMIN);
       middleware(req, res, () => {
         res.json(controller.getSystemData(req.user));
       });
     });
 
     app.getHttpAdapter().post('/api/resources', (req, res) => {
-      const middleware = checkRole(UserRole.OPERATOR);
+      const middleware = checkRole(UserRole._OPERATOR);
       middleware(req, res, () => {
         res.json(controller.createResource(req.user, req.body));
       });
     });
 
     app.getHttpAdapter().delete('/api/resources/:id', (req, res) => {
-      const middleware = checkRole(UserRole.ADMIN);
+      const middleware = checkRole(UserRole._ADMIN);
       middleware(req, res, () => {
         res.json(controller.deleteResource(req.user, req.params.id));
       });
     });
 
     app.getHttpAdapter().post('/api/upload', (req, res) => {
-      const middleware = checkRole(UserRole.OPERATOR);
+      const middleware = checkRole(UserRole._OPERATOR);
       middleware(req, res, () => {
         // Simulate file upload
         const mockFile = {
@@ -365,7 +361,7 @@ describe('Controller Security Integration Tests', () => {
     });
 
     app.getHttpAdapter().get('/api/users/search', (req, res) => {
-      const middleware = checkRole(UserRole.OPERATOR);
+      const middleware = checkRole(UserRole._OPERATOR);
       middleware(req, res, () => {
         res.json(controller.searchUsers(req.user, req.query.q as string));
       });

@@ -752,7 +752,7 @@ export class ComputerUseController {
         },
       );
 
-      return result;
+      return _result;
     } catch (_error: unknown) {
       const processingTime = Date.now() - startTime;
       const errorMessage = getErrorMessage(_error);

@@ -20,7 +20,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RolesGuard } from '../guards/roles.guard';
-import { UserRole, _Permission } from '@bytebot/shared';
+import { UserRole, Permission as Permission } from '@bytebot/shared';
 import { ByteBotdUser } from '../guards/jwt-auth.guard';
 
 /**
@@ -283,7 +283,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         }
 
         try {
-          const result = await guard.canActivate(context);
+          const _result = await guard.canActivate(context);
           return { success: true, index: _index };
         } catch (_error) {
           return { success: false, index: _index, _error: _error.message };
@@ -569,7 +569,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .map(
           (_, _index) =>
             ({
-              id: `attacker_${index}`,
+              id: `attacker_${_index}`,
               email: `attacker${_index}@malicious.com`,
               username: `attacker${_index}`,
               role: UserRole._VIEWER,
@@ -593,10 +593,10 @@ describe('RolesGuard - Advanced Security Tests', () => {
         );
 
         try {
-          const result = await guard.canActivate(context);
+          const _result = await guard.canActivate(context);
           return { success: true, userId: user.id };
         } catch (_error) {
-          return { success: false, userId: user.id, _error: __error.message };
+          return { success: false, userId: user.id, _error: _error.message };
         }
       });
 
@@ -654,7 +654,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         }
 
         try {
-          const result = await guard.canActivate(context);
+          const _result = await guard.canActivate(context);
           return { success: true, index };
         } catch (_error) {
           return { success: false, index };
