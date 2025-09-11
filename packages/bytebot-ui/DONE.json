@@ -828,9 +828,63 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-ui/TODO.json"
+    },
+    {
+      "id": "error_1757576358312_k3a79sbns",
+      "title": "Add explicit return type annotations to all functions in bytebot-ui package",
+      "description": "Add explicit TypeScript return type annotations to ALL functions missing them across the entire bytebot-ui package to resolve @typescript-eslint/explicit-function-return-type violations. Process src/ directory systematically and handle arrow functions, method signatures, and callback functions.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T07:39:18.313Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757576333026_1_general_bc384621",
+      "started_at": "2025-09-11T07:39:37.868Z",
+      "claimed_by": "development_session_1757576333026_1_general_bc384621",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757576333026_1_general_bc384621",
+          "role": "primary",
+          "assignedAt": "2025-09-11T07:39:37.868Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757576358312_k3a79sbns",
+          "completedAt": "2025-09-11T07:54:32.194Z",
+          "completedBy": "development_session_1757576333026_1_general_bc384621",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-11T07:54:32.194Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-11T07:54:32.194Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-ui/TODO.json"
     }
   ],
-  "total_completed": 16,
-  "last_completion": "2025-09-11T07:48:09.354Z",
+  "total_completed": 17,
+  "last_completion": "2025-09-11T07:54:32.194Z",
   "created_at": "2025-09-11T06:47:03.082Z"
 }

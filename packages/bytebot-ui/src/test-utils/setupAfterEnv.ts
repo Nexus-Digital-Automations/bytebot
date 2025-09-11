@@ -429,11 +429,19 @@ export const TestUtils = {
   ): unknown[] => {
     return breakpoints.map((breakpoint) => {
       // Mock different viewport sizes
+      let width: number;
+      if (breakpoint === "mobile") {
+        width = 375;
+      } else if (breakpoint === "tablet") {
+        width = 768;
+      } else {
+        width = 1024;
+      }
+
       Object.defineProperty(window, "innerWidth", {
         writable: true,
         configurable: true,
-        value:
-          breakpoint === "mobile" ? 375 : breakpoint === "tablet" ? 768 : 1024,
+        value: width,
       });
 
       window.dispatchEvent(new Event("resize"));
@@ -457,16 +465,12 @@ export const TestUtils = {
    * Creates mock Task objects with default required properties
    * Useful for testing components that require Task objects
    */
-  createMockTask: (
+  createMockTask: async (
     overrides: Partial<import("@/types").Task> = {},
-  ): import("@/types").Task => {
-    const {
-      Task,
-      TaskStatus,
-      TaskPriority,
-      TaskType,
-      Role,
-    } = require("@/types");
+  ): Promise<import("@/types").Task> => {
+    const { TaskStatus, TaskPriority, TaskType, Role } = await import(
+      "@/types"
+    );
 
     return {
       id: "mock-task-id",

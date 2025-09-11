@@ -26,8 +26,7 @@ export function MessageContent({
     // Filter logic from the original code
     if (
       isToolResultContentBlock(block) &&
-      block.content != null &&
-      block.content.some((contentBlock) => isImageContentBlock(contentBlock))
+      block.content?.some((contentBlock) => isImageContentBlock(contentBlock))
     ) {
       return true;
     }

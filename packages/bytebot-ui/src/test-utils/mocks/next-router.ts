@@ -90,9 +90,12 @@ export const RouterTestUtils = {
     // Update router state
     const urlParts = url.split("?");
     const pathname = urlParts[0];
-    const query = urlParts[1]
-      ? new URLSearchParams(urlParts[1])
-      : new URLSearchParams();
+    const query =
+      urlParts[1] !== undefined &&
+      urlParts[1] !== null &&
+      urlParts[1].length > 0
+        ? new URLSearchParams(urlParts[1])
+        : new URLSearchParams();
 
     Object.assign(router, {
       pathname,
@@ -113,7 +116,7 @@ export const RouterTestUtils = {
       query: params,
       asPath: path.replace(
         /\[([^\]]+)\]/g,
-        (match: string, param: string) => params[param] || match,
+        (match: string, param: string) => params[param] ?? match,
       ),
     });
   },

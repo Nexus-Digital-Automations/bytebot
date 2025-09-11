@@ -52,6 +52,19 @@ export const TopicPopover: React.FC<TopicPopoverProps> = ({
     }
   };
 
+  /**
+   * Handle keyboard interactions for accessibility compliance.
+   * Triggers popover toggle on Enter or Space key press.
+   * @param event - Keyboard event from user interaction
+   */
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
+    // Handle Enter and Space keys for accessibility
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault(); // Prevent scrolling on Space key
+      handleToggle();
+    }
+  };
+
   // Create a modified version of the button with updated text color
   const modifiedChildren = React.Children.map(children, (child) => {
     // Only process React elements (not strings, numbers, etc.)
@@ -84,6 +97,11 @@ export const TopicPopover: React.FC<TopicPopoverProps> = ({
     <div className="relative" ref={popoverRef}>
       <div
         onClick={handleToggle}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
         className={isOpen ? "bg-bytebot-bronze-light-1 rounded-full" : ""}
       >
         {modifiedChildren}

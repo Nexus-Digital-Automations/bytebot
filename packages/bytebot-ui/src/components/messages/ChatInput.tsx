@@ -53,6 +53,7 @@ export function ChatInput({
     e: React.ChangeEvent<HTMLInputElement>,
   ): Promise<void> => {
     const files = e.target.files;
+    const inputElement = e.target; // Capture target reference early
     if (!files || files.length === 0) {
       return;
     }
@@ -62,7 +63,7 @@ export function ChatInput({
     // Check max files limit
     if (selectedFiles.length + files.length > MAX_FILES) {
       setErrorMessage(`Maximum ${MAX_FILES} files allowed`);
-      e.target.value = "";
+      inputElement.value = "";
       return;
     }
 
@@ -78,7 +79,7 @@ export function ChatInput({
       setErrorMessage(
         `File(s) exceed 30MB limit: ${oversizedFiles.join(", ")}`,
       );
-      e.target.value = "";
+      inputElement.value = "";
       return;
     }
 
@@ -107,8 +108,10 @@ export function ChatInput({
       onFileUpload(updatedFiles);
     }
 
-    // Reset the input
-    e.target.value = "";
+    // Reset the input - safe due to early capture
+    if (inputElement) {
+      inputElement.value = "";
+    }
   };
 
   const convertToBase64 = (file: File): Promise<string> => {
