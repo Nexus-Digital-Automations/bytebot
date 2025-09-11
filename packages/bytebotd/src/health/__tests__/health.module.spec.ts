@@ -247,7 +247,7 @@ describe('HealthModule', () => {
       try {
         const httpModule = module.get(HttpModule, { strict: false });
         expect(httpModule).toBeDefined();
-      } catch (_error) {
+      } catch (error) {
         // HttpModule might not be directly accessible, but functionality should work
         console.log(
           `HttpModule not directly accessible, testing functionality instead`,

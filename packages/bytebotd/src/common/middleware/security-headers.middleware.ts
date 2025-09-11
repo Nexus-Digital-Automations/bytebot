@@ -264,7 +264,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     } catch (_error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger._error(`[${operationId}] Security headers middleware error`, {
+      this.logger.error(`[${operationId}] Security headers middleware error`, {
         operationId,
         error: __error.message,
         stack: error.stack,
@@ -536,7 +536,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
         },
       );
     } catch (_error) {
-      this.logger._error('Failed to log BytebotD security headers event', {
+      this.logger.error('Failed to log BytebotD security headers event', {
         operationId,
         _error: __error.message,
         originalEventType: eventType,

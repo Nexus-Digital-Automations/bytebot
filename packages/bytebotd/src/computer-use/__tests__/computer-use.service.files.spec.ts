@@ -16,7 +16,8 @@
  * @version 1.0.0
  */
 
-import { WriteFileAction, _ReadFileAction } from '@bytebot/shared';
+import { WriteFileAction, _ReadFileActionDto } from '@bytebot/shared';
+import { ReadFileActionDtoDto } from '../dto/computer-action.dto';
 
 // Mock the nut-js library first to prevent module loading issues
 jest.mock('@nut-tree-fork/nut-js', () => ({
@@ -207,7 +208,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' }) // chown command
           .mockResolvedValueOnce({ stdout: '', stderr: '' }); // chmod command
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         // Verify successful result structure
         expect(result).toMatchObject({
@@ -278,7 +279,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(true);
         expect(result.path).toBe(
@@ -302,7 +303,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(true);
         expect(result.size).toBe(1024 * 1024); // 1MB
@@ -322,7 +323,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         // Empty base64 data (empty string) is actually rejected by the service
         // because it checks for !action.data which includes empty string
@@ -341,7 +342,7 @@ describe('ComputerUseService - File Operations', () => {
           data: '',
         };
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -367,7 +368,7 @@ describe('ComputerUseService - File Operations', () => {
           data: validBase64Data,
         };
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -384,7 +385,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         // Buffer.from() is very permissive and will decode what it can,
         // so this doesn't fail validation in the actual service
@@ -400,7 +401,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         // Buffer.from() is permissive and doesn't throw for most "invalid" base64
         expect(result.success).toBe(true);
@@ -425,7 +426,7 @@ describe('ComputerUseService - File Operations', () => {
             data: validBase64Data,
           };
 
-          const _result = (await service.action(action)) as FileWriteResult;
+          const result = (await service.action(action)) as FileWriteResult;
 
           expect(result.success).toBe(false);
           expect(result.message).toContain(
@@ -443,7 +444,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(true);
         expect(result.path).toBe('/tmp/test-file.txt');
@@ -456,7 +457,7 @@ describe('ComputerUseService - File Operations', () => {
           data: validBase64Data,
         };
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -482,7 +483,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' }) // chown
           .mockResolvedValueOnce({ stdout: '', stderr: '' }); // chmod
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(true);
 
@@ -506,7 +507,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' }) // mkdir
           .mockRejectedValueOnce(new Error('Permission denied for file copy')); // cp fails
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -527,7 +528,7 @@ describe('ComputerUseService - File Operations', () => {
         // Mock temporary file write failure
         mockFs.writeFile.mockRejectedValue(new Error('Disk full'));
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain('Disk full');
@@ -546,7 +547,7 @@ describe('ComputerUseService - File Operations', () => {
           new Error('Cannot delete temporary file'),
         );
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(true);
 
@@ -572,7 +573,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' }) // chown
           .mockRejectedValueOnce(new Error('Cannot set file permissions')); // chmod fails
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -593,7 +594,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' }) // cp
           .mockRejectedValueOnce(new Error('Cannot change file ownership')); // chown fails
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -613,7 +614,7 @@ describe('ComputerUseService - File Operations', () => {
 
     describe('Successful File Reading Operations', () => {
       it('should read text file successfully with full metadata', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '/home/user/documents/test.txt',
         };
@@ -626,7 +627,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockFs.readFile.mockResolvedValue(testFileContent);
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         // Verify successful result with complete metadata
         expect(result).toMatchObject({
@@ -662,7 +663,7 @@ describe('ComputerUseService - File Operations', () => {
       });
 
       it('should handle relative paths correctly', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: 'documents/relative-test.txt',
         };
@@ -674,7 +675,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockFs.readFile.mockResolvedValue(Buffer.from('relative content'));
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(true);
 
@@ -711,7 +712,7 @@ describe('ComputerUseService - File Operations', () => {
           // Reset mocks for each test
           jest.clearAllMocks();
 
-          const action: ReadFileAction = {
+          const action: ReadFileActionDto = {
             action: 'read_file',
             path: test.path,
           };
@@ -723,7 +724,7 @@ describe('ComputerUseService - File Operations', () => {
 
           mockFs.readFile.mockResolvedValue(Buffer.from('test content'));
 
-          const _result = (await service.action(action)) as FileReadResult;
+          const result = (await service.action(action)) as FileReadResult;
 
           expect(result.success).toBe(true);
           expect(result.mediaType).toBe(test.expectedType);
@@ -731,7 +732,7 @@ describe('ComputerUseService - File Operations', () => {
       });
 
       it('should handle binary files correctly', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '/home/user/image.png',
         };
@@ -743,7 +744,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockFs.readFile.mockResolvedValue(binaryFileContent);
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(true);
         expect(result.data).toBe(binaryFileContent.toString('base64'));
@@ -752,7 +753,7 @@ describe('ComputerUseService - File Operations', () => {
       });
 
       it('should handle empty files correctly', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '/home/user/empty.txt',
         };
@@ -764,7 +765,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockFs.readFile.mockResolvedValue(Buffer.from(''));
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(true);
         expect(result.data).toBe('');
@@ -774,7 +775,7 @@ describe('ComputerUseService - File Operations', () => {
       it('should handle large files correctly', async () => {
         const largeContent = Buffer.alloc(1024 * 1024, 'a'); // 1MB file
 
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '/home/user/large-file.bin',
         };
@@ -789,7 +790,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockFs.readFile.mockResolvedValue(largeContent);
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(true);
         expect(result.size).toBe(1024 * 1024);
@@ -799,12 +800,12 @@ describe('ComputerUseService - File Operations', () => {
 
     describe('Input Validation and Error Handling', () => {
       it('should reject empty or null file path', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '',
         };
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -827,9 +828,9 @@ describe('ComputerUseService - File Operations', () => {
         const action = {
           action: 'read_file',
           path: null,
-        } as unknown as ReadFileAction;
+        } as unknown as ReadFileActionDto;
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -850,12 +851,12 @@ describe('ComputerUseService - File Operations', () => {
         ];
 
         for (const dangerousPath of dangerousPaths) {
-          const action: ReadFileAction = {
+          const action: ReadFileActionDto = {
             action: 'read_file',
             path: dangerousPath,
           };
 
-          const _result = (await service.action(action)) as FileReadResult;
+          const result = (await service.action(action)) as FileReadResult;
 
           expect(result.success).toBe(false);
           expect(result.message).toContain(
@@ -865,7 +866,7 @@ describe('ComputerUseService - File Operations', () => {
       });
 
       it('should allow files in /tmp directory', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '/tmp/test-file.txt',
         };
@@ -877,7 +878,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockFs.readFile.mockResolvedValue(Buffer.from('tmp content'));
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(true);
       });
@@ -885,7 +886,7 @@ describe('ComputerUseService - File Operations', () => {
 
     describe('File System Error Handling', () => {
       it('should handle file copy errors', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '/home/user/test.txt',
         };
@@ -895,7 +896,7 @@ describe('ComputerUseService - File Operations', () => {
           new Error('Permission denied for file access'),
         );
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -907,7 +908,7 @@ describe('ComputerUseService - File Operations', () => {
       });
 
       it('should handle file read errors', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '/home/user/test.txt',
         };
@@ -919,14 +920,14 @@ describe('ComputerUseService - File Operations', () => {
 
         mockFs.readFile.mockRejectedValue(new Error('File corrupted'));
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain('Failed to read file: File corrupted');
       });
 
       it('should handle stat command errors', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '/home/user/test.txt',
         };
@@ -939,7 +940,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockFs.readFile.mockResolvedValue(testFileContent);
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -948,7 +949,7 @@ describe('ComputerUseService - File Operations', () => {
       });
 
       it('should handle malformed stat output', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '/home/user/test.txt',
         };
@@ -961,7 +962,7 @@ describe('ComputerUseService - File Operations', () => {
 
         mockFs.readFile.mockResolvedValue(testFileContent);
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -970,7 +971,7 @@ describe('ComputerUseService - File Operations', () => {
       });
 
       it('should handle cleanup _errors without affecting main error result', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '/home/user/test.txt',
         };
@@ -981,7 +982,7 @@ describe('ComputerUseService - File Operations', () => {
           new Error('Cannot delete temporary file'),
         );
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain('File not found');
@@ -993,7 +994,7 @@ describe('ComputerUseService - File Operations', () => {
       });
 
       it('should handle successful operation with cleanup failure', async () => {
-        const action: ReadFileAction = {
+        const action: ReadFileActionDto = {
           action: 'read_file',
           path: '/home/user/test.txt',
         };
@@ -1009,7 +1010,7 @@ describe('ComputerUseService - File Operations', () => {
           new Error('Cannot delete temporary file'),
         );
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(true);
 
@@ -1043,7 +1044,7 @@ describe('ComputerUseService - File Operations', () => {
         for (const testCase of testCases) {
           jest.clearAllMocks();
 
-          const action: ReadFileAction = {
+          const action: ReadFileActionDto = {
             action: 'read_file',
             path: `/home/user/${testCase.description.replace(/\s+/g, '_')}.txt`,
           };
@@ -1060,7 +1061,7 @@ describe('ComputerUseService - File Operations', () => {
 
           mockFs.readFile.mockResolvedValue(contentBuffer);
 
-          const _result = (await service.action(action)) as FileReadResult;
+          const result = (await service.action(action)) as FileReadResult;
 
           expect(result.success).toBe(true);
           expect(result.data).toBe(contentBuffer.toString('base64'));
@@ -1081,7 +1082,7 @@ describe('ComputerUseService - File Operations', () => {
         data: Buffer.from('test1').toString('base64'),
       };
 
-      const action2: ReadFileAction = {
+      const action2: ReadFileActionDto = {
         action: 'read_file',
         path: '/home/user/test2.txt',
       };
@@ -1131,7 +1132,7 @@ describe('ComputerUseService - File Operations', () => {
     });
 
     it('should log comprehensive operation metadata for successful reads', async () => {
-      const action: ReadFileAction = {
+      const action: ReadFileActionDto = {
         action: 'read_file',
         path: '/home/user/test.txt',
       };
@@ -1175,7 +1176,7 @@ describe('ComputerUseService - File Operations', () => {
         data: Buffer.from('test').toString('base64'),
       };
 
-      const readAction: ReadFileAction = {
+      const readAction: ReadFileActionDto = {
         action: 'read_file',
         path: '/etc/shadow', // Unsafe path
       };
@@ -1216,7 +1217,7 @@ describe('ComputerUseService - File Operations', () => {
 
       mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
-      const _result = (await service.action(action)) as FileWriteResult;
+      const result = (await service.action(action)) as FileWriteResult;
 
       expect(result.success).toBe(true);
       expect(result.path).toBe(longPath);
@@ -1226,7 +1227,7 @@ describe('ComputerUseService - File Operations', () => {
       const specialPath =
         '/home/user/test file with spaces and "quotes" & symbols.txt';
 
-      const action: ReadFileAction = {
+      const action: ReadFileActionDto = {
         action: 'read_file',
         path: specialPath,
       };
@@ -1238,7 +1239,7 @@ describe('ComputerUseService - File Operations', () => {
 
       mockFs.readFile.mockResolvedValue(Buffer.from('test content'));
 
-      const _result = (await service.action(action)) as FileReadResult;
+      const result = (await service.action(action)) as FileReadResult;
 
       expect(result.success).toBe(true);
       expect(result._name).toBe(
@@ -1253,7 +1254,7 @@ describe('ComputerUseService - File Operations', () => {
         data: Buffer.from('concurrent write').toString('base64'),
       };
 
-      const readAction: ReadFileAction = {
+      const readAction: ReadFileActionDto = {
         action: 'read_file',
         path: '/home/user/concurrent2.txt',
       };
@@ -1326,7 +1327,7 @@ describe('ComputerUseService - File Operations', () => {
 
       mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
-      const _result = (await service.action(action)) as FileWriteResult;
+      const result = (await service.action(action)) as FileWriteResult;
 
       expect(result.success).toBe(true);
       expect(result.size).toBe(largeData.length);

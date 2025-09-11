@@ -70,7 +70,7 @@ class MockJwtAuthGuard {
       };
 
       return true;
-    } catch (_error) {
+    } catch (error) {
       if (_error instanceof UnauthorizedException) {
         throw _error;
       }

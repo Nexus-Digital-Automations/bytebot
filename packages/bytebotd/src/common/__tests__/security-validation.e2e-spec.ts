@@ -9,7 +9,7 @@
  * @author Input Validation & API Security Specialist
  */
 
-import { _Test, _TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../app.module';
@@ -34,7 +34,7 @@ describe('Security Validation E2E Tests', () => {
 
   describe('CORS Security Tests', () => {
     it('should block requests from unauthorized origins', async () => {
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .set('Origin', 'https://malicious.com')
         .send({ action: 'screenshot' })
@@ -45,7 +45,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should allow requests from authorized origins', async () => {
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .set('Origin', 'http://localhost:3000')
         .send({ action: 'screenshot' });
@@ -54,7 +54,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should include security headers in response', async () => {
-      const _response = await request(server).get('/health').expect(200);
+      const response = await request(server).get('/health').expect(200);
 
       expect(response.headers['x-frame-options']).toBe('DENY');
       expect(response.headers['x-content-type-options']).toBe('nosniff');
@@ -76,7 +76,7 @@ describe('Security Validation E2E Tests', () => {
 
     xssPayloads.forEach((_payload, _index) => {
       it(`should block XSS payload #${index + 1}: ${_payload.substring(0, 30)}...`, async () => {
-        const _response = await request(server)
+        const response = await request(server)
           .post('/computer-use')
           .send({
             action: 'type_text',
@@ -89,7 +89,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should sanitize text inputs with HTML content', async () => {
-      const _response = await request(server).post('/computer-use').send({
+      const response = await request(server).post('/computer-use').send({
         action: 'type_text',
         text: '<b>Bold text</b> with HTML',
       });
@@ -171,7 +171,7 @@ describe('Security Validation E2E Tests', () => {
 
     pathTraversalPayloads.forEach((_payload, _index) => {
       it(`should block path traversal _payload #${_index + 1}`, async () => {
-        const _response = await request(server)
+        const response = await request(server)
           .post('/computer-use')
           .send({
             action: 'read_file',
@@ -208,7 +208,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should include rate limit headers', async () => {
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({ action: 'screenshot' });
 
@@ -218,7 +218,7 @@ describe('Security Validation E2E Tests', () => {
 
   describe('Input Validation Tests', () => {
     it('should reject invalid action types', async () => {
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({
           action: 'malicious_action',
@@ -230,7 +230,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should validate required fields', async () => {
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({
           action: 'click_mouse',
@@ -258,7 +258,7 @@ describe('Security Validation E2E Tests', () => {
     it('should limit _payload size', async () => {
       const largeData = 'A'.repeat(51 * 1024 * 1024); // 51MB (exceeds 50MB limit)
 
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({
           action: 'type_text',
@@ -272,7 +272,7 @@ describe('Security Validation E2E Tests', () => {
 
   describe('Error Handling Security Tests', () => {
     it('should not leak sensitive information in _error responses', async () => {
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({
           action: 'invalid_action',
@@ -287,7 +287,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should include request ID for tracking', async () => {
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({
           action: 'invalid_action',
@@ -295,7 +295,8 @@ describe('Security Validation E2E Tests', () => {
         .expect(400);
 
       expect(
-        response.body.requestId || response.headers['x-request-id'],
+        _response.response.body.requestId ||
+          _response.response.headers['x-request-id'],
       ).toBeDefined();
     });
 
@@ -303,7 +304,7 @@ describe('Security Validation E2E Tests', () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
 
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({
           action: 'invalid_action',
@@ -319,7 +320,7 @@ describe('Security Validation E2E Tests', () => {
 
   describe('Security Headers Tests', () => {
     it('should include comprehensive security headers', async () => {
-      const _response = await request(server).get('/health');
+      const response = await request(server).get('/health');
 
       const expectedHeaders = [
         'x-frame-options',
@@ -335,7 +336,7 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should set CSP headers', async () => {
-      const _response = await request(server).get('/health');
+      const response = await request(server).get('/health');
 
       expect(response.headers['content-security-policy']).toBeDefined();
     });
@@ -344,7 +345,7 @@ describe('Security Validation E2E Tests', () => {
   describe('Authentication & Authorization Tests', () => {
     it('should handle missing authentication gracefully', async () => {
       // Note: If authentication is implemented, this would test it
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({ action: 'screenshot' });
 
@@ -371,7 +372,7 @@ describe('Security Validation E2E Tests', () => {
 
     fuzzingPayloads.forEach((_payload, _index) => {
       it(`should handle fuzzing _payload #${_index + 1} gracefully`, async () => {
-        const _response = await request(server).post('/computer-use').send({
+        const response = await request(server).post('/computer-use').send({
           action: 'type_text',
           text: _payload,
         });
@@ -390,7 +391,7 @@ describe('Security Validation E2E Tests', () => {
     it('should complete requests within reasonable time', async () => {
       const startTime = Date.now();
 
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({ action: 'screenshot' });
 
@@ -440,14 +441,14 @@ describe('Security Validation E2E Tests', () => {
     });
 
     it('should include correlation IDs', async () => {
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({ action: 'screenshot' });
 
       expect(
-        response.headers['x-request-id'] ||
-          response.headers['x-correlation-id'] ||
-          response.body.operationId,
+        _response.response.headers['x-request-id'] ||
+          _response.response.headers['x-correlation-id'] ||
+          _response.response.body.operationId,
       ).toBeDefined();
     });
   });

@@ -28,15 +28,15 @@ import { NutService } from '../../nut/nut.service';
 import {
   MoveMouseAction,
   ClickMouseAction,
-  _ScreenshotAction,
+  _ScreenshotActionDto,
   WriteFileAction,
-  _ReadFileAction,
-  _ApplicationAction,
+  _ReadFileActionDto,
+  _ApplicationActionDto,
 } from '@bytebot/shared';
 import {
-  ApplicationActionDto,
-  ScreenshotActionDto,
-  ReadFileActionDto,
+  ApplicationActionDtoDto,
+  ScreenshotActionDtoDto,
+  ReadFileActionDtoDto,
 } from '../dto/computer-action.dto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -152,7 +152,7 @@ describe('ComputerUseService Integration Tests', () => {
     });
 
     it('should handle application lifecycle with window management', async () => {
-      const appAction: ApplicationAction = {
+      const appAction: ApplicationActionDto = {
         action: 'application',
         application: 'firefox',
       };
@@ -192,7 +192,7 @@ describe('ComputerUseService Integration Tests', () => {
       expect(writeResult.size).toBe(testFile.content.length);
 
       // Read file back
-      const readAction: ReadFileAction = {
+      const readAction: ReadFileActionDto = {
         action: 'read_file',
         path: writeResult.path,
       };
@@ -229,7 +229,7 @@ describe('ComputerUseService Integration Tests', () => {
         )) as FileWriteResult;
         expect(writeResult.success).toBe(true);
 
-        const readAction: ReadFileAction = {
+        const readAction: ReadFileActionDto = {
           action: 'read_file',
           path: writeResult.path,
         };
@@ -257,7 +257,7 @@ describe('ComputerUseService Integration Tests', () => {
         'File path outside allowed directories',
       );
 
-      const maliciousReadAction: ReadFileAction = {
+      const maliciousReadAction: ReadFileActionDto = {
         action: 'read_file',
         path: '/etc/shadow',
       };
@@ -323,7 +323,7 @@ describe('ComputerUseService Integration Tests', () => {
         )) as FileWriteResult;
         expect(writeResult.success).toBe(true);
 
-        const readAction: ReadFileAction = {
+        const readAction: ReadFileActionDto = {
           action: 'read_file',
           path: writeResult.path,
         };
@@ -360,7 +360,7 @@ describe('ComputerUseService Integration Tests', () => {
 
       // Execute actions sequentially
       for (const action of actions) {
-        const _result = await context.service.action(action);
+        const result = await context.service.action(action);
         expect(result).toBeDefined();
       }
 
@@ -402,7 +402,7 @@ describe('ComputerUseService Integration Tests', () => {
       try {
         await context.service.action(invalidAction);
         fail('Should have thrown an error');
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeInstanceOf(Error);
         expect((_error as Error).message).toContain(
           'Unsupported computer action',
@@ -424,7 +424,7 @@ describe('ComputerUseService Integration Tests', () => {
         data: testFile.base64,
       };
 
-      const _result = (await context.service.action(
+      const result = (await context.service.action(
         writeAction,
       )) as FileWriteResult;
       expect(result.success).toBe(false);
@@ -603,7 +603,7 @@ describe('ComputerUseService Integration Tests', () => {
   async function cleanupTestData(): Promise<void> {
     try {
       await fs.rm(testDataDir, { recursive: true, force: true });
-    } catch (_error) {
+    } catch (error) {
       // Directory might not exist or already cleaned up
       console.warn('Failed to cleanup test data:', _error);
     }

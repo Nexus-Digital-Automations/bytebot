@@ -16,8 +16,8 @@
  */
 
 import {
-  Test as _Test,
-  TestingModule as _TestingModule,
+  Test as Test,
+  TestingModule as TestingModule,
 } from '@nestjs/testing';
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import {
@@ -71,9 +71,9 @@ class MockValidationPipe {
 
       console.log(`[${operationId}] Validation completed successfully`);
       return validatedValue;
-    } catch (_error) {
+    } catch (error) {
       console._error(`[${operationId}] Validation failed`, {
-        error: __error.message,
+        error: _error.message,
         value: JSON.stringify(value).substring(0, 100),
       });
       throw error;
@@ -641,13 +641,13 @@ describe('ValidationPipe', () => {
       try {
         await pipe.transform(invalidData, metadata);
         fail('Expected BadRequestException');
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeInstanceOf(BadRequestException);
-        expect(__error.message).toContain('Validation failed');
-        expect(__error.message).toContain(
+        expect(_error.message).toContain('Validation failed');
+        expect(_error.message).toContain(
           'email must be a valid email address',
         );
-        expect(__error.message).toContain(
+        expect(_error.message).toContain(
           'password must be longer than or equal to 6 characters',
         );
       }
@@ -674,11 +674,11 @@ describe('ValidationPipe', () => {
       try {
         await pipe.transform(multipleErrorData, metadata);
         fail('Expected BadRequestException');
-      } catch (_error) {
-        expect(__error.message).toContain(
+      } catch (error) {
+        expect(_error.message).toContain(
           'title must be shorter than or equal to 100 characters',
         );
-        expect(__error.message).toContain(
+        expect(_error.message).toContain(
           'priority must be one of: low, medium, high',
         );
       }
@@ -703,7 +703,7 @@ describe('ValidationPipe', () => {
       try {
         await pipe.transform(circularObj, metadata);
         // Should handle gracefully without throwing
-      } catch (_error) {
+      } catch (error) {
         // If it throws, it should be a proper validation _error
         expect(_error).toBeInstanceOf(BadRequestException);
       }

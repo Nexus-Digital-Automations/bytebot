@@ -225,7 +225,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
     } catch (_error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger._error(`[${operationId}] Security sanitization failed`, {
+      this.logger.error(`[${operationId}] Security sanitization failed`, {
         operationId,
         error: __error.message,
         processingTimeMs: processingTime,

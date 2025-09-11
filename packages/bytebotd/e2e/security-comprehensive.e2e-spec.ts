@@ -211,7 +211,7 @@ class SecurityE2EJwtService {
       }
 
       return decodedPayload;
-    } catch (_error) {
+    } catch (error) {
       throw new Error('Invalid token');
     }
   }
@@ -673,7 +673,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         const decoded = jwtService.verify(token);
         req.user = decoded;
         next();
-      } catch (_error) {
+      } catch (error) {
         securityMonitor.trackFailedAuthentication(
           'token_invalid',
           req.ip || 'unknown',

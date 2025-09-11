@@ -208,14 +208,14 @@ describe('HealthService', () => {
   describe('Private Methods', () => {
     describe('Database Ping', () => {
       it('should simulate database ping successfully', async () => {
-        const _result = await (service as any).performDatabasePing();
+        const result = await (service as any).performDatabasePing();
         expect(_result).toBe(true);
       });
     });
 
     describe('External Service Check', () => {
       it('should check individual external service', async () => {
-        const _result = await (service as any).checkExternalService(
+        const result = await (service as any).checkExternalService(
           'test-service',
           'http://test.com/health',
         );

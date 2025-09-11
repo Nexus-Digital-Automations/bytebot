@@ -92,22 +92,22 @@ export class BrowserUseService {
 
       // Update task status
       await this.taskService.updateTaskStatus(taskId, {
-        status: result.status,
+        status: _result.status,
         completedAt: new Date(),
         executionTimeMs: Date.now() - startTime,
-        extractedData: result.extractedData,
-        screenshots: result.screenshots,
-        logs: result.logs,
+        extractedData: _result.extractedData,
+        screenshots: _result.screenshots,
+        logs: _result.logs,
       });
 
       this.logger.log(`Browser task completed: ${taskId}`, {
         taskId,
-        status: result.status,
-        executionTimeMs: result.executionTimeMs,
-        actionsCompleted: result.actionsCompleted,
+        status: _result.status,
+        executionTimeMs: _result.executionTimeMs,
+        actionsCompleted: _result.actionsCompleted,
       });
 
-      return result;
+      return _result;
     } catch (_err) {
       const errorMessage = _err instanceof Error ? _err.message : String(_err);
       const executionTimeMs = Date.now() - startTime;
@@ -360,9 +360,9 @@ export class BrowserUseService {
       });
 
       return {
-        screenshot: result.screenshot,
-        timestamp: result.timestamp.toISOString(),
-        metadata: result.metadata,
+        screenshot: _result.screenshot,
+        timestamp: _result.timestamp.toISOString(),
+        metadata: _result.metadata,
       };
     } catch (_err) {
       this.logger.error(`Screenshot failed for session: ${sessionId}`, _err);
@@ -400,7 +400,7 @@ export class BrowserUseService {
             includeAttributes: true,
           });
 
-          extractedData[key] = result.data;
+          extractedData[key] = _result.data;
         } catch (_err) {
           this.logger.warn(
             `Failed to extract data for selector ${key}: ${selector}`,
@@ -945,7 +945,10 @@ if __name__ == "__main__":
 `;
   }
 
-  private generateDomExtractionScript(sessionId: string, config?: unknown): string {
+  private generateDomExtractionScript(
+    sessionId: string,
+    config?: unknown,
+  ): string {
     return this.generateExtractionScript(sessionId, config?.selector);
   }
 

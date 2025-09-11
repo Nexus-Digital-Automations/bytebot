@@ -330,7 +330,7 @@ export class DeprecationGuard implements CanActivate {
     } catch (_error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger._error(`[${operationId}] BytebotD deprecation guard error`, {
+      this.logger.error(`[${operationId}] BytebotD deprecation guard error`, {
         operationId,
         error: __error.message,
         stack: error.stack,
@@ -733,7 +733,7 @@ export class DeprecationGuard implements CanActivate {
         },
       );
     } catch (_error) {
-      this.logger._error(
+      this.logger.error(
         `[${operationId}] Failed to track BytebotD deprecated usage`,
         {
           operationId,
@@ -779,7 +779,7 @@ export class DeprecationGuard implements CanActivate {
         ip: request.ip,
       });
     } catch (_error) {
-      this.logger._error('Failed to log BytebotD deprecation access', {
+      this.logger.error('Failed to log BytebotD deprecation access', {
         operationId,
         _error: __error.message,
       });
@@ -812,7 +812,7 @@ export class DeprecationGuard implements CanActivate {
         ip: request.ip,
       });
     } catch (_error) {
-      this.logger._error('Failed to log BytebotD deprecation bypass', {
+      this.logger.error('Failed to log BytebotD deprecation bypass', {
         operationId,
         _error: __error.message,
       });

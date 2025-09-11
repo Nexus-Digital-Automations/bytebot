@@ -1044,7 +1044,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
      */
     it('should extract _error message from Error object', () => {
       const _error = new Error('Test error message');
-      const _result = ErrorHandler.extractErrorMessage(_error);
+      const result = ErrorHandler.extractErrorMessage(_error);
       expect(_result).toBe('Test error message');
     });
 
@@ -1053,7 +1053,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
      */
     it('should extract _error message from string', () => {
       const _error = 'String error message';
-      const _result = ErrorHandler.extractErrorMessage(_error);
+      const result = ErrorHandler.extractErrorMessage(_error);
       expect(result).toBe('String error message');
     });
 
@@ -1062,7 +1062,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
      */
     it('should extract _error message from object with message property', () => {
       const _error = { message: 'Object error message' };
-      const _result = ErrorHandler.extractErrorMessage(_error);
+      const result = ErrorHandler.extractErrorMessage(_error);
       expect(result).toBe('Object error message');
     });
 
@@ -1072,7 +1072,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
     it('should extract _error stack from Error object', () => {
       const error = new Error('Test error');
       error.stack = 'Error stack trace';
-      const _result = ErrorHandler.extractErrorStack(_error);
+      const result = ErrorHandler.extractErrorStack(_error);
       expect(result).toBe('Error stack trace');
     });
 
@@ -1081,7 +1081,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
      */
     it('should create structured _error object', () => {
       const originalError = new Error('Original error');
-      const _result = ErrorHandler.createError(
+      const result = ErrorHandler.createError(
         'TEST_CODE',
         'Test message',
         'op123',

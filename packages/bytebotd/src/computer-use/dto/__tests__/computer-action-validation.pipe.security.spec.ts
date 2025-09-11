@@ -165,7 +165,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       try {
         await pipe.transform(multiThreatInput, {} as any);
         fail('Should have thrown BadRequestException');
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeInstanceOf(BadRequestException);
         expect(_error.response.message).toContain('security threats detected');
         expect(_error.response.totalRiskScore).toBeGreaterThan(0);
@@ -194,7 +194,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
 
       try {
         await pipe.transform(maliciousInput, {} as any);
-      } catch (_error) {
+      } catch (error) {
         expect(_error.response.operationId).toBeDefined();
         expect(_error.response.timestamp).toBeDefined();
         expect(_error.response.validationStages).toEqual(
@@ -286,7 +286,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       try {
         await pipe.transform(maliciousInput, {} as any);
         fail('Should have thrown BadRequestException');
-      } catch (_error) {
+      } catch (error) {
         expect(_error.response).toHaveProperty('message');
         expect(_error.response).toHaveProperty('operationId');
         expect(_error.response).toHaveProperty('timestamp');

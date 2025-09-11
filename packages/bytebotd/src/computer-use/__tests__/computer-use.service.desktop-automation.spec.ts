@@ -145,6 +145,7 @@ import {
   WriteFileAction,
   _ReadFileAction,
 } from '@bytebot/shared';
+import { ScreenshotActionDto } from '../dto/computer-action.dto';
 
 // Mock services for comprehensive testing
 const mockNutService = {
@@ -507,7 +508,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
           coordinates: { x: test.x, y: test.y },
         };
 
-        const _result = await service.action(moveAction);
+        const result = await service.action(moveAction);
 
         if (test.shouldSucceed) {
           // Action should complete without throwing errors
@@ -672,7 +673,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       const result = await service.action(screenshotAction);
 
       // Screenshot should return a result with image data
-      expect(result).toBeDefined();
+      expect(_result).toBeDefined();
       expect(nutService.screendump).toHaveBeenCalled();
     });
 
@@ -701,7 +702,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       const result = await service.action(screenshotAction);
 
       // Should still work with basic screenshot functionality
-      expect(result).toBeDefined();
+      expect(_result).toBeDefined();
       expect(nutService.screendump).toHaveBeenCalled();
     });
   });
@@ -766,7 +767,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         try {
           const result = await service.action(action);
           results.push({ success: true, result });
-        } catch (_error) {
+        } catch (error) {
           results.push({ success: false, _error });
         }
       }
@@ -828,10 +829,10 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         try {
           const result = await service.action(writeAction);
           // If it succeeds, it should be a FileWriteResult
-          expect(result).toBeDefined();
-        } catch (_error) {
+          expect(_result).toBeDefined();
+        } catch (error) {
           // If it fails, should be due to security reasons
-          expect(__error.message).toMatch(
+          expect(_error.message).toMatch(
             /(security|permission|invalid|denied)/i,
           );
         }
@@ -873,7 +874,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         button: 'left',
       };
 
-      const _result = await service.action(coordinatedAction);
+      const result = await service.action(coordinatedAction);
 
       // Action should complete without throwing errors
       await expect(service.action(coordinatedAction)).resolves.not.toThrow();

@@ -554,7 +554,7 @@ export class CacheInterceptor implements NestInterceptor {
         );
       }
     } catch (_error) {
-      this.logger._error(
+      this.logger.error(
         `Cache invalidation _error: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
       );
     }

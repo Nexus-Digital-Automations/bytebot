@@ -822,7 +822,7 @@ describe('NutService', () => {
         const getErrorMessage = service['getErrorMessage'] as (
           _error: unknown,
         ) => string;
-        const _result = getErrorMessage.call(service, _error);
+        const result = getErrorMessage.call(service, _error);
         expect(_result).toBe('Test error message');
       });
 
@@ -831,7 +831,7 @@ describe('NutService', () => {
         const getErrorMessage = service['getErrorMessage'] as (
           _error: unknown,
         ) => string;
-        const _result = getErrorMessage.call(service, _error);
+        const result = getErrorMessage.call(service, _error);
         expect(_result).toBe('String error message');
       });
 
@@ -840,7 +840,7 @@ describe('NutService', () => {
         const getErrorMessage = service['getErrorMessage'] as (
           _error: unknown,
         ) => string;
-        const _result = getErrorMessage.call(service, _error);
+        const result = getErrorMessage.call(service, _error);
         expect(_result).toBe('Object error message');
       });
 
@@ -849,7 +849,7 @@ describe('NutService', () => {
         const getErrorMessage = service['getErrorMessage'] as (
           _error: unknown,
         ) => string;
-        const _result = getErrorMessage.call(service, _error);
+        const result = getErrorMessage.call(service, _error);
         expect(_result).toBe(JSON.stringify({ nested: 'error' }));
       });
 
@@ -858,7 +858,7 @@ describe('NutService', () => {
         const getErrorMessage = service['getErrorMessage'] as (
           _error: unknown,
         ) => string;
-        const _result = getErrorMessage.call(service, _error);
+        const result = getErrorMessage.call(service, _error);
         expect(_result).toBe('Unknown error occurred');
       });
 
@@ -918,19 +918,19 @@ describe('NutService', () => {
     describe('charToKeyInfo method', () => {
       it('should map lowercase letters correctly', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
-        const _result = charToKeyInfo.call(service, 'a');
+        const result = charToKeyInfo.call(service, 'a');
         expect(_result).toEqual({ keyCode: 'A', withShift: false });
       });
 
       it('should map uppercase letters with shift', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
-        const _result = charToKeyInfo.call(service, 'A');
+        const result = charToKeyInfo.call(service, 'A');
         expect(_result).toEqual({ keyCode: 'A', withShift: true });
       });
 
       it('should map numbers correctly', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
-        const _result = charToKeyInfo.call(service, '5');
+        const result = charToKeyInfo.call(service, '5');
         expect(_result).toEqual({ keyCode: 'Num5', withShift: false });
       });
 
@@ -954,7 +954,7 @@ describe('NutService', () => {
 
       it('should return null for unmappable characters', () => {
         const charToKeyInfo = (service as any)['charToKeyInfo'];
-        const _result = charToKeyInfo.call(service, '€');
+        const result = charToKeyInfo.call(service, '€');
         expect(_result).toBeNull();
       });
     });

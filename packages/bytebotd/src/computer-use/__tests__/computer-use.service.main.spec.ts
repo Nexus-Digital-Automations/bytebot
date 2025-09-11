@@ -361,7 +361,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
         // Act
         jest.advanceTimersByTime(1000);
-        const _result = await delayPromise;
+        const result = await delayPromise;
 
         // Assert
         expect(result).toBeUndefined();
@@ -572,7 +572,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         try {
           await service.action(action);
           fail('Expected error to be thrown');
-        } catch (_error) {
+        } catch (error) {
           expect(_error).toBeInstanceOf(Error);
           expect((_error as Error).message).toContain(
             'Failed to execute type_text',
@@ -721,7 +721,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
       // Fast-forward time
       jest.advanceTimersByTime(duration);
 
-      const _result = await delayPromise;
+      const result = await delayPromise;
 
       // Assert
       expect(result).toBeUndefined();
@@ -759,7 +759,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
       // Act
       const delayPromise = service.action(action);
       jest.advanceTimersByTime(0); // No time advancement needed for 0ms delay
-      const _result = await delayPromise;
+      const result = await delayPromise;
 
       // Assert
       expect(result).toBeUndefined();
@@ -799,7 +799,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const _error = new Error('Test error message');
 
         // Act
-        const _result = ErrorHandler.extractErrorMessage(_error);
+        const result = ErrorHandler.extractErrorMessage(_error);
 
         // Assert
         expect(_result).toBe('Test error message');
@@ -810,7 +810,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const _error = 'String error message';
 
         // Act
-        const _result = ErrorHandler.extractErrorMessage(_error);
+        const result = ErrorHandler.extractErrorMessage(_error);
 
         // Assert
         expect(result).toBe('String error message');
@@ -821,7 +821,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const _error = { message: 'Object error message', code: 'ERR001' };
 
         // Act
-        const _result = ErrorHandler.extractErrorMessage(_error);
+        const result = ErrorHandler.extractErrorMessage(_error);
 
         // Assert
         expect(result).toBe('Object error message');
@@ -832,7 +832,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const _error = { status: 500, detail: 'Server error' };
 
         // Act
-        const _result = ErrorHandler.extractErrorMessage(_error);
+        const result = ErrorHandler.extractErrorMessage(_error);
 
         // Assert
         expect(result).toBe(JSON.stringify(_error));
@@ -854,7 +854,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         error.stack = 'Error: Test error\n    at test.js:1:1';
 
         // Act
-        const _result = ErrorHandler.extractErrorStack(_error);
+        const result = ErrorHandler.extractErrorStack(_error);
 
         // Assert
         expect(result).toBe('Error: Test error\n    at test.js:1:1');
@@ -868,7 +868,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         };
 
         // Act
-        const _result = ErrorHandler.extractErrorStack(_error);
+        const result = ErrorHandler.extractErrorStack(_error);
 
         // Assert
         expect(result).toBe('Custom error\n    at custom.js:1:1');
@@ -879,7 +879,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const _error = { message: 'No stack error' };
 
         // Act
-        const _result = ErrorHandler.extractErrorStack(_error);
+        const result = ErrorHandler.extractErrorStack(_error);
 
         // Assert
         expect(result).toBeUndefined();
@@ -896,7 +896,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const originalError = new Error('Original error');
 
         // Act
-        const _result = ErrorHandler.createError(
+        const result = ErrorHandler.createError(
           code,
           message,
           operationId,
@@ -923,7 +923,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const operationId = 'test_op_123';
 
         // Act
-        const _result = ErrorHandler.createError(code, message, operationId);
+        const result = ErrorHandler.createError(code, message, operationId);
 
         // Assert
         expect(result).toEqual({

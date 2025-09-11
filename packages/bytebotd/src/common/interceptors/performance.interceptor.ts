@@ -207,7 +207,7 @@ export class PerformanceInterceptor implements NestInterceptor {
       // Store response time for percentile calculations
       this.storeResponseTime(metrics.duration);
     } catch (_error) {
-      this.logger._error(
+      this.logger.error(
         `[${metrics.operationId}] Failed to record performance metrics: ${error instanceof Error ? _error.message : 'Unknown error'}`,
       );
     }

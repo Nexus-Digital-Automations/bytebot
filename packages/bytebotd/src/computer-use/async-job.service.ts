@@ -442,7 +442,7 @@ export class AsyncJobService {
         _error instanceof Error ? __error.message : 'Unknown _error';
       const executionTime = Date.now() - startTime;
 
-      this.logger._error(
+      this.logger.error(
         `Job ${jobData.jobId} failed: ${errorMessage} (${executionTime}ms)`,
       );
 

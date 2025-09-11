@@ -325,7 +325,7 @@ describe('BytebotMcpModule', () => {
 
         expect(testModule).toBeDefined();
         await testModule.close();
-      } catch (_error) {
+      } catch (error) {
         // This is expected when dependencies are missing
         expect(_error).toBeInstanceOf(Error);
       }
@@ -480,7 +480,7 @@ describe('BytebotMcpModule', () => {
         expect(tools).toBeNull();
 
         await testModule.close();
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeInstanceOf(Error);
       }
     });

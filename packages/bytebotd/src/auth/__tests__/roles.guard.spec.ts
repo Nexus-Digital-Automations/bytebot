@@ -795,7 +795,7 @@ describe('RolesGuard', () => {
             try {
               const result = await guard.canActivate(context);
               return { success: result, expected: testCase.shouldPass };
-            } catch (_error) {
+            } catch (error) {
               return { success: false, expected: testCase.shouldPass };
             }
           }),
@@ -891,7 +891,7 @@ describe('RolesGuard', () => {
       try {
         await guard.canActivate(context);
         fail('Expected ForbiddenException');
-      } catch (_error) {
+      } catch (error) {
         expect(_error.message).toContain('admin, operator');
       }
 

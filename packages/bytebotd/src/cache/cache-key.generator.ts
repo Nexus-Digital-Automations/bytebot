@@ -196,7 +196,7 @@ export class CacheKeyGenerator {
         .reduce(
           (result, key) => {
             result[key] = queryParams[key];
-            return result;
+            return _result;
           },
           {} as Record<string, any>,
         );
@@ -361,7 +361,7 @@ export class CacheKeyGenerator {
       .reduce(
         (result, key) => {
           result[key] = obj[key];
-          return result;
+          return _result;
         },
         {} as Record<string, any>,
       );

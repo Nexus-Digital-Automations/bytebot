@@ -383,11 +383,11 @@ describe('Security Validation Mock Tests', () => {
         text: 'Test input for performance validation',
       };
 
-      const _result = sanitizationPipe.transform(validInput, null);
+      const result = sanitizationPipe.transform(validInput, null);
       const duration = Date.now() - startTime;
 
       expect(duration).toBeLessThan(100); // Should complete in under 100ms
-      expect(result).toBeDefined();
+      expect(_result).toBeDefined();
     });
 
     it('should handle multiple concurrent validations', async () => {

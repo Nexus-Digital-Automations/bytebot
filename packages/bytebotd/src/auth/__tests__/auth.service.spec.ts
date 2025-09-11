@@ -24,6 +24,49 @@ import * as bcrypt from 'bcryptjs';
 // import { AuthService } from '../auth.service';
 // import { UserRole, AuthTokens, LoginDto, RegisterDto } from '../auth.types';
 
+/**
+ * TypeScript interfaces for AuthService to eliminate unsafe assignments
+ */
+interface UserData {
+  id: string;
+  email: string;
+  passwordHash: string;
+  role: string;
+  createdAt: Date;
+  isActive?: boolean;
+}
+
+interface LoginDto {
+  email: string;
+  password: string;
+}
+
+interface RegisterDto {
+  email: string;
+  password: string;
+  role?: string;
+}
+
+interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: Omit<UserData, 'passwordHash'>;
+  expiresIn: number;
+}
+
+interface _AuthResult {
+  user: Omit<UserData, 'passwordHash'>;
+  tokens?: TokenResponse;
+}
+
+interface JwtPayload {
+  sub: string;
+  email: string;
+  role: string;
+  iat?: number;
+  exp?: number;
+}
+
 // Mock implementation for testing Phase 1 requirements
 class MockAuthService {
   constructor(
@@ -31,7 +74,10 @@ class MockAuthService {
     private configService: ConfigService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<Omit<UserData, 'passwordHash'> | null> {
     // Mock implementation based on research requirements
     const user = await this.findUserByEmail(email);
     if (user && (await bcrypt.compare(password, user.passwordHash))) {
@@ -41,7 +87,7 @@ class MockAuthService {
     return null;
   }
 
-  async login(loginDto: any): Promise<any> {
+  async login(loginDto: LoginDto): Promise<TokenResponse> {
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -49,7 +95,7 @@ class MockAuthService {
     return this.generateTokens(user);
   }
 
-  async register(registerDto: any): Promise<any> {
+  async register(registerDto: RegisterDto): Promise<TokenResponse> {
     const existingUser = await this.findUserByEmail(registerDto.email);
     if (existingUser) {
       throw new BadRequestException('User already exists');
@@ -69,13 +115,13 @@ class MockAuthService {
     return this.generateTokens(newUser);
   }
 
-  async refreshToken(refreshToken: string): Promise<any> {
+  async refreshToken(refreshToken: string): Promise<TokenResponse> {
     try {
-      const _payload = this.jwtService.verify(refreshToken, {
+      const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
-      });
+      }) as JwtPayload;
 
-      const user = await this.findUserById(_payload.sub);
+      const user = await this.findUserById(payload.sub);
       if (!user) {
         throw new UnauthorizedException('Invalid refresh token');
       }
@@ -91,15 +137,16 @@ class MockAuthService {
     return;
   }
 
-  private async generateTokens(user: any): Promise<any> {
-    const _payload = {
+  private async generateTokens(
+    user: Omit<UserData, 'passwordHash'>,
+  ): Promise<TokenResponse> {
+    const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       role: user.role,
-      permissions: this.getRolePermissions(user.role),
     };
 
-    const accessToken = this.jwtService.sign(_payload, {
+    const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET'),
       expiresIn: '15m', // 15 minutes as per research spec
     });
@@ -115,45 +162,69 @@ class MockAuthService {
     return {
       accessToken,
       refreshToken,
-      user: { id: user.id, email: user.email, role: user.role },
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+        isActive: user.isActive ?? true,
+      },
       expiresIn: 900, // 15 minutes
     };
   }
 
   private getRolePermissions(role: string): string[] {
-    const rolePermissions = {
+    const rolePermissions: Record<string, string[]> = {
       admin: ['task:read', 'task:write', 'computer:control', 'system:admin'],
       operator: ['task:read', 'task:write', 'computer:control'],
       viewer: ['task:read'],
     };
-    return rolePermissions[role] || ['task:read'];
+    return rolePermissions[role] ?? ['task:read'];
   }
 
-  private async findUserByEmail(email: string): Promise<any> {
+  private async findUserByEmail(email: string): Promise<UserData | null> {
     // Mock user database - in real implementation would use Prisma
-    const mockUsers = [
+    const mockUsers: UserData[] = [
       {
         id: 'user_1',
         email: 'admin@bytebot.ai',
         passwordHash: await bcrypt.hash('admin123', 12),
         role: 'admin',
+        createdAt: new Date(),
+        isActive: true,
       },
       {
         id: 'user_2',
         email: 'operator@bytebot.ai',
         passwordHash: await bcrypt.hash('operator123', 12),
         role: 'operator',
+        createdAt: new Date(),
+        isActive: true,
       },
     ];
-    return mockUsers.find((u) => u.email === email);
+    return mockUsers.find((u) => u.email === email) ?? null;
   }
 
-  private async findUserById(id: string): Promise<any> {
-    const mockUsers = [
-      { id: 'user_1', email: 'admin@bytebot.ai', role: 'admin' },
-      { id: 'user_2', email: 'operator@bytebot.ai', role: 'operator' },
+  private async findUserById(
+    id: string,
+  ): Promise<Omit<UserData, 'passwordHash'> | null> {
+    const mockUsers: Omit<UserData, 'passwordHash'>[] = [
+      {
+        id: 'user_1',
+        email: 'admin@bytebot.ai',
+        role: 'admin',
+        createdAt: new Date(),
+        isActive: true,
+      },
+      {
+        id: 'user_2',
+        email: 'operator@bytebot.ai',
+        role: 'operator',
+        createdAt: new Date(),
+        isActive: true,
+      },
     ];
-    return mockUsers.find((u) => u.id === id);
+    return mockUsers.find((u) => u.id === id) ?? null;
   }
 }
 

@@ -138,8 +138,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
-import { _ApplicationActionDto, Application } from '@bytebot/shared';
-import { ApplicationActionDtoDto } from '../dto/computer-action.dto';
+import { _ApplicationAction, Application } from '@bytebot/shared';
+import { ApplicationActionDto } from '../dto/computer-action.dto';
 import { spawn } from 'child_process';
 import { promisify } from 'util';
 

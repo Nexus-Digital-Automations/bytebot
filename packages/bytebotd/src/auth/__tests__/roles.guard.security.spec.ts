@@ -212,7 +212,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         // If it passes, verify it's because of proper role validation, not confusion
         const request = context.switchToHttp().getRequest();
         expect(request.user.role).toBe(UserRole._ADMIN);
-      } catch (_error) {
+      } catch (error) {
         // Should throw ForbiddenException if role validation is strict
         expect(_error).toBeInstanceOf(ForbiddenException);
       }
@@ -283,9 +283,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
         }
 
         try {
-          const _result = await guard.canActivate(context);
+          const result = await guard.canActivate(context);
           return { success: true, index: _index };
-        } catch (_error) {
+        } catch (error) {
           return { success: false, index: _index, _error: _error.message };
         }
       });
@@ -422,7 +422,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
         try {
           await guard.canActivate(context);
-        } catch (_error) {
+        } catch (error) {
           // Expected for non-admin users
         }
 
@@ -593,9 +593,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
         );
 
         try {
-          const _result = await guard.canActivate(context);
+          const result = await guard.canActivate(context);
           return { success: true, userId: user.id };
-        } catch (_error) {
+        } catch (error) {
           return { success: false, userId: user.id, _error: _error.message };
         }
       });
@@ -654,9 +654,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
         }
 
         try {
-          const _result = await guard.canActivate(context);
+          const result = await guard.canActivate(context);
           return { success: true, index: _index };
-        } catch (_error) {
+        } catch (error) {
           return { success: false, index: _index };
         }
       });

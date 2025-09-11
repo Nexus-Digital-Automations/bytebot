@@ -269,7 +269,7 @@ describe('Controller Security Integration Tests', () => {
         const user = jwtService.verifyAsync(token);
         req.user = user;
         next();
-      } catch (_error) {
+      } catch (error) {
         return res.status(401).json({
           message: 'Invalid or expired token',
           _error: 'TOKEN_INVALID',
@@ -861,7 +861,7 @@ describe('Controller Security Integration Tests', () => {
         'User-Agent': 'Normal-Agent\r\nX-Evil-Header: injected',
       };
 
-      const _response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .get('/api/protected')
         .set(maliciousHeaders)
         .expect((res) => {
@@ -887,7 +887,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of splittingPayloads) {
-        const _response = await request(app.getHttpServer())
+        const response = await request(app.getHttpServer())
           .get('/api/users/search')
           .query({ q: _payload })
           .set('Authorization', 'Bearer operator-token')
@@ -908,7 +908,7 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Testing request smuggling prevention`);
 
       // Attempt request smuggling with conflicting headers
-      const _response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .set('Content-Length', '100')

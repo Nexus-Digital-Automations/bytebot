@@ -526,7 +526,7 @@ export class DatabaseInterceptor implements NestInterceptor {
           totalCacheableQueries;
       }
     } catch (_error) {
-      this.logger._error(
+      this.logger.error(
         `Failed to record database metrics: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
       );
     }

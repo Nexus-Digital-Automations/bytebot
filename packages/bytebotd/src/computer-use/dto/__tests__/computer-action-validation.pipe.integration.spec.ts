@@ -197,7 +197,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
 
         try {
           await pipe.transform(input, {} as any);
-        } catch (_error) {
+        } catch (error) {
           // Ignore validation errors for incomplete inputs
         }
 
@@ -239,7 +239,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       try {
         await pipe.transform(maliciousInput, {} as any);
         fail('Should have thrown BadRequestException');
-      } catch (_error) {
+      } catch (error) {
         expect(_error).toBeInstanceOf(BadRequestException);
         expect(_error.response.message).toContain('security threats detected');
         expect(_error.response.threatTypes).toContain('ADVANCED_XSS');
@@ -267,7 +267,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       try {
         await pipe.transform(maliciousInput, {} as any);
         fail('Should have thrown BadRequestException');
-      } catch (_error) {
+      } catch (error) {
         expect(_error.response).toHaveProperty('message');
         expect(_error.response).toHaveProperty('operationId');
         expect(_error.response).toHaveProperty('threatTypes');

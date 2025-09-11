@@ -332,7 +332,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
         try {
           await guard.canActivate(context);
-        } catch (_error) {
+        } catch (error) {
           // Expected for failing scenarios
         }
 

@@ -816,7 +816,7 @@ describe('ComputerUseService', () => {
 
         (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.path).toBe('/home/user/Desktop/relative/test.txt');
       });
@@ -829,7 +829,7 @@ describe('ComputerUseService', () => {
           data: testData,
         };
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -844,7 +844,7 @@ describe('ComputerUseService', () => {
           data: 'invalid-base64-data',
         };
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain('Invalid base64 data');
@@ -861,7 +861,7 @@ describe('ComputerUseService', () => {
         (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
         mockExecAsync.mockRejectedValue(new Error('Copy failed'));
 
-        const _result = (await service.action(action)) as FileWriteResult;
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(fs.unlink).toHaveBeenCalled();
@@ -908,7 +908,7 @@ describe('ComputerUseService', () => {
           .mockResolvedValueOnce({ stdout: '' })
           .mockResolvedValueOnce({ stdout: '4 1609459200' });
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(true);
       });
@@ -925,7 +925,7 @@ describe('ComputerUseService', () => {
           .mockResolvedValueOnce({ stdout: '' })
           .mockResolvedValueOnce({ stdout: '8 1609459200' });
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.mediaType).toBe('image/png');
       });
@@ -936,7 +936,7 @@ describe('ComputerUseService', () => {
           path: '/etc/shadow',
         };
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
@@ -952,7 +952,7 @@ describe('ComputerUseService', () => {
 
         mockExecAsync.mockRejectedValue(new Error('File not found'));
 
-        const _result = (await service.action(action)) as FileReadResult;
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain('File read failed');
@@ -1079,10 +1079,10 @@ describe('ComputerUseService', () => {
 
         try {
           await service.action(action);
-        } catch (_error) {
+        } catch (error) {
           expect(_error).toBeInstanceOf(Error);
-          expect(__error.message).toContain('Failed to execute move_mouse');
-          expect(__error.message).toContain('NUT service _error');
+          expect(_error.message).toContain('Failed to execute move_mouse');
+          expect(_error.message).toContain('NUT service _error');
         }
       });
     });
@@ -1126,7 +1126,7 @@ describe('ComputerUseService', () => {
         data: 'invalid-base64',
       };
 
-      const _result = (await service.action(action)) as FileWriteResult;
+      const result = (await service.action(action)) as FileWriteResult;
 
       expect(result.success).toBe(false);
       expect(result.message).toContain('Invalid base64 data');

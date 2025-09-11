@@ -118,7 +118,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     response.setHeader('X-Frame-Options', 'DENY');
 
     // Send secure response
-    response.status(secureResponse.statusCode).json(secureResponse);
+    _response.response.status(secureResponse.statusCode).json(secureResponse);
   }
 
   /**

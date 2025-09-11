@@ -185,7 +185,7 @@ describe('MetricsService', () => {
   describe('Placeholder Methods', () => {
     it('should handle cache operation recording', () => {
       const operation = 'get';
-      const _result = 'hit';
+      const result = 'hit';
       const duration = 5;
 
       expect(() => {

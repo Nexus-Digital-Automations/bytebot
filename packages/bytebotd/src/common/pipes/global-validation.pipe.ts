@@ -175,7 +175,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
     } catch (_error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger._error(`[${operationId}] BytebotD validation failed`, {
+      this.logger.error(`[${operationId}] BytebotD validation failed`, {
         operationId,
         type: metadata.type,
         metatype: metadata.metatype?._name,
