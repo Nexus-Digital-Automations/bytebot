@@ -151,16 +151,16 @@ const mockSession = {
   expires: "2024-01-01T00:00:00.000Z",
 };
 
-const ___mockUseSession = jest.fn();
+const __mockUseSession = jest.fn();
 const _mockSignOut = jest.fn();
 
 jest.mock("next-auth/react", () => ({
-  useSession: ___mockUseSession,
+  useSession: __mockUseSession,
   signOut: _mockSignOut,
 }));
 
 // Set default mock implementation
-___mockUseSession.mockReturnValue({
+__mockUseSession.mockReturnValue({
   data: mockSession,
   status: "authenticated",
 });
@@ -355,7 +355,7 @@ describe("Header Component", () => {
         },
       };
 
-      ___mockUseSession.mockReturnValue({
+      __mockUseSession.mockReturnValue({
         data: sessionWithoutImage,
         status: "authenticated",
       });
@@ -405,7 +405,7 @@ describe("Header Component", () => {
     });
 
     it("shows login button when not authenticated", () => {
-      ___mockUseSession.mockReturnValue({
+      __mockUseSession.mockReturnValue({
         data: null,
         status: "unauthenticated",
       });
@@ -645,7 +645,6 @@ describe("Header Component", () => {
       const renderFunction = () => TestUtils.renderComponent(<Header />);
 
       // Performance test - ensure render time is reasonable
-      // expect(renderFunction).toRenderWithinTime(50); // Custom matcher not available
       expect(renderFunction).toBeDefined();
     });
 
@@ -685,7 +684,7 @@ describe("Header Component", () => {
 
   describe("Error Handling", () => {
     it("handles missing session data gracefully", () => {
-      ___mockUseSession.mockReturnValue({
+      __mockUseSession.mockReturnValue({
         data: null,
         status: "loading",
       });

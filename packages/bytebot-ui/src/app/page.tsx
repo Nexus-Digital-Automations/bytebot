@@ -39,7 +39,7 @@ const StockPhoto: React.FC<StockPhotoProps> = React.memo(
 
 // FileWithBase64 interface is imported from @/types - removing duplicate definition
 
-export default function Home(): JSX.Element {
+export default function Home(): React.JSX.Element {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [models, setModels] = useState<Model[]>([]);

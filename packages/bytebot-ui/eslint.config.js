@@ -21,7 +21,6 @@ import tseslint from "typescript-eslint";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
-import nextConfig from "eslint-config-next";
 
 export default tseslint.config(
   // Base configurations - foundational rules

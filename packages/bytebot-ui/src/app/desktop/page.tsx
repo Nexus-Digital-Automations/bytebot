@@ -1,10 +1,9 @@
 "use client";
 
-import type { JSX } from "react";
 import { Header } from "@/components/layout/Header";
 import { DesktopContainer } from "@/components/ui/desktop-container";
 
-export default function DesktopPage(): JSX.Element {
+export default function DesktopPage(): React.JSX.Element {
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <Header />

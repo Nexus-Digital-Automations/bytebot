@@ -51,7 +51,7 @@ function Button({
   iconPosition = "left",
   children,
   ...props
-}: ButtonProps): JSX.Element {
+}: ButtonProps): React.JSX.Element {
   const Comp = asChild ? Slot : "button";
 
   return (

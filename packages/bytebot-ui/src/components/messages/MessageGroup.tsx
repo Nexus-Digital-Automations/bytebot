@@ -13,7 +13,7 @@ export function MessageGroup({
   group,
   taskStatus,
   messageIdToIndex,
-}: MessageGroupProps): JSX.Element {
+}: MessageGroupProps): React.JSX.Element {
   if (group.role === Role.ASSISTANT) {
     return (
       <AssistantMessage

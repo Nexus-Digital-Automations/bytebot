@@ -33,7 +33,7 @@ function ToolDetailsNormal({
   block,
 }: {
   block: ComputerToolUseContentBlock;
-}): JSX.Element {
+}): React.JSX.Element {
   const baseClasses =
     "px-1 py-0.5 text-[12px] text-bytebot-bronze-light-11 bg-bytebot-red-light-1 border border-bytebot-bronze-light-7 rounded-md";
 
@@ -86,9 +86,9 @@ function ToolDetailsNormal({
             typeof (point as Coordinates).y === "number",
         ) && (
           <p className={baseClasses}>
-            From: {block.input.path[0].x}, {block.input.path[0].y} → To:{" "}
-            {block.input.path[block.input.path.length - 1].x},{" "}
-            {block.input.path[block.input.path.length - 1].y}
+            From: {block.input.path[0]?.x}, {block.input.path[0]?.y} → To:{" "}
+            {block.input.path[block.input.path.length - 1]?.x},{" "}
+            {block.input.path[block.input.path.length - 1]?.y}
           </p>
         )}
 
@@ -109,7 +109,7 @@ function ToolDetailsNormal({
 
 export function ComputerToolContentNormal({
   block,
-}: ComputerToolContentNormalProps): JSX.Element | null {
+}: ComputerToolContentNormalProps): React.JSX.Element | null {
   // Don't render screenshot tool use blocks here - they're handled separately
   if (getLabel(block) === "Screenshot") {
     return null;

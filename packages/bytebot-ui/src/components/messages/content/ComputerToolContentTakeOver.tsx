@@ -19,7 +19,7 @@ function ToolDetailsTakeOver({
   block,
 }: {
   block: ComputerToolUseContentBlock;
-}): JSX.Element {
+}): React.JSX.Element {
   const baseClasses =
     "px-1 py-0.5 text-xs text-fuchsia-600 bg-bytebot-red-light-1 border border-bytebot-bronze-light-7 rounded-md";
 
@@ -66,9 +66,9 @@ function ToolDetailsTakeOver({
             typeof (point as Coordinates).y === "number",
         ) && (
           <p className={baseClasses}>
-            From: {block.input.path[0].x}, {block.input.path[0].y} → To:{" "}
-            {block.input.path[block.input.path.length - 1].x},{" "}
-            {block.input.path[block.input.path.length - 1].y}
+            From: {block.input.path[0]?.x}, {block.input.path[0]?.y} → To:{" "}
+            {block.input.path[block.input.path.length - 1]?.x},{" "}
+            {block.input.path[block.input.path.length - 1]?.y}
           </p>
         )}
 
@@ -84,7 +84,7 @@ function ToolDetailsTakeOver({
 
 export function ComputerToolContentTakeOver({
   block,
-}: ComputerToolContentTakeOverProps): JSX.Element | null {
+}: ComputerToolContentTakeOverProps): React.JSX.Element | null {
   // Don't render screenshot tool use blocks here - they're handled separately
   if (getLabel(block) === "Screenshot") {
     return null;

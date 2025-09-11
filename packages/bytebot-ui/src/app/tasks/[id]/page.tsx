@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { VirtualDesktopStatus } from "@/components/VirtualDesktopStatusHeader";
 
-export default function TaskPage(): JSX.Element {
+export default function TaskPage(): React.JSX.Element {
   const params = useParams();
   const router = useRouter();
   const taskId = params.id as string;

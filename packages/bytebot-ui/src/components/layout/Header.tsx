@@ -12,7 +12,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { usePathname } from "next/navigation";
 
-export function Header(): JSX.Element {
+export function Header(): React.JSX.Element {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();

@@ -6,7 +6,7 @@ function Input({
   className,
   type,
   ...props
-}: React.ComponentProps<"input">): JSX.Element {
+}: React.ComponentProps<"input">): React.JSX.Element {
   return (
     <input
       type={type}

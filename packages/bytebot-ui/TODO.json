@@ -2,9 +2,9 @@
   "project": "unknown",
   "tasks": [
     {
-      "id": "error_1757574452937_pijzcruhl",
-      "title": "Fix missing return type annotations in bytebot-ui package",
-      "description": "Add return type annotations to functions to resolve @typescript-eslint/explicit-function-return-type and @typescript-eslint/explicit-module-boundary-types warnings. Focus on React components (JSX.Element), async functions (Promise<Type>), and utility functions with proper TypeScript types.",
+      "id": "error_1757572910207_2bu35blsl",
+      "title": "Fix TypeScript compilation errors in test suite",
+      "description": "Resolve ALL TypeScript compilation errors in bytebot-ui test files: Header.test.tsx (__mockUseSession undefined variables lines 420,470,744, missing toRenderWithinTime matcher line 707), ChatContainer.test.tsx (ref type conversion errors, mock assignments, GroupedMessages type incompatibilities), fix Jest mock type definitions and integration, add custom Jest matcher types, fix React Testing Library assignments. Run tsc --noEmit, npm run lint, npm test for validation.",
       "priority": "medium",
       "category": "error",
       "status": "in_progress",
@@ -14,36 +14,20 @@
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-11T07:07:32.937Z",
+      "created_at": "2025-09-11T06:41:50.207Z",
       "auto_research_created": false,
-      "assigned_agent": "development_session_1757574430615_1_general_0ee319eb",
-      "started_at": "2025-09-11T07:07:49.518Z",
-      "claimed_by": "development_session_1757574430615_1_general_0ee319eb",
+      "assigned_agent": "development_session_1757575790848_1_general_928cb547",
+      "started_at": "2025-09-11T07:31:02.036Z",
+      "claimed_by": "development_session_1757575790848_1_general_928cb547",
       "agent_assignment_history": [
         {
-          "agentId": "development_session_1757574430615_1_general_0ee319eb",
+          "agentId": "development_session_1757575790848_1_general_928cb547",
           "role": "primary",
-          "assignedAt": "2025-09-11T07:07:49.518Z",
+          "assignedAt": "2025-09-11T07:31:02.036Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
       ]
-    },
-    {
-      "id": "error_1757572910207_2bu35blsl",
-      "title": "Fix TypeScript compilation errors in test suite",
-      "description": "Resolve ALL TypeScript compilation errors in bytebot-ui test files: Header.test.tsx (__mockUseSession undefined variables lines 420,470,744, missing toRenderWithinTime matcher line 707), ChatContainer.test.tsx (ref type conversion errors, mock assignments, GroupedMessages type incompatibilities), fix Jest mock type definitions and integration, add custom Jest matcher types, fix React Testing Library assignments. Run tsc --noEmit, npm run lint, npm test for validation.",
-      "priority": "medium",
-      "category": "error",
-      "status": "pending",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-11T06:41:50.207Z",
-      "auto_research_created": false
     },
     {
       "id": "error_1757572904545_5bt10qwjp",
@@ -388,6 +372,27 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-11T07:24:58.310Z",
       "sessionId": "session_1757575498309",
+      "metadata": {}
+    },
+    "development_session_1757575790848_1_general_928cb547": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T07:29:50.848Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T07:29:50.848Z",
+      "sessionId": "session_1757575790848",
       "metadata": {}
     }
   },

@@ -11,7 +11,7 @@ interface ComputerToolContentProps {
 export function ComputerToolContent({
   block,
   isTakeOver = false,
-}: ComputerToolContentProps): JSX.Element {
+}: ComputerToolContentProps): React.JSX.Element {
   if (isTakeOver) {
     return <ComputerToolContentTakeOver block={block} />;
   }

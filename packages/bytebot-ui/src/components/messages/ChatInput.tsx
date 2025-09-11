@@ -7,13 +7,7 @@ import {
   Cancel01Icon,
 } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
-
-interface FileWithBase64 {
-  name: string;
-  base64: string;
-  type: string;
-  size: number;
-}
+import { FileWithBase64 } from "@/types";
 
 interface ChatInputProps {
   input: string;
@@ -33,7 +27,7 @@ export function ChatInput({
   onFileUpload,
   minLines = 1,
   placeholder = "Give Bytebot a task to work on...",
-}: ChatInputProps): JSX.Element {
+}: ChatInputProps): React.JSX.Element {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<FileWithBase64[]>([]);
@@ -87,8 +81,8 @@ export function ChatInput({
 
       newFiles.push({
         name: file.name,
-        base64,
-        type: file.type,
+        base64: base64 as `data:${string};base64,${string}`,
+        type: file.type as `${string}/${string}`,
         size: file.size,
       });
     }

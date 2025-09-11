@@ -11,7 +11,7 @@ import { Task } from "@/types";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-function TasksPageContent(): JSX.Element {
+function TasksPageContent(): React.JSX.Element {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -49,11 +49,20 @@ function TasksPageContent(): JSX.Element {
       try {
         const statuses =
           activeTab === "ALL" ? undefined : TAB_CONFIGS[activeTab].statuses;
-        const result = await fetchTasks({
+        const fetchParams: {
+          page: number;
+          limit: number;
+          statuses?: string[];
+        } = {
           page: currentPage,
           limit: PAGE_SIZE,
-          statuses,
-        });
+        };
+
+        if (statuses !== undefined) {
+          fetchParams.statuses = statuses.map((status) => status.toString());
+        }
+
+        const result = await fetchTasks(fetchParams);
         setTasks(result.tasks);
         setTotal(result.total);
         setTotalPages(result.totalPages);
@@ -142,7 +151,7 @@ function TasksPageContent(): JSX.Element {
             />
           )}
 
-          {((): JSX.Element => {
+          {((): React.JSX.Element => {
             if (isLoading) {
               return (
                 <div className="p-8 text-center">
@@ -198,7 +207,7 @@ function TasksPageContent(): JSX.Element {
   );
 }
 
-function TasksPageFallback(): JSX.Element {
+function TasksPageFallback(): React.JSX.Element {
   return (
     <div className="p-8 text-center">
       <div className="border-bytebot-bronze-light-5 border-t-bytebot-bronze mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4"></div>
@@ -207,7 +216,7 @@ function TasksPageFallback(): JSX.Element {
   );
 }
 
-export default function TasksPage(): JSX.Element {
+export default function TasksPage(): React.JSX.Element {
   return (
     <Suspense fallback={<TasksPageFallback />}>
       <TasksPageContent />

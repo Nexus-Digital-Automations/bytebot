@@ -8,7 +8,7 @@ interface ImageContentProps {
   block: ImageContentBlock;
 }
 
-export function ImageContent({ block }: ImageContentProps): JSX.Element {
+export function ImageContent({ block }: ImageContentProps): React.JSX.Element {
   // Use a fixed size for the image since width/height are not available on block.source
   const width = 250;
   const height = 250;

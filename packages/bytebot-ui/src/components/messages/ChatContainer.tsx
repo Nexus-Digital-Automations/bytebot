@@ -38,7 +38,7 @@ export function ChatContainer({
   isLoadingMoreMessages,
   hasMoreMessages,
   loadMoreMessages,
-}: ChatContainerProps): JSX.Element {
+}: ChatContainerProps): React.JSX.Element {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Infinite scroll handler
@@ -93,7 +93,7 @@ export function ChatContainer({
   };
 
   // Determine what to render based on state
-  const renderContent = (): JSX.Element => {
+  const renderContent = (): React.JSX.Element => {
     if (isLoadingSession) {
       return (
         <div className="bg-bytebot-bronze-light-3 border-bytebot-bronze-light-7 flex h-full min-h-80 items-center justify-center overflow-hidden rounded-lg border">

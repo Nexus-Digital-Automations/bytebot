@@ -8,7 +8,7 @@ interface MessageAvatarProps {
   role: Role;
 }
 
-export function MessageAvatar({ role }: MessageAvatarProps): JSX.Element {
+export function MessageAvatar({ role }: MessageAvatarProps): React.JSX.Element {
   const baseClasses =
     "flex flex-shrink-0 items-center justify-center rounded-md border border-bytebot-bronze-light-7 bg-bytebot-bronze-light-1 h-[28px] w-[28px]";
 

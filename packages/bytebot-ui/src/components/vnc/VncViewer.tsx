@@ -7,7 +7,7 @@ interface VncViewerProps {
   viewOnly?: boolean;
 }
 
-export function VncViewer({ viewOnly = true }: VncViewerProps): JSX.Element {
+export function VncViewer({ viewOnly = true }: VncViewerProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const [VncComponent, setVncComponent] = useState<React.ComponentType<{
     rfbOptions?: Record<string, unknown>;

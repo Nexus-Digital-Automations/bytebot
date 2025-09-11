@@ -16,7 +16,7 @@ export function AssistantMessage({
   group,
   taskStatus,
   messageIdToIndex,
-}: AssistantMessageProps): JSX.Element {
+}: AssistantMessageProps): React.JSX.Element {
   return (
     <div
       className={cn(
@@ -80,7 +80,7 @@ export function AssistantMessage({
                 })}
                 <MessageContent
                   content={message.content}
-                  isTakeOver={message.take_over}
+                  isTakeOver={message.take_over ?? false}
                 />
               </div>
             ))}
@@ -127,7 +127,7 @@ export function AssistantMessage({
               })}
               <MessageContent
                 content={message.content}
-                isTakeOver={message.take_over}
+                isTakeOver={message.take_over ?? false}
               />
             </div>
           ))}

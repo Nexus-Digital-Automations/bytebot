@@ -176,13 +176,12 @@ export class MessagesService {
           contentBlocks.every((block) => isUserActionContentBlock(block))
         ) {
           // Extract computer tool use (take over actions) from the user action content blocks and show them as assistant messages with take_over flag
-          processedMessage.content = contentBlocks
+          const filteredContent = contentBlocks
             .flatMap((block) => {
               return block.content;
             })
-            .filter((block) =>
-              isComputerToolUseContentBlock(block),
-            ) as MessageContentBlock[];
+            .filter((block) => isComputerToolUseContentBlock(block));
+          processedMessage.content = filteredContent as Prisma.JsonValue;
 
           processedMessage.role = Role._ASSISTANT as Role;
           processedMessage.take_over = true;

@@ -16,7 +16,7 @@ interface UserMessageProps {
 export function UserMessage({
   group,
   messageIdToIndex,
-}: UserMessageProps): JSX.Element {
+}: UserMessageProps): React.JSX.Element {
   if (messageIdToIndex[group.messages[0].id] === 0) {
     return (
       <div className="bg-bytebot-bronze-light-4 sticky top-0 z-10">
