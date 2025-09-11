@@ -24,7 +24,7 @@ describe('HealthService', () => {
     }).compile();
 
     service = module.get<HealthService>(HealthService);
-    logger = module.get<Logger>(Logger) as jest.Mocked<Logger>;
+    _logger = module.get<Logger>(Logger) as jest.Mocked<Logger>;
   });
 
   describe('Service Initialization', () => {
@@ -173,10 +173,10 @@ describe('HealthService', () => {
         expect(result.modules).toHaveProperty('modules');
 
         const _modules = result.modules.modules;
-        expect(modules).toHaveProperty('computer-use', true);
-        expect(modules).toHaveProperty('input-tracking', true);
-        expect(modules).toHaveProperty('cua-integration', true);
-        expect(modules).toHaveProperty('health', true);
+        expect(_modules).toHaveProperty('computer-use', true);
+        expect(_modules).toHaveProperty('input-tracking', true);
+        expect(_modules).toHaveProperty('cua-integration', true);
+        expect(_modules).toHaveProperty('health', true);
       });
     });
   });
@@ -209,7 +209,7 @@ describe('HealthService', () => {
     describe('Database Ping', () => {
       it('should simulate database ping successfully', async () => {
         const _result = await (service as any).performDatabasePing();
-        expect(result).toBe(true);
+        expect(_result).toBe(true);
       });
     });
 
@@ -220,9 +220,9 @@ describe('HealthService', () => {
           'http://test.com/health',
         );
 
-        expect(result).toHaveProperty('status');
-        expect(result).toHaveProperty('responseTime');
-        expect(['healthy', 'unhealthy']).toContain(result.status);
+        expect(_result).toHaveProperty('status');
+        expect(_result).toHaveProperty('responseTime');
+        expect(['healthy', 'unhealthy']).toContain(_result.status);
       });
     });
 

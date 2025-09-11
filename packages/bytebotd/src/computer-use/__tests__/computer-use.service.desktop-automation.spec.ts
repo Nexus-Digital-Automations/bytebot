@@ -507,7 +507,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
           coordinates: { x: test.x, y: test.y },
         };
 
-        const result = await service.action(moveAction);
+        const _result = await service.action(moveAction);
 
         if (test.shouldSucceed) {
           // Action should complete without throwing errors
@@ -873,7 +873,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         button: 'left',
       };
 
-      const result = await service.action(coordinatedAction);
+      const _result = await service.action(coordinatedAction);
 
       // Action should complete without throwing errors
       await expect(service.action(coordinatedAction)).resolves.not.toThrow();

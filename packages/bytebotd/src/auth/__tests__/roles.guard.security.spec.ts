@@ -655,9 +655,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
         try {
           const _result = await guard.canActivate(context);
-          return { success: true, index };
+          return { success: true, index: _index };
         } catch (_error) {
-          return { success: false, index };
+          return { success: false, index: _index };
         }
       });
 

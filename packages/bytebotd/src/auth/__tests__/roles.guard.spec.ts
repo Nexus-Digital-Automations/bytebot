@@ -165,7 +165,7 @@ class MockRolesGuard {
 
 describe('RolesGuard', () => {
   let guard: MockRolesGuard;
-  let _reflector: Reflector;
+  let reflector: Reflector;
 
   const operationId = `roles_guard_test_${Date.now()}`;
 
@@ -703,7 +703,7 @@ describe('RolesGuard', () => {
         .fill(null)
         .map((_, _i) =>
           createMockUser(UserRole._OPERATOR, [], {
-            id: `concurrent_user_${i}`,
+            id: `concurrent_user_${_i}`,
           }),
         );
 
@@ -892,7 +892,7 @@ describe('RolesGuard', () => {
         await guard.canActivate(context);
         fail('Expected ForbiddenException');
       } catch (_error) {
-        expect(__error.message).toContain('admin, operator');
+        expect(_error.message).toContain('admin, operator');
       }
 
       console.log(`[${testId}] Detailed error messages test completed`);

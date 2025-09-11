@@ -327,7 +327,7 @@ class Base64ImageCompressor {
     const _result = await this.compressToSize(base64String, compressionOptions);
 
     // If still too large, apply progressive resizing
-    if (result.sizeKB > targetSizeKB) {
+    if (_result.sizeKB > targetSizeKB) {
       const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
       const inputBuffer = Buffer.from(base64Data, 'base64');
 
@@ -337,7 +337,7 @@ class Base64ImageCompressor {
 
       let scale = 0.9; // Start with 90% of original size
 
-      while (result.sizeKB > targetSizeKB && scale > 0.3) {
+      while (_result.sizeKB > targetSizeKB && scale > 0.3) {
         const newWidth = Math.floor(originalWidth * scale);
         const newHeight = Math.floor(originalHeight * scale);
 
@@ -350,12 +350,12 @@ class Base64ImageCompressor {
 
         const resizedBase64 = resizedBuffer.toString('base64');
 
-        result = await this.compressToSize(resizedBase64, compressionOptions);
+        _result = await this.compressToSize(resizedBase64, compressionOptions);
         scale -= 0.1;
       }
     }
 
-    return result;
+    return _result;
   }
 
   /**
@@ -396,7 +396,7 @@ export async function compressPngBase64Under1MB(
     minQuality: 10,
   });
 
-  return result.base64;
+  return _result.base64;
 }
 
 // Export the class for more control

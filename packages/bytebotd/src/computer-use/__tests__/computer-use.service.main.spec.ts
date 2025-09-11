@@ -796,13 +796,13 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     describe('extractErrorMessage', () => {
       it('should extract message from Error instances', () => {
         // Arrange
-        const error = new Error('Test error message');
+        const _error = new Error('Test error message');
 
         // Act
         const _result = ErrorHandler.extractErrorMessage(_error);
 
         // Assert
-        expect(result).toBe('Test error message');
+        expect(_result).toBe('Test error message');
       });
 
       it('should handle string errors', () => {

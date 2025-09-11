@@ -33,7 +33,7 @@
 
 import { Module, Logger } from '@nestjs/common';
 import { McpModule } from '@rekog/mcp-nest';
-import { _ComputerUseModule } from '../computer-use/computer-use.module';
+import { ComputerUseModule } from '../computer-use/computer-use.module';
 import { ComputerUseTools } from './computer-use.tools';
 
 // Initialize module logger
@@ -57,7 +57,7 @@ const _logger = new Logger('BytebotMcpModule');
 
     // MCP server configuration with Bytebot-specific settings
     McpModule.forRoot({
-      _name: 'bytebotd', // MCP server identifier
+      name: 'bytebotd', // MCP server identifier
       version: '0.0.1', // API version for compatibility
       sseEndpoint: '/mcp', // Server-Sent Events endpoint path
     }),
@@ -68,11 +68,11 @@ const _logger = new Logger('BytebotMcpModule');
 })
 export class BytebotMcpModule {
   constructor() {
-    logger.log(
+    _logger.log(
       'BytebotMcpModule initialized - MCP server ready for connections',
     );
-    logger.log('MCP endpoints available at: /mcp (SSE)');
-    logger.log(
+    _logger.log('MCP endpoints available at: /mcp (SSE)');
+    _logger.log(
       'Available tool categories: mouse, keyboard, screen, file operations',
     );
   }

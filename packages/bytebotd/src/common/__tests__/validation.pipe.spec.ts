@@ -15,7 +15,10 @@
  * @coverage-target 95%+
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import {
+  Test as _Test,
+  TestingModule as _TestingModule,
+} from '@nestjs/testing';
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import {
   IsString,
@@ -641,7 +644,9 @@ describe('ValidationPipe', () => {
       } catch (_error) {
         expect(_error).toBeInstanceOf(BadRequestException);
         expect(__error.message).toContain('Validation failed');
-        expect(__error.message).toContain('email must be a valid email address');
+        expect(__error.message).toContain(
+          'email must be a valid email address',
+        );
         expect(__error.message).toContain(
           'password must be longer than or equal to 6 characters',
         );

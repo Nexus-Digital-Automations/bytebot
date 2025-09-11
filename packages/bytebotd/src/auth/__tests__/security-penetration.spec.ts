@@ -40,8 +40,8 @@ describe('Security Penetration Testing Suite', () => {
   let jwtAuthGuard: JwtAuthGuard;
   let rolesGuard: RolesGuard;
   let jwtService: JwtService;
-  let _configService: ConfigService;
-  let _reflector: Reflector;
+  let configService: ConfigService;
+  let reflector: Reflector;
   let module: TestingModule;
 
   const operationId = `penetration_test_${Date.now()}`;
@@ -166,7 +166,7 @@ describe('Security Penetration Testing Suite', () => {
           results.push({
             success: false,
             token: attackToken,
-            _error: __error.message,
+            _error: _error.message,
             time: Date.now() - attackStart,
           });
         }
@@ -203,7 +203,7 @@ describe('Security Penetration Testing Suite', () => {
           await targetFunction(token);
           results.push({ token, success: true });
         } catch (_error) {
-          results.push({ token, success: false, _error: __error.message });
+          results.push({ token, success: false, _error: _error.message });
         }
       }
 
@@ -235,7 +235,7 @@ describe('Security Penetration Testing Suite', () => {
             return {
               success: false,
               index,
-              _error: __error.message,
+              _error: _error.message,
               userRole: user.role,
             };
           }

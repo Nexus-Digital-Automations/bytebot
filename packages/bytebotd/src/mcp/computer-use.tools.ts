@@ -100,7 +100,7 @@ export class ComputerUseTools {
         operationId,
         toolName,
         executionTimeMs: executionTime,
-        result,
+        _result,
         timestamp: new Date().toISOString(),
       },
     );
@@ -124,7 +124,7 @@ export class ComputerUseTools {
       operationId,
       toolName,
       executionTimeMs: executionTime,
-      errorMessage: _error.message,
+      errorMessage: error.message,
       errorStack: error.stack,
       timestamp: new Date().toISOString(),
     });
@@ -170,7 +170,7 @@ export class ComputerUseTools {
         operationId,
         'computer_move_mouse',
         startTime,
-        result,
+        _result,
       );
 
       return { content: [{ type: 'text', text: 'mouse moved' }] };
@@ -257,7 +257,7 @@ export class ComputerUseTools {
         operationId,
         'computer_trace_mouse',
         startTime,
-        result,
+        _result,
       );
 
       return {
@@ -830,7 +830,7 @@ V, W, X, Y, Z
         operationId,
         'computer_screenshot',
         startTime,
-        result,
+        _result,
       );
 
       return {
