@@ -19,6 +19,7 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import {
   ASYNC_OPERATION_TIMEOUT_MS,
+  BYTES_PER_MB,
   DESKTOP_BREAKPOINT_PX,
   MEMORY_USAGE_THRESHOLD_MB,
   MOBILE_BREAKPOINT_PX,
@@ -161,7 +162,7 @@ expect.extend({
    */
   toRenderWithinTime(
     received: () => unknown,
-    maxMs = 100,
+    maxMs = PERFORMANCE_RENDER_THRESHOLD_COMPLEX_MS,
   ): jest.CustomMatcherResult {
     const startTime = performance.now();
 
@@ -196,7 +197,7 @@ expect.extend({
 // Performance monitoring utilities for UI components
 const performanceMonitor = {
   slowRenderThreshold: PERFORMANCE_RENDER_THRESHOLD_COMPLEX_MS, // 100ms for component renders
-  memoryLeakThreshold: MEMORY_USAGE_THRESHOLD_MB * 1024 * 1024, // 50MB
+  memoryLeakThreshold: MEMORY_USAGE_THRESHOLD_MB * BYTES_PER_MB, // 50MB
   interactionThreshold: USER_INTERACTION_TIMEOUT_MS, // 50ms for user interactions
 
   logSlowRender(componentName: string, duration: number): void {
@@ -238,7 +239,7 @@ const performanceMonitor = {
       // Only log in development, not during tests
       // eslint-disable-next-line no-console
       console.warn(
-        `⚠️ Memory leak detected in "${testName}": +${Math.round(heapDelta / 1024 / 1024)}MB heap`,
+        `⚠️ Memory leak detected in "${testName}": +${Math.round(heapDelta / BYTES_PER_MB)}MB heap`,
       );
     }
   },
@@ -513,7 +514,7 @@ export const TestUtils = {
 // Export test configuration
 export const testConfig = {
   slowRenderThreshold: PERFORMANCE_RENDER_THRESHOLD_COMPLEX_MS,
-  memoryLeakThreshold: MEMORY_USAGE_THRESHOLD_MB * 1024 * 1024,
+  memoryLeakThreshold: MEMORY_USAGE_THRESHOLD_MB * BYTES_PER_MB,
   interactionThreshold: USER_INTERACTION_TIMEOUT_MS,
   timeout: 30000,
 };

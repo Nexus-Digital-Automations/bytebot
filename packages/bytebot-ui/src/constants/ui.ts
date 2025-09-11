@@ -197,10 +197,17 @@ export const USER_INTERACTION_TIMEOUT_MS = 50;
  */
 export const TEST_COMPONENT_PERFORMANCE_LIMIT_MS = 150;
 
+// Time conversion constants
+const HOURS_PER_DAY = 24;
+const MINUTES_PER_HOUR = 60;
+const SECONDS_PER_MINUTE = 60;
+const MS_PER_SECOND = 1000;
+
 /**
  * Session expiry time in milliseconds (24 hours)
  */
-export const SESSION_EXPIRY_MS = 24 * 60 * 60 * 1000;
+export const SESSION_EXPIRY_MS =
+  HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;
 
 // =============================================================================
 // ADDITIONAL TEST CONSTANTS
