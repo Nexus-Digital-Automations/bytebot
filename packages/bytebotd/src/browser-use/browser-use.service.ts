@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, ChildProcess as _ChildProcess } from 'child_process';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';

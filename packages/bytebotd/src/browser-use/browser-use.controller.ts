@@ -40,7 +40,7 @@ import {
 import {
   CreateAsyncJobDto,
   AsyncJobResultDto,
-  AsyncJobStatus,
+  AsyncJobStatus as _AsyncJobStatus,
 } from './dto/async-job.dto';
 // Note: ResponseInterceptor and SecurityLoggingInterceptor imports removed as they don't exist in shared package
 

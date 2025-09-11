@@ -245,7 +245,7 @@ class Base64ImageCompressor {
         targetAchieved: finalSizeKB <= targetSizeKB,
       });
 
-      return result;
+      return _result;
     } catch (_error) {
       const totalTime = Date.now() - startTime;
       _logger.error(`[${operationId}] Compression failed`, {
