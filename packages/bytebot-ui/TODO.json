@@ -2,6 +2,36 @@
   "project": "unknown",
   "tasks": [
     {
+      "id": "error_1757578840793_amxxijonk",
+      "title": "Fix remaining 719 ESLint violations in bytebot-ui package - TypeScript safety continuation",
+      "description": "Continue ESLint violation resolution following magic numbers cleanup. Current state: 719 violations remaining, primarily TypeScript unsafe assignments, unsafe calls, and unsafe member access in test files. Focus on Header.test.tsx and other test files with systematic fixes for @typescript-eslint/no-unsafe-* warnings while maintaining test functionality.",
+      "priority": "high",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-ui/src/components/layout/__tests__/Header.test.tsx"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T08:20:40.793Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757578655224_1_general_1363e452",
+      "started_at": "2025-09-11T08:20:58.093Z",
+      "claimed_by": "development_session_1757578655224_1_general_1363e452",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757578655224_1_general_1363e452",
+          "role": "primary",
+          "assignedAt": "2025-09-11T08:20:58.093Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
       "id": "error_1757578107749_6rkezkyce",
       "title": "Fix bytebot-ui ESLint configuration - exclude Next.js build files",
       "description": "Fix ESLint parsing errors in bytebot-ui package by adding proper ignore patterns for Next.js build directories and files. The current configuration is trying to parse .next build files which causes parser errors. Add ignore patterns for .next/, build/, dist/, and other generated files.",
@@ -703,6 +733,27 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-11T07:56:20.931Z",
       "sessionId": "session_1757577380930",
+      "metadata": {}
+    },
+    "development_session_1757578655224_1_general_1363e452": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-11T08:17:35.225Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-11T08:17:35.225Z",
+      "sessionId": "session_1757578655224",
       "metadata": {}
     }
   },

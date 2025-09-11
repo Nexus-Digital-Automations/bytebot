@@ -5,6 +5,13 @@ import {
   extractScreenshots,
   getScreenshotForScrollPosition,
 } from "@/utils/screenshotUtils";
+import {
+  SCREENSHOT_DEBOUNCE_DELAY_MS,
+  SCREENSHOT_THUMBNAIL_SIZE_PX,
+  SCROLL_ANIMATION_DELAY_MS,
+  SCROLL_ANIMATION_DURATION_MS,
+  SCROLL_THRESHOLD_PX,
+} from "@/constants/ui";
 
 interface UseScrollScreenshotProps {
   messages: Message[];
@@ -42,7 +49,7 @@ export function useScrollScreenshot({
         } else {
           setCurrentScreenshot(screenshots[screenshots.length - 1]);
         }
-      }, 100);
+      }, SCROLL_ANIMATION_DELAY_MS);
     } else if (screenshots.length === 0) {
       setCurrentScreenshot(null);
     } else if (screenshots.length > 0 && currentScreenshot) {
@@ -52,7 +59,7 @@ export function useScrollScreenshot({
           const event = new Event("scroll");
           scrollContainerRef.current.dispatchEvent(event);
         }
-      }, 300);
+      }, SCROLL_ANIMATION_DURATION_MS);
     }
   }, [messages, scrollContainerRef, currentScreenshot]);
 
@@ -69,7 +76,7 @@ export function useScrollScreenshot({
       mutationTimeout = setTimeout(() => {
         const event = new Event("scroll");
         container.dispatchEvent(event);
-      }, 200);
+      }, SCREENSHOT_DEBOUNCE_DELAY_MS);
     });
 
     observer.observe(container, { childList: true, subtree: true });
@@ -88,13 +95,16 @@ export function useScrollScreenshot({
       }
 
       const now = Date.now();
-      if (now - lastScrollTime.current < 100) {
+      if (now - lastScrollTime.current < SCROLL_ANIMATION_DELAY_MS) {
         return;
       }
       lastScrollTime.current = now;
 
       setTimeout(() => {
-        if (Date.now() - now <= 150 && allScreenshots.length > 0) {
+        if (
+          Date.now() - now <= SCREENSHOT_THUMBNAIL_SIZE_PX &&
+          allScreenshots.length > 0
+        ) {
           setCurrentScreenshot((prevScreenshot) => {
             const screenshot = getScreenshotForScrollPosition(
               allScreenshots,
@@ -108,7 +118,7 @@ export function useScrollScreenshot({
             return prevScreenshot;
           });
         }
-      }, 50);
+      }, SCROLL_THRESHOLD_PX);
     },
     [allScreenshots, messages],
   );

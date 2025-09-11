@@ -234,3 +234,52 @@ export const TEST_TIMESTAMP_INCREMENT_MS = 1000;
 export const TEST_TASK_COUNT_TINY = 2;
 export const TEST_TASK_COUNT_SMALL = 3;
 export const TEST_TASK_COUNT_MEDIUM = 4;
+
+// =============================================================================
+// HOOK & UTILITY CONSTANTS
+// =============================================================================
+
+/**
+ * Retry count for hooks and utilities (10 attempts)
+ */
+export const DEFAULT_RETRY_COUNT = 10;
+
+/**
+ * Scroll animation duration in milliseconds (300ms)
+ */
+export const SCROLL_ANIMATION_DURATION_MS = 300;
+
+/**
+ * Scroll animation delay in milliseconds (100ms)
+ */
+export const SCROLL_ANIMATION_DELAY_MS = 100;
+
+/**
+ * Screenshot debounce delay in milliseconds (200ms)
+ */
+export const SCREENSHOT_DEBOUNCE_DELAY_MS = 200;
+
+/**
+ * Screenshot thumbnail size in pixels (150px)
+ */
+export const SCREENSHOT_THUMBNAIL_SIZE_PX = 150;
+
+/**
+ * Scroll threshold in pixels for screenshot triggers (50px)
+ */
+export const SCROLL_THRESHOLD_PX = 50;
+
+/**
+ * Frame rate value for animations and updates (60fps)
+ */
+export const FRAME_RATE_60_FPS = 60;
+
+/**
+ * Standard timeout in milliseconds for operations (1 second)
+ */
+export const STANDARD_TIMEOUT_MS = 1000;
+
+/**
+ * Standard percentage value for calculations (100%)
+ */
+export const PERCENTAGE_100 = 100;

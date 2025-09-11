@@ -15,7 +15,7 @@
 import React from "react";
 import { expect } from "@jest/globals";
 import { type RenderResult, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import userEvent, { type UserEvent } from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import {
   ASYNC_OPERATION_TIMEOUT_MS,
@@ -30,6 +30,35 @@ import {
   PERFORMANCE_RENDER_THRESHOLD_MS as _PERFORMANCE_RENDER_THRESHOLD_MS,
   TEST_COMPONENT_PERFORMANCE_LIMIT_MS as _TEST_COMPONENT_PERFORMANCE_LIMIT_MS,
 } from "@/constants/ui";
+
+// Type definitions for test utilities
+interface MockSocket {
+  emit: jest.Mock;
+  on: jest.Mock;
+  off: jest.Mock;
+  connect: jest.Mock;
+  disconnect: jest.Mock;
+  connected: boolean;
+  id: string;
+}
+
+interface MockRouter {
+  push: jest.Mock;
+  replace: jest.Mock;
+  back: jest.Mock;
+  forward: jest.Mock;
+  refresh: jest.Mock;
+  pathname: string;
+  query: Record<string, unknown>;
+  asPath: string;
+  route: string;
+  isReady: boolean;
+}
+
+interface EnhancedUserEvent extends UserEvent {
+  click: (element: Element) => Promise<void>;
+  type: (element: Element, text: string) => Promise<void>;
+}
 
 // Custom Jest matchers for Bytebot UI domain
 expect.extend({
@@ -347,8 +376,33 @@ export const TestDataFactory = {
   },
 };
 
+// Type definition for TestUtils
+interface TestUtilities {
+  performanceMonitor: typeof performanceMonitor;
+  TestDataFactory: typeof TestDataFactory;
+  renderComponent: (
+    component: React.ReactElement,
+    options?: Record<string, unknown>,
+  ) => RenderResult & { renderTime?: number };
+  createUserEvent: () => EnhancedUserEvent;
+  waitForElement: (selector: string, timeout?: number) => Promise<HTMLElement>;
+  createMockSocket: () => MockSocket;
+  createMockRouter: (overrides?: Partial<MockRouter>) => MockRouter;
+  testResponsive: (
+    component: React.ReactElement,
+    breakpoints: string[],
+  ) => (RenderResult & { renderTime?: number })[];
+  testThemeMode: (
+    component: React.ReactElement,
+    mode: "light" | "dark",
+  ) => RenderResult & { renderTime?: number };
+  createMockTask: (
+    overrides?: Partial<import("@/types").Task>,
+  ) => Promise<import("@/types").Task>;
+}
+
 // Export test utilities for use in test files
-export const TestUtils = {
+export const TestUtils: TestUtilities = {
   performanceMonitor,
   TestDataFactory,
 
@@ -374,7 +428,7 @@ export const TestUtils = {
   /**
    * Creates user event utility with performance monitoring
    */
-  createUserEvent: (): Record<string, unknown> => {
+  createUserEvent: (): EnhancedUserEvent => {
     const user = userEvent.setup();
 
     return {
@@ -391,7 +445,7 @@ export const TestUtils = {
         const duration = performance.now() - startTime;
         performanceMonitor.logSlowInteraction("type", duration);
       },
-    };
+    } as EnhancedUserEvent;
   },
 
   /**
@@ -407,7 +461,7 @@ export const TestUtils = {
   /**
    * Simulates Socket.io connection
    */
-  createMockSocket: (): Record<string, unknown> => ({
+  createMockSocket: (): MockSocket => ({
     emit: jest.fn(),
     on: jest.fn(),
     off: jest.fn(),
@@ -420,9 +474,7 @@ export const TestUtils = {
   /**
    * Creates mock Next.js router
    */
-  createMockRouter: (
-    overrides: Record<string, unknown> = {},
-  ): Record<string, unknown> => ({
+  createMockRouter: (overrides: Partial<MockRouter> = {}): MockRouter => ({
     push: jest.fn(),
     replace: jest.fn(),
     back: jest.fn(),
@@ -442,7 +494,7 @@ export const TestUtils = {
   testResponsive: (
     component: React.ReactElement,
     breakpoints: string[],
-  ): unknown[] => {
+  ): (RenderResult & { renderTime?: number })[] => {
     return breakpoints.map((breakpoint) => {
       // Mock different viewport sizes
       let width: number;

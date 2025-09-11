@@ -12,6 +12,7 @@ import {
 import { MessageContentType } from "@bytebot/shared";
 import { useWebSocket } from "./useWebSocket";
 import { logDebug, logError } from "@/utils/logger";
+import { DEFAULT_RETRY_COUNT } from "@/constants/ui";
 
 /**
  * Configuration interface for the useChatSession hook
@@ -417,7 +418,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
         }
 
         // If we got fewer messages than requested, we've reached the end
-        if (newMessages.length < 10) {
+        if (newMessages.length < DEFAULT_RETRY_COUNT) {
           setHasMoreMessages(false);
         }
       }
@@ -564,7 +565,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
           setCurrentPage(1);
 
           // If we got fewer messages than requested, we've reached the end
-          setHasMoreMessages(messagesResult.length >= 10);
+          setHasMoreMessages(messagesResult.length >= DEFAULT_RETRY_COUNT);
         } else {
           setCurrentPage(1);
           setHasMoreMessages(false);
