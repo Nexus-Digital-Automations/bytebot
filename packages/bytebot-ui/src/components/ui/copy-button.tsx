@@ -4,6 +4,7 @@ import { Copy01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "./button";
 import { copyToClipboard } from "@/utils/clipboard";
 import { cn } from "@/lib/utils";
+import { logError } from "@/utils/logger";
 
 interface CopyButtonProps {
   text: string;
@@ -38,7 +39,7 @@ export function CopyButton({
     <Button
       onClick={(e) => {
         handleCopy(e).catch((error: unknown) => {
-          console.error("Copy failed:", error);
+          logError("Failed to copy to clipboard", error, "CopyButton");
         });
       }}
       variant={variant}
