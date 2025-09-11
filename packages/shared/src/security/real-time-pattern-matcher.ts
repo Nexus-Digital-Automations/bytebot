@@ -217,7 +217,9 @@ class LRUCache<K, V> {
     } else if (this.cache.size >= this.capacity) {
       // Remove least recently used (first entry)
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey);
+      }
     }
     this.cache.set(key, value);
   }
@@ -601,7 +603,11 @@ export class RealTimePatternMatcher extends EventEmitter {
             this.matchSinglePattern(input, patternName, context),
           ),
         );
-        results.push(...batchResults.filter(Boolean));
+        results.push(
+          ...batchResults.filter(
+            (result): result is NonNullable<typeof result> => result !== null,
+          ),
+        );
       } else {
         // Sequential processing
         for (const patternName of patternsToMatch) {

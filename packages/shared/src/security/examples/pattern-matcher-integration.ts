@@ -269,8 +269,8 @@ class WebApplicationSecurityIntegration {
    * Get security metrics for monitoring dashboard
    */
   getSecurityMetrics(): {
-    performance: ReturnType<typeof this.patternMatcher.getMetrics>;
-    patterns: ReturnType<typeof this.patternMatcher.getPatternStats>;
+    performance: Record<string, unknown>;
+    patterns: Record<string, unknown>;
   } {
     return {
       performance: this.patternMatcher.getMetrics(),
@@ -533,18 +533,19 @@ class StreamingSecurityAnalyzer {
   private setupStreamingListeners(): void {
     this.streamingProcessor.on("matches_found", (event) => {
       // Add detected threats to buffer
-      const threats = event.results.filter((result) => result.matched);
+      const threats = event.results.filter((result: any) => result.matched);
       this.threatBuffer.push(...threats);
 
       // Log high-risk threats immediately
       const criticalThreats = threats.filter(
-        (threat) => threat.severity === "critical" || threat.riskScore >= 90,
+        (threat: any) =>
+          threat.severity === "critical" || threat.riskScore >= 90,
       );
 
       if (criticalThreats.length > 0) {
         console.error("Critical threats detected in stream:", {
           count: criticalThreats.length,
-          threats: criticalThreats.map((t) => ({
+          threats: criticalThreats.map((t: any) => ({
             type: t.patternType,
             severity: t.severity,
             riskScore: t.riskScore,
@@ -740,8 +741,8 @@ class APISecurityIntegration {
    * Get API security metrics
    */
   getApiMetrics(): {
-    performance: ReturnType<typeof this.patternMatcher.getMetrics>;
-    patterns: ReturnType<typeof this.patternMatcher.getPatternStats>;
+    performance: Record<string, unknown>;
+    patterns: Record<string, unknown>;
     activeSessions: number;
   } {
     return {
