@@ -11,7 +11,6 @@ import {
 } from './dto/async-job.dto';
 import {
   CreateBrowserTaskDto,
-  BrowserTaskStatus,
   BrowserTaskPriority,
   BrowserActionType,
 } from './dto/browser-task.dto';
