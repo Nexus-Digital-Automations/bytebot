@@ -12,6 +12,29 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import { ComputerActionValidationPipe } from '../computer-action-validation.pipe';
 
+/**
+ * Interface for typed argument metadata used in tests
+ */
+interface TypedArgumentMetadata extends ArgumentMetadata {
+  type: 'body' | 'query' | 'param' | 'custom';
+  metatype?: new (...args: unknown[]) => unknown;
+  data?: string;
+}
+
+/**
+ * Helper to create typed argument metadata for tests
+ */
+function createArgumentMetadata(
+  overrides: Partial<TypedArgumentMetadata> = {},
+): TypedArgumentMetadata {
+  return {
+    type: 'body',
+    metatype: Object,
+    data: undefined,
+    ...overrides,
+  };
+}
+
 // Mock the security utils to avoid compilation issues
 jest.mock('@bytebot/shared/utils/security.utils', () => ({
   detectXSS: jest.fn().mockReturnValue(false), // Legacy function for decorators
@@ -156,7 +179,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
           type: 'body',
           metatype: Object,
           data: undefined,
-        } as any),
+        } as ArgumentMetadata),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -182,7 +205,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
           type: 'body',
           metatype: Object,
           data: undefined,
-        } as any),
+        } as ArgumentMetadata),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -209,7 +232,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
           type: 'body',
           metatype: Object,
           data: undefined,
-        } as any),
+        } as ArgumentMetadata),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -349,7 +372,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
           type: 'body',
           metatype: Object,
           data: undefined,
-        } as any),
+        })),
       ).rejects.toThrow(BadRequestException);
     });
   });

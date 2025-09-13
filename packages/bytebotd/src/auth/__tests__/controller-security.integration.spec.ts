@@ -22,7 +22,6 @@ import request from 'supertest';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import type { Express } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { UserRole, JwtPayload } from '@bytebot/shared';
@@ -123,6 +122,15 @@ interface App {
       next: SafeNextFunction,
     ) => void,
   ): void;
+}
+
+/**
+ * Type-safe helper function to create supertest requests
+ * Eliminates need for 'as any' casting with proper typing
+ */
+function createRequest(app: INestApplication) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+  return request(app.getHttpAdapter().getInstance() as any);
 }
 
 // UserRole is now imported from @bytebot/shared
@@ -562,9 +570,7 @@ describe('Controller Security Integration Tests', () => {
       const testId = `${operationId}_public_access`;
       securityLogger.info(`[${testId}] Testing public endpoint access`);
 
-      const response = await request(app.getHttpAdapter().getInstance() as any)
-        .get('/public/data')
-        .expect(200);
+      const response = await createRequest(app).get('/public/data').expect(200);
 
       expect(
         (response.body as { message: string; timestamp: number }).message,
@@ -580,7 +586,7 @@ describe('Controller Security Integration Tests', () => {
       const testId = `${operationId}_auth_required`;
       securityLogger.info(`[${testId}] Testing authentication requirement`);
 
-      const response = await request(app.getHttpAdapter().getInstance() as any)
+      const response = await createRequest(app)
         .get('/api/protected')
         .expect(401);
 
@@ -595,7 +601,7 @@ describe('Controller Security Integration Tests', () => {
         `[${testId}] Testing valid authentication token acceptance`,
       );
 
-      const response = await request(app.getHttpAdapter().getInstance() as any)
+      const response = await createRequest(app)
         .get('/api/protected')
         .set('Authorization', 'Bearer admin-token')
         .expect(200);
@@ -634,7 +640,7 @@ describe('Controller Security Integration Tests', () => {
       for (const token of invalidTokens) {
         const authHeader = token.includes('Bearer') ? token : `Bearer ${token}`;
 
-        await request(app.getHttpAdapter().getInstance() as any)
+        await createRequest(app)
           .get('/api/protected')
           .set('Authorization', authHeader)
           .expect(401);
@@ -660,7 +666,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const header of malformedHeaders) {
-        await request(app.getHttpAdapter().getInstance() as any)
+        await createRequest(app)
           .get('/api/protected')
           .set('Authorization', header)
           .expect(401);
@@ -678,19 +684,19 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Testing admin-only access enforcement`);
 
       // Admin should have access
-      await request(app.getHttpAdapter().getInstance() as any)
+      await createRequest(app)
         .get('/api/admin')
         .set('Authorization', 'Bearer admin-token')
         .expect(200);
 
       // Operator should be denied
-      await request(app.getHttpAdapter().getInstance() as any)
+      await createRequest(app)
         .get('/api/admin')
         .set('Authorization', 'Bearer operator-token')
         .expect(403);
 
       // Viewer should be denied
-      await request(app.getHttpAdapter().getInstance() as any)
+      await createRequest(app)
         .get('/api/admin')
         .set('Authorization', 'Bearer viewer-token')
         .expect(403);
@@ -705,21 +711,21 @@ describe('Controller Security Integration Tests', () => {
       );
 
       // Admin should have access (role hierarchy)
-      await request(app.getHttpAdapter().getInstance() as any)
+      await createRequest(app)
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .send({ name: 'Test Resource', type: 'document' })
         .expect(200);
 
       // Operator should have access
-      await request(app.getHttpAdapter().getInstance() as any)
+      await createRequest(app)
         .post('/api/resources')
         .set('Authorization', 'Bearer operator-token')
         .send({ name: 'Test Resource', type: 'document' })
         .expect(200);
 
       // Viewer should be denied
-      await request(app.getHttpAdapter().getInstance() as any)
+      await createRequest(app)
         .post('/api/resources')
         .set('Authorization', 'Bearer viewer-token')
         .send({ name: 'Test Resource', type: 'document' })
@@ -755,7 +761,7 @@ describe('Controller Security Integration Tests', () => {
         const method = testCase.endpoint.includes('resources') ? 'post' : 'get';
         const expectedStatus = testCase.shouldPass ? 200 : 403;
 
-        const requestObj = request(app.getHttpAdapter().getInstance() as any);
+        const requestObj = createRequest(app);
         let req = requestObj[method](testCase.endpoint).set(
           'Authorization',
           `Bearer ${testCase.token}`,
@@ -787,7 +793,7 @@ describe('Controller Security Integration Tests', () => {
         },
       };
 
-      const response = await request(app.getHttpAdapter().getInstance() as any)
+      const response = await createRequest(app)
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .send(xssPayloads)
@@ -823,9 +829,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const maliciousQuery of sqlInjectionQueries) {
-        const response = await request(
-          app.getHttpAdapter().getInstance() as any,
-        )
+        const response = await createRequest(app)
           .get('/api/users/search')
           .query({ q: maliciousQuery })
           .set('Authorization', 'Bearer operator-token')
@@ -858,9 +862,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const filename of maliciousFileNames) {
-        const response = await request(
-          app.getHttpAdapter().getInstance() as any,
-        )
+        const response = await createRequest(app)
           .post('/api/upload')
           .set('Authorization', 'Bearer operator-token')
           .set('X-Filename', filename)
@@ -893,7 +895,7 @@ describe('Controller Security Integration Tests', () => {
       };
 
       // Should either accept with limits or reject gracefully
-      const response = await request(app.getHttpAdapter().getInstance() as any)
+      const response = await createRequest(app)
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .send(oversizedData);
@@ -911,9 +913,7 @@ describe('Controller Security Integration Tests', () => {
       const testId = `${operationId}_security_headers`;
       securityLogger.info(`[${testId}] Testing security headers inclusion`);
 
-      const response = await request(app.getHttpAdapter().getInstance() as any)
-        .get('/public/data')
-        .expect(200);
+      const response = await createRequest(app).get('/public/data').expect(200);
 
       const requiredHeaders = {
         'x-content-type-options': 'nosniff',
@@ -936,9 +936,7 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Testing CORS preflight security`);
 
       // Test preflight from allowed origin
-      const allowedOriginResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
-      )
+      const allowedOriginResponse = await createRequest(app)
         .options('/api/resources')
         .set('Origin', 'https://trusted-domain.com')
         .set('Access-Control-Request-Method', 'POST')
@@ -947,9 +945,7 @@ describe('Controller Security Integration Tests', () => {
       expect([200, 204, 404]).toContain(allowedOriginResponse.status);
 
       // Test preflight from malicious origin
-      const maliciousOriginResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
-      )
+      const maliciousOriginResponse = await createRequest(app)
         .options('/api/resources')
         .set('Origin', 'https://malicious-site.com')
         .set('Access-Control-Request-Method', 'POST')
@@ -974,7 +970,7 @@ describe('Controller Security Integration Tests', () => {
         .fill(null)
         .map(
           (_, _index) =>
-            request(app.getHttpAdapter().getInstance() as any)
+            createRequest(app)
               .get('/public/data')
               .set('X-Forwarded-For', '192.168.1.100'), // Simulate same IP
         );
@@ -1003,7 +999,7 @@ describe('Controller Security Integration Tests', () => {
         .fill(null)
         .map(
           (_, _index) =>
-            request(app.getHttpAdapter().getInstance() as any)
+            createRequest(app)
               .get('/public/data')
               .set('X-Forwarded-For', `192.168.1.${200 + _index}`), // Different IPs
         );
@@ -1034,7 +1030,7 @@ describe('Controller Security Integration Tests', () => {
         .fill(null)
         .map(() => {
           return new Promise<{ error: boolean; status?: number }>((resolve) => {
-            const _req = request(app.getHttpAdapter().getInstance() as any)
+            const _req = createRequest(app)
               .post('/api/resources')
               .set('Authorization', 'Bearer admin-token')
               .send({ name: 'Slow Request' })
@@ -1070,7 +1066,7 @@ describe('Controller Security Integration Tests', () => {
         'User-Agent': 'Normal-Agent\r\nX-Evil-Header: injected',
       };
 
-      const _response = await request(app.getHttpAdapter().getInstance() as any)
+      const _response = await createRequest(app)
         .get('/api/protected')
         .set(maliciousHeaders)
         .expect((res) => {
@@ -1096,9 +1092,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of splittingPayloads) {
-        const _response = await request(
-          app.getHttpAdapter().getInstance() as any,
-        )
+        const _response = await createRequest(app)
           .get('/api/users/search')
           .query({ q: _payload })
           .set('Authorization', 'Bearer operator-token')
@@ -1119,7 +1113,7 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Testing request smuggling prevention`);
 
       // Attempt request smuggling with conflicting headers
-      const _response = await request(app.getHttpAdapter().getInstance() as any)
+      const _response = await createRequest(app)
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .set('Content-Length', '100')
@@ -1148,9 +1142,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of traversalPayloads) {
-        const _response = await request(
-          app.getHttpAdapter().getInstance() as any,
-        )
+        const _response = await createRequest(app)
           .delete(`/api/resources/${encodeURIComponent(_payload)}`)
           .set('Authorization', 'Bearer admin-token')
           .expect((res) => {
@@ -1183,12 +1175,12 @@ describe('Controller Security Integration Tests', () => {
       };
 
       // Generate security events
-      await request(app.getHttpAdapter().getInstance() as any)
+      await createRequest(app)
         .get('/api/admin')
         .set('Authorization', 'Bearer malicious-token')
         .expect(401);
 
-      await request(app.getHttpAdapter().getInstance() as any)
+      await createRequest(app)
         .get('/api/admin')
         .set('Authorization', 'Bearer viewer-token')
         .expect(403);
@@ -1228,7 +1220,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const operation of sensitiveOperations) {
-        const requestObj = request(app.getHttpAdapter().getInstance() as any);
+        const requestObj = createRequest(app);
 
         // Handle different HTTP methods with proper typing
         let baseRequest;
@@ -1283,7 +1275,7 @@ describe('Controller Security Integration Tests', () => {
       const promises = Array(50)
         .fill(null)
         .map((_, _index) =>
-          request(app.getHttpAdapter().getInstance() as any)
+          createRequest(app)
             .get('/api/protected')
             .set('Authorization', 'Bearer admin-token')
             .set('X-Request-ID', `perf-test-${_index}`),
@@ -1320,7 +1312,7 @@ describe('Controller Security Integration Tests', () => {
         ...Array(20)
           .fill(null)
           .map(() =>
-            request(app.getHttpAdapter().getInstance() as any)
+            createRequest(app)
               .get('/api/protected')
               .set('Authorization', 'Bearer admin-token'),
           ),
@@ -1329,7 +1321,7 @@ describe('Controller Security Integration Tests', () => {
         ...Array(30)
           .fill(null)
           .map(() =>
-            request(app.getHttpAdapter().getInstance() as any)
+            createRequest(app)
               .get('/api/admin')
               .set('Authorization', 'Bearer invalid-token'),
           ),

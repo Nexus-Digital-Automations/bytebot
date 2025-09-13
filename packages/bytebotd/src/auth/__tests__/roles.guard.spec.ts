@@ -669,7 +669,7 @@ describe('RolesGuard', () => {
 
       const user = createMockUser(
         UserRole._OPERATOR,
-        null as Permission[] | undefined,
+        undefined as Permission[] | undefined,
       );
       const context = createMockExecutionContext(user);
 
@@ -874,7 +874,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_malformed_user`;
       console.log(`[${testId}] Testing malformed user object handling`);
 
-      const malformedUser = { invalid: 'user' } as
+      const malformedUser = { invalid: 'user' } as unknown as
         | AuthenticatedUser
         | undefined;
       const context = createMockExecutionContext(malformedUser);

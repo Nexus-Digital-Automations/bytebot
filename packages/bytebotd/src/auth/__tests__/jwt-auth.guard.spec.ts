@@ -91,7 +91,7 @@ class MockJwtAuthGuard {
       return undefined;
     }
 
-    const [type, token] = authHeader.split(' ') ?? [];
+    const [type, token] = authHeader.split(' ');
     return type === 'Bearer' ? token : undefined;
   }
 }
@@ -139,7 +139,7 @@ describe('JwtAuthGuard', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn((key: string) => {
-              const config: Record<string, string> = {
+              const config: { [key: string]: string } = {
                 JWT_SECRET: 'test-jwt-secret',
                 JWT_REFRESH_SECRET: 'test-refresh-secret',
               };

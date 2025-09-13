@@ -198,9 +198,29 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
    * @param metatype - The metatype to check
    * @returns True if it's a basic type
    */
-  private isBasicType(metatype: unknown): boolean {
-    const basicTypes = [String, Boolean, Number, Array, Object];
-    return basicTypes.includes(metatype as any);
+  private isBasicType(
+    metatype: unknown,
+  ): metatype is
+    | ArrayConstructor
+    | ObjectConstructor
+    | NumberConstructor
+    | StringConstructor
+    | BooleanConstructor {
+    const basicTypes: Array<
+      | ArrayConstructor
+      | ObjectConstructor
+      | NumberConstructor
+      | StringConstructor
+      | BooleanConstructor
+    > = [String, Boolean, Number, Array, Object];
+    return basicTypes.includes(
+      metatype as
+        | ArrayConstructor
+        | ObjectConstructor
+        | NumberConstructor
+        | StringConstructor
+        | BooleanConstructor,
+    );
   }
 
   /**

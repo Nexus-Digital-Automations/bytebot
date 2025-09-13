@@ -1021,7 +1021,7 @@ export class BackgroundWorker
         const sortedJobs = priorityJobs.sort(
           (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
         );
-        return sortedJobs[0] || null;
+        return sortedJobs[0] ?? null;
       }
     }
 

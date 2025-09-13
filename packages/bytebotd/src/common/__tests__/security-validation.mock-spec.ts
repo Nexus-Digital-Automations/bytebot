@@ -9,7 +9,7 @@
  * @author Input Validation & API Security Specialist
  */
 
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, ArgumentsHost } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 import { SecuritySanitizationPipe } from '../pipes/security-sanitization.pipe';
 import { SecurityExceptionFilter } from '../filters/security-exception.filter';
@@ -200,7 +200,7 @@ describe('Security Validation Mock Tests', () => {
     });
 
     it('should not leak sensitive information in errors', () => {
-      const mockHost = {
+      const mockHost: ArgumentsHost = {
         switchToHttp: () => ({
           getRequest: () => ({
             method: 'POST',
@@ -214,7 +214,7 @@ describe('Security Validation Mock Tests', () => {
             setHeader: jest.fn(),
           }),
         }),
-      };
+      } as ArgumentsHost;
 
       const sensitiveError = new Error(
         '/secret/path/database.db connection failed',
@@ -222,7 +222,7 @@ describe('Security Validation Mock Tests', () => {
 
       // The filter should sanitize this error
       expect(() => {
-        securityFilter.catch(sensitiveError, mockHost as any);
+        securityFilter.catch(sensitiveError, mockHost);
       }).not.toThrow();
     });
 

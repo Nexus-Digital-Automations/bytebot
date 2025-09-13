@@ -74,16 +74,17 @@ interface MockUtil {
 }
 
 interface MockExecCallback {
-  (error: Error | null, result?: { stdout: string; stderr?: string }): void;
+  (error: Error | null, stdout?: string, stderr?: string): void;
 }
 
-/**
- * Type-safe Jest spy interface
- */
-type MockJestSpy<
-  T = unknown,
-  Y extends unknown[] = unknown[],
-> = jest.MockedFunction<(...args: Y) => T>;
+interface MockSpawnProcess {
+  unref: jest.MockedFunction<() => void>;
+  pid: number;
+  kill: jest.MockedFunction<() => boolean>;
+  on: jest.MockedFunction<(event: string, listener: (...args: any[]) => void) => void>;
+  stdout: { on: jest.MockedFunction<(event: string, listener: (...args: any[]) => void) => void> };
+  stderr: { on: jest.MockedFunction<(event: string, listener: (...args: any[]) => void) => void> };
+}
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';

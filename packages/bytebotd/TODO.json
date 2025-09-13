@@ -230,9 +230,9 @@
       ]
     },
     {
-      "id": "error_1757744620005_kh83btdwk",
-      "title": "Fix TypeScript TS2339 Property Access Errors",
-      "description": "Fix all TypeScript compilation errors related to property does not exist on type issues. Target missing name properties on user types, incorrect property access on interfaces, add type guards for property access, and ensure all property access is on correct types. Zero tolerance for property access violations.",
+      "id": "error_1757782942391_knvany8mu",
+      "title": "Fix @typescript-eslint/no-unsafe-* violations in computer-use.service.main.spec.ts",
+      "description": "Fix TypeScript unsafe operations in bytebotd async test architecture. Target violations: no-unsafe-return (lines 26, 28, 169), no-unsafe-call (lines 26, 163, 165), no-unsafe-argument (line 459). Add proper type definitions, use type assertions where safe, maintain test functionality. File: /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/computer-use/__tests__/computer-use.service.main.spec.ts",
       "priority": "medium",
       "category": "error",
       "status": "in_progress",
@@ -242,16 +242,100 @@
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-13T06:23:40.005Z",
+      "created_at": "2025-09-13T17:02:22.391Z",
       "auto_research_created": false,
-      "assigned_agent": "development_session_1757744577681_1_general_4a4a32d5",
-      "started_at": "2025-09-13T06:24:20.009Z",
-      "claimed_by": "development_session_1757744577681_1_general_4a4a32d5",
+      "assigned_agent": "development_session_1757782916248_1_general_9168470b",
+      "started_at": "2025-09-13T17:02:57.845Z",
+      "claimed_by": "development_session_1757782916248_1_general_9168470b",
       "agent_assignment_history": [
         {
-          "agentId": "development_session_1757744577681_1_general_4a4a32d5",
+          "agentId": "development_session_1757782916248_1_general_9168470b",
           "role": "primary",
-          "assignedAt": "2025-09-13T06:24:20.009Z",
+          "assignedAt": "2025-09-13T17:02:57.845Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757782940972_3qqlzyv4t",
+      "title": "Fix @typescript-eslint/no-explicit-any violations in computer-action-validation.pipe.integration.spec.ts",
+      "description": "Fix all explicit any types in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/computer-use/dto/__tests__/computer-action-validation.pipe.integration.spec.ts on lines 159, 185, 212, 276, 316. Replace with proper TypeScript interfaces: ValidationResult, ArgumentMetadataTest, ThreatAnalysisResult. Maintain test functionality and zero tolerance for type violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T17:02:20.972Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757782917179_1_general_8d62a77f",
+      "started_at": "2025-09-13T17:02:39.995Z",
+      "claimed_by": "development_session_1757782917179_1_general_8d62a77f",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757782917179_1_general_8d62a77f",
+          "role": "primary",
+          "assignedAt": "2025-09-13T17:02:39.995Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757782933914_62xxewtmn",
+      "title": "Fix @typescript-eslint/no-unused-vars violations in computer-use.service.main.spec.ts",
+      "description": "Fix unused variables MockExecCallback (line 76) and MockJestSpy (line 83) in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/computer-use/__tests__/computer-use.service.main.spec.ts",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T17:02:13.914Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757782915459_1_general_7806ff2a",
+      "started_at": "2025-09-13T17:02:31.678Z",
+      "claimed_by": "development_session_1757782915459_1_general_7806ff2a",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757782915459_1_general_7806ff2a",
+          "role": "primary",
+          "assignedAt": "2025-09-13T17:02:31.678Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757782931639_6dnbg9gss",
+      "title": "Fix @typescript-eslint/no-unsafe-argument violations in validation pipe tests",
+      "description": "Fix all @typescript-eslint/no-unsafe-argument violations in computer-action-validation.pipe.integration.spec.ts and computer-action-validation.pipe.security.spec.ts by adding proper type definitions and replacing any typed arguments with specific types",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T17:02:11.639Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757782913943_1_general_b58b3cd0",
+      "started_at": "2025-09-13T17:02:28.830Z",
+      "claimed_by": "development_session_1757782913943_1_general_b58b3cd0",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757782913943_1_general_b58b3cd0",
+          "role": "primary",
+          "assignedAt": "2025-09-13T17:02:28.830Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
@@ -2903,6 +2987,153 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-13T06:23:03.798Z",
       "sessionId": "session_1757744583797",
+      "metadata": {}
+    },
+    "development_session_1757746908150_1_general_f65e7791": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T07:01:48.152Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T07:01:48.152Z",
+      "sessionId": "session_1757746908150",
+      "metadata": {}
+    },
+    "development_session_1757746909289_1_general_12977361": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T07:01:49.291Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T07:01:49.291Z",
+      "sessionId": "session_1757746909289",
+      "metadata": {}
+    },
+    "development_session_1757746911825_1_general_f5b09615": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T07:01:51.828Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T07:01:51.828Z",
+      "sessionId": "session_1757746911825",
+      "metadata": {}
+    },
+    "development_session_1757782913943_1_general_b58b3cd0": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T17:01:53.945Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T17:01:53.945Z",
+      "sessionId": "session_1757782913943",
+      "metadata": {}
+    },
+    "development_session_1757782915459_1_general_7806ff2a": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T17:01:55.461Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T17:01:55.461Z",
+      "sessionId": "session_1757782915459",
+      "metadata": {}
+    },
+    "development_session_1757782916248_1_general_9168470b": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T17:01:56.249Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T17:01:56.249Z",
+      "sessionId": "session_1757782916248",
+      "metadata": {}
+    },
+    "development_session_1757782917179_1_general_8d62a77f": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T17:01:57.181Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T17:01:57.181Z",
+      "sessionId": "session_1757782917179",
       "metadata": {}
     }
   },

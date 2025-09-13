@@ -566,6 +566,7 @@ describe('Security Penetration Testing Suite', () => {
       );
 
       const targetUser: ByteBotdUser = {
+        sub: 'escalation-target',
         id: 'escalation-target',
         email: 'target@test.com',
         username: 'target',
@@ -641,15 +642,13 @@ describe('Security Penetration Testing Suite', () => {
         {
           name: 'role-confusion',
           user: {
+            sub: 'attacker-3',
             id: 'attacker-3',
             email: 'attacker3@malicious.com',
             username: 'attacker3',
             role: UserRole._VIEWER,
             isActive: true,
-            roles: [UserRole._ADMIN],
             permissions: [Permission._SYSTEM_ADMIN],
-            admin: true,
-            superuser: true,
           } as ByteBotdUser | undefined,
         },
       ];
@@ -815,6 +814,7 @@ describe('Security Penetration Testing Suite', () => {
 
       for (const testCase of roleTestCases) {
         const user: ByteBotdUser = {
+          sub: `timing-user-${Date.now()}`,
           id: `timing-user-${Date.now()}`,
           email: 'timing@test.com',
           username: 'timinguser',
@@ -1416,10 +1416,11 @@ describe('Security Penetration Testing Suite', () => {
           case 'role-escalation': {
             {
               const escalationUser: ByteBotdUser = {
+                sub: 'audit-user',
                 id: 'audit-user',
                 email: 'audit@test.com',
                 username: 'audituser',
-                role: eventType.user.role,
+                role: eventType.user?.role || UserRole._VIEWER,
                 isActive: true,
               };
 

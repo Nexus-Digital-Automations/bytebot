@@ -13,7 +13,7 @@
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
-import helmet from 'helmet';
+import helmet, { HelmetOptions } from 'helmet';
 import { SecurityEventType, createSecurityEvent } from '@bytebot/shared';
 
 /**
@@ -273,7 +273,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
     try {
       // Apply helmet security headers
-      this.helmetMiddleware(req, res, (err?: any) => {
+      this.helmetMiddleware(req, res, (err?: Error) => {
         if (err) {
           const processingTime = Date.now() - startTime;
           const safeError = err as SafeError;
@@ -347,7 +347,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     res: Response,
     next: NextFunction,
   ) => void {
-    const helmetOptions: SafeHelmetOptions = {
+    const helmetOptions: HelmetOptions = {
       // Content Security Policy optimized for desktop service
       contentSecurityPolicy: this.config.csp
         ? {
@@ -413,7 +413,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       // It should be configured separately if needed via custom middleware
     };
 
-    return helmet(helmetOptions as any);
+    return helmet(helmetOptions);
   }
 
   /**

@@ -1602,9 +1602,9 @@ export class ComputerUseService {
         );
 
         const [sizeStr, lastModifiedStr] = statOutput.trim().split(' ');
-        const fileSize = parseInt(sizeStr || '0', 10);
+        const fileSize = parseInt(sizeStr ?? '0', 10);
         const lastModified = new Date(
-          parseInt(lastModifiedStr || '0', 10) * 1000,
+          parseInt(lastModifiedStr ?? '0', 10) * 1000,
         );
 
         if (isNaN(fileSize)) {

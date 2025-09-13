@@ -316,10 +316,14 @@ export class HealthService extends HealthIndicator {
       const services = await Promise.allSettled([
         // External service checks can be added here as needed
         // Example: this.checkExternalService('api', 'https://api.example.com/health')
-      ] as Array<Promise<{ status: string; responseTime?: string }>>);
+      ] as Array<
+        Promise<{ status: string; responseTime?: string; error?: string }>
+      >);
 
-      const results: Record<string, { status: string; responseTime?: string }> =
-        {};
+      const results: Record<
+        string,
+        { status: string; responseTime?: string; error?: string }
+      > = {};
       let allHealthy = true;
 
       services.forEach(
@@ -327,6 +331,7 @@ export class HealthService extends HealthIndicator {
           result: PromiseSettledResult<{
             status: string;
             responseTime?: string;
+            error?: string;
           }>,
           index: number,
         ) => {
@@ -481,7 +486,7 @@ export class HealthService extends HealthIndicator {
   private async checkExternalService(
     _serviceName: string,
     _healthUrl: string,
-  ): Promise<{ status: string; responseTime?: string }> {
+  ): Promise<{ status: string; responseTime?: string; error?: string }> {
     const startTime = Date.now();
 
     try {

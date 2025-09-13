@@ -1010,7 +1010,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         .mockReturnValue(['desktop-session-1', 'automation-session-2']);
 
       const mouseEvent = createMouseEvent({ x: 500, y: 600 });
-      moveHandler(mouseEvent);
+      moveHandler?.(mouseEvent);
 
       // Verify room-based broadcasting capability exists
       expect(gateway.getClientRooms).toBeDefined();
@@ -1125,7 +1125,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Should not crash on broadcast failure
       expect(() => {
-        moveHandler(createMouseEvent({ x: 100, y: 100 }));
+        moveHandler?.(createMouseEvent({ x: 100, y: 100 }));
       }).not.toThrow();
     });
 

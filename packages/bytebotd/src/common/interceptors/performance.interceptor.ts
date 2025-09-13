@@ -335,7 +335,7 @@ export class PerformanceInterceptor implements NestInterceptor {
    */
   private normalizeUrl(url: string): string {
     // Remove query parameters and normalize path parameters
-    const cleanUrl = (url || '').split('?')[0] || '';
+    const cleanUrl = (url ?? '').split('?')[0] ?? '';
     return cleanUrl
       .replace(/\/\d+/g, '/:id') // Replace numeric path params
       .replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUID path params
@@ -380,7 +380,7 @@ export class PerformanceInterceptor implements NestInterceptor {
   private getPercentile(sortedArray: number[], percentile: number): number {
     if (sortedArray.length === 0) return 0;
     const _index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
-    return sortedArray[Math.max(0, _index)] || 0;
+    return sortedArray[Math.max(0, _index)] ?? 0;
   }
 
   /**

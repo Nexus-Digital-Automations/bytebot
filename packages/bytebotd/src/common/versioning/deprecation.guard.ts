@@ -415,7 +415,7 @@ export class DeprecationGuard implements CanActivate {
 
     return {
       clientId: desktopClient,
-      version: version || 'unknown',
+      version: version ?? 'unknown',
       vncClient,
       isComputerUse,
     };
@@ -744,11 +744,11 @@ export class DeprecationGuard implements CanActivate {
     response.setHeader('Warning', warningMessage);
     response.setHeader(
       'X-Desktop-Client-Detected',
-      desktopClientInfo.clientId || 'unknown',
+      desktopClientInfo.clientId ?? 'unknown',
     );
     response.setHeader(
       'X-Desktop-Client-Version',
-      desktopClientInfo.version || 'unknown',
+      desktopClientInfo.version ?? 'unknown',
     );
 
     if (bypassUsed) {

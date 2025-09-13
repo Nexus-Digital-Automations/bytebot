@@ -21,6 +21,42 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import { ComputerActionValidationPipe } from '../computer-action-validation.pipe';
 
+/**
+ * Interface for security validation error responses
+ */
+interface SecurityValidationErrorResponse {
+  message: string;
+  operationId: string;
+  timestamp: string;
+  threatTypes: string[];
+  totalRiskScore: number;
+  threatLevel: string;
+  validationStages: string[];
+}
+
+/**
+ * Interface for typed argument metadata
+ */
+interface TypedArgumentMetadata extends ArgumentMetadata {
+  type: 'body' | 'query' | 'param' | 'custom';
+  metatype?: new (...args: unknown[]) => unknown;
+  data?: string;
+}
+
+/**
+ * Helper to create typed argument metadata
+ */
+function createArgumentMetadata(
+  overrides: Partial<TypedArgumentMetadata> = {},
+): TypedArgumentMetadata {
+  return {
+    type: 'body',
+    metatype: Object,
+    data: undefined,
+    ...overrides,
+  };
+}
+
 describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
   let pipe: ComputerActionValidationPipe;
 
@@ -42,11 +78,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(maliciousInput, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as any),
+        pipe.transform(maliciousInput, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
 
       // Test with advanced XSS patterns
@@ -56,11 +88,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(advancedXSS, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as any),
+        pipe.transform(advancedXSS, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -71,11 +99,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(sqlInjectionInput, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as any),
+        pipe.transform(sqlInjectionInput, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
 
       // Test PostgreSQL-specific injection
@@ -85,11 +109,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(pgSqlInjection, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as any),
+        pipe.transform(pgSqlInjection, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -100,11 +120,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(commandInjectionInput, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as any),
+        pipe.transform(commandInjectionInput, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
 
       // Test Windows-specific command injection
@@ -114,11 +130,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(windowsCommandInjection, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as any),
+        pipe.transform(windowsCommandInjection, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -130,11 +142,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(pathTraversalInput, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as any),
+        pipe.transform(pathTraversalInput, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
 
       // Test absolute path restriction
@@ -145,11 +153,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(absolutePathInput, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as any),
+        pipe.transform(absolutePathInput, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -161,11 +165,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(overflowInput, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as any),
+        pipe.transform(overflowInput, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
 
       // Test negative coordinates (if not allowed)
@@ -175,11 +175,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(negativeCoordInput, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as any),
+        pipe.transform(negativeCoordInput, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -194,7 +190,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       // The test depends on whether unicode normalization creates security risks
       const result = await pipe.transform(
         unicodeAttack,
-        {} as ArgumentMetadata,
+        createArgumentMetadata(),
       );
       expect(result).toBeDefined();
     });
@@ -208,12 +204,13 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       try {
-        await pipe.transform(multiThreatInput, {} as ArgumentMetadata);
+        await pipe.transform(multiThreatInput, createArgumentMetadata());
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
         const badRequestError = error as BadRequestException;
-        const response = badRequestError.getResponse() as any;
+        const response =
+          badRequestError.getResponse() as SecurityValidationErrorResponse;
         expect(response.message).toContain('security threats detected');
         expect(response.totalRiskScore).toBeGreaterThan(0);
         expect(response.threatTypes).toEqual(
@@ -230,7 +227,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
 
       const result = await pipe.transform(
         legitimateInput,
-        {} as ArgumentMetadata,
+        createArgumentMetadata(),
       );
       expect(result).toBeDefined();
       expect(result.action).toBe('move_mouse');
@@ -246,7 +243,8 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         await pipe.transform(maliciousInput, {} as ArgumentMetadata);
       } catch (error) {
         const badRequestError = error as BadRequestException;
-        const response = badRequestError.getResponse() as any;
+        const response =
+          badRequestError.getResponse() as SecurityValidationErrorResponse;
         expect(response.operationId).toBeDefined();
         expect(response.timestamp).toBeDefined();
         expect(response.validationStages).toEqual(
@@ -268,11 +266,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(largePayload, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as any),
+        pipe.transform(largePayload, createArgumentMetadata()),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -284,7 +278,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         data: 'test content',
       };
 
-      const result = await pipe.transform(fileInput, {} as ArgumentMetadata);
+      const result = await pipe.transform(fileInput, createArgumentMetadata());
       expect(result).toBeDefined();
 
       // Form actions should use 'form' context
@@ -295,7 +289,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
 
       const formResult = await pipe.transform(
         formInput,
-        {} as ArgumentMetadata,
+        createArgumentMetadata(),
       );
       expect(formResult).toBeDefined();
     });
@@ -309,7 +303,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       const startTime = Date.now();
-      await pipe.transform(input, {} as ArgumentMetadata);
+      await pipe.transform(input, createArgumentMetadata());
       const endTime = Date.now();
 
       expect(endTime - startTime).toBeLessThan(1000); // Should complete within 1 second
@@ -331,11 +325,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
 
       for (const input of malformedInputs) {
         await expect(
-          pipe.transform(input, {
-            type: 'body',
-            metatype: Object,
-            data: undefined,
-          } as any),
+          pipe.transform(input, createArgumentMetadata()),
         ).rejects.toThrow(BadRequestException);
       }
     });
@@ -349,14 +339,17 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       try {
         await pipe.transform(maliciousInput, {} as ArgumentMetadata);
         fail('Should have thrown BadRequestException');
-      } catch (error: any) {
-        expect(error.response).toHaveProperty('message');
-        expect(error.response).toHaveProperty('operationId');
-        expect(error.response).toHaveProperty('timestamp');
-        expect(error.response).toHaveProperty('threatTypes');
-        expect(error.response).toHaveProperty('totalRiskScore');
-        expect(error.response).toHaveProperty('threatLevel');
-        expect(error.response).toHaveProperty('validationStages');
+      } catch (error) {
+        const badRequestError = error as BadRequestException;
+        const response =
+          badRequestError.getResponse() as SecurityValidationErrorResponse;
+        expect(response).toHaveProperty('message');
+        expect(response).toHaveProperty('operationId');
+        expect(response).toHaveProperty('timestamp');
+        expect(response).toHaveProperty('threatTypes');
+        expect(response).toHaveProperty('totalRiskScore');
+        expect(response).toHaveProperty('threatLevel');
+        expect(response).toHaveProperty('validationStages');
       }
     });
   });

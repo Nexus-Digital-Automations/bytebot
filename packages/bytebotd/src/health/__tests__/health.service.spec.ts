@@ -767,9 +767,9 @@ describe('HealthService', () => {
         const result =
           (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
-        expect(result.process.status).toEqual('up');
-        expect(result.process.uptime).toEqual(300);
-        expect(result.process.memoryMB).toEqual(128);
+        expect(result.process?.status).toEqual('up');
+        expect(result.process?.uptime).toEqual(300);
+        expect(result.process?.memoryMB).toEqual(128);
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(
             /\[process_health_\d+\] Checking process health/,
@@ -799,8 +799,8 @@ describe('HealthService', () => {
         const result =
           (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
-        expect(result.process.status).toEqual('down');
-        expect(result.process.error).toEqual(
+        expect(result.process?.status).toEqual('down');
+        expect(result.process?.error).toEqual(
           expect.stringContaining('Process health check failed'),
         );
         expect(mockLogger.error).toHaveBeenCalledWith(
@@ -820,8 +820,8 @@ describe('HealthService', () => {
         const result =
           (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
-        expect(result.process.status).toEqual('down');
-        expect(result.process.error).toEqual('Process uptime unavailable');
+        expect(result.process?.status).toEqual('down');
+        expect(result.process?.error).toEqual('Process uptime unavailable');
         console.log(`[${testId}] Process health error handling test completed`);
       });
     });
@@ -838,11 +838,11 @@ describe('HealthService', () => {
         const result =
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
-        expect(result.database.status).toEqual('up');
-        expect(result.database.responseTime).toEqual(
+        expect(result.database?.status).toEqual('up');
+        expect(result.database?.responseTime).toEqual(
           expect.stringMatching(/\d+ms/),
         );
-        expect(result.database.connectionStatus).toEqual('connected');
+        expect(result.database?.connectionStatus).toEqual('connected');
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(/\[db_health_\d+\] Checking database health/),
         );
@@ -863,9 +863,9 @@ describe('HealthService', () => {
         const result =
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
-        expect(result.database.status).toEqual('down');
-        expect(result.database.error).toEqual('Database connection failed');
-        expect(result.database.connectionStatus).toEqual('disconnected');
+        expect(result.database?.status).toEqual('down');
+        expect(result.database?.error).toEqual('Database connection failed');
+        expect(result.database?.connectionStatus).toEqual('disconnected');
         expect(mockLogger.error).toHaveBeenCalledWith(
           expect.stringMatching(
             /\[db_health_\d+\] Database health check failed/,
@@ -885,9 +885,9 @@ describe('HealthService', () => {
         const result =
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
-        expect(result.database.status).toEqual('down');
-        expect(result.database.error).toEqual('Database timeout');
-        expect(result.database.connectionStatus).toEqual('disconnected');
+        expect(result.database?.status).toEqual('down');
+        expect(result.database?.error).toEqual('Database timeout');
+        expect(result.database?.connectionStatus).toEqual('disconnected');
         console.log(`[${testId}] Database health exception test completed`);
       });
       it('should measure database response time accurately', async () => {
@@ -901,9 +901,9 @@ describe('HealthService', () => {
           );
         const result =
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
-        expect(result.database.responseTime).toMatch(/\d+ms/);
+        expect(result.database?.responseTime).toMatch(/\d+ms/);
         const responseTime = parseInt(
-          result.database.responseTime.replace('ms', ''),
+          result.database?.responseTime?.replace('ms', '') || '0',
         );
         expect(responseTime).toBeGreaterThan(40); // Should be at least 40ms due to delay
         console.log(`[${testId}] Database response time test completed`);
@@ -925,7 +925,7 @@ describe('HealthService', () => {
         expect(result).toHaveProperty(
           'external_services' as keyof typeof result,
         );
-        expect(result.external_services.status).toBe('up');
+        expect(result.external_services?.status).toBe('up');
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(
             /\[external_services_\d+\] Checking external services/,
@@ -943,7 +943,7 @@ describe('HealthService', () => {
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '20ms' });
         const result =
           (await service.checkExternalServices()) as HealthIndicatorResult;
-        expect(result.external_services.status).toBe('down');
+        expect(result.external_services?.status).toBe('down');
         console.log(`[${testId}] External services failure test completed`);
       });
       it('should handle complete external services failure', async () => {
@@ -956,7 +956,7 @@ describe('HealthService', () => {
           .mockRejectedValue(new Error('Complete failure'));
         const result =
           (await service.checkExternalServices()) as HealthIndicatorResult;
-        expect(result.external_services.status).toBe('down');
+        expect(result.external_services?.status).toBe('down');
         expect(result.external_services.error).toBe('Complete failure');
         // Restore original Promise.allSettled
         Promise.allSettled = originalAllSettled;
@@ -976,9 +976,9 @@ describe('HealthService', () => {
         const result =
           (await service.checkStartupComplete()) as HealthIndicatorResult;
         expect(result).toHaveProperty('startup' as keyof typeof result);
-        expect(result.startup.status).toEqual('up');
-        expect(result.startup.uptime).toEqual(expect.stringMatching(/\d+s/));
-        expect(result.startup.initializationStatus).toEqual('initialized');
+        expect(result.startup?.status).toEqual('up');
+        expect(result.startup?.uptime).toEqual(expect.stringMatching(/\d+s/));
+        expect(result.startup?.initializationStatus).toEqual('initialized');
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(/\[startup_\d+\] Startup check passed/),
         );

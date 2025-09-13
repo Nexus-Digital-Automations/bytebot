@@ -17,14 +17,6 @@
  * @coverage-target 100%
  */
 
- 
- 
- 
- 
- 
- 
- 
-
 import { keyInfoMap, KeyInfo as _KeyInfo } from '../input-tracking.helpers';
 import { UiohookKey } from 'uiohook-napi';
 
@@ -88,18 +80,18 @@ describe('InputTrackingHelpers', () => {
       // Test alphabet keys (should be printable)
       const aKey = keyInfoMap[UiohookKey.A];
       const zKey = keyInfoMap[UiohookKey.Z];
-      expect(aKey.isPrintable).toBe(true);
-      expect(zKey.isPrintable).toBe(true);
+      expect(aKey?.isPrintable).toBe(true);
+      expect(zKey?.isPrintable).toBe(true);
 
       // Test number keys (should be printable)
       const zeroKey = keyInfoMap[UiohookKey[0]];
       const nineKey = keyInfoMap[UiohookKey[9]];
-      expect(zeroKey.isPrintable).toBe(true);
-      expect(nineKey.isPrintable).toBe(true);
+      expect(zeroKey?.isPrintable).toBe(true);
+      expect(nineKey?.isPrintable).toBe(true);
 
       // Test space key (should be printable)
       const spaceKey = keyInfoMap[UiohookKey.Space];
-      expect(spaceKey.isPrintable).toBe(true);
+      expect(spaceKey?.isPrintable).toBe(true);
 
       console.log(`[${testId}] Printable character detection test completed`);
     });
@@ -111,22 +103,22 @@ describe('InputTrackingHelpers', () => {
       // Test function keys (should be non-printable)
       const f1Key = keyInfoMap[UiohookKey.F1];
       const f12Key = keyInfoMap[UiohookKey.F12];
-      expect(f1Key.isPrintable).toBe(false);
-      expect(f12Key.isPrintable).toBe(false);
+      expect(f1Key?.isPrintable).toBe(false);
+      expect(f12Key?.isPrintable).toBe(false);
 
       // Test control keys (should be non-printable)
       const enterKey = keyInfoMap[UiohookKey.Enter];
       const escapeKey = keyInfoMap[UiohookKey.Escape];
       const backspaceKey = keyInfoMap[UiohookKey.Backspace];
-      expect(enterKey.isPrintable).toBe(false);
-      expect(escapeKey.isPrintable).toBe(false);
-      expect(backspaceKey.isPrintable).toBe(false);
+      expect(enterKey?.isPrintable).toBe(false);
+      expect(escapeKey?.isPrintable).toBe(false);
+      expect(backspaceKey?.isPrintable).toBe(false);
 
       // Test arrow keys (should be non-printable)
       const upArrow = keyInfoMap[UiohookKey.ArrowUp];
       const downArrow = keyInfoMap[UiohookKey.ArrowDown];
-      expect(upArrow.isPrintable).toBe(false);
-      expect(downArrow.isPrintable).toBe(false);
+      expect(upArrow?.isPrintable).toBe(false);
+      expect(downArrow?.isPrintable).toBe(false);
 
       console.log(`[${testId}] Non-printable key detection test completed`);
     });
@@ -142,12 +134,12 @@ describe('InputTrackingHelpers', () => {
       const bKey = keyInfoMap[UiohookKey.B];
       const zKey = keyInfoMap[UiohookKey.Z];
 
-      expect(aKey.string).toBe('a');
-      expect(aKey.shiftString).toBe('A');
-      expect(bKey.string).toBe('b');
-      expect(bKey.shiftString).toBe('B');
-      expect(zKey.string).toBe('z');
-      expect(zKey.shiftString).toBe('Z');
+      expect(aKey?.string).toBe('a');
+      expect(aKey?.shiftString).toBe('A');
+      expect(bKey?.string).toBe('b');
+      expect(bKey?.shiftString).toBe('B');
+      expect(zKey?.string).toBe('z');
+      expect(zKey?.shiftString).toBe('Z');
 
       console.log(
         `[${testId}] Alphabet character string mapping test completed`,
@@ -164,14 +156,14 @@ describe('InputTrackingHelpers', () => {
       const nineKey = keyInfoMap[UiohookKey[9]];
       const zeroKey = keyInfoMap[UiohookKey[0]];
 
-      expect(oneKey.string).toBe('1');
-      expect(oneKey.shiftString).toBe('!');
-      expect(twoKey.string).toBe('2');
-      expect(twoKey.shiftString).toBe('@');
-      expect(nineKey.string).toBe('9');
-      expect(nineKey.shiftString).toBe('(');
-      expect(zeroKey.string).toBe('0');
-      expect(zeroKey.shiftString).toBe(')');
+      expect(oneKey?.string).toBe('1');
+      expect(oneKey?.shiftString).toBe('!');
+      expect(twoKey?.string).toBe('2');
+      expect(twoKey?.shiftString).toBe('@');
+      expect(nineKey?.string).toBe('9');
+      expect(nineKey?.shiftString).toBe('(');
+      expect(zeroKey?.string).toBe('0');
+      expect(zeroKey?.shiftString).toBe(')');
 
       console.log(`[${testId}] Number character string mapping test completed`);
     });

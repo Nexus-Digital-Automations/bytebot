@@ -305,9 +305,9 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       const request = context.switchToHttp().getRequest() as MockRequest;
 
       expect(result).toBe(true);
-      expect(request.user!.role).toBe('viewer'); // Should not be elevated to admin
-      expect(request.user!.__proto__).toBeUndefined();
-      expect(request.user!.constructor).toBeUndefined();
+      expect(request.user?.role).toBe('viewer'); // Should not be elevated to admin
+      expect(request.user?.__proto__).toBeUndefined();
+      expect(request.user?.constructor).toBeUndefined();
 
       securityLogger.info(
         `[${testId}] Payload injection attack prevented successfully`,
@@ -445,8 +445,8 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       expect(result).toBe(true);
 
       // Verify XSS content is sanitized or safely handled
-      expect(request.user!.email).toBeDefined();
-      expect(request.user!.name).toBeDefined();
+      expect(request.user?.email).toBeDefined();
+      expect(request.user?.name).toBeDefined();
 
       securityLogger.info(`[${testId}] XSS _payload sanitized successfully`);
     });
@@ -479,9 +479,9 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       expect(result).toBe(true);
 
       // Verify SQL injection payloads are safely handled
-      expect(request.user!.sub).toBeDefined();
-      expect(request.user!.email).toBeDefined();
-      expect(request.user!.role).toBeDefined();
+      expect(request.user?.sub).toBeDefined();
+      expect(request.user?.email).toBeDefined();
+      expect(request.user?.role).toBeDefined();
 
       securityLogger.info(`[${testId}] SQL injection _payload safely handled`);
     });
@@ -599,9 +599,9 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       expect(result).toBe(true);
 
       // Verify control characters are handled safely
-      expect(request.user!.sub).toBeDefined();
-      expect(request.user!.email).toBeDefined();
-      expect(request.user!.role).toBeDefined();
+      expect(request.user?.sub).toBeDefined();
+      expect(request.user?.email).toBeDefined();
+      expect(request.user?.role).toBeDefined();
 
       securityLogger.info(`[${testId}] Control characters handled safely`);
     });

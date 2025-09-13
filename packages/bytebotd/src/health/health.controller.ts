@@ -25,11 +25,11 @@ import {
   HealthCheck,
   HealthCheckResult,
 } from '@nestjs/terminus';
+import { HealthService } from './health.service';
 import {
-  HealthService,
   BasicHealthResponse,
   DetailedStatusResponse,
-} from './health.service';
+} from './interfaces/health.interfaces';
 
 /**
  * Health monitoring controller providing system status endpoints
