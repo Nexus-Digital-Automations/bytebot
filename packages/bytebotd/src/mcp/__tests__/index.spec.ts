@@ -70,7 +70,6 @@ class IndexTestUtils {
   /**
    * Check if an object is a constructor function
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static isConstructor(obj: unknown): boolean {
     return (typeof obj === 'function' &&
       obj.prototype &&
@@ -133,7 +132,7 @@ describe('MCP Index Module', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    _mockLogger = createMockLogger();
+    _mockLogger = createMockLogger() as Record<string, jest.Mock>;
   });
 
   afterEach(() => {
@@ -592,7 +591,7 @@ describe('MCP Index Module', () => {
 
       // Attempt to modify export
       try {
-        (McpIndex as any).BytebotMcpModule = null;
+        (McpIndex as Record<string, unknown>).BytebotMcpModule = null;
       } catch {
         // Some environments might prevent this modification
       }
