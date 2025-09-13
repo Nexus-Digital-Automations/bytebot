@@ -23,6 +23,7 @@ import { Logger } from '@nestjs/common';
 import { Server as _Server, Socket as _Socket } from 'socket.io';
 import { ComputerAction } from '@bytebot/shared';
 import { InputTrackingGateway } from '../input-tracking.gateway';
+import { MockLogger, ScreenshotData } from '../input-tracking.types';
 
 // Mock Socket.IO types
 interface MockSocket {
@@ -126,7 +127,7 @@ describe('InputTrackingGateway', () => {
     logger = module.get<Logger>(Logger);
 
     // Set the mock server
-    gateway.server = mockServer as any;
+    gateway.server = mockServer as unknown as _Server;
 
     console.log(`[${operationId}] InputTrackingGateway test setup completed`);
   });
@@ -164,7 +165,7 @@ describe('InputTrackingGateway', () => {
       const injectable = Reflect.getMetadata(
         '__injectable__',
         InputTrackingGateway,
-      );
+      ) as boolean;
       expect(injectable).toBe(true);
 
       console.log(`[${testId}] Gateway decorators test completed`);
@@ -178,7 +179,7 @@ describe('InputTrackingGateway', () => {
 
       const mockClient = createMockSocket('client_123');
 
-      gateway.handleConnection(mockClient as any);
+      gateway.handleConnection(mockClient as unknown as _Socket);
 
       expect(logger.log).toHaveBeenCalledWith('Client connected: client_123');
 
@@ -233,7 +234,7 @@ describe('InputTrackingGateway', () => {
 
       // Simulate rapid cycles
       for (let i = 0; i < 5; i++) {
-        gateway.handleConnection(mockClient as any);
+        gateway.handleConnection(mockClient as unknown as _Socket);
         gateway.handleDisconnect(mockClient as any);
       }
 

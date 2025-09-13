@@ -433,7 +433,7 @@ export class BrowserSessionService {
     const now = Date.now();
     const expiredSessions: string[] = [];
 
-    for (const [sessionId, session] of this.sessions.entries()) {
+    for (const [sessionId, session] of Array.from(this.sessions.entries())) {
       const inactiveTime = now - session.lastActivityAt.getTime();
       const maxInactiveTime = 1800000; // 30 minutes
 
@@ -482,7 +482,7 @@ export class BrowserSessionService {
     }
 
     // Close all active sessions
-    for (const sessionId of this.sessions.keys()) {
+    for (const sessionId of Array.from(this.sessions.keys())) {
       this.closeSession(sessionId).catch((err) => {
         this.logger.error(
           `Failed to close session during shutdown: ${sessionId}`,

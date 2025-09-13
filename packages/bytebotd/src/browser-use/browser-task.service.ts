@@ -510,7 +510,7 @@ export class BrowserTaskService {
     const now = Date.now();
     let cleanedCount = 0;
 
-    for (const [taskId, task] of this.tasks.entries()) {
+    for (const [taskId, task] of Array.from(this.tasks.entries())) {
       // Skip active tasks
       if (
         task.status === BrowserTaskStatus.RUNNING ||

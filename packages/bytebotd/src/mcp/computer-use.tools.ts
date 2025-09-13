@@ -25,6 +25,24 @@ import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
 import { ComputerUseService } from '../computer-use/computer-use.service';
 import { compressPngBase64Under1MB } from './compressor';
+import {
+  McpSchemas,
+  McpToolResponse,
+  MouseMoveParams,
+  MouseClickParams,
+  MouseScrollParams,
+  KeyboardTypeParams,
+  KeyboardKeyParams,
+  ScreenshotParams,
+  FileReadParams,
+  FileWriteParams,
+  DirectoryListParams,
+  DirectoryCreateParams,
+  BasicOperationResult,
+  ScreenshotResult,
+  FileOperationResult,
+  DirectoryOperationResult,
+} from './types';
 
 /**
  * Computer Use Tools Service
@@ -145,14 +163,9 @@ export class ComputerUseTools {
   @Tool({
     name: 'computer_move_mouse',
     description: 'Moves the mouse cursor to the specified coordinates.',
-    parameters: z.object({
-      coordinates: z.object({
-        x: z.number().describe('The x-coordinate to move the mouse to.'),
-        y: z.number().describe('The y-coordinate to move the mouse to.'),
-      }),
-    }) as any,
+    parameters: McpSchemas.mouseMove,
   })
-  async moveMouse({ coordinates }: { coordinates: { x: number; y: number } }) {
+  async moveMouse({ coordinates }: MouseMoveParams): Promise<McpToolResponse> {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
 
@@ -211,20 +224,7 @@ export class ComputerUseTools {
     name: 'computer_trace_mouse',
     description:
       'Moves the mouse cursor along a specified path of coordinates.',
-    parameters: z.object({
-      path: z
-        .array(
-          z.object({
-            x: z.number().describe('The x-coordinate to move the mouse to.'),
-            y: z.number().describe('The y-coordinate to move the mouse to.'),
-          }),
-        )
-        .describe('An array of coordinate objects representing the path.'),
-      holdKeys: z
-        .array(z.string())
-        .optional()
-        .describe('Optional array of keys to hold during the trace.'),
-    }) as any,
+    parameters: McpSchemas.mouseTrace,
   })
   async traceMouse({
     path,
@@ -285,27 +285,7 @@ export class ComputerUseTools {
     name: 'computer_click_mouse',
     description:
       'Performs a mouse click at the specified coordinates or current position.',
-    parameters: z.object({
-      coordinates: z
-        .object({
-          x: z.number().describe('The x-coordinate to move the mouse to.'),
-          y: z.number().describe('The y-coordinate to move the mouse to.'),
-        })
-        .optional()
-        .describe(
-          'Optional coordinates for the click. If not provided, clicks at the current mouse position.',
-        ),
-      button: z
-        .enum(['left', 'right', 'middle'])
-        .describe('The mouse button to click.'),
-      holdKeys: z
-        .array(z.string())
-        .optional()
-        .describe('Optional array of keys to hold during the click.'),
-      clickCount: z
-        .number()
-        .describe('Number of clicks to perform (e.g., 2 for double-click).'),
-    }) as any,
+    parameters: McpSchemas.mouseClickAdvanced,
   })
   async clickMouse({
     coordinates,

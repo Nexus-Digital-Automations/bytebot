@@ -25,52 +25,17 @@
  * @since 2024-01-01
  */
 
-import * as sharp from 'sharp';
+import sharp from 'sharp';
 import { Logger } from '@nestjs/common';
+import { CompressionOptions, CompressionResult } from './types';
 
 // Initialize logger for compression operations
 const _logger = new Logger('Base64ImageCompressor');
 
 // Type-safe sharp function call helper
 const createSharp = (input: string | Buffer): sharp.Sharp => {
-  return (sharp as any)(input) as sharp.Sharp;
+  return sharp(input);
 };
-
-/**
- * Configuration options for image compression operations
- */
-interface CompressionOptions {
-  /** Target file size in kilobytes (default: 1024KB = 1MB) */
-  targetSizeKB?: number;
-  /** Initial quality setting for compression (0-100, default: 95) */
-  initialQuality?: number;
-  /** Minimum acceptable quality (0-100, default: 10) */
-  minQuality?: number;
-  /** Output image format (default: 'png') */
-  format?: 'png' | 'jpeg' | 'webp';
-  /** Maximum optimization iterations (default: 10) */
-  maxIterations?: number;
-}
-
-/**
- * Comprehensive result data from compression operations
- */
-interface CompressionResult {
-  /** Compressed image as base64 string */
-  base64: string;
-  /** Final file size in bytes */
-  sizeBytes: number;
-  /** Final file size in kilobytes */
-  sizeKB: number;
-  /** Final file size in megabytes */
-  sizeMB: number;
-  /** Final quality setting used */
-  quality: number;
-  /** Output format used */
-  format: string;
-  /** Number of optimization iterations performed */
-  iterations: number;
-}
 
 /**
  * Advanced Base64 Image Compression Engine

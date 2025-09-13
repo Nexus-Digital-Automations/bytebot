@@ -10,8 +10,10 @@ import {
   AsyncJobPriority,
 } from './dto/async-job.dto';
 import {
-  CreateBrowserTaskDto as _CreateBrowserTaskDto,
-  BrowserTaskStatus as _BrowserTaskStatus,
+  CreateBrowserTaskDto,
+  BrowserTaskStatus,
+  BrowserTaskPriority,
+  BrowserActionType,
 } from './dto/browser-task.dto';
 
 /**
@@ -19,6 +21,7 @@ import {
  */
 interface TaskConfig {
   name: string;
+  description?: string;
   url?: string;
   selectors?: string[];
   actions?: string[];
@@ -347,7 +350,7 @@ export class BrowserAsyncJobService {
     const now = Date.now();
     let cleanedCount = 0;
 
-    for (const [jobId, job] of this.jobs.entries()) {
+    for (const [jobId, job] of Array.from(this.jobs.entries())) {
       // Skip active jobs
       if (
         job.status === AsyncJobStatus.RUNNING ||
@@ -454,7 +457,8 @@ export class BrowserAsyncJobService {
         break;
 
       default:
-        throw new Error(`Unsupported job type: ${job.jobType}`);
+        // TypeScript exhaustiveness check - this should never be reached
+        throw new Error(`Unsupported job type: ${job.jobType as string}`);
     }
 
     // Mark job as completed
@@ -476,6 +480,11 @@ export class BrowserAsyncJobService {
     for (let i = 0; i < tasks.length; i++) {
       const taskConfig = tasks[i];
 
+      if (!taskConfig) {
+        this.logger.warn(`Task config at index ${i} is undefined, skipping`);
+        continue;
+      }
+
       job.progress.currentStep = `Processing task ${i + 1}/${tasks.length}: ${taskConfig.name}`;
       job.progress.completedSteps = i;
       job.progress.percentage = Math.round((i / tasks.length) * 100);
@@ -483,13 +492,29 @@ export class BrowserAsyncJobService {
       this.jobs.set(job.jobId, job);
 
       try {
+        // Convert TaskConfig to CreateBrowserTaskDto format
+        const taskDto: CreateBrowserTaskDto = {
+          name: taskConfig.name,
+          description: taskConfig.description || `Task: ${taskConfig.name}`,
+          actions: (taskConfig.actions || []).map((action) => ({
+            type: action as BrowserActionType,
+            selector: taskConfig.selectors?.[0],
+            url: taskConfig.url,
+            waitTimeoutMs: taskConfig.timeout || 5000,
+          })),
+          priority: BrowserTaskPriority.NORMAL,
+          sessionConfig: undefined,
+          maxExecutionTimeMs: taskConfig.timeout || 300000,
+          metadata: { ...taskConfig },
+          enableLogging: true,
+          continueOnError: false,
+        };
+
         const taskResult =
-          await this.browserService.executeBrowserTask(taskConfig);
+          await this.browserService.executeBrowserTask(taskDto);
 
         // Store task ID for tracking
-        if (!job.taskIds) {
-          job.taskIds = [];
-        }
+        job.taskIds ??= [];
         job.taskIds.push(taskResult.taskId);
 
         // Collect results
@@ -517,7 +542,7 @@ export class BrowserAsyncJobService {
         job.results.logs.push({
           timestamp: new Date(),
           level: 'error',
-          message: `Task failed: ${taskConfig.name}`,
+          message: `Task failed: ${taskConfig?.name ?? 'Unknown task'}`,
           metadata: {
             taskIndex: i,
             error: _err instanceof Error ? _err.message : String(_err),
@@ -544,6 +569,11 @@ export class BrowserAsyncJobService {
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
 
+      if (!url) {
+        this.logger.warn(`URL at index ${i} is undefined, skipping`);
+        continue;
+      }
+
       job.progress.currentStep = `Extracting data from ${url}`;
       job.progress.completedSteps = i;
       job.progress.percentage = Math.round((i / urls.length) * 100);
@@ -561,13 +591,14 @@ export class BrowserAsyncJobService {
               typeof config.selectors === 'object' &&
               config.selectors !== null &&
               !Array.isArray(config.selectors)
-                ? config.selectors
-                : {},
+                ? (config.selectors as Record<string, string>)
+                : ({} as Record<string, string>),
             waitForSelector:
               typeof config.waitForSelector === 'string'
                 ? config.waitForSelector
                 : undefined,
-            timeout: config.timeout ?? 30000,
+            timeout:
+              typeof config.timeout === 'number' ? config.timeout : 30000,
           },
         );
 
@@ -838,7 +869,7 @@ export class BrowserAsyncJobService {
     }
 
     // Cancel all running jobs
-    for (const jobId of this.processingJobs) {
+    for (const jobId of Array.from(this.processingJobs)) {
       this.cancelAsyncJob(jobId).catch((err) => {
         this.logger.error(
           `Failed to cancel job during shutdown: ${jobId}`,

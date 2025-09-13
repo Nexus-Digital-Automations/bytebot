@@ -256,10 +256,10 @@ export class JobStorage implements JobStorageInterface {
   constructor(private readonly configService: ConfigService) {
     // Initialize Redis connection with optimized configuration
     this.redis = new Redis({
-      host: this.configService.get('REDIS_HOST', 'localhost'),
-      port: this.configService.get('REDIS_PORT', 6379),
-      password: this.configService.get('REDIS_PASSWORD'),
-      db: this.configService.get('REDIS_DB', 0),
+      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
+      port: this.configService.get<number>('REDIS_PORT', 6379),
+      password: this.configService.get<string>('REDIS_PASSWORD'),
+      db: this.configService.get<number>('REDIS_DB', 0),
       maxRetriesPerRequest: 3,
       lazyConnect: true,
       keepAlive: 30000,
@@ -270,7 +270,7 @@ export class JobStorage implements JobStorageInterface {
 
     // Initialize encryption key for job data
     this.encryptionKey =
-      this.configService.get('JOB_ENCRYPTION_KEY') ??
+      this.configService.get<string>('JOB_ENCRYPTION_KEY') ??
       _crypto
         .createHash('sha256')
         .update('bytebot-job-encryption')
@@ -820,7 +820,10 @@ export class BackgroundWorker
     this.isRunning = true;
     this.stats.isRunning = true;
 
-    const intervalMs = this.configService.get('JOB_WORKER_INTERVAL', 1000);
+    const intervalMs = this.configService.get<number>(
+      'JOB_WORKER_INTERVAL',
+      1000,
+    );
 
     this.workerInterval = setInterval(async () => {
       try {
@@ -1137,22 +1140,25 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
     private readonly configService: ConfigService,
   ) {
     this.config = {
-      maxJobAge: this.configService.get('JOB_MAX_AGE', 7 * 24 * 60 * 60 * 1000), // 7 days
-      cleanupInterval: this.configService.get(
+      maxJobAge: this.configService.get<number>(
+        'JOB_MAX_AGE',
+        7 * 24 * 60 * 60 * 1000,
+      ), // 7 days
+      cleanupInterval: this.configService.get<number>(
         'JOB_CLEANUP_INTERVAL',
         60 * 60 * 1000,
       ), // 1 hour
-      batchSize: this.configService.get('JOB_CLEANUP_BATCH_SIZE', 100),
+      batchSize: this.configService.get<number>('JOB_CLEANUP_BATCH_SIZE', 100),
       retentionPolicy: {
-        completedJobs: this.configService.get(
+        completedJobs: this.configService.get<number>(
           'JOB_RETENTION_COMPLETED',
           24 * 60 * 60 * 1000,
         ), // 24 hours
-        failedJobs: this.configService.get(
+        failedJobs: this.configService.get<number>(
           'JOB_RETENTION_FAILED',
           7 * 24 * 60 * 60 * 1000,
         ), // 7 days
-        cancelledJobs: this.configService.get(
+        cancelledJobs: this.configService.get<number>(
           'JOB_RETENTION_CANCELLED',
           12 * 60 * 60 * 1000,
         ), // 12 hours
@@ -1266,7 +1272,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
       const jobId = _uuidv4();
       const now = new Date();
 
-      const defaultTimeout = this.configService.get(
+      const defaultTimeout = this.configService.get<number>(
         'JOB_DEFAULT_TIMEOUT',
         30000,
       ); // 30 seconds

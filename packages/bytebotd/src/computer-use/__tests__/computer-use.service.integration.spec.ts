@@ -30,7 +30,10 @@ import {
   ClickMouseAction,
   WriteFileAction,
 } from '@bytebot/shared';
-import { ReadFileActionDto } from '../dto/computer-action.dto';
+import {
+  ReadFileActionDto,
+  ApplicationActionDto,
+} from '../dto/computer-action.dto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -156,7 +159,7 @@ describe('ComputerUseService Integration Tests', () => {
         .spyOn(util, 'promisify')
         .mockReturnValue(jest.fn().mockRejectedValue({ code: 1 }));
 
-      await context.service.action(appAction);
+      await context.service.action(appAction as unknown as ComputerAction);
 
       // Verify application launch sequence
       // Note: spawn calls are mocked in createMockNutService

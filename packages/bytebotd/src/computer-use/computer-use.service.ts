@@ -1650,7 +1650,7 @@ export class ComputerUseService {
 
         const _result: FileReadResult = {
           success: true,
-          _data: base64Data,
+          data: base64Data,
           name: fileName,
           size: fileSize,
           mediaType,

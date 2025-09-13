@@ -10,12 +10,6 @@
  * @author Input Validation & API Security Specialist
  */
 
- 
- 
- 
- 
- 
- 
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
 import {
@@ -101,11 +95,14 @@ export class VersionInterceptor implements NestInterceptor {
     private readonly reflector: Reflector,
     private readonly configService: ConfigService,
   ) {
-    this.defaultVersion = this.configService.get(
+    this.defaultVersion = this.configService.get<SupportedVersion>(
       'api.version.default',
       SUPPORTED_API_VERSIONS.V1,
     );
-    this.strictVersioning = this.configService.get('api.version.strict', false);
+    this.strictVersioning = this.configService.get<boolean>(
+      'api.version.strict',
+      false,
+    );
 
     this.logger.log('BytebotD version interceptor initialized', {
       defaultVersion: this.defaultVersion,

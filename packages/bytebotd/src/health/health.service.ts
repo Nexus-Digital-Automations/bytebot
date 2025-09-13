@@ -22,45 +22,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HealthIndicatorResult, HealthIndicator } from '@nestjs/terminus';
 import * as process from 'process';
-
-/**
- * Basic health response interface
- */
-export interface BasicHealthResponse {
-  status: 'healthy' | 'unhealthy';
-  timestamp: string;
-  uptime: number;
-  memory: {
-    used: number;
-    free: number;
-    total: number;
-  };
-}
-
-/**
- * Detailed status response interface
- */
-export interface DetailedStatusResponse {
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  timestamp: string;
-  uptime: number;
-  memory: {
-    used: number;
-    free: number;
-    total: number;
-    heapUsed: number;
-    heapTotal: number;
-  };
-  services: {
-    database: 'connected' | 'disconnected' | 'unknown';
-    cache: 'available' | 'unavailable' | 'unknown';
-    external: 'reachable' | 'unreachable' | 'unknown';
-  };
-  performance: {
-    requestsPerSecond: number;
-    averageResponseTime: number;
-  };
-}
+import {
+  BasicHealthResponse,
+  DetailedStatusResponse,
+  ServiceHealthResponse,
+  ExternalServiceResult,
+  ModuleStatus,
+  ServiceHealthResults,
+  PerformanceMetrics,
+  ServiceStatusMap,
+} from './interfaces/health.interfaces';
 
 /**
  * Enterprise health monitoring service optimized for local deployment
@@ -142,7 +113,7 @@ export class HealthService extends HealthIndicator {
       if (
         serviceStatuses.some(
           (s) =>
-            s === 'disconnected' ?? s === 'unavailable' ?? s === 'unreachable',
+            s === 'disconnected' || s === 'unavailable' || s === 'unreachable',
         )
       ) {
         status = serviceStatuses.every((s) => s === 'unknown')

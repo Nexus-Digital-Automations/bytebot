@@ -393,7 +393,7 @@ export class CacheKeyGenerator {
    * Validate generated key
    */
   private validateKey(key: string): void {
-    if (!key ?? key.length === 0) {
+    if (!key || key.length === 0) {
       throw new Error('Generated key is empty');
     }
 

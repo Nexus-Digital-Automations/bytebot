@@ -56,7 +56,7 @@ jest.mock('util', () => ({
 jest.mock('path', () => ({
   ...jest.requireActual('path'),
   resolve: jest.fn((...paths: string[]) => paths.join('/')),
-  join: jest.fn((...paths: string[]) => paths.join('/'),
+  join: jest.fn((...paths: string[]) => paths.join('/')),
 }));
 
 // Mock @nut-tree-fork/nut-js completely

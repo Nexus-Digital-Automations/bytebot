@@ -10,13 +10,10 @@
  * @author Input Validation & API Security Specialist
  */
 
- 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
- 
+
 /* eslint-disable @typescript-eslint/no-unsafe-call */
- 
- 
 
 import {
   Injectable,
@@ -168,42 +165,48 @@ export class DeprecationGuard implements CanActivate {
   ) {
     // Load deprecation policy from configuration with BytebotD defaults
     this.policy = {
-      enforcement: this.configService.get(
+      enforcement: this.configService.get<DeprecationEnforcement>(
         'api.deprecation.enforcement',
         DeprecationEnforcement.WARN,
       ),
-      gracePeriodDays: this.configService.get(
+      gracePeriodDays: this.configService.get<number>(
         'api.deprecation.gracePeriodDays',
         30,
       ),
-      sunsetGracePeriodDays: this.configService.get(
+      sunsetGracePeriodDays: this.configService.get<number>(
         'api.deprecation.sunsetGracePeriodDays',
         7,
       ),
-      desktopGracePeriodDays: this.configService.get(
+      desktopGracePeriodDays: this.configService.get<number>(
         'api.deprecation.desktopGracePeriodDays',
         60, // Extended grace period for desktop clients
       ),
-      allowBypass: this.configService.get('api.deprecation.allowBypass', false),
-      bypassHeader: this.configService.get(
+      allowBypass: this.configService.get<boolean>(
+        'api.deprecation.allowBypass',
+        false,
+      ),
+      bypassHeader: this.configService.get<string>(
         'api.deprecation.bypassHeader',
         'X-Deprecation-Bypass',
       ),
-      trackUsage: this.configService.get('api.deprecation.trackUsage', true),
-      rateLimitDeprecated: this.configService.get(
+      trackUsage: this.configService.get<boolean>(
+        'api.deprecation.trackUsage',
+        true,
+      ),
+      rateLimitDeprecated: this.configService.get<boolean>(
         'api.deprecation.rateLimitDeprecated',
         true,
       ),
       desktopSpecific: {
-        allowLegacyClients: this.configService.get(
+        allowLegacyClients: this.configService.get<boolean>(
           'api.deprecation.desktop.allowLegacyClients',
           true,
         ),
-        minClientVersionForEnforcement: this.configService.get(
+        minClientVersionForEnforcement: this.configService.get<string>(
           'api.deprecation.desktop.minClientVersion',
           '1.0.0',
         ),
-        computerUseGracePeriodDays: this.configService.get(
+        computerUseGracePeriodDays: this.configService.get<number>(
           'api.deprecation.desktop.computerUseGracePeriod',
           90, // Extended grace for computer use operations
         ),

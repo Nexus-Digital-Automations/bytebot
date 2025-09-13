@@ -24,21 +24,16 @@ import { InputTrackingService } from '../input-tracking.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { UserRole } from '@bytebot/shared';
-
-// Mock ByteBotdUser type
-interface MockByteBotdUser {
-  id: string;
-  username: string;
-  email: string;
-  role: UserRole;
-  permissions: string[];
-  isActive: boolean;
-}
+import {
+  MockByteBotdUser,
+  MockInputTrackingService,
+  MockLogger,
+} from '../input-tracking.types';
 
 describe('InputTrackingController', () => {
   let controller: InputTrackingController;
-  let service: InputTrackingService;
-  let logger: Logger;
+  let service: MockInputTrackingService;
+  let logger: MockLogger;
 
   const operationId = `input_tracking_controller_test_${Date.now()}`;
 
@@ -89,7 +84,7 @@ describe('InputTrackingController', () => {
             startTracking: jest.fn(),
             stopTracking: jest.fn(),
             isTracking: jest.fn().mockReturnValue(false),
-          },
+          } as MockInputTrackingService,
         },
         {
           provide: Logger,
@@ -99,7 +94,7 @@ describe('InputTrackingController', () => {
             warn: jest.fn(),
             debug: jest.fn(),
             verbose: jest.fn(),
-          },
+          } as MockLogger,
         },
       ],
     })
@@ -114,8 +109,8 @@ describe('InputTrackingController', () => {
       .compile();
 
     controller = module.get<InputTrackingController>(InputTrackingController);
-    service = module.get<InputTrackingService>(InputTrackingService);
-    logger = module.get<Logger>(Logger);
+    service = module.get<MockInputTrackingService>(InputTrackingService);
+    logger = module.get<MockLogger>(Logger);
 
     console.log(
       `[${operationId}] InputTrackingController test setup completed`,
@@ -148,7 +143,7 @@ describe('InputTrackingController', () => {
       const controllerMetadata = Reflect.getMetadata(
         'path',
         InputTrackingController,
-      );
+      ) as string;
       expect(controllerMetadata).toBe('input-tracking');
 
       console.log(`[${testId}] Decorators and metadata test completed`);
@@ -165,7 +160,7 @@ describe('InputTrackingController', () => {
       expect(service.startTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         status: 'started',
-        timestamp: expect.any(String),
+        timestamp: expect.any(String) as unknown,
         userId: mockAdminUser.id,
       });
 
@@ -191,7 +186,7 @@ describe('InputTrackingController', () => {
       expect(service.startTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         status: 'started',
-        timestamp: expect.any(String),
+        timestamp: expect.any(String) as unknown,
         userId: mockOperatorUser.id,
       });
 
@@ -223,13 +218,15 @@ describe('InputTrackingController', () => {
       const _result2 = controller.start(mockOperatorUser);
 
       expect(logger.log).toHaveBeenCalledTimes(2);
-      const firstCallArgs = (logger.log as jest.Mock).mock.calls[0];
-      const secondCallArgs = (logger.log as jest.Mock).mock.calls[1];
+      const firstCallArgs = (logger.log as jest.Mock).mock
+        .calls[0] as unknown[];
+      const secondCallArgs = (logger.log as jest.Mock).mock
+        .calls[1] as unknown[];
 
       // Verify different operation IDs were generated
-      expect(firstCallArgs[1].operationId).not.toBe(
-        secondCallArgs[1].operationId,
-      );
+      expect(
+        (firstCallArgs[1] as Record<string, unknown>).operationId,
+      ).not.toBe((secondCallArgs[1] as Record<string, unknown>).operationId);
 
       // Restore original Date.now
       Date.now = originalDateNow;
@@ -264,7 +261,7 @@ describe('InputTrackingController', () => {
       expect(service.stopTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         status: 'stopped',
-        timestamp: expect.any(String),
+        timestamp: expect.any(String) as unknown,
         userId: mockAdminUser.id,
       });
 
@@ -290,7 +287,7 @@ describe('InputTrackingController', () => {
       expect(service.stopTracking).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         status: 'stopped',
-        timestamp: expect.any(String),
+        timestamp: expect.any(String) as unknown,
         userId: mockOperatorUser.id,
       });
 
@@ -351,9 +348,9 @@ describe('InputTrackingController', () => {
       const result = controller.start(mockAdminUser);
 
       expect(result).toMatchObject({
-        status: expect.any(String),
-        timestamp: expect.any(String),
-        userId: expect.any(String),
+        status: expect.any(String) as unknown,
+        timestamp: expect.any(String) as unknown,
+        userId: expect.any(String) as unknown,
       });
 
       expect(Object.keys(result)).toEqual(['status', 'timestamp', 'userId']);
@@ -369,9 +366,9 @@ describe('InputTrackingController', () => {
       const result = controller.stop(mockOperatorUser);
 
       expect(result).toMatchObject({
-        status: expect.any(String),
-        timestamp: expect.any(String),
-        userId: expect.any(String),
+        status: expect.any(String) as unknown,
+        timestamp: expect.any(String) as unknown,
+        userId: expect.any(String) as unknown,
       });
 
       expect(Object.keys(result)).toEqual(['status', 'timestamp', 'userId']);
@@ -391,7 +388,7 @@ describe('InputTrackingController', () => {
       expect(logger.log).toHaveBeenCalledWith(
         expect.stringContaining('Starting input tracking'),
         expect.objectContaining({
-          operationId: expect.any(String),
+          operationId: expect.any(String) as unknown,
           userId: mockAdminUser.id,
           username: mockAdminUser.username,
           userRole: mockAdminUser.role,
@@ -409,11 +406,15 @@ describe('InputTrackingController', () => {
       controller.start(mockOperatorUser);
       controller.stop(mockOperatorUser);
 
-      const startLogCall = (logger.log as jest.Mock).mock.calls[0];
-      const stopLogCall = (logger.log as jest.Mock).mock.calls[1];
+      const startLogCall = (logger.log as jest.Mock).mock.calls[0] as unknown[];
+      const stopLogCall = (logger.log as jest.Mock).mock.calls[1] as unknown[];
 
-      expect(startLogCall[1].operationId).toMatch(/^input-tracking-start-\d+$/);
-      expect(stopLogCall[1].operationId).toMatch(/^input-tracking-stop-\d+$/);
+      expect((startLogCall[1] as Record<string, unknown>).operationId).toMatch(
+        /^input-tracking-start-\d+$/,
+      );
+      expect((stopLogCall[1] as Record<string, unknown>).operationId).toMatch(
+        /^input-tracking-stop-\d+$/,
+      );
 
       console.log(`[${testId}] Operation ID logging test completed`);
     });
@@ -478,7 +479,9 @@ describe('InputTrackingController', () => {
       const testId = `${operationId}_null_user`;
       console.log(`[${testId}] Testing null user handling`);
 
-      expect(() => controller.start(null as any)).toThrow();
+      expect(() =>
+        controller.start(null as unknown as MockByteBotdUser),
+      ).toThrow();
 
       console.log(`[${testId}] Null user handling test completed`);
     });
@@ -490,9 +493,9 @@ describe('InputTrackingController', () => {
       const incompleteUser = {
         id: 'test_user',
         // missing username, email, role
-      } as any;
+      } as Partial<MockByteBotdUser>;
 
-      const result = controller.start(incompleteUser);
+      const result = controller.start(incompleteUser as MockByteBotdUser);
 
       expect(result.userId).toBe('test_user');
       expect(result.status).toBe('started');
@@ -553,10 +556,14 @@ describe('InputTrackingController', () => {
       controller.start(mockAdminUser);
       controller.stop(mockOperatorUser);
 
-      const logCalls = (logger.log as jest.Mock).mock.calls;
+      const logCalls = (logger.log as jest.Mock).mock.calls as unknown[][];
 
-      expect(logCalls[0][1].securityEvent).toBe('input_tracking_started');
-      expect(logCalls[1][1].securityEvent).toBe('input_tracking_stopped');
+      expect((logCalls[0][1] as Record<string, unknown>).securityEvent).toBe(
+        'input_tracking_started',
+      );
+      expect((logCalls[1][1] as Record<string, unknown>).securityEvent).toBe(
+        'input_tracking_stopped',
+      );
 
       console.log(`[${testId}] Security audit trail test completed`);
     });
@@ -589,7 +596,9 @@ describe('InputTrackingController', () => {
       };
 
       // Controller should handle gracefully (guards would prevent this in real scenario)
-      const result = controller.start(malformedUser as any);
+      const result = controller.start(
+        malformedUser as unknown as MockByteBotdUser,
+      );
       expect(result.userId).toBe('test');
 
       console.log(
@@ -605,8 +614,7 @@ describe('InputTrackingController', () => {
 
       // In real scenario, this would be enforced by NestJS
       // Here we just verify the controller expects authentication
-      const controllerInstance = new InputTrackingController(service);
-      expect(controllerInstance).toBeDefined();
+      expect(controller).toBeDefined();
 
       console.log(`[${testId}] JWT guard protection test completed`);
     });

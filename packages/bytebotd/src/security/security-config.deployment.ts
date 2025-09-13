@@ -58,11 +58,11 @@ export class BytebotDSecurityConfigService {
    * Create BytebotD rate limit guard with strict rate limits
    */
   createRateLimitGuard(
-    _reflector: any,
-    _redisClient?: any,
+    _reflector: unknown,
+    _redisClient?: unknown,
   ): StandardizedRateLimitGuard {
     return StandardizedRateLimitGuard.createBytebotDGuard(
-      this.configService.get('NODE_ENV', 'development'),
+      this.configService.get<string>('NODE_ENV', 'development'),
       {
         // Additional configuration can be added here if needed
       },
@@ -137,7 +137,8 @@ export class BytebotDSecurityConfigService {
     {
       provide: 'BYTEBOT_D_VALIDATION_PIPE',
       useFactory: (configService: ConfigService) => {
-        const environment = configService.get('NODE_ENV', 'development');
+        const environment =
+          configService.get<string>('NODE_ENV', 'development') ?? 'development';
         return StandardizedValidationPipes.MAXIMUM_SECURITY(environment);
       },
       inject: [ConfigService],
@@ -175,8 +176,15 @@ export class BytebotDSecurityDeployment {
    * @param app - NestJS application instance
    * @param configService - Configuration service
    */
-  static async applySecurityToApp(app: any, configService: ConfigService) {
-    const environment = configService.get('NODE_ENV', 'development');
+  static async applySecurityToApp(
+    app: {
+      useGlobalPipes: (pipe: unknown) => void;
+      get: (token: string) => unknown;
+    },
+    configService: ConfigService,
+  ): Promise<void> {
+    const environment =
+      configService.get<string>('NODE_ENV', 'development') ?? 'development';
 
     // Apply global validation pipe with maximum security
     app.useGlobalPipes(
@@ -184,9 +192,11 @@ export class BytebotDSecurityDeployment {
     );
 
     // Log security deployment
-    const _logger = app.get('Logger');
-    if (_logger) {
-      _logger.log('BytebotD security middleware deployed successfully', {
+    const logger = app.get('Logger') as
+      | { log: (message: string, context?: unknown) => void }
+      | undefined;
+    if (logger) {
+      logger.log('BytebotD security middleware deployed successfully', {
         service: 'BytebotD',
         securityLevel: 'MAXIMUM',
         environment,
@@ -224,9 +234,15 @@ export class BytebotDSecurityDeployment {
   /**
    * Validate BytebotD security configuration
    */
-  static validateSecurityConfig(configService: ConfigService) {
-    const environment = configService.get('NODE_ENV', 'development');
-    const corsOrigins = configService.get('CORS_ORIGINS', []);
+  static validateSecurityConfig(configService: ConfigService): {
+    environment: string;
+    valid: boolean;
+    warnings: string[];
+    errors: string[];
+  } {
+    const environment =
+      configService.get<string>('NODE_ENV', 'development') ?? 'development';
+    const corsOrigins = configService.get<string[]>('CORS_ORIGINS', []) ?? [];
 
     const validationResults = {
       environment,
@@ -244,7 +260,7 @@ export class BytebotDSecurityDeployment {
     }
 
     // Check VNC configuration
-    const vncUrl = configService.get('BYTEBOT_DESKTOP_VNC_URL');
+    const vncUrl = configService.get<string>('BYTEBOT_DESKTOP_VNC_URL');
     if (!vncUrl) {
       validationResults.warnings.push(
         'VNC URL not configured - computer control may not work',
@@ -252,7 +268,7 @@ export class BytebotDSecurityDeployment {
     }
 
     // Check Redis configuration for rate limiting
-    const redisHost = configService.get('REDIS_HOST');
+    const redisHost = configService.get<string>('REDIS_HOST');
     if (!redisHost && environment !== 'development') {
       validationResults.warnings.push(
         'Redis not configured - rate limiting will use fallback',

@@ -131,7 +131,7 @@ class SecurityE2EAuthService {
       lastAttempt: 0,
     };
 
-    if (!user ?? user.password !== password) {
+    if (!user || user.password !== password) {
       attempts.count++;
       attempts.lastAttempt = Date.now();
       this.failedAttempts.set(email, attempts);
@@ -234,7 +234,7 @@ class SecurityE2EJwtService {
       const [header, payload, signature] = token.split('.');
 
       // Ensure all parts are present
-      if (!header ?? !payload ?? !signature) {
+      if (!header || !payload || !signature) {
         throw new Error('Invalid token format');
       }
 
@@ -308,6 +308,12 @@ class SecurityE2EUserService {
         Permission._COMPUTER_VIEW,
         Permission._METRICS_VIEW,
       ],
+      [UserRole._USER]: [
+        Permission._TASK_READ,
+      ],
+      [UserRole._GUEST]: [
+        Permission._VIEW_PUBLIC_CONTENT,
+      ],
     };
 
     return rolePermissions[role] ?? [];
@@ -326,7 +332,7 @@ class SecurityE2EAuthController {
   async login(body: any, clientInfo: any) {
     const { email, password } = body;
 
-    if (!email ?? !password) {
+    if (!email || !password) {
       throw new Error('Email and password are required');
     }
 

@@ -1,4 +1,5 @@
 /* eslint-env jest */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /**
  * Comprehensive Unit Tests for ComputerUseService File Operations
  *
@@ -176,7 +177,7 @@ describe('ComputerUseService - File Operations', () => {
     service = testModule.get<ComputerUseService>(ComputerUseService);
 
     // Replace the logger instance to ensure our mock is used
-    (service as any).logger = mockLogger;
+    (service as unknown as { logger: Logger }).logger = mockLogger;
   });
 
   afterEach(async () => {
@@ -1093,9 +1094,9 @@ describe('ComputerUseService - File Operations', () => {
       const _result1 = (await service.action(action1)) as FileWriteResult;
       const _result2 = (await service.action(action2)) as FileReadResult;
 
-      expect(result1.operationId).toMatch(/^write_file_\d+_[a-z0-9]+$/);
-      expect(result2.operationId).toMatch(/^read_file_\d+_[a-z0-9]+$/);
-      expect(result1.operationId).not.toBe(result2.operationId);
+      expect(_result1.operationId).toMatch(/^write_file_\d+_[a-z0-9]+$/);
+      expect(_result2.operationId).toMatch(/^read_file_\d+_[a-z0-9]+$/);
+      expect(_result1.operationId).not.toBe(_result2.operationId);
     });
 
     it('should log comprehensive operation metadata for successful writes', async () => {

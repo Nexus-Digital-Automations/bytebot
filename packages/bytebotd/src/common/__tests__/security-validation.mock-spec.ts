@@ -10,11 +10,11 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
+
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
- 
+
 /* eslint-disable @typescript-eslint/no-unsafe-call */
- 
+
 /* eslint-disable no-undef */
 
 import { HttpException, HttpStatus } from '@nestjs/common';
@@ -269,7 +269,7 @@ describe('Security Validation Mock Tests', () => {
             'http://127.0.0.1:3000',
           ];
 
-          if (!origin ?? allowedOrigins.includes(origin)) {
+          if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
           } else {
             callback(new Error('Not allowed by CORS'), false);

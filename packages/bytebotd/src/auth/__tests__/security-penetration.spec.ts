@@ -22,7 +22,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
- 
+
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
 import { Test, TestingModule } from '@nestjs/testing';
@@ -182,7 +182,7 @@ describe('Security Penetration Testing Suite', () => {
           results.push({
             success: false,
             token: attackToken,
-            error: error.message,
+            error: _error instanceof Error ? _error.message : String(_error),
             time: Date.now() - attackStart,
           });
         }
@@ -225,7 +225,7 @@ describe('Security Penetration Testing Suite', () => {
           await targetFunction(token);
           results.push({ token, success: true });
         } catch (_error) {
-          results.push({ token, success: false, error: error.message });
+          results.push({ token, success: false, error: _error.message });
         }
       }
 
@@ -264,7 +264,7 @@ describe('Security Penetration Testing Suite', () => {
             return {
               success: false,
               index: _index,
-              error: error.message,
+              error: _error instanceof Error ? _error.message : String(_error),
               userRole: user.role,
             };
           }
@@ -670,8 +670,8 @@ describe('Security Penetration Testing Suite', () => {
           const _result = await rolesGuard.canActivate(context);
           escalationResults.push({
             attack: attackVector.name,
-            success: result,
-            vulnerability: result ? 'CRITICAL' : 'NONE',
+            success: _result,
+            vulnerability: _result ? 'CRITICAL' : 'NONE',
           });
         } catch (_error) {
           escalationResults.push({

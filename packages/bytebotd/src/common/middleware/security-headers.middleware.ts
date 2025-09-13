@@ -519,7 +519,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
   private isOriginAllowed(origin: string): boolean {
     if (typeof this.config.corsOrigins === 'string') {
       return (
-        this.config.corsOrigins === '*' ?? this.config.corsOrigins === origin
+        this.config.corsOrigins === '*' || this.config.corsOrigins === origin
       );
     }
 

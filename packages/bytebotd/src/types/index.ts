@@ -19,6 +19,10 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import type {
+  ParamsDictionary,
+  Query as ExpressQuery,
+} from 'express-serve-static-core';
 import { JwtPayload as BaseJwtPayload } from 'jsonwebtoken';
 
 // =============================================================================
@@ -332,11 +336,14 @@ export interface ApplicationConfiguration
 
 /**
  * Type-safe authenticated request interface
+ * @template Body - Request body type
+ * @template Query - Query parameters type extending Express Query
+ * @template Params - Route parameters type extending ParamsDictionary
  */
 export interface AuthenticatedRequest<
   Body = unknown,
-  Query = Record<string, string>,
-  Params = Record<string, string>,
+  Query extends ExpressQuery = ExpressQuery,
+  Params extends ParamsDictionary = ParamsDictionary,
 > extends Request<Params, unknown, Body, Query> {
   readonly user: JwtPayload;
   readonly sessionId: string;
@@ -392,11 +399,14 @@ export type TypedMiddleware<
 
 /**
  * Authenticated middleware function type
+ * @template Body - Request body type
+ * @template Query - Query parameters type extending Express Query
+ * @template Params - Route parameters type extending ParamsDictionary
  */
 export type AuthenticatedMiddleware<
   Body = unknown,
-  Query = Record<string, string>,
-  Params = Record<string, string>,
+  Query extends ExpressQuery = ExpressQuery,
+  Params extends ParamsDictionary = ParamsDictionary,
 > = TypedMiddleware<
   AuthenticatedRequest<Body, Query, Params>,
   Response<ApiResponse>

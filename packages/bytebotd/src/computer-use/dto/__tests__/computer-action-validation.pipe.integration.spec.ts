@@ -200,7 +200,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
 
         try {
           await pipe.transform(input, {} as any);
-        } catch (error) {
+        } catch (_error) {
           // Ignore validation errors for incomplete inputs
         }
 

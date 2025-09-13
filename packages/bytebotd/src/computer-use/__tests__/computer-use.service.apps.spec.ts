@@ -64,7 +64,9 @@ jest.mock('util', () => {
   return {
     ...originalUtil,
     promisify: jest.fn(),
-    inspect: jest.fn().mockImplementation((obj: any) => JSON.stringify(obj)),
+    inspect: jest
+      .fn()
+      .mockImplementation((obj: unknown) => JSON.stringify(obj)),
   } as typeof import('util');
 });
 jest.mock('fs/promises');
@@ -140,7 +142,7 @@ import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
 import { Application } from '@bytebot/shared';
 import { ApplicationActionDto } from '../dto/computer-action.dto';
-import { spawn } from 'child_process';
+import { spawn, SpawnOptions } from 'child_process';
 import { promisify } from 'util';
 
 describe('ComputerUseService - Application Management', () => {
@@ -247,7 +249,7 @@ describe('ComputerUseService - Application Management', () => {
           }),
           stdio: 'ignore',
           detached: true,
-        }) as any,
+        }) as SpawnOptions,
       );
 
       // Verify process was unreferenced for proper cleanup
@@ -287,7 +289,7 @@ describe('ComputerUseService - Application Management', () => {
           }),
           stdio: 'ignore',
           detached: true,
-        }) as any,
+        }) as SpawnOptions,
       );
 
       expect(mockProcess.unref).toHaveBeenCalled();
@@ -528,8 +530,8 @@ describe('ComputerUseService - Application Management', () => {
         expect.objectContaining({
           env: expect.objectContaining({
             DISPLAY: ':0.0',
-          }) as any,
-        }) as any,
+          }) as SpawnOptions,
+        }) as SpawnOptions,
       );
     });
   });

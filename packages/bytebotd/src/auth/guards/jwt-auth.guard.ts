@@ -357,6 +357,35 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   /**
+   * Extract message information from authentication info object with type safety
+   * Safely accesses message and name properties from potentially untyped info object
+   *
+   * @param info - Passport authentication info object (potentially untyped)
+   * @returns string - Extracted message or fallback string
+   * @private
+   */
+  private extractMessageFromInfo(info: unknown): string {
+    // Type guard for objects with message property
+    if (info && typeof info === 'object' && 'message' in info) {
+      const messageValue = (info as { message: unknown }).message;
+      if (typeof messageValue === 'string') {
+        return messageValue;
+      }
+    }
+
+    // Type guard for objects with name property
+    if (info && typeof info === 'object' && 'name' in info) {
+      const nameValue = (info as { name: unknown }).name;
+      if (typeof nameValue === 'string') {
+        return nameValue;
+      }
+    }
+
+    // Fallback to string conversion of the entire info object
+    return String(info);
+  }
+
+  /**
    * Get user-friendly authentication error message
    * Provides clear error messages for common authentication failures
    *
@@ -369,7 +398,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return 'Authentication required for computer control';
     }
 
-    const message = info?.message ?? info?.name ?? String(info);
+    const message = String(this.extractMessageFromInfo(info));
 
     // Common JWT errors with user-friendly messages
     switch (message) {
@@ -404,7 +433,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   private performPreAuthChecks(request: Request, operationId: string): boolean {
     // Check for suspicious user agent patterns
     const userAgent = request.headers['user-agent'];
-    if (!userAgent ?? this.isSuspiciousUserAgent(userAgent)) {
+    if (!userAgent || this.isSuspiciousUserAgent(userAgent)) {
       this.logger.warn(`[${operationId}] Suspicious user agent detected`, {
         operationId,
         userAgent,
@@ -503,7 +532,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const token = authHeader.substring(7);
 
     // Token must exist and be reasonable length
-    if (!token ?? token.length < 20 ?? token.length > 2048) {
+    if (!token || token.length < 20 || token.length > 2048) {
       return false;
     }
 

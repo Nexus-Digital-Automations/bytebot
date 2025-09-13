@@ -18,15 +18,17 @@ import { BrowserSessionDto } from './dto/browser-session.dto';
 
 /**
  * Browser element data interface for typed extraction results
+ * @public - Exported for use in controllers and other modules
  */
-interface BrowserElementData {
+export interface BrowserElementData {
   [key: string]: string | number | boolean | null;
 }
 
 /**
  * Browser extraction metadata interface
+ * @public - Exported for use in controllers and other modules
  */
-interface BrowserExtractionMetadata {
+export interface BrowserExtractionMetadata {
   elementsExtracted: number;
   selectors: string[];
   extractionTime: number;
@@ -143,7 +145,34 @@ export class BrowserUseService {
       // Create task tracking
       const task = await this.taskService.createTask({
         taskId,
-        ...taskDto,
+        name: taskDto.name,
+        description: taskDto.description,
+        actions: taskDto.actions.map((action) => ({
+          type: this.convertActionType(action.type),
+          selector: action.selector,
+          value: action.text || action.url,
+          timeout: action.waitTimeoutMs,
+          options: action.parameters,
+          metadata: action.validation,
+        })),
+        priority: taskDto.priority,
+        sessionConfig: taskDto.sessionConfig
+          ? {
+              headless: taskDto.sessionConfig.headless,
+              viewport: {
+                width: taskDto.sessionConfig.viewportWidth || 1920,
+                height: taskDto.sessionConfig.viewportHeight || 1080,
+              },
+              userAgent: taskDto.sessionConfig.userAgent,
+              defaultTimeout: taskDto.sessionConfig.timeoutMs,
+              devtools: taskDto.sessionConfig.devtools,
+              args: taskDto.sessionConfig.additionalArgs,
+            }
+          : undefined,
+        maxExecutionTimeMs: taskDto.maxExecutionTimeMs,
+        metadata: taskDto.metadata,
+        enableLogging: taskDto.enableLogging,
+        continueOnError: taskDto.continueOnError,
         status: BrowserTaskStatus.RUNNING,
         startedAt: new Date(),
         actionsCompleted: 0,
@@ -164,7 +193,16 @@ export class BrowserUseService {
         executionTimeMs: Date.now() - startTime,
         extractedData: _result.extractedData,
         screenshots: _result.screenshots,
-        logs: _result.logs,
+        logs: (_result.logs || []).map((log) => ({
+          timestamp: log.timestamp,
+          level: this.convertLogLevel(log.level || 'info'),
+          message: log.message,
+          actionIndex: log.actionIndex,
+          actionType: (log as any).actionType,
+          duration: (log as any).duration,
+          screenshot: log.screenshot,
+          metadata: log.metadata,
+        })),
       });
 
       this.logger.log(`Browser task completed: ${taskId}`, {
@@ -459,13 +497,13 @@ export class BrowserUseService {
             includeAttributes: true,
           });
 
-          extractedData[key] = _result.data;
+          extractedData[key] = _result.data as any;
         } catch (_err) {
           this.logger.warn(
             `Failed to extract data for selector ${key}: ${selector}`,
             _err,
           );
-          extractedData[key] = null;
+          extractedData[key] = { error: 'Extraction failed' };
         }
       }
 
@@ -615,7 +653,7 @@ export class BrowserUseService {
 
       logs.push({
         timestamp: new Date(),
-        level: '_err',
+        level: 'error',
         message: `Task execution failed: ${errorMessage}`,
         actionIndex: actionsCompleted,
         metadata: { error: errorMessage },
@@ -686,7 +724,10 @@ export class BrowserUseService {
 
       if (action.type === BrowserActionType.EXTRACT_DATA) {
         try {
-          extractedData = JSON.parse(result.output);
+          extractedData = JSON.parse(result.output) as Record<
+            string,
+            BrowserElementData
+          >;
         } catch (parseErr) {
           this.logger.warn('Failed to parse extracted data', parseErr);
         }
@@ -728,7 +769,7 @@ export class BrowserUseService {
     // Create new session
     return await this.sessionService.createSession({
       name: `Auto-created session ${Date.now()}`,
-      ...(config ?? {}),
+      ...(typeof config === 'object' && config !== null ? config : {}),
     });
   }
 
@@ -1027,6 +1068,60 @@ if __name__ == "__main__":
     },
   ): string {
     return this.generateExtractionScript(sessionId, config?.selector);
+  }
+
+  /**
+   * Convert BrowserActionType to BrowserAction type string
+   */
+  private convertActionType(
+    actionType: BrowserActionType,
+  ):
+    | 'click'
+    | 'type'
+    | 'navigate'
+    | 'screenshot'
+    | 'wait'
+    | 'extract'
+    | 'scroll' {
+    switch (actionType) {
+      case BrowserActionType.CLICK:
+        return 'click';
+      case BrowserActionType.TYPE:
+        return 'type';
+      case BrowserActionType.NAVIGATE:
+        return 'navigate';
+      case BrowserActionType.SCREENSHOT:
+        return 'screenshot';
+      case BrowserActionType.WAIT_FOR_ELEMENT:
+      case BrowserActionType.WAIT_FOR_URL:
+        return 'wait';
+      case BrowserActionType.EXTRACT_DATA:
+      case BrowserActionType.EXTRACT_TEXT:
+        return 'extract';
+      case BrowserActionType.SCROLL:
+        return 'scroll';
+      default:
+        return 'click'; // fallback
+    }
+  }
+
+  /**
+   * Convert log level string to TaskLogEntry level
+   */
+  private convertLogLevel(level: string): 'debug' | 'info' | 'warn' | 'error' {
+    switch (level.toLowerCase()) {
+      case 'debug':
+        return 'debug';
+      case 'info':
+        return 'info';
+      case 'warn':
+      case 'warning':
+        return 'warn';
+      case 'error':
+        return 'error';
+      default:
+        return 'info'; // fallback
+    }
   }
 
   /**

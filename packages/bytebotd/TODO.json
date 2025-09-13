@@ -34,6 +34,46 @@
       "mode": "DEVELOPMENT"
     },
     {
+      "id": "error_1757736019148_labrv7rx3",
+      "title": "EMERGENCY: Fix 186 TypeScript compilation errors blocking BytebotD package build",
+      "description": "CRITICAL BUILD FAILURE: BytebotD package has 186 TypeScript compilation errors preventing successful build. Errors span multiple modules including JWT auth guards, browser services, test utilities, security middleware, and error handlers. This blocks the entire CI/CD pipeline and deployment. Requires immediate systematic resolution using concurrent specialized subagents for maximum parallel efficiency.",
+      "priority": "critical",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/guards/jwt-auth.guard.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/browser-use/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/test-utils/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/security/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/utils/error-handler.ts"
+      ],
+      "success_criteria": [
+        "All 186 TypeScript compilation errors resolved",
+        "npm run build completes successfully without errors",
+        "All type safety violations corrected",
+        "Existing functionality preserved",
+        "Code follows TypeScript strict mode standards"
+      ],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:00:19.148Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757735375203_1_general_c7609592",
+      "started_at": "2025-09-13T04:00:42.728Z",
+      "claimed_by": "development_session_1757735375203_1_general_c7609592",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757735375203_1_general_c7609592",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:00:42.728Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
       "id": "error_1757477906659_bvxkxu3qy",
       "title": "CRITICAL: Fix TypeScript compilation errors in bytebotd test files",
       "description": "Fix critical TypeScript compilation errors in bytebotd package test files preventing build: 1) Remove C/ua integration imports and references (cua-integration.service, cua-vision.service, cua-performance.service), 2) Fix missing exported members from @bytebot/shared (OcrAction, FindTextAction, EnhancedScreenshotAction), 3) Update action interfaces for proper typing (DragMouseAction, TraceMouseAction, PressKeysAction), 4) Fix InputTrackingGateway test mocks for missing methods (broadcastActionEvent, broadcastInputEvent, getConnectedClients), 5) Resolve type conflicts and property mismatches. Focus on: computer-use.service.desktop-automation.spec.ts, computer-use.service.spec.ts, input-tracking.realtime-comprehensive.spec.ts",
@@ -186,6 +226,118 @@
           "assignedAt": "2025-09-07T03:52:56.583Z",
           "reassignReason": null,
           "claimPriority": "critical"
+        }
+      ]
+    },
+    {
+      "id": "error_1757736147380_88zwjl7el",
+      "title": "Fix TypeScript compilation errors in browser service modules",
+      "description": "Resolve 5 critical TypeScript errors in browser-async-job.service.ts and browser-use.service.ts including undefined taskConfig access, type conversion issues BrowserActionDto[] to BrowserAction[], and Record<string, string> assignment problems",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:02:27.381Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757736123619_1_general_eec34519",
+      "started_at": "2025-09-13T04:02:46.029Z",
+      "claimed_by": "development_session_1757736123619_1_general_eec34519",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757736123619_1_general_eec34519",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:02:46.029Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757736147309_g74y3i6lo",
+      "title": "Emergency Build Verification - TypeScript Error Elimination",
+      "description": "Wait for TypeScript specialist agents to complete fixes, then run comprehensive build verification: npm run build, verify zero compilation errors, test linting, confirm functionality preserved, generate build success report",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:02:27.309Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757736123967_1_general_4cc0aa35",
+      "started_at": "2025-09-13T04:02:52.349Z",
+      "claimed_by": "development_session_1757736123967_1_general_4cc0aa35",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757736123967_1_general_4cc0aa35",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:02:52.349Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757736142199_00i0y88ow",
+      "title": "TypeScript Error Cleanup - General Compilation Fixes",
+      "description": "Scan bytebotd package for remaining TypeScript compilation errors and fix miscellaneous type safety violations, import/export issues, method signature mismatches, and type inference problems to ensure complete compilation success.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:02:22.199Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757736118854_1_general_58884e14",
+      "started_at": "2025-09-13T04:02:41.299Z",
+      "claimed_by": "development_session_1757736118854_1_general_58884e14",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757736118854_1_general_58884e14",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:02:41.299Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757736140642_40234xrig",
+      "title": "Fix TypeScript type definition errors in AuthenticatedRequest and BrowserElementData",
+      "description": "Resolve TS2344 constraint error in AuthenticatedRequest generic type and TS4053 export visibility issue with BrowserElementData. Fix generic type parameter constraints and ensure type definitions compile successfully.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:02:20.643Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757736119937_1_general_f49e2ed2",
+      "started_at": "2025-09-13T04:02:41.041Z",
+      "claimed_by": "development_session_1757736119937_1_general_f49e2ed2",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757736119937_1_general_f49e2ed2",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:02:41.041Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
         }
       ]
     },
@@ -2345,6 +2497,111 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-13T03:14:43.277Z",
       "sessionId": "session_1757733283272",
+      "metadata": {}
+    },
+    "development_session_1757735111604_1_general_564899c9": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T03:45:11.606Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T03:45:11.606Z",
+      "sessionId": "session_1757735111604",
+      "metadata": {}
+    },
+    "development_session_1757736118854_1_general_58884e14": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:01:58.856Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:01:58.856Z",
+      "sessionId": "session_1757736118854",
+      "metadata": {}
+    },
+    "development_session_1757736119937_1_general_f49e2ed2": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:01:59.939Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:01:59.939Z",
+      "sessionId": "session_1757736119937",
+      "metadata": {}
+    },
+    "development_session_1757736123619_1_general_eec34519": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:02:03.621Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:02:03.621Z",
+      "sessionId": "session_1757736123619",
+      "metadata": {}
+    },
+    "development_session_1757736123967_1_general_4cc0aa35": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:02:03.968Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:02:03.968Z",
+      "sessionId": "session_1757736123967",
       "metadata": {}
     }
   },

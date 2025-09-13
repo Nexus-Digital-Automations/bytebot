@@ -22,7 +22,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
- 
 
 import { Test as Test, TestingModule as TestingModule } from '@nestjs/testing';
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
@@ -65,7 +64,7 @@ class MockValidationPipe {
 
     try {
       // Skip validation for basic types
-      if (!metadata.metatype ?? this.isBasicType(metadata.metatype)) {
+      if (!metadata.metatype || this.isBasicType(metadata.metatype)) {
         return this.sanitizeBasicValue(value);
       }
 
@@ -133,7 +132,7 @@ class MockValidationPipe {
           constraints: { isEmail: 'email must be a valid email address' },
         });
       }
-      if (!instance.password ?? instance.password.length < 6) {
+      if (!instance.password || instance.password.length < 6) {
         errors.push({
           property: 'password',
           constraints: {
@@ -167,7 +166,7 @@ class MockValidationPipe {
   }
 
   private sanitizeObject(obj: any): any {
-    if (obj === null ?? obj === undefined) {
+    if (obj === null || obj === undefined) {
       return obj;
     }
 

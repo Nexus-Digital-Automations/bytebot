@@ -4,7 +4,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { Injectable, Logger } from '@nestjs/common';
 import { ComputerAction } from '@bytebot/shared';
 
@@ -21,7 +21,7 @@ export class InputTrackingGateway
   private readonly logger = new Logger(InputTrackingGateway.name);
 
   @WebSocketServer()
-  server!: Server;
+  server!: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);

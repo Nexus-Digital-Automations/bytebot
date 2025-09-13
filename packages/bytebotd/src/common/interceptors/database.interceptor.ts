@@ -18,13 +18,9 @@
  * @version 1.0.0
  */
 
- 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
- 
- 
- 
 
 import {
   CallHandler,
@@ -241,7 +237,7 @@ export class DatabaseInterceptor implements NestInterceptor {
     startTime: number,
     next: CallHandler,
   ): Observable<unknown> {
-    if (!this.cacheService ?? !this.keyGenerator) {
+    if (!this.cacheService || !this.keyGenerator) {
       return this.handleDatabaseOperation(
         operationId,
         dbOperation,
@@ -253,7 +249,8 @@ export class DatabaseInterceptor implements NestInterceptor {
     return new Observable((observer) => {
       const cacheKey = this.generateQueryCacheKey(dbOperation);
 
-      this.cacheService!.get(cacheKey)
+      this.cacheService
+        .get(cacheKey)
         .then((cachedResult) => {
           if (cachedResult !== null) {
             // Cache hit
@@ -446,7 +443,7 @@ export class DatabaseInterceptor implements NestInterceptor {
    * Get result count from query result
    */
   private getResultCount(result: unknown): number | undefined {
-    if (result === null ?? result === undefined) {
+    if (result === null || result === undefined) {
       return 0;
     }
 
@@ -555,7 +552,11 @@ export class DatabaseInterceptor implements NestInterceptor {
         avgDuration: duration,
       });
     } else {
-      const slowQuery = this.slowQueries.get(queryKey)!;
+      const slowQuery = this.slowQueries.get(queryKey);
+      if (!slowQuery) {
+        // This should not happen due to the check above, but being type-safe
+        return;
+      }
       slowQuery.totalDuration += duration;
       slowQuery.count++;
       slowQuery.avgDuration = slowQuery.totalDuration / slowQuery.count;

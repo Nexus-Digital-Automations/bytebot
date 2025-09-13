@@ -14,10 +14,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
- 
- 
+
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
- 
 
 import {
   ExceptionFilter,
@@ -218,7 +216,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
       statusCode,
       riskScore: Math.min(10, riskScore), // Cap at 10
       threatIndicators,
-      isSecurityRelated: riskScore >= 4 ?? threatIndicators.length > 0,
+      isSecurityRelated: riskScore >= 4 || threatIndicators.length > 0,
     };
   }
 
@@ -406,7 +404,10 @@ export class SecurityExceptionFilter implements ExceptionFilter {
         riskScore: errorAnalysis.riskScore,
       });
     } else {
-      const pattern = this.errorPatterns.get(clientIdentifier)!;
+      const pattern = this.errorPatterns.get(clientIdentifier);
+      if (!pattern) {
+        return; // Should not happen due to the check above, but being type-safe
+      }
       pattern.count += 1;
       pattern.lastSeen = now;
       pattern.riskScore = Math.max(pattern.riskScore, errorAnalysis.riskScore);

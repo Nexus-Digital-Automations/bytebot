@@ -18,12 +18,6 @@
  * @version 1.0.0
  */
 
- 
- 
- 
- 
- 
- 
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
 import {
@@ -638,7 +632,11 @@ export class CacheInterceptor implements NestInterceptor {
       });
     }
 
-    const endpointStats = this.stats.endpointStats.get(normalizedUrl)!;
+    const endpointStats = this.stats.endpointStats.get(normalizedUrl);
+    if (!endpointStats) {
+      // This should not happen due to the check above, but being type-safe
+      return;
+    }
 
     if (result === 'hit') {
       endpointStats.hits++;
