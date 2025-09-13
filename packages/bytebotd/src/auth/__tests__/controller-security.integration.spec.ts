@@ -1252,30 +1252,33 @@ describe('Controller Security Integration Tests', () => {
 
       for (const operation of sensitiveOperations) {
         const requestObj = request(app.getHttpServer() as Express.Application);
-        let req: any;
 
         // Handle different HTTP methods with proper typing
+        let baseRequest;
         switch (operation.method) {
           case 'get':
-            req = requestObj.get(operation.path);
+            baseRequest = requestObj.get(operation.path);
             break;
           case 'post':
-            req = requestObj.post(operation.path);
+            baseRequest = requestObj.post(operation.path);
             break;
           case 'delete':
-            req = requestObj.delete(operation.path);
+            baseRequest = requestObj.delete(operation.path);
             break;
           default:
-            req = requestObj.get(operation.path);
+            baseRequest = requestObj.get(operation.path);
         }
 
-        req = req.set('Authorization', `Bearer ${operation.token}`);
+        let reqWithAuth = baseRequest.set(
+          'Authorization',
+          `Bearer ${operation.token}`,
+        );
 
         if (operation.body) {
-          req = req.send(operation.body);
+          reqWithAuth = reqWithAuth.send(operation.body);
         }
 
-        const response = await req.expect((res: { status: number }) => {
+        const response = await reqWithAuth.expect((res: { status: number }) => {
           expect([200, 201, 204].includes(res.status)).toBe(true);
         });
 

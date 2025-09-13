@@ -1107,7 +1107,7 @@ describe('Security Penetration Testing Suite', () => {
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
-          .mockResolvedValue(technique._payload);
+          .mockResolvedValue(technique.payload as object);
 
         try {
           const _result = await jwtAuthGuard.canActivate(context);

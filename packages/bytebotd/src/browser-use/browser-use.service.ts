@@ -657,7 +657,9 @@ export class BrowserUseService {
   /**
    * Get or create browser session
    */
-  private async getOrCreateSession(config?: unknown): Promise<any> {
+  private async getOrCreateSession(
+    config?: unknown,
+  ): Promise<BrowserSessionDto> {
     // Try to reuse existing idle session
     const existingSessions = await this.sessionService.getAllSessions();
     const idleSession = existingSessions.find((s) => s.status === 'idle');
