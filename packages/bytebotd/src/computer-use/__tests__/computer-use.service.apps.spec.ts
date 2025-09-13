@@ -151,7 +151,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
-import { Application } from '@bytebot/shared';
 import { ApplicationActionDto } from '../dto/computer-action.dto';
 import { ApplicationName } from '../dto/base.dto';
 import { spawn, SpawnOptions } from 'child_process';
