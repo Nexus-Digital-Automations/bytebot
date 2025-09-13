@@ -12,7 +12,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// TypeScript safety note: This file uses flexible typing for NestJS integration
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import {
@@ -225,13 +225,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     exception: unknown,
     request: Request,
     requestId: string,
-    errorAnalysis: {
-      errorType: SecurityErrorType;
-      statusCode: number;
-      riskScore: number;
-      threatIndicators: string[];
-      isSecurityRelated: boolean;
-    },
+    errorAnalysis: any,
   ): SecureErrorResponse {
     const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -284,13 +278,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
    */
   private getSecureErrorMessage(
     exception: unknown,
-    errorAnalysis: {
-      errorType: SecurityErrorType;
-      statusCode: number;
-      riskScore: number;
-      threatIndicators: string[];
-      isSecurityRelated: boolean;
-    },
+    errorAnalysis: any,
   ): string {
     // For security violations, use generic message
     if (errorAnalysis.errorType === SecurityErrorType.SECURITY_VIOLATION) {
@@ -361,13 +349,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
   private logSecurityEvent(
     exception: unknown,
     request: Request,
-    errorAnalysis: {
-      errorType: SecurityErrorType;
-      statusCode: number;
-      riskScore: number;
-      threatIndicators: string[];
-      isSecurityRelated: boolean;
-    },
+    errorAnalysis: any,
     requestId: string,
   ): void {
     const logData = {

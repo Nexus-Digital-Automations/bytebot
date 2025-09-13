@@ -91,13 +91,22 @@ enum MouseButton {
   BUTTON3 = 3, // Middle
 }
 
+// Type definitions for event handlers
+type MouseEventHandler = (event: UiohookMouseEvent) => void;
+type KeyboardEventHandler = (event: UiohookKeyboardEvent) => void;
+type WheelEventHandler = (event: UiohookWheelEvent) => void;
+type UIohookEventHandler =
+  | MouseEventHandler
+  | KeyboardEventHandler
+  | WheelEventHandler;
+
 // Mock uiohook-napi before importing services
-const mockEventListeners: { [key: string]: Function } = {};
+const mockEventListeners: { [key: string]: UIohookEventHandler } = {};
 const mockUIOhook = {
   start: jest.fn(),
   stop: jest.fn(),
   removeAllListeners: jest.fn(),
-  on: jest.fn((event: string, callback: Function) => {
+  on: jest.fn((event: string, callback: UIohookEventHandler) => {
     mockEventListeners[event] = callback;
   }),
   off: jest.fn(),
@@ -437,7 +446,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should process mouse click events with debouncing', async () => {
-      const clickHandler = mockEventListeners['mouseclick'];
+      const clickHandler = mockEventListeners[
+        'mouseclick'
+      ] as MouseEventHandler;
       expect(clickHandler).toBeDefined();
 
       // Generate rapid click events
@@ -476,7 +487,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should track mouse movement with coordinate accuracy', async () => {
-      const moveHandler = mockEventListeners['mousemove'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
       expect(moveHandler).toBeDefined();
 
       const moveEvents = [
@@ -509,9 +520,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should handle mouse drag operations with state management', async () => {
-      const downHandler = mockEventListeners['mousedown'];
-      const moveHandler = mockEventListeners['mousemove'];
-      const upHandler = mockEventListeners['mouseup'];
+      const downHandler = mockEventListeners['mousedown'] as MouseEventHandler;
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
+      const upHandler = mockEventListeners['mouseup'] as MouseEventHandler;
 
       // Start drag
       const startEvent = createMouseEvent({
@@ -571,7 +582,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should process mouse wheel events with direction and scroll amount', async () => {
-      const wheelHandler = mockEventListeners['wheel'];
+      const wheelHandler = mockEventListeners['wheel'] as WheelEventHandler;
       expect(wheelHandler).toBeDefined();
 
       const wheelEvents = [
@@ -616,7 +627,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should handle multi-monitor coordinate mapping', async () => {
-      const moveHandler = mockEventListeners['mousemove'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Test coordinates across multiple monitors
       const multiMonitorEvents = [
@@ -647,8 +658,10 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should process text input with buffering and debouncing', async () => {
-      const keydownHandler = mockEventListeners['keydown'];
-      const keyupHandler = mockEventListeners['keyup'];
+      const keydownHandler = mockEventListeners[
+        'keydown'
+      ] as KeyboardEventHandler;
+      const keyupHandler = mockEventListeners['keyup'] as KeyboardEventHandler;
 
       // Simulate typing "Hello World"
       const text = 'Hello World';
@@ -690,8 +703,10 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should handle modifier key combinations accurately', async () => {
-      const keydownHandler = mockEventListeners['keydown'];
-      const keyupHandler = mockEventListeners['keyup'];
+      const keydownHandler = mockEventListeners[
+        'keydown'
+      ] as KeyboardEventHandler;
+      const keyupHandler = mockEventListeners['keyup'] as KeyboardEventHandler;
 
       // Test various modifier combinations
       const shortcuts = [
@@ -746,7 +761,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should prevent key repeat spam and handle held keys', async () => {
-      const keydownHandler = mockEventListeners['keydown'];
+      const keydownHandler = mockEventListeners[
+        'keydown'
+      ] as KeyboardEventHandler;
 
       // Simulate holding a key (rapid repeated events)
       const heldKey = createKeyboardEvent({ keycode: 65, char: 'a' }); // 'A' key
@@ -764,8 +781,10 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should handle international keyboard layouts and special characters', async () => {
-      const keydownHandler = mockEventListeners['keydown'];
-      const keyupHandler = mockEventListeners['keyup'];
+      const keydownHandler = mockEventListeners[
+        'keydown'
+      ] as KeyboardEventHandler;
+      const keyupHandler = mockEventListeners['keyup'] as KeyboardEventHandler;
 
       // International characters and symbols
       const internationalChars = [
@@ -805,7 +824,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should handle high-frequency mouse events without performance degradation', async () => {
-      const moveHandler = mockEventListeners['mousemove'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
       const startTime = Date.now();
       const highFrequencyEvents = await simulateHighFrequencyInput(
         1000,
@@ -830,8 +849,10 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should handle concurrent input streams efficiently', async () => {
-      const moveHandler = mockEventListeners['mousemove'];
-      const keydownHandler = mockEventListeners['keydown'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
+      const keydownHandler = mockEventListeners[
+        'keydown'
+      ] as KeyboardEventHandler;
 
       // Create concurrent input streams
       const mousePromises = [];
@@ -870,7 +891,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should optimize memory usage with proper buffer management', async () => {
-      const keydownHandler = mockEventListeners['keydown'];
+      const keydownHandler = mockEventListeners[
+        'keydown'
+      ] as KeyboardEventHandler;
       const initialMemory = process.memoryUsage().heapUsed;
 
       // Fill typing buffer multiple times
@@ -908,7 +931,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Create sustained load for 2 seconds
       const endTime = startTime + 2000;
-      const moveHandler = mockEventListeners['mousemove'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       while (Date.now() < endTime) {
         if (moveHandler) {
@@ -939,7 +962,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should broadcast input events to connected clients', async () => {
-      const moveHandler = mockEventListeners['mousemove'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       const mouseEvent = createMouseEvent({ x: 300, y: 400 });
       if (moveHandler) {
@@ -956,7 +979,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should broadcast action events with proper formatting', async () => {
-      const clickHandler = mockEventListeners['mouseclick'];
+      const clickHandler = mockEventListeners[
+        'mouseclick'
+      ] as MouseEventHandler;
 
       const clickEvent = createMouseEvent({
         type: EventType.EVENT_MOUSE_CLICKED,
@@ -981,7 +1006,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should handle WebSocket connection management during high activity', async () => {
-      const moveHandler = mockEventListeners['mousemove'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Simulate high activity
       for (let i = 0; i < 50; i++) {
@@ -998,7 +1023,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should support room-based broadcasting for multi-session scenarios', async () => {
-      const moveHandler = mockEventListeners['mousemove'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Join specific rooms
       mockInputTrackingGateway.getClientRooms = jest
@@ -1026,7 +1051,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         configurable: true,
       });
 
-      const keydownHandler = mockEventListeners['keydown'];
+      const keydownHandler = mockEventListeners[
+        'keydown'
+      ] as KeyboardEventHandler;
 
       // Windows-specific key combinations
       const winKey = createKeyboardEvent({ keycode: 91, metaKey: true }); // Windows key
@@ -1051,7 +1078,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         configurable: true,
       });
 
-      const keydownHandler = mockEventListeners['keydown'];
+      const keydownHandler = mockEventListeners[
+        'keydown'
+      ] as KeyboardEventHandler;
 
       // macOS-specific Command key
       const cmdKey = createKeyboardEvent({ keycode: 91, metaKey: true });
@@ -1076,7 +1105,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         configurable: true,
       });
 
-      const keydownHandler = mockEventListeners['keydown'];
+      const keydownHandler = mockEventListeners[
+        'keydown'
+      ] as KeyboardEventHandler;
 
       // Linux-specific Super key
       const superKey = createKeyboardEvent({ keycode: 133, metaKey: true });
@@ -1117,7 +1148,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
           throw new Error('WebSocket connection lost');
         });
 
-      const moveHandler = mockEventListeners['mousemove'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Should not crash on broadcast failure
       expect(() => {
@@ -1129,7 +1160,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       service.startTracking();
 
       // Simulate memory pressure scenario
-      const keydownHandler = mockEventListeners['keydown'];
+      const keydownHandler = mockEventListeners[
+        'keydown'
+      ] as KeyboardEventHandler;
 
       // Fill up buffers with large amounts of data
       for (let i = 0; i < 10000; i++) {
@@ -1172,7 +1205,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should validate and sanitize input coordinates', async () => {
-      const moveHandler = mockEventListeners['mousemove'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Test edge cases and potentially malicious coordinates
       const edgeCaseEvents = [
@@ -1190,7 +1223,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should limit input event processing rate to prevent DoS', async () => {
-      const moveHandler = mockEventListeners['mousemove'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
       const startTime = Date.now();
 
       // Attempt to overwhelm with rapid events
@@ -1205,7 +1238,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should validate keyboard input and prevent injection attacks', async () => {
-      const keydownHandler = mockEventListeners['keydown'];
+      const keydownHandler = mockEventListeners[
+        'keydown'
+      ] as KeyboardEventHandler;
 
       // Attempt malicious input patterns
       const maliciousInputs: Array<Partial<UiohookKeyboardEvent>> = [
@@ -1232,7 +1267,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should coordinate with screenshot capture during input tracking', async () => {
-      const moveHandler = mockEventListeners['mousemove'];
+      const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Trigger mouse movement
       moveHandler(createMouseEvent({ x: 400, y: 300 }));
@@ -1243,7 +1278,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     });
 
     it('should integrate with computer use actions for complete workflow', async () => {
-      const clickHandler = mockEventListeners['mouseclick'];
+      const clickHandler = mockEventListeners[
+        'mouseclick'
+      ] as MouseEventHandler;
 
       // Simulate a click that might trigger downstream actions
       clickHandler(

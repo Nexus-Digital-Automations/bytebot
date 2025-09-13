@@ -19,9 +19,11 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// TypeScript safety note: This test file uses flexible typing for security testing
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
+
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext } from '@nestjs/common';
@@ -1430,7 +1432,7 @@ describe('Security Penetration Testing Suite', () => {
                 id: 'audit-user',
                 email: 'audit@test.com',
                 username: 'audituser',
-                role: eventType.user?.role ?? UserRole._VIEWER,
+                role: eventType.user?.role || UserRole._VIEWER,
                 isActive: true,
               };
 
@@ -1460,20 +1462,22 @@ describe('Security Penetration Testing Suite', () => {
       console.error = originalConsole.error;
 
       // Validate audit trail
-      const securityAuditEvents = auditEvents.filter((event) => {
-        const message = event.message ?? '';
-        const securityTerms = ['security', 'auth', 'attack', 'unauthorized'];
-        return securityTerms.some((term) => message.includes(term));
-      });
+      const securityAuditEvents = auditEvents.filter(
+        (event) =>
+          event.message.includes('security') ||
+          event.message.includes('auth') ||
+          event.message.includes('attack') ||
+          event.message.includes('unauthorized'),
+      );
 
       expect(securityAuditEvents.length).toBeGreaterThan(0);
 
       // Verify audit events contain critical information
-      const hasIPTracking = auditEvents.some((event) => {
-        const message = event.message ?? '';
-        const ipAddresses = ['192.168.100.100', '10.0.100.100'];
-        return ipAddresses.some((ip) => message.includes(ip));
-      });
+      const hasIPTracking = auditEvents.some(
+        (event) =>
+          event.message.includes('192.168.100.100') ||
+          event.message.includes('10.0.100.100'),
+      );
 
       expect(hasIPTracking).toBe(true);
 

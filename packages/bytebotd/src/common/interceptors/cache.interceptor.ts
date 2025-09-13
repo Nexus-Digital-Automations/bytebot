@@ -18,8 +18,6 @@
  * @version 1.0.0
  */
 
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-
 import {
   CallHandler,
   ExecutionContext,
@@ -215,7 +213,7 @@ export class CacheInterceptor implements NestInterceptor {
     }
 
     const operationId =
-      (request as Request & { operationId?: string }).operationId ||
+      (request as Request & { operationId?: string }).operationId ??
       `cache_${Date.now()}`;
     const startTime = Date.now();
 

@@ -11,7 +11,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// TypeScript safety note: This test file uses flexible typing for security testing
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
@@ -301,7 +301,7 @@ describe('Security Validation E2E Tests', () => {
         .expect(400);
 
       expect(
-        response.body.requestId ?? response.headers['x-request-id'],
+        response.body.requestId || response.headers['x-request-id'],
       ).toBeDefined();
     });
 
@@ -451,8 +451,8 @@ describe('Security Validation E2E Tests', () => {
         .send({ action: 'screenshot' });
 
       expect(
-        response.headers['x-request-id'] ??
-          response.headers['x-correlation-id'] ??
+        response.headers['x-request-id'] ||
+          response.headers['x-correlation-id'] ||
           response.body.operationId,
       ).toBeDefined();
     });

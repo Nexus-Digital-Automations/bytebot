@@ -1,5 +1,3 @@
- 
-
 /**
  * API Versioning Decorators - BytebotD Desktop Service Versioning
  *
@@ -12,11 +10,7 @@
  * @author Input Validation & API Security Specialist
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
- 
- 
+// TypeScript safety note: This file contains NestJS decorators that work with metadata reflection
 
 import { SetMetadata, applyDecorators } from '@nestjs/common';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
@@ -349,8 +343,7 @@ export const ComputerUseApi = (
  * @param target - Target class or method
  * @returns Version configuration or null
  */
-export function getVersionConfig(target: any): ApiVersionConfig | null {
-   
+export function getVersionConfig(target: object): ApiVersionConfig | null {
   const metadata = Reflect.getMetadata(VERSION_CONFIG_KEY, target);
   return metadata && typeof metadata === 'object' && 'version' in metadata
     ? (metadata as ApiVersionConfig)
@@ -362,8 +355,7 @@ export function getVersionConfig(target: any): ApiVersionConfig | null {
  * @param target - Target class or method
  * @returns API version or null
  */
-export function getApiVersion(target: any): string | null {
-   
+export function getApiVersion(target: object): string | null {
   const metadata = Reflect.getMetadata(VERSION_METADATA_KEY, target);
   return typeof metadata === 'string' ? metadata : null;
 }
@@ -373,8 +365,7 @@ export function getApiVersion(target: any): string | null {
  * @param target - Target class or method
  * @returns Array of supported versions or null
  */
-export function getMultiVersions(target: any): SupportedVersion[] | null {
-   
+export function getMultiVersions(target: object): SupportedVersion[] | null {
   const metadata = Reflect.getMetadata('multi_version', target);
   return Array.isArray(metadata) && metadata.every((v) => typeof v === 'string')
     ? (metadata as SupportedVersion[])
@@ -386,8 +377,7 @@ export function getMultiVersions(target: any): SupportedVersion[] | null {
  * @param target - Target class or method
  * @returns Boolean indicating if it's a desktop endpoint
  */
-export function isDesktopApiVersion(target: any): boolean {
-   
+export function isDesktopApiVersion(target: object): boolean {
   const metadata = Reflect.getMetadata(DESKTOP_VERSION_KEY, target);
   return Boolean(metadata);
 }
@@ -398,7 +388,7 @@ export function isDesktopApiVersion(target: any): boolean {
  * @returns Desktop compatibility configuration or null
  */
 export function getDesktopCompatibility(
-  target: any,
+  target: object,
 ): ApiVersionConfig['desktopCompatibility'] | null {
   const versionConfig = getVersionConfig(target);
   return versionConfig?.desktopCompatibility ?? null;

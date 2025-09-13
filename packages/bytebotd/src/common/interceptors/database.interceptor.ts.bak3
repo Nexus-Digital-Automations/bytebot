@@ -19,7 +19,7 @@
  */
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// TypeScript safety note: This file uses flexible typing for NestJS integration
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import {

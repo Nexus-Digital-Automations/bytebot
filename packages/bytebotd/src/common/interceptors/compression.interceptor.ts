@@ -199,7 +199,7 @@ export class CompressionInterceptor implements NestInterceptor {
     response: Response,
   ): Promise<CompressionResult> {
     const operationId =
-      (request as Request & { operationId?: string }).operationId ||
+      (request as Request & { operationId?: string }).operationId ??
       `compress_${Date.now()}`;
     const startTime = Date.now();
 
