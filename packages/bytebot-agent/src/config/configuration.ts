@@ -159,6 +159,7 @@ function isValidatedEnvironmentConfig(
 export interface AppConfig {
   nodeEnv: 'development' | 'staging' | 'production' | 'test';
   port: number;
+  DATABASE_URL: string;
 
   database: {
     url: string;
@@ -308,6 +309,7 @@ function loadConfiguration(): AppConfig {
     const config: AppConfig = {
       nodeEnv: typedConfig.NODE_ENV,
       port: typedConfig.PORT,
+      DATABASE_URL: typedConfig.DATABASE_URL,
 
       database: {
         url: typedConfig.DATABASE_URL,

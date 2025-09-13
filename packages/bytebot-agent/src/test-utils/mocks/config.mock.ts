@@ -146,6 +146,7 @@ export const MOCK_APP_CONFIGS: Record<string, AppConfig> = {
   development: {
     nodeEnv: 'development',
     port: 3000,
+    DATABASE_URL: 'sqlite://memory',
     database: {
       url: 'sqlite://memory',
       maxConnections: 10,
@@ -214,6 +215,7 @@ export const MOCK_APP_CONFIGS: Record<string, AppConfig> = {
   production: {
     nodeEnv: 'production',
     port: 8080,
+    DATABASE_URL: 'postgresql://user:pass@prod-db:5432/bytebot',
     database: {
       url: 'postgresql://user:pass@prod-db:5432/bytebot',
       maxConnections: 50,

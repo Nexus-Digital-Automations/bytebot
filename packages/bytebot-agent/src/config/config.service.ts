@@ -957,12 +957,14 @@ export class BytebotConfigService implements OnModuleInit {
    * @returns App configuration object
    */
   getAppConfig(): AppConfig {
-    const appConfig = this.nestConfigService.get<AppConfig>('app');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    const appConfig = (this.nestConfigService as any).get('app');
     if (!appConfig) {
       throw new Error(
         'Application configuration not found. Ensure configuration is properly loaded.',
       );
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return appConfig;
   }
 
