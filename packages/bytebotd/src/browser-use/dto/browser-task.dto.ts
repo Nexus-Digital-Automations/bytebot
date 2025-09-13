@@ -199,7 +199,7 @@ export class BrowserActionDto {
   })
   @IsOptional()
   @IsObject()
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'Expected outcome validation',
@@ -279,7 +279,7 @@ export class CreateBrowserTaskDto {
   })
   @IsOptional()
   @IsObject()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'Enable detailed logging and screenshots',
@@ -343,7 +343,7 @@ export class BrowserTaskResultDto {
     type: 'object',
     additionalProperties: true,
   })
-  extractedData?: Record<string, any>;
+  extractedData?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'Screenshots captured during execution',
@@ -361,7 +361,7 @@ export class BrowserTaskResultDto {
     type: 'object',
     additionalProperties: true,
   })
-  errorDetails?: Record<string, any>;
+  errorDetails?: Record<string, unknown>;
 
   @ApiProperty({
     description: 'Execution logs and action details',
@@ -373,7 +373,7 @@ export class BrowserTaskResultDto {
     message: string;
     actionIndex?: number;
     screenshot?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }>;
 
   @ApiPropertyOptional({
@@ -381,5 +381,5 @@ export class BrowserTaskResultDto {
     type: 'object',
     additionalProperties: true,
   })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

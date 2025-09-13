@@ -17,6 +17,71 @@ import { BrowserAsyncJobService } from './browser-async-job.service';
 import { BrowserSessionDto } from './dto/browser-session.dto';
 
 /**
+ * Browser element data interface for typed extraction results
+ */
+interface BrowserElementData {
+  [key: string]: string | number | boolean | null;
+}
+
+/**
+ * Browser extraction metadata interface
+ */
+interface BrowserExtractionMetadata {
+  elementsExtracted: number;
+  selectors: string[];
+  extractionTime: number;
+}
+
+/**
+ * Raw extraction data from Python script JSON parsing
+ */
+interface RawExtractionData {
+  data: Record<string, BrowserElementData>;
+  elementsCount?: number;
+  selectors?: string[];
+  [key: string]: unknown;
+}
+
+/**
+ * Standard error interface for error handling
+ */
+interface StandardError {
+  message: string;
+  name?: string;
+  stack?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Browser data extraction result interface
+ */
+interface BrowserDataExtractionResult {
+  data: Record<string, BrowserElementData>;
+  timestamp: Date;
+  metadata: BrowserExtractionMetadata;
+}
+
+/**
+ * Browser action parameters interface
+ */
+interface BrowserActionParams {
+  selector?: string;
+  text?: string;
+  coordinates?: { x: number; y: number };
+  waitTime?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * Screenshot options interface
+ */
+interface ScreenshotOptions {
+  fullPage?: boolean;
+  quality?: number;
+  format?: 'png' | 'jpeg' | 'webp';
+}
+
+/**
  * Browser-Use Service - Core Python Integration Layer
  *
  * Provides high-level interface for browser automation by integrating with
@@ -243,15 +308,7 @@ export class BrowserUseService {
       includeText?: boolean;
       maxDepth?: number;
     },
-  ): Promise<{
-    data: Record<string, any>;
-    timestamp: Date;
-    metadata: {
-      elementsExtracted: number;
-      selectors: string[];
-      extractionTime: number;
-    };
-  }> {
+  ): Promise<BrowserDataExtractionResult> {
     this.logger.log(`Extracting DOM data for session: ${sessionId}`);
 
     try {
@@ -274,7 +331,7 @@ export class BrowserUseService {
       }
 
       const extractionTime = Date.now() - startTime;
-      const extractedData = JSON.parse(result.output);
+      const extractedData = JSON.parse(result.output) as RawExtractionData;
 
       return {
         data: extractedData.data,
@@ -382,7 +439,7 @@ export class BrowserUseService {
       waitForSelector?: string;
       timeout?: number;
     },
-  ): Promise<Record<string, any>> {
+  ): Promise<Record<string, BrowserElementData>> {
     this.logger.log(`Extracting page data for session: ${sessionId}`, {
       sessionId,
       selectorsCount: Object.keys(config.selectors).length,
@@ -391,7 +448,7 @@ export class BrowserUseService {
     });
 
     try {
-      const extractedData: Record<string, any> = {};
+      const extractedData: Record<string, BrowserElementData> = {};
 
       // Extract data for each selector
       for (const [key, selector] of Object.entries(config.selectors)) {
@@ -476,10 +533,10 @@ export class BrowserUseService {
       message: string;
       actionIndex?: number;
       screenshot?: string;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
     }> = [];
     const screenshots: string[] = [];
-    let extractedData: Record<string, any> = {};
+    let extractedData: Record<string, BrowserElementData> = {};
     let actionsCompleted = 0;
 
     try {
@@ -579,7 +636,7 @@ export class BrowserUseService {
     success: boolean;
     executionTime: number;
     screenshot?: string;
-    extractedData?: Record<string, any>;
+    extractedData?: Record<string, BrowserElementData>;
     error?: string;
   }> {
     const startTime = Date.now();
@@ -624,7 +681,7 @@ export class BrowserUseService {
       }
 
       // Parse result based on action type
-      let extractedData: Record<string, any> | undefined;
+      let extractedData: Record<string, BrowserElementData> | undefined;
       let screenshot: string | undefined;
 
       if (action.type === BrowserActionType.EXTRACT_DATA) {
@@ -754,7 +811,7 @@ export class BrowserUseService {
             }
           });
 
-          childProcess.on('_error', async (err) => {
+          childProcess.on('error', async (err: Error) => {
             try {
               await fs.unlink(scriptFile);
             } catch (cleanupErr) {
@@ -768,7 +825,7 @@ export class BrowserUseService {
             });
           });
         })
-        .catch((writeErr) => {
+        .catch((writeErr: Error) => {
           resolve({
             success: false,
             output: '',
@@ -889,9 +946,9 @@ async def main():
         # Capture screenshot
         screenshot = await session.page.screenshot(
             path=${filepath ? JSON.stringify(filepath) : 'None'},
-            full_page=${(config as any)?.fullPage ?? false},
-            quality=${(config as any)?.quality ?? 85},
-            type=${JSON.stringify((config as any)?.format ?? 'png')}
+            full_page=${(config as ScreenshotOptions)?.fullPage ?? false},
+            quality=${(config as ScreenshotOptions)?.quality ?? 85},
+            type=${JSON.stringify((config as ScreenshotOptions)?.format ?? 'png')}
         )
         
         if not ${filepath ? 'True' : 'False'}:

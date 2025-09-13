@@ -62,10 +62,28 @@ interface EnhancedJwtPayload extends JwtPayload {
 }
 
 /**
+ * Request cookies interface for JWT authentication
+ */
+interface JwtCookies {
+  refreshToken?: string;
+  [key: string]: string | undefined;
+}
+
+/**
+ * Request body interface for JWT authentication
+ */
+interface JwtRequestBody {
+  refreshToken?: string;
+  [key: string]: unknown;
+}
+
+/**
  * Enhanced request interface with security context
  */
 interface EnhancedAuthenticatedRequest extends Request {
   user: ByteBotdUser;
+  cookies: JwtCookies;
+  body: JwtRequestBody;
   securityContext: {
     tokenRefreshed: boolean;
     serviceAuthentication: boolean;
@@ -98,7 +116,7 @@ interface JwtAuthInfo {
 /**
  * Verification callback type for JWT authentication
  */
-type JwtVerifyCallback = (
+type _JwtVerifyCallback = (
   error?: Error | null,
   user?: ByteBotdUser | false,
 ) => void;
@@ -376,18 +394,23 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
    */
   private extractRefreshToken(request: Request): string | null {
     // Check refresh token in cookies (most secure)
-    if (request.cookies?.refreshToken) {
-      return request.cookies.refreshToken as string;
+    const cookies = request.cookies as JwtCookies | undefined;
+    if (cookies?.refreshToken && typeof cookies.refreshToken === 'string') {
+      return cookies.refreshToken;
     }
 
     // Check refresh token in secure headers
-    if (request.headers['x-refresh-token']) {
-      return request.headers['x-refresh-token'] as string;
+    const refreshTokenHeader = request.headers['x-refresh-token'];
+    if (refreshTokenHeader && typeof refreshTokenHeader === 'string') {
+      return refreshTokenHeader;
     }
 
     // Check refresh token in request body (for specific endpoints)
-    if (request.body?.refreshToken && request.method === 'POST') {
-      return request.body.refreshToken as string;
+    if (request.method === 'POST' && request.body) {
+      const body = request.body as JwtRequestBody;
+      if (body.refreshToken && typeof body.refreshToken === 'string') {
+        return body.refreshToken;
+      }
     }
 
     return null;

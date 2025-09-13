@@ -32,7 +32,7 @@ type CacheOperation = 'get' | 'set' | 'del' | 'mget' | 'mset' | 'warm';
 /**
  * Type guard to check if a value is a valid JSON object
  */
-function isValidJsonObject(value: unknown): value is Record<string, unknown> {
+function _isValidJsonObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
@@ -51,7 +51,7 @@ function safeJsonParse<T>(jsonString: string): T | null {
 /**
  * Type-safe cache value serialization interface
  */
-interface SerializedCacheValue {
+interface _SerializedCacheValue {
   data: unknown;
   type: 'string' | 'number' | 'boolean' | 'object' | 'array';
   timestamp: number;

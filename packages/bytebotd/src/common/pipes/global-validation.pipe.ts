@@ -79,7 +79,7 @@ const DEFAULT_OPTIONS: GlobalValidationPipeOptions = {
 };
 
 @Injectable()
-export class GlobalValidationPipe implements PipeTransform<any> {
+export class GlobalValidationPipe implements PipeTransform<unknown> {
   private readonly logger = new Logger(GlobalValidationPipe.name);
   private readonly options: GlobalValidationPipeOptions;
 
@@ -101,7 +101,10 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param metadata - Argument metadata from NestJS
    * @returns Validated and transformed value
    */
-  async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
+  async transform(
+    value: unknown,
+    metadata: ArgumentMetadata,
+  ): Promise<unknown> {
     const operationId = `validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -195,7 +198,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param metatype - The metatype to check
    * @returns True if it's a basic type
    */
-  private isBasicType(metatype: any): boolean {
+  private isBasicType(metatype: unknown): boolean {
     const basicTypes = [String, Boolean, Number, Array, Object];
     return basicTypes.includes(metatype);
   }
@@ -206,7 +209,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param operationId - Operation tracking ID
    * @returns Sanitized value
    */
-  private sanitizeBasicValue(value: any, operationId: string): any {
+  private sanitizeBasicValue(value: unknown, operationId: string): unknown {
     if (typeof value === 'string' && this.options.enableSanitization) {
       const sanitized = sanitizeInput(value, this.options.sanitizationOptions);
 
@@ -230,7 +233,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param value - Value to check size for
    * @param operationId - Operation tracking ID
    */
-  private validatePayloadSize(value: any, operationId: string): void {
+  private validatePayloadSize(value: unknown, operationId: string): void {
     try {
       const payloadSize = JSON.stringify(value).length;
 
@@ -274,7 +277,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param value - Value to analyze
    * @param operationId - Operation tracking ID
    */
-  private detectSecurityThreats(value: any, operationId: string): void {
+  private detectSecurityThreats(value: unknown, operationId: string): void {
     const threats: string[] = [];
 
     // Convert value to string for pattern analysis
@@ -328,9 +331,9 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param operationId - Operation tracking ID
    * @returns Sanitized value
    */
-  private sanitizeValue(value: any, operationId: string): any {
+  private sanitizeValue(value: unknown, operationId: string): unknown {
     const startTime = Date.now();
-    let sanitized: any;
+    let sanitized: unknown;
 
     if (typeof value === 'string') {
       sanitized = sanitizeInput(value, this.options.sanitizationOptions);
@@ -382,8 +385,8 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param operationId - Operation tracking ID
    */
   private async validateValue(
-    value: any,
-    metatype: any,
+    value: unknown,
+    metatype: unknown,
     operationId: string,
   ): Promise<void> {
     const startTime = Date.now();
@@ -429,7 +432,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param errors - Class-validator errors
    * @returns Formatted error array
    */
-  private formatValidationErrors(errors: ValidationError[]): any[] {
+  private formatValidationErrors(errors: ValidationError[]): unknown[] {
     return errors.map((error) => ({
       property: error.property,
       value: error.value,
@@ -450,8 +453,8 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    */
   private logSecurityEvent(
     operationId: string,
-    error: any,
-    value: any,
+    error: unknown,
+    value: unknown,
     metadata: ArgumentMetadata,
   ): void {
     try {

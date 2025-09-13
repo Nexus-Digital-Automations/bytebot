@@ -27,7 +27,7 @@ import * as redisStore from 'cache-manager-redis-store';
  * Cache configuration for enterprise-grade Redis caching
  */
 interface CacheConfig {
-  store: any; // Redis store for cache manager
+  store: unknown; // Redis store for cache manager
   host: string;
   port: number;
   ttl: number;

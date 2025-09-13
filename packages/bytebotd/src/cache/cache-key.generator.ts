@@ -89,7 +89,7 @@ export class CacheKeyGenerator {
    * @returns string Generated cache key
    */
   generate(
-    key: string | string[] | Record<string, any>,
+    key: string | string[] | Record<string, unknown>,
     namespace?: string,
     options: KeyGenerationOptions = {},
   ): string {
@@ -180,7 +180,7 @@ export class CacheKeyGenerator {
   generateApiKey(
     method: string,
     path: string,
-    queryParams?: Record<string, any>,
+    queryParams?: Record<string, unknown>,
     userId?: string,
   ): string {
     const keyParts = [
@@ -198,7 +198,7 @@ export class CacheKeyGenerator {
             result[key] = queryParams[key];
             return result;
           },
-          {} as Record<string, any>,
+          {} as Record<string, unknown>,
         );
 
       keyParts.push(this.hashObject(sortedParams));
@@ -222,7 +222,7 @@ export class CacheKeyGenerator {
   generateDbKey(
     table: string,
     operation: string,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
   ): string {
     const keyParts = ['db', table, operation];
 
@@ -244,7 +244,7 @@ export class CacheKeyGenerator {
   generateTaskKey(
     taskId: string,
     operation: string,
-    additionalParams?: Record<string, any>,
+    additionalParams?: Record<string, unknown>,
   ): string {
     const keyParts = ['task', taskId, operation];
 
@@ -313,7 +313,9 @@ export class CacheKeyGenerator {
   /**
    * Normalize key input to string
    */
-  private normalizeKey(key: string | string[] | Record<string, any>): string {
+  private normalizeKey(
+    key: string | string[] | Record<string, unknown>,
+  ): string {
     if (typeof key === 'string') {
       return this.sanitizeKey(key);
     }
@@ -354,7 +356,7 @@ export class CacheKeyGenerator {
   /**
    * Hash object to consistent string representation
    */
-  private hashObject(obj: Record<string, any>): string {
+  private hashObject(obj: Record<string, unknown>): string {
     // Sort keys for consistent hashing
     const sortedObj = Object.keys(obj)
       .sort()
@@ -363,7 +365,7 @@ export class CacheKeyGenerator {
           result[key] = obj[key];
           return result;
         },
-        {} as Record<string, any>,
+        {} as Record<string, unknown>,
       );
 
     const objString = JSON.stringify(sortedObj);
@@ -373,7 +375,9 @@ export class CacheKeyGenerator {
   /**
    * Convert key input to string for logging
    */
-  private keyToString(key: string | string[] | Record<string, any>): string {
+  private keyToString(
+    key: string | string[] | Record<string, unknown>,
+  ): string {
     if (typeof key === 'string') {
       return key;
     }

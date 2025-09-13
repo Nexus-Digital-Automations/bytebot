@@ -62,7 +62,7 @@ export enum JobPriority {
  * Computer action response types (union of all possible responses)
  */
 export type ComputerActionResponse =
-  | { image: string; metadata?: any }
+  | { image: string; metadata?: unknown }
   | { x: number; y: number; timestamp: Date; operationId: string }
   | {
       success: boolean;
@@ -86,7 +86,7 @@ export type ComputerActionResponse =
   | {
       text: string;
       confidence: number;
-      boundingBoxes?: any[];
+      boundingBoxes?: unknown[];
       processingTimeMs: number;
       method: string;
       operationId: string;
@@ -94,15 +94,15 @@ export type ComputerActionResponse =
     }
   | {
       found: boolean;
-      matches: any[];
+      matches: unknown[];
       processingTimeMs: number;
       operationId: string;
-      searchCriteria: any;
+      searchCriteria: unknown;
     }
   | {
       image: string;
-      ocr?: any;
-      textDetection?: any;
+      ocr?: unknown;
+      textDetection?: unknown;
       processingTimeMs: number;
       enhancementsApplied: string[];
       operationId: string;
@@ -137,7 +137,7 @@ export interface JobError {
   readonly code: string;
   readonly message: string;
   readonly stack?: string;
-  readonly originalError?: any;
+  readonly originalError?: unknown;
   readonly timestamp: Date;
   readonly retryable: boolean;
   readonly context: Record<string, any>;
@@ -1065,7 +1065,7 @@ export class BackgroundWorker
   /**
    * Check if error is retryable
    */
-  private isRetryableError(error: any): boolean {
+  private isRetryableError(error: unknown): boolean {
     if (error instanceof Error) {
       // Network errors, temporary service unavailability, etc.
       const retryableMessages = [

@@ -207,7 +207,7 @@ export class CreateBrowserSessionDto {
   })
   @IsOptional()
   @IsObject()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -309,7 +309,7 @@ export class BrowserSessionDto {
     message: string;
     code: string;
     timestamp: Date;
-    details?: Record<string, any>;
+    details?: Record<string, unknown>;
   };
 
   @ApiPropertyOptional({
@@ -317,7 +317,7 @@ export class BrowserSessionDto {
     type: 'object',
     additionalProperties: true,
   })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**

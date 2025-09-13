@@ -126,7 +126,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
   /**
    * Transform and sanitize incoming data
    */
-  async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
+  async transform(value: unknown, metadata: ArgumentMetadata): Promise<any> {
     const operationId = `security-sanitization-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -240,7 +240,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
   /**
    * Check if the metatype is a basic JavaScript type
    */
-  private isBasicType(metatype: any): boolean {
+  private isBasicType(metatype: unknown): boolean {
     const basicTypes = [String, Boolean, Number, Array, Object];
     return basicTypes.includes(metatype);
   }
@@ -248,7 +248,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
   /**
    * Sanitize basic values (strings, numbers, etc.)
    */
-  private sanitizeBasicValue(value: any, operationId: string): any {
+  private sanitizeBasicValue(value: unknown, operationId: string): unknown {
     if (typeof value === 'string') {
       // Check for threats in basic string
       if (this.options.enableXSSDetection && detectXSS(value)) {
@@ -295,7 +295,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
    * Detect comprehensive security threats in input data using enhanced detection
    */
   private detectSecurityThreats(
-    value: any,
+    value: unknown,
     operationId: string,
   ): ThreatDetectionResult {
     const threats: ThreatDetectionResult['threats'] = [];
@@ -357,7 +357,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
    * Recursively scan object for security threats
    */
   private recursiveSecurityScan(
-    obj: any,
+    obj: unknown,
     path: string,
     threats: ThreatDetectionResult['threats'],
     depth: number,
@@ -541,10 +541,13 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
   /**
    * Perform comprehensive security sanitization
    */
-  private performSecuritySanitization(value: any, operationId: string): any {
+  private performSecuritySanitization(
+    value: unknown,
+    operationId: string,
+  ): unknown {
     const startTime = Date.now();
 
-    let sanitizedValue: any;
+    let sanitizedValue: unknown;
 
     if (typeof value === 'string') {
       sanitizedValue = sanitizeInput(value, this.options.sanitizationOptions);
@@ -569,7 +572,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
   /**
    * Validate object size and depth constraints
    */
-  private validateObjectConstraints(value: any, operationId: string): void {
+  private validateObjectConstraints(value: unknown, operationId: string): void {
     try {
       const serialized = JSON.stringify(value);
       const sizeInBytes = Buffer.byteLength(serialized, 'utf8');

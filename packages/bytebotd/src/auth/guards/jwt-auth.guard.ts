@@ -46,6 +46,44 @@ export interface AuthenticatedRequest extends Request {
 }
 
 /**
+ * JWT authentication error types for error handling
+ */
+interface JwtAuthError extends Error {
+  message: string;
+  name: string;
+}
+
+/**
+ * JWT authentication info object containing validation details
+ */
+interface JwtAuthInfo {
+  message?: string;
+  name?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Standard JWT payload interface with standard claims
+ */
+interface StandardJwtPayload {
+  /** Subject (usually user ID) */
+  sub?: string;
+  /** Issued at time (Unix timestamp) */
+  iat?: number;
+  /** Expiration time (Unix timestamp) */
+  exp?: number;
+  /** Not before time (Unix timestamp) */
+  nbf?: number;
+  /** JWT ID */
+  jti?: string;
+  /** Issuer */
+  iss?: string;
+  /** Audience */
+  aud?: string | string[];
+  [key: string]: unknown;
+}
+
+/**
  * JWT Authentication Guard for ByteBotd
  * Validates JWT tokens and protects computer control routes
  */
@@ -190,10 +228,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * @param context - Execution context
    * @returns User object or throws UnauthorizedException
    */
-  handleRequest<TUser = any>(
-    err: unknown,
-    user: unknown,
-    info: unknown,
+  handleRequest<TUser = ByteBotdUser>(
+    err: JwtAuthError | null,
+    user: ByteBotdUser | false,
+    info: JwtAuthInfo | null,
     context: ExecutionContext,
   ): TUser {
     const operationId = `bytebotd-jwt-handle-${Date.now()}`;
@@ -226,7 +264,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Computer control authentication failed - no user`,
         {
           operationId,
-          info: (info as any)?.message ?? (info as any)?.name ?? String(info),
+          info: info?.message ?? info?.name ?? String(info),
           url: request.url,
           method: request.method,
           ipAddress: this.getClientIpAddress(request),
@@ -331,8 +369,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return 'Authentication required for computer control';
     }
 
-    const message =
-      (info as any)?.message ?? (info as any)?.name ?? String(info);
+    const message = info?.message ?? info?.name ?? String(info);
 
     // Common JWT errors with user-friendly messages
     switch (message) {
@@ -512,7 +549,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const base64Payload = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
       const payload = JSON.parse(
         Buffer.from(base64Payload, 'base64').toString('utf8'),
-      );
+      ) as StandardJwtPayload;
 
       const currentTime = Math.floor(Date.now() / 1000);
       const tokenIssuedAt = payload.iat;

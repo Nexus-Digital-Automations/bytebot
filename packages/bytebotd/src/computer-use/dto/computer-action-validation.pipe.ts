@@ -159,8 +159,8 @@ export class ComputerActionValidationPipe
     x: number,
     y: number,
     _screenBounds?: { width: number; height: number },
-    _multiMonitorConfig?: any,
-    _validationOptions?: any,
+    _multiMonitorConfig?: Record<string, unknown>,
+    _validationOptions?: Record<string, unknown>,
   ): CoordinatesValidationResult {
     const _result = validateCoordinates(
       x,
