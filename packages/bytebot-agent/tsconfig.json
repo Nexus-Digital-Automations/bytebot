@@ -20,11 +20,16 @@
     "incremental": true,
     "composite": true,
     "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
+    "strict": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": false,
+    "noFallthroughCasesInSwitch": true,
     "types": ["node", "jest"]
   },
   "include": [
@@ -35,7 +40,6 @@
     "dist",
     "coverage",
     "**/*.js",
-    "src/test-utils/templates/**/*",
     "**/*.spec.ts"
   ],
   "references": [

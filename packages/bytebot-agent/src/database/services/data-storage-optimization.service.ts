@@ -816,7 +816,7 @@ export class DataStorageOptimizationService {
       isTestData: metadata.isTestData === true,
       hasBusinessValue: this.assessBusinessValue({
         ...screenshot,
-        metadata: metadata as any,
+        metadata: screenshot.metadata,
       }),
       accessFrequency: pattern?.accessFrequency || 'low',
       ageInDays,
@@ -881,7 +881,7 @@ export class DataStorageOptimizationService {
       isTestData: metadata.isTestData === true,
       hasBusinessValue: this.assessDomBusinessValue({
         ...domSnapshot,
-        metadata: metadata as any,
+        metadata: domSnapshot.metadata,
       }),
       accessFrequency: pattern?.accessFrequency || 'low',
       ageInDays,

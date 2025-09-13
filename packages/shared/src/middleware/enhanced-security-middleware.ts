@@ -31,25 +31,31 @@ import { ExtendedRequest } from "../types/express-extensions";
 
 /**
  * Threat severity levels
+ * ESLint: enum values are used via dot notation throughout the middleware
  */
+/* eslint-disable no-unused-vars */
 export enum ThreatSeverity {
-  _LOW = "low",
-  _MEDIUM = "medium",
-  _HIGH = "high",
-  _CRITICAL = "critical",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Security action types for automated response
+ * ESLint: enum values are used via dot notation throughout the middleware
  */
+/* eslint-disable no-unused-vars */
 export enum SecurityAction {
-  _LOG_ONLY = "log_only",
-  _RATE_LIMIT = "rate_limit",
-  _TEMPORARY_BLOCK = "temporary_block",
-  _PERMANENT_BLOCK = "permanent_block",
-  _ALERT_SECURITY_TEAM = "alert_security_team",
-  _EMERGENCY_LOCKDOWN = "emergency_lockdown",
+  LOG_ONLY = "log_only",
+  RATE_LIMIT = "rate_limit",
+  TEMPORARY_BLOCK = "temporary_block",
+  PERMANENT_BLOCK = "permanent_block",
+  ALERT_SECURITY_TEAM = "alert_security_team",
+  EMERGENCY_LOCKDOWN = "emergency_lockdown",
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Enhanced threat detection rule configuration
@@ -234,8 +240,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
 
         // Block request if critical threat detected
         if (
-          responseActions.includes(SecurityAction._TEMPORARY_BLOCK) ||
-          responseActions.includes(SecurityAction._PERMANENT_BLOCK)
+          responseActions.includes(SecurityAction.TEMPORARY_BLOCK) ||
+          responseActions.includes(SecurityAction.PERMANENT_BLOCK)
         ) {
           return this.handleThreatResponse(
             req,
@@ -298,8 +304,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
           "Detects SQL injection attempts in URL parameters and request body",
         pattern:
           /(union\s+select|select\s+.*from|insert\s+into|delete\s+from|update\s+.*set|drop\s+table|exec\s*\(|script\s*:|<script|javascript:|vbscript:)/i,
-        severity: ThreatSeverity._CRITICAL,
-        action: SecurityAction._PERMANENT_BLOCK,
+        severity: ThreatSeverity.CRITICAL,
+        action: SecurityAction.PERMANENT_BLOCK,
         enabled: true,
       },
       {
@@ -308,8 +314,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         description: "Detects XSS attack attempts",
         pattern:
           /(<script[^>]*>.*?<\/script>|javascript:|vbscript:|onload=|onerror=|onclick=|onmouseover=)/i,
-        severity: ThreatSeverity._HIGH,
-        action: SecurityAction._TEMPORARY_BLOCK,
+        severity: ThreatSeverity.HIGH,
+        action: SecurityAction.TEMPORARY_BLOCK,
         enabled: true,
       },
       {
@@ -317,8 +323,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         name: "Path Traversal Attack Detection",
         description: "Detects directory traversal attempts",
         pattern: /(\.\.\/|\.\.\\|%2e%2e%2f|%2e%2e\\|\.\.%2f|\.\.%5c)/i,
-        severity: ThreatSeverity._HIGH,
-        action: SecurityAction._TEMPORARY_BLOCK,
+        severity: ThreatSeverity.HIGH,
+        action: SecurityAction.TEMPORARY_BLOCK,
         enabled: true,
       },
       {
@@ -327,8 +333,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         description: "Detects command injection attempts",
         pattern:
           /(;|&&|\|\||`|\$\(|system\s*\(|exec\s*\(|eval\s*\(|passthru\s*\()/i,
-        severity: ThreatSeverity._CRITICAL,
-        action: SecurityAction._PERMANENT_BLOCK,
+        severity: ThreatSeverity.CRITICAL,
+        action: SecurityAction.PERMANENT_BLOCK,
         enabled: true,
       },
       {
@@ -337,8 +343,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         description: "Detects known malicious user agents",
         pattern:
           /(sqlmap|nmap|nikto|dirb|gobuster|masscan|zap|burpsuite|acunetix)/i,
-        severity: ThreatSeverity._MEDIUM,
-        action: SecurityAction._RATE_LIMIT,
+        severity: ThreatSeverity.MEDIUM,
+        action: SecurityAction.RATE_LIMIT,
         enabled: true,
       },
       {
@@ -346,8 +352,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         name: "High Request Rate Detection",
         description: "Detects unusually high request rates from single IP",
         pattern: "", // Handled by behavior analysis
-        severity: ThreatSeverity._MEDIUM,
-        action: SecurityAction._RATE_LIMIT,
+        severity: ThreatSeverity.MEDIUM,
+        action: SecurityAction.RATE_LIMIT,
         enabled: true,
       },
       {
@@ -356,8 +362,8 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         description: "Detects attempts to access sensitive files",
         pattern:
           /(\/etc\/passwd|\/etc\/shadow|web\.config|\.env|config\.php|wp-config\.php)/i,
-        severity: ThreatSeverity._HIGH,
-        action: SecurityAction._TEMPORARY_BLOCK,
+        severity: ThreatSeverity.HIGH,
+        action: SecurityAction.TEMPORARY_BLOCK,
         enabled: true,
       },
     ];
@@ -554,10 +560,10 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
 
           // Calculate risk score based on severity
           const severityScore = {
-            [ThreatSeverity._LOW]: 10,
-            [ThreatSeverity._MEDIUM]: 25,
-            [ThreatSeverity._HIGH]: 50,
-            [ThreatSeverity._CRITICAL]: 75,
+            [ThreatSeverity.LOW]: 10,
+            [ThreatSeverity.MEDIUM]: 25,
+            [ThreatSeverity.HIGH]: 50,
+            [ThreatSeverity.CRITICAL]: 75,
           };
 
           riskScore += severityScore[rule.severity];
@@ -646,16 +652,16 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
   private calculateOverallThreatSeverity(
     threats: EnhancedThreatDetectionRule[],
   ): ThreatSeverity {
-    if (threats.some((t) => t.severity === ThreatSeverity._CRITICAL)) {
-      return ThreatSeverity._CRITICAL;
+    if (threats.some((t) => t.severity === ThreatSeverity.CRITICAL)) {
+      return ThreatSeverity.CRITICAL;
     }
-    if (threats.some((t) => t.severity === ThreatSeverity._HIGH)) {
-      return ThreatSeverity._HIGH;
+    if (threats.some((t) => t.severity === ThreatSeverity.HIGH)) {
+      return ThreatSeverity.HIGH;
     }
-    if (threats.some((t) => t.severity === ThreatSeverity._MEDIUM)) {
-      return ThreatSeverity._MEDIUM;
+    if (threats.some((t) => t.severity === ThreatSeverity.MEDIUM)) {
+      return ThreatSeverity.MEDIUM;
     }
-    return ThreatSeverity._LOW;
+    return ThreatSeverity.LOW;
   }
 
   /**
@@ -749,7 +755,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     ) as EnhancedSecurityEvent;
 
     // Add enhanced properties
-    event.threatSeverity = ThreatSeverity._LOW;
+    event.threatSeverity = ThreatSeverity.LOW;
     event.rulesTriggered = [];
     event.responseActions = [];
 
@@ -773,13 +779,13 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     this.securityMetrics.securityEvents++;
 
     const severityCount =
-      this.securityMetrics.eventsBySeverity.get(event.threatSeverity) || 0;
+      this.securityMetrics.eventsBySeverity.get(event.threatSeverity) ?? 0;
     this.securityMetrics.eventsBySeverity.set(
       event.threatSeverity,
       severityCount + 1,
     );
 
-    const typeCount = this.securityMetrics.eventsByType.get(event.type) || 0;
+    const typeCount = this.securityMetrics.eventsByType.get(event.type) ?? 0;
     this.securityMetrics.eventsByType.set(event.type, typeCount + 1);
 
     // Update IP tracking
@@ -804,19 +810,19 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     };
 
     switch (event.threatSeverity) {
-      case ThreatSeverity._CRITICAL:
+      case ThreatSeverity.CRITICAL:
         this.logger.error(
           `CRITICAL SECURITY THREAT: ${event.message}`,
           logData,
         );
         break;
-      case ThreatSeverity._HIGH:
+      case ThreatSeverity.HIGH:
         this.logger.error(`HIGH SECURITY THREAT: ${event.message}`, logData);
         break;
-      case ThreatSeverity._MEDIUM:
+      case ThreatSeverity.MEDIUM:
         this.logger.warn(`MEDIUM SECURITY THREAT: ${event.message}`, logData);
         break;
-      case ThreatSeverity._LOW:
+      case ThreatSeverity.LOW:
       default:
         this.logger.log(`LOW SECURITY THREAT: ${event.message}`, logData);
         break;
@@ -847,7 +853,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
 
       // Update metrics
       const actionCount =
-        this.securityMetrics.responseActionsTriggered.get(action) || 0;
+        this.securityMetrics.responseActionsTriggered.get(action) ?? 0;
       this.securityMetrics.responseActionsTriggered.set(
         action,
         actionCount + 1,
@@ -868,18 +874,18 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
     operationId: string,
   ): void {
     switch (action) {
-      case SecurityAction._LOG_ONLY:
+      case SecurityAction.LOG_ONLY:
         // Already logged above
         break;
 
-      case SecurityAction._RATE_LIMIT:
+      case SecurityAction.RATE_LIMIT:
         this.applyRateLimit(clientIP, 5 * 60 * 1000); // 5 minutes
         this.logger.warn(
           `[${operationId}] Applied rate limiting to ${clientIP}`,
         );
         break;
 
-      case SecurityAction._TEMPORARY_BLOCK:
+      case SecurityAction.TEMPORARY_BLOCK:
         this.blockIP(
           clientIP,
           15 * 60 * 1000,
@@ -890,7 +896,7 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         );
         break;
 
-      case SecurityAction._PERMANENT_BLOCK:
+      case SecurityAction.PERMANENT_BLOCK:
         this.blockIP(
           clientIP,
           24 * 60 * 60 * 1000,
@@ -901,14 +907,14 @@ export class EnhancedSecurityMiddleware implements NestMiddleware {
         );
         break;
 
-      case SecurityAction._ALERT_SECURITY_TEAM:
+      case SecurityAction.ALERT_SECURITY_TEAM:
         this.alertSecurityTeam(event, operationId);
         this.logger.error(
           `[${operationId}] Security team alerted for critical threat`,
         );
         break;
 
-      case SecurityAction._EMERGENCY_LOCKDOWN:
+      case SecurityAction.EMERGENCY_LOCKDOWN:
         this.triggerEmergencyLockdown(event, operationId);
         this.logger.fatal(`[${operationId}] EMERGENCY LOCKDOWN TRIGGERED`);
         break;

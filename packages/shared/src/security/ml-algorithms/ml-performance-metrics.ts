@@ -19,12 +19,24 @@ import {
 // CORE TYPES AND INTERFACES
 // ===========================
 
+// Helper type for creating complete Records with all VulnerabilitySeverity keys
+type CompleteVulnerabilityRecord<T> = Record<VulnerabilitySeverity, T>;
+
+// All severity levels as array for iteration
+const ALL_SEVERITIES: readonly VulnerabilitySeverity[] = [
+  "info",
+  "low",
+  "medium",
+  "high",
+  "critical",
+] as const;
+
 export interface PerformanceMetrics {
   readonly accuracy: number;
-  readonly precision: Record<VulnerabilitySeverity, number>;
-  readonly recall: Record<VulnerabilitySeverity, number>;
-  readonly f1Score: Record<VulnerabilitySeverity, number>;
-  readonly specificity: Record<VulnerabilitySeverity, number>;
+  readonly precision: CompleteVulnerabilityRecord<number>;
+  readonly recall: CompleteVulnerabilityRecord<number>;
+  readonly f1Score: CompleteVulnerabilityRecord<number>;
+  readonly specificity: CompleteVulnerabilityRecord<number>;
   readonly macroAverages: {
     readonly precision: number;
     readonly recall: number;
@@ -37,11 +49,10 @@ export interface PerformanceMetrics {
     readonly f1Score: number;
     readonly specificity: number;
   };
-  readonly confusionMatrix: Record<
-    VulnerabilitySeverity,
-    Record<VulnerabilitySeverity, number>
+  readonly confusionMatrix: CompleteVulnerabilityRecord<
+    CompleteVulnerabilityRecord<number>
   >;
-  readonly classDistribution: Record<VulnerabilitySeverity, number>;
+  readonly classDistribution: CompleteVulnerabilityRecord<number>;
   readonly totalSamples: number;
 }
 
@@ -55,9 +66,9 @@ export interface CrossValidationResults {
   readonly averageMetrics: PerformanceMetrics;
   readonly standardDeviations: {
     readonly accuracy: number;
-    readonly precision: Record<VulnerabilitySeverity, number>;
-    readonly recall: Record<VulnerabilitySeverity, number>;
-    readonly f1Score: Record<VulnerabilitySeverity, number>;
+    readonly precision: CompleteVulnerabilityRecord<number>;
+    readonly recall: CompleteVulnerabilityRecord<number>;
+    readonly f1Score: CompleteVulnerabilityRecord<number>;
   };
   readonly confidenceIntervals: {
     readonly accuracy: { lower: number; upper: number };
@@ -114,7 +125,7 @@ export interface PredictionResult {
   readonly predicted: VulnerabilitySeverity;
   readonly actual: VulnerabilitySeverity;
   readonly confidence: number;
-  readonly probabilities: Record<VulnerabilitySeverity, number>;
+  readonly probabilities: CompleteVulnerabilityRecord<number>;
   readonly correct: boolean;
 }
 
@@ -370,14 +381,7 @@ export class MLPerformanceMetrics {
     // Analyze improvement areas
     const improvementAreas: string[] = [];
 
-    const severityValues: VulnerabilitySeverity[] = [
-      "info",
-      "low",
-      "medium",
-      "high",
-      "critical",
-    ];
-    for (const severity of severityValues) {
+    for (const severity of ALL_SEVERITIES) {
       const f1Diff =
         modelAMetrics.f1Score[severity] - modelBMetrics.f1Score[severity];
       if (f1Diff < -0.05) {
@@ -552,28 +556,18 @@ export class MLPerformanceMetrics {
   private calculatePerformanceMetrics(
     predictions: readonly PredictionResult[],
   ): PerformanceMetrics {
-    const severities: VulnerabilitySeverity[] = [
-      "info",
-      "low",
-      "medium",
-      "high",
-      "critical",
-    ];
-    const confusionMatrix: Record<
-      VulnerabilitySeverity,
-      Record<VulnerabilitySeverity, number>
-    > = {} as Record<
-      VulnerabilitySeverity,
-      Record<VulnerabilitySeverity, number>
-    >;
-    const classDistribution: Record<VulnerabilitySeverity, number> =
-      {} as Record<VulnerabilitySeverity, number>;
+    // Initialize confusion matrix with proper type safety
+    const confusionMatrix: CompleteVulnerabilityRecord<
+      CompleteVulnerabilityRecord<number>
+    > = {} as CompleteVulnerabilityRecord<CompleteVulnerabilityRecord<number>>;
+    const classDistribution: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
 
-    // Initialize matrices
-    for (const severity of severities) {
-      confusionMatrix[severity] = {} as Record<VulnerabilitySeverity, number>;
+    // Initialize matrices with all severity levels
+    for (const severity of ALL_SEVERITIES) {
+      confusionMatrix[severity] = {} as CompleteVulnerabilityRecord<number>;
       classDistribution[severity] = 0;
-      for (const predSeverity of severities) {
+      for (const predSeverity of ALL_SEVERITIES) {
         confusionMatrix[severity][predSeverity] = 0;
       }
     }
@@ -593,33 +587,25 @@ export class MLPerformanceMetrics {
     const accuracy =
       predictions.length > 0 ? correctPredictions / predictions.length : 0;
 
-    // Calculate per-class metrics
-    const precision: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
-    const recall: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
-    const f1Score: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
-    const specificity: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
+    // Calculate per-class metrics with proper typing
+    const precision: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const recall: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const f1Score: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const specificity: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
 
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       // True Positives, False Positives, False Negatives, True Negatives
       const tp = confusionMatrix[severity][severity];
-      const fp = severities.reduce(
+      const fp = ALL_SEVERITIES.reduce(
         (sum: number, s: VulnerabilitySeverity) =>
           s !== severity ? sum + confusionMatrix[s][severity] : sum,
         0,
       );
-      const fn = severities.reduce(
+      const fn = ALL_SEVERITIES.reduce(
         (sum: number, s: VulnerabilitySeverity) =>
           s !== severity ? sum + confusionMatrix[severity][s] : sum,
         0,
@@ -639,46 +625,46 @@ export class MLPerformanceMetrics {
     // Calculate macro averages
     const macroAverages = {
       precision:
-        severities.reduce(
+        ALL_SEVERITIES.reduce(
           (sum: number, s: VulnerabilitySeverity) => sum + precision[s],
           0,
-        ) / severities.length,
+        ) / ALL_SEVERITIES.length,
       recall:
-        severities.reduce(
+        ALL_SEVERITIES.reduce(
           (sum: number, s: VulnerabilitySeverity) => sum + recall[s],
           0,
-        ) / severities.length,
+        ) / ALL_SEVERITIES.length,
       f1Score:
-        severities.reduce(
+        ALL_SEVERITIES.reduce(
           (sum: number, s: VulnerabilitySeverity) => sum + f1Score[s],
           0,
-        ) / severities.length,
+        ) / ALL_SEVERITIES.length,
       specificity:
-        severities.reduce(
+        ALL_SEVERITIES.reduce(
           (sum: number, s: VulnerabilitySeverity) => sum + specificity[s],
           0,
-        ) / severities.length,
+        ) / ALL_SEVERITIES.length,
     };
 
     // Calculate weighted averages (weighted by class frequency)
     const totalSamples = predictions.length;
     const weightedAverages = {
-      precision: severities.reduce(
+      precision: ALL_SEVERITIES.reduce(
         (sum: number, s: VulnerabilitySeverity) =>
           sum + precision[s] * (classDistribution[s] / totalSamples),
         0,
       ),
-      recall: severities.reduce(
+      recall: ALL_SEVERITIES.reduce(
         (sum: number, s: VulnerabilitySeverity) =>
           sum + recall[s] * (classDistribution[s] / totalSamples),
         0,
       ),
-      f1Score: severities.reduce(
+      f1Score: ALL_SEVERITIES.reduce(
         (sum: number, s: VulnerabilitySeverity) =>
           sum + f1Score[s] * (classDistribution[s] / totalSamples),
         0,
       ),
-      specificity: severities.reduce(
+      specificity: ALL_SEVERITIES.reduce(
         (sum: number, s: VulnerabilitySeverity) =>
           sum + specificity[s] * (classDistribution[s] / totalSamples),
         0,
@@ -734,14 +720,7 @@ export class MLPerformanceMetrics {
     }
 
     // Per-class analysis
-    const severities: VulnerabilitySeverity[] = [
-      "info",
-      "low",
-      "medium",
-      "high",
-      "critical",
-    ];
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       const f1 = metrics.f1Score[severity];
       const precision = metrics.precision[severity];
       const recall = metrics.recall[severity];
@@ -831,13 +810,6 @@ export class MLPerformanceMetrics {
   private calculateAverageMetrics(
     metricsArray: PerformanceMetrics[],
   ): PerformanceMetrics {
-    const severities: VulnerabilitySeverity[] = [
-      "info",
-      "low",
-      "medium",
-      "high",
-      "critical",
-    ];
     const numFolds = metricsArray.length;
 
     // Average scalars
@@ -852,24 +824,16 @@ export class MLPerformanceMetrics {
     );
 
     // Average per-class metrics
-    const precision: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
-    const recall: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
-    const f1Score: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
-    const specificity: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
+    const precision: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const recall: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const f1Score: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const specificity: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
 
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       precision[severity] =
         metricsArray.reduce(
           (sum: number, m: PerformanceMetrics) => sum + m.precision[severity],
@@ -946,21 +910,17 @@ export class MLPerformanceMetrics {
     };
 
     // Average confusion matrix and class distribution
-    const confusionMatrix: Record<
-      VulnerabilitySeverity,
-      Record<VulnerabilitySeverity, number>
-    > = {} as Record<
-      VulnerabilitySeverity,
-      Record<VulnerabilitySeverity, number>
-    >;
-    const classDistribution: Record<VulnerabilitySeverity, number> =
-      {} as Record<VulnerabilitySeverity, number>;
+    const confusionMatrix: CompleteVulnerabilityRecord<
+      CompleteVulnerabilityRecord<number>
+    > = {} as CompleteVulnerabilityRecord<CompleteVulnerabilityRecord<number>>;
+    const classDistribution: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
 
-    for (const severity of severities) {
-      confusionMatrix[severity] = {} as Record<VulnerabilitySeverity, number>;
+    for (const severity of ALL_SEVERITIES) {
+      confusionMatrix[severity] = {} as CompleteVulnerabilityRecord<number>;
       classDistribution[severity] = 0;
 
-      for (const predSeverity of severities) {
+      for (const predSeverity of ALL_SEVERITIES) {
         confusionMatrix[severity][predSeverity] =
           metricsArray.reduce(
             (sum: number, m: PerformanceMetrics) =>
@@ -997,13 +957,6 @@ export class MLPerformanceMetrics {
   private calculateStandardDeviations(
     metricsArray: PerformanceMetrics[],
   ): CrossValidationResults["standardDeviations"] {
-    const severities: VulnerabilitySeverity[] = [
-      "info",
-      "low",
-      "medium",
-      "high",
-      "critical",
-    ];
     const numFolds = metricsArray.length;
 
     // Calculate means first
@@ -1013,20 +966,14 @@ export class MLPerformanceMetrics {
         0,
       ) / numFolds;
 
-    const meanPrecision: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
-    const meanRecall: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
-    const meanF1Score: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
+    const meanPrecision: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const meanRecall: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const meanF1Score: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
 
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       meanPrecision[severity] =
         metricsArray.reduce(
           (sum: number, m: PerformanceMetrics) => sum + m.precision[severity],
@@ -1053,18 +1000,14 @@ export class MLPerformanceMetrics {
       ) /
       (numFolds - 1);
 
-    const precisionVariance: Record<VulnerabilitySeverity, number> =
-      {} as Record<VulnerabilitySeverity, number>;
-    const recallVariance: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
-    const f1ScoreVariance: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
+    const precisionVariance: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const recallVariance: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const f1ScoreVariance: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
 
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       precisionVariance[severity] =
         metricsArray.reduce(
           (sum: number, m: PerformanceMetrics) =>
@@ -1091,20 +1034,14 @@ export class MLPerformanceMetrics {
     // Convert to standard deviations
     const accuracy = Math.sqrt(accuracyVariance);
 
-    const precision: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
-    const recall: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
-    const f1Score: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
+    const precision: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const recall: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
+    const f1Score: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
 
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       precision[severity] = Math.sqrt(precisionVariance[severity]);
       recall[severity] = Math.sqrt(recallVariance[severity]);
       f1Score[severity] = Math.sqrt(f1ScoreVariance[severity]);

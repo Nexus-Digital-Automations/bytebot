@@ -3328,9 +3328,117 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/TODO.json"
+    },
+    {
+      "id": "error_1757783797055_75aeipzbc",
+      "title": "Fix @typescript-eslint/no-unsafe-argument violations in data-export-backup.service.ts",
+      "description": "Fix TypeScript safety violations on lines 660, 700 in database services - unsafe arguments being passed to BrowserSession[] and BrowserTask[] parameters. Add proper type definitions or type assertions to ensure type safety while preserving backup functionality.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T17:16:37.056Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757783777954_1_general_11b07528",
+      "started_at": "2025-09-13T17:16:54.759Z",
+      "claimed_by": "development_session_1757783777954_1_general_11b07528",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757783777954_1_general_11b07528",
+          "role": "primary",
+          "assignedAt": "2025-09-13T17:16:54.759Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757783797055_75aeipzbc",
+          "completedAt": "2025-09-13T17:20:18.884Z",
+          "completedBy": "development_session_1757783777954_1_general_11b07528",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T17:20:18.884Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T17:20:18.884Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/TODO.json"
+    },
+    {
+      "id": "error_1757783798954_p1zufksf7",
+      "title": "Fix @typescript-eslint/no-unsafe-enum-comparison violations in browser monitoring service",
+      "description": "TARGET: Fix 8 @typescript-eslint/no-unsafe-enum-comparison violations in browser monitoring service at lines 850, 855, 861, 863, 865, 867, 869, 901. SCOPE: /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/src/browser-use/services/browser-monitoring.service.ts. APPROACH: Ensure proper enum type alignment for comparisons by converting values to same enum type, using type guards, and adding proper enum type assertions. DELIVERABLES: All 8 violations resolved, browser monitoring functionality preserved, zero remaining violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T17:16:38.955Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757783777341_1_general_17473c34",
+      "started_at": "2025-09-13T17:17:02.876Z",
+      "claimed_by": "development_session_1757783777341_1_general_17473c34",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757783777341_1_general_17473c34",
+          "role": "primary",
+          "assignedAt": "2025-09-13T17:17:02.876Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757783798954_p1zufksf7",
+          "completedAt": "2025-09-13T17:23:41.350Z",
+          "completedBy": "development_session_1757783777341_1_general_17473c34",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T17:23:41.350Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T17:23:41.351Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/TODO.json"
     }
   ],
-  "total_completed": 74,
-  "last_completion": "2025-09-13T03:57:38.305Z",
+  "total_completed": 76,
+  "last_completion": "2025-09-13T17:23:41.351Z",
   "created_at": "2025-09-05T23:30:23.322Z"
 }

@@ -10,12 +10,24 @@
  */
 
 import { performance } from "perf_hooks";
-import { VulnerabilitySeverity } from "../owasp-top10-integration.service";
+import { VulnerabilitySeverity } from "../vulnerability-assessment-engine";
 import { VulnerabilityCategory } from "../vulnerability-assessment-engine";
 
 // ===========================
 // CORE TYPES AND INTERFACES
 // ===========================
+
+// Helper type for creating complete Records with all VulnerabilitySeverity keys
+type CompleteVulnerabilityRecord<T> = Record<VulnerabilitySeverity, T>;
+
+// All severity levels as array for iteration
+const ALL_SEVERITIES: readonly VulnerabilitySeverity[] = [
+  "info",
+  "low",
+  "medium",
+  "high",
+  "critical",
+] as const;
 
 /** Optimizer state for Adam optimizer */
 export interface AdamOptimizerState {
@@ -58,7 +70,7 @@ export interface NeuralNetworkLayer {
 export interface NeuralNetworkPrediction {
   readonly predictedLabel: VulnerabilitySeverity;
   readonly confidence: number;
-  readonly classProbabilities: Record<VulnerabilitySeverity, number>;
+  readonly classProbabilities: CompleteVulnerabilityRecord<number>;
   readonly activations: readonly (readonly number[])[];
   readonly featureImportance: Record<string, number>;
   readonly networkPath: {
@@ -100,12 +112,12 @@ export interface NeuralNetworkModel {
     readonly maxs: readonly number[];
   };
   /** Label encoding */
-  readonly labelEncoding: Record<VulnerabilitySeverity, number>;
+  readonly labelEncoding: CompleteVulnerabilityRecord<number>;
   /** Model metadata */
   readonly metadata: {
     readonly trainingDataSize: number;
     readonly featureCount: number;
-    readonly classDistribution: Record<VulnerabilitySeverity, number>;
+    readonly classDistribution: CompleteVulnerabilityRecord<number>;
     readonly trainedAt: Date;
     readonly version: string;
   };
@@ -519,17 +531,10 @@ export class NeuralNetworkClassifier {
       throw new Error("Training data cannot be empty");
     }
 
-    const validSeverities: VulnerabilitySeverity[] = [
-      VulnerabilitySeverity.INFO,
-      VulnerabilitySeverity.LOW,
-      VulnerabilitySeverity.MEDIUM,
-      VulnerabilitySeverity.HIGH,
-      VulnerabilitySeverity.CRITICAL,
-    ];
     const expectedFeatureLength = data[0].features.features.length;
 
     for (const sample of data) {
-      if (!validSeverities.includes(sample.label)) {
+      if (!ALL_SEVERITIES.includes(sample.label)) {
         throw new Error(`Invalid label: ${sample.label}`);
       }
 
@@ -1323,11 +1328,11 @@ export class NeuralNetworkClassifier {
     output: number[],
   ): Record<VulnerabilitySeverity, number> {
     const severities: VulnerabilitySeverity[] = [
-      VulnerabilitySeverity.INFO,
-      VulnerabilitySeverity.LOW,
-      VulnerabilitySeverity.MEDIUM,
-      VulnerabilitySeverity.HIGH,
-      VulnerabilitySeverity.CRITICAL,
+      "info",
+      "low",
+      "medium",
+      "high",
+      "critical",
     ];
     const probabilities: Record<VulnerabilitySeverity, number> = {} as Record<
       VulnerabilitySeverity,
@@ -1345,7 +1350,7 @@ export class NeuralNetworkClassifier {
     probabilities: Record<VulnerabilitySeverity, number>,
   ): VulnerabilitySeverity {
     let maxProb = -1;
-    let predictedClass: VulnerabilitySeverity = VulnerabilitySeverity.LOW;
+    let predictedClass: VulnerabilitySeverity = "low";
 
     for (const [severity, prob] of Object.entries(probabilities) as [
       VulnerabilitySeverity,
@@ -1382,11 +1387,11 @@ export class NeuralNetworkClassifier {
     >;
 
     const severities: VulnerabilitySeverity[] = [
-      VulnerabilitySeverity.INFO,
-      VulnerabilitySeverity.LOW,
-      VulnerabilitySeverity.MEDIUM,
-      VulnerabilitySeverity.HIGH,
-      VulnerabilitySeverity.CRITICAL,
+      "info",
+      "low",
+      "medium",
+      "high",
+      "critical",
     ];
     for (const severity of severities) {
       distribution[severity] = 0;

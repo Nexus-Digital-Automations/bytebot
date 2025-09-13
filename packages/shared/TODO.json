@@ -193,6 +193,34 @@
       ]
     },
     {
+      "id": "error_1757780621263_eo3dzz382",
+      "title": "Fix ESLint timeout and violations in shared package",
+      "description": "ESLint is timing out when running on src/**/*.ts files. Investigate and fix underlying linting issues that are causing performance problems. May involve configuration issues or massive number of violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T16:23:41.263Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757780430676_1_general_2e19593c",
+      "started_at": "2025-09-13T16:23:58.841Z",
+      "claimed_by": "development_session_1757780430676_1_general_2e19593c",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757780430676_1_general_2e19593c",
+          "role": "primary",
+          "assignedAt": "2025-09-13T16:23:58.841Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
       "id": "error_1757730818797_zpwcyas8q",
       "title": "Fix ESLint error handling violations in bytebotd package",
       "description": "Resolve ESLint violations related to error handling patterns including unsafe error operations, catch parameter shadowing, error propagation issues, and implement comprehensive error handling improvements with custom error classes and proper exception safety patterns",
@@ -1114,6 +1142,58 @@
           "assignedAt": "2025-09-09T19:48:55.381Z",
           "reassignReason": null,
           "claimPriority": "high"
+        }
+      ]
+    },
+    {
+      "id": "feature_1757780448535_lypk3jwuv",
+      "title": "Clean up and organize cluttered root folder",
+      "description": "Organize misplaced files in root directory following ROOT FOLDER CLEANLINESS PROTOCOL: move docs to development/reports/, logs to development/debug-logs/, scripts to development/temp-scripts/, maintain clean project root structure, then commit and push to GitHub",
+      "priority": "medium",
+      "category": "feature",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [
+        {
+          "id": "audit_1757780448535_fb87bc93",
+          "type": "audit",
+          "title": "Audit: Clean up and organize cluttered root folder",
+          "description": "Comprehensive quality audit and review of the completed feature: Clean up and organize cluttered root folder\n\nOriginal Description: Organize misplaced files in root directory following ROOT FOLDER CLEANLINESS PROTOCOL: move docs to development/reports/, logs to development/debug-logs/, scripts to development/temp-scripts/, maintain clean project root structure, then commit and push to GitHub",
+          "status": "pending",
+          "estimated_hours": 0.5,
+          "success_criteria": [
+            "Linter Perfection",
+            "Build Success",
+            "Runtime Success",
+            "Test Integrity",
+            "Function Documentation",
+            "Implementation Quality",
+            "Security Standards",
+            "Performance Standards"
+          ],
+          "prevents_completion": true,
+          "original_implementer": null,
+          "prevents_self_review": true,
+          "audit_type": "embedded_quality_gate",
+          "created_at": "2025-09-13T16:20:48.538Z"
+        }
+      ],
+      "created_at": "2025-09-13T16:20:48.538Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757780430676_1_general_2e19593c",
+      "started_at": "2025-09-13T16:21:08.065Z",
+      "claimed_by": "development_session_1757780430676_1_general_2e19593c",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757780430676_1_general_2e19593c",
+          "role": "primary",
+          "assignedAt": "2025-09-13T16:21:08.065Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
         }
       ]
     },
@@ -3904,6 +3984,27 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-13T02:33:16.083Z",
       "sessionId": "session_1757730796079",
+      "metadata": {}
+    },
+    "development_session_1757780430676_1_general_2e19593c": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T16:20:30.678Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T16:20:30.678Z",
+      "sessionId": "session_1757780430676",
       "metadata": {}
     }
   },

@@ -724,7 +724,8 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
     const logLevel =
       event.riskScore > 70 ? "error" : event.riskScore > 40 ? "warn" : "log";
 
-    this.logger[logLevel](`Security Event: ${event.type}`, {
+    // Safe dynamic logger access with type guards
+    const logData = {
       eventId: event.eventId,
       type: event.type,
       serviceName: event.serviceName,
@@ -738,7 +739,15 @@ export class ComprehensiveSecurityMiddleware implements NestMiddleware {
       reason: event.reason,
       timestamp: event.timestamp.toISOString(),
       metadata: event.metadata,
-    });
+    };
+
+    if (logLevel === "error" && typeof this.logger.error === "function") {
+      this.logger.error(`Security Event: ${event.type}`, logData);
+    } else if (logLevel === "warn" && typeof this.logger.warn === "function") {
+      this.logger.warn(`Security Event: ${event.type}`, logData);
+    } else if (typeof this.logger.log === "function") {
+      this.logger.log(`Security Event: ${event.type}`, logData);
+    }
   }
 
   /**

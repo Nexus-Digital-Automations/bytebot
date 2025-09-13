@@ -230,34 +230,6 @@
       ]
     },
     {
-      "id": "error_1757782942391_knvany8mu",
-      "title": "Fix @typescript-eslint/no-unsafe-* violations in computer-use.service.main.spec.ts",
-      "description": "Fix TypeScript unsafe operations in bytebotd async test architecture. Target violations: no-unsafe-return (lines 26, 28, 169), no-unsafe-call (lines 26, 163, 165), no-unsafe-argument (line 459). Add proper type definitions, use type assertions where safe, maintain test functionality. File: /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/computer-use/__tests__/computer-use.service.main.spec.ts",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T17:02:22.391Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757782916248_1_general_9168470b",
-      "started_at": "2025-09-13T17:02:57.845Z",
-      "claimed_by": "development_session_1757782916248_1_general_9168470b",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757782916248_1_general_9168470b",
-          "role": "primary",
-          "assignedAt": "2025-09-13T17:02:57.845Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757736147309_g74y3i6lo",
       "title": "Emergency Build Verification - TypeScript Error Elimination",
       "description": "Wait for TypeScript specialist agents to complete fixes, then run comprehensive build verification: npm run build, verify zero compilation errors, test linting, confirm functionality preserved, generate build success report",

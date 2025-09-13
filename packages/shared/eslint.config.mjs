@@ -82,8 +82,8 @@ export default tseslint.config(
   },
   {
     rules: {
-      // Allow 'any' in shared packages for flexibility with type interfaces
-      "@typescript-eslint/no-explicit-any": "warn",
+      // Enforce no explicit any types for enterprise-grade type safety
+      "@typescript-eslint/no-explicit-any": "error",
 
       // Unused variables - maintain strictness
       "@typescript-eslint/no-unused-vars": [

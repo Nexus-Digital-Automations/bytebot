@@ -110,7 +110,9 @@ interface TimedResponse extends Response {
  * Timing wrapper for SuperTest requests
  * Handles both Promise<Response> and SuperTest Test objects
  */
-const withTiming = async (requestPromise: Promise<Response>): Promise<any> => {
+const withTiming = async (
+  requestPromise: Promise<unknown>,
+): Promise<unknown> => {
   const startTime = Date.now();
   const response = await requestPromise;
   const duration = Date.now() - startTime;
@@ -513,17 +515,17 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
             logTestExecution('REGISTRATION_RESPONSE', {
               statusCode: response.status,
               hasBody: !!response.body,
-              responseTime: (response as any).duration,
+              responseTime: (response as TimedResponse).duration,
             });
 
             return response;
           },
         );
 
-        const registrationBody = validateApiResponse(registerResponse.body, [
-          'success',
-          'data',
-        ]);
+        const registrationBody = validateApiResponse<{
+          id?: string;
+          email?: string;
+        }>(registerResponse.body, ['success', 'data']);
 
         expect(registrationBody).toMatchObject({
           success: true,
@@ -661,7 +663,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
         );
 
         // Validate logout response
-        const logoutBody = validateApiResponse(logoutResponse.body);
+        const logoutBody = validateApiResponse<object>(logoutResponse.body);
         expect(logoutBody.success).toBe(true);
 
         // Test that token is invalidated after logout
@@ -790,7 +792,8 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
 
             logTestExecution('CREATE_RESPONSE', {
               statusCode: response.status,
-              hasResourceId: !!(response.body as ApiResponse)?.data?.id,
+              hasResourceId: !!(response.body as ApiResponse<{ id?: string }>)
+                ?.data?.id,
               responseTime: (response as any).duration,
             });
 
@@ -1064,7 +1067,10 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
         const bulkCreateDuration = bulkCreateEndTime - bulkCreateStartTime;
 
         const resourceIds = createResponses.map((r) => {
-          const validatedResponse = validateApiResponse(r.body, ['data']);
+          const validatedResponse = validateApiResponse<{ id?: string }>(
+            r.body,
+            ['data'],
+          );
           return validatedResponse?.data?.id;
         });
 
@@ -1331,10 +1337,10 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const adminReadResponseBody = validateApiResponse(
-          adminReadResponse.body,
-          ['data'],
-        );
+        const adminReadResponseBody = validateApiResponse<{
+          id?: string;
+          title?: string;
+        }>(adminReadResponse.body, ['data']);
         expect(adminReadResponseBody?.data).toMatchObject(adminResource);
         expect(adminReadResponseBody?.data?.id).toBe(resourceId);
 
@@ -1462,10 +1468,10 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const ownershipResponseBody = validateApiResponse(createResponse.body, [
-          'success',
-          'data',
-        ]);
+        const ownershipResponseBody = validateApiResponse<{ id?: string }>(
+          createResponse.body,
+          ['success', 'data'],
+        );
         const resourceId = ownershipResponseBody?.data?.id;
 
         expect(resourceId).toBeDefined();
@@ -1508,9 +1514,10 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const ownerUpdateBody = validateApiResponse(ownerUpdateResponse.body, [
-          'data',
-        ]);
+        const ownerUpdateBody = validateApiResponse<{
+          id?: string;
+          title?: string;
+        }>(ownerUpdateResponse.body, ['data']);
         expect(ownerUpdateBody?.data).toMatchObject(updateData);
         expect(ownerUpdateBody?.data?.id).toBe(resourceId);
 
@@ -1527,9 +1534,10 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           .send({ title: `Admin Override ${ownershipTestId}` })
           .expect(200);
 
-        const adminModifyBody = validateApiResponse(adminModifyResponse.body, [
-          'data',
-        ]);
+        const adminModifyBody = validateApiResponse<{
+          title?: string;
+          id?: string;
+        }>(adminModifyResponse.body, ['data']);
         expect(adminModifyBody?.data?.title).toContain('Admin Override');
 
         logTestExecution('ADMIN_OVERRIDE_VALIDATED', {
@@ -1631,10 +1639,10 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const orderCreateResponseBody = validateApiResponse(
-          createOrderResponse.body,
-          ['success', 'data'],
-        );
+        const orderCreateResponseBody = validateApiResponse<{
+          id?: string;
+          status?: string;
+        }>(createOrderResponse.body, ['success', 'data']);
         const orderId = orderCreateResponseBody?.data?.id;
 
         expect(orderId).toBeDefined();
@@ -1707,10 +1715,12 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const paymentResponseBody = validateApiResponse(paymentResponse.body, [
-          'success',
-          'data',
-        ]);
+        const paymentResponseBody = validateApiResponse<{
+          status?: string;
+          orderId?: string;
+          amount?: number;
+          paymentMethod?: string;
+        }>(paymentResponse.body, ['success', 'data']);
         expect(paymentResponseBody?.data?.status).toBe('completed');
 
         // Validate payment details
@@ -1751,10 +1761,12 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const updatedOrderResponseBody = validateApiResponse(
-          updatedOrderResponse.body,
-          ['data'],
-        );
+        const updatedOrderResponseBody = validateApiResponse<{
+          status?: string;
+          id?: string;
+          paymentStatus?: string;
+          total?: number;
+        }>(updatedOrderResponse.body, ['data']);
         expect(updatedOrderResponseBody?.data?.status).toBe('paid');
         expect(updatedOrderResponseBody?.data?.id).toBe(orderId);
 
@@ -1810,10 +1822,10 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const fulfillmentResponseBody = validateApiResponse(
-          fulfillmentResponse.body,
-          ['data'],
-        );
+        const fulfillmentResponseBody = validateApiResponse<{
+          status?: string;
+          trackingNumber?: string;
+        }>(fulfillmentResponse.body, ['data']);
         expect(fulfillmentResponseBody?.data?.status).toBe('fulfilling');
         expect(fulfillmentResponseBody?.data?.trackingNumber).toBeDefined();
 
@@ -1846,10 +1858,11 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           },
         );
 
-        const finalOrderResponseBody = validateApiResponse(
-          finalOrderResponse.body,
-          ['data'],
-        );
+        const finalOrderResponseBody = validateApiResponse<{
+          status?: string;
+          id?: string;
+          statusHistory?: unknown;
+        }>(finalOrderResponse.body, ['data']);
         expect(finalOrderResponseBody?.data?.status).toBe('fulfilled');
         expect(finalOrderResponseBody?.data?.id).toBe(orderId);
 

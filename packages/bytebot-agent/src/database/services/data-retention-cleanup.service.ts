@@ -117,6 +117,13 @@ type BrowserSessionWithIncludes = Prisma.BrowserSessionGetPayload<{
   };
 }>;
 
+// Type-safe screenshot interface for file operations
+interface SafeScreenshot {
+  id: string;
+  filePath: string;
+  fileSize: number;
+}
+
 type BrowserSessionForDeletion = Prisma.BrowserSessionGetPayload<{
   include: {
     tasks: true;
@@ -548,7 +555,7 @@ export class DataRetentionCleanupService {
             ? [
                 {
                   status: {
-                    in: policy.policyConditions.statusFilter as any,
+                    in: policy.policyConditions.statusFilter,
                   },
                 },
               ]
@@ -569,9 +576,9 @@ export class DataRetentionCleanupService {
     if (policy.archivePeriodDays && policy.compressionEnabled) {
       for (const session of sessionsToArchive) {
         try {
-          await this.archiveBrowserSession(session as any);
+          await this.archiveBrowserSession(session);
           result.recordsArchived++;
-          result.bytesArchived += this.calculateSessionSize(session as any);
+          result.bytesArchived += this.calculateSessionSize(session);
         } catch (error) {
           result.errors.push({
             entityId: session.id,
@@ -590,7 +597,7 @@ export class DataRetentionCleanupService {
             ? [
                 {
                   status: {
-                    in: policy.policyConditions.statusFilter as any,
+                    in: policy.policyConditions.statusFilter,
                   },
                 },
               ]
@@ -630,13 +637,16 @@ export class DataRetentionCleanupService {
 
         // Delete associated files
         for (const screenshot of session.screenshots) {
-          try {
-            await fs.unlink(screenshot.filePath);
-            result.bytesFreed += screenshot.fileSize;
-          } catch (error) {
-            this.logger.warn(
-              `Failed to delete screenshot file ${screenshot.filePath}: ${getErrorMessage(error)}`,
-            );
+          // Type guard to ensure screenshot has required properties
+          if (this.isValidScreenshotForDeletion(screenshot)) {
+            try {
+              await fs.unlink(screenshot.filePath);
+              result.bytesFreed += screenshot.fileSize;
+            } catch (error) {
+              this.logger.warn(
+                `Failed to delete screenshot file ${screenshot.filePath}: ${getErrorMessage(error)}`,
+              );
+            }
           }
         }
 
@@ -686,7 +696,7 @@ export class DataRetentionCleanupService {
             ? [
                 {
                   status: {
-                    in: policy.policyConditions.statusFilter as any,
+                    in: policy.policyConditions.statusFilter,
                   },
                 },
               ]
@@ -731,13 +741,16 @@ export class DataRetentionCleanupService {
       try {
         // Delete associated screenshot files
         for (const screenshot of task.screenshots) {
-          try {
-            await fs.unlink(screenshot.filePath);
-            result.bytesFreed += screenshot.fileSize;
-          } catch (error) {
-            this.logger.warn(
-              `Failed to delete task screenshot file ${screenshot.filePath}: ${getErrorMessage(error)}`,
-            );
+          // Type guard to ensure screenshot has required properties
+          if (this.isValidScreenshotForDeletion(screenshot)) {
+            try {
+              await fs.unlink(screenshot.filePath);
+              result.bytesFreed += screenshot.fileSize;
+            } catch (error) {
+              this.logger.warn(
+                `Failed to delete task screenshot file ${screenshot.filePath}: ${getErrorMessage(error)}`,
+              );
+            }
           }
         }
 
@@ -1302,5 +1315,23 @@ export class DataRetentionCleanupService {
         `Failed to log cleanup execution: ${getErrorMessage(error)}`,
       );
     }
+  }
+
+  /**
+   * Type guard to validate screenshot object has required properties for file deletion
+   */
+  private isValidScreenshotForDeletion(
+    screenshot: unknown,
+  ): screenshot is SafeScreenshot {
+    return (
+      typeof screenshot === 'object' &&
+      screenshot !== null &&
+      'id' in screenshot &&
+      'filePath' in screenshot &&
+      'fileSize' in screenshot &&
+      typeof (screenshot as SafeScreenshot).id === 'string' &&
+      typeof (screenshot as SafeScreenshot).filePath === 'string' &&
+      typeof (screenshot as SafeScreenshot).fileSize === 'number'
+    );
   }
 }

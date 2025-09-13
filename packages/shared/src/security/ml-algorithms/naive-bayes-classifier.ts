@@ -10,12 +10,24 @@
  */
 
 import { performance } from "perf_hooks";
-import { VulnerabilitySeverity } from "../owasp-top10-integration.service";
+import { VulnerabilitySeverity } from "../vulnerability-assessment-engine";
 import { VulnerabilityCategory } from "../vulnerability-assessment-engine";
 
 // ===========================
 // CORE TYPES AND INTERFACES
 // ===========================
+
+// Helper type for creating complete Records with all VulnerabilitySeverity keys
+type CompleteVulnerabilityRecord<T> = Record<VulnerabilitySeverity, T>;
+
+// All severity levels as array for iteration
+const ALL_SEVERITIES: readonly VulnerabilitySeverity[] = [
+  "info",
+  "low",
+  "medium",
+  "high",
+  "critical",
+] as const;
 
 export interface NaiveBayesFeatures {
   /** TF-IDF feature vector */
@@ -39,17 +51,16 @@ export interface NaiveBayesTrainingData {
 export interface NaiveBayesPrediction {
   readonly predictedLabel: VulnerabilitySeverity;
   readonly confidence: number;
-  readonly probabilities: Record<VulnerabilitySeverity, number>;
+  readonly probabilities: CompleteVulnerabilityRecord<number>;
   readonly featureImportance: Record<string, number>;
   readonly processingTime: number;
 }
 
 export interface NaiveBayesModel {
   /** Class prior probabilities */
-  readonly classPriors: Record<VulnerabilitySeverity, number>;
+  readonly classPriors: CompleteVulnerabilityRecord<number>;
   /** Feature likelihoods per class */
-  readonly featureLikelihoods: Record<
-    VulnerabilitySeverity,
+  readonly featureLikelihoods: CompleteVulnerabilityRecord<
     Record<string, number>
   >;
   /** Feature vocabulary */
@@ -58,7 +69,7 @@ export interface NaiveBayesModel {
   readonly metadata: {
     readonly trainingDataSize: number;
     readonly featureCount: number;
-    readonly classDistribution: Record<VulnerabilitySeverity, number>;
+    readonly classDistribution: CompleteVulnerabilityRecord<number>;
     readonly trainedAt: Date;
     readonly version: string;
   };
@@ -372,16 +383,8 @@ export class NaiveBayesClassifier {
       throw new Error("Training data cannot be empty");
     }
 
-    const validSeverities: VulnerabilitySeverity[] = [
-      VulnerabilitySeverity.INFO,
-      VulnerabilitySeverity.LOW,
-      VulnerabilitySeverity.MEDIUM,
-      VulnerabilitySeverity.HIGH,
-      VulnerabilitySeverity.CRITICAL,
-    ];
-
     for (const sample of data) {
-      if (!validSeverities.includes(sample.label)) {
+      if (!ALL_SEVERITIES.includes(sample.label)) {
         throw new Error(`Invalid label: ${sample.label}`);
       }
 
@@ -499,11 +502,9 @@ export class NaiveBayesClassifier {
       label: VulnerabilitySeverity;
       weight: number;
     }>,
-  ): Record<VulnerabilitySeverity, number> {
-    const classCounts: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
+  ): CompleteVulnerabilityRecord<number> {
+    const classCounts: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
     let totalWeight = 0;
 
     // Count weighted samples per class
@@ -514,20 +515,11 @@ export class NaiveBayesClassifier {
     }
 
     // Calculate probabilities with smoothing
-    const classPriors: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
+    const classPriors: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
     const numClasses = Object.keys(classCounts).length;
 
-    const severities: VulnerabilitySeverity[] = [
-      VulnerabilitySeverity.INFO,
-      VulnerabilitySeverity.LOW,
-      VulnerabilitySeverity.MEDIUM,
-      VulnerabilitySeverity.HIGH,
-      VulnerabilitySeverity.CRITICAL,
-    ];
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       const count = classCounts[severity] || 0;
       classPriors[severity] =
         (count + this.config.alpha) /
@@ -547,21 +539,12 @@ export class NaiveBayesClassifier {
       weight: number;
     }>,
     vocabulary: Set<string>,
-  ): Record<VulnerabilitySeverity, Record<string, number>> {
-    const likelihoods: Record<
-      VulnerabilitySeverity,
-      Record<string, number>
-    > = {} as Record<VulnerabilitySeverity, Record<string, number>>;
+  ): CompleteVulnerabilityRecord<Record<string, number>> {
+    const likelihoods: CompleteVulnerabilityRecord<Record<string, number>> =
+      {} as CompleteVulnerabilityRecord<Record<string, number>>;
 
     // Initialize likelihood structures
-    const severities: VulnerabilitySeverity[] = [
-      VulnerabilitySeverity.INFO,
-      VulnerabilitySeverity.LOW,
-      VulnerabilitySeverity.MEDIUM,
-      VulnerabilitySeverity.HIGH,
-      VulnerabilitySeverity.CRITICAL,
-    ];
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       likelihoods[severity] = {};
       for (const feature of Array.from(vocabulary)) {
         likelihoods[severity][feature] = 0;
@@ -569,10 +552,8 @@ export class NaiveBayesClassifier {
     }
 
     // Count feature occurrences per class
-    const classTotals: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
+    const classTotals: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
 
     for (const sample of data) {
       const className = sample.label;
@@ -588,7 +569,7 @@ export class NaiveBayesClassifier {
     // Apply Laplace smoothing and normalize
     const vocabularySize = vocabulary.size;
 
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       const classTotal = classTotals[severity] || 0;
       const denominator = classTotal + this.config.alpha * vocabularySize;
 
@@ -609,20 +590,11 @@ export class NaiveBayesClassifier {
       label: VulnerabilitySeverity;
       weight: number;
     }>,
-  ): Record<VulnerabilitySeverity, number> {
-    const distribution: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
+  ): CompleteVulnerabilityRecord<number> {
+    const distribution: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
 
-    const severities: VulnerabilitySeverity[] = [
-      VulnerabilitySeverity.INFO,
-      VulnerabilitySeverity.LOW,
-      VulnerabilitySeverity.MEDIUM,
-      VulnerabilitySeverity.HIGH,
-      VulnerabilitySeverity.CRITICAL,
-    ];
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       distribution[severity] = 0;
     }
 
@@ -666,22 +638,15 @@ export class NaiveBayesClassifier {
    */
   private calculateLogProbabilities(
     features: Record<string, number>,
-  ): Record<VulnerabilitySeverity, number> {
+  ): CompleteVulnerabilityRecord<number> {
     if (!this.model) {
       throw new Error("Model not trained");
     }
 
-    const logProbabilities: Record<VulnerabilitySeverity, number> =
-      {} as Record<VulnerabilitySeverity, number>;
+    const logProbabilities: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
 
-    const severities: VulnerabilitySeverity[] = [
-      VulnerabilitySeverity.INFO,
-      VulnerabilitySeverity.LOW,
-      VulnerabilitySeverity.MEDIUM,
-      VulnerabilitySeverity.HIGH,
-      VulnerabilitySeverity.CRITICAL,
-    ];
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       // Start with log prior
       let logProb = Math.log(this.model.classPriors[severity]);
 
@@ -705,26 +670,17 @@ export class NaiveBayesClassifier {
    * Normalize log probabilities to probabilities
    */
   private normalizeProbabilities(
-    logProbabilities: Record<VulnerabilitySeverity, number>,
-  ): Record<VulnerabilitySeverity, number> {
+    logProbabilities: CompleteVulnerabilityRecord<number>,
+  ): CompleteVulnerabilityRecord<number> {
     // Find maximum for numerical stability
     const maxLogProb = Math.max(...Object.values(logProbabilities));
 
     // Convert to probabilities
     let totalProb = 0;
-    const probabilities: Record<VulnerabilitySeverity, number> = {} as Record<
-      VulnerabilitySeverity,
-      number
-    >;
+    const probabilities: CompleteVulnerabilityRecord<number> =
+      {} as CompleteVulnerabilityRecord<number>;
 
-    const severities: VulnerabilitySeverity[] = [
-      VulnerabilitySeverity.INFO,
-      VulnerabilitySeverity.LOW,
-      VulnerabilitySeverity.MEDIUM,
-      VulnerabilitySeverity.HIGH,
-      VulnerabilitySeverity.CRITICAL,
-    ];
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       probabilities[severity] = Math.exp(
         logProbabilities[severity] - maxLogProb,
       );
@@ -732,7 +688,7 @@ export class NaiveBayesClassifier {
     }
 
     // Normalize
-    for (const severity of severities) {
+    for (const severity of ALL_SEVERITIES) {
       probabilities[severity] /= totalProb;
     }
 
@@ -743,10 +699,10 @@ export class NaiveBayesClassifier {
    * Get predicted class with highest probability
    */
   private getPredictedClass(
-    probabilities: Record<VulnerabilitySeverity, number>,
+    probabilities: CompleteVulnerabilityRecord<number>,
   ): VulnerabilitySeverity {
     let maxProb = -1;
-    let predictedClass: VulnerabilitySeverity = VulnerabilitySeverity.LOW;
+    let predictedClass: VulnerabilitySeverity = "low";
 
     for (const [severity, prob] of Object.entries(probabilities) as [
       VulnerabilitySeverity,
@@ -765,7 +721,7 @@ export class NaiveBayesClassifier {
    * Calculate prediction confidence
    */
   private calculateConfidence(
-    probabilities: Record<VulnerabilitySeverity, number>,
+    probabilities: CompleteVulnerabilityRecord<number>,
   ): number {
     const sortedProbs = Object.values(probabilities).sort((a, b) => b - a);
 
