@@ -647,9 +647,9 @@ export const AuditorAccess = (): CustomDecorator<string> => {
  *
  * @returns Method decorator
  */
-export const ComputerUseAccess = (): CustomDecorator<string> => {
+export const ComputerUseAccess = () => {
   return (
-    target: Function | object,
+    target: any,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
@@ -681,9 +681,9 @@ export const ComputerUseAccess = (): CustomDecorator<string> => {
  *
  * @returns Method decorator
  */
-export const TaskManagementAccess = (): CustomDecorator<string> => {
+export const TaskManagementAccess = () => {
   return (
-    target: Function | object,
+    target: any,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
@@ -714,7 +714,7 @@ export const TaskManagementAccess = (): CustomDecorator<string> => {
  *
  * @returns Method decorator
  */
-export const APIAdminAccess = (): CustomDecorator<string> => {
+export const APIAdminAccess = () => {
   return (
     target: any,
     propertyKey?: string | symbol,
@@ -750,41 +750,25 @@ export const APIAdminAccess = (): CustomDecorator<string> => {
  */
 export const SecurityManagementAccess = () => {
   return (
-    target: Function | object,
+    target: any,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
-    if (propertyKey && descriptor) {
-      // Method decorator
-      SetMetadata(ROLES_KEY, [Role._ADMIN, Role._SUPER_ADMIN])(
-        target,
-        propertyKey,
-        descriptor,
-      );
-      SetMetadata(PERMISSIONS_KEY, [
-        Permission._SECURITY_MANAGEMENT,
-        Permission._ADMIN,
-      ])(target, propertyKey, descriptor);
-      SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
-      SetMetadata(SECURE_ENDPOINT_KEY, {
-        requireEncryption: true,
-        httpsOnly: true,
-        auditLogging: true,
-      })(target, propertyKey, descriptor);
-    } else {
-      // Class decorator - no type casting needed
-      SetMetadata(ROLES_KEY, [Role._ADMIN, Role._SUPER_ADMIN])(target);
-      SetMetadata(PERMISSIONS_KEY, [
-        Permission._SECURITY_MANAGEMENT,
-        Permission._ADMIN,
-      ])(target);
-      SetMetadata(AUDIT_ACCESS_KEY, true)(target);
-      SetMetadata(SECURE_ENDPOINT_KEY, {
-        requireEncryption: true,
-        httpsOnly: true,
-        auditLogging: true,
-      })(target);
-    }
+    SetMetadata(ROLES_KEY, [Role._ADMIN, Role._SUPER_ADMIN])(
+      target,
+      propertyKey,
+      descriptor,
+    );
+    SetMetadata(PERMISSIONS_KEY, [
+      Permission._SECURITY_MANAGEMENT,
+      Permission._ADMIN,
+    ])(target, propertyKey, descriptor);
+    SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
+    SetMetadata(SECURE_ENDPOINT_KEY, {
+      requireEncryption: true,
+      httpsOnly: true,
+      auditLogging: true,
+    })(target, propertyKey, descriptor);
   };
 };
 
