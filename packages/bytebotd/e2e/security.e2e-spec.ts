@@ -243,6 +243,7 @@ describe('Security E2E Tests', () => {
         }
         requestCounts.set(ip, count + 1);
         next();
+        return;
       },
     );
 
@@ -1096,9 +1097,31 @@ describe('Security E2E Tests', () => {
 
       for (const testCase of edgeCases) {
         try {
-          let req = request(app.getHttpAdapter().getInstance() as any)[
-            testCase.method
-          ](testCase.url);
+          const requestAgent = request(
+            app.getHttpAdapter().getInstance() as any,
+          );
+
+          // Type-safe method dispatch to avoid TestAgent index signature errors
+          let req: ReturnType<typeof requestAgent.get>;
+          switch (testCase.method.toLowerCase()) {
+            case 'get':
+              req = requestAgent.get(testCase.url);
+              break;
+            case 'post':
+              req = requestAgent.post(testCase.url);
+              break;
+            case 'put':
+              req = requestAgent.put(testCase.url);
+              break;
+            case 'delete':
+              req = requestAgent.delete(testCase.url);
+              break;
+            case 'patch':
+              req = requestAgent.patch(testCase.url);
+              break;
+            default:
+              throw new Error(`Unsupported HTTP method: ${testCase.method}`);
+          }
           if (testCase.headers) {
             Object.entries(testCase.headers).forEach(([key, value]) => {
               req = req.set(key, value);

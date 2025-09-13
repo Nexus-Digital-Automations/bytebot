@@ -9,14 +9,6 @@
  * @author Input Validation & API Security Specialist
  */
 
- 
-
- 
-
- 
-
- 
-
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 import { SecuritySanitizationPipe } from '../pipes/security-sanitization.pipe';
@@ -102,7 +94,11 @@ describe('Security Validation Mock Tests', () => {
               path: `/tmp/test${_payload}.txt`,
               data: 'dGVzdCBjb250ZW50', // base64 for 'test content'
             },
-            null,
+            {
+              type: 'body',
+              metatype: Object,
+              data: undefined,
+            },
           );
         }).toThrow();
       });
@@ -214,7 +210,7 @@ describe('Security Validation Mock Tests', () => {
 
       // The filter should sanitize this error
       expect(() => {
-        securityFilter.catch(sensitiveError, mockHost as unknown);
+        securityFilter.catch(sensitiveError, mockHost as any);
       }).not.toThrow();
     });
 
@@ -341,7 +337,11 @@ describe('Security Validation Mock Tests', () => {
               action: 'application',
               application: `calculator${_payload}`,
             },
-            null,
+            {
+              type: 'body',
+              metatype: Object,
+              data: undefined,
+            },
           );
         }).toThrow();
       });
@@ -374,7 +374,11 @@ describe('Security Validation Mock Tests', () => {
               action: 'read_file',
               path: _payload,
             },
-            null,
+            {
+              type: 'body',
+              metatype: Object,
+              data: undefined,
+            },
           );
         }).toThrow();
       });
@@ -418,7 +422,11 @@ describe('Security Validation Mock Tests', () => {
               action: 'type_text',
               text: `Test input ${_i}`,
             },
-            null,
+            {
+              type: 'body',
+              metatype: Object,
+              data: undefined,
+            },
           ),
       );
 

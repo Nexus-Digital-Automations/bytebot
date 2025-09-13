@@ -306,9 +306,14 @@ describe('Security Penetration Testing Suite', () => {
         getRequest: jest.fn().mockReturnValue(mockRequest),
         getResponse: jest.fn().mockReturnValue({}),
       }),
+      switchToRpc: jest.fn().mockReturnValue({}),
+      switchToWs: jest.fn().mockReturnValue({}),
       getHandler: jest.fn().mockReturnValue({ name: 'pentestHandler' }),
       getClass: jest.fn().mockReturnValue({ name: 'PentestController' }),
-    } as ExecutionContext;
+      getArgs: jest.fn().mockReturnValue([]),
+      getArgByIndex: jest.fn().mockReturnValue(undefined),
+      getType: jest.fn().mockReturnValue('http'),
+    } as jest.Mocked<ExecutionContext>;
   };
 
   beforeEach(async () => {
@@ -1279,8 +1284,9 @@ describe('Security Penetration Testing Suite', () => {
                 username: `roleattacker${round}${i}`,
                 role: UserRole._VIEWER,
                 isActive: true,
+                sub: `role-attacker-${round}-${i}`,
                 __proto__: { role: UserRole._ADMIN },
-              } as ExecutionContext;
+              };
 
               const context = createPentestExecutionContext(
                 maliciousUser,

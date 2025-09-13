@@ -440,130 +440,109 @@ describe('Controller Security Integration Tests', () => {
 
     (app as App)
       .getHttpAdapter()
-      .get(
-        '/api/protected',
-        (req: SafeRequest & { user: JwtPayload }, res: SafeResponse) => {
+      .get('/api/protected', (req: SafeRequest, res: SafeResponse) => {
+        if (req.user) {
+          res.json(controller.getProtectedData(req.user));
+        } else {
+          res.status(403).json({ error: 'User not authenticated' });
+        }
+      });
+
+    app
+      .getHttpAdapter()
+      .get('/api/admin', (req: SafeRequest, res: SafeResponse) => {
+        const middleware = checkRole(UserRole._ADMIN);
+        middleware(req, res, () => {
           if (req.user) {
-            res.json(controller.getProtectedData(req.user));
+            res.json(controller.getAdminData(req.user));
           } else {
-            res.status(403).json({ error: 'User not authenticated' });
+            res.status(403).json({ error: 'Admin authentication required' });
           }
-        },
-      );
+        });
+      });
 
     app
       .getHttpAdapter()
-      .get(
-        '/api/admin',
-        (req: SafeRequest & { user: JwtPayload }, res: SafeResponse) => {
-          const middleware = checkRole(UserRole._ADMIN);
-          middleware(req, res, () => {
-            if (req.user) {
-              res.json(controller.getAdminData(req.user));
-            } else {
-              res.status(403).json({ error: 'Admin authentication required' });
-            }
-          });
-        },
-      );
+      .get('/api/system', (req: SafeRequest, res: SafeResponse) => {
+        const middleware = checkRole(UserRole._ADMIN);
+        middleware(req, res, () => {
+          if (req.user) {
+            res.json(controller.getSystemData(req.user));
+          } else {
+            res
+              .status(403)
+              .json({ error: 'System access requires admin authentication' });
+          }
+        });
+      });
 
     app
       .getHttpAdapter()
-      .get(
-        '/api/system',
-        (req: SafeRequest & { user: JwtPayload }, res: SafeResponse) => {
-          const middleware = checkRole(UserRole._ADMIN);
-          middleware(req, res, () => {
-            if (req.user) {
-              res.json(controller.getSystemData(req.user));
-            } else {
-              res
-                .status(403)
-                .json({ error: 'System access requires admin authentication' });
-            }
-          });
-        },
-      );
+      .post('/api/resources', (req: SafeRequest, res: SafeResponse) => {
+        const middleware = checkRole(UserRole._OPERATOR);
+        middleware(req, res, () => {
+          if (req.user) {
+            res.json(controller.createResource(req.user, req.body));
+          } else {
+            res.status(403).json({
+              error: 'Resource creation requires operator authentication',
+            });
+          }
+        });
+      });
 
     app
       .getHttpAdapter()
-      .post(
-        '/api/resources',
-        (req: SafeRequest & { user: JwtPayload }, res: SafeResponse) => {
-          const middleware = checkRole(UserRole._OPERATOR);
-          middleware(req, res, () => {
-            if (req.user) {
-              res.json(controller.createResource(req.user, req.body));
-            } else {
-              res.status(403).json({
-                error: 'Resource creation requires operator authentication',
-              });
-            }
-          });
-        },
-      );
+      .delete('/api/resources/:id', (req: SafeRequest, res: SafeResponse) => {
+        const middleware = checkRole(UserRole._ADMIN);
+        middleware(req, res, () => {
+          if (req.user && req.params.id) {
+            res.json(controller.deleteResource(req.user, req.params.id));
+          } else {
+            res.status(400).json({
+              error: 'Admin authentication and resource ID required',
+            });
+          }
+        });
+      });
 
     app
       .getHttpAdapter()
-      .delete(
-        '/api/resources/:id',
-        (req: SafeRequest & { user: JwtPayload }, res: SafeResponse) => {
-          const middleware = checkRole(UserRole._ADMIN);
-          middleware(req, res, () => {
-            if (req.user && req.params.id) {
-              res.json(controller.deleteResource(req.user, req.params.id));
-            } else {
-              res.status(400).json({
-                error: 'Admin authentication and resource ID required',
-              });
-            }
-          });
-        },
-      );
+      .post('/api/upload', (req: SafeRequest, res: SafeResponse) => {
+        const middleware = checkRole(UserRole._OPERATOR);
+        middleware(req, res, () => {
+          // Simulate file upload
+          const mockFile: SafeFile = {
+            originalname: (req.headers['x-filename'] as string) ?? 'unknown',
+            size:
+              parseInt((req.headers['content-length'] as string) ?? '0') ?? 0,
+          };
+          if (req.user) {
+            res.json(controller.uploadFile(req.user, mockFile));
+          } else {
+            res.status(403).json({
+              error: 'File upload requires operator authentication',
+            });
+          }
+        });
+      });
 
     app
       .getHttpAdapter()
-      .post(
-        '/api/upload',
-        (req: SafeRequest & { user: JwtPayload }, res: SafeResponse) => {
-          const middleware = checkRole(UserRole._OPERATOR);
-          middleware(req, res, () => {
-            // Simulate file upload
-            const mockFile: SafeFile = {
-              originalname: (req.headers['x-filename'] as string) ?? 'unknown',
-              size:
-                parseInt((req.headers['content-length'] as string) ?? '0') ?? 0,
-            };
-            if (req.user) {
-              res.json(controller.uploadFile(req.user, mockFile));
-            } else {
-              res.status(403).json({
-                error: 'File upload requires operator authentication',
-              });
-            }
-          });
-        },
-      );
-
-    app
-      .getHttpAdapter()
-      .get(
-        '/api/users/search',
-        (req: SafeRequest & { user?: JwtPayload }, res: SafeResponse) => {
-          const middleware = checkRole(UserRole._OPERATOR);
-          middleware(req, res, () => {
-            if (req.user) {
-              res.json(
-                controller.searchUsers(req.user, (req.query.q as string) ?? ''),
-              );
-            } else {
-              res.status(403).json({
-                error: 'User search requires operator authentication',
-              });
-            }
-          });
-        },
-      );
+      .get('/api/users/search', (req: SafeRequest, res: SafeResponse) => {
+        const middleware = checkRole(UserRole._OPERATOR);
+        middleware(req, res, () => {
+          if (req.user) {
+            res.json(
+              controller.searchUsers(req.user, (req.query.q as string) ?? ''),
+            );
+          } else {
+            res.status(403).json({
+              error: 'User search requires operator authentication',
+            });
+          }
+        });
+      });
 
     await app.init();
     securityLogger.info(

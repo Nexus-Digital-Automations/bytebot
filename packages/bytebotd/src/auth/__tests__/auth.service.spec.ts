@@ -415,6 +415,8 @@ describe('AuthService', () => {
         id: 'user_123',
         email: 'test@bytebot.ai',
         role: 'admin',
+        createdAt: new Date('2023-01-01T00:00:00.000Z'),
+        isActive: true,
       };
 
       const expectedAccessPayload = {

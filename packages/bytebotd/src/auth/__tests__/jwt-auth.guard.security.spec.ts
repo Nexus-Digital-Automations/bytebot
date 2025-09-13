@@ -87,9 +87,14 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         getRequest: jest.fn().mockReturnValue(mockRequest),
         getResponse: jest.fn().mockReturnValue({}),
       }),
+      switchToRpc: jest.fn().mockReturnValue({}),
+      switchToWs: jest.fn().mockReturnValue({}),
       getHandler: jest.fn().mockReturnValue({ name: 'testHandler' }),
       getClass: jest.fn().mockReturnValue({ name: 'TestController' }),
-    } as ExecutionContext;
+      getArgs: jest.fn().mockReturnValue([]),
+      getArgByIndex: jest.fn().mockReturnValue(undefined),
+      getType: jest.fn().mockReturnValue('http'),
+    } as jest.Mocked<ExecutionContext>;
   };
 
   // Create malicious JWT tokens for security testing
@@ -540,11 +545,13 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       // Simulate 50 concurrent attack attempts
       const promises = Array(50)
         .fill(null)
-        .map((_, _index) =>
-          guard
-            .canActivate(contexts[_index % contexts.length])
-            .catch(() => 'attack-blocked'),
-        );
+        .map((_, _index) => {
+          const context = contexts[_index % contexts.length];
+          if (!context) {
+            throw new Error('Context is undefined');
+          }
+          return guard.canActivate(context).catch(() => 'attack-blocked');
+        });
 
       const results = await Promise.all(promises);
       const processingTime = Date.now() - startTime;

@@ -229,6 +229,7 @@ export interface JwtPayload extends BaseJwtPayload {
   readonly role: SharedUserRole;
   readonly permissions: Permission[];
   readonly sessionId: string;
+  readonly name?: string;
   readonly iat: number;
   readonly exp: number;
   readonly iss?: string;
@@ -710,6 +711,7 @@ export interface DecodedJwtPayload extends BaseJwtPayload {
   readonly role: SharedUserRole;
   readonly sessionId?: string;
   readonly permissions?: Permission[];
+  readonly name?: string;
   readonly exp: number;
   readonly iat: number;
   readonly iss?: string;
@@ -757,6 +759,7 @@ export interface EnhancedRequest extends Request {
     readonly role: SharedUserRole;
     readonly sessionId?: string;
     readonly permissions?: Permission[];
+    readonly name?: string;
     readonly clientInfo?: ClientInfo;
   };
   session?: {

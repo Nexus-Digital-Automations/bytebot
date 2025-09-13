@@ -1608,9 +1608,29 @@ describe('Security E2E - Comprehensive Testing', () => {
       ];
 
       for (const endpoint of endpoints) {
-        const response = await request(
-          app.getHttpAdapter().getInstance() as any,
-        )[endpoint.method](endpoint.path);
+        const requestAgent = request(app.getHttpAdapter().getInstance() as any);
+
+        // Type-safe method dispatch to avoid TestAgent index signature errors
+        let response: Awaited<ReturnType<typeof requestAgent.get>>;
+        switch (endpoint.method.toLowerCase()) {
+          case 'get':
+            response = await requestAgent.get(endpoint.path);
+            break;
+          case 'post':
+            response = await requestAgent.post(endpoint.path);
+            break;
+          case 'put':
+            response = await requestAgent.put(endpoint.path);
+            break;
+          case 'delete':
+            response = await requestAgent.delete(endpoint.path);
+            break;
+          case 'patch':
+            response = await requestAgent.patch(endpoint.path);
+            break;
+          default:
+            throw new Error(`Unsupported HTTP method: ${endpoint.method}`);
+        }
 
         if (endpoint.authRequired) {
           expect(response.status).toBe(401); // Should require authentication

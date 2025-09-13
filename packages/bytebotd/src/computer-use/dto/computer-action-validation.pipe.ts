@@ -596,7 +596,7 @@ export class ComputerActionValidationPipe
         if (rawInput.action === 'write_file') {
           const fileData = (rawInput as { data?: string }).data;
           if (typeof fileData === 'string') {
-            if (detectMaliciousFileContent(fileData, filePath)) {
+            if (detectMaliciousFileContent(fileData, filePath ?? '')) {
               securityContext.threats.push('MALICIOUS_FILE_CONTENT');
               securityContext.totalRiskScore += 80;
               securityContext.detectionEvents.push({
@@ -902,7 +902,7 @@ export class ComputerActionValidationPipe
       value: _error.value as unknown,
       constraints: _error.constraints,
       children:
-        _error.children?.length > 0
+        _error.children && _error.children.length > 0
           ? this.formatValidationErrors(_error.children)
           : undefined,
     }));
