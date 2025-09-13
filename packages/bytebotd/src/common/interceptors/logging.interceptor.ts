@@ -277,7 +277,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const path = url.split('?')[0];
 
     // Replace common ID patterns with placeholders
-    return (path || '')
+    return (path ?? '')
       .replace(/\/\d+/g, '/:id') // Replace numeric IDs
       .replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUIDs
       .replace(/\/[a-f0-9]{24}/g, '/:objectId') // Replace MongoDB ObjectIDs
@@ -291,10 +291,10 @@ export class LoggingInterceptor implements NestInterceptor {
    * @returns Client IP address
    */
   private getClientIpAddress(request: Request): string {
-    return (request.headers['x-forwarded-for'] ||
-      request.headers['x-real-ip'] ||
-      request.connection?.remoteAddress ||
-      request.socket?.remoteAddress ||
+    return (request.headers['x-forwarded-for'] ??
+      request.headers['x-real-ip'] ??
+      request.connection?.remoteAddress ??
+      request.socket?.remoteAddress ??
       'unknown') as string;
   }
 

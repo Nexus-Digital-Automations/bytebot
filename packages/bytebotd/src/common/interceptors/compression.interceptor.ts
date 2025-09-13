@@ -19,7 +19,6 @@
  */
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
 import {
   CallHandler,

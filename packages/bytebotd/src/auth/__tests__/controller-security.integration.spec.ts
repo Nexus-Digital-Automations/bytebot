@@ -19,6 +19,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import type { Server } from 'http';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
@@ -129,7 +130,7 @@ interface App {
  * Eliminates need for 'as any' casting with proper typing
  */
 function createRequest(app: INestApplication) {
-  return request(app.getHttpServer());
+  return request(app.getHttpServer() as Server);
 }
 
 // UserRole is now imported from @bytebot/shared
