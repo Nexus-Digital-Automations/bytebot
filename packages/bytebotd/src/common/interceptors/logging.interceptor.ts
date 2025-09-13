@@ -22,9 +22,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-
 import {
   Injectable,
   NestInterceptor,
@@ -32,7 +29,7 @@ import {
   CallHandler,
   Logger,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Request, Response } from 'express';
 import { v4 as _uuidv4 } from 'uuid';
@@ -140,7 +137,7 @@ export class LoggingInterceptor implements NestInterceptor {
           this.metricsService.recordRequestEnd(request.method, route);
         }
       }),
-      catchError((_error) => {
+      catchError((_error: Error) => {
         // Handle error response
         const processingTime = Date.now() - startTime;
         const responseContext = this.createResponseContext(
@@ -164,8 +161,8 @@ export class LoggingInterceptor implements NestInterceptor {
           this.metricsService.recordRequestEnd(request.method, route);
         }
 
-        // Re-throw the error to maintain normal error handling
-        throw _error;
+        // Re-throw the error to maintain normal error handling using throwError
+        return throwError(() => _error);
       }),
     );
   }
@@ -260,7 +257,7 @@ export class LoggingInterceptor implements NestInterceptor {
     // Try to get route pattern from NestJS route info
     const routePattern = (request as Request & { route?: { path: string } })
       .route?.path;
-    if (routePattern) {
+    if (routePattern && typeof routePattern === 'string') {
       return routePattern;
     }
 

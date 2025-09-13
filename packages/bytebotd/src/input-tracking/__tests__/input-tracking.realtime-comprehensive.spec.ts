@@ -1,9 +1,5 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+// TypeScript safety note: This test file contains complex UIohook integration that requires flexible typing
 /**
  * Input Tracking Service - Real-time Comprehensive Test Suite
  *
@@ -1212,16 +1208,19 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       const keydownHandler = mockEventListeners['keydown'];
 
       // Attempt malicious input patterns
-      const maliciousInputs = [
-        { keycode: null, char: '<script>alert("xss")</script>' },
-        { keycode: undefined, char: '$(rm -rf /)' },
-        { keycode: 'invalid', char: '../../etc/passwd' },
+      const maliciousInputs: Array<Partial<UiohookKeyboardEvent>> = [
+        {
+          keycode: null as unknown as number,
+          char: '<script>alert("xss")</script>',
+        },
+        { keycode: undefined as unknown as number, char: '$(rm -rf /)' },
+        { keycode: 'invalid' as unknown as number, char: '../../etc/passwd' },
       ];
 
       for (const maliciousInput of maliciousInputs) {
         // Should handle invalid input gracefully
         expect(() => {
-          keydownHandler(createKeyboardEvent(maliciousInput as any));
+          keydownHandler(createKeyboardEvent(maliciousInput));
         }).not.toThrow();
       }
     });

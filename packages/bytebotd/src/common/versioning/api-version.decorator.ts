@@ -1,3 +1,5 @@
+ 
+
 /**
  * API Versioning Decorators - BytebotD Desktop Service Versioning
  *
@@ -11,11 +13,9 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
  
- 
-/* eslint-disable @typescript-eslint/no-unsafe-return */
  
 
 import { SetMetadata, applyDecorators } from '@nestjs/common';
@@ -350,7 +350,11 @@ export const ComputerUseApi = (
  * @returns Version configuration or null
  */
 export function getVersionConfig(target: any): ApiVersionConfig | null {
-  return Reflect.getMetadata(VERSION_CONFIG_KEY, target) ?? null;
+   
+  const metadata = Reflect.getMetadata(VERSION_CONFIG_KEY, target);
+  return metadata && typeof metadata === 'object' && 'version' in metadata
+    ? (metadata as ApiVersionConfig)
+    : null;
 }
 
 /**
@@ -359,7 +363,9 @@ export function getVersionConfig(target: any): ApiVersionConfig | null {
  * @returns API version or null
  */
 export function getApiVersion(target: any): string | null {
-  return Reflect.getMetadata(VERSION_METADATA_KEY, target) ?? null;
+   
+  const metadata = Reflect.getMetadata(VERSION_METADATA_KEY, target);
+  return typeof metadata === 'string' ? metadata : null;
 }
 
 /**
@@ -368,7 +374,11 @@ export function getApiVersion(target: any): string | null {
  * @returns Array of supported versions or null
  */
 export function getMultiVersions(target: any): SupportedVersion[] | null {
-  return Reflect.getMetadata('multi_version', target) ?? null;
+   
+  const metadata = Reflect.getMetadata('multi_version', target);
+  return Array.isArray(metadata) && metadata.every((v) => typeof v === 'string')
+    ? (metadata as SupportedVersion[])
+    : null;
 }
 
 /**
@@ -377,7 +387,9 @@ export function getMultiVersions(target: any): SupportedVersion[] | null {
  * @returns Boolean indicating if it's a desktop endpoint
  */
 export function isDesktopApiVersion(target: any): boolean {
-  return Reflect.getMetadata(DESKTOP_VERSION_KEY, target) ?? false;
+   
+  const metadata = Reflect.getMetadata(DESKTOP_VERSION_KEY, target);
+  return Boolean(metadata);
 }
 
 /**

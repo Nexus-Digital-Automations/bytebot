@@ -1,8 +1,9 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
+
 /**
  * NUT Service Unit Tests
  * Comprehensive test suite covering all methods, error handling, and edge cases
@@ -31,6 +32,8 @@ import { Logger } from '@nestjs/common';
 import { NutService } from './nut.service';
 import { spawn, type ChildProcessWithoutNullStreams } from 'child_process';
 import * as fs from 'fs';
+
+// Type definitions for testing private methods - now imported from test-interfaces
 
 // Type definitions for nut-js mocks
 interface MockKeyboard {
@@ -224,7 +227,7 @@ jest.mock('fs', () => ({
 }));
 
 describe('NutService', () => {
-  let service: NutService;
+  let service: TestableNutService;
   let loggerSpy: jest.SpyInstance;
 
   const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
@@ -250,7 +253,7 @@ describe('NutService', () => {
       providers: [NutService],
     }).compile();
 
-    service = module.get<NutService>(NutService);
+    service = module.get<NutService>(NutService) as TestableNutService;
   });
 
   afterEach(() => {
@@ -283,9 +286,7 @@ describe('NutService', () => {
     describe('sendKeys method', () => {
       it('should successfully send valid keys', async () => {
         const operationId = 'test_op_123';
-        jest
-          .spyOn(service as any, 'generateOperationId')
-          .mockReturnValue(operationId);
+        jest.spyOn(service, 'generateOperationId').mockReturnValue(operationId);
 
         const result = await service.sendKeys(['A', 'B', 'C'], 50);
 
@@ -810,9 +811,8 @@ describe('NutService', () => {
 
     describe('generateOperationId method', () => {
       it('should generate unique operation IDs', () => {
-        const generateOp = service['generateOperationId'] as () => string;
-        const id1 = generateOp.call(service);
-        const id2 = generateOp.call(service);
+        const id1 = service.generateOperationId();
+        const id2 = service.generateOperationId();
 
         expect(id1).toMatch(/^nut_operation_\d+_[a-z0-9]{6}$/);
         expect(id2).toMatch(/^nut_operation_\d+_[a-z0-9]{6}$/);
@@ -823,57 +823,37 @@ describe('NutService', () => {
     describe('getErrorMessage method', () => {
       it('should extract message from Error objects', () => {
         const error = new Error('Test error message');
-        const getErrorMessage = service['getErrorMessage'] as (
-          _error: unknown,
-        ) => string;
-        const result = getErrorMessage.call(service, error);
+        const result = service.getErrorMessage(error);
         expect(result).toBe('Test error message');
       });
 
       it('should handle string errors', () => {
         const _error = 'String error message';
-        const getErrorMessage = service['getErrorMessage'] as (
-          _error: unknown,
-        ) => string;
-        const result = getErrorMessage.call(service, _error);
+        const result = service.getErrorMessage(_error);
         expect(result).toBe('String error message');
       });
 
       it('should extract message from objects with message property', () => {
         const _error = { message: 'Object error message' };
-        const getErrorMessage = service['getErrorMessage'] as (
-          _error: unknown,
-        ) => string;
-        const result = getErrorMessage.call(service, _error);
+        const result = service.getErrorMessage(_error);
         expect(result).toBe('Object error message');
       });
 
       it('should handle objects with non-string message', () => {
         const _error = { message: { nested: 'error' } };
-        const getErrorMessage = service['getErrorMessage'] as (
-          _error: unknown,
-        ) => string;
-        const result = getErrorMessage.call(service, _error);
+        const result = service.getErrorMessage(_error);
         expect(result).toBe(JSON.stringify({ nested: 'error' }));
       });
 
       it('should return default message for unknown _error types', () => {
         const _error = 42;
-        const getErrorMessage = service['getErrorMessage'] as (
-          _error: unknown,
-        ) => string;
-        const result = getErrorMessage.call(service, _error);
+        const result = service.getErrorMessage(_error);
         expect(result).toBe('Unknown error occurred');
       });
 
       it('should handle null and undefined errors', () => {
-        const getErrorMessage = service['getErrorMessage'] as (
-          _error: unknown,
-        ) => string;
-        expect(getErrorMessage.call(service, null)).toBe(
-          'Unknown error occurred',
-        );
-        expect(getErrorMessage.call(service, undefined)).toBe(
+        expect(service.getErrorMessage(null)).toBe('Unknown error occurred');
+        expect(service.getErrorMessage(undefined)).toBe(
           'Unknown error occurred',
         );
       });
@@ -888,8 +868,7 @@ describe('NutService', () => {
             return {} as NodeJS.Timeout;
           });
 
-        const delay = service['delay'] as (ms: number) => Promise<void>;
-        await delay.call(service, 100);
+        await service.delay(100);
 
         expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 100);
         setTimeoutSpy.mockRestore();
@@ -921,44 +900,38 @@ describe('NutService', () => {
   describe('Character to Key Mapping', () => {
     describe('charToKeyInfo method', () => {
       it('should map lowercase letters correctly', () => {
-        const charToKeyInfo = (service as any)['charToKeyInfo'];
-        const result = charToKeyInfo.call(service, 'a');
+        const result = service.charToKeyInfo('a');
         expect(result).toEqual({ keyCode: 'A', withShift: false });
       });
 
       it('should map uppercase letters with shift', () => {
-        const charToKeyInfo = (service as any)['charToKeyInfo'];
-        const result = charToKeyInfo.call(service, 'A');
+        const result = service.charToKeyInfo('A');
         expect(result).toEqual({ keyCode: 'A', withShift: true });
       });
 
       it('should map numbers correctly', () => {
-        const charToKeyInfo = (service as any)['charToKeyInfo'];
-        const result = charToKeyInfo.call(service, '5');
+        const result = service.charToKeyInfo('5');
         expect(result).toEqual({ keyCode: 'Num5', withShift: false });
       });
 
       it('should map special characters without shift', () => {
-        const charToKeyInfo = (service as any)['charToKeyInfo'];
-        const spaceResult = charToKeyInfo.call(service, ' ');
+        const spaceResult = service.charToKeyInfo(' ');
         expect(spaceResult).toEqual({ keyCode: 'Space', withShift: false });
 
-        const periodResult = charToKeyInfo.call(service, '.');
+        const periodResult = service.charToKeyInfo('.');
         expect(periodResult).toEqual({ keyCode: 'Period', withShift: false });
       });
 
       it('should map special characters with shift', () => {
-        const charToKeyInfo = (service as any)['charToKeyInfo'];
-        const exclamationResult = charToKeyInfo.call(service, '!');
+        const exclamationResult = service.charToKeyInfo('!');
         expect(exclamationResult).toEqual({ keyCode: 'Num1', withShift: true });
 
-        const atResult = charToKeyInfo.call(service, '@');
+        const atResult = service.charToKeyInfo('@');
         expect(atResult).toEqual({ keyCode: 'Num2', withShift: true });
       });
 
       it('should return null for unmappable characters', () => {
-        const charToKeyInfo = (service as any)['charToKeyInfo'];
-        const result = charToKeyInfo.call(service, '€');
+        const result = service.charToKeyInfo('€');
         expect(result).toBeNull();
       });
     });
@@ -1008,9 +981,7 @@ describe('NutService', () => {
   describe('Logging and Operation Tracking', () => {
     it('should log operations with unique operation IDs', async () => {
       const mockOpId = 'test_operation_12345_abc123';
-      jest
-        .spyOn(service as any, 'generateOperationId')
-        .mockReturnValue(mockOpId);
+      jest.spyOn(service, 'generateOperationId').mockReturnValue(mockOpId);
 
       await service.sendKeys(['Enter']);
 
@@ -1022,9 +993,7 @@ describe('NutService', () => {
 
     it('should log successful operations', async () => {
       const mockOpId = 'success_op_67890_def456';
-      jest
-        .spyOn(service as any, 'generateOperationId')
-        .mockReturnValue(mockOpId);
+      jest.spyOn(service, 'generateOperationId').mockReturnValue(mockOpId);
 
       await service.sendKeys(['Tab']);
 

@@ -10,8 +10,6 @@
  * @author Input Validation & API Security Specialist
  */
 
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-
 import {
   Injectable,
   NestInterceptor,
@@ -349,11 +347,11 @@ export class VersionInterceptor implements NestInterceptor {
     const userAgent = request.get('User-Agent') ?? '';
 
     // Detect if this is a desktop client
-    const isDesktopClient = !!(
+    const isDesktopClient = Boolean(
       desktopClient ||
-      computerUseClient ||
-      userAgent.toLowerCase().includes('bytebotd') ||
-      userAgent.toLowerCase().includes('desktop')
+        (computerUseClient ?? '') ||
+        userAgent.toLowerCase().includes('bytebotd') ||
+        userAgent.toLowerCase().includes('desktop'),
     );
 
     // Extract version from client header (e.g., "BytebotD-Desktop-1.0.0")
@@ -362,13 +360,13 @@ export class VersionInterceptor implements NestInterceptor {
     );
     const clientVersion = versionMatch ? versionMatch[1] : 'unknown';
 
-    const isComputerUse = !!(
-      computerUseClient ||
-      request.path.includes('computer-use') ||
-      request.path.includes('screenshot') ||
-      request.path.includes('click') ||
-      request.path.includes('type') ||
-      request.path.includes('key')
+    const isComputerUse = Boolean(
+      (computerUseClient ?? '') ||
+        request.path.includes('computer-use') ||
+        request.path.includes('screenshot') ||
+        request.path.includes('click') ||
+        request.path.includes('type') ||
+        request.path.includes('key'),
     );
 
     return {

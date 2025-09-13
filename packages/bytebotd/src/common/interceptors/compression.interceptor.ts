@@ -19,8 +19,6 @@
  */
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
 import {
@@ -30,7 +28,7 @@ import {
   Logger,
   NestInterceptor,
 } from '@nestjs/common';
-import { Observable, map } from 'rxjs';
+import { Observable, mergeMap, from } from 'rxjs';
 import { Request, Response } from 'express';
 import { gzip, brotliCompress, deflate } from 'zlib';
 import { promisify } from 'util';
@@ -140,46 +138,57 @@ export class CompressionInterceptor implements NestInterceptor {
     const response = context.switchToHttp().getResponse<Response>();
 
     return next.handle().pipe(
-      map(async (data) => {
-        // Skip compression if already handled by middleware
-        if (response.get('Content-Encoding')) {
-          this.updateStats({
-            algorithm: 'identity',
-            originalSize: 0,
-            compressedSize: 0,
-            ratio: 1,
-            compressionTime: 0,
-            applied: false,
-          });
-          return data;
-        }
-
-        // Compress response if applicable
-        const compressionResult = await this.compressResponse(
-          data,
-          request,
-          response,
-        );
-
-        if (
-          compressionResult.applied &&
-          compressionResult.algorithm !== 'identity'
-        ) {
-          // Set compression headers
-          response.set('Content-Encoding', compressionResult.algorithm);
-          response.set('Vary', 'Accept-Encoding');
-
-          this.logger.debug(
-            `Response compressed: ${compressionResult.algorithm}, ` +
-              `${compressionResult.originalSize}b → ${compressionResult.compressedSize}b ` +
-              `(${(compressionResult.ratio * 100).toFixed(1)}% reduction)`,
-          );
-        }
-
-        this.updateStats(compressionResult);
-        return data;
+      mergeMap((data: unknown) => {
+        return from(this.handleCompressionAsync(data, request, response));
       }),
     );
+  }
+
+  /**
+   * Handle compression asynchronously with proper type safety
+   */
+  private async handleCompressionAsync(
+    data: unknown,
+    request: Request,
+    response: Response,
+  ): Promise<unknown> {
+    // Skip compression if already handled by middleware
+    if (response.get('Content-Encoding')) {
+      this.updateStats({
+        algorithm: 'identity',
+        originalSize: 0,
+        compressedSize: 0,
+        ratio: 1,
+        compressionTime: 0,
+        applied: false,
+      });
+      return data;
+    }
+
+    // Compress response if applicable
+    const compressionResult = await this.compressResponse(
+      data,
+      request,
+      response,
+    );
+
+    if (
+      compressionResult.applied &&
+      compressionResult.algorithm !== 'identity'
+    ) {
+      // Set compression headers
+      response.set('Content-Encoding', compressionResult.algorithm);
+      response.set('Vary', 'Accept-Encoding');
+
+      this.logger.debug(
+        `Response compressed: ${compressionResult.algorithm}, ` +
+          `${compressionResult.originalSize}b → ${compressionResult.compressedSize}b ` +
+          `(${(compressionResult.ratio * 100).toFixed(1)}% reduction)`,
+      );
+    }
+
+    this.updateStats(compressionResult);
+    return data;
   }
 
   /**
