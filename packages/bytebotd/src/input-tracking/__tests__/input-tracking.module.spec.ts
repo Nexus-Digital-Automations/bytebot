@@ -1,10 +1,9 @@
 /* eslint-env jest */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
- 
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-construction */
 /**
  * Input Tracking Module Test Suite
  *
@@ -647,7 +646,7 @@ describe('InputTrackingModule', () => {
       expect(modules).toHaveLength(5);
 
       // Clean up all modules
-       
+
       await Promise.all(modules.map((m) => m.close()));
 
       console.log(`[${testId}] Rapid module lifecycle test completed`);

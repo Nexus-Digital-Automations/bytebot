@@ -772,16 +772,13 @@ export interface EnhancedRequest extends Request {
 // =============================================================================
 
 /**
- * Generic type for API responses with consistent structure
+ * Generic type for enhanced API responses (extends existing ApiResponse)
  * @template T - The data type returned in the response
  */
-export interface ApiResponse<T = unknown> {
-  readonly success: boolean;
-  readonly data?: T;
-  readonly message?: string;
-  readonly error?: string;
-  readonly timestamp: string;
-  readonly requestId: string;
+export interface EnhancedApiResponse<T = unknown> extends ApiResponse<T> {
+  readonly duration?: number;
+  readonly correlationId?: string;
+  readonly metadata?: StrictRecord<unknown>;
 }
 
 /**

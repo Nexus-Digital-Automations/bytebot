@@ -54,6 +54,7 @@ class IndexTestUtils {
    * Validate that an export exists and has correct type
    */
   static validateExport(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     exportObj: any,
     name: string,
     expectedType: string,

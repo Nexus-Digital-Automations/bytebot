@@ -1,6 +1,5 @@
 /* eslint-env jest */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Enterprise Security Validation E2E Tests
  *
@@ -222,8 +221,12 @@ describe('Security Validation E2E Tests', () => {
 
       // Check rate limit response format
       const rateLimitResponse = rateLimitedResponses[0];
-      expect(rateLimitResponse.body.error).toBe('Too Many Requests');
-      expect(rateLimitResponse.body.message).toContain('rate limit');
+      expect((rateLimitResponse.body as SecurityErrorResponse).error).toBe(
+        'Too Many Requests',
+      );
+      expect(
+        (rateLimitResponse.body as SecurityErrorResponse).message,
+      ).toContain('rate limit');
     });
 
     it('should include rate limit headers', async () => {
@@ -314,7 +317,8 @@ describe('Security Validation E2E Tests', () => {
         .expect(400);
 
       expect(
-        (response.body as SecurityErrorResponse).requestId ?? response.headers['x-request-id'],
+        (response.body as SecurityErrorResponse).requestId ??
+          response.headers['x-request-id'],
       ).toBeDefined();
     });
 
