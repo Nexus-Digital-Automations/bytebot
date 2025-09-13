@@ -505,9 +505,9 @@ describe('InputTrackingService', () => {
       const emitCalls = (gateway.emitAction as jest.Mock).mock.calls as Array<
         [ClickMouseAction]
       >;
-      expect(emitCalls[0]![0].button).toBe('left');
-      expect(emitCalls[1]![0].button).toBe('right');
-      expect(emitCalls[2]![0].button).toBe('middle');
+      expect(emitCalls[0]?.[0]?.button).toBe('left');
+      expect(emitCalls[1]?.[0]?.button).toBe('right');
+      expect(emitCalls[2]?.[0]?.button).toBe('middle');
 
       console.log(`[${testId}] Button code mapping test completed`);
     });

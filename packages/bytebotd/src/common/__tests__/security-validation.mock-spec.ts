@@ -214,7 +214,7 @@ describe('Security Validation Mock Tests', () => {
 
       // The filter should sanitize this error
       expect(() => {
-        securityFilter.catch(sensitiveError, mockHost as any);
+        securityFilter.catch(sensitiveError, mockHost as unknown);
       }).not.toThrow();
     });
 

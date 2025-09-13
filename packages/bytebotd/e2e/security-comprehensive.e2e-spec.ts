@@ -412,7 +412,7 @@ class SecurityE2EAuthController {
     };
   }
 
-  async logout(user: any) {
+  async logout(user: { sub: string; sessionId?: string }) {
     if (user.sessionId) {
       await this.authService.logout(user.sessionId);
     }
@@ -422,7 +422,12 @@ class SecurityE2EAuthController {
 }
 
 class SecurityE2EProtectedController {
-  getUserData(user: any) {
+  getUserData(user: {
+    sub: string;
+    email: string;
+    role: UserRole;
+    sessionId?: string;
+  }) {
     return {
       id: user.sub,
       email: user.email,
@@ -432,7 +437,7 @@ class SecurityE2EProtectedController {
     };
   }
 
-  getUserTasks(user: any) {
+  getUserTasks(user: { sub: string }) {
     return {
       tasks: [
         { id: '1', title: 'Task 1', assignedTo: user.sub },
