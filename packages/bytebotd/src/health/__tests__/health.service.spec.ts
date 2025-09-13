@@ -1109,7 +1109,7 @@ describe('HealthService', () => {
               1,
             );
           } else {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+             
             originalSetTimeout(() => callback(null, true), delay);
           }
         }) as unknown;

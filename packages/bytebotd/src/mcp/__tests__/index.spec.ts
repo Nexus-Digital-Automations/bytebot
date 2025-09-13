@@ -1,7 +1,5 @@
 /* eslint-env jest */
 
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 /**
@@ -58,6 +56,7 @@ class IndexTestUtils {
     exportObj: any,
     name: string,
     expectedType: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expectedConstructor?: any,
   ): void {
     expect(exportObj).toBeDefined();
@@ -71,7 +70,8 @@ class IndexTestUtils {
   /**
    * Check if an object is a constructor function
    */
-  static isConstructor(obj: any): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static isConstructor(obj: unknown): boolean {
     return (typeof obj === 'function' &&
       obj.prototype &&
       obj.prototype.constructor === obj) as boolean;
@@ -80,9 +80,9 @@ class IndexTestUtils {
   /**
    * Get all property names including non-enumerable ones
    */
-  static getAllPropertyNames(obj: any): string[] {
+  static getAllPropertyNames(obj: unknown): string[] {
     const props: string[] = [];
-    let current = obj;
+    let current = obj as object | null;
 
     do {
       Object.getOwnPropertyNames(current).forEach((_name) => {
@@ -90,7 +90,7 @@ class IndexTestUtils {
           props.push(_name);
         }
       });
-      current = Object.getPrototypeOf(current);
+      current = Object.getPrototypeOf(current) as object | null;
     } while (current && current !== Object.prototype);
 
     return props.sort();
@@ -99,10 +99,10 @@ class IndexTestUtils {
   /**
    * Calculate approximate memory footprint of an object
    */
-  static getApproximateSize(obj: any): number {
+  static getApproximateSize(obj: unknown): number {
     const visited = new WeakSet();
 
-    function calculateSize(value: any): number {
+    function calculateSize(value: unknown): number {
       if (value === null || typeof value !== 'object') {
         return 8; // Approximate size for primitives
       }
@@ -129,7 +129,7 @@ class IndexTestUtils {
 }
 
 describe('MCP Index Module', () => {
-  let _mockLogger: jest.Mocked<any>;
+  let _mockLogger: Record<string, jest.Mock>;
 
   beforeEach(() => {
     jest.clearAllMocks();
