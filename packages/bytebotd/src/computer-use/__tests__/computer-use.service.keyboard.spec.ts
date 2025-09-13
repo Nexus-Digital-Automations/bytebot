@@ -1,4 +1,5 @@
 /* eslint-env jest */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /**
  * Comprehensive Unit Tests for ComputerUseService - Keyboard Operations Focus
  *
@@ -75,7 +76,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
   // Spy on Logger methods for logging verification
   let __loggerLogSpy: jest.SpyInstance;
   let __loggerErrorSpy: jest.SpyInstance;
-  let ___loggerWarnSpy: jest.SpyInstance;
+  let __loggerWarnSpy: jest.SpyInstance;
   let __loggerDebugSpy: jest.SpyInstance;
 
   /**
@@ -101,9 +102,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
     __loggerErrorSpy = jest
       .spyOn(Logger.prototype, 'error')
       .mockImplementation();
-    ___loggerWarnSpy = jest
-      .spyOn(Logger.prototype, 'warn')
-      .mockImplementation();
+    __loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
     __loggerDebugSpy = jest
       .spyOn(Logger.prototype, 'debug')
       .mockImplementation();
@@ -117,7 +116,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
     jest.clearAllMocks();
     __loggerLogSpy.mockRestore();
     __loggerErrorSpy.mockRestore();
-    ___loggerWarnSpy.mockRestore();
+    __loggerWarnSpy.mockRestore();
     __loggerDebugSpy.mockRestore();
   });
 
@@ -1078,7 +1077,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
     it('should extract _error stack from Error object', () => {
       const error = new Error('Test error');
       error.stack = 'Error stack trace';
-      const result = ErrorHandler.extractErrorStack(_error);
+      const result = ErrorHandler.extractErrorStack(error);
       expect(result).toBe('Error stack trace');
     });
 

@@ -21,7 +21,12 @@ export class InputTrackingGateway
   private readonly logger = new Logger(InputTrackingGateway.name);
 
   @WebSocketServer()
-  server!: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
+  server!: Server<
+    DefaultEventsMap,
+    DefaultEventsMap,
+    DefaultEventsMap,
+    unknown
+  >;
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);

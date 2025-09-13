@@ -494,16 +494,16 @@ export class BrowserAsyncJobService {
         // Convert TaskConfig to CreateBrowserTaskDto format
         const taskDto: CreateBrowserTaskDto = {
           name: taskConfig.name,
-          description: taskConfig.description || `Task: ${taskConfig.name}`,
-          actions: (taskConfig.actions || []).map((action) => ({
+          description: taskConfig.description ?? `Task: ${taskConfig.name}`,
+          actions: (taskConfig.actions ?? []).map((action) => ({
             type: action as BrowserActionType,
             selector: taskConfig.selectors?.[0],
             url: taskConfig.url,
-            waitTimeoutMs: taskConfig.timeout || 5000,
+            waitTimeoutMs: taskConfig.timeout ?? 5000,
           })),
           priority: BrowserTaskPriority.NORMAL,
           sessionConfig: undefined,
-          maxExecutionTimeMs: taskConfig.timeout || 300000,
+          maxExecutionTimeMs: taskConfig.timeout ?? 300000,
           metadata: { ...taskConfig },
           enableLogging: true,
           continueOnError: false,

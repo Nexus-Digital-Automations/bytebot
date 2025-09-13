@@ -25,24 +25,7 @@ import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
 import { ComputerUseService } from '../computer-use/computer-use.service';
 import { compressPngBase64Under1MB } from './compressor';
-import {
-  McpSchemas,
-  McpToolResponse,
-  MouseMoveParams,
-  MouseClickParams,
-  MouseScrollParams,
-  KeyboardTypeParams,
-  KeyboardKeyParams,
-  ScreenshotParams,
-  FileReadParams,
-  FileWriteParams,
-  DirectoryListParams,
-  DirectoryCreateParams,
-  BasicOperationResult,
-  ScreenshotResult,
-  FileOperationResult,
-  DirectoryOperationResult,
-} from './types';
+import { McpSchemas, McpToolResponse, MouseMoveParams } from './types';
 
 /**
  * Computer Use Tools Service
@@ -325,23 +308,7 @@ export class ComputerUseTools {
     name: 'computer_press_mouse',
     description:
       'Presses or releases a specified mouse button at the given coordinates or current position.',
-    parameters: z.object({
-      coordinates: z
-        .object({
-          x: z.number().describe('The x-coordinate for the mouse action.'),
-          y: z.number().describe('The y-coordinate for the mouse action.'),
-        })
-        .optional()
-        .describe(
-          'Optional coordinates for the mouse press/release. If not provided, uses the current mouse position.',
-        ),
-      button: z
-        .enum(['left', 'right', 'middle'])
-        .describe('The mouse button to press or release.'),
-      press: z
-        .enum(['down', 'up'])
-        .describe('The action to perform (press or release).'),
-    }) as any,
+    parameters: McpSchemas.mousePress,
   })
   async pressMouse({
     coordinates,
@@ -378,29 +345,7 @@ export class ComputerUseTools {
     name: 'computer_drag_mouse',
     description:
       'Drags the mouse from a starting point along a path while holding a specified button.',
-    parameters: z.object({
-      path: z
-        .array(
-          z.object({
-            x: z
-              .number()
-              .describe('The x-coordinate of a point in the drag path.'),
-            y: z
-              .number()
-              .describe('The y-coordinate of a point in the drag path.'),
-          }),
-        )
-        .describe(
-          'An array of coordinate objects representing the drag path. The first coordinate is the start point.',
-        ),
-      button: z
-        .enum(['left', 'right', 'middle'])
-        .describe('The mouse button to hold while dragging.'),
-      holdKeys: z
-        .array(z.string())
-        .optional()
-        .describe('Optional array of keys to hold during the drag.'),
-    }) as any,
+    parameters: McpSchemas.mouseDragPath,
   })
   async dragMouse({
     path,

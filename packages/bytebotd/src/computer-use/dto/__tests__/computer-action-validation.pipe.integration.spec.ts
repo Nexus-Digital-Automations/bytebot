@@ -8,7 +8,7 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import { ComputerActionValidationPipe } from '../computer-action-validation.pipe';
 
 // Mock the security utils to avoid compilation issues

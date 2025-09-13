@@ -26,6 +26,7 @@ import {
 import { ComputerUseModule } from '../computer-use.module';
 import { NutService } from '../../nut/nut.service';
 import {
+  ComputerAction,
   MoveMouseAction,
   ClickMouseAction,
   WriteFileAction,

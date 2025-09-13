@@ -495,6 +495,24 @@ export const McpSchemas = {
       .optional()
       .describe('Working directory for the command.'),
   }),
+
+  mousePress: z.object({
+    coordinates: z
+      .object({
+        x: z.number().describe('The x-coordinate for the mouse action.'),
+        y: z.number().describe('The y-coordinate for the mouse action.'),
+      })
+      .optional()
+      .describe(
+        'Optional coordinates for the mouse press/release. If not provided, uses the current mouse position.',
+      ),
+    button: z
+      .enum(['left', 'right', 'middle'])
+      .describe('The mouse button to press or release.'),
+    press: z
+      .enum(['down', 'up'])
+      .describe('The action to perform (press or release).'),
+  }),
 } as const;
 
 // ==========================================

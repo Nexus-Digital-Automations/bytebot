@@ -35,6 +35,20 @@ export interface BrowserExtractionMetadata {
 }
 
 /**
+ * Enhanced browser task log with additional properties
+ */
+interface EnhancedBrowserTaskLog {
+  timestamp: Date;
+  level: string;
+  message: string;
+  actionIndex?: number;
+  screenshot?: string;
+  metadata?: Record<string, unknown>;
+  actionType?: string;
+  duration?: number;
+}
+
+/**
  * Raw extraction data from Python script JSON parsing
  */
 interface RawExtractionData {
@@ -150,7 +164,7 @@ export class BrowserUseService {
         actions: taskDto.actions.map((action) => ({
           type: this.convertActionType(action.type),
           selector: action.selector,
-          value: action.text || action.url,
+          value: action.text ?? action.url,
           timeout: action.waitTimeoutMs,
           options: action.parameters,
           metadata: action.validation,
@@ -160,8 +174,8 @@ export class BrowserUseService {
           ? {
               headless: taskDto.sessionConfig.headless,
               viewport: {
-                width: taskDto.sessionConfig.viewportWidth || 1920,
-                height: taskDto.sessionConfig.viewportHeight || 1080,
+                width: taskDto.sessionConfig.viewportWidth ?? 1920,
+                height: taskDto.sessionConfig.viewportHeight ?? 1080,
               },
               userAgent: taskDto.sessionConfig.userAgent,
               defaultTimeout: taskDto.sessionConfig.timeoutMs,
@@ -193,16 +207,19 @@ export class BrowserUseService {
         executionTimeMs: Date.now() - startTime,
         extractedData: _result.extractedData,
         screenshots: _result.screenshots,
-        logs: (_result.logs || []).map((log) => ({
-          timestamp: log.timestamp,
-          level: this.convertLogLevel(log.level || 'info'),
-          message: log.message,
-          actionIndex: log.actionIndex,
-          actionType: (log as any).actionType,
-          duration: (log as any).duration,
-          screenshot: log.screenshot,
-          metadata: log.metadata,
-        })),
+        logs: (_result.logs ?? []).map((log) => {
+          const enhancedLog = log as EnhancedBrowserTaskLog;
+          return {
+            timestamp: log.timestamp,
+            level: this.convertLogLevel(log.level ?? 'info'),
+            message: log.message,
+            actionIndex: log.actionIndex,
+            actionType: enhancedLog.actionType ?? undefined,
+            duration: enhancedLog.duration ?? undefined,
+            screenshot: log.screenshot,
+            metadata: log.metadata,
+          };
+        }),
       });
 
       this.logger.log(`Browser task completed: ${taskId}`, {
@@ -497,7 +514,11 @@ export class BrowserUseService {
             includeAttributes: true,
           });
 
-          extractedData[key] = _result.data as any;
+          // Extract the first matching element or merge all data
+          const selectorData =
+            Object.values(_result.data)[0] ??
+            (_result.data as unknown as BrowserElementData);
+          extractedData[key] = selectorData;
         } catch (_err) {
           this.logger.warn(
             `Failed to extract data for selector ${key}: ${selector}`,

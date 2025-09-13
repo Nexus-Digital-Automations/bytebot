@@ -23,7 +23,7 @@ import { Logger } from '@nestjs/common';
 import { Server as _Server, Socket as _Socket } from 'socket.io';
 import { ComputerAction } from '@bytebot/shared';
 import { InputTrackingGateway } from '../input-tracking.gateway';
-import { MockLogger, ScreenshotData } from '../input-tracking.types';
+// Types imported for potential use but may not be needed in all test cases
 
 // Mock Socket.IO types
 interface MockSocket {
@@ -192,7 +192,7 @@ describe('InputTrackingGateway', () => {
 
       const mockClient = createMockSocket('client_456');
 
-      gateway.handleDisconnect(mockClient as any);
+      gateway.handleDisconnect(mockClient as unknown as _Socket);
 
       expect(logger.log).toHaveBeenCalledWith(
         'Client disconnected: client_456',
@@ -210,7 +210,7 @@ describe('InputTrackingGateway', () => {
       );
 
       clients.forEach((client) => {
-        gateway.handleConnection(client as any);
+        gateway.handleConnection(client as unknown as _Socket);
       });
 
       expect(logger.log).toHaveBeenCalledTimes(10);
@@ -235,7 +235,7 @@ describe('InputTrackingGateway', () => {
       // Simulate rapid cycles
       for (let i = 0; i < 5; i++) {
         gateway.handleConnection(mockClient as unknown as _Socket);
-        gateway.handleDisconnect(mockClient as any);
+        gateway.handleDisconnect(mockClient as unknown as _Socket);
       }
 
       expect(logger.log).toHaveBeenCalledTimes(10); // 5 connections + 5 disconnections
@@ -462,10 +462,11 @@ describe('InputTrackingGateway', () => {
 
       expect(mockServer.emit).toHaveBeenCalledTimes(3);
 
-      const emitCalls = (mockServer.emit as jest.Mock).mock.calls;
+      const emitCalls = (mockServer.emit as jest.Mock).mock
+        .calls as unknown[][];
       events.forEach((event, index) => {
-        expect(emitCalls[index][0]).toBe('action');
-        expect(emitCalls[index][1]).toEqual(event);
+        expect((emitCalls[index] as unknown[])[0]).toBe('action');
+        expect((emitCalls[index] as unknown[])[1]).toEqual(event);
       });
 
       console.log(
@@ -481,7 +482,7 @@ describe('InputTrackingGateway', () => {
 
       // This should not throw an error
       expect(() => {
-        gateway.emitAction(null as any);
+        gateway.emitAction(null as unknown as ComputerAction);
       }).not.toThrow();
 
       expect(mockServer.emit).toHaveBeenCalledWith('action', null);
@@ -494,7 +495,10 @@ describe('InputTrackingGateway', () => {
       console.log(`[${testId}] Testing undefined screenshot handling`);
 
       expect(() => {
-        gateway.emitScreenshotAndAction(undefined as any, mockClickAction);
+        gateway.emitScreenshotAndAction(
+          undefined as unknown as { image: string },
+          mockClickAction,
+        );
       }).not.toThrow();
 
       expect(mockServer.emit).toHaveBeenCalledWith(
@@ -516,7 +520,7 @@ describe('InputTrackingGateway', () => {
       };
 
       expect(() => {
-        gateway.emitAction(malformedAction as any);
+        gateway.emitAction(malformedAction as unknown as ComputerAction);
       }).not.toThrow();
 
       expect(mockServer.emit).toHaveBeenCalledWith('action', malformedAction);
@@ -546,7 +550,7 @@ describe('InputTrackingGateway', () => {
 
       const invalidClient = createMockSocket('');
 
-      gateway.handleConnection(invalidClient as any);
+      gateway.handleConnection(invalidClient as unknown as _Socket);
 
       expect(logger.log).toHaveBeenCalledWith('Client connected: ');
 
@@ -561,8 +565,8 @@ describe('InputTrackingGateway', () => {
 
       const client = createMockSocket('temp_client');
 
-      gateway.handleConnection(client as any);
-      gateway.handleDisconnect(client as any);
+      gateway.handleConnection(client as unknown as _Socket);
+      gateway.handleDisconnect(client as unknown as _Socket);
 
       // Verify logging was called correctly
       expect(logger.log).toHaveBeenCalledWith('Client connected: temp_client');
@@ -583,8 +587,8 @@ describe('InputTrackingGateway', () => {
 
       for (let i = 0; i < connectionCount; i++) {
         const client = createMockSocket(`stress_client_${i}`);
-        gateway.handleConnection(client as any);
-        gateway.handleDisconnect(client as any);
+        gateway.handleConnection(client as unknown as _Socket);
+        gateway.handleDisconnect(client as unknown as _Socket);
       }
 
       expect(logger.log).toHaveBeenCalledTimes(connectionCount * 2);
@@ -613,7 +617,7 @@ describe('InputTrackingGateway', () => {
       const client = createMockSocket('cors_test_client');
 
       expect(() => {
-        gateway.handleConnection(client as any);
+        gateway.handleConnection(client as unknown as _Socket);
       }).not.toThrow();
 
       console.log(`[${testId}] CORS configuration test completed`);
@@ -655,7 +659,7 @@ describe('InputTrackingGateway', () => {
 
       for (let i = 0; i < connectionCount; i++) {
         const client = createMockSocket(`perf_client_${i}`);
-        gateway.handleConnection(client as any);
+        gateway.handleConnection(client as unknown as _Socket);
       }
 
       const totalTime = Date.now() - startTime;
@@ -679,7 +683,7 @@ describe('InputTrackingGateway', () => {
       const clientCount = 5;
       for (let i = 0; i < clientCount; i++) {
         const client = createMockSocket(`broadcast_client_${i}`);
-        gateway.handleConnection(client as any);
+        gateway.handleConnection(client as unknown as _Socket);
       }
 
       gateway.emitAction(mockClickAction);
@@ -764,7 +768,7 @@ describe('InputTrackingGateway', () => {
       const connectionPromises = Array.from({ length: 10 }, (_, i) =>
         Promise.resolve().then(() => {
           const client = createMockSocket(`concurrent_client_${i}`);
-          gateway.handleConnection(client as any);
+          gateway.handleConnection(client as unknown as _Socket);
         }),
       );
 

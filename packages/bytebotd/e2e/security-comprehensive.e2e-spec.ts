@@ -30,6 +30,18 @@ import {
 } from '../src/types';
 import { Request, Response, NextFunction } from 'express';
 
+// Extend Express Request interface to include user with role
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: {
+      sub: string;
+      email: string;
+      role: UserRole;
+      [key: string]: any;
+    };
+  }
+}
+
 /**
  * Comprehensive E2E Security Testing Module
  */
@@ -59,6 +71,8 @@ class _SecurityE2ETestModule {
 interface SecuritySession {
   id: string;
   userId: string;
+  email: string;
+  role: UserRole;
   createdAt: number;
   lastActivity: number;
   clientInfo?: any;
@@ -308,12 +322,8 @@ class SecurityE2EUserService {
         Permission._COMPUTER_VIEW,
         Permission._METRICS_VIEW,
       ],
-      [UserRole._USER]: [
-        Permission._TASK_READ,
-      ],
-      [UserRole._GUEST]: [
-        Permission._VIEW_PUBLIC_CONTENT,
-      ],
+      [UserRole._USER]: [Permission._TASK_READ],
+      [UserRole._GUEST]: [Permission._VIEW_PUBLIC_CONTENT],
     };
 
     return rolePermissions[role] ?? [];
@@ -680,7 +690,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       // Clean old requests
       clientData.requests = clientData.requests.filter(
-        (timestamp) => now - timestamp < windowMs,
+        (timestamp: number) => now - timestamp < windowMs,
       );
 
       if (clientData.requests.length >= maxRequests) {
@@ -752,14 +762,21 @@ describe('Security E2E - Comprehensive Testing', () => {
         }
 
         const userRole = req.user.role;
-        const roleHierarchy = {
+        const roleHierarchy: Record<UserRole, UserRole[]> = {
           [UserRole._ADMIN]: [
             UserRole._ADMIN,
             UserRole._OPERATOR,
             UserRole._VIEWER,
+            UserRole._USER,
           ],
-          [UserRole._OPERATOR]: [UserRole._OPERATOR, UserRole._VIEWER],
-          [UserRole._VIEWER]: [UserRole._VIEWER],
+          [UserRole._OPERATOR]: [
+            UserRole._OPERATOR,
+            UserRole._VIEWER,
+            UserRole._USER,
+          ],
+          [UserRole._VIEWER]: [UserRole._VIEWER, UserRole._USER],
+          [UserRole._USER]: [UserRole._USER],
+          [UserRole._GUEST]: [UserRole._GUEST],
         };
 
         const allowedRoles = roleHierarchy[userRole] ?? [];
@@ -827,13 +844,15 @@ describe('Security E2E - Comprehensive Testing', () => {
 
         const result = await authController.login(req.body, clientInfo);
         res.json(result);
-      } catch (error) {
+      } catch (error: unknown) {
         securityMonitor.trackFailedAuthentication(
           req.body?.email ?? 'unknown',
           req.ip ?? 'unknown',
           req.headers['user-agent'] ?? 'unknown',
         );
-        res.status(401).json({ error: error.message });
+        res.status(401).json({
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     });
 
@@ -841,8 +860,12 @@ describe('Security E2E - Comprehensive Testing', () => {
       try {
         const result = await authController.refresh(req.body);
         res.json(result);
-      } catch (error) {
-        res.status(401).json({ error: error.message });
+      } catch (error: unknown) {
+        res
+          .status(401)
+          .json({
+            error: error instanceof Error ? error.message : String(error),
+          });
       }
     });
 
@@ -850,8 +873,8 @@ describe('Security E2E - Comprehensive Testing', () => {
       try {
         const result = await authController.logout(req.user);
         res.json(result);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+      } catch (error: unknown) {
+        res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
       }
     });
 
