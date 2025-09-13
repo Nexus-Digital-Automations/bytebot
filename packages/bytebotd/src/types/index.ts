@@ -767,6 +767,91 @@ export interface EnhancedRequest extends Request {
   startTime?: number;
 }
 
+// =============================================================================
+// Generic Type Constraints for Common Patterns
+// =============================================================================
+
+/**
+ * Generic type for API responses with consistent structure
+ * @template T - The data type returned in the response
+ */
+export interface ApiResponse<T = unknown> {
+  readonly success: boolean;
+  readonly data?: T;
+  readonly message?: string;
+  readonly error?: string;
+  readonly timestamp: string;
+  readonly requestId: string;
+}
+
+/**
+ * Generic type for paginated responses
+ * @template T - The type of items in the response
+ */
+export interface PaginatedResponse<T> {
+  readonly items: readonly T[];
+  readonly totalCount: number;
+  readonly pageSize: number;
+  readonly currentPage: number;
+  readonly totalPages: number;
+  readonly hasNextPage: boolean;
+  readonly hasPreviousPage: boolean;
+}
+
+/**
+ * Generic type for event handlers with proper typing
+ * @template T - The event data type
+ */
+export type EventHandler<T = unknown> = (event: T) => void | Promise<void>;
+
+/**
+ * Generic type for middleware functions
+ * @template T - Request context type
+ * @template R - Response type
+ */
+export type MiddlewareFunction<T = Request, R = Response> = (
+  req: T,
+  res: R,
+  next: NextFunction,
+) => void | Promise<void>;
+
+/**
+ * Generic type for service methods with consistent error handling
+ * @template T - Return type
+ * @template E - Error type
+ */
+export type ServiceMethod<T, E = Error> = (
+  ...args: unknown[]
+) => Promise<Result<T, E>>;
+
+/**
+ * Generic type for configuration objects with required and optional fields
+ * @template R - Required configuration fields
+ * @template O - Optional configuration fields
+ */
+export type Configuration<R, O = Record<string, never>> = R & Partial<O>;
+
+/**
+ * Generic type for database entities with audit fields
+ * @template T - Entity-specific fields
+ */
+export type DatabaseEntity<T> = T & {
+  readonly id: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+  readonly version?: number;
+};
+
+/**
+ * Generic type for mock implementations
+ * @template T - The interface being mocked
+ */
+export type MockImplementation<T> = {
+  [K in keyof T]: T[K] extends (...args: infer A) => infer R
+    ? jest.MockedFunction<(...args: A) => R>
+    : T[K];
+};
+
 // Default export with grouped types for convenience
 export default {
   UserRole,

@@ -1,6 +1,5 @@
 /* eslint-env jest */
 
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /**
@@ -175,9 +174,11 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.response.message).toContain('security threats detected');
-        expect(error.response.totalRiskScore).toBeGreaterThan(0);
-        expect(error.response.threatTypes).toEqual(
+        const badRequestError = error as BadRequestException;
+        const response = badRequestError.getResponse();
+        expect(response.message).toContain('security threats detected');
+        expect(response.totalRiskScore).toBeGreaterThan(0);
+        expect(response.threatTypes).toEqual(
           expect.arrayContaining([expect.stringMatching(/XSS|SQL|PATH/i)]),
         );
       }
@@ -206,9 +207,11 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       try {
         await pipe.transform(maliciousInput, {} as ArgumentMetadata);
       } catch (error) {
-        expect(error.response.operationId).toBeDefined();
-        expect(error.response.timestamp).toBeDefined();
-        expect(error.response.validationStages).toEqual(
+        const badRequestError = error as BadRequestException;
+        const response = badRequestError.getResponse();
+        expect(response.operationId).toBeDefined();
+        expect(response.timestamp).toBeDefined();
+        expect(response.validationStages).toEqual(
           expect.arrayContaining([
             'input-preprocessing',
             'xss-detection',

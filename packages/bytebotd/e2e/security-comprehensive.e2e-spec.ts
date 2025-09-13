@@ -20,6 +20,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { Express } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { JwtService as _JwtService } from '@nestjs/jwt';
 import { ConfigService as _ConfigService } from '@nestjs/config';
 import { UserRole, Permission } from '@bytebot/shared';
@@ -29,13 +30,8 @@ import {
   AuthenticatedRequest as _AuthenticatedRequest,
   ClientInfo,
   TaskData,
-  TokenData,
   DecodedJwtPayload,
-  SecurityEventData,
-  MockResponseData,
-  EnhancedRequest,
 } from '../src/types';
-import { Request, Response, NextFunction } from 'express';
 
 // Extend Express Request interface to include user with role
 declare module 'express-serve-static-core' {

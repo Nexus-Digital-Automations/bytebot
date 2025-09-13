@@ -16,10 +16,26 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
+import { Server } from 'http';
+
+// Define types for common response patterns
+interface ErrorResponse {
+  message: string;
+  error?: string;
+  statusCode?: number;
+}
+
+interface SecurityErrorResponse extends ErrorResponse {
+  requestId?: string;
+  stack?: string;
+  details?: string;
+  errors?: string[];
+  operationId?: string;
+}
 
 describe('Security Validation E2E Tests', () => {
   let app: INestApplication;
-  let server: any;
+  let server: Server;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -87,7 +103,7 @@ describe('Security Validation E2E Tests', () => {
           })
           .expect(400);
 
-        expect(response.body.message).toContain('security');
+        expect((response.body as ErrorResponse).message).toContain('security');
       });
     });
 
@@ -99,7 +115,7 @@ describe('Security Validation E2E Tests', () => {
 
       // Should either block or sanitize
       if (response.status === 400) {
-        expect(response.body.message).toContain('security');
+        expect((response.body as ErrorResponse).message).toContain('security');
       } else {
         // If allowed, should be sanitized
         expect(response.body).toBeDefined();
@@ -130,7 +146,7 @@ describe('Security Validation E2E Tests', () => {
           })
           .expect(400);
 
-        expect(response.body.message).toContain('security');
+        expect((response.body as ErrorResponse).message).toContain('security');
       });
     });
   });
@@ -157,7 +173,7 @@ describe('Security Validation E2E Tests', () => {
           })
           .expect(400);
 
-        expect(response.body.message).toContain('security');
+        expect((response.body as ErrorResponse).message).toContain('security');
       });
     });
   });
@@ -182,7 +198,7 @@ describe('Security Validation E2E Tests', () => {
           })
           .expect(400);
 
-        expect(response.body.message).toContain('security');
+        expect((response.body as ErrorResponse).message).toContain('security');
       });
     });
   });
@@ -229,7 +245,7 @@ describe('Security Validation E2E Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.message).toBeDefined();
+      expect((response.body as ErrorResponse).message).toBeDefined();
     });
 
     it('should validate required fields', async () => {
@@ -241,7 +257,7 @@ describe('Security Validation E2E Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.message).toBeDefined();
+      expect((response.body as ErrorResponse).message).toBeDefined();
     });
 
     it('should validate coordinate ranges', async () => {
@@ -255,7 +271,7 @@ describe('Security Validation E2E Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.errors).toBeDefined();
+      expect((response.body as SecurityErrorResponse).errors).toBeDefined();
     });
 
     it('should limit payload size', async () => {
@@ -269,7 +285,7 @@ describe('Security Validation E2E Tests', () => {
         })
         .expect(413); // Payload Too Large
 
-      expect(response.body.message).toContain('too large');
+      expect((response.body as ErrorResponse).message).toContain('too large');
     });
   });
 
@@ -298,7 +314,7 @@ describe('Security Validation E2E Tests', () => {
         .expect(400);
 
       expect(
-        response.body.requestId ?? response.headers['x-request-id'],
+        (response.body as SecurityErrorResponse).requestId ?? response.headers['x-request-id'],
       ).toBeDefined();
     });
 
@@ -313,8 +329,8 @@ describe('Security Validation E2E Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.stack).toBeUndefined();
-      expect(response.body.details).toBeUndefined();
+      expect((response.body as SecurityErrorResponse).stack).toBeUndefined();
+      expect((response.body as SecurityErrorResponse).details).toBeUndefined();
 
       process.env.NODE_ENV = originalEnv;
     });
@@ -383,7 +399,7 @@ describe('Security Validation E2E Tests', () => {
         expect(response.status).toBeLessThan(500); // No server errors
 
         if (response.status >= 400) {
-          expect(response.body.message).toBeDefined();
+          expect((response.body as ErrorResponse).message).toBeDefined();
         }
       });
     });
@@ -450,7 +466,7 @@ describe('Security Validation E2E Tests', () => {
       expect(
         response.headers['x-request-id'] ??
           response.headers['x-correlation-id'] ??
-          response.body.operationId,
+          (response.body as SecurityErrorResponse).operationId,
       ).toBeDefined();
     });
   });

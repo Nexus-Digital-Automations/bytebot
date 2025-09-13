@@ -96,34 +96,6 @@
       "auto_research_created": false
     },
     {
-      "id": "error_1757737625050_qwwqxrezo",
-      "title": "CRITICAL ESLint FINAL ELIMINATION - Import/Reference Specialist",
-      "description": "TARGET: Eliminate all import and reference violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd\n\nFOCUS AREAS:\n1. All undefined variable references\n2. Missing imports\n3. Incorrect type imports\n4. Unused import cleanup\n5. Module resolution issues\n\nSYSTEMATIC APPROACH: Add missing imports, fix reference errors, clean unused imports.\n\nZERO TOLERANCE MANDATE: We are at 519 violations total - eliminate maximum import/reference violations.\n\nREPORT BACK: Import violations eliminated, files processed, remaining violation count.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T04:27:05.050Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757737595895_1_general_8e326932",
-      "started_at": "2025-09-13T04:27:30.820Z",
-      "claimed_by": "development_session_1757737595895_1_general_8e326932",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757737595895_1_general_8e326932",
-          "role": "primary",
-          "assignedAt": "2025-09-13T04:27:30.820Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757737618019_gqrkyn9yc",
       "title": "CRITICAL ESLint FINAL ELIMINATION - General TypeScript Safety Violations",
       "description": "Eliminate all general ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd focusing on: 1) @typescript-eslint/no-unsafe-assignment violations 2) @typescript-eslint/no-unsafe-member-access violations 3) @typescript-eslint/no-unsafe-return violations 4) @typescript-eslint/no-explicit-any violations 5) All general TypeScript safety violations. Target 519 total violations - prioritize files with highest violation counts for maximum impact.",
