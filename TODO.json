@@ -32,32 +32,36 @@
       ]
     },
     {
-      "id": "error_1757733270773_ynx2fmo37",
-      "title": "Fix all @typescript-eslint/no-unsafe-return violations in bytebotd package",
-      "description": "Scan and fix all @typescript-eslint/no-unsafe-return violations by adding proper return type annotations, replacing any returns with typed returns, and ensuring all functions have explicit return types",
+      "id": "error_1757734829425_n1p0k5gog",
+      "title": "CRITICAL: Fix ByteBot-Agent build failure blocking deployment",
+      "description": "Emergency resolution of critical build failure in bytebot-agent package preventing secure deployment:\n\n**CRITICAL FAILURE:**\nByteBot-Agent build failed with exit code 1 during NestJS compilation\n\n**SECURITY IMPACT:** \n- Blocks secure production deployment\n- Compromises CI/CD pipeline integrity  \n- Prevents agent service functionality\n\n**INVESTIGATION REQUIRED:**\n1. Identify specific TypeScript compilation errors in bytebot-agent\n2. Check for missing dependencies or configuration issues\n3. Verify Prisma schema generation completed successfully\n4. Fix all compilation errors\n5. Ensure successful build completion\n\n**SUCCESS CRITERIA:**\n- npx @nestjs/cli build completes without errors\n- All TypeScript compilation issues resolved\n- Build produces valid deployment artifacts",
       "priority": "medium",
       "category": "error",
-      "status": "in_progress",
+      "status": "pending",
       "dependencies": [],
       "important_files": [],
       "success_criteria": [],
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-13T03:14:30.774Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757733253702_1_general_1e573aa6",
-      "started_at": "2025-09-13T03:14:47.442Z",
-      "claimed_by": "development_session_1757733253702_1_general_1e573aa6",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757733253702_1_general_1e573aa6",
-          "role": "primary",
-          "assignedAt": "2025-09-13T03:14:47.442Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
+      "created_at": "2025-09-13T03:40:29.426Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "error_1757734806587_3q4zxvbcm",
+      "title": "CRITICAL: Fix ByteBot-UI build failures blocking production deployment",
+      "description": "Emergency resolution of critical build failures in bytebot-ui package preventing secure deployment:\n\n**CRITICAL FAILURES:**\n1. TypeScript type error in TaskItem.tsx line 39 - IconSvgObject type assignment\n2. Missing exports in shared/messageContent.types: ComputerToolUseContentBlock, CreateTaskToolUseBlock, DocumentContentBlock, ImageContentBlock, MessageContentBlock\n3. Missing exports in shared/security.types: SecurityEvent, ValidationResult, XSSDetectionResult, SanitizationOptions\n4. ESLint configuration errors - unknown options: useEslintrc, extensions\n\n**SECURITY IMPACT:** Build failures prevent secure production deployment and compromise CI/CD pipeline integrity\n\n**REQUIRED ACTIONS:**\n1. Fix IconSvgObject type assignment in TaskItem.tsx\n2. Add missing exports to messageContent.types and security.types\n3. Update ESLint configuration to remove deprecated options\n4. Verify successful build completion",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T03:40:06.587Z",
+      "auto_research_created": false
     },
     {
       "id": "error_1757733267893_d2ktqgkhy",
