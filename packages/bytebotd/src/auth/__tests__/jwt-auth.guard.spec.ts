@@ -66,7 +66,7 @@ class MockJwtAuthGuard {
         id: _payload.sub,
         email: _payload.email,
         role: _payload.role,
-        permissions: _payload.permissions || [],
+        permissions: _payload.permissions ?? [],
       };
 
       return true;

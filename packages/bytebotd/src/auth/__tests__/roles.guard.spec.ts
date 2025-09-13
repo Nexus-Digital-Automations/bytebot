@@ -194,7 +194,7 @@ describe('RolesGuard', () => {
     id: `user_${Date.now()}`,
     email: `${role}@bytebot.ai`,
     role,
-    permissions: permissions || guard?.getRolePermissions(role) || [],
+    permissions: permissions ?? guard?.getRolePermissions(role) ?? [],
     ...overrides,
   });
 

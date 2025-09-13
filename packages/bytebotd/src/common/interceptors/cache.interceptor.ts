@@ -58,6 +58,28 @@ interface CacheMetadata {
 }
 
 /**
+ * Computer-use request body interface for type safety
+ */
+interface ComputerUseRequestBody {
+  action?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Type guard for computer-use request body
+ */
+function isComputerUseRequestBody(
+  body: unknown,
+): body is ComputerUseRequestBody {
+  return (
+    typeof body === 'object' &&
+    body !== null &&
+    (typeof (body as Record<string, unknown>).action === 'string' ||
+      (body as Record<string, unknown>).action === undefined)
+  );
+}
+
+/**
  * Cached response data structure
  */
 interface CachedResponse {
@@ -148,8 +170,11 @@ export class CacheInterceptor implements NestInterceptor {
       ttl: 30,
       cacheableStatuses: [200],
       skipCacheIf: (req) => {
-        // Only cache screenshot requests
-        return req.body?.action !== 'screenshot';
+        // Only cache screenshot requests - use type guard for safe access
+        return (
+          !isComputerUseRequestBody(req.body) ||
+          req.body.action !== 'screenshot'
+        );
       },
     },
 

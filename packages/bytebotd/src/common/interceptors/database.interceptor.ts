@@ -217,9 +217,9 @@ export class DatabaseInterceptor implements NestInterceptor {
           startTime,
           endTime: Date.now(),
           duration: Date.now() - startTime,
-          error,
+          error: _error,
         });
-        throw error;
+        throw _error;
       }),
     );
   }
@@ -245,8 +245,7 @@ export class DatabaseInterceptor implements NestInterceptor {
     return new Observable((observer) => {
       const cacheKey = this.generateQueryCacheKey(dbOperation);
 
-      this.cacheService
-        .get(cacheKey)
+      this.cacheService!.get(cacheKey)
         .then((cachedResult) => {
           if (cachedResult !== null) {
             // Cache hit
@@ -343,9 +342,9 @@ export class DatabaseInterceptor implements NestInterceptor {
           startTime,
           endTime: Date.now(),
           duration: Date.now() - startTime,
-          error,
+          error: _error,
         });
-        throw error;
+        throw _error;
       }),
     );
   }

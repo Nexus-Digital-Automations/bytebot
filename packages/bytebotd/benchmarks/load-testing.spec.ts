@@ -24,6 +24,7 @@ import { MetricsService } from '../src/metrics/metrics.service';
 import { CacheService } from '../src/cache/cache.service';
 import { PerformanceInterceptor } from '../src/common/interceptors/performance.interceptor';
 import { CompressionInterceptor } from '../src/common/interceptors/compression.interceptor';
+import { Optional, TypeSafetyUtils } from '../src/types';
 import request from 'supertest';
 
 /**

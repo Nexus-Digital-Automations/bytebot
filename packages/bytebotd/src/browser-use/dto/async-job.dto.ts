@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
@@ -10,6 +9,163 @@ import {
   Min,
   Max,
 } from 'class-validator';
+
+/**
+ * Configuration parameters for job execution
+ */
+export interface JobConfiguration {
+  url?: string;
+  selectors?: string[];
+  actions?: string[];
+  timeout?: number;
+  viewport?: {
+    width: number;
+    height: number;
+  };
+  headers?: Record<string, string>;
+  cookies?: Array<{
+    name: string;
+    value: string;
+    domain?: string;
+    path?: string;
+  }>;
+  waitForSelectors?: string[];
+  extractFields?: Record<string, string>;
+  formData?: Record<string, string>;
+  scrollBehavior?: 'auto' | 'smooth';
+  screenshot?: {
+    enabled: boolean;
+    quality?: number;
+    fullPage?: boolean;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * Job metadata information
+ */
+export interface JobMetadata {
+  retryCount: number;
+  maxRetries: number;
+  createdBy: string;
+  tags: string[];
+  priority?: AsyncJobPriority;
+  estimatedDuration?: number;
+  sessionId?: string;
+  parentJobId?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Job execution log entry
+ */
+export interface JobLogEntry {
+  timestamp: Date;
+  level: 'debug' | 'info' | 'warn' | 'error' | 'critical';
+  message: string;
+  step?: string;
+  actionIndex?: number;
+  screenshot?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Extracted data structure
+ */
+export interface ExtractedData {
+  [key: string]: unknown;
+}
+
+/**
+ * Job error details
+ */
+export interface JobErrorDetails {
+  message: string;
+  code: string;
+  step: string;
+  actionIndex?: number;
+  timestamp: Date;
+  recoverable?: boolean;
+  screenshot?: string;
+  details?: Record<string, unknown>;
+}
+
+/**
+ * File download information
+ */
+export interface DownloadInfo {
+  filename: string;
+  path: string;
+  size: number;
+  mimeType: string;
+  downloadedAt: Date;
+}
+
+/**
+ * Job execution statistics
+ */
+export interface JobExecutionStatistics {
+  totalActions: number;
+  successfulActions: number;
+  failedActions: number;
+  actionsCompleted?: number;
+  screenshotsCaptured: number;
+  pagesNavigated: number;
+  formsSubmitted: number;
+  elementsClicked: number;
+  textExtracted: number;
+  dataPoints: number;
+  dataExtracted?: number;
+}
+
+/**
+ * Job progress information
+ */
+export interface JobProgress {
+  currentStep: string;
+  completedSteps: number;
+  totalSteps: number;
+  percentage: number;
+  estimatedRemainingMs: number;
+}
+
+/**
+ * Job results structure
+ */
+export interface JobResults {
+  tasksCompleted: number;
+  totalTasks: number;
+  screenshots: string[];
+  extractedData: ExtractedData;
+  logs: JobLogEntry[];
+}
+
+/**
+ * Resource URLs for job artifacts
+ */
+export interface JobResourceUrls {
+  screenshotsUrl?: string;
+  downloadsUrl?: string;
+  logsUrl?: string;
+  reportUrl?: string;
+}
+
+/**
+ * Export options for job data
+ */
+export interface JobExportOptions {
+  availableFormats: string[];
+  downloadUrls: Record<string, string>;
+}
+
+/**
+ * Retry configuration for jobs
+ */
+export interface JobRetryConfig {
+  maxRetries: number;
+  retryDelayMs: number;
+  exponentialBackoff: boolean;
+}
 
 /**
  * Async job status for long-running browser automation tasks
@@ -105,7 +261,7 @@ export class CreateAsyncJobDto {
     },
   })
   @IsObject()
-  configuration: Record<string, any>;
+  configuration: JobConfiguration;
 
   @ApiPropertyOptional({
     description: 'Maximum retry attempts on failure',
@@ -134,7 +290,7 @@ export class CreateAsyncJobDto {
   })
   @IsOptional()
   @IsObject()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -231,7 +387,7 @@ export class AsyncJobResultDto {
     type: 'object',
     additionalProperties: true,
   })
-  configuration: Record<string, any>;
+  configuration: JobConfiguration;
 
   @ApiProperty({
     description: 'Job execution results',
@@ -258,19 +414,7 @@ export class AsyncJobResultDto {
       },
     },
   })
-  results: {
-    tasksCompleted: number;
-    totalTasks: number;
-    screenshots: string[];
-    extractedData: Record<string, any>;
-    logs: Array<{
-      timestamp: Date;
-      level: string;
-      message: string;
-      step?: string;
-      metadata?: Record<string, any>;
-    }>;
-  };
+  results: JobResults;
 
   @ApiPropertyOptional({
     description: 'Associated task IDs for this job',
@@ -295,26 +439,14 @@ export class AsyncJobResultDto {
       details: { type: 'object', additionalProperties: true },
     },
   })
-  error?: {
-    message: string;
-    code: string;
-    step: string;
-    timestamp: Date;
-    details?: Record<string, any>;
-  };
+  error?: JobErrorDetails;
 
   @ApiProperty({
     description: 'Job metadata and execution details',
     type: 'object',
     additionalProperties: true,
   })
-  metadata: {
-    retryCount: number;
-    maxRetries: number;
-    createdBy: string;
-    tags: string[];
-    [key: string]: any;
-  };
+  metadata: JobMetadata;
 }
 
 /**
@@ -378,7 +510,7 @@ export class JobSubmissionResponseDto {
     type: 'object',
     additionalProperties: true,
   })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -473,14 +605,7 @@ export class JobStatusResponseDto {
       details: { type: 'object', additionalProperties: true },
     },
   })
-  errorInfo?: {
-    message: string;
-    code: string;
-    step: string;
-    timestamp: Date;
-    recoverable: boolean;
-    details?: Record<string, any>;
-  };
+  errorInfo?: JobErrorDetails;
 
   @ApiPropertyOptional({
     description: 'Recent execution logs',
@@ -510,7 +635,7 @@ export class JobStatusResponseDto {
     type: 'object',
     additionalProperties: true,
   })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 
   @ApiProperty({
     description: 'Whether results are ready for retrieval',
@@ -553,7 +678,7 @@ export class JobResultResponseDto {
     type: 'object',
     additionalProperties: true,
   })
-  data?: Record<string, any>;
+  data?: ExtractedData;
 
   @ApiPropertyOptional({
     description: 'Screenshots captured during execution',
@@ -577,13 +702,7 @@ export class JobResultResponseDto {
       },
     },
   })
-  downloads?: Array<{
-    filename: string;
-    path: string;
-    size: number;
-    mimeType: string;
-    downloadedAt: Date;
-  }>;
+  downloads?: DownloadInfo[];
 
   @ApiProperty({
     description: 'Complete execution logs',
@@ -602,15 +721,7 @@ export class JobResultResponseDto {
       },
     },
   })
-  logs: Array<{
-    timestamp: Date;
-    level: string;
-    message: string;
-    actionIndex?: number;
-    step?: string;
-    screenshot?: string;
-    metadata?: Record<string, any>;
-  }>;
+  logs: JobLogEntry[];
 
   @ApiProperty({
     description: 'Final execution statistics',
@@ -628,17 +739,7 @@ export class JobResultResponseDto {
       dataPoints: { type: 'number' },
     },
   })
-  statistics: {
-    totalActions: number;
-    successfulActions: number;
-    failedActions: number;
-    screenshotsCaptured: number;
-    pagesNavigated: number;
-    formsSubmitted: number;
-    elementsClicked: number;
-    textExtracted: number;
-    dataPoints: number;
-  };
+  statistics: JobExecutionStatistics;
 
   @ApiPropertyOptional({
     description: 'Error information if job failed',
@@ -654,22 +755,14 @@ export class JobResultResponseDto {
       details: { type: 'object', additionalProperties: true },
     },
   })
-  errorInfo?: {
-    message: string;
-    code: string;
-    step: string;
-    actionIndex: number;
-    timestamp: Date;
-    screenshot?: string;
-    details?: Record<string, any>;
-  };
+  errorInfo?: JobErrorDetails;
 
   @ApiPropertyOptional({
     description: 'Job metadata and configuration',
     type: 'object',
     additionalProperties: true,
   })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 
   @ApiProperty({
     description: 'Resource URLs for artifacts',
@@ -682,12 +775,7 @@ export class JobResultResponseDto {
       reportUrl: { type: 'string' },
     },
   })
-  resources: {
-    screenshotsUrl?: string;
-    downloadsUrl?: string;
-    logsUrl?: string;
-    reportUrl?: string;
-  };
+  resources: JobResourceUrls;
 
   @ApiProperty({
     description: 'Data export options',
@@ -701,10 +789,7 @@ export class JobResultResponseDto {
       },
     },
   })
-  exports: {
-    availableFormats: string[]; // ['json', 'csv', 'xlsx', 'html']
-    downloadUrls: Record<string, string>;
-  };
+  exports: JobExportOptions;
 }
 
 /**
@@ -745,7 +830,7 @@ export class AsyncBrowserJobSubmissionDto {
     additionalProperties: true,
   })
   @IsObject()
-  payload: Record<string, any>;
+  payload: JobConfiguration;
 
   @ApiPropertyOptional({
     description: 'Enable real-time streaming of job progress',
@@ -769,7 +854,7 @@ export class AsyncBrowserJobSubmissionDto {
   })
   @IsOptional()
   @IsObject()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'Job retry configuration',

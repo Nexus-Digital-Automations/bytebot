@@ -108,7 +108,7 @@ class MockAuthService {
       id: 'user_' + Date.now(),
       email: registerDto.email,
       passwordHash,
-      role: registerDto.role || 'viewer',
+      role: registerDto.role ?? 'viewer',
       createdAt: new Date(),
     };
 
@@ -255,13 +255,13 @@ describe('AuthService', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn((key: string) => {
-              const config = {
+              const config: Record<string, string> = {
                 JWT_SECRET: 'test-secret-key',
                 JWT_REFRESH_SECRET: 'test-refresh-secret-key',
                 JWT_EXPIRES_IN: '15m',
                 JWT_REFRESH_EXPIRES_IN: '7d',
               };
-              return config[key];
+              return config[key as keyof typeof config];
             }),
           },
         },
@@ -654,7 +654,7 @@ describe('AuthService', () => {
 
       // Mock database error
       jest
-        .spyOn(service, 'findUserByEmail' as any)
+        .spyOn(service, 'findUserByEmail' as keyof MockAuthService)
         .mockRejectedValue(new Error('Database connection failed'));
 
       const loginDto = {
@@ -681,16 +681,12 @@ describe('AuthService', () => {
       const result = await service.login(loginDto);
 
       // Verify consistent response structure
-      expect(result).toMatchObject({
-        accessToken: expect.any(String),
-        refreshToken: expect.any(String),
-        user: expect.objectContaining({
-          id: expect.any(String),
-          email: expect.any(String),
-          role: expect.any(String),
-        }),
-        expiresIn: expect.any(Number),
-      });
+      expect(result.accessToken).toEqual(expect.stringMatching(/.+/));
+      expect(result.refreshToken).toEqual(expect.stringMatching(/.+/));
+      expect(result.user.id).toEqual(expect.stringMatching(/.+/));
+      expect(result.user.email).toEqual(expect.stringMatching(/.+/));
+      expect(result.user.role).toEqual(expect.stringMatching(/.+/));
+      expect(typeof result.expiresIn).toBe('number');
 
       console.log(`[${testId}] Response format consistency test completed`);
     });
@@ -732,8 +728,12 @@ describe('AuthService', () => {
       const testId = `${operationId}_edge_null_inputs`;
       console.log(`[${testId}] Testing null/undefined input handling`);
 
-      await expect(service.login(null as any)).rejects.toThrow();
-      await expect(service.refreshToken(null as any)).rejects.toThrow();
+      await expect(
+        service.login(null as unknown as LoginDto),
+      ).rejects.toThrow();
+      await expect(
+        service.refreshToken(null as unknown as string),
+      ).rejects.toThrow();
 
       console.log(`[${testId}] Null/undefined input handling test completed`);
     });

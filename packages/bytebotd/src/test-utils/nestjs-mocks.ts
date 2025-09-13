@@ -12,9 +12,27 @@
  * @version 1.0.0
  */
 
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import { TestingModule, Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { ModuleMetadata } from '@nestjs/common/interfaces';
+
+/**
+ * Type definitions for mock utilities
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DecoratorTarget = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MockServiceMethods<T = any> = jest.Mocked<T>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MockValue = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type WebSocketOptions = any;
 
 /**
  * Mock implementation for NestJS decorators
@@ -23,24 +41,30 @@ export const mockDecorators = {
   /**
    * Mock @Controller decorator
    */
-  Controller: (path?: string) => (target: any) => {
+  Controller: (path?: string) => (target: DecoratorTarget) => {
+     
     target.controllerPath = path;
+     
     return target;
   },
 
   /**
    * Mock @Injectable decorator
    */
-  Injectable: () => (target: any) => {
+  Injectable: () => (target: DecoratorTarget) => {
+     
     target.injectable = true;
+     
     return target;
   },
 
   /**
    * Mock @Module decorator
    */
-  Module: (metadata: ModuleMetadata) => (target: any) => {
+  Module: (metadata: ModuleMetadata) => (target: DecoratorTarget) => {
+     
     target.moduleMetadata = metadata;
+     
     return target;
   },
 
@@ -49,7 +73,11 @@ export const mockDecorators = {
    */
   Get:
     (path?: string) =>
-    (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    (
+      target: DecoratorTarget,
+      propertyKey: string,
+      descriptor: PropertyDescriptor,
+    ) => {
       descriptor.value.httpMethod = 'GET';
       descriptor.value.path = path;
       return descriptor;
@@ -57,7 +85,11 @@ export const mockDecorators = {
 
   Post:
     (path?: string) =>
-    (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    (
+      target: DecoratorTarget,
+      propertyKey: string,
+      descriptor: PropertyDescriptor,
+    ) => {
       descriptor.value.httpMethod = 'POST';
       descriptor.value.path = path;
       return descriptor;
@@ -65,7 +97,11 @@ export const mockDecorators = {
 
   Put:
     (path?: string) =>
-    (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    (
+      target: DecoratorTarget,
+      propertyKey: string,
+      descriptor: PropertyDescriptor,
+    ) => {
       descriptor.value.httpMethod = 'PUT';
       descriptor.value.path = path;
       return descriptor;
@@ -73,7 +109,11 @@ export const mockDecorators = {
 
   Delete:
     (path?: string) =>
-    (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    (
+      target: DecoratorTarget,
+      propertyKey: string,
+      descriptor: PropertyDescriptor,
+    ) => {
       descriptor.value.httpMethod = 'DELETE';
       descriptor.value.path = path;
       return descriptor;
@@ -86,7 +126,7 @@ export const mockDecorators = {
   Body:
     () =>
     (
-      _target: any,
+      _target: DecoratorTarget,
       _propertyKey: string | undefined,
       _parameterIndex: number,
     ) => {
@@ -96,7 +136,7 @@ export const mockDecorators = {
   Param:
     (_key?: string) =>
     (
-      _target: any,
+      _target: DecoratorTarget,
       _propertyKey: string | undefined,
       _parameterIndex: number,
     ) => {
@@ -106,7 +146,7 @@ export const mockDecorators = {
   Query:
     (_key?: string) =>
     (
-      _target: any,
+      _target: DecoratorTarget,
       _propertyKey: string | undefined,
       _parameterIndex: number,
     ) => {
@@ -116,14 +156,19 @@ export const mockDecorators = {
   /**
    * Mock WebSocket decorators
    */
-  WebSocketGateway: (options?: any) => (target: any) => {
-    target.websocketOptions = options;
-    return target;
-  },
+  WebSocketGateway:
+    (options?: WebSocketOptions) => (target: DecoratorTarget) => {
+      target.websocketOptions = options;
+      return target;
+    },
 
   SubscribeMessage:
     (message: string) =>
-    (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    (
+      target: DecoratorTarget,
+      propertyKey: string,
+      descriptor: PropertyDescriptor,
+    ) => {
       descriptor.value.messagePattern = message;
       return descriptor;
     },
@@ -131,7 +176,7 @@ export const mockDecorators = {
   MessageBody:
     () =>
     (
-      _target: any,
+      _target: DecoratorTarget,
       _propertyKey: string | undefined,
       _parameterIndex: number,
     ) => {
@@ -141,7 +186,7 @@ export const mockDecorators = {
   ConnectedSocket:
     () =>
     (
-      _target: any,
+      _target: DecoratorTarget,
       _propertyKey: string | undefined,
       _parameterIndex: number,
     ) => {
@@ -163,8 +208,8 @@ export class MockTestingModuleBuilder {
   /**
    * Add providers to the testing module
    */
-  addProvider(provider: any): this {
-    this.moduleMetadata.providers = this.moduleMetadata.providers || [];
+  addProvider(provider: MockValue): this {
+    this.moduleMetadata.providers = this.moduleMetadata.providers ?? [];
     this.moduleMetadata.providers.push(provider);
     return this;
   }
@@ -172,7 +217,7 @@ export class MockTestingModuleBuilder {
   /**
    * Add mock provider with value
    */
-  addMockProvider(token: any, mockValue: any): this {
+  addMockProvider(token: MockValue, mockValue: MockValue): this {
     return this.addProvider({
       provide: token,
       useValue: mockValue,
@@ -182,7 +227,7 @@ export class MockTestingModuleBuilder {
   /**
    * Add mock provider with factory
    */
-  addMockProviderFactory(token: any, factory: () => any): this {
+  addMockProviderFactory(token: MockValue, factory: () => MockValue): this {
     return this.addProvider({
       provide: token,
       useFactory: factory,
@@ -192,8 +237,8 @@ export class MockTestingModuleBuilder {
   /**
    * Add controllers to the testing module
    */
-  addController(controller: any): this {
-    this.moduleMetadata.controllers = this.moduleMetadata.controllers || [];
+  addController(controller: MockValue): this {
+    this.moduleMetadata.controllers = this.moduleMetadata.controllers ?? [];
     this.moduleMetadata.controllers.push(controller);
     return this;
   }
@@ -211,13 +256,13 @@ export class MockTestingModuleBuilder {
   createTestingModule(metadata: ModuleMetadata) {
     this.moduleMetadata = { ...this.moduleMetadata, ...metadata };
     return {
-      overrideModule: (moduleToOverride: any) => ({
-        useValue: (overrideValue: any) => ({
+      overrideModule: (moduleToOverride: MockValue) => ({
+        useValue: (overrideValue: MockValue) => ({
           compile: async () => {
             return Test.createTestingModule({
               ...this.moduleMetadata,
               providers: [
-                ...(this.moduleMetadata.providers || []),
+                ...(this.moduleMetadata.providers ?? []),
                 {
                   provide: moduleToOverride,
                   useValue: overrideValue,
@@ -236,12 +281,13 @@ export class MockTestingModuleBuilder {
 /**
  * Common mock implementations for NestJS services
  */
-export const createMockService = <T = any>(
+export const createMockService = <T = MockValue>(
   methods: (keyof T)[] = [],
-): jest.Mocked<T> => {
-  const mockService = {} as jest.Mocked<T>;
+): MockServiceMethods<T> => {
+  const mockService = {} as MockServiceMethods<T>;
 
   methods.forEach((method) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockService[method] = jest.fn() as any;
   });
 
@@ -251,7 +297,9 @@ export const createMockService = <T = any>(
 /**
  * Mock repository implementation for TypeORM/Prisma
  */
-export const createMockRepository = <T = any>(): jest.Mocked<T> => {
+export const createMockRepository = <
+  T = MockValue,
+>(): MockServiceMethods<T> => {
   return {
     find: jest.fn(),
     findOne: jest.fn(),
@@ -263,13 +311,14 @@ export const createMockRepository = <T = any>(): jest.Mocked<T> => {
     remove: jest.fn(),
     count: jest.fn(),
     findAndCount: jest.fn(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 };
 
 /**
  * Mock logger implementation with all required NestJS Logger properties
  */
-export const createMockLogger = (): jest.Mocked<any> => ({
+export const createMockLogger = (): MockServiceMethods => ({
   log: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
@@ -277,6 +326,7 @@ export const createMockLogger = (): jest.Mocked<any> => ({
   verbose: jest.fn(),
   fatal: jest.fn(), // Added missing fatal method
   setContext: jest.fn(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   localInstance: {} as any, // Added missing localInstance property
 });
 
@@ -419,6 +469,7 @@ export const createMockApplication = (): jest.Mocked<INestApplication> =>
     getInternalConfig: jest.fn(),
     register: jest.fn(),
     registerParserMiddleware: jest.fn(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }) as any;
 
 /**

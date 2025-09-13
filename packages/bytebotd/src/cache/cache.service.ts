@@ -30,6 +30,34 @@ import { MetricsService } from '../metrics/metrics.service';
 type CacheOperation = 'get' | 'set' | 'del' | 'mget' | 'mset' | 'warm';
 
 /**
+ * Type guard to check if a value is a valid JSON object
+ */
+function isValidJsonObject(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/**
+ * Safe JSON parsing with type validation
+ */
+function safeJsonParse<T>(jsonString: string): T | null {
+  try {
+    const parsed: unknown = JSON.parse(jsonString);
+    return parsed as T;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Type-safe cache value serialization interface
+ */
+interface SerializedCacheValue {
+  data: unknown;
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  timestamp: number;
+}
+
+/**
  * Cache options for fine-grained control
  */
 interface CacheOptions {
@@ -98,9 +126,11 @@ export class CacheService {
 
         let _result: T;
         if (options.serialize !== false) {
-          try {
-            _result = JSON.parse(cachedValue);
-          } catch {
+          const parsedValue = safeJsonParse<T>(cachedValue);
+          if (parsedValue !== null) {
+            _result = parsedValue;
+          } else {
+            // Fallback to treating cached value as raw data
             _result = cachedValue as unknown as T;
           }
         } else {
@@ -158,9 +188,17 @@ export class CacheService {
 
       let cacheValue: string;
       if (options.serialize !== false) {
-        cacheValue = JSON.stringify(value);
+        try {
+          cacheValue = JSON.stringify(value);
+        } catch (serializationError) {
+          this.logger.warn(
+            `[${operationId}] JSON serialization failed, storing as string: ${serializationError instanceof Error ? serializationError.message : 'Unknown error'}`,
+          );
+          cacheValue = String(value);
+        }
       } else {
-        cacheValue = value as unknown as string;
+        // Type-safe string conversion for non-serialized values
+        cacheValue = typeof value === 'string' ? value : String(value);
       }
 
       this.logger.debug(

@@ -22,13 +22,14 @@ import { AppModule } from '../src/app.module';
 import { MetricsService } from '../src/metrics/metrics.service';
 import { CacheService } from '../src/cache/cache.service';
 import { PerformanceInterceptor } from '../src/common/interceptors/performance.interceptor';
+import { Optional, TypeSafetyUtils } from '../src/types';
 import request from 'supertest';
 
 describe('API Performance Benchmarks', () => {
   let app: INestApplication;
   let metricsService: MetricsService;
   let cacheService: CacheService;
-  let performanceInterceptor: PerformanceInterceptor;
+  let performanceInterceptor: Optional<PerformanceInterceptor>;
 
   // Performance configuration
   const PERFORMANCE_TARGETS = {
@@ -55,10 +56,10 @@ describe('API Performance Benchmarks', () => {
     metricsService = moduleFixture.get<MetricsService>(MetricsService);
     cacheService = moduleFixture.get<CacheService>(CacheService);
 
-    // Get performance interceptor instance for stats
+    // Get performance interceptor instance for stats with proper null safety
     const interceptors = moduleFixture.get('APP_INTERCEPTOR');
     performanceInterceptor = Array.isArray(interceptors)
-      ? interceptors.find((i) => i instanceof PerformanceInterceptor)
+      ? (interceptors.find((i) => i instanceof PerformanceInterceptor) ?? null)
       : interceptors instanceof PerformanceInterceptor
         ? interceptors
         : null;

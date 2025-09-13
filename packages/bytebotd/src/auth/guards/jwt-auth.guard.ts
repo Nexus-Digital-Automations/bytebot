@@ -226,7 +226,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Computer control authentication failed - no user`,
         {
           operationId,
-          info: (info as any)?.message || (info as any)?.name || String(info),
+          info: (info as any)?.message ?? (info as any)?.name ?? String(info),
           url: request.url,
           method: request.method,
           ipAddress: this.getClientIpAddress(request),

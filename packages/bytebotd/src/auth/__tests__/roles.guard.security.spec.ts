@@ -34,12 +34,12 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
   const operationId = `roles_security_test_${Date.now()}`;
   const securityLogger = {
-    info: (message: string, meta?: any) =>
-      console.log(`[RBAC-SECURITY] ${message}`, meta || ''),
-    warn: (message: string, meta?: any) =>
-      console.warn(`[RBAC-WARNING] ${message}`, meta || ''),
-    error: (message: string, meta?: any) =>
-      console.error(`[RBAC-ERROR] ${message}`, meta || ''),
+    info: (message: string, meta?: Record<string, unknown>) =>
+      console.log(`[RBAC-SECURITY] ${message}`, meta ?? ''),
+    warn: (message: string, meta?: Record<string, unknown>) =>
+      console.warn(`[RBAC-WARNING] ${message}`, meta ?? ''),
+    error: (message: string, meta?: Record<string, unknown>) =>
+      console.error(`[RBAC-ERROR] ${message}`, meta ?? ''),
   };
 
   // Mock execution context factory with security metadata
@@ -286,7 +286,11 @@ describe('RolesGuard - Advanced Security Tests', () => {
           const result = await guard.canActivate(context);
           return { success: true, index: _index };
         } catch (error) {
-          return { success: false, index: _index, error: (error as Error).message };
+          return {
+            success: false,
+            index: _index,
+            error: (error as Error).message,
+          };
         }
       });
 
@@ -596,7 +600,11 @@ describe('RolesGuard - Advanced Security Tests', () => {
           const result = await guard.canActivate(context);
           return { success: true, userId: user.id };
         } catch (error) {
-          return { success: false, userId: user.id, error: (error as Error).message };
+          return {
+            success: false,
+            userId: user.id,
+            error: (error as Error).message,
+          };
         }
       });
 

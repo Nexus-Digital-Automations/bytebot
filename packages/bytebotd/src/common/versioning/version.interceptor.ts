@@ -119,9 +119,8 @@ export class VersionInterceptor implements NestInterceptor {
       const endpointVersion = getApiVersion(context.getHandler());
       const multiVersions = getMultiVersions(context.getHandler());
       const isDesktopEndpoint = isDesktopApiVersion(context.getHandler());
-      const desktopCompatibility = getDesktopCompatibility(
-        context.getHandler(),
-      );
+      const desktopCompatibility: DesktopCompatibility | null =
+        getDesktopCompatibility(context.getHandler()) || null;
 
       this.logger.debug(`[${operationId}] Processing BytebotD API version`, {
         operationId,
@@ -324,7 +323,7 @@ export class VersionInterceptor implements NestInterceptor {
       isSupported,
       desktopCompatibility: {
         isDesktopClient: desktopClientInfo.isDesktopClient,
-        clientVersion: desktopClientInfo.clientVersion,
+        clientVersion: desktopClientInfo.clientVersion || 'unknown',
         vncClient: desktopClientInfo.vncClient,
         isComputerUse: desktopClientInfo.isComputerUse,
         compatibilityIssues,

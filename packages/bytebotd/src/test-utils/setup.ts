@@ -13,6 +13,9 @@
  * @version 1.0.0
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 // Global type declarations
 declare global {
   var testUtils: {
@@ -26,7 +29,7 @@ declare global {
 // Set test environment variables
 process.env.NODE_ENV = 'test';
 process.env.LOG_LEVEL = 'error'; // Reduce log noise during tests
-process.env.JEST_WORKER_ID = process.env.JEST_WORKER_ID || '1';
+process.env.JEST_WORKER_ID = process.env.JEST_WORKER_ID ?? '1';
 
 // Increase test timeout for integration tests
 jest.setTimeout(30000);
@@ -174,12 +177,12 @@ const performanceMetrics = {
 
 // Global performance tracking
 beforeEach(() => {
-  const testName = expect.getState().currentTestName || 'unknown';
+  const testName = expect.getState().currentTestName ?? 'unknown';
   performanceMetrics.memoryUsage.set(testName, process.memoryUsage());
 });
 
 afterEach(() => {
-  const testName = expect.getState().currentTestName || 'unknown';
+  const testName = expect.getState().currentTestName ?? 'unknown';
   const startMemory = performanceMetrics.memoryUsage.get(testName);
 
   if (startMemory) {

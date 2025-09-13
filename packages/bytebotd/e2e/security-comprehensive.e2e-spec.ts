@@ -654,7 +654,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       const authHeader = req.headers.authorization;
 
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      if (!authHeader?.startsWith('Bearer ')) {
         securityMonitor.trackFailedAuthentication(
           'unknown',
           req.ip || 'unknown',

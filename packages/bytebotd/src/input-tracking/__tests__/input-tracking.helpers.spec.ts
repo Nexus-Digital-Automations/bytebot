@@ -652,7 +652,7 @@ describe('InputTrackingHelpers', () => {
         UiohookKey.F12, // Function keys
       ];
 
-      criticalKeys.forEach((_keyCode) => {
+      criticalKeys.forEach((keyCode) => {
         expect(keyInfoMap[keyCode]).toBeDefined();
         expect(keyInfoMap[keyCode].name).toBeTruthy();
       });
@@ -738,7 +738,7 @@ describe('InputTrackingHelpers', () => {
 
       // Function keys should be named F1, F2, etc.
       const functionKeyPattern = /^F\d{1,2}$/;
-      [UiohookKey.F1, UiohookKey.F5, UiohookKey.F12].forEach((_keyCode) => {
+      [UiohookKey.F1, UiohookKey.F5, UiohookKey.F12].forEach((keyCode) => {
         expect(keyInfoMap[keyCode].name).toMatch(functionKeyPattern);
       });
 

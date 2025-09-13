@@ -134,15 +134,20 @@ async function bootstrap(): Promise<void> {
         : baseAllowedOrigins;
 
     app.enableCors({
-      origin: (origin, callback) => {
+      origin: (
+        origin: string | undefined,
+        callback: (err: Error | null, allow?: boolean) => void,
+      ): void => {
         // Allow requests with no origin (mobile apps, curl, postman, etc.)
         if (!origin) {
-          return callback(null, true);
+          callback(null, true);
+          return;
         }
 
         // Check if origin is in allowed list
         if (allowedOrigins.includes(origin)) {
-          return callback(null, true);
+          callback(null, true);
+          return;
         }
 
         // Allow any localhost in development
@@ -151,12 +156,14 @@ async function bootstrap(): Promise<void> {
           (origin.startsWith('http://localhost:') ||
             origin.startsWith('https://localhost:'))
         ) {
-          return callback(null, true);
+          callback(null, true);
+          return;
         }
 
         // Support wildcard subdomains for bytebot.ai in production
         if (environment === 'production' && origin.endsWith('.bytebot.ai')) {
-          return callback(null, true);
+          callback(null, true);
+          return;
         }
 
         // Block unauthorized origins with detailed logging
@@ -168,7 +175,7 @@ async function bootstrap(): Promise<void> {
           timestamp: new Date().toISOString(),
         });
 
-        return callback(
+        callback(
           new Error(`Origin ${origin} not allowed by CORS policy`),
           false,
         );
@@ -197,18 +204,24 @@ async function bootstrap(): Promise<void> {
     });
 
     // Additional security headers for BytebotD
-    app.use((_req, res, next) => {
-      res.setHeader('X-Service', 'BytebotD');
-      res.setHeader('X-API-Version', '1.0');
-      res.setHeader('X-Service-ID', 'computer-use-service');
+    app.use(
+      (
+        _req: express.Request,
+        res: express.Response,
+        next: express.NextFunction,
+      ): void => {
+        res.setHeader('X-Service', 'BytebotD');
+        res.setHeader('X-API-Version', '1.0');
+        res.setHeader('X-Service-ID', 'computer-use-service');
 
-      if (environment === 'production') {
-        res.removeHeader('X-Powered-By');
-        res.removeHeader('Server');
-      }
+        if (environment === 'production') {
+          res.removeHeader('X-Powered-By');
+          res.removeHeader('Server');
+        }
 
-      next();
-    });
+        next();
+      },
+    );
 
     const wsProxy = createProxyMiddleware({
       target: 'http://localhost:6080',

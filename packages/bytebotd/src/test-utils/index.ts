@@ -48,13 +48,45 @@ export {
 // TestDataFactory is exported from setupAfterEnv.ts to avoid duplication
 
 /**
+ * Type definitions for test utilities
+ */
+interface OperationResult {
+  operationId?: string;
+  timestamp?: Date;
+  [key: string]: unknown;
+}
+
+interface TestCoordinates {
+  x: number;
+  y: number;
+}
+
+interface ScreenshotResult {
+  image: string;
+  metadata: Record<string, unknown>;
+}
+
+interface PerformanceMetrics {
+  duration: number;
+  successRate?: number;
+  [key: string]: unknown;
+}
+
+interface TestError extends Error {
+  code?: string;
+}
+
+/**
  * Assertion helpers for common test patterns
  */
 export const AssertionHelpers = {
   /**
    * Assert that an operation result has required fields
    */
-  expectValidOperationResult: (result: any, expectedFields: string[] = []) => {
+  expectValidOperationResult: (
+    result: OperationResult,
+    expectedFields: string[] = [],
+  ) => {
     expect(result).toBeDefined();
     expect(typeof result).toBe('object');
 
@@ -78,9 +110,9 @@ export const AssertionHelpers = {
    * Assert that a mock service method was called correctly
    */
   expectServiceMethodCall: (
-    mockMethod: jest.MockedFunction<any>,
+    mockMethod: jest.MockedFunction<(...args: unknown[]) => unknown>,
     expectedCallCount: number = 1,
-    expectedArgs?: any[],
+    expectedArgs?: unknown[],
   ) => {
     expect(mockMethod).toHaveBeenCalledTimes(expectedCallCount);
     if (expectedArgs) {
@@ -92,7 +124,7 @@ export const AssertionHelpers = {
    * Assert that an error has expected structure
    */
   expectValidError: (
-    _error: any,
+    _error: TestError,
     expectedMessage?: string,
     expectedCode?: string,
   ) => {
@@ -108,7 +140,7 @@ export const AssertionHelpers = {
   /**
    * Assert that coordinates are valid
    */
-  expectValidCoordinates: (coords: any) => {
+  expectValidCoordinates: (coords: TestCoordinates) => {
     expect(coords).toBeDefined();
     expect(typeof coords).toBe('object');
     expect(coords).toHaveProperty('x');
@@ -120,7 +152,7 @@ export const AssertionHelpers = {
   /**
    * Assert that screenshot result is valid
    */
-  expectValidScreenshot: (screenshot: any) => {
+  expectValidScreenshot: (screenshot: ScreenshotResult) => {
     expect(screenshot).toBeDefined();
     expect(typeof screenshot).toBe('object');
     expect(screenshot).toHaveProperty('image');
@@ -135,7 +167,7 @@ export const AssertionHelpers = {
    * Assert performance metrics are within acceptable ranges
    */
   expectPerformanceWithinLimits: (
-    metrics: any,
+    metrics: PerformanceMetrics,
     maxDurationMs: number = 5000,
     minSuccessRate: number = 0.95,
   ) => {
@@ -218,23 +250,23 @@ export const TestEnvironment = {
    */
   isCI: () =>
     Boolean(
-      process.env.CI || process.env.GITHUB_ACTIONS || process.env.JENKINS_URL,
+      process.env.CI ?? process.env.GITHUB_ACTIONS ?? process.env.JENKINS_URL,
     ),
 
   /**
    * Check if running in debug mode
    */
-  isDebug: () => Boolean(process.env.DEBUG || process.env.NODE_ENV === 'debug'),
+  isDebug: () => Boolean(process.env.DEBUG ?? process.env.NODE_ENV === 'debug'),
 
   /**
    * Get test worker ID
    */
-  getWorkerId: () => process.env.JEST_WORKER_ID || '1',
+  getWorkerId: () => process.env.JEST_WORKER_ID ?? '1',
 
   /**
    * Check if running in parallel mode
    */
-  isParallel: () => parseInt(process.env.JEST_WORKER_ID || '1', 10) > 1,
+  isParallel: () => parseInt(process.env.JEST_WORKER_ID ?? '1', 10) > 1,
 
   /**
    * Get memory constraints for current test environment

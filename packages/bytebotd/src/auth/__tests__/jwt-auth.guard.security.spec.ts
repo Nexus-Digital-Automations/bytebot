@@ -37,17 +37,17 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
   const operationId = `jwt_security_test_${Date.now()}`;
   const securityLogger = {
-    info: (message: string, meta?: any) =>
-      console.log(`[SECURITY] ${message}`, meta || ''),
-    warn: (message: string, meta?: any) =>
-      console.warn(`[SECURITY WARNING] ${message}`, meta || ''),
-    error: (message: string, meta?: any) =>
-      console.error(`[SECURITY ERROR] ${message}`, meta || ''),
+    info: (message: string, meta?: Record<string, unknown>) =>
+      console.log(`[SECURITY] ${message}`, meta ?? ''),
+    warn: (message: string, meta?: Record<string, unknown>) =>
+      console.warn(`[SECURITY WARNING] ${message}`, meta ?? ''),
+    error: (message: string, meta?: Record<string, unknown>) =>
+      console.error(`[SECURITY ERROR] ${message}`, meta ?? ''),
   };
 
   // Mock execution context factory with enhanced security metadata
   const createMockExecutionContext = (
-    headers: any = {},
+    headers: Record<string, string> = {},
     _isPublic = false,
     route = 'test-route',
     ip = '127.0.0.1',

@@ -193,9 +193,9 @@
       ]
     },
     {
-      "id": "error_1757729647359_ymmuxte1p",
-      "title": "CRITICAL: Fix 21 ESLint violations in shared package - TypeScript any types and parsing errors",
-      "description": "Fix critical ESLint violations preventing development progress: 4 explicit any-type warnings in rbac-authorization.decorators.ts (lines 652, 694, 734, 778) and 17 TypeScript project parsing errors for test files and utilities. These violations block development and must be resolved immediately.",
+      "id": "error_1757730818797_zpwcyas8q",
+      "title": "Fix ESLint error handling violations in bytebotd package",
+      "description": "Resolve ESLint violations related to error handling patterns including unsafe error operations, catch parameter shadowing, error propagation issues, and implement comprehensive error handling improvements with custom error classes and proper exception safety patterns",
       "priority": "medium",
       "category": "error",
       "status": "in_progress",
@@ -205,25 +205,25 @@
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-13T02:14:07.359Z",
+      "created_at": "2025-09-13T02:33:38.798Z",
       "auto_research_created": false,
-      "assigned_agent": "development_session_1757728092762_1_general_c2e3b3ad",
-      "started_at": "2025-09-13T02:14:27.656Z",
-      "claimed_by": "development_session_1757728092762_1_general_c2e3b3ad",
+      "assigned_agent": "development_session_1757730796079_1_general_e13db333",
+      "started_at": "2025-09-13T02:34:14.923Z",
+      "claimed_by": "development_session_1757730796079_1_general_e13db333",
       "agent_assignment_history": [
         {
-          "agentId": "development_session_1757728092762_1_general_c2e3b3ad",
+          "agentId": "development_session_1757730796079_1_general_e13db333",
           "role": "primary",
-          "assignedAt": "2025-09-13T02:14:27.656Z",
+          "assignedAt": "2025-09-13T02:34:14.923Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
       ]
     },
     {
-      "id": "error_1757729491841_w16dpai76",
-      "title": "Fix TypeScript any types in middleware files",
-      "description": "Replace any types with proper Express middleware type definitions in security-middleware.standardized.ts, cors-security.middleware.ts, cors-security-simple.middleware.ts, and file-security.middleware.ts. Create specific middleware interfaces and ensure Express.js typing compatibility.",
+      "id": "error_1757730815813_i0p798n3o",
+      "title": "Comprehensive TypeScript Type Safety Enhancements for bytebotd Package",
+      "description": "Implement comprehensive type safety improvements across the bytebotd package including: 1) Create comprehensive interface libraries, 2) Optimize generic type usage, 3) Improve type assertion patterns, 4) Add utility types for common patterns, 5) Enhance overall TypeScript type safety and modernization, 6) Add comprehensive type documentation following enterprise standards",
       "priority": "medium",
       "category": "error",
       "status": "in_progress",
@@ -233,25 +233,25 @@
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-13T02:11:31.841Z",
+      "created_at": "2025-09-13T02:33:35.813Z",
       "auto_research_created": false,
-      "assigned_agent": "development_session_1757729463886_1_general_d7b8f8f2",
-      "started_at": "2025-09-13T02:11:59.747Z",
-      "claimed_by": "development_session_1757729463886_1_general_d7b8f8f2",
+      "assigned_agent": "development_session_1757730775192_1_general_2f816e49",
+      "started_at": "2025-09-13T02:34:15.854Z",
+      "claimed_by": "development_session_1757730775192_1_general_2f816e49",
       "agent_assignment_history": [
         {
-          "agentId": "development_session_1757729463886_1_general_d7b8f8f2",
+          "agentId": "development_session_1757730775192_1_general_2f816e49",
           "role": "primary",
-          "assignedAt": "2025-09-13T02:11:59.747Z",
+          "assignedAt": "2025-09-13T02:34:15.854Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
       ]
     },
     {
-      "id": "error_1757729491787_m6rn5ryxi",
-      "title": "Fix TypeScript safety issues in test utilities and mock files",
-      "description": "Systematically resolve any types in test utility and mock files by creating proper Jest mock type definitions, replacing any types with specific mock interfaces, and ensuring test functionality is preserved while using proper TypeScript testing patterns.",
+      "id": "error_1757730545411_rkyg0tutz",
+      "title": "CRITICAL: Fix 2,264 ESLint violations in bytebotd package - EMERGENCY",
+      "description": "Fix massive linting violations in bytebotd package blocking development: unsafe any assignments, explicit any types, unsafe return types, unsafe member access, unused variables, and nullish coalescing issues. Zero tolerance policy requires immediate resolution.",
       "priority": "medium",
       "category": "error",
       "status": "in_progress",
@@ -261,16 +261,16 @@
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-13T02:11:31.787Z",
+      "created_at": "2025-09-13T02:29:05.411Z",
       "auto_research_created": false,
-      "assigned_agent": "development_session_1757729463268_1_general_3d6a9fd6",
-      "started_at": "2025-09-13T02:12:00.776Z",
-      "claimed_by": "development_session_1757729463268_1_general_3d6a9fd6",
+      "assigned_agent": "development_session_1757730440105_1_general_adfa2125",
+      "started_at": "2025-09-13T02:29:26.243Z",
+      "claimed_by": "development_session_1757730440105_1_general_adfa2125",
       "agent_assignment_history": [
         {
-          "agentId": "development_session_1757729463268_1_general_3d6a9fd6",
+          "agentId": "development_session_1757730440105_1_general_adfa2125",
           "role": "primary",
-          "assignedAt": "2025-09-13T02:12:00.776Z",
+          "assignedAt": "2025-09-13T02:29:26.243Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
@@ -1079,7 +1079,7 @@
       "description": "Comprehensive quality audit and review of the completed feature: Comprehensive Security Compliance Verification\n\nOriginal Description: Conduct comprehensive security validation across the entire bytebot ecosystem covering OWASP Top 10 compliance, authentication security, input validation, data protection, API security, and security headers validation",
       "category": "audit",
       "priority": "high",
-      "status": "pending",
+      "status": "in_progress",
       "dependencies": [],
       "important_files": [],
       "success_criteria": [
@@ -1099,7 +1099,19 @@
       "created_from_completed_task": "feature_1757728664933_ctpagnw1y",
       "original_implementer": "development_session_1757728613972_1_general_170867e2",
       "prevents_self_review": true,
-      "audit_type": "post_completion"
+      "audit_type": "post_completion",
+      "assigned_agent": "development_session_1757730269262_1_general_61bf834b",
+      "started_at": "2025-09-13T02:25:16.802Z",
+      "claimed_by": "development_session_1757730269262_1_general_61bf834b",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757730269262_1_general_61bf834b",
+          "role": "primary",
+          "assignedAt": "2025-09-13T02:25:16.802Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "id": "feature_1757447315138_glmx3az42",
@@ -3726,7 +3738,7 @@
       "createdAt": "2025-09-13T01:48:12.763Z",
       "sessionId": "session_1757728092762",
       "metadata": {
-        "renewedAt": "2025-09-13T02:11:50.110Z",
+        "renewedAt": "2025-09-13T02:21:32.027Z",
         "renewalReason": "Agent reinitialization requested"
       },
       "lastRenewal": "2025-09-13T01:49:24.041Z",
@@ -3836,6 +3848,90 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-13T02:11:03.887Z",
       "sessionId": "session_1757729463886",
+      "metadata": {}
+    },
+    "development_session_1757730269262_1_general_61bf834b": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T02:24:29.263Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T02:24:29.263Z",
+      "sessionId": "session_1757730269262",
+      "metadata": {}
+    },
+    "development_session_1757730440105_1_general_adfa2125": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T02:27:20.107Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T02:27:20.107Z",
+      "sessionId": "session_1757730440105",
+      "metadata": {}
+    },
+    "development_session_1757730775192_1_general_2f816e49": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T02:32:55.198Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T02:32:55.198Z",
+      "sessionId": "session_1757730775192",
+      "metadata": {}
+    },
+    "development_session_1757730796079_1_general_e13db333": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T02:33:16.083Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T02:33:16.083Z",
+      "sessionId": "session_1757730796079",
       "metadata": {}
     }
   },

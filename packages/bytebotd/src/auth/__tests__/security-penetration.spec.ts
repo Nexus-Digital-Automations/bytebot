@@ -18,11 +18,7 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  ExecutionContext,
-  UnauthorizedException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { ExecutionContext } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
@@ -46,14 +42,14 @@ describe('Security Penetration Testing Suite', () => {
 
   const operationId = `penetration_test_${Date.now()}`;
   const pentestLogger = {
-    info: (message: string, meta?: any) =>
-      console.log(`[PENTEST] ${message}`, meta || ''),
-    warn: (message: string, meta?: any) =>
-      console.warn(`[PENTEST-WARNING] ${message}`, meta || ''),
-    error: (message: string, meta?: any) =>
-      console.error(`[PENTEST-ERROR] ${message}`, meta || ''),
-    critical: (message: string, meta?: any) =>
-      console.error(`[PENTEST-CRITICAL] ${message}`, meta || ''),
+    info: (message: string, meta?: Record<string, unknown>) =>
+      console.log(`[PENTEST] ${message}`, meta ?? ''),
+    warn: (message: string, meta?: Record<string, unknown>) =>
+      console.warn(`[PENTEST-WARNING] ${message}`, meta ?? ''),
+    error: (message: string, meta?: Record<string, unknown>) =>
+      console.error(`[PENTEST-ERROR] ${message}`, meta ?? ''),
+    critical: (message: string, meta?: Record<string, unknown>) =>
+      console.error(`[PENTEST-CRITICAL] ${message}`, meta ?? ''),
   };
 
   // Advanced JWT manipulation toolkit
@@ -61,7 +57,7 @@ describe('Security Penetration Testing Suite', () => {
     // Create JWT with specific vulnerabilities
     createVulnerableJWT: (_payload: any, options: any = {}) => {
       const header = {
-        alg: options.algorithm || 'HS256',
+        alg: options.algorithm ?? 'HS256',
         typ: 'JWT',
         ...options.headerInjection,
       };
@@ -77,7 +73,7 @@ describe('Security Penetration Testing Suite', () => {
         return `${encodedHeader}.${encodedPayload}.`;
       }
 
-      const signature = options.customSignature || 'fake-signature';
+      const signature = options.customSignature ?? 'fake-signature';
       return `${encodedHeader}.${encodedPayload}.${signature}`;
     },
 
@@ -128,12 +124,12 @@ describe('Security Penetration Testing Suite', () => {
     // Timing attack utilities
     measureTokenProcessingTime: async (
       token: string,
-      verifyFunction: Function,
-    ) => {
+      verifyFunction: (token: string) => Promise<unknown>,
+    ): Promise<number> => {
       const startTime = process.hrtime.bigint();
       try {
         await verifyFunction(token);
-      } catch (error) {
+      } catch (_error) {
         // Ignore errors for timing measurement
       }
       const endTime = process.hrtime.bigint();
@@ -145,9 +141,21 @@ describe('Security Penetration Testing Suite', () => {
   const AttackSimulator = {
     // Brute force attack simulation
     simulateBruteForceAttack: async (
-      targetFunction: Function,
+      targetFunction: (token: string) => Promise<unknown>,
       attempts: number = 100,
-    ) => {
+    ): Promise<{
+      totalTime: number;
+      attempts: number;
+      successful: number;
+      failed: number;
+      averageTime: number;
+      results: Array<{
+        success: boolean;
+        token: string;
+        time: number;
+        error?: string;
+      }>;
+    }> => {
       const results = [];
       const startTime = Date.now();
 
@@ -186,8 +194,14 @@ describe('Security Penetration Testing Suite', () => {
     // Session replay attack simulation
     simulateSessionReplayAttack: async (
       validToken: string,
-      targetFunction: Function,
-    ) => {
+      targetFunction: (token: string) => Promise<unknown>,
+    ): Promise<
+      Array<{
+        token: string;
+        success: boolean;
+        error?: string;
+      }>
+    > => {
       const replayAttempts = [
         validToken, // Original token
         validToken.replace(/.$/, '1'), // Modified last character
@@ -213,8 +227,15 @@ describe('Security Penetration Testing Suite', () => {
     // Race condition attack simulation
     simulateRaceConditionAttack: async (
       user: ByteBotdUser,
-      targetFunction: Function,
-    ) => {
+      targetFunction: (user: ByteBotdUser) => Promise<unknown>,
+    ): Promise<
+      Array<{
+        success: boolean;
+        index: number;
+        userRole: UserRole;
+        error?: string;
+      }>
+    > => {
       const originalRole = user.role;
       const concurrentRequests = 20;
 
@@ -229,7 +250,7 @@ describe('Security Penetration Testing Suite', () => {
           }
 
           try {
-            const result = await targetFunction(user);
+            const _result = await targetFunction(user);
             return { success: true, index: _index, userRole: user.role };
           } catch (error) {
             return {
@@ -268,16 +289,16 @@ describe('Security Penetration Testing Suite', () => {
       user,
       headers: {
         'user-agent': 'PenetrationTestBot/1.0',
-        'x-forwarded-for': metadata.ip || '10.0.0.100',
-        'x-real-ip': metadata.ip || '10.0.0.100',
-        'x-attack-vector': metadata.attackVector || 'unknown',
+        'x-forwarded-for': metadata.ip ?? '10.0.0.100',
+        'x-real-ip': metadata.ip ?? '10.0.0.100',
+        'x-attack-vector': metadata.attackVector ?? 'unknown',
         ...headers,
       },
-      ip: metadata.ip || '10.0.0.100',
-      url: metadata.url || '/api/pentest',
-      method: metadata.method || 'GET',
-      connection: { remoteAddress: metadata.ip || '10.0.0.100' },
-      socket: { remoteAddress: metadata.ip || '10.0.0.100' },
+      ip: metadata.ip ?? '10.0.0.100',
+      url: metadata.url ?? '/api/pentest',
+      method: metadata.method ?? 'GET',
+      connection: { remoteAddress: metadata.ip ?? '10.0.0.100' },
+      socket: { remoteAddress: metadata.ip ?? '10.0.0.100' },
     };
 
     return {
@@ -385,7 +406,7 @@ describe('Security Penetration Testing Suite', () => {
             success: true,
             vulnerability: 'CRITICAL',
           });
-        } catch (error) {
+        } catch (_error) {
           attackResults.push({ attackType, success: false, blocked: true });
         }
       }
@@ -494,7 +515,7 @@ describe('Security Penetration Testing Suite', () => {
           .mockResolvedValue(maliciousPayload);
 
         try {
-          const result = await jwtAuthGuard.canActivate(context);
+          const _result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest();
 
           // Check if role escalation succeeded
@@ -509,7 +530,7 @@ describe('Security Penetration Testing Suite', () => {
             success: escalationSuccess,
             vulnerability: escalationSuccess ? 'CRITICAL' : 'NONE',
           });
-        } catch (error) {
+        } catch (_error) {
           attackResults.push({ attackType, success: false, blocked: true });
         }
       }
@@ -788,7 +809,7 @@ describe('Security Penetration Testing Suite', () => {
         const context = createPentestExecutionContext(
           user,
           {},
-          { attackVector: `authz-timing-${testCase.role || 'null'}` },
+          { attackVector: `authz-timing-${testCase.role ?? 'null'}` },
         );
 
         jest
@@ -808,7 +829,7 @@ describe('Security Penetration Testing Suite', () => {
         const processingTime = Number(endTime - startTime) / 1000000;
 
         authzTimingResults.push({
-          userRole: testCase.role || 'null',
+          userRole: testCase.role ?? 'null',
           time: processingTime,
           shouldPass: testCase.shouldPass,
         });
@@ -1089,7 +1110,7 @@ describe('Security Penetration Testing Suite', () => {
           .mockResolvedValue(technique._payload);
 
         try {
-          const result = await jwtAuthGuard.canActivate(context);
+          const _result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest();
 
           // Check if evasion led to privilege escalation

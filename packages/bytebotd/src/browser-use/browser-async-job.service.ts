@@ -435,7 +435,7 @@ export class BrowserAsyncJobService {
    */
   private async processBatchAutomation(job: AsyncJobResultDto): Promise<void> {
     const config = job.configuration;
-    const tasks = config.tasks || [];
+    const tasks = Array.isArray(config.tasks) ? config.tasks : [];
 
     job.progress.totalSteps = tasks.length;
     job.results.totalTasks = tasks.length;
@@ -504,7 +504,7 @@ export class BrowserAsyncJobService {
    */
   private async processDataExtraction(job: AsyncJobResultDto): Promise<void> {
     const config = job.configuration;
-    const urls = config.urls || [];
+    const urls = Array.isArray(config.urls) ? config.urls : [];
 
     job.progress.totalSteps = urls.length;
 
@@ -524,8 +524,16 @@ export class BrowserAsyncJobService {
         const extractedData = await this.browserService.extractPageData(
           sessionId,
           {
-            selectors: config.selectors,
-            waitForSelector: config.waitForSelector,
+            selectors:
+              typeof config.selectors === 'object' &&
+              config.selectors !== null &&
+              !Array.isArray(config.selectors)
+                ? config.selectors
+                : {},
+            waitForSelector:
+              typeof config.waitForSelector === 'string'
+                ? config.waitForSelector
+                : undefined,
             timeout: config.timeout || 30000,
           },
         );
@@ -764,9 +772,13 @@ export class BrowserAsyncJobService {
   private estimateTotalSteps(_dto: CreateAsyncJobDto): number {
     switch (_dto.jobType) {
       case AsyncJobType.BATCH_AUTOMATION:
-        return _dto.configuration.tasks?.length || 1;
+        return Array.isArray(_dto.configuration.tasks)
+          ? _dto.configuration.tasks.length
+          : 1;
       case AsyncJobType.DATA_EXTRACTION:
-        return _dto.configuration.urls?.length || 1;
+        return Array.isArray(_dto.configuration.urls)
+          ? _dto.configuration.urls.length
+          : 1;
       default:
         return 1;
     }

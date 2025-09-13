@@ -17,6 +17,25 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { Application } from 'express';
+import {
+  UserRole,
+  TestJwtPayload,
+  LoginCredentials,
+  LoginResponse,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  CreateTaskRequest,
+  TaskResponse,
+  AuthenticatedRequest,
+  MockAuthServiceInterface,
+  MockJwtServiceInterface,
+  MockConfigServiceInterface,
+  HealthCheckResponse,
+  ExpressRequest,
+  ExpressResponse,
+  ExpressNextFunction,
+} from '../src/test-utils/test-interfaces';
 
 // Mock App Module for security testing
 class MockSecurityModule {
@@ -36,9 +55,9 @@ class MockSecurityModule {
 
 // Mock controllers for testing
 class MockAuthController {
-  constructor(private authService: any) {}
+  constructor(private authService: MockAuthServiceInterface) {}
 
-  async login(body: any) {
+  async login(body: LoginCredentials): Promise<LoginResponse> {
     if (body.email === 'admin@bytebot.ai' && body.password === 'admin123') {
       return {
         accessToken: 'mock-jwt-token',
@@ -50,7 +69,7 @@ class MockAuthController {
     throw new Error('Invalid credentials');
   }
 
-  async refresh(body: any) {
+  async refresh(body: RefreshTokenRequest): Promise<RefreshTokenResponse> {
     if (body.refreshToken === 'mock-refresh-token') {
       return {
         accessToken: 'new-mock-jwt-token',
@@ -63,7 +82,7 @@ class MockAuthController {
 }
 
 class MockTasksController {
-  async getTasks(req: any) {
+  async getTasks(req: AuthenticatedRequest): Promise<TaskResponse[]> {
     // Requires authentication
     if (!req.user) {
       throw new Error('Authentication required');
@@ -74,7 +93,10 @@ class MockTasksController {
     ];
   }
 
-  async createTask(req: any, body: any) {
+  async createTask(
+    req: AuthenticatedRequest,
+    body: CreateTaskRequest,
+  ): Promise<TaskResponse> {
     // Requires operator or admin role
     if (!req.user || !['admin', 'operator'].includes(req.user.role)) {
       throw new Error('Insufficient permissions');
@@ -86,7 +108,10 @@ class MockTasksController {
     };
   }
 
-  async deleteTask(req: any, params: any) {
+  async deleteTask(
+    req: AuthenticatedRequest,
+    params: { id: string },
+  ): Promise<{ success: boolean; deletedId: string }> {
     // Requires admin role
     if (!req.user || req.user.role !== 'admin') {
       throw new Error('Admin access required');
@@ -96,7 +121,7 @@ class MockTasksController {
 }
 
 class MockHealthController {
-  async getHealth() {
+  async getHealth(): Promise<HealthCheckResponse> {
     return {
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -106,33 +131,52 @@ class MockHealthController {
 }
 
 // Mock services
-class MockAuthService {
-  validateToken(token: string) {
-    const validTokens = {
-      'mock-jwt-token': { id: '1', email: 'admin@bytebot.ai', role: 'admin' },
+class MockAuthService implements MockAuthServiceInterface {
+  validateToken(token: string): TestJwtPayload | null {
+    const validTokens: Record<string, TestJwtPayload> = {
+      'mock-jwt-token': {
+        id: '1',
+        sub: '1',
+        email: 'admin@bytebot.ai',
+        role: UserRole._ADMIN,
+      },
       'operator-token': {
         id: '2',
+        sub: '2',
         email: 'operator@bytebot.ai',
-        role: 'operator',
+        role: UserRole._OPERATOR,
       },
-      'viewer-token': { id: '3', email: 'viewer@bytebot.ai', role: 'viewer' },
+      'viewer-token': {
+        id: '3',
+        sub: '3',
+        email: 'viewer@bytebot.ai',
+        role: UserRole._VIEWER,
+      },
     };
-    return validTokens[token] || null;
+    return validTokens[token] ?? null;
   }
 }
 
-class MockJwtService {
-  verify(token: string) {
+class MockJwtService implements MockJwtServiceInterface {
+  verify(token: string): TestJwtPayload {
     const authService = new MockAuthService();
     const user = authService.validateToken(token);
     if (!user) throw new Error('Invalid token');
     return user;
   }
+
+  verifyAsync(token: string): Promise<TestJwtPayload> {
+    return Promise.resolve(this.verify(token));
+  }
+
+  sign(_payload: Record<string, unknown>): string {
+    return 'generated-token';
+  }
 }
 
-class MockConfigService {
-  get(key: string) {
-    const config = {
+class MockConfigService implements MockConfigServiceInterface {
+  get(key: string): string | number | undefined {
+    const config: Record<string, string | number> = {
       JWT_SECRET: 'test-secret',
       CORS_ORIGIN: 'http://localhost:3000',
       RATE_LIMIT_MAX: 100,
@@ -147,6 +191,9 @@ describe('Security E2E Tests', () => {
 
   const operationId = `security_e2e_test_${Date.now()}`;
 
+  // Helper function to get typed HTTP server
+  const getHttpServer = () => app.getHttpServer() as Application;
+
   beforeAll(async () => {
     console.log(`[${operationId}] Setting up Security E2E test application`);
 
@@ -157,103 +204,167 @@ describe('Security E2E Tests', () => {
     app = moduleRef.createNestApplication();
 
     // Configure security middleware
-    app.use('/api/*', (req, res, next) => {
-      // Mock authentication middleware
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.substring(7);
-        try {
-          const jwtService = new MockJwtService();
-          const user = jwtService.verify(token);
-          req.user = user;
-        } catch {
-          // Invalid token, user remains undefined
+    app.use(
+      '/api/*',
+      (
+        req: AuthenticatedRequest,
+        res: ExpressResponse,
+        next: ExpressNextFunction,
+      ) => {
+        // Mock authentication middleware
+        const authHeader = req.headers.authorization;
+        if (authHeader?.startsWith('Bearer ')) {
+          const token = authHeader.substring(7);
+          try {
+            const jwtService = new MockJwtService();
+            const user = jwtService.verify(token);
+            req.user = user;
+          } catch {
+            // Invalid token, user remains undefined
+          }
         }
-      }
-      next();
-    });
+        next();
+      },
+    );
 
     // Mock rate limiting middleware
-    const requestCounts = new Map();
-    app.use((req, res, next) => {
-      const ip = req.ip || '127.0.0.1';
-      const count = requestCounts.get(ip) || 0;
-      if (count > 50) {
-        // Rate limit
-        return res.status(429).json({ message: 'Too many requests' });
-      }
-      requestCounts.set(ip, count + 1);
-      next();
-    });
+    const requestCounts = new Map<string, number>();
+    app.use(
+      (
+        req: ExpressRequest,
+        res: ExpressResponse,
+        next: ExpressNextFunction,
+      ) => {
+        const ip = req.ip ?? '127.0.0.1';
+        const count = requestCounts.get(ip) ?? 0;
+        if (count > 50) {
+          // Rate limit
+          return res.status(429).json({ message: 'Too many requests' });
+        }
+        requestCounts.set(ip, count + 1);
+        next();
+      },
+    );
 
     // Mock security headers middleware
-    app.use((req, res, next) => {
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('X-Frame-Options', 'DENY');
-      res.setHeader('X-XSS-Protection', '1; mode=block');
-      res.setHeader(
-        'Strict-Transport-Security',
-        'max-age=31536000; includeSubDomains',
-      );
-      next();
-    });
+    app.use(
+      (
+        req: ExpressRequest,
+        res: ExpressResponse,
+        next: ExpressNextFunction,
+      ) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'DENY');
+        res.setHeader('X-XSS-Protection', '1; mode=block');
+        res.setHeader(
+          'Strict-Transport-Security',
+          'max-age=31536000; includeSubDomains',
+        );
+        next();
+      },
+    );
 
     // Mock route handlers
-    app.getHttpAdapter().post('/auth/login', async (req, res) => {
-      try {
-        const controller = new MockAuthController(new MockAuthService());
-        const result = await controller.login(req.body);
-        res.json(result);
-      } catch (error) {
-        res.status(401).json({ message: error.message });
-      }
-    });
+    app
+      .getHttpAdapter()
+      .post(
+        '/auth/login',
+        async (req: ExpressRequest, res: ExpressResponse) => {
+          try {
+            const controller = new MockAuthController(new MockAuthService());
+            const result = await controller.login(req.body as LoginCredentials);
+            res.json(result);
+          } catch (error: unknown) {
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
+            res.status(401).json({ message: errorMessage });
+          }
+        },
+      );
 
-    app.getHttpAdapter().post('/auth/refresh', async (req, res) => {
-      try {
-        const controller = new MockAuthController(new MockAuthService());
-        const result = await controller.refresh(req.body);
-        res.json(result);
-      } catch (error) {
-        res.status(401).json({ message: error.message });
-      }
-    });
+    app
+      .getHttpAdapter()
+      .post(
+        '/auth/refresh',
+        async (req: ExpressRequest, res: ExpressResponse) => {
+          try {
+            const controller = new MockAuthController(new MockAuthService());
+            const result = await controller.refresh(
+              req.body as RefreshTokenRequest,
+            );
+            res.json(result);
+          } catch (error: unknown) {
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
+            res.status(401).json({ message: errorMessage });
+          }
+        },
+      );
 
-    app.getHttpAdapter().get('/api/tasks', async (req, res) => {
-      try {
-        const controller = new MockTasksController();
-        const result = await controller.getTasks(req);
-        res.json(result);
-      } catch (error) {
-        res.status(401).json({ message: error.message });
-      }
-    });
+    app
+      .getHttpAdapter()
+      .get(
+        '/api/tasks',
+        async (req: AuthenticatedRequest, res: ExpressResponse) => {
+          try {
+            const controller = new MockTasksController();
+            const result = await controller.getTasks(req);
+            res.json(result);
+          } catch (error: unknown) {
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
+            res.status(401).json({ message: errorMessage });
+          }
+        },
+      );
 
-    app.getHttpAdapter().post('/api/tasks', async (req, res) => {
-      try {
-        const controller = new MockTasksController();
-        const result = await controller.createTask(req, req.body);
-        res.json(result);
-      } catch (error) {
-        res.status(403).json({ message: error.message });
-      }
-    });
+    app
+      .getHttpAdapter()
+      .post(
+        '/api/tasks',
+        async (req: AuthenticatedRequest, res: ExpressResponse) => {
+          try {
+            const controller = new MockTasksController();
+            const result = await controller.createTask(
+              req,
+              req.body as CreateTaskRequest,
+            );
+            res.json(result);
+          } catch (error: unknown) {
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
+            res.status(403).json({ message: errorMessage });
+          }
+        },
+      );
 
-    app.getHttpAdapter().delete('/api/tasks/:id', async (req, res) => {
-      try {
-        const controller = new MockTasksController();
-        const result = await controller.deleteTask(req, req.params);
-        res.json(result);
-      } catch (error) {
-        res.status(403).json({ message: error.message });
-      }
-    });
+    app
+      .getHttpAdapter()
+      .delete(
+        '/api/tasks/:id',
+        async (req: AuthenticatedRequest, res: ExpressResponse) => {
+          try {
+            const controller = new MockTasksController();
+            const result = await controller.deleteTask(
+              req,
+              req.params as { id: string },
+            );
+            res.json(result);
+          } catch (error: unknown) {
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
+            res.status(403).json({ message: errorMessage });
+          }
+        },
+      );
 
-    app.getHttpAdapter().get('/health', async (req, res) => {
-      const controller = new MockHealthController();
-      const result = await controller.getHealth();
-      res.json(result);
-    });
+    app
+      .getHttpAdapter()
+      .get('/health', async (req: ExpressRequest, res: ExpressResponse) => {
+        const controller = new MockHealthController();
+        const result = await controller.getHealth();
+        res.json(result);
+      });
 
     await app.init();
 
@@ -273,7 +384,7 @@ describe('Security E2E Tests', () => {
       const testId = `${operationId}_valid_login`;
       console.log(`[${testId}] Testing valid credential login`);
 
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .post('/auth/login')
         .send({
           email: 'admin@bytebot.ai',
@@ -298,7 +409,7 @@ describe('Security E2E Tests', () => {
       const testId = `${operationId}_invalid_login`;
       console.log(`[${testId}] Testing invalid credential rejection`);
 
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .post('/auth/login')
         .send({
           email: 'admin@bytebot.ai',
@@ -313,7 +424,7 @@ describe('Security E2E Tests', () => {
       const testId = `${operationId}_token_refresh`;
       console.log(`[${testId}] Testing token refresh`);
 
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .post('/auth/refresh')
         .send({
           refreshToken: 'mock-refresh-token',
@@ -333,7 +444,7 @@ describe('Security E2E Tests', () => {
       const testId = `${operationId}_invalid_refresh`;
       console.log(`[${testId}] Testing invalid refresh token rejection`);
 
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .post('/auth/refresh')
         .send({
           refreshToken: 'invalid-refresh-token',
@@ -350,7 +461,7 @@ describe('Security E2E Tests', () => {
       );
 
       // Missing password
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .post('/auth/login')
         .send({
           email: 'admin@bytebot.ai',
@@ -358,7 +469,7 @@ describe('Security E2E Tests', () => {
         .expect(401);
 
       // Missing email
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .post('/auth/login')
         .send({
           password: 'admin123',
@@ -366,10 +477,7 @@ describe('Security E2E Tests', () => {
         .expect(401);
 
       // Empty payload
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({})
-        .expect(401);
+      await request(getHttpServer()).post('/auth/login').send({}).expect(401);
 
       console.log(
         `[${testId}] Malformed authentication payload rejection test completed`,
@@ -384,13 +492,13 @@ describe('Security E2E Tests', () => {
         `[${testId}] Testing authenticated user access to protected routes`,
       );
 
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .get('/api/tasks')
         .set('Authorization', 'Bearer mock-jwt-token')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBeGreaterThan(0);
+      expect((response.body as unknown[]).length).toBeGreaterThan(0);
 
       console.log(
         `[${testId}] Authenticated access test completed successfully`,
@@ -401,7 +509,7 @@ describe('Security E2E Tests', () => {
       const testId = `${operationId}_unauthenticated_denial`;
       console.log(`[${testId}] Testing unauthenticated access denial`);
 
-      await request(app.getHttpServer()).get('/api/tasks').expect(401);
+      await request(getHttpServer()).get('/api/tasks').expect(401);
 
       console.log(`[${testId}] Unauthenticated denial test completed`);
     });
@@ -411,33 +519,33 @@ describe('Security E2E Tests', () => {
       console.log(`[${testId}] Testing role-based access for task creation`);
 
       // Admin should be able to create tasks
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .post('/api/tasks')
         .set('Authorization', 'Bearer mock-jwt-token')
         .send({
           title: 'Admin Task',
           description: 'Task created by admin',
-        })
+        } as CreateTaskRequest)
         .expect(200);
 
       // Operator should be able to create tasks
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .post('/api/tasks')
         .set('Authorization', 'Bearer operator-token')
         .send({
           title: 'Operator Task',
           description: 'Task created by operator',
-        })
+        } as CreateTaskRequest)
         .expect(200);
 
       // Viewer should not be able to create tasks
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .post('/api/tasks')
         .set('Authorization', 'Bearer viewer-token')
         .send({
           title: 'Viewer Task',
           description: 'Task attempted by viewer',
-        })
+        } as CreateTaskRequest)
         .expect(403);
 
       console.log(`[${testId}] Role-based task creation test completed`);
@@ -448,19 +556,19 @@ describe('Security E2E Tests', () => {
       console.log(`[${testId}] Testing admin-only access for task deletion`);
 
       // Admin should be able to delete tasks
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .delete('/api/tasks/123')
         .set('Authorization', 'Bearer mock-jwt-token')
         .expect(200);
 
       // Operator should not be able to delete tasks
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .delete('/api/tasks/456')
         .set('Authorization', 'Bearer operator-token')
         .expect(403);
 
       // Viewer should not be able to delete tasks
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .delete('/api/tasks/789')
         .set('Authorization', 'Bearer viewer-token')
         .expect(403);
@@ -473,19 +581,19 @@ describe('Security E2E Tests', () => {
       console.log(`[${testId}] Testing invalid JWT token rejection`);
 
       // Malformed token
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .get('/api/tasks')
         .set('Authorization', 'Bearer invalid-token')
         .expect(401);
 
       // Expired token (simulated)
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .get('/api/tasks')
         .set('Authorization', 'Bearer expired-token')
         .expect(401);
 
       // No Bearer prefix
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .get('/api/tasks')
         .set('Authorization', 'mock-jwt-token')
         .expect(401);
@@ -505,15 +613,15 @@ describe('Security E2E Tests', () => {
         priority: 'high',
       };
 
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .post('/api/tasks')
         .set('Authorization', 'Bearer mock-jwt-token')
         .send(maliciousPayload)
         .expect(200);
 
       // Verify XSS content is sanitized (depends on implementation)
-      expect(response.body.title).toBeDefined();
-      expect(response.body.description).toBeDefined();
+      expect((response.body as TaskResponse).title).toBeDefined();
+      expect((response.body as TaskResponse).description).toBeDefined();
 
       console.log(`[${testId}] XSS sanitization test completed`);
     });
@@ -523,14 +631,14 @@ describe('Security E2E Tests', () => {
       console.log(`[${testId}] Testing invalid input data type rejection`);
 
       // Array instead of object
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .post('/api/tasks')
         .set('Authorization', 'Bearer mock-jwt-token')
         .send(['invalid', 'array', 'payload'])
         .expect(400);
 
       // String instead of object
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .post('/api/tasks')
         .set('Authorization', 'Bearer mock-jwt-token')
         .send('invalid string payload')
@@ -550,7 +658,7 @@ describe('Security E2E Tests', () => {
       };
 
       // Should either accept with size limits or reject gracefully
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .post('/api/tasks')
         .set('Authorization', 'Bearer mock-jwt-token')
         .send(largePayload);
@@ -571,13 +679,13 @@ describe('Security E2E Tests', () => {
       };
 
       // Should accept the payload but sanitize it
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .post('/api/tasks')
         .set('Authorization', 'Bearer mock-jwt-token')
         .send(sqlInjectionPayload)
         .expect(200);
 
-      expect(response.body.title).toBeDefined();
+      expect((response.body as TaskResponse).title).toBeDefined();
 
       console.log(`[${testId}] SQL injection prevention test completed`);
     });
@@ -587,7 +695,7 @@ describe('Security E2E Tests', () => {
       console.log(`[${testId}] Testing required field validation`);
 
       // Missing title (assuming it's required)
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .post('/api/tasks')
         .set('Authorization', 'Bearer mock-jwt-token')
         .send({
@@ -605,7 +713,7 @@ describe('Security E2E Tests', () => {
       const testId = `${operationId}_security_headers`;
       console.log(`[${testId}] Testing security headers inclusion`);
 
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .get('/health')
         .expect(200);
 
@@ -623,7 +731,7 @@ describe('Security E2E Tests', () => {
       const testId = `${operationId}_cors_preflight`;
       console.log(`[${testId}] Testing CORS preflight request handling`);
 
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .options('/api/tasks')
         .set('Origin', 'http://localhost:3000')
         .set('Access-Control-Request-Method', 'POST')
@@ -639,7 +747,7 @@ describe('Security E2E Tests', () => {
       const testId = `${operationId}_clickjacking_prevention`;
       console.log(`[${testId}] Testing clickjacking prevention`);
 
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .get('/health')
         .expect(200);
 
@@ -652,7 +760,7 @@ describe('Security E2E Tests', () => {
       const testId = `${operationId}_content_sniffing_prevention`;
       console.log(`[${testId}] Testing content-type sniffing prevention`);
 
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .get('/health')
         .expect(200);
 
@@ -754,7 +862,7 @@ describe('Security E2E Tests', () => {
 
       for (const test of timingTests) {
         const startTime = Date.now();
-        await request(app.getHttpServer())
+        await request(getHttpServer())
           .post('/auth/login')
           .send(test)
           .expect(401);
@@ -810,7 +918,7 @@ describe('Security E2E Tests', () => {
 
       const responses = [];
       for (const email of testEmails) {
-        const response = await request(app.getHttpServer())
+        const response = await request(getHttpServer())
           .post('/auth/login')
           .send({
             email,
@@ -831,7 +939,7 @@ describe('Security E2E Tests', () => {
       console.log(`[${testId}] Testing malformed JSON handling`);
 
       // Send malformed JSON
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .post('/auth/login')
         .send('{"email": "test@example.com", "password": "incomplete"}')
         .set('Content-Type', 'application/json');
@@ -852,7 +960,7 @@ describe('Security E2E Tests', () => {
         'Custom-Header': 'value\r\nSet-Cookie: evil=true',
       };
 
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .get('/health')
         .set(maliciousHeaders);
 
@@ -869,7 +977,7 @@ describe('Security E2E Tests', () => {
       console.log(`[${testId}] Testing request smuggling prevention`);
 
       // Attempt request smuggling with conflicting content-length headers
-      const response = await request(app.getHttpServer())
+      const response = await request(getHttpServer())
         .post('/auth/login')
         .set('Content-Length', '100')
         .set('Transfer-Encoding', 'chunked')
@@ -896,7 +1004,7 @@ describe('Security E2E Tests', () => {
       };
 
       // Generate security events
-      await request(app.getHttpServer())
+      await request(getHttpServer())
         .post('/auth/login')
         .send({
           email: 'attacker@evil.com',
@@ -1008,7 +1116,7 @@ describe('Security E2E Tests', () => {
       const securityChecks = [];
 
       for (const endpoint of endpoints) {
-        const response = await request(app.getHttpServer()).get(endpoint);
+        const response = await request(getHttpServer()).get(endpoint);
 
         securityChecks.push({
           endpoint,

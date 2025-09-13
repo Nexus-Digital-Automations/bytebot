@@ -214,7 +214,9 @@ describe('MetricsService', () => {
     it('should update system metrics periodically', () => {
       // Test that system metrics update doesn't throw errors
       expect(() => {
-        (service as any).updateSystemMetrics();
+        (
+          service as unknown as { updateSystemMetrics: () => void }
+        ).updateSystemMetrics();
       }).not.toThrow();
     });
   });
@@ -240,7 +242,9 @@ describe('MetricsService', () => {
         });
 
       expect(() => {
-        (service as any).updateSystemMetrics();
+        (
+          service as unknown as { updateSystemMetrics: () => void }
+        ).updateSystemMetrics();
       }).not.toThrow();
 
       // Restore original function

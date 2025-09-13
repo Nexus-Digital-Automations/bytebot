@@ -1697,9 +1697,225 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/TODO.json"
+    },
+    {
+      "id": "error_1757729491841_w16dpai76",
+      "title": "Fix TypeScript any types in middleware files",
+      "description": "Replace any types with proper Express middleware type definitions in security-middleware.standardized.ts, cors-security.middleware.ts, cors-security-simple.middleware.ts, and file-security.middleware.ts. Create specific middleware interfaces and ensure Express.js typing compatibility.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T02:11:31.841Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757729463886_1_general_d7b8f8f2",
+      "started_at": "2025-09-13T02:11:59.747Z",
+      "claimed_by": "development_session_1757729463886_1_general_d7b8f8f2",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757729463886_1_general_d7b8f8f2",
+          "role": "primary",
+          "assignedAt": "2025-09-13T02:11:59.747Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757729491841_w16dpai76",
+          "completedAt": "2025-09-13T02:18:08.608Z",
+          "completedBy": "development_session_1757729463886_1_general_d7b8f8f2",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T02:18:08.608Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T02:18:08.608Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/TODO.json"
+    },
+    {
+      "id": "error_1757729491787_m6rn5ryxi",
+      "title": "Fix TypeScript safety issues in test utilities and mock files",
+      "description": "Systematically resolve any types in test utility and mock files by creating proper Jest mock type definitions, replacing any types with specific mock interfaces, and ensuring test functionality is preserved while using proper TypeScript testing patterns.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T02:11:31.787Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757729463268_1_general_3d6a9fd6",
+      "started_at": "2025-09-13T02:12:00.776Z",
+      "claimed_by": "development_session_1757729463268_1_general_3d6a9fd6",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757729463268_1_general_3d6a9fd6",
+          "role": "primary",
+          "assignedAt": "2025-09-13T02:12:00.776Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757729491787_m6rn5ryxi",
+          "completedAt": "2025-09-13T02:19:46.542Z",
+          "completedBy": "development_session_1757729463268_1_general_3d6a9fd6",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T02:19:46.542Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T02:19:46.542Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/TODO.json"
+    },
+    {
+      "id": "error_1757729647359_ymmuxte1p",
+      "title": "CRITICAL: Fix 21 ESLint violations in shared package - TypeScript any types and parsing errors",
+      "description": "Fix critical ESLint violations preventing development progress: 4 explicit any-type warnings in rbac-authorization.decorators.ts (lines 652, 694, 734, 778) and 17 TypeScript project parsing errors for test files and utilities. These violations block development and must be resolved immediately.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T02:14:07.359Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757728092762_1_general_c2e3b3ad",
+      "started_at": "2025-09-13T02:14:27.656Z",
+      "claimed_by": "development_session_1757728092762_1_general_c2e3b3ad",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757728092762_1_general_c2e3b3ad",
+          "role": "primary",
+          "assignedAt": "2025-09-13T02:14:27.656Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757729647359_ymmuxte1p",
+          "completedAt": "2025-09-13T02:19:52.660Z",
+          "completedBy": "development_session_1757728092762_1_general_c2e3b3ad",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T02:19:52.660Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T02:19:52.660Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/TODO.json"
+    },
+    {
+      "id": "error_1757730199863_yxfqv0tyi",
+      "title": "EMERGENCY: Fix 4 any-type ESLint warnings in RBAC decorators",
+      "description": "Fix 4 TypeScript any-type warnings in rbac-authorization.decorators.ts lines 652, 686, 719, 753. These violations block development progress and violate zero-tolerance linting policy. Replace any types with proper TypeScript types for decorator target parameters.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T02:23:19.863Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757728092762_1_general_c2e3b3ad",
+      "started_at": "2025-09-13T02:23:40.200Z",
+      "claimed_by": "development_session_1757728092762_1_general_c2e3b3ad",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757728092762_1_general_c2e3b3ad",
+          "role": "primary",
+          "assignedAt": "2025-09-13T02:23:40.200Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757730199863_yxfqv0tyi",
+          "completedAt": "2025-09-13T02:25:36.583Z",
+          "completedBy": "development_session_1757728092762_1_general_c2e3b3ad",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T02:25:36.583Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T02:25:36.583Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/TODO.json"
     }
   ],
-  "total_completed": 38,
-  "last_completion": "2025-09-13T02:04:28.832Z",
+  "total_completed": 42,
+  "last_completion": "2025-09-13T02:25:36.583Z",
   "created_at": "2025-09-06T08:07:58.068Z"
 }

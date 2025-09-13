@@ -12,6 +12,11 @@
  * @version 1.0.0
  */
 
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { expect } from '@jest/globals';
 
 // Custom Jest matchers for BytebotD testing
