@@ -1558,9 +1558,63 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/TODO.json"
+    },
+    {
+      "id": "error_1757737618019_gqrkyn9yc",
+      "title": "CRITICAL ESLint FINAL ELIMINATION - General TypeScript Safety Violations",
+      "description": "Eliminate all general ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd focusing on: 1) @typescript-eslint/no-unsafe-assignment violations 2) @typescript-eslint/no-unsafe-member-access violations 3) @typescript-eslint/no-unsafe-return violations 4) @typescript-eslint/no-explicit-any violations 5) All general TypeScript safety violations. Target 519 total violations - prioritize files with highest violation counts for maximum impact.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:26:58.019Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757737589448_1_general_68286cc9",
+      "started_at": "2025-09-13T04:27:32.420Z",
+      "claimed_by": "development_session_1757737589448_1_general_68286cc9",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757737589448_1_general_68286cc9",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:27:32.420Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757737618019_gqrkyn9yc",
+          "completedAt": "2025-09-13T05:08:39.544Z",
+          "completedBy": "development_session_1757737589448_1_general_68286cc9",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T05:08:39.544Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T05:08:39.544Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/TODO.json"
     }
   ],
-  "total_completed": 29,
-  "last_completion": "2025-09-13T05:02:31.925Z",
+  "total_completed": 30,
+  "last_completion": "2025-09-13T05:08:39.544Z",
   "created_at": "2025-09-11T09:00:29.533Z"
 }
