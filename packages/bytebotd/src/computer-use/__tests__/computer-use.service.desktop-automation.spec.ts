@@ -772,9 +772,10 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       }
 
       // First and third should succeed, second should fail
-      expect(results[0].success).toBe(true); // move_mouse
-      expect(results[1].success).toBe(false); // click_mouse (failed)
-      expect(results[2].success).toBe(true); // type_text
+      expect(results).toHaveLength(3);
+      expect(results[0]?.success).toBe(true); // move_mouse
+      expect(results[1]?.success).toBe(false); // click_mouse (failed)
+      expect(results[2]?.success).toBe(true); // type_text
     });
   });
 

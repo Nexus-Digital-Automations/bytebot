@@ -224,8 +224,13 @@ describe('Security Penetration Testing Suite', () => {
         try {
           await targetFunction(token);
           results.push({ token, success: true });
-        } catch (_error) {
-          results.push({ token, success: false, error: _error.message });
+        } catch (_error: unknown) {
+          // Type guard for Error-like objects with message property
+          const errorMessage =
+            _error && typeof _error === 'object' && 'message' in _error
+              ? (_error as { message: string }).message
+              : 'Unknown error occurred';
+          results.push({ token, success: false, error: errorMessage });
         }
       }
 
@@ -512,8 +517,12 @@ describe('Security Penetration Testing Suite', () => {
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
 
         // Simulate successful token verification but with malicious payload
+        const tokenPart = token.split('.')[1];
+        if (!tokenPart) {
+          throw new Error('Invalid token format: missing payload part');
+        }
         const maliciousPayload = JSON.parse(
-          Buffer.from(token.split('.')[1], 'base64url').toString(),
+          Buffer.from(tokenPart, 'base64url').toString(),
         ) as object;
         jest
           .spyOn(jwtService, 'verifyAsync')
@@ -1278,6 +1287,7 @@ describe('Security Penetration Testing Suite', () => {
         for (let i = 0; i < 15; i++) {
           roundPromises.push(
             (async () => {
+              // Intentional prototype pollution attack test - using type assertion for security testing
               const maliciousUser: ByteBotdUser = {
                 id: `role-attacker-${round}-${i}`,
                 email: `attacker${round}${i}@malicious.com`,
@@ -1285,8 +1295,10 @@ describe('Security Penetration Testing Suite', () => {
                 role: UserRole._VIEWER,
                 isActive: true,
                 sub: `role-attacker-${round}-${i}`,
-                __proto__: { role: UserRole._ADMIN },
-              };
+                ...({
+                  __proto__: { role: UserRole._ADMIN },
+                } as any),
+              } as ByteBotdUser;
 
               const context = createPentestExecutionContext(
                 maliciousUser,

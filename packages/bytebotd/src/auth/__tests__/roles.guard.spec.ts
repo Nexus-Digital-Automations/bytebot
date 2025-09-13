@@ -909,8 +909,15 @@ describe('RolesGuard', () => {
       try {
         await guard.canActivate(context);
         fail('Expected ForbiddenException');
-      } catch (error) {
-        expect(error.message).toContain('admin, operator');
+      } catch (error: unknown) {
+        // Type guard for Error-like objects with message property
+        if (error && typeof error === 'object' && 'message' in error) {
+          expect((error as { message: string }).message).toContain(
+            'admin, operator',
+          );
+        } else {
+          throw new Error('Expected error with message property');
+        }
       }
 
       console.log(`[${testId}] Detailed error messages test completed`);

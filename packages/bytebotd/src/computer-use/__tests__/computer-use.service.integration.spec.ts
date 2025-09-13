@@ -35,6 +35,7 @@ import {
   ReadFileActionDto,
   ApplicationActionDto,
 } from '../dto/computer-action.dto';
+import { ApplicationName } from '../dto/base.dto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -151,7 +152,7 @@ describe('ComputerUseService Integration Tests', () => {
     it('should handle application lifecycle with window management', async () => {
       const appAction: ApplicationActionDto = {
         action: 'application',
-        application: 'firefox',
+        application: ApplicationName.FIREFOX,
       };
 
       // Mock application not running initially
@@ -523,6 +524,11 @@ describe('ComputerUseService Integration Tests', () => {
       })) as FileReadResult;
 
       expect(readResults.success).toBe(true);
+      if (!readResults.data) {
+        throw new Error(
+          'Expected readResults.data to be defined for successful read operation',
+        );
+      }
       const parsedResults = JSON.parse(
         Buffer.from(readResults.data, 'base64').toString(),
       ) as { originalFile: string; status: string };

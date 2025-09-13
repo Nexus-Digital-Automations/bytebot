@@ -153,6 +153,7 @@ import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
 import { Application } from '@bytebot/shared';
 import { ApplicationActionDto } from '../dto/computer-action.dto';
+import { ApplicationName } from '../dto/base.dto';
 import { spawn, SpawnOptions } from 'child_process';
 import { promisify } from 'util';
 
@@ -245,7 +246,7 @@ describe('ComputerUseService - Application Management', () => {
     it('should activate desktop using wmctrl command', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'desktop',
+        application: ApplicationName.DESKTOP,
       };
 
       await service.action(action);
@@ -276,7 +277,7 @@ describe('ComputerUseService - Application Management', () => {
     it('should launch firefox when not running', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'firefox',
+        application: ApplicationName.FIREFOX,
       };
 
       // Mock application not running (wmctrl check fails with exit code 1)
@@ -310,13 +311,17 @@ describe('ComputerUseService - Application Management', () => {
      * Test all supported applications launch correctly
      */
     it('should launch all supported applications when not running', async () => {
-      const appConfigs: Array<[Application, string, string]> = [
-        ['firefox', 'firefox-esr', 'Navigator.firefox-esr'],
-        ['1password', '1password', '1password.1Password'],
-        ['thunderbird', 'thunderbird', 'Mail.thunderbird'],
-        ['vscode', 'code', 'code.Code'],
-        ['terminal', 'xfce4-terminal', 'xfce4-terminal.Xfce4-Terminal'],
-        ['directory', 'thunar', 'Thunar'],
+      const appConfigs: Array<[ApplicationName, string, string]> = [
+        [ApplicationName.FIREFOX, 'firefox-esr', 'Navigator.firefox-esr'],
+        [ApplicationName.ONEPASSWORD, '1password', '1password.1Password'],
+        [ApplicationName.THUNDERBIRD, 'thunderbird', 'Mail.thunderbird'],
+        [ApplicationName.VSCODE, 'code', 'code.Code'],
+        [
+          ApplicationName.TERMINAL,
+          'xfce4-terminal',
+          'xfce4-terminal.Xfce4-Terminal',
+        ],
+        [ApplicationName.DIRECTORY, 'thunar', 'Thunar'],
       ];
 
       for (const [app, command, processName] of appConfigs) {
@@ -354,10 +359,10 @@ describe('ComputerUseService - Application Management', () => {
      * Should activate window and maximize it for better UX
      */
     it('should activate and maximize running applications', async () => {
-      const appConfigs: Array<[Application, string]> = [
-        ['firefox', 'Navigator.firefox-esr'],
-        ['vscode', 'code.Code'],
-        ['thunderbird', 'Mail.thunderbird'],
+      const appConfigs: Array<[ApplicationName, string]> = [
+        [ApplicationName.FIREFOX, 'Navigator.firefox-esr'],
+        [ApplicationName.VSCODE, 'code.Code'],
+        [ApplicationName.THUNDERBIRD, 'Mail.thunderbird'],
       ];
 
       for (const [app, processName] of appConfigs) {
@@ -420,7 +425,7 @@ describe('ComputerUseService - Application Management', () => {
     it('should throw _error for unsupported application', async () => {
       const action = {
         action: 'application' as const,
-        application: 'unsupported-app' as Application,
+        application: 'unsupported-app' as ApplicationName,
       };
 
       await expect(service.action(action)).rejects.toThrow(
@@ -436,7 +441,7 @@ describe('ComputerUseService - Application Management', () => {
     it('should handle wmctrl timeout _error gracefully', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'firefox',
+        application: ApplicationName.FIREFOX,
       };
 
       // Mock timeout error
@@ -463,7 +468,7 @@ describe('ComputerUseService - Application Management', () => {
     it('should handle spawn errors during application launch', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'terminal',
+        application: ApplicationName.TERMINAL,
       };
 
       mockExecAsync.mockRejectedValue({ code: 1 });
@@ -484,7 +489,7 @@ describe('ComputerUseService - Application Management', () => {
     it('should properly unref spawned processes', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'vscode',
+        application: ApplicationName.VSCODE,
       };
 
       // Mock application already running to trigger both activation and maximization
@@ -505,7 +510,7 @@ describe('ComputerUseService - Application Management', () => {
     it('should run all operations with sudo user context', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'thunderbird',
+        application: ApplicationName.THUNDERBIRD,
       };
 
       mockExecAsync.mockResolvedValue({
@@ -528,7 +533,7 @@ describe('ComputerUseService - Application Management', () => {
     it('should set secure DISPLAY environment variable', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: '1password',
+        application: ApplicationName.ONEPASSWORD,
       };
 
       mockExecAsync.mockRejectedValue({ code: 1 });
@@ -554,7 +559,7 @@ describe('ComputerUseService - Application Management', () => {
     it('should apply timeout to application status checks', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'directory',
+        application: ApplicationName.DIRECTORY,
       };
 
       mockExecAsync.mockResolvedValue({ stdout: 'Thunar window' });

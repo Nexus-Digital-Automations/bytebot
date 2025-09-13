@@ -1068,6 +1068,11 @@ describe('ComputerUseService - File Operations', () => {
           expect(result.data).toBe(contentBuffer.toString('base64'));
 
           // Verify content can be decoded back correctly
+          if (!result.data) {
+            throw new Error(
+              'Expected result.data to be defined for successful read operation',
+            );
+          }
           const decodedContent = Buffer.from(result.data, 'base64').toString();
           expect(decodedContent).toBe(testCase.content);
         }
