@@ -295,7 +295,7 @@ describe('Security Validation E2E Tests', () => {
         .expect(400);
 
       expect(
-        response.body.requestId || response.headers['x-request-id'],
+        response.body.requestId ?? response.headers['x-request-id'],
       ).toBeDefined();
     });
 

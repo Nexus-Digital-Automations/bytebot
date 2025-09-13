@@ -98,7 +98,7 @@ class MockTasksController {
     body: CreateTaskRequest,
   ): Promise<TaskResponse> {
     // Requires operator or admin role
-    if (!req.user || !['admin', 'operator'].includes(req.user.role)) {
+    if (!req.user ?? !['admin', 'operator'].includes(req.user.role)) {
       throw new Error('Insufficient permissions');
     }
     return {
@@ -113,7 +113,7 @@ class MockTasksController {
     params: { id: string },
   ): Promise<{ success: boolean; deletedId: string }> {
     // Requires admin role
-    if (!req.user || req.user.role !== 'admin') {
+    if (!req.user ?? req.user.role !== 'admin') {
       throw new Error('Admin access required');
     }
     return { success: true, deletedId: params.id };

@@ -28,16 +28,9 @@ import { NutService } from '../../nut/nut.service';
 import {
   MoveMouseAction,
   ClickMouseAction,
-  ScreenshotAction,
   WriteFileAction,
-  ReadFileAction,
-  ApplicationAction,
 } from '@bytebot/shared';
-import {
-  ApplicationActionDto,
-  ScreenshotActionDto,
-  ReadFileActionDto,
-} from '../dto/computer-action.dto';
+import { ReadFileActionDto } from '../dto/computer-action.dto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 

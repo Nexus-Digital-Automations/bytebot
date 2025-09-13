@@ -580,7 +580,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         await expect(service.action(action)).rejects.toThrow();
 
         // Assert
-        expect(_loggerErrorSpy).toHaveBeenCalledWith(
+        expect(loggerErrorSpy).toHaveBeenCalledWith(
           expect.stringContaining('Computer action failed'),
           expect.objectContaining({
             operationId: expect.any(String),
@@ -591,7 +591,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         );
       });
 
-      it('should include operation ID in all _error messages', async () => {
+      it('should include operation ID in all error messages', async () => {
         // Arrange
         const action = createTestAction<TypeTextAction>({
           action: 'type_text',

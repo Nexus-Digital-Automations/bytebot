@@ -27,17 +27,11 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { UserRole, JwtPayload } from '@bytebot/shared';
 import {
-  TestJwtPayload,
   ApiErrorResponse,
-  SystemDataResponse,
-  ResourceResponse,
-  DeleteResourceResponse,
   UserSearchResponse,
   FileUploadResponse,
-  AuthenticatedRequest,
 } from '../../test-utils/test-interfaces';
 import { ErrorHandlerUtils } from '../../utils/error-handler';
-import { TokenInvalidError } from '../../errors/custom-errors';
 
 /**
  * Type definitions for safe Express request/response handling
@@ -373,9 +367,23 @@ describe('Controller Security Integration Tests', () => {
         const token = authHeader.substring(7);
 
         try {
-          const user = await jwtService.verifyAsync(token);
-          req.user = user as JwtPayload;
-          next();
+          const user: unknown = await jwtService.verifyAsync(token);
+          // Type guard for safe user assignment
+          if (
+            user &&
+            typeof user === 'object' &&
+            'sub' in user &&
+            'email' in user &&
+            'role' in user
+          ) {
+            req.user = user as JwtPayload;
+            next();
+          } else {
+            return res.status(401).json({
+              message: 'Invalid token payload structure',
+              error: 'TOKEN_INVALID',
+            });
+          }
         } catch (error: unknown) {
           const safeError = ErrorHandlerUtils.transformError(error);
           return res.status(401).json({
@@ -805,9 +813,18 @@ describe('Controller Security Integration Tests', () => {
         .expect(200);
 
       // Response should contain the data but safely handled
-      expect(response.body.name).toBeDefined();
-      expect(response.body.description).toBeDefined();
-      expect(response.body.type).toBeDefined();
+      expect(
+        (response.body as { name: string; description: string; type: string })
+          .name,
+      ).toBeDefined();
+      expect(
+        (response.body as { name: string; description: string; type: string })
+          .description,
+      ).toBeDefined();
+      expect(
+        (response.body as { name: string; description: string; type: string })
+          .type,
+      ).toBeDefined();
 
       securityLogger.info(`[${testId}] XSS payloads safely handled`);
     });
@@ -834,9 +851,11 @@ describe('Controller Security Integration Tests', () => {
           .expect(200);
 
         // Should return search results without executing injection
-        expect(response.body.query).toBeDefined();
-        expect(response.body.results).toBeInstanceOf(Array);
-        expect(response.body.searchedBy).toBe('op-1');
+        expect((response.body as UserSearchResponse).query).toBeDefined();
+        expect((response.body as UserSearchResponse).results).toBeInstanceOf(
+          Array,
+        );
+        expect((response.body as UserSearchResponse).searchedBy).toBe('op-1');
       }
 
       securityLogger.info(`[${testId}] SQL injection attempts safely handled`);
@@ -868,8 +887,8 @@ describe('Controller Security Integration Tests', () => {
           .expect(200);
 
         // Should handle malicious filenames safely
-        expect(response.body.filename).toBeDefined();
-        expect(response.body.uploadedBy).toBe('op-1');
+        expect((response.body as FileUploadResponse).filename).toBeDefined();
+        expect((response.body as FileUploadResponse).uploadedBy).toBe('op-1');
       }
 
       securityLogger.info(
@@ -1098,7 +1117,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of splittingPayloads) {
-        const response = await request(
+        const _response = await request(
           app.getHttpServer() as Express.Application,
         )
           .get('/api/users/search')
@@ -1121,7 +1140,9 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Testing request smuggling prevention`);
 
       // Attempt request smuggling with conflicting headers
-      const response = await request(app.getHttpServer() as Express.Application)
+      const _response = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .set('Content-Length', '100')
@@ -1231,17 +1252,31 @@ describe('Controller Security Integration Tests', () => {
 
       for (const operation of sensitiveOperations) {
         const requestObj = request(app.getHttpServer() as Express.Application);
-        let req = requestObj[operation.method](operation.path).set(
-          'Authorization',
-          `Bearer ${operation.token}`,
-        );
+        let req: any;
+
+        // Handle different HTTP methods with proper typing
+        switch (operation.method) {
+          case 'get':
+            req = requestObj.get(operation.path);
+            break;
+          case 'post':
+            req = requestObj.post(operation.path);
+            break;
+          case 'delete':
+            req = requestObj.delete(operation.path);
+            break;
+          default:
+            req = requestObj.get(operation.path);
+        }
+
+        req = req.set('Authorization', `Bearer ${operation.token}`);
 
         if (operation.body) {
           req = req.send(operation.body);
         }
 
-        const response = await req.expect((res: SuperTestResponse) => {
-          expect([200, 201, 204].includes(res.status as number)).toBe(true);
+        const response = await req.expect((res: { status: number }) => {
+          expect([200, 201, 204].includes(res.status)).toBe(true);
         });
 
         // In a real implementation, verify audit logs contain:

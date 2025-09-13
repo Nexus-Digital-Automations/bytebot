@@ -274,7 +274,7 @@ export class ComputerUseController {
       // Create safe copy for logging
       const paramsCopy = { ...actionParams };
       if (paramsCopy.action === 'write_file') {
-        (paramsCopy as any).data = '[base64 data redacted]';
+        (paramsCopy as Record<string, unknown>).data = '[base64 data redacted]';
       }
 
       this.logger.log(
@@ -527,7 +527,7 @@ export class ComputerUseController {
       // Create safe copy for logging (avoid logging large base64 data)
       const resultCopy = { ...jobResult };
       if (resultCopy.result && typeof resultCopy.result === 'object') {
-        const _result = resultCopy.result as any;
+        const _result = resultCopy.result as Record<string, unknown>;
         if (
           _result.image &&
           typeof _result.image === 'string' &&

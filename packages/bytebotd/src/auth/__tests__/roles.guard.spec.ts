@@ -654,7 +654,10 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_null_permissions`;
       console.log(`[${testId}] Testing null permissions handling`);
 
-      const user = createMockUser(UserRole._OPERATOR, null as any);
+      const user = createMockUser(
+        UserRole._OPERATOR,
+        null as Permission[] | undefined,
+      );
       const context = createMockExecutionContext(user);
 
       jest
@@ -858,7 +861,9 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_malformed_user`;
       console.log(`[${testId}] Testing malformed user object handling`);
 
-      const malformedUser = { invalid: 'user' } as any;
+      const malformedUser = { invalid: 'user' } as
+        | AuthenticatedUser
+        | undefined;
       const context = createMockExecutionContext(malformedUser);
 
       jest

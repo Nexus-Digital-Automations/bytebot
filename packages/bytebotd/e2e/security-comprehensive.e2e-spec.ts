@@ -19,10 +19,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import type { Express } from 'express';
 import { JwtService as _JwtService } from '@nestjs/jwt';
 import { ConfigService as _ConfigService } from '@nestjs/config';
 import { UserRole, Permission } from '@bytebot/shared';
-import { StrictRecord } from '../src/types';
+import {
+  StrictRecord,
+  TypedMiddleware,
+  AuthenticatedRequest,
+} from '../src/types';
+import { Request, Response, NextFunction } from 'express';
 
 /**
  * Comprehensive E2E Security Testing Module
@@ -88,12 +94,12 @@ class SecurityE2EAuthService {
     const user = this.users.get(email);
 
     // Track failed attempts for security monitoring
-    const attempts = this.failedAttempts.get(email) || {
+    const attempts = this.failedAttempts.get(email) ?? {
       count: 0,
       lastAttempt: 0,
     };
 
-    if (!user || user.password !== password) {
+    if (!user ?? user.password !== password) {
       attempts.count++;
       attempts.lastAttempt = Date.now();
       this.failedAttempts.set(email, attempts);
@@ -158,7 +164,7 @@ class SecurityE2EAuthService {
 
   getFailedAttempts(email?: string) {
     if (email) {
-      return this.failedAttempts.get(email) || { count: 0, lastAttempt: 0 };
+      return this.failedAttempts.get(email) ?? { count: 0, lastAttempt: 0 };
     }
     return Array.from(this.failedAttempts.entries());
   }
@@ -194,7 +200,7 @@ class SecurityE2EJwtService {
       const [header, payload, signature] = token.split('.');
 
       // Ensure all parts are present
-      if (!header || !payload || !signature) {
+      if (!header ?? !payload ?? !signature) {
         throw new Error('Invalid token format');
       }
 
@@ -270,7 +276,7 @@ class SecurityE2EUserService {
       ],
     };
 
-    return rolePermissions[role] || [];
+    return rolePermissions[role] ?? [];
   }
 }
 
@@ -286,7 +292,7 @@ class SecurityE2EAuthController {
   async login(body: any, clientInfo: any) {
     const { email, password } = body;
 
-    if (!email || !password) {
+    if (!email ?? !password) {
       throw new Error('Email and password are required');
     }
 
@@ -503,13 +509,13 @@ describe('Security E2E - Comprehensive Testing', () => {
   const operationId = `security_e2e_comprehensive_${Date.now()}`;
   const securityLogger = {
     info: (message: string, meta?: any) =>
-      console.log(`[E2E-SECURITY] ${message}`, meta || ''),
+      console.log(`[E2E-SECURITY] ${message}`, meta ?? ''),
     warn: (message: string, meta?: any) =>
-      console.warn(`[E2E-WARNING] ${message}`, meta || ''),
+      console.warn(`[E2E-WARNING] ${message}`, meta ?? ''),
     error: (message: string, meta?: any) =>
-      console.error(`[E2E-ERROR] ${message}`, meta || ''),
+      console.error(`[E2E-ERROR] ${message}`, meta ?? ''),
     critical: (message: string, meta?: any) =>
-      console.error(`[E2E-CRITICAL] ${message}`, meta || ''),
+      console.error(`[E2E-CRITICAL] ${message}`, meta ?? ''),
   };
 
   // Security monitoring utilities
@@ -599,7 +605,7 @@ describe('Security E2E - Comprehensive Testing', () => {
     // Security middleware stack
 
     // 1. Security Headers Middleware
-    app.use((req, res, next) => {
+    app.use((req: Request, res: Response, next: NextFunction) => {
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('X-Frame-Options', 'DENY');
       res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -621,13 +627,13 @@ describe('Security E2E - Comprehensive Testing', () => {
 
     // 2. Rate Limiting Middleware
     const rateLimits = new Map();
-    app.use((req, res, next) => {
-      const clientId = req.ip || req.connection.remoteAddress || 'unknown';
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      const clientId = req.ip ?? req.connection?.remoteAddress ?? 'unknown';
       const now = Date.now();
       const windowMs = 15 * 60 * 1000; // 15 minutes
       const maxRequests = 100;
 
-      const clientData = rateLimits.get(clientId) || {
+      const clientData = rateLimits.get(clientId) ?? {
         requests: [],
         windowStart: now,
       };
@@ -654,7 +660,7 @@ describe('Security E2E - Comprehensive Testing', () => {
     });
 
     // 3. Authentication Middleware
-    app.use('/api/*', (req, res, next) => {
+    app.use('/api/*', (req: Request, res: Response, next: NextFunction) => {
       if (req.path === '/api/health') {
         return next(); // Health endpoint is public
       }
@@ -664,8 +670,8 @@ describe('Security E2E - Comprehensive Testing', () => {
       if (!authHeader?.startsWith('Bearer ')) {
         securityMonitor.trackFailedAuthentication(
           'unknown',
-          req.ip || 'unknown',
-          req.headers['user-agent'] || 'unknown',
+          req.ip ?? 'unknown',
+          req.headers['user-agent'] ?? 'unknown',
         );
         return res.status(401).json({
           error: 'Unauthorized',
@@ -683,8 +689,8 @@ describe('Security E2E - Comprehensive Testing', () => {
       } catch (error) {
         securityMonitor.trackFailedAuthentication(
           'token_invalid',
-          req.ip || 'unknown',
-          req.headers['user-agent'] || 'unknown',
+          req.ip ?? 'unknown',
+          req.headers['user-agent'] ?? 'unknown',
         );
         return res.status(401).json({
           error: 'Unauthorized',
@@ -696,7 +702,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
     // 4. Role-based Authorization Middleware
     const requireRole = (requiredRole: UserRole) => {
-      return (req, res, next) => {
+      return (req: Request, res: Response, next: NextFunction) => {
         if (!req.user) {
           return res.status(403).json({
             error: 'Forbidden',
@@ -716,7 +722,7 @@ describe('Security E2E - Comprehensive Testing', () => {
           [UserRole._VIEWER]: [UserRole._VIEWER],
         };
 
-        const allowedRoles = roleHierarchy[userRole] || [];
+        const allowedRoles = roleHierarchy[userRole] ?? [];
 
         if (!allowedRoles.includes(requiredRole)) {
           securityMonitor.trackPrivilegeEscalation(
@@ -738,10 +744,10 @@ describe('Security E2E - Comprehensive Testing', () => {
     };
 
     // 5. Input Validation and Sanitization Middleware
-    app.use((req, res, next) => {
+    app.use((req: Request, res: Response, next: NextFunction) => {
       // Basic input sanitization
       const sanitizeObject = (obj) => {
-        if (typeof obj !== 'object' || obj === null) return obj;
+        if (typeof obj !== 'object' ?? obj === null) return obj;
 
         for (const key in obj) {
           if (typeof obj[key] === 'string') {
@@ -783,9 +789,9 @@ describe('Security E2E - Comprehensive Testing', () => {
         res.json(result);
       } catch (error) {
         securityMonitor.trackFailedAuthentication(
-          req.body?.email || 'unknown',
-          req.ip || 'unknown',
-          req.headers['user-agent'] || 'unknown',
+          req.body?.email ?? 'unknown',
+          req.ip ?? 'unknown',
+          req.headers['user-agent'] ?? 'unknown',
         );
         res.status(401).json({ error: error.message });
       }

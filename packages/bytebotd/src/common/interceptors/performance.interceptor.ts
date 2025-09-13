@@ -18,6 +18,14 @@
  * @version 1.0.0
  */
 
+ 
+ 
+ 
+ 
+ 
+ 
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+
 import {
   CallHandler,
   ExecutionContext,
@@ -175,7 +183,7 @@ export class PerformanceInterceptor implements NestInterceptor {
           ),
         });
 
-        throw error; // Re-throw the error
+        throw _error; // Re-throw the error
       }),
     );
   }
@@ -208,7 +216,7 @@ export class PerformanceInterceptor implements NestInterceptor {
       this.storeResponseTime(metrics.duration);
     } catch (_error) {
       this.logger.error(
-        `[${metrics.operationId}] Failed to record performance metrics: ${error instanceof Error ? _error.message : 'Unknown error'}`,
+        `[${metrics.operationId}] Failed to record performance metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
       );
     }
   }

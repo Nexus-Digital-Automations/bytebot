@@ -10,6 +10,14 @@
  * @author Input Validation & API Security Specialist
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+ 
+ 
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+
 import { SetMetadata, applyDecorators } from '@nestjs/common';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
 

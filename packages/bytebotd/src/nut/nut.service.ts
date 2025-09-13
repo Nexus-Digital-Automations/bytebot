@@ -262,7 +262,7 @@ export class NutService {
    */
   private validateKey(key: string): Key {
     // Try exact matches first
-    let nutKey: Key | undefined = XKeySymToNutKeyMap[key] || NutKeyMap[key];
+    let nutKey: Key | undefined = XKeySymToNutKeyMap[key] ?? NutKeyMap[key];
 
     // If not found, try case-insensitive matching
     if (nutKey === undefined) {
@@ -270,7 +270,7 @@ export class NutService {
 
       // Try to find case-insensitive match in XKeySymToNutKeyMapLowercase or NutKeyMapLowercase
       nutKey =
-        XKeySymToNutKeyMapLowercase[lowerKey] || NutKeyMapLowercase[lowerKey];
+        XKeySymToNutKeyMapLowercase[lowerKey] ?? NutKeyMapLowercase[lowerKey];
     }
 
     if (nutKey === undefined) {
@@ -420,7 +420,7 @@ export class NutService {
       '\n': { keyCode: Key.Enter, withShift: false },
     };
 
-    return specialCharMap[char] || null;
+    return specialCharMap[char] ?? null;
   }
 
   /**
@@ -682,7 +682,7 @@ export class NutService {
       this.logger.error(`Service status check failed: ${errorMessage}`);
       return {
         healthy: false,
-        screenshotDir: this.screenshotDir || 'not set',
+        screenshotDir: this.screenshotDir ?? 'not set',
         mouseConfig: { autoDelayMs: mouse.config.autoDelayMs },
         keyboardConfig: { autoDelayMs: keyboard.config.autoDelayMs },
       };

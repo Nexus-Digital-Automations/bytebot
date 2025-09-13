@@ -331,7 +331,7 @@ describe('Security Penetration Testing Suite', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn((key: string): string | boolean | undefined => {
-              const config = {
+              const config: Record<string, string | boolean> = {
                 JWT_SECRET: 'pentest-secret-key',
                 JWT_REFRESH_SECRET: 'pentest-refresh-secret',
                 JWT_EXPIRATION: '15m',
@@ -509,14 +509,14 @@ describe('Security Penetration Testing Suite', () => {
         // Simulate successful token verification but with malicious payload
         const maliciousPayload = JSON.parse(
           Buffer.from(token.split('.')[1], 'base64url').toString(),
-        );
+        ) as object;
         jest
           .spyOn(jwtService, 'verifyAsync')
           .mockResolvedValue(maliciousPayload);
 
         try {
           const _result = await jwtAuthGuard.canActivate(context);
-          const request = context.switchToHttp().getRequest();
+          const request = context.switchToHttp().getRequest() as {\n            user?: {\n              role?: UserRole;\n              admin?: boolean;\n              roles?: UserRole[];\n            };\n          };
 
           // Check if role escalation succeeded
           const escalationSuccess =
@@ -634,7 +634,7 @@ describe('Security Penetration Testing Suite', () => {
             permissions: [Permission._SYSTEM_ADMIN],
             admin: true,
             superuser: true,
-          } as any,
+          } as ByteBotdUser | undefined,
         },
       ];
 
@@ -1111,7 +1111,7 @@ describe('Security Penetration Testing Suite', () => {
 
         try {
           const _result = await jwtAuthGuard.canActivate(context);
-          const request = context.switchToHttp().getRequest();
+          const request = context.switchToHttp().getRequest() as {\n            user?: {\n              role?: UserRole;\n              admin?: boolean;\n              roles?: UserRole[];\n            };\n          };
 
           // Check if evasion led to privilege escalation
           const escalationSuccess =

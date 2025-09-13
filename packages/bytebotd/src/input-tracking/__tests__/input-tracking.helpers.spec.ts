@@ -17,6 +17,14 @@
  * @coverage-target 100%
  */
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
 import { keyInfoMap, KeyInfo as _KeyInfo } from '../input-tracking.helpers';
 import { UiohookKey } from 'uiohook-napi';
 
@@ -54,7 +62,7 @@ describe('InputTrackingHelpers', () => {
       console.log(`[${testId}] Testing KeyInfo structure validation`);
 
       Object.entries(keyInfoMap).forEach(([_keyCode, keyInfo]) => {
-        expect(keyInfo).toHaveProperty('_name');
+        expect(keyInfo).toHaveProperty('name');
         expect(keyInfo).toHaveProperty('isPrintable');
         expect(typeof keyInfo.name).toBe('string');
         expect(typeof keyInfo.isPrintable).toBe('boolean');
