@@ -3,7 +3,7 @@
 
 // Mock console.log for demonstration
 const originalConsoleLog = console.log;
-console.log = (...args: any[]) => {
+console.log = (...args: unknown[]) => {
   originalConsoleLog(...args);
 };
 

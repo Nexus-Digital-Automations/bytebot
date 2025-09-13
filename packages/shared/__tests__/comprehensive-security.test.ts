@@ -98,8 +98,8 @@ describe("Comprehensive Security System", () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string, defaultValue?: any) => {
-              const config: Record<string, any> = {
+            get: jest.fn((key: string, defaultValue?: unknown) => {
+              const config: Record<string, unknown> = {
                 NODE_ENV: "test",
                 SERVICE_NAME: "test-service",
                 CORS_ORIGINS: "http://localhost:3000,https://app.bytebot.ai",
@@ -256,7 +256,7 @@ describe("Comprehensive Security System", () => {
       test("should block malicious origins in production", async () => {
         // Mock production environment
         const prodConfigService = {
-          get: jest.fn((key: string, defaultValue?: any) => {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
             if (key === "NODE_ENV") return "production";
             if (key === "SERVICE_NAME") return "test-service";
             return configService.get(key, defaultValue);
