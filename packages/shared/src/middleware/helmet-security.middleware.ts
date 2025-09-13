@@ -464,13 +464,19 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
     private readonly serviceType: RateLimitServiceType = RateLimitServiceType._SHARED,
   ) {
     // Initialize configuration
+    // Safe access to DEFAULT_HELMET_CONFIGS with fallback
+    const defaultConfig =
+      DEFAULT_HELMET_CONFIGS[
+        serviceType as keyof typeof DEFAULT_HELMET_CONFIGS
+      ] ?? DEFAULT_HELMET_CONFIGS[RateLimitServiceType._BYTEBOTD];
+
     this.config = {
-      ...DEFAULT_HELMET_CONFIGS[serviceType],
+      ...defaultConfig,
       ...this._configService.get<Partial<HelmetSecurityConfig>>(
         `helmet.${serviceType}`,
         {},
       ),
-    };
+    } as HelmetSecurityConfig;
 
     this.logger.log(
       `Helmet security middleware initialized for ${serviceType}`,
@@ -649,7 +655,8 @@ export class HelmetSecurityMiddleware implements NestMiddleware {
     // Referrer Policy
     if (this.config.referrerPolicy.enabled) {
       const policy = Array.isArray(this.config.referrerPolicy.policy)
-        ? this.config.referrerPolicy.policy[0]
+        ? (this.config.referrerPolicy.policy[0] ??
+          "strict-origin-when-cross-origin")
         : this.config.referrerPolicy.policy;
       // Ensure policy is a valid ReferrerPolicyToken
       const validPolicy = policy as
