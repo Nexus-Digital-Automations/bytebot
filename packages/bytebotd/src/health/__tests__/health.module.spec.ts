@@ -50,7 +50,7 @@ describe('HealthModule', () => {
       error: jest.fn(),
       warn: jest.fn(),
       verbose: jest.fn(),
-    } as any;
+    } as jest.Mocked<Logger>;
 
     // Mock Logger constructor to return our mock
     jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);
@@ -139,7 +139,7 @@ describe('HealthModule', () => {
         ],
       }).compile();
 
-      const testService = testModule.get('TestServiceUsingHealth');
+      const testService = testModule.get('TestServiceUsingHealth') as any;
       const exportedHealthService = testService.getHealthService();
 
       expect(exportedHealthService).toBeDefined();
@@ -486,7 +486,9 @@ describe('HealthModule', () => {
         ],
       }).compile();
 
-      const customHealthIndicator = extendedModule.get('CustomHealthIndicator');
+      const customHealthIndicator = extendedModule.get(
+        'CustomHealthIndicator',
+      ) as any;
       expect(customHealthIndicator).toBeDefined();
 
       const customHealth = await customHealthIndicator.checkCustomHealth();

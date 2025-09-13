@@ -1131,7 +1131,8 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       for (const event of edgeCaseEvents) {
         // Should handle edge cases gracefully without crashing
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return\n        expect(() => moveHandler(event)).not.toThrow();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        expect(() => moveHandler(event)).not.toThrow();
       }
     });
 

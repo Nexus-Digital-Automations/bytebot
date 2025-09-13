@@ -18,7 +18,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   ComputerUseService,
   ErrorHandler,
-  ScreenshotResult,
+  ScreenshotResult as _ScreenshotResult,
   FileWriteResult,
   FileReadResult,
 } from './computer-use.service';
@@ -980,7 +980,7 @@ describe('ComputerUseService', () => {
   describe('Error Handling', () => {
     describe('ErrorHandler utility', () => {
       it('should extract _error messages from Error objects', () => {
-        const error = new Error('Test error message');
+        const _error = new Error('Test error message');
         const message = ErrorHandler.extractErrorMessage(_error);
         expect(message).toBe('Test error message');
       });
@@ -1003,7 +1003,7 @@ describe('ComputerUseService', () => {
       });
 
       it('should extract stack traces from Error objects', () => {
-        const error = new Error('Test error');
+        const _error = new Error('Test error');
         const stack = ErrorHandler.extractErrorStack(_error);
         expect(stack).toBeDefined();
         expect(stack).toContain('Error: Test error');

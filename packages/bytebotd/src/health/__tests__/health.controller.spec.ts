@@ -87,16 +87,16 @@ describe('HealthController', () => {
       error: jest.fn(),
       warn: jest.fn(),
       verbose: jest.fn(),
-    } as any;
+    } as jest.Mocked<Logger>;
 
     // Create mocked Terminus dependencies
     healthCheckService = {
       check: jest.fn(),
-    } as any;
+    } as jest.Mocked<Partial<HealthCheckService>>;
 
     httpHealthIndicator = {
       pingCheck: jest.fn(),
-    } as any;
+    } as jest.Mocked<Partial<HttpHealthIndicator>>;
 
     memoryHealthIndicator = {
       checkHeap: jest.fn(),
@@ -854,12 +854,8 @@ describe('HealthController', () => {
       expect(typeof result.timestamp).toBe('string');
       expect(typeof (result as BasicHealthResponse).uptime).toBe('number');
       expect(typeof (result as BasicHealthResponse).memory).toBe('object');
-      expect(typeof (result as BasicHealthResponse).memory.used).toBe(
-        'number',
-      );
-      expect(typeof (result as BasicHealthResponse).memory.free).toBe(
-        'number',
-      );
+      expect(typeof (result as BasicHealthResponse).memory.used).toBe('number');
+      expect(typeof (result as BasicHealthResponse).memory.free).toBe('number');
       expect(typeof (result as BasicHealthResponse).memory.total).toBe(
         'number',
       );

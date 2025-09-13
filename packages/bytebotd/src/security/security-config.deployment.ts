@@ -45,7 +45,10 @@ export class BytebotDSecurityConfigService {
    * Create BytebotD validation pipe with maximum security settings
    */
   createValidationPipe(): StandardizedValidationPipe {
-    const environment = this.configService.get('NODE_ENV', 'development');
+    const environment = this.configService.get<string>(
+      'NODE_ENV',
+      'development',
+    );
 
     // Use maximum security pipe for BytebotD
     return StandardizedValidationPipes.MAXIMUM_SECURITY(environment);
@@ -70,7 +73,10 @@ export class BytebotDSecurityConfigService {
    * Get security configuration for manual inspection
    */
   getSecurityConfig() {
-    const environment = this.configService.get('NODE_ENV', 'development');
+    const environment = this.configService.get<string>(
+      'NODE_ENV',
+      'development',
+    );
 
     return {
       serviceType: ServiceType._BYTEBOTD,
