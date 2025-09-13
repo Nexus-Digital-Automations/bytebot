@@ -290,11 +290,11 @@ describe('MCP Index Module', () => {
       const moduleMetadata = Reflect.getMetadata(
         'imports',
         McpIndex.BytebotMcpModule,
-      );
+      ) as unknown[];
       const providersMetadata = Reflect.getMetadata(
         'providers',
         McpIndex.BytebotMcpModule,
-      );
+      ) as unknown[];
 
       expect(moduleMetadata).toBeDefined();
       expect(providersMetadata).toBeDefined();
@@ -579,7 +579,8 @@ describe('MCP Index Module', () => {
      */
     it('should handle missing exports gracefully', () => {
       // Test accessing non-existent export
-      const nonExistent = (McpIndex as any).NonExistentExport;
+      const nonExistent = (McpIndex as Record<string, unknown>)
+        .NonExistentExport;
       expect(nonExistent).toBeUndefined();
     });
 
