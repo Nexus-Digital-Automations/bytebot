@@ -384,7 +384,7 @@ class SecurityE2EAuthController {
     };
   }
 
-  async refresh(body: any) {
+  async refresh(body: { refreshToken: string }) {
     const { refreshToken } = body;
 
     if (!refreshToken) {

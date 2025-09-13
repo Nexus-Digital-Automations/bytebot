@@ -110,7 +110,7 @@ describe('InputTrackingModule', () => {
       console.log(`[${testId}] Testing module metadata structure`);
 
       const _moduleMetadata =
-        Reflect.getMetadata('imports', InputTrackingModule) ||
+        Reflect.getMetadata('imports', InputTrackingModule) ??
         Reflect.getMetadata('module', InputTrackingModule);
 
       // Module should have the @Module decorator

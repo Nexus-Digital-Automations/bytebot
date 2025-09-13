@@ -124,34 +124,6 @@
       ]
     },
     {
-      "id": "error_1757737624773_u8kc6l5cz",
-      "title": "CRITICAL: Eliminate all guard and middleware ESLint violations in bytebot packages",
-      "description": "Focus on security-critical guard (.guard.ts) and middleware (.middleware.ts) files in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd. Priority areas: authentication type safety, request/response type safety, security violations. Target: maximum violation elimination from current 519 total count.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T04:27:04.773Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757737595875_1_general_a6f0cd3d",
-      "started_at": "2025-09-13T04:27:30.803Z",
-      "claimed_by": "development_session_1757737595875_1_general_a6f0cd3d",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757737595875_1_general_a6f0cd3d",
-          "role": "primary",
-          "assignedAt": "2025-09-13T04:27:30.803Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757737618019_gqrkyn9yc",
       "title": "CRITICAL ESLint FINAL ELIMINATION - General TypeScript Safety Violations",
       "description": "Eliminate all general ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd focusing on: 1) @typescript-eslint/no-unsafe-assignment violations 2) @typescript-eslint/no-unsafe-member-access violations 3) @typescript-eslint/no-unsafe-return violations 4) @typescript-eslint/no-explicit-any violations 5) All general TypeScript safety violations. Target 519 total violations - prioritize files with highest violation counts for maximum impact.",
