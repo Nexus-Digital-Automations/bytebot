@@ -144,7 +144,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: 'Hello World',
       };
 
-      const result = await pipe.transform(validInput, {} as ArgumentMetadata);
+      const result = await pipe.transform(validInput, createArgumentMetadata());
 
       expect(result).toBeDefined();
       expect(result.action).toBe('type_text');
@@ -175,11 +175,14 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       await expect(
-        pipe.transform(maliciousInput, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as ArgumentMetadata),
+        pipe.transform(
+          maliciousInput,
+          createArgumentMetadata({
+            type: 'body',
+            metatype: Object,
+            data: undefined,
+          }),
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -201,11 +204,14 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       await expect(
-        pipe.transform(maliciousInput, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as ArgumentMetadata),
+        pipe.transform(
+          maliciousInput,
+          createArgumentMetadata({
+            type: 'body',
+            metatype: Object,
+            data: undefined,
+          }),
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -228,11 +234,14 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       await expect(
-        pipe.transform(maliciousInput, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        } as ArgumentMetadata),
+        pipe.transform(
+          maliciousInput,
+          createArgumentMetadata({
+            type: 'body',
+            metatype: Object,
+            data: undefined,
+          }),
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -250,7 +259,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         const input = { action: testCase.action };
 
         try {
-          await pipe.transform(input, {} as ArgumentMetadata);
+          await pipe.transform(input, createArgumentMetadata());
         } catch (_error) {
           // Ignore validation errors for incomplete inputs
         }
@@ -291,12 +300,13 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       try {
-        await pipe.transform(maliciousInput, {} as ArgumentMetadata);
+        await pipe.transform(maliciousInput, createArgumentMetadata());
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
         const badRequestError = error as BadRequestException;
-        const response = badRequestError.getResponse() as any;
+        const response =
+          badRequestError.getResponse() as SecurityValidationErrorResponse;
         expect(response.message).toContain('security threats detected');
         expect(response.threatTypes).toContain('ADVANCED_XSS');
         expect(response.threatTypes).toContain('ADVANCED_SQL_INJECTION');
@@ -321,7 +331,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       try {
-        await pipe.transform(maliciousInput, {} as ArgumentMetadata);
+        await pipe.transform(maliciousInput, createArgumentMetadata());
         fail('Should have thrown BadRequestException');
       } catch (error) {
         const badRequestError = error as BadRequestException;
@@ -336,11 +346,10 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         expect(response).toHaveProperty('detectionCount');
         expect(response).toHaveProperty('timestamp');
 
-        const typedResponse = response as any;
-        expect(Array.isArray(typedResponse.threatTypes)).toBe(true);
-        expect(Array.isArray(typedResponse.validationStages)).toBe(true);
-        expect(typeof typedResponse.totalRiskScore).toBe('number');
-        expect(typedResponse.detectionCount).toBeGreaterThan(0);
+        expect(Array.isArray(response.threatTypes)).toBe(true);
+        expect(Array.isArray(response.validationStages)).toBe(true);
+        expect(typeof response.totalRiskScore).toBe('number');
+        expect(response.detectionCount).toBeGreaterThan(0);
       }
     });
 
@@ -355,7 +364,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       ];
 
       for (const input of validInputs) {
-        const result = await pipe.transform(input, {} as ArgumentMetadata);
+        const result = await pipe.transform(input, createArgumentMetadata());
         expect(result).toBeDefined();
         expect(result.action).toBe(input.action);
       }
@@ -368,11 +377,14 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       await expect(
-        pipe.transform(largePayload, {
-          type: 'body',
-          metatype: Object,
-          data: undefined,
-        })),
+        pipe.transform(
+          largePayload,
+          createArgumentMetadata({
+            type: 'body',
+            metatype: Object,
+            data: undefined,
+          }),
+        ),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -384,7 +396,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       const start = Date.now();
-      await pipe.transform(input, {} as ArgumentMetadata);
+      await pipe.transform(input, createArgumentMetadata());
       const duration = Date.now() - start;
 
       expect(duration).toBeLessThan(100); // Should complete within 100ms

@@ -240,7 +240,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       try {
-        await pipe.transform(maliciousInput, {} as ArgumentMetadata);
+        await pipe.transform(maliciousInput, createArgumentMetadata());
       } catch (error) {
         const badRequestError = error as BadRequestException;
         const response =
@@ -337,7 +337,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       try {
-        await pipe.transform(maliciousInput, {} as ArgumentMetadata);
+        await pipe.transform(maliciousInput, createArgumentMetadata());
         fail('Should have thrown BadRequestException');
       } catch (error) {
         const badRequestError = error as BadRequestException;
