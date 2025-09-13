@@ -344,7 +344,10 @@ class SecurityE2EAuthController {
     private jwtService: SecurityE2EJwtService,
   ) {}
 
-  async login(body: any, clientInfo: any) {
+  async login(
+    body: { email: string; password: string },
+    clientInfo: ClientInfo,
+  ) {
     const { email, password } = body;
 
     if (!email || !password) {
