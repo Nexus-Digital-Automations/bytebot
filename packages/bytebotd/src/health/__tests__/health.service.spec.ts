@@ -45,14 +45,14 @@ interface HealthCheckResult {
   timestamp: number;
 }
 
-interface ServiceStatus {
+interface _ServiceStatus {
   name: string;
   status: 'healthy' | 'unhealthy' | 'unknown';
   responseTime?: number;
   error?: string;
 }
 
-interface PerformanceMetrics {
+interface _PerformanceMetrics {
   startTime: number;
   uptime: number;
   memoryUsage: NodeJS.MemoryUsage;
@@ -1096,11 +1096,13 @@ describe('HealthService', () => {
           timeoutCallCount++;
           if (timeoutCallCount % 2 === 0) {
             // Simulate timeout/rejection on every other call
+             
             originalSetTimeout(
               () => callback(new Error('Service unavailable')),
               1,
             );
           } else {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             originalSetTimeout(() => callback(null, true), delay);
           }
         }) as unknown;

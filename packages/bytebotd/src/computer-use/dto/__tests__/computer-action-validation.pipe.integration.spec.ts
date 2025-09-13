@@ -84,7 +84,10 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
     );
 
     // Get mocked functions
-    const securityUtils = require('@bytebot/shared/utils/security.utils');
+    const securityUtils = require('@bytebot/shared/utils/security.utils') as {
+      detectAdvancedXSS: jest.Mock;
+      detectSQLInjection: jest.Mock;
+    };
     mockDetectAdvancedXSS = securityUtils.detectAdvancedXSS as jest.Mock;
     mockDetectSQLInjection = securityUtils.detectSQLInjection as jest.Mock;
     mockDetectCommandInjection =

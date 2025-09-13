@@ -50,7 +50,10 @@ import Redis from 'ioredis';
     {
       provide: APP_PIPE,
       useFactory: (configService: ConfigService) => {
-        const environment = configService.get('NODE_ENV', 'development');
+        const environment = configService.get<string>(
+          'NODE_ENV',
+          'development',
+        );
 
         // Use different validation levels based on environment
         switch (environment) {

@@ -15,6 +15,37 @@ import {
 } from './dto/browser-task.dto';
 
 /**
+ * Task configuration interface with proper typing
+ */
+interface TaskConfig {
+  name: string;
+  url?: string;
+  selectors?: string[];
+  actions?: string[];
+  timeout?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * Job configuration with tasks array properly typed
+ */
+interface TypedJobConfiguration {
+  tasks?: TaskConfig[];
+  urls?: string[];
+  [key: string]: unknown;
+}
+
+/**
+ * Standard error interface for error handling
+ */
+interface StandardError {
+  message: string;
+  name: string;
+  stack?: string;
+  [key: string]: unknown;
+}
+
+/**
  * Browser Async Job Service - Long-Running Task Management
  *
  * Manages asynchronous browser automation jobs that may take extended time to complete.
@@ -434,8 +465,10 @@ export class BrowserAsyncJobService {
    * Process batch automation job
    */
   private async processBatchAutomation(job: AsyncJobResultDto): Promise<void> {
-    const config = job.configuration;
-    const tasks = Array.isArray(config.tasks) ? config.tasks : [];
+    const config = job.configuration as TypedJobConfiguration;
+    const tasks = Array.isArray(config.tasks)
+      ? config.tasks
+      : ([] as TaskConfig[]);
 
     job.progress.totalSteps = tasks.length;
     job.results.totalTasks = tasks.length;
@@ -503,8 +536,8 @@ export class BrowserAsyncJobService {
    * Process data extraction job
    */
   private async processDataExtraction(job: AsyncJobResultDto): Promise<void> {
-    const config = job.configuration;
-    const urls = Array.isArray(config.urls) ? config.urls : [];
+    const config = job.configuration as TypedJobConfiguration;
+    const urls = Array.isArray(config.urls) ? config.urls : ([] as string[]);
 
     job.progress.totalSteps = urls.length;
 
@@ -633,7 +666,10 @@ export class BrowserAsyncJobService {
   /**
    * Handle job failure
    */
-  private async handleJobFailure(jobId: string, error: any): Promise<void> {
+  private async handleJobFailure(
+    jobId: string,
+    error: StandardError | Error | unknown,
+  ): Promise<void> {
     const job = this.jobs.get(jobId);
     if (!job) {
       return;

@@ -20,19 +20,19 @@
  */
 
 import { performance } from 'perf_hooks';
-import * as sharp from 'sharp';
+import * as _sharp from 'sharp';
 import { Logger } from '@nestjs/common';
 import {
   Base64ImageCompressor,
   compressPngBase64Under1MB,
-  CompressionOptions,
+  CompressionOptions as _CompressionOptions,
   CompressionResult,
 } from '../compressor';
 import {
-  TestUtils,
+  TestUtils as _TestUtils,
   AssertionHelpers,
-  MockDataProviders,
-  TestEnvironment,
+  MockDataProviders as _MockDataProviders,
+  TestEnvironment as _TestEnvironment,
   createMockLogger,
 } from '../../test-utils';
 
@@ -359,9 +359,9 @@ describe('Base64ImageCompressor', () => {
      * Test progressive scaling
      */
     it('should apply progressive scaling when needed', async () => {
-      let resizeCallCount = 0;
+      let _resizeCallCount = 0;
       mockSharpInstance.resize.mockImplementation((width, height, options) => {
-        resizeCallCount++;
+        _resizeCallCount++;
         expect(width).toBeGreaterThan(0);
         expect(height).toBeGreaterThan(0);
         expect(options.fit).toBe('inside');
@@ -678,7 +678,7 @@ describe('Base64ImageCompressor', () => {
      * Test compression ratio calculations
      */
     it('should calculate compression ratios correctly', async () => {
-      const inputSize = 1000 * 1024; // 1MB
+      const _inputSize = 1000 * 1024; // 1MB
       const outputSize = 800 * 1024; // 800KB
 
       mockSharpInstance.toBuffer.mockResolvedValue(

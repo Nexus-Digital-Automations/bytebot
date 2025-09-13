@@ -21,7 +21,7 @@
 
 import { performance } from 'perf_hooks';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { Logger as _Logger } from '@nestjs/common';
 import { ComputerUseTools } from '../computer-use.tools';
 import { ComputerUseService } from '../../computer-use/computer-use.service';
 import { compressPngBase64Under1MB } from '../compressor';

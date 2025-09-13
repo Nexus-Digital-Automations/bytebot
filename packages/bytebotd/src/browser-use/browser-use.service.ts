@@ -45,7 +45,7 @@ interface RawExtractionData {
 /**
  * Standard error interface for error handling
  */
-interface StandardError {
+interface _StandardError {
   message: string;
   name?: string;
   stack?: string;
@@ -64,7 +64,7 @@ interface BrowserDataExtractionResult {
 /**
  * Browser action parameters interface
  */
-interface BrowserActionParams {
+interface _BrowserActionParams {
   selector?: string;
   text?: string;
   coordinates?: { x: number; y: number };

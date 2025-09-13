@@ -17,11 +17,12 @@
 
 // Mock child_process and fs operations BEFORE imports
 jest.mock('child_process', () => ({
-  exec: jest.fn((cmd, opts, cb) => {
+  exec: jest.fn((cmd: string, opts: any, cb?: any) => {
     if (typeof opts === 'function') cb = opts;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     setTimeout(() => cb(null, { stdout: '', stderr: '' }), 10);
     return { pid: 12345 };
-  }),
+  }) as any,
   spawn: jest.fn().mockReturnValue({
     unref: jest.fn(),
     pid: 12345,
@@ -39,14 +40,19 @@ jest.mock('fs/promises', () => ({
 }));
 
 // Don't mock util completely - just mock promisify when needed
-jest.mock('util', () => ({
-  ...jest.requireActual('util'),
-  promisify: jest.fn(
-    (fn: (...args: unknown[]) => unknown) =>
-      (...args: unknown[]) =>
-        Promise.resolve(fn(...args)),
-  ),
-}));
+jest.mock(
+  'util',
+   
+  () =>
+    ({
+      ...jest.requireActual('util'),
+      promisify: jest.fn(
+        (fn: (...args: unknown[]) => unknown) =>
+          (...args: unknown[]) =>
+            Promise.resolve(fn(...args)),
+      ) as any,
+    }) as any,
+);
 
 /**
  * Type definitions for mocked modules

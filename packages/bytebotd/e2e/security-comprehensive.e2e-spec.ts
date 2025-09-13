@@ -25,18 +25,18 @@ import { ConfigService as _ConfigService } from '@nestjs/config';
 import { UserRole, Permission } from '@bytebot/shared';
 import {
   StrictRecord,
-  TypedMiddleware,
-  AuthenticatedRequest,
+  TypedMiddleware as _TypedMiddleware,
+  AuthenticatedRequest as _AuthenticatedRequest,
 } from '../src/types';
 import { Request, Response, NextFunction } from 'express';
 
 /**
  * Comprehensive E2E Security Testing Module
  */
-class SecurityE2ETestModule {
+class _SecurityE2ETestModule {
   static forTesting() {
     return {
-      module: SecurityE2ETestModule,
+      module: _SecurityE2ETestModule,
       providers: [
         SecurityE2EAuthService,
         SecurityE2EJwtService,
@@ -51,6 +51,38 @@ class SecurityE2ETestModule {
       ],
     };
   }
+}
+
+/**
+ * Type definitions for security testing
+ */
+interface SecuritySession {
+  id: string;
+  userId: string;
+  createdAt: number;
+  lastActivity: number;
+  clientInfo?: any;
+}
+
+interface FailedAttempt {
+  count: number;
+  lastAttempt: number;
+}
+
+interface _SecurityUser {
+  id: string;
+  email: string;
+  role: string;
+  password: string;
+}
+
+interface TaskData {
+  id: string;
+  [key: string]: any;
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 /**
@@ -87,8 +119,8 @@ class SecurityE2EAuthService {
     ],
   ]);
 
-  private sessions = new Map();
-  private failedAttempts = new Map();
+  private sessions = new Map<string, SecuritySession>();
+  private failedAttempts = new Map<string, FailedAttempt>();
 
   async authenticate(email: string, password: string, clientInfo: any) {
     const user = this.users.get(email);
@@ -140,7 +172,7 @@ class SecurityE2EAuthService {
     };
   }
 
-  async validateSession(sessionId: string) {
+  async validateSession(sessionId: string): Promise<SecuritySession> {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error('Invalid session');
@@ -162,7 +194,9 @@ class SecurityE2EAuthService {
     this.sessions.delete(sessionId);
   }
 
-  getFailedAttempts(email?: string) {
+  getFailedAttempts(
+    email?: string,
+  ): FailedAttempt | Array<[string, FailedAttempt]> {
     if (email) {
       return this.failedAttempts.get(email) ?? { count: 0, lastAttempt: 0 };
     }
@@ -195,7 +229,7 @@ class SecurityE2EJwtService {
     return `${header}.${payloadEncoded}.${signature}`;
   }
 
-  verify(token: string) {
+  verify(token: string): any {
     try {
       const [header, payload, signature] = token.split('.');
 
@@ -223,8 +257,8 @@ class SecurityE2EJwtService {
         throw new Error('Invalid signature');
       }
 
-      return decodedPayload;
-    } catch (error) {
+      return decodedPayload as any;
+    } catch (_error) {
       throw new Error('Invalid token');
     }
   }
@@ -385,22 +419,22 @@ class SecurityE2EProtectedController {
     };
   }
 
-  createTask(user: any, data: any) {
+  createTask(user: any, data: any): TaskData {
     return {
       id: 'new-task-id',
       ...data,
       createdBy: user.sub,
       createdAt: Date.now(),
-    };
+    } as TaskData;
   }
 
-  updateTask(user: any, taskId: string, data: any) {
+  updateTask(user: any, taskId: string, data: any): TaskData {
     return {
       id: taskId,
       ...data,
       updatedBy: user.sub,
       updatedAt: Date.now(),
-    };
+    } as TaskData;
   }
 }
 
@@ -686,7 +720,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         const decoded = jwtService.verify(token);
         req.user = decoded;
         next();
-      } catch (error) {
+      } catch (_error) {
         securityMonitor.trackFailedAuthentication(
           'token_invalid',
           req.ip ?? 'unknown',
@@ -746,8 +780,8 @@ describe('Security E2E - Comprehensive Testing', () => {
     // 5. Input Validation and Sanitization Middleware
     app.use((req: Request, res: Response, next: NextFunction) => {
       // Basic input sanitization
-      const sanitizeObject = (obj) => {
-        if (typeof obj !== 'object' ?? obj === null) return obj;
+      const sanitizeObject = (obj: any): any => {
+        if (typeof obj !== 'object' || obj === null) return obj;
 
         for (const key in obj) {
           if (typeof obj[key] === 'string') {

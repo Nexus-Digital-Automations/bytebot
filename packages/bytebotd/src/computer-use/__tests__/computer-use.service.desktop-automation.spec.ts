@@ -48,15 +48,15 @@ jest.mock('util', () => ({
   ...jest.requireActual('util'),
   promisify: jest.fn(
     (fn) =>
-      (...args) =>
+      (...args: any[]) =>
         Promise.resolve(fn(...args)),
   ),
 }));
 
 jest.mock('path', () => ({
   ...jest.requireActual('path'),
-  resolve: jest.fn((...paths) => paths.join('/')),
-  join: jest.fn((...paths) => paths.join('/')),
+  resolve: jest.fn((...paths: string[]) => paths.join('/')),
+  join: jest.fn((...paths: string[]) => paths.join('/'),
 }));
 
 // Mock @nut-tree-fork/nut-js completely

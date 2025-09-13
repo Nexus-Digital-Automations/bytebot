@@ -21,10 +21,10 @@
 
 import { performance } from 'perf_hooks';
 import {
-  TestUtils,
-  AssertionHelpers,
-  MockDataProviders,
-  TestEnvironment,
+  TestUtils as _TestUtils,
+  AssertionHelpers as _AssertionHelpers,
+  MockDataProviders as _MockDataProviders,
+  TestEnvironment as _TestEnvironment,
   createMockLogger,
 } from '../../test-utils';
 
@@ -37,8 +37,8 @@ import { ComputerUseTools } from '../computer-use.tools';
 import {
   Base64ImageCompressor,
   compressPngBase64Under1MB,
-  CompressionOptions,
-  CompressionResult,
+  CompressionOptions as _CompressionOptions,
+  CompressionResult as _CompressionResult,
 } from '../compressor';
 
 /**
@@ -66,11 +66,9 @@ class IndexTestUtils {
    * Check if an object is a constructor function
    */
   static isConstructor(obj: any): boolean {
-    return (
-      typeof obj === 'function' &&
+    return (typeof obj === 'function' &&
       obj.prototype &&
-      obj.prototype.constructor === obj
-    );
+      obj.prototype.constructor === obj) as boolean;
   }
 
   /**
@@ -125,11 +123,11 @@ class IndexTestUtils {
 }
 
 describe('MCP Index Module', () => {
-  let mockLogger: jest.Mocked<any>;
+  let _mockLogger: jest.Mocked<any>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLogger = createMockLogger();
+    _mockLogger = createMockLogger();
   });
 
   afterEach(() => {

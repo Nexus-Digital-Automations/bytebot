@@ -109,7 +109,7 @@ describe('ComputerUseService Integration Tests', () => {
 
     it('should handle unsupported actions gracefully', async () => {
       // Test with unsupported action
-      const invalidAction = { action: 'invalid_action' } as any;
+      const invalidAction = { action: 'invalid_action' } as unknown;
 
       await expect(context.service.action(invalidAction)).rejects.toThrow(
         'Unsupported computer action',
@@ -390,7 +390,7 @@ describe('ComputerUseService Integration Tests', () => {
     it('should provide detailed _error context for debugging', async () => {
       const invalidAction = {
         action: 'invalid_action',
-      } as any;
+      } as unknown;
 
       try {
         await context.service.action(invalidAction);
@@ -521,7 +521,7 @@ describe('ComputerUseService Integration Tests', () => {
       expect(readResults.success).toBe(true);
       const parsedResults = JSON.parse(
         Buffer.from(readResults.data, 'base64').toString(),
-      );
+      ) as { originalFile: string; status: string };
       expect(parsedResults.originalFile).toBe('test-document.txt');
       expect(parsedResults.status).toBe('completed');
     });

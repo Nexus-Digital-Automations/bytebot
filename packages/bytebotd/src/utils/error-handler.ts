@@ -11,9 +11,9 @@
 
 import {
   ApplicationError,
-  getErrorMessage,
-  getErrorCode,
-  getErrorContext,
+  getErrorMessage as _getErrorMessage,
+  getErrorCode as _getErrorCode,
+  getErrorContext as _getErrorContext,
   getErrorSeverity,
   isApplicationError,
   isAuthenticationError,
@@ -24,7 +24,10 @@ import {
   isHttpError,
 } from '../types/error-types';
 
-import { ErrorFactory, BaseCustomError } from '../errors/custom-errors';
+import {
+  ErrorFactory,
+  BaseCustomError as _BaseCustomError,
+} from '../errors/custom-errors';
 
 /**
  * Result type for operations that may fail

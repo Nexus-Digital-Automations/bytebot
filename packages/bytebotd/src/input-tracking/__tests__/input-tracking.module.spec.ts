@@ -129,6 +129,7 @@ describe('InputTrackingModule', () => {
       expect(InputTrackingModule.prototype).toBeDefined();
 
       // Should be instantiable (though we don't typically instantiate modules directly)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       expect(() => new (InputTrackingModule as any)()).not.toThrow();
 
       console.log(`[${testId}] Valid NestJS module class test completed`);
@@ -640,6 +641,7 @@ describe('InputTrackingModule', () => {
       expect(modules).toHaveLength(5);
 
       // Clean up all modules
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       await Promise.all(modules.map((m) => m.close()));
 
       console.log(`[${testId}] Rapid module lifecycle test completed`);

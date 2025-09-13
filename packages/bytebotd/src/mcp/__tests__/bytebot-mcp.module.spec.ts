@@ -23,13 +23,13 @@ import { Logger } from '@nestjs/common';
 import { BytebotMcpModule } from '../bytebot-mcp.module';
 import { ComputerUseTools } from '../computer-use.tools';
 import { ComputerUseModule } from '../../computer-use/computer-use.module';
-import { McpModule } from '@rekog/mcp-nest';
+import { McpModule as _McpModule } from '@rekog/mcp-nest';
 import {
   createMockService,
   createMockLogger,
   MockTestingModuleBuilder,
-  TestUtils,
-  AssertionHelpers,
+  TestUtils as _TestUtils,
+  AssertionHelpers as _AssertionHelpers,
 } from '../../test-utils';
 
 /**

@@ -20,9 +20,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
- 
+
 /* eslint-disable @typescript-eslint/no-unsafe-return */
- 
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
@@ -291,7 +290,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         }
 
         try {
-          const result = await guard.canActivate(context);
+          const _result = await guard.canActivate(context);
           return { success: true, index: _index };
         } catch (error) {
           return {
@@ -434,7 +433,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
         try {
           await guard.canActivate(context);
-        } catch (error) {
+        } catch (_error) {
           // Expected for non-admin users
         }
 
@@ -605,7 +604,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         );
 
         try {
-          const result = await guard.canActivate(context);
+          const _result = await guard.canActivate(context);
           return { success: true, userId: user.id };
         } catch (error) {
           return {
@@ -670,9 +669,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
         }
 
         try {
-          const result = await guard.canActivate(context);
+          const _result = await guard.canActivate(context);
           return { success: true, index: _index };
-        } catch (error) {
+        } catch (_error) {
           return { success: false, index: _index };
         }
       });

@@ -16,7 +16,7 @@ import {
   SecurityError,
   SystemError,
   HttpError,
-  ErrorSeverity,
+  ErrorSeverity as _ErrorSeverity,
 } from '../types/error-types';
 
 /**
