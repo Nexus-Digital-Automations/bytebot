@@ -18,8 +18,8 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import type { Express } from 'express';
+
+const request = require('supertest') as typeof import('supertest');
 import { Request, Response, NextFunction } from 'express';
 import { JwtService as _JwtService } from '@nestjs/jwt';
 import { ConfigService as _ConfigService } from '@nestjs/config';
@@ -393,6 +393,9 @@ class SecurityE2EAuthController {
       throw new Error('Invalid refresh token');
     }
 
+    if (!payload.sessionId) {
+      throw new Error('Session ID is required in refresh token');
+    }
     const session = await this.authService.validateSession(payload.sessionId);
 
     const newAccessToken = this.jwtService.sign({
