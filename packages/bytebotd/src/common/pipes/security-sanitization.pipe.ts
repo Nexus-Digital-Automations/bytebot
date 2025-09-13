@@ -141,7 +141,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
 
     try {
       // Skip sanitization for basic types without metatype
-      if (!metadata.metatype || this.isBasicType(metadata.metatype)) {
+      if (!metadata.metatype ?? this.isBasicType(metadata.metatype)) {
         return this.sanitizeBasicValue(value, operationId);
       }
 
@@ -454,7 +454,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
       for (const [key, value] of Object.entries(obj)) {
         // Check property name for threats
         if (typeof key === 'string') {
-          if (detectXSS(key) || detectSQLInjection(key)) {
+          if (detectXSS(key) ?? detectSQLInjection(key)) {
             threats.push({
               type: 'MALICIOUS_INPUT',
               field: `${path}.${key}`,

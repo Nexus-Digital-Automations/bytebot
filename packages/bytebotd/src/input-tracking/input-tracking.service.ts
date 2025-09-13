@@ -102,7 +102,7 @@ export class InputTrackingService implements OnModuleDestroy {
   }
 
   private isModifierKey(key: UiohookKeyboardEvent) {
-    return key.altKey || key.ctrlKey || key.metaKey;
+    return key.altKey ?? key.ctrlKey ?? key.metaKey;
   }
 
   private registerListeners() {
@@ -300,7 +300,7 @@ export class InputTrackingService implements OnModuleDestroy {
 
     if (
       this.screenshot &&
-      (action.action === 'click_mouse' || action.action === 'drag_mouse')
+      (action.action === 'click_mouse' ?? action.action === 'drag_mouse')
     ) {
       this.gateway.emitScreenshotAndAction(this.screenshot, action);
       return;

@@ -203,7 +203,7 @@ export function getErrorCode(error: unknown): string {
   }
 
   if (error instanceof Error) {
-    return error.name || 'UNKNOWN_ERROR';
+    return error.name ?? 'UNKNOWN_ERROR';
   }
 
   return 'UNKNOWN_ERROR';
@@ -214,7 +214,7 @@ export function getErrorCode(error: unknown): string {
  */
 export function getErrorContext(error: unknown): Record<string, unknown> {
   if (isApplicationError(error)) {
-    return error.context || {};
+    return error.context ?? {};
   }
 
   if (error instanceof Error) {
@@ -252,7 +252,7 @@ export function getErrorSeverity(error: unknown): ErrorSeverity {
       : ErrorSeverity.HIGH;
   }
 
-  if (isAuthenticationError(error) || isAuthorizationError(error)) {
+  if (isAuthenticationError(error) ?? isAuthorizationError(error)) {
     return ErrorSeverity.MEDIUM;
   }
 

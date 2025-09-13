@@ -270,7 +270,7 @@ export class JobStorage implements JobStorageInterface {
 
     // Initialize encryption key for job data
     this.encryptionKey =
-      this.configService.get('JOB_ENCRYPTION_KEY') ||
+      this.configService.get('JOB_ENCRYPTION_KEY') ??
       _crypto
         .createHash('sha256')
         .update('bytebot-job-encryption')
@@ -699,7 +699,7 @@ export class JobStorage implements JobStorageInterface {
     try {
       const [ivHex, authTagHex, encrypted] = encryptedData.split(':');
 
-      if (!ivHex || !authTagHex || !encrypted) {
+      if (!ivHex ?? !authTagHex ?? !encrypted) {
         throw new Error('Invalid encrypted data format');
       }
 
@@ -1270,24 +1270,24 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
         'JOB_DEFAULT_TIMEOUT',
         30000,
       ); // 30 seconds
-      const timeout = options.timeout || defaultTimeout;
+      const timeout = options.timeout ?? defaultTimeout;
 
       const job: JobResult = {
         jobId,
         status: JobStatus.PENDING,
-        priority: options.priority || JobPriority.NORMAL,
+        priority: options.priority ?? JobPriority.NORMAL,
         action,
         createdAt: now,
         timeoutAt: new Date(now.getTime() + timeout),
         retryCount: 0,
-        maxRetries: options.maxRetries || 3,
+        maxRetries: options.maxRetries ?? 3,
         metadata: {
           userId: options.metadata?.userId,
           sessionId: options.metadata?.sessionId,
-          correlationId: options.metadata?.correlationId || operationId,
+          correlationId: options.metadata?.correlationId ?? operationId,
           sourceIp: options.metadata?.sourceIp,
           userAgent: options.metadata?.userAgent,
-          tags: options.tags || [],
+          tags: options.tags ?? [],
           metrics: {
             queueSize: undefined,
             workerCount: undefined,
@@ -1370,9 +1370,9 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
         throw new Error(`Job ${jobId} is still ${job.status.toLowerCase()}`);
       }
 
-      if (job.status === JobStatus.FAILED || job.status === JobStatus.TIMEOUT) {
+      if (job.status === JobStatus.FAILED ?? job.status === JobStatus.TIMEOUT) {
         throw new Error(
-          `Job ${jobId} failed: ${job.error?.message || 'Unknown error'}`,
+          `Job ${jobId} failed: ${job.error?.message ?? 'Unknown error'}`,
         );
       }
 

@@ -11,7 +11,7 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
+
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
@@ -214,7 +214,7 @@ export class EnterpriseRateLimitGuard
           {
             statusCode: HttpStatus.TOO_MANY_REQUESTS,
             error: 'Too Many Requests',
-            message: rateLimitConfig.message || 'Rate limit exceeded',
+            message: rateLimitConfig.message ?? 'Rate limit exceeded',
             retryAfter: rateLimitConfig.windowSeconds,
             rateLimitTier: rateLimitConfig.tier,
             operationId,
@@ -247,14 +247,14 @@ export class EnterpriseRateLimitGuard
 
     if (path.includes('computer-use')) {
       return (
-        RATE_LIMIT_CONFIGS.computer_use ||
-        RATE_LIMIT_CONFIGS.general ||
+        RATE_LIMIT_CONFIGS.computer_use ??
+        RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
-    } else if (path.includes('auth') || path.includes('login')) {
+    } else if (path.includes('auth') ?? path.includes('login')) {
       return (
-        RATE_LIMIT_CONFIGS.auth ||
-        RATE_LIMIT_CONFIGS.general ||
+        RATE_LIMIT_CONFIGS.auth ??
+        RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
     } else if (
@@ -263,8 +263,8 @@ export class EnterpriseRateLimitGuard
       path.includes('ocr')
     ) {
       return (
-        RATE_LIMIT_CONFIGS.vision ||
-        RATE_LIMIT_CONFIGS.general ||
+        RATE_LIMIT_CONFIGS.vision ??
+        RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
     } else if (
@@ -273,14 +273,14 @@ export class EnterpriseRateLimitGuard
       path.includes('write')
     ) {
       return (
-        RATE_LIMIT_CONFIGS.file_operations ||
-        RATE_LIMIT_CONFIGS.general ||
+        RATE_LIMIT_CONFIGS.file_operations ??
+        RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
     }
 
     // Default to general rate limiting
-    return RATE_LIMIT_CONFIGS.general || this.getDefaultConfig();
+    return RATE_LIMIT_CONFIGS.general ?? this.getDefaultConfig();
   }
 
   /**
@@ -301,13 +301,13 @@ export class EnterpriseRateLimitGuard
   private getClientIdentifier(request: Request): string {
     // Use combination of IP and User-Agent for better identification
     const ip =
-      request.ip ||
-      request.connection.remoteAddress ||
-      request.socket.remoteAddress ||
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+      request.ip ??
+      request.connection.remoteAddress ??
+      request.socket.remoteAddress ??
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ??
       'unknown';
 
-    const userAgent = request.headers['user-agent'] || 'unknown';
+    const userAgent = request.headers['user-agent'] ?? 'unknown';
 
     // Create hash-like identifier without actually hashing (for performance)
     return `${ip}:${userAgent.substring(0, 50)}`.replace(

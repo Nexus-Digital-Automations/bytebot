@@ -16,7 +16,7 @@
  
  
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+ 
 
 import { SetMetadata, applyDecorators } from '@nestjs/common';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
@@ -321,7 +321,7 @@ export const ComputerUseApi = (
       desktopCompatibility: {
         minDesktopVersion: '1.0.0',
         vncRequirements: ['noVNC 1.3.0+', 'WebSocket support'],
-        computerUseFeatures: features || [
+        computerUseFeatures: features ?? [
           'screenshot',
           'click',
           'type',
@@ -350,7 +350,7 @@ export const ComputerUseApi = (
  * @returns Version configuration or null
  */
 export function getVersionConfig(target: any): ApiVersionConfig | null {
-  return Reflect.getMetadata(VERSION_CONFIG_KEY, target) || null;
+  return Reflect.getMetadata(VERSION_CONFIG_KEY, target) ?? null;
 }
 
 /**
@@ -359,7 +359,7 @@ export function getVersionConfig(target: any): ApiVersionConfig | null {
  * @returns API version or null
  */
 export function getApiVersion(target: any): string | null {
-  return Reflect.getMetadata(VERSION_METADATA_KEY, target) || null;
+  return Reflect.getMetadata(VERSION_METADATA_KEY, target) ?? null;
 }
 
 /**
@@ -368,7 +368,7 @@ export function getApiVersion(target: any): string | null {
  * @returns Array of supported versions or null
  */
 export function getMultiVersions(target: any): SupportedVersion[] | null {
-  return Reflect.getMetadata('multi_version', target) || null;
+  return Reflect.getMetadata('multi_version', target) ?? null;
 }
 
 /**
@@ -377,7 +377,7 @@ export function getMultiVersions(target: any): SupportedVersion[] | null {
  * @returns Boolean indicating if it's a desktop endpoint
  */
 export function isDesktopApiVersion(target: any): boolean {
-  return Reflect.getMetadata(DESKTOP_VERSION_KEY, target) || false;
+  return Reflect.getMetadata(DESKTOP_VERSION_KEY, target) ?? false;
 }
 
 /**
@@ -389,7 +389,7 @@ export function getDesktopCompatibility(
   target: any,
 ): ApiVersionConfig['desktopCompatibility'] | null {
   const versionConfig = getVersionConfig(target);
-  return versionConfig?.desktopCompatibility || null;
+  return versionConfig?.desktopCompatibility ?? null;
 }
 
 export default {

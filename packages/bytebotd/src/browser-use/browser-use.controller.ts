@@ -330,7 +330,7 @@ export class BrowserUseController {
       sessionName: createSessionDto.name,
       headless: createSessionDto.headless,
       viewport: `${createSessionDto.viewportWidth}x${createSessionDto.viewportHeight}`,
-      initialUrls: createSessionDto.initialUrls?.length || 0,
+      initialUrls: createSessionDto.initialUrls?.length ?? 0,
     });
 
     try {
@@ -744,7 +744,7 @@ export class BrowserUseController {
     try {
       const screenshotData = await this.browserUseService.takeScreenshot(
         sessionId,
-        options || {},
+        options ?? {},
       );
 
       // Update session activity

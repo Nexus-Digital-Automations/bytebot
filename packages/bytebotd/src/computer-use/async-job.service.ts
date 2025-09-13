@@ -120,14 +120,14 @@ export class AsyncJobService {
         const cachedJob: JobData = {
           jobId,
           status: JobStatus.COMPLETED,
-          priority: options.priority || JobPriority.NORMAL,
+          priority: options.priority ?? JobPriority.NORMAL,
           action,
           progress: 100,
           submittedAt,
           startedAt: submittedAt,
           completedAt: submittedAt,
           result: cachedResult,
-          timeout: options.timeout || 30000,
+          timeout: options.timeout ?? 30000,
           useCache: true,
           retryCount: 0,
           maxRetries: 3,
@@ -151,12 +151,12 @@ export class AsyncJobService {
     const jobData: JobData = {
       jobId,
       status: JobStatus.PENDING,
-      priority: options.priority || JobPriority.NORMAL,
+      priority: options.priority ?? JobPriority.NORMAL,
       action,
       progress: 0,
       submittedAt,
-      timeout: options.timeout || 30000,
-      useCache: options.useCache || false,
+      timeout: options.timeout ?? 30000,
+      useCache: options.useCache ?? false,
       retryCount: 0,
       maxRetries: 3,
       metadata: options.metadata,
@@ -237,7 +237,7 @@ export class AsyncJobService {
       result: job.result,
       errorMessage: job.errorMessage,
       submittedAt: job.submittedAt.toISOString(),
-      completedAt: job.completedAt?.toISOString() || new Date().toISOString(),
+      completedAt: job.completedAt?.toISOString() ?? new Date().toISOString(),
       executionTimeMs: executionTime,
       metadata: {
         ...job.metadata,
@@ -260,7 +260,7 @@ export class AsyncJobService {
       return false;
     }
 
-    if (job.status === JobStatus.COMPLETED || job.status === JobStatus.FAILED) {
+    if (job.status === JobStatus.COMPLETED ?? job.status === JobStatus.FAILED) {
       return false; // Cannot cancel completed jobs
     }
 
@@ -321,7 +321,7 @@ export class AsyncJobService {
    * @returns string Unique job ID
    */
   private generateJobId(): string {
-    return `job_${Date.now()}_${uuidv4().substring(0, 8)}`;
+    return `job_${Date.now()}_${_uuidv4().substring(0, 8)}`;
   }
 
   /**
@@ -367,7 +367,7 @@ export class AsyncJobService {
    * Process jobs from the queue
    */
   private async processQueue(): Promise<void> {
-    if (this.isProcessing || this.activeJobs >= this.maxConcurrentJobs) {
+    if (this.isProcessing ?? this.activeJobs >= this.maxConcurrentJobs) {
       return;
     }
 

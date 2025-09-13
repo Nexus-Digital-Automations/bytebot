@@ -128,7 +128,7 @@ export class VersionInterceptor implements NestInterceptor {
       const multiVersions = getMultiVersions(context.getHandler());
       const isDesktopEndpoint = isDesktopApiVersion(context.getHandler());
       const desktopCompatibility: DesktopCompatibility | null =
-        getDesktopCompatibility(context.getHandler()) || null;
+        getDesktopCompatibility(context.getHandler()) ?? null;
 
       this.logger.debug(`[${operationId}] Processing BytebotD API version`, {
         operationId,
@@ -331,7 +331,7 @@ export class VersionInterceptor implements NestInterceptor {
       isSupported,
       desktopCompatibility: {
         isDesktopClient: desktopClientInfo.isDesktopClient,
-        clientVersion: desktopClientInfo.clientVersion || 'unknown',
+        clientVersion: desktopClientInfo.clientVersion ?? 'unknown',
         vncClient: desktopClientInfo.vncClient,
         isComputerUse: desktopClientInfo.isComputerUse,
         compatibilityIssues,
@@ -346,10 +346,10 @@ export class VersionInterceptor implements NestInterceptor {
    * @returns Desktop client information
    */
   private extractDesktopClientInfo(request: Request) {
-    const desktopClient = request.get('X-Desktop-Client') || '';
+    const desktopClient = request.get('X-Desktop-Client') ?? '';
     const computerUseClient = request.get('X-Computer-Use-Client');
-    const vncClient = request.get('X-VNC-Client') || 'unknown';
-    const userAgent = request.get('User-Agent') || '';
+    const vncClient = request.get('X-VNC-Client') ?? 'unknown';
+    const userAgent = request.get('User-Agent') ?? '';
 
     // Detect if this is a desktop client
     const isDesktopClient = !!(
@@ -446,7 +446,7 @@ export class VersionInterceptor implements NestInterceptor {
   ): string[] {
     const issues: string[] = [];
 
-    if (!desktopCompatibility || !desktopClientInfo.isDesktopClient) {
+    if (!desktopCompatibility ?? !desktopClientInfo.isDesktopClient) {
       return issues;
     }
 
@@ -499,7 +499,7 @@ export class VersionInterceptor implements NestInterceptor {
    * @returns Boolean indicating if version1 >= version2
    */
   private compareVersions(version1: string, version2: string): boolean {
-    if (version1 === 'unknown' || version2 === 'unknown') {
+    if (version1 === 'unknown' ?? version2 === 'unknown') {
       return false;
     }
 
@@ -507,8 +507,8 @@ export class VersionInterceptor implements NestInterceptor {
     const v2Parts = version2.split('.').map(Number);
 
     for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
-      const v1Part = v1Parts[i] || 0;
-      const v2Part = v2Parts[i] || 0;
+      const v1Part = v1Parts[i] ?? 0;
+      const v2Part = v2Parts[i] ?? 0;
 
       if (v1Part > v2Part) return true;
       if (v1Part < v2Part) return false;

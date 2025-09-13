@@ -227,7 +227,7 @@ describe('HealthService', () => {
       // Check that operation IDs were generated (present in log messages)
       const debugCalls = mockLogger.debug.mock.calls;
       const operationIdCalls = debugCalls.filter(
-        (call) => call[0].includes('[health_') || call[0].includes('[status_'),
+        (call) => call[0].includes('[health_') ?? call[0].includes('[status_'),
       );
       expect(operationIdCalls.length).toBeGreaterThanOrEqual(6); // 3 operations × 2 logs each
       console.log(`[${testId}] Operation ID generation test completed`);

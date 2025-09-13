@@ -77,6 +77,33 @@ interface EnhancedAuthenticatedRequest extends Request {
 }
 
 /**
+ * JWT authentication error types for enhanced error handling
+ */
+interface JwtAuthError extends Error {
+  message: string;
+  name: string;
+  expiredAt?: Date;
+}
+
+/**
+ * JWT authentication info object containing validation details
+ */
+interface JwtAuthInfo {
+  message?: string;
+  name?: string;
+  expiredAt?: Date;
+  [key: string]: unknown;
+}
+
+/**
+ * Verification callback type for JWT authentication
+ */
+type JwtVerifyCallback = (
+  error?: Error | null,
+  user?: ByteBotdUser | false,
+) => void;
+
+/**
  * Computer use authorization levels
  */
 enum ComputerUsePermission {
@@ -273,7 +300,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
     // Check refresh attempt rate limiting
     const clientId = this.getClientIpAddress(request);
-    const attempts = this.refreshAttempts.get(clientId) || 0;
+    const attempts = this.refreshAttempts.get(clientId) ?? 0;
 
     if (attempts >= 3) {
       this.logger.warn(
@@ -295,7 +322,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       // Validate and decode refresh token
       const refreshPayload =
         await this.jwtService.verifyAsync<EnhancedJwtPayload>(refreshToken, {
-          secret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+          secret: process.env.JWT_REFRESH_SECRET ?? process.env.JWT_SECRET,
         });
 
       if (refreshPayload.tokenType !== 'refresh') {
@@ -310,13 +337,13 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
       // Create user object for request context
       // Ensure email and id exist, provide fallbacks if not available
-      const userId = refreshPayload.sub || `user-${Date.now()}`;
-      const email = refreshPayload.email || `${userId}@unknown.local`;
+      const userId = refreshPayload.sub ?? `user-${Date.now()}`;
+      const email = refreshPayload.email ?? `${userId}@unknown.local`;
       const user: ByteBotdUser = {
         id: userId,
         email,
-        username: email.split('@')[0] || 'unknown-user', // Fallback username from email
-        role: refreshPayload.role || UserRole._VIEWER, // Default to VIEWER role if missing
+        username: email.split('@')[0] ?? 'unknown-user', // Fallback username from email
+        role: refreshPayload.role ?? UserRole._VIEWER, // Default to VIEWER role if missing
         isActive: true, // Assuming active if refresh is valid
       };
 
@@ -350,7 +377,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   private extractRefreshToken(request: Request): string | null {
     // Check refresh token in cookies (most secure)
     if (request.cookies?.refreshToken) {
-      return request.cookies.refreshToken;
+      return request.cookies.refreshToken as string;
     }
 
     // Check refresh token in secure headers
@@ -360,7 +387,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
     // Check refresh token in request body (for specific endpoints)
     if (request.body?.refreshToken && request.method === 'POST') {
-      return request.body.refreshToken;
+      return request.body.refreshToken as string;
     }
 
     return null;
@@ -385,7 +412,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     };
 
     return this.jwtService.signAsync(accessPayload, {
-      expiresIn: process.env.JWT_ACCESS_EXPIRY || '15m',
+      expiresIn: process.env.JWT_ACCESS_EXPIRY ?? '15m',
       issuer: 'bytebotd-enhanced',
       audience: 'computer-control',
     });
@@ -424,7 +451,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     }
 
     // Validate request size for computer control operations
-    const contentLength = parseInt(request.headers['content-length'] || '0');
+    const contentLength = parseInt(request.headers['content-length'] ?? '0');
     if (contentLength > 10 * 1024 * 1024) {
       // 10MB limit
       return {
@@ -453,7 +480,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       const payload = await this.jwtService.verifyAsync<EnhancedJwtPayload>(
         token,
         {
-          secret: process.env.SERVICE_JWT_SECRET || process.env.JWT_SECRET,
+          secret: process.env.SERVICE_JWT_SECRET ?? process.env.JWT_SECRET,
           audience: 'service-to-service',
         },
       );
@@ -502,7 +529,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     const origin = request.headers.origin;
     const allowedOrigins = process.env.COMPUTER_CONTROL_ALLOWED_ORIGINS?.split(
       ',',
-    ) || [
+    ) ?? [
       'http://localhost:3000',
       'http://localhost:3001',
       'https://app.bytebot.ai',
@@ -521,7 +548,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
    * Detect suspicious request patterns
    */
   private detectSuspiciousPatterns(request: Request): boolean {
-    const userAgent = request.headers['user-agent'] || '';
+    const userAgent = request.headers['user-agent'] ?? '';
     const path = request.url;
 
     // Check for automation tools that shouldn't be used for computer control
@@ -539,12 +566,12 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     }
 
     // Check for suspicious path patterns
-    if (path.includes('../') || path.includes('..\\')) {
+    if (path.includes('../') ?? path.includes('..\\')) {
       return true;
     }
 
     // Check for SQL injection patterns in query strings
-    const queryString = request.url.split('?')[1] || '';
+    const queryString = request.url.split('?')[1] ?? '';
     const sqlPatterns = [
       /union\s+select/gi,
       /drop\s+table/gi,
@@ -608,19 +635,19 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     let requiredPermissions = ComputerUsePermission.NONE;
 
     // Determine required permissions based on endpoint
-    if (path.includes('/screenshot') || path.includes('/screen')) {
+    if (path.includes('/screenshot') ?? path.includes('/screen')) {
       requiredPermissions |= ComputerUsePermission.VIEW_SCREEN;
     }
 
-    if (path.includes('/mouse') || path.includes('/click')) {
+    if (path.includes('/mouse') ?? path.includes('/click')) {
       requiredPermissions |= ComputerUsePermission.MOUSE_CONTROL;
     }
 
-    if (path.includes('/keyboard') || path.includes('/type')) {
+    if (path.includes('/keyboard') ?? path.includes('/type')) {
       requiredPermissions |= ComputerUsePermission.KEYBOARD_CONTROL;
     }
 
-    if (path.includes('/file') || path.includes('/upload')) {
+    if (path.includes('/file') ?? path.includes('/upload')) {
       requiredPermissions |= ComputerUsePermission.FILE_ACCESS;
     }
 
@@ -719,7 +746,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
     // Increase risk based on endpoint sensitivity
     const path = request.url.toLowerCase();
-    if (path.includes('/file') || path.includes('/upload')) {
+    if (path.includes('/file') ?? path.includes('/upload')) {
       riskScore += 25;
     }
 
@@ -758,11 +785,11 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
    */
   private getClientIpAddress(request: Request): string {
     return (
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      (request.headers['x-real-ip'] as string) ||
-      (request.headers['x-client-ip'] as string) ||
-      request.connection?.remoteAddress ||
-      request.socket?.remoteAddress ||
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??
+      (request.headers['x-real-ip'] as string) ??
+      (request.headers['x-client-ip'] as string) ??
+      request.connection?.remoteAddress ??
+      request.socket?.remoteAddress ??
       'unknown'
     );
   }
@@ -792,12 +819,17 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   /**
    * Handle authentication request with enhanced error information
    */
-  handleRequest<TUser = any>(
-    err: any,
-    user: any,
-    info: any,
+  handleRequest<TUser = ByteBotdUser>(
+    err: JwtAuthError | null,
+    user: ByteBotdUser | false,
+    info: JwtAuthInfo | null,
     context: ExecutionContext,
   ): TUser {
+    /**
+     * Returns authenticated user with proper type assertion
+     * @param user - User object from JWT strategy validation
+     * @returns {TUser} Typed user object
+     */
     const operationId = `enhanced-jwt-handle-${Date.now()}`;
     const request = context
       .switchToHttp()
@@ -822,7 +854,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Enhanced authentication failed - no user`,
         {
           operationId,
-          info: info?.message || info?.name || String(info),
+          info: info?.message ?? info?.name ?? String(info),
           url: request.url,
           method: request.method,
           errorMessage,
@@ -845,18 +877,18 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       },
     );
 
-    return user;
+    return user as TUser;
   }
 
   /**
    * Get enhanced authentication error message
    */
-  private getEnhancedAuthErrorMessage(info: any): string {
+  private getEnhancedAuthErrorMessage(info: JwtAuthInfo | null): string {
     if (!info) {
       return 'Enhanced authentication required for computer control';
     }
 
-    const message = info.message || info.name || String(info);
+    const message = info.message ?? info.name ?? String(info);
 
     switch (message) {
       case 'TokenExpiredError':

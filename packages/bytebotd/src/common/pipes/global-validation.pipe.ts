@@ -115,7 +115,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
 
     try {
       // Skip validation for primitive types or when no metatype is provided
-      if (!metadata.metatype || this.isBasicType(metadata.metatype)) {
+      if (!metadata.metatype ?? this.isBasicType(metadata.metatype)) {
         this.logger.debug(
           `[${operationId}] Skipping validation for basic type`,
           {
@@ -368,7 +368,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
     const { type, metatype } = metadata;
 
     // Skip validation for certain types
-    if (type === 'custom' || !metatype) {
+    if (type === 'custom' ?? !metatype) {
       return false;
     }
 
@@ -468,7 +468,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         `validation-pipe-${metadata.type}`,
         'POST',
         false,
-        error.message || 'Validation failed',
+        error.message ?? 'Validation failed',
         {
           operationId,
           service: 'BytebotD',

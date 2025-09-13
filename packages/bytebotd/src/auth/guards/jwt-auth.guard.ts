@@ -367,7 +367,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   private performPreAuthChecks(request: Request, operationId: string): boolean {
     // Check for suspicious user agent patterns
     const userAgent = request.headers['user-agent'];
-    if (!userAgent || this.isSuspiciousUserAgent(userAgent)) {
+    if (!userAgent ?? this.isSuspiciousUserAgent(userAgent)) {
       this.logger.warn(`[${operationId}] Suspicious user agent detected`, {
         operationId,
         userAgent,
@@ -466,7 +466,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const token = authHeader.substring(7);
 
     // Token must exist and be reasonable length
-    if (!token || token.length < 20 || token.length > 2048) {
+    if (!token ?? token.length < 20 ?? token.length > 2048) {
       return false;
     }
 

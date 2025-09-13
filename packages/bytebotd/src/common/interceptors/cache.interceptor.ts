@@ -430,7 +430,7 @@ export class CacheInterceptor implements NestInterceptor {
     const path = request.url.split('?')[0]; // Remove query string for pattern matching
 
     for (const rule of this.cacheRules) {
-      if (rule.pattern.test(path || '')) {
+      if (rule.pattern.test(path ?? '')) {
         return rule;
       }
     }

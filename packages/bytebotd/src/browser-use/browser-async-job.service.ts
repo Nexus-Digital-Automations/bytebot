@@ -690,7 +690,7 @@ export class BrowserAsyncJobService {
    */
   private async updateJobProgress(jobId: string): Promise<void> {
     const job = this.jobs.get(jobId);
-    if (!job ?? job.status !== AsyncJobStatus.RUNNING) {
+    if (!job || job.status !== AsyncJobStatus.RUNNING) {
       return;
     }
 

@@ -473,7 +473,7 @@ export class ComputerUseService {
       operationId,
       pathLength: path.length,
       hasHoldKeys: !!holdKeys,
-      holdKeysCount: holdKeys?.length || 0,
+      holdKeysCount: holdKeys?.length ?? 0,
     });
 
     try {
@@ -1646,7 +1646,7 @@ export class ComputerUseService {
           h: 'text/x-chdr',
         };
 
-        const mediaType = mimeTypes[ext] || 'application/octet-stream';
+        const mediaType = mimeTypes[ext] ?? 'application/octet-stream';
 
         const _result: FileReadResult = {
           success: true,

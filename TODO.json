@@ -32,29 +32,9 @@
       ]
     },
     {
-      "id": "error_1757731765880_9nnramkvu",
-      "title": "Continue fixing TypeScript violations in bytebotd auth test files",
-      "description": "Continue systematic fix of TypeScript violations in auth module test files that were in progress: auth.service.spec.ts, controller-security.integration.spec.ts, jwt-auth.guard.security.spec.ts, and security-penetration.spec.ts. Apply comprehensive type safety using existing test-interfaces.ts definitions. Target zero linter violations.",
-      "priority": "medium",
-      "category": "error",
-      "status": "pending",
-      "dependencies": [],
-      "important_files": [
-        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/__tests__/auth.service.spec.ts",
-        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/__tests__/controller-security.integration.spec.ts",
-        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/test-utils/test-interfaces.ts"
-      ],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T02:49:25.880Z",
-      "auto_research_created": false
-    },
-    {
-      "id": "error_1757730608890_vx3qybln3",
-      "title": "Fix all TypeScript violations in bytebotd authentication test files",
-      "description": "CRITICAL EMERGENCY: Fix TypeScript violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/__tests__/ - Unsafe assignment violations (@typescript-eslint/no-unsafe-assignment), Explicit any types (@typescript-eslint/no-explicit-any), Unsafe member access (@typescript-eslint/no-unsafe-member-access), Unsafe argument violations (@typescript-eslint/no-unsafe-argument), Unused variables (@typescript-eslint/no-unused-vars). Create proper TypeScript interfaces for all test data structures, replace all any types with specific interfaces, fix unsafe assignments with proper type casting, add proper type guards for member access, remove unused variables or prefix with underscore. Zero tolerance for remaining violations.",
+      "id": "error_1757733273347_remi5zpaw",
+      "title": "CRITICAL: Fix all @typescript-eslint/no-unsafe-member-access violations in packages/bytebotd",
+      "description": "Comprehensive resolution of TypeScript unsafe member access violations. Target files include enhanced-jwt-auth.guard.ts and all other files with violations. Replace any types with proper interfaces, add type guards and assertions, create interfaces for user payloads, refresh tokens, JWT structures. Zero tolerance for unsafe member access.",
       "priority": "medium",
       "category": "error",
       "status": "in_progress",
@@ -64,16 +44,156 @@
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-13T02:30:08.890Z",
+      "created_at": "2025-09-13T03:14:33.347Z",
       "auto_research_created": false,
-      "assigned_agent": "development_session_1757730587351_1_general_8a33ae12",
-      "started_at": "2025-09-13T02:30:31.037Z",
-      "claimed_by": "development_session_1757730587351_1_general_8a33ae12",
+      "assigned_agent": "development_session_1757733253702_1_general_4a1c507f",
+      "started_at": "2025-09-13T03:14:50.739Z",
+      "claimed_by": "development_session_1757733253702_1_general_4a1c507f",
       "agent_assignment_history": [
         {
-          "agentId": "development_session_1757730587351_1_general_8a33ae12",
+          "agentId": "development_session_1757733253702_1_general_4a1c507f",
           "role": "primary",
-          "assignedAt": "2025-09-13T02:30:31.037Z",
+          "assignedAt": "2025-09-13T03:14:50.739Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757733270773_ynx2fmo37",
+      "title": "Fix all @typescript-eslint/no-unsafe-return violations in bytebotd package",
+      "description": "Scan and fix all @typescript-eslint/no-unsafe-return violations by adding proper return type annotations, replacing any returns with typed returns, and ensuring all functions have explicit return types",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T03:14:30.774Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757733253702_1_general_1e573aa6",
+      "started_at": "2025-09-13T03:14:47.442Z",
+      "claimed_by": "development_session_1757733253702_1_general_1e573aa6",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757733253702_1_general_1e573aa6",
+          "role": "primary",
+          "assignedAt": "2025-09-13T03:14:47.442Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757733270633_di95vnk5a",
+      "title": "Fix ESLint parsing error at line 1128:66 in security-penetration.spec.ts",
+      "description": "CRITICAL: Fix parsing error in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/__tests__/security-penetration.spec.ts at line 1128:66. Identify invalid character causing parsing error, fix syntax error (likely encoding issue or malformed code), verify file compiles after fix.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T03:14:30.633Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757733251116_1_general_e77552a8",
+      "started_at": "2025-09-13T03:14:53.384Z",
+      "claimed_by": "development_session_1757733251116_1_general_e77552a8",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757733251116_1_general_e77552a8",
+          "role": "primary",
+          "assignedAt": "2025-09-13T03:14:53.384Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757733270519_s3uixbq6r",
+      "title": "Fix @typescript-eslint/no-explicit-any violations in bytebotd packages",
+      "description": "Scan ALL files in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd for explicit any types. Replace with proper TypeScript types/interfaces. Focus on enhanced-jwt-auth.guard.ts (lines 795, 796, 797, 798, 854). Create context-specific interfaces for parameters and variables. Use generic types where appropriate. Zero tolerance for explicit any types.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T03:14:30.519Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757733252144_1_general_358c075d",
+      "started_at": "2025-09-13T03:14:47.087Z",
+      "claimed_by": "development_session_1757733252144_1_general_358c075d",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757733252144_1_general_358c075d",
+          "role": "primary",
+          "assignedAt": "2025-09-13T03:14:47.087Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757733267893_d2ktqgkhy",
+      "title": "Fix @typescript-eslint/no-unsafe-assignment violations in bytebotd packages",
+      "description": "CRITICAL ESLint VIOLATION RESOLUTION: Fix all @typescript-eslint/no-unsafe-assignment violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd. Focus on enhanced-jwt-auth.guard.ts (lines 825, 840, 841, 842, 859). Add type assertions or proper typing at assignment points. Create type-safe assignment patterns. Use destructuring with proper types where applicable.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T03:14:27.893Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757733251460_1_general_bd1bc9af",
+      "started_at": "2025-09-13T03:14:44.730Z",
+      "claimed_by": "development_session_1757733251460_1_general_bd1bc9af",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757733251460_1_general_bd1bc9af",
+          "role": "primary",
+          "assignedAt": "2025-09-13T03:14:44.730Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757733265491_ab9q39gwa",
+      "title": "Fix @typescript-eslint/no-unused-vars violations in bytebotd package",
+      "description": "Scan and fix ALL @typescript-eslint/no-unused-vars violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd. Focus on test files first. Use underscore prefix for intentionally unused variables (_result, _error). Remove truly unused variables.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T03:14:25.491Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757733248749_1_general_3a47b529",
+      "started_at": "2025-09-13T03:14:42.229Z",
+      "claimed_by": "development_session_1757733248749_1_general_3a47b529",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757733248749_1_general_3a47b529",
+          "role": "primary",
+          "assignedAt": "2025-09-13T03:14:42.229Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
@@ -1261,6 +1381,111 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-13T02:48:00.869Z",
       "sessionId": "session_1757731680867",
+      "metadata": {}
+    },
+    "development_session_1757733248749_1_general_3a47b529": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T03:14:08.753Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T03:14:08.753Z",
+      "sessionId": "session_1757733248749",
+      "metadata": {}
+    },
+    "development_session_1757733251116_1_general_e77552a8": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T03:14:11.117Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T03:14:11.117Z",
+      "sessionId": "session_1757733251116",
+      "metadata": {}
+    },
+    "development_session_1757733251460_1_general_bd1bc9af": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T03:14:11.461Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T03:14:11.461Z",
+      "sessionId": "session_1757733251460",
+      "metadata": {}
+    },
+    "development_session_1757733252144_1_general_358c075d": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T03:14:12.144Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T03:14:12.144Z",
+      "sessionId": "session_1757733252144",
+      "metadata": {}
+    },
+    "development_session_1757733253702_1_general_4a1c507f": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T03:14:13.707Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T03:14:13.707Z",
+      "sessionId": "session_1757733253702",
       "metadata": {}
     }
   },

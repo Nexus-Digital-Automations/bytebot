@@ -33,7 +33,7 @@ const _logger = new Logger('Base64ImageCompressor');
 
 // Type-safe sharp function call helper
 const createSharp = (input: string | Buffer): sharp.Sharp => {
-  return (sharp as any)(input);
+  return (sharp as any)(input) as sharp.Sharp;
 };
 
 /**

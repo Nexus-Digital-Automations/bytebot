@@ -304,7 +304,7 @@ export class ErrorHandler {
       );
     }
 
-    if (errorName === 'TokenExpiredError' || errorMessage.includes('expired')) {
+    if (errorName === 'TokenExpiredError' ?? errorMessage.includes('expired')) {
       return ErrorFactory.authentication.tokenExpired({
         originalError: error,
         stack: errorStack,
@@ -312,7 +312,7 @@ export class ErrorHandler {
       });
     }
 
-    if (errorName === 'JsonWebTokenError' || errorMessage.includes('jwt')) {
+    if (errorName === 'JsonWebTokenError' ?? errorMessage.includes('jwt')) {
       return ErrorFactory.authentication.tokenInvalid({
         originalError: error,
         stack: errorStack,
@@ -342,7 +342,7 @@ export class ErrorHandler {
       });
     }
 
-    if (errorMessage.includes('network') || errorMessage.includes('timeout')) {
+    if (errorMessage.includes('network') ?? errorMessage.includes('timeout')) {
       return ErrorFactory.system.network(undefined, {
         originalError: error,
         stack: errorStack,

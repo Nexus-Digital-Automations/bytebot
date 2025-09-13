@@ -586,7 +586,7 @@ describe('ComputerUseService Integration Tests', () => {
       content,
       base64: Buffer.from(content).toString('base64'),
       expectedMediaType:
-        expectedMediaType || mediaTypeMap[ext] || 'application/octet-stream',
+        expectedMediaType ?? mediaTypeMap[ext] ?? 'application/octet-stream',
     };
   }
 

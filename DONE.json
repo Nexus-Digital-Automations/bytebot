@@ -324,9 +324,109 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/TODO.json"
+    },
+    {
+      "id": "error_1757730608890_vx3qybln3",
+      "title": "Fix all TypeScript violations in bytebotd authentication test files",
+      "description": "CRITICAL EMERGENCY: Fix TypeScript violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/__tests__/ - Unsafe assignment violations (@typescript-eslint/no-unsafe-assignment), Explicit any types (@typescript-eslint/no-explicit-any), Unsafe member access (@typescript-eslint/no-unsafe-member-access), Unsafe argument violations (@typescript-eslint/no-unsafe-argument), Unused variables (@typescript-eslint/no-unused-vars). Create proper TypeScript interfaces for all test data structures, replace all any types with specific interfaces, fix unsafe assignments with proper type casting, add proper type guards for member access, remove unused variables or prefix with underscore. Zero tolerance for remaining violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T02:30:08.890Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757730587351_1_general_8a33ae12",
+      "started_at": "2025-09-13T02:30:31.037Z",
+      "claimed_by": "development_session_1757730587351_1_general_8a33ae12",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757730587351_1_general_8a33ae12",
+          "role": "primary",
+          "assignedAt": "2025-09-13T02:30:31.037Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757730608890_vx3qybln3",
+          "completedAt": "2025-09-13T02:55:36.399Z",
+          "completedBy": "development_session_1757730587351_1_general_8a33ae12",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T02:55:36.399Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T02:55:36.399Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/TODO.json"
+    },
+    {
+      "id": "error_1757731765880_9nnramkvu",
+      "title": "Continue fixing TypeScript violations in bytebotd auth test files",
+      "description": "Continue systematic fix of TypeScript violations in auth module test files that were in progress: auth.service.spec.ts, controller-security.integration.spec.ts, jwt-auth.guard.security.spec.ts, and security-penetration.spec.ts. Apply comprehensive type safety using existing test-interfaces.ts definitions. Target zero linter violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/__tests__/auth.service.spec.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/__tests__/controller-security.integration.spec.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/test-utils/test-interfaces.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T02:49:25.880Z",
+      "auto_research_created": false,
+      "completion_history": [
+        {
+          "taskId": "error_1757731765880_9nnramkvu",
+          "completedAt": "2025-09-13T03:00:22.653Z",
+          "completedBy": "unknown",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T03:00:22.653Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "pending",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T03:00:22.653Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/TODO.json"
     }
   ],
-  "total_completed": 6,
-  "last_completion": "2025-09-13T02:54:53.141Z",
+  "total_completed": 8,
+  "last_completion": "2025-09-13T03:00:22.653Z",
   "created_at": "2025-09-11T09:00:29.533Z"
 }

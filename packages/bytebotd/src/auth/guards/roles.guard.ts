@@ -179,9 +179,9 @@ export class RolesGuard implements CanActivate {
         operationId,
         userId: user.id,
         userRole: user.role,
-        requiredRoles: requiredRoles?.map((r) => r.toString()) || [],
+        requiredRoles: requiredRoles?.map((r) => r.toString()) ?? [],
         requiredPermissions:
-          requiredPermissions?.map((p) => p.toString()) || [],
+          requiredPermissions?.map((p) => p.toString()) ?? [],
         authTimeMs: authTime,
         securityEvent: 'rbac_authorization_success',
       });
@@ -223,7 +223,7 @@ export class RolesGuard implements CanActivate {
     operationId: string,
   ): boolean {
     const userRole = user.role;
-    const userHierarchyRoles = ROLE_HIERARCHY[userRole] || [userRole];
+    const userHierarchyRoles = ROLE_HIERARCHY[userRole] ?? [userRole];
 
     // Check if user's role (or any inherited roles) match any required role
     const hasRole = requiredRoles.some((requiredRole) =>
@@ -256,7 +256,7 @@ export class RolesGuard implements CanActivate {
     operationId: string,
   ): boolean {
     // Get user's default permissions based on role
-    const rolePermissions = DEFAULT_ROLE_PERMISSIONS[user.role] || [];
+    const rolePermissions = DEFAULT_ROLE_PERMISSIONS[user.role] ?? [];
 
     // TODO: In a real implementation, also get user-specific permissions from database
     // For now, use role-based permissions only
@@ -287,7 +287,7 @@ export class RolesGuard implements CanActivate {
    * @returns boolean - Whether user has the role (including hierarchy)
    */
   static hasRole(user: ByteBotdUser, role: UserRole): boolean {
-    const userHierarchyRoles = ROLE_HIERARCHY[user.role] || [user.role];
+    const userHierarchyRoles = ROLE_HIERARCHY[user.role] ?? [user.role];
     return userHierarchyRoles.includes(role);
   }
 
@@ -299,7 +299,7 @@ export class RolesGuard implements CanActivate {
    * @returns boolean - Whether user has the permission
    */
   static hasPermission(user: ByteBotdUser, permission: Permission): boolean {
-    const rolePermissions = DEFAULT_ROLE_PERMISSIONS[user.role] || [];
+    const rolePermissions = DEFAULT_ROLE_PERMISSIONS[user.role] ?? [];
     return rolePermissions.includes(permission);
   }
 
@@ -310,6 +310,6 @@ export class RolesGuard implements CanActivate {
    * @returns Permission[] - Array of permissions
    */
   static getUserPermissions(user: ByteBotdUser): Permission[] {
-    return DEFAULT_ROLE_PERMISSIONS[user.role] || [];
+    return DEFAULT_ROLE_PERMISSIONS[user.role] ?? [];
   }
 }

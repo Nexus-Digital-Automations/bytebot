@@ -192,7 +192,7 @@ describe('Security E2E Tests', () => {
   const operationId = `security_e2e_test_${Date.now()}`;
 
   // Helper function to get typed HTTP server
-  const getHttpServer = () => app.getHttpServer() as Application;
+  const getHttpServer = (): Express => app.getHttpServer() as Express;
 
   beforeAll(async () => {
     console.log(`[${operationId}] Setting up Security E2E test application`);

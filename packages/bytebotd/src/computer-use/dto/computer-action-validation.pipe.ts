@@ -296,7 +296,7 @@ export class ComputerActionValidationPipe
     operationId: string,
   ): RawActionInput {
     // Check for null, undefined, or non-object values
-    if (!value || typeof value !== 'object') {
+    if (!value ?? typeof value !== 'object') {
       this.logSecurityEvent(
         operationId,
         SecurityEventType._VALIDATION_FAILED,
@@ -335,7 +335,7 @@ export class ComputerActionValidationPipe
     }
 
     // Validate presence and type of action field
-    if (!input.action || typeof input.action !== 'string') {
+    if (!input.action ?? typeof input.action !== 'string') {
       this.logSecurityEvent(
         operationId,
         SecurityEventType._VALIDATION_FAILED,
@@ -549,7 +549,7 @@ export class ComputerActionValidationPipe
       }
 
       // ========== STAGE 5: FILE OPERATION SECURITY VALIDATION ==========
-      if (rawInput.action === 'write_file' || rawInput.action === 'read_file') {
+      if (rawInput.action === 'write_file' ?? rawInput.action === 'read_file') {
         this.logger.debug(
           `[${operationId}] Stage 5: File operation security validation`,
         );
@@ -570,13 +570,13 @@ export class ComputerActionValidationPipe
 
           if (!pathValidation.isValid) {
             securityContext.threats.push('MALICIOUS_FILE_PATH');
-            securityContext.totalRiskScore += pathValidation.riskScore || 60;
+            securityContext.totalRiskScore += pathValidation.riskScore ?? 60;
             securityContext.detectionEvents.push({
               type: 'FILE_PATH_VIOLATION',
-              severity: pathValidation.severity || 'high',
-              riskScore: pathValidation.riskScore || 60,
+              severity: pathValidation.severity ?? 'high',
+              riskScore: pathValidation.riskScore ?? 60,
               confidence: 95,
-              context: pathValidation.errors || [],
+              context: pathValidation.errors ?? [],
               timestamp: new Date(),
             });
 
@@ -664,13 +664,13 @@ export class ComputerActionValidationPipe
 
             if (!coordValidation.isValid) {
               securityContext.threats.push('INVALID_COORDINATES');
-              securityContext.totalRiskScore += coordValidation.riskScore || 40;
+              securityContext.totalRiskScore += coordValidation.riskScore ?? 40;
               securityContext.detectionEvents.push({
                 type: 'COORDINATE_VALIDATION_FAILED',
-                severity: coordValidation.severity || 'medium',
-                riskScore: coordValidation.riskScore || 40,
+                severity: coordValidation.severity ?? 'medium',
+                riskScore: coordValidation.riskScore ?? 40,
                 confidence: 95,
-                context: coordValidation.errors || [],
+                context: coordValidation.errors ?? [],
                 timestamp: new Date(),
               });
 
@@ -833,7 +833,7 @@ export class ComputerActionValidationPipe
     // Apply confidence weighting
     const avgConfidence =
       detectionEvents.reduce((sum, event) => sum + event.confidence, 0) /
-      (detectionEvents.length || 1);
+      (detectionEvents.length ?? 1);
     if (avgConfidence > 90) {
       adjustedScore *= 1.2;
       reasoning.push(

@@ -46,10 +46,10 @@ export class BrowserUseService {
   ) {
     // Local-only paths - no cloud dependencies
     this.browserUsePath =
-      process.env.BROWSER_USE_PATH ||
+      process.env.BROWSER_USE_PATH ??
       '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use';
     this.workingDirectory =
-      process.env.BROWSER_USE_WORK_DIR ||
+      process.env.BROWSER_USE_WORK_DIR ??
       path.join(process.cwd(), 'browser-use-workspace');
     this.tempDirectory = path.join(this.workingDirectory, 'temp');
 
@@ -190,7 +190,7 @@ export class BrowserUseService {
 
       // Generate unique filename
       const timestamp = new Date();
-      const filename = `screenshot_${sessionId}_${Date.now()}.${config?.format || 'png'}`;
+      const filename = `screenshot_${sessionId}_${Date.now()}.${config?.format ?? 'png'}`;
       const filepath = path.join(this.tempDirectory, filename);
 
       // Execute Python script for screenshot capture
@@ -218,7 +218,7 @@ export class BrowserUseService {
         screenshot: screenshotBase64,
         timestamp,
         metadata: {
-          format: config?.format || 'png',
+          format: config?.format ?? 'png',
           size: screenshotBuffer.length,
           dimensions: { width: 1920, height: 1080 }, // TODO: Extract actual dimensions
         },
@@ -280,8 +280,8 @@ export class BrowserUseService {
         data: extractedData.data,
         timestamp: new Date(),
         metadata: {
-          elementsExtracted: extractedData.elementsCount || 0,
-          selectors: extractedData.selectors || [],
+          elementsExtracted: extractedData.elementsCount ?? 0,
+          selectors: extractedData.selectors ?? [],
           extractionTime,
         },
       };
@@ -590,16 +590,16 @@ export class BrowserUseService {
 
       switch (action.type) {
         case BrowserActionType.NAVIGATE:
-          script = this.generateNavigationScript(sessionId, action.url || '');
+          script = this.generateNavigationScript(sessionId, action.url ?? '');
           break;
         case BrowserActionType.CLICK:
-          script = this.generateClickScript(sessionId, action.selector || '');
+          script = this.generateClickScript(sessionId, action.selector ?? '');
           break;
         case BrowserActionType.TYPE:
           script = this.generateTypeScript(
             sessionId,
-            action.selector || '',
-            action.text || '',
+            action.selector ?? '',
+            action.text ?? '',
           );
           break;
         case BrowserActionType.SCREENSHOT:
@@ -671,7 +671,7 @@ export class BrowserUseService {
     // Create new session
     return await this.sessionService.createSession({
       name: `Auto-created session ${Date.now()}`,
-      ...(config || {}),
+      ...(config ?? {}),
     });
   }
 
@@ -724,11 +724,11 @@ export class BrowserUseService {
           let stdout = '';
           let stderr = '';
 
-          childProcess.stdout.on('data', (data) => {
+          childProcess.stdout.on('data', (data: Buffer) => {
             stdout += data.toString();
           });
 
-          childProcess.stderr.on('data', (data) => {
+          childProcess.stderr.on('data', (data: Buffer) => {
             stderr += data.toString();
           });
 
@@ -749,7 +749,7 @@ export class BrowserUseService {
               resolve({
                 success: false,
                 output: stdout,
-                error: stderr || `Process exited with code ${code}`,
+                error: stderr ?? `Process exited with code ${code}`,
               });
             }
           });
@@ -889,9 +889,9 @@ async def main():
         # Capture screenshot
         screenshot = await session.page.screenshot(
             path=${filepath ? JSON.stringify(filepath) : 'None'},
-            full_page=${(config as any)?.fullPage || false},
-            quality=${(config as any)?.quality || 85},
-            type=${JSON.stringify((config as any)?.format || 'png')}
+            full_page=${(config as any)?.fullPage ?? false},
+            quality=${(config as any)?.quality ?? 85},
+            type=${JSON.stringify((config as any)?.format ?? 'png')}
         )
         
         if not ${filepath ? 'True' : 'False'}:
@@ -928,7 +928,7 @@ async def main():
         
         # Extract data
         if ${selector ? 'True' : 'False'}:
-            elements = await session.page.query_selector_all(${JSON.stringify(selector || '')})
+            elements = await session.page.query_selector_all(${JSON.stringify(selector ?? '')})
             data = []
             for element in elements:
                 text_content = await element.text_content()
@@ -945,7 +945,7 @@ async def main():
         result = {
             'data': data,
             'elementsCount': len(data) if isinstance(data, list) else 1,
-            'selectors': [${JSON.stringify(selector || 'body')}]
+            'selectors': [${JSON.stringify(selector ?? 'body')}]
         }
         
         print(json.dumps(result))

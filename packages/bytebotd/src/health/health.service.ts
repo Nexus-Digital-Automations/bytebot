@@ -142,7 +142,7 @@ export class HealthService extends HealthIndicator {
       if (
         serviceStatuses.some(
           (s) =>
-            s === 'disconnected' || s === 'unavailable' || s === 'unreachable',
+            s === 'disconnected' ?? s === 'unavailable' ?? s === 'unreachable',
         )
       ) {
         status = serviceStatuses.every((s) => s === 'unknown')

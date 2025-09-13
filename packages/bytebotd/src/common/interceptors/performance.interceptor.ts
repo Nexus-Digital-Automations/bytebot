@@ -24,7 +24,7 @@
  
  
  
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+ 
 
 import {
   CallHandler,
@@ -103,18 +103,18 @@ export class PerformanceInterceptor implements NestInterceptor {
   // Performance thresholds (configurable via environment variables)
   private readonly thresholds: PerformanceThresholds = {
     slowRequestWarning: parseInt(
-      process.env.SLOW_REQUEST_WARNING || '1000',
+      process.env.SLOW_REQUEST_WARNING ?? '1000',
       10,
     ), // 1 second
     slowRequestCritical: parseInt(
-      process.env.SLOW_REQUEST_CRITICAL || '5000',
+      process.env.SLOW_REQUEST_CRITICAL ?? '5000',
       10,
     ), // 5 seconds
     memoryLeakWarning: parseInt(
-      process.env.MEMORY_LEAK_WARNING || '50000000',
+      process.env.MEMORY_LEAK_WARNING ?? '50000000',
       10,
     ), // 50MB
-    memoryUsageWarning: parseInt(process.env.MEMORY_USAGE_WARNING || '80', 10), // 80%
+    memoryUsageWarning: parseInt(process.env.MEMORY_USAGE_WARNING ?? '80', 10), // 80%
   };
 
   constructor(private readonly metricsService?: MetricsService) {
@@ -174,7 +174,7 @@ export class PerformanceInterceptor implements NestInterceptor {
           duration: Date.now() - startTime,
           method: request.method,
           url: request.url,
-          statusCode: response.statusCode || 500,
+          statusCode: response.statusCode ?? 500,
           memoryBefore,
           memoryAfter: process.memoryUsage(),
           memoryDelta: this.calculateMemoryDelta(

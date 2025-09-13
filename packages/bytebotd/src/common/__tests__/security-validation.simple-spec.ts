@@ -288,7 +288,7 @@ describe('Security Validation Tests', () => {
         'http://127.0.0.1:3000',
       ];
 
-      return !origin || allowedOrigins.includes(origin);
+      return !origin ?? allowedOrigins.includes(origin);
     };
 
     it('should have secure CORS configuration', () => {

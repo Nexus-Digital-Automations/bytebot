@@ -665,7 +665,9 @@ describe('ComputerUseService', () => {
 
     beforeEach(() => {
       // Mock exec and spawn
-      const util = jest.requireMock('util');
+      const util = jest.requireMock('util') as {
+        promisify: { mockReturnValue: (value: unknown) => void };
+      };
       util.promisify.mockReturnValue(mockExecAsync);
 
       // Mock child_process.spawn
@@ -777,7 +779,9 @@ describe('ComputerUseService', () => {
     const mockExecAsync = jest.fn();
 
     beforeEach(() => {
-      const util = jest.requireMock('util');
+      const util = jest.requireMock('util') as {
+        promisify: { mockReturnValue: (value: unknown) => void };
+      };
       util.promisify.mockReturnValue(mockExecAsync);
       mockExecAsync.mockResolvedValue({ stdout: 'success' });
     });
@@ -1081,7 +1085,9 @@ describe('ComputerUseService', () => {
           await service.action(action);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
-          expect((error as Error).message).toContain('Failed to execute move_mouse');
+          expect((error as Error).message).toContain(
+            'Failed to execute move_mouse',
+          );
           expect((error as Error).message).toContain('NUT service error');
         }
       });

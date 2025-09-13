@@ -269,7 +269,7 @@ describe('Security Validation Mock Tests', () => {
             'http://127.0.0.1:3000',
           ];
 
-          if (!origin || allowedOrigins.includes(origin)) {
+          if (!origin ?? allowedOrigins.includes(origin)) {
             callback(null, true);
           } else {
             callback(new Error('Not allowed by CORS'), false);

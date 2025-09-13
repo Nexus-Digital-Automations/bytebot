@@ -26,7 +26,7 @@ async function bootstrap(): Promise<void> {
 
     // Get configuration service for standardized security
     const _configService = app.get(ConfigService);
-    const environment = process.env.NODE_ENV || 'development';
+    const environment = process.env.NODE_ENV ?? 'development';
 
     // Deploy standardized security middleware for BytebotD - MAXIMUM SECURITY
     const securityMiddleware =

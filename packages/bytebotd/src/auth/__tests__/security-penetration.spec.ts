@@ -17,6 +17,14 @@
  * @penetration-testing High-Risk
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+ 
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -516,7 +524,13 @@ describe('Security Penetration Testing Suite', () => {
 
         try {
           const _result = await jwtAuthGuard.canActivate(context);
-          const request = context.switchToHttp().getRequest() as {\n            user?: {\n              role?: UserRole;\n              admin?: boolean;\n              roles?: UserRole[];\n            };\n          };
+          const request = context.switchToHttp().getRequest() as {
+            user?: {
+              role?: UserRole;
+              admin?: boolean;
+              roles?: UserRole[];
+            };
+          };
 
           // Check if role escalation succeeded
           const escalationSuccess =
@@ -1096,7 +1110,7 @@ describe('Security Penetration Testing Suite', () => {
 
       for (const technique of evasionTechniques) {
         const evasionToken = JWTManipulator.createVulnerableJWT(
-          technique._payload,
+          technique.payload,
         );
         const context = createPentestExecutionContext(
           undefined,
@@ -1111,7 +1125,13 @@ describe('Security Penetration Testing Suite', () => {
 
         try {
           const _result = await jwtAuthGuard.canActivate(context);
-          const request = context.switchToHttp().getRequest() as {\n            user?: {\n              role?: UserRole;\n              admin?: boolean;\n              roles?: UserRole[];\n            };\n          };
+          const request = context.switchToHttp().getRequest() as {
+            user?: {
+              role?: UserRole;
+              admin?: boolean;
+              roles?: UserRole[];
+            };
+          };
 
           // Check if evasion led to privilege escalation
           const escalationSuccess =
