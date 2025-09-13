@@ -28,7 +28,7 @@ import { HealthService } from '../health.service';
 import {
   BasicHealthResponse,
   DetailedStatusResponse,
-  ServiceHealthResponse,
+  _ServiceHealthResponse,
 } from '../interfaces/health.interfaces';
 
 /**
@@ -48,6 +48,19 @@ interface _ServiceStatus {
   responseTime?: number;
   error?: string;
 }
+
+interface ServiceHealthMockReturn {
+  database: string;
+  cache: string;
+  external: string;
+  disk?: string;
+}
+
+// Type for Health Service with access to private methods (for testing)
+type TestableHealthService = HealthService & {
+  checkServiceHealth(): ServiceHealthMockReturn;
+  _performHealthCheck?(): ServiceHealthMockReturn;
+};
 
 interface _PerformanceMetrics {
   startTime: number;
@@ -298,27 +311,33 @@ describe('HealthService', () => {
       // Mock the private service health check method
       const _originalCheckServiceHealth = service['checkServiceHealth'];
       // Test healthy status
-      jest.spyOn(service as any, 'checkServiceHealth').mockReturnValue({
-        database: 'connected',
-        cache: 'available',
-        external: 'reachable',
-      });
+      jest
+        .spyOn(service as TestableHealthService, 'checkServiceHealth')
+        .mockReturnValue({
+          database: 'connected',
+          cache: 'available',
+          external: 'reachable',
+        });
       const result = service.getDetailedStatus() as DetailedStatusResponse;
       expect(result.status).toBe('healthy');
       // Test degraded status (unknown services)
-      jest.spyOn(service as any, 'checkServiceHealth').mockReturnValue({
-        database: 'unknown',
-        cache: 'unknown',
-        external: 'unknown',
-      });
+      jest
+        .spyOn(service as TestableHealthService, 'checkServiceHealth')
+        .mockReturnValue({
+          database: 'unknown',
+          cache: 'unknown',
+          external: 'unknown',
+        });
       const result2 = await service.getDetailedStatus();
       expect(result2.status).toBe('degraded');
       // Test unhealthy status (failed services)
-      jest.spyOn(service as any, 'checkServiceHealth').mockReturnValue({
-        database: 'disconnected',
-        cache: 'unavailable',
-        external: 'unreachable',
-      });
+      jest
+        .spyOn(service as TestableHealthService, 'checkServiceHealth')
+        .mockReturnValue({
+          database: 'disconnected',
+          cache: 'unavailable',
+          external: 'unreachable',
+        });
       const result3 = await service.getDetailedStatus();
       expect(result3.status).toBe('unhealthy');
       console.log(`[${testId}] Overall status determination test completed`);
@@ -903,7 +922,7 @@ describe('HealthService', () => {
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result.database?.responseTime).toMatch(/\d+ms/);
         const responseTime = parseInt(
-          result.database?.responseTime?.replace('ms', '') || '0',
+          result.database?.responseTime?.replace('ms', '') ?? '0',
         );
         expect(responseTime).toBeGreaterThan(40); // Should be at least 40ms due to delay
         console.log(`[${testId}] Database response time test completed`);

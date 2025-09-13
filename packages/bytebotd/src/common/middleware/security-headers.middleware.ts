@@ -26,7 +26,7 @@ interface SafeRequest extends Request {
 /**
  * Type-safe helmet options interface
  */
-interface SafeHelmetOptions {
+interface _SafeHelmetOptions {
   contentSecurityPolicy?:
     | {
         directives: Record<string, string[]>;
@@ -273,7 +273,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
     try {
       // Apply helmet security headers
-      this.helmetMiddleware(req, res, (err?: Error) => {
+      this.helmetMiddleware(req, res, (err?: unknown) => {
         if (err) {
           const processingTime = Date.now() - startTime;
           const safeError = err as SafeError;

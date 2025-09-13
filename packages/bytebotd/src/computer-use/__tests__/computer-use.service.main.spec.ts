@@ -19,23 +19,31 @@
  */
 
 // Mock child_process and fs operations BEFORE imports
-jest.mock('child_process', () => ({
-  exec: jest.fn().mockImplementation((cmd: string, opts: any, cb?: any) => {
-    const callback = typeof opts === 'function' ? opts : cb;
-    if (callback) {
-      setTimeout(() => callback(null, '', ''), 10);
-    }
-    return { pid: 12345 } as any;
-  }),
-  spawn: jest.fn().mockReturnValue({
-    unref: jest.fn(),
+jest.mock('child_process', () => {
+  const mockChildProcess = {
     pid: 12345,
+    unref: jest.fn(),
     kill: jest.fn(),
     on: jest.fn(),
     stdout: { on: jest.fn() },
     stderr: { on: jest.fn() },
-  }),
-}));
+  };
+
+  return {
+    exec: jest.fn().mockImplementation((cmd: string, opts: any, cb?: any) => {
+      const callback = typeof opts === 'function' ? opts : cb;
+      if (callback) {
+        setTimeout(() => (callback as MockExecCallback)(null, '', ''), 10);
+      }
+      return mockChildProcess as unknown as import('child_process').ChildProcess;
+    }),
+    spawn: jest
+      .fn()
+      .mockReturnValue(
+        mockChildProcess as unknown as import('child_process').ChildProcess,
+      ),
+  };
+});
 
 jest.mock('fs/promises', () => ({
   writeFile: jest.fn().mockResolvedValue(undefined),
@@ -77,14 +85,7 @@ interface MockExecCallback {
   (error: Error | null, stdout?: string, stderr?: string): void;
 }
 
-interface MockSpawnProcess {
-  unref: jest.MockedFunction<() => void>;
-  pid: number;
-  kill: jest.MockedFunction<() => boolean>;
-  on: jest.MockedFunction<(event: string, listener: (...args: any[]) => void) => void>;
-  stdout: { on: jest.MockedFunction<(event: string, listener: (...args: any[]) => void) => void> };
-  stderr: { on: jest.MockedFunction<(event: string, listener: (...args: any[]) => void) => void> };
-}
+// MockSpawnProcess interface removed - using direct mocks with type assertions
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
@@ -150,10 +151,19 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     jest.clearAllMocks();
 
     // Mock child_process.exec with proper typing
-    const childProcess = require('child_process') as MockChildProcess;
-    const _util = require('util') as MockUtil;
+    const childProcess = jest.requireMock<MockChildProcess>('child_process');
+    const _util = jest.requireMock<MockUtil>('util');
 
     // Mock exec to resolve quickly for tests
+    const mockChildProcess = {
+      pid: 12345,
+      unref: jest.fn(),
+      kill: jest.fn(),
+      on: jest.fn(),
+      stdout: { on: jest.fn() },
+      stderr: { on: jest.fn() },
+    };
+
     childProcess.exec.mockImplementation(
       (command: string, options: any, callback?: any) => {
         const cb = typeof options === 'function' ? options : callback;
@@ -161,13 +171,13 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         setTimeout(() => {
           if (cb) {
             if (command.includes('stat')) {
-              cb(null, '1024 1640995200', ''); // stdout, stderr
+              (cb as MockExecCallback)(null, '1024 1640995200', ''); // stdout, stderr
             } else {
-              cb(null, '', '');
+              (cb as MockExecCallback)(null, '', '');
             }
           }
         }, 10);
-        return { pid: 12345 } as any;
+        return mockChildProcess as unknown as import('child_process').ChildProcess;
       },
     );
 
@@ -455,16 +465,20 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should route application action correctly', async () => {
         // Arrange
-        const childProcessForApp = require('child_process') as MockChildProcess;
+        const childProcessForApp =
+          jest.requireMock<MockChildProcess>('child_process');
         const { spawn } = childProcessForApp;
-        spawn.mockReturnValue({
+        const mockSpawnProcess = {
           unref: jest.fn(),
           pid: 12345,
           kill: jest.fn(),
           on: jest.fn(),
-          stdout: { on: jest.fn() } as any,
-          stderr: { on: jest.fn() } as any,
-        } as any);
+          stdout: { on: jest.fn() },
+          stderr: { on: jest.fn() },
+        };
+        spawn.mockReturnValue(
+          mockSpawnProcess as unknown as import('child_process').ChildProcess,
+        );
 
         const action = createTestAction<ApplicationAction>({
           action: 'application',

@@ -8,6 +8,20 @@ import { Server, Socket, DefaultEventsMap } from 'socket.io';
 import { Injectable, Logger } from '@nestjs/common';
 import { ComputerAction } from '@bytebot/shared';
 
+// Interface for input event data
+interface InputEventData {
+  type: string;
+  timestamp: number;
+  data?: Record<string, unknown>;
+}
+
+// Interface for action event data
+interface ActionEventData {
+  action: ComputerAction;
+  timestamp: number;
+  metadata?: Record<string, unknown>;
+}
+
 @Injectable()
 @WebSocketGateway({
   cors: {
@@ -51,7 +65,7 @@ export class InputTrackingGateway
    * Broadcast input event to all connected clients
    * @param inputData - Input event data to broadcast
    */
-  broadcastInputEvent(inputData: any) {
+  broadcastInputEvent(inputData: InputEventData) {
     this.server.emit('inputEvent', inputData);
   }
 
@@ -59,7 +73,7 @@ export class InputTrackingGateway
    * Broadcast action event to all connected clients
    * @param actionData - Action event data to broadcast
    */
-  broadcastActionEvent(actionData: any) {
+  broadcastActionEvent(actionData: ActionEventData) {
     this.server.emit('actionEvent', actionData);
   }
 
@@ -77,7 +91,7 @@ export class InputTrackingGateway
    * @param event - Event name
    * @param data - Data to broadcast
    */
-  broadcastToRoom(room: string, event: string, data: any) {
+  broadcastToRoom(room: string, event: string, data: unknown) {
     this.server.to(room).emit(event, data);
   }
 
