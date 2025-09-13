@@ -62,7 +62,7 @@ class MockAuthController {
       return {
         accessToken: 'mock-jwt-token',
         refreshToken: 'mock-refresh-token',
-        user: { id: '1', email: 'admin@bytebot.ai', role: 'admin' },
+        user: { id: '1', email: 'admin@bytebot.ai', role: UserRole._ADMIN },
         expiresIn: 900,
       };
     }

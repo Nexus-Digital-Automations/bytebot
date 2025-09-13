@@ -275,15 +275,7 @@ describe('Security Penetration Testing Suite', () => {
       // Restore original role
       user.role = originalRole;
 
-      return {
-        totalRequests: concurrentRequests,
-        successful: results.filter((r) => r.success).length,
-        failed: results.filter((r) => !r.success).length,
-        inconsistentResults: results.filter(
-          (r) => r.success && r.userRole !== originalRole,
-        ).length,
-        results: results,
-      };
+      return results;
     },
   };
 
@@ -594,11 +586,16 @@ describe('Security Penetration Testing Suite', () => {
         );
 
       // Race condition attacks should not lead to inconsistent authorization
-      expect(raceAttackResults.inconsistentResults).toBe(0);
-      expect(raceAttackResults.successful).toBeLessThan(5); // Should mostly fail
+      const successful = raceAttackResults.filter((r) => r.success).length;
+      const inconsistent = raceAttackResults.filter(
+        (r) => r.success && r.userRole !== UserRole._VIEWER,
+      ).length;
+
+      expect(inconsistent).toBe(0);
+      expect(successful).toBeLessThan(5); // Should mostly fail
 
       pentestLogger.critical(
-        `[${testId}] Race condition escalation results: ${raceAttackResults.successful}/${raceAttackResults.totalRequests} successful (inconsistent: ${raceAttackResults.inconsistentResults})`,
+        `[${testId}] Race condition escalation results: ${successful}/${raceAttackResults.length} successful (inconsistent: ${inconsistent})`,
       );
     });
 

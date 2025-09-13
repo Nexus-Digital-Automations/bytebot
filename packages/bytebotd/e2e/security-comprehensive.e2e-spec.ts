@@ -23,7 +23,7 @@ import type { Express } from 'express';
 import { Request, Response, NextFunction } from 'express';
 import { JwtService as _JwtService } from '@nestjs/jwt';
 import { ConfigService as _ConfigService } from '@nestjs/config';
-import { Permission } from '@bytebot/shared';
+import { UserRole, Permission } from '@bytebot/shared';
 import {
   StrictRecord,
   TypedMiddleware as _TypedMiddleware,
@@ -31,7 +31,6 @@ import {
   ClientInfo,
   TaskData,
   DecodedJwtPayload,
-  UserRole,
 } from '../src/types';
 
 // Extend Express Request interface to include user with role
@@ -108,7 +107,7 @@ class SecurityE2EAuthService {
       {
         id: '1',
         email: 'admin@bytebot.ai',
-        role: UserRole.ADMIN,
+        role: UserRole._ADMIN,
         password: 'Admin123!@#',
       },
     ],
@@ -117,7 +116,7 @@ class SecurityE2EAuthService {
       {
         id: '2',
         email: 'operator@bytebot.ai',
-        role: UserRole.OPERATOR,
+        role: UserRole._OPERATOR,
         password: 'Operator123!@#',
       },
     ],
@@ -126,7 +125,7 @@ class SecurityE2EAuthService {
       {
         id: '3',
         email: 'viewer@bytebot.ai',
-        role: UserRole.VIEWER,
+        role: UserRole._VIEWER,
         password: 'Viewer123!@#',
       },
     ],
@@ -301,7 +300,7 @@ class SecurityE2EConfigService {
 class SecurityE2EUserService {
   getPermissions(role: UserRole): Permission[] {
     const rolePermissions: Record<UserRole, Permission[]> = {
-      [UserRole.ADMIN]: [
+      [UserRole._ADMIN]: [
         Permission._TASK_READ,
         Permission._TASK_WRITE,
         Permission._TASK_DELETE,
@@ -312,20 +311,20 @@ class SecurityE2EUserService {
         Permission._METRICS_VIEW,
         Permission._LOGS_VIEW,
       ],
-      [UserRole.OPERATOR]: [
+      [UserRole._OPERATOR]: [
         Permission._TASK_READ,
         Permission._TASK_WRITE,
         Permission._COMPUTER_CONTROL,
         Permission._COMPUTER_VIEW,
         Permission._METRICS_VIEW,
       ],
-      [UserRole.VIEWER]: [
+      [UserRole._VIEWER]: [
         Permission._TASK_READ,
         Permission._COMPUTER_VIEW,
         Permission._METRICS_VIEW,
       ],
-      [UserRole.USER]: [Permission._TASK_READ],
-      [UserRole.GUEST]: [Permission._VIEW_PUBLIC_CONTENT],
+      [UserRole._USER]: [Permission._TASK_READ],
+      [UserRole._GUEST]: [Permission._VIEW_PUBLIC_CONTENT],
     };
 
     return rolePermissions[role] ?? [];
@@ -488,9 +487,9 @@ class SecurityE2EAdminController {
   getUserList(user: any) {
     return {
       users: [
-        { id: '1', email: 'admin@bytebot.ai', role: UserRole.ADMIN },
-        { id: '2', email: 'operator@bytebot.ai', role: UserRole.OPERATOR },
-        { id: '3', email: 'viewer@bytebot.ai', role: UserRole.VIEWER },
+        { id: '1', email: 'admin@bytebot.ai', role: UserRole._ADMIN },
+        { id: '2', email: 'operator@bytebot.ai', role: UserRole._OPERATOR },
+        { id: '3', email: 'viewer@bytebot.ai', role: UserRole._VIEWER },
       ],
       total: 3,
       requestedBy: user.sub,
@@ -764,7 +763,14 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       try {
         const decoded = jwtService.verify(token);
-        req.user = decoded;
+        req.user = {
+          sub: decoded.sub,
+          email: decoded.email,
+          role: decoded.role,
+          sessionId: decoded.sessionId,
+          permissions: decoded.permissions,
+          clientInfo: decoded.clientInfo,
+        };
         next();
       } catch (_error) {
         securityMonitor.trackFailedAuthentication(
@@ -793,20 +799,20 @@ describe('Security E2E - Comprehensive Testing', () => {
 
         const userRole = req.user.role;
         const roleHierarchy: Record<UserRole, UserRole[]> = {
-          [UserRole.ADMIN]: [
-            UserRole.ADMIN,
-            UserRole.OPERATOR,
-            UserRole.VIEWER,
-            UserRole.USER,
+          [UserRole._ADMIN]: [
+            UserRole._ADMIN,
+            UserRole._OPERATOR,
+            UserRole._VIEWER,
+            UserRole._USER,
           ],
-          [UserRole.OPERATOR]: [
-            UserRole.OPERATOR,
-            UserRole.VIEWER,
-            UserRole.USER,
+          [UserRole._OPERATOR]: [
+            UserRole._OPERATOR,
+            UserRole._VIEWER,
+            UserRole._USER,
           ],
-          [UserRole.VIEWER]: [UserRole.VIEWER, UserRole.USER],
-          [UserRole.USER]: [UserRole.USER],
-          [UserRole.GUEST]: [UserRole.GUEST],
+          [UserRole._VIEWER]: [UserRole._VIEWER, UserRole._USER],
+          [UserRole._USER]: [UserRole._USER],
+          [UserRole._GUEST]: [UserRole._GUEST],
         };
 
         const allowedRoles = roleHierarchy[userRole] ?? [];

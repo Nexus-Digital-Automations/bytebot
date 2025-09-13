@@ -23,6 +23,8 @@ export enum UserRole {
   _ADMIN = 'admin',
   _OPERATOR = 'operator',
   _VIEWER = 'viewer',
+  _USER = 'user',
+  _GUEST = 'guest',
 }
 
 /**

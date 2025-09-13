@@ -116,6 +116,8 @@ class MockRolesGuard {
       ],
       [UserRole._OPERATOR]: [UserRole._OPERATOR, UserRole._VIEWER],
       [UserRole._VIEWER]: [UserRole._VIEWER],
+      [UserRole._USER]: [UserRole._USER],
+      [UserRole._GUEST]: [UserRole._GUEST],
     };
 
     const userRoleAccess = roleHierarchy[userRole] ?? [];
@@ -146,6 +148,8 @@ class MockRolesGuard {
       ],
       [UserRole._OPERATOR]: [UserRole._OPERATOR, UserRole._VIEWER],
       [UserRole._VIEWER]: [UserRole._VIEWER],
+      [UserRole._USER]: [UserRole._USER],
+      [UserRole._GUEST]: [UserRole._GUEST],
     };
   }
 
@@ -164,6 +168,8 @@ class MockRolesGuard {
         Permission._COMPUTER_CONTROL,
       ],
       [UserRole._VIEWER]: [Permission._TASK_READ],
+      [UserRole._USER]: [Permission._TASK_READ],
+      [UserRole._GUEST]: [Permission._VIEW_PUBLIC_CONTENT],
     };
 
     return rolePermissions[role] ?? [];

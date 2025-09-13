@@ -194,13 +194,14 @@ export interface LoadTestResult {
 
 /**
  * User roles enumeration with comprehensive access levels
+ * NOTE: Using underscore prefixes to match shared package compatibility
  */
 export enum UserRole {
-  ADMIN = 'admin',
-  OPERATOR = 'operator',
-  VIEWER = 'viewer',
-  USER = 'user',
-  GUEST = 'guest',
+  _ADMIN = 'admin',
+  _OPERATOR = 'operator',
+  _VIEWER = 'viewer',
+  _USER = 'user',
+  _GUEST = 'guest',
 }
 
 /**
