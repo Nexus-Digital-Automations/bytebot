@@ -1,5 +1,5 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -44,9 +44,9 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         text: '<img src=x onerror=alert(String.fromCharCode(88,83,83))>',
       };
 
-      await expect(pipe.transform(maliciousInput, {} as any)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(maliciousInput, {} as unknown),
+      ).rejects.toThrow(BadRequestException);
 
       // Test with advanced XSS patterns
       const advancedXSS = {
@@ -54,7 +54,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         text: 'javascript:eval(String.fromCharCode(97,108,101,114,116,40,39,88,83,83,39,41))',
       };
 
-      await expect(pipe.transform(advancedXSS, {} as any)).rejects.toThrow(
+      await expect(pipe.transform(advancedXSS, {} as unknown)).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -66,7 +66,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(sqlInjectionInput, {} as any),
+        pipe.transform(sqlInjectionInput, {} as unknown),
       ).rejects.toThrow(BadRequestException);
 
       // Test PostgreSQL-specific injection
@@ -75,9 +75,9 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         text: '1; SELECT version(); --',
       };
 
-      await expect(pipe.transform(pgSqlInjection, {} as any)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(pgSqlInjection, {} as unknown),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should detect command injection attacks with platform analysis', async () => {
@@ -87,7 +87,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(commandInjectionInput, {} as any),
+        pipe.transform(commandInjectionInput, {} as unknown),
       ).rejects.toThrow(BadRequestException);
 
       // Test Windows-specific command injection
@@ -97,7 +97,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(windowsCommandInjection, {} as any),
+        pipe.transform(windowsCommandInjection, {} as unknown),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -109,7 +109,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(pathTraversalInput, {} as any),
+        pipe.transform(pathTraversalInput, {} as unknown),
       ).rejects.toThrow(BadRequestException);
 
       // Test absolute path restriction
@@ -120,7 +120,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(absolutePathInput, {} as any),
+        pipe.transform(absolutePathInput, {} as unknown),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -131,9 +131,9 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         coordinates: { x: Number.MAX_SAFE_INTEGER, y: Number.MAX_SAFE_INTEGER },
       };
 
-      await expect(pipe.transform(overflowInput, {} as any)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(overflowInput, {} as unknown),
+      ).rejects.toThrow(BadRequestException);
 
       // Test negative coordinates (if not allowed)
       const negativeCoordInput = {
@@ -142,7 +142,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       await expect(
-        pipe.transform(negativeCoordInput, {} as any),
+        pipe.transform(negativeCoordInput, {} as unknown),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -226,7 +226,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         text: 'A'.repeat(2 * 1024 * 1024), // 2MB payload
       };
 
-      await expect(pipe.transform(largePayload, {} as any)).rejects.toThrow(
+      await expect(pipe.transform(largePayload, {} as unknown)).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -285,7 +285,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       ];
 
       for (const input of malformedInputs) {
-        await expect(pipe.transform(input, {} as any)).rejects.toThrow(
+        await expect(pipe.transform(input, {} as unknown)).rejects.toThrow(
           BadRequestException,
         );
       }

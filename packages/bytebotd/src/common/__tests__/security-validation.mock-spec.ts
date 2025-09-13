@@ -9,13 +9,13 @@
  * @author Input Validation & API Security Specialist
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
+ 
 
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+ 
 
-/* eslint-disable no-undef */
+ 
 
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
@@ -262,7 +262,10 @@ describe('Security Validation Mock Tests', () => {
   describe('CORS Security Tests', () => {
     it('should have secure CORS configuration', () => {
       const corsConfig = {
-        origin: (origin: string, callback: Function) => {
+        origin: (
+          origin: string,
+          callback: (error: Error | null, result?: boolean) => void,
+        ) => {
           const allowedOrigins = [
             'http://localhost:3000',
             'http://localhost:3001',
@@ -284,7 +287,10 @@ describe('Security Validation Mock Tests', () => {
     });
 
     it('should block unauthorized origins', () => {
-      const corsOriginHandler = (origin: string, callback: Function) => {
+      const corsOriginHandler = (
+        origin: string,
+        callback: (error: Error | null, result?: boolean) => void,
+      ) => {
         const allowedOrigins = ['http://localhost:3000'];
 
         if (allowedOrigins.includes(origin)) {
@@ -410,7 +416,7 @@ describe('Security Validation Mock Tests', () => {
           sanitizationPipe.transform(
             {
               action: 'type_text',
-              text: `Test input ${i}`,
+              text: `Test input ${_i}`,
             },
             null,
           ),

@@ -448,8 +448,8 @@ describe('Security Validation E2E Tests', () => {
         .send({ action: 'screenshot' });
 
       expect(
-        response.headers['x-request-id'] ||
-          response.headers['x-correlation-id'] ||
+        response.headers['x-request-id'] ??
+          response.headers['x-correlation-id'] ??
           response.body.operationId,
       ).toBeDefined();
     });

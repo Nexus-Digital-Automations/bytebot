@@ -539,10 +539,10 @@ describe('InputTrackingService', () => {
 
       expect(gateway.emitAction).toHaveBeenCalled();
       const emitCalls = (gateway.emitAction as jest.Mock).mock.calls as Array<
-        [any]
+        [{ action: string }]
       >;
       const typeAction = emitCalls.find(
-        (call) => call[0].action === 'type_text',
+        (call) => call[0]?.action === 'type_text',
       )?.[0];
       expect(typeAction).toBeDefined();
 
@@ -788,8 +788,11 @@ describe('InputTrackingService', () => {
 
       // Should emit the highest click count
       expect(gateway.emitAction).toHaveBeenCalled();
-      const emitCall = (gateway.emitAction as jest.Mock).mock.calls[0][0];
-      expect(emitCall.clickCount).toBe(2);
+      const emitCalls = (gateway.emitAction as jest.Mock).mock.calls as Array<
+        [{ clickCount: number }]
+      >;
+      const emitCall = emitCalls[0]?.[0];
+      expect(emitCall?.clickCount).toBe(2);
 
       console.log(`[${testId}] Click event debouncing test completed`);
     });
@@ -1022,14 +1025,16 @@ describe('InputTrackingService', () => {
       clickHandler?.(mouseEvent);
       jest.runAllTimers();
 
-      const emitCall = (gateway.emitAction as jest.Mock).mock
-        .calls[0][0] as ClickMouseAction;
-      expect(emitCall.action).toBe('click_mouse');
-      expect(emitCall.coordinates).toEqual({ x: 150, y: 250 });
-      expect(emitCall.button).toBe('left');
-      expect(emitCall.clickCount).toBe(1);
-      expect(emitCall.holdKeys).toContain('ctrl');
-      expect(emitCall.holdKeys).toContain('shift');
+      const emitCalls = (gateway.emitAction as jest.Mock).mock.calls as Array<
+        [ClickMouseAction]
+      >;
+      const emitCall = emitCalls[0]?.[0];
+      expect(emitCall?.action).toBe('click_mouse');
+      expect(emitCall?.coordinates).toEqual({ x: 150, y: 250 });
+      expect(emitCall?.button).toBe('left');
+      expect(emitCall?.clickCount).toBe(1);
+      expect(emitCall?.holdKeys).toContain('ctrl');
+      expect(emitCall?.holdKeys).toContain('shift');
 
       console.log(`[${testId}] Mouse action conversion test completed`);
     });
@@ -1054,11 +1059,13 @@ describe('InputTrackingService', () => {
         wheelHandler?.(wheelEvent);
       }
 
-      const emitCall = (gateway.emitAction as jest.Mock).mock
-        .calls[0][0] as ScrollAction;
-      expect(emitCall.action).toBe('scroll');
-      expect(emitCall.direction).toBe('down');
-      expect(emitCall.coordinates).toEqual({ x: 200, y: 300 });
+      const emitCalls = (gateway.emitAction as jest.Mock).mock.calls as Array<
+        [ScrollAction]
+      >;
+      const emitCall = emitCalls[0]?.[0];
+      expect(emitCall?.action).toBe('scroll');
+      expect(emitCall?.direction).toBe('down');
+      expect(emitCall?.coordinates).toEqual({ x: 200, y: 300 });
 
       console.log(`[${testId}] Scroll action conversion test completed`);
     });
@@ -1080,9 +1087,11 @@ describe('InputTrackingService', () => {
         wheelHandler?.(horizontalWheelEvent);
       }
 
-      const emitCall = (gateway.emitAction as jest.Mock).mock
-        .calls[0][0] as ScrollAction;
-      expect(emitCall.direction).toBe('left');
+      const emitCalls = (gateway.emitAction as jest.Mock).mock.calls as Array<
+        [ScrollAction]
+      >;
+      const emitCall = emitCalls[0]?.[0];
+      expect(emitCall?.direction).toBe('left');
 
       console.log(`[${testId}] Horizontal scroll test completed`);
     });

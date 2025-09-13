@@ -138,7 +138,7 @@ class SecurityE2EAuthService {
   private sessions = new Map<string, SecuritySession>();
   private failedAttempts = new Map<string, FailedAttempt>();
 
-  async authenticate(email: string, password: string, clientInfo: any) {
+  async authenticate(email: string, password: string, clientInfo: ClientInfo) {
     const user = this.users.get(email);
 
     // Track failed attempts for security monitoring
@@ -448,22 +448,42 @@ class SecurityE2EProtectedController {
     };
   }
 
-  createTask(user: any, data: any): TaskData {
+  createTask(user: { sub: string }, data: Partial<TaskData>): TaskData {
     return {
       id: 'new-task-id',
-      ...data,
+      title: data.title ?? 'New Task',
+      description: data.description,
+      status: data.status ?? 'pending',
+      priority: data.priority ?? 'medium',
       createdBy: user.sub,
+      updatedBy: data.updatedBy,
+      assignedTo: data.assignedTo,
       createdAt: Date.now(),
-    } as TaskData;
+      updatedAt: data.updatedAt,
+      dueDate: data.dueDate,
+      metadata: data.metadata,
+    };
   }
 
-  updateTask(user: any, taskId: string, data: any): TaskData {
+  updateTask(
+    user: { sub: string },
+    taskId: string,
+    data: Partial<TaskData>,
+  ): TaskData {
     return {
       id: taskId,
-      ...data,
+      title: data.title ?? 'Updated Task',
+      description: data.description,
+      status: data.status ?? 'pending',
+      priority: data.priority ?? 'medium',
+      createdBy: data.createdBy,
       updatedBy: user.sub,
+      assignedTo: data.assignedTo,
+      createdAt: data.createdAt ?? Date.now(),
       updatedAt: Date.now(),
-    } as TaskData;
+      dueDate: data.dueDate,
+      metadata: data.metadata,
+    };
   }
 }
 

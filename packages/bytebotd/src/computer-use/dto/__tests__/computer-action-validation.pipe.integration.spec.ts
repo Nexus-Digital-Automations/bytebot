@@ -1,7 +1,7 @@
 /* eslint-env jest */
+
  
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 /**
  * Security Validation Pipeline Integration Tests
  * Tests the enhanced multi-stage security validation pipeline integration
@@ -138,9 +138,9 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: '<script>alert("xss")</script>',
       };
 
-      await expect(pipe.transform(maliciousInput, {} as any)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(maliciousInput, {} as unknown),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should block requests when SQL injection threats are detected', async () => {
@@ -160,9 +160,9 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: "'; DROP TABLE users; --",
       };
 
-      await expect(pipe.transform(maliciousInput, {} as any)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(maliciousInput, {} as unknown),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should block requests when command injection threats are detected', async () => {
@@ -183,9 +183,9 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: 'test; rm -rf /',
       };
 
-      await expect(pipe.transform(maliciousInput, {} as any)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(maliciousInput, {} as unknown),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should use correct security context for different action types', async () => {
@@ -247,10 +247,17 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.response.message).toContain('security threats detected');
-        expect(error.response.threatTypes).toContain('ADVANCED_XSS');
-        expect(error.response.threatTypes).toContain('ADVANCED_SQL_INJECTION');
-        expect(error.response.totalRiskScore).toBeGreaterThan(0);
+        const badRequestError = error as BadRequestException;
+        expect(badRequestError.getResponse().message).toContain(
+          'security threats detected',
+        );
+        expect(badRequestError.getResponse().threatTypes).toContain(
+          'ADVANCED_XSS',
+        );
+        expect(badRequestError.getResponse().threatTypes).toContain(
+          'ADVANCED_SQL_INJECTION',
+        );
+        expect(badRequestError.getResponse().totalRiskScore).toBeGreaterThan(0);
       }
     });
 
@@ -274,19 +281,21 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         await pipe.transform(maliciousInput, {} as ArgumentMetadata);
         fail('Should have thrown BadRequestException');
       } catch (error) {
-        expect(error.response).toHaveProperty('message');
-        expect(error.response).toHaveProperty('operationId');
-        expect(error.response).toHaveProperty('threatTypes');
-        expect(error.response).toHaveProperty('totalRiskScore');
-        expect(error.response).toHaveProperty('threatLevel');
-        expect(error.response).toHaveProperty('validationStages');
-        expect(error.response).toHaveProperty('detectionCount');
-        expect(error.response).toHaveProperty('timestamp');
+        const badRequestError = error as BadRequestException;
+        const response = badRequestError.getResponse();
+        expect(response).toHaveProperty('message');
+        expect(response).toHaveProperty('operationId');
+        expect(response).toHaveProperty('threatTypes');
+        expect(response).toHaveProperty('totalRiskScore');
+        expect(response).toHaveProperty('threatLevel');
+        expect(response).toHaveProperty('validationStages');
+        expect(response).toHaveProperty('detectionCount');
+        expect(response).toHaveProperty('timestamp');
 
-        expect(Array.isArray(error.response.threatTypes)).toBe(true);
-        expect(Array.isArray(error.response.validationStages)).toBe(true);
-        expect(typeof error.response.totalRiskScore).toBe('number');
-        expect(error.response.detectionCount).toBeGreaterThan(0);
+        expect(Array.isArray(response.threatTypes)).toBe(true);
+        expect(Array.isArray(response.validationStages)).toBe(true);
+        expect(typeof response.totalRiskScore).toBe('number');
+        expect(response.detectionCount).toBeGreaterThan(0);
       }
     });
 
@@ -313,7 +322,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: 'A'.repeat(2 * 1024 * 1024), // 2MB payload
       };
 
-      await expect(pipe.transform(largePayload, {} as any)).rejects.toThrow(
+      await expect(pipe.transform(largePayload, {} as unknown)).rejects.toThrow(
         BadRequestException,
       );
     });

@@ -1288,9 +1288,117 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/TODO.json"
+    },
+    {
+      "id": "error_1757737597328_thm31f439",
+      "title": "CRITICAL ESLint Utilities/Common Module Elimination",
+      "description": "Systematically eliminate all ESLint violations in utilities and common modules in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd. Focus on utils/ directories, common/ directories, helper functions, shared modules, and configuration violations. Target: Maximum violation elimination from 519 total violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:26:37.328Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757737571801_1_general_b70edfbb",
+      "started_at": "2025-09-13T04:26:56.474Z",
+      "claimed_by": "development_session_1757737571801_1_general_b70edfbb",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757737571801_1_general_b70edfbb",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:26:56.474Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757737597328_thm31f439",
+          "completedAt": "2025-09-13T04:49:38.991Z",
+          "completedBy": "development_session_1757737571801_1_general_b70edfbb",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T04:49:38.991Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T04:49:38.991Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/TODO.json"
+    },
+    {
+      "id": "error_1757737596882_uppwhgql2",
+      "title": "CRITICAL ESLint FINAL ELIMINATION - Logic Expression Specialist",
+      "description": "Systematically eliminate all logic and expression violations in bytebot packages: constant binary expressions, nullish coalescing issues, logical operator problems, boolean expression violations, conditional logic violations. Focus on /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:26:36.882Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757737571790_1_general_24a76365",
+      "started_at": "2025-09-13T04:27:04.367Z",
+      "claimed_by": "development_session_1757737571790_1_general_24a76365",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757737571790_1_general_24a76365",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:27:04.367Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757737596882_uppwhgql2",
+          "completedAt": "2025-09-13T04:57:35.162Z",
+          "completedBy": "development_session_1757737571790_1_general_24a76365",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T04:57:35.162Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T04:57:35.162Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/TODO.json"
     }
   ],
-  "total_completed": 24,
-  "last_completion": "2025-09-13T04:46:36.574Z",
+  "total_completed": 26,
+  "last_completion": "2025-09-13T04:57:35.162Z",
   "created_at": "2025-09-11T09:00:29.533Z"
 }

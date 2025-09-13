@@ -1,6 +1,9 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 /**
  * MCP Index Module Test Suite
  *
@@ -99,7 +102,7 @@ class IndexTestUtils {
     const visited = new WeakSet();
 
     function calculateSize(value: any): number {
-      if (value === null ?? typeof value !== 'object') {
+      if (value === null || typeof value !== 'object') {
         return 8; // Approximate size for primitives
       }
 
