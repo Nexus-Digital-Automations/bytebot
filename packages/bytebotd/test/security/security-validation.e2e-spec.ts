@@ -221,12 +221,14 @@ describe('Security Validation E2E Tests', () => {
 
       // Check rate limit response format
       const rateLimitResponse = rateLimitedResponses[0];
-      expect((rateLimitResponse.body as SecurityErrorResponse).error).toBe(
-        'Too Many Requests',
-      );
-      expect(
-        (rateLimitResponse.body as SecurityErrorResponse).message,
-      ).toContain('rate limit');
+      if (rateLimitResponse) {
+        expect((rateLimitResponse.body as SecurityErrorResponse).error).toBe(
+          'Too Many Requests',
+        );
+        expect(
+          (rateLimitResponse.body as SecurityErrorResponse).message,
+        ).toContain('rate limit');
+      }
     });
 
     it('should include rate limit headers', async () => {

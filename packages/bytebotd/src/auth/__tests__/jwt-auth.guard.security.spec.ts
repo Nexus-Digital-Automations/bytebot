@@ -327,11 +327,11 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       const timings = [];
 
       for (const scenario of scenarios) {
-        const context = createMockExecutionContext({
-          authorization: scenario.token
-            ? `Bearer ${scenario.token}`
-            : undefined,
-        });
+        const headers: Record<string, string> = {};
+        if (scenario.token) {
+          headers.authorization = `Bearer ${scenario.token}`;
+        }
+        const context = createMockExecutionContext(headers);
 
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
 

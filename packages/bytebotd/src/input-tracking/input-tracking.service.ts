@@ -230,7 +230,7 @@ export class InputTrackingService implements OnModuleDestroy {
       }
 
       /* Printable char with no active modifier → buffer for TypeTextAction. */
-      if (!this.isModifierKey(e) && keyInfoMap[e.keycode].isPrintable) {
+      if (!this.isModifierKey(e) && keyInfoMap[e.keycode]?.isPrintable) {
         const keyInfo = keyInfoMap[e.keycode];
         const char = e.shiftKey
           ? (keyInfo.shiftString ?? keyInfo.string ?? '')
@@ -257,7 +257,7 @@ export class InputTrackingService implements OnModuleDestroy {
       }
       /* If key belongs to typing buffer we don't emit anything on keyup. *
        * (Up‑event is irrelevant for a pure "typed character".) */
-      if (!this.isModifierKey(e) && keyInfoMap[e.keycode].isPrintable) {
+      if (!this.isModifierKey(e) && keyInfoMap[e.keycode]?.isPrintable) {
         return;
       }
 
@@ -272,7 +272,7 @@ export class InputTrackingService implements OnModuleDestroy {
         keys: [
           // take the pressed keys and map them to their names
           ...Array.from(this.pressedKeys.values()).map(
-            (key) => keyInfoMap[key].name,
+            (key) => keyInfoMap[key]?.name,
           ),
         ].filter((key) => key !== undefined),
       };

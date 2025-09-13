@@ -1,9 +1,9 @@
 /* eslint-env jest */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
- 
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
- 
+
 /**
  * ComputerUseTools Test Suite
  *
@@ -281,7 +281,7 @@ describe('ComputerUseTools', () => {
           ...parameters,
         });
 
-        expect(result.content[0].text).toBe('scrolled');
+        expect(result.content[0]?.text).toBe('scrolled');
       });
     });
   });
@@ -306,7 +306,7 @@ describe('ComputerUseTools', () => {
           ...parameters,
         });
 
-        expect(result.content[0].text).toBe('keys typed');
+        expect(result.content[0]?.text).toBe('keys typed');
       });
     });
 
@@ -329,7 +329,7 @@ describe('ComputerUseTools', () => {
           ...parameters,
         });
 
-        expect(result.content[0].text).toBe('text typed');
+        expect(result.content[0]?.text).toBe('text typed');
       });
     });
 
@@ -349,7 +349,7 @@ describe('ComputerUseTools', () => {
           text,
         });
 
-        expect(result.content[0].text).toBe('text pasted');
+        expect(result.content[0]?.text).toBe('text pasted');
       });
     });
   });
@@ -371,7 +371,7 @@ describe('ComputerUseTools', () => {
           duration,
         });
 
-        expect(result.content[0].text).toBe('waiting done');
+        expect(result.content[0]?.text).toBe('waiting done');
       });
     });
 

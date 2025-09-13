@@ -230,9 +230,9 @@
       ]
     },
     {
-      "id": "error_1757740662221_knp3kl864",
-      "title": "Fix TypeScript compilation errors in security-comprehensive.e2e-spec.ts",
-      "description": "Fix critical type compatibility issues: string|undefined not assignable to string parameter (line 396), ClientInfo timestamp type mismatch (line 874), Application vs App type incompatibility. Add null checks, fix timestamp to string type, resolve import/casting issues.",
+      "id": "error_1757741853068_f2ny67a4y",
+      "title": "Fix TypeScript interface compatibility errors in src/types/index.ts",
+      "description": "Critical TypeScript compilation errors requiring immediate fix: 1) AuthenticatedRequest interface incorrectly extends Express Request 2) EnhancedRequest interface type compatibility issues 3) Permission array type mismatches 4) CSP directive type issues in main.ts line 80. Must ensure all interface inheritance is valid and types are compatible for successful compilation.",
       "priority": "medium",
       "category": "error",
       "status": "in_progress",
@@ -242,16 +242,100 @@
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-13T05:17:42.221Z",
+      "created_at": "2025-09-13T05:37:33.069Z",
       "auto_research_created": false,
-      "assigned_agent": "development_session_1757740637174_1_general_9f7aba69",
-      "started_at": "2025-09-13T05:18:15.316Z",
-      "claimed_by": "development_session_1757740637174_1_general_9f7aba69",
+      "assigned_agent": "development_session_1757741827450_1_general_fd516c04",
+      "started_at": "2025-09-13T05:37:54.624Z",
+      "claimed_by": "development_session_1757741827450_1_general_fd516c04",
       "agent_assignment_history": [
         {
-          "agentId": "development_session_1757740637174_1_general_9f7aba69",
+          "agentId": "development_session_1757741827450_1_general_fd516c04",
           "role": "primary",
-          "assignedAt": "2025-09-13T05:18:15.316Z",
+          "assignedAt": "2025-09-13T05:37:54.624Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757741850217_bp4zpuqx0",
+      "title": "Fix TypeScript compilation errors in test files",
+      "description": "Fix remaining type issues in mcp/__tests__/compressor.spec.ts and mcp/__tests__/index.spec.ts - CompressionResult vs OperationResult incompatibility, implicit any types from string indexing, and test mock type mismatches",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T05:37:30.217Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757741831268_1_general_6be43e2c",
+      "started_at": "2025-09-13T05:38:02.849Z",
+      "claimed_by": "development_session_1757741831268_1_general_6be43e2c",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757741831268_1_general_6be43e2c",
+          "role": "primary",
+          "assignedAt": "2025-09-13T05:38:02.849Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757741844629_t5u7ietzg",
+      "title": "Fix Permission enum TypeScript compilation errors between bytebotd and shared packages",
+      "description": "CRITICAL: Fix Permission enum incompatibility between bytebotd and shared packages. Specific issues: src/types/index.ts interfaces incorrectly extend request interfaces, Permission[] type mismatch between shared and local definitions. Solution: 1) Align Permission enum format with shared package (check for underscore prefixes), 2) Update all Permission references throughout codebase, 3) Fix AuthenticatedRequest and EnhancedRequest interfaces, 4) Ensure type compatibility in user.permissions fields",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T05:37:24.629Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757741823546_1_general_a40760fe",
+      "started_at": "2025-09-13T05:37:47.113Z",
+      "claimed_by": "development_session_1757741823546_1_general_a40760fe",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757741823546_1_general_a40760fe",
+          "role": "primary",
+          "assignedAt": "2025-09-13T05:37:47.113Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757741844577_mkf3nppv7",
+      "title": "Fix TypeScript Null Safety Compilation Errors",
+      "description": "Fix critical TypeScript compilation errors related to null safety. Target specific issues: Line 396 payload.sessionId (string | undefined) not assignable to string, and multiple Object is possibly undefined errors in input-tracking.service.ts, mcp/__tests__/computer-use.tools.spec.ts, and test/security/security-validation.e2e-spec.ts. Add null checks, type guards, optional chaining, and proper undefined handling for strict null checking compliance.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T05:37:24.577Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757741821307_1_general_e12ba8bc",
+      "started_at": "2025-09-13T05:37:46.203Z",
+      "claimed_by": "development_session_1757741821307_1_general_e12ba8bc",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757741821307_1_general_e12ba8bc",
+          "role": "primary",
+          "assignedAt": "2025-09-13T05:37:46.203Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
@@ -2609,6 +2693,111 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-13T05:17:17.175Z",
       "sessionId": "session_1757740637174",
+      "metadata": {}
+    },
+    "development_session_1757741821307_1_general_e12ba8bc": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T05:37:01.310Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T05:37:01.310Z",
+      "sessionId": "session_1757741821307",
+      "metadata": {}
+    },
+    "development_session_1757741823546_1_general_a40760fe": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T05:37:03.547Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T05:37:03.547Z",
+      "sessionId": "session_1757741823546",
+      "metadata": {}
+    },
+    "development_session_1757741827450_1_general_fd516c04": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T05:37:07.452Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T05:37:07.452Z",
+      "sessionId": "session_1757741827450",
+      "metadata": {}
+    },
+    "development_session_1757741828652_1_general_058690f0": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T05:37:08.653Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T05:37:08.653Z",
+      "sessionId": "session_1757741828652",
+      "metadata": {}
+    },
+    "development_session_1757741831268_1_general_6be43e2c": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T05:37:11.269Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T05:37:11.269Z",
+      "sessionId": "session_1757741831268",
       "metadata": {}
     }
   },

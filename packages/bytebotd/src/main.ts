@@ -77,8 +77,7 @@ async function bootstrap(): Promise<void> {
             ],
             baseUri: ["'self'"],
             formAction: ["'self'"],
-            upgradeInsecureRequests:
-              environment === 'production' ? [] : undefined,
+            upgradeInsecureRequests: environment === 'production' ? [] : null,
           },
           reportOnly: environment === 'development',
         },

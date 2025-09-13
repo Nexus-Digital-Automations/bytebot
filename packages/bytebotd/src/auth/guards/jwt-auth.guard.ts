@@ -23,12 +23,14 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { UserRole } from '@bytebot/shared';
+import { UserRole, Permission } from '@bytebot/shared';
+import { ClientInfo } from '../../types';
 
 /**
  * User interface for ByteBotd (subset of full User model)
  */
 export interface ByteBotdUser {
+  sub: string; // Required by shared interface compatibility
   id: string;
   email: string;
   username: string;
@@ -36,6 +38,9 @@ export interface ByteBotdUser {
   lastName?: string;
   role: UserRole;
   isActive: boolean;
+  sessionId?: string;
+  permissions?: Permission[];
+  clientInfo?: ClientInfo;
 }
 
 /**

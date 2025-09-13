@@ -279,6 +279,8 @@ export interface CompressionResult {
   };
   /** Execution time in milliseconds */
   executionTime?: number;
+  /** Index signature for compatibility with OperationResult */
+  [key: string]: unknown;
 }
 
 // ==========================================

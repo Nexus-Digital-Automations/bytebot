@@ -24,6 +24,8 @@ import type {
   Query as ExpressQuery,
 } from 'express-serve-static-core';
 import { JwtPayload as BaseJwtPayload } from 'jsonwebtoken';
+// Import shared package types to resolve compatibility issues
+import { Permission, UserRole as SharedUserRole } from '@bytebot/shared';
 // import type { BufferEncoding } from 'node:buffer'; // Causing import issues - use string instead
 
 // =============================================================================
@@ -193,21 +195,19 @@ export interface LoadTestResult {
 // =============================================================================
 
 /**
- * User roles enumeration with comprehensive access levels
- * NOTE: Using underscore prefixes to match shared package compatibility
+ * Re-export shared UserRole enum for compatibility
+ * NOTE: Using shared package types to ensure consistency across services
  */
-export enum UserRole {
-  _ADMIN = 'admin',
-  _OPERATOR = 'operator',
-  _VIEWER = 'viewer',
-  _USER = 'user',
-  _GUEST = 'guest',
-}
+export {
+  UserRole,
+  Permission,
+} from '../../../shared/dist/types/security.types';
 
 /**
- * Permission types for role-based access control
+ * Type alias for backward compatibility with local Permission interface
+ * @deprecated Use Permission enum from shared package instead
  */
-export interface Permission {
+export interface LegacyPermission {
   readonly resource: string;
   readonly action: 'create' | 'read' | 'update' | 'delete' | 'execute';
   readonly scope: 'global' | 'organization' | 'team' | 'personal';
@@ -215,18 +215,18 @@ export interface Permission {
 }
 
 /**
- * Role-based permissions mapping with type safety
+ * Role-based permissions mapping with type safety using shared Permission enum
  */
 export type RolePermissions = StrictRecord<Permission[]>;
 
 /**
- * Enhanced JWT payload interface with strict typing
+ * Enhanced JWT payload interface with strict typing using shared types
  */
 export interface JwtPayload extends BaseJwtPayload {
   readonly sub: string;
   readonly id: string;
   readonly email: string;
-  readonly role: UserRole;
+  readonly role: SharedUserRole;
   readonly permissions: Permission[];
   readonly sessionId: string;
   readonly iat: number;
@@ -263,7 +263,7 @@ export interface AuthResponse {
 export interface UserInfo {
   readonly id: string;
   readonly email: string;
-  readonly role: UserRole;
+  readonly role: SharedUserRole;
   readonly name?: string;
   readonly avatar?: string;
   readonly lastLogin?: string;
@@ -444,7 +444,7 @@ export interface FileUploadOptions {
  * Buffer creation helper with proper null safety
  */
 export interface SafeBufferOptions {
-  readonly encoding: BufferEncoding;
+  readonly encoding: string;
   readonly maxLength: number;
   readonly allowEmpty: boolean;
 }
@@ -702,14 +702,14 @@ export interface TokenData {
 }
 
 /**
- * Decoded JWT payload with enhanced type safety
+ * Decoded JWT payload with enhanced type safety using shared types
  */
 export interface DecodedJwtPayload extends BaseJwtPayload {
   readonly sub: string;
   readonly email: string;
-  readonly role: UserRole;
+  readonly role: SharedUserRole;
   readonly sessionId?: string;
-  readonly permissions?: string[];
+  readonly permissions?: Permission[];
   readonly exp: number;
   readonly iat: number;
   readonly iss?: string;
@@ -748,15 +748,15 @@ export interface MockResponseData {
 }
 
 /**
- * Express.js Request extension with user info
+ * Express.js Request extension with user info using shared types
  */
 export interface EnhancedRequest extends Request {
   user?: {
     readonly sub: string;
     readonly email: string;
-    readonly role: UserRole;
+    readonly role: SharedUserRole;
     readonly sessionId?: string;
-    readonly permissions?: string[];
+    readonly permissions?: Permission[];
     readonly clientInfo?: ClientInfo;
   };
   session?: {
@@ -852,7 +852,8 @@ export type MockImplementation<T> = {
 
 // Default export with grouped types for convenience
 export default {
-  UserRole,
+  UserRole: SharedUserRole,
+  Permission,
   HealthStatus,
   TypeSafetyUtils,
 } as const;

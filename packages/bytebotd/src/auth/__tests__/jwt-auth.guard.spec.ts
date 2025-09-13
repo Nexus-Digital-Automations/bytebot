@@ -16,11 +16,11 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
- 
+
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
- 
+
 /* eslint-disable no-constant-binary-expression */
 
 import { Test, TestingModule } from '@nestjs/testing';
@@ -572,9 +572,9 @@ describe('JwtAuthGuard', () => {
       );
 
       // Only lowercase 'authorization' header should work
-      expect(results[0].status).toBe('fulfilled');
-      expect(results[1].status).toBe('rejected');
-      expect(results[2].status).toBe('rejected');
+      expect(results[0]?.status).toBe('fulfilled');
+      expect(results[1]?.status).toBe('rejected');
+      expect(results[2]?.status).toBe('rejected');
 
       console.log(`[${testId}] Case-sensitive header parsing test completed`);
     });

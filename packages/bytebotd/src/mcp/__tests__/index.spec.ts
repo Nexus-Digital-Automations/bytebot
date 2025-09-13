@@ -116,7 +116,7 @@ class IndexTestUtils {
       for (const key in value) {
         if (Object.prototype.hasOwnProperty.call(value, key)) {
           size += key.length * 2; // String key size
-          size += calculateSize(value[key]);
+          size += calculateSize((value as Record<string, unknown>)[key]);
         }
       }
 
