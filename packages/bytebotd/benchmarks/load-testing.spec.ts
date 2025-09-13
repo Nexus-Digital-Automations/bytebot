@@ -69,8 +69,8 @@ describe('Load Testing Benchmarks', () => {
   let app: INestApplication;
   let metricsService: MetricsService;
   let cacheService: CacheService;
-  let performanceInterceptor: PerformanceInterceptor;
-  let compressionInterceptor: CompressionInterceptor;
+  let performanceInterceptor: Optional<PerformanceInterceptor>;
+  let compressionInterceptor: Optional<CompressionInterceptor>;
 
   const loadTestConfigs: LoadTestConfig[] = [
     {

@@ -868,9 +868,5 @@ export class AsyncBrowserJobSubmissionDto {
   })
   @IsOptional()
   @IsObject()
-  retryConfig?: {
-    maxRetries: number;
-    retryDelayMs: number;
-    exponentialBackoff: boolean;
-  };
+  retryConfig?: JobRetryConfig;
 }

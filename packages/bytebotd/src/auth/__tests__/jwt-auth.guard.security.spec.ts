@@ -25,6 +25,19 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import _crypto from 'crypto';
 
 /**
+ * Type definitions for mock request objects
+ */
+interface MockRequest {
+  headers: Record<string, string>;
+  user?: unknown;
+  url: string;
+  method: string;
+  ip: string;
+  connection: { remoteAddress: string };
+  socket: { remoteAddress: string };
+}
+
+/**
  * Advanced Security-Focused JWT Authentication Guard Tests
  * Tests critical security vulnerabilities and attack vectors
  */
@@ -52,7 +65,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
     route = 'test-route',
     ip = '127.0.0.1',
   ): ExecutionContext => {
-    const mockRequest = {
+    const mockRequest: MockRequest = {
       headers,
       user: undefined,
       url: `/${route}`,

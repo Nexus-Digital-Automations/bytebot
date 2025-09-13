@@ -91,7 +91,7 @@ expect.extend({
     if (typeof received === 'number') {
       executionTime = received;
     } else if (received && typeof received === 'object') {
-      executionTime = received.processingTimeMs || received.duration || 0;
+      executionTime = received.processingTimeMs ?? received.duration ?? 0;
     } else {
       return {
         message: () =>
@@ -316,7 +316,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  const testName = expect.getState().currentTestName || 'unknown';
+  const testName = expect.getState().currentTestName ?? 'unknown';
   const duration = Date.now() - testStartTime;
   const endMemory = process.memoryUsage();
 

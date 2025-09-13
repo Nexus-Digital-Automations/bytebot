@@ -653,7 +653,7 @@ describe('Security Penetration Testing Suite', () => {
           .mockReturnValueOnce(undefined);
 
         try {
-          const result = await rolesGuard.canActivate(context);
+          const _result = await rolesGuard.canActivate(context);
           escalationResults.push({
             attack: attackVector.name,
             success: result,
