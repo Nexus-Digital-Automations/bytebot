@@ -209,8 +209,8 @@ export class VersionInterceptor implements NestInterceptor {
       const processingTime = Date.now() - startTime;
       this.logger.error(`[${operationId}] BytebotD version interceptor error`, {
         operationId,
-        error: error instanceof Error ? _error.message : String(_error),
-        stack: error instanceof Error ? error.stack : undefined,
+        error: _error instanceof Error ? _error.message : String(_error),
+        stack: _error instanceof Error ? _error.stack : undefined,
         processingTimeMs: processingTime,
       });
 

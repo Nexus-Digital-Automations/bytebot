@@ -9,7 +9,9 @@ console.log = (...args: unknown[]) => {
 
 // Mock performance.now for demonstration
 if (typeof performance === "undefined") {
-  (global as any).performance = {
+  (
+    global as typeof globalThis & { performance?: { now: () => number } }
+  ).performance = {
     now: () => Date.now(),
   };
 }

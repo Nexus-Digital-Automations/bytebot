@@ -5,8 +5,10 @@ import { webcrypto } from 'crypto';
 import { json, urlencoded } from 'express';
 
 // Polyfill for crypto global (required by @nestjs/schedule)
+// Using type assertion to work around TypeScript restrictions
 if (!globalThis.crypto) {
-  (globalThis as any).crypto = webcrypto;
+  (globalThis as typeof globalThis & { crypto: typeof webcrypto }).crypto =
+    webcrypto;
 }
 
 async function bootstrap() {

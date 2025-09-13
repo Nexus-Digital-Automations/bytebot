@@ -23,14 +23,71 @@ import {
   BrowserSessionMetrics,
 } from '../dto/browser-session.dto';
 import { randomUUID } from 'crypto';
-import { join } from 'path';
+
+interface BrowserProfile {
+  headless?: boolean;
+  screenshots?: boolean;
+  videoRecording?: boolean;
+  networkLogging?: boolean;
+  consoleLogging?: boolean;
+  timeout?: number;
+  [key: string]: unknown;
+}
+
+interface SessionError {
+  message: string;
+  code: string;
+  timestamp: Date;
+}
+
+interface BrowserStateResponse {
+  success: boolean;
+  url?: string;
+  title?: string;
+  tabs?: Array<{
+    id: string;
+    title?: string;
+    url?: string;
+    active?: boolean;
+    createdAt?: string | number;
+    lastActivity?: string | number;
+    loadingStatus?: 'loading' | 'complete' | 'error';
+  }>;
+  metrics?: {
+    pagesVisited?: number;
+    actionsPerformed?: number;
+    screenshotsTaken?: number;
+    errorsEncountered?: number;
+    networkRequests?: number;
+    dataTransferredBytes?: number;
+    averagePageLoadTime?: number;
+    memoryUsageMB?: number;
+    cpuUsagePercent?: number;
+  };
+}
+
+interface BrowserCommand {
+  action: string;
+  url?: string;
+  include_tabs?: boolean;
+  include_metrics?: boolean;
+}
+
+interface SessionSummary {
+  totalSessions: number;
+  activeSessions: number;
+  idleSessions: number;
+  closedSessions: number;
+  averageSessionDuration: number;
+  peakMemoryUsage: number;
+}
 
 interface SessionData {
   id: string;
   name: string;
   description?: string;
   status: BrowserSessionStatus;
-  profile: any;
+  profile: BrowserProfile;
   timeoutSeconds: number;
   enableScreenshots: boolean;
   enableVideoRecording: boolean;
@@ -47,8 +104,8 @@ interface SessionData {
   metrics: BrowserSessionMetrics;
   processId?: string;
   websocketUrl?: string;
-  config?: Record<string, any>;
-  error?: any;
+  config?: Record<string, unknown>;
+  error?: SessionError;
 }
 
 @Injectable()
@@ -77,18 +134,20 @@ export class BrowserSessionService {
 
     try {
       // Create browser process through browser-use service
+      const browserProfile: BrowserProfile = {
+        ...createDto.profile,
+        headless: createDto.profile?.headless ?? true,
+        screenshots: createDto.enableScreenshots,
+        videoRecording: createDto.enableVideoRecording,
+        networkLogging: createDto.enableNetworkLogging,
+        consoleLogging: createDto.enableConsoleLogging,
+        timeout: createDto.timeoutSeconds * 1000,
+      };
+
       const processId = await this.browserUseService.createBrowserProcess(
         'session',
         sessionId,
-        {
-          ...createDto.profile,
-          headless: createDto.profile?.headless ?? true,
-          screenshots: createDto.enableScreenshots,
-          videoRecording: createDto.enableVideoRecording,
-          networkLogging: createDto.enableNetworkLogging,
-          consoleLogging: createDto.enableConsoleLogging,
-          timeout: createDto.timeoutSeconds * 1000,
-        },
+        browserProfile,
       );
 
       // Initialize session data
@@ -97,7 +156,7 @@ export class BrowserSessionService {
         name: createDto.name,
         description: createDto.description,
         status: BrowserSessionStatus.INITIALIZING,
-        profile: createDto.profile || {},
+        profile: browserProfile,
         timeoutSeconds: createDto.timeoutSeconds || 600,
         enableScreenshots: createDto.enableScreenshots ?? true,
         enableVideoRecording: createDto.enableVideoRecording ?? false,
@@ -142,11 +201,11 @@ export class BrowserSessionService {
 
       // Cleanup on failure
       if (this.sessions.has(sessionId)) {
-        await this.cleanupSession(sessionId);
+        this.cleanupSession(sessionId);
       }
 
       throw new ConflictException(
-        `Failed to create browser session: ${error.message}`,
+        `Failed to create browser session: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -242,14 +301,14 @@ export class BrowserSessionService {
         await this.browserUseService.cleanupProcess(sessionData.processId);
       }
 
-      await this.cleanupSession(sessionId);
+      this.cleanupSession(sessionId);
 
       this.logger.log(`Browser session closed successfully: ${sessionId}`);
     } catch (error) {
       this.logger.error(`Failed to close browser session: ${sessionId}`, error);
       sessionData.status = BrowserSessionStatus.ERROR;
       sessionData.error = {
-        message: error.message,
+        message: error instanceof Error ? error.message : 'Unknown close error',
         code: 'CLOSE_ERROR',
         timestamp: new Date(),
       };
@@ -310,10 +369,14 @@ export class BrowserSessionService {
       }
 
       // Send navigation command to browser process
-      await this.browserUseService.sendCommand(sessionData.processId, {
+      const navCommand: BrowserCommand = {
         action: 'navigate',
         url: url,
-      });
+      };
+      await this.browserUseService.sendCommand(
+        sessionData.processId,
+        navCommand,
+      );
 
       sessionData.currentUrl = url;
       sessionData.lastActivity = new Date();
@@ -330,14 +393,15 @@ export class BrowserSessionService {
 
     try {
       // Get current browser state
-      const browserState = await this.browserUseService.sendCommand(
+      const stateCommand: BrowserCommand = {
+        action: 'get_state',
+        include_tabs: true,
+        include_metrics: true,
+      };
+      const browserState = (await this.browserUseService.sendCommand(
         sessionData.processId,
-        {
-          action: 'get_state',
-          include_tabs: true,
-          include_metrics: true,
-        },
-      );
+        stateCommand,
+      )) as BrowserStateResponse;
 
       if (browserState.success) {
         // Update current URL and title
@@ -353,9 +417,7 @@ export class BrowserSessionService {
             active: tab.active || false,
             createdAt: new Date(tab.createdAt || Date.now()),
             lastActivity: new Date(tab.lastActivity || Date.now()),
-            loadingStatus:
-              (tab.loadingStatus as 'loading' | 'complete' | 'error') ||
-              'complete',
+            loadingStatus: tab.loadingStatus || 'complete',
           }));
         }
 
@@ -386,30 +448,34 @@ export class BrowserSessionService {
   /**
    * Update session metrics with new data
    */
-  private updateSessionMetrics(sessionData: SessionData, metrics: any): void {
+  private updateSessionMetrics(
+    sessionData: SessionData,
+    metrics: BrowserStateResponse['metrics'],
+  ): void {
     const currentTime = Date.now();
     const sessionDuration =
       (currentTime - sessionData.createdAt.getTime()) / 1000;
 
     sessionData.metrics = {
       totalDurationSeconds: sessionDuration,
-      pagesVisited: metrics.pagesVisited || sessionData.metrics.pagesVisited,
+      pagesVisited: metrics?.pagesVisited ?? sessionData.metrics.pagesVisited,
       actionsPerformed:
-        metrics.actionsPerformed || sessionData.metrics.actionsPerformed,
+        metrics?.actionsPerformed ?? sessionData.metrics.actionsPerformed,
       screenshotsTaken:
-        metrics.screenshotsTaken || sessionData.metrics.screenshotsTaken,
+        metrics?.screenshotsTaken ?? sessionData.metrics.screenshotsTaken,
       errorsEncountered:
-        metrics.errorsEncountered || sessionData.metrics.errorsEncountered,
+        metrics?.errorsEncountered ?? sessionData.metrics.errorsEncountered,
       networkRequests:
-        metrics.networkRequests || sessionData.metrics.networkRequests,
+        metrics?.networkRequests ?? sessionData.metrics.networkRequests,
       dataTransferredBytes:
-        metrics.dataTransferredBytes ||
+        metrics?.dataTransferredBytes ??
         sessionData.metrics.dataTransferredBytes,
       averagePageLoadTime:
-        metrics.averagePageLoadTime || sessionData.metrics.averagePageLoadTime,
-      memoryUsageMB: metrics.memoryUsageMB || sessionData.metrics.memoryUsageMB,
+        metrics?.averagePageLoadTime ?? sessionData.metrics.averagePageLoadTime,
+      memoryUsageMB:
+        metrics?.memoryUsageMB ?? sessionData.metrics.memoryUsageMB,
       cpuUsagePercent:
-        metrics.cpuUsagePercent || sessionData.metrics.cpuUsagePercent,
+        metrics?.cpuUsagePercent ?? sessionData.metrics.cpuUsagePercent,
     };
   }
 
@@ -445,9 +511,9 @@ export class BrowserSessionService {
     if (!sessionData) return;
 
     // Set new timeout
-    const timeout = setTimeout(async () => {
+    const timeout = setTimeout(() => {
       this.logger.log(`Session timeout reached: ${sessionId}`);
-      await this.closeSession(sessionId).catch((error) =>
+      this.closeSession(sessionId).catch((error) =>
         this.logger.error(
           `Failed to close timed-out session: ${sessionId}`,
           error,
@@ -461,7 +527,7 @@ export class BrowserSessionService {
   /**
    * Cleanup session resources
    */
-  private async cleanupSession(sessionId: string): Promise<void> {
+  private cleanupSession(sessionId: string): void {
     const sessionData = this.sessions.get(sessionId);
     if (!sessionData) return;
 
@@ -484,7 +550,7 @@ export class BrowserSessionService {
   /**
    * Calculate session summary statistics
    */
-  private calculateSessionSummary(sessions: SessionData[]): any {
+  private calculateSessionSummary(sessions: SessionData[]): SessionSummary {
     const activeSessions = sessions.filter(
       (s) => s.status === BrowserSessionStatus.ACTIVE,
     ).length;

@@ -418,7 +418,12 @@ export const createMockRateLimiter = (
     };
 
     Object.entries(originalMethods).forEach(([methodName, originalMethod]) => {
-      (mock as any)[methodName] = jest.fn(async (..._args: unknown[]) => {
+      (
+        mock as Record<
+          string,
+          jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>
+        >
+      )[methodName] = jest.fn(async (..._args: unknown[]) => {
         await new Promise((resolve) => setTimeout(resolve, simulateLatency));
         return (originalMethod as (..._args: unknown[]) => unknown)(..._args);
       });

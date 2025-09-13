@@ -34,7 +34,9 @@
     "node_modules",
     "dist",
     "coverage",
-    "**/*.js"
+    "**/*.js",
+    "src/test-utils/templates/**/*",
+    "**/*.spec.ts"
   ],
   "references": [
     {

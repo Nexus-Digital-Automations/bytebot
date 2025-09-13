@@ -35,6 +35,50 @@ export enum TaskPriority {
   URGENT = 'urgent',
 }
 
+export interface TaskResult {
+  success: boolean;
+  data?: unknown;
+  message?: string;
+  timestamp: Date;
+}
+
+export interface TaskError {
+  code: string;
+  message: string;
+  stack?: string;
+  timestamp: Date;
+}
+
+export interface TaskExecutionStep {
+  stepNumber: number;
+  action: string;
+  status: TaskStatus;
+  startedAt?: Date;
+  completedAt?: Date;
+  result?: string;
+  error?: string;
+  durationMs?: number;
+}
+
+export interface TaskMetadata {
+  userId?: string;
+  agentId?: string;
+  retryCount: number;
+  maxRetries: number;
+  timeoutMs: number;
+  tags: string[];
+  customData: Record<string, unknown>;
+}
+
+export interface TaskMetrics {
+  executionTimeMs?: number;
+  memoryUsageMB: number;
+  cpuUsagePercent: number;
+  networkRequests: number;
+  screenshotsTaken: number;
+  pagesVisited: number;
+}
+
 export interface BrowserTaskExecution {
   taskId: string;
   sessionId: string;
@@ -46,40 +90,57 @@ export interface BrowserTaskExecution {
   currentStep: number;
   totalSteps: number;
   estimatedRemainingMs?: number;
-  result?: any;
-  error?: {
-    code: string;
-    message: string;
-    stack?: string;
-    timestamp: Date;
+  result?: TaskResult;
+  error?: TaskError;
+  metadata: TaskMetadata;
+  metrics: TaskMetrics;
+  executionSteps: TaskExecutionStep[];
+}
+
+// Type guards for task validation
+function isTaskError(
+  error: unknown,
+): error is { message: string; stack?: string } {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message: unknown }).message === 'string'
+  );
+}
+
+// Convert between enum types safely
+function convertToBrowserTaskStatus(status: TaskStatus): BrowserTaskStatus {
+  const statusMap: Record<TaskStatus, BrowserTaskStatus> = {
+    [TaskStatus.PENDING]: BrowserTaskStatus.PENDING,
+    [TaskStatus.RUNNING]: BrowserTaskStatus.RUNNING,
+    [TaskStatus.COMPLETED]: BrowserTaskStatus.COMPLETED,
+    [TaskStatus.FAILED]: BrowserTaskStatus.FAILED,
+    [TaskStatus.CANCELLED]: BrowserTaskStatus.CANCELLED,
   };
-  metadata: {
-    userId?: string;
-    agentId?: string;
-    retryCount: number;
-    maxRetries: number;
-    timeoutMs: number;
-    tags: string[];
-    customData: Record<string, any>;
+  return statusMap[status];
+}
+
+function convertToBrowserTaskPriority(
+  priority: TaskPriority,
+): BrowserTaskPriority {
+  const priorityMap: Record<TaskPriority, BrowserTaskPriority> = {
+    [TaskPriority.LOW]: BrowserTaskPriority.LOW,
+    [TaskPriority.NORMAL]: BrowserTaskPriority.NORMAL,
+    [TaskPriority.HIGH]: BrowserTaskPriority.HIGH,
+    [TaskPriority.URGENT]: BrowserTaskPriority.URGENT,
   };
-  metrics: {
-    executionTimeMs?: number;
-    memoryUsageMB: number;
-    cpuUsagePercent: number;
-    networkRequests: number;
-    screenshotsTaken: number;
-    pagesVisited: number;
+  return priorityMap[priority];
+}
+
+function convertToTaskPriority(priority: BrowserTaskPriority): TaskPriority {
+  const priorityMap: Record<BrowserTaskPriority, TaskPriority> = {
+    [BrowserTaskPriority.LOW]: TaskPriority.LOW,
+    [BrowserTaskPriority.NORMAL]: TaskPriority.NORMAL,
+    [BrowserTaskPriority.HIGH]: TaskPriority.HIGH,
+    [BrowserTaskPriority.URGENT]: TaskPriority.URGENT,
   };
-  executionSteps: Array<{
-    stepNumber: number;
-    action: string;
-    status: TaskStatus;
-    startedAt?: Date;
-    completedAt?: Date;
-    result?: string;
-    error?: string;
-    durationMs?: number;
-  }>;
+  return priorityMap[priority];
 }
 
 @Injectable()
@@ -123,7 +184,7 @@ export class BrowserTaskService {
 
     try {
       // Validate task configuration
-      await this.validateTaskConfiguration(createTaskDto);
+      this.validateTaskConfiguration(createTaskDto);
 
       // Create browser session
       const session = await this.sessionService.createSession({
@@ -133,13 +194,15 @@ export class BrowserTaskService {
       const sessionId = session.id;
 
       // Create task execution object
+      const taskPriority = createTaskDto.priority
+        ? convertToTaskPriority(createTaskDto.priority)
+        : TaskPriority.NORMAL;
+
       const taskExecution: BrowserTaskExecution = {
         taskId,
         sessionId,
         status: TaskStatus.PENDING,
-        priority:
-          (createTaskDto.priority as unknown as TaskPriority) ??
-          TaskPriority.NORMAL,
+        priority: taskPriority,
         startedAt: now,
         lastActivityAt: now,
         currentStep: 0,
@@ -179,11 +242,11 @@ export class BrowserTaskService {
         name: createTaskDto.name,
         description: createTaskDto.description,
         status: BrowserTaskStatus.PENDING,
-        priority: createTaskDto.priority || BrowserTaskPriority.NORMAL,
+        priority: createTaskDto.priority ?? BrowserTaskPriority.NORMAL,
         sessionId,
         createdAt: now,
         updatedAt: now,
-        createdBy: userId || 'system',
+        createdBy: userId ?? 'system',
         progress: 0,
         totalSteps: taskExecution.totalSteps,
         completedSteps: 0,
@@ -193,9 +256,10 @@ export class BrowserTaskService {
         tags: createTaskDto.tags,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      const errorStack = error instanceof Error ? error.stack : undefined;
+      const errorMessage = isTaskError(error)
+        ? error.message
+        : 'Unknown error occurred during task creation';
+      const errorStack = isTaskError(error) ? error.stack : undefined;
 
       this.logger.error(
         `Failed to create browser task: ${errorMessage}`,
@@ -210,7 +274,7 @@ export class BrowserTaskService {
   /**
    * Get status of a specific task
    */
-  async getTaskStatus(taskId: string): Promise<BrowserTaskStatusDto> {
+  getTaskStatus(taskId: string): BrowserTaskStatusDto {
     const task =
       this.activeTasks.get(taskId) ?? this.completedTasks.get(taskId);
 
@@ -264,7 +328,7 @@ export class BrowserTaskService {
       sessionId: task.sessionId,
       metrics: task.metrics,
       executionSteps: task.executionSteps,
-      result: task.result,
+      result: task.result?.data,
       error: task.error,
       timestamp: new Date(),
     };
@@ -273,10 +337,10 @@ export class BrowserTaskService {
   /**
    * Cancel a running or pending task
    */
-  async cancelTask(
+  cancelTask(
     taskId: string,
     reason?: string,
-  ): Promise<{ success: boolean; message: string }> {
+  ): { success: boolean; message: string } {
     const task = this.activeTasks.get(taskId);
 
     if (!task) {
@@ -323,11 +387,14 @@ export class BrowserTaskService {
         success: true,
         message: `Task ${taskId} cancelled successfully`,
       };
-    } catch (error) {
-      this.logger.error(`Failed to cancel task ${taskId}: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = isTaskError(error)
+        ? error.message
+        : 'Unknown error occurred while cancelling task';
+      this.logger.error(`Failed to cancel task ${taskId}: ${errorMessage}`);
       return {
         success: false,
-        message: `Failed to cancel task: ${error.message}`,
+        message: `Failed to cancel task: ${errorMessage}`,
       };
     }
   }
@@ -335,7 +402,7 @@ export class BrowserTaskService {
   /**
    * Get a specific task by ID
    */
-  async getTask(taskId: string): Promise<BrowserTaskResponseDto> {
+  getTask(taskId: string): BrowserTaskResponseDto {
     const task =
       this.activeTasks.get(taskId) ?? this.completedTasks.get(taskId);
 
@@ -352,8 +419,8 @@ export class BrowserTaskService {
       id: task.taskId,
       name: `Browser Task ${task.taskId}`, // We don't store name separately in internal format
       description: 'Browser automation task', // We don't store description separately
-      status: task.status as unknown as BrowserTaskStatus,
-      priority: task.priority as any,
+      status: convertToBrowserTaskStatus(task.status),
+      priority: convertToBrowserTaskPriority(task.priority),
       sessionId: task.sessionId,
       createdAt: task.startedAt,
       updatedAt: task.lastActivityAt,
@@ -373,7 +440,7 @@ export class BrowserTaskService {
         success: step.status === TaskStatus.COMPLETED,
         error: step.error,
       })),
-      result: task.result,
+      result: task.result?.data,
       error: task.error
         ? {
             message: task.error.message,
@@ -397,10 +464,10 @@ export class BrowserTaskService {
   /**
    * Update an existing task
    */
-  async updateTask(
+  updateTask(
     taskId: string,
     updateTaskDto: UpdateBrowserTaskDto,
-  ): Promise<BrowserTaskResponseDto> {
+  ): BrowserTaskResponseDto {
     const task = this.activeTasks.get(taskId);
 
     if (!task) {
@@ -413,15 +480,16 @@ export class BrowserTaskService {
 
     // Update task properties
     if (updateTaskDto.priority) {
-      task.priority = updateTaskDto.priority as unknown as TaskPriority;
+      task.priority = convertToTaskPriority(updateTaskDto.priority);
     }
     if (updateTaskDto.tags) {
       task.metadata.tags = updateTaskDto.tags;
     }
     if (updateTaskDto.config) {
+      const configData = updateTaskDto.config ?? {};
       task.metadata.customData = {
         ...task.metadata.customData,
-        ...updateTaskDto.config,
+        ...configData,
       };
     }
     if (updateTaskDto.constraints?.maxExecutionTime) {
@@ -434,13 +502,13 @@ export class BrowserTaskService {
     this.logger.log(`Task updated: ${taskId}`);
 
     // Return updated task
-    return await this.getTask(taskId);
+    return this.getTask(taskId);
   }
 
   /**
    * Start task execution
    */
-  async startTask(taskId: string): Promise<BrowserTaskResponseDto> {
+  startTask(taskId: string): BrowserTaskResponseDto {
     const task = this.activeTasks.get(taskId);
 
     if (!task) {
@@ -476,18 +544,22 @@ export class BrowserTaskService {
     this.logger.log(`Starting task manually: ${taskId}`);
 
     // Execute task immediately
-    this.executeTask(task).catch((error) => {
-      this.logger.error(`Task execution failed: ${error.message}`, error.stack);
+    void this.executeTask(task).catch((error: unknown) => {
+      const errorMessage = isTaskError(error)
+        ? error.message
+        : 'Unknown error during task execution';
+      const errorStack = isTaskError(error) ? error.stack : undefined;
+      this.logger.error(`Task execution failed: ${errorMessage}`, errorStack);
     });
 
-    return await this.getTask(taskId);
+    return this.getTask(taskId);
   }
 
   /**
    * Stop task execution
    */
-  async stopTask(taskId: string): Promise<BrowserTaskResponseDto> {
-    const result = await this.cancelTask(taskId, 'Task stopped by user');
+  stopTask(taskId: string): BrowserTaskResponseDto {
+    const result = this.cancelTask(taskId, 'Task stopped by user');
 
     if (!result.success) {
       throw new Error(result.message);
@@ -495,11 +567,14 @@ export class BrowserTaskService {
 
     // Try to get task from completed tasks since it was just cancelled
     try {
-      return await this.getTask(taskId);
-    } catch (error) {
+      return this.getTask(taskId);
+    } catch (error: unknown) {
       // If task is not found in completed tasks, create a minimal response
+      const errorMessage = isTaskError(error)
+        ? error.message
+        : 'Unknown error retrieving task status';
       throw new Error(
-        `Task ${taskId} was stopped but could not retrieve final status`,
+        `Task ${taskId} was stopped but could not retrieve final status: ${errorMessage}`,
       );
     }
   }
@@ -507,7 +582,7 @@ export class BrowserTaskService {
   /**
    * Delete a task
    */
-  async deleteTask(taskId: string): Promise<void> {
+  deleteTask(taskId: string): void {
     const activeTask = this.activeTasks.get(taskId);
     const completedTask = this.completedTasks.get(taskId);
 
@@ -521,7 +596,7 @@ export class BrowserTaskService {
       (activeTask.status === TaskStatus.RUNNING ||
         activeTask.status === TaskStatus.PENDING)
     ) {
-      await this.cancelTask(taskId, 'Task deleted');
+      this.cancelTask(taskId, 'Task deleted');
     }
 
     // Remove from all collections
@@ -540,11 +615,11 @@ export class BrowserTaskService {
   /**
    * Get list of all tasks (active and completed) with pagination
    */
-  async listTasks(options: {
+  listTasks(options: {
     status?: TaskStatus;
     page?: number;
     limit?: number;
-  }): Promise<BrowserTaskListResponseDto> {
+  }): BrowserTaskListResponseDto {
     const { status, page = 1, limit = 10 } = options;
 
     const allTasks = [
@@ -572,11 +647,14 @@ export class BrowserTaskService {
     const tasks: BrowserTaskResponseDto[] = [];
     for (const task of paginatedTasks) {
       try {
-        const taskDto = await this.convertToResponseDto(task);
+        const taskDto = this.convertToResponseDto(task);
         tasks.push(taskDto);
-      } catch (error) {
+      } catch (error: unknown) {
+        const errorMessage = isTaskError(error)
+          ? error.message
+          : 'Unknown error converting task';
         this.logger.error(
-          `Failed to convert task ${task.taskId}: ${error.message}`,
+          `Failed to convert task ${task.taskId}: ${errorMessage}`,
         );
       }
     }
@@ -595,14 +673,14 @@ export class BrowserTaskService {
   /**
    * Get list of all tasks (active and completed) - Legacy method for backward compatibility
    */
-  async listTasksLegacy(filters?: {
+  listTasksLegacy(filters?: {
     status?: TaskStatus;
     userId?: string;
     agentId?: string;
     sessionId?: string;
     priority?: TaskPriority;
     tags?: string[];
-  }): Promise<BrowserTaskStatusDto[]> {
+  }): BrowserTaskStatusDto[] {
     const allTasks = [
       ...Array.from(this.activeTasks.values()),
       ...Array.from(this.completedTasks.values()),
@@ -654,7 +732,7 @@ export class BrowserTaskService {
       sessionId: task.sessionId,
       metrics: task.metrics,
       executionSteps: task.executionSteps,
-      result: task.result,
+      result: task.result?.data,
       error: task.error,
       timestamp: new Date(),
     }));
@@ -663,7 +741,7 @@ export class BrowserTaskService {
   /**
    * Get task execution metrics and statistics
    */
-  async getTaskMetrics(): Promise<{
+  getTaskMetrics(): {
     totalTasks: number;
     activeTasks: number;
     completedTasks: number;
@@ -675,7 +753,7 @@ export class BrowserTaskService {
       memoryUsageMB: number;
       cpuUsagePercent: number;
     };
-  }> {
+  } {
     const allTasks = [
       ...Array.from(this.activeTasks.values()),
       ...Array.from(this.completedTasks.values()),
@@ -736,7 +814,7 @@ export class BrowserTaskService {
   /**
    * Process task queue and execute pending tasks
    */
-  private async processTaskQueue(): Promise<void> {
+  private processTaskQueue(): void {
     if (this.taskQueue.length === 0) return;
 
     const runningTasks = Array.from(this.activeTasks.values()).filter(
@@ -751,10 +829,14 @@ export class BrowserTaskService {
     for (const taskId of tasksToStart) {
       const task = this.activeTasks.get(taskId);
       if (task) {
-        this.executeTask(task).catch((error) => {
+        void this.executeTask(task).catch((error: unknown) => {
+          const errorMessage = isTaskError(error)
+            ? error.message
+            : 'Unknown error during task execution';
+          const errorStack = isTaskError(error) ? error.stack : undefined;
           this.logger.error(
-            `Task execution failed: ${error.message}`,
-            error.stack,
+            `Task execution failed: ${errorMessage}`,
+            errorStack,
           );
         });
       }
@@ -787,7 +869,12 @@ export class BrowserTaskService {
       task.status = result.success ? TaskStatus.COMPLETED : TaskStatus.FAILED;
       task.completedAt = new Date();
       task.lastActivityAt = new Date();
-      task.result = result.results;
+      task.result = {
+        success: result.success,
+        data: result.results,
+        message: result.success ? 'Task completed successfully' : 'Task failed',
+        timestamp: new Date(),
+      };
       task.currentStep = task.totalSteps;
 
       if (!result.success && result.error) {
@@ -799,8 +886,12 @@ export class BrowserTaskService {
       }
 
       // Update metrics
-      task.metrics.executionTimeMs = result.executionTimeMs;
-      task.metrics.screenshotsTaken = result.screenshotsTaken ?? 0;
+      if (typeof result.executionTimeMs === 'number') {
+        task.metrics.executionTimeMs = result.executionTimeMs;
+      }
+      if (typeof result.screenshotsTaken === 'number') {
+        task.metrics.screenshotsTaken = result.screenshotsTaken;
+      }
 
       // Move to completed tasks
       this.completedTasks.set(task.taskId, task);
@@ -809,14 +900,18 @@ export class BrowserTaskService {
       this.logger.log(
         `Browser task completed: ${task.taskId} (${task.status})`,
       );
-    } catch (error) {
+    } catch (error: unknown) {
       task.status = TaskStatus.FAILED;
       task.completedAt = new Date();
       task.lastActivityAt = new Date();
+      const errorMessage = isTaskError(error)
+        ? error.message
+        : 'Unknown error during task execution';
+      const errorStack = isTaskError(error) ? error.stack : undefined;
       task.error = {
         code: 'EXECUTION_ERROR',
-        message: error.message,
-        stack: error.stack,
+        message: errorMessage,
+        stack: errorStack,
         timestamp: new Date(),
       };
 
@@ -824,8 +919,8 @@ export class BrowserTaskService {
       this.activeTasks.delete(task.taskId);
 
       this.logger.error(
-        `Browser task failed: ${task.taskId} - ${error.message}`,
-        error.stack,
+        `Browser task failed: ${task.taskId} - ${errorMessage}`,
+        errorStack,
       );
     }
   }
@@ -837,9 +932,7 @@ export class BrowserTaskService {
     return `task_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 
-  private async validateTaskConfiguration(
-    createTaskDto: CreateBrowserTaskDto,
-  ): Promise<void> {
+  private validateTaskConfiguration(createTaskDto: CreateBrowserTaskDto): void {
     if (!createTaskDto.name) {
       throw new Error('Task name is required');
     }
@@ -894,7 +987,9 @@ export class BrowserTaskService {
     this.taskQueue.splice(insertIndex, 0, taskId);
 
     // Process queue asynchronously
-    setImmediate(() => this.processTaskQueue());
+    setImmediate(() => {
+      this.processTaskQueue();
+    });
   }
 
   private comparePriority(a: TaskPriority, b: TaskPriority): number {
@@ -941,9 +1036,9 @@ export class BrowserTaskService {
   /**
    * Convert internal task to response DTO
    */
-  private async convertToResponseDto(
+  private convertToResponseDto(
     task: BrowserTaskExecution,
-  ): Promise<BrowserTaskResponseDto> {
+  ): BrowserTaskResponseDto {
     const progressPercent = Math.round(
       (task.currentStep / Math.max(task.totalSteps, 1)) * 100,
     );
@@ -952,8 +1047,8 @@ export class BrowserTaskService {
       id: task.taskId,
       name: `Browser Task ${task.taskId}`,
       description: 'Browser automation task',
-      status: task.status as unknown as BrowserTaskStatus,
-      priority: task.priority as any,
+      status: convertToBrowserTaskStatus(task.status),
+      priority: convertToBrowserTaskPriority(task.priority),
       sessionId: task.sessionId,
       createdAt: task.startedAt,
       updatedAt: task.lastActivityAt,
@@ -973,7 +1068,7 @@ export class BrowserTaskService {
         success: step.status === TaskStatus.COMPLETED,
         error: step.error,
       })),
-      result: task.result,
+      result: task.result?.data,
       error: task.error
         ? {
             message: task.error.message,
@@ -997,7 +1092,7 @@ export class BrowserTaskService {
   /**
    * Cleanup on service destruction
    */
-  async onModuleDestroy(): Promise<void> {
+  onModuleDestroy(): void {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
     }
@@ -1008,7 +1103,7 @@ export class BrowserTaskService {
         task.status === TaskStatus.RUNNING ||
         task.status === TaskStatus.PENDING
       ) {
-        await this.cancelTask(taskId, 'Service shutdown');
+        this.cancelTask(taskId, 'Service shutdown');
       }
     }
 

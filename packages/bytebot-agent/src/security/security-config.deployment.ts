@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 /**
  * Security Configuration Deployment - Bytebot-Agent Service
  *
@@ -40,9 +39,9 @@ export class BytebotAgentSecurityConfigService {
    */
   createSecurityMiddleware(): StandardizedSecurityMiddleware {
     try {
-      return (
-        StandardizedSecurityMiddleware as any
-      ).createBytebotAgentMiddleware(this.configService);
+      return StandardizedSecurityMiddleware.createBytebotAgentMiddleware(
+        this.configService,
+      );
     } catch {
       throw new Error('Failed to create security middleware');
     }
@@ -60,7 +59,7 @@ export class BytebotAgentSecurityConfigService {
     try {
       // Use high security pipe for Bytebot-Agent
 
-      return (StandardizedValidationPipes as any).HIGH_SECURITY(environment);
+      return StandardizedValidationPipes.HIGH_SECURITY(environment);
     } catch {
       throw new Error('Failed to create validation pipe');
     }
@@ -74,7 +73,7 @@ export class BytebotAgentSecurityConfigService {
     redisClient?: unknown,
   ): StandardizedRateLimitGuard {
     try {
-      return (StandardizedRateLimitGuard as any).createBytebotAgentGuard(
+      return StandardizedRateLimitGuard.createBytebotAgentGuard(
         reflector,
         this.configService,
         redisClient,
@@ -159,7 +158,7 @@ export class BytebotAgentSecurityConfigService {
     {
       provide: 'BYTEBOT_AGENT_SECURITY_MIDDLEWARE',
       useFactory: (configService: ConfigService) =>
-        (StandardizedSecurityMiddleware as any).createBytebotAgentMiddleware(
+        StandardizedSecurityMiddleware.createBytebotAgentMiddleware(
           configService,
         ),
       inject: [ConfigService],
@@ -172,7 +171,7 @@ export class BytebotAgentSecurityConfigService {
           'development',
         );
 
-        return (StandardizedValidationPipes as any).HIGH_SECURITY(environment);
+        return StandardizedValidationPipes.HIGH_SECURITY(environment);
       },
       inject: [ConfigService],
     },
@@ -183,7 +182,7 @@ export class BytebotAgentSecurityConfigService {
         configService: ConfigService,
         redisClient?: unknown,
       ) =>
-        (StandardizedRateLimitGuard as any).createBytebotAgentGuard(
+        StandardizedRateLimitGuard.createBytebotAgentGuard(
           reflector,
           configService,
           redisClient,
@@ -205,9 +204,10 @@ export class BytebotAgentSecurityModule implements NestModule {
     try {
       // Apply Bytebot-Agent security middleware to all routes
 
-      const securityMiddleware = (
-        StandardizedSecurityMiddleware as any
-      ).createBytebotAgentMiddleware(this.configService);
+      const securityMiddleware =
+        StandardizedSecurityMiddleware.createBytebotAgentMiddleware(
+          this.configService,
+        );
 
       consumer
         .apply(
@@ -241,39 +241,49 @@ export class BytebotAgentSecurityDeployment {
 
       // Apply global validation pipe with high security
 
-      (app as any).useGlobalPipes(
-        (StandardizedValidationPipes as any).HIGH_SECURITY(environment),
+      app.useGlobalPipes(
+        StandardizedValidationPipes.HIGH_SECURITY(environment),
       );
 
       // Apply global rate limiting guard
 
-      const reflector = (app as any).get('Reflector');
+      const reflector = app.get(Reflector);
 
-      const redisClient = (app as any).get('REDIS_CLIENT', null);
+      const redisClient: unknown = app.get('REDIS_CLIENT', { strict: false });
 
-      const rateLimitGuard = (
-        StandardizedRateLimitGuard as any
-      ).createBytebotAgentGuard(reflector, configService, redisClient);
+      const rateLimitGuard = StandardizedRateLimitGuard.createBytebotAgentGuard(
+        reflector,
+        configService,
+        redisClient,
+      );
 
-      (app as any).useGlobalGuards(rateLimitGuard);
+      app.useGlobalGuards(rateLimitGuard);
 
       // Log security deployment
 
-      const logger = (app as any).get('Logger');
-      if (logger) {
-        logger.log('Bytebot-Agent security middleware deployed successfully', {
-          service: 'Bytebot-Agent',
-          securityLevel: 'HIGH',
-          environment,
-          features: {
-            api: true,
-            taskManagement: true,
+      const logger: unknown = app.get('Logger', { strict: false });
+      if (
+        logger &&
+        typeof logger === 'object' &&
+        logger !== null &&
+        'log' in logger
+      ) {
+        (logger as { log: (message: string, meta?: unknown) => void }).log(
+          'Bytebot-Agent security middleware deployed successfully',
+          {
+            service: 'Bytebot-Agent',
+            securityLevel: 'HIGH',
+            environment,
+            features: {
+              api: true,
+              taskManagement: true,
 
-            rateLimiting: !!redisClient,
-            validation: true,
-            authentication: true,
+              rateLimiting: !!redisClient,
+              validation: true,
+              authentication: true,
+            },
           },
-        });
+        );
       }
     } catch {
       throw new Error('Failed to apply security configuration');

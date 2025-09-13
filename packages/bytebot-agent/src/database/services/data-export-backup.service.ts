@@ -657,7 +657,7 @@ export class DataExportBackupService {
 
     // Apply privacy transformations
     const processedSessions = config.privacy.anonymize
-      ? this.anonymizeSessions(sessions)
+      ? this.anonymizeSessions(sessions as any)
       : sessions;
 
     const filename = `browser_sessions.${config.format}`;
@@ -697,7 +697,7 @@ export class DataExportBackupService {
 
     // Apply privacy transformations
     const processedTasks = config.privacy.anonymize
-      ? this.anonymizeTasks(tasks)
+      ? this.anonymizeTasks(tasks as any)
       : tasks;
 
     const filename = `browser_tasks.${config.format}`;
@@ -1426,6 +1426,8 @@ export class DataExportBackupService {
       .map(
         (task): AnonymizedTask => ({
           ...task,
+          result: task.result ? JSON.stringify(task.result) : null,
+          error: task.error ? JSON.stringify(task.error) : null,
           userId: task.userId
             ? `user_${crypto.randomBytes(4).toString('hex')}`
             : null,

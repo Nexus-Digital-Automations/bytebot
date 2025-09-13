@@ -120,7 +120,7 @@ export class CacheInterceptor implements NestInterceptor {
       includeUserId: true,
       cacheableStatuses: [200],
       varyBy: ['Authorization'],
-      skipCacheIf: (_req) => {
+      skipCacheIf: (req) => {
         // Skip cache if real-time data is requested
         return req.query.realtime === 'true';
       },
@@ -147,7 +147,7 @@ export class CacheInterceptor implements NestInterceptor {
       pattern: /^\/computer-use$/,
       ttl: 30,
       cacheableStatuses: [200],
-      skipCacheIf: (_req) => {
+      skipCacheIf: (req) => {
         // Only cache screenshot requests
         return req.body?.action !== 'screenshot';
       },
@@ -274,7 +274,7 @@ export class CacheInterceptor implements NestInterceptor {
         .catch((_error) => {
           // Cache error - proceed without cache
           this.logger.error(
-            `[${operationId}] Cache retrieval error: ${error instanceof Error ? _error.message : 'Unknown error'}`,
+            `[${operationId}] Cache retrieval error: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
           );
 
           next.handle().subscribe({
@@ -397,7 +397,7 @@ export class CacheInterceptor implements NestInterceptor {
     const path = request.url.split('?')[0]; // Remove query string for pattern matching
 
     for (const rule of this.cacheRules) {
-      if (rule.pattern.test(path)) {
+      if (rule.pattern.test(path || '')) {
         return rule;
       }
     }
@@ -555,7 +555,7 @@ export class CacheInterceptor implements NestInterceptor {
       }
     } catch (_error) {
       this.logger.error(
-        `Cache invalidation _error: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
+        `Cache invalidation _error: ${_error instanceof Error ? _error.message : 'Unknown _error'}`,
       );
     }
   }
@@ -620,7 +620,8 @@ export class CacheInterceptor implements NestInterceptor {
   /**
    * Normalize URL for statistics grouping
    */
-  private normalizeUrlForStats(url: string): string {
+  private normalizeUrlForStats(url: string | undefined): string {
+    if (!url) return '';
     return url
       .split('?')[0] // Remove query string
       .replace(/\/\d+/g, '/:id') // Replace IDs

@@ -38,6 +38,159 @@ import {
   BrowserStateResponseDto,
 } from '../dto/browser-dom.dto';
 
+// Browser API response interfaces
+interface BrowserCommandResult {
+  success: boolean;
+  error?: string;
+  executionTime?: number;
+  [key: string]: unknown;
+}
+
+interface BrowserElementResult {
+  element?: BrowserElementData;
+  success?: boolean;
+  error?: string;
+}
+
+interface BrowserPageInfoResult {
+  url?: string;
+  title?: string;
+  loadingStatus?: string;
+  viewport?: {
+    width: number;
+    height: number;
+  };
+  scrollPosition?: {
+    x: number;
+    y: number;
+  };
+  performance?: {
+    loadTime: number;
+    domContentLoaded: number;
+    firstContentfulPaint: number;
+  };
+}
+
+interface BrowserElementData {
+  index?: number;
+  tagName?: string;
+  text?: string;
+  textContent?: string;
+  id?: string;
+  className?: string;
+  attributes?: unknown;
+  boundingBox?: unknown;
+  visible?: boolean;
+  enabled?: boolean;
+  clickable?: boolean;
+  inputField?: boolean;
+  selector?: string;
+}
+
+interface BrowserInteractiveElementsResult {
+  elements?: Array<unknown>;
+}
+
+interface BrowserScreenshotResult {
+  screenshot?: string | { data?: string };
+}
+
+// Type guards for browser API responses
+function isBrowserCommandResult(obj: unknown): obj is BrowserCommandResult {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof (obj as BrowserCommandResult).success === 'boolean'
+  );
+}
+
+// Helper function to safely extract element data
+function safeExtractElement(element: unknown): ElementInfo | null {
+  if (!element || typeof element !== 'object') {
+    return null;
+  }
+
+  const el = element as Record<string, unknown>;
+
+  const safeAttributes =
+    el.attributes &&
+    typeof el.attributes === 'object' &&
+    el.attributes !== null &&
+    el.attributes.constructor === Object
+      ? (el.attributes as Record<string, string>)
+      : {};
+
+  const boundingBoxObj = el.boundingBox;
+  const safeBoundingBox =
+    boundingBoxObj &&
+    typeof boundingBoxObj === 'object' &&
+    boundingBoxObj !== null &&
+    typeof (boundingBoxObj as Record<string, unknown>).x === 'number' &&
+    typeof (boundingBoxObj as Record<string, unknown>).y === 'number' &&
+    typeof (boundingBoxObj as Record<string, unknown>).width === 'number' &&
+    typeof (boundingBoxObj as Record<string, unknown>).height === 'number'
+      ? (boundingBoxObj as {
+          x: number;
+          y: number;
+          width: number;
+          height: number;
+        })
+      : { x: 0, y: 0, width: 0, height: 0 };
+
+  const safeTagName = typeof el.tagName === 'string' ? el.tagName : 'div';
+
+  return {
+    index: typeof el.index === 'number' ? el.index : 0,
+    tagName: safeTagName,
+    text:
+      typeof el.text === 'string'
+        ? el.text
+        : typeof el.textContent === 'string'
+          ? el.textContent
+          : '',
+    id: typeof el.id === 'string' ? el.id : undefined,
+    className: typeof el.className === 'string' ? el.className : undefined,
+    textContent:
+      typeof el.textContent === 'string' ? el.textContent : undefined,
+    attributes: safeAttributes,
+    boundingBox: safeBoundingBox,
+    visible: typeof el.visible === 'boolean' ? el.visible : true,
+    enabled: typeof el.enabled === 'boolean' ? el.enabled : true,
+    clickable: typeof el.clickable === 'boolean' ? el.clickable : true,
+    inputField:
+      typeof el.inputField === 'boolean'
+        ? el.inputField
+        : ['input', 'textarea', 'select'].includes(safeTagName.toLowerCase()),
+    selector: typeof el.selector === 'string' ? el.selector : '',
+  };
+}
+
+function isBrowserElementResult(obj: unknown): obj is BrowserElementResult {
+  return typeof obj === 'object' && obj !== null;
+}
+
+function isBrowserPageInfoResult(obj: unknown): obj is BrowserPageInfoResult {
+  return typeof obj === 'object' && obj !== null;
+}
+
+function isBrowserInteractiveElementsResult(
+  obj: unknown,
+): obj is BrowserInteractiveElementsResult {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    (typeof (obj as BrowserInteractiveElementsResult).elements ===
+      'undefined' ||
+      Array.isArray((obj as BrowserInteractiveElementsResult).elements))
+  );
+}
+
+function isBrowserScreenshotResult(
+  obj: unknown,
+): obj is BrowserScreenshotResult {
+  return typeof obj === 'object' && obj !== null;
+}
+
 interface ElementInfo {
   index: number; // Required by DOMElement
   tagName: string;
@@ -491,9 +644,9 @@ export class BrowserDomService {
    */
   private async executeWithRetry(
     processId: string,
-    command: any,
+    command: Record<string, unknown>,
     maxRetries: number,
-  ): Promise<any> {
+  ): Promise<BrowserCommandResult> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const startTime = Date.now();
@@ -502,6 +655,44 @@ export class BrowserDomService {
           command,
         );
         const executionTime = Date.now() - startTime;
+
+        if (!isBrowserCommandResult(result)) {
+          // Convert unknown result to BrowserCommandResult
+          const convertedResult: BrowserCommandResult = {
+            success:
+              typeof result === 'object' &&
+              result !== null &&
+              'success' in result
+                ? Boolean((result as { success: unknown }).success)
+                : true,
+            error:
+              typeof result === 'object' && result !== null && 'error' in result
+                ? (() => {
+                    const errorValue = (result as { error: unknown }).error;
+                    if (typeof errorValue === 'string') {
+                      return errorValue;
+                    }
+                    if (
+                      typeof errorValue === 'number' ||
+                      typeof errorValue === 'boolean'
+                    ) {
+                      return String(errorValue);
+                    }
+                    if (typeof errorValue === 'object' && errorValue !== null) {
+                      try {
+                        return JSON.stringify(errorValue);
+                      } catch {
+                        return '[Error: Unable to serialize]';
+                      }
+                    }
+                    return 'Unknown error';
+                  })()
+                : undefined,
+            executionTime,
+            ...(typeof result === 'object' && result !== null ? result : {}),
+          };
+          return convertedResult;
+        }
 
         return {
           ...result,
@@ -518,6 +709,9 @@ export class BrowserDomService {
         await this.delay(1000 * Math.pow(2, attempt - 1));
       }
     }
+
+    // This should never be reached, but TypeScript needs it
+    throw new Error('Max retries exceeded');
   }
 
   /**
@@ -550,19 +744,56 @@ export class BrowserDomService {
 
     const result = await this.browserUseService.sendCommand(processId, command);
 
+    if (!isBrowserPageInfoResult(result)) {
+      return {
+        url: 'about:blank',
+        title: '',
+        loadingStatus: 'complete' as const,
+        viewport: { width: 1280, height: 720 },
+        scrollPosition: { x: 0, y: 0 },
+        performance: {
+          loadTime: 0,
+          domContentLoaded: 0,
+          firstContentfulPaint: 0,
+        },
+      };
+    }
+
     return {
-      url: result.url || 'about:blank',
-      title: result.title || '',
+      url: typeof result.url === 'string' ? result.url : 'about:blank',
+      title: typeof result.title === 'string' ? result.title : '',
       loadingStatus:
-        (result.loadingStatus as 'loading' | 'complete' | 'error') ||
-        'complete',
-      viewport: result.viewport || { width: 1280, height: 720 },
-      scrollPosition: result.scrollPosition || { x: 0, y: 0 },
-      performance: result.performance || {
-        loadTime: 0,
-        domContentLoaded: 0,
-        firstContentfulPaint: 0,
-      },
+        result.loadingStatus === 'loading' ||
+        result.loadingStatus === 'complete' ||
+        result.loadingStatus === 'error'
+          ? result.loadingStatus
+          : 'complete',
+      viewport:
+        result.viewport &&
+        typeof result.viewport === 'object' &&
+        typeof result.viewport.width === 'number' &&
+        typeof result.viewport.height === 'number'
+          ? result.viewport
+          : { width: 1280, height: 720 },
+      scrollPosition:
+        result.scrollPosition &&
+        typeof result.scrollPosition === 'object' &&
+        typeof result.scrollPosition.x === 'number' &&
+        typeof result.scrollPosition.y === 'number'
+          ? result.scrollPosition
+          : { x: 0, y: 0 },
+      performance:
+        result.performance &&
+        typeof result.performance === 'object' &&
+        typeof result.performance.loadTime === 'number' &&
+        typeof result.performance.domContentLoaded === 'number' &&
+        typeof result.performance.firstContentfulPaint === 'number'
+          ? result.performance
+          : {
+              loadTime: 0,
+              domContentLoaded: 0,
+              firstContentfulPaint: 0,
+            },
     };
   }
 
@@ -582,7 +813,18 @@ export class BrowserDomService {
 
     const result = await this.browserUseService.sendCommand(processId, command);
 
-    return (result.elements as ElementInfo[]) || [];
+    if (!isBrowserInteractiveElementsResult(result)) {
+      return [];
+    }
+
+    if (!Array.isArray(result.elements)) {
+      return [];
+    }
+
+    // Safely convert elements to ElementInfo using helper function
+    return result.elements
+      .map(safeExtractElement)
+      .filter((element): element is ElementInfo => element !== null);
   }
 
   /**
@@ -605,36 +847,20 @@ export class BrowserDomService {
         command,
       );
 
+      if (!isBrowserElementResult(result)) {
+        return null;
+      }
+
       const element = result.element;
       if (!element) return null;
 
-      // Ensure ElementInfo has all required properties for DOMElement compatibility
-      const elementInfo: ElementInfo = {
-        index: (element as any).index || 0,
-        tagName: (element as any).tagName || 'div',
-        text: (element as any).text || (element as any).textContent || '',
-        id: (element as any).id,
-        className: (element as any).className,
-        textContent: (element as any).textContent,
-        attributes: (element as any).attributes || {},
-        boundingBox: (element as any).boundingBox || {
-          x: 0,
-          y: 0,
-          width: 0,
-          height: 0,
-        },
-        visible: (element as any).visible !== false,
-        enabled: (element as any).enabled !== false,
-        clickable: (element as any).clickable !== false,
-        inputField:
-          (element as any).inputField ||
-          ['input', 'textarea', 'select'].includes(
-            (element as any).tagName?.toLowerCase(),
-          ),
-        selector: (element as any).selector || selector,
-      };
+      // Use the safe helper function and provide fallback selector
+      const extractedElement = safeExtractElement(element);
+      if (extractedElement && !extractedElement.selector) {
+        extractedElement.selector = selector;
+      }
 
-      return elementInfo;
+      return extractedElement;
     } catch (error) {
       this.logger.warn(
         `Failed to get element info for selector ${selector}:`,
@@ -661,11 +887,19 @@ export class BrowserDomService {
 
     const result = await this.browserUseService.sendCommand(processId, command);
 
+    if (!isBrowserScreenshotResult(result)) {
+      return { data: '' };
+    }
+
     return {
       data:
         typeof result.screenshot === 'string'
           ? result.screenshot
-          : (result.screenshot as { data?: string })?.data || '',
+          : typeof result.screenshot === 'object' &&
+              result.screenshot !== null &&
+              typeof (result.screenshot as { data?: string }).data === 'string'
+            ? (result.screenshot as { data: string }).data
+            : '',
     };
   }
 

@@ -37,6 +37,14 @@ export interface FormInfo {
   fieldTypes: Record<string, number>;
 }
 
+export interface FormValidationRules {
+  pattern?: string;
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+}
+
 export interface FormFieldInfo {
   element: PageElement;
   fieldType: FormFieldType;
@@ -44,14 +52,31 @@ export interface FormFieldInfo {
   label?: string;
   placeholder?: string;
   required: boolean;
-  validation?: {
-    pattern?: string;
-    minLength?: number;
-    maxLength?: number;
-    min?: number;
-    max?: number;
-  };
+  validation?: FormValidationRules;
   options?: string[]; // For select, radio, checkbox
+}
+
+export interface FormSubmissionResult {
+  success: boolean;
+  error?: string;
+  result?: unknown;
+}
+
+export interface FormValidationResult {
+  valid: boolean;
+  error?: string;
+}
+
+export interface ErrorWithMessage {
+  message: string;
+  stack?: string;
+}
+
+export interface FormFieldFillOptions {
+  clearFields: boolean;
+  skipMissingFields: boolean;
+  fieldDelayMs: number;
+  validateFields: boolean;
 }
 
 export interface FieldFillResult {
@@ -145,7 +170,7 @@ export class BrowserFormService {
       }
 
       // Discover forms on the page
-      const forms = await this.discoverForms(pageState);
+      const forms = this.discoverForms(pageState);
       if (forms.length === 0) {
         return {
           success: false,
@@ -256,11 +281,13 @@ export class BrowserFormService {
             : undefined,
       };
     } catch (error) {
-      this.logger.error(`Form filling error: ${error.message}`, error.stack);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Form filling error: ${errorMsg}`, errorStack);
 
       return {
         success: false,
-        message: `Form filling failed: ${error.message}`,
+        message: `Form filling failed: ${errorMsg}`,
         fieldsProcessed: 0,
         fieldsSuccessful: 0,
         fieldsFailed: 0,
@@ -269,7 +296,7 @@ export class BrowserFormService {
         durationMs: Date.now() - startTime,
         error: {
           code: 'FORM_FILL_ERROR',
-          message: error.message,
+          message: errorMsg,
         },
       };
     }
@@ -299,7 +326,7 @@ export class BrowserFormService {
         }
       }
 
-      let submitResult: { success: boolean; error?: string; result?: any };
+      let submitResult: FormSubmissionResult;
 
       switch (submitDto.method ?? FormSubmissionMethod.CLICK_SUBMIT) {
         case FormSubmissionMethod.CLICK_SUBMIT:
@@ -369,11 +396,13 @@ export class BrowserFormService {
         warnings: submissionValidation.warnings,
       };
     } catch (error) {
-      this.logger.error(`Form submission error: ${error.message}`, error.stack);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Form submission error: ${errorMsg}`, errorStack);
 
       return {
         success: false,
-        message: `Form submission failed: ${error.message}`,
+        message: `Form submission failed: ${errorMsg}`,
         fieldsProcessed: 0,
         fieldsSuccessful: 0,
         fieldsFailed: 1,
@@ -382,7 +411,7 @@ export class BrowserFormService {
         durationMs: Date.now() - startTime,
         error: {
           code: 'SUBMISSION_ERROR',
-          message: error.message,
+          message: errorMsg,
         },
       };
     }
@@ -391,7 +420,7 @@ export class BrowserFormService {
   /**
    * Discover and analyze forms on the current page
    */
-  async discoverForms(pageState: PageState): Promise<FormInfo[]> {
+  discoverForms(pageState: PageState): FormInfo[] {
     const forms: FormInfo[] = [];
 
     // Use cached forms if available and recent
@@ -530,8 +559,10 @@ export class BrowserFormService {
     return element.attributes['aria-label'] || element.attributes.title;
   }
 
-  private extractValidationRules(element: PageElement): any {
-    const validation: any = {};
+  private extractValidationRules(
+    element: PageElement,
+  ): FormValidationRules | undefined {
+    const validation: Partial<FormValidationRules> = {};
 
     if (element.attributes.pattern) {
       validation.pattern = element.attributes.pattern;
@@ -553,7 +584,9 @@ export class BrowserFormService {
       validation.max = parseFloat(element.attributes.max);
     }
 
-    return Object.keys(validation).length > 0 ? validation : undefined;
+    return Object.keys(validation).length > 0
+      ? (validation as FormValidationRules)
+      : undefined;
   }
 
   private extractFieldOptions(element: PageElement): string[] | undefined {
@@ -586,8 +619,8 @@ export class BrowserFormService {
   }
 
   private async waitForDynamicContent(
-    sessionId: string,
-    timeoutSeconds: number,
+    _sessionId: string,
+    _timeoutSeconds: number,
   ): Promise<void> {
     // Wait for any dynamic loading to complete
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -630,7 +663,7 @@ export class BrowserFormService {
     sessionId: string,
     form: FormInfo,
     fieldData: FormField,
-    options: any,
+    options: FormFieldFillOptions,
   ): Promise<FieldFillResult> {
     try {
       // Find matching form field
@@ -685,7 +718,7 @@ export class BrowserFormService {
         field: fieldData.name,
         success: false,
         value: fieldData.value,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         validationPassed: false,
       };
     }
@@ -726,7 +759,7 @@ export class BrowserFormService {
   private validateFieldValue(
     fieldData: FormField,
     formField: FormFieldInfo,
-  ): { valid: boolean; error?: string } {
+  ): FormValidationResult {
     if (formField.required && !fieldData.value) {
       return { valid: false, error: 'Required field cannot be empty' };
     }
@@ -792,7 +825,7 @@ export class BrowserFormService {
     sessionId: string,
     formField: FormFieldInfo,
     fieldData: FormField,
-    options: any,
+    options: FormFieldFillOptions,
   ): Promise<void> {
     const elementIndex = formField.element.index;
 
@@ -849,7 +882,7 @@ export class BrowserFormService {
   private async submitByButtonClick(
     sessionId: string,
     submitDto: SubmitFormDto,
-  ): Promise<{ success: boolean; error?: string; result?: any }> {
+  ): Promise<FormSubmissionResult> {
     try {
       // Find submit button
       const pageState = await this.domService.getPageState(sessionId);
@@ -887,14 +920,15 @@ export class BrowserFormService {
         error: clickResult.error?.message,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      return { success: false, error: errorMsg };
     }
   }
 
   private async submitByEnterKey(
     sessionId: string,
-    submitDto: SubmitFormDto,
-  ): Promise<{ success: boolean; error?: string; result?: any }> {
+    _submitDto: SubmitFormDto,
+  ): Promise<FormSubmissionResult> {
     try {
       // Press Enter key
       const result = await this.browserUseService.keyPress({
@@ -903,18 +937,19 @@ export class BrowserFormService {
       });
 
       return {
-        success: result.success,
-        error: result.error,
+        success: Boolean(result?.success),
+        error: typeof result?.error === 'string' ? result.error : undefined,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      return { success: false, error: errorMsg };
     }
   }
 
   private async submitByFormSubmit(
     sessionId: string,
     submitDto: SubmitFormDto,
-  ): Promise<{ success: boolean; error?: string; result?: any }> {
+  ): Promise<FormSubmissionResult> {
     try {
       // Execute form submit via JavaScript
       const result = await this.browserUseService.executeScript({
@@ -929,12 +964,23 @@ export class BrowserFormService {
         `,
       });
 
+      // Type guard for result.result
+      const resultData = result.result as
+        | { success?: boolean; error?: string }
+        | null
+        | undefined;
+
       return {
-        success: result.success && result.result?.success,
-        error: result.error || result.result?.error,
+        success: result.success && Boolean(resultData?.success),
+        error:
+          result.error ??
+          (typeof resultData?.error === 'string'
+            ? resultData.error
+            : undefined),
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      return { success: false, error: errorMsg };
     }
   }
 
@@ -995,7 +1041,7 @@ export class BrowserFormService {
 
   private async validateFormState(
     sessionId: string,
-    submitDto: SubmitFormDto,
+    _submitDto: SubmitFormDto,
   ): Promise<FormValidationResponseDto> {
     // Basic validation - check if form exists
     const pageState = await this.domService.getPageState(sessionId);
@@ -1041,7 +1087,7 @@ export class BrowserFormService {
   /**
    * Cleanup on service destruction
    */
-  async onModuleDestroy(): Promise<void> {
+  onModuleDestroy(): void {
     this.formsCache.clear();
     this.logger.log('Browser form service cleanup completed');
   }

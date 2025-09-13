@@ -517,7 +517,7 @@ export const createAuthProviderMock = (): AuthProviderMock => {
       async (
         token: string,
         tokenType?: TokenType,
-      ): Promise<{ valid: boolean; payload?: any; error?: string }> => {
+      ): Promise<{ valid: boolean; payload?: JwtPayload; error?: string }> => {
         const payload = parseToken(token);
 
         if (!payload) {
@@ -1062,9 +1062,16 @@ export const createMockAuthProvider = (
     };
 
     Object.entries(originalMethods).forEach(([methodName, originalMethod]) => {
-      (mock as any)[methodName] = jest.fn(async (...args: unknown[]) => {
+      (
+        mock as Record<
+          string,
+          jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>
+        >
+      )[methodName] = jest.fn(async (...args: unknown[]) => {
         await new Promise((resolve) => setTimeout(resolve, simulateLatency));
-        return (originalMethod as any)(...args);
+        return (originalMethod as (...args: unknown[]) => Promise<unknown>)(
+          ...args,
+        );
       });
     });
   }
@@ -1074,8 +1081,18 @@ export const createMockAuthProvider = (
     const authMethods = ["authenticate", "validateToken", "refreshToken"];
 
     authMethods.forEach((methodName) => {
-      const originalMethod = (mock as any)[methodName];
-      (mock as any)[methodName] = jest.fn(async (...args: unknown[]) => {
+      const originalMethod = (
+        mock as Record<
+          string,
+          jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>
+        >
+      )[methodName];
+      (
+        mock as Record<
+          string,
+          jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>
+        >
+      )[methodName] = jest.fn(async (...args: unknown[]) => {
         if (Math.random() < failureRate) {
           throw new Error("Authentication service temporarily unavailable");
         }

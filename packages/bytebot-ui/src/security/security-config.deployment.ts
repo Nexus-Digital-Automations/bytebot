@@ -25,6 +25,10 @@ import {
 } from "@bytebot/shared/server";
 import { logError } from "@/utils/logger";
 
+// Rate limiting time constants
+const SECONDS_IN_MINUTE = 60;
+const MILLISECONDS_PER_SECOND = 1000;
+
 // Type definitions for better type safety
 interface NestJSApp {
   useGlobalPipes: (pipe: unknown) => void;
@@ -473,35 +477,35 @@ export class BytebotUISecurityDeployment {
       // Lenient limits for UI interactions
       uiInteraction: {
         max: 200,
-        windowMs: 60 * 1000, // 1 minute
+        windowMs: SECONDS_IN_MINUTE * MILLISECONDS_PER_SECOND, // 1 minute
         message: "UI interaction rate limit exceeded",
       },
 
       // High limits for data fetching
       dataFetching: {
         max: 1000,
-        windowMs: 60 * 1000, // 1 minute
+        windowMs: SECONDS_IN_MINUTE * MILLISECONDS_PER_SECOND, // 1 minute
         message: "Data fetching rate limit exceeded",
       },
 
       // Moderate limits for form submissions
       formSubmission: {
         max: 50,
-        windowMs: 60 * 1000, // 1 minute
+        windowMs: SECONDS_IN_MINUTE * MILLISECONDS_PER_SECOND, // 1 minute
         message: "Form submission rate limit exceeded",
       },
 
       // Strict limits for file uploads
       fileUpload: {
         max: 10,
-        windowMs: 60 * 1000, // 1 minute
+        windowMs: SECONDS_IN_MINUTE * MILLISECONDS_PER_SECOND, // 1 minute
         message: "File upload rate limit exceeded",
       },
 
       // High limits for WebSocket connections
       websocketConnection: {
         max: 50,
-        windowMs: 60 * 1000, // 1 minute
+        windowMs: SECONDS_IN_MINUTE * MILLISECONDS_PER_SECOND, // 1 minute
         message: "WebSocket connection rate limit exceeded",
       },
     };

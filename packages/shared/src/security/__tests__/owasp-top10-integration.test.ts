@@ -70,7 +70,15 @@ interface MockProcess {
   stdin: MockStream;
   on: jest.Mock;
   kill: jest.Mock;
-  [key: string]: any;
+  [key: string]: unknown;
+  stdio?: unknown[];
+  killed?: boolean;
+  connected?: boolean;
+  pid?: number;
+  exitCode?: number | null;
+  signalCode?: string | null;
+  spawnargs?: string[];
+  spawnfile?: string;
 }
 
 describe("OWASPTop10IntegrationService", () => {
@@ -108,7 +116,7 @@ describe("OWASPTop10IntegrationService", () => {
       spawnfile: "",
     };
 
-    mockSpawn.mockReturnValue(mockProcess as any);
+    mockSpawn.mockReturnValue(mockProcess as unknown as ChildProcess);
 
     // Mock filesystem operations
     mockFs.access.mockResolvedValue(undefined);
@@ -715,7 +723,7 @@ describe("OWASPTop10IntegrationService", () => {
         },
       };
 
-      mockSpawn.mockReturnValueOnce(longRunningProcess as any);
+      mockSpawn.mockReturnValueOnce(longRunningProcess as unknown as ChildProcess);
 
       // Start scan without awaiting
       const scanPromise = service.scanWebApplication("https://example.com");
@@ -1062,7 +1070,10 @@ describe("OWASPTop10IntegrationService", () => {
       );
 
       await expect(
-        service.generateReport(scanResult.scan_id, "xml" as any),
+        service.generateReport(
+          scanResult.scan_id,
+          "xml" as "json" | "html" | "csv",
+        ),
       ).rejects.toThrow("Report generation failed");
     });
 
@@ -1342,7 +1353,7 @@ describe("OWASPTop10IntegrationService", () => {
         },
       };
 
-      mockSpawn.mockReturnValueOnce(longRunningProcess as any);
+      mockSpawn.mockReturnValueOnce(longRunningProcess as unknown as ChildProcess);
 
       // Start scan without awaiting
       const scanPromise = service.scanWebApplication("https://example.com");
@@ -1370,15 +1381,19 @@ describe("OWASPTop10IntegrationService", () => {
       oldDate.setDate(oldDate.getDate() - 35); // 35 days old
 
       mockFs.readdir.mockResolvedValueOnce([
-        "scan_old.json" as any,
-        "scan_new.json" as any,
-      ]);
-      mockFs.stat.mockImplementation(((filePath: any) => {
+        "scan_old.json",
+        "scan_new.json",
+      ] as Parameters<typeof mockFs.readdir>[0] extends Promise<infer T>
+        ? T
+        : never);
+      mockFs.stat.mockImplementation((filePath: string) => {
         const isOld = String(filePath).includes("old");
         return Promise.resolve({
           mtime: isOld ? oldDate : new Date(),
-        } as any);
-      }) as any);
+        } as Parameters<typeof mockFs.stat>[0] extends Promise<infer T>
+          ? T
+          : never);
+      });
       mockFs.unlink.mockResolvedValue(undefined);
 
       const cleanedCount = await service.cleanupOldScans(30);
@@ -1422,8 +1437,8 @@ describe("OWASPTop10IntegrationService", () => {
                 }
               },
             ),
-        } as any;
-        return failedProcess;
+        } as MockProcess;
+        return failedProcess as ChildProcess;
       });
 
       const result = await service.scanWebApplication("https://example.com");

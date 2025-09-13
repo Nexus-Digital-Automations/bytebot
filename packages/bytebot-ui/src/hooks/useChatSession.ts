@@ -469,7 +469,9 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
             {
               taskId: initialTaskId,
               error:
-                task.status === "rejected" ? task.reason : "Task not found",
+                task.status === "rejected"
+                  ? String(task.reason)
+                  : "Task not found",
             },
             "useChatSession",
           );
@@ -484,7 +486,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
             "Failed to fetch messages",
             {
               taskId: initialTaskId,
-              error: taskMessages.reason,
+              error: String(taskMessages.reason),
             },
             "useChatSession",
           );
@@ -500,7 +502,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
             "Failed to fetch processed messages",
             {
               taskId: initialTaskId,
-              error: processedMessages.reason,
+              error: String(processedMessages.reason),
             },
             "useChatSession",
           );

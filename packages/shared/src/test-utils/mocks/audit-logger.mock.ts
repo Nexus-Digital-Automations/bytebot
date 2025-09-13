@@ -532,7 +532,7 @@ export const createAuditLoggerMock = (): AuditLoggerMock => {
       (
         operation: string,
         duration: number,
-        metadata?: Record<string, any>,
+        metadata?: Record<string, unknown>,
       ): void => {
         const level: LogLevel =
           duration > 5000 ? "warn" : duration > 10000 ? "error" : "info";
@@ -662,8 +662,13 @@ export const createMockAuditLogger = (
   // Disable logging if configured
   if (!enableLogging) {
     Object.keys(mock).forEach((key) => {
-      if (typeof (mock as any)[key] === "function") {
-        (mock as any)[key] = jest.fn().mockResolvedValue(undefined);
+      if (typeof (mock as Record<string, unknown>)[key] === "function") {
+        (
+          mock as Record<
+            string,
+            jest.MockedFunction<(...args: unknown[]) => unknown>
+          >
+        )[key] = jest.fn().mockResolvedValue(undefined);
       }
     });
     return mock;
@@ -691,9 +696,16 @@ export const createMockAuditLogger = (
     };
 
     Object.entries(originalMethods).forEach(([methodName, originalMethod]) => {
-      (mock as any)[methodName] = jest.fn(async (...args: any[]) => {
+      (
+        mock as Record<
+          string,
+          jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>
+        >
+      )[methodName] = jest.fn(async (...args: unknown[]) => {
         await new Promise((resolve) => setTimeout(resolve, simulateLatency));
-        return (originalMethod as any)(...args);
+        return (originalMethod as (...args: unknown[]) => Promise<unknown>)(
+          ...args,
+        );
       });
     });
   }
@@ -703,8 +715,18 @@ export const createMockAuditLogger = (
     const loggingMethods = ["log", "info", "warn", "error", "critical"];
 
     loggingMethods.forEach((methodName) => {
-      const originalMethod = (mock as any)[methodName];
-      (mock as any)[methodName] = jest.fn(async (...args: any[]) => {
+      const originalMethod = (
+        mock as Record<
+          string,
+          jest.MockedFunction<(...args: unknown[]) => unknown>
+        >
+      )[methodName];
+      (
+        mock as Record<
+          string,
+          jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>
+        >
+      )[methodName] = jest.fn(async (...args: unknown[]) => {
         if (Math.random() < failureRate) {
           throw new Error("Audit logger temporarily unavailable");
         }

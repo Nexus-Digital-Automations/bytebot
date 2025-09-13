@@ -19,7 +19,7 @@ export interface ValidationResult {
   isValid: boolean;
   errors: string[];
   warnings: string[];
-  sanitized?: any;
+  sanitized?: Record<string, unknown>;
 }
 
 export interface ValidationRule {
@@ -29,15 +29,21 @@ export interface ValidationRule {
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
-  customValidator?: (_value: any) => boolean;
+  customValidator?: (_value: unknown) => boolean;
 }
 
 export interface ValidationServiceMock {
   validate: jest.MockedFunction<
-    (_data: any, _rules: ValidationRule[]) => Promise<ValidationResult>
+    (
+      _data: Record<string, unknown>,
+      _rules: ValidationRule[],
+    ) => Promise<ValidationResult>
   >;
   validateSchema: jest.MockedFunction<
-    (_data: any, _schema: any) => Promise<ValidationResult>
+    (
+      _data: Record<string, unknown>,
+      _schema: Record<string, unknown>,
+    ) => Promise<ValidationResult>
   >;
   sanitizeInput: jest.MockedFunction<(_input: string) => string>;
   validateEmail: jest.MockedFunction<(_email: string) => boolean>;
@@ -61,10 +67,17 @@ export interface ValidationServiceMock {
   >;
   validateApiKey: jest.MockedFunction<(_apiKey: string) => boolean>;
   validateJson: jest.MockedFunction<
-    (_jsonString: string) => { isValid: boolean; parsed?: any; error?: string }
+    (_jsonString: string) => {
+      isValid: boolean;
+      parsed?: unknown;
+      error?: string;
+    }
   >;
   validateBusinessRules: jest.MockedFunction<
-    (_data: any, _context: string) => Promise<ValidationResult>
+    (
+      _data: Record<string, unknown>,
+      _context: string,
+    ) => Promise<ValidationResult>
   >;
 }
 
@@ -74,7 +87,10 @@ export interface ValidationServiceMock {
 export const createValidationServiceMock = (): ValidationServiceMock => {
   return {
     validate: jest.fn(
-      async (data: any, rules: ValidationRule[]): Promise<ValidationResult> => {
+      async (
+        data: Record<string, unknown>,
+        rules: ValidationRule[],
+      ): Promise<ValidationResult> => {
         const errors: string[] = [];
         const warnings: string[] = [];
         const sanitized = { ...data };
@@ -179,7 +195,10 @@ export const createValidationServiceMock = (): ValidationServiceMock => {
     ),
 
     validateSchema: jest.fn(
-      async (data: any, schema: any): Promise<ValidationResult> => {
+      async (
+        data: Record<string, unknown>,
+        schema: Record<string, unknown>,
+      ): Promise<ValidationResult> => {
         // Mock JSON schema validation
         const errors: string[] = [];
         const warnings: string[] = [];
@@ -198,8 +217,11 @@ export const createValidationServiceMock = (): ValidationServiceMock => {
             schema.properties,
           )) {
             const value = data[field];
-            if (value !== undefined && (fieldSchema as any).type) {
-              const expectedType = (fieldSchema as any).type;
+            if (
+              value !== undefined &&
+              (fieldSchema as { type?: string }).type
+            ) {
+              const expectedType = (fieldSchema as { type?: string }).type;
               const actualType = typeof value;
 
               if (expectedType === "array" && !Array.isArray(value)) {
@@ -522,7 +544,7 @@ export const createValidationServiceMock = (): ValidationServiceMock => {
     validateJson: jest.fn(
       (
         jsonString: string,
-      ): { isValid: boolean; parsed?: any; error?: string } => {
+      ): { isValid: boolean; parsed?: unknown; error?: string } => {
         try {
           const parsed = JSON.parse(jsonString);
           return { isValid: true, parsed };
@@ -536,7 +558,10 @@ export const createValidationServiceMock = (): ValidationServiceMock => {
     ),
 
     validateBusinessRules: jest.fn(
-      async (data: any, context: string): Promise<ValidationResult> => {
+      async (
+        data: Record<string, unknown>,
+        context: string,
+      ): Promise<ValidationResult> => {
         const errors: string[] = [];
         const warnings: string[] = [];
 
@@ -615,10 +640,12 @@ export const createMockValidationService = (
   // Add custom rules to validation
   if (customRules.length > 0) {
     const originalValidate = mock.validate;
-    mock.validate = jest.fn(async (data: any, rules: ValidationRule[]) => {
-      const allRules = [...rules, ...customRules];
-      return originalValidate(data, allRules);
-    });
+    mock.validate = jest.fn(
+      async (data: Record<string, unknown>, rules: ValidationRule[]) => {
+        const allRules = [...rules, ...customRules];
+        return originalValidate(data, allRules);
+      },
+    );
   }
 
   // Simulate random failures if configured
@@ -653,7 +680,7 @@ export const ValidationTestUtils = {
   /**
    * Create test data that should pass validation
    */
-  createValidTestData: (): any => {
+  createValidTestData: (): Record<string, unknown> => {
     return {
       email: "test@example.com",
       username: "testuser123",
@@ -667,7 +694,7 @@ export const ValidationTestUtils = {
   /**
    * Create test data that should fail validation
    */
-  createInvalidTestData: (): any => {
+  createInvalidTestData: (): Record<string, unknown> => {
     return {
       email: "invalid-email",
       username: "ab", // too short

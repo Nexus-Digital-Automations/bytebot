@@ -673,7 +673,7 @@ describe("TaskList Component", () => {
       );
 
       expect(screen.getAllByTestId(/task-item-/)).toHaveLength(
-        TEST_TASK_COUNT_SMALL,
+        _TEST_TASK_COUNT_SMALL,
       );
 
       const newTask = {
@@ -691,7 +691,7 @@ describe("TaskList Component", () => {
       rerender(<TaskList {...defaultProps} tasks={[...mockTasks, newTask]} />);
 
       expect(screen.getAllByTestId(/task-item-/)).toHaveLength(
-        TEST_TASK_COUNT_MEDIUM,
+        _TEST_TASK_COUNT_MEDIUM,
       );
       expect(screen.getByTestId("task-item-task-4")).toBeInTheDocument();
     });
@@ -702,7 +702,7 @@ describe("TaskList Component", () => {
       );
 
       expect(screen.getAllByTestId(/task-item-/)).toHaveLength(
-        TEST_TASK_COUNT_SMALL,
+        _TEST_TASK_COUNT_SMALL,
       );
 
       rerender(<TaskList {...defaultProps} tasks={mockTasks.slice(0, 2)} />);

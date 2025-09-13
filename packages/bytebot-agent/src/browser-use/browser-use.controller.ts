@@ -345,11 +345,11 @@ export class BrowserUseController {
     description: 'List of browser tasks retrieved successfully',
     type: BrowserTaskListResponseDto,
   })
-  async listBrowserTasks(
+  listBrowserTasks(
     @Query('status') status?: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-  ): Promise<BrowserTaskListResponseDto> {
+  ): BrowserTaskListResponseDto {
     this.logger.log(
       `Listing browser tasks - status: ${status}, page: ${page}, limit: ${limit}`,
     );
@@ -370,7 +370,7 @@ export class BrowserUseController {
     }
 
     // Get task list directly from service (already returns BrowserTaskListResponseDto)
-    return await this.browserTaskService.listTasks({
+    return this.browserTaskService.listTasks({
       status: taskStatus,
       page,
       limit,
@@ -397,11 +397,9 @@ export class BrowserUseController {
     status: HttpStatus.NOT_FOUND,
     description: 'Browser task not found',
   })
-  async getBrowserTask(
-    @Param('taskId') taskId: string,
-  ): Promise<BrowserTaskResponseDto> {
+  getBrowserTask(@Param('taskId') taskId: string): BrowserTaskResponseDto {
     this.logger.log(`Getting browser task: ${taskId}`);
-    return await this.browserTaskService.getTask(taskId);
+    return this.browserTaskService.getTask(taskId);
   }
 
   @Put('tasks/:taskId')
@@ -425,12 +423,12 @@ export class BrowserUseController {
     status: HttpStatus.NOT_FOUND,
     description: 'Browser task not found',
   })
-  async updateBrowserTask(
+  updateBrowserTask(
     @Param('taskId') taskId: string,
     @Body() updateTaskDto: UpdateBrowserTaskDto,
-  ): Promise<BrowserTaskResponseDto> {
+  ): BrowserTaskResponseDto {
     this.logger.log(`Updating browser task: ${taskId}`);
-    return await this.browserTaskService.updateTask(taskId, updateTaskDto);
+    return this.browserTaskService.updateTask(taskId, updateTaskDto);
   }
 
   @Post('tasks/:taskId/start')
@@ -458,11 +456,9 @@ export class BrowserUseController {
     status: HttpStatus.CONFLICT,
     description: 'Task already running',
   })
-  async startBrowserTask(
-    @Param('taskId') taskId: string,
-  ): Promise<BrowserTaskResponseDto> {
+  startBrowserTask(@Param('taskId') taskId: string): BrowserTaskResponseDto {
     this.logger.log(`Starting browser task: ${taskId}`);
-    return await this.browserTaskService.startTask(taskId);
+    return this.browserTaskService.startTask(taskId);
   }
 
   @Post('tasks/:taskId/stop')
@@ -485,11 +481,9 @@ export class BrowserUseController {
     status: HttpStatus.NOT_FOUND,
     description: 'Browser task not found',
   })
-  async stopBrowserTask(
-    @Param('taskId') taskId: string,
-  ): Promise<BrowserTaskResponseDto> {
+  stopBrowserTask(@Param('taskId') taskId: string): BrowserTaskResponseDto {
     this.logger.log(`Stopping browser task: ${taskId}`);
-    return await this.browserTaskService.stopTask(taskId);
+    return this.browserTaskService.stopTask(taskId);
   }
 
   @Delete('tasks/:taskId')
@@ -511,9 +505,9 @@ export class BrowserUseController {
     status: HttpStatus.NOT_FOUND,
     description: 'Browser task not found',
   })
-  async deleteBrowserTask(@Param('taskId') taskId: string): Promise<void> {
+  deleteBrowserTask(@Param('taskId') taskId: string): void {
     this.logger.log(`Deleting browser task: ${taskId}`);
-    await this.browserTaskService.deleteTask(taskId);
+    return this.browserTaskService.deleteTask(taskId);
   }
 
   // ========================================

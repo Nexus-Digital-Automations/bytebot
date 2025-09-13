@@ -1,1 +1,1 @@
-import './src/security/ml-algorithms/naive-bayes-classifier';
+import "./src/security/ml-algorithms/naive-bayes-classifier";

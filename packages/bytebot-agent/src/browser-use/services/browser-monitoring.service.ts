@@ -13,11 +13,13 @@ import {
   TaskStatusResponseDto,
 } from '../dto/browser-monitoring.dto';
 import { BrowserSessionStatus } from '../dto/browser-session.dto';
+import { BrowserTaskStatusDto } from '../dto/browser-task.dto';
 import { BrowserUseService } from '../browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
 import { BrowserTaskService } from './browser-task.service';
 import * as os from 'os';
 import * as fs from 'fs/promises';
+import * as dns from 'dns';
 
 export interface SystemMetrics {
   cpu: {
@@ -90,17 +92,99 @@ export interface PerformanceMetrics {
   };
 }
 
+export interface BrowserSession {
+  id: string;
+  status: string;
+  currentUrl?: string;
+  pageTitle?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface TaskError {
+  code?: string;
+  message?: string;
+  stack?: string;
+  timestamp?: Date;
+}
+
+export interface TaskProgress {
+  currentStep?: number;
+  totalSteps?: number;
+  percentComplete?: number;
+  estimatedRemainingMs?: number;
+}
+
+export interface TaskTiming {
+  startedAt?: Date;
+  lastActivityAt?: Date;
+  completedAt?: Date;
+  totalDurationMs?: number;
+}
+
+export interface TaskMetrics {
+  memoryUsageMB?: number;
+  cpuUsagePercent?: number;
+  networkRequests?: number;
+  screenshotsTaken?: number;
+  pagesVisited?: number;
+}
+
+export interface TaskExecutionStep {
+  stepNumber: number;
+  action: string;
+  status: string;
+  startedAt?: Date;
+  completedAt?: Date;
+  result?: unknown;
+  error?: TaskError;
+}
+
+export interface TaskStatus {
+  success: boolean;
+  found: boolean;
+  sessionId?: string;
+  status: string;
+  progress?: TaskProgress;
+  timing?: TaskTiming;
+  executionTime?: number;
+  metrics?: TaskMetrics;
+  executionSteps?: TaskExecutionStep[];
+  error?: TaskError;
+}
+
+export interface TaskServiceMetrics {
+  totalTasks: number;
+  activeTasks: number;
+  completedTasks: number;
+  failedTasks: number;
+  averageExecutionTimeMs: number;
+  successRate: number;
+}
+
+export interface HealthCheckResult {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  message?: string;
+}
+
+export interface MonitoringError extends Error {
+  code?: string;
+  timestamp?: Date;
+}
+
+export interface IssueRecord {
+  timestamp: Date;
+  level: 'error' | 'warning' | 'info';
+  message: string;
+  source: string;
+  details?: unknown;
+}
+
 @Injectable()
 export class BrowserMonitoringService {
   private readonly logger = new Logger(BrowserMonitoringService.name);
   private readonly startTime = Date.now();
-  private readonly recentIssues: Array<{
-    timestamp: Date;
-    level: 'error' | 'warning' | 'info';
-    message: string;
-    source: string;
-    details?: any;
-  }> = [];
+  private readonly recentIssues: IssueRecord[] = [];
   private readonly maxIssuesHistory = 100;
   private monitoringInterval: NodeJS.Timeout | null = null;
   private systemMetricsCache: {
@@ -167,15 +251,19 @@ export class BrowserMonitoringService {
         timestamp,
       };
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
       this.logger.error(
-        `Failed to get service health: ${error.message}`,
-        error.stack,
+        `Failed to get service health: ${errorMessage}`,
+        errorStack,
       );
 
       return {
         serviceHealth: {
           status: 'unhealthy',
-          message: `Health check failed: ${error.message}`,
+          message: `Health check failed: ${errorMessage}`,
           uptime: Math.floor((Date.now() - this.startTime) / 1000),
           version: this.getServiceVersion(),
         },
@@ -206,9 +294,9 @@ export class BrowserMonitoringService {
           {
             timestamp,
             level: 'error',
-            message: `Health check failed: ${error.message}`,
+            message: `Health check failed: ${errorMessage}`,
             source: 'BrowserMonitoringService',
-            details: { error: error.message },
+            details: { error: errorMessage },
           },
         ],
         timestamp,
@@ -226,7 +314,7 @@ export class BrowserMonitoringService {
       this.logger.debug(`Getting detailed status for task: ${taskId}`);
 
       // Get task status from task service
-      const taskStatus = await this.taskService.getTaskStatus(taskId);
+      const taskStatus = this.taskService.getTaskStatus(taskId);
 
       if (!taskStatus.success || !taskStatus.found) {
         return {
@@ -261,7 +349,15 @@ export class BrowserMonitoringService {
       }
 
       // Get current browser state if task has a session
-      let browserState;
+      let browserState:
+        | {
+            sessionId: string;
+            currentUrl: string;
+            pageTitle: string;
+            loadingStatus: string;
+            tabsOpen: number;
+          }
+        | undefined;
       if (taskStatus.sessionId) {
         try {
           const session = await this.sessionService.getSession(
@@ -279,7 +375,7 @@ export class BrowserMonitoringService {
               tabsOpen: 1, // Simplified
             };
           }
-        } catch (error) {
+        } catch {
           this.logger.warn(
             `Could not get browser state for session: ${taskStatus.sessionId}`,
           );
@@ -347,9 +443,13 @@ export class BrowserMonitoringService {
         timestamp,
       };
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
       this.logger.error(
-        `Failed to get task status: ${error.message}`,
-        error.stack,
+        `Failed to get task status: ${errorMessage}`,
+        errorStack,
       );
 
       return {
@@ -375,7 +475,7 @@ export class BrowserMonitoringService {
         recentLogs: [],
         error: {
           code: 'STATUS_CHECK_FAILED',
-          message: error.message,
+          message: errorMessage,
           timestamp,
           retryCount: 0,
         },
@@ -391,7 +491,7 @@ export class BrowserMonitoringService {
     level: 'error' | 'warning' | 'info',
     message: string,
     source: string,
-    details?: any,
+    details?: unknown,
   ): void {
     const issue = {
       timestamp: new Date(),
@@ -428,7 +528,7 @@ export class BrowserMonitoringService {
   async getPerformanceMetrics(): Promise<PerformanceMetrics> {
     try {
       // Get task metrics
-      const taskMetrics = await this.taskService.getTaskMetrics();
+      const taskMetrics = this.taskService.getTaskMetrics();
 
       // Get session metrics
       const sessionMetrics = await this.getSessionMetrics();
@@ -450,7 +550,9 @@ export class BrowserMonitoringService {
         sessionMetrics,
       };
     } catch (error) {
-      this.logger.error(`Failed to get performance metrics: ${error.message}`);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to get performance metrics: ${errorMessage}`);
       throw error;
     }
   }
@@ -498,7 +600,9 @@ export class BrowserMonitoringService {
 
       return metrics;
     } catch (error) {
-      this.logger.error(`Failed to get system metrics: ${error.message}`);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to get system metrics: ${errorMessage}`);
       throw error;
     }
   }
@@ -523,7 +627,7 @@ export class BrowserMonitoringService {
     });
   }
 
-  private async getDiskUsage(): Promise<{
+  private getDiskUsage(): Promise<{
     totalGB: number;
     usedGB: number;
     availableGB: number;
@@ -532,19 +636,19 @@ export class BrowserMonitoringService {
     try {
       // This is a simplified implementation
       // In production, you would use a library like 'node-disk-usage'
-      return {
+      return Promise.resolve({
         totalGB: 100,
         usedGB: 60,
         availableGB: 40,
         usagePercent: 60,
-      };
-    } catch (error) {
-      return {
+      });
+    } catch {
+      return Promise.resolve({
         totalGB: 0,
         usedGB: 0,
         availableGB: 0,
         usagePercent: 0,
-      };
+      });
     }
   }
 
@@ -553,14 +657,14 @@ export class BrowserMonitoringService {
     const startTime = Date.now();
     try {
       // Attempt to resolve localhost
-      await new Promise((resolve, reject) => {
-        require('dns').resolve('localhost', (err: any) => {
-          if (err) reject(err);
-          else resolve(null);
+      await new Promise<void>((resolve, reject) => {
+        dns.resolve('localhost', (err) => {
+          if (err) reject(new Error('DNS resolution failed'));
+          else resolve();
         });
       });
       return Date.now() - startTime;
-    } catch (error) {
+    } catch {
       return 999; // High latency indicates network issues
     }
   }
@@ -575,24 +679,26 @@ export class BrowserMonitoringService {
 
     try {
       // Check browser-use framework
-      const browserTest = await this.browserUseService.healthCheck?.();
+      const browserTest = this.browserUseService.healthCheck
+        ? this.browserUseService.healthCheck()
+        : null;
       health.browserUseFramework =
         browserTest?.status === 'healthy' ? 'online' : 'error';
-    } catch (error) {
+    } catch {
       health.browserUseFramework = 'error';
     }
 
     try {
       // Check Python runtime
       health.pythonRuntime = 'online'; // Simplified check
-    } catch (error) {
+    } catch {
       health.pythonRuntime = 'error';
     }
 
     try {
       // Check Chrome driver
       health.chromeDriver = 'online'; // Simplified check
-    } catch (error) {
+    } catch {
       health.chromeDriver = 'error';
     }
 
@@ -600,7 +706,7 @@ export class BrowserMonitoringService {
       // Check local storage
       await fs.access(process.cwd());
       health.localStorage = 'online';
-    } catch (error) {
+    } catch {
       health.localStorage = 'error';
     }
 
@@ -650,7 +756,7 @@ export class BrowserMonitoringService {
         memoryUsageMB: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
         cpuUsagePercent: await this.getCpuUsage(),
       };
-    } catch (error) {
+    } catch {
       return {
         totalProcesses: 0,
         activeProcesses: 0,
@@ -713,15 +819,18 @@ export class BrowserMonitoringService {
   > {
     try {
       const sessions = await this.sessionService.listSessions();
-      const activeSessions = sessions.filter((s) => s.status === 'active');
+      const activeSessions =
+        sessions?.filter((s: BrowserSession) => s.status === 'active') ?? [];
 
       return {
-        totalSessions: sessions.length,
-        activeSessions: activeSessions.length,
+        totalSessions: sessions?.length ?? 0,
+        activeSessions: Array.isArray(activeSessions)
+          ? activeSessions.length
+          : 0,
         averageSessionDurationMs: 300000, // Would be calculated from actual session data
         sessionsCreatedPerHour: 5, // Would be calculated from session creation timestamps
       };
-    } catch (error) {
+    } catch {
       return {
         totalSessions: 0,
         activeSessions: 0,
@@ -736,13 +845,14 @@ export class BrowserMonitoringService {
     return 2.5;
   }
 
-  private getCurrentAction(taskStatus: any): string {
+  private getCurrentAction(taskStatus: BrowserTaskStatusDto): string {
     if (
       taskStatus.status === 'running' &&
-      taskStatus.executionSteps?.length > 0
+      taskStatus.executionSteps &&
+      taskStatus.executionSteps.length > 0
     ) {
       const currentStep = taskStatus.executionSteps.find(
-        (step: any) => step.status === 'running',
+        (step) => step.status === 'running',
       );
       return currentStep?.action || 'Processing...';
     }
@@ -765,7 +875,7 @@ export class BrowserMonitoringService {
 
   private generateTaskLogs(
     taskId: string,
-    taskStatus: any,
+    taskStatus: BrowserTaskStatusDto,
   ): Array<{
     timestamp: Date;
     level: 'debug' | 'info' | 'warning' | 'error';
@@ -773,7 +883,12 @@ export class BrowserMonitoringService {
     source: string;
   }> {
     // Simplified log generation - in production, would retrieve from logging system
-    const logs = [];
+    const logs: Array<{
+      timestamp: Date;
+      level: 'debug' | 'info' | 'warning' | 'error';
+      message: string;
+      source: string;
+    }> = [];
     const now = new Date();
 
     logs.push({
@@ -796,7 +911,7 @@ export class BrowserMonitoringService {
       logs.push({
         timestamp: taskStatus.error.timestamp || now,
         level: 'error' as const,
-        message: taskStatus.error.message,
+        message: taskStatus.error.message || 'Unknown error',
         source: 'BrowserTaskService',
       });
     }
@@ -806,19 +921,19 @@ export class BrowserMonitoringService {
 
   private startSystemMetricsCollection(): void {
     // Start periodic metrics collection
-    this.monitoringInterval = setInterval(async () => {
-      try {
-        await this.getSystemMetrics();
-      } catch (error) {
-        this.logger.warn(`Failed to collect system metrics: ${error.message}`);
-      }
+    this.monitoringInterval = setInterval(() => {
+      this.getSystemMetrics().catch((error) => {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        this.logger.warn(`Failed to collect system metrics: ${errorMessage}`);
+      });
     }, this.metricsRefreshIntervalMs);
   }
 
   /**
    * Cleanup on service destruction
    */
-  async onModuleDestroy(): Promise<void> {
+  onModuleDestroy(): void {
     if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval);
     }

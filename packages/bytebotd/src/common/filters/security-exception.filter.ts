@@ -118,7 +118,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     response.setHeader('X-Frame-Options', 'DENY');
 
     // Send secure response
-    response.response.status(secureResponse.statusCode).json(secureResponse);
+    response.status(secureResponse.statusCode).json(secureResponse);
   }
 
   /**
@@ -250,7 +250,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
    * Get secure error name based on status code
    */
   private getSecureErrorName(statusCode: number): string {
-    const errorNames = {
+    const errorNames: Record<number, string> = {
       400: 'Bad Request',
       401: 'Unauthorized',
       403: 'Forbidden',

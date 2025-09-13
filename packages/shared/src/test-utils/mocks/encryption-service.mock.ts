@@ -15,7 +15,7 @@
 import { MockConfig } from "./mock-config";
 
 // Jest-agnostic mock function type
-type MockFunction<T extends (...args: any[]) => any> = T & {
+type MockFunction<T extends (...args: unknown[]) => unknown> = T & {
   mockImplementation?: (impl: T) => void;
   mockReturnValue?: (value: ReturnType<T>) => void;
   mockResolvedValue?: (value: Awaited<ReturnType<T>>) => void;
@@ -28,7 +28,7 @@ type MockFunction<T extends (...args: any[]) => any> = T & {
 const isJestAvailable = typeof jest !== "undefined";
 
 // Create mock function that works with or without Jest
-const createMockFn = <T extends (...args: any[]) => any>(
+const createMockFn = <T extends (...args: unknown[]) => unknown>(
   impl: T,
 ): MockFunction<T> => {
   if (isJestAvailable) {

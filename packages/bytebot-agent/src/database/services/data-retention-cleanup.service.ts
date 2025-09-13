@@ -539,40 +539,39 @@ export class DataRetentionCleanupService {
     };
 
     // Find sessions to archive
-    const sessionsToArchive: BrowserSessionWithIncludes[] =
-      await this.prismaService.browserSession.findMany({
-        where: {
-          AND: [
-            { updatedAt: { lt: archiveDate } },
-            { updatedAt: { gte: deleteDate } },
-            ...(policy.policyConditions?.statusFilter
-              ? [
-                  {
-                    status: {
-                      in: policy.policyConditions.statusFilter,
-                    },
+    const sessionsToArchive = await this.prismaService.browserSession.findMany({
+      where: {
+        AND: [
+          { updatedAt: { lt: archiveDate } },
+          { updatedAt: { gte: deleteDate } },
+          ...(policy.policyConditions?.statusFilter
+            ? [
+                {
+                  status: {
+                    in: policy.policyConditions.statusFilter as any,
                   },
-                ]
-              : []),
-          ],
+                },
+              ]
+            : []),
+        ],
+      },
+      include: {
+        tasks: {
+          select: { id: true },
         },
-        include: {
-          tasks: {
-            select: { id: true },
-          },
-          screenshots: {
-            select: { id: true, fileSize: true },
-          },
+        screenshots: {
+          select: { id: true, fileSize: true },
         },
-      });
+      },
+    });
 
     // Archive sessions if enabled
     if (policy.archivePeriodDays && policy.compressionEnabled) {
       for (const session of sessionsToArchive) {
         try {
-          await this.archiveBrowserSession(session);
+          await this.archiveBrowserSession(session as any);
           result.recordsArchived++;
-          result.bytesArchived += this.calculateSessionSize(session);
+          result.bytesArchived += this.calculateSessionSize(session as any);
         } catch (error) {
           result.errors.push({
             entityId: session.id,
@@ -583,46 +582,45 @@ export class DataRetentionCleanupService {
     }
 
     // Find sessions to delete
-    const sessionsToDelete: BrowserSessionForDeletion[] =
-      await this.prismaService.browserSession.findMany({
-        where: {
-          AND: [
-            { updatedAt: { lt: deleteDate } },
-            ...(policy.policyConditions?.statusFilter
-              ? [
-                  {
-                    status: {
-                      in: policy.policyConditions.statusFilter,
+    const sessionsToDelete = await this.prismaService.browserSession.findMany({
+      where: {
+        AND: [
+          { updatedAt: { lt: deleteDate } },
+          ...(policy.policyConditions?.statusFilter
+            ? [
+                {
+                  status: {
+                    in: policy.policyConditions.statusFilter as any,
+                  },
+                },
+              ]
+            : []),
+          ...(policy.policyConditions?.preserveProductionData
+            ? [
+                {
+                  OR: [
+                    {
+                      metadata: { path: ['isProductionData'], equals: false },
                     },
-                  },
-                ]
-              : []),
-            ...(policy.policyConditions?.preserveProductionData
-              ? [
-                  {
-                    OR: [
-                      {
-                        metadata: { path: ['isProductionData'], equals: false },
-                      },
-                      {
-                        metadata: { path: ['isProductionData'], equals: null },
-                      },
-                    ],
-                  },
-                ]
-              : []),
-          ],
+                    {
+                      metadata: { path: ['isProductionData'], equals: null },
+                    },
+                  ],
+                },
+              ]
+            : []),
+        ],
+      },
+      include: {
+        tasks: true,
+        screenshots: {
+          select: { id: true, fileSize: true, filePath: true },
         },
-        include: {
-          tasks: true,
-          screenshots: {
-            select: { id: true, fileSize: true, filePath: true },
-          },
-          domSnapshots: {
-            select: { id: true, fileSize: true },
-          },
+        domSnapshots: {
+          select: { id: true, fileSize: true },
         },
-      });
+      },
+    });
 
     // Delete sessions and cascade delete related data
     for (const session of sessionsToDelete) {
@@ -680,54 +678,53 @@ export class DataRetentionCleanupService {
     };
 
     // Find tasks to delete
-    const tasksToDelete: BrowserTaskForDeletion[] =
-      await this.prismaService.browserTask.findMany({
-        where: {
-          AND: [
-            { updatedAt: { lt: deleteDate } },
-            ...(policy.policyConditions?.statusFilter
-              ? [
-                  {
-                    status: {
-                      in: policy.policyConditions.statusFilter,
+    const tasksToDelete = await this.prismaService.browserTask.findMany({
+      where: {
+        AND: [
+          { updatedAt: { lt: deleteDate } },
+          ...(policy.policyConditions?.statusFilter
+            ? [
+                {
+                  status: {
+                    in: policy.policyConditions.statusFilter as any,
+                  },
+                },
+              ]
+            : []),
+          ...(policy.policyConditions?.preserveProductionData
+            ? [
+                {
+                  OR: [
+                    {
+                      customData: {
+                        path: ['isProductionData'],
+                        equals: false,
+                      },
                     },
-                  },
-                ]
-              : []),
-            ...(policy.policyConditions?.preserveProductionData
-              ? [
-                  {
-                    OR: [
-                      {
-                        customData: {
-                          path: ['isProductionData'],
-                          equals: false,
-                        },
+                    {
+                      customData: {
+                        path: ['isProductionData'],
+                        equals: null,
                       },
-                      {
-                        customData: {
-                          path: ['isProductionData'],
-                          equals: null,
-                        },
-                      },
-                    ],
-                  },
-                ]
-              : []),
-          ],
+                    },
+                  ],
+                },
+              ]
+            : []),
+        ],
+      },
+      include: {
+        screenshots: {
+          select: { id: true, fileSize: true, filePath: true },
         },
-        include: {
-          screenshots: {
-            select: { id: true, fileSize: true, filePath: true },
-          },
-          domSnapshots: {
-            select: { id: true, fileSize: true },
-          },
-          dataExtractions: {
-            select: { id: true },
-          },
+        domSnapshots: {
+          select: { id: true, fileSize: true },
         },
-      });
+        dataExtractions: {
+          select: { id: true },
+        },
+      },
+    });
 
     // Delete tasks and associated data
     for (const task of tasksToDelete) {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
 /**
  * Local Configuration Service - 100% Local-Only Architecture
  * Centralized configuration access and management with comprehensive local file-based secrets management
@@ -566,14 +565,14 @@ export class BytebotConfigService implements OnModuleInit {
    * @param defaultValue - Default value if key not found
    * @returns Configuration value
    */
-  get<T = any>(key: string, defaultValue?: T): T {
+  get<T = any>(key: keyof AppConfig, defaultValue?: T): T {
     const operationId = `config-get-${Date.now()}`;
     const startTime = Date.now();
 
     this.logger.debug(`[${operationId}] Retrieving configuration`, { key });
 
     try {
-      const value = this.nestConfigService.get(key as any, defaultValue);
+      const value = this.nestConfigService.get<T>(key, defaultValue);
       const responseTime = Date.now() - startTime;
 
       // Update performance metrics
@@ -929,14 +928,17 @@ export class BytebotConfigService implements OnModuleInit {
    *
    * @returns Features configuration object
    */
-  getFeaturesConfig(): Record<string, boolean> {
-    const features = this.nestConfigService.get('features' as any, {
-      authentication: false,
-      rateLimiting: false,
-      metricsCollection: false,
-      healthChecks: true,
-      circuitBreaker: false,
-    });
+  getFeaturesConfig(): AppConfig['features'] {
+    const features = this.nestConfigService.get<AppConfig['features']>(
+      'features',
+      {
+        authentication: false,
+        rateLimiting: false,
+        metricsCollection: false,
+        healthChecks: true,
+        circuitBreaker: false,
+      },
+    );
 
     return (
       features || {
@@ -955,7 +957,13 @@ export class BytebotConfigService implements OnModuleInit {
    * @returns App configuration object
    */
   getAppConfig(): AppConfig {
-    return this.nestConfigService.get('app' as any);
+    const appConfig = this.nestConfigService.get<AppConfig>('app');
+    if (!appConfig) {
+      throw new Error(
+        'Application configuration not found. Ensure configuration is properly loaded.',
+      );
+    }
+    return appConfig;
   }
 
   /**
@@ -964,7 +972,7 @@ export class BytebotConfigService implements OnModuleInit {
    * @returns API configuration object
    */
   getApiConfig(): AppConfig['api'] {
-    return this.nestConfigService.get('api' as any, {
+    return this.nestConfigService.get('api', {
       rateLimitWindow: 900000,
       rateLimitMaxRequests: 100,
       corsOrigins: '*',
@@ -979,7 +987,7 @@ export class BytebotConfigService implements OnModuleInit {
    * @returns Development configuration object
    */
   getDevelopmentConfig(): AppConfig['development'] {
-    return this.nestConfigService.get('development' as any, {
+    return this.nestConfigService.get('development', {
       enableSwagger: true,
       swaggerPath: '/api/docs',
       debugMode: false,

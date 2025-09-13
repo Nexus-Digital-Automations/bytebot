@@ -25,6 +25,28 @@ import * as path from "path";
 import * as crypto from "crypto";
 import { execSync } from "child_process";
 
+// Trivy scan result interfaces
+interface TrivyVulnerability {
+  VulnerabilityID?: string;
+  Severity?: string;
+  PkgName?: string;
+  InstalledVersion?: string;
+  FixedVersion?: string;
+  Description?: string;
+  Title?: string;
+  [key: string]: unknown;
+}
+
+interface TrivyScanResult {
+  Vulnerabilities?: TrivyVulnerability[];
+  [key: string]: unknown;
+}
+
+interface TrivyScanData {
+  Results?: TrivyScanResult[];
+  [key: string]: unknown;
+}
+
 interface OrchestratedTestConfig {
   target: {
     url: string;
@@ -670,9 +692,9 @@ export class PenetrationTestingOrchestrator {
 
           // Extract vulnerabilities from trivy results
           if (scanData.Results) {
-            scanData.Results.forEach((result: any) => {
+            scanData.Results.forEach((result: TrivyScanResult) => {
               if (result.Vulnerabilities) {
-                result.Vulnerabilities.forEach((vuln: any) => {
+                result.Vulnerabilities.forEach((vuln: TrivyVulnerability) => {
                   vulnerabilities.push({
                     cveId: vuln.VulnerabilityID || "UNKNOWN",
                     severity: vuln.Severity?.toLowerCase() || "medium",

@@ -88,7 +88,7 @@ describe('MessagesService', () => {
 
   const mockUserMessage: Message = {
     id: mockMessageId,
-    content: [mockTextContentBlock],
+    content: [mockTextContentBlock] as any,
     role: MessageRole.USER,
     taskId: mockTaskId,
     summaryId: null,
@@ -113,7 +113,7 @@ describe('MessagesService', () => {
 
   const mockToolResultMessage: Message = {
     id: 'message-tool-result-123',
-    content: [mockToolResultContentBlock],
+    content: [mockToolResultContentBlock] as any,
     role: MessageRole.USER,
     taskId: mockTaskId,
     summaryId: null,

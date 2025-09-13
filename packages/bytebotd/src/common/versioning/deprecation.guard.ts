@@ -86,6 +86,40 @@ interface DeprecationPolicy {
 }
 
 /**
+ * Version configuration with deprecation information
+ */
+interface VersionConfig {
+  deprecation?: {
+    since?: string | Date;
+    sunset?: string | Date;
+  };
+  isComputerUse?: boolean;
+  version?: string;
+}
+
+/**
+ * Desktop client information
+ */
+interface DesktopClientInfo {
+  version?: string;
+  userAgent?: string;
+  clientId?: string;
+  isComputerUse?: boolean;
+}
+
+/**
+ * Deprecation evaluation result
+ */
+interface DeprecationResult {
+  state: string;
+  inGracePeriod: boolean;
+  inDesktopGracePeriod: boolean;
+  isSunset: boolean;
+  isPastSunsetGrace: boolean;
+  daysUntilSunset: number | null;
+}
+
+/**
  * Deprecation usage statistics for BytebotD
  */
 interface DeprecationStats {
@@ -332,8 +366,8 @@ export class DeprecationGuard implements CanActivate {
 
       this.logger.error(`[${operationId}] BytebotD deprecation guard error`, {
         operationId,
-        error: __error.message,
-        stack: error.stack,
+        error: (_error as Error).message,
+        stack: (_error as Error).stack,
         processingTimeMs: processingTime,
       });
 
@@ -353,20 +387,20 @@ export class DeprecationGuard implements CanActivate {
     vncClient: string;
     isComputerUse: boolean;
   } {
-    const desktopClient = request.get('X-Desktop-Client') || 'unknown';
+    const desktopClient = request.get('X-Desktop-Client') ?? 'unknown';
     const computerUseClient = request.get('X-Computer-Use-Client');
-    const vncClient = request.get('X-VNC-Client') || 'unknown';
-    const _userAgent = request.get('User-Agent') || 'unknown';
+    const vncClient = request.get('X-VNC-Client') ?? 'unknown';
+    const _userAgent = request.get('User-Agent') ?? 'unknown';
 
     // Extract version from client header (e.g., "BytebotD-Desktop-1.0.0")
     const versionMatch = desktopClient.match(/-([0-9]+\.[0-9]+\.[0-9]+)/);
     const version = versionMatch ? versionMatch[1] : '0.0.0';
 
     const isComputerUse = !!(
-      computerUseClient ||
-      request.path.includes('computer-use') ||
-      request.path.includes('screenshot') ||
-      request.path.includes('click') ||
+      computerUseClient ??
+      request.path.includes('computer-use') ??
+      request.path.includes('screenshot') ??
+      request.path.includes('click') ??
       request.path.includes('type')
     );
 
@@ -388,10 +422,10 @@ export class DeprecationGuard implements CanActivate {
    * @returns Deprecation evaluation result
    */
   private evaluateDeprecation(
-    versionConfig: any,
+    versionConfig: VersionConfig,
     now: Date,
     isDesktopEndpoint: boolean,
-    desktopClientInfo: any,
+    desktopClientInfo: DesktopClientInfo,
     operationId: string,
   ) {
     const deprecation = versionConfig.deprecation;
@@ -437,8 +471,8 @@ export class DeprecationGuard implements CanActivate {
         : false;
 
     const inGracePeriod =
-      standardGracePeriod || desktopGracePeriod || computerUseGracePeriod;
-    const inDesktopGracePeriod = desktopGracePeriod || computerUseGracePeriod;
+      standardGracePeriod ?? desktopGracePeriod ?? computerUseGracePeriod;
+    const inDesktopGracePeriod = desktopGracePeriod ?? computerUseGracePeriod;
 
     const isSunset = sunsetDate ? now >= sunsetDate : false;
 
@@ -504,11 +538,11 @@ export class DeprecationGuard implements CanActivate {
    * @returns Whether request is allowed
    */
   private applyEnforcementPolicy(
-    deprecationResult: any,
+    deprecationResult: DeprecationResult,
     request: Request,
-    versionConfig: any,
+    versionConfig: VersionConfig,
     isDesktopEndpoint: boolean,
-    desktopClientInfo: any,
+    desktopClientInfo: DesktopClientInfo,
     operationId: string,
   ): boolean {
     // Check if legacy desktop clients should be allowed extended access
@@ -554,7 +588,7 @@ export class DeprecationGuard implements CanActivate {
       case DeprecationEnforcement.BLOCK_WITH_WARNING:
         // Block if past grace period or sunset, considering desktop extensions
         if (
-          deprecationResult.state === 'sunset_strict' ||
+          deprecationResult.state === 'sunset_strict' ??
           (!deprecationResult.inGracePeriod &&
             !deprecationResult.inDesktopGracePeriod &&
             ![
@@ -607,13 +641,13 @@ export class DeprecationGuard implements CanActivate {
    * @param desktopClientInfo - Desktop client information
    * @returns Boolean indicating if client is legacy
    */
-  private isLegacyDesktopClient(desktopClientInfo: any): boolean {
+  private isLegacyDesktopClient(desktopClientInfo: DesktopClientInfo): boolean {
     const minVersion =
       this.policy.desktopSpecific.minClientVersionForEnforcement;
     const clientVersion = desktopClientInfo.version;
 
     // Simple version comparison (assumes semantic versioning)
-    if (clientVersion === '0.0.0' || clientVersion === 'unknown') {
+    if (clientVersion === '0.0.0' ?? clientVersion === 'unknown') {
       return true; // Unknown versions are considered legacy
     }
 
@@ -621,8 +655,8 @@ export class DeprecationGuard implements CanActivate {
     const clientParts = clientVersion.split('.').map(Number);
 
     for (let i = 0; i < Math.max(minParts.length, clientParts.length); i++) {
-      const minPart = minParts[i] || 0;
-      const clientPart = clientParts[i] || 0;
+      const minPart = minParts[i] ?? 0;
+      const clientPart = clientParts[i] ?? 0;
 
       if (clientPart < minPart) {
         return true;
@@ -643,9 +677,9 @@ export class DeprecationGuard implements CanActivate {
    */
   private setDeprecationHeaders(
     response: Response,
-    versionConfig: any,
+    versionConfig: VersionConfig,
     bypassUsed: boolean,
-    desktopClientInfo: any,
+    desktopClientInfo: DesktopClientInfo,
   ): void {
     const deprecation = versionConfig.deprecation;
 
@@ -699,8 +733,8 @@ export class DeprecationGuard implements CanActivate {
    */
   private trackDeprecatedUsage(
     request: Request,
-    versionConfig: any,
-    desktopClientInfo: any,
+    versionConfig: VersionConfig,
+    desktopClientInfo: DesktopClientInfo,
     operationId: string,
   ): void {
     try {
@@ -716,7 +750,7 @@ export class DeprecationGuard implements CanActivate {
       }
 
       const endpoint = `${request.method} ${request.url}`;
-      const currentCount = this.stats.endpointUsage.get(endpoint) || 0;
+      const currentCount = this.stats.endpointUsage.get(endpoint) ?? 0;
       this.stats.endpointUsage.set(endpoint, currentCount + 1);
 
       this.logger.debug(
@@ -737,7 +771,7 @@ export class DeprecationGuard implements CanActivate {
         `[${operationId}] Failed to track BytebotD deprecated usage`,
         {
           operationId,
-          error: __error.message,
+          error: (_error as Error).message,
         },
       );
     }
@@ -753,9 +787,9 @@ export class DeprecationGuard implements CanActivate {
    */
   private async logDeprecationAccess(
     request: Request,
-    versionConfig: any,
-    deprecationResult: any,
-    desktopClientInfo: any,
+    versionConfig: VersionConfig,
+    deprecationResult: DeprecationResult,
+    desktopClientInfo: DesktopClientInfo,
     operationId: string,
   ): Promise<void> {
     try {
@@ -781,7 +815,7 @@ export class DeprecationGuard implements CanActivate {
     } catch (_error) {
       this.logger.error('Failed to log BytebotD deprecation access', {
         operationId,
-        _error: __error.message,
+        _error: (_error as Error).message,
       });
     }
   }
@@ -795,8 +829,8 @@ export class DeprecationGuard implements CanActivate {
    */
   private async logDeprecationBypass(
     request: Request,
-    versionConfig: any,
-    desktopClientInfo: any,
+    versionConfig: VersionConfig,
+    desktopClientInfo: DesktopClientInfo,
     operationId: string,
   ): Promise<void> {
     try {
@@ -814,7 +848,7 @@ export class DeprecationGuard implements CanActivate {
     } catch (_error) {
       this.logger.error('Failed to log BytebotD deprecation bypass', {
         operationId,
-        _error: __error.message,
+        _error: (_error as Error).message,
       });
     }
   }
@@ -827,9 +861,9 @@ export class DeprecationGuard implements CanActivate {
    * @param operationId - Operation ID
    */
   private throwDeprecationError(
-    versionConfig: any,
-    deprecationResult: any,
-    desktopClientInfo: any,
+    versionConfig: VersionConfig,
+    deprecationResult: DeprecationResult,
+    desktopClientInfo: DesktopClientInfo,
     operationId: string,
   ): void {
     const deprecation = versionConfig.deprecation;

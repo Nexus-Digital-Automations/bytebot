@@ -54,6 +54,52 @@ interface BrowserCommandResult {
   error?: string;
   data?: unknown;
   content?: string;
+  links?: BrowserLink[];
+  images?: BrowserImage[];
+}
+
+// Define interfaces for browser API responses
+interface BrowserExtractionItem {
+  data?: Record<string, unknown>;
+  tagName?: string;
+  textContent?: string;
+  attributes?: Record<string, string>;
+  confidence?: number;
+  selector?: string;
+  xpath?: string;
+}
+
+interface BrowserStructuredData {
+  jsonLD?: unknown[];
+  microdata?: unknown[];
+  openGraph?: Record<string, string>;
+  twitterCards?: Record<string, string>;
+}
+
+interface BrowserLink {
+  text: string;
+  href: string;
+  title?: string;
+  rel?: string;
+  target?: string;
+}
+
+interface BrowserImage {
+  src: string;
+  alt?: string;
+  title?: string;
+  width?: number;
+  height?: number;
+}
+
+interface TransformationRule {
+  trim?: boolean;
+  lowercase?: boolean;
+  uppercase?: boolean;
+  removeHtml?: boolean;
+  parseNumber?: boolean;
+  parseDate?: boolean;
+  replacePattern?: { pattern: string; replacement: string };
 }
 
 @Injectable()
@@ -62,6 +108,63 @@ export class BrowserDataService {
   private readonly aiProvider: string;
   private readonly maxRetries = 3;
   private readonly defaultTimeout = 30000;
+
+  // Type guard functions
+  private isBrowserExtractionItem(
+    value: unknown,
+  ): value is BrowserExtractionItem {
+    return typeof value === 'object' && value !== null;
+  }
+
+  private isBrowserStructuredData(
+    value: unknown,
+  ): value is BrowserStructuredData {
+    return typeof value === 'object' && value !== null;
+  }
+
+  private isTransformationRule(value: unknown): value is TransformationRule {
+    return typeof value === 'object' && value !== null;
+  }
+
+  private isStringRecord(value: unknown): value is Record<string, string> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+
+  private isUnknownArray(value: unknown): value is unknown[] {
+    return Array.isArray(value);
+  }
+
+  private safeGetString(obj: unknown, key: string, defaultValue = ''): string {
+    if (typeof obj === 'object' && obj !== null && key in obj) {
+      const value = (obj as Record<string, unknown>)[key];
+      return typeof value === 'string' ? value : defaultValue;
+    }
+    return defaultValue;
+  }
+
+  private safeGetNumber(obj: unknown, key: string, defaultValue = 0): number {
+    if (typeof obj === 'object' && obj !== null && key in obj) {
+      const value = (obj as Record<string, unknown>)[key];
+      return typeof value === 'number' ? value : defaultValue;
+    }
+    return defaultValue;
+  }
+
+  private safeGetRecord(obj: unknown, key: string): Record<string, string> {
+    if (typeof obj === 'object' && obj !== null && key in obj) {
+      const value = (obj as Record<string, unknown>)[key];
+      return this.isStringRecord(value) ? value : {};
+    }
+    return {};
+  }
+
+  private safeGetArray(obj: unknown, key: string): unknown[] {
+    if (typeof obj === 'object' && obj !== null && key in obj) {
+      const value = (obj as Record<string, unknown>)[key];
+      return this.isUnknownArray(value) ? value : [];
+    }
+    return [];
+  }
 
   constructor(
     private readonly browserUseService: BrowserUseService,
@@ -613,7 +716,7 @@ export class BrowserDataService {
     canonicalUrl?: string;
     ogTags?: Record<string, string>;
     twitterTags?: Record<string, string>;
-    structuredData?: any[];
+    structuredData?: unknown[];
   }> {
     try {
       const pageState = await this.browserDomService.getState(sessionId);
@@ -677,7 +780,24 @@ export class BrowserDataService {
         browserProcess.id,
         command,
       );
-      return result.links || [];
+
+      // Type-safe extraction of links with validation
+      if (typeof result === 'object' && result !== null && 'links' in result) {
+        const links = (result as { links?: unknown }).links;
+        if (Array.isArray(links)) {
+          return links.filter((link): link is BrowserLink => {
+            return (
+              typeof link === 'object' &&
+              link !== null &&
+              'text' in link &&
+              'href' in link &&
+              typeof (link as BrowserLink).text === 'string' &&
+              typeof (link as BrowserLink).href === 'string'
+            );
+          });
+        }
+      }
+      return [];
     } catch (error) {
       this.logger.warn('Failed to extract links:', error);
       return [];
@@ -712,7 +832,22 @@ export class BrowserDataService {
         browserProcess.id,
         command,
       );
-      return result.images || [];
+
+      // Type-safe extraction of images with validation
+      if (typeof result === 'object' && result !== null && 'images' in result) {
+        const images = (result as { images?: unknown }).images;
+        if (Array.isArray(images)) {
+          return images.filter((image): image is BrowserImage => {
+            return (
+              typeof image === 'object' &&
+              image !== null &&
+              'src' in image &&
+              typeof (image as BrowserImage).src === 'string'
+            );
+          });
+        }
+      }
+      return [];
     } catch (error) {
       this.logger.warn('Failed to extract images:', error);
       return [];
@@ -800,8 +935,10 @@ export class BrowserDataService {
     // Add data rows
     data.forEach((item) => {
       const row = headers.map((header) => {
-        const value = item.data[header] || '';
-        return `"${String(value).replace(/"/g, '""')}"`;
+        const value = (item.data as Record<string, unknown>)[header] || '';
+        const stringValue =
+          typeof value === 'string' ? value : JSON.stringify(value);
+        return `"${stringValue.replace(/"/g, '""')}"`;
       });
       csvRows.push(row.join(','));
     });
@@ -817,9 +954,13 @@ export class BrowserDataService {
 
     data.forEach((item, index) => {
       xml += `  <item index="${index}">\n`;
-      Object.entries(item.data).forEach(([key, value]) => {
-        xml += `    <${key}>${String(value)}</${key}>\n`;
-      });
+      Object.entries(item.data as Record<string, unknown>).forEach(
+        ([key, value]) => {
+          const stringValue =
+            typeof value === 'string' ? value : JSON.stringify(value);
+          xml += `    <${key}>${stringValue}</${key}>\n`;
+        },
+      );
       xml += '  </item>\n';
     });
 
@@ -833,8 +974,12 @@ export class BrowserDataService {
   private convertToPlainText(data: ExtractedDataItem[]): string {
     return data
       .map((item, index) => {
-        const itemText = Object.entries(item.data)
-          .map(([key, value]) => `${key}: ${value}`)
+        const itemText = Object.entries(item.data as Record<string, unknown>)
+          .map(([key, value]) => {
+            const stringValue =
+              typeof value === 'string' ? value : JSON.stringify(value);
+            return `${key}: ${stringValue}`;
+          })
           .join('\n  ');
         return `Item ${index + 1}:\n  ${itemText}`;
       })
@@ -845,87 +990,129 @@ export class BrowserDataService {
    * Normalize AI extraction results
    */
   private normalizeAIResults(
-    data: any,
+    data: unknown,
     _context: ExtractionContext,
   ): ExtractedDataItem[] {
     if (!data || !Array.isArray(data)) {
       return [];
     }
 
-    return data.map((item, index) => ({
-      data: item.data || item,
-      source: {
-        tagName: item.tagName || 'unknown',
-        textContent: item.textContent || '',
-        attributes: item.attributes || {},
-      },
-      confidence: item.confidence || 0.8,
-      index,
-    }));
+    return data.map((item: unknown, index) => {
+      if (!this.isBrowserExtractionItem(item)) {
+        return {
+          data:
+            typeof item === 'object' && item !== null
+              ? (item as Record<string, unknown>)
+              : {},
+          source: {
+            tagName: 'unknown',
+            textContent: '',
+            attributes: {},
+          },
+          confidence: 0.5,
+          index,
+        };
+      }
+
+      const normalizedItem = item;
+      return {
+        data: normalizedItem.data || normalizedItem,
+        source: {
+          tagName: this.safeGetString(normalizedItem, 'tagName', 'unknown'),
+          textContent: this.safeGetString(normalizedItem, 'textContent', ''),
+          attributes: this.safeGetRecord(normalizedItem, 'attributes'),
+        },
+        confidence: this.safeGetNumber(normalizedItem, 'confidence', 0.8),
+        index,
+      };
+    });
   }
 
   /**
    * Normalize selector-based extraction results
    */
   private normalizeSelectorResults(
-    data: any,
+    data: unknown,
     _context: ExtractionContext,
   ): ExtractedDataItem[] {
     if (!data || !Array.isArray(data)) {
       return [];
     }
 
-    return data.map((item, index) => ({
-      data: item.data || {},
-      source: {
-        selector: item.selector,
-        xpath: item.xpath,
-        tagName: item.tagName || 'unknown',
-        textContent: item.textContent || '',
-        attributes: item.attributes || {},
-      },
-      confidence: 0.9, // Selector-based extraction has high confidence
-      index,
-    }));
+    return data.map((item: unknown, index) => {
+      if (!this.isBrowserExtractionItem(item)) {
+        return {
+          data: {},
+          source: {
+            selector: '',
+            xpath: '',
+            tagName: 'unknown',
+            textContent: '',
+            attributes: {},
+          },
+          confidence: 0.5,
+          index,
+        };
+      }
+
+      const normalizedItem = item;
+      return {
+        data: normalizedItem.data || {},
+        source: {
+          selector: this.safeGetString(normalizedItem, 'selector', ''),
+          xpath: this.safeGetString(normalizedItem, 'xpath', ''),
+          tagName: this.safeGetString(normalizedItem, 'tagName', 'unknown'),
+          textContent: this.safeGetString(normalizedItem, 'textContent', ''),
+          attributes: this.safeGetRecord(normalizedItem, 'attributes'),
+        },
+        confidence: 0.9, // Selector-based extraction has high confidence
+        index,
+      };
+    });
   }
 
   /**
    * Normalize structured data results
    */
   private normalizeStructuredData(
-    data: any,
+    data: unknown,
     _context: ExtractionContext,
   ): ExtractedDataItem[] {
     const items: ExtractedDataItem[] = [];
+    const structuredData = data as Record<string, unknown>;
 
-    if (data.jsonLD && Array.isArray(data.jsonLD)) {
-      data.jsonLD.forEach((item: any, index: number) => {
-        items.push({
-          data: item,
-          source: {
-            tagName: 'script',
-            textContent: JSON.stringify(item),
-            attributes: { type: 'application/ld+json' },
-          },
-          confidence: 0.95, // Structured data has very high confidence
-          index,
-        });
-      });
+    if (structuredData?.jsonLD && Array.isArray(structuredData.jsonLD)) {
+      (structuredData.jsonLD as unknown[]).forEach(
+        (item: unknown, index: number) => {
+          items.push({
+            data: item as Record<string, unknown>,
+            source: {
+              tagName: 'script',
+              textContent: JSON.stringify(item),
+              attributes: { type: 'application/ld+json' },
+            },
+            confidence: 0.95, // Structured data has very high confidence
+            index,
+          });
+        },
+      );
     }
 
-    if (data.microdata && Array.isArray(data.microdata)) {
-      data.microdata.forEach((item: any, _index: number) => {
-        items.push({
-          data: item,
-          source: {
-            tagName: 'div',
-            textContent: JSON.stringify(item),
-            attributes: { itemscope: 'true' },
-          },
-          confidence: 0.9,
-          index: items.length,
-        });
-      });
+    if (structuredData?.microdata && Array.isArray(structuredData.microdata)) {
+      (structuredData.microdata as unknown[]).forEach(
+        (item: unknown, _index: number) => {
+          items.push({
+            data: item as Record<string, unknown>,
+            source: {
+              tagName: 'div',
+              textContent: JSON.stringify(item),
+              attributes: { itemscope: 'true' },
+            },
+            confidence: 0.9,
+            index: items.length,
+          });
+        },
+      );
     }
 
     return items;
@@ -934,30 +1121,49 @@ export class BrowserDataService {
   /**
    * Transform value based on transformation rules
    */
-  private transformValue(value: string, transform?: any): string {
-    if (!transform) return value;
+  private transformValue(value: string, transform?: unknown): string {
+    if (!transform || !this.isTransformationRule(transform)) {
+      return value;
+    }
 
+    const transformObj = transform;
     let result = value;
 
-    if (transform.trim) {
+    if (transformObj.trim === true) {
       result = result.trim();
     }
 
-    if (transform.lowercase) {
+    if (transformObj.lowercase === true) {
       result = result.toLowerCase();
     }
 
-    if (transform.uppercase) {
+    if (transformObj.uppercase === true) {
       result = result.toUpperCase();
     }
 
-    if (transform.removeHtml) {
+    if (transformObj.removeHtml === true) {
       result = result.replace(/<[^>]*>/g, '');
     }
 
-    if (transform.replacePattern) {
-      const regex = new RegExp(transform.replacePattern.pattern, 'g');
-      result = result.replace(regex, transform.replacePattern.replacement);
+    if (
+      transformObj.replacePattern &&
+      typeof transformObj.replacePattern === 'object' &&
+      transformObj.replacePattern !== null &&
+      'pattern' in transformObj.replacePattern &&
+      'replacement' in transformObj.replacePattern
+    ) {
+      const replacePattern = transformObj.replacePattern;
+      if (
+        typeof replacePattern.pattern === 'string' &&
+        typeof replacePattern.replacement === 'string'
+      ) {
+        try {
+          const regex = new RegExp(replacePattern.pattern, 'g');
+          result = result.replace(regex, replacePattern.replacement);
+        } catch (error) {
+          this.logger.warn('Invalid regex pattern in transformation:', error);
+        }
+      }
     }
 
     return result;

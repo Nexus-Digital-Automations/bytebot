@@ -10,13 +10,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { createHash } from 'crypto';
 import {
   BrowserResultsResponseDto,
   ResultStatus,
   TaskExecutionStep,
   ExtractedDataResult,
-  TaskPerformanceMetrics,
 } from '../dto/browser-results.dto';
 
 export interface BrowserAutomationResult {
@@ -39,8 +37,8 @@ export interface BrowserAutomationResult {
     url?: string;
     title?: string;
     screenshots?: string[];
-    extractedData?: any[];
-    formResults?: any;
+    extractedData?: Record<string, unknown>[];
+    formResults?: Record<string, unknown>;
     navigationHistory?: string[];
     errors?: string[];
     warnings?: string[];
@@ -75,7 +73,7 @@ export interface BrowserAutomationResult {
     userId?: string;
     agentId?: string;
     tags: string[];
-    customFields: Record<string, any>;
+    customFields: Record<string, unknown>;
     relatedResults: string[];
   };
 }
@@ -138,6 +136,20 @@ export interface ResultsAnalytics {
 @Injectable()
 export class BrowserResultsService {
   private readonly logger = new Logger(BrowserResultsService.name);
+
+  /**
+   * Helper method to safely extract error messages
+   */
+  private getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : 'Unknown error';
+  }
+
+  /**
+   * Helper method to safely extract error stack
+   */
+  private getErrorStack(error: unknown): string | undefined {
+    return error instanceof Error ? error.stack : undefined;
+  }
   private readonly resultsCache = new Map<string, BrowserAutomationResult>();
   private readonly resultsDirectory: string;
   private readonly maxCacheSize: number;
@@ -158,7 +170,7 @@ export class BrowserResultsService {
       90,
     );
 
-    this.initializeResultsDirectory();
+    void this.initializeResultsDirectory();
     this.startPeriodicCleanup();
   }
 
@@ -179,20 +191,20 @@ export class BrowserResultsService {
 
       // Store in cache
       this.resultsCache.set(resultId, fullResult);
-      await this.manageCacheSize();
+      this.manageCacheSize();
 
       // Persist to disk
       await this.persistResult(fullResult);
 
       // Update analytics cache if needed
-      await this.updateAnalyticsCache(fullResult);
+      this.updateAnalyticsCache(fullResult);
 
       this.logger.log(`Result stored successfully: ${resultId}`);
       return resultId;
     } catch (error) {
       this.logger.error(
-        `Failed to store result: ${error.message}`,
-        error.stack,
+        `Failed to store result: ${this.getErrorMessage(error)}`,
+        this.getErrorStack(error),
       );
       throw error;
     }
@@ -217,7 +229,9 @@ export class BrowserResultsService {
 
       return result;
     } catch (error) {
-      this.logger.error(`Failed to get result ${resultId}: ${error.message}`);
+      this.logger.error(
+        `Failed to get result ${resultId}: ${this.getErrorMessage(error)}`,
+      );
       return null;
     }
   }
@@ -340,8 +354,8 @@ export class BrowserResultsService {
       };
     } catch (error) {
       this.logger.error(
-        `Failed to search results: ${error.message}`,
-        error.stack,
+        `Failed to search results: ${this.getErrorMessage(error)}`,
+        this.getErrorStack(error),
       );
       throw error;
     }
@@ -392,22 +406,24 @@ export class BrowserResultsService {
 
       switch (options.format) {
         case 'json':
-          exportData = await this.exportToJson(results, options);
+          exportData = this.exportToJson(results, options);
           break;
         case 'csv':
-          exportData = await this.exportToCsv(results, options);
+          exportData = this.exportToCsv(results, options);
           break;
         case 'xlsx':
-          exportData = await this.exportToExcel(results, options);
+          exportData = this.exportToExcel(results, options);
           break;
         case 'pdf':
-          exportData = await this.exportToPdf(results, options);
+          exportData = this.exportToPdf(results, options);
           break;
         case 'html':
-          exportData = await this.exportToHtml(results, options);
+          exportData = this.exportToHtml(results, options);
           break;
         default:
-          throw new Error(`Unsupported export format: ${options.format}`);
+          throw new Error(
+            `Unsupported export format: ${options.format as string}`,
+          );
       }
 
       // Write export file
@@ -422,12 +438,12 @@ export class BrowserResultsService {
       };
     } catch (error) {
       this.logger.error(
-        `Failed to export results: ${error.message}`,
-        error.stack,
+        `Failed to export results: ${this.getErrorMessage(error)}`,
+        this.getErrorStack(error),
       );
       return {
         success: false,
-        error: error.message,
+        error: this.getErrorMessage(error),
       };
     }
   }
@@ -526,8 +542,8 @@ export class BrowserResultsService {
       };
     } catch (error) {
       this.logger.error(
-        `Failed to generate analytics: ${error.message}`,
-        error.stack,
+        `Failed to generate analytics: ${this.getErrorMessage(error)}`,
+        this.getErrorStack(error),
       );
       throw error;
     }
@@ -764,8 +780,8 @@ export class BrowserResultsService {
       };
     } catch (error) {
       this.logger.error(
-        `Failed to get task results for ${taskId}: ${error.message}`,
-        error.stack,
+        `Failed to get task results for ${taskId}: ${this.getErrorMessage(error)}`,
+        this.getErrorStack(error),
       );
 
       // Return error structure in DTO format
@@ -821,11 +837,11 @@ export class BrowserResultsService {
         taskConfiguration: {},
         error: {
           code: 'RETRIEVAL_ERROR',
-          message: error.message,
+          message: this.getErrorMessage(error),
           timestamp: new Date(),
           failedStep: undefined,
           recoverable: false,
-          details: error.stack,
+          details: this.getErrorStack(error),
         },
         archived: false,
         retrievedAt: new Date(),
@@ -873,12 +889,12 @@ export class BrowserResultsService {
       return result;
     } catch (error) {
       this.logger.error(
-        `Failed to export task results for ${taskId}: ${error.message}`,
-        error.stack,
+        `Failed to export task results for ${taskId}: ${this.getErrorMessage(error)}`,
+        this.getErrorStack(error),
       );
       return {
         success: false,
-        error: error.message,
+        error: this.getErrorMessage(error),
       };
     }
   }
@@ -909,7 +925,7 @@ export class BrowserResultsService {
         this.resultsCache.delete(resultId);
         deleted.push(resultId);
       } catch (error) {
-        errors.push({ resultId, error: error.message });
+        errors.push({ resultId, error: this.getErrorMessage(error) });
       }
     }
 
@@ -938,7 +954,7 @@ export class BrowserResultsService {
       );
     } catch (error) {
       this.logger.error(
-        `Failed to initialize results directory: ${error.message}`,
+        `Failed to initialize results directory: ${this.getErrorMessage(error)}`,
       );
     }
   }
@@ -946,7 +962,7 @@ export class BrowserResultsService {
   private async ensureDirectoryExists(dirPath: string): Promise<void> {
     try {
       await fs.access(dirPath);
-    } catch (error) {
+    } catch {
       await fs.mkdir(dirPath, { recursive: true });
     }
   }
@@ -965,8 +981,8 @@ export class BrowserResultsService {
       const fileName = `${resultId}.json`;
       const filePath = path.join(this.resultsDirectory, fileName);
       const data = await fs.readFile(filePath, 'utf8');
-      return JSON.parse(data);
-    } catch (error) {
+      return JSON.parse(data) as BrowserAutomationResult;
+    } catch {
       return null;
     }
   }
@@ -984,20 +1000,24 @@ export class BrowserResultsService {
             const filePath = path.join(this.resultsDirectory, file);
             const data = await fs.readFile(filePath, 'utf8');
             return JSON.parse(data) as BrowserAutomationResult;
-          } catch (error) {
+          } catch {
             return null;
           }
         }),
       );
 
-      return results.filter((result) => result !== null);
+      return results.filter(
+        (result): result is BrowserAutomationResult => result !== null,
+      );
     } catch (error) {
-      this.logger.error(`Failed to load all results: ${error.message}`);
+      this.logger.error(
+        `Failed to load all results: ${this.getErrorMessage(error)}`,
+      );
       return [];
     }
   }
 
-  private async manageCacheSize(): Promise<void> {
+  private manageCacheSize(): void {
     if (this.resultsCache.size <= this.maxCacheSize) {
       return;
     }
@@ -1019,9 +1039,7 @@ export class BrowserResultsService {
     this.logger.debug(`Removed ${toRemove.length} results from cache`);
   }
 
-  private async updateAnalyticsCache(
-    result: BrowserAutomationResult,
-  ): Promise<void> {
+  private updateAnalyticsCache(_result: BrowserAutomationResult): void {
     // In production, this would update cached analytics
     // For now, analytics are calculated on demand
   }
@@ -1131,10 +1149,10 @@ export class BrowserResultsService {
     };
   }
 
-  private async exportToJson(
+  private exportToJson(
     results: BrowserAutomationResult[],
     options: ResultsExportOptions,
-  ): Promise<string> {
+  ): string {
     const exportData = {
       exportInfo: {
         timestamp: new Date().toISOString(),
@@ -1143,16 +1161,16 @@ export class BrowserResultsService {
       },
       results: options.includeRawData
         ? results
-        : results.map(this.sanitizeResultForExport.bind(this)),
+        : results.map((result) => this.sanitizeResultForExport(result)),
     };
 
     return JSON.stringify(exportData, null, 2);
   }
 
-  private async exportToCsv(
+  private exportToCsv(
     results: BrowserAutomationResult[],
-    options: ResultsExportOptions,
-  ): Promise<string> {
+    _options: ResultsExportOptions,
+  ): string {
     const headers = [
       'Result ID',
       'Task ID',
@@ -1184,30 +1202,30 @@ export class BrowserResultsService {
     return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
   }
 
-  private async exportToExcel(
+  private exportToExcel(
     results: BrowserAutomationResult[],
     options: ResultsExportOptions,
-  ): Promise<Buffer> {
+  ): Buffer {
     // This would require a library like 'xlsx' or 'exceljs'
     // Simplified implementation returning CSV as buffer
-    const csvData = await this.exportToCsv(results, options);
+    const csvData = this.exportToCsv(results, options);
     return Buffer.from(csvData, 'utf8');
   }
 
-  private async exportToPdf(
+  private exportToPdf(
     results: BrowserAutomationResult[],
     options: ResultsExportOptions,
-  ): Promise<Buffer> {
+  ): Buffer {
     // This would require a library like 'puppeteer' or 'jspdf'
     // Simplified implementation
-    const htmlData = await this.exportToHtml(results, options);
+    const htmlData = this.exportToHtml(results, options);
     return Buffer.from(htmlData, 'utf8');
   }
 
-  private async exportToHtml(
+  private exportToHtml(
     results: BrowserAutomationResult[],
-    options: ResultsExportOptions,
-  ): Promise<string> {
+    _options: ResultsExportOptions,
+  ): string {
     let html = `
 <!DOCTYPE html>
 <html>
@@ -1265,7 +1283,9 @@ export class BrowserResultsService {
     return html;
   }
 
-  private sanitizeResultForExport(result: BrowserAutomationResult): any {
+  private sanitizeResultForExport(
+    result: BrowserAutomationResult,
+  ): Partial<BrowserAutomationResult> {
     // Remove sensitive or large data for export
     const sanitized = { ...result };
 
@@ -1290,7 +1310,7 @@ export class BrowserResultsService {
     const filePath = path.join(this.resultsDirectory, `${resultId}.json`);
     try {
       await fs.unlink(filePath);
-    } catch (error) {
+    } catch {
       // File might not exist, which is okay
     }
   }
@@ -1300,7 +1320,9 @@ export class BrowserResultsService {
     this.cleanupInterval = setInterval(
       () => {
         this.performPeriodicCleanup().catch((error) => {
-          this.logger.error(`Periodic cleanup failed: ${error.message}`);
+          this.logger.error(
+            `Periodic cleanup failed: ${this.getErrorMessage(error)}`,
+          );
         });
       },
       24 * 60 * 60 * 1000,
@@ -1327,14 +1349,16 @@ export class BrowserResultsService {
         );
       }
     } catch (error) {
-      this.logger.error(`Periodic cleanup error: ${error.message}`);
+      this.logger.error(
+        `Periodic cleanup error: ${this.getErrorMessage(error)}`,
+      );
     }
   }
 
   /**
    * Cleanup on service destruction
    */
-  async onModuleDestroy(): Promise<void> {
+  onModuleDestroy(): void {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
     }

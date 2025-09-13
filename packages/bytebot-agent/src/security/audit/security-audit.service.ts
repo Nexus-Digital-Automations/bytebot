@@ -158,7 +158,7 @@ export interface SecurityEvent {
     requestId?: string;
     transactionId?: string;
     operationDurationMs?: number;
-    additionalData: Record<string, any>;
+    additionalData: Record<string, unknown>;
   };
   security: {
     riskScore?: number;

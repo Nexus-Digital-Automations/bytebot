@@ -22,9 +22,16 @@ import request from 'supertest';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
+import type { Express } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
-import { UserRole } from '@bytebot/shared';
+import {
+  UserRole,
+  JwtPayload,
+  SecurityEvent,
+  createSecurityEvent,
+  SecurityEventType,
+} from '@bytebot/shared';
 
 // UserRole is now imported from @bytebot/shared
 
@@ -38,75 +45,75 @@ class MockSecureController {
   }
 
   // Protected endpoint (authentication required)
-  getProtectedData(user: any) {
+  getProtectedData(user: JwtPayload) {
     return {
       message: 'Protected data',
-      userId: user.id,
+      userId: user.sub,
       role: user.role,
       timestamp: Date.now(),
     };
   }
 
   // Role-restricted endpoint (admin only)
-  getAdminData(user: any) {
+  getAdminData(user: JwtPayload) {
     return {
       message: 'Admin data',
-      userId: user.id,
+      userId: user.sub,
       sensitiveInfo: 'classified',
       timestamp: Date.now(),
     };
   }
 
   // Permission-restricted endpoint
-  getSystemData(user: any) {
+  getSystemData(user: JwtPayload) {
     return {
       message: 'System data',
-      userId: user.id,
+      userId: user.sub,
       systemConfig: 'sensitive-config',
       timestamp: Date.now(),
     };
   }
 
   // Data modification endpoint
-  createResource(user: any, data: any) {
+  createResource(user: JwtPayload, data: Record<string, unknown>) {
     return {
       id: 'new-resource-id',
       ...data,
-      createdBy: user.id,
+      createdBy: user.sub,
       createdAt: Date.now(),
     };
   }
 
   // Sensitive operation endpoint
-  deleteResource(user: any, id: string) {
+  deleteResource(user: JwtPayload, id: string) {
     return {
       message: 'Resource deleted',
       deletedId: id,
-      deletedBy: user.id,
+      deletedBy: user.sub,
       deletedAt: Date.now(),
     };
   }
 
   // File upload endpoint (potential security risk)
-  uploadFile(user: any, file: any) {
+  uploadFile(user: JwtPayload, file: Express.Multer.File) {
     return {
       message: 'File uploaded',
       filename: file.originalname,
       size: file.size,
-      uploadedBy: user.id,
+      uploadedBy: user.sub,
       uploadedAt: Date.now(),
     };
   }
 
   // User search endpoint (potential injection risk)
-  searchUsers(user: any, query: string) {
+  searchUsers(user: JwtPayload, query: string) {
     return {
       query: query,
       results: [
         { id: '1', name: 'John Doe', email: 'john@test.com' },
         { id: '2', name: 'Jane Smith', email: 'jane@test.com' },
       ],
-      searchedBy: user.id,
+      searchedBy: user.sub,
       timestamp: Date.now(),
     };
   }
@@ -141,7 +148,7 @@ class MockSecurityJwtService {
     return Promise.resolve(user);
   }
 
-  sign(_payload: any) {
+  sign(_payload: Record<string, unknown>) {
     return 'generated-token';
   }
 }
@@ -157,12 +164,12 @@ describe('Controller Security Integration Tests', () => {
 
   const operationId = `controller_security_test_${Date.now()}`;
   const securityLogger = {
-    info: (message: string, meta?: any) =>
-      console.log(`[CONTROLLER-SECURITY] ${message}`, meta || ''),
-    warn: (message: string, meta?: any) =>
-      console.warn(`[CONTROLLER-WARNING] ${message}`, meta || ''),
-    error: (message: string, meta?: any) =>
-      console.error(`[CONTROLLER-ERROR] ${message}`, meta || ''),
+    info: (message: string, meta?: Record<string, unknown>) =>
+      console.log(`[CONTROLLER-SECURITY] ${message}`, meta ?? ''),
+    warn: (message: string, meta?: Record<string, unknown>) =>
+      console.warn(`[CONTROLLER-WARNING] ${message}`, meta ?? ''),
+    error: (message: string, meta?: Record<string, unknown>) =>
+      console.error(`[CONTROLLER-ERROR] ${message}`, meta ?? ''),
   };
 
   beforeAll(async () => {
@@ -181,7 +188,7 @@ describe('Controller Security Integration Tests', () => {
           provide: ConfigService,
           useValue: {
             get: (key: string) => {
-              const config = {
+              const config: Record<string, string | number> = {
                 JWT_SECRET: 'test-security-secret',
                 JWT_EXPIRATION: '15m',
                 CORS_ORIGIN: 'https://trusted-domain.com',
@@ -211,75 +218,99 @@ describe('Controller Security Integration Tests', () => {
     const _reflector = moduleRef.get<Reflector>(Reflector);
 
     // Configure security middleware
-    app.use((_req, res, next) => {
-      // Security headers middleware
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('X-Frame-Options', 'DENY');
-      res.setHeader('X-XSS-Protection', '1; mode=block');
-      res.setHeader(
-        'Strict-Transport-Security',
-        'max-age=31536000; includeSubDomains',
-      );
-      res.setHeader('Content-Security-Policy', "default-src 'self'");
-      res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-      next();
-    });
+    app.use(
+      (
+        _req: Express.Request,
+        res: Express.Response,
+        next: Express.NextFunction,
+      ) => {
+        // Security headers middleware
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'DENY');
+        res.setHeader('X-XSS-Protection', '1; mode=block');
+        res.setHeader(
+          'Strict-Transport-Security',
+          'max-age=31536000; includeSubDomains',
+        );
+        res.setHeader('Content-Security-Policy', "default-src 'self'");
+        res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        next();
+      },
+    );
 
     // Rate limiting middleware
-    const requestCounts = new Map();
-    app.use((req, res, next) => {
-      const ip = req.ip || req.connection.remoteAddress || '127.0.0.1';
-      const count = requestCounts.get(ip) || 0;
+    const requestCounts = new Map<string, number>();
+    app.use(
+      (
+        req: Express.Request,
+        res: Express.Response,
+        next: Express.NextFunction,
+      ) => {
+        const ip =
+          req.ip ?? (req as any).connection?.remoteAddress ?? '127.0.0.1';
+        const count = requestCounts.get(ip) ?? 0;
 
-      if (count > 100) {
-        return res.status(429).json({
-          message: 'Too Many Requests',
-          retryAfter: 900,
-          error: 'RATE_LIMIT_EXCEEDED',
-        });
-      }
+        if (count > 100) {
+          return res.status(429).json({
+            message: 'Too Many Requests',
+            retryAfter: 900,
+            error: 'RATE_LIMIT_EXCEEDED',
+          });
+        }
 
-      requestCounts.set(ip, count + 1);
+        requestCounts.set(ip, count + 1);
 
-      // Reset counts every 15 minutes
-      setTimeout(
-        () => {
-          requestCounts.delete(ip);
-        },
-        15 * 60 * 1000,
-      );
+        // Reset counts every 15 minutes
+        setTimeout(
+          () => {
+            requestCounts.delete(ip);
+          },
+          15 * 60 * 1000,
+        );
 
-      next();
-    });
+        next();
+      },
+    );
 
     // Authentication middleware
-    app.use('/api/*', (req, res, next) => {
-      const authHeader = req.headers.authorization;
+    app.use(
+      '/api/*',
+      (
+        req: Express.Request & { user?: JwtPayload },
+        res: Express.Response,
+        next: Express.NextFunction,
+      ) => {
+        const authHeader = req.headers.authorization;
 
-      if (!authHeader?.startsWith('Bearer ')) {
-        return res.status(401).json({
-          message: 'Authentication required',
-          error: 'UNAUTHORIZED',
-        });
-      }
+        if (!authHeader?.startsWith('Bearer ')) {
+          return res.status(401).json({
+            message: 'Authentication required',
+            error: 'UNAUTHORIZED',
+          });
+        }
 
-      const token = authHeader.substring(7);
+        const token = authHeader.substring(7);
 
-      try {
-        const user = jwtService.verifyAsync(token);
-        req.user = user;
-        next();
-      } catch (error) {
-        return res.status(401).json({
-          message: 'Invalid or expired token',
-          _error: 'TOKEN_INVALID',
-        });
-      }
-    });
+        try {
+          const user = jwtService.verifyAsync(token);
+          req.user = user;
+          next();
+        } catch (error) {
+          return res.status(401).json({
+            message: 'Invalid or expired token',
+            _error: 'TOKEN_INVALID',
+          });
+        }
+      },
+    );
 
     // Authorization middleware
     const checkRole = (requiredRole: UserRole) => {
-      return (req, res, next) => {
+      return (
+        req: Express.Request & { user?: JwtPayload },
+        res: Express.Response,
+        next: Express.NextFunction,
+      ) => {
         if (!req.user) {
           return res.status(403).json({
             message: 'Access forbidden - authentication required',
@@ -288,7 +319,7 @@ describe('Controller Security Integration Tests', () => {
         }
 
         const userRole = req.user.role;
-        const roleHierarchy = {
+        const roleHierarchy: Record<UserRole, UserRole[]> = {
           [UserRole._ADMIN]: [
             UserRole._ADMIN,
             UserRole._OPERATOR,
@@ -298,7 +329,7 @@ describe('Controller Security Integration Tests', () => {
           [UserRole._VIEWER]: [UserRole._VIEWER],
         };
 
-        const allowedRoles = roleHierarchy[userRole] || [];
+        const allowedRoles = roleHierarchy[userRole] ?? [];
 
         if (!allowedRoles.includes(requiredRole)) {
           return res.status(403).json({
@@ -312,53 +343,103 @@ describe('Controller Security Integration Tests', () => {
     };
 
     // Setup routes
-    app.getHttpAdapter().get('/public/data', (_req, res) => {
-      res.json(controller.getPublicData());
-    });
-
-    app.getHttpAdapter().get('/api/protected', (req, res) => {
-      res.json(controller.getProtectedData(req.user));
-    });
-
-    app.getHttpAdapter().get('/api/admin', (req, res) => {
-      const middleware = checkRole(UserRole._ADMIN);
-      middleware(req, res, () => {
-        res.json(controller.getAdminData(req.user));
+    app
+      .getHttpAdapter()
+      .get('/public/data', (_req: Express.Request, res: Express.Response) => {
+        res.json(controller.getPublicData());
       });
-    });
 
-    app.getHttpAdapter().get('/api/system', (req, res) => {
-      const middleware = checkRole(UserRole._ADMIN);
-      middleware(req, res, () => {
-        res.json(controller.getSystemData(req.user));
-      });
-    });
+    app
+      .getHttpAdapter()
+      .get(
+        '/api/protected',
+        (
+          req: Express.Request & { user: JwtPayload },
+          res: Express.Response,
+        ) => {
+          res.json(controller.getProtectedData(req.user));
+        },
+      );
 
-    app.getHttpAdapter().post('/api/resources', (req, res) => {
-      const middleware = checkRole(UserRole._OPERATOR);
-      middleware(req, res, () => {
-        res.json(controller.createResource(req.user, req.body));
-      });
-    });
+    app
+      .getHttpAdapter()
+      .get(
+        '/api/admin',
+        (
+          req: Express.Request & { user: JwtPayload },
+          res: Express.Response,
+        ) => {
+          const middleware = checkRole(UserRole._ADMIN);
+          middleware(req, res, () => {
+            res.json(controller.getAdminData(req.user));
+          });
+        },
+      );
 
-    app.getHttpAdapter().delete('/api/resources/:id', (req, res) => {
-      const middleware = checkRole(UserRole._ADMIN);
-      middleware(req, res, () => {
-        res.json(controller.deleteResource(req.user, req.params.id));
-      });
-    });
+    app
+      .getHttpAdapter()
+      .get(
+        '/api/system',
+        (
+          req: Express.Request & { user: JwtPayload },
+          res: Express.Response,
+        ) => {
+          const middleware = checkRole(UserRole._ADMIN);
+          middleware(req, res, () => {
+            res.json(controller.getSystemData(req.user));
+          });
+        },
+      );
 
-    app.getHttpAdapter().post('/api/upload', (req, res) => {
-      const middleware = checkRole(UserRole._OPERATOR);
-      middleware(req, res, () => {
-        // Simulate file upload
-        const mockFile = {
-          originalname: req.headers['x-filename'] || 'unknown',
-          size: parseInt(req.headers['content-length']) || 0,
-        };
-        res.json(controller.uploadFile(req.user, mockFile));
-      });
-    });
+    app
+      .getHttpAdapter()
+      .post(
+        '/api/resources',
+        (
+          req: Express.Request & { user: JwtPayload },
+          res: Express.Response,
+        ) => {
+          const middleware = checkRole(UserRole._OPERATOR);
+          middleware(req, res, () => {
+            res.json(controller.createResource(req.user, req.body));
+          });
+        },
+      );
+
+    app
+      .getHttpAdapter()
+      .delete(
+        '/api/resources/:id',
+        (
+          req: Express.Request & { user: JwtPayload },
+          res: Express.Response,
+        ) => {
+          const middleware = checkRole(UserRole._ADMIN);
+          middleware(req, res, () => {
+            res.json(controller.deleteResource(req.user, req.params.id));
+          });
+        },
+      );
+
+    app
+      .getHttpAdapter()
+      .post(
+        '/api/upload',
+        (
+          req: Express.Request & { user: JwtPayload },
+          res: Express.Response,
+        ) => {
+          const middleware = checkRole(UserRole._OPERATOR);
+          middleware(req, res, () => {
+            // Simulate file upload
+            const mockFile = {
+              originalname: req.headers['x-filename'] || 'unknown',
+              size: parseInt(req.headers['content-length']) || 0,
+            };
+            res.json(controller.uploadFile(req.user, mockFile));
+          });
+        },
+      );
 
     app.getHttpAdapter().get('/api/users/search', (req, res) => {
       const middleware = checkRole(UserRole._OPERATOR);

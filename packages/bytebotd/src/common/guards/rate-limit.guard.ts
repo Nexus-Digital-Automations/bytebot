@@ -43,7 +43,7 @@ interface RateLimitConfig {
 /**
  * Default rate limiting configurations by endpoint type
  */
-const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
+const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig | undefined> = {
   // Computer control operations - moderate limits
   computer_use: {
     limit: 120,
@@ -185,7 +185,7 @@ export class EnterpriseRateLimitGuard
     } catch (_error) {
       if (
         _error instanceof ThrottlerException ||
-        _error.status === HttpStatus.TOO_MANY_REQUESTS
+        (_error as any).status === HttpStatus.TOO_MANY_REQUESTS
       ) {
         const clientIdentifier = this.getClientIdentifier(request);
         const rateLimitConfig = this.getRateLimitConfig(context);
@@ -241,25 +241,53 @@ export class EnterpriseRateLimitGuard
     const path = request.path.toLowerCase();
 
     if (path.includes('computer-use')) {
-      return RATE_LIMIT_CONFIGS.computer_use;
+      return (
+        RATE_LIMIT_CONFIGS.computer_use ||
+        RATE_LIMIT_CONFIGS.general ||
+        this.getDefaultConfig()
+      );
     } else if (path.includes('auth') || path.includes('login')) {
-      return RATE_LIMIT_CONFIGS.auth;
+      return (
+        RATE_LIMIT_CONFIGS.auth ||
+        RATE_LIMIT_CONFIGS.general ||
+        this.getDefaultConfig()
+      );
     } else if (
       path.includes('screenshot') ||
       path.includes('vision') ||
       path.includes('ocr')
     ) {
-      return RATE_LIMIT_CONFIGS.vision;
+      return (
+        RATE_LIMIT_CONFIGS.vision ||
+        RATE_LIMIT_CONFIGS.general ||
+        this.getDefaultConfig()
+      );
     } else if (
       path.includes('file') ||
       path.includes('read') ||
       path.includes('write')
     ) {
-      return RATE_LIMIT_CONFIGS.file_operations;
+      return (
+        RATE_LIMIT_CONFIGS.file_operations ||
+        RATE_LIMIT_CONFIGS.general ||
+        this.getDefaultConfig()
+      );
     }
 
     // Default to general rate limiting
-    return RATE_LIMIT_CONFIGS.general;
+    return RATE_LIMIT_CONFIGS.general || this.getDefaultConfig();
+  }
+
+  /**
+   * Get default rate limit configuration as fallback
+   */
+  private getDefaultConfig(): RateLimitConfig {
+    return {
+      limit: 200,
+      windowSeconds: 60,
+      tier: 'lenient' as const,
+      message: 'API rate limit exceeded. Please reduce request frequency.',
+    };
   }
 
   /**

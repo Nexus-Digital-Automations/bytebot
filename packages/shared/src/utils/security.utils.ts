@@ -55,6 +55,16 @@ type DOMPurifyInstance = {
   isValidAttribute: (_tag: string, _attr: string, _value: string) => boolean;
 };
 
+// Type for DOMPurify constructor function
+type DOMPurifyConstructor = (
+  window: WindowLikeWithDOMPurify,
+) => DOMPurifyInstance;
+
+// Type for DOMPurify module that handles both CommonJS and ES module exports
+type DOMPurifyModule = DOMPurifyConstructor & {
+  default?: DOMPurifyConstructor;
+};
+
 let purify: DOMPurifyInstance | null = null;
 
 function getPurify(): DOMPurifyInstance {
@@ -73,8 +83,13 @@ function getPurify(): DOMPurifyInstance {
         NamedNodeMap: jsdomWindow.NamedNodeMap,
         document: jsdomWindow.document,
       } as WindowLikeWithDOMPurify;
-      const purifyConstructor = (DOMPurify as any).default || DOMPurify;
-      purify = (purifyConstructor as any)(window) as DOMPurifyInstance;
+      const purifyConstructor =
+        (DOMPurify as { default?: unknown } & unknown).default || DOMPurify;
+      purify = (
+        purifyConstructor as (
+          window: WindowLikeWithDOMPurify,
+        ) => DOMPurifyInstance
+      )(window);
     } catch (err) {
       throw new Error(
         `Failed to initialize DOMPurify: ${(err as Error).message}`,
@@ -4312,8 +4327,11 @@ export function sanitizeContentByContext(
     document: jsdomWindow.document,
   } as WindowLikeWithDOMPurify;
 
-  const purifyConstructor = (DOMPurify as any).default || DOMPurify;
-  const _purify = (purifyConstructor as any)(window) as DOMPurifyInstance;
+  const purifyConstructor =
+    (DOMPurify as { default?: unknown } & unknown).default || DOMPurify;
+  const _purify = (
+    purifyConstructor as (window: WindowLikeWithDOMPurify) => DOMPurifyInstance
+  )(window);
 
   // Apply context-specific sanitization
   if (rules.stripHtml || !rules.allowHtml) {

@@ -18,6 +18,11 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { useChatSession } from "../useChatSession";
 import { Message, Role, Task, TaskStatus } from "@/types";
 import { MessageContentType } from "@bytebot/shared";
+import {
+  LARGE_DATASET_SIZE,
+  MEMORY_LEAK_TEST_ITERATIONS,
+  PERFORMANCE_TEST_TIMEOUT_MS,
+} from "@/constants/ui";
 
 // Mock external dependencies
 jest.mock("@/utils/taskUtils", () => ({
@@ -30,7 +35,7 @@ jest.mock("@/utils/taskUtils", () => ({
   cancelTask: jest.fn(),
 }));
 
-jest.mock("./useWebSocket", () => ({
+jest.mock("../useWebSocket", () => ({
   useWebSocket: jest.fn(() => ({
     joinTask: jest.fn(),
     leaveTask: jest.fn(),
@@ -45,12 +50,12 @@ jest.mock("@/utils/logger", () => ({
 
 // Import mocked utilities
 import * as taskUtils from "@/utils/taskUtils";
-import { useWebSocket } from "./useWebSocket";
+import { useWebSocket } from "../useWebSocket";
 import * as logger from "@/utils/logger";
 
 // Type the mocked functions
 const mockTaskUtils = taskUtils as jest.Mocked<typeof taskUtils>;
-const mockUseWebSocket = useWebSocket;
+const mockUseWebSocket = jest.mocked(useWebSocket);
 const mockLogger = logger as jest.Mocked<typeof logger>;
 
 describe("useChatSession Hook", () => {
@@ -860,7 +865,7 @@ describe("useChatSession Hook", () => {
         });
       };
 
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < MEMORY_LEAK_TEST_ITERATIONS; i++) {
         sendRapidMessage(i);
       }
 
@@ -869,12 +874,15 @@ describe("useChatSession Hook", () => {
     });
 
     it("efficiently handles large message sets", async () => {
-      const largeMessageSet = Array.from({ length: 1000 }, (_, i) => ({
-        id: `msg-${i}`,
-        content: [{ type: MessageContentType._Text, text: `Message ${i}` }],
-        role: i % 2 === 0 ? Role.USER : Role.ASSISTANT,
-        createdAt: new Date().toISOString(),
-      }));
+      const largeMessageSet = Array.from(
+        { length: LARGE_DATASET_SIZE },
+        (_, i) => ({
+          id: `msg-${i}`,
+          content: [{ type: MessageContentType._Text, text: `Message ${i}` }],
+          role: i % 2 === 0 ? Role.USER : Role.ASSISTANT,
+          createdAt: new Date().toISOString(),
+        }),
+      );
 
       mockTaskUtils.fetchTaskMessages.mockResolvedValue(largeMessageSet);
 
@@ -890,8 +898,8 @@ describe("useChatSession Hook", () => {
       const endTime = performance.now();
       const renderTime = endTime - startTime;
 
-      expect(result.current.messages).toHaveLength(1000);
-      expect(renderTime).toBeLessThan(1000); // Should handle large sets efficiently
+      expect(result.current.messages).toHaveLength(LARGE_DATASET_SIZE);
+      expect(renderTime).toBeLessThan(PERFORMANCE_TEST_TIMEOUT_MS * 2); // Should handle large sets efficiently
     });
   });
 
@@ -961,7 +969,12 @@ export const ChatSessionTestUtils = {
     ...overrides,
   }),
 
-  setupMockWebSocket: () => {
+  setupMockWebSocket: (): {
+    onTaskUpdate: jest.Mock;
+    onNewMessage: jest.Mock;
+    onTaskCreated: jest.Mock;
+    onTaskDeleted: jest.Mock;
+  } => {
     const mockHandlers = {
       onTaskUpdate: jest.fn(),
       onNewMessage: jest.fn(),

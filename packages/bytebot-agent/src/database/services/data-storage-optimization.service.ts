@@ -317,7 +317,7 @@ export class DataStorageOptimizationService {
         if (recommendation.action !== 'no-action') {
           const optimizationResult = await this.optimizeScreenshot(
             screenshot,
-            recommendation.recommendedTier,
+            recommendation.recommendedTier as StorageTier,
           );
           results.push(optimizationResult);
         }
@@ -371,7 +371,7 @@ export class DataStorageOptimizationService {
         if (recommendation.action !== 'no-action') {
           const optimizationResult = await this.optimizeDomSnapshot(
             domSnapshot,
-            recommendation.recommendedTier,
+            recommendation.recommendedTier as StorageTier,
           );
           results.push(optimizationResult);
         }
@@ -814,7 +814,10 @@ export class DataStorageOptimizationService {
       isRedundant: contentAnalysis.similarScreenshotsCount > 3,
       isLowQuality: contentAnalysis.qualityScore < 0.5,
       isTestData: metadata.isTestData === true,
-      hasBusinessValue: this.assessBusinessValue({ ...screenshot, metadata }),
+      hasBusinessValue: this.assessBusinessValue({
+        ...screenshot,
+        metadata: metadata as any,
+      }),
       accessFrequency: pattern?.accessFrequency || 'low',
       ageInDays,
     };
@@ -878,7 +881,7 @@ export class DataStorageOptimizationService {
       isTestData: metadata.isTestData === true,
       hasBusinessValue: this.assessDomBusinessValue({
         ...domSnapshot,
-        metadata,
+        metadata: metadata as any,
       }),
       accessFrequency: pattern?.accessFrequency || 'low',
       ageInDays,

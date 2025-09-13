@@ -20,36 +20,6 @@ import {
 import { BrowserUseService } from '../browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
 
-// Error handling interfaces for type safety
-export interface ScreenshotError extends Error {
-  code?: string;
-  details?: unknown;
-}
-
-export interface FileSystemError extends Error {
-  code: string;
-  path?: string;
-}
-
-export interface ImageProcessingResult {
-  buffer: Buffer;
-  hash: string;
-  sizeBytes: number;
-  format: 'png' | 'jpeg' | 'webp';
-}
-
-export interface ScreenshotComparisonResult {
-  differenceScore: number;
-  differenceAreas: Array<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    intensity: number;
-  }>;
-  comparisonScreenshotId?: string;
-}
-
 export interface ScreenshotMetadata {
   screenshotId: string;
   sessionId: string;
@@ -126,7 +96,7 @@ export class BrowserScreenshotService {
       90,
     );
 
-    void this.initializeScreenshotDirectory();
+    this.initializeScreenshotDirectory();
   }
 
   /**
@@ -295,25 +265,20 @@ export class BrowserScreenshotService {
 
       // Store in cache
       this.screenshotsCache.set(screenshotId, metadata);
-      this.manageCacheSize();
+      await this.manageCacheSize();
 
       // Apply annotations if requested
       if (captureDto.annotations && captureDto.annotations.length > 0) {
-        this.applyAnnotations(screenshotId, captureDto.annotations);
+        await this.applyAnnotations(screenshotId, captureDto.annotations);
       }
 
       // Perform comparison if base screenshot provided
+      let comparisonResult;
       if (captureDto.compareWith) {
-        const comparisonResult = await this.compareScreenshots(
+        comparisonResult = await this.compareScreenshots(
           screenshotId,
           captureDto.compareWith,
         );
-        // Store comparison result in metadata
-        metadata.comparison = {
-          baseScreenshotId: captureDto.compareWith,
-          differenceScore: comparisonResult.differenceScore,
-          differenceAreas: comparisonResult.differenceAreas,
-        };
       }
 
       this.logger.log(`Screenshot captured successfully: ${screenshotId}`);
@@ -345,10 +310,9 @@ export class BrowserScreenshotService {
         sessionId,
       };
     } catch (error) {
-      const screenshotError = error as ScreenshotError;
       this.logger.error(
-        `Failed to capture screenshot: ${screenshotError.message}`,
-        screenshotError.stack,
+        `Failed to capture screenshot: ${error.message}`,
+        error.stack,
       );
 
       return {
@@ -371,7 +335,7 @@ export class BrowserScreenshotService {
         sessionId,
         error: {
           code: 'CAPTURE_ERROR',
-          message: screenshotError.message,
+          message: error.message,
           details: { sessionId, options: captureDto },
           timestamp,
         },
@@ -413,11 +377,9 @@ export class BrowserScreenshotService {
       try {
         const buffer = await fs.readFile(metadata.fileInfo.path);
         imageData = buffer.toString('base64');
-      } catch (fileError) {
-        const fsError = fileError as FileSystemError;
+      } catch (error) {
         this.logger.error(
           `Failed to read screenshot file: ${metadata.fileInfo.path}`,
-          fsError.message,
         );
         return {
           id: screenshotId,
@@ -469,10 +431,7 @@ export class BrowserScreenshotService {
         success: true,
       };
     } catch (error) {
-      const screenshotError = error as ScreenshotError;
-      this.logger.error(
-        `Error retrieving screenshot: ${screenshotError.message}`,
-      );
+      this.logger.error(`Error retrieving screenshot: ${error.message}`);
       return {
         id: screenshotId,
         data: '',
@@ -491,7 +450,7 @@ export class BrowserScreenshotService {
         success: false,
         error: {
           code: 'RETRIEVAL_ERROR',
-          message: screenshotError.message,
+          message: error.message,
         },
       };
     }
@@ -535,11 +494,9 @@ export class BrowserScreenshotService {
           } else {
             imageData = buffer.toString('base64');
           }
-        } catch (fileError) {
-          const fsError = fileError as FileSystemError;
+        } catch (error) {
           this.logger.error(
             `Failed to read screenshot file: ${metadata.fileInfo.path}`,
-            fsError.message,
           );
           return {
             success: false,
@@ -557,15 +514,12 @@ export class BrowserScreenshotService {
         imageData,
       };
     } catch (error) {
-      const screenshotError = error as ScreenshotError;
-      this.logger.error(
-        `Error retrieving screenshot: ${screenshotError.message}`,
-      );
+      this.logger.error(`Error retrieving screenshot: ${error.message}`);
       return {
         success: false,
         error: {
           code: 'RETRIEVAL_ERROR',
-          message: screenshotError.message,
+          message: error.message,
         },
       };
     }
@@ -574,13 +528,13 @@ export class BrowserScreenshotService {
   /**
    * List screenshots with filtering options
    */
-  listScreenshots(filters?: {
+  async listScreenshots(filters?: {
     sessionId?: string;
     taskId?: string;
     fromDate?: Date;
     toDate?: Date;
     limit?: number;
-  }): ScreenshotMetadata[] {
+  }): Promise<ScreenshotMetadata[]> {
     let screenshots = Array.from(this.screenshotsCache.values());
 
     if (filters) {
@@ -617,7 +571,17 @@ export class BrowserScreenshotService {
   async compareScreenshots(
     screenshotId1: string,
     screenshotId2: string,
-  ): Promise<ScreenshotComparisonResult> {
+  ): Promise<{
+    differenceScore: number;
+    differenceAreas: Array<{
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      intensity: number;
+    }>;
+    comparisonScreenshotId?: string;
+  }> {
     try {
       // This is a simplified comparison - in production, you'd use a library like Pixelmatch
       const screenshot1 = await this.getScreenshotInternal(screenshotId1, {
@@ -663,10 +627,7 @@ export class BrowserScreenshotService {
         differenceAreas,
       };
     } catch (error) {
-      const comparisonError = error as ScreenshotError;
-      this.logger.error(
-        `Screenshot comparison failed: ${comparisonError.message}`,
-      );
+      this.logger.error(`Screenshot comparison failed: ${error.message}`);
       throw error;
     }
   }
@@ -674,7 +635,7 @@ export class BrowserScreenshotService {
   /**
    * Apply annotations to a screenshot
    */
-  private applyAnnotations(
+  private async applyAnnotations(
     screenshotId: string,
     annotations: Array<{
       type: 'rectangle' | 'circle' | 'arrow' | 'text';
@@ -682,7 +643,7 @@ export class BrowserScreenshotService {
       style: { color: string; thickness: number; fill?: string };
       text?: string;
     }>,
-  ): void {
+  ): Promise<void> {
     const metadata = this.screenshotsCache.get(screenshotId);
     if (!metadata) {
       throw new Error(`Screenshot ${screenshotId} not found`);
@@ -716,11 +677,9 @@ export class BrowserScreenshotService {
       // Delete file from disk
       try {
         await fs.unlink(metadata.fileInfo.path);
-      } catch (deleteError) {
-        const fsError = deleteError as FileSystemError;
+      } catch (error) {
         this.logger.warn(
           `Could not delete screenshot file: ${metadata.fileInfo.path}`,
-          fsError.message,
         );
       }
 
@@ -730,8 +689,7 @@ export class BrowserScreenshotService {
       this.logger.debug(`Screenshot deleted: ${screenshotId}`);
       return true;
     } catch (error) {
-      const deleteError = error as ScreenshotError;
-      this.logger.error(`Failed to delete screenshot: ${deleteError.message}`);
+      this.logger.error(`Failed to delete screenshot: ${error.message}`);
       return false;
     }
   }
@@ -785,17 +743,12 @@ export class BrowserScreenshotService {
             path.join(this.screenshotDirectory, file),
           );
           diskTotalSize += stats.size;
-        } catch (statError) {
+        } catch (error) {
           // Skip files that can't be read
-          const fsError = statError as FileSystemError;
-          this.logger.debug(`Could not stat file: ${file}`, fsError.message);
         }
       }
     } catch (error) {
-      const dirError = error as FileSystemError;
-      this.logger.warn(
-        `Could not read screenshot directory: ${dirError.message}`,
-      );
+      this.logger.warn(`Could not read screenshot directory: ${error.message}`);
     }
 
     return {
@@ -822,10 +775,8 @@ export class BrowserScreenshotService {
   private async initializeScreenshotDirectory(): Promise<void> {
     try {
       await fs.access(this.screenshotDirectory);
-    } catch (accessError) {
+    } catch (error) {
       // Directory doesn't exist, create it
-      const fsError = accessError as FileSystemError;
-      this.logger.debug(`Directory access error: ${fsError.message}`);
       await fs.mkdir(this.screenshotDirectory, { recursive: true });
       this.logger.log(
         `Created screenshots directory: ${this.screenshotDirectory}`,
@@ -833,7 +784,7 @@ export class BrowserScreenshotService {
     }
   }
 
-  private manageCacheSize(): void {
+  private async manageCacheSize(): Promise<void> {
     if (this.screenshotsCache.size <= this.maxCacheSize) {
       return;
     }
@@ -856,7 +807,7 @@ export class BrowserScreenshotService {
   /**
    * Cleanup on service destruction
    */
-  onModuleDestroy(): void {
+  async onModuleDestroy(): Promise<void> {
     this.logger.log('Screenshot service cleanup completed');
   }
 }

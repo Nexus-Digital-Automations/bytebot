@@ -401,7 +401,7 @@ export class LocalJwtAuthService {
   /**
    * Refresh JWT token using refresh token
    */
-  refreshToken(
+  async refreshToken(
     refreshToken: string,
     ipAddress?: string,
   ): Promise<{
@@ -409,6 +409,8 @@ export class LocalJwtAuthService {
     refreshToken: string;
     expiresIn: number;
   }> {
+    // Ensure async behavior for consistent API
+    await Promise.resolve();
     try {
       // Verify refresh token (implement your refresh token validation logic)
       const { userId, sessionId, tokenId } =

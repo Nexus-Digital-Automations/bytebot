@@ -237,9 +237,7 @@ describe('Browser-Use Integration Tests', () => {
         mockAuthUser.id,
       );
 
-      const statusResponse = await browserTaskService.getTaskStatus(
-        taskResponse.id,
-      );
+      const statusResponse = browserTaskService.getTaskStatus(taskResponse.id);
 
       expect(statusResponse.success).toBe(true);
       expect(statusResponse.taskId).toBe(taskResponse.id);
@@ -261,7 +259,7 @@ describe('Browser-Use Integration Tests', () => {
         mockAuthUser.id,
       );
 
-      const tasks = await browserTaskService.listTasks({
+      const tasks = browserTaskService.listTasks({
         status: TaskStatus.PENDING,
         page: 1,
         limit: 10,
@@ -287,7 +285,7 @@ describe('Browser-Use Integration Tests', () => {
         mockAuthUser.id,
       );
 
-      const cancelResponse = await browserTaskService.cancelTask(
+      const cancelResponse = browserTaskService.cancelTask(
         taskResponse.id,
         'Integration test cancellation',
       );
@@ -297,7 +295,7 @@ describe('Browser-Use Integration Tests', () => {
     });
 
     it('should get task execution metrics', async () => {
-      const metrics = await browserTaskService.getTaskMetrics();
+      const metrics = browserTaskService.getTaskMetrics();
 
       expect(metrics).toBeDefined();
       expect(typeof metrics.totalTasks).toBe('number');
@@ -507,9 +505,7 @@ describe('Browser-Use Integration Tests', () => {
       );
 
       // Verify task was saved to database
-      const taskStatus = await browserTaskService.getTaskStatus(
-        taskResponse.id,
-      );
+      const taskStatus = browserTaskService.getTaskStatus(taskResponse.id);
 
       expect(taskStatus.success).toBe(true);
       expect(taskStatus.taskId).toBe(taskResponse.id);
