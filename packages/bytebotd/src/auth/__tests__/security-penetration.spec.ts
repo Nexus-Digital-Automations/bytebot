@@ -308,7 +308,7 @@ describe('Security Penetration Testing Suite', () => {
       }),
       getHandler: jest.fn().mockReturnValue({ name: 'pentestHandler' }),
       getClass: jest.fn().mockReturnValue({ name: 'PentestController' }),
-    } as any;
+    } as ExecutionContext;
   };
 
   beforeEach(async () => {
@@ -338,7 +338,7 @@ describe('Security Penetration Testing Suite', () => {
                 SECURITY_AUDIT_ENABLED: true,
                 RATE_LIMIT_ENABLED: true,
               };
-              return config[key];
+              return config[key] ?? '';
             }),
           },
         },
@@ -1263,7 +1263,7 @@ describe('Security Penetration Testing Suite', () => {
                 role: UserRole._VIEWER,
                 isActive: true,
                 __proto__: { role: UserRole._ADMIN },
-              } as any;
+              } as ExecutionContext;
 
               const context = createPentestExecutionContext(
                 maliciousUser,

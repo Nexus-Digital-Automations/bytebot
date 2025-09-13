@@ -162,9 +162,117 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/TODO.json"
+    },
+    {
+      "id": "error_1757730603637_xdh3pew6i",
+      "title": "Fix TypeScript violations in bytebotd service layer test files",
+      "description": "Target: /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/services/__tests__/ - Fix service method unsafe argument violations, business logic unsafe return types, service dependency injection unsafe assignments, mock service implementations with any types, and service result handling unsafe member access. Create proper service interface definitions, secure return types, and achieve zero linter violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T02:30:03.637Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757730587531_1_general_dcbaeacc",
+      "started_at": "2025-09-13T02:30:20.404Z",
+      "claimed_by": "development_session_1757730587531_1_general_dcbaeacc",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757730587531_1_general_dcbaeacc",
+          "role": "primary",
+          "assignedAt": "2025-09-13T02:30:20.404Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757730603637_xdh3pew6i",
+          "completedAt": "2025-09-13T02:49:42.803Z",
+          "completedBy": "development_session_1757730587531_1_general_dcbaeacc",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T02:49:42.803Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T02:49:42.803Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/TODO.json"
+    },
+    {
+      "id": "error_1757730605982_4n2ywydc7",
+      "title": "Fix TypeScript violations in bytebotd API and controller test files",
+      "description": "CRITICAL: Fix all TypeScript violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/api/__tests__/ and related controller test files. Fix unsafe return violations, prefer nullish coalescing, unsafe member access on error objects, unsafe argument violations in controller tests, and unused response variables. Maintain API test functionality while achieving zero linter violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T02:30:05.982Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757730587217_1_general_d829878e",
+      "started_at": "2025-09-13T02:30:27.719Z",
+      "claimed_by": "development_session_1757730587217_1_general_d829878e",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757730587217_1_general_d829878e",
+          "role": "primary",
+          "assignedAt": "2025-09-13T02:30:27.719Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757730605982_4n2ywydc7",
+          "completedAt": "2025-09-13T02:50:11.032Z",
+          "completedBy": "development_session_1757730587217_1_general_d829878e",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T02:50:11.032Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T02:50:11.032Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/TODO.json"
     }
   ],
-  "total_completed": 3,
-  "last_completion": "2025-09-13T02:46:45.704Z",
+  "total_completed": 5,
+  "last_completion": "2025-09-13T02:50:11.032Z",
   "created_at": "2025-09-11T09:00:29.533Z"
 }

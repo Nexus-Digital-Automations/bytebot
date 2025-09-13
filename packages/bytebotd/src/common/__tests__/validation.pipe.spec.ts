@@ -15,6 +15,15 @@
  * @coverage-target 95%+
  */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+
 import { Test as Test, TestingModule as TestingModule } from '@nestjs/testing';
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import {
@@ -641,7 +650,9 @@ describe('ValidationPipe', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
         expect((error as Error).message).toContain('Validation failed');
-        expect((error as Error).message).toContain('email must be a valid email address');
+        expect((error as Error).message).toContain(
+          'email must be a valid email address',
+        );
         expect((error as Error).message).toContain(
           'password must be longer than or equal to 6 characters',
         );

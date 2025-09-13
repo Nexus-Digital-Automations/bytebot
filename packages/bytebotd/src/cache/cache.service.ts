@@ -184,7 +184,7 @@ export class CacheService {
 
     try {
       const fullKey = this.keyGenerator.generate(key, options.namespace);
-      const ttl = options.ttl || 300; // 5 minutes default
+      const ttl = options.ttl ?? 300; // 5 minutes default
 
       let cacheValue: string;
       if (options.serialize !== false) {

@@ -49,6 +49,55 @@ interface ErrorWithMessage {
   message: string;
 }
 
+/**
+ * OCR result data interface
+ */
+interface OcrData {
+  text: string;
+  confidence: number;
+  boundingBoxes?: Array<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    confidence?: number;
+    text?: string;
+  }>;
+  words?: Array<{
+    text: string;
+    confidence: number;
+    bbox: [number, number, number, number];
+  }>;
+  lines?: Array<{
+    text: string;
+    confidence: number;
+    words: string[];
+    bbox: [number, number, number, number];
+  }>;
+  processingTimeMs?: number;
+  method?: string;
+}
+
+/**
+ * Text detection result data interface
+ */
+interface TextDetectionData {
+  detected: boolean;
+  regions?: Array<{
+    text: string;
+    confidence: number;
+    coordinates: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+  }>;
+  language?: string;
+  processingTimeMs?: number;
+  method?: string;
+}
+
 interface ErrorWithStack extends ErrorWithMessage {
   stack?: string;
 }
@@ -102,7 +151,14 @@ type ComputerActionResponse =
   | {
       text: string;
       confidence: number;
-      boundingBoxes?: Array<any>;
+      boundingBoxes?: Array<{
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        confidence?: number;
+        text?: string;
+      }>;
       processingTimeMs: number;
       method: string;
     }
@@ -120,8 +176,8 @@ type ComputerActionResponse =
     }
   | {
       image: string;
-      ocr?: any;
-      textDetection?: any;
+      ocr?: OcrData;
+      textDetection?: TextDetectionData;
       processingTimeMs: number;
       enhancementsApplied: string[];
     };

@@ -48,12 +48,12 @@ interface CacheConfig {
 
         const config: CacheConfig = {
           store: redisStore,
-          host: process.env.REDIS_HOST || 'localhost',
-          port: parseInt(process.env.REDIS_PORT || '6379', 10),
-          ttl: parseInt(process.env.CACHE_TTL || '300', 10), // 5 minutes default
-          max: parseInt(process.env.CACHE_MAX_ITEMS || '1000', 10),
+          host: process.env.REDIS_HOST ?? 'localhost',
+          port: parseInt(process.env.REDIS_PORT ?? '6379', 10),
+          ttl: parseInt(process.env.CACHE_TTL ?? '300', 10), // 5 minutes default
+          max: parseInt(process.env.CACHE_MAX_ITEMS ?? '1000', 10),
           password: process.env.REDIS_PASSWORD,
-          db: parseInt(process.env.REDIS_DB || '0', 10),
+          db: parseInt(process.env.REDIS_DB ?? '0', 10),
         };
 
         _logger.log('Cache module configuration:', {

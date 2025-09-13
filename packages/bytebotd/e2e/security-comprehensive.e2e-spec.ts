@@ -22,11 +22,12 @@ import request from 'supertest';
 import { JwtService as _JwtService } from '@nestjs/jwt';
 import { ConfigService as _ConfigService } from '@nestjs/config';
 import { UserRole, Permission } from '@bytebot/shared';
+import { StrictRecord } from '../src/types';
 
 /**
  * Comprehensive E2E Security Testing Module
  */
-class _SecurityE2ETestModule {
+class SecurityE2ETestModule {
   static forTesting() {
     return {
       module: SecurityE2ETestModule,
@@ -191,6 +192,12 @@ class SecurityE2EJwtService {
   verify(token: string) {
     try {
       const [header, payload, signature] = token.split('.');
+
+      // Ensure all parts are present
+      if (!header || !payload || !signature) {
+        throw new Error('Invalid token format');
+      }
+
       const decodedPayload = JSON.parse(
         Buffer.from(payload, 'base64url').toString(),
       );
@@ -218,7 +225,7 @@ class SecurityE2EJwtService {
 }
 
 class SecurityE2EConfigService {
-  private config = {
+  private config: StrictRecord<string | number> = {
     JWT_SECRET: 'e2e-security-test-secret',
     JWT_REFRESH_SECRET: 'e2e-security-refresh-secret',
     JWT_EXPIRATION: '15m',
@@ -230,7 +237,7 @@ class SecurityE2EConfigService {
     ACCOUNT_LOCKOUT_DURATION: 15 * 60 * 1000, // 15 minutes
   };
 
-  get(key: string) {
+  get(key: string): string | number | undefined {
     return this.config[key];
   }
 }

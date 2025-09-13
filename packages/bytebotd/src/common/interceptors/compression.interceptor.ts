@@ -100,10 +100,10 @@ export class CompressionInterceptor implements NestInterceptor {
 
   // Compression configuration (configurable via environment variables)
   private readonly config: CompressionConfig = {
-    minSize: parseInt(process.env.COMPRESSION_MIN_SIZE || '1024', 10), // 1KB
-    level: parseInt(process.env.COMPRESSION_LEVEL || '6', 10), // Balanced compression
-    threshold: parseFloat(process.env.COMPRESSION_THRESHOLD || '0.8'), // 20% minimum reduction
-    maxSize: parseInt(process.env.COMPRESSION_MAX_SIZE || '10485760', 10), // 10MB
+    minSize: parseInt(process.env.COMPRESSION_MIN_SIZE ?? '1024', 10), // 1KB
+    level: parseInt(process.env.COMPRESSION_LEVEL ?? '6', 10), // Balanced compression
+    threshold: parseFloat(process.env.COMPRESSION_THRESHOLD ?? '0.8'), // 20% minimum reduction
+    maxSize: parseInt(process.env.COMPRESSION_MAX_SIZE ?? '10485760', 10), // 10MB
     compressibleTypes: new Set([
       'application/json',
       'application/javascript',
@@ -278,7 +278,7 @@ export class CompressionInterceptor implements NestInterceptor {
     }
 
     // Check content type
-    const contentType = response.get('Content-Type') || '';
+    const contentType = response.get('Content-Type') ?? '';
     const baseType = contentType.split(';')[0].toLowerCase();
 
     return this.config.compressibleTypes.has(baseType);
@@ -288,7 +288,7 @@ export class CompressionInterceptor implements NestInterceptor {
    * Select optimal compression algorithm based on client support
    */
   private selectCompressionAlgorithm(request: Request): CompressionAlgorithm {
-    const acceptEncoding = request.get('Accept-Encoding') || '';
+    const acceptEncoding = request.get('Accept-Encoding') ?? '';
 
     // Priority order: brotli (best compression) → gzip (widely supported) → deflate
     if (acceptEncoding.includes('br')) {

@@ -29,7 +29,14 @@ import _crypto from 'crypto';
  */
 interface MockRequest {
   headers: Record<string, string>;
-  user?: unknown;
+  user?: {
+    sub?: string;
+    email?: string;
+    role?: string;
+    exp?: number;
+    __proto__?: unknown;
+    constructor?: unknown;
+  };
   url: string;
   method: string;
   ip: string;
@@ -136,13 +143,13 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn((key: string) => {
-              const config = {
+              const config: Record<string, string> = {
                 JWT_SECRET: 'test-jwt-secret',
                 JWT_REFRESH_SECRET: 'test-refresh-secret',
                 JWT_EXPIRATION: '15m',
                 JWT_REFRESH_EXPIRATION: '7d',
               };
-              return config[key];
+              return config[key] ?? null;
             }),
           },
         },
@@ -289,7 +296,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
       // Should succeed but user object should be sanitized
       const result = await guard.canActivate(context);
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as MockRequest;
 
       expect(result).toBe(true);
       expect(request.user.role).toBe('viewer'); // Should not be elevated to admin
@@ -427,7 +434,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(xssPayload);
 
       const result = await guard.canActivate(context);
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as MockRequest;
 
       expect(result).toBe(true);
 
@@ -461,7 +468,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         .mockResolvedValue(sqlInjectionPayload);
 
       const result = await guard.canActivate(context);
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as MockRequest;
 
       expect(result).toBe(true);
 
@@ -579,7 +586,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(maliciousPayload);
 
       const result = await guard.canActivate(context);
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as MockRequest;
 
       expect(result).toBe(true);
 

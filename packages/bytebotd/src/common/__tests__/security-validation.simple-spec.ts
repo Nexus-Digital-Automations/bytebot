@@ -8,6 +8,8 @@
  * @author Input Validation & API Security Specialist
  */
 
+/* eslint-disable no-undef */
+
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 

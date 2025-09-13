@@ -7,6 +7,95 @@ import {
 } from './dto/browser-task.dto';
 
 /**
+ * Browser automation action interface
+ */
+export interface BrowserAction {
+  type:
+    | 'click'
+    | 'type'
+    | 'navigate'
+    | 'screenshot'
+    | 'wait'
+    | 'extract'
+    | 'scroll';
+  selector?: string;
+  value?: string | number;
+  timeout?: number;
+  coordinates?: { x: number; y: number };
+  options?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Browser session configuration
+ */
+export interface BrowserSessionConfig {
+  headless?: boolean;
+  viewport?: {
+    width: number;
+    height: number;
+  };
+  userAgent?: string;
+  defaultTimeout?: number;
+  slowMo?: number;
+  devtools?: boolean;
+  args?: string[];
+  executablePath?: string;
+  ignoreHTTPSErrors?: boolean;
+  defaultNavigationTimeout?: number;
+  defaultWaitTimeout?: number;
+}
+
+/**
+ * Task execution log entry
+ */
+export interface TaskLogEntry {
+  timestamp: Date;
+  level: 'debug' | 'info' | 'warn' | 'error';
+  message: string;
+  actionIndex?: number;
+  actionType?: string;
+  duration?: number;
+  screenshot?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Task creation data interface
+ */
+export interface TaskCreationData {
+  taskId: string;
+  name: string;
+  description: string;
+  actions: BrowserAction[];
+  priority?: BrowserTaskPriority;
+  sessionConfig?: BrowserSessionConfig;
+  maxExecutionTimeMs?: number;
+  metadata?: Record<string, unknown>;
+  enableLogging?: boolean;
+  continueOnError?: boolean;
+  status: BrowserTaskStatus;
+  startedAt: Date;
+  actionsCompleted: number;
+  totalActions: number;
+  logs: TaskLogEntry[];
+}
+
+/**
+ * Task update data interface
+ */
+export interface TaskUpdateData {
+  status?: BrowserTaskStatus;
+  completedAt?: Date;
+  executionTimeMs?: number;
+  extractedData?: Record<string, unknown>;
+  screenshots?: string[];
+  logs?: TaskLogEntry[];
+  errorMessage?: string;
+  errorDetails?: Record<string, unknown>;
+}
+
+/**
  * Browser Task Service - Task Lifecycle Management
  *
  * Manages browser automation task tracking, monitoring, and persistence.
@@ -35,23 +124,7 @@ export class BrowserTaskService {
   /**
    * Create a new browser automation task
    */
-  async createTask(taskData: {
-    taskId: string;
-    name: string;
-    description: string;
-    actions: any[];
-    priority?: BrowserTaskPriority;
-    sessionConfig?: any;
-    maxExecutionTimeMs?: number;
-    metadata?: Record<string, any>;
-    enableLogging?: boolean;
-    continueOnError?: boolean;
-    status: BrowserTaskStatus;
-    startedAt: Date;
-    actionsCompleted: number;
-    totalActions: number;
-    logs: any[];
-  }): Promise<BrowserTaskResultDto> {
+  async createTask(taskData: TaskCreationData): Promise<BrowserTaskResultDto> {
     const task: BrowserTaskResultDto = {
       taskId: taskData.taskId,
       status: taskData.status,
@@ -64,8 +137,8 @@ export class BrowserTaskService {
         ...taskData.metadata,
         name: taskData.name,
         description: taskData.description,
-        priority: taskData.priority || BrowserTaskPriority.NORMAL,
-        maxExecutionTimeMs: taskData.maxExecutionTimeMs || 300000,
+        priority: taskData.priority ?? BrowserTaskPriority.NORMAL,
+        maxExecutionTimeMs: taskData.maxExecutionTimeMs ?? 300000,
         enableLogging: taskData.enableLogging ?? true,
         continueOnError: taskData.continueOnError ?? false,
         createdAt: new Date(),
@@ -80,7 +153,7 @@ export class BrowserTaskService {
     if (taskData.status === BrowserTaskStatus.PENDING) {
       this.addToQueue(
         taskData.taskId,
-        taskData.priority || BrowserTaskPriority.NORMAL,
+        taskData.priority ?? BrowserTaskPriority.NORMAL,
       );
     }
 
@@ -134,16 +207,7 @@ export class BrowserTaskService {
    */
   async updateTaskStatus(
     taskId: string,
-    updates: {
-      status?: BrowserTaskStatus;
-      completedAt?: Date;
-      executionTimeMs?: number;
-      extractedData?: Record<string, any>;
-      screenshots?: string[];
-      logs?: any[];
-      errorMessage?: string;
-      errorDetails?: Record<string, any>;
-    },
+    updates: TaskUpdateData,
   ): Promise<void> {
     const task = this.tasks.get(taskId);
     if (!task) {

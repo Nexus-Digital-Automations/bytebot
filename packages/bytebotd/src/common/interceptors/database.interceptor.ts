@@ -123,17 +123,17 @@ export class DatabaseInterceptor implements NestInterceptor {
   // Database performance configuration
   private readonly config: DatabaseConfig = {
     slowQueryThreshold: parseInt(
-      process.env.DB_SLOW_QUERY_THRESHOLD || '1000',
+      process.env.DB_SLOW_QUERY_THRESHOLD ?? '1000',
       10,
     ), // 1 second
     criticalQueryThreshold: parseInt(
-      process.env.DB_CRITICAL_QUERY_THRESHOLD || '5000',
+      process.env.DB_CRITICAL_QUERY_THRESHOLD ?? '5000',
       10,
     ), // 5 seconds
     enableQueryCaching: process.env.DB_ENABLE_QUERY_CACHING !== 'false',
-    defaultCacheTtl: parseInt(process.env.DB_CACHE_TTL || '300', 10), // 5 minutes
-    maxRetryAttempts: parseInt(process.env.DB_MAX_RETRY_ATTEMPTS || '3', 10),
-    retryDelay: parseInt(process.env.DB_RETRY_DELAY || '1000', 10), // 1 second
+    defaultCacheTtl: parseInt(process.env.DB_CACHE_TTL ?? '300', 10), // 5 minutes
+    maxRetryAttempts: parseInt(process.env.DB_MAX_RETRY_ATTEMPTS ?? '3', 10),
+    retryDelay: parseInt(process.env.DB_RETRY_DELAY ?? '1000', 10), // 1 second
   };
 
   constructor(
@@ -155,7 +155,7 @@ export class DatabaseInterceptor implements NestInterceptor {
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest();
-    const operationId = request.operationId || `db_${Date.now()}`;
+    const operationId = request.operationId ?? `db_${Date.now()}`;
 
     // Extract database operation metadata
     const dbOperation = this.extractDatabaseOperation(context, request);
@@ -233,7 +233,7 @@ export class DatabaseInterceptor implements NestInterceptor {
     startTime: number,
     next: CallHandler,
   ): Observable<unknown> {
-    if (!this.cacheService || !this.keyGenerator) {
+    if (!this.cacheService ?? !this.keyGenerator) {
       return this.handleDatabaseOperation(
         operationId,
         dbOperation,
@@ -363,7 +363,7 @@ export class DatabaseInterceptor implements NestInterceptor {
     const controllerClass = context.getClass().name;
 
     // Example patterns for different operations
-    if (handlerName.includes('find') || handlerName.includes('get')) {
+    if (handlerName.includes('find') ?? handlerName.includes('get')) {
       return {
         operation: 'SELECT',
         table: this.extractTableName(controllerClass),
@@ -371,7 +371,7 @@ export class DatabaseInterceptor implements NestInterceptor {
       };
     }
 
-    if (handlerName.includes('create') || handlerName.includes('insert')) {
+    if (handlerName.includes('create') ?? handlerName.includes('insert')) {
       return {
         operation: 'INSERT',
         table: this.extractTableName(controllerClass),
@@ -387,7 +387,7 @@ export class DatabaseInterceptor implements NestInterceptor {
       };
     }
 
-    if (handlerName.includes('delete') || handlerName.includes('remove')) {
+    if (handlerName.includes('delete') ?? handlerName.includes('remove')) {
       return {
         operation: 'DELETE',
         table: this.extractTableName(controllerClass),
@@ -438,7 +438,7 @@ export class DatabaseInterceptor implements NestInterceptor {
    * Get result count from query result
    */
   private getResultCount(result: unknown): number | undefined {
-    if (result === null || result === undefined) {
+    if (result === null ?? result === undefined) {
       return 0;
     }
 
@@ -494,7 +494,7 @@ export class DatabaseInterceptor implements NestInterceptor {
           {
             table: operation.table,
             resultCount: metrics.resultCount,
-            cacheHit: cacheHit || false,
+            cacheHit: cacheHit ?? false,
           },
         );
       }

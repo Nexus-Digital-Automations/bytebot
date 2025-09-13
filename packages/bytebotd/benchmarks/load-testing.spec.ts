@@ -490,9 +490,12 @@ async function executeLoadTest(
     responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
   const minResponseTime = Math.min(...responseTimes);
   const maxResponseTime = Math.max(...responseTimes);
-  const p50ResponseTime = sortedTimes[Math.floor(sortedTimes.length * 0.5)];
-  const p95ResponseTime = sortedTimes[Math.floor(sortedTimes.length * 0.95)];
-  const p99ResponseTime = sortedTimes[Math.floor(sortedTimes.length * 0.99)];
+  const p50ResponseTime =
+    sortedTimes[Math.floor(sortedTimes.length * 0.5)] ?? 0;
+  const p95ResponseTime =
+    sortedTimes[Math.floor(sortedTimes.length * 0.95)] ?? 0;
+  const p99ResponseTime =
+    sortedTimes[Math.floor(sortedTimes.length * 0.99)] ?? 0;
 
   const actualRps = (totalRequests / executionTime) * 1000;
   const errorRate = (failedRequests / totalRequests) * 100;

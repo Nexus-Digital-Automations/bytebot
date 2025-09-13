@@ -111,7 +111,7 @@ class MockRolesGuard {
       [UserRole._VIEWER]: [UserRole._VIEWER],
     };
 
-    const userRoleAccess = roleHierarchy[userRole] || [];
+    const userRoleAccess = roleHierarchy[userRole] ?? [];
     return requiredRoles.some((role) => userRoleAccess.includes(role));
   }
 
@@ -119,7 +119,7 @@ class MockRolesGuard {
     user: AuthenticatedUser,
     requiredPermissions: Permission[],
   ): boolean {
-    if (!user.permissions || user.permissions.length === 0) {
+    if (!user.permissions ?? user.permissions.length === 0) {
       return false;
     }
 
@@ -159,7 +159,7 @@ class MockRolesGuard {
       [UserRole._VIEWER]: [Permission._TASK_READ],
     };
 
-    return rolePermissions[role] || [];
+    return rolePermissions[role] ?? [];
   }
 }
 

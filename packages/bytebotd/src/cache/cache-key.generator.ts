@@ -104,7 +104,7 @@ export class CacheKeyGenerator {
 
       // Add namespace
       const keyNamespace =
-        namespace || options.namespace || this.DEFAULT_NAMESPACE;
+        namespace ?? options.namespace ?? this.DEFAULT_NAMESPACE;
       keyComponents.push(keyNamespace);
 
       // Add version if specified
@@ -126,7 +126,7 @@ export class CacheKeyGenerator {
       // Handle long keys
       const shouldHash =
         options.hashLongKeys !== false &&
-        fullKey.length > (options.maxLength || this.HASH_THRESHOLD);
+        fullKey.length > (options.maxLength ?? this.HASH_THRESHOLD);
 
       if (shouldHash) {
         fullKey = this.hashKey(fullKey, keyNamespace);
@@ -162,7 +162,7 @@ export class CacheKeyGenerator {
       );
 
       // Fallback to simple key generation
-      const fallbackKey = `${namespace || this.DEFAULT_NAMESPACE}${this.KEY_SEPARATOR}${this.keyToString(key)}`;
+      const fallbackKey = `${namespace ?? this.DEFAULT_NAMESPACE}${this.KEY_SEPARATOR}${this.keyToString(key)}`;
       this.logger.warn(`Using fallback key: ${fallbackKey}`);
       return fallbackKey;
     }
@@ -389,7 +389,7 @@ export class CacheKeyGenerator {
    * Validate generated key
    */
   private validateKey(key: string): void {
-    if (!key || key.length === 0) {
+    if (!key ?? key.length === 0) {
       throw new Error('Generated key is empty');
     }
 
@@ -412,7 +412,7 @@ export class CacheKeyGenerator {
     this.stats.totalGenerated++;
 
     // Update namespace usage
-    const currentCount = this.stats.namespaceUsage.get(namespace) || 0;
+    const currentCount = this.stats.namespaceUsage.get(namespace) ?? 0;
     this.stats.namespaceUsage.set(namespace, currentCount + 1);
 
     // Update average key length

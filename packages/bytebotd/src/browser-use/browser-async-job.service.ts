@@ -74,17 +74,17 @@ export class BrowserAsyncJobService {
         description: _dto.description,
         jobType: _dto.jobType,
         status: AsyncJobStatus.QUEUED,
-        priority: _dto.priority || AsyncJobPriority.NORMAL,
+        priority: _dto.priority ?? AsyncJobPriority.NORMAL,
         progress: {
           currentStep: 'Job queued for processing',
           completedSteps: 0,
           totalSteps: this.estimateTotalSteps(_dto),
           percentage: 0,
-          estimatedRemainingMs: _dto.estimatedDurationMs || 300000,
+          estimatedRemainingMs: _dto.estimatedDurationMs ?? 300000,
         },
         createdAt: now,
         queuedAt: now,
-        estimatedDurationMs: _dto.estimatedDurationMs || 300000,
+        estimatedDurationMs: _dto.estimatedDurationMs ?? 300000,
         configuration: _dto.configuration,
         results: {
           tasksCompleted: 0,
@@ -95,9 +95,9 @@ export class BrowserAsyncJobService {
         },
         metadata: {
           retryCount: 0,
-          maxRetries: _dto.maxRetries || 3,
+          maxRetries: _dto.maxRetries ?? 3,
           createdBy: 'browser-automation-api',
-          tags: _dto.tags || [],
+          tags: _dto.tags ?? [],
           ..._dto.metadata,
         },
       };
@@ -534,7 +534,7 @@ export class BrowserAsyncJobService {
               typeof config.waitForSelector === 'string'
                 ? config.waitForSelector
                 : undefined,
-            timeout: config.timeout || 30000,
+            timeout: config.timeout ?? 30000,
           },
         );
 
@@ -690,7 +690,7 @@ export class BrowserAsyncJobService {
    */
   private async updateJobProgress(jobId: string): Promise<void> {
     const job = this.jobs.get(jobId);
-    if (!job || job.status !== AsyncJobStatus.RUNNING) {
+    if (!job ?? job.status !== AsyncJobStatus.RUNNING) {
       return;
     }
 
@@ -756,7 +756,7 @@ export class BrowserAsyncJobService {
    * Get next job from queue
    */
   private getNextJobFromQueue(): string | null {
-    return this.jobQueue.shift() || null;
+    return this.jobQueue.shift() ?? null;
   }
 
   /**

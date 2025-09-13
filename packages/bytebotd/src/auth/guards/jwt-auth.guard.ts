@@ -301,7 +301,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     if (!authHeader.startsWith('Bearer ')) {
-      return `invalid-format-${authHeader.split(' ')[0] || 'no-type'}`;
+      return `invalid-format-${authHeader.split(' ')[0] ?? 'no-type'}`;
     }
 
     const token = authHeader.substring(7);
@@ -332,7 +332,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     const message =
-      (info as any)?.message || (info as any)?.name || String(info);
+      (info as any)?.message ?? (info as any)?.name ?? String(info);
 
     // Common JWT errors with user-friendly messages
     switch (message) {

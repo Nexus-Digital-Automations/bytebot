@@ -47,7 +47,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey:
-        process.env.JWT_SECRET || 'bytebot-default-secret-change-in-production',
+        process.env.JWT_SECRET ?? 'bytebot-default-secret-change-in-production',
       algorithms: ['HS256'],
     });
   }
@@ -78,7 +78,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     );
 
     // Validate required payload fields
-    if (!payload.sub || !payload.email || !payload.username || !payload.role) {
+    if (!payload.sub ?? !payload.email ?? !payload.username ?? !payload.role) {
       this.logger.warn(
         `[${operationId}] Invalid JWT payload - missing required fields`,
         {

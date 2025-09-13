@@ -32,6 +32,26 @@
       ]
     },
     {
+      "id": "error_1757731765880_9nnramkvu",
+      "title": "Continue fixing TypeScript violations in bytebotd auth test files",
+      "description": "Continue systematic fix of TypeScript violations in auth module test files that were in progress: auth.service.spec.ts, controller-security.integration.spec.ts, jwt-auth.guard.security.spec.ts, and security-penetration.spec.ts. Apply comprehensive type safety using existing test-interfaces.ts definitions. Target zero linter violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/__tests__/auth.service.spec.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/__tests__/controller-security.integration.spec.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/test-utils/test-interfaces.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T02:49:25.880Z",
+      "auto_research_created": false
+    },
+    {
       "id": "error_1757730608890_vx3qybln3",
       "title": "Fix all TypeScript violations in bytebotd authentication test files",
       "description": "CRITICAL EMERGENCY: Fix TypeScript violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/__tests__/ - Unsafe assignment violations (@typescript-eslint/no-unsafe-assignment), Explicit any types (@typescript-eslint/no-explicit-any), Unsafe member access (@typescript-eslint/no-unsafe-member-access), Unsafe argument violations (@typescript-eslint/no-unsafe-argument), Unused variables (@typescript-eslint/no-unused-vars). Create proper TypeScript interfaces for all test data structures, replace all any types with specific interfaces, fix unsafe assignments with proper type casting, add proper type guards for member access, remove unused variables or prefix with underscore. Zero tolerance for remaining violations.",
@@ -116,34 +136,6 @@
       ]
     },
     {
-      "id": "error_1757730605982_4n2ywydc7",
-      "title": "Fix TypeScript violations in bytebotd API and controller test files",
-      "description": "CRITICAL: Fix all TypeScript violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/api/__tests__/ and related controller test files. Fix unsafe return violations, prefer nullish coalescing, unsafe member access on error objects, unsafe argument violations in controller tests, and unused response variables. Maintain API test functionality while achieving zero linter violations.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T02:30:05.982Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757730587217_1_general_d829878e",
-      "started_at": "2025-09-13T02:30:27.719Z",
-      "claimed_by": "development_session_1757730587217_1_general_d829878e",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757730587217_1_general_d829878e",
-          "role": "primary",
-          "assignedAt": "2025-09-13T02:30:27.719Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757730604366_k44933ath",
       "title": "Fix TypeScript violations in bytebotd utility, helper, and common test files",
       "description": "Fix all TypeScript violations in /packages/bytebotd/src/utils/, /src/helpers/, /src/common/, and shared utility tests. Primary violations: unsafe argument types, unsafe return types, unsafe member access, unsafe assignments, unsafe type handling in validation utilities. Create utility-specific TypeScript interfaces, fix function argument and return type safety, secure configuration object handling, fix validation utility type patterns, handle common module member access safely.",
@@ -166,34 +158,6 @@
           "agentId": "development_session_1757730585173_1_general_5ce19c57",
           "role": "primary",
           "assignedAt": "2025-09-13T02:30:21.674Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "id": "error_1757730603637_xdh3pew6i",
-      "title": "Fix TypeScript violations in bytebotd service layer test files",
-      "description": "Target: /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/services/__tests__/ - Fix service method unsafe argument violations, business logic unsafe return types, service dependency injection unsafe assignments, mock service implementations with any types, and service result handling unsafe member access. Create proper service interface definitions, secure return types, and achieve zero linter violations.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T02:30:03.637Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757730587531_1_general_dcbaeacc",
-      "started_at": "2025-09-13T02:30:20.404Z",
-      "claimed_by": "development_session_1757730587531_1_general_dcbaeacc",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757730587531_1_general_dcbaeacc",
-          "role": "primary",
-          "assignedAt": "2025-09-13T02:30:20.404Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }

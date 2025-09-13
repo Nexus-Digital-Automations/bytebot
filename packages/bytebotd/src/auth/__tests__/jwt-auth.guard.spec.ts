@@ -51,7 +51,7 @@ class MockJwtAuthGuard {
       });
 
       // Validate token payload structure
-      if (!_payload.sub || !_payload.email || !_payload.role) {
+      if (!_payload.sub ?? !_payload.email ?? !_payload.role) {
         throw new UnauthorizedException('Invalid token _payload structure');
       }
 

@@ -9,10 +9,17 @@
  * @author Input Validation & API Security Specialist
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+ 
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+ 
+/* eslint-disable no-undef */
+
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 import { SecuritySanitizationPipe } from '../pipes/security-sanitization.pipe';
-import { EnterpriseRateLimitGuard } from '../guards/rate-limit.guard';
 import { SecurityExceptionFilter } from '../filters/security-exception.filter';
 
 describe('Security Validation Mock Tests', () => {

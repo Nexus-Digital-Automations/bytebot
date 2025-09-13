@@ -145,7 +145,7 @@ export class LoggingInterceptor implements NestInterceptor {
 
         // Record metrics for failed requests
         if (this.metricsService) {
-          const statusCode = error?.status || error?.statusCode || 500;
+          const statusCode = error?.status ?? error?.statusCode ?? 500;
           this.metricsService.recordApiRequestDuration(
             request.method,
             route,
@@ -174,7 +174,7 @@ export class LoggingInterceptor implements NestInterceptor {
       request.headers['x-request-id'] ||
       request.headers['x-trace-id'];
 
-    return (existingId as string) || uuidv4();
+    return (existingId as string) ?? uuidv4();
   }
 
   /**
@@ -191,7 +191,7 @@ export class LoggingInterceptor implements NestInterceptor {
     return {
       correlationId,
       method: request.method,
-      url: request.originalUrl || request.url,
+      url: request.originalUrl ?? request.url,
       userAgent: request.headers['user-agent'],
       remoteAddress: this.getClientIpAddress(request),
       timestamp: new Date().toISOString(),
@@ -216,7 +216,7 @@ export class LoggingInterceptor implements NestInterceptor {
       statusCode: response.statusCode,
       processingTime,
       contentLength:
-        parseInt(response.get('Content-Length') || '0', 10) || undefined,
+        parseInt(response.get('Content-Length') ?? '0', 10) ?? undefined,
       cacheHit: response.get('X-Cache-Status') === 'HIT',
     };
   }
@@ -229,8 +229,8 @@ export class LoggingInterceptor implements NestInterceptor {
    */
   private createErrorContext(error: Error): ErrorContext {
     return {
-      name: error?.name || 'UnknownError',
-      message: error?.message || 'An unknown error occurred',
+      name: error?.name ?? 'UnknownError',
+      message: error?.message ?? 'An unknown error occurred',
       stack: error?.stack,
       statusCode:
         'status' in error && typeof error.status === 'number'
@@ -256,7 +256,7 @@ export class LoggingInterceptor implements NestInterceptor {
     }
 
     // Fallback to URL path with parameter normalization
-    const url = request.originalUrl || request.url;
+    const url = request.originalUrl ?? request.url;
     return this.normalizeUrlForMetrics(url);
   }
 

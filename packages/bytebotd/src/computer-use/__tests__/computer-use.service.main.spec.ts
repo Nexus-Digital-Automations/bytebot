@@ -42,11 +42,36 @@ jest.mock('fs/promises', () => ({
 jest.mock('util', () => ({
   ...jest.requireActual('util'),
   promisify: jest.fn(
-    (fn) =>
-      (...args) =>
+    (fn: (...args: unknown[]) => unknown) =>
+      (...args: unknown[]) =>
         Promise.resolve(fn(...args)),
   ),
 }));
+
+/**
+ * Type definitions for mocked modules
+ */
+interface MockChildProcess {
+  exec: jest.MockedFunction<any>;
+  spawn: jest.MockedFunction<any>;
+}
+
+interface MockUtil {
+  promisify: jest.MockedFunction<any>;
+}
+
+interface MockExecCallback {
+  (error: Error | null, result?: { stdout: string; stderr?: string }): void;
+}
+
+/**
+ * Type-safe Jest spy interface
+ */
+interface MockJestSpy extends jest.SpyInstance {
+  mockImplementation: jest.MockInstance<any, any>['mockImplementation'];
+  mockResolvedValue: jest.MockInstance<any, any>['mockResolvedValue'];
+  mockRejectedValue: jest.MockInstance<any, any>['mockRejectedValue'];
+}
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
@@ -106,25 +131,27 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
 
-    // Mock child_process.exec
-    const { exec } = require('child_process');
-    const { _promisify } = require('util');
+    // Mock child_process.exec with proper typing
+    const childProcess = require('child_process') as MockChildProcess;
+    const util = require('util') as MockUtil;
 
     // Mock exec to resolve quickly for tests
-    exec.mockImplementation((command, options, callback) => {
-      if (typeof options === 'function') {
-        callback = options;
-      }
-      // Simulate quick exec resolution
-      setTimeout(() => {
-        if (command.includes('stat')) {
-          callback(null, { stdout: '1024 1640995200' }); // size and timestamp
-        } else {
-          callback(null, { stdout: '' });
+    childProcess.exec.mockImplementation(
+      (command: string, options: unknown, callback?: MockExecCallback) => {
+        if (typeof options === 'function') {
+          callback = options as MockExecCallback;
         }
-      }, 10);
-      return { pid: 12345 };
-    });
+        // Simulate quick exec resolution
+        setTimeout(() => {
+          if (command.includes('stat')) {
+            callback(null, { stdout: '1024 1640995200' }); // size and timestamp
+          } else {
+            callback(null, { stdout: '' });
+          }
+        }, 10);
+        return { pid: 12345 };
+      },
+    );
 
     // Mock Logger to prevent console output during tests
     jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});
@@ -408,7 +435,8 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should route application action correctly', async () => {
         // Arrange
-        const { spawn } = require('child_process');
+        const childProcessForApp = require('child_process') as MockChildProcess;
+        const { spawn } = childProcessForApp;
         spawn.mockReturnValue({
           unref: jest.fn(),
           pid: 12345,
@@ -533,9 +561,12 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         expect(nutService.screendump).toHaveBeenCalled();
       });
 
-      it('should log structured _error information', async () => {
+      it('should log structured error information', async () => {
         // Arrange
-        const _loggerErrorSpy = jest.spyOn(Logger.prototype, 'error');
+        const loggerErrorSpy = jest.spyOn(
+          Logger.prototype,
+          'error',
+        ) as MockJestSpy;
         const action = createTestAction<ClickMouseAction>({
           action: 'click_mouse',
           button: 'left',
@@ -584,7 +615,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     describe('Performance Monitoring', () => {
       it('should log action start with performance tracking', async () => {
         // Arrange
-        const _loggerLogSpy = jest.spyOn(Logger.prototype, 'log');
+        const loggerLogSpy = jest.spyOn(Logger.prototype, 'log') as MockJestSpy;
         const action = createTestAction<MoveMouseAction>({
           action: 'move_mouse',
           coordinates: { x: 100, y: 200 },
@@ -594,7 +625,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         await service.action(action);
 
         // Assert
-        expect(_loggerLogSpy).toHaveBeenCalledWith(
+        expect(loggerLogSpy).toHaveBeenCalledWith(
           expect.stringContaining('Executing computer action: move_mouse'),
           expect.objectContaining({
             operationId: expect.any(String),
@@ -607,7 +638,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should log action completion with performance metrics', async () => {
         // Arrange
-        const _loggerLogSpy = jest.spyOn(Logger.prototype, 'log');
+        const loggerLogSpy = jest.spyOn(Logger.prototype, 'log') as MockJestSpy;
         const action = createTestAction<ScreenshotAction>({
           action: 'screenshot',
         });
@@ -876,10 +907,10 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should return undefined for objects without stack', () => {
         // Arrange
-        const _error = { message: 'No stack error' };
+        const errorObject = { message: 'No stack error' };
 
         // Act
-        const result = ErrorHandler.extractErrorStack(_error);
+        const result = ErrorHandler.extractErrorStack(errorObject);
 
         // Assert
         expect(result).toBeUndefined();
@@ -887,7 +918,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     });
 
     describe('createError', () => {
-      it('should create comprehensive _error object', () => {
+      it('should create comprehensive error object', () => {
         // Arrange
         const code = 'TEST_ERROR';
         const message = 'Test error message';

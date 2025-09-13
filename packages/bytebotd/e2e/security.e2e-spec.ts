@@ -17,7 +17,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { Application } from 'express';
+import type { Express } from 'express';
 import {
   UserRole,
   TestJwtPayload,
@@ -778,7 +778,9 @@ describe('Security E2E Tests', () => {
       // Make many requests rapidly
       const requests = Array(60)
         .fill(null)
-        .map(() => request(app.getHttpServer()).get('/health'));
+        .map(() =>
+          request(app.getHttpServer() as Express.Application).get('/health'),
+        );
 
       const responses = await Promise.all(requests);
 
@@ -802,7 +804,9 @@ describe('Security E2E Tests', () => {
       // Send burst of concurrent requests
       const promises = Array(20)
         .fill(null)
-        .map(() => request(app.getHttpServer()).get('/health'));
+        .map(() =>
+          request(app.getHttpServer() as Express.Application).get('/health'),
+        );
 
       const responses = await Promise.all(promises);
       const executionTime = Date.now() - startTime;
@@ -825,12 +829,14 @@ describe('Security E2E Tests', () => {
       // Test different endpoints
       const healthRequests = Array(10)
         .fill(null)
-        .map(() => request(app.getHttpServer()).get('/health'));
+        .map(() =>
+          request(app.getHttpServer() as Express.Application).get('/health'),
+        );
 
       const taskRequests = Array(10)
         .fill(null)
         .map(() =>
-          request(app.getHttpServer())
+          request(app.getHttpServer() as Express.Application)
             .get('/api/tasks')
             .set('Authorization', 'Bearer mock-jwt-token'),
         );
@@ -887,10 +893,12 @@ describe('Security E2E Tests', () => {
       const concurrentLogins = Array(10)
         .fill(null)
         .map(() =>
-          request(app.getHttpServer()).post('/auth/login').send({
-            email: 'admin@bytebot.ai',
-            password: 'admin123',
-          }),
+          request(app.getHttpServer() as Express.Application)
+            .post('/auth/login')
+            .send({
+              email: 'admin@bytebot.ai',
+              password: 'admin123',
+            }),
         );
 
       const responses = await Promise.all(concurrentLogins);
@@ -1032,21 +1040,21 @@ describe('Security E2E Tests', () => {
         ...Array(10)
           .fill(null)
           .map(() =>
-            request(app.getHttpServer())
+            request(app.getHttpServer() as Express.Application)
               .post('/auth/login')
               .send({ email: 'admin@bytebot.ai', password: 'admin123' }),
           ),
         ...Array(10)
           .fill(null)
           .map(() =>
-            request(app.getHttpServer())
+            request(app.getHttpServer() as Express.Application)
               .get('/api/tasks')
               .set('Authorization', 'Bearer mock-jwt-token'),
           ),
         ...Array(10)
           .fill(null)
           .map(() =>
-            request(app.getHttpServer())
+            request(app.getHttpServer() as Express.Application)
               .post('/api/tasks')
               .set('Authorization', 'Bearer mock-jwt-token')
               .send({ title: 'Load Test Task' }),
@@ -1088,7 +1096,9 @@ describe('Security E2E Tests', () => {
 
       for (const testCase of edgeCases) {
         try {
-          let req = request(app.getHttpServer())[testCase.method](testCase.url);
+          let req = request(app.getHttpServer() as Express.Application)[
+            testCase.method
+          ](testCase.url);
           if (testCase.headers) {
             Object.entries(testCase.headers).forEach(([key, value]) => {
               req = req.set(key, value);
