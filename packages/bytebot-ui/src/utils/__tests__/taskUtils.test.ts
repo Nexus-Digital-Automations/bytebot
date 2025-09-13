@@ -23,7 +23,14 @@ import {
   resumeTask,
   takeOverTask,
 } from "../taskUtils";
-import { Message, Role, Task, TaskStatus } from "@/types";
+import {
+  Message,
+  Role,
+  Task,
+  TaskPriority,
+  TaskStatus,
+  TaskType,
+} from "@/types";
 import { MessageContentType } from "@bytebot/shared";
 // Import types for test utilities if needed
 // import { TestUtils, TestDataFactory } from "@/test-utils/setupAfterEnv";
@@ -376,8 +383,12 @@ describe("TaskUtils", () => {
       id: "task-123",
       title: "Test Task",
       description: "Test Description",
+      type: TaskType.IMMEDIATE,
       status: TaskStatus.RUNNING,
+      priority: TaskPriority.MEDIUM,
       control: Role.ASSISTANT,
+      createdBy: Role.USER,
+      model: { provider: "openai", name: "gpt-4", title: "GPT-4" },
       createdAt: "2023-01-01T00:00:00Z",
       updatedAt: "2023-01-01T00:00:00Z",
     };
@@ -446,8 +457,12 @@ describe("TaskUtils", () => {
       id: "task-123",
       title: "Test Task",
       description: "Test Description",
+      type: TaskType.IMMEDIATE,
       status: TaskStatus.NEEDS_HELP,
+      priority: TaskPriority.MEDIUM,
       control: Role.USER,
+      createdBy: Role.USER,
+      model: { provider: "openai", name: "gpt-4", title: "GPT-4" },
       createdAt: "2023-01-01T00:00:00Z",
       updatedAt: "2023-01-01T00:01:00Z",
     };
@@ -499,8 +514,12 @@ describe("TaskUtils", () => {
       id: "task-123",
       title: "Test Task",
       description: "Test Description",
+      type: TaskType.IMMEDIATE,
       status: TaskStatus.RUNNING,
+      priority: TaskPriority.MEDIUM,
       control: Role.ASSISTANT,
+      createdBy: Role.USER,
+      model: { provider: "openai", name: "gpt-4", title: "GPT-4" },
       createdAt: "2023-01-01T00:00:00Z",
       updatedAt: "2023-01-01T00:01:00Z",
     };
@@ -545,8 +564,12 @@ describe("TaskUtils", () => {
       id: "task-123",
       title: "Test Task",
       description: "Test Description",
+      type: TaskType.IMMEDIATE,
       status: TaskStatus.CANCELLED,
+      priority: TaskPriority.MEDIUM,
       control: Role.ASSISTANT,
+      createdBy: Role.USER,
+      model: { provider: "openai", name: "gpt-4", title: "GPT-4" },
       createdAt: "2023-01-01T00:00:00Z",
       updatedAt: "2023-01-01T00:01:00Z",
     };

@@ -374,13 +374,20 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
 
         // Append new messages to the end of the list (newer messages)
         const formattedMessages: Message[] = validMessages.map(
-          (msg: Message) => ({
-            id: msg.id,
-            content: msg.content,
-            role: msg.role,
-            createdAt: msg.createdAt,
-            taskId: msg.taskId, // Ensure taskId is preserved
-          }),
+          (msg: Message) => {
+            const formatted: Message = {
+              id: msg.id,
+              content: msg.content,
+              role: msg.role,
+            };
+            if (msg.createdAt !== undefined) {
+              formatted.createdAt = msg.createdAt;
+            }
+            if (msg.taskId !== undefined) {
+              formatted.taskId = msg.taskId;
+            }
+            return formatted;
+          },
         );
 
         // Filter out any messages we already have
@@ -549,13 +556,20 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
           });
 
           const formattedMessages: Message[] = validMessages.map(
-            (msg: Message) => ({
-              id: msg.id,
-              content: msg.content,
-              role: msg.role,
-              createdAt: msg.createdAt,
-              taskId: msg.taskId, // Preserve taskId
-            }),
+            (msg: Message) => {
+              const formatted: Message = {
+                id: msg.id,
+                content: msg.content,
+                role: msg.role,
+              };
+              if (msg.createdAt !== undefined) {
+                formatted.createdAt = msg.createdAt;
+              }
+              if (msg.taskId !== undefined) {
+                formatted.taskId = msg.taskId;
+              }
+              return formatted;
+            },
           );
 
           // Add message IDs to processed set

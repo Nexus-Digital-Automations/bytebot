@@ -14,10 +14,9 @@
  * @version 1.0.0
  */
 
-import React from "react";
 import { screen } from "@testing-library/react";
 import { TaskItem } from "../TaskItem";
-import { Role, Task, TaskStatus } from "@/types";
+import { Role, Task, TaskPriority, TaskStatus, TaskType } from "@/types";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 import { format } from "date-fns";
 import { capitalizeFirstChar } from "@/utils/stringUtils";
@@ -70,13 +69,20 @@ jest.mock("@/components/ui/loader", () => ({
 }));
 
 describe("TaskItem Component", () => {
-  const mockBaseTask = {
+  const mockBaseTask: Task = {
     id: "task-123",
     title: "Test Task Title",
     description: "Test task description",
+    type: TaskType.IMMEDIATE,
+    status: TaskStatus.PENDING,
+    priority: TaskPriority.MEDIUM,
     control: Role.ASSISTANT,
-    priority: "medium" as const,
-    tags: ["test", "ui"],
+    createdBy: Role.USER,
+    model: {
+      provider: "openai",
+      name: "gpt-4",
+      title: "GPT-4",
+    },
     createdAt: "2023-04-13T12:01:00Z",
     updatedAt: "2023-04-13T12:01:00Z",
   };
@@ -87,7 +93,7 @@ describe("TaskItem Component", () => {
 
     // Configure format mock to return proper string values
     (format as jest.Mock).mockImplementation(
-      (date: Date, formatString: string): string => {
+      (_date: Date, formatString: string): string => {
         if (formatString.includes("Today")) {
           return "today 9:13am";
         }

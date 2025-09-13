@@ -129,8 +129,7 @@ interface App {
  * Eliminates need for 'as any' casting with proper typing
  */
 function createRequest(app: INestApplication) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-  return request(app.getHttpAdapter().getInstance() as any);
+  return request(app.getHttpServer());
 }
 
 // UserRole is now imported from @bytebot/shared

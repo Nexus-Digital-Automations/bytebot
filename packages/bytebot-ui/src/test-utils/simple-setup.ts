@@ -11,7 +11,7 @@
 import "reflect-metadata";
 
 // Set test environment for Bytebot UI
-process.env.NODE_ENV = "test";
+(process.env as any).NODE_ENV = "test";
 process.env.BYTEBOT_TEST_MODE = "true";
 process.env.BYTEBOT_UI_TEST = "true";
 

@@ -538,62 +538,6 @@
       ]
     },
     {
-      "id": "error_1757783798601_b7pxzbr9h",
-      "title": "Fix @typescript-eslint/no-unsafe-assignment violations in data-storage-optimization.service.ts",
-      "description": "Fix unsafe assignment violations on lines 819 and 884 in data-storage-optimization.service.ts by creating proper TypeScript interfaces and replacing any typed assignments with typed assignments",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T17:16:38.601Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757783778117_1_general_54663dbf",
-      "started_at": "2025-09-13T17:16:56.870Z",
-      "claimed_by": "development_session_1757783778117_1_general_54663dbf",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757783778117_1_general_54663dbf",
-          "role": "primary",
-          "assignedAt": "2025-09-13T17:16:56.870Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "id": "error_1757783798368_q7wjstn5o",
-      "title": "Fix @typescript-eslint unsafe violations in data-retention-cleanup.service.ts",
-      "description": "Fix 13 @typescript-eslint/no-unsafe-* violations in database cleanup service: unsafe assignments (lines 551, 593, 689), unsafe arguments (lines 572, 574, 634, 735), and unsafe member access (lines 634, 635, 638, 735, 736, 739). Create proper TypeScript interfaces and type guards while preserving database cleanup functionality.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T17:16:38.368Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757783777458_1_general_affe8e5b",
-      "started_at": "2025-09-13T17:16:59.450Z",
-      "claimed_by": "development_session_1757783777458_1_general_affe8e5b",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757783777458_1_general_affe8e5b",
-          "role": "primary",
-          "assignedAt": "2025-09-13T17:16:59.450Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757735241901_wgjpshez9",
       "title": "CRITICAL: Fix ByteBot-Agent TypeScript config error blocking deployment",
       "description": "Emergency resolution of critical TypeScript compilation error in bytebot-agent package: src/config/config.service.ts line 828 - DATABASE_URL type assignment error. Prevents agent service build and blocks production deployment. Fix AppConfig interface to include DATABASE_URL property and resolve TS2345 error.",

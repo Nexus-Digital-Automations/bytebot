@@ -176,8 +176,8 @@ export class LoggingInterceptor implements NestInterceptor {
   private generateCorrelationId(request: Request): string {
     // Check if correlation ID already exists (from upstream service)
     const existingId =
-      request.headers['x-correlation-id'] ||
-      request.headers['x-request-id'] ||
+      request.headers['x-correlation-id'] ??
+      request.headers['x-request-id'] ??
       request.headers['x-trace-id'];
 
     return (existingId as string) ?? _uuidv4();

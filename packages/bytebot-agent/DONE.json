@@ -3436,9 +3436,117 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/TODO.json"
+    },
+    {
+      "id": "error_1757783798368_q7wjstn5o",
+      "title": "Fix @typescript-eslint unsafe violations in data-retention-cleanup.service.ts",
+      "description": "Fix 13 @typescript-eslint/no-unsafe-* violations in database cleanup service: unsafe assignments (lines 551, 593, 689), unsafe arguments (lines 572, 574, 634, 735), and unsafe member access (lines 634, 635, 638, 735, 736, 739). Create proper TypeScript interfaces and type guards while preserving database cleanup functionality.",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T17:16:38.368Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757783777458_1_general_affe8e5b",
+      "started_at": "2025-09-13T17:16:59.450Z",
+      "claimed_by": "development_session_1757783777458_1_general_affe8e5b",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757783777458_1_general_affe8e5b",
+          "role": "primary",
+          "assignedAt": "2025-09-13T17:16:59.450Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757783798368_q7wjstn5o",
+          "completedAt": "2025-09-13T17:25:25.035Z",
+          "completedBy": "development_session_1757783777458_1_general_affe8e5b",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T17:25:25.035Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T17:25:25.035Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/TODO.json"
+    },
+    {
+      "id": "error_1757783798601_b7pxzbr9h",
+      "title": "Fix @typescript-eslint/no-unsafe-assignment violations in data-storage-optimization.service.ts",
+      "description": "Fix unsafe assignment violations on lines 819 and 884 in data-storage-optimization.service.ts by creating proper TypeScript interfaces and replacing any typed assignments with typed assignments",
+      "priority": "medium",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T17:16:38.601Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757783778117_1_general_54663dbf",
+      "started_at": "2025-09-13T17:16:56.870Z",
+      "claimed_by": "development_session_1757783778117_1_general_54663dbf",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757783778117_1_general_54663dbf",
+          "role": "primary",
+          "assignedAt": "2025-09-13T17:16:56.870Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completion_history": [
+        {
+          "taskId": "error_1757783798601_b7pxzbr9h",
+          "completedAt": "2025-09-13T17:25:44.793Z",
+          "completedBy": "development_session_1757783778117_1_general_54663dbf",
+          "evidence": {},
+          "completionNotes": "",
+          "category": "error",
+          "priority": "medium"
+        }
+      ],
+      "access_history": [
+        {
+          "agentId": "system",
+          "timestamp": "2025-09-13T17:25:44.793Z",
+          "action": "status_change",
+          "details": {
+            "oldStatus": "in_progress",
+            "newStatus": "completed"
+          }
+        }
+      ],
+      "completed_at": "2025-09-13T17:25:44.793Z",
+      "needs_linter_feedback": true,
+      "linter_feedback_generated": false,
+      "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent/TODO.json"
     }
   ],
-  "total_completed": 76,
-  "last_completion": "2025-09-13T17:23:41.351Z",
+  "total_completed": 78,
+  "last_completion": "2025-09-13T17:25:44.793Z",
   "created_at": "2025-09-05T23:30:23.322Z"
 }
