@@ -649,7 +649,7 @@ export const AuditorAccess = (): CustomDecorator<string> => {
  */
 export const ComputerUseAccess = () => {
   return (
-    target: any,
+    target: abstract new (..._args: unknown[]) => unknown,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
@@ -683,7 +683,7 @@ export const ComputerUseAccess = () => {
  */
 export const TaskManagementAccess = () => {
   return (
-    target: any,
+    target: abstract new (..._args: unknown[]) => unknown,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
@@ -716,7 +716,7 @@ export const TaskManagementAccess = () => {
  */
 export const APIAdminAccess = () => {
   return (
-    target: any,
+    target: abstract new (..._args: unknown[]) => unknown,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
@@ -750,7 +750,7 @@ export const APIAdminAccess = () => {
  */
 export const SecurityManagementAccess = () => {
   return (
-    target: any,
+    target: abstract new (..._args: unknown[]) => unknown,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
