@@ -394,7 +394,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
 
         next();
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         const processingTime = Date.now() - startTime;
 
         this.logger.error(`[${operationId}] File security validation failed`, {

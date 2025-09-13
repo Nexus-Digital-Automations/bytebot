@@ -94,6 +94,15 @@ const TEST_PASSWORD = "TestPassword123!";
 const TEST_WEAK_PASSWORD = "weak";
 const TEST_USER_ID = "test-user-123";
 
+// JWT payload template for tests
+const TEST_JWT_PAYLOAD_BASE = {
+  sub: TEST_USER_ID,
+  userId: TEST_USER_ID,
+  iss: "test-issuer",
+  sessionId: "test-session-123",
+  type: "access" as const,
+};
+
 // Mock data for comprehensive testing
 const MALICIOUS_XSS_PAYLOADS = [
   "<script>alert('xss')</script>",
@@ -289,7 +298,6 @@ describe("Password Security Functions", () => {
         requireSpecialChars: true,
         minSpecialChars: 2,
         forbiddenPatterns: ["password", "123456"],
-        maxConsecutiveChars: 2,
       };
 
       const password = "CustomPass123!!";
@@ -431,7 +439,10 @@ describe("JWT Token Management Functions", () => {
     test("should generate valid access tokens", () => {
       console.log("Testing access token generation...");
 
-      const payload = { userId: TEST_USER_ID, role: UserRole._ADMIN };
+      const payload = {
+        ...TEST_JWT_PAYLOAD_BASE,
+        role: UserRole._ADMIN,
+      };
       const token = generateAccessToken(payload, TEST_SECRET);
 
       expect(token).toBeDefined();

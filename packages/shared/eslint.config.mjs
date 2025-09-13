@@ -70,7 +70,9 @@ export default tseslint.config(
       ecmaVersion: 2022,
       sourceType: "module",
       parserOptions: {
+        project: ["./tsconfig.json", "./tsconfig.test.json"],
         tsconfigRootDir: import.meta.dirname,
+        allowDefaultProject: true,
         // Performance optimization for large files
         ecmaFeatures: {
           jsx: false,
@@ -123,6 +125,13 @@ export default tseslint.config(
       "src/**/__tests__/**/*.ts",
       "src/**/test-utils/**/*.ts",
     ],
+    languageOptions: {
+      parserOptions: {
+        project: "./tsconfig.test.json",
+        tsconfigRootDir: import.meta.dirname,
+        allowDefaultProject: true,
+      },
+    },
     rules: {
       // Relax rules for test files
       "@typescript-eslint/no-explicit-any": "off",
@@ -133,6 +142,12 @@ export default tseslint.config(
 
       // Allow require imports for dynamic mocking
       "@typescript-eslint/no-require-imports": "off",
+
+      // Additional relaxed rules for test files
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
     },
   },
 );

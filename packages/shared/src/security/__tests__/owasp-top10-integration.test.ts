@@ -723,7 +723,9 @@ describe("OWASPTop10IntegrationService", () => {
         },
       };
 
-      mockSpawn.mockReturnValueOnce(longRunningProcess as unknown as ChildProcess);
+      mockSpawn.mockReturnValueOnce(
+        longRunningProcess as unknown as ChildProcess,
+      );
 
       // Start scan without awaiting
       const scanPromise = service.scanWebApplication("https://example.com");
@@ -1353,7 +1355,9 @@ describe("OWASPTop10IntegrationService", () => {
         },
       };
 
-      mockSpawn.mockReturnValueOnce(longRunningProcess as unknown as ChildProcess);
+      mockSpawn.mockReturnValueOnce(
+        longRunningProcess as unknown as ChildProcess,
+      );
 
       // Start scan without awaiting
       const scanPromise = service.scanWebApplication("https://example.com");
@@ -1438,7 +1442,7 @@ describe("OWASPTop10IntegrationService", () => {
               },
             ),
         } as MockProcess;
-        return failedProcess as ChildProcess;
+        return failedProcess as unknown as ChildProcess;
       });
 
       const result = await service.scanWebApplication("https://example.com");

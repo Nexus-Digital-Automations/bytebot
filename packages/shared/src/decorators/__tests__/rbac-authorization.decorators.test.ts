@@ -495,8 +495,6 @@ describe("RBAC Authorization Decorators", () => {
           @ComputerUseAccess()
           computerMethod() {}
         }
-        // Type assertion to satisfy _ClassConstructor requirements
-        const controller = TestController as any;
 
         const rolesMetadata = Reflect.getMetadata(
           ROLES_KEY,
@@ -530,8 +528,6 @@ describe("RBAC Authorization Decorators", () => {
           @TaskManagementAccess()
           taskMethod() {}
         }
-        // Type assertion to satisfy _ClassConstructor requirements
-        const controller = TestController as any;
 
         const rolesMetadata = Reflect.getMetadata(
           ROLES_KEY,
@@ -559,8 +555,6 @@ describe("RBAC Authorization Decorators", () => {
           @APIAdminAccess()
           apiAdminMethod() {}
         }
-        // Type assertion to satisfy _ClassConstructor requirements
-        const controller = TestController as any;
 
         const rolesMetadata = Reflect.getMetadata(
           ROLES_KEY,
@@ -593,8 +587,6 @@ describe("RBAC Authorization Decorators", () => {
           @SecurityManagementAccess()
           securityMethod() {}
         }
-        // Type assertion to satisfy _ClassConstructor requirements
-        const controller = TestController as any;
 
         const rolesMetadata = Reflect.getMetadata(
           ROLES_KEY,

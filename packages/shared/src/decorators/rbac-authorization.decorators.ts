@@ -647,31 +647,23 @@ export const AuditorAccess = (): CustomDecorator<string> => {
  *
  * @returns Method decorator
  */
-export const ComputerUseAccess = () => {
-  return <T extends _ClassConstructor>(
-    target: T,
+export const ComputerUseAccess = (): CustomDecorator<string> => {
+  return (
+    target: Function | object,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
-    if (propertyKey && descriptor) {
-      // Method decorator
-      SetMetadata(ROLES_KEY, [Role._USER, Role._ADMIN, Role._OPERATOR])(
-        target,
-        propertyKey,
-        descriptor,
-      );
-      SetMetadata(PERMISSIONS_KEY, [Permission._COMPUTER_USE])(
-        target,
-        propertyKey,
-        descriptor,
-      );
-      SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
-    } else {
-      // Class decorator - no type casting needed
-      SetMetadata(ROLES_KEY, [Role._USER, Role._ADMIN, Role._OPERATOR])(target);
-      SetMetadata(PERMISSIONS_KEY, [Permission._COMPUTER_USE])(target);
-      SetMetadata(AUDIT_ACCESS_KEY, true)(target);
-    }
+    SetMetadata(ROLES_KEY, [Role._USER, Role._ADMIN, Role._OPERATOR])(
+      target,
+      propertyKey,
+      descriptor,
+    );
+    SetMetadata(PERMISSIONS_KEY, [Permission._COMPUTER_USE])(
+      target,
+      propertyKey,
+      descriptor,
+    );
+    SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
   };
 };
 
@@ -689,29 +681,22 @@ export const ComputerUseAccess = () => {
  *
  * @returns Method decorator
  */
-export const TaskManagementAccess = () => {
-  return <T extends _ClassConstructor>(
-    target: T,
+export const TaskManagementAccess = (): CustomDecorator<string> => {
+  return (
+    target: Function | object,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
-    if (propertyKey && descriptor) {
-      // Method decorator
-      SetMetadata(ROLES_KEY, [Role._USER, Role._ADMIN, Role._OPERATOR])(
-        target,
-        propertyKey,
-        descriptor,
-      );
-      SetMetadata(PERMISSIONS_KEY, [Permission._TASK_MANAGEMENT])(
-        target,
-        propertyKey,
-        descriptor,
-      );
-    } else {
-      // Class decorator - no type casting needed
-      SetMetadata(ROLES_KEY, [Role._USER, Role._ADMIN, Role._OPERATOR])(target);
-      SetMetadata(PERMISSIONS_KEY, [Permission._TASK_MANAGEMENT])(target);
-    }
+    SetMetadata(ROLES_KEY, [Role._USER, Role._ADMIN, Role._OPERATOR])(
+      target,
+      propertyKey,
+      descriptor,
+    );
+    SetMetadata(PERMISSIONS_KEY, [Permission._TASK_MANAGEMENT])(
+      target,
+      propertyKey,
+      descriptor,
+    );
   };
 };
 
@@ -729,33 +714,23 @@ export const TaskManagementAccess = () => {
  *
  * @returns Method decorator
  */
-export const APIAdminAccess = () => {
-  return <T extends _ClassConstructor>(
-    target: T,
+export const APIAdminAccess = (): CustomDecorator<string> => {
+  return (
+    target: any,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
-    if (propertyKey && descriptor) {
-      // Method decorator
-      SetMetadata(ROLES_KEY, [Role._ADMIN, Role._SUPER_ADMIN])(
-        target,
-        propertyKey,
-        descriptor,
-      );
-      SetMetadata(PERMISSIONS_KEY, [Permission._API_ADMIN, Permission._ADMIN])(
-        target,
-        propertyKey,
-        descriptor,
-      );
-      SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
-    } else {
-      // Class decorator - no type casting needed
-      SetMetadata(ROLES_KEY, [Role._ADMIN, Role._SUPER_ADMIN])(target);
-      SetMetadata(PERMISSIONS_KEY, [Permission._API_ADMIN, Permission._ADMIN])(
-        target,
-      );
-      SetMetadata(AUDIT_ACCESS_KEY, true)(target);
-    }
+    SetMetadata(ROLES_KEY, [Role._ADMIN, Role._SUPER_ADMIN])(
+      target,
+      propertyKey,
+      descriptor,
+    );
+    SetMetadata(PERMISSIONS_KEY, [Permission._API_ADMIN, Permission._ADMIN])(
+      target,
+      propertyKey,
+      descriptor,
+    );
+    SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
   };
 };
 
@@ -774,8 +749,8 @@ export const APIAdminAccess = () => {
  * @returns Method decorator
  */
 export const SecurityManagementAccess = () => {
-  return <T extends _ClassConstructor>(
-    target: T,
+  return (
+    target: Function | object,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {

@@ -1,41 +1,32 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Shared Package Tests",
+  "display": "Shared Package Test Configuration",
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "composite": false,
-    "declaration": false,
-    "declarationMap": false,
-    "outDir": "./dist-test",
-    "types": ["jest", "node"],
-    "allowJs": true,
-    "checkJs": false,
-    "strict": false,
+    "types": ["node", "@jest/globals", "jest"],
     "noImplicitAny": false,
     "strictNullChecks": false,
-    "strictFunctionTypes": false,
-    "strictBindCallApply": false,
-    "strictPropertyInitialization": false,
-    "noImplicitThis": false,
-    "alwaysStrict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "exactOptionalPropertyTypes": false,
-    "noImplicitReturns": false,
-    "noFallthroughCasesInSwitch": false,
-    "noUncheckedIndexedAccess": false,
-    "noImplicitOverride": false
+    "strict": false,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/**/__tests__/**/*",
-    "__tests__/**/*"
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "__tests__/**/*",
+    "src/**/__tests__/**/*", 
+    "src/**/test-utils/**/*",
+    "test-*",
+    "**/test-*",
+    "src/test-utils/**/*",
+    "src/interceptors/*.d.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "dist-test",
     "coverage"
   ]
 }

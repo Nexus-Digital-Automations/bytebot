@@ -90,23 +90,23 @@ import {
 
 // Valid content block fixtures
 const VALID_TEXT_BLOCK: TextContentBlock = {
-  type: MessageContentType.Text,
+  type: MessageContentType._Text,
   text: "This is a valid text content block with comprehensive test data.",
 };
 
 const VALID_THINKING_BLOCK: ThinkingContentBlock = {
-  type: MessageContentType.Thinking,
+  type: MessageContentType._Thinking,
   thinking: "This is internal thinking content for testing purposes.",
   signature: "test-signature-12345",
 };
 
 const VALID_REDACTED_THINKING_BLOCK: RedactedThinkingContentBlock = {
-  type: MessageContentType.RedactedThinking,
+  type: MessageContentType._RedactedThinking,
   data: "base64-encoded-redacted-thinking-data",
 };
 
 const VALID_IMAGE_BLOCK: ImageContentBlock = {
-  type: MessageContentType.Image,
+  type: MessageContentType._Image,
   source: {
     type: "base64",
     media_type: "image/png",
@@ -115,7 +115,7 @@ const VALID_IMAGE_BLOCK: ImageContentBlock = {
 };
 
 const VALID_DOCUMENT_BLOCK: DocumentContentBlock = {
-  type: MessageContentType.Document,
+  type: MessageContentType._Document,
   source: {
     type: "base64",
     media_type: "application/pdf",
@@ -124,11 +124,12 @@ const VALID_DOCUMENT_BLOCK: DocumentContentBlock = {
 };
 
 const VALID_USER_ACTION_BLOCK: UserActionContentBlock = {
-  type: MessageContentType.UserAction,
+  type: MessageContentType._UserAction,
+  content: [], // Add required content property
 };
 
 const VALID_TOOL_USE_BLOCK: ToolUseContentBlock = {
-  type: MessageContentType.ToolUse,
+  type: MessageContentType._ToolUse,
   id: "tool-use-12345",
   name: "test_tool",
   input: {
@@ -139,7 +140,7 @@ const VALID_TOOL_USE_BLOCK: ToolUseContentBlock = {
 };
 
 const VALID_COMPUTER_TOOL_USE_BLOCK: ComputerToolUseContentBlock = {
-  type: MessageContentType.ToolUse,
+  type: MessageContentType._ToolUse,
   id: "computer-tool-use-12345",
   name: "computer_screenshot",
   input: {
@@ -150,11 +151,11 @@ const VALID_COMPUTER_TOOL_USE_BLOCK: ComputerToolUseContentBlock = {
 };
 
 const VALID_TOOL_RESULT_BLOCK: ToolResultContentBlock = {
-  type: MessageContentType.ToolResult,
+  type: MessageContentType._ToolResult,
   tool_use_id: "tool-use-12345",
   content: [
     {
-      type: MessageContentType.Text,
+      type: MessageContentType._Text,
       text: "Tool execution result",
     },
   ],
@@ -195,15 +196,15 @@ const INVALID_CONTENT_BLOCKS = [
   undefined,
   {},
   { type: "invalid_type" },
-  { type: MessageContentType.Text }, // Missing text property
-  { type: MessageContentType.Image }, // Missing source property
+  { type: MessageContentType._Text }, // Missing text property
+  { type: MessageContentType._Image }, // Missing source property
   { type: MessageContentType.ToolUse }, // Missing required properties
   "not an object",
   42,
   true,
   [],
-  { type: MessageContentType.Text, text: null },
-  { type: MessageContentType.Image, source: "invalid" },
+  { type: MessageContentType._Text, text: null },
+  { type: MessageContentType._Image, source: "invalid" },
 ];
 
 /**
@@ -229,15 +230,15 @@ describe("Basic Content Block Type Guards", () => {
       console.log("Testing various text content formats...");
 
       const textVariations = [
-        { type: MessageContentType.Text, text: "" }, // Empty text
-        { type: MessageContentType.Text, text: "Single word" },
-        { type: MessageContentType.Text, text: "Multi-line\ntext\ncontent" },
-        { type: MessageContentType.Text, text: "Unicode: 🚀 中文 العربية" },
+        { type: MessageContentType._Text, text: "" }, // Empty text
+        { type: MessageContentType._Text, text: "Single word" },
+        { type: MessageContentType._Text, text: "Multi-line\ntext\ncontent" },
+        { type: MessageContentType._Text, text: "Unicode: 🚀 中文 العربية" },
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: "Special chars: !@#$%^&*()_+-=[]{}|;:,.<>?",
         },
-        { type: MessageContentType.Text, text: "A".repeat(10000) }, // Very long text
+        { type: MessageContentType._Text, text: "A".repeat(10000) }, // Very long text
       ];
 
       textVariations.forEach((variation, index) => {
@@ -254,11 +255,11 @@ describe("Basic Content Block Type Guards", () => {
 
       const invalidBlocks = [
         ...INVALID_CONTENT_BLOCKS,
-        { type: MessageContentType.Text, text: 42 }, // Wrong text type
-        { type: MessageContentType.Text, text: null },
-        { type: MessageContentType.Text, text: undefined },
-        { type: MessageContentType.Text, text: {} },
-        { type: MessageContentType.Image, text: "wrong type" }, // Wrong block type
+        { type: MessageContentType._Text, text: 42 }, // Wrong text type
+        { type: MessageContentType._Text, text: null },
+        { type: MessageContentType._Text, text: undefined },
+        { type: MessageContentType._Text, text: {} },
+        { type: MessageContentType._Image, text: "wrong type" }, // Wrong block type
       ];
 
       invalidBlocks.forEach((block, index) => {
@@ -320,7 +321,7 @@ describe("Basic Content Block Type Guards", () => {
         { type: MessageContentType.Thinking, signature: "test" }, // Missing thinking
         { type: MessageContentType.Thinking, thinking: 42, signature: "test" }, // Wrong thinking type
         { type: MessageContentType.Thinking, thinking: "test", signature: 42 }, // Wrong signature type
-        { type: MessageContentType.Text, thinking: "test", signature: "test" }, // Wrong block type
+        { type: MessageContentType._Text, thinking: "test", signature: "test" }, // Wrong block type
       ];
 
       invalidBlocks.forEach((block, index) => {
@@ -381,7 +382,7 @@ describe("Basic Content Block Type Guards", () => {
         { type: MessageContentType.RedactedThinking, data: 42 }, // Wrong data type
         { type: MessageContentType.RedactedThinking, data: null },
         { type: MessageContentType.RedactedThinking, data: {} },
-        { type: MessageContentType.Text, data: "test" }, // Wrong block type
+        { type: MessageContentType._Text, data: "test" }, // Wrong block type
       ];
 
       invalidBlocks.forEach((block, index) => {
@@ -411,7 +412,7 @@ describe("Basic Content Block Type Guards", () => {
 
       const validImageVariations = [
         {
-          type: MessageContentType.Image,
+          type: MessageContentType._Image,
           source: {
             type: "base64",
             media_type: "image/jpeg",
@@ -419,7 +420,7 @@ describe("Basic Content Block Type Guards", () => {
           },
         },
         {
-          type: MessageContentType.Image,
+          type: MessageContentType._Image,
           source: {
             type: "url",
             media_type: "image/gif",
@@ -427,7 +428,7 @@ describe("Basic Content Block Type Guards", () => {
           },
         },
         {
-          type: MessageContentType.Image,
+          type: MessageContentType._Image,
           source: {
             type: "file",
             media_type: "image/webp",
@@ -450,23 +451,23 @@ describe("Basic Content Block Type Guards", () => {
 
       const invalidBlocks = [
         ...INVALID_CONTENT_BLOCKS,
-        { type: MessageContentType.Image }, // Missing source
-        { type: MessageContentType.Image, source: "invalid" }, // Wrong source type
-        { type: MessageContentType.Image, source: {} }, // Empty source
+        { type: MessageContentType._Image }, // Missing source
+        { type: MessageContentType._Image, source: "invalid" }, // Wrong source type
+        { type: MessageContentType._Image, source: {} }, // Empty source
         {
-          type: MessageContentType.Image,
+          type: MessageContentType._Image,
           source: { type: "base64" }, // Missing media_type and data
         },
         {
-          type: MessageContentType.Image,
+          type: MessageContentType._Image,
           source: { media_type: "image/png" }, // Missing type and data
         },
         {
-          type: MessageContentType.Image,
+          type: MessageContentType._Image,
           source: { data: "test" }, // Missing type and media_type
         },
         {
-          type: MessageContentType.Image,
+          type: MessageContentType._Image,
           source: { type: 42, media_type: "image/png", data: "test" }, // Wrong type property type
         },
       ];
@@ -504,7 +505,7 @@ describe("Basic Content Block Type Guards", () => {
 
       const invalidBlocks = [
         ...INVALID_CONTENT_BLOCKS,
-        { type: MessageContentType.Text }, // Wrong type
+        { type: MessageContentType._Text }, // Wrong type
         { type: MessageContentType.ToolUse }, // Wrong type
       ];
 
@@ -535,7 +536,7 @@ describe("Basic Content Block Type Guards", () => {
 
       const validDocumentVariations = [
         {
-          type: MessageContentType.Document,
+          type: MessageContentType._Document,
           source: {
             type: "base64",
             media_type: "application/pdf",
@@ -543,7 +544,7 @@ describe("Basic Content Block Type Guards", () => {
           },
         },
         {
-          type: MessageContentType.Document,
+          type: MessageContentType._Document,
           source: {
             type: "file",
             media_type: "text/plain",
@@ -551,7 +552,7 @@ describe("Basic Content Block Type Guards", () => {
           },
         },
         {
-          type: MessageContentType.Document,
+          type: MessageContentType._Document,
           source: {
             type: "url",
             media_type: "application/json",
@@ -574,14 +575,14 @@ describe("Basic Content Block Type Guards", () => {
 
       const invalidBlocks = [
         ...INVALID_CONTENT_BLOCKS,
-        { type: MessageContentType.Document }, // Missing source
-        { type: MessageContentType.Document, source: "invalid" }, // Wrong source type
+        { type: MessageContentType._Document }, // Missing source
+        { type: MessageContentType._Document, source: "invalid" }, // Wrong source type
         {
-          type: MessageContentType.Document,
+          type: MessageContentType._Document,
           source: { type: "base64" }, // Missing media_type and data
         },
         {
-          type: MessageContentType.Document,
+          type: MessageContentType._Document,
           source: { type: 42, media_type: "application/pdf", data: "test" }, // Wrong type property type
         },
       ];
@@ -797,24 +798,24 @@ describe("Tool Use Content Block Type Guards", () => {
 
       const toolResultVariations = [
         {
-          type: MessageContentType.ToolResult,
+          type: MessageContentType._ToolResult,
           tool_use_id: "simple-result",
         },
         {
-          type: MessageContentType.ToolResult,
+          type: MessageContentType._ToolResult,
           tool_use_id: "result-with-content",
-          content: [{ type: MessageContentType.Text, text: "Result text" }],
+          content: [{ type: MessageContentType._Text, text: "Result text" }],
         },
         {
-          type: MessageContentType.ToolResult,
+          type: MessageContentType._ToolResult,
           tool_use_id: "result-with-image",
           content: [VALID_IMAGE_BLOCK],
         },
         {
-          type: MessageContentType.ToolResult,
+          type: MessageContentType._ToolResult,
           tool_use_id: "result-with-error",
           is_error: true,
-          content: [{ type: MessageContentType.Text, text: "Error occurred" }],
+          content: [{ type: MessageContentType._Text, text: "Error occurred" }],
         },
       ];
 
@@ -832,13 +833,13 @@ describe("Tool Use Content Block Type Guards", () => {
 
       const invalidBlocks = [
         ...INVALID_CONTENT_BLOCKS,
-        { type: MessageContentType.ToolResult }, // Missing tool_use_id
+        { type: MessageContentType._ToolResult }, // Missing tool_use_id
         {
-          type: MessageContentType.ToolResult,
+          type: MessageContentType._ToolResult,
           tool_use_id: 42, // Wrong tool_use_id type
         },
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           tool_use_id: "test", // Wrong block type
         },
       ];
@@ -901,7 +902,7 @@ describe("Message Content Block Type Analysis", () => {
 
       const edgeCases = [
         { type: "unknown_type" }, // Unknown type
-        { type: MessageContentType.Text, extra: "property" }, // Extra properties
+        { type: MessageContentType._Text, extra: "property" }, // Extra properties
         { ...VALID_TEXT_BLOCK, type: "modified" }, // Modified valid block
       ];
 
@@ -1347,7 +1348,7 @@ describe("Integration and Edge Cases", () => {
 
       const batchSize = 1000;
       const contentBlocks = Array.from({ length: batchSize }, (_, i) => ({
-        type: MessageContentType.Text,
+        type: MessageContentType._Text,
         text: `Test message ${i}`,
       }));
 
@@ -1409,7 +1410,7 @@ describe("Integration and Edge Cases", () => {
         { type: null },
         { type: undefined },
         { type: 42 },
-        { type: MessageContentType.Text, text: null },
+        { type: MessageContentType._Text, text: null },
         { type: MessageContentType.ToolUse, id: null },
         { circular: null }, // Will be made circular
       ];
@@ -1463,7 +1464,7 @@ describe("Integration and Edge Cases", () => {
       console.log("Testing very large string property handling...");
 
       const largeTextBlock = {
-        type: MessageContentType.Text,
+        type: MessageContentType._Text,
         text: "A".repeat(1000000), // 1MB of text
       };
 
@@ -1484,11 +1485,11 @@ describe("Integration and Edge Cases", () => {
 
       const coercionTestCases = [
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: 0, // Number that could be coerced to string
         },
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: false, // Boolean that could be coerced to string
         },
         {
@@ -1513,17 +1514,17 @@ describe("Integration and Edge Cases", () => {
       const propertyTestCases = [
         // Has property but wrong type
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: {},
         },
         // Missing required property
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           // Missing 'text' property
         },
         // Extra properties
         {
-          type: MessageContentType.Text,
+          type: MessageContentType._Text,
           text: "valid",
           extraProperty: "should not affect validation",
         },

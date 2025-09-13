@@ -662,9 +662,10 @@ export const createMockAuditLogger = (
   // Disable logging if configured
   if (!enableLogging) {
     Object.keys(mock).forEach((key) => {
-      if (typeof (mock as Record<string, unknown>)[key] === "function") {
+      const mockRecord = mock as unknown as Record<string, unknown>;
+      if (typeof mockRecord[key] === "function") {
         (
-          mock as Record<
+          mock as unknown as Record<
             string,
             jest.MockedFunction<(...args: unknown[]) => unknown>
           >
