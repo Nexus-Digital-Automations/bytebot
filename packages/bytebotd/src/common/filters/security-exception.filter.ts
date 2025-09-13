@@ -409,7 +409,16 @@ export class SecurityExceptionFilter implements ExceptionFilter {
   /**
    * Track error patterns for threat detection
    */
-  private trackErrorPattern(request: Request, errorAnalysis: any): void {
+  private trackErrorPattern(
+    request: Request,
+    errorAnalysis: {
+      errorType: SecurityErrorType;
+      statusCode: number;
+      riskScore: number;
+      threatIndicators: string[];
+      isSecurityRelated: boolean;
+    },
+  ): void {
     const clientIdentifier = this.getClientIdentifier(request);
     const now = new Date();
 
@@ -438,7 +447,13 @@ export class SecurityExceptionFilter implements ExceptionFilter {
    */
   private handleHighRiskError(
     request: Request,
-    errorAnalysis: any,
+    errorAnalysis: {
+      errorType: SecurityErrorType;
+      statusCode: number;
+      riskScore: number;
+      threatIndicators: string[];
+      isSecurityRelated: boolean;
+    },
     requestId: string,
   ): void {
     const clientIP = this.getClientIP(request);
