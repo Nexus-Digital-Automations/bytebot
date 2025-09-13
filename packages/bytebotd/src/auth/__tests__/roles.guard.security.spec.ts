@@ -84,6 +84,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
     return {
       // User with prototype pollution attempt
       prototypePollution: {
+        sub: 'user_123',
         id: 'user_123',
         email: 'user@test.com',
         username: 'testuser',
@@ -95,6 +96,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       // User with role confusion
       roleConfusion: {
+        sub: 'user_456',
         id: 'user_456',
         email: 'admin@test.com',
         username: 'fakeadmin',
@@ -106,6 +108,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       // User with XSS in properties
       xssPayload: {
+        sub: '<script>alert("XSS")</script>',
         id: '<script>alert("XSS")</script>',
         email: '<img src=x onerror=alert("XSS")>@test.com',
         username: 'javascript:alert("XSS")',
@@ -117,6 +120,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       // User with SQL injection in properties
       sqlInjection: {
+        sub: "'; DROP TABLE users; --",
         id: "'; DROP TABLE users; --",
         email: "admin@test.com'; DELETE FROM sessions WHERE '1'='1",
         username: "admin' OR '1'='1",
@@ -126,6 +130,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       // Inactive user attempting access
       inactiveUser: {
+        sub: 'inactive_user',
         id: 'inactive_user',
         email: 'inactive@test.com',
         username: 'inactive',
@@ -267,6 +272,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
 
       const user: ByteBotdUser = {
+        sub: 'mutable_user',
         id: 'mutable_user',
         email: 'user@test.com',
         username: 'mutableuser',
@@ -321,6 +327,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
 
       const user: ByteBotdUser = {
+        sub: 'perm_user',
         id: 'perm_user',
         email: 'user@test.com',
         username: 'permuser',
@@ -415,6 +422,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       for (const testUser of users) {
         const user: ByteBotdUser = {
+          sub: `timing_${Date.now()}`,
           id: `timing_${Date.now()}`,
           email: 'timing@test.com',
           username: 'timinguser',
@@ -464,6 +472,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
 
       const user: ByteBotdUser = {
+        sub: 'rapid_user',
         id: 'rapid_user',
         email: 'rapid@test.com',
         username: 'rapiduser',
@@ -580,6 +589,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .map(
           (_, _index) =>
             ({
+              sub: `attacker_${_index}`,
               id: `attacker_${_index}`,
               email: `attacker${_index}@malicious.com`,
               username: `attacker${_index}`,
@@ -637,6 +647,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
 
       const sharedUser: ByteBotdUser = {
+        sub: 'race_user',
         id: 'race_user',
         email: 'race@test.com',
         username: 'raceuser',
@@ -707,6 +718,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       };
 
       const suspiciousUser: ByteBotdUser = {
+        sub: 'suspicious_user',
         id: 'suspicious_user',
         email: 'attacker@malicious.com',
         username: 'hacker',
@@ -755,6 +767,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       securityLogger.info(`[${testId}] Testing authorization pattern tracking`);
 
       const normalUser: ByteBotdUser = {
+        sub: 'normal_user',
         id: 'normal_user',
         email: 'user@company.com',
         username: 'normaluser',
@@ -822,6 +835,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       // Simulate sustained authorization attacks
       for (let i = 0; i < 500; i++) {
         const attackUser: ByteBotdUser = {
+          sub: `memory_attacker_${i}`,
           id: `memory_attacker_${i}`,
           email: `attacker${i}@malicious.com`,
           username: `attacker${i}`,
@@ -865,6 +879,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
 
       const loadUser: ByteBotdUser = {
+        sub: 'load_user',
         id: 'load_user',
         email: 'load@test.com',
         username: 'loaduser',
