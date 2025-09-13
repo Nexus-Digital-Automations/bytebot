@@ -223,7 +223,10 @@ class SecurityE2EAuthService {
 class SecurityE2EJwtService {
   private secret = 'e2e-security-test-secret';
 
-  sign(payload: any, options: any = {}) {
+  sign(
+    payload: Record<string, unknown>,
+    options: { expiresIn?: string | number } = {},
+  ) {
     // Simulate JWT signing
     const header = Buffer.from(
       JSON.stringify({ alg: 'HS256', typ: 'JWT' }),
@@ -233,7 +236,7 @@ class SecurityE2EJwtService {
         ...payload,
         exp:
           Math.floor(Date.now() / 1000) +
-          (options.expiresIn ? parseInt(options.expiresIn) : 900), // 15 minutes default
+          (options.expiresIn ? parseInt(String(options.expiresIn)) : 900), // 15 minutes default
         iat: Math.floor(Date.now() / 1000),
       }),
     ).toString('base64url');
@@ -245,7 +248,7 @@ class SecurityE2EJwtService {
     return `${header}.${payloadEncoded}.${signature}`;
   }
 
-  verify(token: string): any {
+  verify(token: string): DecodedJwtPayload {
     try {
       const [header, payload, signature] = token.split('.');
 
@@ -273,7 +276,7 @@ class SecurityE2EJwtService {
         throw new Error('Invalid signature');
       }
 
-      return decodedPayload as any;
+      return decodedPayload as DecodedJwtPayload;
     } catch (_error) {
       throw new Error('Invalid token');
     }

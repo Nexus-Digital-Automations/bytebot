@@ -1,6 +1,6 @@
 /* eslint-env jest */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
- 
+
 /**
  * Health Service Test Suite
  *
@@ -1214,7 +1214,7 @@ describe('HealthService', () => {
           expect((result as unknown).error).toBeDefined();
         } else {
           expect(['up', 'down']).toContain(
-            (Object.values(result)[0] as unknown)?.status ||
+            (Object.values(result)[0] as unknown)?.status ??
               (result as unknown).status,
           );
         }

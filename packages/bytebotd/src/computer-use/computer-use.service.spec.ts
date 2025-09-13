@@ -620,9 +620,9 @@ describe('ComputerUseService', () => {
         expect(result).toMatchObject({
           image: fakeImageBuffer.toString('base64'),
           metadata: expect.objectContaining({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+             
             captureTime: expect.any(Date),
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+             
             operationId: expect.any(String),
             format: 'png',
           }),

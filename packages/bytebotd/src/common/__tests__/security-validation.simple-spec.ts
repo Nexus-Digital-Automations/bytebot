@@ -324,7 +324,7 @@ describe('Security Validation Tests', () => {
     });
 
     it('should handle multiple concurrent validations efficiently', () => {
-      const inputs = Array.from({ length: 100 }, (_, _i) => `Test input ${i}`);
+      const inputs = Array.from({ length: 100 }, (_, _i) => `Test input ${_i}`);
 
       const startTime = Date.now();
       const results = inputs.map((text) => ({

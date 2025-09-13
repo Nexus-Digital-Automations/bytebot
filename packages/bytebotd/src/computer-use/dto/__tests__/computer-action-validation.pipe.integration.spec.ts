@@ -1,4 +1,7 @@
 /* eslint-env jest */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Security Validation Pipeline Integration Tests
  * Tests the enhanced multi-stage security validation pipeline integration

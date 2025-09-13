@@ -377,9 +377,9 @@ describe('InputTrackingService', () => {
       });
 
       // Simulate clicking
-      const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const clickHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'click',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
       expect(clickHandler).toBeDefined();
 
       clickHandler?.(mockEvent);
@@ -401,15 +401,15 @@ describe('InputTrackingService', () => {
       const endEvent = createMockMouseEvent({ x: 200, y: 200 });
 
       // Get event handlers
-      const mouseDownHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const mouseDownHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'mousedown',
-      )?.[1];
-      const mouseMoveHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      )?.[1] as EventHandler | undefined;
+      const mouseMoveHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'mousemove',
-      )?.[1];
-      const mouseUpHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      )?.[1] as EventHandler | undefined;
+      const mouseUpHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'mouseup',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       expect(mouseDownHandler).toBeDefined();
       expect(mouseMoveHandler).toBeDefined();
@@ -433,9 +433,9 @@ describe('InputTrackingService', () => {
       const singleClickEvent = createMockMouseEvent({ clicks: 1 });
       const doubleClickEvent = createMockMouseEvent({ clicks: 2 });
 
-      const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const clickHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'click',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       // Send single click first
       clickHandler?.(singleClickEvent);
@@ -465,9 +465,9 @@ describe('InputTrackingService', () => {
         rotation: -3, // Scroll up
       });
 
-      const wheelHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const wheelHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'wheel',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       expect(wheelHandler).toBeDefined();
 
@@ -489,9 +489,9 @@ describe('InputTrackingService', () => {
       const rightClick = createMockMouseEvent({ button: 2 });
       const middleClick = createMockMouseEvent({ button: 3 });
 
-      const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const clickHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'click',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       clickHandler?.(leftClick);
       jest.runAllTimers();
@@ -522,9 +522,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_printable_character_typing`;
       console.log(`[${testId}] Testing printable character typing`);
 
-      const keydownHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const keydownHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'keydown',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       expect(keydownHandler).toBeDefined();
 
@@ -553,12 +553,12 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_key_combinations`;
       console.log(`[${testId}] Testing key combinations with modifiers`);
 
-      const keydownHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const keydownHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'keydown',
-      )?.[1];
-      const keyupHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      )?.[1] as EventHandler | undefined;
+      const keyupHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'keyup',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       // Ctrl+C combination
       keydownHandler?.(
@@ -591,9 +591,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_key_repeat_suppression`;
       console.log(`[${testId}] Testing key repeat suppression`);
 
-      const keydownHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const keydownHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'keydown',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       const keyEvent = createMockKeyboardEvent({
         keycode: 32, // Space
@@ -636,9 +636,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_unknown_key_codes`;
       console.log(`[${testId}] Testing unknown key code handling`);
 
-      const keydownHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const keydownHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'keydown',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       const unknownKeyEvent = createMockKeyboardEvent({
         keycode: 999, // Non-existent key
@@ -661,9 +661,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_screenshot_on_mouse_move`;
       console.log(`[${testId}] Testing screenshot capture on mouse movement`);
 
-      const mouseMoveHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const mouseMoveHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'mousemove',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       const moveEvent = createMockMouseEvent({ x: 200, y: 300 });
       mouseMoveHandler?.(moveEvent);
@@ -684,18 +684,18 @@ describe('InputTrackingService', () => {
       console.log(`[${testId}] Testing screenshot emission with actions`);
 
       // First trigger a screenshot
-      const mouseMoveHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const mouseMoveHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'mousemove',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
       mouseMoveHandler?.(createMockMouseEvent());
 
       jest.runAllTimers();
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Then trigger a click
-      const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const clickHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'click',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
       clickHandler?.(createMockMouseEvent());
 
       jest.runAllTimers();
@@ -714,9 +714,9 @@ describe('InputTrackingService', () => {
         .spyOn(computerUseService, 'screenshot')
         .mockRejectedValueOnce(new Error('Screenshot failed'));
 
-      const mouseMoveHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const mouseMoveHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'mousemove',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
       mouseMoveHandler?.(createMockMouseEvent());
 
       jest.runAllTimers();
@@ -745,9 +745,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_typing_debounce`;
       console.log(`[${testId}] Testing typing event debouncing`);
 
-      const keydownHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const keydownHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'keydown',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       // Type characters rapidly
       keydownHandler?.(createMockKeyboardEvent({ keycode: 72 })); // H
@@ -772,9 +772,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_click_debounce`;
       console.log(`[${testId}] Testing click event debouncing`);
 
-      const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const clickHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'click',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       // Rapid clicks
       clickHandler?.(createMockMouseEvent({ clicks: 1 }));
@@ -798,9 +798,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_screenshot_debounce`;
       console.log(`[${testId}] Testing screenshot capture debouncing`);
 
-      const mouseMoveHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const mouseMoveHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'mousemove',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       // Rapid mouse movements
       mouseMoveHandler?.(createMockMouseEvent({ x: 100, y: 100 }));
@@ -829,9 +829,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_high_frequency_input`;
       console.log(`[${testId}] Testing high-frequency input handling`);
 
-      const mouseMoveHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const mouseMoveHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'mousemove',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       const startTime = Date.now();
 
@@ -854,9 +854,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_timer_cleanup`;
       console.log(`[${testId}] Testing timer cleanup`);
 
-      const keydownHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const keydownHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'keydown',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       // Start typing to create a timer
       keydownHandler?.(createMockKeyboardEvent({ keycode: 65 }));
@@ -874,15 +874,15 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_concurrent_event_processing`;
       console.log(`[${testId}] Testing concurrent event processing`);
 
-      const mouseMoveHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const mouseMoveHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'mousemove',
-      )?.[1];
-      const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      )?.[1] as EventHandler | undefined;
+      const clickHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'click',
-      )?.[1];
-      const keydownHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      )?.[1] as EventHandler | undefined;
+      const keydownHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'keydown',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       // Simulate concurrent events
       mouseMoveHandler?.(createMockMouseEvent());
@@ -907,9 +907,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_invalid_mouse_coordinates`;
       console.log(`[${testId}] Testing invalid mouse coordinates`);
 
-      const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const clickHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'click',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       const invalidEvent = createMockMouseEvent({
         x: -1000,
@@ -928,9 +928,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_malformed_keyboard_events`;
       console.log(`[${testId}] Testing malformed keyboard events`);
 
-      const keydownHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const keydownHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'keydown',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       const malformedEvent = {
         // Missing required properties
@@ -953,9 +953,9 @@ describe('InputTrackingService', () => {
         throw new Error('Gateway error');
       });
 
-      const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const clickHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'click',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       expect(() => {
         clickHandler?.(createMockMouseEvent());
@@ -1006,9 +1006,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_mouse_action_conversion`;
       console.log(`[${testId}] Testing mouse event to action conversion`);
 
-      const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const clickHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'click',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       const mouseEvent = createMockMouseEvent({
         x: 150,
@@ -1038,9 +1038,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_scroll_action_conversion`;
       console.log(`[${testId}] Testing scroll event to action conversion`);
 
-      const wheelHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const wheelHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'wheel',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       const wheelEvent = createMockWheelEvent({
         x: 200,
@@ -1067,9 +1067,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_horizontal_scroll`;
       console.log(`[${testId}] Testing horizontal scroll handling`);
 
-      const wheelHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const wheelHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'wheel',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       const horizontalWheelEvent = createMockWheelEvent({
         direction: WheelDirection.HORIZONTAL,
@@ -1095,9 +1095,9 @@ describe('InputTrackingService', () => {
 
       service.startTracking();
 
-      const mouseMoveHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const mouseMoveHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'mousemove',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       mouseMoveHandler?.(createMockMouseEvent());
       jest.runAllTimers();
@@ -1117,9 +1117,9 @@ describe('InputTrackingService', () => {
 
       service.startTracking();
 
-      const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const clickHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'click',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       clickHandler?.(createMockMouseEvent());
       jest.runAllTimers();
@@ -1139,9 +1139,9 @@ describe('InputTrackingService', () => {
       const testId = `${operationId}_action_logging`;
       console.log(`[${testId}] Testing action logging`);
 
-      const clickHandler = ((mockUIOhook.on as jest.Mock).mock.calls as MockCall[]).find(
+      const clickHandler = (mockUIOhook.on as jest.Mock).mock.calls.find(
         (call: [string, Function]) => call[0] === 'click',
-      )?.[1];
+      )?.[1] as EventHandler | undefined;
 
       clickHandler?.(createMockMouseEvent());
       jest.runAllTimers();
