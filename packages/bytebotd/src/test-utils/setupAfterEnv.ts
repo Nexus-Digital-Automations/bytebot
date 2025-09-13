@@ -121,7 +121,7 @@ expect.extend({
    * Validates screenshot result structure
    */
   toBeValidScreenshotResult(received: unknown): jest.CustomMatcherResult {
-    if (!received ?? typeof received !== 'object') {
+    if (!received || typeof received !== 'object') {
       return {
         message: () => `Expected ${received} to be an object`,
         pass: false,
@@ -146,7 +146,7 @@ expect.extend({
         pass: true,
       };
     } else {
-      const issues = [];
+      const issues: string[] = [];
       if (!hasImage) issues.push('missing or invalid image');
       if (!hasMetadata) issues.push('missing metadata');
       if (!hasValidTimestamp) issues.push('missing or invalid captureTime');
@@ -167,7 +167,7 @@ expect.extend({
     received: unknown,
     operation: 'read' | 'write',
   ): jest.CustomMatcherResult {
-    if (!received ?? typeof received !== 'object') {
+    if (!received || typeof received !== 'object') {
       return {
         message: () => `Expected ${received} to be an object`,
         pass: false,
@@ -181,7 +181,7 @@ expect.extend({
     const hasMessage = typeof _result.message === 'string';
 
     let operationSpecificChecks = true;
-    const issues = [];
+    const issues: string[] = [];
 
     if (operation === 'read') {
       const hasValidReadData = _result.success
@@ -201,8 +201,7 @@ expect.extend({
       hasSuccess &&
       hasOperationId &&
       hasTimestamp &&
-       
-      (_result.success ?? hasMessage) &&
+      (_result.success === true || hasMessage) &&
       operationSpecificChecks;
 
     if (pass) {
@@ -229,7 +228,7 @@ expect.extend({
    * Validates OCR operation result structure
    */
   toBeValidOcrResult(received: unknown): jest.CustomMatcherResult {
-    if (!received ?? typeof received !== 'object') {
+    if (!received || typeof received !== 'object') {
       return {
         message: () => `Expected ${received} to be an object`,
         pass: false,
@@ -248,7 +247,7 @@ expect.extend({
     const hasMethod = typeof _result.method === 'string';
     const hasOperationId = typeof _result.operationId === 'string';
     const hasBoundingBoxes =
-      !_result.boundingBoxes ?? Array.isArray(_result.boundingBoxes);
+      !_result.boundingBoxes || Array.isArray(_result.boundingBoxes);
 
     const pass =
       hasText &&
@@ -264,7 +263,7 @@ expect.extend({
         pass: true,
       };
     } else {
-      const issues = [];
+      const issues: string[] = [];
       if (!hasText) issues.push('missing or invalid text');
       if (!hasConfidence) issues.push('missing or invalid confidence');
       if (!hasProcessingTime)
