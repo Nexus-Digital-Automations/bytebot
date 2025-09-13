@@ -16,7 +16,10 @@ import { BrowserSessionStatus } from '../dto/browser-session.dto';
 import { BrowserTaskStatusDto } from '../dto/browser-task.dto';
 import { BrowserUseService } from '../browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
-import { BrowserTaskService } from './browser-task.service';
+import {
+  BrowserTaskService,
+  TaskStatus as BrowserTaskStatus,
+} from './browser-task.service';
 import * as os from 'os';
 import * as fs from 'fs/promises';
 import * as dns from 'dns';
@@ -847,26 +850,26 @@ export class BrowserMonitoringService {
 
   private getCurrentAction(taskStatus: BrowserTaskStatusDto): string {
     if (
-      taskStatus.status === 'running' &&
+      taskStatus.status === BrowserTaskStatus.RUNNING &&
       taskStatus.executionSteps &&
       taskStatus.executionSteps.length > 0
     ) {
       const currentStep = taskStatus.executionSteps.find(
-        (step) => step.status === 'running',
+        (step) => step.status === BrowserTaskStatus.RUNNING,
       );
       return currentStep?.action || 'Processing...';
     }
 
     switch (taskStatus.status) {
-      case 'pending':
+      case BrowserTaskStatus.PENDING:
         return 'Waiting in queue';
-      case 'running':
+      case BrowserTaskStatus.RUNNING:
         return 'Executing task';
-      case 'completed':
+      case BrowserTaskStatus.COMPLETED:
         return 'Task completed';
-      case 'failed':
+      case BrowserTaskStatus.FAILED:
         return 'Task failed';
-      case 'cancelled':
+      case BrowserTaskStatus.CANCELLED:
         return 'Task cancelled';
       default:
         return 'Unknown';
@@ -898,7 +901,7 @@ export class BrowserMonitoringService {
       source: 'BrowserTaskService',
     });
 
-    if (taskStatus.status === 'running') {
+    if (taskStatus.status === BrowserTaskStatus.RUNNING) {
       logs.push({
         timestamp: new Date(now.getTime() - 2000),
         level: 'debug' as const,
