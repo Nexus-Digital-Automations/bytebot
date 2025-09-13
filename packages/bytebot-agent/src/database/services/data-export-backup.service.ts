@@ -657,7 +657,7 @@ export class DataExportBackupService {
 
     // Apply privacy transformations
     const processedSessions = config.privacy.anonymize
-      ? this.anonymizeSessions(sessions as any)
+      ? this.anonymizeSessions(sessions as BrowserSession[])
       : sessions;
 
     const filename = `browser_sessions.${config.format}`;
@@ -697,7 +697,7 @@ export class DataExportBackupService {
 
     // Apply privacy transformations
     const processedTasks = config.privacy.anonymize
-      ? this.anonymizeTasks(tasks as any)
+      ? this.anonymizeTasks(tasks as BrowserTask[])
       : tasks;
 
     const filename = `browser_tasks.${config.format}`;
