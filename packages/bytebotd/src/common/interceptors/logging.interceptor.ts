@@ -21,7 +21,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
@@ -280,7 +280,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const path = url.split('?')[0];
 
     // Replace common ID patterns with placeholders
-    return path
+    return (path || '')
       .replace(/\/\d+/g, '/:id') // Replace numeric IDs
       .replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUIDs
       .replace(/\/[a-f0-9]{24}/g, '/:objectId') // Replace MongoDB ObjectIDs
@@ -329,7 +329,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const logLevel = responseContext.statusCode >= 400 ? 'warn' : 'info';
     const message = `HTTP Request Completed - ${requestContext.method} ${requestContext.url} - ${responseContext.statusCode}`;
 
-    this.logger[logLevel]({
+    const logData = {
       message,
       level: logLevel,
       type: 'http_response',
@@ -338,7 +338,13 @@ export class LoggingInterceptor implements NestInterceptor {
         response: responseContext,
       },
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    if (logLevel === 'warn') {
+      this.logger.warn(logData);
+    } else {
+      this.logger.log(logData);
+    }
   }
 
   /**

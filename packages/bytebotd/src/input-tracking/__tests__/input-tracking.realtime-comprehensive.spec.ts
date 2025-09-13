@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
+
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /**
  * Input Tracking Service - Real-time Comprehensive Test Suite
@@ -467,7 +467,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       ];
 
       for (const event of clickEvents) {
-        clickHandler(event);
+        if (clickHandler) {
+          clickHandler(event);
+        }
       }
 
       // Wait for debounce timeout
@@ -493,7 +495,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       ];
 
       for (const event of moveEvents) {
-        moveHandler(event);
+        if (moveHandler) {
+          moveHandler(event);
+        }
       }
 
       // Verify movement events were processed
@@ -520,7 +524,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         y: 100,
         button: MouseButton.BUTTON1,
       });
-      downHandler(startEvent);
+      if (downHandler) {
+        downHandler(startEvent);
+      }
 
       // Drag movement
       const dragEvents = [
@@ -542,7 +548,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       ];
 
       for (const event of dragEvents) {
-        moveHandler(event);
+        if (moveHandler) {
+          moveHandler(event);
+        }
       }
 
       // End drag
@@ -552,7 +560,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         y: 250,
         button: MouseButton.BUTTON1,
       });
-      upHandler(endEvent);
+      if (upHandler) {
+        upHandler(endEvent);
+      }
 
       // Verify drag action was created and broadcasted
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
@@ -593,7 +603,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       ];
 
       for (const event of wheelEvents) {
-        wheelHandler(event);
+        if (wheelHandler) {
+          wheelHandler(event);
+        }
       }
 
       // Wait for scroll debouncing
@@ -623,7 +635,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       ];
 
       for (const event of multiMonitorEvents) {
-        moveHandler(event);
+        if (moveHandler) {
+          moveHandler(event);
+        }
       }
 
       // Verify all coordinate systems were handled
@@ -646,21 +660,25 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         const char = text[i];
         const keycode = char === ' ' ? 32 : char.charCodeAt(0);
 
-        keydownHandler(
-          createKeyboardEvent({
-            keycode,
-            char: char === ' ' ? ' ' : char.toLowerCase(),
-            type: EventType.EVENT_KEY_PRESSED,
-          }),
-        );
+        if (keydownHandler) {
+          keydownHandler(
+            createKeyboardEvent({
+              keycode,
+              char: char === ' ' ? ' ' : char.toLowerCase(),
+              type: EventType.EVENT_KEY_PRESSED,
+            }),
+          );
+        }
 
-        keyupHandler(
-          createKeyboardEvent({
-            keycode,
-            char: char === ' ' ? ' ' : char.toLowerCase(),
-            type: EventType.EVENT_KEY_RELEASED,
-          }),
-        );
+        if (keyupHandler) {
+          keyupHandler(
+            createKeyboardEvent({
+              keycode,
+              char: char === ' ' ? ' ' : char.toLowerCase(),
+              type: EventType.EVENT_KEY_RELEASED,
+            }),
+          );
+        }
       }
 
       // Wait for typing buffer timeout
@@ -708,9 +726,13 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         for (const keyEvent of shortcut) {
           const event = createKeyboardEvent(keyEvent);
           if (shortcut.indexOf(keyEvent) < shortcut.length / 2) {
-            keydownHandler(event);
+            if (keydownHandler) {
+              keydownHandler(event);
+            }
           } else {
-            keyupHandler(event);
+            if (keyupHandler) {
+              keyupHandler(event);
+            }
           }
         }
 
@@ -735,7 +757,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Send multiple rapid keydown events (simulating key repeat)
       for (let i = 0; i < 20; i++) {
-        keydownHandler({ ...heldKey, time: Date.now() + i });
+        if (keydownHandler) {
+          keydownHandler({ ...heldKey, time: Date.now() + i });
+        }
         await new Promise((resolve) => setTimeout(resolve, 10));
       }
 
@@ -758,8 +782,12 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       ];
 
       for (const charData of internationalChars) {
-        keydownHandler(createKeyboardEvent(charData));
-        keyupHandler(createKeyboardEvent(charData));
+        if (keydownHandler) {
+          keydownHandler(createKeyboardEvent(charData));
+        }
+        if (keyupHandler) {
+          keyupHandler(createKeyboardEvent(charData));
+        }
         await new Promise((resolve) => setTimeout(resolve, 10));
       }
 

@@ -1,10 +1,7 @@
 /* eslint-env jest */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
- 
- 
- 
- 
+
 /**
  * Computer Use Service - Main Action Router and Error Handling Unit Tests
  *
@@ -160,10 +157,12 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         }
         // Simulate quick exec resolution
         setTimeout(() => {
-          if (command.includes('stat')) {
-            callback(null, { stdout: '1024 1640995200' }); // size and timestamp
-          } else {
-            callback(null, { stdout: '' });
+          if (callback) {
+            if (command.includes('stat')) {
+              callback(null, { stdout: '1024 1640995200' }); // size and timestamp
+            } else {
+              callback(null, { stdout: '' });
+            }
           }
         }, 10);
         return { pid: 12345 };

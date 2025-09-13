@@ -200,7 +200,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
    */
   private isBasicType(metatype: unknown): boolean {
     const basicTypes = [String, Boolean, Number, Array, Object];
-    return basicTypes.includes(metatype);
+    return basicTypes.includes(metatype as any);
   }
 
   /**
@@ -391,7 +391,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
   ): Promise<void> {
     const startTime = Date.now();
 
-    const errors: ValidationError[] = await validate(value, {
+    const errors: ValidationError[] = await validate(value as object, {
       whitelist: this.options.whitelist,
       forbidNonWhitelisted: this.options.forbidNonWhitelisted,
       skipMissingProperties: this.options.skipMissingProperties,

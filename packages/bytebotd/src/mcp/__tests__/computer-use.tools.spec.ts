@@ -391,7 +391,7 @@ describe('ComputerUseTools', () => {
           application: 'firefox',
         });
 
-        expect(result.content[0].text).toBe('application opened');
+        expect(result.content[0]?.text).toBe('application opened');
       });
     });
   });
@@ -555,7 +555,7 @@ describe('ComputerUseTools', () => {
         coordinates: { x: 0, y: 0 },
       });
 
-      expect(result.content[0].text).toContain('Error moving mouse');
+      expect(result.content[0]?.text).toContain('Error moving mouse');
     });
 
     /**
@@ -573,7 +573,7 @@ describe('ComputerUseTools', () => {
       for (const coordinates of invalidCoords) {
         const result = await computerUseTools.moveMouse({ coordinates });
         expect(result).toBeDefined();
-        expect(result.content[0].text).toBe('mouse moved');
+        expect(result.content[0]?.text).toBe('mouse moved');
       }
     });
   });
@@ -592,6 +592,7 @@ describe('ComputerUseTools', () => {
       // Validate MCP response structure
       expect(result).toHaveProperty('content');
       expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content[0]).toBeDefined();
       expect(result.content[0]).toHaveProperty('type');
       expect(result.content[0]).toHaveProperty('text');
     });

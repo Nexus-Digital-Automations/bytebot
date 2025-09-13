@@ -232,6 +232,10 @@ export class InputTrackingService implements OnModuleDestroy {
       /* Printable char with no active modifier → buffer for TypeTextAction. */
       if (!this.isModifierKey(e) && keyInfoMap[e.keycode]?.isPrintable) {
         const keyInfo = keyInfoMap[e.keycode];
+        if (!keyInfo) {
+          this.logger.warn(`Key info not found for keycode: ${e.keycode}`);
+          return;
+        }
         const char = e.shiftKey
           ? (keyInfo.shiftString ?? keyInfo.string ?? '')
           : (keyInfo.string ?? '');

@@ -273,7 +273,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
     try {
       // Apply helmet security headers
-      this.helmetMiddleware(req, res, (err?: Error | null) => {
+      this.helmetMiddleware(req, res, (err?: any) => {
         if (err) {
           const processingTime = Date.now() - startTime;
           const safeError = err as SafeError;
@@ -413,7 +413,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       // It should be configured separately if needed via custom middleware
     };
 
-    return helmet(helmetOptions);
+    return helmet(helmetOptions as any);
   }
 
   /**

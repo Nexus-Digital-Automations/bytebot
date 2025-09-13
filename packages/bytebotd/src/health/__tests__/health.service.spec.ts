@@ -737,7 +737,15 @@ describe('HealthService', () => {
       ];
       const promises = Array(20)
         .fill(null)
-        .map((_, i) => operations[i % operations.length]());
+        .map((_, i) => {
+          const operation = operations[i % operations.length];
+          if (!operation) {
+            throw new Error(
+              `Operation at index ${i % operations.length} is undefined`,
+            );
+          }
+          return operation();
+        });
       const results = await Promise.all(promises);
       // All operations should complete successfully
       expect(results).toHaveLength(20);
@@ -1109,7 +1117,6 @@ describe('HealthService', () => {
               1,
             );
           } else {
-             
             originalSetTimeout(() => callback(null, true), delay);
           }
         }) as unknown;

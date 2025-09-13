@@ -18,14 +18,6 @@
  * @version 1.0.0
  */
 
- 
- 
- 
- 
- 
- 
- 
-
 import {
   CallHandler,
   ExecutionContext,
@@ -343,8 +335,8 @@ export class PerformanceInterceptor implements NestInterceptor {
    */
   private normalizeUrl(url: string): string {
     // Remove query parameters and normalize path parameters
-    return url
-      .split('?')[0] // Remove query string
+    const cleanUrl = (url || '').split('?')[0] || '';
+    return cleanUrl
       .replace(/\/\d+/g, '/:id') // Replace numeric path params
       .replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUID path params
       .replace(/\/[a-f0-9]{24}/g, '/:objectid'); // Replace MongoDB ObjectId path params
@@ -386,8 +378,9 @@ export class PerformanceInterceptor implements NestInterceptor {
    * Get specific percentile from sorted array
    */
   private getPercentile(sortedArray: number[], percentile: number): number {
+    if (sortedArray.length === 0) return 0;
     const _index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
-    return sortedArray[Math.max(0, _index)];
+    return sortedArray[Math.max(0, _index)] || 0;
   }
 
   /**

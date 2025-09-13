@@ -779,7 +779,7 @@ describe('Security E2E Tests', () => {
       const requests = Array(60)
         .fill(null)
         .map(() =>
-          request(app.getHttpServer() as Express.Application).get('/health'),
+          request(app.getHttpAdapter().getInstance() as any).get('/health'),
         );
 
       const responses = await Promise.all(requests);
@@ -805,7 +805,7 @@ describe('Security E2E Tests', () => {
       const promises = Array(20)
         .fill(null)
         .map(() =>
-          request(app.getHttpServer() as Express.Application).get('/health'),
+          request(app.getHttpAdapter().getInstance() as any).get('/health'),
         );
 
       const responses = await Promise.all(promises);
@@ -830,13 +830,13 @@ describe('Security E2E Tests', () => {
       const healthRequests = Array(10)
         .fill(null)
         .map(() =>
-          request(app.getHttpServer() as Express.Application).get('/health'),
+          request(app.getHttpAdapter().getInstance() as any).get('/health'),
         );
 
       const taskRequests = Array(10)
         .fill(null)
         .map(() =>
-          request(app.getHttpServer() as Express.Application)
+          request(app.getHttpAdapter().getInstance() as any)
             .get('/api/tasks')
             .set('Authorization', 'Bearer mock-jwt-token'),
         );
@@ -893,7 +893,7 @@ describe('Security E2E Tests', () => {
       const concurrentLogins = Array(10)
         .fill(null)
         .map(() =>
-          request(app.getHttpServer() as Express.Application)
+          request(app.getHttpAdapter().getInstance() as any)
             .post('/auth/login')
             .send({
               email: 'admin@bytebot.ai',
@@ -1040,21 +1040,21 @@ describe('Security E2E Tests', () => {
         ...Array(10)
           .fill(null)
           .map(() =>
-            request(app.getHttpServer() as Express.Application)
+            request(app.getHttpAdapter().getInstance() as any)
               .post('/auth/login')
               .send({ email: 'admin@bytebot.ai', password: 'admin123' }),
           ),
         ...Array(10)
           .fill(null)
           .map(() =>
-            request(app.getHttpServer() as Express.Application)
+            request(app.getHttpAdapter().getInstance() as any)
               .get('/api/tasks')
               .set('Authorization', 'Bearer mock-jwt-token'),
           ),
         ...Array(10)
           .fill(null)
           .map(() =>
-            request(app.getHttpServer() as Express.Application)
+            request(app.getHttpAdapter().getInstance() as any)
               .post('/api/tasks')
               .set('Authorization', 'Bearer mock-jwt-token')
               .send({ title: 'Load Test Task' }),
@@ -1096,7 +1096,7 @@ describe('Security E2E Tests', () => {
 
       for (const testCase of edgeCases) {
         try {
-          let req = request(app.getHttpServer() as Express.Application)[
+          let req = request(app.getHttpAdapter().getInstance() as any)[
             testCase.method
           ](testCase.url);
           if (testCase.headers) {
