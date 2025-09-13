@@ -16,7 +16,7 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import { ComputerActionValidationPipe } from '../computer-action-validation.pipe';
 
 describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
@@ -150,7 +150,10 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
 
       // This should be detected and handled appropriately
       // The test depends on whether unicode normalization creates security risks
-      const result = await pipe.transform(unicodeAttack, {} as any);
+      const result = await pipe.transform(
+        unicodeAttack,
+        {} as ArgumentMetadata,
+      );
       expect(result).toBeDefined();
     });
 
@@ -163,7 +166,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       try {
-        await pipe.transform(multiThreatInput, {} as any);
+        await pipe.transform(multiThreatInput, {} as ArgumentMetadata);
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
@@ -181,7 +184,10 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         coordinates: { x: 100, y: 200 },
       };
 
-      const result = await pipe.transform(legitimateInput, {} as any);
+      const result = await pipe.transform(
+        legitimateInput,
+        {} as ArgumentMetadata,
+      );
       expect(result).toBeDefined();
       expect(result.action).toBe('move_mouse');
     });
@@ -193,7 +199,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       try {
-        await pipe.transform(maliciousInput, {} as any);
+        await pipe.transform(maliciousInput, {} as ArgumentMetadata);
       } catch (error) {
         expect(error.response.operationId).toBeDefined();
         expect(error.response.timestamp).toBeDefined();
@@ -228,7 +234,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         data: 'test content',
       };
 
-      const result = await pipe.transform(fileInput, {} as any);
+      const result = await pipe.transform(fileInput, {} as ArgumentMetadata);
       expect(result).toBeDefined();
 
       // Form actions should use 'form' context
@@ -237,7 +243,10 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
         text: 'normal text',
       };
 
-      const formResult = await pipe.transform(formInput, {} as any);
+      const formResult = await pipe.transform(
+        formInput,
+        {} as ArgumentMetadata,
+      );
       expect(formResult).toBeDefined();
     });
   });
@@ -250,7 +259,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       const startTime = Date.now();
-      await pipe.transform(input, {} as any);
+      await pipe.transform(input, {} as ArgumentMetadata);
       const endTime = Date.now();
 
       expect(endTime - startTime).toBeLessThan(1000); // Should complete within 1 second
@@ -284,7 +293,7 @@ describe('ComputerActionValidationPipe - Enhanced Security Pipeline', () => {
       };
 
       try {
-        await pipe.transform(maliciousInput, {} as any);
+        await pipe.transform(maliciousInput, {} as ArgumentMetadata);
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error.response).toHaveProperty('message');

@@ -8,8 +8,8 @@ export class AppController {
   // this method will automatically redirect them to the noVNC URL.
   @Get('vnc')
   // Leave the decorator empty but keep the status code.
-  @Redirect(undefined, 302)
-  redirectToVnc(@Headers('host') host: string) {
+  @Redirect('', 302)
+  redirectToVnc(@Headers('host') host: string): { url: string } {
     return {
       url: `/novnc/vnc.html?host=${host}&path=websockify&resize=scale`,
     };

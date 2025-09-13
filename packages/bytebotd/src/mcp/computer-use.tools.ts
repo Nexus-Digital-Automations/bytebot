@@ -381,35 +381,7 @@ export class ComputerUseTools {
   @Tool({
     name: 'computer_scroll',
     description: 'Scrolls the mouse wheel up, down, left, or right.',
-    parameters: z.object({
-      coordinates: z
-        .object({
-          x: z
-            .number()
-            .describe(
-              'The x-coordinate for the scroll action (if applicable).',
-            ),
-          y: z
-            .number()
-            .describe(
-              'The y-coordinate for the scroll action (if applicable).',
-            ),
-        })
-        .optional()
-        .describe(
-          'Coordinates for where the scroll should occur. Behavior might depend on the OS/application.',
-        ),
-      direction: z
-        .enum(['up', 'down', 'left', 'right'])
-        .describe('The direction to scroll the mouse wheel.'),
-      scrollCount: z
-        .number()
-        .describe('The number of times to scroll the mouse wheel.'),
-      holdKeys: z
-        .array(z.string())
-        .optional()
-        .describe('Optional array of keys to hold during the scroll.'),
-    }) as any,
+    parameters: McpSchemas.scrollAdvanced,
   })
   async scroll({
     coordinates,
