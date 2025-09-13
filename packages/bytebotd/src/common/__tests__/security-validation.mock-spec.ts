@@ -153,7 +153,11 @@ describe('Security Validation Mock Tests', () => {
       };
 
       expect(() => {
-        sanitizationPipe.transform(invalidAction, null);
+        sanitizationPipe.transform(invalidAction, {
+          metatype: Object,
+          type: 'body',
+          data: undefined,
+        });
       }).toThrow();
     });
 
@@ -164,7 +168,11 @@ describe('Security Validation Mock Tests', () => {
       };
 
       expect(() => {
-        sanitizationPipe.transform(largeInput, null);
+        sanitizationPipe.transform(largeInput, {
+          metatype: Object,
+          type: 'body',
+          data: undefined,
+        });
       }).toThrow();
     });
 
@@ -175,7 +183,11 @@ describe('Security Validation Mock Tests', () => {
       };
 
       expect(() => {
-        sanitizationPipe.transform(validInput, null);
+        sanitizationPipe.transform(validInput, {
+          metatype: Object,
+          type: 'body',
+          data: undefined,
+        });
       }).not.toThrow();
     });
   });
@@ -402,7 +414,11 @@ describe('Security Validation Mock Tests', () => {
         text: 'Test input for performance validation',
       };
 
-      const result = sanitizationPipe.transform(validInput, null);
+      const result = sanitizationPipe.transform(validInput, {
+        metatype: Object,
+        type: 'body',
+        data: undefined,
+      });
       const duration = Date.now() - startTime;
 
       expect(duration).toBeLessThan(100); // Should complete in under 100ms

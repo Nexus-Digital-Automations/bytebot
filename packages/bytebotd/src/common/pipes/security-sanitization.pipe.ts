@@ -189,7 +189,7 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
         const validationErrors = await validate(transformedValue as object, {
           whitelist: this.options.whitelist,
           forbidNonWhitelisted: this.options.strictMode,
-          transform: true,
+          skipMissingProperties: false,
         });
 
         if (validationErrors.length > 0) {
@@ -245,7 +245,14 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
    */
   private isBasicType(metatype: unknown): boolean {
     const basicTypes = [String, Boolean, Number, Array, Object];
-    return basicTypes.includes(metatype);
+    return basicTypes.includes(
+      metatype as
+        | typeof String
+        | typeof Boolean
+        | typeof Number
+        | typeof Array
+        | typeof Object,
+    );
   }
 
   /**

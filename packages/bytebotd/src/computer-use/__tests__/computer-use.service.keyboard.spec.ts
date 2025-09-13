@@ -139,7 +139,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         scrollCount: 3,
       };
 
-      nutService.mouseWheelEvent.mockResolvedValue(undefined);
+      nutService.mouseWheelEvent.mockResolvedValue({ success: true });
 
       // Act: Execute scroll operation
       await service.action(scrollAction);
@@ -176,8 +176,8 @@ describe('ComputerUseService - Keyboard Operations', () => {
         scrollCount: 2,
       };
 
-      nutService.mouseMoveEvent.mockResolvedValue(undefined);
-      nutService.mouseWheelEvent.mockResolvedValue(undefined);
+      nutService.mouseMoveEvent.mockResolvedValue({ success: true });
+      nutService.mouseWheelEvent.mockResolvedValue({ success: true });
 
       // Act: Execute scroll with coordinates
       await service.action(scrollAction);
@@ -208,9 +208,9 @@ describe('ComputerUseService - Keyboard Operations', () => {
         holdKeys: ['ctrl', 'shift'],
       };
 
-      nutService.mouseMoveEvent.mockResolvedValue(undefined);
-      nutService.holdKeys.mockResolvedValue(undefined);
-      nutService.mouseWheelEvent.mockResolvedValue(undefined);
+      nutService.mouseMoveEvent.mockResolvedValue({ success: true });
+      nutService.holdKeys.mockResolvedValue({ success: true });
+      nutService.mouseWheelEvent.mockResolvedValue({ success: true });
 
       // Act: Execute scroll with modifiers
       await service.action(scrollAction);
@@ -242,7 +242,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         scrollCount: 100, // Should be limited to 50
       };
 
-      nutService.mouseWheelEvent.mockResolvedValue(undefined);
+      nutService.mouseWheelEvent.mockResolvedValue({ success: true });
 
       // Act: Execute scroll with high count
       await service.action(scrollAction);
@@ -270,7 +270,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       };
 
       const errorMessage = 'Mouse wheel event failed';
-      nutService.holdKeys.mockResolvedValue(undefined);
+      nutService.holdKeys.mockResolvedValue({ success: true });
       nutService.mouseWheelEvent.mockRejectedValue(new Error(errorMessage));
 
       // Act & Assert: Verify error is thrown
@@ -307,7 +307,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
           scrollCount: 1,
         };
 
-        nutService.mouseWheelEvent.mockResolvedValue(undefined);
+        nutService.mouseWheelEvent.mockResolvedValue({ success: true });
 
         // Act: Execute scroll in direction
         await service.action(scrollAction);
@@ -490,7 +490,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'down',
       };
 
-      nutService.holdKeys.mockResolvedValue(undefined);
+      nutService.holdKeys.mockResolvedValue({ success: true });
 
       // Act: Execute key press
       await service.action(pressKeysAction);
@@ -523,7 +523,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'up',
       };
 
-      nutService.holdKeys.mockResolvedValue(undefined);
+      nutService.holdKeys.mockResolvedValue({ success: true });
 
       // Act: Execute key release
       await service.action(pressKeysAction);
@@ -556,7 +556,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'down',
       };
 
-      nutService.holdKeys.mockResolvedValue(undefined);
+      nutService.holdKeys.mockResolvedValue({ success: true });
 
       // Act: Execute single key press
       await service.action(pressKeysAction);
@@ -610,7 +610,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'down',
       };
 
-      nutService.holdKeys.mockResolvedValue(undefined);
+      nutService.holdKeys.mockResolvedValue({ success: true });
 
       // Act: Execute empty key press
       await service.action(pressKeysAction);
@@ -1215,9 +1215,9 @@ describe('ComputerUseService - Keyboard Operations', () => {
      */
     it('should use structured logging for all operations', async () => {
       // Arrange: Setup successful operations
-      nutService.mouseWheelEvent.mockResolvedValue(undefined);
+      nutService.mouseWheelEvent.mockResolvedValue({ success: true });
       nutService.sendKeys.mockResolvedValue(undefined);
-      nutService.holdKeys.mockResolvedValue(undefined);
+      nutService.holdKeys.mockResolvedValue({ success: true });
       nutService.typeText.mockResolvedValue(undefined);
       nutService.pasteText.mockResolvedValue(undefined);
 

@@ -23,6 +23,7 @@
  */
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
+import { HealthIndicatorResult } from '@nestjs/terminus';
 import { HealthService } from '../health.service';
 import {
   BasicHealthResponse,
@@ -832,10 +833,10 @@ describe('HealthService', () => {
         );
         // Mock successful database ping
         jest
-          .spyOn(service as unknown, 'performDatabasePing')
+          .spyOn(service as any, 'performDatabasePing')
           .mockResolvedValue(true);
         const result =
-          (await service.checkDatabaseHealth()) as BasicHealthResponse;
+          (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
         expect(result.database.status).toEqual('up');
         expect(result.database.responseTime).toEqual(
@@ -860,7 +861,7 @@ describe('HealthService', () => {
           .spyOn(service as unknown, 'performDatabasePing')
           .mockResolvedValue(false);
         const result =
-          (await service.checkDatabaseHealth()) as BasicHealthResponse;
+          (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
         expect(result.database.status).toEqual('down');
         expect(result.database.error).toEqual('Database connection failed');
@@ -882,7 +883,7 @@ describe('HealthService', () => {
           .spyOn(service as unknown, 'performDatabasePing')
           .mockRejectedValue(new Error('Database timeout'));
         const result =
-          (await service.checkDatabaseHealth()) as BasicHealthResponse;
+          (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
         expect(result.database.status).toEqual('down');
         expect(result.database.error).toEqual('Database timeout');
@@ -899,7 +900,7 @@ describe('HealthService', () => {
             () => new Promise((resolve) => setTimeout(() => resolve(true), 50)),
           );
         const result =
-          (await service.checkDatabaseHealth()) as BasicHealthResponse;
+          (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result.database.responseTime).toMatch(/\d+ms/);
         const responseTime = parseInt(
           result.database.responseTime.replace('ms', ''),

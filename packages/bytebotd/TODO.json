@@ -230,34 +230,6 @@
       ]
     },
     {
-      "id": "error_1757744620605_54u2cl6zp",
-      "title": "Fix TypeScript Interface Compatibility Errors",
-      "description": "Resolve all interface type compatibility issues including SafeRequest vs SafeRequest & { user: JwtPayload } mismatches, header type compatibility issues, function signature mismatches, and ensure consistent typing across auth flows",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T06:23:40.605Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757744583577_1_general_3059d601",
-      "started_at": "2025-09-13T06:24:20.283Z",
-      "claimed_by": "development_session_1757744583577_1_general_3059d601",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757744583577_1_general_3059d601",
-          "role": "primary",
-          "assignedAt": "2025-09-13T06:24:20.283Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757744620533_acsv2k9cq",
       "title": "Fix Jest mock type conversion and compatibility errors",
       "description": "Fix all Jest mock type mismatches including ExecutionContext mocks, mock object property completeness, and type assertions. Complete mock object interfaces with required properties, use proper Jest type assertions, add missing properties to ExecutionContext mocks, and fix mock function signatures.",
@@ -314,62 +286,6 @@
       ]
     },
     {
-      "id": "error_1757744620428_ow9zw1n26",
-      "title": "Fix TS18048 undefined property access errors",
-      "description": "Fix all TypeScript compilation errors related to TS18048 possibly undefined violations. Target: request.user access violations, ExecutionContext undefined possibilities, property access on potentially undefined objects. Solution: Add null/undefined checks, use optional chaining, add non-null assertions where safe, provide default values or early returns.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T06:23:40.428Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757744579739_1_general_d2551563",
-      "started_at": "2025-09-13T06:24:20.256Z",
-      "claimed_by": "development_session_1757744579739_1_general_d2551563",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757744579739_1_general_d2551563",
-          "role": "primary",
-          "assignedAt": "2025-09-13T06:24:20.256Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "id": "error_1757744620415_oiokq489x",
-      "title": "Fix TypeScript TestAgent index signature errors",
-      "description": "Fix TS7052 errors in e2e/security-comprehensive.e2e-spec.ts(1611,32) and e2e/security.e2e-spec.ts(1099,21) by replacing bracket notation with proper TestAgent method calls",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T06:23:40.415Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757744583797_1_general_e8c00ac1",
-      "started_at": "2025-09-13T06:24:20.265Z",
-      "claimed_by": "development_session_1757744583797_1_general_e8c00ac1",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757744583797_1_general_e8c00ac1",
-          "role": "primary",
-          "assignedAt": "2025-09-13T06:24:20.265Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757744620005_kh83btdwk",
       "title": "Fix TypeScript TS2339 Property Access Errors",
       "description": "Fix all TypeScript compilation errors related to property does not exist on type issues. Target missing name properties on user types, incorrect property access on interfaces, add type guards for property access, and ensure all property access is on correct types. Zero tolerance for property access violations.",
@@ -420,34 +336,6 @@
           "agentId": "development_session_1757744583442_1_general_0b6646c3",
           "role": "primary",
           "assignedAt": "2025-09-13T06:24:20.296Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "id": "error_1757744619622_oqpiwipof",
-      "title": "Fix TS7030 missing return statements in e2e/security.e2e-spec.ts",
-      "description": "Fix TypeScript compilation error TS7030 at line 233,7 - Not all code paths return a value. Examine function control flow and add missing return statements to ensure all code paths have proper returns.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T06:23:39.622Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757744577681_1_general_39b69d02",
-      "started_at": "2025-09-13T06:24:19.425Z",
-      "claimed_by": "development_session_1757744577681_1_general_39b69d02",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757744577681_1_general_39b69d02",
-          "role": "primary",
-          "assignedAt": "2025-09-13T06:24:19.425Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }

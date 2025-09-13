@@ -93,16 +93,20 @@ describe('HealthController', () => {
       error: jest.fn(),
       warn: jest.fn(),
       verbose: jest.fn(),
-    } as jest.Mocked<Logger>;
+      fatal: jest.fn(),
+      localInstance: {} as any,
+      options: {} as any,
+      registerLocalInstanceRef: jest.fn(),
+    } as any;
 
     // Create mocked Terminus dependencies
     healthCheckService = {
       check: jest.fn(),
-    } as jest.Mocked<Partial<HealthCheckService>>;
+    } as any;
 
     httpHealthIndicator = {
       pingCheck: jest.fn(),
-    } as jest.Mocked<Partial<HttpHealthIndicator>>;
+    } as any;
 
     memoryHealthIndicator = {
       checkHeap: jest.fn(),

@@ -1018,9 +1018,10 @@ export class BackgroundWorker
 
       if (priorityJobs.length > 0) {
         // Return oldest job of this priority
-        return priorityJobs.sort(
+        const sortedJobs = priorityJobs.sort(
           (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
-        )[0];
+        );
+        return sortedJobs[0] || null;
       }
     }
 

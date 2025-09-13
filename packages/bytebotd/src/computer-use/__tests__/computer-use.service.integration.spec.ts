@@ -115,9 +115,9 @@ describe('ComputerUseService Integration Tests', () => {
       // Test with unsupported action
       const invalidAction = { action: 'invalid_action' } as unknown;
 
-      await expect(context.service.action(invalidAction)).rejects.toThrow(
-        'Unsupported computer action',
-      );
+      await expect(
+        context.service.action(invalidAction as ComputerAction),
+      ).rejects.toThrow('Unsupported computer action');
     });
   });
 
@@ -397,7 +397,7 @@ describe('ComputerUseService Integration Tests', () => {
       } as unknown;
 
       try {
-        await context.service.action(invalidAction);
+        await context.service.action(invalidAction as ComputerAction);
         fail('Should have thrown an error');
       } catch (error) {
         expect(error).toBeInstanceOf(Error);

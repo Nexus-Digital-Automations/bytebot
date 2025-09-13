@@ -10,10 +10,6 @@
  * @author Input Validation & API Security Specialist
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
 import {
   Injectable,
   CanActivate,
@@ -110,6 +106,7 @@ interface DesktopClientInfo {
   version?: string;
   userAgent?: string;
   clientId?: string;
+  vncClient?: string;
   isComputerUse?: boolean;
 }
 
@@ -418,7 +415,7 @@ export class DeprecationGuard implements CanActivate {
 
     return {
       clientId: desktopClient,
-      version,
+      version: version || 'unknown',
       vncClient,
       isComputerUse,
     };
@@ -704,14 +701,19 @@ export class DeprecationGuard implements CanActivate {
     }
 
     if (deprecation.since) {
-      response.setHeader(
-        'Deprecation',
-        `date="${deprecation.since.toISOString()}"`,
-      );
+      const sinceDate =
+        typeof deprecation.since === 'string'
+          ? new Date(deprecation.since)
+          : deprecation.since;
+      response.setHeader('Deprecation', `date="${sinceDate.toISOString()}"`);
     }
 
     if (deprecation.sunset) {
-      response.setHeader('Sunset', deprecation.sunset.toISOString());
+      const sunsetDate =
+        typeof deprecation.sunset === 'string'
+          ? new Date(deprecation.sunset)
+          : deprecation.sunset;
+      response.setHeader('Sunset', sunsetDate.toISOString());
     }
 
     if (deprecation.migration) {
@@ -728,7 +730,11 @@ export class DeprecationGuard implements CanActivate {
     // Add desktop-specific warning header
     let warningMessage = `299 - "BytebotD desktop API endpoint is deprecated"`;
     if (deprecation.sunset) {
-      warningMessage += ` and will be removed on ${deprecation.sunset.toISOString()}`;
+      const sunsetDate =
+        typeof deprecation.sunset === 'string'
+          ? new Date(deprecation.sunset)
+          : deprecation.sunset;
+      warningMessage += ` and will be removed on ${sunsetDate.toISOString()}`;
     }
 
     if (desktopClientInfo.isComputerUse) {
@@ -736,8 +742,14 @@ export class DeprecationGuard implements CanActivate {
     }
 
     response.setHeader('Warning', warningMessage);
-    response.setHeader('X-Desktop-Client-Detected', desktopClientInfo.clientId);
-    response.setHeader('X-Desktop-Client-Version', desktopClientInfo.version);
+    response.setHeader(
+      'X-Desktop-Client-Detected',
+      desktopClientInfo.clientId || 'unknown',
+    );
+    response.setHeader(
+      'X-Desktop-Client-Version',
+      desktopClientInfo.version || 'unknown',
+    );
 
     if (bypassUsed) {
       response.setHeader('X-Deprecation-Bypass-Used', 'true');
@@ -761,9 +773,13 @@ export class DeprecationGuard implements CanActivate {
       this.stats.deprecatedRequests++;
       this.stats.lastSeen = new Date();
 
-      this.stats.uniqueDesktopClients.add(desktopClientInfo.clientId);
-      this.stats.desktopClientVersions.add(desktopClientInfo.version);
-      this.stats.vncClients.add(desktopClientInfo.vncClient);
+      this.stats.uniqueDesktopClients.add(
+        desktopClientInfo.clientId ?? 'unknown',
+      );
+      this.stats.desktopClientVersions.add(
+        desktopClientInfo.version ?? 'unknown',
+      );
+      this.stats.vncClients.add(desktopClientInfo.vncClient ?? 'unknown');
 
       if (desktopClientInfo.isComputerUse) {
         this.stats.computerUseDeprecatedRequests++;
@@ -906,7 +922,11 @@ export class DeprecationGuard implements CanActivate {
       message = `BytebotD desktop API endpoint has been sunset and is no longer available`;
       statusCode = HttpStatus.GONE;
     } else if (deprecation.sunset) {
-      message += ` and will be removed on ${deprecation.sunset.toISOString()}`;
+      const sunsetDate =
+        typeof deprecation.sunset === 'string'
+          ? new Date(deprecation.sunset)
+          : deprecation.sunset;
+      message += ` and will be removed on ${sunsetDate.toISOString()}`;
     }
 
     if (desktopClientInfo.isComputerUse) {

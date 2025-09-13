@@ -485,7 +485,11 @@ export class ComputerUseService {
       }
 
       // Move to the first coordinate
-      await this.nutService.mouseMoveEvent(path[0]);
+      if (path[0]) {
+        await this.nutService.mouseMoveEvent(path[0]);
+      } else {
+        throw new Error('Path must contain at least one coordinate');
+      }
 
       // Hold keys if provided
       if (holdKeys && holdKeys.length > 0) {
@@ -498,6 +502,12 @@ export class ComputerUseService {
       // Move to each coordinate in the path
       for (let i = 0, len = path.length; i < len; i++) {
         const coordinates = path[i];
+        if (!coordinates) {
+          this.logger.warn(
+            `[${operationId}] Skipping undefined coordinates at index ${i}`,
+          );
+          continue;
+        }
         this.logger.debug(
           `[${operationId}] Moving to path point ${i + 1}/${path.length}`,
           {
@@ -731,11 +741,15 @@ export class ComputerUseService {
       }
 
       // Move to the first coordinate
-      this.logger.log(
-        `[${operationId}] Moving to drag start position`,
-        path[0],
-      );
-      await this.nutService.mouseMoveEvent(path[0]);
+      if (path[0]) {
+        this.logger.log(
+          `[${operationId}] Moving to drag start position`,
+          path[0],
+        );
+        await this.nutService.mouseMoveEvent(path[0]);
+      } else {
+        throw new Error('Path must contain at least one coordinate');
+      }
 
       // Hold keys if provided
       if (holdKeys && holdKeys.length > 0) {
@@ -755,6 +769,12 @@ export class ComputerUseService {
       // Move along the drag path
       for (let i = 0, len = path.length; i < len; i++) {
         const coordinates = path[i];
+        if (!coordinates) {
+          this.logger.warn(
+            `[${operationId}] Skipping undefined coordinates at index ${i}`,
+          );
+          continue;
+        }
         this.logger.debug(
           `[${operationId}] Dragging to point ${i + 1}/${path.length}`,
           {
@@ -1582,8 +1602,10 @@ export class ComputerUseService {
         );
 
         const [sizeStr, lastModifiedStr] = statOutput.trim().split(' ');
-        const fileSize = parseInt(sizeStr, 10);
-        const lastModified = new Date(parseInt(lastModifiedStr, 10) * 1000);
+        const fileSize = parseInt(sizeStr || '0', 10);
+        const lastModified = new Date(
+          parseInt(lastModifiedStr || '0', 10) * 1000,
+        );
 
         if (isNaN(fileSize)) {
           throw new Error('Failed to read file size from stat output');

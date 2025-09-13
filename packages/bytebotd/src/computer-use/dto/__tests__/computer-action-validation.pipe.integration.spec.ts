@@ -69,6 +69,20 @@ jest.mock('@bytebot/shared/utils/security.utils', () => ({
   },
 }));
 
+/**
+ * Security validation error response interface
+ */
+interface SecurityValidationErrorResponse {
+  message: string;
+  operationId: string;
+  threatTypes: string[];
+  totalRiskScore: number;
+  threatLevel: string;
+  validationStages: string[];
+  detectionCount: number;
+  timestamp: string;
+}
+
 describe('ComputerActionValidationPipe - Integration Tests', () => {
   let pipe: ComputerActionValidationPipe;
   let mockDetectAdvancedXSS: jest.Mock;
@@ -138,7 +152,11 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       await expect(
-        pipe.transform(maliciousInput, {} as unknown),
+        pipe.transform(maliciousInput, {
+          type: 'body',
+          metatype: Object,
+          data: undefined,
+        } as any),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -160,7 +178,11 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       await expect(
-        pipe.transform(maliciousInput, {} as unknown),
+        pipe.transform(maliciousInput, {
+          type: 'body',
+          metatype: Object,
+          data: undefined,
+        } as any),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -183,7 +205,11 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       await expect(
-        pipe.transform(maliciousInput, {} as unknown),
+        pipe.transform(maliciousInput, {
+          type: 'body',
+          metatype: Object,
+          data: undefined,
+        } as any),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -247,16 +273,11 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
         const badRequestError = error as BadRequestException;
-        expect(badRequestError.getResponse().message).toContain(
-          'security threats detected',
-        );
-        expect(badRequestError.getResponse().threatTypes).toContain(
-          'ADVANCED_XSS',
-        );
-        expect(badRequestError.getResponse().threatTypes).toContain(
-          'ADVANCED_SQL_INJECTION',
-        );
-        expect(badRequestError.getResponse().totalRiskScore).toBeGreaterThan(0);
+        const response = badRequestError.getResponse() as any;
+        expect(response.message).toContain('security threats detected');
+        expect(response.threatTypes).toContain('ADVANCED_XSS');
+        expect(response.threatTypes).toContain('ADVANCED_SQL_INJECTION');
+        expect(response.totalRiskScore).toBeGreaterThan(0);
       }
     });
 
@@ -281,7 +302,8 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         fail('Should have thrown BadRequestException');
       } catch (error) {
         const badRequestError = error as BadRequestException;
-        const response = badRequestError.getResponse();
+        const response =
+          badRequestError.getResponse() as SecurityValidationErrorResponse;
         expect(response).toHaveProperty('message');
         expect(response).toHaveProperty('operationId');
         expect(response).toHaveProperty('threatTypes');
@@ -291,10 +313,11 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         expect(response).toHaveProperty('detectionCount');
         expect(response).toHaveProperty('timestamp');
 
-        expect(Array.isArray(response.threatTypes)).toBe(true);
-        expect(Array.isArray(response.validationStages)).toBe(true);
-        expect(typeof response.totalRiskScore).toBe('number');
-        expect(response.detectionCount).toBeGreaterThan(0);
+        const typedResponse = response as any;
+        expect(Array.isArray(typedResponse.threatTypes)).toBe(true);
+        expect(Array.isArray(typedResponse.validationStages)).toBe(true);
+        expect(typeof typedResponse.totalRiskScore).toBe('number');
+        expect(typedResponse.detectionCount).toBeGreaterThan(0);
       }
     });
 
@@ -321,9 +344,13 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: 'A'.repeat(2 * 1024 * 1024), // 2MB payload
       };
 
-      await expect(pipe.transform(largePayload, {} as unknown)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(largePayload, {
+          type: 'body',
+          metatype: Object,
+          data: undefined,
+        } as any),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 

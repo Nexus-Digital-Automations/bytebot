@@ -15,7 +15,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-undef */
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
@@ -83,7 +82,7 @@ describe('Security Validation E2E Tests', () => {
     ];
 
     xssPayloads.forEach((_payload, _index) => {
-      it(`should block XSS payload #${index + 1}: ${_payload.substring(0, 30)}...`, async () => {
+      it(`should block XSS payload #${_index + 1}: ${_payload.substring(0, 30)}...`, async () => {
         const response = await request(server)
           .post('/computer-use')
           .send({
@@ -211,8 +210,8 @@ describe('Security Validation E2E Tests', () => {
 
       // Check rate limit response format
       const rateLimitResponse = rateLimitedResponses[0];
-      expect(rateLimitResponse.body.error).toBe('Too Many Requests');
-      expect(rateLimitResponse.body.message).toContain('rate limit');
+      expect(rateLimitResponse?.body.error).toBe('Too Many Requests');
+      expect(rateLimitResponse?.body.message).toContain('rate limit');
     });
 
     it('should include rate limit headers', async () => {

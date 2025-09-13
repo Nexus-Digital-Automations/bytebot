@@ -23,7 +23,7 @@ import { InputTrackingController } from '../input-tracking.controller';
 import { InputTrackingService } from '../input-tracking.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import { UserRole } from '@bytebot/shared';
+import { UserRole, Permission } from '@bytebot/shared';
 import {
   MockByteBotdUser,
   MockInputTrackingService,
@@ -40,33 +40,40 @@ describe('InputTrackingController', () => {
   // Mock users for testing
   const mockAdminUser: MockByteBotdUser = {
     id: 'admin_user_1',
+    sub: 'admin_user_1',
     username: 'admin',
     email: 'admin@bytebot.ai',
     role: UserRole._ADMIN,
     permissions: [
-      'task:read',
-      'task:write',
-      'computer:control',
-      'system:admin',
+      Permission._TASK_READ,
+      Permission._TASK_WRITE,
+      Permission._COMPUTER_CONTROL,
+      Permission._SYSTEM_ADMIN,
     ],
     isActive: true,
   };
 
   const mockOperatorUser: MockByteBotdUser = {
     id: 'operator_user_1',
+    sub: 'operator_user_1',
     username: 'operator',
     email: 'operator@bytebot.ai',
     role: UserRole._OPERATOR,
-    permissions: ['task:read', 'task:write', 'computer:control'],
+    permissions: [
+      Permission._TASK_READ,
+      Permission._TASK_WRITE,
+      Permission._COMPUTER_CONTROL,
+    ],
     isActive: true,
   };
 
   const _mockViewerUser: MockByteBotdUser = {
     id: 'viewer_user_1',
+    sub: 'viewer_user_1',
     username: 'viewer',
     email: 'viewer@bytebot.ai',
     role: UserRole._VIEWER,
-    permissions: ['task:read'],
+    permissions: [Permission._TASK_READ],
     isActive: true,
   };
 
@@ -492,6 +499,7 @@ describe('InputTrackingController', () => {
 
       const incompleteUser = {
         id: 'test_user',
+        sub: 'test_user',
         // missing username, email, role
       } as Partial<MockByteBotdUser>;
 
@@ -592,6 +600,7 @@ describe('InputTrackingController', () => {
 
       const malformedUser = {
         id: 'test',
+        sub: 'test',
         // Missing required properties
       };
 

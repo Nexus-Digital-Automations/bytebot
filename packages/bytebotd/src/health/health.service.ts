@@ -337,7 +337,7 @@ export class HealthService extends HealthIndicator {
           } else {
             results[serviceName] = {
               status: 'error',
-              _error:
+              error:
                 result.reason instanceof Error
                   ? result.reason.message
                   : String(result.reason),

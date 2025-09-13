@@ -57,7 +57,7 @@ jest.mock(
               Promise.resolve(fn(...args)),
         ),
         { custom: Symbol.for('nodejs.util.promisify.custom') },
-      ) as jest.MockedFunction<typeof import('util').promisify>,
+      ) as any,
     }) as jest.Mocked<typeof import('util')>,
 );
 
@@ -154,21 +154,19 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
     // Mock exec to resolve quickly for tests
     childProcess.exec.mockImplementation(
-      (command: string, options: unknown, callback?: MockExecCallback) => {
-        if (typeof options === 'function') {
-          callback = options as MockExecCallback;
-        }
+      (command: string, options: any, callback?: any) => {
+        const cb = typeof options === 'function' ? options : callback;
         // Simulate quick exec resolution
         setTimeout(() => {
-          if (callback) {
+          if (cb) {
             if (command.includes('stat')) {
-              callback(null, { stdout: '1024 1640995200' }); // size and timestamp
+              cb(null, '1024 1640995200', ''); // stdout, stderr
             } else {
-              callback(null, { stdout: '' });
+              cb(null, '', '');
             }
           }
         }, 10);
-        return { pid: 12345 };
+        return { pid: 12345 } as any;
       },
     );
 
@@ -463,9 +461,9 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
           pid: 12345,
           kill: jest.fn(),
           on: jest.fn(),
-          stdout: { on: jest.fn() },
-          stderr: { on: jest.fn() },
-        });
+          stdout: { on: jest.fn() } as any,
+          stderr: { on: jest.fn() } as any,
+        } as any);
 
         const action = createTestAction<ApplicationAction>({
           action: 'application',
@@ -584,10 +582,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should log structured error information', async () => {
         // Arrange
-        const loggerErrorSpy = jest.spyOn(
-          Logger.prototype,
-          'error',
-        ) as MockJestSpy;
+        const loggerErrorSpy = jest.spyOn(Logger.prototype, 'error');
         const action = createTestAction<ClickMouseAction>({
           action: 'click_mouse',
           button: 'left',
@@ -636,7 +631,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     describe('Performance Monitoring', () => {
       it('should log action start with performance tracking', async () => {
         // Arrange
-        const loggerLogSpy = jest.spyOn(Logger.prototype, 'log') as MockJestSpy;
+        const loggerLogSpy = jest.spyOn(Logger.prototype, 'log');
         const action = createTestAction<MoveMouseAction>({
           action: 'move_mouse',
           coordinates: { x: 100, y: 200 },
@@ -659,10 +654,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should log action completion with performance metrics', async () => {
         // Arrange
-        const _loggerLogSpy = jest.spyOn(
-          Logger.prototype,
-          'log',
-        ) as MockJestSpy;
+        const _loggerLogSpy = jest.spyOn(Logger.prototype, 'log');
         const action = createTestAction<ScreenshotAction>({
           action: 'screenshot',
         });

@@ -8,7 +8,7 @@
  * @version 1.0.0
  */
 
-import { UserRole } from '@bytebot/shared';
+import { UserRole, Permission } from '@bytebot/shared';
 
 // Base coordinate interface for mouse positions
 export interface Coordinates {
@@ -36,10 +36,11 @@ export interface KeyInfo {
 // Mock user interface for testing
 export interface MockByteBotdUser {
   id: string;
+  sub: string;
   username: string;
   email: string;
   role: UserRole;
-  permissions: string[];
+  permissions: Permission[];
   isActive: boolean;
 }
 
