@@ -105,7 +105,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: 'Hello World',
       };
 
-      const result = await pipe.transform(validInput, {} as any);
+      const result = await pipe.transform(validInput, {} as ArgumentMetadata);
 
       expect(result).toBeDefined();
       expect(result.action).toBe('type_text');
@@ -199,7 +199,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         const input = { action: testCase.action };
 
         try {
-          await pipe.transform(input, {} as any);
+          await pipe.transform(input, {} as ArgumentMetadata);
         } catch (_error) {
           // Ignore validation errors for incomplete inputs
         }
@@ -240,7 +240,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       try {
-        await pipe.transform(maliciousInput, {} as any);
+        await pipe.transform(maliciousInput, {} as ArgumentMetadata);
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
@@ -268,7 +268,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       try {
-        await pipe.transform(maliciousInput, {} as any);
+        await pipe.transform(maliciousInput, {} as ArgumentMetadata);
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error.response).toHaveProperty('message');
@@ -298,7 +298,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       ];
 
       for (const input of validInputs) {
-        const result = await pipe.transform(input, {} as any);
+        const result = await pipe.transform(input, {} as ArgumentMetadata);
         expect(result).toBeDefined();
         expect(result.action).toBe(input.action);
       }
@@ -323,7 +323,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       const start = Date.now();
-      await pipe.transform(input, {} as any);
+      await pipe.transform(input, {} as ArgumentMetadata);
       const duration = Date.now() - start;
 
       expect(duration).toBeLessThan(100); // Should complete within 100ms

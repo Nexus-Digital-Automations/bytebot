@@ -861,11 +861,9 @@ describe('Security E2E - Comprehensive Testing', () => {
         const result = await authController.refresh(req.body);
         res.json(result);
       } catch (error: unknown) {
-        res
-          .status(401)
-          .json({
-            error: error instanceof Error ? error.message : String(error),
-          });
+        res.status(401).json({
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     });
 
@@ -874,7 +872,11 @@ describe('Security E2E - Comprehensive Testing', () => {
         const result = await authController.logout(req.user);
         res.json(result);
       } catch (error: unknown) {
-        res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+        res
+          .status(500)
+          .json({
+            error: error instanceof Error ? error.message : String(error),
+          });
       }
     });
 
