@@ -250,7 +250,9 @@ describe('Security Validation Mock Tests', () => {
 
       expectedSecurityHeaders.forEach((header) => {
         expect(securityHeaders).toHaveProperty(header);
-        expect(securityHeaders[header]).toBeTruthy();
+        expect(
+          (securityHeaders as Record<string, string>)[header],
+        ).toBeTruthy();
       });
     });
   });

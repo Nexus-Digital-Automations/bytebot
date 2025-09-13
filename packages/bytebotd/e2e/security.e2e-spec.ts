@@ -224,6 +224,7 @@ describe('Security E2E Tests', () => {
           }
         }
         next();
+        return;
       },
     );
 
@@ -262,6 +263,7 @@ describe('Security E2E Tests', () => {
           'max-age=31536000; includeSubDomains',
         );
         next();
+        return;
       },
     );
 

@@ -20,11 +20,13 @@
 
 // Mock child_process and fs operations BEFORE imports
 jest.mock('child_process', () => ({
-  exec: jest.fn((cmd: string, opts: unknown, cb?: MockExecCallback) => {
-    if (typeof opts === 'function') cb = opts as MockExecCallback;
-    setTimeout(() => cb?.(null, { stdout: '', stderr: '' }), 10);
-    return { pid: 12345 };
-  }) as jest.MockedFunction<typeof import('child_process').exec>,
+  exec: jest.fn().mockImplementation((cmd: string, opts: any, cb?: any) => {
+    const callback = typeof opts === 'function' ? opts : cb;
+    if (callback) {
+      setTimeout(() => callback(null, '', ''), 10);
+    }
+    return { pid: 12345 } as any;
+  }),
   spawn: jest.fn().mockReturnValue({
     unref: jest.fn(),
     pid: 12345,
@@ -75,12 +77,10 @@ interface MockExecCallback {
 /**
  * Type-safe Jest spy interface
  */
-interface MockJestSpy<T = unknown, Y extends unknown[] = unknown[]>
-  extends jest.SpyInstance<T, Y> {
-  mockImplementation: jest.MockInstance<T, Y>['mockImplementation'];
-  mockResolvedValue: jest.MockInstance<T, Y>['mockResolvedValue'];
-  mockRejectedValue: jest.MockInstance<T, Y>['mockRejectedValue'];
-}
+type MockJestSpy<
+  T = unknown,
+  Y extends unknown[] = unknown[],
+> = jest.MockedFunction<(...args: Y) => T>;
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';

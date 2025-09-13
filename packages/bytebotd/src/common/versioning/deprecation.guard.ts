@@ -10,7 +10,6 @@
  * @author Input Validation & API Security Specialist
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 /* eslint-disable @typescript-eslint/no-unsafe-call */
@@ -97,6 +96,8 @@ interface VersionConfig {
   deprecation?: {
     since?: string | Date;
     sunset?: string | Date;
+    migration?: string;
+    desktopMigrationNotes?: string;
   };
   isComputerUse?: boolean;
   version?: string;
@@ -658,7 +659,11 @@ export class DeprecationGuard implements CanActivate {
     const clientVersion = desktopClientInfo.version;
 
     // Simple version comparison (assumes semantic versioning)
-    if (clientVersion === '0.0.0' || clientVersion === 'unknown') {
+    if (
+      !clientVersion ||
+      clientVersion === '0.0.0' ||
+      clientVersion === 'unknown'
+    ) {
       return true; // Unknown versions are considered legacy
     }
 
