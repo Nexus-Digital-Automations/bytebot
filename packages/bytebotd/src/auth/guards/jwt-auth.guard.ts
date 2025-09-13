@@ -268,7 +268,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??
       (request.headers['x-real-ip'] as string) ??
       request.connection?.remoteAddress ??
-      (request.socket?.remoteAddress || 'unknown')
+      request.socket?.remoteAddress ??
+      'unknown'
     );
   }
 

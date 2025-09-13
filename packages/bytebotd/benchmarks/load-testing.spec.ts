@@ -136,12 +136,10 @@ describe('Load Testing Benchmarks', () => {
       ? interceptors
       : [interceptors];
 
-    performanceInterceptor = interceptorArray.find(
-      (i) => i instanceof PerformanceInterceptor,
-    );
-    compressionInterceptor = interceptorArray.find(
-      (i) => i instanceof CompressionInterceptor,
-    );
+    performanceInterceptor =
+      interceptorArray.find((i) => i instanceof PerformanceInterceptor) ?? null;
+    compressionInterceptor =
+      interceptorArray.find((i) => i instanceof CompressionInterceptor) ?? null;
 
     await app.init();
 

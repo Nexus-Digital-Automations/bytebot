@@ -526,7 +526,7 @@ describe('Controller Security Integration Tests', () => {
       const testId = `${operationId}_public_access`;
       securityLogger.info(`[${testId}] Testing public endpoint access`);
 
-      const response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer() as Express.Application)
         .get('/public/data')
         .expect(200);
 

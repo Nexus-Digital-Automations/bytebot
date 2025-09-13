@@ -170,7 +170,7 @@ describe('Security Penetration Testing Suite', () => {
             token: attackToken,
             time: Date.now() - attackStart,
           });
-        } catch (error) {
+        } catch (_error) {
           results.push({
             success: false,
             token: attackToken,
@@ -216,7 +216,7 @@ describe('Security Penetration Testing Suite', () => {
         try {
           await targetFunction(token);
           results.push({ token, success: true });
-        } catch (error) {
+        } catch (_error) {
           results.push({ token, success: false, error: error.message });
         }
       }
@@ -252,7 +252,7 @@ describe('Security Penetration Testing Suite', () => {
           try {
             const _result = await targetFunction(user);
             return { success: true, index: _index, userRole: user.role };
-          } catch (error) {
+          } catch (_error) {
             return {
               success: false,
               index: _index,
@@ -462,7 +462,7 @@ describe('Security Penetration Testing Suite', () => {
             success: true,
             vulnerability: 'HIGH',
           });
-        } catch (error) {
+        } catch (_error) {
           attackResults.push({
             header: Object.keys(headerInjection)[0],
             success: false,
@@ -659,7 +659,7 @@ describe('Security Penetration Testing Suite', () => {
             success: result,
             vulnerability: result ? 'CRITICAL' : 'NONE',
           });
-        } catch (error) {
+        } catch (_error) {
           escalationResults.push({
             attack: attackVector.name,
             success: false,
@@ -821,7 +821,7 @@ describe('Security Penetration Testing Suite', () => {
 
         try {
           await rolesGuard.canActivate(context);
-        } catch (error) {
+        } catch (_error) {
           // Expected for unauthorized cases
         }
 
@@ -926,7 +926,7 @@ describe('Security Penetration Testing Suite', () => {
             success: true,
             vulnerability: 'CRITICAL',
           });
-        } catch (error) {
+        } catch (_error) {
           stuffingResults.push({
             token: stuffingToken.substring(0, 20) + '...',
             success: false,
@@ -1034,7 +1034,7 @@ describe('Security Penetration Testing Suite', () => {
             success: true,
             vulnerability: 'CRITICAL',
           });
-        } catch (error) {
+        } catch (_error) {
           manipulationResults.push({ success: false, blocked: true });
         }
       }
@@ -1122,7 +1122,7 @@ describe('Security Penetration Testing Suite', () => {
             success: escalationSuccess,
             vulnerability: escalationSuccess ? 'CRITICAL' : 'LOW',
           });
-        } catch (error) {
+        } catch (_error) {
           evasionResults.push({
             technique: technique.name,
             success: false,
@@ -1173,7 +1173,7 @@ describe('Security Penetration Testing Suite', () => {
           try {
             await jwtAuthGuard.canActivate(context);
             attackResults.push({ attempt: attemptCount, success: true });
-          } catch (error) {
+          } catch (_error) {
             attackResults.push({ attempt: attemptCount, success: false });
           }
 
@@ -1245,7 +1245,7 @@ describe('Security Penetration Testing Suite', () => {
               try {
                 await jwtAuthGuard.canActivate(context);
                 return { success: true };
-              } catch (error) {
+              } catch (_error) {
                 return { success: false, blocked: true };
               }
             })(),
@@ -1278,7 +1278,7 @@ describe('Security Penetration Testing Suite', () => {
               try {
                 await rolesGuard.canActivate(context);
                 return { success: true };
-              } catch (error) {
+              } catch (_error) {
                 return { success: false, blocked: true };
               }
             })(),
@@ -1383,7 +1383,7 @@ describe('Security Penetration Testing Suite', () => {
 
               try {
                 await jwtAuthGuard.canActivate(authContext);
-              } catch (error) {
+              } catch (_error) {
                 // Expected failure
               }
             }
@@ -1412,7 +1412,7 @@ describe('Security Penetration Testing Suite', () => {
 
               try {
                 await rolesGuard.canActivate(roleContext);
-              } catch (error) {
+              } catch (_error) {
                 // Expected failure
               }
             }

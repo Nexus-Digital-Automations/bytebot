@@ -82,7 +82,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       }),
       getHandler: jest.fn().mockReturnValue({ name: 'testHandler' }),
       getClass: jest.fn().mockReturnValue({ name: 'TestController' }),
-    } as any;
+    } as ExecutionContext;
   };
 
   // Create malicious JWT tokens for security testing
@@ -345,7 +345,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
         try {
           await guard.canActivate(context);
-        } catch (error) {
+        } catch (_error) {
           // Expected for failing scenarios
         }
 

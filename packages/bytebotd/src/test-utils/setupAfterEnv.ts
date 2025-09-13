@@ -201,6 +201,7 @@ expect.extend({
       hasSuccess &&
       hasOperationId &&
       hasTimestamp &&
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       (_result.success || hasMessage) &&
       operationSpecificChecks;
 
