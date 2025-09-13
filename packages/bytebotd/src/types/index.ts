@@ -24,7 +24,7 @@ import type {
   Query as ExpressQuery,
 } from 'express-serve-static-core';
 import { JwtPayload as BaseJwtPayload } from 'jsonwebtoken';
-import type { BufferEncoding } from 'node:buffer';
+// import type { BufferEncoding } from 'node:buffer'; // Causing import issues - use string instead
 
 // =============================================================================
 // Core Utility Types - Advanced TypeScript Patterns
