@@ -599,7 +599,7 @@ export class DeprecationGuard implements CanActivate {
       case DeprecationEnforcement.BLOCK_WITH_WARNING:
         // Block if past grace period or sunset, considering desktop extensions
         if (
-          deprecationResult.state === 'sunset_strict' ??
+          deprecationResult.state === 'sunset_strict' ||
           (!deprecationResult.inGracePeriod &&
             !deprecationResult.inDesktopGracePeriod &&
             ![
@@ -641,7 +641,7 @@ export class DeprecationGuard implements CanActivate {
 
       default:
         this.logger.warn(
-          `[${operationId}] Unknown enforcement level: ${this.policy.enforcement}`,
+          `[${operationId}] Unknown enforcement level: ${String(this.policy.enforcement)}`,
         );
         return true;
     }
@@ -658,7 +658,7 @@ export class DeprecationGuard implements CanActivate {
     const clientVersion = desktopClientInfo.version;
 
     // Simple version comparison (assumes semantic versioning)
-    if (clientVersion === '0.0.0' ?? clientVersion === 'unknown') {
+    if (clientVersion === '0.0.0' || clientVersion === 'unknown') {
       return true; // Unknown versions are considered legacy
     }
 

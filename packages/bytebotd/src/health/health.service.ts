@@ -25,12 +25,6 @@ import * as process from 'process';
 import {
   BasicHealthResponse,
   DetailedStatusResponse,
-  ServiceHealthResponse,
-  ExternalServiceResult,
-  ModuleStatus,
-  ServiceHealthResults,
-  PerformanceMetrics,
-  ServiceStatusMap,
 } from './interfaces/health.interfaces';
 
 /**
@@ -324,7 +318,8 @@ export class HealthService extends HealthIndicator {
         // Example: this.checkExternalService('api', 'https://api.example.com/health')
       ] as Array<Promise<{ status: string; responseTime?: string }>>);
 
-      const results: Record<string, any> = {};
+      const results: Record<string, { status: string; responseTime?: string }> =
+        {};
       let allHealthy = true;
 
       services.forEach(

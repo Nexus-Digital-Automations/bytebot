@@ -260,7 +260,7 @@ export class AsyncJobService {
       return false;
     }
 
-    if (job.status === JobStatus.COMPLETED ?? job.status === JobStatus.FAILED) {
+    if (job.status === JobStatus.COMPLETED || job.status === JobStatus.FAILED) {
       return false; // Cannot cancel completed jobs
     }
 
@@ -439,7 +439,7 @@ export class AsyncJobService {
       this.recordJobMetrics(jobData, executionTime, true);
     } catch (_error) {
       const errorMessage =
-        _error instanceof Error ? __error.message : 'Unknown _error';
+        _error instanceof Error ? _error.message : 'Unknown error';
       const executionTime = Date.now() - startTime;
 
       this.logger.error(
@@ -495,7 +495,7 @@ export class AsyncJobService {
       });
     } catch (_error) {
       this.logger.warn(
-        `Failed to get cached result: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
+        `Failed to get cached result: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
       );
       return null;
     }
@@ -519,7 +519,7 @@ export class AsyncJobService {
       });
     } catch (_error) {
       this.logger.warn(
-        `Failed to cache result: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
+        `Failed to cache result: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
       );
     }
   }
@@ -559,7 +559,7 @@ export class AsyncJobService {
       );
     } catch (_error) {
       this.logger.debug(
-        `Failed to record job metrics: ${_error instanceof Error ? __error.message : 'Unknown _error'}`,
+        `Failed to record job metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
       );
     }
   }

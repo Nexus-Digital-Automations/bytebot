@@ -27,6 +27,13 @@ import {
   StrictRecord,
   TypedMiddleware as _TypedMiddleware,
   AuthenticatedRequest as _AuthenticatedRequest,
+  ClientInfo,
+  TaskData,
+  TokenData,
+  DecodedJwtPayload,
+  SecurityEventData,
+  MockResponseData,
+  EnhancedRequest,
 } from '../src/types';
 import { Request, Response, NextFunction } from 'express';
 
@@ -37,7 +44,9 @@ declare module 'express-serve-static-core' {
       sub: string;
       email: string;
       role: UserRole;
-      [key: string]: any;
+      sessionId?: string;
+      permissions?: string[];
+      clientInfo?: ClientInfo;
     };
   }
 }
@@ -75,7 +84,7 @@ interface SecuritySession {
   role: UserRole;
   createdAt: number;
   lastActivity: number;
-  clientInfo?: any;
+  clientInfo?: ClientInfo;
 }
 
 interface FailedAttempt {
@@ -90,14 +99,7 @@ interface _SecurityUser {
   password: string;
 }
 
-interface TaskData {
-  id: string;
-  [key: string]: any;
-  createdBy?: string;
-  updatedBy?: string;
-  createdAt?: number;
-  updatedAt?: number;
-}
+// TaskData interface is now imported from '../src/types'
 
 /**
  * Mock services for comprehensive security testing
@@ -872,11 +874,9 @@ describe('Security E2E - Comprehensive Testing', () => {
         const result = await authController.logout(req.user);
         res.json(result);
       } catch (error: unknown) {
-        res
-          .status(500)
-          .json({
-            error: error instanceof Error ? error.message : String(error),
-          });
+        res.status(500).json({
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     });
 

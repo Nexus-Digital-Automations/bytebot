@@ -97,7 +97,7 @@ interface ThreatDetectionResult {
 }
 
 @Injectable()
-export class SecuritySanitizationPipe implements PipeTransform<any> {
+export class SecuritySanitizationPipe implements PipeTransform<unknown> {
   private readonly logger = new Logger(SecuritySanitizationPipe.name);
   private readonly options: Required<SecuritySanitizationOptions>;
 
@@ -126,7 +126,10 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
   /**
    * Transform and sanitize incoming data
    */
-  async transform(value: unknown, metadata: ArgumentMetadata): Promise<any> {
+  async transform(
+    value: unknown,
+    metadata: ArgumentMetadata,
+  ): Promise<unknown> {
     const operationId = `security-sanitization-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -141,7 +144,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
 
     try {
       // Skip sanitization for basic types without metatype
-      if (!metadata.metatype ?? this.isBasicType(metadata.metatype)) {
+      if (!metadata.metatype || this.isBasicType(metadata.metatype)) {
         return this.sanitizeBasicValue(value, operationId);
       }
 
@@ -454,7 +457,7 @@ export class SecuritySanitizationPipe implements PipeTransform<any> {
       for (const [key, value] of Object.entries(obj)) {
         // Check property name for threats
         if (typeof key === 'string') {
-          if (detectXSS(key) ?? detectSQLInjection(key)) {
+          if (detectXSS(key) || detectSQLInjection(key)) {
             threats.push({
               type: 'MALICIOUS_INPUT',
               field: `${path}.${key}`,

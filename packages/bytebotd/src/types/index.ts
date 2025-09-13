@@ -24,6 +24,7 @@ import type {
   Query as ExpressQuery,
 } from 'express-serve-static-core';
 import { JwtPayload as BaseJwtPayload } from 'jsonwebtoken';
+import type { BufferEncoding } from 'node:buffer';
 
 // =============================================================================
 // Core Utility Types - Advanced TypeScript Patterns
@@ -650,6 +651,121 @@ export const TypeSafetyUtils = {
     return value == null;
   },
 } as const;
+
+// =============================================================================
+// Security Testing and Client Information Types
+// =============================================================================
+
+/**
+ * Client information interface for security sessions
+ */
+export interface ClientInfo {
+  readonly userAgent?: string;
+  readonly ipAddress?: string;
+  readonly platform?: string;
+  readonly browser?: string;
+  readonly version?: string;
+  readonly deviceType?: 'desktop' | 'mobile' | 'tablet' | 'unknown';
+  readonly screenResolution?: string;
+  readonly timestamp: string;
+}
+
+/**
+ * Enhanced task data interface with strict typing
+ */
+export interface TaskData {
+  readonly id: string;
+  readonly title: string;
+  readonly description?: string;
+  readonly status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly createdBy?: string;
+  readonly updatedBy?: string;
+  readonly assignedTo?: string;
+  readonly createdAt?: number;
+  readonly updatedAt?: number;
+  readonly dueDate?: number;
+  readonly metadata?: StrictRecord<string | number | boolean>;
+}
+
+/**
+ * JWT token data with proper typing
+ */
+export interface TokenData {
+  readonly token: string;
+  readonly refreshToken?: string;
+  readonly expiresIn: number | string;
+  readonly tokenType: 'Bearer' | 'JWT';
+  readonly scope?: string[];
+  readonly issuedAt: number;
+}
+
+/**
+ * Decoded JWT payload with enhanced type safety
+ */
+export interface DecodedJwtPayload extends BaseJwtPayload {
+  readonly sub: string;
+  readonly email: string;
+  readonly role: UserRole;
+  readonly sessionId?: string;
+  readonly permissions?: string[];
+  readonly exp: number;
+  readonly iat: number;
+  readonly iss?: string;
+  readonly aud?: string | string[];
+}
+
+/**
+ * Security event data interface
+ */
+export interface SecurityEventData {
+  readonly eventType:
+    | 'login'
+    | 'logout'
+    | 'failed_attempt'
+    | 'session_timeout'
+    | 'permission_denied';
+  readonly userId?: string;
+  readonly sessionId?: string;
+  readonly ipAddress?: string;
+  readonly userAgent?: string;
+  readonly timestamp: number;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly details?: StrictRecord<string | number | boolean>;
+}
+
+/**
+ * Mock server response data interface
+ */
+export interface MockResponseData {
+  readonly status: number;
+  readonly message: string;
+  readonly data?: unknown;
+  readonly timestamp: string;
+  readonly requestId: string;
+  readonly duration?: number;
+}
+
+/**
+ * Express.js Request extension with user info
+ */
+export interface EnhancedRequest extends Request {
+  user?: {
+    readonly sub: string;
+    readonly email: string;
+    readonly role: UserRole;
+    readonly sessionId?: string;
+    readonly permissions?: string[];
+    readonly clientInfo?: ClientInfo;
+  };
+  session?: {
+    readonly id: string;
+    readonly data: StrictRecord<unknown>;
+    readonly expiresAt: number;
+  };
+  requestId?: string;
+  startTime?: number;
+}
 
 // Default export with grouped types for convenience
 export default {

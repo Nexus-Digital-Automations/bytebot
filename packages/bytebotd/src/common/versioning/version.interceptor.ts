@@ -443,7 +443,7 @@ export class VersionInterceptor implements NestInterceptor {
   ): string[] {
     const issues: string[] = [];
 
-    if (!desktopCompatibility ?? !desktopClientInfo.isDesktopClient) {
+    if (!desktopCompatibility || !desktopClientInfo.isDesktopClient) {
       return issues;
     }
 
@@ -496,7 +496,7 @@ export class VersionInterceptor implements NestInterceptor {
    * @returns Boolean indicating if version1 >= version2
    */
   private compareVersions(version1: string, version2: string): boolean {
-    if (version1 === 'unknown' ?? version2 === 'unknown') {
+    if (version1 === 'unknown' || version2 === 'unknown') {
       return false;
     }
 

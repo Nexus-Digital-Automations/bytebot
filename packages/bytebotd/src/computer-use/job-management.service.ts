@@ -140,7 +140,7 @@ export interface JobError {
   readonly originalError?: unknown;
   readonly timestamp: Date;
   readonly retryable: boolean;
-  readonly context: Record<string, any>;
+  readonly context: Record<string, unknown>;
 }
 
 /**
@@ -699,7 +699,7 @@ export class JobStorage implements JobStorageInterface {
     try {
       const [ivHex, authTagHex, encrypted] = encryptedData.split(':');
 
-      if (!ivHex ?? !authTagHex ?? !encrypted) {
+      if (!ivHex || !authTagHex || !encrypted) {
         throw new Error('Invalid encrypted data format');
       }
 
@@ -1376,7 +1376,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
         throw new Error(`Job ${jobId} is still ${job.status.toLowerCase()}`);
       }
 
-      if (job.status === JobStatus.FAILED ?? job.status === JobStatus.TIMEOUT) {
+      if (job.status === JobStatus.FAILED || job.status === JobStatus.TIMEOUT) {
         throw new Error(
           `Job ${jobId} failed: ${job.error?.message ?? 'Unknown error'}`,
         );
@@ -1386,7 +1386,10 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
         throw new Error(`Job ${jobId} was cancelled`);
       }
 
-      return job.result!;
+      if (job.result === undefined) {
+        throw new Error(`Job ${jobId} has no result`);
+      }
+      return job.result;
     } catch (_error) {
       this.logger.error(`[${operationId}] Failed to get job result`, {
         jobId,

@@ -44,15 +44,20 @@ jest.mock('fs/promises', () => ({
   mkdir: jest.fn(),
 }));
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('util', () => ({
   ...jest.requireActual('util'),
   promisify: jest.fn(
-    (fn) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (fn: any) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (...args: any[]) =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         Promise.resolve(fn(...args)),
   ),
 }));
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('path', () => ({
   ...jest.requireActual('path'),
   resolve: jest.fn((...paths: string[]) => paths.join('/')),
@@ -81,6 +86,7 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
     height: jest.fn(),
     colorAt: jest.fn(),
   },
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   Point: jest.fn().mockImplementation((x, y) => ({ x, y })),
   Region: jest.fn(),
   Key: {
@@ -134,16 +140,9 @@ import {
   ClickMouseAction,
   PressMouseAction,
   DragMouseAction,
-  ScrollAction,
-  TypeKeysAction,
   PressKeysAction,
   TypeTextAction,
-  PasteTextAction,
-  ScreenshotAction,
-  CursorPositionAction,
-  ApplicationAction,
   WriteFileAction,
-  ReadFileAction,
 } from '@bytebot/shared';
 import { ScreenshotActionDto } from '../dto/computer-action.dto';
 
@@ -508,7 +507,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
           coordinates: { x: test.x, y: test.y },
         };
 
-        const result = await service.action(moveAction);
+        const _result = await service.action(moveAction);
 
         if (test.shouldSucceed) {
           // Action should complete without throwing errors
@@ -874,7 +873,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         button: 'left',
       };
 
-      const result = await service.action(coordinatedAction);
+      const _result = await service.action(coordinatedAction);
 
       // Action should complete without throwing errors
       await expect(service.action(coordinatedAction)).resolves.not.toThrow();

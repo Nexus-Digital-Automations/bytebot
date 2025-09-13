@@ -32,9 +32,73 @@
       ]
     },
     {
-      "id": "error_1757735617045_zelvfuagk",
-      "title": "Fix MCP Service ESLint Violations",
-      "description": "Resolve all ESLint violations in MCP (Model Context Protocol) services in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd. Focus on MCP module violations, protocol message handling, MCP tool implementations, context protocol violations, and MCP configuration violations. Implement proper TypeScript interfaces for MCP protocol operations.",
+      "id": "error_1757738140603_76te73bhu",
+      "title": "ESLint Emergency Cleanup Agent 8 - Guard and Interceptor Files",
+      "description": "URGENT: Fix ESLint violations in deprecation.guard.ts (3), version.interceptor.ts (2), security-sanitization.pipe.ts (3). Zero tolerance mandate.",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:35:40.603Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "error_1757738115000_58s4yy7lv",
+      "title": "ESLint Emergency Cleanup Agent 5 - security.e2e-spec.ts (14 violations)",
+      "description": "URGENT: Fix all 14 ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/e2e/security.e2e-spec.ts. Zero tolerance mandate.",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:35:15.000Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "error_1757738072484_mr7eon5bx",
+      "title": "ESLint Emergency Cleanup Agent 2 - computer-use.service.spec.ts (22 violations)",
+      "description": "URGENT: Fix all 22 ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/computer-use/computer-use.service.spec.ts. Zero tolerance mandate.",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:34:32.484Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "error_1757738024547_lg9y2ur7i",
+      "title": "ESLint Emergency Cleanup Agent 1 - security-comprehensive.e2e-spec.ts (218 violations)",
+      "description": "URGENT: Fix all 218 ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/e2e/security-comprehensive.e2e-spec.ts. Focus on @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-* violations. Zero tolerance mandate.",
+      "priority": "medium",
+      "category": "error",
+      "status": "pending",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:33:44.547Z",
+      "auto_research_created": false
+    },
+    {
+      "id": "error_1757737625050_qwwqxrezo",
+      "title": "CRITICAL ESLint FINAL ELIMINATION - Import/Reference Specialist",
+      "description": "TARGET: Eliminate all import and reference violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd\n\nFOCUS AREAS:\n1. All undefined variable references\n2. Missing imports\n3. Incorrect type imports\n4. Unused import cleanup\n5. Module resolution issues\n\nSYSTEMATIC APPROACH: Add missing imports, fix reference errors, clean unused imports.\n\nZERO TOLERANCE MANDATE: We are at 519 violations total - eliminate maximum import/reference violations.\n\nREPORT BACK: Import violations eliminated, files processed, remaining violation count.",
       "priority": "medium",
       "category": "error",
       "status": "in_progress",
@@ -44,25 +108,25 @@
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-13T03:53:37.045Z",
+      "created_at": "2025-09-13T04:27:05.050Z",
       "auto_research_created": false,
-      "assigned_agent": "development_session_1757735598520_1_general_15fa3966",
-      "started_at": "2025-09-13T03:53:56.547Z",
-      "claimed_by": "development_session_1757735598520_1_general_15fa3966",
+      "assigned_agent": "development_session_1757737595895_1_general_8e326932",
+      "started_at": "2025-09-13T04:27:30.820Z",
+      "claimed_by": "development_session_1757737595895_1_general_8e326932",
       "agent_assignment_history": [
         {
-          "agentId": "development_session_1757735598520_1_general_15fa3966",
+          "agentId": "development_session_1757737595895_1_general_8e326932",
           "role": "primary",
-          "assignedAt": "2025-09-13T03:53:56.547Z",
+          "assignedAt": "2025-09-13T04:27:30.820Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
       ]
     },
     {
-      "id": "error_1757735616426_u5v3ajpk2",
-      "title": "Fix ESLint violations in computer-use service",
-      "description": "TARGET: Fix all computer-use service ESLint violations in packages/bytebotd - computer-use.service.ts violations, Computer action validation violations, Job management service violations, Action parameter typing, Screen interaction violations. SOLUTION PATTERNS: Computer actions typed action interfaces, Screen coordinates proper number typing, Action validation type-safe validation, Job configuration typed configuration, Error handling proper error interfaces. ZERO TOLERANCE: All computer use operations must have strict typing.",
+      "id": "error_1757737624773_u8kc6l5cz",
+      "title": "CRITICAL: Eliminate all guard and middleware ESLint violations in bytebot packages",
+      "description": "Focus on security-critical guard (.guard.ts) and middleware (.middleware.ts) files in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd. Priority areas: authentication type safety, request/response type safety, security violations. Target: maximum violation elimination from current 519 total count.",
       "priority": "medium",
       "category": "error",
       "status": "in_progress",
@@ -72,16 +136,184 @@
       "estimate": "",
       "requires_research": false,
       "subtasks": [],
-      "created_at": "2025-09-13T03:53:36.426Z",
+      "created_at": "2025-09-13T04:27:04.773Z",
       "auto_research_created": false,
-      "assigned_agent": "development_session_1757735596473_1_general_580c699e",
-      "started_at": "2025-09-13T03:53:56.690Z",
-      "claimed_by": "development_session_1757735596473_1_general_580c699e",
+      "assigned_agent": "development_session_1757737595875_1_general_a6f0cd3d",
+      "started_at": "2025-09-13T04:27:30.803Z",
+      "claimed_by": "development_session_1757737595875_1_general_a6f0cd3d",
       "agent_assignment_history": [
         {
-          "agentId": "development_session_1757735596473_1_general_580c699e",
+          "agentId": "development_session_1757737595875_1_general_a6f0cd3d",
           "role": "primary",
-          "assignedAt": "2025-09-13T03:53:56.690Z",
+          "assignedAt": "2025-09-13T04:27:30.803Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757737618019_gqrkyn9yc",
+      "title": "CRITICAL ESLint FINAL ELIMINATION - General TypeScript Safety Violations",
+      "description": "Eliminate all general ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd focusing on: 1) @typescript-eslint/no-unsafe-assignment violations 2) @typescript-eslint/no-unsafe-member-access violations 3) @typescript-eslint/no-unsafe-return violations 4) @typescript-eslint/no-explicit-any violations 5) All general TypeScript safety violations. Target 519 total violations - prioritize files with highest violation counts for maximum impact.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:26:58.019Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757737589448_1_general_68286cc9",
+      "started_at": "2025-09-13T04:27:32.420Z",
+      "claimed_by": "development_session_1757737589448_1_general_68286cc9",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757737589448_1_general_68286cc9",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:27:32.420Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757737616400_fz0mchqa5",
+      "title": "CRITICAL ESLint FINAL ELIMINATION - DTO/VALIDATION SPECIALIST",
+      "description": "TARGET: Eliminate all DTO and validation ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd. FOCUS AREAS: 1. All DTO files (.dto.ts) 2. All validation pipes 3. Data transfer object typing 4. Validation schema violations 5. Request/response validation. CRITICAL PRIORITY: DTOs and validation are data integrity points - must be violation-free. ZERO TOLERANCE MANDATE: We are at 519 violations total - eliminate maximum DTO/validation violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:26:56.400Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757737591080_1_general_1d6d5e3a",
+      "started_at": "2025-09-13T04:27:22.741Z",
+      "claimed_by": "development_session_1757737591080_1_general_1d6d5e3a",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757737591080_1_general_1d6d5e3a",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:27:22.741Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757737603108_dcshebkb1",
+      "title": "ESLint Type Safety Hardening - Replace any types with precise interfaces in bytebotd",
+      "description": "Implement maximum type safety in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd by: 1) Replacing all remaining any types with precise interfaces, 2) Adding type assertions where needed, 3) Creating missing type definitions, 4) Enhancing existing interfaces, 5) Adding generic type constraints. Target enterprise-level TypeScript type safety to eliminate maximum violations from current 519 total.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:26:43.108Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757737578884_1_general_5fddc044",
+      "started_at": "2025-09-13T04:27:24.804Z",
+      "claimed_by": "development_session_1757737578884_1_general_5fddc044",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757737578884_1_general_5fddc044",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:27:24.804Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757737597328_thm31f439",
+      "title": "CRITICAL ESLint Utilities/Common Module Elimination",
+      "description": "Systematically eliminate all ESLint violations in utilities and common modules in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd. Focus on utils/ directories, common/ directories, helper functions, shared modules, and configuration violations. Target: Maximum violation elimination from 519 total violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:26:37.328Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757737571801_1_general_b70edfbb",
+      "started_at": "2025-09-13T04:26:56.474Z",
+      "claimed_by": "development_session_1757737571801_1_general_b70edfbb",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757737571801_1_general_b70edfbb",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:26:56.474Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757737596882_uppwhgql2",
+      "title": "CRITICAL ESLint FINAL ELIMINATION - Logic Expression Specialist",
+      "description": "Systematically eliminate all logic and expression violations in bytebot packages: constant binary expressions, nullish coalescing issues, logical operator problems, boolean expression violations, conditional logic violations. Focus on /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:26:36.882Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757737571790_1_general_24a76365",
+      "started_at": "2025-09-13T04:27:04.367Z",
+      "claimed_by": "development_session_1757737571790_1_general_24a76365",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757737571790_1_general_24a76365",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:27:04.367Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "id": "error_1757737596866_xtm3i58ao",
+      "title": "CRITICAL ESLint FINAL ELIMINATION - TEST FILES SPECIALIST",
+      "description": "Eliminate all test file ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd. Focus on Jest mock type safety issues, test assertion type problems, mock object typing violations, and test variable usage violations. Apply test-specific ESLint disables for legitimate test patterns while fixing actual type safety issues. Target: Maximum elimination from 519 total violations.",
+      "priority": "medium",
+      "category": "error",
+      "status": "in_progress",
+      "dependencies": [],
+      "important_files": [],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:26:36.866Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757737571815_1_general_dca6f739",
+      "started_at": "2025-09-13T04:27:03.554Z",
+      "claimed_by": "development_session_1757737571815_1_general_dca6f739",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757737571815_1_general_dca6f739",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:27:03.554Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
@@ -110,90 +342,6 @@
           "agentId": "development_session_1757735593452_1_general_a0439529",
           "role": "primary",
           "assignedAt": "2025-09-13T03:53:55.432Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "id": "error_1757735613202_3xvmx72n9",
-      "title": "Fix ESLint violations in test files",
-      "description": "Address all test file ESLint violations in packages/bytebotd including Jest mock violations, unused variables, type safety issues, and E2E test violations",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T03:53:33.202Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757735593445_1_general_1469f466",
-      "started_at": "2025-09-13T03:53:57.494Z",
-      "claimed_by": "development_session_1757735593445_1_general_1469f466",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757735593445_1_general_1469f466",
-          "role": "primary",
-          "assignedAt": "2025-09-13T03:53:57.494Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "id": "error_1757735609709_a3br5s8xl",
-      "title": "Fix ESLint violations in input tracking service",
-      "description": "Fix all input tracking service ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd. Focus areas: 1. Input tracking service violations 2. Mouse and keyboard event violations 3. Screen interaction violations 4. Input validation violations 5. Tracking data violations. Create precise typing for input events, mouse coordinates, keyboard input, tracking data, and input validation.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T03:53:29.709Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757735588819_1_general_588cfd01",
-      "started_at": "2025-09-13T03:53:49.663Z",
-      "claimed_by": "development_session_1757735588819_1_general_588cfd01",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757735588819_1_general_588cfd01",
-          "role": "primary",
-          "assignedAt": "2025-09-13T03:53:49.663Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "id": "error_1757735608461_0ghnumg2d",
-      "title": "Fix Browser Service ESLint Violations in bytebotd",
-      "description": "Fix all browser-related service ESLint violations in browser-use.service.ts and browser-async-job.service.ts, including browser element data typing, Puppeteer interaction typing, and browser session management violations",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T03:53:28.461Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757735588825_1_general_de3224c7",
-      "started_at": "2025-09-13T03:53:51.694Z",
-      "claimed_by": "development_session_1757735588825_1_general_de3224c7",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757735588825_1_general_de3224c7",
-          "role": "primary",
-          "assignedAt": "2025-09-13T03:53:51.694Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
@@ -1707,6 +1855,216 @@
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-13T03:53:18.521Z",
       "sessionId": "session_1757735598520",
+      "metadata": {}
+    },
+    "development_session_1757737571790_1_general_24a76365": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:26:11.792Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:26:11.792Z",
+      "sessionId": "session_1757737571790",
+      "metadata": {}
+    },
+    "development_session_1757737571801_1_general_b70edfbb": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:26:11.803Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:26:11.803Z",
+      "sessionId": "session_1757737571801",
+      "metadata": {}
+    },
+    "development_session_1757737571815_1_general_dca6f739": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:26:11.816Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:26:11.816Z",
+      "sessionId": "session_1757737571815",
+      "metadata": {}
+    },
+    "development_session_1757737578884_1_general_5fddc044": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:26:18.886Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:26:18.886Z",
+      "sessionId": "session_1757737578884",
+      "metadata": {}
+    },
+    "development_session_1757737584096_1_general_158b407d": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:26:24.097Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:26:24.097Z",
+      "sessionId": "session_1757737584096",
+      "metadata": {}
+    },
+    "development_session_1757737589444_1_general_d9d19e70": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:26:29.445Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:26:29.445Z",
+      "sessionId": "session_1757737589444",
+      "metadata": {}
+    },
+    "development_session_1757737589448_1_general_68286cc9": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:26:29.449Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:26:29.449Z",
+      "sessionId": "session_1757737589448",
+      "metadata": {}
+    },
+    "development_session_1757737591080_1_general_1d6d5e3a": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:26:31.081Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:26:31.081Z",
+      "sessionId": "session_1757737591080",
+      "metadata": {}
+    },
+    "development_session_1757737595875_1_general_a6f0cd3d": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:26:35.877Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:26:35.877Z",
+      "sessionId": "session_1757737595875",
+      "metadata": {}
+    },
+    "development_session_1757737595895_1_general_8e326932": {
+      "name": "development Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-13T04:26:35.896Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-13T04:26:35.896Z",
+      "sessionId": "session_1757737595895",
       "metadata": {}
     }
   },

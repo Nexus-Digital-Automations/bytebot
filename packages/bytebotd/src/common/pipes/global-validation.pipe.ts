@@ -118,7 +118,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
 
     try {
       // Skip validation for primitive types or when no metatype is provided
-      if (!metadata.metatype ?? this.isBasicType(metadata.metatype)) {
+      if (!metadata.metatype || this.isBasicType(metadata.metatype)) {
         this.logger.debug(
           `[${operationId}] Skipping validation for basic type`,
           {
@@ -147,8 +147,8 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
       }
 
       // Transform to class instance
-      const transformedValue = this.options.transform
-        ? plainToClass(metadata.metatype, sanitizedValue)
+      const transformedValue: unknown = this.options.transform
+        ? plainToClass(metadata.metatype as new () => unknown, sanitizedValue)
         : sanitizedValue;
 
       // Perform class-validator validation
@@ -237,12 +237,12 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
     try {
       const payloadSize = JSON.stringify(value).length;
 
-      if (payloadSize > this.options.maxPayloadSize!) {
+      if (payloadSize > (this.options.maxPayloadSize ?? 0)) {
         this.logger.warn(`[${operationId}] Payload size limit exceeded`, {
           operationId,
           payloadSize,
           maxPayloadSize: this.options.maxPayloadSize,
-          ratio: (payloadSize / this.options.maxPayloadSize!).toFixed(2),
+          ratio: (payloadSize / (this.options.maxPayloadSize ?? 1)).toFixed(2),
         });
 
         throw new PayloadTooLargeException(
@@ -255,7 +255,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
         payloadSize,
         maxPayloadSize: this.options.maxPayloadSize,
         utilizationPercent: (
-          (payloadSize / this.options.maxPayloadSize!) *
+          (payloadSize / (this.options.maxPayloadSize ?? 1)) *
           100
         ).toFixed(1),
       });
@@ -371,7 +371,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
     const { type, metatype } = metadata;
 
     // Skip validation for certain types
-    if (type === 'custom' ?? !metatype) {
+    if (type === 'custom' || !metatype) {
       return false;
     }
 
@@ -404,7 +404,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
 
       this.logger.warn(`[${operationId}] BytebotD class validation failed`, {
         operationId,
-        metatype: metatype.name,
+        metatype: (metatype as { name?: string }).name ?? 'unknown',
         errorCount: errors.length,
         validationTimeMs: validationTime,
         errors: formattedErrors,
@@ -421,7 +421,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
 
     this.logger.debug(`[${operationId}] BytebotD class validation passed`, {
       operationId,
-      metatype: metatype.name,
+      metatype: (metatype as { name?: string }).name ?? 'unknown',
       validationTimeMs: validationTime,
       errorCount: 0,
     });
@@ -432,14 +432,19 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
    * @param errors - Class-validator errors
    * @returns Formatted error array
    */
-  private formatValidationErrors(errors: ValidationError[]): unknown[] {
+  private formatValidationErrors(errors: ValidationError[]): Array<{
+    property: string;
+    value: unknown;
+    constraints?: Record<string, string>;
+    children?: unknown;
+  }> {
     return errors.map((error) => ({
       property: error.property,
-      value: error.value,
+      value: error.value as unknown,
       constraints: error.constraints,
       children:
-        error.children?.length > 0
-          ? this.formatValidationErrors(error.children)
+        error.children && error.children.length > 0
+          ? (this.formatValidationErrors(error.children) as unknown)
           : undefined,
     }));
   }
@@ -459,10 +464,12 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
   ): void {
     try {
       let eventType = SecurityEventType._VALIDATION_FAILED;
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
-      if (error.message?.includes('XSS')) {
+      if (errorMessage?.includes('XSS')) {
         eventType = SecurityEventType._XSS_ATTEMPT_BLOCKED;
-      } else if (error.message?.includes('SQL')) {
+      } else if (errorMessage?.includes('SQL')) {
         eventType = SecurityEventType._INJECTION_ATTEMPT_BLOCKED;
       }
 
@@ -471,13 +478,14 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
         `validation-pipe-${metadata.type}`,
         'POST',
         false,
-        error.message ?? 'Validation failed',
+        errorMessage ?? 'Validation failed',
         {
           operationId,
           service: 'BytebotD',
           inputType: typeof value,
           metatype: metadata.metatype?.name,
-          errorType: error.constructor.name,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
           threatDetection: this.options.enableThreatDetection,
           sanitizationEnabled: this.options.enableSanitization,
         },
@@ -493,13 +501,14 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
         },
       );
     } catch (loggingError) {
+      const loggingErrorMessage =
+        loggingError instanceof Error
+          ? loggingError.message
+          : String(loggingError);
       this.logger.error('Failed to log BytebotD security event', {
         operationId,
-        originalError: loggingError.message,
-        loggingError:
-          loggingError instanceof Error
-            ? loggingError.message
-            : String(loggingError),
+        originalError: error instanceof Error ? error.message : String(error),
+        loggingError: loggingErrorMessage,
       });
     }
   }

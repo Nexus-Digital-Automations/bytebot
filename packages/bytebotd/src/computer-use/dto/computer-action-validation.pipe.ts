@@ -296,7 +296,7 @@ export class ComputerActionValidationPipe
     operationId: string,
   ): RawActionInput {
     // Check for null, undefined, or non-object values
-    if (!value ?? typeof value !== 'object') {
+    if (!value || typeof value !== 'object') {
       this.logSecurityEvent(
         operationId,
         SecurityEventType._VALIDATION_FAILED,
@@ -335,7 +335,7 @@ export class ComputerActionValidationPipe
     }
 
     // Validate presence and type of action field
-    if (!input.action ?? typeof input.action !== 'string') {
+    if (!input.action || typeof input.action !== 'string') {
       this.logSecurityEvent(
         operationId,
         SecurityEventType._VALIDATION_FAILED,
@@ -549,7 +549,7 @@ export class ComputerActionValidationPipe
       }
 
       // ========== STAGE 5: FILE OPERATION SECURITY VALIDATION ==========
-      if (rawInput.action === 'write_file' ?? rawInput.action === 'read_file') {
+      if (rawInput.action === 'write_file' || rawInput.action === 'read_file') {
         this.logger.debug(
           `[${operationId}] Stage 5: File operation security validation`,
         );
@@ -899,7 +899,7 @@ export class ComputerActionValidationPipe
   }> {
     return errors.map((_error) => ({
       property: _error.property,
-      value: _error.value,
+      value: _error.value as unknown,
       constraints: _error.constraints,
       children:
         _error.children?.length > 0
