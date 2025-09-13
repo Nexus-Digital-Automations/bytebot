@@ -1,7 +1,5 @@
 /* eslint-env jest */
 
- 
- 
 /**
  * Security Validation Pipeline Integration Tests
  * Tests the enhanced multi-stage security validation pipeline integration
@@ -90,6 +88,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
     const securityUtils = require('@bytebot/shared/utils/security.utils') as {
       detectAdvancedXSS: jest.Mock;
       detectSQLInjection: jest.Mock;
+      detectCommandInjection: jest.Mock;
     };
     mockDetectAdvancedXSS = securityUtils.detectAdvancedXSS as jest.Mock;
     mockDetectSQLInjection = securityUtils.detectSQLInjection as jest.Mock;

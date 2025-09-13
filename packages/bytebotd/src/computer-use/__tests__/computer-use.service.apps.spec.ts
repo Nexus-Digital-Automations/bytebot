@@ -65,10 +65,19 @@ jest.mock('util', () => {
   const originalUtil = jest.requireActual('util') as typeof import('util');
   return {
     ...originalUtil,
-    promisify: jest.fn(),
-    inspect: jest
-      .fn()
-      .mockImplementation((obj: unknown) => JSON.stringify(obj)),
+    promisify: Object.assign(jest.fn(), {
+      custom: Symbol.for('nodejs.util.promisify.custom'),
+    }),
+    inspect: Object.assign(
+      jest.fn().mockImplementation((obj: unknown) => JSON.stringify(obj)),
+      {
+        colors: originalUtil.inspect.colors,
+        styles: originalUtil.inspect.styles,
+        defaultOptions: originalUtil.inspect.defaultOptions,
+        replDefaults: originalUtil.inspect.replDefaults,
+        custom: originalUtil.inspect.custom,
+      },
+    ),
   } as typeof import('util');
 });
 jest.mock('fs/promises');

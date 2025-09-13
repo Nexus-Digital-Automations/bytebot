@@ -764,7 +764,7 @@ describe('HealthService', () => {
           arrayBuffers: 0,
         });
         const result =
-          (await service.checkProcessHealth()) as BasicHealthResponse;
+          (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
         expect(result.process.status).toEqual('up');
         expect(result.process.uptime).toEqual(300);
@@ -796,7 +796,7 @@ describe('HealthService', () => {
           arrayBuffers: 0,
         });
         const result =
-          (await service.checkProcessHealth()) as BasicHealthResponse;
+          (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
         expect(result.process.status).toEqual('down');
         expect(result.process.error).toEqual(
@@ -817,7 +817,7 @@ describe('HealthService', () => {
           throw new Error('Process uptime unavailable');
         });
         const result =
-          (await service.checkProcessHealth()) as BasicHealthResponse;
+          (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
         expect(result.process.status).toEqual('down');
         expect(result.process.error).toEqual('Process uptime unavailable');

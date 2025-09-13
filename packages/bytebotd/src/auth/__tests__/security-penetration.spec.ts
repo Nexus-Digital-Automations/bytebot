@@ -753,7 +753,7 @@ describe('Security Penetration Testing Suite', () => {
         }
 
         const processingTime = await JWTManipulator.measureTokenProcessingTime(
-          testCase.token,
+          testCase.token ?? '',
           () => jwtAuthGuard.canActivate(context),
         );
 
