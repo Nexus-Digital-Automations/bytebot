@@ -513,6 +513,95 @@ export const McpSchemas = {
       .enum(['down', 'up'])
       .describe('The action to perform (press or release).'),
   }),
+
+  scrollAdvanced: z.object({
+    coordinates: z
+      .object({
+        x: z
+          .number()
+          .describe('The x-coordinate for the scroll action (if applicable).'),
+        y: z
+          .number()
+          .describe('The y-coordinate for the scroll action (if applicable).'),
+      })
+      .optional()
+      .describe(
+        'Coordinates for where the scroll should occur. Behavior might depend on the OS/application.',
+      ),
+    direction: z
+      .enum(['up', 'down', 'left', 'right'])
+      .describe('The direction to scroll the mouse wheel.'),
+    scrollCount: z
+      .number()
+      .describe('The number of times to scroll the mouse wheel.'),
+    holdKeys: z
+      .array(z.string())
+      .optional()
+      .describe('Optional array of keys to hold during the scroll.'),
+  }),
+
+  typeKeysAdvanced: z.object({
+    keys: z
+      .array(z.string())
+      .describe(
+        'An array of key names to type in sequence (e.g., ["control", "c"]).',
+      ),
+    delay: z
+      .number()
+      .optional()
+      .describe('Optional delay in milliseconds between key presses.'),
+  }),
+
+  pressKeysAdvanced: z.object({
+    keys: z
+      .array(z.string())
+      .describe('An array of key names to press or release (e.g., ["shift"]).'),
+    press: z
+      .enum(['down', 'up'])
+      .describe('Whether to press the keys down or release them up.'),
+  }),
+
+  typeTextAdvanced: z.object({
+    text: z.string().describe('The text string to type.'),
+    delay: z
+      .number()
+      .optional()
+      .describe('Optional delay in milliseconds between key presses.'),
+  }),
+
+  pasteText: z.object({
+    text: z.string().describe('The text string to paste.'),
+  }),
+
+  wait: z.object({
+    duration: z
+      .number()
+      .default(500)
+      .describe('The duration to wait in milliseconds.'),
+  }),
+
+  application: z.object({
+    application: z.enum([
+      'firefox',
+      '1password',
+      'thunderbird',
+      'vscode',
+      'terminal',
+      'desktop',
+      'directory',
+    ]),
+  }),
+
+  writeFile: z.object({
+    path: z
+      .string()
+      .describe('The file path where the file should be written.'),
+    data: z.string().describe('Base64 encoded file data to write.'),
+  }),
+
+  readFile: z.object({
+    path: z.string().describe('The file path to read from.'),
+  }),
 } as const;
 
 // ==========================================
