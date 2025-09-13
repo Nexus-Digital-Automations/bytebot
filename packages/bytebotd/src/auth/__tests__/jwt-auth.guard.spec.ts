@@ -21,8 +21,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 
-/* eslint-disable no-constant-binary-expression */
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -60,7 +58,7 @@ class MockJwtAuthGuard {
       });
 
       // Validate token payload structure
-      if (!_payload.sub ?? !_payload.email ?? !_payload.role) {
+      if (!_payload.sub || !_payload.email || !_payload.role) {
         throw new UnauthorizedException('Invalid token _payload structure');
       }
 
@@ -141,7 +139,7 @@ describe('JwtAuthGuard', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn((key: string) => {
-              const config = {
+              const config: Record<string, string> = {
                 JWT_SECRET: 'test-jwt-secret',
                 JWT_REFRESH_SECRET: 'test-refresh-secret',
               };
