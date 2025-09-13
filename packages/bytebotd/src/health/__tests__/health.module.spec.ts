@@ -56,7 +56,7 @@ describe('HealthModule', () => {
       error: jest.fn(),
       warn: jest.fn(),
       verbose: jest.fn(),
-    } as jest.Mocked<Logger>;
+    } as any;
 
     // Mock Logger constructor to return our mock
     jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);
