@@ -121,7 +121,7 @@ expect.extend({
    * Validates screenshot result structure
    */
   toBeValidScreenshotResult(received: unknown): jest.CustomMatcherResult {
-    if (!received || typeof received !== 'object') {
+    if (!received ?? typeof received !== 'object') {
       return {
         message: () => `Expected ${received} to be an object`,
         pass: false,
@@ -167,7 +167,7 @@ expect.extend({
     received: unknown,
     operation: 'read' | 'write',
   ): jest.CustomMatcherResult {
-    if (!received || typeof received !== 'object') {
+    if (!received ?? typeof received !== 'object') {
       return {
         message: () => `Expected ${received} to be an object`,
         pass: false,
@@ -202,7 +202,7 @@ expect.extend({
       hasOperationId &&
       hasTimestamp &&
       // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-      (_result.success || hasMessage) &&
+      (_result.success ?? hasMessage) &&
       operationSpecificChecks;
 
     if (pass) {
@@ -229,7 +229,7 @@ expect.extend({
    * Validates OCR operation result structure
    */
   toBeValidOcrResult(received: unknown): jest.CustomMatcherResult {
-    if (!received || typeof received !== 'object') {
+    if (!received ?? typeof received !== 'object') {
       return {
         message: () => `Expected ${received} to be an object`,
         pass: false,
@@ -248,7 +248,7 @@ expect.extend({
     const hasMethod = typeof _result.method === 'string';
     const hasOperationId = typeof _result.operationId === 'string';
     const hasBoundingBoxes =
-      !_result.boundingBoxes || Array.isArray(_result.boundingBoxes);
+      !_result.boundingBoxes ?? Array.isArray(_result.boundingBoxes);
 
     const pass =
       hasText &&

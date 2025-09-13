@@ -16,7 +16,7 @@
  * @version 1.0.0
  */
 
-import { WriteFileAction, ReadFileAction } from '@bytebot/shared';
+import { WriteFileAction } from '@bytebot/shared';
 import { ReadFileActionDto } from '../dto/computer-action.dto';
 
 // Mock the nut-js library first to prevent module loading issues

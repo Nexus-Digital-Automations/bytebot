@@ -244,7 +244,7 @@ class SecurityE2EConfigService {
 
 class SecurityE2EUserService {
   getPermissions(role: UserRole): Permission[] {
-    const rolePermissions = {
+    const rolePermissions: Record<UserRole, Permission[]> = {
       [UserRole._ADMIN]: [
         Permission._TASK_READ,
         Permission._TASK_WRITE,
@@ -891,7 +891,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       securityLogger.info(`[${testId}] Testing complete authentication flow`);
 
       // Step 1: Login with valid credentials
-      const loginResponse = await request(app.getHttpServer())
+      const loginResponse = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .post('/auth/login')
         .send({
           email: 'admin@bytebot.ai',
@@ -906,7 +908,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       const { accessToken, refreshToken } = loginResponse.body;
 
       // Step 2: Access protected resource with token
-      const profileResponse = await request(app.getHttpServer())
+      const profileResponse = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .get('/api/user/profile')
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
@@ -915,7 +919,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       expect(profileResponse.body.role).toBe(UserRole._ADMIN);
 
       // Step 3: Refresh token
-      const refreshResponse = await request(app.getHttpServer())
+      const refreshResponse = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .post('/auth/refresh')
         .send({ refreshToken })
         .expect(200);
@@ -924,13 +930,13 @@ describe('Security E2E - Comprehensive Testing', () => {
       expect(refreshResponse.body.accessToken).not.toBe(accessToken);
 
       // Step 4: Use new token
-      await request(app.getHttpServer())
+      await request(app.getHttpServer() as Express.Application)
         .get('/api/user/profile')
         .set('Authorization', `Bearer ${refreshResponse.body.accessToken}`)
         .expect(200);
 
       // Step 5: Logout
-      await request(app.getHttpServer())
+      await request(app.getHttpServer() as Express.Application)
         .post('/auth/logout')
         .set('Authorization', `Bearer ${refreshResponse.body.accessToken}`)
         .expect(200);
@@ -953,7 +959,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       ];
 
       for (const credentials of invalidCredentialsTests) {
-        await request(app.getHttpServer())
+        await request(app.getHttpServer() as Express.Application)
           .post('/auth/login')
           .send(credentials)
           .expect(401);
@@ -971,7 +977,9 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       // Make multiple failed attempts
       for (let i = 0; i < 4; i++) {
-        const response = await request(app.getHttpServer())
+        const response = await request(
+          app.getHttpServer() as Express.Application,
+        )
           .post('/auth/login')
           .send({ email, password: wrongPassword });
 
@@ -985,7 +993,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       }
 
       // Verify account is locked even with correct password
-      await request(app.getHttpServer())
+      await request(app.getHttpServer() as Express.Application)
         .post('/auth/login')
         .send({ email, password: 'Viewer123!@#' })
         .expect(401);
@@ -1042,7 +1050,9 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       for (const roleTest of roleTests) {
         // Login
-        const loginResponse = await request(app.getHttpServer())
+        const loginResponse = await request(
+          app.getHttpServer() as Express.Application,
+        )
           .post('/auth/login')
           .send({
             email: roleTest.email,
@@ -1054,14 +1064,16 @@ describe('Security E2E - Comprehensive Testing', () => {
 
         // Test profile access (should work for all)
         if (roleTest.shouldAccess['/api/user/profile']) {
-          await request(app.getHttpServer())
+          await request(app.getHttpServer() as Express.Application)
             .get('/api/user/profile')
             .set('Authorization', `Bearer ${token}`)
             .expect(200);
         }
 
         // Test task creation (operator and admin only)
-        const taskResponse = await request(app.getHttpServer())
+        const taskResponse = await request(
+          app.getHttpServer() as Express.Application,
+        )
           .post('/api/tasks')
           .set('Authorization', `Bearer ${token}`)
           .send({ title: 'Test Task', description: 'Test Description' });
@@ -1073,7 +1085,9 @@ describe('Security E2E - Comprehensive Testing', () => {
         }
 
         // Test admin user list (admin only)
-        const usersResponse = await request(app.getHttpServer())
+        const usersResponse = await request(
+          app.getHttpServer() as Express.Application,
+        )
           .get('/api/admin/users')
           .set('Authorization', `Bearer ${token}`);
 
@@ -1084,7 +1098,9 @@ describe('Security E2E - Comprehensive Testing', () => {
         }
 
         // Test admin metrics (admin only)
-        const metricsResponse = await request(app.getHttpServer())
+        const metricsResponse = await request(
+          app.getHttpServer() as Express.Application,
+        )
           .get('/api/admin/metrics')
           .set('Authorization', `Bearer ${token}`);
 
@@ -1107,7 +1123,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       );
 
       // Login as operator
-      const operatorLogin = await request(app.getHttpServer())
+      const operatorLogin = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .post('/auth/login')
         .send({
           email: 'operator@bytebot.ai',
@@ -1119,7 +1137,9 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       // Try to access another user's data (should be prevented by proper implementation)
       // This test assumes the API properly validates user ownership
-      const profileResponse = await request(app.getHttpServer())
+      const profileResponse = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .get('/api/user/profile')
         .set('Authorization', `Bearer ${operatorToken}`)
         .expect(200);
@@ -1139,7 +1159,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       const testId = `${operationId}_security_headers`;
       securityLogger.info(`[${testId}] Testing security headers integration`);
 
-      const response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer() as Express.Application)
         .get('/health')
         .expect(200);
 
@@ -1169,7 +1189,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       // Make requests up to the limit (100 requests per 15 minutes)
       for (let i = 0; i < 105; i++) {
         requests.push(
-          request(app.getHttpServer())
+          request(app.getHttpServer() as Express.Application)
             .get('/health')
             .set('X-Forwarded-For', '192.168.1.100'), // Same IP
         );
@@ -1193,7 +1213,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       securityLogger.info(`[${testId}] Testing input sanitization`);
 
       // Login first
-      const loginResponse = await request(app.getHttpServer())
+      const loginResponse = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .post('/auth/login')
         .send({
           email: 'operator@bytebot.ai',
@@ -1214,7 +1236,9 @@ describe('Security E2E - Comprehensive Testing', () => {
         },
       };
 
-      const taskResponse = await request(app.getHttpServer())
+      const taskResponse = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .post('/api/tasks')
         .set('Authorization', `Bearer ${token}`)
         .send(maliciousTask)
@@ -1237,7 +1261,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       );
 
       // Login first
-      const loginResponse = await request(app.getHttpServer())
+      const loginResponse = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .post('/auth/login')
         .send({
           email: 'admin@bytebot.ai',
@@ -1252,7 +1278,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       const promises = Array(50)
         .fill(null)
         .map(() =>
-          request(app.getHttpServer())
+          request(app.getHttpServer() as Express.Application)
             .get('/api/user/profile')
             .set('Authorization', `Bearer ${token}`),
         );
@@ -1279,7 +1305,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       securityLogger.info(`[${testId}] Testing mixed traffic handling`);
 
       // Login for legitimate requests
-      const loginResponse = await request(app.getHttpServer())
+      const loginResponse = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .post('/auth/login')
         .send({
           email: 'admin@bytebot.ai',
@@ -1295,7 +1323,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         ...Array(20)
           .fill(null)
           .map(() =>
-            request(app.getHttpServer())
+            request(app.getHttpServer() as Express.Application)
               .get('/api/user/profile')
               .set('Authorization', `Bearer ${token}`),
           ),
@@ -1304,7 +1332,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         ...Array(15)
           .fill(null)
           .map(() =>
-            request(app.getHttpServer())
+            request(app.getHttpServer() as Express.Application)
               .get('/api/admin/users')
               .set('Authorization', 'Bearer invalid-token'),
           ),
@@ -1312,7 +1340,11 @@ describe('Security E2E - Comprehensive Testing', () => {
         // Attack requests - no authentication (15)
         ...Array(15)
           .fill(null)
-          .map(() => request(app.getHttpServer()).get('/api/admin/metrics')),
+          .map(() =>
+            request(app.getHttpServer() as Express.Application).get(
+              '/api/admin/metrics',
+            ),
+          ),
       ];
 
       const responses = await Promise.all(promises);
@@ -1355,7 +1387,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       // Generate various security events
 
       // Failed authentication
-      await request(app.getHttpServer())
+      await request(app.getHttpServer() as Express.Application)
         .post('/auth/login')
         .send({
           email: 'attacker@malicious.com',
@@ -1364,13 +1396,15 @@ describe('Security E2E - Comprehensive Testing', () => {
         .expect(401);
 
       // Unauthorized access attempt
-      await request(app.getHttpServer())
+      await request(app.getHttpServer() as Express.Application)
         .get('/api/admin/users')
         .set('Authorization', 'Bearer invalid-token')
         .expect(401);
 
       // Role escalation attempt
-      const viewerLogin = await request(app.getHttpServer())
+      const viewerLogin = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .post('/auth/login')
         .send({
           email: 'viewer@bytebot.ai',
@@ -1378,7 +1412,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         })
         .expect(200);
 
-      await request(app.getHttpServer())
+      await request(app.getHttpServer() as Express.Application)
         .get('/api/admin/metrics')
         .set('Authorization', `Bearer ${viewerLogin.body.accessToken}`)
         .expect(403);
@@ -1409,7 +1443,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       securityLogger.info(`[${testId}] Testing audit information detail`);
 
       // Login as admin
-      const loginResponse = await request(app.getHttpServer())
+      const loginResponse = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .post('/auth/login')
         .send({
           email: 'admin@bytebot.ai',
@@ -1420,7 +1456,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       const token = loginResponse.body.accessToken;
 
       // Access audit logs
-      const auditResponse = await request(app.getHttpServer())
+      const auditResponse = await request(
+        app.getHttpServer() as Express.Application,
+      )
         .get('/api/admin/audit-logs')
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
@@ -1462,9 +1500,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       ];
 
       for (const endpoint of endpoints) {
-        const response = await request(app.getHttpServer())[endpoint.method](
-          endpoint.path,
-        );
+        const response = await request(
+          app.getHttpServer() as Express.Application,
+        )[endpoint.method](endpoint.path);
 
         if (endpoint.authRequired) {
           expect(response.status).toBe(401); // Should require authentication
@@ -1502,7 +1540,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       ];
 
       for (const headers of edgeCases) {
-        const response = await request(app.getHttpServer())
+        const response = await request(
+          app.getHttpServer() as Express.Application,
+        )
           .get('/api/user/profile')
           .set(headers);
 

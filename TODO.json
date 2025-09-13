@@ -108,34 +108,6 @@
       ]
     },
     {
-      "id": "error_1757730606210_jcfehs4vr",
-      "title": "Fix TypeScript violations in bytebotd database, repository, and entity test files",
-      "description": "CRITICAL ERROR TASK: Fix all TypeScript violations in database connection tests, entity creation with any types, repository method return type violations, database query result handling with unsafe member access, and migration test unsafe arguments in /packages/bytebotd/src/database/, /src/repositories/, and entity test files. Create proper TypeScript interfaces for database entities, fix unsafe assignments, secure repository method typing, and handle database query results with type safety while maintaining test functionality.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T02:30:06.210Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757730587064_1_general_d2cb8023",
-      "started_at": "2025-09-13T02:30:28.490Z",
-      "claimed_by": "development_session_1757730587064_1_general_d2cb8023",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757730587064_1_general_d2cb8023",
-          "role": "primary",
-          "assignedAt": "2025-09-13T02:30:28.490Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757730604366_k44933ath",
       "title": "Fix TypeScript violations in bytebotd utility, helper, and common test files",
       "description": "Fix all TypeScript violations in /packages/bytebotd/src/utils/, /src/helpers/, /src/common/, and shared utility tests. Primary violations: unsafe argument types, unsafe return types, unsafe member access, unsafe assignments, unsafe type handling in validation utilities. Create utility-specific TypeScript interfaces, fix function argument and return type safety, secure configuration object handling, fix validation utility type patterns, handle common module member access safely.",

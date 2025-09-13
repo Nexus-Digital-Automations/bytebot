@@ -976,11 +976,11 @@ V, W, X, Y, Z
               type: 'document',
               source: {
                 type: 'base64',
-                media_type: fileResult.mediaType || 'application/octet-stream',
+                media_type: fileResult.mediaType ?? 'application/octet-stream',
                 data: fileResult.data,
               },
-              name: fileResult.name || 'file',
-              size: fileResult.size || 0,
+              name: fileResult.name ?? 'file',
+              size: fileResult.size ?? 0,
             },
           ],
         };

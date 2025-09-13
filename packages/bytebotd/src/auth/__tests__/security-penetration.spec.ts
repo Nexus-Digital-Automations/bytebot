@@ -330,7 +330,7 @@ describe('Security Penetration Testing Suite', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => {
+            get: jest.fn((key: string): string | boolean | undefined => {
               const config = {
                 JWT_SECRET: 'pentest-secret-key',
                 JWT_REFRESH_SECRET: 'pentest-refresh-secret',

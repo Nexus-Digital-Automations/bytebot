@@ -109,8 +109,8 @@ class Base64ImageCompressor {
     _logger.log(`[${operationId}] Starting image compression`, {
       operationId,
       inputSize: base64String.length,
-      targetSizeKB: options.targetSizeKB || 1024,
-      format: options.format || 'png',
+      targetSizeKB: options.targetSizeKB ?? 1024,
+      format: options.format ?? 'png',
     });
     const {
       targetSizeKB = 1024, // 1MB default
@@ -332,8 +332,8 @@ class Base64ImageCompressor {
       const inputBuffer = Buffer.from(base64Data, 'base64');
 
       const metadata = await createSharp(inputBuffer).metadata();
-      const originalWidth = metadata.width || maxWidth;
-      const originalHeight = metadata.height || maxHeight;
+      const originalWidth = metadata.width ?? maxWidth;
+      const originalHeight = metadata.height ?? maxHeight;
 
       let scale = 0.9; // Start with 90% of original size
 

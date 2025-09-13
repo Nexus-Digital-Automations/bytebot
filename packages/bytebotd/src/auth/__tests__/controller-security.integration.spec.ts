@@ -595,7 +595,7 @@ describe('Controller Security Integration Tests', () => {
         .get('/api/protected')
         .expect(401);
 
-      expect(response.body.error).toBe('UNAUTHORIZED');
+      expect((response.body as ApiErrorResponse).error).toBe('UNAUTHORIZED');
 
       securityLogger.info(`[${testId}] Authentication requirement enforced`);
     });
@@ -611,9 +611,18 @@ describe('Controller Security Integration Tests', () => {
         .set('Authorization', 'Bearer admin-token')
         .expect(200);
 
-      expect(response.body.message).toBe('Protected data');
-      expect(response.body.userId).toBe('admin-1');
-      expect(response.body.role).toBe(UserRole._ADMIN);
+      expect(
+        (response.body as { message: string; userId: string; role: string })
+          .message,
+      ).toBe('Protected data');
+      expect(
+        (response.body as { message: string; userId: string; role: string })
+          .userId,
+      ).toBe('admin-1');
+      expect(
+        (response.body as { message: string; userId: string; role: string })
+          .role,
+      ).toBe(UserRole._ADMIN);
 
       securityLogger.info(`[${testId}] Valid authentication token accepted`);
     });

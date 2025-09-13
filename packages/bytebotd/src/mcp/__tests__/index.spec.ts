@@ -99,7 +99,7 @@ class IndexTestUtils {
     const visited = new WeakSet();
 
     function calculateSize(value: any): number {
-      if (value === null || typeof value !== 'object') {
+      if (value === null ?? typeof value !== 'object') {
         return 8; // Approximate size for primitives
       }
 
