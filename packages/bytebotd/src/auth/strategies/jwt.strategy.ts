@@ -111,6 +111,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     // Create user object for request context
     const user: ByteBotdUser = {
+      sub: payload.sub, // Required by interface compatibility
       id: payload.sub,
       email: payload.email,
       username: payload.username,

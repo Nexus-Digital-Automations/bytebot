@@ -653,7 +653,8 @@ export class CacheInterceptor implements NestInterceptor {
    */
   private normalizeUrlForStats(url: string | undefined): string {
     if (!url) return '';
-    return url
+    const normalizedUrl = url as string;
+    return normalizedUrl
       .split('?')[0] // Remove query string
       .replace(/\/\d+/g, '/:id') // Replace IDs
       .replace(/\/[a-f0-9-]{36}/g, '/:uuid'); // Replace UUIDs

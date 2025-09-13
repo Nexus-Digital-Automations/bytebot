@@ -258,62 +258,6 @@
       ]
     },
     {
-      "id": "error_1757741850217_bp4zpuqx0",
-      "title": "Fix TypeScript compilation errors in test files",
-      "description": "Fix remaining type issues in mcp/__tests__/compressor.spec.ts and mcp/__tests__/index.spec.ts - CompressionResult vs OperationResult incompatibility, implicit any types from string indexing, and test mock type mismatches",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T05:37:30.217Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757741831268_1_general_6be43e2c",
-      "started_at": "2025-09-13T05:38:02.849Z",
-      "claimed_by": "development_session_1757741831268_1_general_6be43e2c",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757741831268_1_general_6be43e2c",
-          "role": "primary",
-          "assignedAt": "2025-09-13T05:38:02.849Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "id": "error_1757741844629_t5u7ietzg",
-      "title": "Fix Permission enum TypeScript compilation errors between bytebotd and shared packages",
-      "description": "CRITICAL: Fix Permission enum incompatibility between bytebotd and shared packages. Specific issues: src/types/index.ts interfaces incorrectly extend request interfaces, Permission[] type mismatch between shared and local definitions. Solution: 1) Align Permission enum format with shared package (check for underscore prefixes), 2) Update all Permission references throughout codebase, 3) Fix AuthenticatedRequest and EnhancedRequest interfaces, 4) Ensure type compatibility in user.permissions fields",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T05:37:24.629Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757741823546_1_general_a40760fe",
-      "started_at": "2025-09-13T05:37:47.113Z",
-      "claimed_by": "development_session_1757741823546_1_general_a40760fe",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757741823546_1_general_a40760fe",
-          "role": "primary",
-          "assignedAt": "2025-09-13T05:37:47.113Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757741844577_mkf3nppv7",
       "title": "Fix TypeScript Null Safety Compilation Errors",
       "description": "Fix critical TypeScript compilation errors related to null safety. Target specific issues: Line 396 payload.sessionId (string | undefined) not assignable to string, and multiple Object is possibly undefined errors in input-tracking.service.ts, mcp/__tests__/computer-use.tools.spec.ts, and test/security/security-validation.e2e-spec.ts. Add null checks, type guards, optional chaining, and proper undefined handling for strict null checking compliance.",

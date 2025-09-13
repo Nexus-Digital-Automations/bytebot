@@ -250,7 +250,7 @@ export class DatabaseInterceptor implements NestInterceptor {
       const cacheKey = this.generateQueryCacheKey(dbOperation);
 
       this.cacheService
-        .get(cacheKey)
+        ?.get(cacheKey)
         .then((cachedResult) => {
           if (cachedResult !== null) {
             // Cache hit

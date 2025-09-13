@@ -358,6 +358,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       const userId = refreshPayload.sub ?? `user-${Date.now()}`;
       const email = refreshPayload.email ?? `${userId}@unknown.local`;
       const user: ByteBotdUser = {
+        sub: userId, // Required by interface compatibility
         id: userId,
         email,
         username: email.split('@')[0] ?? 'unknown-user', // Fallback username from email

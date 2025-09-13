@@ -1289,7 +1289,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       );
 
       expect(rateLimitedResponses.length).toBeGreaterThan(0);
-      expect(rateLimitedResponses[0].body.error).toBe('Too Many Requests');
+      expect(rateLimitedResponses[0]?.body.error).toBe('Too Many Requests');
 
       securityLogger.warn(
         `[${testId}] Rate limiting enforced - ${rateLimitedResponses.length} requests blocked`,

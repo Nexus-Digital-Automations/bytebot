@@ -18,11 +18,8 @@
  * @version 1.0.0
  */
 
- 
- 
- 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
- 
+
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
@@ -287,7 +284,7 @@ export class CompressionInterceptor implements NestInterceptor {
 
     // Check content type
     const contentType = response.get('Content-Type') ?? '';
-    const baseType = contentType.split(';')[0].toLowerCase();
+    const baseType = contentType.split(';')[0]?.toLowerCase() ?? '';
 
     return this.config.compressibleTypes.has(baseType);
   }
