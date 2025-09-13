@@ -22,7 +22,6 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
-import { z } from 'zod';
 import { ComputerUseService } from '../computer-use/computer-use.service';
 import { compressPngBase64Under1MB } from './compressor';
 import { McpSchemas, McpToolResponse, MouseMoveParams } from './types';
@@ -443,17 +442,7 @@ S, ScrollLock, Semicolon, Slash, Space, Subtract,
 T, Tab,  
 U, Up,  
 V, W, X, Y, Z`,
-    parameters: z.object({
-      keys: z
-        .array(z.string())
-        .describe(
-          'An array of key names to type in sequence (e.g., ["control", "c"]).',
-        ),
-      delay: z
-        .number()
-        .optional()
-        .describe('Optional delay in milliseconds between key presses.'),
-    }) as any,
+    parameters: McpSchemas.typeKeysAdvanced,
   })
   async typeKeys({ keys, delay }: { keys: string[]; delay?: number }) {
     try {
@@ -503,16 +492,7 @@ T, Tab,
 U, Up,  
 V, W, X, Y, Z  
       `,
-    parameters: z.object({
-      keys: z
-        .array(z.string())
-        .describe(
-          'An array of key names to press or release (e.g., ["shift"]).',
-        ),
-      press: z
-        .enum(['down', 'up'])
-        .describe('Whether to press the keys down or release them up.'),
-    }) as any,
+    parameters: McpSchemas.pressKeysAdvanced,
   })
   async pressKeys({ keys, press }: { keys: string[]; press: 'down' | 'up' }) {
     try {
@@ -538,13 +518,7 @@ V, W, X, Y, Z
     name: 'computer_type_text',
     description:
       'Types a string of text character by character. Use this tool for strings less than 25 characters, or passwords/sensitive form fields.',
-    parameters: z.object({
-      text: z.string().describe('The text string to type.'),
-      delay: z
-        .number()
-        .optional()
-        .describe('Optional delay in milliseconds between key presses.'),
-    }) as any,
+    parameters: McpSchemas.typeTextAdvanced,
   })
   async typeText({ text, delay }: { text: string; delay?: number }) {
     try {
@@ -570,9 +544,7 @@ V, W, X, Y, Z
     name: 'computer_paste_text',
     description:
       'Copies text to the clipboard and pastes it. Use this tool for typing long text strings or special characters not on the standard keyboard.',
-    parameters: z.object({
-      text: z.string().describe('The text string to paste.'),
-    }) as any,
+    parameters: McpSchemas.pasteText,
   })
   async pasteText({ text }: { text: string }) {
     try {
@@ -593,12 +565,7 @@ V, W, X, Y, Z
   @Tool({
     name: 'computer_wait',
     description: 'Pauses execution for a specified duration.',
-    parameters: z.object({
-      duration: z
-        .number()
-        .default(500)
-        .describe('The duration to wait in milliseconds.'),
-    }) as any,
+    parameters: McpSchemas.wait,
   })
   async wait({ duration }: { duration: number }) {
     try {
@@ -620,17 +587,7 @@ V, W, X, Y, Z
     name: 'computer_application',
     description:
       'Opens or switches to the specified application and maximizes it.',
-    parameters: z.object({
-      application: z.enum([
-        'firefox',
-        '1password',
-        'thunderbird',
-        'vscode',
-        'terminal',
-        'desktop',
-        'directory',
-      ]),
-    }) as any,
+    parameters: McpSchemas.application,
   })
   async application({
     application,
@@ -790,12 +747,7 @@ V, W, X, Y, Z
     name: 'computer_write_file',
     description:
       'Writes a file to the specified path with base64 encoded data.',
-    parameters: z.object({
-      path: z
-        .string()
-        .describe('The file path where the file should be written.'),
-      data: z.string().describe('Base64 encoded file data to write.'),
-    }) as any,
+    parameters: McpSchemas.writeFile,
   })
   async writeFile({ path, data }: { path: string; data: string }) {
     try {
@@ -837,9 +789,7 @@ V, W, X, Y, Z
     name: 'computer_read_file',
     description:
       'Reads a file from the specified path and returns it as a document content block with base64 encoded data.',
-    parameters: z.object({
-      path: z.string().describe('The file path to read from.'),
-    }) as any,
+    parameters: McpSchemas.readFile,
   })
   async readFile({ path }: { path: string }) {
     try {

@@ -1,4 +1,6 @@
 /* eslint-env jest */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Health Service Test Suite
  *
@@ -1096,7 +1098,7 @@ describe('HealthService', () => {
           timeoutCallCount++;
           if (timeoutCallCount % 2 === 0) {
             // Simulate timeout/rejection on every other call
-             
+
             originalSetTimeout(
               () => callback(new Error('Service unavailable')),
               1,

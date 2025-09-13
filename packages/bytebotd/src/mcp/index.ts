@@ -29,5 +29,15 @@ export * from './bytebot-mcp.module';
 export * from './computer-use.tools';
 export * from './compressor';
 
-// Explicitly export compression types for better compatibility
-export type { CompressionOptions, CompressionResult } from './compressor';
+// Explicitly export all types for better compatibility
+export type {
+  CompressionOptions,
+  CompressionResult,
+  McpToolResponse,
+  McpContentItem,
+  McpSchemas,
+  MouseMoveParams,
+  MockComputerUseService,
+  TestContext,
+  MockModule,
+} from './types';
