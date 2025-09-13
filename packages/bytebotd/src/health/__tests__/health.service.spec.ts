@@ -921,7 +921,7 @@ describe('HealthService', () => {
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '25ms' })
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '30ms' });
         const result =
-          (await service.checkExternalServices()) as BasicHealthResponse;
+          (await service.checkExternalServices()) as HealthIndicatorResult;
         expect(result).toHaveProperty(
           'external_services' as keyof typeof result,
         );
@@ -942,7 +942,7 @@ describe('HealthService', () => {
           .mockRejectedValueOnce(new Error('Service unavailable'))
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '20ms' });
         const result =
-          (await service.checkExternalServices()) as BasicHealthResponse;
+          (await service.checkExternalServices()) as HealthIndicatorResult;
         expect(result.external_services.status).toBe('down');
         console.log(`[${testId}] External services failure test completed`);
       });
@@ -955,7 +955,7 @@ describe('HealthService', () => {
           .fn()
           .mockRejectedValue(new Error('Complete failure'));
         const result =
-          (await service.checkExternalServices()) as BasicHealthResponse;
+          (await service.checkExternalServices()) as HealthIndicatorResult;
         expect(result.external_services.status).toBe('down');
         expect(result.external_services.error).toBe('Complete failure');
         // Restore original Promise.allSettled
@@ -974,7 +974,7 @@ describe('HealthService', () => {
         // Mock service that has been running for sufficient time
         (service as unknown).startTime = Date.now() - 30000; // 30 seconds ago
         const result =
-          (await service.checkStartupComplete()) as BasicHealthResponse;
+          (await service.checkStartupComplete()) as HealthIndicatorResult;
         expect(result).toHaveProperty('startup' as keyof typeof result);
         expect(result.startup.status).toEqual('up');
         expect(result.startup.uptime).toEqual(expect.stringMatching(/\d+s/));
@@ -992,7 +992,7 @@ describe('HealthService', () => {
         // Mock service that was just started
         (service as unknown).startTime = Date.now() - 5000; // 5 seconds ago
         const result =
-          (await service.checkStartupComplete()) as BasicHealthResponse;
+          (await service.checkStartupComplete()) as HealthIndicatorResult;
         expect(result).toHaveProperty('startup' as keyof typeof result);
         expect(result.startup.status).toEqual('down');
         expect(result.startup.initializationStatus).toEqual('initializing');
@@ -1011,7 +1011,7 @@ describe('HealthService', () => {
           throw new Error('Time unavailable');
         });
         const result =
-          (await service.checkStartupComplete()) as BasicHealthResponse;
+          (await service.checkStartupComplete()) as HealthIndicatorResult;
         expect(result.startup.status).toBe('down');
         expect(result.startup.error).toBe('Time unavailable');
         // Restore Date.now
@@ -1024,7 +1024,7 @@ describe('HealthService', () => {
         const testId = `${operationId}_module_initialization_complete`;
         console.log(`[${testId}] Testing complete module initialization`);
         const result =
-          (await service.checkModuleInitialization()) as BasicHealthResponse;
+          (await service.checkModuleInitialization()) as HealthIndicatorResult;
         expect(result).toHaveProperty('modules' as keyof typeof result);
         expect(result.modules).toMatchObject({
           status: 'up',
@@ -1052,7 +1052,7 @@ describe('HealthService', () => {
           throw new Error('Module check failed');
         });
         const result =
-          (await service.checkModuleInitialization()) as BasicHealthResponse;
+          (await service.checkModuleInitialization()) as HealthIndicatorResult;
         expect(result.modules.status).toBe('down');
         expect(result.modules.error).toBe('Module check failed');
         // Restore Object.values
@@ -1143,7 +1143,7 @@ describe('HealthService', () => {
       });
       jest.spyOn(service as any, 'performDatabasePing').mockResolvedValue(true);
       jest
-        .spyOn(service as unknown, 'checkExternalService')
+        .spyOn(service as any, 'checkExternalService')
         .mockResolvedValue({ status: 'healthy', responseTime: '25ms' });
       // Mock well-established service
       (service as unknown).startTime = Date.now() - 60000; // 1 minute ago
@@ -1186,7 +1186,7 @@ describe('HealthService', () => {
         .spyOn(service as any, 'performDatabasePing')
         .mockRejectedValue(new Error('Database overloaded'));
       jest
-        .spyOn(service as unknown, 'checkExternalService')
+        .spyOn(service as any, 'checkExternalService')
         .mockRejectedValue(new Error('External services down'));
       // Execute health checks that should fail gracefully
       const basicHealthPromise = Promise.resolve(

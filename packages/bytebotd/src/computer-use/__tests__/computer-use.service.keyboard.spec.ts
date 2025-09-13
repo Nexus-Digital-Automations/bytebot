@@ -1156,7 +1156,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       // Arrange: Setup operations where first fails, second succeeds
       nutService.sendKeys
         .mockRejectedValueOnce(new Error('First operation failed'))
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValueOnce({ success: true });
 
       // Act: Execute operations with error recovery
       await expect(
