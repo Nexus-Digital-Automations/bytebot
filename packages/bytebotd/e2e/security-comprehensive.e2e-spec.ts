@@ -18,12 +18,12 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
+import * as request from 'supertest';
 import type { Express } from 'express';
 import { Request, Response, NextFunction } from 'express';
 import { JwtService as _JwtService } from '@nestjs/jwt';
 import { ConfigService as _ConfigService } from '@nestjs/config';
-import { UserRole, Permission } from '@bytebot/shared';
+import { Permission } from '@bytebot/shared';
 import {
   StrictRecord,
   TypedMiddleware as _TypedMiddleware,
@@ -31,6 +31,7 @@ import {
   ClientInfo,
   TaskData,
   DecodedJwtPayload,
+  UserRole,
 } from '../src/types';
 
 // Extend Express Request interface to include user with role
@@ -107,7 +108,7 @@ class SecurityE2EAuthService {
       {
         id: '1',
         email: 'admin@bytebot.ai',
-        role: UserRole._ADMIN,
+        role: UserRole.ADMIN,
         password: 'Admin123!@#',
       },
     ],
@@ -116,7 +117,7 @@ class SecurityE2EAuthService {
       {
         id: '2',
         email: 'operator@bytebot.ai',
-        role: UserRole._OPERATOR,
+        role: UserRole.OPERATOR,
         password: 'Operator123!@#',
       },
     ],
@@ -125,7 +126,7 @@ class SecurityE2EAuthService {
       {
         id: '3',
         email: 'viewer@bytebot.ai',
-        role: UserRole._VIEWER,
+        role: UserRole.VIEWER,
         password: 'Viewer123!@#',
       },
     ],
@@ -300,7 +301,7 @@ class SecurityE2EConfigService {
 class SecurityE2EUserService {
   getPermissions(role: UserRole): Permission[] {
     const rolePermissions: Record<UserRole, Permission[]> = {
-      [UserRole._ADMIN]: [
+      [UserRole.ADMIN]: [
         Permission._TASK_READ,
         Permission._TASK_WRITE,
         Permission._TASK_DELETE,
@@ -311,20 +312,20 @@ class SecurityE2EUserService {
         Permission._METRICS_VIEW,
         Permission._LOGS_VIEW,
       ],
-      [UserRole._OPERATOR]: [
+      [UserRole.OPERATOR]: [
         Permission._TASK_READ,
         Permission._TASK_WRITE,
         Permission._COMPUTER_CONTROL,
         Permission._COMPUTER_VIEW,
         Permission._METRICS_VIEW,
       ],
-      [UserRole._VIEWER]: [
+      [UserRole.VIEWER]: [
         Permission._TASK_READ,
         Permission._COMPUTER_VIEW,
         Permission._METRICS_VIEW,
       ],
-      [UserRole._USER]: [Permission._TASK_READ],
-      [UserRole._GUEST]: [Permission._VIEW_PUBLIC_CONTENT],
+      [UserRole.USER]: [Permission._TASK_READ],
+      [UserRole.GUEST]: [Permission._VIEW_PUBLIC_CONTENT],
     };
 
     return rolePermissions[role] ?? [];
@@ -487,9 +488,9 @@ class SecurityE2EAdminController {
   getUserList(user: any) {
     return {
       users: [
-        { id: '1', email: 'admin@bytebot.ai', role: UserRole._ADMIN },
-        { id: '2', email: 'operator@bytebot.ai', role: UserRole._OPERATOR },
-        { id: '3', email: 'viewer@bytebot.ai', role: UserRole._VIEWER },
+        { id: '1', email: 'admin@bytebot.ai', role: UserRole.ADMIN },
+        { id: '2', email: 'operator@bytebot.ai', role: UserRole.OPERATOR },
+        { id: '3', email: 'viewer@bytebot.ai', role: UserRole.VIEWER },
       ],
       total: 3,
       requestedBy: user.sub,
@@ -735,7 +736,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       clientData.requests.push(now);
       rateLimits.set(clientId, clientData);
 
-      next();
+      return next();
     });
 
     // 3. Authentication Middleware
@@ -792,20 +793,20 @@ describe('Security E2E - Comprehensive Testing', () => {
 
         const userRole = req.user.role;
         const roleHierarchy: Record<UserRole, UserRole[]> = {
-          [UserRole._ADMIN]: [
-            UserRole._ADMIN,
-            UserRole._OPERATOR,
-            UserRole._VIEWER,
-            UserRole._USER,
+          [UserRole.ADMIN]: [
+            UserRole.ADMIN,
+            UserRole.OPERATOR,
+            UserRole.VIEWER,
+            UserRole.USER,
           ],
-          [UserRole._OPERATOR]: [
-            UserRole._OPERATOR,
-            UserRole._VIEWER,
-            UserRole._USER,
+          [UserRole.OPERATOR]: [
+            UserRole.OPERATOR,
+            UserRole.VIEWER,
+            UserRole.USER,
           ],
-          [UserRole._VIEWER]: [UserRole._VIEWER, UserRole._USER],
-          [UserRole._USER]: [UserRole._USER],
-          [UserRole._GUEST]: [UserRole._GUEST],
+          [UserRole.VIEWER]: [UserRole.VIEWER, UserRole.USER],
+          [UserRole.USER]: [UserRole.USER],
+          [UserRole.GUEST]: [UserRole.GUEST],
         };
 
         const allowedRoles = roleHierarchy[userRole] ?? [];
@@ -825,7 +826,7 @@ describe('Security E2E - Comprehensive Testing', () => {
           });
         }
 
-        next();
+        return next();
       };
     };
 
@@ -865,10 +866,10 @@ describe('Security E2E - Comprehensive Testing', () => {
     // Authentication routes
     app.getHttpAdapter().post('/auth/login', async (req, res) => {
       try {
-        const clientInfo = {
-          ip: req.ip,
+        const clientInfo: ClientInfo = {
+          ipAddress: req.ip,
           userAgent: req.headers['user-agent'],
-          timestamp: Date.now(),
+          timestamp: Date.now().toString(),
         };
 
         const result = await authController.login(req.body, clientInfo);
