@@ -574,8 +574,8 @@ export class DatabaseInterceptor implements NestInterceptor {
       .map(([key, stats]) => {
         const [operation, table] = key.split(':');
         return {
-          operation,
-          table,
+          operation: operation ?? '',
+          table: table ?? '',
           avgDuration: stats.avgDuration,
           count: stats.count,
         };
