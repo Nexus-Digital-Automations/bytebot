@@ -50,10 +50,13 @@ jest.mock(
   () =>
     ({
       ...jest.requireActual('util'),
-      promisify: jest.fn(
-        (fn: (...args: unknown[]) => unknown) =>
-          (...args: unknown[]) =>
-            Promise.resolve(fn(...args)),
+      promisify: Object.assign(
+        jest.fn(
+          (fn: (...args: unknown[]) => unknown) =>
+            (...args: unknown[]) =>
+              Promise.resolve(fn(...args)),
+        ),
+        { custom: Symbol.for('nodejs.util.promisify.custom') },
       ) as jest.MockedFunction<typeof import('util').promisify>,
     }) as jest.Mocked<typeof import('util')>,
 );

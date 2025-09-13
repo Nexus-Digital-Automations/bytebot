@@ -303,8 +303,7 @@ describe('Security Validation E2E Tests', () => {
         .expect(400);
 
       expect(
-        response.response.body.requestId ||
-          response.response.headers['x-request-id'],
+        response.body.requestId || response.headers['x-request-id'],
       ).toBeDefined();
     });
 
@@ -454,9 +453,9 @@ describe('Security Validation E2E Tests', () => {
         .send({ action: 'screenshot' });
 
       expect(
-        response.response.headers['x-request-id'] ||
-          response.response.headers['x-correlation-id'] ||
-          response.response.body.operationId,
+        response.headers['x-request-id'] ||
+          response.headers['x-correlation-id'] ||
+          response.body.operationId,
       ).toBeDefined();
     });
   });

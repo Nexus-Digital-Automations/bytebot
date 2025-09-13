@@ -8,8 +8,6 @@
  * @author Input Validation & API Security Specialist
  */
 
- 
-
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 
@@ -275,7 +273,9 @@ describe('Security Validation Tests', () => {
 
       expectedHeaders.forEach((header) => {
         expect(securityHeaders).toHaveProperty(header);
-        expect(securityHeaders[header]).toBeTruthy();
+        expect(
+          (securityHeaders as Record<string, string>)[header],
+        ).toBeTruthy();
       });
     });
   });

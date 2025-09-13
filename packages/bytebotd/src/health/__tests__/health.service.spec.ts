@@ -297,7 +297,7 @@ describe('HealthService', () => {
       // Mock the private service health check method
       const _originalCheckServiceHealth = service['checkServiceHealth'];
       // Test healthy status
-      jest.spyOn(service, 'checkServiceHealth' as unknown).mockReturnValue({
+      jest.spyOn(service as any, 'checkServiceHealth').mockReturnValue({
         database: 'connected',
         cache: 'available',
         external: 'reachable',
@@ -305,7 +305,7 @@ describe('HealthService', () => {
       const result = service.getDetailedStatus() as DetailedStatusResponse;
       expect(result.status).toBe('healthy');
       // Test degraded status (unknown services)
-      jest.spyOn(service, 'checkServiceHealth' as unknown).mockReturnValue({
+      jest.spyOn(service as any, 'checkServiceHealth').mockReturnValue({
         database: 'unknown',
         cache: 'unknown',
         external: 'unknown',
@@ -313,7 +313,7 @@ describe('HealthService', () => {
       const result2 = await service.getDetailedStatus();
       expect(result2.status).toBe('degraded');
       // Test unhealthy status (failed services)
-      jest.spyOn(service, 'checkServiceHealth' as unknown).mockReturnValue({
+      jest.spyOn(service as any, 'checkServiceHealth').mockReturnValue({
         database: 'disconnected',
         cache: 'unavailable',
         external: 'unreachable',

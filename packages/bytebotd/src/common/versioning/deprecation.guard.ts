@@ -699,6 +699,10 @@ export class DeprecationGuard implements CanActivate {
   ): void {
     const deprecation = versionConfig.deprecation;
 
+    if (!deprecation) {
+      return;
+    }
+
     if (deprecation.since) {
       response.setHeader(
         'Deprecation',
@@ -885,6 +889,18 @@ export class DeprecationGuard implements CanActivate {
     const deprecation = versionConfig.deprecation;
     let message = `BytebotD desktop API endpoint is deprecated`;
     let statusCode = HttpStatus.GONE; // 410 Gone
+
+    if (!deprecation) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Deprecation configuration is missing',
+          error: 'Internal Server Error',
+          operationId,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
 
     if (deprecationResult.isSunset) {
       message = `BytebotD desktop API endpoint has been sunset and is no longer available`;
