@@ -698,7 +698,7 @@ export const createMockAuditLogger = (
 
     Object.entries(originalMethods).forEach(([methodName, originalMethod]) => {
       (
-        mock as Record<
+        mock as unknown as Record<
           string,
           jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>
         >
@@ -717,13 +717,13 @@ export const createMockAuditLogger = (
 
     loggingMethods.forEach((methodName) => {
       const originalMethod = (
-        mock as Record<
+        mock as unknown as Record<
           string,
           jest.MockedFunction<(...args: unknown[]) => unknown>
         >
       )[methodName];
       (
-        mock as Record<
+        mock as unknown as Record<
           string,
           jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>
         >
@@ -797,7 +797,7 @@ export const AuditLogTestUtils = {
     return requiredFields.every(
       (field) =>
         Object.prototype.hasOwnProperty.call(entry, field) &&
-        (entry as unknown)[field] !== undefined,
+        (entry as unknown as Record<string, unknown>)[field] !== undefined,
     );
   },
 
