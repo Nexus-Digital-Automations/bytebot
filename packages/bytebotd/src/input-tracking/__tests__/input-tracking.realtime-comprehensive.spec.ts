@@ -818,7 +818,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Process all events
       for (const event of highFrequencyEvents) {
-        moveHandler(event);
+        if (moveHandler) {
+          moveHandler(event);
+        }
       }
 
       const processingTime = Date.now() - startTime;
@@ -843,7 +845,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         mousePromises.push(
           new Promise((resolve) => {
             setTimeout(() => {
-              moveHandler(createMouseEvent({ x: i, y: i }));
+              if (moveHandler) {
+                moveHandler(createMouseEvent({ x: i, y: i }));
+              }
               resolve(undefined);
             }, i);
           }),
@@ -852,7 +856,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         keyboardPromises.push(
           new Promise((resolve) => {
             setTimeout(() => {
-              keydownHandler(createKeyboardEvent({ keycode: 65 + (i % 26) }));
+              if (keydownHandler) {
+                keydownHandler(createKeyboardEvent({ keycode: 65 + (i % 26) }));
+              }
               resolve(undefined);
             }, i);
           }),
@@ -876,12 +882,14 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         const longText = 'A'.repeat(1000);
 
         for (const char of longText) {
-          keydownHandler(
-            createKeyboardEvent({
-              keycode: char.charCodeAt(0),
-              char: char.toLowerCase(),
-            }),
-          );
+          if (keydownHandler) {
+            keydownHandler(
+              createKeyboardEvent({
+                keycode: char.charCodeAt(0),
+                char: char.toLowerCase(),
+              }),
+            );
+          }
         }
 
         // Wait for buffer to flush
@@ -907,12 +915,14 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       const moveHandler = mockEventListeners['mousemove'];
 
       while (Date.now() < endTime) {
-        moveHandler(
-          createMouseEvent({
-            x: Math.random() * 1920,
-            y: Math.random() * 1080,
-          }),
-        );
+        if (moveHandler) {
+          moveHandler(
+            createMouseEvent({
+              x: Math.random() * 1920,
+              y: Math.random() * 1080,
+            }),
+          );
+        }
         eventsProcessed++;
 
         // Small delay to prevent blocking
@@ -936,7 +946,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       const moveHandler = mockEventListeners['mousemove'];
 
       const mouseEvent = createMouseEvent({ x: 300, y: 400 });
-      moveHandler(mouseEvent);
+      if (moveHandler) {
+        moveHandler(mouseEvent);
+      }
 
       expect(gateway.broadcastInputEvent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -956,7 +968,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         y: 250,
         clicks: 1,
       });
-      clickHandler(clickEvent);
+      if (clickHandler) {
+        clickHandler(clickEvent);
+      }
 
       // Wait for debounce
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -975,7 +989,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Simulate high activity
       for (let i = 0; i < 50; i++) {
-        moveHandler(createMouseEvent({ x: i * 10, y: i * 5 }));
+        if (moveHandler) {
+          moveHandler(createMouseEvent({ x: i * 10, y: i * 5 }));
+        }
       }
 
       // Verify gateway was called but not overwhelmed
@@ -1018,7 +1034,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Windows-specific key combinations
       const winKey = createKeyboardEvent({ keycode: 91, metaKey: true }); // Windows key
-      keydownHandler(winKey);
+      if (keydownHandler) {
+        keydownHandler(winKey);
+      }
 
       expect(gateway.broadcastInputEvent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1041,7 +1059,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // macOS-specific Command key
       const cmdKey = createKeyboardEvent({ keycode: 91, metaKey: true });
-      keydownHandler(cmdKey);
+      if (keydownHandler) {
+        keydownHandler(cmdKey);
+      }
 
       expect(gateway.broadcastInputEvent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1064,7 +1084,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Linux-specific Super key
       const superKey = createKeyboardEvent({ keycode: 133, metaKey: true });
-      keydownHandler(superKey);
+      if (keydownHandler) {
+        keydownHandler(superKey);
+      }
 
       expect(gateway.broadcastInputEvent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1115,12 +1137,14 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       // Fill up buffers with large amounts of data
       for (let i = 0; i < 10000; i++) {
-        keydownHandler(
-          createKeyboardEvent({
-            keycode: 65 + (i % 26),
-            char: String.fromCharCode(97 + (i % 26)),
-          }),
-        );
+        if (keydownHandler) {
+          keydownHandler(
+            createKeyboardEvent({
+              keycode: 65 + (i % 26),
+              char: String.fromCharCode(97 + (i % 26)),
+            }),
+          );
+        }
       }
 
       // Wait for buffer management
