@@ -230,34 +230,6 @@
       ]
     },
     {
-      "id": "error_1757741853068_f2ny67a4y",
-      "title": "Fix TypeScript interface compatibility errors in src/types/index.ts",
-      "description": "Critical TypeScript compilation errors requiring immediate fix: 1) AuthenticatedRequest interface incorrectly extends Express Request 2) EnhancedRequest interface type compatibility issues 3) Permission array type mismatches 4) CSP directive type issues in main.ts line 80. Must ensure all interface inheritance is valid and types are compatible for successful compilation.",
-      "priority": "medium",
-      "category": "error",
-      "status": "in_progress",
-      "dependencies": [],
-      "important_files": [],
-      "success_criteria": [],
-      "estimate": "",
-      "requires_research": false,
-      "subtasks": [],
-      "created_at": "2025-09-13T05:37:33.069Z",
-      "auto_research_created": false,
-      "assigned_agent": "development_session_1757741827450_1_general_fd516c04",
-      "started_at": "2025-09-13T05:37:54.624Z",
-      "claimed_by": "development_session_1757741827450_1_general_fd516c04",
-      "agent_assignment_history": [
-        {
-          "agentId": "development_session_1757741827450_1_general_fd516c04",
-          "role": "primary",
-          "assignedAt": "2025-09-13T05:37:54.624Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
       "id": "error_1757741844577_mkf3nppv7",
       "title": "Fix TypeScript Null Safety Compilation Errors",
       "description": "Fix critical TypeScript compilation errors related to null safety. Target specific issues: Line 396 payload.sessionId (string | undefined) not assignable to string, and multiple Object is possibly undefined errors in input-tracking.service.ts, mcp/__tests__/computer-use.tools.spec.ts, and test/security/security-validation.e2e-spec.ts. Add null checks, type guards, optional chaining, and proper undefined handling for strict null checking compliance.",
