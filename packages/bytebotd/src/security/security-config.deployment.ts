@@ -182,7 +182,7 @@ export class BytebotDSecurityDeployment {
       get: (token: string) => unknown;
     },
     configService: ConfigService,
-  ): Promise<void> {
+  ): void {
     const environment =
       configService.get<string>('NODE_ENV', 'development') ?? 'development';
 
