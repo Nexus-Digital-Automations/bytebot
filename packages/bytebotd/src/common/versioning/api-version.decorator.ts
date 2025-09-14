@@ -12,6 +12,7 @@
 
 // TypeScript safety note: This file contains NestJS decorators that work with metadata reflection
 
+import 'reflect-metadata';
 import { SetMetadata, applyDecorators } from '@nestjs/common';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
 
