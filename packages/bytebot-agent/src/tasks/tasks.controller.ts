@@ -51,7 +51,8 @@ import {
   Authenticated,
   CurrentUser,
 } from '../auth/decorators/roles.decorator';
-import { User, Permission } from '@prisma/client';
+import type { User } from '@prisma/client';
+import { Permission } from '@prisma/client';
 
 // Type definitions for proxy API responses
 interface ProxyModelData {

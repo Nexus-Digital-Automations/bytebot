@@ -27,7 +27,7 @@ import {
   Res,
   Param,
 } from '@nestjs/common';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { HealthService, HealthCheckResult } from './health.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { MetricsService } from '../metrics/metrics.service';

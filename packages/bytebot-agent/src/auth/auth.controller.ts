@@ -37,7 +37,8 @@ import {
 import { RateLimitGuard, RateLimit } from '../common/guards/rate-limit.guard';
 import { RateLimitPreset } from '@bytebot/shared';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard, AuthenticatedRequest } from './guards/jwt-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import type { AuthenticatedRequest } from './guards/jwt-auth.guard';
 import {
   LoginDto,
   RegisterDto,
@@ -46,7 +47,7 @@ import {
 } from './dto/login.dto';
 import { TokenPair } from './types/jwt-payload.interface';
 import { Public, CurrentUser } from './decorators/roles.decorator';
-import { User } from '@prisma/client';
+import type { User } from '@prisma/client';
 
 /**
  * Authentication Controller

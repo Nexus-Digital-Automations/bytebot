@@ -33,7 +33,7 @@ import { Request } from 'express';
 import { User } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../../prisma/prisma.service';
 // import { TokenValidationService } from '../services/token-validation.service';
 // import { SecurityEventService } from '../services/security-event.service';

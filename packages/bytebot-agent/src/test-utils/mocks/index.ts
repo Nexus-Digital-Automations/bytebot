@@ -14,22 +14,22 @@
  */
 
 // Export all mock services
-export * from './nestjs.mock.js';
-export * from './auth.mock.js';
-export * from './agent.mock.js';
-export * from './database.mock.js';
-export * from './external-apis.mock.js';
-export * from './websocket.mock.js';
-export * from './config.mock.js';
+export * from './nestjs.mock';
+export * from './auth.mock';
+export * from './agent.mock';
+export * from './database.mock';
+export * from './external-apis.mock';
+export * from './websocket.mock';
+export * from './config.mock';
 
 // Mock service registry for easy access (using static imports instead of dynamic)
-import * as NestJSMock from './nestjs.mock.js';
-import * as AuthMock from './auth.mock.js';
-import * as AgentMock from './agent.mock.js';
-import * as DatabaseMock from './database.mock.js';
-import * as ExternalAPIsMock from './external-apis.mock.js';
-import * as WebSocketMock from './websocket.mock.js';
-import * as ConfigMock from './config.mock.js';
+import * as NestJSMock from './nestjs.mock';
+import * as AuthMock from './auth.mock';
+import * as AgentMock from './agent.mock';
+import * as DatabaseMock from './database.mock';
+import * as ExternalAPIsMock from './external-apis.mock';
+import * as WebSocketMock from './websocket.mock';
+import * as ConfigMock from './config.mock';
 
 export const MockRegistry = {
   NestJS: NestJSMock,

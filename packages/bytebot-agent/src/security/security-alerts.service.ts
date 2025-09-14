@@ -22,8 +22,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   SecuritySeverity,
   SecurityEventType,
-  SecurityEvent,
 } from './security-monitoring.service';
+import type { SecurityEvent } from './security-monitoring.service';
 
 /**
  * Security configuration interface
