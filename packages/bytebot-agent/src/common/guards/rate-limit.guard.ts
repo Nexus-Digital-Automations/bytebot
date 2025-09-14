@@ -372,7 +372,11 @@ export class RateLimitGuard implements CanActivate {
   ): string {
     // Use custom key generator if provided
     if (config.keyGenerator) {
-      return config.keyGenerator(request);
+      return config.keyGenerator(
+        request as unknown as Parameters<
+          NonNullable<typeof config.keyGenerator>
+        >[0],
+      );
     }
 
     // Default key generation

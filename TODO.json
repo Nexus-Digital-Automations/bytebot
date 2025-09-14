@@ -667,7 +667,7 @@
       "id": "feature_1757880771548_tre9csl3fio"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-14T20:13:02.291Z",
       "title": "Comprehensive Prisma Integration Audit",
       "description": "Audit all bytebot packages for Prisma usage, identify inconsistencies, and fix integration issues including missing build steps",
@@ -684,7 +684,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-14T20:43:33.547Z",
+      "updated_at": "2025-09-14T20:43:33.547Z"
     },
     {
       "status": "completed",

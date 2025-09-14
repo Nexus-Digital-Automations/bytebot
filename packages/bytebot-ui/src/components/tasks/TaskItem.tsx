@@ -21,8 +21,8 @@ interface TaskItemProps {
  * Supports both HugeIcons components and loader states
  */
 interface StatusIconConfig {
-  /** HugeIcons icon component - must be compatible with HugeiconsIcon wrapper */
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  /** HugeIcons icon name - IconSvgObject from @hugeicons/core-free-icons */
+  icon?: any;
   /** Tailwind CSS color class for the icon */
   color?: string;
   /** Whether to show a loading spinner instead of an icon */

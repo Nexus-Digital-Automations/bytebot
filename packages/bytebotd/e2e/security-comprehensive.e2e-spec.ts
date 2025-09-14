@@ -771,7 +771,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         securityMonitor.trackFailedAuthentication(
           'unknown',
           req.ip ?? 'unknown',
-          req.headers['user-agent'] ?? 'unknown',
+          (req.headers['user-agent'] as string) ?? 'unknown',
         );
         return res.status(401).json({
           error: 'Unauthorized',
@@ -790,14 +790,14 @@ describe('Security E2E - Comprehensive Testing', () => {
           role: decoded.role,
           sessionId: decoded.sessionId,
           permissions: decoded.permissions as Permission[],
-          clientInfo: decoded.clientInfo,
+          clientInfo: decoded.clientInfo as ClientInfo | undefined,
         };
         next();
       } catch (_error) {
         securityMonitor.trackFailedAuthentication(
           'token_invalid',
           req.ip ?? 'unknown',
-          req.headers['user-agent'] ?? 'unknown',
+          (req.headers['user-agent'] as string) ?? 'unknown',
         );
         return res.status(401).json({
           error: 'Unauthorized',
@@ -898,18 +898,21 @@ describe('Security E2E - Comprehensive Testing', () => {
     app.getHttpAdapter().post('/auth/login', async (req, res) => {
       try {
         const clientInfo: ClientInfo = {
-          ipAddress: req.ip,
-          userAgent: req.headers['user-agent'],
+          ipAddress: req.ip ?? 'unknown',
+          userAgent: req.headers['user-agent'] as string | undefined,
           timestamp: Date.now().toString(),
         };
 
-        const result = await authController.login(req.body, clientInfo);
+        const result = await authController.login(
+          req.body as { email: string; password: string },
+          clientInfo,
+        );
         res.json(result);
       } catch (error: unknown) {
         securityMonitor.trackFailedAuthentication(
-          req.body?.email ?? 'unknown',
+          (req.body as { email?: string })?.email ?? 'unknown',
           req.ip ?? 'unknown',
-          req.headers['user-agent'] ?? 'unknown',
+          (req.headers['user-agent'] as string) ?? 'unknown',
         );
         res.status(401).json({
           error: error instanceof Error ? error.message : String(error),
@@ -919,7 +922,9 @@ describe('Security E2E - Comprehensive Testing', () => {
 
     app.getHttpAdapter().post('/auth/refresh', async (req, res) => {
       try {
-        const result = await authController.refresh(req.body);
+        const result = await authController.refresh(
+          req.body as { refreshToken: string },
+        );
         res.json(result);
       } catch (error: unknown) {
         res.status(401).json({
@@ -1022,7 +1027,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       // Step 1: Login with valid credentials
       const loginResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .post('/auth/login')
         .send({
@@ -1031,44 +1036,64 @@ describe('Security E2E - Comprehensive Testing', () => {
         })
         .expect(200);
 
-      expect(loginResponse.body.accessToken).toBeDefined();
-      expect(loginResponse.body.refreshToken).toBeDefined();
-      expect(loginResponse.body.user.role).toBe(UserRole._ADMIN);
+      expect(
+        (loginResponse.body as { accessToken: string }).accessToken,
+      ).toBeDefined();
+      expect(
+        (loginResponse.body as { refreshToken: string }).refreshToken,
+      ).toBeDefined();
+      expect(
+        (loginResponse.body as { user: { role: UserRole } }).user.role,
+      ).toBe(UserRole._ADMIN);
 
       const { accessToken, refreshToken } = loginResponse.body;
 
       // Step 2: Access protected resource with token
       const profileResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .get('/api/user/profile')
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
-      expect(profileResponse.body.email).toBe('admin@bytebot.ai');
-      expect(profileResponse.body.role).toBe(UserRole._ADMIN);
+      expect((profileResponse.body as { email: string }).email).toBe(
+        'admin@bytebot.ai',
+      );
+      expect((profileResponse.body as { role: UserRole }).role).toBe(
+        UserRole._ADMIN,
+      );
 
       // Step 3: Refresh token
       const refreshResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .post('/auth/refresh')
         .send({ refreshToken })
         .expect(200);
 
-      expect(refreshResponse.body.accessToken).toBeDefined();
-      expect(refreshResponse.body.accessToken).not.toBe(accessToken);
+      expect(
+        (refreshResponse.body as { accessToken: string }).accessToken,
+      ).toBeDefined();
+      expect(
+        (refreshResponse.body as { accessToken: string }).accessToken,
+      ).not.toBe(accessToken);
 
       // Step 4: Use new token
-      await request(app.getHttpAdapter().getInstance() as any)
+      await request(app.getHttpAdapter().getInstance() as TestAppInstance)
         .get('/api/user/profile')
-        .set('Authorization', `Bearer ${refreshResponse.body.accessToken}`)
+        .set(
+          'Authorization',
+          `Bearer ${(refreshResponse.body as { accessToken: string }).accessToken}`,
+        )
         .expect(200);
 
       // Step 5: Logout
-      await request(app.getHttpAdapter().getInstance() as any)
+      await request(app.getHttpAdapter().getInstance() as TestAppInstance)
         .post('/auth/logout')
-        .set('Authorization', `Bearer ${refreshResponse.body.accessToken}`)
+        .set(
+          'Authorization',
+          `Bearer ${(refreshResponse.body as { accessToken: string }).accessToken}`,
+        )
         .expect(200);
 
       securityLogger.info(
@@ -1089,7 +1114,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       ];
 
       for (const credentials of invalidCredentialsTests) {
-        await request(app.getHttpAdapter().getInstance() as any)
+        await request(app.getHttpAdapter().getInstance() as TestAppInstance)
           .post('/auth/login')
           .send(credentials)
           .expect(401);
@@ -1108,22 +1133,26 @@ describe('Security E2E - Comprehensive Testing', () => {
       // Make multiple failed attempts
       for (let i = 0; i < 4; i++) {
         const response = await request(
-          app.getHttpAdapter().getInstance() as any,
+          app.getHttpAdapter().getInstance() as TestAppInstance,
         )
           .post('/auth/login')
           .send({ email, password: wrongPassword });
 
         if (i < 3) {
           expect(response.status).toBe(401);
-          expect(response.body.error).toContain('Invalid credentials');
+          expect((response.body as { error: string }).error).toContain(
+            'Invalid credentials',
+          );
         } else {
           expect(response.status).toBe(401);
-          expect(response.body.error).toContain('temporarily locked');
+          expect((response.body as { error: string }).error).toContain(
+            'temporarily locked',
+          );
         }
       }
 
       // Verify account is locked even with correct password
-      await request(app.getHttpAdapter().getInstance() as any)
+      await request(app.getHttpAdapter().getInstance() as TestAppInstance)
         .post('/auth/login')
         .send({ email, password: 'Viewer123!@#' })
         .expect(401);
@@ -1181,7 +1210,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       for (const roleTest of roleTests) {
         // Login
         const loginResponse = await request(
-          app.getHttpAdapter().getInstance() as any,
+          app.getHttpAdapter().getInstance() as TestAppInstance,
         )
           .post('/auth/login')
           .send({
@@ -1190,11 +1219,12 @@ describe('Security E2E - Comprehensive Testing', () => {
           })
           .expect(200);
 
-        const token = loginResponse.body.accessToken;
+        const token = (loginResponse.body as { accessToken: string })
+          .accessToken;
 
         // Test profile access (should work for all)
         if (roleTest.shouldAccess['/api/user/profile']) {
-          await request(app.getHttpAdapter().getInstance() as any)
+          await request(app.getHttpAdapter().getInstance() as TestAppInstance)
             .get('/api/user/profile')
             .set('Authorization', `Bearer ${token}`)
             .expect(200);
@@ -1202,7 +1232,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
         // Test task creation (operator and admin only)
         const taskResponse = await request(
-          app.getHttpAdapter().getInstance() as any,
+          app.getHttpAdapter().getInstance() as TestAppInstance,
         )
           .post('/api/tasks')
           .set('Authorization', `Bearer ${token}`)
@@ -1216,7 +1246,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
         // Test admin user list (admin only)
         const usersResponse = await request(
-          app.getHttpAdapter().getInstance() as any,
+          app.getHttpAdapter().getInstance() as TestAppInstance,
         )
           .get('/api/admin/users')
           .set('Authorization', `Bearer ${token}`);
@@ -1229,7 +1259,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
         // Test admin metrics (admin only)
         const metricsResponse = await request(
-          app.getHttpAdapter().getInstance() as any,
+          app.getHttpAdapter().getInstance() as TestAppInstance,
         )
           .get('/api/admin/metrics')
           .set('Authorization', `Bearer ${token}`);
@@ -1254,7 +1284,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       // Login as operator
       const operatorLogin = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .post('/auth/login')
         .send({
@@ -1268,15 +1298,19 @@ describe('Security E2E - Comprehensive Testing', () => {
       // Try to access another user's data (should be prevented by proper implementation)
       // This test assumes the API properly validates user ownership
       const profileResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .get('/api/user/profile')
         .set('Authorization', `Bearer ${operatorToken}`)
         .expect(200);
 
       // Should only return operator's data
-      expect(profileResponse.body.email).toBe('operator@bytebot.ai');
-      expect(profileResponse.body.role).toBe(UserRole._OPERATOR);
+      expect((profileResponse.body as { email: string }).email).toBe(
+        'operator@bytebot.ai',
+      );
+      expect((profileResponse.body as { role: UserRole }).role).toBe(
+        UserRole._OPERATOR,
+      );
 
       securityLogger.info(
         `[${testId}] Horizontal privilege escalation prevented`,
@@ -1289,7 +1323,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       const testId = `${operationId}_security_headers`;
       securityLogger.info(`[${testId}] Testing security headers integration`);
 
-      const response = await request(app.getHttpAdapter().getInstance() as any)
+      const response = await request(
+        app.getHttpAdapter().getInstance() as TestAppInstance,
+      )
         .get('/health')
         .expect(200);
 
@@ -1319,7 +1355,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       // Make requests up to the limit (100 requests per 15 minutes)
       for (let i = 0; i < 105; i++) {
         requests.push(
-          request(app.getHttpAdapter().getInstance() as any)
+          request(app.getHttpAdapter().getInstance() as TestAppInstance)
             .get('/health')
             .set('X-Forwarded-For', '192.168.1.100'), // Same IP
         );
@@ -1344,7 +1380,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       // Login first
       const loginResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .post('/auth/login')
         .send({
@@ -1353,7 +1389,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         })
         .expect(200);
 
-      const token = loginResponse.body.accessToken;
+      const token = (loginResponse.body as { accessToken: string }).accessToken;
 
       // Test XSS sanitization in task creation
       const maliciousTask = {
@@ -1367,7 +1403,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       };
 
       const taskResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .post('/api/tasks')
         .set('Authorization', `Bearer ${token}`)
@@ -1375,9 +1411,13 @@ describe('Security E2E - Comprehensive Testing', () => {
         .expect(200);
 
       // Verify XSS content was sanitized
-      expect(taskResponse.body.title).toBeDefined();
-      expect(taskResponse.body.title).not.toContain('<script>');
-      expect(taskResponse.body.description).not.toContain('<img');
+      expect((taskResponse.body as { title: string }).title).toBeDefined();
+      expect((taskResponse.body as { title: string }).title).not.toContain(
+        '<script>',
+      );
+      expect(
+        (taskResponse.body as { description?: string }).description,
+      ).not.toContain('<img');
 
       securityLogger.info(`[${testId}] Malicious input sanitized successfully`);
     });
@@ -1392,7 +1432,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       // Login first
       const loginResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .post('/auth/login')
         .send({
@@ -1401,14 +1441,14 @@ describe('Security E2E - Comprehensive Testing', () => {
         })
         .expect(200);
 
-      const token = loginResponse.body.accessToken;
+      const token = (loginResponse.body as { accessToken: string }).accessToken;
       const startTime = Date.now();
 
       // Make 50 concurrent authenticated requests
       const promises = Array(50)
         .fill(null)
         .map(() =>
-          request(app.getHttpAdapter().getInstance() as any)
+          request(app.getHttpAdapter().getInstance() as TestAppInstance)
             .get('/api/user/profile')
             .set('Authorization', `Bearer ${token}`),
         );
@@ -1436,7 +1476,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       // Login for legitimate requests
       const loginResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .post('/auth/login')
         .send({
@@ -1445,7 +1485,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         })
         .expect(200);
 
-      const token = loginResponse.body.accessToken;
+      const token = (loginResponse.body as { accessToken: string }).accessToken;
       const startTime = Date.now();
 
       const promises = [
@@ -1453,7 +1493,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         ...Array(20)
           .fill(null)
           .map(() =>
-            request(app.getHttpAdapter().getInstance() as any)
+            request(app.getHttpAdapter().getInstance() as TestAppInstance)
               .get('/api/user/profile')
               .set('Authorization', `Bearer ${token}`),
           ),
@@ -1462,7 +1502,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         ...Array(15)
           .fill(null)
           .map(() =>
-            request(app.getHttpAdapter().getInstance() as any)
+            request(app.getHttpAdapter().getInstance() as TestAppInstance)
               .get('/api/admin/users')
               .set('Authorization', 'Bearer invalid-token'),
           ),
@@ -1471,7 +1511,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         ...Array(15)
           .fill(null)
           .map(() =>
-            request(app.getHttpAdapter().getInstance() as any).get(
+            request(app.getHttpAdapter().getInstance() as TestAppInstance).get(
               '/api/admin/metrics',
             ),
           ),
@@ -1517,7 +1557,7 @@ describe('Security E2E - Comprehensive Testing', () => {
       // Generate various security events
 
       // Failed authentication
-      await request(app.getHttpAdapter().getInstance() as any)
+      await request(app.getHttpAdapter().getInstance() as TestAppInstance)
         .post('/auth/login')
         .send({
           email: 'attacker@malicious.com',
@@ -1526,14 +1566,14 @@ describe('Security E2E - Comprehensive Testing', () => {
         .expect(401);
 
       // Unauthorized access attempt
-      await request(app.getHttpAdapter().getInstance() as any)
+      await request(app.getHttpAdapter().getInstance() as TestAppInstance)
         .get('/api/admin/users')
         .set('Authorization', 'Bearer invalid-token')
         .expect(401);
 
       // Role escalation attempt
       const viewerLogin = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .post('/auth/login')
         .send({
@@ -1542,7 +1582,7 @@ describe('Security E2E - Comprehensive Testing', () => {
         })
         .expect(200);
 
-      await request(app.getHttpAdapter().getInstance() as any)
+      await request(app.getHttpAdapter().getInstance() as TestAppInstance)
         .get('/api/admin/metrics')
         .set('Authorization', `Bearer ${viewerLogin.body.accessToken}`)
         .expect(403);
@@ -1574,7 +1614,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       // Login as admin
       const loginResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .post('/auth/login')
         .send({
@@ -1583,23 +1623,32 @@ describe('Security E2E - Comprehensive Testing', () => {
         })
         .expect(200);
 
-      const token = loginResponse.body.accessToken;
+      const token = (loginResponse.body as { accessToken: string }).accessToken;
 
       // Access audit logs
       const auditResponse = await request(
-        app.getHttpAdapter().getInstance() as any,
+        app.getHttpAdapter().getInstance() as TestAppInstance,
       )
         .get('/api/admin/audit-logs')
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      expect(auditResponse.body.logs).toBeDefined();
-      expect(Array.isArray(auditResponse.body.logs)).toBe(true);
-      expect(auditResponse.body.requestedBy).toBeDefined();
+      expect((auditResponse.body as { logs: unknown[] }).logs).toBeDefined();
+      expect(
+        Array.isArray((auditResponse.body as { logs: unknown[] }).logs),
+      ).toBe(true);
+      expect(
+        (auditResponse.body as { requestedBy: string }).requestedBy,
+      ).toBeDefined();
 
       // Verify audit log structure
-      if (auditResponse.body.logs.length > 0) {
-        const log = auditResponse.body.logs[0];
+      if ((auditResponse.body as { logs: unknown[] }).logs.length > 0) {
+        const log = (auditResponse.body as { logs: unknown[] }).logs[0] as {
+          id: string;
+          action: string;
+          userId: string;
+          timestamp: number;
+        };
         expect(log.id).toBeDefined();
         expect(log.action).toBeDefined();
         expect(log.userId).toBeDefined();
@@ -1630,7 +1679,9 @@ describe('Security E2E - Comprehensive Testing', () => {
       ];
 
       for (const endpoint of endpoints) {
-        const requestAgent = request(app.getHttpAdapter().getInstance() as any);
+        const requestAgent = request(
+          app.getHttpAdapter().getInstance() as TestAppInstance,
+        );
 
         // Type-safe method dispatch to avoid TestAgent index signature errors
         let response: Awaited<ReturnType<typeof requestAgent.get>>;
@@ -1691,7 +1742,7 @@ describe('Security E2E - Comprehensive Testing', () => {
 
       for (const headers of edgeCases) {
         const response = await request(
-          app.getHttpAdapter().getInstance() as any,
+          app.getHttpAdapter().getInstance() as TestAppInstance,
         )
           .get('/api/user/profile')
           .set(headers);

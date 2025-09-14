@@ -265,3 +265,18 @@ export type MessageContentBlock =
   | UserActionContentBlock
   | ComputerToolUseContentBlock
   | ToolResultContentBlock;
+
+// Export all types that are referenced in index-client.ts
+export {
+  TextContentBlock,
+  ImageContentBlock,
+  DocumentContentBlock,
+  ThinkingContentBlock,
+  RedactedThinkingContentBlock,
+  ToolUseContentBlock,
+  ToolResultContentBlock,
+  ComputerToolUseContentBlock,
+  SetTaskStatusToolUseBlock,
+  CreateTaskToolUseBlock,
+  UserActionContentBlock,
+} from "./messageContent.types";
