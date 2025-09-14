@@ -822,9 +822,10 @@ export class BrowserMonitoringService {
   > {
     try {
       const sessions = await this.sessionService.listSessions();
-      const activeSessions = sessions
-        ? sessions.filter((s: BrowserSession) => s.status === 'active')
-        : [];
+      const activeSessions =
+        sessions && Array.isArray(sessions)
+          ? sessions.filter((s: BrowserSession) => s.status === 'active')
+          : [];
 
       return {
         totalSessions: sessions?.length ?? 0,

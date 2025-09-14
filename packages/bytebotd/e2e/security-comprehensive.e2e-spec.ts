@@ -95,6 +95,18 @@ interface _SecurityUser {
   password: string;
 }
 
+// Type definition for Express app instance in tests
+type TestAppInstance = {
+  address(): { port: number } | string | null;
+  listen(port: number): Promise<void>;
+  get(path: string): unknown;
+  post(path: string): unknown;
+  put(path: string): unknown;
+  delete(path: string): unknown;
+  patch(path: string): unknown;
+  use(...args: unknown[]): unknown;
+} & Record<string, unknown>;
+
 // TaskData interface is now imported from '../src/types'
 
 /**
@@ -718,7 +730,10 @@ describe('Security E2E - Comprehensive Testing', () => {
       const windowMs = 15 * 60 * 1000; // 15 minutes
       const maxRequests = 100;
 
-      const clientData = rateLimits.get(clientId) ?? {
+      const clientData = (rateLimits.get(clientId) as {
+        requests: number[];
+        windowStart: number;
+      }) ?? {
         requests: [],
         windowStart: now,
       };
@@ -845,21 +860,25 @@ describe('Security E2E - Comprehensive Testing', () => {
     // 5. Input Validation and Sanitization Middleware
     app.use((req: Request, res: Response, next: NextFunction) => {
       // Basic input sanitization
-      const sanitizeObject = (obj: any): any => {
+      const sanitizeObject = (
+        obj: Record<string, unknown>,
+      ): Record<string, unknown> => {
         if (typeof obj !== 'object' || obj === null) return obj;
 
         for (const key in obj) {
           if (typeof obj[key] === 'string') {
             // Remove potential XSS patterns
-            obj[key] = obj[key]
+            obj[key] = (obj[key] as string)
               .replace(/<script[^>]*>.*?<\/script>/gi, '')
               .replace(/<[^>]*>/g, '')
               .replace(/javascript:/gi, '')
               .replace(/on\w+=/gi, '');
-          } else if (typeof obj[key] === 'object') {
-            sanitizeObject(obj[key]);
+          } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+            sanitizeObject(obj[key] as Record<string, unknown>);
           }
         }
+
+        return obj;
       };
 
       if (req.body) {
