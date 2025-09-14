@@ -1109,7 +1109,7 @@ describe('HealthService', () => {
         const originalSetTimeout = setTimeout;
         let timeoutCallCount = 0;
         global.setTimeout = (jest.fn() as any).mockImplementation(
-          (callback, delay: number) => {
+          (callback: any, delay: number) => {
             timeoutCallCount++;
             if (timeoutCallCount % 2 === 0) {
               // Simulate timeout/rejection on every other call
@@ -1122,7 +1122,7 @@ describe('HealthService', () => {
               originalSetTimeout(() => callback(null, true), delay);
             }
           },
-        ) as unknown;
+        ) as unknown as typeof setTimeout;
         const results = await Promise.all([
           (service as any).checkExternalService(
             'service-1',
