@@ -572,7 +572,10 @@ export class BytebotConfigService implements OnModuleInit {
     this.logger.debug(`[${operationId}] Retrieving configuration`, { key });
 
     try {
-      const value = this.nestConfigService.get<T>(key, defaultValue);
+      const value =
+        defaultValue !== undefined
+          ? this.nestConfigService.get<T>(key, defaultValue)
+          : this.nestConfigService.get<T>(key);
       const responseTime = Date.now() - startTime;
 
       // Update performance metrics
@@ -588,7 +591,12 @@ export class BytebotConfigService implements OnModuleInit {
         },
       );
 
-      return value;
+      if (value === undefined && defaultValue === undefined) {
+        throw new Error(
+          `Configuration key '${String(key)}' not found and no default value provided`,
+        );
+      }
+      return value as T;
     } catch (error) {
       const responseTime = Date.now() - startTime;
       this.performanceMetrics.errorCount++;
@@ -599,6 +607,11 @@ export class BytebotConfigService implements OnModuleInit {
         responseTimeMs: responseTime,
       });
 
+      if (defaultValue === undefined) {
+        throw new Error(
+          `Failed to retrieve configuration key '${String(key)}' and no default value provided`,
+        );
+      }
       return defaultValue;
     }
   }

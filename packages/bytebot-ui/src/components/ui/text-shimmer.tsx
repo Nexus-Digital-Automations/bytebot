@@ -46,7 +46,7 @@ function TextShimmerComponent({
         {
           "--spread": `${dynamicSpread}px`,
           backgroundImage: `var(--bg), linear-gradient(var(--base-color), var(--base-color))`,
-        } as React.CSSProperties
+        } as any
       }
     >
       {children}

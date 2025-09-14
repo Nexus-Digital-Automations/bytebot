@@ -252,14 +252,14 @@ export function convertWaitActionToToolUseBlock(
 }
 
 export function convertScreenshotActionToToolUseBlock(
-  action: ScreenshotAction,
+  _action: ScreenshotAction,
   toolUseId: string,
 ): ComputerToolUseContentBlock {
   return createToolUseBlock("computer_screenshot", toolUseId, {});
 }
 
 export function convertCursorPositionActionToToolUseBlock(
-  action: CursorPositionAction,
+  _action: CursorPositionAction,
   toolUseId: string,
 ): ComputerToolUseContentBlock {
   return createToolUseBlock("computer_cursor_position", toolUseId, {});

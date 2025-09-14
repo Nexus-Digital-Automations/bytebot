@@ -250,7 +250,7 @@ export function IsNotXSS(validationOptions?: ValidationOptions) {
       name: "isNotXSS",
       target: object.constructor,
       propertyName: propertyName,
-      options: validationOptions,
+      options: validationOptions || {},
       validator: IsNotXSSConstraint,
     });
   };
@@ -266,7 +266,7 @@ export function IsNotSQLInjection(validationOptions?: ValidationOptions) {
       name: "isNotSQLInjection",
       target: object.constructor,
       propertyName: propertyName,
-      options: validationOptions,
+      options: validationOptions || {},
       validator: IsNotSQLInjectionConstraint,
     });
   };
@@ -287,7 +287,7 @@ export function IsSafeFilePath(
       target: object.constructor,
       propertyName: propertyName,
       constraints: [allowedBasePaths],
-      options: validationOptions,
+      options: validationOptions || {},
       validator: IsSafeFilePathConstraint,
     });
   };
@@ -308,7 +308,7 @@ export function IsValidScreenCoordinates(
       target: object.constructor,
       propertyName: propertyName,
       constraints: [screenBounds],
-      options: validationOptions,
+      options: validationOptions || {},
       validator: IsValidScreenCoordinatesConstraint,
     });
   };
@@ -329,7 +329,7 @@ export function IsNotMaliciousFile(
       target: object.constructor,
       propertyName: propertyName,
       constraints: [filename],
-      options: validationOptions,
+      options: validationOptions || {},
       validator: IsNotMaliciousFileConstraint,
     });
   };
@@ -350,7 +350,7 @@ export function IsSafeTextInput(
       target: object.constructor,
       propertyName: propertyName,
       constraints: [enableAdditionalChecks],
-      options: validationOptions,
+      options: validationOptions || {},
       validator: IsSafeTextInputConstraint,
     });
   };
@@ -371,7 +371,7 @@ export function IsValidComputerActionText(
       target: object.constructor,
       propertyName: propertyName,
       constraints: [maxLength],
-      options: validationOptions,
+      options: validationOptions || {},
       validator: IsValidComputerActionTextConstraint,
     });
   };
@@ -392,7 +392,7 @@ export function IsSanitizedString(
       target: object.constructor,
       propertyName: propertyName,
       constraints: [sanitizationOptions],
-      options: validationOptions,
+      options: validationOptions || {},
       validator: {
         validate(value: unknown, args: ValidationArguments): boolean {
           if (typeof value !== "string") {

@@ -11,6 +11,7 @@
 export * from "./types/messageContent.types";
 export * from "./types/computerAction.types";
 export * from "./types/agent.types";
+export * from "./types/security.types";
 
 // Export enums directly (these have runtime exports)
 export { MessageContentType, Role } from "./types/messageContent.types";

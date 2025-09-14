@@ -187,21 +187,25 @@ export function createSecurityEvent(
   ipAddress?: string,
   userAgent?: string,
 ): SecurityEvent {
-  return {
+  const event: SecurityEvent = {
     eventId: `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     type,
     timestamp: new Date(),
     riskScore: calculateRiskScore(type, success),
-    userId,
-    ipAddress,
-    userAgent,
-    resource: endpoint,
     endpoint,
     method,
-    success,
-    message,
-    metadata,
+    resource: endpoint,
   };
+
+  // Only add optional properties if they have values
+  if (userId !== undefined) event.userId = userId;
+  if (ipAddress !== undefined) event.ipAddress = ipAddress;
+  if (userAgent !== undefined) event.userAgent = userAgent;
+  if (success !== undefined) event.success = success;
+  if (message !== undefined) event.message = message;
+  if (metadata !== undefined) event.metadata = metadata;
+
+  return event;
 }
 
 /**
