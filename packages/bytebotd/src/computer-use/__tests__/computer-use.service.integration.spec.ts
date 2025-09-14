@@ -163,7 +163,7 @@ describe('ComputerUseService Integration Tests', () => {
       const util = await import('util');
       jest
         .spyOn(util, 'promisify')
-         as jest.MockedFunction<any>).mockReturnValue(jest.fn() as jest.MockedFunction<any>).mockRejectedValue({ code: 1 }));
+         as jest.MockedFunction<any>).mockReturnValue((jest.fn() as jest.MockedFunction<any>).mockRejectedValue({ code: 1 }));
 
       await context.service.action(appAction as unknown as ComputerAction);
 
@@ -417,7 +417,7 @@ describe('ComputerUseService Integration Tests', () => {
       const util = await import('util');
       jest
         .spyOn(util, 'promisify')
-         as jest.MockedFunction<any>).mockReturnValue(jest.fn() as jest.MockedFunction<any>).mockRejectedValue(new Error('Copy failed')));
+         as jest.MockedFunction<any>).mockReturnValue((jest.fn() as jest.MockedFunction<any>).mockRejectedValue(new Error('Copy failed')));
 
       const testFile = createTestFile('failure-test.txt', 'Test content');
       const writeAction: WriteFileAction = {
@@ -548,18 +548,18 @@ describe('ComputerUseService Integration Tests', () => {
    */
   function createMockNutService(): Partial<NutService> {
     return {
-      mouseMoveEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      mouseClickEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      mouseButtonEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      mouseWheelEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      holdKeys: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      sendKeys: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      typeText: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      pasteText: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
+      mouseMoveEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
+      mouseClickEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
+      mouseButtonEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
+      mouseWheelEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
+      holdKeys: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
+      sendKeys: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
+      typeText: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
+      pasteText: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
       screendump: jest
         .fn()
          as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('mocked-screenshot-data')),
-      getCursorPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
+      getCursorPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
     };
   }
 

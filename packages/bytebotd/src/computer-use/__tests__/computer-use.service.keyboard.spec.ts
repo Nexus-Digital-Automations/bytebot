@@ -98,11 +98,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
     nutService = module.get(NutService);
 
     // Setup logger spies for comprehensive logging verification
-    __loggerLogSpy = jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation();
+    __loggerLogSpy = (jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation();
     __loggerErrorSpy = jest
       .spyOn(Logger.prototype, 'error')
        as jest.MockedFunction<any>).mockImplementation();
-    __loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation();
+    __loggerWarnSpy = (jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation();
     __loggerDebugSpy = jest
       .spyOn(Logger.prototype, 'debug')
        as jest.MockedFunction<any>).mockImplementation();

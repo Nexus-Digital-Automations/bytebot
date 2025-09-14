@@ -205,7 +205,7 @@ const createMockLogger = () => ({
 });
 
 const mockComputerUseService = {
-  action: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
+  action: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
     success: true,
     message: 'Screenshot captured',
     image: 'base64-mock-screenshot-data',
@@ -216,7 +216,7 @@ const mockComputerUseService = {
       operationId: 'screenshot-123',
     },
   }),
-  screenshot: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
+  screenshot: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
     image: 'base64-mock-screenshot-data',
     metadata: {
       width: 1920,
@@ -230,11 +230,11 @@ const mockComputerUseService = {
 const mockInputTrackingGateway = {
   broadcastInputEvent: jest.fn(),
   broadcastActionEvent: jest.fn(),
-  getConnectedClients: jest.fn() as jest.MockedFunction<any>).mockReturnValue(5),
+  getConnectedClients: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(5),
   broadcastToRoom: jest.fn(),
   joinRoom: jest.fn(),
   leaveRoom: jest.fn(),
-  getClientRooms: jest.fn() as jest.MockedFunction<any>).mockReturnValue(['desktop-session-1']),
+  getClientRooms: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(['desktop-session-1']),
   emitAction: jest.fn(),
   emitScreenshotAndAction: jest.fn(),
   handleConnection: jest.fn(),
@@ -1132,7 +1132,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
   describe('Error Handling and Recovery', () => {
     it('should handle UIohook initialization failures gracefully', () => {
-      mockUIOhook.start = jest.fn() as jest.MockedFunction<any>).mockImplementation(() => {
+      mockUIOhook.start = (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => {
         throw new Error('UIohook initialization failed');
       });
 

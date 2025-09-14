@@ -539,7 +539,7 @@ describe('InputTrackingGateway', () => {
       console.log(`[${testId}] Testing server emission error handling`);
 
       // Mock server emit to throw error
-      mockServer.emit = jest.fn() as jest.MockedFunction<any>).mockImplementation(() => {
+      mockServer.emit = (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => {
         throw new Error('Network error');
       });
 

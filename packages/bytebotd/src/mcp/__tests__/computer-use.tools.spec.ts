@@ -115,7 +115,7 @@ describe('ComputerUseTools', () => {
 
     // Setup mock computer use service with all required methods
     mockComputerUseService = {
-      action: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+      action: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
     } as unknown as jest.Mocked<ComputerUseService>;
 
     // Setup mock compressor

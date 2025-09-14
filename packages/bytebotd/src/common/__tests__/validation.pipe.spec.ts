@@ -727,8 +727,8 @@ describe('ValidationPipe', () => {
       const testId = `${operationId}_validation_logging`;
       console.log(`[${testId}] Testing validation attempt logging`);
 
-      const consoleLogSpy = jest.spyOn(console, 'log') as jest.MockedFunction<any>).mockImplementation();
-      const consoleErrorSpy = jest.spyOn(console, 'error') as jest.MockedFunction<any>).mockImplementation();
+      const consoleLogSpy = (jest.spyOn(console, 'log') as jest.MockedFunction<any>).mockImplementation();
+      const consoleErrorSpy = (jest.spyOn(console, 'error') as jest.MockedFunction<any>).mockImplementation();
 
       const validData = {
         email: 'test@example.com',

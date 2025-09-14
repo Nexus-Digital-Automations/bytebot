@@ -212,7 +212,7 @@ describe('InputTrackingService', () => {
         {
           provide: ComputerUseService,
           useValue: {
-            screenshot: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
+            screenshot: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
               image: 'mock-screenshot-base64-data',
             }),
           },

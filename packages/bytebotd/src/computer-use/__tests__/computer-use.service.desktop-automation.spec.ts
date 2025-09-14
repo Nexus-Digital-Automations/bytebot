@@ -29,7 +29,7 @@
 // Mock all external dependencies before imports
 jest.mock('child_process', () => ({
   exec: jest.fn(),
-  spawn: jest.fn() as jest.MockedFunction<any>).mockReturnValue({
+  spawn: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({
     unref: jest.fn(),
     pid: 12345,
     kill: jest.fn(),
@@ -91,7 +91,7 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
     colorAt: jest.fn(),
   },
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  Point: jest.fn() as jest.MockedFunction<any>).mockImplementation((x, y) => ({ x, y })),
+  Point: (jest.fn() as jest.MockedFunction<any>).mockImplementation((x, y) => ({ x, y })),
   Region: jest.fn(),
   Key: {
     LeftCmd: 'LeftCmd',
@@ -152,22 +152,22 @@ import { ScreenshotActionDto } from '../dto/computer-action.dto';
 
 // Mock services for comprehensive testing
 const mockNutService = {
-  mouseMoveEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-  mouseClickEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-  mouseButtonEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-  mouseWheelEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-  sendKeys: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-  holdKeys: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-  typeText: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-  pasteText: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-  screendump: jest.fn() as jest.MockedFunction<any>).mockResolvedValue('mock-base64-screenshot-data'),
-  getCursorPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
+  mouseMoveEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  mouseClickEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  mouseButtonEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  mouseWheelEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  sendKeys: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  holdKeys: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  typeText: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  pasteText: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  screendump: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue('mock-base64-screenshot-data'),
+  getCursorPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
 };
 
 // Standard performance tracking for desktop automation
 const _mockPerformanceTracker = {
-  recordMetric: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-  getMetrics: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
+  recordMetric: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  getMetrics: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
     operationCount: 42,
     averageLatency: 150,
     memoryUsage: 1024,

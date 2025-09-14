@@ -30,7 +30,7 @@ jest.mock('child_process', () => {
   };
 
   return {
-    exec: jest.fn() as jest.MockedFunction<any>).mockImplementation((cmd: string, opts: any, cb?: any) => {
+    exec: (jest.fn() as jest.MockedFunction<any>).mockImplementation((cmd: string, opts: any, cb?: any) => {
       const callback = typeof opts === 'function' ? opts : cb;
       if (callback) {
         setTimeout(() => (callback as MockExecCallback)(null, '', ''), 10);
@@ -46,9 +46,9 @@ jest.mock('child_process', () => {
 });
 
 jest.mock('fs/promises', () => ({
-  writeFile: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-  readFile: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test content')),
-  unlink: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  writeFile: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  readFile: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test content')),
+  unlink: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
 }));
 
 // Don't mock util completely - just mock promisify when needed
@@ -182,10 +182,10 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     );
 
     // Mock Logger to prevent console output during tests
-    jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>).mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, 'debug') as jest.MockedFunction<any>).mockImplementation(() => {});
+    (jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation(() => {});
+    (jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>).mockImplementation(() => {});
+    (jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation(() => {});
+    (jest.spyOn(Logger.prototype, 'debug') as jest.MockedFunction<any>).mockImplementation(() => {});
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

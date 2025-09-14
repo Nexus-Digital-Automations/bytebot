@@ -189,9 +189,9 @@ describe('RolesGuard', () => {
     const mockRequest = { user };
 
     return {
-      switchToHttp: jest.fn() as jest.MockedFunction<any>).mockReturnValue({
-        getRequest: jest.fn() as jest.MockedFunction<any>).mockReturnValue(mockRequest),
-        getResponse: jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
+      switchToHttp: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({
+        getRequest: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(mockRequest),
+        getResponse: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
       }),
       getHandler: jest.fn(),
       getClass: jest.fn(),
@@ -243,7 +243,7 @@ describe('RolesGuard', () => {
       const user = createMockUser(UserRole._VIEWER);
       const context = createMockExecutionContext(user);
 
-      jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(undefined);
+      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(undefined);
 
       const result = await guard.canActivate(context);
 

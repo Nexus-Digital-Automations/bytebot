@@ -23,26 +23,26 @@ import { ReadFileActionDto } from '../dto/computer-action.dto';
 // Mock the nut-js library first to prevent module loading issues
 jest.mock('@nut-tree-fork/nut-js', () => ({
   keyboard: {
-    pressKey: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    releaseKey: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    pressKey: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    releaseKey: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
     config: { autoDelayMs: 100 },
   },
   mouse: {
-    setPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    click: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    pressButton: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    releaseButton: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollUp: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollDown: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollLeft: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollRight: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    getPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
+    setPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    click: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    pressButton: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    releaseButton: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollUp: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollDown: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollLeft: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollRight: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    getPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
     config: { autoDelayMs: 100 },
   },
   screen: {
-    capture: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    capture: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
   },
-  Point: jest.fn() as jest.MockedFunction<any>).mockImplementation((x: number, y: number) => ({ x, y })),
+  Point: (jest.fn() as jest.MockedFunction<any>).mockImplementation((x: number, y: number) => ({ x, y })),
   Key: {
     A: 'A',
     B: 'B',
@@ -60,22 +60,22 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
 
 // Mock all external modules at the top level
 jest.mock('fs/promises', () => ({
-  writeFile: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-  readFile: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test content')),
-  unlink: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  writeFile: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  readFile: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test content')),
+  unlink: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
 }));
 
 jest.mock('child_process');
 
 jest.mock('util', () => ({
   promisify: jest.fn(() =>
-    jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ stdout: 'success', stderr: '' }),
+    (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ stdout: 'success', stderr: '' }),
   ),
 }));
 
 // Mock the axios and http modules that are causing issues
 jest.mock('@nestjs/axios', () => ({
-  HttpService: jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
+  HttpService: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
     axiosRef: {
       get: jest.fn(),
       post: jest.fn(),

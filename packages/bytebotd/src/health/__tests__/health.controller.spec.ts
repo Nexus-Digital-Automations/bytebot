@@ -155,9 +155,9 @@ describe('HealthController', () => {
     healthService = module.get<jest.Mocked<HealthService>>(HealthService);
 
     // Mock the logger
-    jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation(mockLogger.log);
-    jest.spyOn(Logger.prototype, 'debug') as jest.MockedFunction<any>).mockImplementation(mockLogger.debug);
-    jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>).mockImplementation(mockLogger.error);
+    (jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation(mockLogger.log);
+    (jest.spyOn(Logger.prototype, 'debug') as jest.MockedFunction<any>).mockImplementation(mockLogger.debug);
+    (jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>).mockImplementation(mockLogger.error);
 
     console.log(`[${operationId}] HealthController test setup completed`);
   });

@@ -13,20 +13,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 // Mock external dependencies first
 jest.mock('@nut-tree-fork/nut-js', () => ({
   keyboard: {
-    pressKey: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    releaseKey: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    pressKey: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    releaseKey: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
     config: { autoDelayMs: 100 },
   },
   mouse: {
-    setPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    click: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    getPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
+    setPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    click: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    getPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
     config: { autoDelayMs: 100 },
   },
   screen: {
-    capture: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    capture: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
   },
-  Point: jest.fn() as jest.MockedFunction<any>).mockImplementation((x: number, y: number) => ({ x, y })),
+  Point: (jest.fn() as jest.MockedFunction<any>).mockImplementation((x: number, y: number) => ({ x, y })),
   Key: {
     A: 'A',
     B: 'B',
@@ -42,9 +42,9 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
 // Mock dynamic fs import
 jest.mock('fs', () => ({
   promises: {
-    mkdir: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    readFile: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test')),
-    unlink: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    mkdir: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    readFile: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test')),
+    unlink: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
   },
 }));
 

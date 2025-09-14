@@ -41,8 +41,8 @@ function createArgumentMetadata(
 
 // Mock the security utils to avoid compilation issues
 jest.mock('@bytebot/shared/utils/security.utils', () => ({
-  detectXSS: jest.fn() as jest.MockedFunction<any>).mockReturnValue(false), // Legacy function for decorators
-  detectSQLInjection: jest.fn() as jest.MockedFunction<any>).mockReturnValue({
+  detectXSS: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(false), // Legacy function for decorators
+  detectSQLInjection: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({
     hasInjection: false,
     threats: [],
     riskScore: 0,
@@ -50,7 +50,7 @@ jest.mock('@bytebot/shared/utils/security.utils', () => ({
     confidence: 100,
     detectionContext: [],
   }),
-  detectAdvancedXSS: jest.fn() as jest.MockedFunction<any>).mockReturnValue({
+  detectAdvancedXSS: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({
     hasXSS: false,
     threats: [],
     riskScore: 0,
@@ -58,7 +58,7 @@ jest.mock('@bytebot/shared/utils/security.utils', () => ({
     confidence: 100,
     detectionContext: [],
   }),
-  detectCommandInjection: jest.fn() as jest.MockedFunction<any>).mockReturnValue({
+  detectCommandInjection: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({
     hasInjection: false,
     threats: [],
     riskScore: 0,
@@ -68,15 +68,15 @@ jest.mock('@bytebot/shared/utils/security.utils', () => ({
     attackVectors: [],
     platform: 'unix',
   }),
-  detectMaliciousFileContent: jest.fn() as jest.MockedFunction<any>).mockReturnValue(false),
-  validateFilePath: jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
+  detectMaliciousFileContent: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(false),
+  validateFilePath: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
     isValid: true,
     errors: [],
     riskScore: 0,
     severity: 'low',
     detectionContext: [],
   })),
-  validateCoordinates: jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
+  validateCoordinates: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
     isValid: true,
     errors: [],
     riskScore: 0,
@@ -84,7 +84,7 @@ jest.mock('@bytebot/shared/utils/security.utils', () => ({
     isOverflow: false,
     normalizedCoordinates: { x: 100, y: 200 },
   })),
-  createSecurityEvent: jest.fn() as jest.MockedFunction<any>).mockReturnValue({
+  createSecurityEvent: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({
     eventId: 'test-event-id',
     type: 'suspicious_activity',
     timestamp: new Date(),

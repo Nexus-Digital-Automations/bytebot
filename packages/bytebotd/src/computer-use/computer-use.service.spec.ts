@@ -51,7 +51,7 @@ jest.mock('fs/promises');
 jest.mock('child_process');
 jest.mock('util', () => ({
   promisify: jest.fn(() =>
-    jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ stdout: 'mocked output' }),
+    (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ stdout: 'mocked output' }),
   ),
 }));
 

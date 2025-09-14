@@ -70,12 +70,12 @@ describe('RolesGuard - Advanced Security Tests', () => {
     };
 
     return {
-      switchToHttp: jest.fn() as jest.MockedFunction<any>).mockReturnValue({
-        getRequest: jest.fn() as jest.MockedFunction<any>).mockReturnValue(mockRequest),
-        getResponse: jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
+      switchToHttp: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({
+        getRequest: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(mockRequest),
+        getResponse: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
       }),
-      getHandler: jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'testHandler' }),
-      getClass: jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'TestController' }),
+      getHandler: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'testHandler' }),
+      getClass: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'TestController' }),
     } as any;
   };
 

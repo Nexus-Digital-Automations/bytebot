@@ -305,17 +305,17 @@ describe('Security Penetration Testing Suite', () => {
     };
 
     return {
-      switchToHttp: jest.fn() as jest.MockedFunction<any>).mockReturnValue({
-        getRequest: jest.fn() as jest.MockedFunction<any>).mockReturnValue(mockRequest),
-        getResponse: jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
+      switchToHttp: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({
+        getRequest: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(mockRequest),
+        getResponse: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
       }),
-      switchToRpc: jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
-      switchToWs: jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
-      getHandler: jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'pentestHandler' }),
-      getClass: jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'PentestController' }),
-      getArgs: jest.fn() as jest.MockedFunction<any>).mockReturnValue([]),
-      getArgByIndex: jest.fn() as jest.MockedFunction<any>).mockReturnValue(undefined),
-      getType: jest.fn() as jest.MockedFunction<any>).mockReturnValue('http'),
+      switchToRpc: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
+      switchToWs: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
+      getHandler: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'pentestHandler' }),
+      getClass: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'PentestController' }),
+      getArgs: (jest.fn() as jest.MockedFunction<any>).mockReturnValue([]),
+      getArgByIndex: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(undefined),
+      getType: (jest.fn() as jest.MockedFunction<any>).mockReturnValue('http'),
     } as jest.Mocked<ExecutionContext>;
   };
 
@@ -402,7 +402,7 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: `algorithm-confusion-${attackType}` },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+        (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
            as jest.MockedFunction<any>).mockRejectedValue(new Error('Algorithm confusion detected'));
@@ -458,7 +458,7 @@ describe('Security Penetration Testing Suite', () => {
           },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+        (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
            as jest.MockedFunction<any>).mockRejectedValue(new Error('Header manipulation detected'));
@@ -512,7 +512,7 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: `_payload-injection-${attackType}` },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+        (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
 
         // Simulate successful token verification but with malicious payload
         const tokenPart = token.split('.')[1];
@@ -743,10 +743,10 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: `timing-${testCase.name}` },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+        (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
 
         if (testCase.shouldSucceed) {
-          jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>).mockResolvedValue({
+          (jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>).mockResolvedValue({
             sub: 'user',
             email: 'user@test.com',
             role: UserRole._VIEWER,
@@ -890,7 +890,7 @@ describe('Security Penetration Testing Suite', () => {
             { attackVector: 'brute-force-auth', ip: '192.168.1.100' },
           );
 
-          jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+          (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
           jest
             .spyOn(jwtService, 'verifyAsync')
              as jest.MockedFunction<any>).mockRejectedValue(new Error('Brute force token'));
@@ -937,7 +937,7 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: 'credential-stuffing', ip: '10.0.0.200' },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+        (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
            as jest.MockedFunction<any>).mockRejectedValue(new Error('Credential stuffing detected'));
@@ -991,11 +991,11 @@ describe('Security Penetration Testing Suite', () => {
             { attackVector: 'session-replay', ip: '172.16.0.100' },
           );
 
-          jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+          (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
 
           if (replayToken === legitimateToken) {
             // Only the original token should work
-            jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>).mockResolvedValue({
+            (jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>).mockResolvedValue({
               sub: 'user123',
               email: 'user@test.com',
               role: UserRole._VIEWER,
@@ -1046,7 +1046,7 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: 'token-manipulation', ip: '203.0.113.100' },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+        (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
            as jest.MockedFunction<any>).mockRejectedValue(new Error('Token manipulation detected'));
@@ -1127,7 +1127,7 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: `apt-${technique.name}`, ip: '198.51.100.100' },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+        (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
            as jest.MockedFunction<any>).mockResolvedValue(technique.payload as object);
@@ -1194,7 +1194,7 @@ describe('Security Penetration Testing Suite', () => {
             },
           );
 
-          jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+          (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
           jest
             .spyOn(jwtService, 'verifyAsync')
              as jest.MockedFunction<any>).mockRejectedValue(new Error('Low and slow attack'));
@@ -1266,7 +1266,7 @@ describe('Security Penetration Testing Suite', () => {
                 { attackVector: `sustained-jwt-${round}-${i}` },
               );
 
-              jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+              (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
               jest
                 .spyOn(jwtService, 'verifyAsync')
                  as jest.MockedFunction<any>).mockRejectedValue(new Error('Sustained attack'));
@@ -1409,7 +1409,7 @@ describe('Security Penetration Testing Suite', () => {
                 { attackVector: eventType.type, ip: '192.168.100.100' },
               );
 
-              jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+              (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
               jest
                 .spyOn(jwtService, 'verifyAsync')
                  as jest.MockedFunction<any>).mockRejectedValue(new Error('Audit test failure'));

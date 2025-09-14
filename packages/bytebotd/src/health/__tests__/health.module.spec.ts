@@ -59,10 +59,10 @@ describe('HealthModule', () => {
     } as any;
 
     // Mock Logger constructor to return our mock
-    jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation(mockLogger.log);
-    jest.spyOn(Logger.prototype, 'debug') as jest.MockedFunction<any>).mockImplementation(mockLogger.debug);
-    jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>).mockImplementation(mockLogger.error);
-    jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation(mockLogger.warn);
+    (jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation(mockLogger.log);
+    (jest.spyOn(Logger.prototype, 'debug') as jest.MockedFunction<any>).mockImplementation(mockLogger.debug);
+    (jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>).mockImplementation(mockLogger.error);
+    (jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation(mockLogger.warn);
     jest
       .spyOn(Logger.prototype, 'verbose')
        as jest.MockedFunction<any>).mockImplementation(mockLogger.verbose);
@@ -563,8 +563,8 @@ describe('HealthModule', () => {
         getDetailedStatus: jest
           .fn()
            as jest.MockedFunction<any>).mockRejectedValue(new Error('Service initialization failed')),
-        isServiceStable: jest.fn() as jest.MockedFunction<any>).mockReturnValue(false),
-        getInitializationTime: jest.fn() as jest.MockedFunction<any>).mockReturnValue(Date.now()),
+        isServiceStable: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(false),
+        getInitializationTime: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(Date.now()),
       };
 
       const failureModule = await Test.createTestingModule({

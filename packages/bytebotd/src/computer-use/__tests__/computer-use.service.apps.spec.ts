@@ -25,26 +25,26 @@
 // Mock @nut-tree-fork/nut-js FIRST before any imports to avoid import issues
 jest.mock('@nut-tree-fork/nut-js', () => ({
   keyboard: {
-    pressKey: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    releaseKey: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    pressKey: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    releaseKey: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
     config: { autoDelayMs: 100 },
   },
   mouse: {
-    setPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    click: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    pressButton: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    releaseButton: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollUp: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollDown: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollLeft: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollRight: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    getPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
+    setPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    click: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    pressButton: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    releaseButton: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollUp: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollDown: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollLeft: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollRight: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    getPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
     config: { autoDelayMs: 100 },
   },
   screen: {
-    capture: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    capture: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
   },
-  Point: jest.fn() as jest.MockedFunction<any>).mockImplementation((x: number, y: number) => ({ x, y })),
+  Point: (jest.fn() as jest.MockedFunction<any>).mockImplementation((x: number, y: number) => ({ x, y })),
   Key: {
     A: 'A',
     B: 'B',
@@ -69,7 +69,7 @@ jest.mock('util', () => {
       custom: Symbol.for('nodejs.util.promisify.custom'),
     }),
     inspect: Object.assign(
-      jest.fn() as jest.MockedFunction<any>).mockImplementation((obj: unknown) => JSON.stringify(obj)),
+      (jest.fn() as jest.MockedFunction<any>).mockImplementation((obj: unknown) => JSON.stringify(obj)),
       {
         colors: originalUtil.inspect.colors,
         styles: originalUtil.inspect.styles,
@@ -84,7 +84,7 @@ jest.mock('fs/promises');
 
 // Mock axios and HTTP services that cause util.inherits issues
 jest.mock('@nestjs/axios', () => ({
-  HttpService: jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
+  HttpService: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
     axiosRef: {
       get: jest.fn(),
       post: jest.fn(),
@@ -115,10 +115,10 @@ jest.mock('axios', () => ({
 
 // Mock RxJS to avoid additional issues
 jest.mock('rxjs', () => ({
-  firstValueFrom: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ data: 'mocked' }),
+  firstValueFrom: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ data: 'mocked' }),
   of: jest.fn(),
   from: jest.fn(),
-  Subject: jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
+  Subject: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
     next: jest.fn(),
     error: jest.fn(),
     complete: jest.fn(),
@@ -126,7 +126,7 @@ jest.mock('rxjs', () => ({
     unsubscribe: jest.fn(),
     observers: [],
   })),
-  BehaviorSubject: jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
+  BehaviorSubject: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
     next: jest.fn(),
     error: jest.fn(),
     complete: jest.fn(),
@@ -135,15 +135,15 @@ jest.mock('rxjs', () => ({
     observers: [],
     getValue: jest.fn(),
   })),
-  Observable: jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
+  Observable: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
     subscribe: jest.fn(),
   })),
 }));
 
 // Mock @nestjs/config
 jest.mock('@nestjs/config', () => ({
-  ConfigService: jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
-    get: jest.fn() as jest.MockedFunction<any>).mockReturnValue('test-value'),
+  ConfigService: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
+    get: (jest.fn() as jest.MockedFunction<any>).mockReturnValue('test-value'),
   })),
 }));
 
