@@ -827,7 +827,7 @@ export class DeprecationGuard implements CanActivate {
     deprecationResult: DeprecationResult,
     desktopClientInfo: DesktopClientInfo,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     try {
       this.logger.warn(`BytebotD deprecated API access: ${operationId}`, {
         operationId,
@@ -868,7 +868,7 @@ export class DeprecationGuard implements CanActivate {
     versionConfig: VersionConfig,
     desktopClientInfo: DesktopClientInfo,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     try {
       this.logger.warn(`BytebotD deprecation bypass used: ${operationId}`, {
         operationId,

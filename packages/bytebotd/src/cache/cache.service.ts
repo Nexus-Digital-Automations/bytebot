@@ -174,7 +174,7 @@ export class CacheService {
    * @param value Value to cache
    * @param options Cache options
    */
-  set<T>(
+  async set<T>(
     key: string,
     value: T,
     options: CacheOptions = {},
@@ -270,7 +270,7 @@ export class CacheService {
    * @param options Cache options
    * @returns Promise<Map<string, T>> Map of key-value pairs
    */
-  mget<T>(
+  async mget<T>(
     keys: string[],
     options: CacheOptions = {},
   ): Promise<Map<string, T>> {
@@ -319,7 +319,7 @@ export class CacheService {
    * @param entries Array of key-value pairs
    * @param options Cache options
    */
-  mset<T>(
+  async mset<T>(
     entries: Array<{ key: string; value: T }>,
     options: CacheOptions = {},
   ): Promise<void> {
@@ -364,7 +364,7 @@ export class CacheService {
    * @param keys Array of keys to warm
    * @param options Cache options
    */
-  warmCache<T>(
+  async warmCache<T>(
     dataProvider: (key: string) => Promise<T | null>,
     keys: string[],
     options: CacheOptions = {},

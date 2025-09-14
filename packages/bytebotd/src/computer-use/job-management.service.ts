@@ -845,7 +845,7 @@ export class BackgroundWorker
   /**
    * Stop the background worker
    */
-  stop(): void {
+  async stop(): Promise<void> {
     if (!this.isRunning) {
       this.logger.warn('Worker not running', { workerId: this.workerId });
       return;
@@ -867,7 +867,7 @@ export class BackgroundWorker
   /**
    * Get worker statistics
    */
-  getWorkerStats(): WorkerStats {
+  async getWorkerStats(): Promise<WorkerStats> {
     const memUsage = process.memoryUsage();
 
     return {
@@ -1263,7 +1263,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
   /**
    * Create a new job for async execution
    */
-  createJob(
+  async createJob(
     action: ComputerAction,
     options: JobOptions = {},
   ): Promise<string> {
@@ -1457,10 +1457,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
   /**
    * Execute action asynchronously (for backward compatibility)
    */
-  executeActionAsync(
-    jobId: string,
-    action: ComputerAction,
-  ): Promise<void> {
+  executeActionAsync(jobId: string, action: ComputerAction): Promise<void> {
     // This method is deprecated - use createJob instead
     this.logger.warn(
       'executeActionAsync is deprecated, use createJob instead',

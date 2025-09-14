@@ -98,7 +98,7 @@ export class AsyncJobService {
    * @param options Job execution options
    * @returns JobSubmissionResponseDto Job submission details
    */
-  submitJob(
+  async submitJob(
     action: ComputerActionDto,
     options: {
       priority?: JobPriority;
