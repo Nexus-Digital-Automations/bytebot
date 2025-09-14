@@ -128,18 +128,18 @@ describe('Load Testing Benchmarks', () => {
     app = moduleFixture.createNestApplication();
 
     // Get service instances
-    metricsService = moduleFixture.get<MetricsService>(MetricsService);
+    _metricsService = moduleFixture.get<MetricsService>(MetricsService);
     cacheService = moduleFixture.get<CacheService>(CacheService);
 
     // Get interceptor instances
-    const interceptors = moduleFixture.get('APP_INTERCEPTOR');
+    const interceptors: unknown = moduleFixture.get('APP_INTERCEPTOR');
     const interceptorArray = Array.isArray(interceptors)
       ? interceptors
       : [interceptors];
 
     performanceInterceptor =
       interceptorArray.find((i) => i instanceof PerformanceInterceptor) ?? null;
-    compressionInterceptor =
+    _compressionInterceptor =
       interceptorArray.find((i) => i instanceof CompressionInterceptor) ?? null;
 
     await app.init();
@@ -161,8 +161,8 @@ describe('Load Testing Benchmarks', () => {
 
       for (let i = 0; i < warmupRequests; i++) {
         warmupPromises.push(
-          request(app.getHttpServer()).get('/health'),
-          request(app.getHttpServer()).get('/metrics'),
+          request(app.getHttpServer() as Server).get('/health'),
+          request(app.getHttpServer() as Server).get('/metrics'),
         );
       }
 
@@ -240,7 +240,9 @@ describe('Load Testing Benchmarks', () => {
       console.log(`  Memory Increase: ${result.memoryIncrease.toFixed(2)}MB`);
 
       // Stress test should not crash the application
-      const healthResponse = await request(app.getHttpServer()).get('/health');
+      const healthResponse = await request(app.getHttpServer() as Server).get(
+        '/health',
+      );
       expect(healthResponse.status).toBe(200);
 
       console.log('  System Stability: ✅ Application remained responsive');
@@ -263,8 +265,8 @@ describe('Load Testing Benchmarks', () => {
         const cyclePromises = [];
         for (let i = 0; i < 1000; i++) {
           cyclePromises.push(
-            request(app.getHttpServer()).get('/health'),
-            request(app.getHttpServer()).get('/metrics'),
+            request(app.getHttpServer() as Server).get('/health'),
+            request(app.getHttpServer() as Server).get('/metrics'),
           );
         }
 
@@ -316,7 +318,9 @@ describe('Load Testing Benchmarks', () => {
       console.log('📊 Generating load for metrics validation...');
       const loadPromises = [];
       for (let i = 0; i < 500; i++) {
-        loadPromises.push(request(app.getHttpServer()).get('/health'));
+        loadPromises.push(
+          request(app.getHttpServer() as Server).get('/health'),
+        );
       }
 
       await Promise.all(loadPromises);
@@ -456,13 +460,13 @@ async function executeLoadTest(
       for (let i = 0; i < config.requestsPerUser; i++) {
         const requestStart = Date.now();
         try {
-          const response = await request(app.getHttpServer())
+          const response = await request(app.getHttpServer() as Server)
             .get('/health')
             .timeout(10000); // 10 second timeout
 
           const duration = Date.now() - requestStart;
           userResults.push({ duration, status: response.status });
-        } catch (error) {
+        } catch (_error) {
           const duration = Date.now() - requestStart;
           userResults.push({ duration, status: 500 });
         }

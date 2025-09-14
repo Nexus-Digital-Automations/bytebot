@@ -283,7 +283,7 @@ export class BrowserUseService {
   /**
    * Take screenshot of current browser state
    */
-  captureScreenshot(
+  async captureScreenshot(
     sessionId: string,
     config?: {
       fullPage?: boolean;
@@ -303,7 +303,7 @@ export class BrowserUseService {
     this.logger.log(`Capturing screenshot for session: ${sessionId}`);
 
     try {
-      const session = await this.sessionService.getSession(sessionId);
+      const session = this.sessionService.getSession(sessionId);
       if (!session) {
         throw new Error(`Session not found: ${sessionId}`);
       }
@@ -355,7 +355,7 @@ export class BrowserUseService {
   /**
    * Extract DOM data from current page
    */
-  extractDomData(
+  async extractDomData(
     sessionId: string,
     config?: {
       selector?: string;
@@ -367,7 +367,7 @@ export class BrowserUseService {
     this.logger.log(`Extracting DOM data for session: ${sessionId}`);
 
     try {
-      const session = await this.sessionService.getSession(sessionId);
+      const session = this.sessionService.getSession(sessionId);
       if (!session) {
         throw new Error(`Session not found: ${sessionId}`);
       }
@@ -440,7 +440,7 @@ export class BrowserUseService {
   /**
    * Take screenshot (wrapper for captureScreenshot with controller-expected interface)
    */
-  takeScreenshot(
+  async takeScreenshot(
     sessionId: string,
     options: {
       fullPage?: boolean;
@@ -487,7 +487,7 @@ export class BrowserUseService {
   /**
    * Extract page data (wrapper for extractDomData with controller-expected interface)
    */
-  extractPageData(
+  async extractPageData(
     sessionId: string,
     config: {
       selectors: Record<string, string>;
