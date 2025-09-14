@@ -30,6 +30,7 @@
     "noImplicitThis": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
     "types": ["node", "jest"]
   },
   "include": [
