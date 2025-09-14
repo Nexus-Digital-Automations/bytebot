@@ -155,7 +155,7 @@ describe('ComputerUseTools', () => {
      * Test dependency injection
      */
     it('should have ComputerUseService injected correctly', () => {
-      const service = (computerUseTools as Record<string, unknown>)
+      const service = (computerUseTools as unknown as Record<string, unknown>)
         .computerUseService;
       expect(service).toBeDefined();
       expect(service).toBe(mockComputerUseService);

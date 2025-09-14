@@ -1,8 +1,4 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /**
  * Unit Tests for Enhanced Health Service
  *
@@ -17,6 +13,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { HealthService } from './health.service';
+
+// Type definitions for test mocking - simplified for ESLint compliance
 
 describe('HealthService', () => {
   let service: HealthService;
@@ -85,9 +83,11 @@ describe('HealthService', () => {
       it('should handle process health check errors', async () => {
         // Mock process.memoryUsage to throw error
         const originalMemoryUsage = process.memoryUsage;
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         process.memoryUsage = jest.fn(() => {
           throw new Error('Memory error');
-        }) as any;
+        }) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         const result = await service.checkProcessHealth();
 
@@ -112,6 +112,7 @@ describe('HealthService', () => {
       it('should handle database connection failures', async () => {
         // Mock performDatabasePing to return false
         jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .spyOn(service as any, 'performDatabasePing')
           .mockResolvedValueOnce(false);
 
@@ -132,12 +133,10 @@ describe('HealthService', () => {
 
       it('should handle external service check errors', async () => {
         // Mock checkExternalService to throw error
-        (
-          jest.spyOn(
-            service as any,
-            'checkExternalService',
-          ) as jest.MockedFunction<any>
-        ).mockRejectedValue(new Error('Service error'));
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .spyOn(service as any, 'checkExternalService')
+          .mockRejectedValue(new Error('Service error'));
 
         const result = await service.checkExternalServices();
 
@@ -162,6 +161,7 @@ describe('HealthService', () => {
 
       it('should pass startup check after sufficient uptime', async () => {
         // Mock the start time to be old enough
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
         (service as any).startTime = Date.now() - 15000; // 15 seconds ago
 
         const result = await service.checkStartupComplete();
@@ -179,6 +179,7 @@ describe('HealthService', () => {
         expect(result.modules).toHaveProperty('status', 'up');
         expect(result.modules).toHaveProperty('modules');
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const _modules = result.modules?.modules;
         expect(_modules).toHaveProperty('computer-use', true);
         expect(_modules).toHaveProperty('input-tracking', true);
@@ -191,6 +192,7 @@ describe('HealthService', () => {
   describe('Service Stability', () => {
     it('should check service stability with default threshold', () => {
       // Mock start time to be 35 seconds ago
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       (service as any).startTime = Date.now() - 35000;
 
       const isStable = service.isServiceStable();
@@ -199,6 +201,7 @@ describe('HealthService', () => {
 
     it('should check service stability with custom threshold', () => {
       // Mock start time to be 25 seconds ago
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       (service as any).startTime = Date.now() - 25000;
 
       const isStable = service.isServiceStable(60); // 60 second threshold
@@ -215,6 +218,7 @@ describe('HealthService', () => {
   describe('Private Methods', () => {
     describe('Database Ping', () => {
       it('should simulate database ping successfully', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
         const result = await (service as any).performDatabasePing();
         expect(result).toBe(true);
       });
@@ -222,6 +226,7 @@ describe('HealthService', () => {
 
     describe('External Service Check', () => {
       it('should check individual external service', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
         const result = await (service as any).checkExternalService(
           'test-service',
           'http://test.com/health',
@@ -229,12 +234,14 @@ describe('HealthService', () => {
 
         expect(result).toHaveProperty('status');
         expect(result).toHaveProperty('responseTime');
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(['healthy', 'unhealthy']).toContain(result.status);
       });
     });
 
     describe('Legacy Service Health Check', () => {
       it('should return legacy service health status', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
         const services = (service as any).checkServiceHealth();
 
         expect(services).toHaveProperty('database', 'unknown');

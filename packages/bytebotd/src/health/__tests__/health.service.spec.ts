@@ -1,10 +1,10 @@
 /* eslint-env jest */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// TypeScript safety note: This test file uses flexible typing for testing complex integrations
-
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// TypeScript safety note: Test file with flexible typing for complex mock integrations
 
 /**
  * Health Service Test Suite
@@ -57,7 +57,14 @@ interface _ServiceHealthMockReturn {
   disk?: string;
 }
 
-// Type for Health Service with access to private methods (for testing) - already imported above
+// Type for Health Service with access to private methods (for testing)
+interface _TestableHealthService extends HealthService {
+  checkServiceHealth: () => _ServiceHealthMockReturn;
+  getPerformanceMetrics(): _PerformanceMetrics;
+  checkProcessHealth(): Promise<HealthIndicatorResult>;
+  checkDiskUsage(): Promise<HealthIndicatorResult>;
+  validateServiceResponse(service: _ServiceStatus): boolean;
+}
 
 interface _PerformanceMetrics {
   startTime: number;
@@ -313,7 +320,7 @@ describe('HealthService', () => {
         cache: 'available',
         external: 'reachable',
       });
-      const result = service.getDetailedStatus() as DetailedStatusResponse;
+      const result = await service.getDetailedStatus();
       expect(result.status).toBe('healthy');
       // Test degraded status (unknown services)
       jest.spyOn(service as any, 'checkServiceHealth').mockReturnValue({
@@ -1089,12 +1096,8 @@ describe('HealthService', () => {
           'test-service',
           'http://test.com/health',
         );
-        expect(healthyResult).toHaveProperty(
-          'status' as keyof typeof healthyResult,
-        );
-        expect(healthyResult).toHaveProperty(
-          'responseTime' as keyof typeof healthyResult,
-        );
+        expect(healthyResult).toHaveProperty('status');
+        expect(healthyResult).toHaveProperty('responseTime');
         expect(['healthy', 'unhealthy']).toContain(healthyResult.status);
         expect(healthyResult.responseTime).toMatch(/\d+ms/);
         console.log(`[${testId}] Individual external service test completed`);
@@ -1105,9 +1108,8 @@ describe('HealthService', () => {
         // Mock setTimeout to reject immediately for some calls
         const originalSetTimeout = setTimeout;
         let timeoutCallCount = 0;
-        global.setTimeout = jest
-          .fn()
-          .mockImplementation((callback, delay: number) => {
+        global.setTimeout = (jest.fn() as any).mockImplementation(
+          (callback, delay: number) => {
             timeoutCallCount++;
             if (timeoutCallCount % 2 === 0) {
               // Simulate timeout/rejection on every other call
@@ -1119,7 +1121,8 @@ describe('HealthService', () => {
             } else {
               originalSetTimeout(() => callback(null, true), delay);
             }
-          }) as unknown;
+          },
+        ) as unknown;
         const results = await Promise.all([
           (service as any).checkExternalService(
             'service-1',
@@ -1221,7 +1224,7 @@ describe('HealthService', () => {
       results.forEach((result) => {
         expect(result).toBeDefined();
         if ('error' in result) {
-          expect((result as unknown).error).toBeDefined();
+          expect((result as { error: unknown }).error).toBeDefined();
         } else {
           const resultValues = Object.values(result as Record<string, unknown>);
           const statusValue =

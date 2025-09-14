@@ -671,13 +671,13 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       const text = 'Hello World';
       for (let i = 0; i < text.length; i++) {
         const char = text[i];
-        const keycode = char === ' ' ? 32 : char.charCodeAt(0);
+        const keycode = char === ' ' ? 32 : (char?.charCodeAt(0) ?? 0);
 
         if (keydownHandler) {
           keydownHandler(
             createKeyboardEvent({
               keycode,
-              char: char === ' ' ? ' ' : char.toLowerCase(),
+              char: char === ' ' ? ' ' : char?.toLowerCase(),
               type: EventType.EVENT_KEY_PRESSED,
             }),
           );
@@ -687,7 +687,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
           keyupHandler(
             createKeyboardEvent({
               keycode,
-              char: char === ' ' ? ' ' : char.toLowerCase(),
+              char: char === ' ' ? ' ' : char?.toLowerCase(),
               type: EventType.EVENT_KEY_RELEASED,
             }),
           );
@@ -740,7 +740,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       for (const shortcut of shortcuts) {
         for (const keyEvent of shortcut) {
           const event = createKeyboardEvent(keyEvent);
-          if (shortcut.indexOf(keyEvent) < shortcut.length / 2) {
+          if (shortcut.indexOf(keyEvent as any) < shortcut.length / 2) {
             if (keydownHandler) {
               keydownHandler(event);
             }
@@ -838,7 +838,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       // Process all events
       for (const event of highFrequencyEvents) {
         if (moveHandler) {
-          moveHandler(event);
+          moveHandler(event as any);
         }
       }
 
@@ -1132,11 +1132,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
   describe('Error Handling and Recovery', () => {
     it('should handle UIohook initialization failures gracefully', () => {
-      mockUIOhook.start = (
-        jest.fn() as jest.MockedFunction<() => void>
-      ).mockImplementation(() => {
+      mockUIOhook.start = jest.fn().mockImplementation(() => {
         throw new Error('UIohook initialization failed');
-      });
+      }) as any;
 
       expect(() => service.startTracking()).not.toThrow();
 
@@ -1148,11 +1146,11 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       service.startTracking();
 
       // Mock gateway failure
-      mockInputTrackingGateway.broadcastInputEvent = (
-        jest.fn() as jest.MockedFunction<(...args: unknown[]) => void>
-      ).mockImplementation(() => {
-        throw new Error('WebSocket connection lost');
-      });
+      mockInputTrackingGateway.broadcastInputEvent = jest
+        .fn()
+        .mockImplementation(() => {
+          throw new Error('WebSocket connection lost');
+        });
 
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 

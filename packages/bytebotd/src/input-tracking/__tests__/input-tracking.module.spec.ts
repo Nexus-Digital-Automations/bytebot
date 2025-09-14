@@ -1,9 +1,8 @@
 /* eslint-env jest */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
- 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
- 
+
 /**
  * Input Tracking Module Test Suite
  *
@@ -134,8 +133,10 @@ describe('InputTrackingModule', () => {
       expect(InputTrackingModule.prototype).toBeDefined();
 
       // Should be instantiable (though we don't typically instantiate modules directly)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      expect(() => new (InputTrackingModule as Record<string, unknown>)()).not.toThrow();
+
+      expect(
+        () => new (InputTrackingModule as unknown as Record<string, unknown>)(),
+      ).not.toThrow();
 
       console.log(`[${testId}] Valid NestJS module class test completed`);
     });

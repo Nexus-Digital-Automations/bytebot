@@ -677,7 +677,7 @@ describe('InputTrackingHelpers', () => {
 
       criticalKeys.forEach((keyCode) => {
         expect(keyInfoMap[keyCode]).toBeDefined();
-        expect(keyInfoMap[keyCode].name).toBeTruthy();
+        expect(keyInfoMap[keyCode]?.name).toBeTruthy();
       });
 
       console.log(`[${testId}] Critical keys coverage test completed`);
@@ -762,18 +762,18 @@ describe('InputTrackingHelpers', () => {
       // Function keys should be named F1, F2, etc.
       const functionKeyPattern = /^F\d{1,2}$/;
       [UiohookKey.F1, UiohookKey.F5, UiohookKey.F12].forEach((keyCode) => {
-        expect(keyInfoMap[keyCode].name).toMatch(functionKeyPattern);
+        expect(keyInfoMap[keyCode]?.name).toMatch(functionKeyPattern);
       });
 
       // Arrow keys should contain directional names
-      expect(keyInfoMap[UiohookKey.ArrowUp].name).toContain('Up');
-      expect(keyInfoMap[UiohookKey.ArrowDown].name).toContain('Down');
-      expect(keyInfoMap[UiohookKey.ArrowLeft].name).toContain('Left');
-      expect(keyInfoMap[UiohookKey.ArrowRight].name).toContain('Right');
+      expect(keyInfoMap[UiohookKey.ArrowUp]?.name).toContain('Up');
+      expect(keyInfoMap[UiohookKey.ArrowDown]?.name).toContain('Down');
+      expect(keyInfoMap[UiohookKey.ArrowLeft]?.name).toContain('Left');
+      expect(keyInfoMap[UiohookKey.ArrowRight]?.name).toContain('Right');
 
       // Modifier keys should indicate their position when applicable
-      expect(keyInfoMap[UiohookKey.Shift].name).toContain('Left');
-      expect(keyInfoMap[UiohookKey.ShiftRight].name).toContain('Right');
+      expect(keyInfoMap[UiohookKey.Shift]?.name).toContain('Left');
+      expect(keyInfoMap[UiohookKey.ShiftRight]?.name).toContain('Right');
 
       console.log(`[${testId}] Appropriate key names test completed`);
     });

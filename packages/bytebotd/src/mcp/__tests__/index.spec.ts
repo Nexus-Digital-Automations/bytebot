@@ -132,7 +132,7 @@ describe('MCP Index Module', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    _mockLogger = createMockLogger() as Record<string, jest.Mock>;
+    _mockLogger = createMockLogger() as unknown as Record<string, jest.Mock>;
   });
 
   afterEach(() => {

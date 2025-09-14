@@ -1148,11 +1148,11 @@ if __name__ == "__main__":
   /**
    * Get system load information
    */
-  private getSystemLoad(): {
+  private async getSystemLoad(): Promise<{
     cpuUsage: number;
     memoryUsage: number;
     diskUsage: number;
-  } {
+  }> {
     // Basic system load - in production, would use system monitoring
     const memUsage = process.memoryUsage();
 
