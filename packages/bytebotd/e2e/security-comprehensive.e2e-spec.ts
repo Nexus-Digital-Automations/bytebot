@@ -255,7 +255,7 @@ class SecurityE2EJwtService {
 
       const decodedPayload = JSON.parse(
         Buffer.from(payload, 'base64url').toString(),
-      );
+      ) as { exp: number; [key: string]: unknown };
 
       // Check expiration
       if (decodedPayload.exp < Math.floor(Date.now() / 1000)) {
@@ -525,7 +525,7 @@ class SecurityE2EAdminController {
     };
   }
 
-  getAuditLogs(user: any) {
+  getAuditLogs(user: { sub: string; email: string; role: UserRole }) {
     return {
       logs: [
         {
@@ -593,19 +593,19 @@ describe('Security E2E - Comprehensive Testing', () => {
 
   const operationId = `security_e2e_comprehensive_${Date.now()}`;
   const securityLogger = {
-    info: (message: string, meta?: any) =>
+    info: (message: string, meta?: unknown) =>
       console.log(`[E2E-SECURITY] ${message}`, meta ?? ''),
-    warn: (message: string, meta?: any) =>
+    warn: (message: string, meta?: unknown) =>
       console.warn(`[E2E-WARNING] ${message}`, meta ?? ''),
-    error: (message: string, meta?: any) =>
+    error: (message: string, meta?: unknown) =>
       console.error(`[E2E-ERROR] ${message}`, meta ?? ''),
-    critical: (message: string, meta?: any) =>
+    critical: (message: string, meta?: unknown) =>
       console.error(`[E2E-CRITICAL] ${message}`, meta ?? ''),
   };
 
   // Security monitoring utilities
   const securityMonitor = {
-    trackSecurityEvent: (event: any) => {
+    trackSecurityEvent: (event: Record<string, unknown>) => {
       console.log(`[SECURITY-EVENT] ${JSON.stringify(event)}`);
     },
 
@@ -627,7 +627,7 @@ describe('Security E2E - Comprehensive Testing', () => {
     trackSuspiciousActivity: (
       userId: string,
       activity: string,
-      metadata: any,
+      metadata: Record<string, unknown>,
     ) => {
       securityMonitor.trackSecurityEvent({
         type: 'suspicious_activity',
