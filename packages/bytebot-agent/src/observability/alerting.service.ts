@@ -179,12 +179,12 @@ export class AlertingService implements OnModuleInit {
       this.notificationConfig = {
         email: this.configService.get('ALERTING_EMAIL'),
         slack: {
-          webhookUrl: this.configService.get<string>('SLACK_WEBHOOK_URL'),
+          webhookUrl: this.configService.get<string>('SLACK_WEBHOOK_URL') || '',
           channel: this.configService.get<string>('SLACK_CHANNEL', '#alerts'),
           botToken: this.configService.get<string>('SLACK_BOT_TOKEN'),
         },
         webhook: {
-          url: this.configService.get<string>('ALERTING_WEBHOOK_URL'),
+          url: this.configService.get<string>('ALERTING_WEBHOOK_URL') || '',
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           timeout: this.configService.get<number>(
@@ -193,9 +193,8 @@ export class AlertingService implements OnModuleInit {
           ),
         },
         pagerduty: {
-          integrationKey: this.configService.get<string>(
-            'PAGERDUTY_INTEGRATION_KEY',
-          ),
+          integrationKey:
+            this.configService.get<string>('PAGERDUTY_INTEGRATION_KEY') || '',
           apiUrl: this.configService.get<string>(
             'PAGERDUTY_API_URL',
             'https://events.pagerduty.com/v2/enqueue',
@@ -216,7 +215,9 @@ export class AlertingService implements OnModuleInit {
         `[${operationId}] Alerting service initialized successfully`,
         {
           configuredChannels: Object.keys(this.notificationConfig).filter(
-            (key) => this.notificationConfig[key] !== undefined,
+            (key) =>
+              (this.notificationConfig as Record<string, unknown>)[key] !==
+              undefined,
           ),
         },
       );

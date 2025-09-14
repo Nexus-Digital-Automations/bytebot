@@ -28,6 +28,12 @@ import { User } from '@prisma/client';
  */
 interface AuthenticatedRequest extends Request {
   user?: User;
+  requestId?: string;
+  securityContext?: {
+    startTime: number;
+    ipAddress: string;
+    userAgent?: string;
+  };
 }
 
 /**

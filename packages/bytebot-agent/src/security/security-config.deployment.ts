@@ -73,11 +73,11 @@ export class BytebotAgentSecurityConfigService {
     redisClient?: unknown,
   ): StandardizedRateLimitGuard {
     try {
-      return StandardizedRateLimitGuard.createBytebotAgentGuard(
-        reflector,
-        this.configService,
-        redisClient,
+      const environment = this.configService.get<string>(
+        'NODE_ENV',
+        'development',
       );
+      return StandardizedRateLimitGuard.createBytebotAgentGuard(environment);
     } catch {
       throw new Error('Failed to create rate limit guard');
     }
@@ -181,12 +181,13 @@ export class BytebotAgentSecurityConfigService {
         reflector: Reflector,
         configService: ConfigService,
         redisClient?: unknown,
-      ) =>
-        StandardizedRateLimitGuard.createBytebotAgentGuard(
-          reflector,
-          configService,
-          redisClient,
-        ),
+      ) => {
+        const environment = configService.get<string>(
+          'NODE_ENV',
+          'development',
+        );
+        return StandardizedRateLimitGuard.createBytebotAgentGuard(environment);
+      },
       inject: ['Reflector', ConfigService, 'REDIS_CLIENT'],
     },
   ],
@@ -251,11 +252,8 @@ export class BytebotAgentSecurityDeployment {
 
       const redisClient: unknown = app.get('REDIS_CLIENT', { strict: false });
 
-      const rateLimitGuard = StandardizedRateLimitGuard.createBytebotAgentGuard(
-        reflector,
-        configService,
-        redisClient,
-      );
+      const rateLimitGuard =
+        StandardizedRateLimitGuard.createBytebotAgentGuard(environment);
 
       app.useGlobalGuards(rateLimitGuard);
 
