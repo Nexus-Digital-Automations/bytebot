@@ -26,7 +26,7 @@ module.exports = [
   js.configs.recommended,
   // TypeScript configuration
   {
-    files: ['src/**/*.ts', 'test/**/*.ts', 'e2e/**/*.ts'],
+    files: ['src/**/*.ts', 'test/**/*.ts', 'e2e/**/*.ts', 'benchmarks/**/*.ts'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {

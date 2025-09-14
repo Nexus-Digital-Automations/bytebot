@@ -344,16 +344,18 @@ export class DatabaseInterceptor implements NestInterceptor {
           `[${operationId}] Database cache MISS: ${dbOperation.operation} - cached result (${duration}ms)`,
         );
       }),
-      catchError((_error) => {
+      catchError((error: unknown) => {
+        const typedError =
+          error instanceof Error ? error : new Error(String(error));
         this.recordDatabaseMetrics({
           operationId,
           operation: dbOperation,
           startTime,
           endTime: Date.now(),
           duration: Date.now() - startTime,
-          error: _error,
+          error: typedError,
         });
-        throw _error;
+        throw typedError;
       }),
     );
   }
