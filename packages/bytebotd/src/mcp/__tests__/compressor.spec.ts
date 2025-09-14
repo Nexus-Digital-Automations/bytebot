@@ -122,7 +122,7 @@ describe('Base64ImageCompressor', () => {
     jest.clearAllMocks();
 
     // Setup mock logger
-    mockLogger = createMockLogger();
+    mockLogger = createMockLogger() as never;
     jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);
     jest.spyOn(Logger.prototype, 'debug').mockImplementation(mockLogger.debug);
     jest.spyOn(Logger.prototype, 'warn').mockImplementation(mockLogger.warn);

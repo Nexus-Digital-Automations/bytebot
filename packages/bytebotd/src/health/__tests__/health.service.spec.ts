@@ -59,10 +59,7 @@ interface _ServiceHealthMockReturn {
 
 // Type for Health Service with access to private methods (for testing)
 interface _TestableHealthService extends HealthService {
-  getPerformanceMetrics(): _PerformanceMetrics;
-  checkProcessHealth(): Promise<HealthIndicatorResult>;
-  checkDiskUsage(): Promise<HealthIndicatorResult>;
-  validateServiceResponse(service: _ServiceStatus): boolean;
+  // Additional test-specific methods can be added here
 }
 
 interface _PerformanceMetrics {

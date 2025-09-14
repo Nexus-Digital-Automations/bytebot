@@ -93,7 +93,7 @@ describe('BytebotMcpModule', () => {
     jest.clearAllMocks();
 
     // Create mock logger
-    mockLogger = createMockLogger() as unknown as Mocked<Logger>;
+    mockLogger = createMockLogger() as unknown as jest.Mocked<Logger>;
 
     // Mock Logger constructor to return our mock
     jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);

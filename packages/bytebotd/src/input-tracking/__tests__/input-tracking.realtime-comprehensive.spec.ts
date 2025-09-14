@@ -740,7 +740,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       for (const shortcut of shortcuts) {
         for (const keyEvent of shortcut) {
           const event = createKeyboardEvent(keyEvent);
-          if (shortcut.indexOf(keyEvent as any) < shortcut.length / 2) {
+          if (shortcut.indexOf(keyEvent as never) < shortcut.length / 2) {
             if (keydownHandler) {
               keydownHandler(event);
             }
@@ -838,7 +838,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       // Process all events
       for (const event of highFrequencyEvents) {
         if (moveHandler) {
-          moveHandler(event as any);
+          moveHandler(event as never);
         }
       }
 
@@ -1134,7 +1134,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     it('should handle UIohook initialization failures gracefully', () => {
       mockUIOhook.start = jest.fn().mockImplementation(() => {
         throw new Error('UIohook initialization failed');
-      }) as any;
+      }) as never;
 
       expect(() => service.startTracking()).not.toThrow();
 
