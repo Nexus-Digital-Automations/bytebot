@@ -282,7 +282,7 @@ export class DatabaseInterceptor implements NestInterceptor {
               next,
             ).subscribe({
               next: (result) => observer.next(result),
-              error: (_error) => observer.error(_error),
+              error: (error: unknown) => observer.error(error),
               complete: () => observer.complete(),
             });
           }
@@ -301,7 +301,7 @@ export class DatabaseInterceptor implements NestInterceptor {
             next,
           ).subscribe({
             next: (result) => observer.next(result),
-            error: (_error) => observer.error(_error),
+            error: (error: unknown) => observer.error(error),
             complete: () => observer.complete(),
           });
         });

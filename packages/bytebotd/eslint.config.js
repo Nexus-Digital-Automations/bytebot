@@ -14,8 +14,8 @@ module.exports = [
       'dist/**',
       'coverage/**',
       'node_modules/**',
-      'benchmarks/**',
-      '**/*.js.map',
+      'benchmarks/**/*.js', // Ignore compiled JS files in benchmarks
+      'benchmarks/**/*.js.map', // Ignore source maps
       '**/*.d.ts.map',
       'test_shared_exports.js',
       'root/**',

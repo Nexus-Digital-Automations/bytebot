@@ -651,7 +651,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   /**
    * Validate computer use permissions for specific operations
    */
-  private validateComputerUsePermissions(
+  private async validateComputerUsePermissions(
     request: EnhancedAuthenticatedRequest,
     operationId: string,
   ): Promise<void> {
@@ -686,7 +686,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     // For ADMIN users, grant full permissions
     if (request.user.role === UserRole._ADMIN) {
       request.securityContext.screenAccessGranted = true;
-      return;
+      return Promise.resolve();
     }
 
     // TODO: In a real implementation, get user's computer use permissions from database
@@ -713,12 +713,14 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       userPermissions,
       granted: true,
     });
+
+    return Promise.resolve();
   }
 
   /**
    * Validate VNC session if applicable
    */
-  private validateVncSession(
+  private async validateVncSession(
     request: EnhancedAuthenticatedRequest,
     operationId: string,
   ): Promise<void> {
@@ -726,7 +728,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
     if (!vncSessionId) {
       // VNC session not required for all operations
-      return;
+      return Promise.resolve();
     }
 
     // TODO: In a real implementation, validate VNC session against database
@@ -742,6 +744,8 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       userId: request.user.id,
       vncSessionId,
     });
+
+    return Promise.resolve();
   }
 
   /**
@@ -796,12 +800,12 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   /**
    * Check if user exceeds concurrent session limit
    */
-  private exceedsConcurrentSessionLimit(
+  private async exceedsConcurrentSessionLimit(
     _userId: string,
   ): Promise<boolean> {
     // TODO: In a real implementation, check against session store
     // For now, assume limit is not exceeded
-    return false;
+    return Promise.resolve(false);
   }
 
   /**
