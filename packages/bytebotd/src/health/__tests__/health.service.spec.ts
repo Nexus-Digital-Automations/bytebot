@@ -25,6 +25,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
 import { HealthService } from '../health.service';
+import { TestableHealthService } from '../../types/test-interfaces';
 import {
   BasicHealthResponse,
   DetailedStatusResponse,
@@ -82,7 +83,7 @@ describe('HealthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [HealthService],
     }).compile();
-    service = module.get<HealthService>(HealthService) as TestableHealthService;
+    service = module.get<HealthService>(HealthService);
     // Mock the logger
     jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);
     jest.spyOn(Logger.prototype, 'debug').mockImplementation(mockLogger.debug);
@@ -129,8 +130,10 @@ describe('HealthService', () => {
         external: 1048576, // 1 MB
         arrayBuffers: 0,
       };
-      jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemoryUsage);
-      jest.spyOn(process, 'uptime').mockReturnValue(300); // 5 minutes
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(
+        mockMemoryUsage,
+      );
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300); // 5 minutes
       const result = service.getBasicHealth() as BasicHealthResponse;
       expect(result).toMatchObject({
         status: 'healthy',
@@ -182,8 +185,12 @@ describe('HealthService', () => {
         },
       ];
       for (const mockMemory of edgeCases) {
-        jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemory);
-        jest.spyOn(process, 'uptime').mockReturnValue(100);
+        (
+          jest.spyOn(process, 'memoryUsage') as jest.SpyInstance
+        ) as jest.MockedFunction<any>).mockReturnValue(mockMemory);
+        (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(
+          100,
+        );
         const result = service.getBasicHealth() as BasicHealthResponse;
         expect(result.status).toBe('healthy');
         expect(result.memory.used).toBeGreaterThanOrEqual(0);
@@ -199,7 +206,7 @@ describe('HealthService', () => {
       const testId = `${operationId}_uptime_variations`;
       console.log(`[${testId}] Testing process uptime variations`);
       const uptimeValues = [0, 1, 60, 3600, 86400, 604800]; // 0s, 1s, 1m, 1h, 1d, 1w
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 67108864,
         heapTotal: 33554432,
         heapUsed: 16777216,
@@ -207,7 +214,9 @@ describe('HealthService', () => {
         arrayBuffers: 0,
       });
       for (const uptime of uptimeValues) {
-        jest.spyOn(process, 'uptime').mockReturnValue(uptime);
+        (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(
+          uptime,
+        );
         const result = service.getBasicHealth() as BasicHealthResponse;
         expect(result.uptime).toBe(Math.round(uptime));
         expect(result.status).toBe('healthy');
@@ -217,14 +226,14 @@ describe('HealthService', () => {
     it('should generate unique operation IDs for tracking', async () => {
       const testId = `${operationId}_operation_ids`;
       console.log(`[${testId}] Testing operation ID generation for tracking`);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 67108864,
         heapTotal: 33554432,
         heapUsed: 16777216,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
       // Execute multiple health checks
       await service.getBasicHealth();
       await service.getBasicHealth();
@@ -241,7 +250,9 @@ describe('HealthService', () => {
       const testId = `${operationId}_basic_health_errors`;
       console.log(`[${testId}] Testing basic health error handling`);
       // Mock process.memoryUsage to throw an error
-      jest.spyOn(process, 'memoryUsage').mockImplementation(() => {
+      (
+        jest.spyOn(process, 'memoryUsage') as jest.SpyInstance
+      ) as jest.MockedFunction<any>).mockImplementation(() => {
         throw new Error('Memory access denied');
       });
       await expect(service.getBasicHealth()).rejects.toThrow(
@@ -266,8 +277,10 @@ describe('HealthService', () => {
         external: 2097152, // 2 MB
         arrayBuffers: 0,
       };
-      jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemoryUsage);
-      jest.spyOn(process, 'uptime').mockReturnValue(1800); // 30 minutes
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(
+        mockMemoryUsage,
+      );
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(1800); // 30 minutes
       const result = service.getDetailedStatus() as DetailedStatusResponse;
       expect(result).toMatchObject({
         status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/),
@@ -297,44 +310,44 @@ describe('HealthService', () => {
     it('should determine correct overall status based on service health', async () => {
       const testId = `${operationId}_overall_status_determination`;
       console.log(`[${testId}] Testing overall status determination logic`);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
       // Mock the private service health check method
       const _originalCheckServiceHealth = service['checkServiceHealth'];
       // Test healthy status
-      jest
-        .spyOn(service as TestableHealthService, 'checkServiceHealth')
-        .mockReturnValue({
-          database: 'connected',
-          cache: 'available',
-          external: 'reachable',
-        });
+      (
+        jest.spyOn(service, 'checkServiceHealth' as keyof typeof service) as jest.SpyInstance
+      ) as jest.MockedFunction<any>).mockReturnValue({
+        database: 'connected',
+        cache: 'available',
+        external: 'reachable',
+      });
       const result = service.getDetailedStatus() as DetailedStatusResponse;
       expect(result.status).toBe('healthy');
       // Test degraded status (unknown services)
-      jest
-        .spyOn(service as TestableHealthService, 'checkServiceHealth')
-        .mockReturnValue({
-          database: 'unknown',
-          cache: 'unknown',
-          external: 'unknown',
-        });
+      (
+        jest.spyOn(service, 'checkServiceHealth' as keyof typeof service) as jest.SpyInstance
+      ) as jest.MockedFunction<any>).mockReturnValue({
+        database: 'unknown',
+        cache: 'unknown',
+        external: 'unknown',
+      });
       const result2 = await service.getDetailedStatus();
       expect(result2.status).toBe('degraded');
       // Test unhealthy status (failed services)
-      jest
-        .spyOn(service as TestableHealthService, 'checkServiceHealth')
-        .mockReturnValue({
-          database: 'disconnected',
-          cache: 'unavailable',
-          external: 'unreachable',
-        });
+      (
+        jest.spyOn(service, 'checkServiceHealth' as keyof typeof service) as jest.SpyInstance
+      ) as jest.MockedFunction<any>).mockReturnValue({
+        database: 'disconnected',
+        cache: 'unavailable',
+        external: 'unreachable',
+      });
       const result3 = await service.getDetailedStatus();
       expect(result3.status).toBe('unhealthy');
       console.log(`[${testId}] Overall status determination test completed`);
@@ -342,14 +355,14 @@ describe('HealthService', () => {
     it('should provide detailed logging with context', async () => {
       const testId = `${operationId}_detailed_logging`;
       console.log(`[${testId}] Testing detailed logging with context`);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(process, 'uptime').mockReturnValue(600);
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(600);
       await service.getDetailedStatus();
       // Verify detailed logging with context
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -370,9 +383,11 @@ describe('HealthService', () => {
       const testId = `${operationId}_detailed_status_errors`;
       console.log(`[${testId}] Testing detailed status error handling`);
       // Mock process.uptime to throw an error
-      jest.spyOn(process, 'uptime').mockImplementation(() => {
-        throw new Error('System uptime unavailable');
-      });
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockImplementation(
+        () => {
+          throw new Error('System uptime unavailable');
+        },
+      );
       await expect(service.getDetailedStatus()).rejects.toThrow(
         'System uptime unavailable',
       );
@@ -532,14 +547,14 @@ describe('HealthService', () => {
     it('should complete basic health check within performance threshold', async () => {
       const testId = `${operationId}_basic_health_performance`;
       console.log(`[${testId}] Testing basic health check performance`);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
       const startTime = Date.now();
       await service.getBasicHealth();
       const executionTime = Date.now() - startTime;
@@ -552,14 +567,14 @@ describe('HealthService', () => {
     it('should complete detailed status within performance threshold', async () => {
       const testId = `${operationId}_detailed_status_performance`;
       console.log(`[${testId}] Testing detailed status performance`);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
       const startTime = Date.now();
       await service.getDetailedStatus();
       const executionTime = Date.now() - startTime;
@@ -572,14 +587,14 @@ describe('HealthService', () => {
     it('should handle concurrent health checks efficiently', async () => {
       const testId = `${operationId}_concurrent_health_checks`;
       console.log(`[${testId}] Testing concurrent health check efficiency`);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
       const startTime = Date.now();
       // Execute 20 concurrent health checks
       const promises = Array(20)
@@ -601,14 +616,14 @@ describe('HealthService', () => {
     it('should not leak memory during extended operations', async () => {
       const testId = `${operationId}_memory_leak_prevention`;
       console.log(`[${testId}] Testing memory leak prevention`);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
       const initialMemory = process.memoryUsage();
       // Execute many health checks
       for (let i = 0; i < 50; i++) {
@@ -626,14 +641,14 @@ describe('HealthService', () => {
     it('should maintain consistent response times under load', async () => {
       const testId = `${operationId}_response_time_consistency`;
       console.log(`[${testId}] Testing response time consistency under load`);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
       const executionTimes: number[] = [];
       // Execute 10 health checks and measure individual times
       for (let i = 0; i < 10; i++) {
@@ -660,14 +675,14 @@ describe('HealthService', () => {
       const testId = `${operationId}_resource_constraints`;
       console.log(`[${testId}] Testing system resource constraint handling`);
       // Simulate very low memory conditions
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 1048576, // 1 MB
         heapTotal: 524288, // 0.5 MB
         heapUsed: 524288, // 0.5 MB (100% usage)
         external: 0,
         arrayBuffers: 0,
       });
-      jest.spyOn(process, 'uptime').mockReturnValue(10);
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(10);
       const result = (await service.getBasicHealth()) as BasicHealthResponse;
       expect(result.status).toBe('healthy');
       expect((result as BasicHealthResponse).memory.used).toBe(1); // 1 MB
@@ -679,7 +694,9 @@ describe('HealthService', () => {
       console.log(`[${testId}] Testing uptime calculation accuracy`);
       const testUptimes = [0.1, 1, 59.9, 60, 61, 3599, 3600, 3601];
       for (const testUptime of testUptimes) {
-        jest.spyOn(process, 'uptime').mockReturnValue(testUptime);
+        (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(
+          testUptime,
+        );
         const result = service.getBasicHealth() as BasicHealthResponse;
         const expectedUptime = Math.round(testUptime);
         expect(result.uptime).toBe(expectedUptime);
@@ -689,14 +706,14 @@ describe('HealthService', () => {
     it('should handle timestamp generation consistently', async () => {
       const testId = `${operationId}_timestamp_consistency`;
       console.log(`[${testId}] Testing timestamp generation consistency`);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
       const beforeTime = new Date();
       const result = (await service.getBasicHealth()) as BasicHealthResponse;
       const afterTime = new Date();
@@ -724,14 +741,14 @@ describe('HealthService', () => {
     it('should maintain thread safety in concurrent operations', async () => {
       const testId = `${operationId}_thread_safety`;
       console.log(`[${testId}] Testing thread safety in concurrent operations`);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
       // Execute mixed concurrent operations
       const operations = [
         () => service.getBasicHealth(),
@@ -758,7 +775,7 @@ describe('HealthService', () => {
         (r) => r && typeof r === 'object' && 'status' in r,
       );
       const allHealthy = healthResults.every(
-        (r) => (r as unknown).status === 'healthy',
+        (r) => (r as Record<string, unknown>).status === 'healthy',
       );
       expect(allHealthy).toBe(true);
       console.log(`[${testId}] Thread safety test completed successfully`);
@@ -772,8 +789,12 @@ describe('HealthService', () => {
           `[${testId}] Testing process health check with valid metrics`,
         );
         // Mock healthy process state
-        jest.spyOn(process, 'uptime').mockReturnValue(300); // 5 minutes
-        jest.spyOn(process, 'memoryUsage').mockReturnValue({
+        (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(
+          300,
+        ); // 5 minutes
+        (
+          jest.spyOn(process, 'memoryUsage') as jest.SpyInstance
+        ) as jest.MockedFunction<any>).mockReturnValue({
           rss: 134217728, // 128 MB
           heapTotal: 67108864, // 64 MB
           heapUsed: 33554432, // 32 MB
@@ -804,8 +825,10 @@ describe('HealthService', () => {
           `[${testId}] Testing process health check with invalid state`,
         );
         // Mock invalid process state
-        jest.spyOn(process, 'uptime').mockReturnValue(0);
-        jest.spyOn(process, 'memoryUsage').mockReturnValue({
+        (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(0);
+        (
+          jest.spyOn(process, 'memoryUsage') as jest.SpyInstance
+        ) as jest.MockedFunction<any>).mockReturnValue({
           rss: 0,
           heapTotal: 0,
           heapUsed: 0,
@@ -830,9 +853,11 @@ describe('HealthService', () => {
         const testId = `${operationId}_process_health_error`;
         console.log(`[${testId}] Testing process health check error handling`);
         // Mock process.uptime to throw error
-        jest.spyOn(process, 'uptime').mockImplementation(() => {
-          throw new Error('Process uptime unavailable');
-        });
+        (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockImplementation(
+          () => {
+            throw new Error('Process uptime unavailable');
+          },
+        );
         const result =
           (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
@@ -848,7 +873,9 @@ describe('HealthService', () => {
           `[${testId}] Testing database health check with connection`,
         );
         // Mock successful database ping
-        jest.spyOn(service, 'performDatabasePing').mockResolvedValue(true);
+        jest
+          .spyOn(service as any, 'performDatabasePing')
+           as jest.MockedFunction<any>).mockResolvedValue(true);
         const result =
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
@@ -871,7 +898,9 @@ describe('HealthService', () => {
         const testId = `${operationId}_database_health_disconnected`;
         console.log(`[${testId}] Testing database health check with failure`);
         // Mock failed database ping
-        jest.spyOn(service, 'performDatabasePing').mockResolvedValue(false);
+        jest
+          .spyOn(service as any, 'performDatabasePing')
+           as jest.MockedFunction<any>).mockResolvedValue(false);
         const result =
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
@@ -892,8 +921,8 @@ describe('HealthService', () => {
         );
         // Mock database ping to throw exception
         jest
-          .spyOn(service, 'performDatabasePing')
-          .mockRejectedValue(new Error('Database timeout'));
+          .spyOn(service as any, 'performDatabasePing')
+           as jest.MockedFunction<any>).mockRejectedValue(new Error('Database timeout'));
         const result =
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
@@ -907,8 +936,8 @@ describe('HealthService', () => {
         console.log(`[${testId}] Testing database response time measurement`);
         // Mock database ping with delay
         jest
-          .spyOn(service, 'performDatabasePing')
-          .mockImplementation(
+          .spyOn(service as any, 'performDatabasePing')
+           as jest.MockedFunction<any>).mockImplementation(
             () => new Promise((resolve) => setTimeout(() => resolve(true), 50)),
           );
         const result =
@@ -929,7 +958,7 @@ describe('HealthService', () => {
         );
         // Mock successful external service checks
         jest
-          .spyOn(service, 'checkExternalService')
+          .spyOn(service as any, 'checkExternalService')
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '25ms' })
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '30ms' });
         const result =
@@ -950,7 +979,7 @@ describe('HealthService', () => {
         console.log(`[${testId}] Testing external services failure handling`);
         // Mock external service failures
         jest
-          .spyOn(service, 'checkExternalService')
+          .spyOn(service as any, 'checkExternalService')
           .mockRejectedValueOnce(new Error('Service unavailable'))
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '20ms' });
         const result =
@@ -965,11 +994,11 @@ describe('HealthService', () => {
         const originalAllSettled = Promise.allSettled;
         Promise.allSettled = jest
           .fn()
-          .mockRejectedValue(new Error('Complete failure'));
+           as jest.MockedFunction<any>).mockRejectedValue(new Error('Complete failure'));
         const result =
           (await service.checkExternalServices()) as HealthIndicatorResult;
         expect(result.external_services?.status).toBe('down');
-        expect(result.external_services.error).toBe('Complete failure');
+        expect(result.external_services?.error).toBe('Complete failure');
         // Restore original Promise.allSettled
         Promise.allSettled = originalAllSettled;
         console.log(
@@ -984,7 +1013,7 @@ describe('HealthService', () => {
           `[${testId}] Testing startup check for established service`,
         );
         // Mock service that has been running for sufficient time
-        (service as unknown).startTime = Date.now() - 30000; // 30 seconds ago
+        (service as HealthService & { [key: string]: unknown }).startTime = Date.now() - 30000; // 30 seconds ago
         const result =
           (await service.checkStartupComplete()) as HealthIndicatorResult;
         expect(result).toHaveProperty('startup' as keyof typeof result);
@@ -1002,13 +1031,13 @@ describe('HealthService', () => {
           `[${testId}] Testing startup check for recently started service`,
         );
         // Mock service that was just started
-        (service as unknown).startTime = Date.now() - 5000; // 5 seconds ago
+        (service as HealthService & { [key: string]: unknown }).startTime = Date.now() - 5000; // 5 seconds ago
         const result =
           (await service.checkStartupComplete()) as HealthIndicatorResult;
         expect(result).toHaveProperty('startup' as keyof typeof result);
-        expect(result.startup.status).toEqual('down');
-        expect(result.startup.initializationStatus).toEqual('initializing');
-        expect(result.startup.message).toEqual('Service is still starting up');
+        expect(result.startup?.status).toEqual('down');
+        expect(result.startup?.initializationStatus).toEqual('initializing');
+        expect(result.startup?.message).toEqual('Service is still starting up');
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(/\[startup_\d+\] Startup still in progress/),
         );
@@ -1024,8 +1053,8 @@ describe('HealthService', () => {
         });
         const result =
           (await service.checkStartupComplete()) as HealthIndicatorResult;
-        expect(result.startup.status).toBe('down');
-        expect(result.startup.error).toBe('Time unavailable');
+        expect(result.startup?.status).toBe('down');
+        expect(result.startup?.error).toBe('Time unavailable');
         // Restore Date.now
         Date.now = originalNow;
         console.log(`[${testId}] Startup error handling test completed`);
@@ -1065,8 +1094,8 @@ describe('HealthService', () => {
         });
         const result =
           (await service.checkModuleInitialization()) as HealthIndicatorResult;
-        expect(result.modules.status).toBe('down');
-        expect(result.modules.error).toBe('Module check failed');
+        expect(result.modules?.status).toBe('down');
+        expect(result.modules?.error).toBe('Module check failed');
         // Restore Object.values
         Object.values = originalValues;
         console.log(`[${testId}] Module initialization error test completed`);
@@ -1109,7 +1138,7 @@ describe('HealthService', () => {
         let timeoutCallCount = 0;
         global.setTimeout = jest
           .fn()
-          .mockImplementation((callback, delay: number) => {
+           as jest.MockedFunction<any>).mockImplementation((callback, delay: number) => {
             timeoutCallCount++;
             if (timeoutCallCount % 2 === 0) {
               // Simulate timeout/rejection on every other call
@@ -1147,18 +1176,20 @@ describe('HealthService', () => {
       const testId = `${operationId}_full_health_workflow`;
       console.log(`[${testId}] Testing full health check workflow`);
       // Mock all dependencies for successful health checks
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(service, 'performDatabasePing').mockResolvedValue(true);
+      (
+        jest.spyOn(service, 'performDatabasePing' as keyof typeof service) as jest.SpyInstance
+      ) as jest.MockedFunction<any>).mockResolvedValue(true);
       jest
-        .spyOn(service, 'checkExternalService')
-        .mockResolvedValue({ status: 'healthy', responseTime: '25ms' });
+        .spyOn(service as any, 'checkExternalService')
+         as jest.MockedFunction<any>).mockResolvedValue({ status: 'healthy', responseTime: '25ms' });
       // Mock well-established service
       (service as unknown).startTime = Date.now() - 60000; // 1 minute ago
       // Execute all health checks
@@ -1193,15 +1224,17 @@ describe('HealthService', () => {
       const testId = `${operationId}_cascading_failures`;
       console.log(`[${testId}] Testing cascading health failures`);
       // Mock system under stress
-      jest.spyOn(process, 'uptime').mockImplementation(() => {
-        throw new Error('System overload');
-      });
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockImplementation(
+        () => {
+          throw new Error('System overload');
+        },
+      );
       jest
-        .spyOn(service, 'performDatabasePing')
-        .mockRejectedValue(new Error('Database overloaded'));
+        .spyOn(service as any, 'performDatabasePing')
+         as jest.MockedFunction<any>).mockRejectedValue(new Error('Database overloaded'));
       jest
-        .spyOn(service, 'checkExternalService')
-        .mockRejectedValue(new Error('External services down'));
+        .spyOn(service as any, 'checkExternalService')
+         as jest.MockedFunction<any>).mockRejectedValue(new Error('External services down'));
       // Execute health checks that should fail gracefully
       const basicHealthPromise = Promise.resolve(
         service.getBasicHealth(),
@@ -1238,16 +1271,18 @@ describe('HealthService', () => {
       const testId = `${operationId}_concurrent_performance`;
       console.log(`[${testId}] Testing concurrent health check performance`);
       // Mock healthy system state
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(service, 'performDatabasePing').mockResolvedValue(true);
-      service.startTime = Date.now() - 60000;
+      (
+        jest.spyOn(service, 'performDatabasePing' as keyof typeof service) as jest.SpyInstance
+      ) as jest.MockedFunction<any>).mockResolvedValue(true);
+      (service as HealthService & { [key: string]: unknown }).startTime = Date.now() - 60000;
       const startTime = Date.now();
       // Execute 50 concurrent health checks
       const concurrentChecks = Array(50)
@@ -1279,16 +1314,18 @@ describe('HealthService', () => {
         `[${testId}] Testing health check response schema validation`,
       );
       // Mock healthy state
-      jest.spyOn(process, 'uptime').mockReturnValue(300);
-      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      (jest.spyOn(process, 'uptime') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue(300);
+      (jest.spyOn(process, 'memoryUsage') as jest.SpyInstance) as jest.MockedFunction<any>).mockReturnValue({
         rss: 134217728,
         heapTotal: 67108864,
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
       });
-      jest.spyOn(service, 'performDatabasePing').mockResolvedValue(true);
-      service.startTime = Date.now() - 60000;
+      (
+        jest.spyOn(service, 'performDatabasePing' as keyof typeof service) as jest.SpyInstance
+      ) as jest.MockedFunction<any>).mockResolvedValue(true);
+      (service as HealthService & { [key: string]: unknown }).startTime = Date.now() - 60000;
       const healthChecks = await Promise.all([
         service.getBasicHealth(),
         service.getDetailedStatus(),
@@ -1349,10 +1386,10 @@ describe('HealthService', () => {
       console.log(`[${testId}] Testing service recovery scenarios`);
       // Initial failure state
       jest
-        .spyOn(service, 'performDatabasePing')
+        .spyOn(service as any, 'performDatabasePing')
         .mockRejectedValueOnce(new Error('Database connection failed'))
         .mockResolvedValueOnce(true) // Recovery
-        .mockResolvedValue(true); // Stable recovery
+         as jest.MockedFunction<any>).mockResolvedValue(true); // Stable recovery
       // Test failure -> recovery pattern
       const failedCheck = await service.checkDatabaseHealth();
       expect(failedCheck.database.status).toBe('down');

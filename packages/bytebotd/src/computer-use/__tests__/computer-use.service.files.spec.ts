@@ -23,26 +23,26 @@ import { ReadFileActionDto } from '../dto/computer-action.dto';
 // Mock the nut-js library first to prevent module loading issues
 jest.mock('@nut-tree-fork/nut-js', () => ({
   keyboard: {
-    pressKey: jest.fn().mockResolvedValue(undefined),
-    releaseKey: jest.fn().mockResolvedValue(undefined),
+    pressKey: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    releaseKey: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
     config: { autoDelayMs: 100 },
   },
   mouse: {
-    setPosition: jest.fn().mockResolvedValue(undefined),
-    click: jest.fn().mockResolvedValue(undefined),
-    pressButton: jest.fn().mockResolvedValue(undefined),
-    releaseButton: jest.fn().mockResolvedValue(undefined),
-    scrollUp: jest.fn().mockResolvedValue(undefined),
-    scrollDown: jest.fn().mockResolvedValue(undefined),
-    scrollLeft: jest.fn().mockResolvedValue(undefined),
-    scrollRight: jest.fn().mockResolvedValue(undefined),
-    getPosition: jest.fn().mockResolvedValue({ x: 100, y: 200 }),
+    setPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    click: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    pressButton: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    releaseButton: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollUp: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollDown: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollLeft: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    scrollRight: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    getPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
     config: { autoDelayMs: 100 },
   },
   screen: {
-    capture: jest.fn().mockResolvedValue(undefined),
+    capture: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
   },
-  Point: jest.fn().mockImplementation((x: number, y: number) => ({ x, y })),
+  Point: jest.fn() as jest.MockedFunction<any>).mockImplementation((x: number, y: number) => ({ x, y })),
   Key: {
     A: 'A',
     B: 'B',
@@ -60,22 +60,22 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
 
 // Mock all external modules at the top level
 jest.mock('fs/promises', () => ({
-  writeFile: jest.fn().mockResolvedValue(undefined),
-  readFile: jest.fn().mockResolvedValue(Buffer.from('test content')),
-  unlink: jest.fn().mockResolvedValue(undefined),
+  writeFile: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  readFile: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test content')),
+  unlink: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
 }));
 
 jest.mock('child_process');
 
 jest.mock('util', () => ({
   promisify: jest.fn(() =>
-    jest.fn().mockResolvedValue({ stdout: 'success', stderr: '' }),
+    jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ stdout: 'success', stderr: '' }),
   ),
 }));
 
 // Mock the axios and http modules that are causing issues
 jest.mock('@nestjs/axios', () => ({
-  HttpService: jest.fn().mockImplementation(() => ({
+  HttpService: jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
     axiosRef: {
       get: jest.fn(),
       post: jest.fn(),
@@ -155,13 +155,13 @@ describe('ComputerUseService - File Operations', () => {
     } as unknown as jest.Mocked<Logger>;
 
     // Setup promisify mock to return our mock exec function
-    mockPromisify.mockReturnValue(mockExecAsync);
+    mockPromisify as jest.MockedFunction<any>).mockReturnValue(mockExecAsync);
 
     // Setup default successful mock responses
-    mockExecAsync.mockResolvedValue({ stdout: 'success', stderr: '' });
-    mockFs.writeFile.mockResolvedValue(undefined);
-    mockFs.readFile.mockResolvedValue(Buffer.from('test content'));
-    mockFs.unlink.mockResolvedValue(undefined);
+    mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: 'success', stderr: '' });
+    mockFs.writeFile as jest.MockedFunction<any>).mockResolvedValue(undefined);
+    mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test content'));
+    mockFs.unlink as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
     // Focus on file operations with standard mocking
 
@@ -278,7 +278,7 @@ describe('ComputerUseService - File Operations', () => {
           data: validBase64Data,
         };
 
-        mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+        mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '', stderr: '' });
 
         const result = (await service.action(action)) as FileWriteResult;
 
@@ -302,7 +302,7 @@ describe('ComputerUseService - File Operations', () => {
           data: largeBase64Data,
         };
 
-        mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+        mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '', stderr: '' });
 
         const result = (await service.action(action)) as FileWriteResult;
 
@@ -322,7 +322,7 @@ describe('ComputerUseService - File Operations', () => {
           data: emptyBase64Data,
         };
 
-        mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+        mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '', stderr: '' });
 
         const result = (await service.action(action)) as FileWriteResult;
 
@@ -384,7 +384,7 @@ describe('ComputerUseService - File Operations', () => {
           data: 'invalid-base64-characters-!@#$%',
         };
 
-        mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+        mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '', stderr: '' });
 
         const result = (await service.action(action)) as FileWriteResult;
 
@@ -400,7 +400,7 @@ describe('ComputerUseService - File Operations', () => {
           data: 'not-valid-base64-!@#$%^&*()+={}[]|\\:";\'<>?,./`~',
         };
 
-        mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+        mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '', stderr: '' });
 
         const result = (await service.action(action)) as FileWriteResult;
 
@@ -443,7 +443,7 @@ describe('ComputerUseService - File Operations', () => {
           data: validBase64Data,
         };
 
-        mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+        mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '', stderr: '' });
 
         const result = (await service.action(action)) as FileWriteResult;
 
@@ -527,7 +527,7 @@ describe('ComputerUseService - File Operations', () => {
         };
 
         // Mock temporary file write failure
-        mockFs.writeFile.mockRejectedValue(new Error('Disk full'));
+        mockFs.writeFile as jest.MockedFunction<any>).mockRejectedValue(new Error('Disk full'));
 
         const result = (await service.action(action)) as FileWriteResult;
 
@@ -543,8 +543,8 @@ describe('ComputerUseService - File Operations', () => {
         };
 
         // Mock successful operation but cleanup failure
-        mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
-        mockFs.unlink.mockRejectedValue(
+        mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '', stderr: '' });
+        mockFs.unlink as jest.MockedFunction<any>).mockRejectedValue(
           new Error('Cannot delete temporary file'),
         );
 
@@ -626,7 +626,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' }) // chmod command
           .mockResolvedValueOnce({ stdout: '25 1609459200', stderr: '' }); // stat command
 
-        mockFs.readFile.mockResolvedValue(testFileContent);
+        mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(testFileContent);
 
         const result = (await service.action(action)) as FileReadResult;
 
@@ -674,7 +674,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' })
           .mockResolvedValueOnce({ stdout: '15 1609459200', stderr: '' });
 
-        mockFs.readFile.mockResolvedValue(Buffer.from('relative content'));
+        mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('relative content'));
 
         const result = (await service.action(action)) as FileReadResult;
 
@@ -723,7 +723,7 @@ describe('ComputerUseService - File Operations', () => {
             .mockResolvedValueOnce({ stdout: '', stderr: '' })
             .mockResolvedValueOnce({ stdout: '100 1609459200', stderr: '' });
 
-          mockFs.readFile.mockResolvedValue(Buffer.from('test content'));
+          mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test content'));
 
           const result = (await service.action(action)) as FileReadResult;
 
@@ -743,7 +743,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' })
           .mockResolvedValueOnce({ stdout: '8 1609459200', stderr: '' });
 
-        mockFs.readFile.mockResolvedValue(binaryFileContent);
+        mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(binaryFileContent);
 
         const result = (await service.action(action)) as FileReadResult;
 
@@ -764,7 +764,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' })
           .mockResolvedValueOnce({ stdout: '0 1609459200', stderr: '' });
 
-        mockFs.readFile.mockResolvedValue(Buffer.from(''));
+        mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(Buffer.from(''));
 
         const result = (await service.action(action)) as FileReadResult;
 
@@ -789,7 +789,7 @@ describe('ComputerUseService - File Operations', () => {
             stderr: '',
           });
 
-        mockFs.readFile.mockResolvedValue(largeContent);
+        mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(largeContent);
 
         const result = (await service.action(action)) as FileReadResult;
 
@@ -877,7 +877,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' })
           .mockResolvedValueOnce({ stdout: '10 1609459200', stderr: '' });
 
-        mockFs.readFile.mockResolvedValue(Buffer.from('tmp content'));
+        mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('tmp content'));
 
         const result = (await service.action(action)) as FileReadResult;
 
@@ -893,7 +893,7 @@ describe('ComputerUseService - File Operations', () => {
         };
 
         // Mock file copy failure
-        mockExecAsync.mockRejectedValue(
+        mockExecAsync as jest.MockedFunction<any>).mockRejectedValue(
           new Error('Permission denied for file access'),
         );
 
@@ -919,7 +919,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' })
           .mockResolvedValueOnce({ stdout: '', stderr: '' });
 
-        mockFs.readFile.mockRejectedValue(new Error('File corrupted'));
+        mockFs.readFile as jest.MockedFunction<any>).mockRejectedValue(new Error('File corrupted'));
 
         const result = (await service.action(action)) as FileReadResult;
 
@@ -937,9 +937,9 @@ describe('ComputerUseService - File Operations', () => {
         mockExecAsync
           .mockResolvedValueOnce({ stdout: '', stderr: '' })
           .mockResolvedValueOnce({ stdout: '', stderr: '' })
-          .mockRejectedValue(new Error('Cannot get file stats'));
+           as jest.MockedFunction<any>).mockRejectedValue(new Error('Cannot get file stats'));
 
-        mockFs.readFile.mockResolvedValue(testFileContent);
+        mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(testFileContent);
 
         const result = (await service.action(action)) as FileReadResult;
 
@@ -961,7 +961,7 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' })
           .mockResolvedValueOnce({ stdout: 'invalid stat output', stderr: '' });
 
-        mockFs.readFile.mockResolvedValue(testFileContent);
+        mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(testFileContent);
 
         const result = (await service.action(action)) as FileReadResult;
 
@@ -978,8 +978,8 @@ describe('ComputerUseService - File Operations', () => {
         };
 
         // Mock file operation failure and cleanup failure
-        mockExecAsync.mockRejectedValue(new Error('File not found'));
-        mockFs.unlink.mockRejectedValue(
+        mockExecAsync as jest.MockedFunction<any>).mockRejectedValue(new Error('File not found'));
+        mockFs.unlink as jest.MockedFunction<any>).mockRejectedValue(
           new Error('Cannot delete temporary file'),
         );
 
@@ -1006,8 +1006,8 @@ describe('ComputerUseService - File Operations', () => {
           .mockResolvedValueOnce({ stdout: '', stderr: '' })
           .mockResolvedValueOnce({ stdout: '10 1609459200', stderr: '' });
 
-        mockFs.readFile.mockResolvedValue(testFileContent);
-        mockFs.unlink.mockRejectedValue(
+        mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(testFileContent);
+        mockFs.unlink as jest.MockedFunction<any>).mockRejectedValue(
           new Error('Cannot delete temporary file'),
         );
 
@@ -1060,7 +1060,7 @@ describe('ComputerUseService - File Operations', () => {
               stderr: '',
             });
 
-          mockFs.readFile.mockResolvedValue(contentBuffer);
+          mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(contentBuffer);
 
           const result = (await service.action(action)) as FileReadResult;
 
@@ -1093,8 +1093,8 @@ describe('ComputerUseService - File Operations', () => {
         path: '/home/user/test2.txt',
       };
 
-      mockExecAsync.mockResolvedValue({ stdout: '10 1609459200', stderr: '' });
-      mockFs.readFile.mockResolvedValue(Buffer.from('test2'));
+      mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '10 1609459200', stderr: '' });
+      mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test2'));
 
       const _result1 = (await service.action(action1)) as FileWriteResult;
       const _result2 = (await service.action(action2)) as FileReadResult;
@@ -1111,7 +1111,7 @@ describe('ComputerUseService - File Operations', () => {
         data: Buffer.from('test content').toString('base64'),
       };
 
-      mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+      mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '', stderr: '' });
 
       await service.action(action);
 
@@ -1148,7 +1148,7 @@ describe('ComputerUseService - File Operations', () => {
         .mockResolvedValueOnce({ stdout: '', stderr: '' })
         .mockResolvedValueOnce({ stdout: '12 1609459200', stderr: '' });
 
-      mockFs.readFile.mockResolvedValue(Buffer.from('test content'));
+      mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test content'));
 
       await service.action(action);
 
@@ -1221,7 +1221,7 @@ describe('ComputerUseService - File Operations', () => {
         data: Buffer.from('test').toString('base64'),
       };
 
-      mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+      mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '', stderr: '' });
 
       const result = (await service.action(action)) as FileWriteResult;
 
@@ -1243,7 +1243,7 @@ describe('ComputerUseService - File Operations', () => {
         .mockResolvedValueOnce({ stdout: '', stderr: '' })
         .mockResolvedValueOnce({ stdout: '10 1609459200', stderr: '' });
 
-      mockFs.readFile.mockResolvedValue(Buffer.from('test content'));
+      mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test content'));
 
       const result = (await service.action(action)) as FileReadResult;
 
@@ -1265,8 +1265,8 @@ describe('ComputerUseService - File Operations', () => {
         path: '/home/user/concurrent2.txt',
       };
 
-      mockExecAsync.mockResolvedValue({ stdout: '15 1609459200', stderr: '' });
-      mockFs.readFile.mockResolvedValue(Buffer.from('concurrent read'));
+      mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '15 1609459200', stderr: '' });
+      mockFs.readFile as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('concurrent read'));
 
       // Execute operations concurrently
       const [writeResult, readResult] = await Promise.all([
@@ -1297,15 +1297,15 @@ describe('ComputerUseService - File Operations', () => {
       // Simulate various failure scenarios to test cleanup
       const failureScenarios = [
         () => {
-          mockExecAsync.mockRejectedValue(new Error('mkdir failed'));
+          mockExecAsync as jest.MockedFunction<any>).mockRejectedValue(new Error('mkdir failed'));
         },
         () => {
-          mockFs.writeFile.mockRejectedValue(new Error('write failed'));
+          mockFs.writeFile as jest.MockedFunction<any>).mockRejectedValue(new Error('write failed'));
         },
         () => {
           mockExecAsync
             .mockResolvedValueOnce({ stdout: '', stderr: '' }) // mkdir
-            .mockRejectedValue(new Error('cp failed')); // cp
+             as jest.MockedFunction<any>).mockRejectedValue(new Error('cp failed')); // cp
         },
       ];
 
@@ -1331,7 +1331,7 @@ describe('ComputerUseService - File Operations', () => {
         data: largeBase64,
       };
 
-      mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+      mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '', stderr: '' });
 
       const result = (await service.action(action)) as FileWriteResult;
 

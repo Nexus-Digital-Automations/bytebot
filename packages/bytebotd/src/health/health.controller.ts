@@ -97,7 +97,7 @@ export class HealthController {
 
     return this.health.check([
       // Check memory usage (fail if over 90% memory usage)
-      () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024 * 1024), // 150MB limit
+      () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024), // 150MB limit
       // Check if core services are responsive
       () => this.healthService.checkProcessHealth(),
     ]);
@@ -127,7 +127,7 @@ export class HealthController {
       () =>
         this.disk.checkStorage('storage', { thresholdPercent: 0.8, path: '/' }),
       // Check memory usage (warn if over 80%)
-      () => this.memory.checkHeap('memory_heap', 120 * 1024 * 1024 * 1024), // 120MB limit
+      () => this.memory.checkHeap('memory_heap', 120 * 1024 * 1024), // 120MB limit
     ]);
   }
 

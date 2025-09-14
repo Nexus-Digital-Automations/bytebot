@@ -189,9 +189,9 @@ describe('RolesGuard', () => {
     const mockRequest = { user };
 
     return {
-      switchToHttp: jest.fn().mockReturnValue({
-        getRequest: jest.fn().mockReturnValue(mockRequest),
-        getResponse: jest.fn().mockReturnValue({}),
+      switchToHttp: jest.fn() as jest.MockedFunction<any>).mockReturnValue({
+        getRequest: jest.fn() as jest.MockedFunction<any>).mockReturnValue(mockRequest),
+        getResponse: jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
       }),
       getHandler: jest.fn(),
       getClass: jest.fn(),
@@ -243,7 +243,7 @@ describe('RolesGuard', () => {
       const user = createMockUser(UserRole._VIEWER);
       const context = createMockExecutionContext(user);
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(undefined);
+      jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(undefined);
 
       const result = await guard.canActivate(context);
 
@@ -648,7 +648,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_null_role`;
       console.log(`[${testId}] Testing null role handling`);
 
-      const user = createMockUser(UserRole._VIEWER, [], { role: null as any });
+      const user: unknown = createMockUser(UserRole._VIEWER, [], { role: null as any });
       const context = createMockExecutionContext(user);
 
       jest
@@ -725,7 +725,7 @@ describe('RolesGuard', () => {
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValue([UserRole._OPERATOR]);
+         as jest.MockedFunction<any>).mockReturnValue([UserRole._OPERATOR]);
 
       const promises = users.map((user) => {
         const context = createMockExecutionContext(user);
@@ -749,7 +749,7 @@ describe('RolesGuard', () => {
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValue([UserRole._VIEWER]); // Should pass due to hierarchy
+         as jest.MockedFunction<any>).mockReturnValue([UserRole._VIEWER]); // Should pass due to hierarchy
 
       const startTime = Date.now();
       const promises = Array(100)

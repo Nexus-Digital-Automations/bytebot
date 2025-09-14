@@ -31,8 +31,8 @@ import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard, ByteBotdUser } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { UserRole, Permission } from '@bytebot/shared';
-import _crypto from 'crypto';
-import _jwt from 'jsonwebtoken';
+import * as _crypto from 'crypto';
+import * as _jwt from 'jsonwebtoken';
 
 /**
  * Security Penetration Testing Suite
@@ -198,7 +198,7 @@ describe('Security Penetration Testing Suite', () => {
     },
 
     // Session replay attack simulation
-    simulateSessionReplayAttack: (
+    simulateSessionReplayAttack: async (
       validToken: string,
       targetFunction: (token: string) => Promise<unknown>,
     ): Promise<
@@ -236,7 +236,7 @@ describe('Security Penetration Testing Suite', () => {
     },
 
     // Race condition attack simulation
-    simulateRaceConditionAttack: (
+    simulateRaceConditionAttack: async (
       user: ByteBotdUser,
       targetFunction: (user: ByteBotdUser) => Promise<unknown>,
     ): Promise<
@@ -305,17 +305,17 @@ describe('Security Penetration Testing Suite', () => {
     };
 
     return {
-      switchToHttp: jest.fn().mockReturnValue({
-        getRequest: jest.fn().mockReturnValue(mockRequest),
-        getResponse: jest.fn().mockReturnValue({}),
+      switchToHttp: jest.fn() as jest.MockedFunction<any>).mockReturnValue({
+        getRequest: jest.fn() as jest.MockedFunction<any>).mockReturnValue(mockRequest),
+        getResponse: jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
       }),
-      switchToRpc: jest.fn().mockReturnValue({}),
-      switchToWs: jest.fn().mockReturnValue({}),
-      getHandler: jest.fn().mockReturnValue({ name: 'pentestHandler' }),
-      getClass: jest.fn().mockReturnValue({ name: 'PentestController' }),
-      getArgs: jest.fn().mockReturnValue([]),
-      getArgByIndex: jest.fn().mockReturnValue(undefined),
-      getType: jest.fn().mockReturnValue('http'),
+      switchToRpc: jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
+      switchToWs: jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
+      getHandler: jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'pentestHandler' }),
+      getClass: jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'PentestController' }),
+      getArgs: jest.fn() as jest.MockedFunction<any>).mockReturnValue([]),
+      getArgByIndex: jest.fn() as jest.MockedFunction<any>).mockReturnValue(undefined),
+      getType: jest.fn() as jest.MockedFunction<any>).mockReturnValue('http'),
     } as jest.Mocked<ExecutionContext>;
   };
 
@@ -402,10 +402,10 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: `algorithm-confusion-${attackType}` },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
-          .mockRejectedValue(new Error('Algorithm confusion detected'));
+           as jest.MockedFunction<any>).mockRejectedValue(new Error('Algorithm confusion detected'));
 
         try {
           await jwtAuthGuard.canActivate(context);
@@ -458,10 +458,10 @@ describe('Security Penetration Testing Suite', () => {
           },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
-          .mockRejectedValue(new Error('Header manipulation detected'));
+           as jest.MockedFunction<any>).mockRejectedValue(new Error('Header manipulation detected'));
 
         try {
           await jwtAuthGuard.canActivate(context);
@@ -512,7 +512,7 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: `_payload-injection-${attackType}` },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
 
         // Simulate successful token verification but with malicious payload
         const tokenPart = token.split('.')[1];
@@ -524,7 +524,7 @@ describe('Security Penetration Testing Suite', () => {
         ) as object;
         jest
           .spyOn(jwtService, 'verifyAsync')
-          .mockResolvedValue(maliciousPayload);
+           as jest.MockedFunction<any>).mockResolvedValue(maliciousPayload);
 
         try {
           const _result = await jwtAuthGuard.canActivate(context);
@@ -583,7 +583,7 @@ describe('Security Penetration Testing Suite', () => {
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValue([UserRole._ADMIN]);
+         as jest.MockedFunction<any>).mockReturnValue([UserRole._ADMIN]);
 
       const raceAttackResults =
         await AttackSimulator.simulateRaceConditionAttack(
@@ -618,7 +618,7 @@ describe('Security Penetration Testing Suite', () => {
         `[${testId}] EXECUTING: Object manipulation privilege escalation attack`,
       );
 
-      const attackVectors = [
+      const attackVectors: unknown = [
         {
           name: 'prototype-pollution',
           user: {
@@ -743,10 +743,10 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: `timing-${testCase.name}` },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
 
         if (testCase.shouldSucceed) {
-          jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
+          jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>).mockResolvedValue({
             sub: 'user',
             email: 'user@test.com',
             role: UserRole._VIEWER,
@@ -755,7 +755,7 @@ describe('Security Penetration Testing Suite', () => {
         } else {
           jest
             .spyOn(jwtService, 'verifyAsync')
-            .mockRejectedValue(new Error('Invalid token'));
+             as jest.MockedFunction<any>).mockRejectedValue(new Error('Invalid token'));
         }
 
         const processingTime = await JWTManipulator.measureTokenProcessingTime(
@@ -793,7 +793,7 @@ describe('Security Penetration Testing Suite', () => {
         `[${testId}] EXECUTING: Authorization timing side-channel analysis`,
       );
 
-      const roleTestCases = [
+      const roleTestCases: unknown = [
         {
           role: UserRole._ADMIN,
           requiredRole: UserRole._ADMIN,
@@ -890,10 +890,10 @@ describe('Security Penetration Testing Suite', () => {
             { attackVector: 'brute-force-auth', ip: '192.168.1.100' },
           );
 
-          jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+          jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
           jest
             .spyOn(jwtService, 'verifyAsync')
-            .mockRejectedValue(new Error('Brute force token'));
+             as jest.MockedFunction<any>).mockRejectedValue(new Error('Brute force token'));
 
           return await jwtAuthGuard.canActivate(context);
         },
@@ -937,10 +937,10 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: 'credential-stuffing', ip: '10.0.0.200' },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
-          .mockRejectedValue(new Error('Credential stuffing detected'));
+           as jest.MockedFunction<any>).mockRejectedValue(new Error('Credential stuffing detected'));
 
         try {
           await jwtAuthGuard.canActivate(context);
@@ -991,11 +991,11 @@ describe('Security Penetration Testing Suite', () => {
             { attackVector: 'session-replay', ip: '172.16.0.100' },
           );
 
-          jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+          jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
 
           if (replayToken === legitimateToken) {
             // Only the original token should work
-            jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
+            jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>).mockResolvedValue({
               sub: 'user123',
               email: 'user@test.com',
               role: UserRole._VIEWER,
@@ -1004,7 +1004,7 @@ describe('Security Penetration Testing Suite', () => {
           } else {
             jest
               .spyOn(jwtService, 'verifyAsync')
-              .mockRejectedValue(new Error('Replay token invalid'));
+               as jest.MockedFunction<any>).mockRejectedValue(new Error('Replay token invalid'));
           }
 
           return await jwtAuthGuard.canActivate(context);
@@ -1046,10 +1046,10 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: 'token-manipulation', ip: '203.0.113.100' },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
-          .mockRejectedValue(new Error('Token manipulation detected'));
+           as jest.MockedFunction<any>).mockRejectedValue(new Error('Token manipulation detected'));
 
         try {
           await jwtAuthGuard.canActivate(context);
@@ -1127,10 +1127,10 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: `apt-${technique.name}`, ip: '198.51.100.100' },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
         jest
           .spyOn(jwtService, 'verifyAsync')
-          .mockResolvedValue(technique.payload as object);
+           as jest.MockedFunction<any>).mockResolvedValue(technique.payload as object);
 
         try {
           const _result = await jwtAuthGuard.canActivate(context);
@@ -1194,10 +1194,10 @@ describe('Security Penetration Testing Suite', () => {
             },
           );
 
-          jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+          jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
           jest
             .spyOn(jwtService, 'verifyAsync')
-            .mockRejectedValue(new Error('Low and slow attack'));
+             as jest.MockedFunction<any>).mockRejectedValue(new Error('Low and slow attack'));
 
           try {
             await jwtAuthGuard.canActivate(context);
@@ -1266,10 +1266,10 @@ describe('Security Penetration Testing Suite', () => {
                 { attackVector: `sustained-jwt-${round}-${i}` },
               );
 
-              jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+              jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
               jest
                 .spyOn(jwtService, 'verifyAsync')
-                .mockRejectedValue(new Error('Sustained attack'));
+                 as jest.MockedFunction<any>).mockRejectedValue(new Error('Sustained attack'));
 
               try {
                 await jwtAuthGuard.canActivate(context);
@@ -1295,7 +1295,7 @@ describe('Security Penetration Testing Suite', () => {
                 sub: `role-attacker-${round}-${i}`,
                 ...({
                   __proto__: { role: UserRole._ADMIN },
-                } as any),
+                } as Record<string, unknown>),
               } as ByteBotdUser;
 
               const context = createPentestExecutionContext(
@@ -1306,7 +1306,7 @@ describe('Security Penetration Testing Suite', () => {
 
               jest
                 .spyOn(reflector, 'getAllAndOverride')
-                .mockReturnValue([UserRole._ADMIN]);
+                 as jest.MockedFunction<any>).mockReturnValue([UserRole._ADMIN]);
 
               try {
                 await rolesGuard.canActivate(context);
@@ -1409,10 +1409,10 @@ describe('Security Penetration Testing Suite', () => {
                 { attackVector: eventType.type, ip: '192.168.100.100' },
               );
 
-              jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+              jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
               jest
                 .spyOn(jwtService, 'verifyAsync')
-                .mockRejectedValue(new Error('Audit test failure'));
+                 as jest.MockedFunction<any>).mockRejectedValue(new Error('Audit test failure'));
 
               try {
                 await jwtAuthGuard.canActivate(authContext);
@@ -1442,7 +1442,7 @@ describe('Security Penetration Testing Suite', () => {
 
               jest
                 .spyOn(reflector, 'getAllAndOverride')
-                .mockReturnValue([eventType.requiredRole]);
+                 as jest.MockedFunction<any>).mockReturnValue([eventType.requiredRole]);
 
               try {
                 await rolesGuard.canActivate(roleContext);

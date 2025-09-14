@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-env jest */
  
  
@@ -535,7 +539,7 @@ describe('InputTrackingGateway', () => {
       console.log(`[${testId}] Testing server emission error handling`);
 
       // Mock server emit to throw error
-      mockServer.emit = jest.fn().mockImplementation(() => {
+      mockServer.emit = jest.fn() as jest.MockedFunction<any>).mockImplementation(() => {
         throw new Error('Network error');
       });
 
@@ -743,7 +747,7 @@ describe('InputTrackingGateway', () => {
         .mockImplementationOnce(() => {
           throw new Error('Temporary server error');
         })
-        .mockImplementation(() => {
+         as jest.MockedFunction<any>).mockImplementation(() => {
           return true;
         });
 

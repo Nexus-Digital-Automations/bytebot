@@ -98,14 +98,14 @@ describe('ComputerUseService - Keyboard Operations', () => {
     nutService = module.get(NutService);
 
     // Setup logger spies for comprehensive logging verification
-    __loggerLogSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
+    __loggerLogSpy = jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation();
     __loggerErrorSpy = jest
       .spyOn(Logger.prototype, 'error')
-      .mockImplementation();
-    __loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+       as jest.MockedFunction<any>).mockImplementation();
+    __loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation();
     __loggerDebugSpy = jest
       .spyOn(Logger.prototype, 'debug')
-      .mockImplementation();
+       as jest.MockedFunction<any>).mockImplementation();
   });
 
   /**
@@ -114,10 +114,10 @@ describe('ComputerUseService - Keyboard Operations', () => {
    */
   afterEach(() => {
     jest.clearAllMocks();
-    __loggerLogSpy.mockRestore();
-    __loggerErrorSpy.mockRestore();
-    __loggerWarnSpy.mockRestore();
-    __loggerDebugSpy.mockRestore();
+    __loggerLogSpy as jest.MockedFunction<any>).mockRestore();
+    __loggerErrorSpy as jest.MockedFunction<any>).mockRestore();
+    __loggerWarnSpy as jest.MockedFunction<any>).mockRestore();
+    __loggerDebugSpy as jest.MockedFunction<any>).mockRestore();
   });
 
   /**
@@ -139,7 +139,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         scrollCount: 3,
       };
 
-      nutService.mouseWheelEvent.mockResolvedValue({ success: true });
+      nutService.mouseWheelEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute scroll operation
       await service.action(scrollAction);
@@ -176,8 +176,8 @@ describe('ComputerUseService - Keyboard Operations', () => {
         scrollCount: 2,
       };
 
-      nutService.mouseMoveEvent.mockResolvedValue({ success: true });
-      nutService.mouseWheelEvent.mockResolvedValue({ success: true });
+      nutService.mouseMoveEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+      nutService.mouseWheelEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute scroll with coordinates
       await service.action(scrollAction);
@@ -208,9 +208,9 @@ describe('ComputerUseService - Keyboard Operations', () => {
         holdKeys: ['ctrl', 'shift'],
       };
 
-      nutService.mouseMoveEvent.mockResolvedValue({ success: true });
-      nutService.holdKeys.mockResolvedValue({ success: true });
-      nutService.mouseWheelEvent.mockResolvedValue({ success: true });
+      nutService.mouseMoveEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+      nutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+      nutService.mouseWheelEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute scroll with modifiers
       await service.action(scrollAction);
@@ -242,7 +242,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         scrollCount: 100, // Should be limited to 50
       };
 
-      nutService.mouseWheelEvent.mockResolvedValue({ success: true });
+      nutService.mouseWheelEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute scroll with high count
       await service.action(scrollAction);
@@ -270,8 +270,8 @@ describe('ComputerUseService - Keyboard Operations', () => {
       };
 
       const errorMessage = 'Mouse wheel event failed';
-      nutService.holdKeys.mockResolvedValue({ success: true });
-      nutService.mouseWheelEvent.mockRejectedValue(new Error(errorMessage));
+      nutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+      nutService.mouseWheelEvent as jest.MockedFunction<any>).mockRejectedValue(new Error(errorMessage));
 
       // Act & Assert: Verify error is thrown
       await expect(service.action(scrollAction)).rejects.toThrow(
@@ -307,7 +307,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
           scrollCount: 1,
         };
 
-        nutService.mouseWheelEvent.mockResolvedValue({ success: true });
+        nutService.mouseWheelEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
         // Act: Execute scroll in direction
         await service.action(scrollAction);
@@ -334,7 +334,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         keys: ['h', 'e', 'l', 'l', 'o'],
       };
 
-      nutService.sendKeys.mockResolvedValue({ success: true });
+      nutService.sendKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute key typing
       await service.action(typeKeysAction);
@@ -372,7 +372,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         delay: 100,
       };
 
-      nutService.sendKeys.mockResolvedValue({ success: true });
+      nutService.sendKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute key typing with delay
       await service.action(typeKeysAction);
@@ -400,7 +400,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         keys: ['ctrl+c', 'alt+tab', 'escape', 'enter'],
       };
 
-      nutService.sendKeys.mockResolvedValue({ success: true });
+      nutService.sendKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute special key typing
       await service.action(typeKeysAction);
@@ -425,7 +425,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       };
 
       const errorMessage = 'Key sending failed';
-      nutService.sendKeys.mockRejectedValue(new Error(errorMessage));
+      nutService.sendKeys as jest.MockedFunction<any>).mockRejectedValue(new Error(errorMessage));
 
       // Act & Assert: Verify error is thrown
       await expect(service.action(typeKeysAction)).rejects.toThrow(
@@ -456,7 +456,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         keys: [],
       };
 
-      nutService.sendKeys.mockResolvedValue({ success: true });
+      nutService.sendKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute empty key typing
       await service.action(typeKeysAction);
@@ -490,7 +490,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'down',
       };
 
-      nutService.holdKeys.mockResolvedValue({ success: true });
+      nutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute key press
       await service.action(pressKeysAction);
@@ -523,7 +523,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'up',
       };
 
-      nutService.holdKeys.mockResolvedValue({ success: true });
+      nutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute key release
       await service.action(pressKeysAction);
@@ -556,7 +556,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'down',
       };
 
-      nutService.holdKeys.mockResolvedValue({ success: true });
+      nutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute single key press
       await service.action(pressKeysAction);
@@ -578,7 +578,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       };
 
       const errorMessage = 'Key press failed';
-      nutService.holdKeys.mockRejectedValue(new Error(errorMessage));
+      nutService.holdKeys as jest.MockedFunction<any>).mockRejectedValue(new Error(errorMessage));
 
       // Act & Assert: Verify error is thrown
       await expect(service.action(pressKeysAction)).rejects.toThrow(
@@ -610,7 +610,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'down',
       };
 
-      nutService.holdKeys.mockResolvedValue({ success: true });
+      nutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
 
       // Act: Execute empty key press
       await service.action(pressKeysAction);
@@ -640,17 +640,17 @@ describe('ComputerUseService - Keyboard Operations', () => {
       // Arrange: Setup text typing operation
       const typeTextAction: TypeTextAction = {
         action: 'type_text',
-        text: 'Hello, World!',
+        text: 'Hello, World as NonNullable<typeof World>',
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      nutService.typeText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute text typing
       await service.action(typeTextAction);
 
       // Assert: Verify correct NutService call and logging
       expect(nutService.typeText).toHaveBeenCalledWith(
-        'Hello, World!',
+        'Hello, World as NonNullable<typeof World>',
         undefined,
       );
       expect(__loggerLogSpy).toHaveBeenCalledWith(
@@ -681,7 +681,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         delay: 200,
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      nutService.typeText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute text typing with delay
       await service.action(typeTextAction);
@@ -710,7 +710,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         sensitive: true,
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      nutService.typeText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute sensitive text typing
       await service.action(typeTextAction);
@@ -740,7 +740,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: '!@#$%^&*()_+-={}|[]\\:";\'<>?,./',
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      nutService.typeText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute special character typing
       await service.action(typeTextAction);
@@ -764,7 +764,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: multilineText,
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      nutService.typeText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute multiline text typing
       await service.action(typeTextAction);
@@ -795,7 +795,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       };
 
       const errorMessage = 'Text typing failed';
-      nutService.typeText.mockRejectedValue(new Error(errorMessage));
+      nutService.typeText as jest.MockedFunction<any>).mockRejectedValue(new Error(errorMessage));
 
       // Act & Assert: Verify error is thrown
       await expect(service.action(typeTextAction)).rejects.toThrow(
@@ -826,7 +826,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: '',
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      nutService.typeText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute empty text typing
       await service.action(typeTextAction);
@@ -858,7 +858,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: 'Clipboard content',
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      nutService.pasteText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute text pasting
       await service.action(pasteTextAction);
@@ -890,7 +890,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: largeText,
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      nutService.pasteText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute large text pasting
       await service.action(pasteTextAction);
@@ -918,7 +918,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: formattedText,
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      nutService.pasteText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute formatted text pasting
       await service.action(pasteTextAction);
@@ -939,7 +939,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: multilineText,
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      nutService.pasteText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute multiline text pasting
       await service.action(pasteTextAction);
@@ -966,7 +966,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       };
 
       const errorMessage = 'Clipboard paste failed';
-      nutService.pasteText.mockRejectedValue(new Error(errorMessage));
+      nutService.pasteText as jest.MockedFunction<any>).mockRejectedValue(new Error(errorMessage));
 
       // Act & Assert: Verify error is thrown
       await expect(service.action(pasteTextAction)).rejects.toThrow(
@@ -996,7 +996,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: '',
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      nutService.pasteText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute empty text pasting
       await service.action(pasteTextAction);
@@ -1023,7 +1023,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: unicodeText,
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      nutService.pasteText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute unicode text pasting
       await service.action(pasteTextAction);
@@ -1116,9 +1116,9 @@ describe('ComputerUseService - Keyboard Operations', () => {
      */
     it('should handle sequential keyboard operations', async () => {
       // Arrange: Setup multiple keyboard operations
-      nutService.sendKeys.mockResolvedValue({ success: true });
-      nutService.typeText.mockResolvedValue(undefined);
-      nutService.pasteText.mockResolvedValue(undefined);
+      nutService.sendKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+      nutService.typeText as jest.MockedFunction<any>).mockResolvedValue(undefined);
+      nutService.pasteText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute sequential operations
       await service.action({
@@ -1190,7 +1190,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
      */
     it('should include timing information in logs', async () => {
       // Arrange: Setup operation with controlled timing
-      nutService.typeText.mockImplementation(
+      nutService.typeText as jest.MockedFunction<any>).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100)),
       );
 
@@ -1215,11 +1215,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
      */
     it('should use structured logging for all operations', async () => {
       // Arrange: Setup successful operations
-      nutService.mouseWheelEvent.mockResolvedValue({ success: true });
-      nutService.sendKeys.mockResolvedValue({ success: true });
-      nutService.holdKeys.mockResolvedValue({ success: true });
-      nutService.typeText.mockResolvedValue(undefined);
-      nutService.pasteText.mockResolvedValue(undefined);
+      nutService.mouseWheelEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+      nutService.sendKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+      nutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+      nutService.typeText as jest.MockedFunction<any>).mockResolvedValue(undefined);
+      nutService.pasteText as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       // Act: Execute all keyboard operation types
       const operations = [

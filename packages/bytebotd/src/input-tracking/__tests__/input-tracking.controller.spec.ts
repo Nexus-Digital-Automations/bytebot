@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-env jest */
 /**
  * Input Tracking Controller Test Suite
@@ -90,7 +94,7 @@ describe('InputTrackingController', () => {
           useValue: {
             startTracking: jest.fn(),
             stopTracking: jest.fn(),
-            isTracking: jest.fn().mockReturnValue(false),
+            isTracking: jest.fn() as jest.MockedFunction<any>).mockReturnValue(false),
           } as MockInputTrackingService,
         },
         {
@@ -107,11 +111,11 @@ describe('InputTrackingController', () => {
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({
-        canActivate: jest.fn().mockReturnValue(true),
+        canActivate: jest.fn() as jest.MockedFunction<any>).mockReturnValue(true),
       })
       .overrideGuard(RolesGuard)
       .useValue({
-        canActivate: jest.fn().mockReturnValue(true),
+        canActivate: jest.fn() as jest.MockedFunction<any>).mockReturnValue(true),
       })
       .compile();
 
@@ -320,7 +324,7 @@ describe('InputTrackingController', () => {
       console.log(`[${testId}] Testing service error handling`);
 
       // Mock service to throw an error
-      jest.spyOn(service, 'startTracking').mockImplementation(() => {
+      jest.spyOn(service, 'startTracking') as jest.MockedFunction<any>).mockImplementation(() => {
         throw new Error('Service unavailable');
       });
 
@@ -516,7 +520,7 @@ describe('InputTrackingController', () => {
       console.log(`[${testId}] Testing service method exceptions`);
 
       // Test startTracking exception
-      jest.spyOn(service, 'startTracking').mockImplementation(() => {
+      jest.spyOn(service, 'startTracking') as jest.MockedFunction<any>).mockImplementation(() => {
         throw new Error('Hardware not available');
       });
 
@@ -525,7 +529,7 @@ describe('InputTrackingController', () => {
       );
 
       // Test stopTracking exception
-      jest.spyOn(service, 'stopTracking').mockImplementation(() => {
+      jest.spyOn(service, 'stopTracking') as jest.MockedFunction<any>).mockImplementation(() => {
         throw new Error('Cannot stop tracking');
       });
 

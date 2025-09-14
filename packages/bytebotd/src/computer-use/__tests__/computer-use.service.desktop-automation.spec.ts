@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-env jest */
 /**
  * Computer Use Service - Advanced Desktop Automation Test Suite
@@ -25,7 +29,7 @@
 // Mock all external dependencies before imports
 jest.mock('child_process', () => ({
   exec: jest.fn(),
-  spawn: jest.fn().mockReturnValue({
+  spawn: jest.fn() as jest.MockedFunction<any>).mockReturnValue({
     unref: jest.fn(),
     pid: 12345,
     kill: jest.fn(),
@@ -87,7 +91,7 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
     colorAt: jest.fn(),
   },
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  Point: jest.fn().mockImplementation((x, y) => ({ x, y })),
+  Point: jest.fn() as jest.MockedFunction<any>).mockImplementation((x, y) => ({ x, y })),
   Region: jest.fn(),
   Key: {
     LeftCmd: 'LeftCmd',
@@ -148,22 +152,22 @@ import { ScreenshotActionDto } from '../dto/computer-action.dto';
 
 // Mock services for comprehensive testing
 const mockNutService = {
-  mouseMoveEvent: jest.fn().mockResolvedValue(undefined),
-  mouseClickEvent: jest.fn().mockResolvedValue(undefined),
-  mouseButtonEvent: jest.fn().mockResolvedValue(undefined),
-  mouseWheelEvent: jest.fn().mockResolvedValue(undefined),
-  sendKeys: jest.fn().mockResolvedValue(undefined),
-  holdKeys: jest.fn().mockResolvedValue(undefined),
-  typeText: jest.fn().mockResolvedValue(undefined),
-  pasteText: jest.fn().mockResolvedValue(undefined),
-  screendump: jest.fn().mockResolvedValue('mock-base64-screenshot-data'),
-  getCursorPosition: jest.fn().mockResolvedValue({ x: 100, y: 200 }),
+  mouseMoveEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  mouseClickEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  mouseButtonEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  mouseWheelEvent: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  sendKeys: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  holdKeys: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  typeText: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  pasteText: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  screendump: jest.fn() as jest.MockedFunction<any>).mockResolvedValue('mock-base64-screenshot-data'),
+  getCursorPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
 };
 
 // Standard performance tracking for desktop automation
 const _mockPerformanceTracker = {
-  recordMetric: jest.fn().mockResolvedValue(undefined),
-  getMetrics: jest.fn().mockResolvedValue({
+  recordMetric: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+  getMetrics: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
     operationCount: 42,
     averageLatency: 150,
     memoryUsage: 1024,
@@ -413,9 +417,9 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
     it('should handle international text input with proper encoding', async () => {
       const internationalTexts = [
         'Hello, 世界!', // Chinese
-        'Bonjour, le monde!', // French
+        'Bonjour, le monde as NonNullable<typeof monde>', // French
         'Привет мир!', // Russian
-        '¡Hola mundo!', // Spanish
+        '¡Hola mundo as NonNullable<typeof mundo>', // Spanish
         'こんにちは世界', // Japanese
         '🌍🚀💻', // Emojis
       ];
@@ -663,7 +667,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
   describe('Screenshot and Basic Vision Functionality', () => {
     it('should capture screenshots successfully', async () => {
       // Mock a screenshot capture
-      mockNutService.screendump.mockResolvedValue('base64-screenshot-data');
+      mockNutService.screendump as jest.MockedFunction<any>).mockResolvedValue('base64-screenshot-data');
 
       const screenshotAction: ScreenshotActionDto = {
         action: 'screenshot',
@@ -678,7 +682,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
 
     it('should handle screenshot errors gracefully', async () => {
       // Mock screenshot failure
-      mockNutService.screendump.mockRejectedValue(
+      mockNutService.screendump as jest.MockedFunction<any>).mockRejectedValue(
         new Error('Screenshot failed'),
       );
 
@@ -729,7 +733,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       nutService.mouseClickEvent = jest
         .fn()
         .mockRejectedValueOnce(new Error('Transient failure'))
-        .mockResolvedValue(undefined);
+         as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       const clickAction: ClickMouseAction = {
         action: 'click_mouse',
@@ -759,7 +763,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       // Make the middle action fail
       nutService.mouseClickEvent = jest
         .fn()
-        .mockRejectedValue(new Error('Click failed'));
+         as jest.MockedFunction<any>).mockRejectedValue(new Error('Click failed'));
 
       const results = [];
       for (const action of mixedActions) {

@@ -57,7 +57,7 @@ describe('InputTrackingModule', () => {
             {
               provide: ComputerUseService,
               useValue: {
-                screenshot: jest.fn().mockResolvedValue({
+                screenshot: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
                   image: 'mock-screenshot-data',
                 }),
               },
@@ -135,7 +135,7 @@ describe('InputTrackingModule', () => {
 
       // Should be instantiable (though we don't typically instantiate modules directly)
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      expect(() => new (InputTrackingModule as any)()).not.toThrow();
+      expect(() => new (InputTrackingModule as Record<string, unknown>)()).not.toThrow();
 
       console.log(`[${testId}] Valid NestJS module class test completed`);
     });

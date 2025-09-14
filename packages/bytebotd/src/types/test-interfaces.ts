@@ -1,44 +1,69 @@
 /**
- * Testing Interface Definitions for TypeScript Strict Compliance
- *
- * This file provides properly typed interfaces for accessing private methods
- * and properties in test files, eliminating the need for 'as any' type assertions.
- *
- * @author Claude Code - TypeScript Violation Fixer
- * @version 1.0.0
+ * Proper TypeScript test interfaces for ESLint compliance
  */
+import type { HealthIndicatorResult } from '@nestjs/terminus';
+import type { HealthService } from '../health/health.service';
+import type { NutService } from '../nut/nut.service';
 
-/**
- * Interface for key mapping information in NutService
- */
 export interface KeyMappingInfo {
   keyCode: string;
   withShift: boolean;
 }
 
-/**
- * Typed interfaces for testable services - provides access to private methods
- * and properties in test files with proper TypeScript compliance
- */
-export type TestableHealthService = {
-  [key: string]: unknown;
-} & Record<string, unknown>;
+export interface ServiceResponse {
+  success: boolean;
+  message?: string;
+}
 
-export type TestableNutService = {
-  [key: string]: unknown;
-} & Record<string, unknown>;
+export interface Coordinates {
+  x: number;
+  y: number;
+}
+
+export interface KeyInfo {
+  keyCode: string;
+  withShift: boolean;
+}
+
+export type MouseButton = 'left' | 'right' | 'middle';
+export type ScrollDirection = 'up' | 'down' | 'left' | 'right';
 
 /**
- * Helper function to cast services to testable interfaces
- * This allows access to private methods and properties in tests
+ * Type-safe interface for HealthService testing including private methods
  */
+export type TestableHealthService = HealthService & {
+  checkServiceHealth?(): {
+    database: 'connected' | 'disconnected' | 'unknown';
+    cache: 'available' | 'unavailable' | 'unknown';
+    external: 'reachable' | 'unreachable' | 'unknown';
+  };
+  performDatabasePing?(): Promise<boolean>;
+  checkExternalService?(url: string, timeout?: number): Promise<{
+    status: string;
+    responseTime?: string;
+  }>;
+  getPerformanceMetrics?(): {
+    requestsPerSecond: number;
+    averageResponseTime: number;
+  };
+};
+
+/**
+ * Type-safe interface for NutService testing
+ */
+export type TestableNutService = NutService & {
+  validateKey?(key: string): string;
+  charToKeyInfo?(char: string): KeyInfo | null;
+  getErrorMessage?(error: unknown): string;
+  delay?(ms: number): Promise<void>;
+  generateOperationId?(): string;
+  getServiceStatus?(): Record<string, unknown>;
+};
+
 export function asTestable<T>(service: T): T & Record<string, unknown> {
   return service as T & Record<string, unknown>;
 }
 
-/**
- * Type for health indicator results with proper typing
- */
 export interface TypedHealthIndicatorResult {
   [key: string]: {
     status: 'up' | 'down';

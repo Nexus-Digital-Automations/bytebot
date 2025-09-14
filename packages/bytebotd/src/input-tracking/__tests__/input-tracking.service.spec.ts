@@ -212,7 +212,7 @@ describe('InputTrackingService', () => {
         {
           provide: ComputerUseService,
           useValue: {
-            screenshot: jest.fn().mockResolvedValue({
+            screenshot: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
               image: 'mock-screenshot-base64-data',
             }),
           },
@@ -935,7 +935,7 @@ describe('InputTrackingService', () => {
         (mockUIOhook.on as jest.Mock).mock.calls as MockCall[]
       ).find((call: [string, Function]) => call[0] === 'keydown')?.[1];
 
-      const malformedEvent = {
+      const malformedEvent: unknown = {
         // Missing required properties
         keycode: null,
       } as any;

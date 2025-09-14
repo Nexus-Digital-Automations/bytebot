@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-env jest */
 /**
  * Minimal NUT Service Test
@@ -9,20 +13,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 // Mock external dependencies first
 jest.mock('@nut-tree-fork/nut-js', () => ({
   keyboard: {
-    pressKey: jest.fn().mockResolvedValue(undefined),
-    releaseKey: jest.fn().mockResolvedValue(undefined),
+    pressKey: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    releaseKey: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
     config: { autoDelayMs: 100 },
   },
   mouse: {
-    setPosition: jest.fn().mockResolvedValue(undefined),
-    click: jest.fn().mockResolvedValue(undefined),
-    getPosition: jest.fn().mockResolvedValue({ x: 100, y: 200 }),
+    setPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    click: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    getPosition: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
     config: { autoDelayMs: 100 },
   },
   screen: {
-    capture: jest.fn().mockResolvedValue(undefined),
+    capture: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
   },
-  Point: jest.fn().mockImplementation((x: number, y: number) => ({ x, y })),
+  Point: jest.fn() as jest.MockedFunction<any>).mockImplementation((x: number, y: number) => ({ x, y })),
   Key: {
     A: 'A',
     B: 'B',
@@ -38,9 +42,9 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
 // Mock dynamic fs import
 jest.mock('fs', () => ({
   promises: {
-    mkdir: jest.fn().mockResolvedValue(undefined),
-    readFile: jest.fn().mockResolvedValue(Buffer.from('test')),
-    unlink: jest.fn().mockResolvedValue(undefined),
+    mkdir: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    readFile: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test')),
+    unlink: jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
   },
 }));
 

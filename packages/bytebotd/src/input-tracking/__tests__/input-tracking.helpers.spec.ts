@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Input Tracking Helpers Test Suite
  *
@@ -78,16 +82,16 @@ describe('InputTrackingHelpers', () => {
       console.log(`[${testId}] Testing printable character detection`);
 
       // Test alphabet keys (should be printable)
-      const aKey = keyInfoMap[UiohookKey.A];
-      const zKey = keyInfoMap[UiohookKey.Z];
-      expect(aKey?.isPrintable).toBe(true);
-      expect(zKey?.isPrintable).toBe(true);
+      const aKey = keyInfoMap[UiohookKey.A]!;
+      const zKey = keyInfoMap[UiohookKey.Z]!;
+      expect(aKey.isPrintable).toBe(true);
+      expect(zKey.isPrintable).toBe(true);
 
       // Test number keys (should be printable)
-      const zeroKey = keyInfoMap[UiohookKey[0]];
-      const nineKey = keyInfoMap[UiohookKey[9]];
-      expect(zeroKey?.isPrintable).toBe(true);
-      expect(nineKey?.isPrintable).toBe(true);
+      const zeroKey = keyInfoMap[UiohookKey[0]]!;
+      const nineKey = keyInfoMap[UiohookKey[9]]!;
+      expect(zeroKey.isPrintable).toBe(true);
+      expect(nineKey.isPrintable).toBe(true);
 
       // Test space key (should be printable)
       const spaceKey = keyInfoMap[UiohookKey.Space];
@@ -173,19 +177,19 @@ describe('InputTrackingHelpers', () => {
       console.log(`[${testId}] Testing punctuation character string mapping`);
 
       // Test punctuation keys
-      const semicolonKey = keyInfoMap[UiohookKey.Semicolon];
-      const equalKey = keyInfoMap[UiohookKey.Equal];
-      const commaKey = keyInfoMap[UiohookKey.Comma];
-      const periodKey = keyInfoMap[UiohookKey.Period];
+      const semicolonKey = keyInfoMap[UiohookKey.Semicolon]!;
+      const equalKey = keyInfoMap[UiohookKey.Equal]!;
+      const commaKey = keyInfoMap[UiohookKey.Comma]!;
+      const periodKey = keyInfoMap[UiohookKey.Period]!;
 
-      expect(semicolonKey.string).toBe(';');
-      expect(semicolonKey.shiftString).toBe(':');
-      expect(equalKey.string).toBe('=');
-      expect(equalKey.shiftString).toBe('+');
-      expect(commaKey.string).toBe(',');
-      expect(commaKey.shiftString).toBe('"'); // Shift+comma on some layouts
-      expect(periodKey.string).toBe('.');
-      expect(periodKey.shiftString).toBe('>');
+      expect(semicolonKey?.string).toBe(';');
+      expect(semicolonKey?.shiftString).toBe(':');
+      expect(equalKey?.string).toBe('=');
+      expect(equalKey?.shiftString).toBe('+');
+      expect(commaKey?.string).toBe(',');
+      expect(commaKey?.shiftString).toBe('"'); // Shift+comma on some layouts
+      expect(periodKey?.string).toBe('.');
+      expect(periodKey?.shiftString).toBe('>');
 
       console.log(
         `[${testId}] Punctuation character string mapping test completed`,
@@ -196,12 +200,12 @@ describe('InputTrackingHelpers', () => {
       const testId = `${operationId}_space_key_handling`;
       console.log(`[${testId}] Testing space key handling`);
 
-      const spaceKey = keyInfoMap[UiohookKey.Space];
+      const spaceKey = keyInfoMap[UiohookKey.Space]!;
 
-      expect(spaceKey.name).toBe('Space');
-      expect(spaceKey.isPrintable).toBe(true);
-      expect(spaceKey.string).toBe(' ');
-      expect(spaceKey.shiftString).toBe(' '); // Space with shift is still space
+      expect(spaceKey?.name).toBe('Space');
+      expect(spaceKey?.isPrintable).toBe(true);
+      expect(spaceKey?.string).toBe(' ');
+      expect(spaceKey?.shiftString).toBe(' '); // Space with shift is still space
 
       console.log(`[${testId}] Space key handling test completed`);
     });
@@ -216,10 +220,10 @@ describe('InputTrackingHelpers', () => {
       for (let i = 1; i <= 12; i++) {
         const fKey = keyInfoMap[UiohookKey[`F${i}` as keyof typeof UiohookKey]];
         expect(fKey).toBeDefined();
-        expect(fKey.name).toBe(`F${i}`);
-        expect(fKey.isPrintable).toBe(false);
-        expect(fKey.string).toBeUndefined();
-        expect(fKey.shiftString).toBeUndefined();
+        expect(fKey as NonNullable<typeof fKey>.name).toBe(`F${i}`);
+        expect(fKey as NonNullable<typeof fKey>.isPrintable).toBe(false);
+        expect(fKey as NonNullable<typeof fKey>.string).toBeUndefined();
+        expect(fKey as NonNullable<typeof fKey>.shiftString).toBeUndefined();
       }
 
       // Test extended function keys if they exist
@@ -256,8 +260,8 @@ describe('InputTrackingHelpers', () => {
       arrowKeys.forEach(({ key, name }) => {
         const keyInfo = keyInfoMap[key];
         expect(keyInfo).toBeDefined();
-        expect(keyInfo.name).toBe(name);
-        expect(keyInfo.isPrintable).toBe(false);
+        expect(keyInfo as NonNullable<typeof keyInfo>.name).toBe(name);
+        expect(keyInfo as NonNullable<typeof keyInfo>.isPrintable).toBe(false);
       });
 
       // Test page navigation keys
@@ -266,13 +270,18 @@ describe('InputTrackingHelpers', () => {
       const homeKey = keyInfoMap[UiohookKey.Home];
       const endKey = keyInfoMap[UiohookKey.End];
 
-      expect(pageUpKey.name).toBe('PageUp');
-      expect(pageDownKey.name).toBe('PageDown');
-      expect(homeKey.name).toBe('Home');
-      expect(endKey.name).toBe('End');
+      expect(pageUpKey).toBeDefined();
+      expect(pageDownKey).toBeDefined();
+      expect(homeKey).toBeDefined();
+      expect(endKey).toBeDefined();
+
+      expect(pageUpKey as NonNullable<typeof pageUpKey>.name).toBe('PageUp');
+      expect(pageDownKey as NonNullable<typeof pageDownKey>.name).toBe('PageDown');
+      expect(homeKey as NonNullable<typeof homeKey>.name).toBe('Home');
+      expect(endKey as NonNullable<typeof endKey>.name).toBe('End');
 
       [pageUpKey, pageDownKey, homeKey, endKey].forEach((keyInfo) => {
-        expect(keyInfo.isPrintable).toBe(false);
+        expect(keyInfo as NonNullable<typeof keyInfo>.isPrintable).toBe(false);
       });
 
       console.log(`[${testId}] Navigation keys mapping test completed`);
@@ -299,10 +308,10 @@ describe('InputTrackingHelpers', () => {
       modifierKeys.forEach(({ key, name }) => {
         const keyInfo = keyInfoMap[key];
         expect(keyInfo).toBeDefined();
-        expect(keyInfo.name).toBe(name);
-        expect(keyInfo.isPrintable).toBe(false);
-        expect(keyInfo.string).toBeUndefined();
-        expect(keyInfo.shiftString).toBeUndefined();
+        expect(keyInfo as NonNullable<typeof keyInfo>.name).toBe(name);
+        expect(keyInfo as NonNullable<typeof keyInfo>.isPrintable).toBe(false);
+        expect(keyInfo as NonNullable<typeof keyInfo>.string).toBeUndefined();
+        expect(keyInfo as NonNullable<typeof keyInfo>.shiftString).toBeUndefined();
       });
 
       console.log(`[${testId}] Modifier keys mapping test completed`);
@@ -319,10 +328,10 @@ describe('InputTrackingHelpers', () => {
         const numpadKey =
           keyInfoMap[UiohookKey[`Numpad${i}` as keyof typeof UiohookKey]];
         expect(numpadKey).toBeDefined();
-        expect(numpadKey.name).toBe(`Numpad${i}`);
-        expect(numpadKey.isPrintable).toBe(true);
-        expect(numpadKey.string).toBe(i.toString());
-        expect(numpadKey.shiftString).toBe(i.toString());
+        expect(numpadKey as NonNullable<typeof numpadKey>.name).toBe(`Numpad${i}`);
+        expect(numpadKey as NonNullable<typeof numpadKey>.isPrintable).toBe(true);
+        expect(numpadKey as NonNullable<typeof numpadKey>.string).toBe(i.toString());
+        expect(numpadKey as NonNullable<typeof numpadKey>.shiftString).toBe(i.toString());
       }
 
       console.log(`[${testId}] Numpad number keys mapping test completed`);
@@ -344,10 +353,10 @@ describe('InputTrackingHelpers', () => {
       operatorKeys.forEach(({ key, name, char }) => {
         const keyInfo = keyInfoMap[key];
         expect(keyInfo).toBeDefined();
-        expect(keyInfo.name).toBe(name);
-        expect(keyInfo.isPrintable).toBe(true);
-        expect(keyInfo.string).toBe(char);
-        expect(keyInfo.shiftString).toBe(char);
+        expect(keyInfo as NonNullable<typeof keyInfo>.name).toBe(name);
+        expect(keyInfo as NonNullable<typeof keyInfo>.isPrintable).toBe(true);
+        expect(keyInfo as NonNullable<typeof keyInfo>.string).toBe(char);
+        expect(keyInfo as NonNullable<typeof keyInfo>.shiftString).toBe(char);
       });
 
       console.log(`[${testId}] Numpad operator keys mapping test completed`);
@@ -672,8 +681,8 @@ describe('InputTrackingHelpers', () => {
       expect(minusKey.shiftString).toBe('_');
 
       const equalKey = keyInfoMap[UiohookKey.Equal];
-      expect(equalKey.string).toBe('=');
-      expect(equalKey.shiftString).toBe('+');
+      expect(equalKey?.string).toBe('=');
+      expect(equalKey?.shiftString).toBe('+');
 
       console.log(`[${testId}] Special character handling test completed`);
     });

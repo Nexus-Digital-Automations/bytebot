@@ -1,10 +1,10 @@
 /* eslint-env jest */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
- 
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
- 
+
 /**
  * Health Module Test Suite
  *
@@ -59,13 +59,13 @@ describe('HealthModule', () => {
     } as any;
 
     // Mock Logger constructor to return our mock
-    jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);
-    jest.spyOn(Logger.prototype, 'debug').mockImplementation(mockLogger.debug);
-    jest.spyOn(Logger.prototype, 'error').mockImplementation(mockLogger.error);
-    jest.spyOn(Logger.prototype, 'warn').mockImplementation(mockLogger.warn);
+    jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation(mockLogger.log);
+    jest.spyOn(Logger.prototype, 'debug') as jest.MockedFunction<any>).mockImplementation(mockLogger.debug);
+    jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>).mockImplementation(mockLogger.error);
+    jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation(mockLogger.warn);
     jest
       .spyOn(Logger.prototype, 'verbose')
-      .mockImplementation(mockLogger.verbose);
+       as jest.MockedFunction<any>).mockImplementation(mockLogger.verbose);
 
     module = await Test.createTestingModule({
       imports: [HealthModule],
@@ -145,7 +145,7 @@ describe('HealthModule', () => {
         ],
       }).compile();
 
-      const testService = testModule.get('TestServiceUsingHealth') as any;
+      const testService: unknown = testModule.get('TestServiceUsingHealth') as any;
       const exportedHealthService = testService.getHealthService();
 
       expect(exportedHealthService).toBeDefined();
@@ -492,7 +492,7 @@ describe('HealthModule', () => {
         ],
       }).compile();
 
-      const customHealthIndicator = extendedModule.get(
+      const customHealthIndicator: unknown = extendedModule.get(
         'CustomHealthIndicator',
       ) as any;
       expect(customHealthIndicator).toBeDefined();
@@ -559,12 +559,12 @@ describe('HealthModule', () => {
       const mockHealthService = {
         getBasicHealth: jest
           .fn()
-          .mockRejectedValue(new Error('Service initialization failed')),
+           as jest.MockedFunction<any>).mockRejectedValue(new Error('Service initialization failed')),
         getDetailedStatus: jest
           .fn()
-          .mockRejectedValue(new Error('Service initialization failed')),
-        isServiceStable: jest.fn().mockReturnValue(false),
-        getInitializationTime: jest.fn().mockReturnValue(Date.now()),
+           as jest.MockedFunction<any>).mockRejectedValue(new Error('Service initialization failed')),
+        isServiceStable: jest.fn() as jest.MockedFunction<any>).mockReturnValue(false),
+        getInitializationTime: jest.fn() as jest.MockedFunction<any>).mockReturnValue(Date.now()),
       };
 
       const failureModule = await Test.createTestingModule({
@@ -581,7 +581,7 @@ describe('HealthModule', () => {
       // Controller should handle service failures gracefully
       const healthResult = await failureHealthController.getHealth();
       expect(healthResult.status).toBe('unhealthy');
-      expect((healthResult as any).error).toBeDefined();
+      expect((healthResult as Record<string, unknown>).error).toBeDefined();
 
       await failureModule.close();
       console.log(
@@ -679,7 +679,7 @@ describe('HealthModule', () => {
             const health = await healthController.getHealth();
             return health;
           } catch (error) {
-            return { status: 'error', error: error.message };
+            return { status: 'error', error: (error as Error).message };
           }
         });
 

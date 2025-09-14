@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-env jest */
 // TypeScript safety note: This test file contains complex UIohook integration that requires flexible typing
 /**
@@ -201,7 +205,7 @@ const createMockLogger = () => ({
 });
 
 const mockComputerUseService = {
-  action: jest.fn().mockResolvedValue({
+  action: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
     success: true,
     message: 'Screenshot captured',
     image: 'base64-mock-screenshot-data',
@@ -212,7 +216,7 @@ const mockComputerUseService = {
       operationId: 'screenshot-123',
     },
   }),
-  screenshot: jest.fn().mockResolvedValue({
+  screenshot: jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
     image: 'base64-mock-screenshot-data',
     metadata: {
       width: 1920,
@@ -226,11 +230,11 @@ const mockComputerUseService = {
 const mockInputTrackingGateway = {
   broadcastInputEvent: jest.fn(),
   broadcastActionEvent: jest.fn(),
-  getConnectedClients: jest.fn().mockReturnValue(5),
+  getConnectedClients: jest.fn() as jest.MockedFunction<any>).mockReturnValue(5),
   broadcastToRoom: jest.fn(),
   joinRoom: jest.fn(),
   leaveRoom: jest.fn(),
-  getClientRooms: jest.fn().mockReturnValue(['desktop-session-1']),
+  getClientRooms: jest.fn() as jest.MockedFunction<any>).mockReturnValue(['desktop-session-1']),
   emitAction: jest.fn(),
   emitScreenshotAndAction: jest.fn(),
   handleConnection: jest.fn(),
@@ -1028,7 +1032,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       // Join specific rooms
       mockInputTrackingGateway.getClientRooms = jest
         .fn()
-        .mockReturnValue(['desktop-session-1', 'automation-session-2']);
+         as jest.MockedFunction<any>).mockReturnValue(['desktop-session-1', 'automation-session-2']);
 
       const mouseEvent = createMouseEvent({ x: 500, y: 600 });
       moveHandler?.(mouseEvent);
@@ -1128,7 +1132,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
   describe('Error Handling and Recovery', () => {
     it('should handle UIohook initialization failures gracefully', () => {
-      mockUIOhook.start = jest.fn().mockImplementation(() => {
+      mockUIOhook.start = jest.fn() as jest.MockedFunction<any>).mockImplementation(() => {
         throw new Error('UIohook initialization failed');
       });
 
@@ -1144,7 +1148,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       // Mock gateway failure
       mockInputTrackingGateway.broadcastInputEvent = jest
         .fn()
-        .mockImplementation(() => {
+         as jest.MockedFunction<any>).mockImplementation(() => {
           throw new Error('WebSocket connection lost');
         });
 
