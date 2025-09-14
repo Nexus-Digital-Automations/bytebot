@@ -51,7 +51,7 @@ jest.mock('fs/promises');
 jest.mock('child_process');
 jest.mock('util', () => ({
   promisify: jest.fn(() =>
-    (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ stdout: 'mocked output' }),
+    jest.fn().mockResolvedValue({ stdout: 'mocked output' }),
   ),
 }));
 
@@ -79,9 +79,9 @@ describe('ComputerUseService', () => {
     jest.clearAllMocks();
 
     // Reset file system mocks
-    (fs.writeFile as jest.Mock) as jest.MockedFunction<any>).mockResolvedValue(undefined);
-    (fs.readFile as jest.Mock) as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test content'));
-    (fs.unlink as jest.Mock) as jest.MockedFunction<any>).mockResolvedValue(undefined);
+    (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
+    (fs.readFile as jest.Mock).mockResolvedValue(Buffer.from('test content'));
+    (fs.unlink as jest.Mock).mockResolvedValue(undefined);
 
     testModule = await Test.createTestingModule({
       providers: [
@@ -96,8 +96,8 @@ describe('ComputerUseService', () => {
     service = testModule.get<ComputerUseService>(ComputerUseService);
 
     // Setup default mock behaviors
-    mockNutService.screendump as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('fake-image-data'));
-    mockNutService.getCursorPosition as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 });
+    (mockNutService.screendump).mockResolvedValue(Buffer.from('fake-image-data'));
+    (mockNutService.getCursorPosition).mockResolvedValue({ x: 100, y: 200 });
   });
 
   afterEach(async () => {
@@ -118,7 +118,7 @@ describe('ComputerUseService', () => {
           coordinates: { x: 100, y: 200 },
         };
 
-        mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseMoveEvent).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -134,7 +134,7 @@ describe('ComputerUseService', () => {
           coordinates: { x: 100, y: 200 },
         };
 
-        mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockRejectedValue(
+        (mockNutService.mouseMoveEvent).mockRejectedValue(
           new Error('Mouse movement failed'),
         );
 
@@ -155,7 +155,7 @@ describe('ComputerUseService', () => {
           ],
         };
 
-        mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseMoveEvent).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -184,8 +184,8 @@ describe('ComputerUseService', () => {
           holdKeys: ['shift', 'ctrl'],
         };
 
-        mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
-        mockNutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseMoveEvent).mockResolvedValue({ success: true });
+        (mockNutService.holdKeys).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -217,10 +217,10 @@ describe('ComputerUseService', () => {
           holdKeys: ['shift'],
         };
 
-        mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockRejectedValue(
+        (mockNutService.mouseMoveEvent).mockRejectedValue(
           new Error('Movement failed'),
         );
-        mockNutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.holdKeys).mockResolvedValue({ success: true });
 
         await expect(service.action(action)).rejects.toThrow();
         expect(mockNutService.holdKeys).toHaveBeenCalledWith(['shift'], false);
@@ -235,7 +235,7 @@ describe('ComputerUseService', () => {
           clickCount: 1,
         };
 
-        mockNutService.mouseClickEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseClickEvent).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -250,8 +250,8 @@ describe('ComputerUseService', () => {
           clickCount: 3,
         };
 
-        mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
-        mockNutService.mouseClickEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseMoveEvent).mockResolvedValue({ success: true });
+        (mockNutService.mouseClickEvent).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -269,7 +269,7 @@ describe('ComputerUseService', () => {
           clickCount: 20, // Over limit
         };
 
-        mockNutService.mouseClickEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseClickEvent).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -285,8 +285,8 @@ describe('ComputerUseService', () => {
           holdKeys: ['ctrl'],
         };
 
-        mockNutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
-        mockNutService.mouseClickEvent as jest.MockedFunction<any>).mockRejectedValue(
+        (mockNutService.holdKeys).mockResolvedValue({ success: true });
+        (mockNutService.mouseClickEvent).mockRejectedValue(
           new Error('Click failed'),
         );
 
@@ -303,7 +303,7 @@ describe('ComputerUseService', () => {
           press: 'down',
         };
 
-        mockNutService.mouseButtonEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseButtonEvent).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -321,8 +321,8 @@ describe('ComputerUseService', () => {
           press: 'up',
         };
 
-        mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
-        mockNutService.mouseButtonEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseMoveEvent).mockResolvedValue({ success: true });
+        (mockNutService.mouseButtonEvent).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -348,8 +348,8 @@ describe('ComputerUseService', () => {
           button: 'left',
         };
 
-        mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
-        mockNutService.mouseButtonEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseMoveEvent).mockResolvedValue({ success: true });
+        (mockNutService.mouseButtonEvent).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -384,11 +384,11 @@ describe('ComputerUseService', () => {
           holdKeys: ['shift'],
         };
 
-        mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
-        mockNutService.mouseButtonEvent
+        (mockNutService.mouseMoveEvent).mockResolvedValue({ success: true });
+        (mockNutService.mouseButtonEvent)
           .mockResolvedValueOnce({ success: true }) // Press
-           as jest.MockedFunction<any>).mockRejectedValue(new Error('Release failed')); // Release fails
-        mockNutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+          .mockRejectedValue(new Error('Release failed')); // Release fails
+        (mockNutService.holdKeys).mockResolvedValue({ success: true });
 
         await expect(service.action(action)).rejects.toThrow();
         expect(mockNutService.holdKeys).toHaveBeenCalledWith(['shift'], false);
@@ -403,7 +403,7 @@ describe('ComputerUseService', () => {
           scrollCount: 3,
         };
 
-        mockNutService.mouseWheelEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseWheelEvent).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -418,7 +418,7 @@ describe('ComputerUseService', () => {
           scrollCount: 100, // Over limit
         };
 
-        mockNutService.mouseWheelEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseWheelEvent).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -435,9 +435,9 @@ describe('ComputerUseService', () => {
           holdKeys: ['alt'],
         };
 
-        mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
-        mockNutService.mouseWheelEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
-        mockNutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.mouseMoveEvent).mockResolvedValue({ success: true });
+        (mockNutService.mouseWheelEvent).mockResolvedValue({ success: true });
+        (mockNutService.holdKeys).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -459,7 +459,7 @@ describe('ComputerUseService', () => {
           keys: ['a', 'b', 'c'],
         };
 
-        mockNutService.sendKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.sendKeys).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -476,7 +476,7 @@ describe('ComputerUseService', () => {
           delay: 100,
         };
 
-        mockNutService.sendKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.sendKeys).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -495,7 +495,7 @@ describe('ComputerUseService', () => {
           press: 'down',
         };
 
-        mockNutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.holdKeys).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -512,7 +512,7 @@ describe('ComputerUseService', () => {
           press: 'up',
         };
 
-        mockNutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+        (mockNutService.holdKeys).mockResolvedValue({ success: true });
 
         await service.action(action);
 
@@ -527,7 +527,7 @@ describe('ComputerUseService', () => {
           text: 'Hello World',
         };
 
-        mockNutService.typeText as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        (mockNutService.typeText).mockResolvedValue(undefined);
 
         await service.action(action);
 
@@ -545,7 +545,7 @@ describe('ComputerUseService', () => {
           sensitive: true,
         };
 
-        mockNutService.typeText as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        (mockNutService.typeText).mockResolvedValue(undefined);
 
         await service.action(action);
 
@@ -563,7 +563,7 @@ describe('ComputerUseService', () => {
           text: 'Clipboard content',
         };
 
-        mockNutService.pasteText as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        (mockNutService.pasteText).mockResolvedValue(undefined);
 
         await service.action(action);
 
@@ -613,7 +613,7 @@ describe('ComputerUseService', () => {
         };
 
         const fakeImageBuffer = Buffer.from('fake-image-data');
-        mockNutService.screendump as jest.MockedFunction<any>).mockResolvedValue(fakeImageBuffer);
+        (mockNutService.screendump).mockResolvedValue(fakeImageBuffer);
 
         const result = await service.action(action);
 
@@ -636,7 +636,7 @@ describe('ComputerUseService', () => {
           action: 'cursor_position',
         };
 
-        mockNutService.getCursorPosition as jest.MockedFunction<any>).mockResolvedValue({ x: 150, y: 250 });
+        (mockNutService.getCursorPosition).mockResolvedValue({ x: 150, y: 250 });
 
         const result = await service.action(action);
 
@@ -653,7 +653,7 @@ describe('ComputerUseService', () => {
           action: 'cursor_position',
         };
 
-        mockNutService.getCursorPosition as jest.MockedFunction<any>).mockRejectedValue(
+        (mockNutService.getCursorPosition).mockRejectedValue(
           new Error('Position failed'),
         );
 
@@ -673,7 +673,7 @@ describe('ComputerUseService', () => {
       const util = jest.requireMock('util') as {
         promisify: { mockReturnValue: (value: unknown) => void };
       };
-      util.promisify as jest.MockedFunction<any>).mockReturnValue(mockExecAsync);
+      (util.promisify).mockReturnValue(mockExecAsync);
 
       // Mock child_process.spawn
       jest.doMock('child_process', () => ({
@@ -681,7 +681,7 @@ describe('ComputerUseService', () => {
         exec: jest.fn(),
       }));
 
-      mockSpawn as jest.MockedFunction<any>).mockReturnValue({
+      (mockSpawn).mockReturnValue({
         unref: jest.fn(),
       });
     });
@@ -713,7 +713,7 @@ describe('ComputerUseService', () => {
         };
 
         // Mock application not running (error code 1)
-        mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({ code: 1 });
+        (mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({ code: 1 });
 
         await service.action(action);
 
@@ -735,7 +735,7 @@ describe('ComputerUseService', () => {
         };
 
         // Mock application already running
-        mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({
+        (mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({
           stdout: 'Navigator.code.Code running',
         });
 
@@ -766,7 +766,7 @@ describe('ComputerUseService', () => {
         };
 
         // Mock timeout error
-        mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({ message: 'timeout' });
+        (mockExecAsync as jest.Mock).mockRejectedValue({ message: 'timeout' });
 
         await service.action(action);
 
@@ -787,8 +787,8 @@ describe('ComputerUseService', () => {
       const util = jest.requireMock('util') as {
         promisify: { mockReturnValue: (value: unknown) => void };
       };
-      util.promisify as jest.MockedFunction<any>).mockReturnValue(mockExecAsync);
-      mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: 'success' });
+      (util.promisify).mockReturnValue(mockExecAsync);
+      (mockExecAsync).mockResolvedValue({ stdout: 'success' });
     });
 
     describe('write_file action', () => {
@@ -800,8 +800,8 @@ describe('ComputerUseService', () => {
           data: testData,
         };
 
-        (fs.writeFile as jest.Mock) as jest.MockedFunction<any>).mockResolvedValue(undefined);
-        mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: '' });
+        (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
+        (mockExecAsync as jest.Mock).mockResolvedValue({ stdout: '' });
 
         const result = await service.action(action);
 
@@ -823,7 +823,7 @@ describe('ComputerUseService', () => {
           data: testData,
         };
 
-        (fs.writeFile as jest.Mock) as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
 
         const result = (await service.action(action)) as FileWriteResult;
 
@@ -867,8 +867,8 @@ describe('ComputerUseService', () => {
           data: testData,
         };
 
-        (fs.writeFile as jest.Mock) as jest.MockedFunction<any>).mockResolvedValue(undefined);
-        mockExecAsync as jest.MockedFunction<any>).mockRejectedValue(new Error('Copy failed'));
+        (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
+        (mockExecAsync as jest.Mock).mockRejectedValue(new Error('Copy failed'));
 
         const result = (await service.action(action)) as FileWriteResult;
 
@@ -885,7 +885,7 @@ describe('ComputerUseService', () => {
         };
 
         const fileContent = Buffer.from('test file content');
-        (fs.readFile as jest.Mock) as jest.MockedFunction<any>).mockResolvedValue(fileContent);
+        (fs.readFile as jest.Mock)).mockResolvedValue(fileContent);
         mockExecAsync
           .mockResolvedValueOnce({ stdout: '' }) // mkdir
           .mockResolvedValueOnce({ stdout: '' }) // chmod
@@ -911,7 +911,7 @@ describe('ComputerUseService', () => {
           path: 'test.txt',
         };
 
-        (fs.readFile as jest.Mock) as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('test'));
+        (fs.readFile as jest.Mock)).mockResolvedValue(Buffer.from('test'));
         mockExecAsync
           .mockResolvedValueOnce({ stdout: '' })
           .mockResolvedValueOnce({ stdout: '' })
@@ -928,7 +928,7 @@ describe('ComputerUseService', () => {
           path: '/home/user/image.png',
         };
 
-        (fs.readFile as jest.Mock) as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('png data'));
+        (fs.readFile as jest.Mock)).mockResolvedValue(Buffer.from('png data'));
         mockExecAsync
           .mockResolvedValueOnce({ stdout: '' })
           .mockResolvedValueOnce({ stdout: '' })
@@ -959,7 +959,7 @@ describe('ComputerUseService', () => {
           path: '/home/user/nonexistent.txt',
         };
 
-        mockExecAsync as jest.MockedFunction<any>).mockRejectedValue(new Error('File not found'));
+        (mockExecAsync as jest.Mock).mockRejectedValue(new Error('File not found'));
 
         const result = (await service.action(action)) as FileReadResult;
 
@@ -973,7 +973,7 @@ describe('ComputerUseService', () => {
           path: '/home/user/test.txt',
         };
 
-        mockExecAsync as jest.MockedFunction<any>).mockRejectedValue(new Error('Copy failed'));
+        (mockExecAsync as jest.Mock).mockRejectedValue(new Error('Copy failed'));
 
         await service.action(action);
 
@@ -1084,7 +1084,7 @@ describe('ComputerUseService', () => {
         };
 
         const originalError = new Error('NUT service error');
-        mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockRejectedValue(originalError);
+        (mockNutService.mouseMoveEvent).mockRejectedValue(originalError);
 
         try {
           await service.action(action);
@@ -1109,9 +1109,9 @@ describe('ComputerUseService', () => {
         holdKeys: ['ctrl', 'shift'],
       };
 
-      mockNutService.mouseMoveEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
-      mockNutService.holdKeys as jest.MockedFunction<any>).mockResolvedValue({ success: true });
-      mockNutService.mouseClickEvent as jest.MockedFunction<any>).mockResolvedValue({ success: true });
+      mockNutService.mouseMoveEvent).mockResolvedValue({ success: true });
+      mockNutService.holdKeys).mockResolvedValue({ success: true });
+      mockNutService.mouseClickEvent).mockResolvedValue({ success: true });
 
       await service.action(action);
 

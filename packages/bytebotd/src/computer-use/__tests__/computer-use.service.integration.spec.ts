@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -161,9 +160,9 @@ describe('ComputerUseService Integration Tests', () => {
 
       // Mock application not running initially
       const util = await import('util');
-      jest
-        .spyOn(util, 'promisify')
-         as jest.MockedFunction<any>).mockReturnValue((jest.fn() as jest.MockedFunction<any>).mockRejectedValue({ code: 1 }));
+      (
+        jest.spyOn(util, 'promisify') as jest.MockedFunction<any>
+      ).mockReturnValue(jest.fn().mockRejectedValue({ code: 1 }));
 
       await context.service.action(appAction as unknown as ComputerAction);
 
@@ -377,10 +376,14 @@ describe('ComputerUseService Integration Tests', () => {
     it('should handle and recover from temporary service failures', async () => {
       // Mock temporary NUT service failure
       const originalMouseMove = context.nutService.mouseMoveEvent;
-      jest
-        .spyOn(context.nutService, 'mouseMoveEvent')
+      (
+        jest.spyOn(
+          context.nutService,
+          'mouseMoveEvent',
+        ) as jest.MockedFunction<any>
+      )
         .mockRejectedValueOnce(new Error('Temporary failure'))
-         as jest.MockedFunction<any>).mockImplementation(originalMouseMove);
+        .mockImplementation(originalMouseMove);
 
       const moveAction: MoveMouseAction = {
         action: 'move_mouse',
@@ -415,9 +418,9 @@ describe('ComputerUseService Integration Tests', () => {
     it('should handle resource cleanup on operation failures', async () => {
       // Mock file write failure after temporary file creation
       const util = await import('util');
-      jest
-        .spyOn(util, 'promisify')
-         as jest.MockedFunction<any>).mockReturnValue((jest.fn() as jest.MockedFunction<any>).mockRejectedValue(new Error('Copy failed')));
+      (
+        jest.spyOn(util, 'promisify') as jest.MockedFunction<any>
+      ).mockReturnValue(jest.fn().mockRejectedValue(new Error('Copy failed')));
 
       const testFile = createTestFile('failure-test.txt', 'Test content');
       const writeAction: WriteFileAction = {
@@ -548,18 +551,18 @@ describe('ComputerUseService Integration Tests', () => {
    */
   function createMockNutService(): Partial<NutService> {
     return {
-      mouseMoveEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      mouseClickEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      mouseButtonEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      mouseWheelEvent: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      holdKeys: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      sendKeys: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      typeText: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
-      pasteText: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ success: true }),
+      mouseMoveEvent: jest.fn().mockResolvedValue({ success: true }),
+      mouseClickEvent: jest.fn().mockResolvedValue({ success: true }),
+      mouseButtonEvent: jest.fn().mockResolvedValue({ success: true }),
+      mouseWheelEvent: jest.fn().mockResolvedValue({ success: true }),
+      holdKeys: jest.fn().mockResolvedValue({ success: true }),
+      sendKeys: jest.fn().mockResolvedValue({ success: true }),
+      typeText: jest.fn().mockResolvedValue({ success: true }),
+      pasteText: jest.fn().mockResolvedValue({ success: true }),
       screendump: jest
         .fn()
-         as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('mocked-screenshot-data')),
-      getCursorPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
+        .mockResolvedValue(Buffer.from('mocked-screenshot-data')),
+      getCursorPosition: jest.fn().mockResolvedValue({ x: 100, y: 200 }),
     };
   }
 

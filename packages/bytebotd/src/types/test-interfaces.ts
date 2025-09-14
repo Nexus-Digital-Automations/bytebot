@@ -1,7 +1,7 @@
 /**
  * Proper TypeScript test interfaces for ESLint compliance
  */
-import type { HealthIndicatorResult } from '@nestjs/terminus';
+import type { HealthIndicatorResult as _HealthIndicatorResult } from '@nestjs/terminus';
 import type { HealthService } from '../health/health.service';
 import type { NutService } from '../nut/nut.service';
 
@@ -38,7 +38,10 @@ export type TestableHealthService = HealthService & {
     external: 'reachable' | 'unreachable' | 'unknown';
   };
   performDatabasePing?(): Promise<boolean>;
-  checkExternalService?(url: string, timeout?: number): Promise<{
+  checkExternalService?(
+    url: string,
+    timeout?: number,
+  ): Promise<{
     status: string;
     responseTime?: string;
   }>;

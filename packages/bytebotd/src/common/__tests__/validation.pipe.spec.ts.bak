@@ -18,11 +18,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
+// TypeScript safety note: This test file uses flexible typing for security testing
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
 import { Test as Test, TestingModule as TestingModule } from '@nestjs/testing';
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
@@ -36,6 +35,11 @@ import {
   IsEnum,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
+
+interface ValidationError {
+  property: string;
+  constraints?: Record<string, string>;
+}
 
 // Mock Validation Pipe implementation for Phase 1 requirements
 class MockValidationPipe {
@@ -86,9 +90,9 @@ class MockValidationPipe {
     }
   }
 
-  private isBasicType(metatype: any): boolean {
+  private isBasicType(metatype: unknown): boolean {
     const types = [String, Boolean, Number, Array, Object];
-    return types.includes(metatype);
+    return types.includes(metatype as typeof String);
   }
 
   private sanitizeBasicValue(value: any): any {
@@ -103,7 +107,7 @@ class MockValidationPipe {
     return value;
   }
 
-  private async validateAndTransform(value: any, metatype: any): Promise<any> {
+  private validateAndTransform(value: any, metatype: any): any {
     // Mock validation logic - in real implementation would use class-validator
     const instance = new metatype();
     Object.assign(instance, value);
@@ -113,7 +117,7 @@ class MockValidationPipe {
 
     if (errors.length > 0) {
       const errorMessages = errors
-        .map((err) => Object.values(err.constraints || {}).join(', '))
+        .map((err) => Object.values(err.constraints ?? {}).join(', '))
         .join('; ');
 
       throw new BadRequestException(`Validation failed: ${errorMessages}`);
@@ -122,8 +126,8 @@ class MockValidationPipe {
     return this.sanitizeObject(instance);
   }
 
-  private mockValidate(instance: any, metatype: any): any[] {
-    const errors: any[] = [];
+  private mockValidate(instance: any, metatype: any): ValidationError[] {
+    const errors: ValidationError[] = [];
 
     // Mock validation rules based on common patterns
     if (metatype.name === 'CreateUserDto') {
@@ -154,7 +158,7 @@ class MockValidationPipe {
       }
       if (
         instance.priority &&
-        !['low', 'medium', 'high'].includes(instance.priority)
+        !['low', 'medium', 'high'].includes(instance.priority as string)
       ) {
         errors.push({
           property: 'priority',
@@ -181,7 +185,9 @@ class MockValidationPipe {
 
     if (typeof obj === 'object') {
       const sanitized: any = {};
-      for (const [key, value] of Object.entries(obj)) {
+      for (const [key, value] of Object.entries(
+        obj as Record<string, unknown>,
+      )) {
         // Remove potentially dangerous properties
         if (!this.isDangerousProperty(key)) {
           sanitized[key] = this.sanitizeObject(value);
@@ -209,11 +215,11 @@ class MockValidationPipe {
 // Mock DTOs for testing
 class CreateUserDto {
   @IsEmail()
-  email: string;
+  email: string = '';
 
   @IsString()
   @MinLength(6)
-  password: string;
+  password: string = '';
 
   @IsOptional()
   @IsString()
@@ -267,7 +273,7 @@ describe('ValidationPipe', () => {
 
   const operationId = `validation_pipe_test_${Date.now()}`;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     console.log(`[${operationId}] Setting up ValidationPipe test module`);
 
     pipe = new MockValidationPipe({
@@ -721,8 +727,12 @@ describe('ValidationPipe', () => {
       const testId = `${operationId}_validation_logging`;
       console.log(`[${testId}] Testing validation attempt logging`);
 
-      const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleLogSpy = (
+        jest.spyOn(console, 'log') as jest.MockedFunction<any>
+      ).mockImplementation();
+      const consoleErrorSpy = (
+        jest.spyOn(console, 'error') as jest.MockedFunction<any>
+      ).mockImplementation();
 
       const validData = {
         email: 'test@example.com',
@@ -746,8 +756,8 @@ describe('ValidationPipe', () => {
         expect.stringContaining('Validation completed successfully'),
       );
 
-      consoleLogSpy.mockRestore();
-      consoleErrorSpy.mockRestore();
+      (consoleLogSpy as jest.MockedFunction<any>).mockRestore();
+      (consoleErrorSpy as jest.MockedFunction<any>).mockRestore();
 
       console.log(`[${testId}] Validation logging test completed`);
     });

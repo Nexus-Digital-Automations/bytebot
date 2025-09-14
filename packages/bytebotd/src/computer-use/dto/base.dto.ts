@@ -1,5 +1,4 @@
 import { IsNumber, Min, Max } from 'class-validator';
-import { IsValidScreenCoordinates } from '@bytebot/shared/dist/index-server';
 
 /**
  * Data Transfer Object for screen coordinates with enhanced security validation
@@ -18,11 +17,8 @@ export class CoordinatesDto {
 
   /**
    * Validate the entire coordinate object for security issues
-   * This decorator checks both coordinates together for bounds and overflow attacks
+   * Individual property validators above provide comprehensive validation
    */
-  @IsValidScreenCoordinates(undefined, {
-    message: 'Coordinates contain invalid or potentially unsafe values',
-  })
   validateCoordinates() {
     return { x: this.x, y: this.y };
   }

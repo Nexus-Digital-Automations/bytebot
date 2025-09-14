@@ -70,17 +70,17 @@ describe('RolesGuard - Advanced Security Tests', () => {
     };
 
     return {
-      switchToHttp: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({
-        getRequest: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(mockRequest),
-        getResponse: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue(mockRequest),
+        getResponse: jest.fn().mockReturnValue({}),
       }),
-      getHandler: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'testHandler' }),
-      getClass: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'TestController' }),
+      getHandler: jest.fn().mockReturnValue({ name: 'testHandler' }),
+      getClass: jest.fn().mockReturnValue({ name: 'TestController' }),
     } as any;
   };
 
   // Create malicious user objects for security testing
-  const createMaliciousUsers: unknown = () => {
+  const createMaliciousUsers = () => {
     return {
       // User with prototype pollution attempt
       prototypePollution: {
@@ -179,7 +179,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       const maliciousUsers = createMaliciousUsers();
       const context = createMockExecutionContext(
-        maliciousUsers.prototypePollution,
+        maliciousUsers.prototypePollution as ByteBotdUser,
         'admin-endpoint',
         'POST',
         '192.168.1.100',
@@ -242,7 +242,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       const maliciousUsers = createMaliciousUsers();
       const context = createMockExecutionContext(
-        maliciousUsers.inactiveUser,
+        maliciousUsers.inactiveUser as ByteBotdUser,
         'user-management',
         'DELETE',
       );
@@ -286,7 +286,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-         as jest.MockedFunction<any>).mockReturnValue([UserRole._ADMIN]); // All require admin
+        .mockReturnValue([UserRole._ADMIN]); // All require admin
 
       // Simulate concurrent requests where user role might be modified
       const promises = contexts.map(async (context, _index) => {
@@ -347,8 +347,12 @@ describe('RolesGuard - Advanced Security Tests', () => {
       const maliciousRequest = context.switchToHttp().getRequest();
 
       // Try to inject permissions
-      (maliciousRequest.user as Record<string, unknown>).permissions = [Permission._SYSTEM_ADMIN];
-      (maliciousRequest.user as Record<string, unknown>).__permissions = [Permission._SYSTEM_ADMIN];
+      (maliciousRequest.user as Record<string, unknown>).permissions = [
+        Permission._SYSTEM_ADMIN,
+      ];
+      (maliciousRequest.user as Record<string, unknown>).__permissions = [
+        Permission._SYSTEM_ADMIN,
+      ];
 
       // Should still deny access based on role-based permissions
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -482,7 +486,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-         as jest.MockedFunction<any>).mockReturnValue([UserRole._ADMIN]);
+        .mockReturnValue([UserRole._ADMIN]);
 
       const startTime = Date.now();
 
@@ -518,7 +522,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       const maliciousUsers = createMaliciousUsers();
       const context = createMockExecutionContext(
-        maliciousUsers.xssPayload,
+        maliciousUsers.xssPayload as ByteBotdUser,
         'user-profile',
         'GET',
       );
@@ -551,7 +555,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       const maliciousUsers = createMaliciousUsers();
       const context = createMockExecutionContext(
-        maliciousUsers.sqlInjection,
+        maliciousUsers.sqlInjection as ByteBotdUser,
         'data-query',
         'POST',
       );
@@ -600,7 +604,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-         as jest.MockedFunction<any>).mockReturnValue([UserRole._ADMIN]); // All require admin access
+        .mockReturnValue([UserRole._ADMIN]); // All require admin access
 
       const startTime = Date.now();
 
@@ -657,7 +661,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-         as jest.MockedFunction<any>).mockReturnValue([UserRole._ADMIN]);
+        .mockReturnValue([UserRole._ADMIN]);
 
       // Create multiple contexts sharing the same user object
       const contexts = Array(20)
@@ -893,7 +897,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-         as jest.MockedFunction<any>).mockReturnValue([UserRole._ADMIN]);
+        .mockReturnValue([UserRole._ADMIN]);
 
       const iterations = 100;
       const timings: number[] = [];

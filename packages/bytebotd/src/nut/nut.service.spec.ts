@@ -79,26 +79,26 @@ interface MockNutJs {
 // Mock @nut-tree-fork/nut-js
 jest.mock('@nut-tree-fork/nut-js', () => ({
   keyboard: {
-    pressKey: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    releaseKey: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    pressKey: jest.fn().mockResolvedValue(undefined),
+    releaseKey: jest.fn().mockResolvedValue(undefined),
     config: { autoDelayMs: 100 },
   },
   mouse: {
-    setPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    click: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    pressButton: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    releaseButton: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollUp: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollDown: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollLeft: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollRight: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    getPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
+    setPosition: jest.fn().mockResolvedValue(undefined),
+    click: jest.fn().mockResolvedValue(undefined),
+    pressButton: jest.fn().mockResolvedValue(undefined),
+    releaseButton: jest.fn().mockResolvedValue(undefined),
+    scrollUp: jest.fn().mockResolvedValue(undefined),
+    scrollDown: jest.fn().mockResolvedValue(undefined),
+    scrollLeft: jest.fn().mockResolvedValue(undefined),
+    scrollRight: jest.fn().mockResolvedValue(undefined),
+    getPosition: jest.fn().mockResolvedValue({ x: 100, y: 200 }),
     config: { autoDelayMs: 100 },
   },
   screen: {
-    capture: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    capture: jest.fn().mockResolvedValue(undefined),
   },
-  Point: (jest.fn() as jest.MockedFunction<any>).mockImplementation((x: number, y: number) => ({ x, y })),
+  Point: jest.fn().mockImplementation((x: number, y: number) => ({ x, y })),
   Key: {
     // Alphanumeric keys
     A: 'A',
@@ -219,9 +219,9 @@ jest.mock('child_process', () => ({
 // Mock fs promises
 jest.mock('fs', () => ({
   promises: {
-    mkdir: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    readFile: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('mock-image-data')),
-    unlink: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    mkdir: jest.fn().mockResolvedValue(undefined),
+    readFile: jest.fn().mockResolvedValue(Buffer.from('mock-image-data')),
+    unlink: jest.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -244,9 +244,9 @@ describe('NutService', () => {
     jest.clearAllMocks();
 
     // Setup logger spy
-    loggerSpy = (jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation();
-    (jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>).mockImplementation();
-    (jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation();
+    loggerSpy = (jest.spyOn(Logger.prototype, 'log')).mockImplementation();
+    (jest.spyOn(Logger.prototype, 'error')).mockImplementation();
+    (jest.spyOn(Logger.prototype, 'warn')).mockImplementation();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [NutService],
@@ -287,7 +287,7 @@ describe('NutService', () => {
     describe('sendKeys method', () => {
       it('should successfully send valid keys', async () => {
         const operationId = 'test_op_123';
-        (jest.spyOn(service, 'generateOperationId') as jest.MockedFunction<any>).mockReturnValue(operationId);
+        (jest.spyOn(service, 'generateOperationId')).mockReturnValue(operationId);
 
         const result = await service.sendKeys(['A', 'B', 'C'], 50);
 
@@ -441,9 +441,7 @@ describe('NutService', () => {
       });
 
       it('should apply delay between characters when specified', async () => {
-        const delaySpy = jest
-          .spyOn(global, 'setTimeout')
-           as jest.MockedFunction<any>).mockImplementation((callback: () => void) => {
+        const delaySpy = (jest.spyOn(global, 'setTimeout') as jest.MockedFunction<any>).mockImplementation((callback: () => void) => {
             callback();
             return {} as NodeJS.Timeout;
           });
@@ -451,7 +449,7 @@ describe('NutService', () => {
         await service.typeText('ab', 50);
 
         expect(delaySpy).toHaveBeenCalledWith(expect.any(Function), 50);
-        delaySpy as jest.MockedFunction<any>).mockRestore();
+        delaySpy.mockRestore();
       });
 
       it('should throw _error for unmappable characters', async () => {
@@ -489,14 +487,14 @@ describe('NutService', () => {
           once: jest.fn(),
           on: jest.fn(),
         };
-        mockSpawn as jest.MockedFunction<any>).mockReturnValue(
+        (mockSpawn as jest.MockedFunction<any>).mockReturnValue(
           mockChildProcess as unknown as ChildProcessWithoutNullStreams,
         );
       });
 
       it('should successfully paste text', async () => {
         // Setup successful xclip process
-        mockChildProcess.once as jest.MockedFunction<any>).mockImplementation(
+        (mockChildProcess.once as jest.MockedFunction<any>).mockImplementation(
           (event: string, callback: (code: number) => void) => {
             if (event === 'close') {
               setTimeout(() => callback(0), 10); // Success exit code
@@ -524,7 +522,7 @@ describe('NutService', () => {
       });
 
       it('should handle xclip process _error', async () => {
-        mockChildProcess.once as jest.MockedFunction<any>).mockImplementation(
+        (mockChildProcess.once as jest.Mock).mockImplementation(
           (event: string, callback: (_error: Error) => void) => {
             if (event === '_error') {
               setTimeout(() => callback(new Error('xclip not found')), 10);
@@ -538,7 +536,7 @@ describe('NutService', () => {
       });
 
       it('should handle xclip process failure', async () => {
-        mockChildProcess.once as jest.MockedFunction<any>).mockImplementation(
+        (mockChildProcess.once as jest.Mock).mockImplementation(
           (event: string, callback: (code: number) => void) => {
             if (event === 'close') {
               setTimeout(() => callback(1), 10); // Failure exit code
@@ -553,7 +551,7 @@ describe('NutService', () => {
 
       it('should handle clipboard paste keyboard _error', async () => {
         // Setup successful xclip
-        mockChildProcess.once as jest.MockedFunction<any>).mockImplementation(
+        (mockChildProcess.once as jest.Mock).mockImplementation(
           (event: string, callback: (code: number) => void) => {
             if (event === 'close') {
               setTimeout(() => callback(0), 10);
@@ -730,7 +728,7 @@ describe('NutService', () => {
     describe('screendump method', () => {
       beforeEach(() => {
         // Mock Date.now for consistent filename
-        (jest.spyOn(Date, 'now') as jest.MockedFunction<any>).mockReturnValue(1234567890);
+        (jest.spyOn(Date, 'now')).mockReturnValue(1234567890);
       });
 
       afterEach(() => {
@@ -864,7 +862,7 @@ describe('NutService', () => {
       it('should create proper delay', async () => {
         const setTimeoutSpy = jest
           .spyOn(global, 'setTimeout')
-           as jest.MockedFunction<any>).mockImplementation((callback: () => void) => {
+          .mockImplementation((callback: () => void) => {
             callback();
             return {} as NodeJS.Timeout;
           });
@@ -872,7 +870,7 @@ describe('NutService', () => {
         await service.delay(100);
 
         expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 100);
-        setTimeoutSpy as jest.MockedFunction<any>).mockRestore();
+        setTimeoutSpy.mockRestore();
       });
     });
 
@@ -982,7 +980,7 @@ describe('NutService', () => {
   describe('Logging and Operation Tracking', () => {
     it('should log operations with unique operation IDs', async () => {
       const mockOpId = 'test_operation_12345_abc123';
-      (jest.spyOn(service, 'generateOperationId') as jest.MockedFunction<any>).mockReturnValue(mockOpId);
+      (jest.spyOn(service, 'generateOperationId')).mockReturnValue(mockOpId);
 
       await service.sendKeys(['Enter']);
 
@@ -994,7 +992,7 @@ describe('NutService', () => {
 
     it('should log successful operations', async () => {
       const mockOpId = 'success_op_67890_def456';
-      (jest.spyOn(service, 'generateOperationId') as jest.MockedFunction<any>).mockReturnValue(mockOpId);
+      (jest.spyOn(service, 'generateOperationId')).mockReturnValue(mockOpId);
 
       await service.sendKeys(['Tab']);
 

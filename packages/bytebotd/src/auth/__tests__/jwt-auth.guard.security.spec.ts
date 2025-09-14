@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
+ 
+ 
+ 
 /* eslint-env jest */
 /**
  * JWT Authentication Guard Advanced Security Test Suite
@@ -88,17 +88,27 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
     };
 
     return {
-      switchToHttp: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({
-        getRequest: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(mockRequest),
-        getResponse: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue(
+          mockRequest,
+        ),
+        getResponse: jest.fn().mockReturnValue(
+          {},
+        ),
       }),
-      switchToRpc: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
-      switchToWs: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({}),
-      getHandler: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'testHandler' }),
-      getClass: (jest.fn() as jest.MockedFunction<any>).mockReturnValue({ name: 'TestController' }),
-      getArgs: (jest.fn() as jest.MockedFunction<any>).mockReturnValue([]),
-      getArgByIndex: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(undefined),
-      getType: (jest.fn() as jest.MockedFunction<any>).mockReturnValue('http'),
+      switchToRpc: jest.fn().mockReturnValue({}),
+      switchToWs: jest.fn().mockReturnValue({}),
+      getHandler: jest.fn().mockReturnValue({
+        name: 'testHandler',
+      }),
+      getClass: jest.fn().mockReturnValue({
+        name: 'TestController',
+      }),
+      getArgs: jest.fn().mockReturnValue([]),
+      getArgByIndex: jest.fn().mockReturnValue(
+        undefined,
+      ),
+      getType: jest.fn().mockReturnValue('http'),
     } as jest.Mocked<ExecutionContext>;
   };
 
@@ -197,10 +207,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         authorization: `Bearer ${maliciousTokens.algorithmConfusion}`,
       });
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-         as jest.MockedFunction<any>).mockRejectedValue(new Error('Invalid algorithm'));
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockRejectedValue(new Error('Invalid algorithm'));
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         UnauthorizedException,
@@ -223,10 +235,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         authorization: `Bearer ${noneAlgorithmToken}`,
       });
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-         as jest.MockedFunction<any>).mockRejectedValue(new Error('Algorithm mismatch'));
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockRejectedValue(new Error('Algorithm mismatch'));
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         UnauthorizedException,
@@ -267,10 +281,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         authorization: `Bearer ${manipulatedToken}`,
       });
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-         as jest.MockedFunction<any>).mockRejectedValue(new Error('Invalid signature'));
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockRejectedValue(new Error('Invalid signature'));
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         UnauthorizedException,
@@ -301,8 +317,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         authorization: 'Bearer malicious-token',
       });
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      (jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>).mockResolvedValue(maliciousPayload);
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockResolvedValue(maliciousPayload);
 
       // Should succeed but user object should be sanitized
       const result = await guard.canActivate(context);
@@ -343,19 +363,23 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         }
         const context = createMockExecutionContext(headers);
 
-        (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+        (
+          jest.spyOn(reflector, 'getAllAndOverride')
+        ).mockReturnValue(false);
 
         if (scenario.shouldSucceed) {
-          (jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>).mockResolvedValue({
+          (
+            jest.spyOn(jwtService, 'verifyAsync')
+          ).mockResolvedValue({
             sub: 'user123',
             email: 'test@example.com',
             role: 'viewer',
             exp: Math.floor(Date.now() / 1000) + 3600,
           });
         } else {
-          jest
-            .spyOn(jwtService, 'verifyAsync')
-             as jest.MockedFunction<any>).mockRejectedValue(new Error('Authentication failed'));
+          (
+            jest.spyOn(jwtService, 'verifyAsync')
+          ).mockRejectedValue(new Error('Authentication failed'));
         }
 
         const startTime = process.hrtime.bigint();
@@ -399,10 +423,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         '192.168.1.100',
       );
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-         as jest.MockedFunction<any>).mockRejectedValue(new Error('Invalid token'));
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockRejectedValue(new Error('Invalid token'));
 
       // Simulate multiple rapid authentication failures
       const attempts = Array(10)
@@ -440,8 +466,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         authorization: 'Bearer xss-token',
       });
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      (jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>).mockResolvedValue(xssPayload);
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockResolvedValue(xssPayload);
 
       const result = await guard.canActivate(context);
       const request = context.switchToHttp().getRequest() as MockRequest;
@@ -472,10 +502,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         authorization: 'Bearer sql-injection-token',
       });
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-         as jest.MockedFunction<any>).mockResolvedValue(sqlInjectionPayload);
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockResolvedValue(sqlInjectionPayload);
 
       const result = await guard.canActivate(context);
       const request = context.switchToHttp().getRequest() as MockRequest;
@@ -501,10 +533,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         authorization: `Bearer ${maliciousTokens.oversized}`,
       });
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-         as jest.MockedFunction<any>).mockRejectedValue(new Error('Token too large'));
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockRejectedValue(new Error('Token too large'));
 
       const startTime = Date.now();
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -540,10 +574,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         }),
       );
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-         as jest.MockedFunction<any>).mockRejectedValue(new Error('Attack token'));
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockRejectedValue(new Error('Attack token'));
 
       const startTime = Date.now();
 
@@ -594,8 +630,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         authorization: 'Bearer control-char-token',
       });
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      (jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>).mockResolvedValue(maliciousPayload);
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockResolvedValue(maliciousPayload);
 
       const result = await guard.canActivate(context);
       const request = context.switchToHttp().getRequest() as MockRequest;
@@ -624,8 +664,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         'custom-auth': 'Bearer super-admin-token',
       });
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      (jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>).mockResolvedValue({
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockResolvedValue({
         sub: 'user123',
         email: 'test@example.com',
         role: 'viewer',
@@ -674,7 +718,9 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       for (const headers of malformedHeaders) {
         const context = createMockExecutionContext(headers);
 
-        (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+        (
+          jest.spyOn(reflector, 'getAllAndOverride')
+        ).mockReturnValue(false);
 
         await expect(guard.canActivate(context)).rejects.toThrow(
           UnauthorizedException,
@@ -684,7 +730,9 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       for (const headers of nullUndefinedHeaders) {
         const context = createMockExecutionContext(headers);
 
-        (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
+        (
+          jest.spyOn(reflector, 'getAllAndOverride')
+        ).mockReturnValue(false);
 
         await expect(guard.canActivate(context)).rejects.toThrow(
           UnauthorizedException,
@@ -725,10 +773,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         '10.0.0.1',
       );
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-         as jest.MockedFunction<any>).mockRejectedValue(new Error('Malicious token detected'));
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockRejectedValue(new Error('Malicious token detected'));
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         UnauthorizedException,
@@ -769,10 +819,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         '192.168.1.100',
       );
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-         as jest.MockedFunction<any>).mockRejectedValue(new Error('Suspicious activity'));
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockRejectedValue(new Error('Suspicious activity'));
 
       await expect(guard.canActivate(suspiciousContext)).rejects.toThrow(
         UnauthorizedException,
@@ -800,10 +852,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
           authorization: `Bearer attack-token-${i}`,
         });
 
-        (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-        jest
-          .spyOn(jwtService, 'verifyAsync')
-           as jest.MockedFunction<any>).mockRejectedValue(new Error('Attack blocked'));
+        (
+          jest.spyOn(reflector, 'getAllAndOverride')
+        ).mockReturnValue(false);
+        (
+          jest.spyOn(jwtService, 'verifyAsync')
+        ).mockRejectedValue(new Error('Attack blocked'));
 
         try {
           await guard.canActivate(context);
@@ -832,10 +886,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         authorization: `Bearer ${oversizedToken}`,
       });
 
-      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(false);
-      jest
-        .spyOn(jwtService, 'verifyAsync')
-         as jest.MockedFunction<any>).mockRejectedValue(new Error('Token too large'));
+      (
+        jest.spyOn(reflector, 'getAllAndOverride')
+      ).mockReturnValue(false);
+      (
+        jest.spyOn(jwtService, 'verifyAsync')
+      ).mockRejectedValue(new Error('Token too large'));
 
       const startTime = process.hrtime.bigint();
       await expect(guard.canActivate(context)).rejects.toThrow(

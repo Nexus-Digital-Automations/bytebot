@@ -1,9 +1,9 @@
 /* eslint-env jest */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+ 
 /**
  * Input Tracking Module Test Suite
  *
@@ -57,7 +57,7 @@ describe('InputTrackingModule', () => {
             {
               provide: ComputerUseService,
               useValue: {
-                screenshot: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
+                screenshot: jest.fn().mockResolvedValue({
                   image: 'mock-screenshot-data',
                 }),
               },

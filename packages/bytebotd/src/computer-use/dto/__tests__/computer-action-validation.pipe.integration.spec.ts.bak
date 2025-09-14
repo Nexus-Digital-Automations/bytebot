@@ -1,4 +1,9 @@
+ 
+ 
+ 
+ 
 /* eslint-env jest */
+
 /**
  * Security Validation Pipeline Integration Tests
  * Tests the enhanced multi-stage security validation pipeline integration
@@ -8,8 +13,31 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import { ComputerActionValidationPipe } from '../computer-action-validation.pipe';
+
+/**
+ * Interface for typed argument metadata used in tests
+ */
+interface TypedArgumentMetadata extends ArgumentMetadata {
+  type: 'body' | 'query' | 'param' | 'custom';
+  metatype?: new (...args: unknown[]) => unknown;
+  data?: string;
+}
+
+/**
+ * Helper to create typed argument metadata for tests
+ */
+function createArgumentMetadata(
+  overrides: Partial<TypedArgumentMetadata> = {},
+): TypedArgumentMetadata {
+  return {
+    type: 'body',
+    metatype: Object,
+    data: undefined,
+    ...overrides,
+  };
+}
 
 // Mock the security utils to avoid compilation issues
 jest.mock('@bytebot/shared/utils/security.utils', () => ({
@@ -68,6 +96,20 @@ jest.mock('@bytebot/shared/utils/security.utils', () => ({
   },
 }));
 
+/**
+ * Security validation error response interface
+ */
+interface SecurityValidationErrorResponse {
+  message: string;
+  operationId: string;
+  threatTypes: string[];
+  totalRiskScore: number;
+  threatLevel: string;
+  validationStages: string[];
+  detectionCount: number;
+  timestamp: string;
+}
+
 describe('ComputerActionValidationPipe - Integration Tests', () => {
   let pipe: ComputerActionValidationPipe;
   let mockDetectAdvancedXSS: jest.Mock;
@@ -84,7 +126,11 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
     );
 
     // Get mocked functions
-    const securityUtils = require('@bytebot/shared/utils/security.utils');
+    const securityUtils = require('@bytebot/shared/utils/security.utils') as {
+      detectAdvancedXSS: jest.Mock;
+      detectSQLInjection: jest.Mock;
+      detectCommandInjection: jest.Mock;
+    };
     mockDetectAdvancedXSS = securityUtils.detectAdvancedXSS as jest.Mock;
     mockDetectSQLInjection = securityUtils.detectSQLInjection as jest.Mock;
     mockDetectCommandInjection =
@@ -102,7 +148,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: 'Hello World',
       };
 
-      const result = await pipe.transform(validInput, {} as any);
+      const result = await pipe.transform(validInput, createArgumentMetadata());
 
       expect(result).toBeDefined();
       expect(result.action).toBe('type_text');
@@ -132,9 +178,16 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: '<script>alert("xss")</script>',
       };
 
-      await expect(pipe.transform(maliciousInput, {} as any)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(
+          maliciousInput,
+          createArgumentMetadata({
+            type: 'body',
+            metatype: Object,
+            data: undefined,
+          }),
+        ),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should block requests when SQL injection threats are detected', async () => {
@@ -154,9 +207,16 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: "'; DROP TABLE users; --",
       };
 
-      await expect(pipe.transform(maliciousInput, {} as any)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(
+          maliciousInput,
+          createArgumentMetadata({
+            type: 'body',
+            metatype: Object,
+            data: undefined,
+          }),
+        ),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should block requests when command injection threats are detected', async () => {
@@ -177,9 +237,16 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: 'test; rm -rf /',
       };
 
-      await expect(pipe.transform(maliciousInput, {} as any)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(
+          maliciousInput,
+          createArgumentMetadata({
+            type: 'body',
+            metatype: Object,
+            data: undefined,
+          }),
+        ),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should use correct security context for different action types', async () => {
@@ -196,8 +263,8 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         const input = { action: testCase.action };
 
         try {
-          await pipe.transform(input, {} as any);
-        } catch (error) {
+          await pipe.transform(input, createArgumentMetadata());
+        } catch (_error) {
           // Ignore validation errors for incomplete inputs
         }
 
@@ -237,14 +304,17 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       try {
-        await pipe.transform(maliciousInput, {} as any);
+        await pipe.transform(maliciousInput, createArgumentMetadata());
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.response.message).toContain('security threats detected');
-        expect(error.response.threatTypes).toContain('ADVANCED_XSS');
-        expect(error.response.threatTypes).toContain('ADVANCED_SQL_INJECTION');
-        expect(error.response.totalRiskScore).toBeGreaterThan(0);
+        const badRequestError = error as BadRequestException;
+        const response =
+          badRequestError.getResponse() as SecurityValidationErrorResponse;
+        expect(response.message).toContain('security threats detected');
+        expect(response.threatTypes).toContain('ADVANCED_XSS');
+        expect(response.threatTypes).toContain('ADVANCED_SQL_INJECTION');
+        expect(response.totalRiskScore).toBeGreaterThan(0);
       }
     });
 
@@ -265,22 +335,25 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       try {
-        await pipe.transform(maliciousInput, {} as any);
+        await pipe.transform(maliciousInput, createArgumentMetadata());
         fail('Should have thrown BadRequestException');
       } catch (error) {
-        expect(error.response).toHaveProperty('message');
-        expect(error.response).toHaveProperty('operationId');
-        expect(error.response).toHaveProperty('threatTypes');
-        expect(error.response).toHaveProperty('totalRiskScore');
-        expect(error.response).toHaveProperty('threatLevel');
-        expect(error.response).toHaveProperty('validationStages');
-        expect(error.response).toHaveProperty('detectionCount');
-        expect(error.response).toHaveProperty('timestamp');
+        const badRequestError = error as BadRequestException;
+        const response =
+          badRequestError.getResponse() as SecurityValidationErrorResponse;
+        expect(response).toHaveProperty('message');
+        expect(response).toHaveProperty('operationId');
+        expect(response).toHaveProperty('threatTypes');
+        expect(response).toHaveProperty('totalRiskScore');
+        expect(response).toHaveProperty('threatLevel');
+        expect(response).toHaveProperty('validationStages');
+        expect(response).toHaveProperty('detectionCount');
+        expect(response).toHaveProperty('timestamp');
 
-        expect(Array.isArray(error.response.threatTypes)).toBe(true);
-        expect(Array.isArray(error.response.validationStages)).toBe(true);
-        expect(typeof error.response.totalRiskScore).toBe('number');
-        expect(error.response.detectionCount).toBeGreaterThan(0);
+        expect(Array.isArray(response.threatTypes)).toBe(true);
+        expect(Array.isArray(response.validationStages)).toBe(true);
+        expect(typeof response.totalRiskScore).toBe('number');
+        expect(response.detectionCount).toBeGreaterThan(0);
       }
     });
 
@@ -295,7 +368,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       ];
 
       for (const input of validInputs) {
-        const result = await pipe.transform(input, {} as any);
+        const result = await pipe.transform(input, createArgumentMetadata());
         expect(result).toBeDefined();
         expect(result.action).toBe(input.action);
       }
@@ -307,9 +380,16 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
         text: 'A'.repeat(2 * 1024 * 1024), // 2MB payload
       };
 
-      await expect(pipe.transform(largePayload, {} as any)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(
+          largePayload,
+          createArgumentMetadata({
+            type: 'body',
+            metatype: Object,
+            data: undefined,
+          }),
+        ),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -320,7 +400,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       const start = Date.now();
-      await pipe.transform(input, {} as any);
+      await pipe.transform(input, createArgumentMetadata());
       const duration = Date.now() - start;
 
       expect(duration).toBeLessThan(100); // Should complete within 100ms

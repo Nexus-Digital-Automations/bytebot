@@ -1,4 +1,7 @@
 /* eslint-env jest */
+
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 /**
  * MCP Index Module Test Suite
  *
@@ -21,10 +24,10 @@
 
 import { performance } from 'perf_hooks';
 import {
-  TestUtils,
-  AssertionHelpers,
-  MockDataProviders,
-  TestEnvironment,
+  TestUtils as _TestUtils,
+  AssertionHelpers as _AssertionHelpers,
+  MockDataProviders as _MockDataProviders,
+  TestEnvironment as _TestEnvironment,
   createMockLogger,
 } from '../../test-utils';
 
@@ -37,8 +40,8 @@ import { ComputerUseTools } from '../computer-use.tools';
 import {
   Base64ImageCompressor,
   compressPngBase64Under1MB,
-  CompressionOptions,
-  CompressionResult,
+  CompressionOptions as _CompressionOptions,
+  CompressionResult as _CompressionResult,
 } from '../compressor';
 
 /**
@@ -49,9 +52,11 @@ class IndexTestUtils {
    * Validate that an export exists and has correct type
    */
   static validateExport(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     exportObj: any,
     name: string,
     expectedType: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expectedConstructor?: any,
   ): void {
     expect(exportObj).toBeDefined();
@@ -65,20 +70,18 @@ class IndexTestUtils {
   /**
    * Check if an object is a constructor function
    */
-  static isConstructor(obj: any): boolean {
-    return (
-      typeof obj === 'function' &&
+  static isConstructor(obj: unknown): boolean {
+    return (typeof obj === 'function' &&
       obj.prototype &&
-      obj.prototype.constructor === obj
-    );
+      obj.prototype.constructor === obj) as boolean;
   }
 
   /**
    * Get all property names including non-enumerable ones
    */
-  static getAllPropertyNames(obj: any): string[] {
+  static getAllPropertyNames(obj: unknown): string[] {
     const props: string[] = [];
-    let current = obj;
+    let current = obj as object | null;
 
     do {
       Object.getOwnPropertyNames(current).forEach((_name) => {
@@ -86,7 +89,7 @@ class IndexTestUtils {
           props.push(_name);
         }
       });
-      current = Object.getPrototypeOf(current);
+      current = Object.getPrototypeOf(current) as object | null;
     } while (current && current !== Object.prototype);
 
     return props.sort();
@@ -95,11 +98,11 @@ class IndexTestUtils {
   /**
    * Calculate approximate memory footprint of an object
    */
-  static getApproximateSize(obj: any): number {
+  static getApproximateSize(obj: unknown): number {
     const visited = new WeakSet();
 
-    function calculateSize(value: any): number {
-      if (value === null ?? typeof value !== 'object') {
+    function calculateSize(value: unknown): number {
+      if (value === null || typeof value !== 'object') {
         return 8; // Approximate size for primitives
       }
 
@@ -113,7 +116,7 @@ class IndexTestUtils {
       for (const key in value) {
         if (Object.prototype.hasOwnProperty.call(value, key)) {
           size += key.length * 2; // String key size
-          size += calculateSize(value[key]);
+          size += calculateSize((value as Record<string, unknown>)[key]);
         }
       }
 
@@ -125,11 +128,11 @@ class IndexTestUtils {
 }
 
 describe('MCP Index Module', () => {
-  let mockLogger: jest.Mocked<any>;
+  let _mockLogger: Record<string, jest.Mock>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLogger = createMockLogger();
+    _mockLogger = createMockLogger() as Record<string, jest.Mock>;
   });
 
   afterEach(() => {
@@ -286,11 +289,11 @@ describe('MCP Index Module', () => {
       const moduleMetadata = Reflect.getMetadata(
         'imports',
         McpIndex.BytebotMcpModule,
-      );
+      ) as unknown[];
       const providersMetadata = Reflect.getMetadata(
         'providers',
         McpIndex.BytebotMcpModule,
-      );
+      ) as unknown[];
 
       expect(moduleMetadata).toBeDefined();
       expect(providersMetadata).toBeDefined();
@@ -382,7 +385,7 @@ describe('MCP Index Module', () => {
     /**
      * Test that exports work together correctly
      */
-    it('should allow seamless integration between exported components', async () => {
+    it('should allow seamless integration between exported components', () => {
       // Test that module can be used with tools
       const module = new McpIndex.BytebotMcpModule();
       expect(module).toBeDefined();
@@ -575,7 +578,8 @@ describe('MCP Index Module', () => {
      */
     it('should handle missing exports gracefully', () => {
       // Test accessing non-existent export
-      const nonExistent = (McpIndex as any).NonExistentExport;
+      const nonExistent = (McpIndex as Record<string, unknown>)
+        .NonExistentExport;
       expect(nonExistent).toBeUndefined();
     });
 
@@ -587,7 +591,7 @@ describe('MCP Index Module', () => {
 
       // Attempt to modify export
       try {
-        (McpIndex as any).BytebotMcpModule = null;
+        (McpIndex as Record<string, unknown>).BytebotMcpModule = null;
       } catch {
         // Some environments might prevent this modification
       }

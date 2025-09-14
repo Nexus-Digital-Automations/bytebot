@@ -1,4 +1,6 @@
 /* eslint-env jest */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Comprehensive Application Management Unit Tests for ComputerUseService
  *
@@ -23,26 +25,51 @@
 // Mock @nut-tree-fork/nut-js FIRST before any imports to avoid import issues
 jest.mock('@nut-tree-fork/nut-js', () => ({
   keyboard: {
-    pressKey: jest.fn().mockResolvedValue(undefined),
-    releaseKey: jest.fn().mockResolvedValue(undefined),
+    pressKey: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    releaseKey: jest.fn().mockResolvedValue(
+      undefined,
+    ),
     config: { autoDelayMs: 100 },
   },
   mouse: {
-    setPosition: jest.fn().mockResolvedValue(undefined),
+    setPosition: jest.fn().mockResolvedValue(
+      undefined,
+    ),
     click: jest.fn().mockResolvedValue(undefined),
-    pressButton: jest.fn().mockResolvedValue(undefined),
-    releaseButton: jest.fn().mockResolvedValue(undefined),
-    scrollUp: jest.fn().mockResolvedValue(undefined),
-    scrollDown: jest.fn().mockResolvedValue(undefined),
-    scrollLeft: jest.fn().mockResolvedValue(undefined),
-    scrollRight: jest.fn().mockResolvedValue(undefined),
-    getPosition: jest.fn().mockResolvedValue({ x: 100, y: 200 }),
+    pressButton: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    releaseButton: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    scrollUp: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    scrollDown: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    scrollLeft: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    scrollRight: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    getPosition: jest.fn().mockResolvedValue({
+      x: 100,
+      y: 200,
+    }),
     config: { autoDelayMs: 100 },
   },
   screen: {
-    capture: jest.fn().mockResolvedValue(undefined),
+    capture: jest.fn().mockResolvedValue(
+      undefined,
+    ),
   },
-  Point: jest.fn().mockImplementation((x: number, y: number) => ({ x, y })),
+  Point: jest.fn().mockImplementation(
+    (x: number, y: number) => ({ x, y }),
+  ),
   Key: {
     A: 'A',
     B: 'B',
@@ -60,29 +87,44 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
 // Mock external dependencies
 jest.mock('child_process');
 jest.mock('util', () => {
-  const originalUtil = jest.requireActual('util');
+  const originalUtil = jest.requireActual('util') as typeof import('util');
   return {
     ...originalUtil,
-    promisify: jest.fn(),
-    inspect: jest.fn().mockImplementation((obj: any) => JSON.stringify(obj)),
+    promisify: Object.assign(jest.fn(), {
+      custom: Symbol.for('nodejs.util.promisify.custom'),
+    }),
+    inspect: Object.assign(
+      jest.fn().mockImplementation(
+        (obj: unknown) => JSON.stringify(obj),
+      ),
+      {
+        colors: originalUtil.inspect.colors,
+        styles: originalUtil.inspect.styles,
+        defaultOptions: originalUtil.inspect.defaultOptions,
+        replDefaults: originalUtil.inspect.replDefaults,
+        custom: originalUtil.inspect.custom,
+      },
+    ),
   } as typeof import('util');
 });
 jest.mock('fs/promises');
 
 // Mock axios and HTTP services that cause util.inherits issues
 jest.mock('@nestjs/axios', () => ({
-  HttpService: jest.fn().mockImplementation(() => ({
-    axiosRef: {
+  HttpService: jest.fn().mockImplementation(
+    () => ({
+      axiosRef: {
+        get: jest.fn(),
+        post: jest.fn(),
+        put: jest.fn(),
+        delete: jest.fn(),
+      },
       get: jest.fn(),
       post: jest.fn(),
       put: jest.fn(),
       delete: jest.fn(),
-    },
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    delete: jest.fn(),
-  })),
+    }),
+  ),
 }));
 
 jest.mock('axios', () => ({
@@ -102,7 +144,9 @@ jest.mock('axios', () => ({
 
 // Mock RxJS to avoid additional issues
 jest.mock('rxjs', () => ({
-  firstValueFrom: jest.fn().mockResolvedValue({ data: 'mocked' }),
+  firstValueFrom: jest.fn().mockResolvedValue({
+    data: 'mocked',
+  }),
   of: jest.fn(),
   from: jest.fn(),
   Subject: jest.fn().mockImplementation(() => ({
@@ -113,34 +157,42 @@ jest.mock('rxjs', () => ({
     unsubscribe: jest.fn(),
     observers: [],
   })),
-  BehaviorSubject: jest.fn().mockImplementation(() => ({
-    next: jest.fn(),
-    error: jest.fn(),
-    complete: jest.fn(),
-    subscribe: jest.fn(),
-    unsubscribe: jest.fn(),
-    observers: [],
-    getValue: jest.fn(),
-  })),
-  Observable: jest.fn().mockImplementation(() => ({
-    subscribe: jest.fn(),
-  })),
+  BehaviorSubject: jest.fn().mockImplementation(
+    () => ({
+      next: jest.fn(),
+      error: jest.fn(),
+      complete: jest.fn(),
+      subscribe: jest.fn(),
+      unsubscribe: jest.fn(),
+      observers: [],
+      getValue: jest.fn(),
+    }),
+  ),
+  Observable: jest.fn().mockImplementation(
+    () => ({
+      subscribe: jest.fn(),
+    }),
+  ),
 }));
 
 // Mock @nestjs/config
 jest.mock('@nestjs/config', () => ({
-  ConfigService: jest.fn().mockImplementation(() => ({
-    get: jest.fn().mockReturnValue('test-value'),
-  })),
+  ConfigService: jest.fn().mockImplementation(
+    () => ({
+      get: jest.fn().mockReturnValue(
+        'test-value',
+      ),
+    }),
+  ),
 }));
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
-import { Application } from '@bytebot/shared';
 import { ApplicationActionDto } from '../dto/computer-action.dto';
-import { spawn } from 'child_process';
+import { ApplicationName } from '../dto/base.dto';
+import { spawn, SpawnOptions } from 'child_process';
 import { promisify } from 'util';
 
 describe('ComputerUseService - Application Management', () => {
@@ -187,10 +239,10 @@ describe('ComputerUseService - Application Management', () => {
     jest.clearAllMocks();
 
     // Setup promisify mock to return execAsync
-    mockPromisify.mockReturnValue(mockExecAsync);
+    (mockPromisify as jest.MockedFunction<any>).mockReturnValue(mockExecAsync);
 
     // Setup spawn mock to return mock process
-    mockSpawn.mockReturnValue(
+    (mockSpawn as jest.MockedFunction<any>).mockReturnValue(
       mockProcess as unknown as ReturnType<typeof spawn>,
     );
 
@@ -232,7 +284,7 @@ describe('ComputerUseService - Application Management', () => {
     it('should activate desktop using wmctrl command', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'desktop',
+        application: ApplicationName.DESKTOP,
       };
 
       await service.action(action);
@@ -241,13 +293,13 @@ describe('ComputerUseService - Application Management', () => {
       expect(mockSpawn).toHaveBeenCalledWith(
         'sudo',
         ['-u', 'user', 'wmctrl', '-k', 'on'],
-        {
+        expect.objectContaining({
           env: expect.objectContaining({
             DISPLAY: ':0.0',
           }),
           stdio: 'ignore',
           detached: true,
-        },
+        }) as SpawnOptions,
       );
 
       // Verify process was unreferenced for proper cleanup
@@ -263,11 +315,13 @@ describe('ComputerUseService - Application Management', () => {
     it('should launch firefox when not running', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'firefox',
+        application: ApplicationName.FIREFOX,
       };
 
       // Mock application not running (wmctrl check fails with exit code 1)
-      mockExecAsync.mockRejectedValue({ code: 1 });
+      (mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({
+        code: 1,
+      });
 
       await service.action(action);
 
@@ -281,13 +335,13 @@ describe('ComputerUseService - Application Management', () => {
       expect(mockSpawn).toHaveBeenCalledWith(
         'sudo',
         ['-u', 'user', 'nohup', 'firefox-esr'],
-        {
+        expect.objectContaining({
           env: expect.objectContaining({
             DISPLAY: ':0.0',
           }),
           stdio: 'ignore',
           detached: true,
-        },
+        }) as SpawnOptions,
       );
 
       expect(mockProcess.unref).toHaveBeenCalled();
@@ -297,18 +351,24 @@ describe('ComputerUseService - Application Management', () => {
      * Test all supported applications launch correctly
      */
     it('should launch all supported applications when not running', async () => {
-      const appConfigs: Array<[Application, string, string]> = [
-        ['firefox', 'firefox-esr', 'Navigator.firefox-esr'],
-        ['1password', '1password', '1password.1Password'],
-        ['thunderbird', 'thunderbird', 'Mail.thunderbird'],
-        ['vscode', 'code', 'code.Code'],
-        ['terminal', 'xfce4-terminal', 'xfce4-terminal.Xfce4-Terminal'],
-        ['directory', 'thunar', 'Thunar'],
+      const appConfigs: Array<[ApplicationName, string, string]> = [
+        [ApplicationName.FIREFOX, 'firefox-esr', 'Navigator.firefox-esr'],
+        [ApplicationName.ONEPASSWORD, '1password', '1password.1Password'],
+        [ApplicationName.THUNDERBIRD, 'thunderbird', 'Mail.thunderbird'],
+        [ApplicationName.VSCODE, 'code', 'code.Code'],
+        [
+          ApplicationName.TERMINAL,
+          'xfce4-terminal',
+          'xfce4-terminal.Xfce4-Terminal',
+        ],
+        [ApplicationName.DIRECTORY, 'thunar', 'Thunar'],
       ];
 
       for (const [app, command, processName] of appConfigs) {
         jest.clearAllMocks();
-        mockExecAsync.mockRejectedValue({ code: 1 });
+        (mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({
+          code: 1,
+        });
 
         const action: ApplicationActionDto = {
           action: 'application',
@@ -326,7 +386,7 @@ describe('ComputerUseService - Application Management', () => {
           'sudo',
           ['-u', 'user', 'nohup', command],
           expect.objectContaining({
-            env: expect.objectContaining({ DISPLAY: ':0.0' }),
+            env: expect.objectContaining({ DISPLAY: ':0.0' }) as any,
             stdio: 'ignore',
             detached: true,
           }),
@@ -341,10 +401,10 @@ describe('ComputerUseService - Application Management', () => {
      * Should activate window and maximize it for better UX
      */
     it('should activate and maximize running applications', async () => {
-      const appConfigs: Array<[Application, string]> = [
-        ['firefox', 'Navigator.firefox-esr'],
-        ['vscode', 'code.Code'],
-        ['thunderbird', 'Mail.thunderbird'],
+      const appConfigs: Array<[ApplicationName, string]> = [
+        [ApplicationName.FIREFOX, 'Navigator.firefox-esr'],
+        [ApplicationName.VSCODE, 'code.Code'],
+        [ApplicationName.THUNDERBIRD, 'Mail.thunderbird'],
       ];
 
       for (const [app, processName] of appConfigs) {
@@ -356,7 +416,7 @@ describe('ComputerUseService - Application Management', () => {
         };
 
         // Mock application already running
-        mockExecAsync.mockResolvedValue({
+        (mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({
           stdout: `${processName}    window-id  desktop`,
         });
 
@@ -368,7 +428,7 @@ describe('ComputerUseService - Application Management', () => {
           'sudo',
           ['-u', 'user', 'wmctrl', '-x', '-a', processName],
           expect.objectContaining({
-            env: expect.objectContaining({ DISPLAY: ':0.0' }),
+            env: expect.objectContaining({ DISPLAY: ':0.0' }) as any,
             stdio: 'ignore',
             detached: true,
           }),
@@ -389,7 +449,7 @@ describe('ComputerUseService - Application Management', () => {
             'add,maximized_vert,maximized_horz',
           ],
           expect.objectContaining({
-            env: expect.objectContaining({ DISPLAY: ':0.0' }),
+            env: expect.objectContaining({ DISPLAY: ':0.0' }) as any,
             stdio: 'ignore',
             detached: true,
           }),
@@ -407,7 +467,7 @@ describe('ComputerUseService - Application Management', () => {
     it('should throw _error for unsupported application', async () => {
       const action = {
         action: 'application' as const,
-        application: 'unsupported-app' as Application,
+        application: 'unsupported-app' as ApplicationName,
       };
 
       await expect(service.action(action)).rejects.toThrow(
@@ -423,11 +483,11 @@ describe('ComputerUseService - Application Management', () => {
     it('should handle wmctrl timeout _error gracefully', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'firefox',
+        application: ApplicationName.FIREFOX,
       };
 
       // Mock timeout error
-      mockExecAsync.mockRejectedValue({
+      (mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({
         message: 'Command timeout after 5000ms',
         code: 'TIMEOUT',
       });
@@ -439,7 +499,7 @@ describe('ComputerUseService - Application Management', () => {
         'sudo',
         ['-u', 'user', 'nohup', 'firefox-esr'],
         expect.objectContaining({
-          env: expect.objectContaining({ DISPLAY: ':0.0' }),
+          env: expect.objectContaining({ DISPLAY: ':0.0' }) as any,
         }),
       );
     });
@@ -450,11 +510,13 @@ describe('ComputerUseService - Application Management', () => {
     it('should handle spawn errors during application launch', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'terminal',
+        application: ApplicationName.TERMINAL,
       };
 
-      mockExecAsync.mockRejectedValue({ code: 1 });
-      mockSpawn.mockImplementation(() => {
+      (mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({
+        code: 1,
+      });
+      (mockSpawn as jest.MockedFunction<any>).mockImplementation(() => {
         throw new Error('Failed to spawn process');
       });
 
@@ -471,11 +533,11 @@ describe('ComputerUseService - Application Management', () => {
     it('should properly unref spawned processes', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'vscode',
+        application: ApplicationName.VSCODE,
       };
 
       // Mock application already running to trigger both activation and maximization
-      mockExecAsync.mockResolvedValue({
+      (mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({
         stdout: 'code.Code window data',
       });
 
@@ -492,10 +554,10 @@ describe('ComputerUseService - Application Management', () => {
     it('should run all operations with sudo user context', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'thunderbird',
+        application: ApplicationName.THUNDERBIRD,
       };
 
-      mockExecAsync.mockResolvedValue({
+      (mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({
         stdout: 'Mail.thunderbird window data',
       });
 
@@ -515,10 +577,12 @@ describe('ComputerUseService - Application Management', () => {
     it('should set secure DISPLAY environment variable', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: '1password',
+        application: ApplicationName.ONEPASSWORD,
       };
 
-      mockExecAsync.mockRejectedValue({ code: 1 });
+      (mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({
+        code: 1,
+      });
 
       await service.action(action);
 
@@ -528,8 +592,8 @@ describe('ComputerUseService - Application Management', () => {
         expect.objectContaining({
           env: expect.objectContaining({
             DISPLAY: ':0.0',
-          }),
-        }),
+          }) as SpawnOptions,
+        }) as SpawnOptions,
       );
     });
   });
@@ -541,10 +605,12 @@ describe('ComputerUseService - Application Management', () => {
     it('should apply timeout to application status checks', async () => {
       const action: ApplicationActionDto = {
         action: 'application',
-        application: 'directory',
+        application: ApplicationName.DIRECTORY,
       };
 
-      mockExecAsync.mockResolvedValue({ stdout: 'Thunar window' });
+      (mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({
+        stdout: 'Thunar window',
+      });
 
       await service.action(action);
 

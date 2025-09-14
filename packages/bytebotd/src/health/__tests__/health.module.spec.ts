@@ -59,13 +59,13 @@ describe('HealthModule', () => {
     } as any;
 
     // Mock Logger constructor to return our mock
-    (jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation(mockLogger.log);
-    (jest.spyOn(Logger.prototype, 'debug') as jest.MockedFunction<any>).mockImplementation(mockLogger.debug);
-    (jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>).mockImplementation(mockLogger.error);
-    (jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation(mockLogger.warn);
-    jest
-      .spyOn(Logger.prototype, 'verbose')
-       as jest.MockedFunction<any>).mockImplementation(mockLogger.verbose);
+    jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);
+    jest.spyOn(Logger.prototype, 'debug').mockImplementation(mockLogger.debug);
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(mockLogger.error);
+    jest.spyOn(Logger.prototype, 'warn').mockImplementation(mockLogger.warn);
+    (
+      jest.spyOn(Logger.prototype, 'verbose') as jest.MockedFunction<any>
+    ).mockImplementation(mockLogger.verbose);
 
     module = await Test.createTestingModule({
       imports: [HealthModule],
@@ -145,7 +145,9 @@ describe('HealthModule', () => {
         ],
       }).compile();
 
-      const testService: unknown = testModule.get('TestServiceUsingHealth') as any;
+      const testService: unknown = testModule.get(
+        'TestServiceUsingHealth',
+      ) as any;
       const exportedHealthService = testService.getHealthService();
 
       expect(exportedHealthService).toBeDefined();
@@ -557,14 +559,14 @@ describe('HealthModule', () => {
 
       // Mock HealthService constructor to simulate initialization failure
       const mockHealthService = {
-        getBasicHealth: jest
-          .fn()
-           as jest.MockedFunction<any>).mockRejectedValue(new Error('Service initialization failed')),
-        getDetailedStatus: jest
-          .fn()
-           as jest.MockedFunction<any>).mockRejectedValue(new Error('Service initialization failed')),
-        isServiceStable: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(false),
-        getInitializationTime: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(Date.now()),
+        getBasicHealth: (
+          jest.fn() as jest.MockedFunction<any>
+        ).mockRejectedValue(new Error('Service initialization failed')),
+        getDetailedStatus: (
+          jest.fn() as jest.MockedFunction<any>
+        ).mockRejectedValue(new Error('Service initialization failed')),
+        isServiceStable: jest.fn().mockReturnValue(false),
+        getInitializationTime: jest.fn().mockReturnValue(Date.now()),
       };
 
       const failureModule = await Test.createTestingModule({

@@ -25,26 +25,51 @@
 // Mock @nut-tree-fork/nut-js FIRST before any imports to avoid import issues
 jest.mock('@nut-tree-fork/nut-js', () => ({
   keyboard: {
-    pressKey: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    releaseKey: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    pressKey: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    releaseKey: jest.fn().mockResolvedValue(
+      undefined,
+    ),
     config: { autoDelayMs: 100 },
   },
   mouse: {
-    setPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    click: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    pressButton: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    releaseButton: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollUp: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollDown: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollLeft: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    scrollRight: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
-    getPosition: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ x: 100, y: 200 }),
+    setPosition: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    click: jest.fn().mockResolvedValue(undefined),
+    pressButton: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    releaseButton: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    scrollUp: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    scrollDown: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    scrollLeft: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    scrollRight: jest.fn().mockResolvedValue(
+      undefined,
+    ),
+    getPosition: jest.fn().mockResolvedValue({
+      x: 100,
+      y: 200,
+    }),
     config: { autoDelayMs: 100 },
   },
   screen: {
-    capture: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+    capture: jest.fn().mockResolvedValue(
+      undefined,
+    ),
   },
-  Point: (jest.fn() as jest.MockedFunction<any>).mockImplementation((x: number, y: number) => ({ x, y })),
+  Point: jest.fn().mockImplementation(
+    (x: number, y: number) => ({ x, y }),
+  ),
   Key: {
     A: 'A',
     B: 'B',
@@ -69,7 +94,9 @@ jest.mock('util', () => {
       custom: Symbol.for('nodejs.util.promisify.custom'),
     }),
     inspect: Object.assign(
-      (jest.fn() as jest.MockedFunction<any>).mockImplementation((obj: unknown) => JSON.stringify(obj)),
+      jest.fn().mockImplementation(
+        (obj: unknown) => JSON.stringify(obj),
+      ),
       {
         colors: originalUtil.inspect.colors,
         styles: originalUtil.inspect.styles,
@@ -84,18 +111,20 @@ jest.mock('fs/promises');
 
 // Mock axios and HTTP services that cause util.inherits issues
 jest.mock('@nestjs/axios', () => ({
-  HttpService: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
-    axiosRef: {
+  HttpService: jest.fn().mockImplementation(
+    () => ({
+      axiosRef: {
+        get: jest.fn(),
+        post: jest.fn(),
+        put: jest.fn(),
+        delete: jest.fn(),
+      },
       get: jest.fn(),
       post: jest.fn(),
       put: jest.fn(),
       delete: jest.fn(),
-    },
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    delete: jest.fn(),
-  })),
+    }),
+  ),
 }));
 
 jest.mock('axios', () => ({
@@ -115,10 +144,12 @@ jest.mock('axios', () => ({
 
 // Mock RxJS to avoid additional issues
 jest.mock('rxjs', () => ({
-  firstValueFrom: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({ data: 'mocked' }),
+  firstValueFrom: jest.fn().mockResolvedValue({
+    data: 'mocked',
+  }),
   of: jest.fn(),
   from: jest.fn(),
-  Subject: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
+  Subject: jest.fn().mockImplementation(() => ({
     next: jest.fn(),
     error: jest.fn(),
     complete: jest.fn(),
@@ -126,25 +157,33 @@ jest.mock('rxjs', () => ({
     unsubscribe: jest.fn(),
     observers: [],
   })),
-  BehaviorSubject: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
-    next: jest.fn(),
-    error: jest.fn(),
-    complete: jest.fn(),
-    subscribe: jest.fn(),
-    unsubscribe: jest.fn(),
-    observers: [],
-    getValue: jest.fn(),
-  })),
-  Observable: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
-    subscribe: jest.fn(),
-  })),
+  BehaviorSubject: jest.fn().mockImplementation(
+    () => ({
+      next: jest.fn(),
+      error: jest.fn(),
+      complete: jest.fn(),
+      subscribe: jest.fn(),
+      unsubscribe: jest.fn(),
+      observers: [],
+      getValue: jest.fn(),
+    }),
+  ),
+  Observable: jest.fn().mockImplementation(
+    () => ({
+      subscribe: jest.fn(),
+    }),
+  ),
 }));
 
 // Mock @nestjs/config
 jest.mock('@nestjs/config', () => ({
-  ConfigService: (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => ({
-    get: (jest.fn() as jest.MockedFunction<any>).mockReturnValue('test-value'),
-  })),
+  ConfigService: jest.fn().mockImplementation(
+    () => ({
+      get: jest.fn().mockReturnValue(
+        'test-value',
+      ),
+    }),
+  ),
 }));
 
 import { Test, TestingModule } from '@nestjs/testing';
@@ -200,10 +239,10 @@ describe('ComputerUseService - Application Management', () => {
     jest.clearAllMocks();
 
     // Setup promisify mock to return execAsync
-    mockPromisify as jest.MockedFunction<any>).mockReturnValue(mockExecAsync);
+    (mockPromisify).mockReturnValue(mockExecAsync);
 
     // Setup spawn mock to return mock process
-    mockSpawn as jest.MockedFunction<any>).mockReturnValue(
+    (mockSpawn).mockReturnValue(
       mockProcess as unknown as ReturnType<typeof spawn>,
     );
 
@@ -280,7 +319,9 @@ describe('ComputerUseService - Application Management', () => {
       };
 
       // Mock application not running (wmctrl check fails with exit code 1)
-      mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({ code: 1 });
+      (mockExecAsync).mockRejectedValue({
+        code: 1,
+      });
 
       await service.action(action);
 
@@ -325,7 +366,9 @@ describe('ComputerUseService - Application Management', () => {
 
       for (const [app, command, processName] of appConfigs) {
         jest.clearAllMocks();
-        mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({ code: 1 });
+        (mockExecAsync).mockRejectedValue({
+          code: 1,
+        });
 
         const action: ApplicationActionDto = {
           action: 'application',
@@ -373,7 +416,7 @@ describe('ComputerUseService - Application Management', () => {
         };
 
         // Mock application already running
-        mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({
+        (mockExecAsync).mockResolvedValue({
           stdout: `${processName}    window-id  desktop`,
         });
 
@@ -444,7 +487,7 @@ describe('ComputerUseService - Application Management', () => {
       };
 
       // Mock timeout error
-      mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({
+      (mockExecAsync).mockRejectedValue({
         message: 'Command timeout after 5000ms',
         code: 'TIMEOUT',
       });
@@ -470,8 +513,10 @@ describe('ComputerUseService - Application Management', () => {
         application: ApplicationName.TERMINAL,
       };
 
-      mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({ code: 1 });
-      mockSpawn as jest.MockedFunction<any>).mockImplementation(() => {
+      (mockExecAsync).mockRejectedValue({
+        code: 1,
+      });
+      (mockSpawn).mockImplementation(() => {
         throw new Error('Failed to spawn process');
       });
 
@@ -492,7 +537,7 @@ describe('ComputerUseService - Application Management', () => {
       };
 
       // Mock application already running to trigger both activation and maximization
-      mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({
+      (mockExecAsync).mockResolvedValue({
         stdout: 'code.Code window data',
       });
 
@@ -512,7 +557,7 @@ describe('ComputerUseService - Application Management', () => {
         application: ApplicationName.THUNDERBIRD,
       };
 
-      mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({
+      (mockExecAsync).mockResolvedValue({
         stdout: 'Mail.thunderbird window data',
       });
 
@@ -535,7 +580,9 @@ describe('ComputerUseService - Application Management', () => {
         application: ApplicationName.ONEPASSWORD,
       };
 
-      mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({ code: 1 });
+      (mockExecAsync).mockRejectedValue({
+        code: 1,
+      });
 
       await service.action(action);
 
@@ -561,7 +608,9 @@ describe('ComputerUseService - Application Management', () => {
         application: ApplicationName.DIRECTORY,
       };
 
-      mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({ stdout: 'Thunar window' });
+      (mockExecAsync).mockResolvedValue({
+        stdout: 'Thunar window',
+      });
 
       await service.action(action);
 

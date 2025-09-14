@@ -1,4 +1,5 @@
 /* eslint-env jest */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /**
  * Comprehensive Unit Tests for ComputerUseService - Keyboard Operations Focus
  *
@@ -98,9 +99,13 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
     // Setup logger spies for comprehensive logging verification
     __loggerLogSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
-    __loggerErrorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+    __loggerErrorSpy = jest
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation();
     __loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
-    __loggerDebugSpy = jest.spyOn(Logger.prototype, 'debug').mockImplementation();
+    __loggerDebugSpy = jest
+      .spyOn(Logger.prototype, 'debug')
+      .mockImplementation();
   });
 
   /**
@@ -109,10 +114,10 @@ describe('ComputerUseService - Keyboard Operations', () => {
    */
   afterEach(() => {
     jest.clearAllMocks();
-    __loggerLogSpy.mockRestore();
-    __loggerErrorSpy.mockRestore();
-    __loggerWarnSpy.mockRestore();
-    __loggerDebugSpy.mockRestore();
+    __loggerLogSpy?.mockRestore();
+    __loggerErrorSpy?.mockRestore();
+    __loggerWarnSpy?.mockRestore();
+    __loggerDebugSpy?.mockRestore();
   });
 
   /**
@@ -134,7 +139,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
         scrollCount: 3,
       };
 
-      nutService.mouseWheelEvent.mockResolvedValue(undefined);
+      (
+        nutService.mouseWheelEvent as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({ success: true });
 
       // Act: Execute scroll operation
       await service.action(scrollAction);
@@ -142,7 +151,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       // Assert: Verify correct NutService calls and logging
       expect(nutService.mouseWheelEvent).toHaveBeenCalledTimes(3);
       expect(nutService.mouseWheelEvent).toHaveBeenCalledWith('down', 1);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[scroll_\d+_\w+\] Performing scroll operation/),
         expect.objectContaining({
           hasCoordinates: false,
@@ -151,7 +160,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
           hasHoldKeys: false,
         }),
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[scroll_\d+_\w+\] Scroll operation completed successfully/,
         ),
@@ -171,8 +180,16 @@ describe('ComputerUseService - Keyboard Operations', () => {
         scrollCount: 2,
       };
 
-      nutService.mouseMoveEvent.mockResolvedValue(undefined);
-      nutService.mouseWheelEvent.mockResolvedValue(undefined);
+      (
+        nutService.mouseMoveEvent as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({ success: true });
+      (
+        nutService.mouseWheelEvent as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({ success: true });
 
       // Act: Execute scroll with coordinates
       await service.action(scrollAction);
@@ -181,7 +198,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       expect(nutService.mouseMoveEvent).toHaveBeenCalledWith(mockCoordinates);
       expect(nutService.mouseWheelEvent).toHaveBeenCalledTimes(2);
       expect(nutService.mouseWheelEvent).toHaveBeenCalledWith('up', 1);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[scroll_\d+_\w+\] Moving to scroll coordinates/,
         ),
@@ -203,9 +220,23 @@ describe('ComputerUseService - Keyboard Operations', () => {
         holdKeys: ['ctrl', 'shift'],
       };
 
-      nutService.mouseMoveEvent.mockResolvedValue(undefined);
-      nutService.holdKeys.mockResolvedValue(undefined);
-      nutService.mouseWheelEvent.mockResolvedValue(undefined);
+      (
+        nutService.mouseMoveEvent as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({ success: true });
+      (
+        nutService.holdKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
+      (
+        nutService.mouseWheelEvent as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({ success: true });
 
       // Act: Execute scroll with modifiers
       await service.action(scrollAction);
@@ -217,10 +248,10 @@ describe('ComputerUseService - Keyboard Operations', () => {
         ['ctrl', 'shift'],
         false,
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[scroll_\d+_\w+\] Holding keys: ctrl, shift/),
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[scroll_\d+_\w+\] Releasing held keys/),
       );
     });
@@ -237,14 +268,18 @@ describe('ComputerUseService - Keyboard Operations', () => {
         scrollCount: 100, // Should be limited to 50
       };
 
-      nutService.mouseWheelEvent.mockResolvedValue(undefined);
+      (
+        nutService.mouseWheelEvent as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({ success: true });
 
       // Act: Execute scroll with high count
       await service.action(scrollAction);
 
       // Assert: Verify count was limited and warning logged
       expect(nutService.mouseWheelEvent).toHaveBeenCalledTimes(50);
-      expect(_loggerWarnSpy).toHaveBeenCalledWith(
+      expect(__loggerWarnSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[scroll_\d+_\w+\] Scroll count adjusted from 100 to 50/,
         ),
@@ -265,8 +300,18 @@ describe('ComputerUseService - Keyboard Operations', () => {
       };
 
       const errorMessage = 'Mouse wheel event failed';
-      nutService.holdKeys.mockResolvedValue(undefined);
-      nutService.mouseWheelEvent.mockRejectedValue(new Error(errorMessage));
+      (
+        nutService.holdKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
+      (
+        nutService.mouseWheelEvent as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockRejectedValue(new Error(errorMessage));
 
       // Act & Assert: Verify error is thrown
       await expect(service.action(scrollAction)).rejects.toThrow(
@@ -276,7 +321,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       // Assert: Verify key cleanup was attempted
       expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], true);
       expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], false);
-      expect(_loggerErrorSpy).toHaveBeenCalledWith(
+      expect(__loggerErrorSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[scroll_\d+_\w+\] Scroll operation failed: Mouse wheel event failed/,
         ),
@@ -302,7 +347,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
           scrollCount: 1,
         };
 
-        nutService.mouseWheelEvent.mockResolvedValue(undefined);
+        (
+          nutService.mouseWheelEvent as jest.MockedFunction<
+            (...args: unknown[]) => Promise<unknown>
+          >
+        ).mockResolvedValue({ success: true });
 
         // Act: Execute scroll in direction
         await service.action(scrollAction);
@@ -329,7 +378,13 @@ describe('ComputerUseService - Keyboard Operations', () => {
         keys: ['h', 'e', 'l', 'l', 'o'],
       };
 
-      nutService.sendKeys.mockResolvedValue(undefined);
+      (
+        nutService.sendKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
 
       // Act: Execute key typing
       await service.action(typeKeysAction);
@@ -339,7 +394,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         ['h', 'e', 'l', 'l', 'o'],
         undefined,
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_keys_\d+_\w+\] Typing key sequence/),
         expect.objectContaining({
           keyCount: 5,
@@ -348,7 +403,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
           keys: 'h, e, l, l, o',
         }),
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[type_keys_\d+_\w+\] Key typing completed successfully/,
         ),
@@ -367,14 +422,20 @@ describe('ComputerUseService - Keyboard Operations', () => {
         delay: 100,
       };
 
-      nutService.sendKeys.mockResolvedValue(undefined);
+      (
+        nutService.sendKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
 
       // Act: Execute key typing with delay
       await service.action(typeKeysAction);
 
       // Assert: Verify delay parameter passed
       expect(nutService.sendKeys).toHaveBeenCalledWith(['a', 'b', 'c'], 100);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_keys_\d+_\w+\] Typing key sequence/),
         expect.objectContaining({
           keyCount: 3,
@@ -395,7 +456,13 @@ describe('ComputerUseService - Keyboard Operations', () => {
         keys: ['ctrl+c', 'alt+tab', 'escape', 'enter'],
       };
 
-      nutService.sendKeys.mockResolvedValue(undefined);
+      (
+        nutService.sendKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
 
       // Act: Execute special key typing
       await service.action(typeKeysAction);
@@ -420,7 +487,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
       };
 
       const errorMessage = 'Key sending failed';
-      nutService.sendKeys.mockRejectedValue(new Error(errorMessage));
+      (
+        nutService.sendKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockRejectedValue(new Error(errorMessage));
 
       // Act & Assert: Verify error is thrown
       await expect(service.action(typeKeysAction)).rejects.toThrow(
@@ -428,7 +499,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       );
 
       // Assert: Verify error logging
-      expect(_loggerErrorSpy).toHaveBeenCalledWith(
+      expect(__loggerErrorSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[type_keys_\d+_\w+\] Key typing failed: Key sending failed/,
         ),
@@ -451,14 +522,20 @@ describe('ComputerUseService - Keyboard Operations', () => {
         keys: [],
       };
 
-      nutService.sendKeys.mockResolvedValue(undefined);
+      (
+        nutService.sendKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
 
       // Act: Execute empty key typing
       await service.action(typeKeysAction);
 
       // Assert: Verify empty array is passed
       expect(nutService.sendKeys).toHaveBeenCalledWith([], undefined);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_keys_\d+_\w+\] Typing key sequence/),
         expect.objectContaining({
           keyCount: 0,
@@ -485,21 +562,27 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'down',
       };
 
-      nutService.holdKeys.mockResolvedValue(undefined);
+      (
+        nutService.holdKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
 
       // Act: Execute key press
       await service.action(pressKeysAction);
 
       // Assert: Verify correct NutService call and logging
       expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl', 'shift'], true);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[press_keys_\d+_\w+\] Pressing keys/),
         expect.objectContaining({
           keys: 'ctrl, shift',
           press: 'down',
         }),
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[press_keys_\d+_\w+\] Key down operation completed successfully/,
         ),
@@ -518,21 +601,27 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'up',
       };
 
-      nutService.holdKeys.mockResolvedValue(undefined);
+      (
+        nutService.holdKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
 
       // Act: Execute key release
       await service.action(pressKeysAction);
 
       // Assert: Verify correct release call
       expect(nutService.holdKeys).toHaveBeenCalledWith(['alt', 'f4'], false);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[press_keys_\d+_\w+\] Releasing keys/),
         expect.objectContaining({
           keys: 'alt, f4',
           press: 'up',
         }),
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[press_keys_\d+_\w+\] Key up operation completed successfully/,
         ),
@@ -551,7 +640,13 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'down',
       };
 
-      nutService.holdKeys.mockResolvedValue(undefined);
+      (
+        nutService.holdKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
 
       // Act: Execute single key press
       await service.action(pressKeysAction);
@@ -573,7 +668,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
       };
 
       const errorMessage = 'Key press failed';
-      nutService.holdKeys.mockRejectedValue(new Error(errorMessage));
+      (
+        nutService.holdKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockRejectedValue(new Error(errorMessage));
 
       // Act & Assert: Verify error is thrown
       await expect(service.action(pressKeysAction)).rejects.toThrow(
@@ -581,7 +680,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       );
 
       // Assert: Verify error logging
-      expect(_loggerErrorSpy).toHaveBeenCalledWith(
+      expect(__loggerErrorSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[press_keys_\d+_\w+\] Key down operation failed: Key press failed/,
         ),
@@ -605,14 +704,20 @@ describe('ComputerUseService - Keyboard Operations', () => {
         press: 'down',
       };
 
-      nutService.holdKeys.mockResolvedValue(undefined);
+      (
+        nutService.holdKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
 
       // Act: Execute empty key press
       await service.action(pressKeysAction);
 
       // Assert: Verify empty array is handled
       expect(nutService.holdKeys).toHaveBeenCalledWith([], true);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[press_keys_\d+_\w+\] Pressing keys/),
         expect.objectContaining({
           keys: '',
@@ -635,20 +740,24 @@ describe('ComputerUseService - Keyboard Operations', () => {
       // Arrange: Setup text typing operation
       const typeTextAction: TypeTextAction = {
         action: 'type_text',
-        text: 'Hello, World!',
+        text: 'Hello, World as NonNullable<typeof World>',
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      (
+        nutService.typeText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute text typing
       await service.action(typeTextAction);
 
       // Assert: Verify correct NutService call and logging
       expect(nutService.typeText).toHaveBeenCalledWith(
-        'Hello, World!',
+        'Hello, World as NonNullable<typeof World>',
         undefined,
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_text_\d+_\w+\] Typing text/),
         expect.objectContaining({
           textLength: 13,
@@ -657,7 +766,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
           isSensitive: undefined,
         }),
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[type_text_\d+_\w+\] Text typing completed successfully/,
         ),
@@ -676,14 +785,18 @@ describe('ComputerUseService - Keyboard Operations', () => {
         delay: 200,
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      (
+        nutService.typeText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute text typing with delay
       await service.action(typeTextAction);
 
       // Assert: Verify delay parameter passed
       expect(nutService.typeText).toHaveBeenCalledWith('Slow typing', 200);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_text_\d+_\w+\] Typing text/),
         expect.objectContaining({
           textLength: 11,
@@ -705,7 +818,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
         sensitive: true,
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      (
+        nutService.typeText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute sensitive text typing
       await service.action(typeTextAction);
@@ -715,7 +832,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         'secretpassword123',
         undefined,
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_text_\d+_\w+\] Typing text/),
         expect.objectContaining({
           textLength: 17,
@@ -735,7 +852,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: '!@#$%^&*()_+-={}|[]\\:";\'<>?,./',
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      (
+        nutService.typeText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute special character typing
       await service.action(typeTextAction);
@@ -759,7 +880,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: multilineText,
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      (
+        nutService.typeText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute multiline text typing
       await service.action(typeTextAction);
@@ -769,7 +894,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         multilineText,
         undefined,
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_text_\d+_\w+\] Typing text/),
         expect.objectContaining({
           textLength: 20,
@@ -790,7 +915,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
       };
 
       const errorMessage = 'Text typing failed';
-      nutService.typeText.mockRejectedValue(new Error(errorMessage));
+      (
+        nutService.typeText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockRejectedValue(new Error(errorMessage));
 
       // Act & Assert: Verify error is thrown
       await expect(service.action(typeTextAction)).rejects.toThrow(
@@ -798,7 +927,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       );
 
       // Assert: Verify error logging (sensitive data excluded)
-      expect(_loggerErrorSpy).toHaveBeenCalledWith(
+      expect(__loggerErrorSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[type_text_\d+_\w+\] Text typing failed: Text typing failed/,
         ),
@@ -821,14 +950,18 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: '',
       };
 
-      nutService.typeText.mockResolvedValue(undefined);
+      (
+        nutService.typeText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute empty text typing
       await service.action(typeTextAction);
 
       // Assert: Verify empty string is handled
       expect(nutService.typeText).toHaveBeenCalledWith('', undefined);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[type_text_\d+_\w+\] Typing text/),
         expect.objectContaining({
           textLength: 0,
@@ -853,20 +986,24 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: 'Clipboard content',
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      (
+        nutService.pasteText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute text pasting
       await service.action(pasteTextAction);
 
       // Assert: Verify correct NutService call and logging
       expect(nutService.pasteText).toHaveBeenCalledWith('Clipboard content');
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[paste_text_\d+_\w+\] Pasting text/),
         expect.objectContaining({
           textLength: 17,
         }),
       );
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[paste_text_\d+_\w+\] Text pasting completed successfully/,
         ),
@@ -885,14 +1022,18 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: largeText,
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      (
+        nutService.pasteText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute large text pasting
       await service.action(pasteTextAction);
 
       // Assert: Verify large text handling
       expect(nutService.pasteText).toHaveBeenCalledWith(largeText);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[paste_text_\d+_\w+\] Pasting text/),
         expect.objectContaining({
           textLength: 10000,
@@ -913,7 +1054,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: formattedText,
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      (
+        nutService.pasteText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute formatted text pasting
       await service.action(pasteTextAction);
@@ -934,14 +1079,18 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: multilineText,
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      (
+        nutService.pasteText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute multiline text pasting
       await service.action(pasteTextAction);
 
       // Assert: Verify multiline text handling
       expect(nutService.pasteText).toHaveBeenCalledWith(multilineText);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[paste_text_\d+_\w+\] Pasting text/),
         expect.objectContaining({
           textLength: 28,
@@ -961,7 +1110,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
       };
 
       const errorMessage = 'Clipboard paste failed';
-      nutService.pasteText.mockRejectedValue(new Error(errorMessage));
+      (
+        nutService.pasteText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockRejectedValue(new Error(errorMessage));
 
       // Act & Assert: Verify error is thrown
       await expect(service.action(pasteTextAction)).rejects.toThrow(
@@ -969,7 +1122,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       );
 
       // Assert: Verify error logging
-      expect(_loggerErrorSpy).toHaveBeenCalledWith(
+      expect(__loggerErrorSpy).toHaveBeenCalledWith(
         expect.stringMatching(
           /\[paste_text_\d+_\w+\] Text pasting failed: Clipboard paste failed/,
         ),
@@ -991,14 +1144,18 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: '',
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      (
+        nutService.pasteText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute empty text pasting
       await service.action(pasteTextAction);
 
       // Assert: Verify empty string is handled
       expect(nutService.pasteText).toHaveBeenCalledWith('');
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[paste_text_\d+_\w+\] Pasting text/),
         expect.objectContaining({
           textLength: 0,
@@ -1018,14 +1175,18 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: unicodeText,
       };
 
-      nutService.pasteText.mockResolvedValue(undefined);
+      (
+        nutService.pasteText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute unicode text pasting
       await service.action(pasteTextAction);
 
       // Assert: Verify unicode text handling
       expect(nutService.pasteText).toHaveBeenCalledWith(unicodeText);
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[paste_text_\d+_\w+\] Pasting text/),
         expect.objectContaining({
           textLength: unicodeText.length,
@@ -1072,7 +1233,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
     it('should extract _error stack from Error object', () => {
       const error = new Error('Test error');
       error.stack = 'Error stack trace';
-      const result = ErrorHandler.extractErrorStack(_error);
+      const result = ErrorHandler.extractErrorStack(error);
       expect(result).toBe('Error stack trace');
     });
 
@@ -1111,9 +1272,23 @@ describe('ComputerUseService - Keyboard Operations', () => {
      */
     it('should handle sequential keyboard operations', async () => {
       // Arrange: Setup multiple keyboard operations
-      nutService.sendKeys.mockResolvedValue(undefined);
-      nutService.typeText.mockResolvedValue(undefined);
-      nutService.pasteText.mockResolvedValue(undefined);
+      (
+        nutService.sendKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
+      (
+        nutService.typeText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
+      (
+        nutService.pasteText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute sequential operations
       await service.action({
@@ -1151,7 +1326,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       // Arrange: Setup operations where first fails, second succeeds
       nutService.sendKeys
         .mockRejectedValueOnce(new Error('First operation failed'))
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValueOnce({ success: true });
 
       // Act: Execute operations with error recovery
       await expect(
@@ -1185,7 +1360,11 @@ describe('ComputerUseService - Keyboard Operations', () => {
      */
     it('should include timing information in logs', async () => {
       // Arrange: Setup operation with controlled timing
-      nutService.typeText.mockImplementation(
+      (
+        nutService.typeText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100)),
       );
 
@@ -1196,7 +1375,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       });
 
       // Assert: Verify timing is logged
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/Computer action completed successfully/),
         expect.objectContaining({
           processingTimeMs: expect.any(Number),
@@ -1210,11 +1389,35 @@ describe('ComputerUseService - Keyboard Operations', () => {
      */
     it('should use structured logging for all operations', async () => {
       // Arrange: Setup successful operations
-      nutService.mouseWheelEvent.mockResolvedValue(undefined);
-      nutService.sendKeys.mockResolvedValue(undefined);
-      nutService.holdKeys.mockResolvedValue(undefined);
-      nutService.typeText.mockResolvedValue(undefined);
-      nutService.pasteText.mockResolvedValue(undefined);
+      (
+        nutService.mouseWheelEvent as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({ success: true });
+      (
+        nutService.sendKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
+      (
+        nutService.holdKeys as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue({
+        success: true,
+      });
+      (
+        nutService.typeText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
+      (
+        nutService.pasteText as jest.MockedFunction<
+          (...args: unknown[]) => Promise<unknown>
+        >
+      ).mockResolvedValue(undefined);
 
       // Act: Execute all keyboard operation types
       const operations = [
@@ -1238,7 +1441,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       }
 
       // Assert: Verify structured logging for all operations
-      expect(_loggerLogSpy).toHaveBeenCalledWith(
+      expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[.+\] Executing computer action: /),
         expect.objectContaining({
           operationId: expect.any(String),

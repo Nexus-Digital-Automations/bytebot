@@ -16,11 +16,10 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
- 
+
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
- 
+
 /* eslint-disable @typescript-eslint/no-unsafe-return */
- 
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
@@ -40,7 +39,7 @@ interface AuthenticatedUser {
 class MockRolesGuard {
   constructor(private reflector: Reflector) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
       'roles',
       [context.getHandler(), context.getClass()],
@@ -117,6 +116,8 @@ class MockRolesGuard {
       ],
       [UserRole._OPERATOR]: [UserRole._OPERATOR, UserRole._VIEWER],
       [UserRole._VIEWER]: [UserRole._VIEWER],
+      [UserRole._USER]: [UserRole._USER],
+      [UserRole._GUEST]: [UserRole._GUEST],
     };
 
     const userRoleAccess = roleHierarchy[userRole] ?? [];
@@ -127,7 +128,7 @@ class MockRolesGuard {
     user: AuthenticatedUser,
     requiredPermissions: Permission[],
   ): boolean {
-    if (!user.permissions ?? user.permissions.length === 0) {
+    if (!user.permissions || user.permissions.length === 0) {
       return false;
     }
 
@@ -147,6 +148,8 @@ class MockRolesGuard {
       ],
       [UserRole._OPERATOR]: [UserRole._OPERATOR, UserRole._VIEWER],
       [UserRole._VIEWER]: [UserRole._VIEWER],
+      [UserRole._USER]: [UserRole._USER],
+      [UserRole._GUEST]: [UserRole._GUEST],
     };
   }
 
@@ -165,6 +168,8 @@ class MockRolesGuard {
         Permission._COMPUTER_CONTROL,
       ],
       [UserRole._VIEWER]: [Permission._TASK_READ],
+      [UserRole._USER]: [Permission._TASK_READ],
+      [UserRole._GUEST]: [Permission._VIEW_PUBLIC_CONTENT],
     };
 
     return rolePermissions[role] ?? [];
@@ -238,7 +243,7 @@ describe('RolesGuard', () => {
       const user = createMockUser(UserRole._VIEWER);
       const context = createMockExecutionContext(user);
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(undefined);
+      (jest.spyOn(reflector, 'getAllAndOverride') as jest.MockedFunction<any>).mockReturnValue(undefined);
 
       const result = await guard.canActivate(context);
 
@@ -398,7 +403,7 @@ describe('RolesGuard', () => {
       console.log(`[${testId}] Operator admin denial test completed`);
     });
 
-    it('should validate role hierarchy structure', async () => {
+    it('should validate role hierarchy structure', () => {
       const testId = `${operationId}_role_hierarchy_structure`;
       console.log(`[${testId}] Testing role hierarchy structure`);
 
@@ -509,7 +514,7 @@ describe('RolesGuard', () => {
       console.log(`[${testId}] Partial permission denial test completed`);
     });
 
-    it('should validate default role permissions', async () => {
+    it('should validate default role permissions', () => {
       const testId = `${operationId}_default_permissions`;
       console.log(`[${testId}] Testing default role permission sets`);
 
@@ -643,7 +648,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_null_role`;
       console.log(`[${testId}] Testing null role handling`);
 
-      const user = createMockUser(UserRole._VIEWER, [], { role: null as any });
+      const user: unknown = createMockUser(UserRole._VIEWER, [], { role: null as any });
       const context = createMockExecutionContext(user);
 
       jest
@@ -664,7 +669,7 @@ describe('RolesGuard', () => {
 
       const user = createMockUser(
         UserRole._OPERATOR,
-        null as Permission[] | undefined,
+        undefined as Permission[] | undefined,
       );
       const context = createMockExecutionContext(user);
 
@@ -718,9 +723,9 @@ describe('RolesGuard', () => {
           }),
         );
 
-      jest
+      (jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValue([UserRole._OPERATOR]);
+         as jest.MockedFunction<any>).mockReturnValue([UserRole._OPERATOR]);
 
       const promises = users.map((user) => {
         const context = createMockExecutionContext(user);
@@ -744,7 +749,7 @@ describe('RolesGuard', () => {
 
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValue([UserRole._VIEWER]); // Should pass due to hierarchy
+         as jest.MockedFunction<any>).mockReturnValue([UserRole._VIEWER]); // Should pass due to hierarchy
 
       const startTime = Date.now();
       const promises = Array(100)
@@ -806,7 +811,7 @@ describe('RolesGuard', () => {
             try {
               const result = await guard.canActivate(context);
               return { success: result, expected: testCase.shouldPass };
-            } catch (error) {
+            } catch (_error) {
               return { success: false, expected: testCase.shouldPass };
             }
           }),
@@ -869,7 +874,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_malformed_user`;
       console.log(`[${testId}] Testing malformed user object handling`);
 
-      const malformedUser = { invalid: 'user' } as
+      const malformedUser = { invalid: 'user' } as unknown as
         | AuthenticatedUser
         | undefined;
       const context = createMockExecutionContext(malformedUser);
@@ -904,8 +909,15 @@ describe('RolesGuard', () => {
       try {
         await guard.canActivate(context);
         fail('Expected ForbiddenException');
-      } catch (error) {
-        expect(error.message).toContain('admin, operator');
+      } catch (error: unknown) {
+        // Type guard for Error-like objects with message property
+        if (error && typeof error === 'object' && 'message' in error) {
+          expect((error as { message: string }).message).toContain(
+            'admin, operator',
+          );
+        } else {
+          throw new Error('Expected error with message property');
+        }
       }
 
       console.log(`[${testId}] Detailed error messages test completed`);

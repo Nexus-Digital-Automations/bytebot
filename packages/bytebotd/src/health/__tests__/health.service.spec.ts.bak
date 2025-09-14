@@ -1,4 +1,11 @@
 /* eslint-env jest */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+// TypeScript safety note: This test file uses flexible typing for testing complex integrations
+
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 /**
  * Health Service Test Suite
  *
@@ -16,7 +23,14 @@
  */
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
+import { HealthIndicatorResult } from '@nestjs/terminus';
 import { HealthService } from '../health.service';
+// Removed TestableHealthService import - using HealthService directly
+import {
+  BasicHealthResponse,
+  DetailedStatusResponse,
+  ServiceHealthResponse as _ServiceHealthResponse,
+} from '../interfaces/health.interfaces';
 
 /**
  * TypeScript interfaces for type-safe health service testing
@@ -29,30 +43,23 @@ interface MockLogger {
   verbose: jest.MockedFunction<Logger['verbose']>;
 }
 
-interface HealthCheckResult {
-  status: 'healthy' | 'unhealthy' | 'degraded';
-  uptime: number;
-  memory: {
-    used: number;
-    total: number;
-    percentage: number;
-  };
-  services: Array<{
-    name: string;
-    status: string;
-    responseTime?: number;
-  }>;
-  timestamp: number;
-}
-
-interface ServiceStatus {
+interface _ServiceStatus {
   name: string;
   status: 'healthy' | 'unhealthy' | 'unknown';
   responseTime?: number;
   error?: string;
 }
 
-interface PerformanceMetrics {
+interface _ServiceHealthMockReturn {
+  database: string;
+  cache: string;
+  external: string;
+  disk?: string;
+}
+
+// Type for Health Service with access to private methods (for testing) - already imported above
+
+interface _PerformanceMetrics {
   startTime: number;
   uptime: number;
   memoryUsage: NodeJS.MemoryUsage;
@@ -87,7 +94,7 @@ describe('HealthService', () => {
     jest.clearAllMocks();
   });
   describe('Service Initialization', () => {
-    it('should initialize with proper configuration', async () => {
+    it('should initialize with proper configuration', () => {
       const testId = `${operationId}_initialization`;
       console.log(`[${testId}] Testing service initialization`);
       expect(service).toBeDefined();
@@ -99,7 +106,7 @@ describe('HealthService', () => {
         `[${testId}] Service initialization test completed successfully`,
       );
     });
-    it('should record accurate initialization timestamp', async () => {
+    it('should record accurate initialization timestamp', () => {
       const testId = `${operationId}_initialization_timestamp`;
       console.log(`[${testId}] Testing initialization timestamp accuracy`);
       const beforeInit = Date.now() - 1000; // Account for test setup time
@@ -111,7 +118,7 @@ describe('HealthService', () => {
     });
   });
   describe('Basic Health Monitoring', () => {
-    it('should return healthy status with valid memory and uptime data', async () => {
+    it('should return healthy status with valid memory and uptime data', () => {
       const testId = `${operationId}_basic_health`;
       console.log(`[${testId}] Testing basic health monitoring`);
       // Mock process.memoryUsage and process.uptime
@@ -124,7 +131,7 @@ describe('HealthService', () => {
       };
       jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300); // 5 minutes
-      const result = (await service.getBasicHealth()) as HealthCheckResult;
+      const result = service.getBasicHealth() as BasicHealthResponse;
       expect(result).toMatchObject({
         status: 'healthy',
         timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
@@ -145,7 +152,7 @@ describe('HealthService', () => {
         `[${testId}] Basic health monitoring test completed successfully`,
       );
     });
-    it('should handle memory usage edge cases', async () => {
+    it('should handle memory usage edge cases', () => {
       const testId = `${operationId}_memory_edge_cases`;
       console.log(`[${testId}] Testing memory usage edge cases`);
       const edgeCases = [
@@ -177,20 +184,18 @@ describe('HealthService', () => {
       for (const mockMemory of edgeCases) {
         jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemory);
         jest.spyOn(process, 'uptime').mockReturnValue(100);
-        const result = (await service.getBasicHealth()) as HealthCheckResult;
+        const result = service.getBasicHealth() as BasicHealthResponse;
         expect(result.status).toBe('healthy');
-        expect(
-          (result as HealthCheckResult).memory.used,
-        ).toBeGreaterThanOrEqual(0);
-        expect(
-          (result as HealthCheckResult).memory.total,
-        ).toBeGreaterThanOrEqual(0);
+        expect(result.memory.used).toBeGreaterThanOrEqual(0);
+        expect(result.memory.total).toBeGreaterThanOrEqual(0);
         // free can be negative in edge cases
-        expect(typeof (result as HealthCheckResult).memory.free).toBe('number');
+        expect(typeof (result as BasicHealthResponse).memory.free).toBe(
+          'number',
+        );
       }
       console.log(`[${testId}] Memory edge cases test completed`);
     });
-    it('should handle process.uptime variations', async () => {
+    it('should handle process.uptime variations', () => {
       const testId = `${operationId}_uptime_variations`;
       console.log(`[${testId}] Testing process uptime variations`);
       const uptimeValues = [0, 1, 60, 3600, 86400, 604800]; // 0s, 1s, 1m, 1h, 1d, 1w
@@ -203,7 +208,7 @@ describe('HealthService', () => {
       });
       for (const uptime of uptimeValues) {
         jest.spyOn(process, 'uptime').mockReturnValue(uptime);
-        const result = (await service.getBasicHealth()) as HealthCheckResult;
+        const result = service.getBasicHealth() as BasicHealthResponse;
         expect(result.uptime).toBe(Math.round(uptime));
         expect(result.status).toBe('healthy');
       }
@@ -227,7 +232,7 @@ describe('HealthService', () => {
       // Check that operation IDs were generated (present in log messages)
       const debugCalls = mockLogger.debug.mock.calls;
       const operationIdCalls = debugCalls.filter(
-        (call) => call[0].includes('[health_') || call[0].includes('[status_'),
+        (call) => call[0].includes('[health_') ?? call[0].includes('[status_'),
       );
       expect(operationIdCalls.length).toBeGreaterThanOrEqual(6); // 3 operations × 2 logs each
       console.log(`[${testId}] Operation ID generation test completed`);
@@ -251,7 +256,7 @@ describe('HealthService', () => {
     });
   });
   describe('Detailed Status Monitoring', () => {
-    it('should return comprehensive system status', async () => {
+    it('should return comprehensive system status', () => {
       const testId = `${operationId}_detailed_status`;
       console.log(`[${testId}] Testing detailed system status monitoring`);
       const mockMemoryUsage = {
@@ -263,7 +268,7 @@ describe('HealthService', () => {
       };
       jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(1800); // 30 minutes
-      const result = (await service.getDetailedStatus()) as HealthCheckResult;
+      const result = service.getDetailedStatus() as DetailedStatusResponse;
       expect(result).toMatchObject({
         status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/),
         timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
@@ -303,15 +308,15 @@ describe('HealthService', () => {
       // Mock the private service health check method
       const _originalCheckServiceHealth = service['checkServiceHealth'];
       // Test healthy status
-      jest.spyOn(service, 'checkServiceHealth' as unknown).mockReturnValue({
+      jest.spyOn(service as unknown, 'checkServiceHealth').mockReturnValue({
         database: 'connected',
         cache: 'available',
         external: 'reachable',
       });
-      const result = (await service.getDetailedStatus()) as HealthCheckResult;
+      const result = service.getDetailedStatus() as DetailedStatusResponse;
       expect(result.status).toBe('healthy');
       // Test degraded status (unknown services)
-      jest.spyOn(service, 'checkServiceHealth' as unknown).mockReturnValue({
+      jest.spyOn(service as unknown, 'checkServiceHealth').mockReturnValue({
         database: 'unknown',
         cache: 'unknown',
         external: 'unknown',
@@ -319,7 +324,7 @@ describe('HealthService', () => {
       const result2 = await service.getDetailedStatus();
       expect(result2.status).toBe('degraded');
       // Test unhealthy status (failed services)
-      jest.spyOn(service, 'checkServiceHealth' as unknown).mockReturnValue({
+      jest.spyOn(service as unknown, 'checkServiceHealth').mockReturnValue({
         database: 'disconnected',
         cache: 'unavailable',
         external: 'unreachable',
@@ -374,7 +379,7 @@ describe('HealthService', () => {
     });
   });
   describe('Service Health Checking', () => {
-    it('should return unknown status for unimplemented health checks', async () => {
+    it('should return unknown status for unimplemented health checks', () => {
       const testId = `${operationId}_service_health_unknown`;
       console.log(`[${testId}] Testing unimplemented service health checks`);
       // Access the private method for testing
@@ -395,10 +400,10 @@ describe('HealthService', () => {
       expect(mockLogger.debug).toHaveBeenCalledWith('Checking service health');
       console.log(`[${testId}] Service health logging test completed`);
     });
-    it('should provide extensible service health structure', async () => {
+    it('should provide extensible service health structure', () => {
       const testId = `${operationId}_service_health_structure`;
       console.log(`[${testId}] Testing service health structure extensibility`);
-      const result = (await service.getDetailedStatus()) as HealthCheckResult;
+      const result = service.getDetailedStatus() as DetailedStatusResponse;
       // Verify service structure supports expected services
       expect(result.services).toHaveProperty(
         'database' as keyof typeof result.services,
@@ -425,10 +430,10 @@ describe('HealthService', () => {
     });
   });
   describe('Performance Metrics Collection', () => {
-    it('should return placeholder performance metrics', async () => {
+    it('should return placeholder performance metrics', () => {
       const testId = `${operationId}_performance_metrics`;
       console.log(`[${testId}] Testing performance metrics collection`);
-      const result = (await service.getDetailedStatus()) as HealthCheckResult;
+      const result = service.getDetailedStatus() as DetailedStatusResponse;
       expect(result.performance).toEqual({
         requestsPerSecond: 0,
         averageResponseTime: 0,
@@ -438,7 +443,7 @@ describe('HealthService', () => {
       );
       console.log(`[${testId}] Performance metrics test completed`);
     });
-    it('should log performance metrics collection activity', async () => {
+    it('should log performance metrics collection activity', () => {
       const testId = `${operationId}_performance_metrics_logging`;
       console.log(`[${testId}] Testing performance metrics logging`);
       // Access the private method directly
@@ -452,10 +457,10 @@ describe('HealthService', () => {
       );
       console.log(`[${testId}] Performance metrics logging test completed`);
     });
-    it('should provide extensible performance metrics structure', async () => {
+    it('should provide extensible performance metrics structure', () => {
       const testId = `${operationId}_performance_structure`;
       console.log(`[${testId}] Testing performance metrics structure`);
-      const result = (await service.getDetailedStatus()) as HealthCheckResult;
+      const result = service.getDetailedStatus() as DetailedStatusResponse;
       expect(result.performance).toHaveProperty(
         'requestsPerSecond' as keyof typeof result.performance,
       );
@@ -477,14 +482,14 @@ describe('HealthService', () => {
       expect(isStable).toBe(true);
       console.log(`[${testId}] Service stability test completed`);
     });
-    it('should correctly identify unstable services', async () => {
+    it('should correctly identify unstable services', () => {
       const testId = `${operationId}_service_unstable`;
       console.log(`[${testId}] Testing unstable service identification`);
       const isStable = service.isServiceStable(3600); // 1 hour minimum
       expect(isStable).toBe(false);
       console.log(`[${testId}] Service instability test completed`);
     });
-    it('should use default minimum time when not specified', async () => {
+    it('should use default minimum time when not specified', () => {
       const testId = `${operationId}_default_minimum_time`;
       console.log(`[${testId}] Testing default minimum time for stability`);
       const isStable = service.isServiceStable(); // Should use default 30s
@@ -492,7 +497,7 @@ describe('HealthService', () => {
       expect(isStable).toBe(false);
       console.log(`[${testId}] Default minimum time test completed`);
     });
-    it('should log stability check results with context', async () => {
+    it('should log stability check results with context', () => {
       const testId = `${operationId}_stability_logging`;
       console.log(`[${testId}] Testing stability check logging`);
       service.isServiceStable(10);
@@ -505,7 +510,7 @@ describe('HealthService', () => {
       );
       console.log(`[${testId}] Stability logging test completed`);
     });
-    it('should handle edge cases in stability calculation', async () => {
+    it('should handle edge cases in stability calculation', () => {
       const testId = `${operationId}_stability_edge_cases`;
       console.log(`[${testId}] Testing stability calculation edge cases`);
       // Test with very small minimum time (should be stable)
@@ -579,7 +584,7 @@ describe('HealthService', () => {
       expect(results).toHaveLength(20);
       expect(
         results.every(
-          (result) => (result as HealthCheckResult).status === 'healthy',
+          (result) => (result as BasicHealthResponse).status === 'healthy',
         ),
       ).toBe(true);
       expect(totalTime).toBeLessThan(500); // Should complete within 500ms
@@ -657,19 +662,19 @@ describe('HealthService', () => {
         arrayBuffers: 0,
       });
       jest.spyOn(process, 'uptime').mockReturnValue(10);
-      const result = (await service.getBasicHealth()) as HealthCheckResult;
+      const result = (await service.getBasicHealth()) as BasicHealthResponse;
       expect(result.status).toBe('healthy');
-      expect((result as HealthCheckResult).memory.used).toBe(1); // 1 MB
-      expect((result as HealthCheckResult).memory.free).toBe(0); // No free memory
+      expect((result as BasicHealthResponse).memory.used).toBe(1); // 1 MB
+      expect((result as BasicHealthResponse).memory.free).toBe(0); // No free memory
       console.log(`[${testId}] Resource constraints handling test completed`);
     });
-    it('should provide accurate uptime calculations across service lifecycle', async () => {
+    it('should provide accurate uptime calculations across service lifecycle', () => {
       const testId = `${operationId}_uptime_accuracy`;
       console.log(`[${testId}] Testing uptime calculation accuracy`);
       const testUptimes = [0.1, 1, 59.9, 60, 61, 3599, 3600, 3601];
       for (const testUptime of testUptimes) {
         jest.spyOn(process, 'uptime').mockReturnValue(testUptime);
-        const result = (await service.getBasicHealth()) as HealthCheckResult;
+        const result = service.getBasicHealth() as BasicHealthResponse;
         const expectedUptime = Math.round(testUptime);
         expect(result.uptime).toBe(expectedUptime);
       }
@@ -687,7 +692,7 @@ describe('HealthService', () => {
       });
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       const beforeTime = new Date();
-      const result = (await service.getBasicHealth()) as HealthCheckResult;
+      const result = (await service.getBasicHealth()) as BasicHealthResponse;
       const afterTime = new Date();
       const resultTime = new Date(result.timestamp);
       expect(resultTime.getTime()).toBeGreaterThanOrEqual(beforeTime.getTime());
@@ -730,7 +735,15 @@ describe('HealthService', () => {
       ];
       const promises = Array(20)
         .fill(null)
-        .map((_, i) => operations[i % operations.length]());
+        .map((_, i) => {
+          const operation = operations[i % operations.length];
+          if (!operation) {
+            throw new Error(
+              `Operation at index ${i % operations.length} is undefined`,
+            );
+          }
+          return operation();
+        });
       const results = await Promise.all(promises);
       // All operations should complete successfully
       expect(results).toHaveLength(20);
@@ -739,7 +752,7 @@ describe('HealthService', () => {
         (r) => r && typeof r === 'object' && 'status' in r,
       );
       const allHealthy = healthResults.every(
-        (r) => (r as unknown).status === 'healthy',
+        (r) => (r as Record<string, unknown>).status === 'healthy',
       );
       expect(allHealthy).toBe(true);
       console.log(`[${testId}] Thread safety test completed successfully`);
@@ -762,11 +775,11 @@ describe('HealthService', () => {
           arrayBuffers: 0,
         });
         const result =
-          (await service.checkProcessHealth()) as HealthCheckResult;
+          (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
-        expect(result.process.status).toEqual('up');
-        expect(result.process.uptime).toEqual(300);
-        expect(result.process.memoryMB).toEqual(128);
+        expect(result.process?.status).toEqual('up');
+        expect(result.process?.uptime).toEqual(300);
+        expect(result.process?.memoryMB).toEqual(128);
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(
             /\[process_health_\d+\] Checking process health/,
@@ -794,10 +807,10 @@ describe('HealthService', () => {
           arrayBuffers: 0,
         });
         const result =
-          (await service.checkProcessHealth()) as HealthCheckResult;
+          (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
-        expect(result.process.status).toEqual('down');
-        expect(result.process.error).toEqual(
+        expect(result.process?.status).toEqual('down');
+        expect(result.process?.error).toEqual(
           expect.stringContaining('Process health check failed'),
         );
         expect(mockLogger.error).toHaveBeenCalledWith(
@@ -815,10 +828,10 @@ describe('HealthService', () => {
           throw new Error('Process uptime unavailable');
         });
         const result =
-          (await service.checkProcessHealth()) as HealthCheckResult;
+          (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
-        expect(result.process.status).toEqual('down');
-        expect(result.process.error).toEqual('Process uptime unavailable');
+        expect(result.process?.status).toEqual('down');
+        expect(result.process?.error).toEqual('Process uptime unavailable');
         console.log(`[${testId}] Process health error handling test completed`);
       });
     });
@@ -833,13 +846,13 @@ describe('HealthService', () => {
           .spyOn(service as unknown, 'performDatabasePing')
           .mockResolvedValue(true);
         const result =
-          (await service.checkDatabaseHealth()) as HealthCheckResult;
+          (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
-        expect(result.database.status).toEqual('up');
-        expect(result.database.responseTime).toEqual(
+        expect(result.database?.status).toEqual('up');
+        expect(result.database?.responseTime).toEqual(
           expect.stringMatching(/\d+ms/),
         );
-        expect(result.database.connectionStatus).toEqual('connected');
+        expect(result.database?.connectionStatus).toEqual('connected');
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(/\[db_health_\d+\] Checking database health/),
         );
@@ -858,11 +871,11 @@ describe('HealthService', () => {
           .spyOn(service as unknown, 'performDatabasePing')
           .mockResolvedValue(false);
         const result =
-          (await service.checkDatabaseHealth()) as HealthCheckResult;
+          (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
-        expect(result.database.status).toEqual('down');
-        expect(result.database.error).toEqual('Database connection failed');
-        expect(result.database.connectionStatus).toEqual('disconnected');
+        expect(result.database?.status).toEqual('down');
+        expect(result.database?.error).toEqual('Database connection failed');
+        expect(result.database?.connectionStatus).toEqual('disconnected');
         expect(mockLogger.error).toHaveBeenCalledWith(
           expect.stringMatching(
             /\[db_health_\d+\] Database health check failed/,
@@ -880,11 +893,11 @@ describe('HealthService', () => {
           .spyOn(service as unknown, 'performDatabasePing')
           .mockRejectedValue(new Error('Database timeout'));
         const result =
-          (await service.checkDatabaseHealth()) as HealthCheckResult;
+          (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('database' as keyof typeof result);
-        expect(result.database.status).toEqual('down');
-        expect(result.database.error).toEqual('Database timeout');
-        expect(result.database.connectionStatus).toEqual('disconnected');
+        expect(result.database?.status).toEqual('down');
+        expect(result.database?.error).toEqual('Database timeout');
+        expect(result.database?.connectionStatus).toEqual('disconnected');
         console.log(`[${testId}] Database health exception test completed`);
       });
       it('should measure database response time accurately', async () => {
@@ -897,10 +910,10 @@ describe('HealthService', () => {
             () => new Promise((resolve) => setTimeout(() => resolve(true), 50)),
           );
         const result =
-          (await service.checkDatabaseHealth()) as HealthCheckResult;
-        expect(result.database.responseTime).toMatch(/\d+ms/);
+          (await service.checkDatabaseHealth()) as HealthIndicatorResult;
+        expect(result.database?.responseTime).toMatch(/\d+ms/);
         const responseTime = parseInt(
-          result.database.responseTime.replace('ms', ''),
+          String(result.database?.responseTime ?? '').replace('ms', '') || '0',
         );
         expect(responseTime).toBeGreaterThan(40); // Should be at least 40ms due to delay
         console.log(`[${testId}] Database response time test completed`);
@@ -918,11 +931,11 @@ describe('HealthService', () => {
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '25ms' })
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '30ms' });
         const result =
-          (await service.checkExternalServices()) as HealthCheckResult;
+          (await service.checkExternalServices()) as HealthIndicatorResult;
         expect(result).toHaveProperty(
           'external_services' as keyof typeof result,
         );
-        expect(result.external_services.status).toBe('up');
+        expect(result.external_services?.status).toBe('up');
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(
             /\[external_services_\d+\] Checking external services/,
@@ -939,8 +952,8 @@ describe('HealthService', () => {
           .mockRejectedValueOnce(new Error('Service unavailable'))
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '20ms' });
         const result =
-          (await service.checkExternalServices()) as HealthCheckResult;
-        expect(result.external_services.status).toBe('down');
+          (await service.checkExternalServices()) as HealthIndicatorResult;
+        expect(result.external_services?.status).toBe('down');
         console.log(`[${testId}] External services failure test completed`);
       });
       it('should handle complete external services failure', async () => {
@@ -952,9 +965,9 @@ describe('HealthService', () => {
           .fn()
           .mockRejectedValue(new Error('Complete failure'));
         const result =
-          (await service.checkExternalServices()) as HealthCheckResult;
-        expect(result.external_services.status).toBe('down');
-        expect(result.external_services.error).toBe('Complete failure');
+          (await service.checkExternalServices()) as HealthIndicatorResult;
+        expect(result.external_services?.status).toBe('down');
+        expect(result.external_services?.error).toBe('Complete failure');
         // Restore original Promise.allSettled
         Promise.allSettled = originalAllSettled;
         console.log(
@@ -969,13 +982,14 @@ describe('HealthService', () => {
           `[${testId}] Testing startup check for established service`,
         );
         // Mock service that has been running for sufficient time
-        (service as unknown).startTime = Date.now() - 30000; // 30 seconds ago
+        (service as HealthService & { [key: string]: unknown }).startTime =
+          Date.now() - 30000; // 30 seconds ago
         const result =
-          (await service.checkStartupComplete()) as HealthCheckResult;
+          (await service.checkStartupComplete()) as HealthIndicatorResult;
         expect(result).toHaveProperty('startup' as keyof typeof result);
-        expect(result.startup.status).toEqual('up');
-        expect(result.startup.uptime).toEqual(expect.stringMatching(/\d+s/));
-        expect(result.startup.initializationStatus).toEqual('initialized');
+        expect(result.startup?.status).toEqual('up');
+        expect(result.startup?.uptime).toEqual(expect.stringMatching(/\d+s/));
+        expect(result.startup?.initializationStatus).toEqual('initialized');
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(/\[startup_\d+\] Startup check passed/),
         );
@@ -987,13 +1001,14 @@ describe('HealthService', () => {
           `[${testId}] Testing startup check for recently started service`,
         );
         // Mock service that was just started
-        (service as unknown).startTime = Date.now() - 5000; // 5 seconds ago
+        (service as HealthService & { [key: string]: unknown }).startTime =
+          Date.now() - 5000; // 5 seconds ago
         const result =
-          (await service.checkStartupComplete()) as HealthCheckResult;
+          (await service.checkStartupComplete()) as HealthIndicatorResult;
         expect(result).toHaveProperty('startup' as keyof typeof result);
-        expect(result.startup.status).toEqual('down');
-        expect(result.startup.initializationStatus).toEqual('initializing');
-        expect(result.startup.message).toEqual('Service is still starting up');
+        expect(result.startup?.status).toEqual('down');
+        expect(result.startup?.initializationStatus).toEqual('initializing');
+        expect(result.startup?.message).toEqual('Service is still starting up');
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(/\[startup_\d+\] Startup still in progress/),
         );
@@ -1008,9 +1023,9 @@ describe('HealthService', () => {
           throw new Error('Time unavailable');
         });
         const result =
-          (await service.checkStartupComplete()) as HealthCheckResult;
-        expect(result.startup.status).toBe('down');
-        expect(result.startup.error).toBe('Time unavailable');
+          (await service.checkStartupComplete()) as HealthIndicatorResult;
+        expect(result.startup?.status).toBe('down');
+        expect(result.startup?.error).toBe('Time unavailable');
         // Restore Date.now
         Date.now = originalNow;
         console.log(`[${testId}] Startup error handling test completed`);
@@ -1021,7 +1036,7 @@ describe('HealthService', () => {
         const testId = `${operationId}_module_initialization_complete`;
         console.log(`[${testId}] Testing complete module initialization`);
         const result =
-          (await service.checkModuleInitialization()) as HealthCheckResult;
+          (await service.checkModuleInitialization()) as HealthIndicatorResult;
         expect(result).toHaveProperty('modules' as keyof typeof result);
         expect(result.modules).toMatchObject({
           status: 'up',
@@ -1049,9 +1064,9 @@ describe('HealthService', () => {
           throw new Error('Module check failed');
         });
         const result =
-          (await service.checkModuleInitialization()) as HealthCheckResult;
-        expect(result.modules.status).toBe('down');
-        expect(result.modules.error).toBe('Module check failed');
+          (await service.checkModuleInitialization()) as HealthIndicatorResult;
+        expect(result.modules?.status).toBe('down');
+        expect(result.modules?.error).toBe('Module check failed');
         // Restore Object.values
         Object.values = originalValues;
         console.log(`[${testId}] Module initialization error test completed`);
@@ -1092,18 +1107,21 @@ describe('HealthService', () => {
         // Mock setTimeout to reject immediately for some calls
         const originalSetTimeout = setTimeout;
         let timeoutCallCount = 0;
-        global.setTimeout = jest.fn().mockImplementation((callback, delay) => {
-          timeoutCallCount++;
-          if (timeoutCallCount % 2 === 0) {
-            // Simulate timeout/rejection on every other call
-            originalSetTimeout(
-              () => callback(new Error('Service unavailable')),
-              1,
-            );
-          } else {
-            originalSetTimeout(() => callback(null, true), delay);
-          }
-        }) as unknown;
+        global.setTimeout = jest
+          .fn()
+          .mockImplementation((callback, delay: number) => {
+            timeoutCallCount++;
+            if (timeoutCallCount % 2 === 0) {
+              // Simulate timeout/rejection on every other call
+
+              originalSetTimeout(
+                () => callback(new Error('Service unavailable')),
+                1,
+              );
+            } else {
+              originalSetTimeout(() => callback(null, true), delay);
+            }
+          }) as unknown;
         const results = await Promise.all([
           (service as unknown).checkExternalService(
             'service-1',
@@ -1209,10 +1227,11 @@ describe('HealthService', () => {
         if ('error' in result) {
           expect((result as unknown).error).toBeDefined();
         } else {
-          expect(['up', 'down']).toContain(
-            (Object.values(result)[0] as unknown)?.status ||
-              (result as unknown).status,
-          );
+          const resultValues = Object.values(result as Record<string, unknown>);
+          const statusValue =
+            (resultValues[0] as { status?: string })?.status ??
+            (result as { status?: string }).status;
+          expect(['up', 'down']).toContain(statusValue);
         }
       });
       console.log(`[${testId}] Cascading failures test completed`);
@@ -1232,7 +1251,8 @@ describe('HealthService', () => {
       jest
         .spyOn(service as unknown, 'performDatabasePing')
         .mockResolvedValue(true);
-      (service as unknown).startTime = Date.now() - 60000;
+      (service as HealthService & { [key: string]: unknown }).startTime =
+        Date.now() - 60000;
       const startTime = Date.now();
       // Execute 50 concurrent health checks
       const concurrentChecks = Array(50)
@@ -1275,7 +1295,8 @@ describe('HealthService', () => {
       jest
         .spyOn(service as unknown, 'performDatabasePing')
         .mockResolvedValue(true);
-      (service as unknown).startTime = Date.now() - 60000;
+      (service as HealthService & { [key: string]: unknown }).startTime =
+        Date.now() - 60000;
       const healthChecks = await Promise.all([
         service.getBasicHealth(),
         service.getDetailedStatus(),

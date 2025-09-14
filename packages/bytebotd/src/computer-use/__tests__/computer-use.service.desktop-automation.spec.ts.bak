@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-env jest */
 /**
  * Computer Use Service - Advanced Desktop Automation Test Suite
@@ -44,19 +48,24 @@ jest.mock('fs/promises', () => ({
   mkdir: jest.fn(),
 }));
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('util', () => ({
   ...jest.requireActual('util'),
   promisify: jest.fn(
-    (fn) =>
-      (...args) =>
+     
+    (fn: any) =>
+       
+      (...args: any[]) =>
+         
         Promise.resolve(fn(...args)),
   ),
 }));
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('path', () => ({
   ...jest.requireActual('path'),
-  resolve: jest.fn((...paths) => paths.join('/')),
-  join: jest.fn((...paths) => paths.join('/')),
+  resolve: jest.fn((...paths: string[]) => paths.join('/')),
+  join: jest.fn((...paths: string[]) => paths.join('/')),
 }));
 
 // Mock @nut-tree-fork/nut-js completely
@@ -81,6 +90,7 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
     height: jest.fn(),
     colorAt: jest.fn(),
   },
+   
   Point: jest.fn().mockImplementation((x, y) => ({ x, y })),
   Region: jest.fn(),
   Key: {
@@ -134,16 +144,9 @@ import {
   ClickMouseAction,
   PressMouseAction,
   DragMouseAction,
-  ScrollAction,
-  TypeKeysAction,
   PressKeysAction,
   TypeTextAction,
-  PasteTextAction,
-  ScreenshotAction,
-  CursorPositionAction,
-  ApplicationAction,
   WriteFileAction,
-  ReadFileAction,
 } from '@bytebot/shared';
 import { ScreenshotActionDto } from '../dto/computer-action.dto';
 
@@ -414,9 +417,9 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
     it('should handle international text input with proper encoding', async () => {
       const internationalTexts = [
         'Hello, 世界!', // Chinese
-        'Bonjour, le monde!', // French
+        'Bonjour, le monde as NonNullable<typeof monde>', // French
         'Привет мир!', // Russian
-        '¡Hola mundo!', // Spanish
+        '¡Hola mundo as NonNullable<typeof mundo>', // Spanish
         'こんにちは世界', // Japanese
         '🌍🚀💻', // Emojis
       ];
@@ -508,7 +511,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
           coordinates: { x: test.x, y: test.y },
         };
 
-        const result = await service.action(moveAction);
+        const _result = await service.action(moveAction);
 
         if (test.shouldSucceed) {
           // Action should complete without throwing errors
@@ -664,7 +667,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
   describe('Screenshot and Basic Vision Functionality', () => {
     it('should capture screenshots successfully', async () => {
       // Mock a screenshot capture
-      mockNutService.screendump.mockResolvedValue('base64-screenshot-data');
+      (mockNutService.screendump as jest.MockedFunction<any>).mockResolvedValue('base64-screenshot-data');
 
       const screenshotAction: ScreenshotActionDto = {
         action: 'screenshot',
@@ -679,7 +682,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
 
     it('should handle screenshot errors gracefully', async () => {
       // Mock screenshot failure
-      mockNutService.screendump.mockRejectedValue(
+      (mockNutService.screendump as jest.MockedFunction<any>).mockRejectedValue(
         new Error('Screenshot failed'),
       );
 
@@ -727,10 +730,9 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
 
     it('should implement retry logic for transient failures', async () => {
       // Mock a transient failure followed by success
-      nutService.mouseClickEvent = jest
+      nutService.mouseClickEvent = (jest
         .fn()
-        .mockRejectedValueOnce(new Error('Transient failure'))
-        .mockResolvedValue(undefined);
+        .mockRejectedValueOnce(new Error('Transient failure')) as jest.MockedFunction<any>).mockResolvedValue(undefined);
 
       const clickAction: ClickMouseAction = {
         action: 'click_mouse',
@@ -758,9 +760,8 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       ];
 
       // Make the middle action fail
-      nutService.mouseClickEvent = jest
-        .fn()
-        .mockRejectedValue(new Error('Click failed'));
+      nutService.mouseClickEvent = (jest
+        .fn() as jest.MockedFunction<any>).mockRejectedValue(new Error('Click failed'));
 
       const results = [];
       for (const action of mixedActions) {
@@ -773,9 +774,10 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       }
 
       // First and third should succeed, second should fail
-      expect(results[0].success).toBe(true); // move_mouse
-      expect(results[1].success).toBe(false); // click_mouse (failed)
-      expect(results[2].success).toBe(true); // type_text
+      expect(results).toHaveLength(3);
+      expect(results[0]?.success).toBe(true); // move_mouse
+      expect(results[1]?.success).toBe(false); // click_mouse (failed)
+      expect(results[2]?.success).toBe(true); // type_text
     });
   });
 
@@ -874,7 +876,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         button: 'left',
       };
 
-      const result = await service.action(coordinatedAction);
+      const _result = await service.action(coordinatedAction);
 
       // Action should complete without throwing errors
       await expect(service.action(coordinatedAction)).resolves.not.toThrow();

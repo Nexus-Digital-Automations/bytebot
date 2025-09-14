@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
+ 
+ 
 /* eslint-env jest */
 /**
  * Authentication Service Test Suite
@@ -296,7 +295,9 @@ describe('AuthService', () => {
         password: 'admin123',
       };
 
-      (jest.spyOn(jwtService, 'sign') as jest.MockedFunction<any>).mockReturnValue('mocked-jwt-token');
+      (
+        jest.spyOn(jwtService, 'sign')
+      ).mockReturnValue('mocked-jwt-token');
 
       const result = await service.login(loginDto);
 
@@ -358,7 +359,9 @@ describe('AuthService', () => {
         role: 'operator',
       };
 
-      (jest.spyOn(jwtService, 'sign') as jest.MockedFunction<any>).mockReturnValue('mocked-jwt-token');
+      (
+        jest.spyOn(jwtService, 'sign')
+      ).mockReturnValue('mocked-jwt-token');
 
       const result = await service.register(registerDto);
 
@@ -400,7 +403,9 @@ describe('AuthService', () => {
         // No role specified
       };
 
-      (jest.spyOn(jwtService, 'sign') as jest.MockedFunction<any>).mockReturnValue('mocked-jwt-token');
+      (
+        jest.spyOn(jwtService, 'sign')
+      ).mockReturnValue('mocked-jwt-token');
 
       const result = await service.register(registerDto);
 
@@ -472,7 +477,9 @@ describe('AuthService', () => {
       const mockPayload = { sub: 'user_1' };
       const refreshToken = 'valid-refresh-token';
 
-      (jest.spyOn(jwtService, 'verify') as jest.MockedFunction<any>).mockReturnValue(mockPayload);
+      (
+        jest.spyOn(jwtService, 'verify')
+      ).mockReturnValue(mockPayload);
       jest
         .spyOn(jwtService, 'sign')
         .mockReturnValueOnce('new-access-token')
@@ -492,7 +499,9 @@ describe('AuthService', () => {
 
       const invalidToken = 'invalid-refresh-token';
 
-      (jest.spyOn(jwtService, 'verify') as jest.MockedFunction<any>).mockImplementation(() => {
+      (
+        jest.spyOn(jwtService, 'verify')
+      ).mockImplementation(() => {
         throw new Error('Invalid token');
       });
 
@@ -592,7 +601,9 @@ describe('AuthService', () => {
         password: 'admin123',
       };
 
-      (jest.spyOn(jwtService, 'sign') as jest.MockedFunction<any>).mockReturnValue('concurrent-test-token');
+      (
+        jest.spyOn(jwtService, 'sign')
+      ).mockReturnValue('concurrent-test-token');
 
       // Simulate concurrent login attempts
       const promises = Array(10)
@@ -614,7 +625,9 @@ describe('AuthService', () => {
       console.log(`[${testId}] Testing token expiration handling`);
 
       // Mock expired token verification
-      (jest.spyOn(jwtService, 'verify') as jest.MockedFunction<any>).mockImplementation(() => {
+      (
+        jest.spyOn(jwtService, 'verify')
+      ).mockImplementation(() => {
         const error = new Error('Token expired');
         error.name = 'TokenExpiredError';
         throw error;
@@ -640,7 +653,9 @@ describe('AuthService', () => {
         password: 'admin123',
       };
 
-      (jest.spyOn(jwtService, 'sign') as jest.MockedFunction<any>).mockReturnValue('performance-test-token');
+      (
+        jest.spyOn(jwtService, 'sign')
+      ).mockReturnValue('performance-test-token');
 
       const startTime = Date.now();
       await service.login(loginDto);
@@ -659,9 +674,12 @@ describe('AuthService', () => {
       console.log(`[${testId}] Testing database error handling`);
 
       // Mock database error
-      jest
-        .spyOn(service, 'findUserByEmail' as keyof MockAuthService)
-         as jest.MockedFunction<any>).mockRejectedValue(new Error('Database connection failed'));
+      (
+        jest.spyOn(
+          service,
+          'findUserByEmail' as keyof MockAuthService,
+        )
+      ).mockRejectedValue(new Error('Database connection failed'));
 
       const loginDto = {
         email: 'admin@bytebot.ai',
@@ -682,7 +700,9 @@ describe('AuthService', () => {
         password: 'admin123',
       };
 
-      (jest.spyOn(jwtService, 'sign') as jest.MockedFunction<any>).mockReturnValue('format-test-token');
+      (
+        jest.spyOn(jwtService, 'sign')
+      ).mockReturnValue('format-test-token');
 
       const result = await service.login(loginDto);
 
@@ -705,7 +725,9 @@ describe('AuthService', () => {
 
       const malformedToken = 'not.a.jwt.token';
 
-      (jest.spyOn(jwtService, 'verify') as jest.MockedFunction<any>).mockImplementation(() => {
+      (
+        jest.spyOn(jwtService, 'verify')
+      ).mockImplementation(() => {
         throw new Error('Malformed token');
       });
 

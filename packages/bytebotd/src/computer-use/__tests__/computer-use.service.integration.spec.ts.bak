@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-env jest */
 /**
  * Comprehensive Integration Tests for ComputerUseService
@@ -26,11 +30,16 @@ import {
 import { ComputerUseModule } from '../computer-use.module';
 import { NutService } from '../../nut/nut.service';
 import {
+  ComputerAction,
   MoveMouseAction,
   ClickMouseAction,
   WriteFileAction,
 } from '@bytebot/shared';
-import { ReadFileActionDto } from '../dto/computer-action.dto';
+import {
+  ReadFileActionDto,
+  ApplicationActionDto,
+} from '../dto/computer-action.dto';
+import { ApplicationName } from '../dto/base.dto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -109,11 +118,11 @@ describe('ComputerUseService Integration Tests', () => {
 
     it('should handle unsupported actions gracefully', async () => {
       // Test with unsupported action
-      const invalidAction = { action: 'invalid_action' } as any;
+      const invalidAction = { action: 'invalid_action' } as unknown;
 
-      await expect(context.service.action(invalidAction)).rejects.toThrow(
-        'Unsupported computer action',
-      );
+      await expect(
+        context.service.action(invalidAction as ComputerAction),
+      ).rejects.toThrow('Unsupported computer action');
     });
   });
 
@@ -147,16 +156,16 @@ describe('ComputerUseService Integration Tests', () => {
     it('should handle application lifecycle with window management', async () => {
       const appAction: ApplicationActionDto = {
         action: 'application',
-        application: 'firefox',
+        application: ApplicationName.FIREFOX,
       };
 
       // Mock application not running initially
       const util = await import('util');
       jest
         .spyOn(util, 'promisify')
-        .mockReturnValue(jest.fn().mockRejectedValue({ code: 1 }));
+         as jest.MockedFunction<any>).mockReturnValue(jest.fn().mockRejectedValue({ code: 1 }));
 
-      await context.service.action(appAction);
+      await context.service.action(appAction as unknown as ComputerAction);
 
       // Verify application launch sequence
       // Note: spawn calls are mocked in createMockNutService
@@ -187,7 +196,7 @@ describe('ComputerUseService Integration Tests', () => {
       // Read file back
       const readAction: ReadFileActionDto = {
         action: 'read_file',
-        path: writeResult.path,
+        path: writeResult.path ?? '',
       };
 
       const readResult = (await context.service.action(
@@ -224,7 +233,7 @@ describe('ComputerUseService Integration Tests', () => {
 
         const readAction: ReadFileActionDto = {
           action: 'read_file',
-          path: writeResult.path,
+          path: writeResult.path ?? '',
         };
 
         const readResult = (await context.service.action(
@@ -318,7 +327,7 @@ describe('ComputerUseService Integration Tests', () => {
 
         const readAction: ReadFileActionDto = {
           action: 'read_file',
-          path: writeResult.path,
+          path: writeResult.path ?? '',
         };
 
         const readResult = (await context.service.action(
@@ -371,7 +380,7 @@ describe('ComputerUseService Integration Tests', () => {
       jest
         .spyOn(context.nutService, 'mouseMoveEvent')
         .mockRejectedValueOnce(new Error('Temporary failure'))
-        .mockImplementation(originalMouseMove);
+         as jest.MockedFunction<any>).mockImplementation(originalMouseMove);
 
       const moveAction: MoveMouseAction = {
         action: 'move_mouse',
@@ -390,10 +399,10 @@ describe('ComputerUseService Integration Tests', () => {
     it('should provide detailed _error context for debugging', async () => {
       const invalidAction = {
         action: 'invalid_action',
-      } as any;
+      } as unknown;
 
       try {
-        await context.service.action(invalidAction);
+        await context.service.action(invalidAction as ComputerAction);
         fail('Should have thrown an error');
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
@@ -408,7 +417,7 @@ describe('ComputerUseService Integration Tests', () => {
       const util = await import('util');
       jest
         .spyOn(util, 'promisify')
-        .mockReturnValue(jest.fn().mockRejectedValue(new Error('Copy failed')));
+         as jest.MockedFunction<any>).mockReturnValue(jest.fn().mockRejectedValue(new Error('Copy failed')));
 
       const testFile = createTestFile('failure-test.txt', 'Test content');
       const writeAction: WriteFileAction = {
@@ -484,7 +493,7 @@ describe('ComputerUseService Integration Tests', () => {
       // Read document back to verify
       const readResult = (await context.service.action({
         action: 'read_file',
-        path: writeResult.path,
+        path: writeResult.path ?? '',
       })) as FileReadResult;
       expect(readResult.success).toBe(true);
 
@@ -515,13 +524,18 @@ describe('ComputerUseService Integration Tests', () => {
       // Verify results can be read back
       const readResults = (await context.service.action({
         action: 'read_file',
-        path: saveResult.path,
+        path: saveResult.path ?? '',
       })) as FileReadResult;
 
       expect(readResults.success).toBe(true);
+      if (!readResults.data) {
+        throw new Error(
+          'Expected readResults.data to be defined for successful read operation',
+        );
+      }
       const parsedResults = JSON.parse(
         Buffer.from(readResults.data, 'base64').toString(),
-      );
+      ) as { originalFile: string; status: string };
       expect(parsedResults.originalFile).toBe('test-document.txt');
       expect(parsedResults.status).toBe('completed');
     });
@@ -544,7 +558,7 @@ describe('ComputerUseService Integration Tests', () => {
       pasteText: jest.fn().mockResolvedValue({ success: true }),
       screendump: jest
         .fn()
-        .mockResolvedValue(Buffer.from('mocked-screenshot-data')),
+         as jest.MockedFunction<any>).mockResolvedValue(Buffer.from('mocked-screenshot-data')),
       getCursorPosition: jest.fn().mockResolvedValue({ x: 100, y: 200 }),
     };
   }
@@ -586,7 +600,7 @@ describe('ComputerUseService Integration Tests', () => {
       content,
       base64: Buffer.from(content).toString('base64'),
       expectedMediaType:
-        expectedMediaType || mediaTypeMap[ext] || 'application/octet-stream',
+        expectedMediaType ?? mediaTypeMap[ext] ?? 'application/octet-stream',
     };
   }
 
