@@ -5,7 +5,7 @@
       "id": "error_1757389319302_r2nwsfpgw",
       "title": "CRITICAL: Fix TypeScript build errors in shared package",
       "description": "Multiple TypeScript compilation errors blocking build process in compliance-framework.service.ts. Properties like PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED and eventEmitter not found - need to fix property access issues preventing successful build.",
-      "priority": "critical",
+      "priority": "normal",
       "category": "error",
       "status": "in_progress",
       "dependencies": [],
@@ -37,7 +37,7 @@
       "description": "URGENT: Fix ESLint violations in deprecation.guard.ts (3), version.interceptor.ts (2), security-sanitization.pipe.ts (3). Zero tolerance mandate.",
       "priority": "medium",
       "category": "error",
-      "status": "pending",
+      "status": "in_progress",
       "dependencies": [],
       "important_files": [],
       "success_criteria": [],
@@ -45,7 +45,19 @@
       "requires_research": false,
       "subtasks": [],
       "created_at": "2025-09-13T04:35:40.603Z",
-      "auto_research_created": false
+      "auto_research_created": false,
+      "assigned_agent": "dev_session_1757880763950_1_general_4d8eb1ac",
+      "started_at": "2025-09-14T20:34:53.920Z",
+      "claimed_by": "dev_session_1757880763950_1_general_4d8eb1ac",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757880763950_1_general_4d8eb1ac",
+          "role": "primary",
+          "assignedAt": "2025-09-14T20:34:53.920Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "id": "error_1757738115000_58s4yy7lv",
@@ -53,7 +65,7 @@
       "description": "URGENT: Fix all 14 ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/e2e/security.e2e-spec.ts. Zero tolerance mandate.",
       "priority": "medium",
       "category": "error",
-      "status": "pending",
+      "status": "in_progress",
       "dependencies": [],
       "important_files": [],
       "success_criteria": [],
@@ -61,7 +73,19 @@
       "requires_research": false,
       "subtasks": [],
       "created_at": "2025-09-13T04:35:15.000Z",
-      "auto_research_created": false
+      "auto_research_created": false,
+      "assigned_agent": "dev_session_1757880764168_1_general_4a2c870d",
+      "started_at": "2025-09-14T20:35:27.387Z",
+      "claimed_by": "dev_session_1757880764168_1_general_4a2c870d",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757880764168_1_general_4a2c870d",
+          "role": "primary",
+          "assignedAt": "2025-09-14T20:35:27.387Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "id": "error_1757738072484_mr7eon5bx",
@@ -299,7 +323,7 @@
       "id": "error_1757420515725_f4zujtc14",
       "title": "Fix remaining 520 ESLint violations in shared package - TypeScript configuration optimization",
       "description": "Fix TypeScript configuration and ESLint violations in shared package:\n\n1. **TypeScript Project Configuration Issues**:\n   - Test files showing compilation errors (TS2448, TS2454, TS2345, TS2339)\n   - Project service configuration not properly handling all test files\n   - Include/exclude patterns may need optimization\n   - TypeScript project references configuration\n\n2. **ESLint Rule Violations**:\n   - Prettier formatting violations (quote consistency, spacing)\n   - @typescript-eslint/unbound-method errors in test files\n   - Unused ESLint disable directives\n   - TypeScript strict type checking issues\n\n3. **Test File Configuration**:\n   - Root-level __tests__/ directory coverage\n   - Nested src/**/__tests__/ directory coverage\n   - Proper TypeScript compilation for all test patterns\n   - ESLint rule overrides for test files not applying correctly\n\n4. **Project Structure Optimization**:\n   - tsconfig.json include/exclude patterns\n   - eslint.config.mjs test file patterns\n   - TypeScript project service configuration\n   - Path mapping and module resolution\n\n**Target**: Zero ESLint violations with proper TypeScript type checking for all files including tests\n**Evidence**: Clean ESLint output with no violations\n**Files**: tsconfig.json, eslint.config.mjs, test files",
-      "priority": 1,
+      "priority": "normal",
       "category": "error",
       "status": "in_progress",
       "dependencies": [],
@@ -330,7 +354,7 @@
       "id": "error_1757403630694_hbrzxsc10",
       "title": "AGENT-9: Final validation and coordination security-config-analyzer",
       "description": "Perform final comprehensive ESLint validation after all fixes. Coordinate results from other agents, ensure no regressions, and verify complete resolution of all 1344 violations.",
-      "priority": 1,
+      "priority": "normal",
       "category": "error",
       "status": "in_progress",
       "dependencies": [],
@@ -480,7 +504,7 @@
       "id": "feature_1757387214182_op1ggz5z2",
       "title": "Implement ML-Based False Positive Reduction System for Security Accuracy Optimization",
       "description": "Create comprehensive false positive reduction algorithms using ML techniques including pattern classification improvements, feedback learning systems, confidence scoring for security alerts, adaptive thresholds, integration with all ML security components, and performance metrics reporting for enterprise-grade detection accuracy",
-      "priority": 1,
+      "priority": "normal",
       "category": "feature",
       "status": "in_progress",
       "dependencies": [],
@@ -581,6 +605,134 @@
           "claimPriority": "normal"
         }
       ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-14T20:12:51.548Z",
+      "title": "Analyze and optimize workspace performance after coordination fixes",
+      "description": "Performance Optimization Agent: Analyze workspace build performance, optimize pnpm configuration, monitor TypeScript compilation, test parallel execution, benchmark operations, and create optimization recommendations",
+      "category": "feature",
+      "id": "feature_1757880771548_tre9csl3fio"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-14T20:13:02.291Z",
+      "title": "Comprehensive Prisma Integration Audit",
+      "description": "Audit all bytebot packages for Prisma usage, identify inconsistencies, and fix integration issues including missing build steps",
+      "category": "feature",
+      "id": "feature_1757880782290_i04wx0ltj6",
+      "assigned_agent": "dev_session_1757880763434_1_general_e043e0bf",
+      "started_at": "2025-09-14T20:36:39.179Z",
+      "claimed_by": "dev_session_1757880763434_1_general_e043e0bf",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757880763434_1_general_e043e0bf",
+          "role": "primary",
+          "assignedAt": "2025-09-14T20:36:39.179Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-14T20:13:03.380Z",
+      "title": "Standardize NestJS Core versions across bytebot packages",
+      "description": "Upgrade all bytebot packages from @nestjs/core ^11.0.1 to ^11.1.6 to match shared package and eliminate version conflicts",
+      "category": "feature",
+      "id": "feature_1757880783380_akrvw4v89gw",
+      "assigned_agent": "dev_session_1757880763491_1_general_3f8bf2ec",
+      "started_at": "2025-09-14T20:35:03.606Z",
+      "claimed_by": "dev_session_1757880763491_1_general_3f8bf2ec",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757880763491_1_general_3f8bf2ec",
+          "role": "primary",
+          "assignedAt": "2025-09-14T20:35:03.606Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-14T20:13:10.930Z",
+      "title": "Fix build script inconsistencies and optimize Prisma integration",
+      "description": "Audit Prisma usage in bytebotd package, standardize Prisma integration in build scripts, verify build execution order, and optimize build pipeline coordination across workspace packages",
+      "category": "feature",
+      "id": "feature_1757880790930_bxh4nq7jt3m"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-14T20:13:11.121Z",
+      "title": "Comprehensive linting validation testing after ESLint standardization",
+      "description": "Test individual package linting, workspace-level coordination, ESLint configuration compatibility, autofix functionality, and create validation report",
+      "category": "test",
+      "id": "test_1757880791121_u1rx13olpqr"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-14T20:13:14.689Z",
+      "title": "Standardize ESLint versions across bytebot packages",
+      "description": "Audit and standardize ESLint versions to ^9.18.0 across all bytebot packages, fix version inconsistencies in bytebot-ui (^8.57.1) and security-config-analyzer (^9.35.0), update related dependencies, and verify compatibility",
+      "category": "error",
+      "id": "error_1757880794689_qem7ejt7bom",
+      "assigned_agent": "dev_session_1757880764156_1_general_06c555c1",
+      "started_at": "2025-09-14T20:30:01.302Z",
+      "claimed_by": "dev_session_1757880764156_1_general_06c555c1",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757880764156_1_general_06c555c1",
+          "role": "primary",
+          "assignedAt": "2025-09-14T20:30:01.302Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-14T20:29:48.940Z",
+      "title": "Comprehensive build pipeline testing after workspace coordination fixes",
+      "description": "Test individual package builds, workspace build coordination, Prisma integration, TypeScript compilation, and production builds across the entire workspace with performance monitoring",
+      "category": "test",
+      "id": "test_1757881788940_5jjn8wyrq0a"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-14T20:29:52.951Z",
+      "title": "Standardize quote styles in package.json script definitions",
+      "description": "Examine all bytebot package.json files for script quote style variations, standardize to double quotes for outer script definitions and single quotes for inner patterns, fix shell parsing issues, verify script execution after changes",
+      "category": "feature",
+      "id": "feature_1757881792951_gg3ahtfaf4u"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-14T20:29:54.066Z",
+      "title": "Workspace Dependency Validation and Optimization",
+      "description": "Validate pnpm workspace configuration, verify @bytebot/shared references, check dependency hoisting patterns, identify conflicts, validate tsconfig project references, test dependency resolution, optimize workspace catalog usage, and document results",
+      "category": "feature",
+      "id": "feature_1757881794066_rxk381wlcai",
+      "assigned_agent": "dev_session_1757880764736_1_general_6250369f",
+      "started_at": "2025-09-14T20:36:08.277Z",
+      "claimed_by": "dev_session_1757880764736_1_general_6250369f",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757880764736_1_general_6250369f",
+          "role": "primary",
+          "assignedAt": "2025-09-14T20:36:08.277Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-14T20:29:54.567Z",
+      "title": "Standardize lint script patterns across all bytebot packages",
+      "description": "Analyze and standardize lint script variations including file patterns, quote styles, and flags across bytebot-agent-cc, bytebot-agent, bytebot-ui, bytebotd, security-config-analyzer, and shared packages. Design consistent patterns based on package architecture and implement standardized quote styles and appropriate flags.",
+      "category": "feature",
+      "id": "feature_1757881794567_t5k16h2pzdi"
     }
   ],
   "agents": {
@@ -1870,6 +2022,216 @@
       "createdAt": "2025-09-13T04:26:35.896Z",
       "sessionId": "session_1757737595895",
       "metadata": {}
+    },
+    "dev_session_1757880754225_1_general_8a7266e8": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T20:12:34.225Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T20:12:34.225Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757880763434_1_general_e043e0bf": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T20:12:43.435Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T20:12:43.435Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757880763491_1_general_3f8bf2ec": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T20:12:43.492Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T20:12:43.492Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757880763950_1_general_4d8eb1ac": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T20:12:43.951Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T20:12:43.951Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757880764107_1_general_cc97a8c4": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T20:12:44.107Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T20:12:44.107Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757880764156_1_general_06c555c1": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T20:12:44.156Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T20:12:44.156Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757880764168_1_general_4a2c870d": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T20:12:44.169Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T20:12:44.169Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757880764723_1_general_36472aa1": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T20:12:44.724Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T20:12:44.724Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757880764736_1_general_6250369f": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T20:12:44.736Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T20:12:44.736Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757880766249_1_general_09b9d985": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T20:12:46.249Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T20:12:46.249Z",
+      "sessionId": null,
+      "metadata": {}
     }
   },
   "settings": {
@@ -1892,5 +2254,7 @@
       "test": 4
     }
   },
-  "current_mode": "DEVELOPMENT"
+  "current_mode": "DEVELOPMENT",
+  "completed_tasks": [],
+  "features": []
 }

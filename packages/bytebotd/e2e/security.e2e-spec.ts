@@ -395,7 +395,8 @@ describe('Security E2E Tests', () => {
         })
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      const responseBody = response.body as LoginResponse;
+      expect(responseBody).toMatchObject({
         accessToken: expect.any(String),
         refreshToken: expect.any(String),
         user: expect.objectContaining({
@@ -434,7 +435,8 @@ describe('Security E2E Tests', () => {
         })
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      const responseBody = response.body as RefreshTokenResponse;
+      expect(responseBody).toMatchObject({
         accessToken: expect.any(String),
         refreshToken: expect.any(String),
         expiresIn: 900,
@@ -781,9 +783,7 @@ describe('Security E2E Tests', () => {
       // Make many requests rapidly
       const requests = Array(60)
         .fill(null)
-        .map(() =>
-          request(app.getHttpAdapter().getInstance() as any).get('/health'),
-        );
+        .map(() => request(getHttpServer()).get('/health'));
 
       const responses = await Promise.all(requests);
 
@@ -807,9 +807,7 @@ describe('Security E2E Tests', () => {
       // Send burst of concurrent requests
       const promises = Array(20)
         .fill(null)
-        .map(() =>
-          request(app.getHttpAdapter().getInstance() as any).get('/health'),
-        );
+        .map(() => request(getHttpServer()).get('/health'));
 
       const responses = await Promise.all(promises);
       const executionTime = Date.now() - startTime;
@@ -832,14 +830,12 @@ describe('Security E2E Tests', () => {
       // Test different endpoints
       const healthRequests = Array(10)
         .fill(null)
-        .map(() =>
-          request(app.getHttpAdapter().getInstance() as any).get('/health'),
-        );
+        .map(() => request(getHttpServer()).get('/health'));
 
       const taskRequests = Array(10)
         .fill(null)
         .map(() =>
-          request(app.getHttpAdapter().getInstance() as any)
+          request(getHttpServer())
             .get('/api/tasks')
             .set('Authorization', 'Bearer mock-jwt-token'),
         );
@@ -896,12 +892,10 @@ describe('Security E2E Tests', () => {
       const concurrentLogins = Array(10)
         .fill(null)
         .map(() =>
-          request(app.getHttpAdapter().getInstance() as any)
-            .post('/auth/login')
-            .send({
-              email: 'admin@bytebot.ai',
-              password: 'admin123',
-            }),
+          request(getHttpServer()).post('/auth/login').send({
+            email: 'admin@bytebot.ai',
+            password: 'admin123',
+          }),
         );
 
       const responses = await Promise.all(concurrentLogins);
@@ -1043,24 +1037,24 @@ describe('Security E2E Tests', () => {
         ...Array(10)
           .fill(null)
           .map(() =>
-            request(app.getHttpAdapter().getInstance() as any)
+            request(getHttpServer())
               .post('/auth/login')
               .send({ email: 'admin@bytebot.ai', password: 'admin123' }),
           ),
         ...Array(10)
           .fill(null)
           .map(() =>
-            request(app.getHttpAdapter().getInstance() as any)
+            request(getHttpServer())
               .get('/api/tasks')
               .set('Authorization', 'Bearer mock-jwt-token'),
           ),
         ...Array(10)
           .fill(null)
           .map(() =>
-            request(app.getHttpAdapter().getInstance() as any)
+            request(getHttpServer())
               .post('/api/tasks')
               .set('Authorization', 'Bearer mock-jwt-token')
-              .send({ title: 'Load Test Task' }),
+              .send({ title: 'Load Test Task' } as CreateTaskRequest),
           ),
       ];
 
