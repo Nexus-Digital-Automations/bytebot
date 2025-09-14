@@ -882,11 +882,11 @@ describe('Security E2E - Comprehensive Testing', () => {
       };
 
       if (req.body) {
-        sanitizeObject(req.body);
+        sanitizeObject(req.body as Record<string, unknown>);
       }
 
       if (req.query) {
-        sanitizeObject(req.query);
+        sanitizeObject(req.query as Record<string, unknown>);
       }
 
       next();
@@ -898,13 +898,13 @@ describe('Security E2E - Comprehensive Testing', () => {
     app.getHttpAdapter().post('/auth/login', async (req, res) => {
       try {
         const clientInfo: ClientInfo = {
-          ipAddress: req.ip ?? 'unknown',
-          userAgent: req.headers['user-agent'] as string | undefined,
+          ipAddress: (req as Request & { ip?: string }).ip ?? 'unknown',
+          userAgent: (req.headers as Record<string, string>)['user-agent'],
           timestamp: Date.now().toString(),
         };
 
         const result = await authController.login(
-          req.body as { email: string; password: string },
+          (req as Request & { body: { email: string; password: string } }).body,
           clientInfo,
         );
         res.json(result);

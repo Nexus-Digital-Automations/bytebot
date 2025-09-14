@@ -355,10 +355,12 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       const remainingConnections = this.shutdownState.activeConnections.size;
 
       if (remainingConnections === 0) {
-        this.shutdownState.shutdownMetrics.drainCompleted = true;
-        this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
-          'drain_connections',
-        );
+        if (this.shutdownState.shutdownMetrics) {
+          this.shutdownState.shutdownMetrics.drainCompleted = true;
+          this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
+            'drain_connections',
+          );
+        }
 
         this.logger.log(
           'Phase 2 completed: All connections drained successfully',
