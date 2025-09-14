@@ -97,7 +97,7 @@ describe('API Performance Benchmarks', () => {
 
       for (let i = 0; i < LOAD_TEST_CONFIG.BENCHMARK_REQUESTS; i++) {
         const requestStart = Date.now();
-        const response = await request(app.getHttpServer() as any).get(
+        const response = await request(app.getHttpServer() as Server).get(
           '/health',
         );
         const requestDuration = Date.now() - requestStart;
@@ -150,7 +150,7 @@ describe('API Performance Benchmarks', () => {
 
       for (let i = 0; i < LOAD_TEST_CONFIG.BENCHMARK_REQUESTS; i++) {
         const requestStart = Date.now();
-        const response = await request(app.getHttpServer() as any).get(
+        const response = await request(app.getHttpServer() as Server).get(
           '/metrics',
         );
         const requestDuration = Date.now() - requestStart;
@@ -199,7 +199,7 @@ describe('API Performance Benchmarks', () => {
             // 20 requests per user
             const start = Date.now();
             try {
-              const response = await request(app.getHttpServer())
+              const response = await request(app.getHttpServer() as Server)
                 .get('/health')
                 .timeout(5000);
 
@@ -258,10 +258,10 @@ describe('API Performance Benchmarks', () => {
 
       for (let i = 0; i < 500; i++) {
         sustainedLoadPromises.push(
-          request(app.getHttpServer() as any).get('/health'),
+          request(app.getHttpServer() as Server).get('/health'),
         );
         sustainedLoadPromises.push(
-          request(app.getHttpServer() as any).get('/metrics'),
+          request(app.getHttpServer() as Server).get('/metrics'),
         );
       }
 

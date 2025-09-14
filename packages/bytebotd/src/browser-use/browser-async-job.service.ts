@@ -697,7 +697,7 @@ export class BrowserAsyncJobService {
   private handleJobFailure(
     jobId: string,
     error: StandardError | Error | unknown,
-  ): Promise<void> {
+  ): void {
     const job = this.jobs.get(jobId);
     if (!job) {
       return;

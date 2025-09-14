@@ -1085,7 +1085,7 @@ export class ComputerUseService {
    * @param ms - Delay duration in milliseconds
    * @returns Promise that resolves after the specified delay
    */
-  private delay(ms: number): void {
+  private delay(ms: number): Promise<void> {
     const operationId = `delay_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     // Validate delay duration (reasonable limits)

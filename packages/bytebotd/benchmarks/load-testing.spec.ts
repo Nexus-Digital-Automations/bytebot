@@ -24,7 +24,8 @@ import { MetricsService } from '../src/metrics/metrics.service';
 import { CacheService } from '../src/cache/cache.service';
 import { PerformanceInterceptor } from '../src/common/interceptors/performance.interceptor';
 import { CompressionInterceptor } from '../src/common/interceptors/compression.interceptor';
-import { Optional, TypeSafetyUtils } from '../src/types';
+import { Optional } from '../src/types';
+import { Server } from 'http';
 import request from 'supertest';
 
 /**
@@ -67,10 +68,10 @@ interface LoadTestResult {
 
 describe('Load Testing Benchmarks', () => {
   let app: INestApplication;
-  let metricsService: MetricsService;
+  let _metricsService: MetricsService;
   let cacheService: CacheService;
   let performanceInterceptor: Optional<PerformanceInterceptor>;
-  let compressionInterceptor: Optional<CompressionInterceptor>;
+  let _compressionInterceptor: Optional<CompressionInterceptor>;
 
   const loadTestConfigs: LoadTestConfig[] = [
     {

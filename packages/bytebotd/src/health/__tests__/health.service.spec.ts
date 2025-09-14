@@ -28,7 +28,7 @@ import { HealthService } from '../health.service';
 import {
   BasicHealthResponse,
   DetailedStatusResponse,
-  ServiceHealthResponse,
+  ServiceHealthResponse as _ServiceHealthResponse,
 } from '../interfaces/health.interfaces';
 
 /**
@@ -49,7 +49,7 @@ interface _ServiceStatus {
   error?: string;
 }
 
-interface ServiceHealthMockReturn {
+interface _ServiceHealthMockReturn {
   database: string;
   cache: string;
   external: string;
@@ -57,15 +57,7 @@ interface ServiceHealthMockReturn {
 }
 
 // Type for Health Service with access to private methods (for testing)
-type TestableHealthService = HealthService & {
-  checkServiceHealth(): ServiceHealthMockReturn;
-  _performHealthCheck?(): ServiceHealthMockReturn;
-  performDatabasePing(): Promise<boolean>;
-  checkExternalService(
-    url: string,
-  ): Promise<{ status: string; responseTime: string }>;
-  getInitializationTime(): number;
-};
+type TestableHealthService = HealthService;
 
 interface _PerformanceMetrics {
   startTime: number;
