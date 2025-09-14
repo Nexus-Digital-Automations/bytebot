@@ -487,7 +487,7 @@ class SecurityE2EProtectedController {
 }
 
 class SecurityE2EAdminController {
-  getUserList(user: any) {
+  getUserList(user: { sub: string; email: string; role: UserRole }) {
     return {
       users: [
         { id: '1', email: 'admin@bytebot.ai', role: UserRole._ADMIN },
@@ -499,7 +499,7 @@ class SecurityE2EAdminController {
     };
   }
 
-  getSystemMetrics(user: any) {
+  getSystemMetrics(user: { sub: string; email: string; role: UserRole }) {
     return {
       metrics: {
         activeUsers: 15,
@@ -513,7 +513,10 @@ class SecurityE2EAdminController {
     };
   }
 
-  deleteUser(user: any, userId: string) {
+  deleteUser(
+    user: { sub: string; email: string; role: UserRole },
+    userId: string,
+  ) {
     return {
       message: 'User deleted successfully',
       deletedUserId: userId,

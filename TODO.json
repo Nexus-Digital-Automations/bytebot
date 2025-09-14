@@ -95,7 +95,7 @@
       "description": "URGENT: Fix all 22 ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/computer-use/computer-use.service.spec.ts. Zero tolerance mandate.",
       "priority": "medium",
       "category": "error",
-      "status": "in_progress",
+      "status": "completed",
       "dependencies": [],
       "important_files": [],
       "success_criteria": [],
@@ -115,7 +115,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-14T20:40:50.318Z",
+      "updated_at": "2025-09-14T20:40:50.318Z"
     },
     {
       "id": "error_1757738024547_lg9y2ur7i",
@@ -207,7 +209,7 @@
       "description": "Emergency resolution of critical build failure in bytebot-agent package preventing secure deployment:\n\n**CRITICAL FAILURE:**\nByteBot-Agent build failed with exit code 1 during NestJS compilation\n\n**SECURITY IMPACT:** \n- Blocks secure production deployment\n- Compromises CI/CD pipeline integrity  \n- Prevents agent service functionality\n\n**INVESTIGATION REQUIRED:**\n1. Identify specific TypeScript compilation errors in bytebot-agent\n2. Check for missing dependencies or configuration issues\n3. Verify Prisma schema generation completed successfully\n4. Fix all compilation errors\n5. Ensure successful build completion\n\n**SUCCESS CRITERIA:**\n- npx @nestjs/cli build completes without errors\n- All TypeScript compilation issues resolved\n- Build produces valid deployment artifacts",
       "priority": "medium",
       "category": "error",
-      "status": "pending",
+      "status": "in_progress",
       "dependencies": [],
       "important_files": [],
       "success_criteria": [],
@@ -215,7 +217,19 @@
       "requires_research": false,
       "subtasks": [],
       "created_at": "2025-09-13T03:40:29.426Z",
-      "auto_research_created": false
+      "auto_research_created": false,
+      "assigned_agent": "dev_session_1757880764107_1_general_cc97a8c4",
+      "started_at": "2025-09-14T20:40:41.510Z",
+      "claimed_by": "dev_session_1757880764107_1_general_cc97a8c4",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757880764107_1_general_cc97a8c4",
+          "role": "primary",
+          "assignedAt": "2025-09-14T20:40:41.510Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "id": "error_1757734806587_3q4zxvbcm",
