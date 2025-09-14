@@ -432,7 +432,7 @@ export class DataStorageOptimizationService {
         checksumGroups.set(checksum, []);
       }
 
-      checksumGroups.get(checksum).push(screenshot.id);
+      checksumGroups.get(checksum)!.push(screenshot.id);
 
       // If this checksum has been seen before, it's a duplicate
       if (processedChecksums.has(checksum)) {
@@ -817,6 +817,7 @@ export class DataStorageOptimizationService {
       hasBusinessValue: this.assessBusinessValue({
         ...screenshot,
         metadata: screenshot.metadata,
+        url: screenshot.url || undefined,
       }),
       accessFrequency: pattern?.accessFrequency || 'low',
       ageInDays,
@@ -831,7 +832,7 @@ export class DataStorageOptimizationService {
     return {
       id: screenshot.id,
       entityType: 'screenshot',
-      currentTier: screenshot.storageTier,
+      currentTier: screenshot.storageTier || undefined,
       recommendedTier,
       estimatedSavings,
       confidence,
@@ -896,7 +897,7 @@ export class DataStorageOptimizationService {
     return {
       id: domSnapshot.id,
       entityType: 'domSnapshot',
-      currentTier: domSnapshot.storageTier,
+      currentTier: domSnapshot.storageTier || undefined,
       recommendedTier,
       estimatedSavings,
       confidence,
@@ -1084,6 +1085,7 @@ export class DataStorageOptimizationService {
     const businessValueScore = this.assessBusinessValue({
       ...screenshot,
       metadata: screenshot.metadata,
+      url: screenshot.url || undefined,
     })
       ? 0.8
       : 0.3;
@@ -1136,7 +1138,7 @@ export class DataStorageOptimizationService {
 
   private async calculateFileChecksum(filePath: string): Promise<string> {
     if (this.checksumCache.has(filePath)) {
-      return this.checksumCache.get(filePath);
+      return this.checksumCache.get(filePath)!;
     }
 
     try {
@@ -1217,7 +1219,7 @@ export class DataStorageOptimizationService {
       return true;
     }
 
-    if (metadata.isTestData || metadata.isDebugData) {
+    if (metadata.isTestData === true || metadata.isDebugData === true) {
       return false;
     }
 
@@ -1225,7 +1227,7 @@ export class DataStorageOptimizationService {
     return (
       domSnapshot.url.includes('production') ||
       domSnapshot.url.includes('app') ||
-      (domSnapshot.formCount && domSnapshot.formCount > 0)
+      (domSnapshot.formCount != null && domSnapshot.formCount > 0)
     );
   }
 

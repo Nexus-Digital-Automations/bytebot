@@ -21,7 +21,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { StorageTier } from '../models/browser-automation.models';
-import { Prisma } from '@prisma/client';
+import { Prisma, $Enums } from '@prisma/client';
 import * as fs from 'fs/promises';
 
 export interface RetentionPolicy {
@@ -555,7 +555,8 @@ export class DataRetentionCleanupService {
             ? [
                 {
                   status: {
-                    in: policy.policyConditions.statusFilter,
+                    in: policy.policyConditions
+                      .statusFilter as $Enums.BrowserSessionStatus[],
                   },
                 },
               ]
@@ -597,7 +598,8 @@ export class DataRetentionCleanupService {
             ? [
                 {
                   status: {
-                    in: policy.policyConditions.statusFilter,
+                    in: policy.policyConditions
+                      .statusFilter as $Enums.BrowserSessionStatus[],
                   },
                 },
               ]
@@ -610,7 +612,10 @@ export class DataRetentionCleanupService {
                       metadata: { path: ['isProductionData'], equals: false },
                     },
                     {
-                      metadata: { path: ['isProductionData'], equals: null },
+                      metadata: {
+                        path: ['isProductionData'],
+                        equals: Prisma.JsonNull,
+                      },
                     },
                   ],
                 },
@@ -696,7 +701,8 @@ export class DataRetentionCleanupService {
             ? [
                 {
                   status: {
-                    in: policy.policyConditions.statusFilter,
+                    in: policy.policyConditions
+                      .statusFilter as $Enums.BrowserTaskStatus[],
                   },
                 },
               ]
@@ -714,7 +720,7 @@ export class DataRetentionCleanupService {
                     {
                       customData: {
                         path: ['isProductionData'],
-                        equals: null,
+                        equals: Prisma.JsonNull,
                       },
                     },
                   ],
@@ -817,7 +823,12 @@ export class DataRetentionCleanupService {
               {
                 OR: [
                   { metadata: { path: ['isProductionData'], equals: false } },
-                  { metadata: { path: ['isProductionData'], equals: null } },
+                  {
+                    metadata: {
+                      path: ['isProductionData'],
+                      equals: Prisma.JsonNull,
+                    },
+                  },
                 ],
               },
             ]
@@ -916,7 +927,10 @@ export class DataRetentionCleanupService {
                         metadata: { path: ['isProductionData'], equals: false },
                       },
                       {
-                        metadata: { path: ['isProductionData'], equals: null },
+                        metadata: {
+                          path: ['isProductionData'],
+                          equals: Prisma.JsonNull,
+                        },
                       },
                     ],
                   },
@@ -981,7 +995,10 @@ export class DataRetentionCleanupService {
                         metadata: { path: ['isProductionData'], equals: false },
                       },
                       {
-                        metadata: { path: ['isProductionData'], equals: null },
+                        metadata: {
+                          path: ['isProductionData'],
+                          equals: Prisma.JsonNull,
+                        },
                       },
                       // Note: sensitivityLevel field not available in current schema
                       // { sensitivityLevel: { in: ['low', 'medium'] } },

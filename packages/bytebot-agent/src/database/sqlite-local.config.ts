@@ -185,10 +185,11 @@ export class SQLiteLocalConfig {
           'SQLITE_ENCRYPTION_ENABLED',
           false,
         ),
-        encryptionKey: this.secretsService.getSecret(
-          'sqlite-encryption-key',
-          'SQLITE_ENCRYPTION_KEY',
-        ),
+        encryptionKey:
+          this.secretsService.getSecret(
+            'sqlite-encryption-key',
+            'SQLITE_ENCRYPTION_KEY',
+          ) || undefined,
         backupEncryption: this.configService.get<boolean>(
           'SQLITE_BACKUP_ENCRYPTION',
           false,
