@@ -711,7 +711,7 @@
       "updated_at": "2025-09-14T20:39:15.916Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-14T20:13:10.930Z",
       "title": "Fix build script inconsistencies and optimize Prisma integration",
       "description": "Audit Prisma usage in bytebotd package, standardize Prisma integration in build scripts, verify build execution order, and optimize build pipeline coordination across workspace packages",
@@ -728,7 +728,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-14T20:46:37.347Z",
+      "updated_at": "2025-09-14T20:46:37.347Z"
     },
     {
       "status": "pending",
@@ -777,7 +779,7 @@
       "id": "feature_1757881792951_gg3ahtfaf4u"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-14T20:29:54.066Z",
       "title": "Workspace Dependency Validation and Optimization",
       "description": "Validate pnpm workspace configuration, verify @bytebot/shared references, check dependency hoisting patterns, identify conflicts, validate tsconfig project references, test dependency resolution, optimize workspace catalog usage, and document results",
@@ -794,7 +796,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-14T20:46:44.055Z",
+      "updated_at": "2025-09-14T20:46:44.055Z"
     },
     {
       "status": "pending",

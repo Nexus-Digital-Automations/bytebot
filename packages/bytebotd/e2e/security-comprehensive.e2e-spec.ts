@@ -910,9 +910,10 @@ describe('Security E2E - Comprehensive Testing', () => {
         res.json(result);
       } catch (error: unknown) {
         securityMonitor.trackFailedAuthentication(
-          (req.body as { email?: string })?.email ?? 'unknown',
-          req.ip ?? 'unknown',
-          (req.headers['user-agent'] as string) ?? 'unknown',
+          (req as Request & { body: { email?: string } }).body?.email ??
+            'unknown',
+          (req as Request & { ip?: string }).ip ?? 'unknown',
+          (req.headers as Record<string, string>)['user-agent'] ?? 'unknown',
         );
         res.status(401).json({
           error: error instanceof Error ? error.message : String(error),
@@ -923,7 +924,7 @@ describe('Security E2E - Comprehensive Testing', () => {
     app.getHttpAdapter().post('/auth/refresh', async (req, res) => {
       try {
         const result = await authController.refresh(
-          req.body as { refreshToken: string },
+          (req as Request & { body: { refreshToken: string } }).body,
         );
         res.json(result);
       } catch (error: unknown) {
@@ -935,7 +936,9 @@ describe('Security E2E - Comprehensive Testing', () => {
 
     app.getHttpAdapter().post('/auth/logout', async (req, res) => {
       try {
-        const result = await authController.logout(req.user);
+        const result = await authController.logout(
+          (req as Request & { user: { sub: string; sessionId?: string } }).user,
+        );
         res.json(result);
       } catch (error: unknown) {
         res.status(500).json({
@@ -946,17 +949,39 @@ describe('Security E2E - Comprehensive Testing', () => {
 
     // Protected routes
     app.getHttpAdapter().get('/api/user/profile', (req, res) => {
-      res.json(protectedController.getUserData(req.user));
+      res.json(
+        protectedController.getUserData(
+          (
+            req as Request & {
+              user: {
+                sub: string;
+                email: string;
+                role: UserRole;
+                sessionId?: string;
+              };
+            }
+          ).user,
+        ),
+      );
     });
 
     app.getHttpAdapter().get('/api/user/tasks', (req, res) => {
-      res.json(protectedController.getUserTasks(req.user));
+      res.json(
+        protectedController.getUserTasks(
+          (req as Request & { user: { sub: string } }).user,
+        ),
+      );
     });
 
     app.getHttpAdapter().post('/api/tasks', (req, res) => {
       const middleware = requireRole(UserRole._OPERATOR);
       middleware(req, res, () => {
-        res.json(protectedController.createTask(req.user, req.body));
+        res.json(
+          protectedController.createTask(
+            (req as Request & { user: { sub: string } }).user,
+            (req as Request & { body: Partial<TaskData> }).body,
+          ),
+        );
       });
     });
 
@@ -964,7 +989,11 @@ describe('Security E2E - Comprehensive Testing', () => {
       const middleware = requireRole(UserRole._OPERATOR);
       middleware(req, res, () => {
         res.json(
-          protectedController.updateTask(req.user, req.params.id, req.body),
+          protectedController.updateTask(
+            (req as Request & { user: { sub: string } }).user,
+            (req as Request & { params: { id: string } }).params.id,
+            (req as Request & { body: Partial<TaskData> }).body,
+          ),
         );
       });
     });
@@ -973,28 +1002,61 @@ describe('Security E2E - Comprehensive Testing', () => {
     app.getHttpAdapter().get('/api/admin/users', (req, res) => {
       const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
-        res.json(adminController.getUserList(req.user));
+        res.json(
+          adminController.getUserList(
+            (
+              req as Request & {
+                user: { sub: string; email: string; role: UserRole };
+              }
+            ).user,
+          ),
+        );
       });
     });
 
     app.getHttpAdapter().get('/api/admin/metrics', (req, res) => {
       const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
-        res.json(adminController.getSystemMetrics(req.user));
+        res.json(
+          adminController.getSystemMetrics(
+            (
+              req as Request & {
+                user: { sub: string; email: string; role: UserRole };
+              }
+            ).user,
+          ),
+        );
       });
     });
 
     app.getHttpAdapter().delete('/api/admin/users/:id', (req, res) => {
       const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
-        res.json(adminController.deleteUser(req.user, req.params.id));
+        res.json(
+          adminController.deleteUser(
+            (
+              req as Request & {
+                user: { sub: string; email: string; role: UserRole };
+              }
+            ).user,
+            (req as Request & { params: { id: string } }).params.id,
+          ),
+        );
       });
     });
 
     app.getHttpAdapter().get('/api/admin/audit-logs', (req, res) => {
       const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
-        res.json(adminController.getAuditLogs(req.user));
+        res.json(
+          adminController.getAuditLogs(
+            (
+              req as Request & {
+                user: { sub: string; email: string; role: UserRole };
+              }
+            ).user,
+          ),
+        );
       });
     });
 

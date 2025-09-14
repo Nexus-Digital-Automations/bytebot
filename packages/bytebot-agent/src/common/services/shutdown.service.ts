@@ -378,14 +378,18 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
           },
         );
 
-        this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
-          'drain_connections_partial',
-        );
+        if (this.shutdownState.shutdownMetrics) {
+          this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
+            'drain_connections_partial',
+          );
+        }
       }
     } catch (error) {
-      this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
-        'drain_connections',
-      );
+      if (this.shutdownState.shutdownMetrics) {
+        this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
+          'drain_connections',
+        );
+      }
       this.logger.error('Phase 2 failed: Error during connection draining', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -422,12 +426,14 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       const completed = results.filter((r) => r.success);
       const failed = results.filter((r) => !r.success);
 
-      this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
-        ...completed.map((r) => `cleanup_${r.taskName}`),
-      );
-      this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
-        ...failed.map((r) => `cleanup_${r.taskName}`),
-      );
+      if (this.shutdownState.shutdownMetrics) {
+        this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
+          ...completed.map((r) => `cleanup_${r.taskName}`),
+        );
+        this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
+          ...failed.map((r) => `cleanup_${r.taskName}`),
+        );
+      }
 
       this.logger.log('Phase 3 completed: Cleanup tasks executed', {
         totalTasks: results.length,
@@ -446,9 +452,11 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
         });
       }
     } catch (error) {
-      this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
-        'execute_cleanup_tasks',
-      );
+      if (this.shutdownState.shutdownMetrics) {
+        this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
+          'execute_cleanup_tasks',
+        );
+      }
       this.logger.error('Phase 3 failed: Error during cleanup task execution', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -501,15 +509,19 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       this.shutdownState.activeConnections.clear();
       this.shutdownState.cleanupTasks.clear();
 
-      this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
-        'final_cleanup',
-      );
+      if (this.shutdownState.shutdownMetrics) {
+        this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
+          'final_cleanup',
+        );
+      }
 
       this.logger.log('Phase 4 completed: Final cleanup successful');
     } catch (error) {
-      this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
-        'final_cleanup',
-      );
+      if (this.shutdownState.shutdownMetrics) {
+        this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
+          'final_cleanup',
+        );
+      }
       this.logger.error('Phase 4 failed: Final cleanup error', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -523,7 +535,9 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
   private forceShutdown(): void {
     this.logger.warn('Force shutdown initiated');
 
-    this.shutdownState.shutdownMetrics.forceShutdownTriggered = true;
+    if (this.shutdownState.shutdownMetrics) {
+      this.shutdownState.shutdownMetrics.forceShutdownTriggered = true;
+    }
 
     try {
       // Force close all active connections

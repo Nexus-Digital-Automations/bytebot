@@ -12,22 +12,11 @@ export * from "./types/messageContent.types";
 export * from "./types/computerAction.types";
 export * from "./types/agent.types";
 
-// Additional type exports that are frequently imported individually
-export {
-  ThinkingContentBlock,
-  RedactedThinkingContentBlock,
-  ToolUseContentBlock,
-  ToolResultContentBlock,
-  TextContentBlock,
-  ImageContentBlock,
-  DocumentContentBlock,
-  ComputerToolUseContentBlock,
-  SetTaskStatusToolUseBlock,
-  CreateTaskToolUseBlock,
-  UserActionContentBlock,
-  MessageContentType,
-  MessageContentBlock,
-} from "./types/messageContent.types";
+// Export enums directly (these have runtime exports)
+export { MessageContentType, Role } from "./types/messageContent.types";
+
+// Type-only exports are handled by `export * from` above
+// Individual type exports are commented out to prevent Next.js warnings
 
 // Client-safe utilities - Re-export all functions
 export * from "./utils/messageContent.utils";
@@ -69,29 +58,20 @@ export {
   isReadFileToolUseBlock,
 } from "./utils/messageContent.utils";
 
-// Security Types (exported individually to avoid duplicates)
+// Export security enums and constants directly (these have runtime exports)
 export {
   SecurityEventType,
-  SecurityEvent,
-  createSecurityEvent,
-  SanitizationOptions,
   UserRole,
   Permission,
-  JwtPayload,
-  PasswordPolicy,
-  ValidationResult,
-  ValidationError,
-  SecurityErrorCode,
-  RateLimitConfig,
   RateLimitPreset,
   RateLimitServiceType,
+  SecurityErrorCode,
+  VersioningStrategy,
   DEFAULT_SANITIZATION_OPTIONS,
-  XSSDetectionResult,
-  SQLInjectionDetectionResult,
-  CommandInjectionDetectionResult,
-  FilePathValidationResult,
-  CoordinatesValidationResult,
+  createSecurityEvent,
 } from "./types/security.types";
+
+// Type-only exports are handled by `export * from` above
 
 // Client-safe Security Utilities (browser-compatible subset)
 export {

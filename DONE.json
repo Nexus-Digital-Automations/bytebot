@@ -1780,10 +1780,58 @@
       "updated_at": "2025-09-14T20:43:33.547Z",
       "archived_at": "2025-09-14T20:43:33.550Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-14T20:13:10.930Z",
+      "title": "Fix build script inconsistencies and optimize Prisma integration",
+      "description": "Audit Prisma usage in bytebotd package, standardize Prisma integration in build scripts, verify build execution order, and optimize build pipeline coordination across workspace packages",
+      "category": "feature",
+      "id": "feature_1757880790930_bxh4nq7jt3m",
+      "assigned_agent": "dev_session_1757880764168_1_general_4a2c870d",
+      "started_at": "2025-09-14T20:41:41.714Z",
+      "claimed_by": "dev_session_1757880764168_1_general_4a2c870d",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757880764168_1_general_4a2c870d",
+          "role": "primary",
+          "assignedAt": "2025-09-14T20:41:41.714Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-14T20:46:37.347Z",
+      "updated_at": "2025-09-14T20:46:37.347Z",
+      "archived_at": "2025-09-14T20:46:37.350Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-14T20:29:54.066Z",
+      "title": "Workspace Dependency Validation and Optimization",
+      "description": "Validate pnpm workspace configuration, verify @bytebot/shared references, check dependency hoisting patterns, identify conflicts, validate tsconfig project references, test dependency resolution, optimize workspace catalog usage, and document results",
+      "category": "feature",
+      "id": "feature_1757881794066_rxk381wlcai",
+      "assigned_agent": "dev_session_1757880764736_1_general_6250369f",
+      "started_at": "2025-09-14T20:36:08.277Z",
+      "claimed_by": "dev_session_1757880764736_1_general_6250369f",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757880764736_1_general_6250369f",
+          "role": "primary",
+          "assignedAt": "2025-09-14T20:36:08.277Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-14T20:46:44.055Z",
+      "updated_at": "2025-09-14T20:46:44.055Z",
+      "archived_at": "2025-09-14T20:46:44.061Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 36,
+  "total_completed": 38,
   "last_completion": "2025-09-13T05:08:39.544Z",
   "created_at": "2025-09-11T09:00:29.533Z",
-  "last_archived": "2025-09-14T20:43:33.550Z"
+  "last_archived": "2025-09-14T20:46:44.061Z"
 }
