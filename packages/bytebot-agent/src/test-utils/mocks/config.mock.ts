@@ -551,6 +551,11 @@ export class MockConfigService extends ConfigService {
       return this.parseConfigValue(envValue) as T;
     }
 
+    if (defaultValue === undefined) {
+      throw new Error(
+        `Configuration property '${propertyPath}' not found and no default value provided`,
+      );
+    }
     return defaultValue;
   }
 

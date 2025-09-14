@@ -269,6 +269,10 @@ export class NestJSTestBuilder {
       await this.build();
     }
 
+    if (!this.testingModule) {
+      throw new Error('Failed to build testing module');
+    }
+
     this.app = this.testingModule.createNestApplication();
     await this.app.init();
 

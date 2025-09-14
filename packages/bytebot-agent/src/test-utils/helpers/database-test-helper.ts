@@ -163,6 +163,9 @@ export class DatabaseTestHelper {
     if (!this.prisma) {
       await this.initialize();
     }
+    if (!this.prisma) {
+      throw new Error('Failed to initialize Prisma client');
+    }
     return this.prisma;
   }
 

@@ -226,7 +226,7 @@ export class MockSocketIOClient
         if (!this.eventListeners.has(event)) {
           this.eventListeners.set(event, []);
         }
-        this.eventListeners.get(event).push(callback);
+        this.eventListeners.get(event)!.push(callback);
         super.on(event, callback);
         return this;
       },
@@ -418,7 +418,7 @@ export class MockSocketIOServer implements MockWebSocketServer {
         if (!this.eventListeners.has(event)) {
           this.eventListeners.set(event, []);
         }
-        this.eventListeners.get(event).push(callback);
+        this.eventListeners.get(event)!.push(callback);
         return this;
       },
     );
@@ -489,7 +489,7 @@ export class MockSocketIOServer implements MockWebSocketServer {
         if (!this.rooms.has(room)) {
           this.rooms.set(room, new Set());
         }
-        this.rooms.get(room).add(client.id);
+        this.rooms.get(room)!.add(client.id);
         client.rooms.add(room);
         return Promise.resolve();
       });

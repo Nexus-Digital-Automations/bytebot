@@ -735,7 +735,7 @@ export const createMockAuthContext = (
   const defaultUser = user || createMockUser();
 
   return {
-    user: user,
+    user: user || undefined,
     permissions: user?.permissions || [],
     session: user ? createMockUserSession(user) : undefined,
     isAuthenticated: !!user,
