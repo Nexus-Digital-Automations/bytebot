@@ -135,7 +135,7 @@ describe('InputTrackingModule', () => {
       // Should be instantiable (though we don't typically instantiate modules directly)
 
       expect(
-        () => new (InputTrackingModule as unknown as Record<string, unknown>)(),
+        () => new (InputTrackingModule as unknown as new () => unknown)(),
       ).not.toThrow();
 
       console.log(`[${testId}] Valid NestJS module class test completed`);
