@@ -808,7 +808,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
           .spyOn(reflector, 'getAllAndOverride')
           .mockReturnValueOnce([UserRole._ADMIN])
           .mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
-        return guard.canActivate(context).catch(() => 'blocked');
+        return (guard.canActivate(context) as Promise<boolean>).catch(
+          (_error: unknown) => 'blocked',
+        );
       });
 
       const suspiciousResults = await Promise.all(suspiciousPromises);

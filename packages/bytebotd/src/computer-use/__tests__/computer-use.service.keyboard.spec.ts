@@ -858,7 +858,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: 'Clipboard content',
       };
 
-      nutService.pasteText.mockResolvedValue({ success: true });
+      nutService.pasteText.mockResolvedValue(undefined);
 
       // Act: Execute text pasting
       await service.action(pasteTextAction);
@@ -890,7 +890,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: largeText,
       };
 
-      nutService.pasteText.mockResolvedValue({ success: true });
+      nutService.pasteText.mockResolvedValue(undefined);
 
       // Act: Execute large text pasting
       await service.action(pasteTextAction);
@@ -918,7 +918,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: formattedText,
       };
 
-      nutService.pasteText.mockResolvedValue({ success: true });
+      nutService.pasteText.mockResolvedValue(undefined);
 
       // Act: Execute formatted text pasting
       await service.action(pasteTextAction);
@@ -939,7 +939,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: multilineText,
       };
 
-      nutService.pasteText.mockResolvedValue({ success: true });
+      nutService.pasteText.mockResolvedValue(undefined);
 
       // Act: Execute multiline text pasting
       await service.action(pasteTextAction);
@@ -996,7 +996,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: '',
       };
 
-      nutService.pasteText.mockResolvedValue({ success: true });
+      nutService.pasteText.mockResolvedValue(undefined);
 
       // Act: Execute empty text pasting
       await service.action(pasteTextAction);
@@ -1023,7 +1023,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: unicodeText,
       };
 
-      nutService.pasteText.mockResolvedValue({ success: true });
+      nutService.pasteText.mockResolvedValue(undefined);
 
       // Act: Execute unicode text pasting
       await service.action(pasteTextAction);
@@ -1118,7 +1118,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       // Arrange: Setup multiple keyboard operations
       nutService.sendKeys.mockResolvedValue({ success: true });
       nutService.typeText.mockResolvedValue(undefined);
-      nutService.pasteText.mockResolvedValue({ success: true });
+      nutService.pasteText.mockResolvedValue(undefined);
 
       // Act: Execute sequential operations
       await service.action({
@@ -1219,7 +1219,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       nutService.sendKeys.mockResolvedValue({ success: true });
       nutService.holdKeys.mockResolvedValue({ success: true });
       nutService.typeText.mockResolvedValue(undefined);
-      nutService.pasteText.mockResolvedValue({ success: true });
+      nutService.pasteText.mockResolvedValue(undefined);
 
       // Act: Execute all keyboard operation types
       const operations = [

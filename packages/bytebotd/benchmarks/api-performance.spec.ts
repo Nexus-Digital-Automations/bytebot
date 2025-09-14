@@ -22,12 +22,12 @@ import { AppModule } from '../src/app.module';
 import { MetricsService } from '../src/metrics/metrics.service';
 import { CacheService } from '../src/cache/cache.service';
 import { PerformanceInterceptor } from '../src/common/interceptors/performance.interceptor';
-import { Optional, TypeSafetyUtils } from '../src/types';
+import { Optional } from '../src/types';
 import request from 'supertest';
 
 describe('API Performance Benchmarks', () => {
   let app: INestApplication;
-  let metricsService: MetricsService;
+  let _metricsService: MetricsService;
   let cacheService: CacheService;
   let performanceInterceptor: Optional<PerformanceInterceptor>;
 
@@ -53,11 +53,11 @@ describe('API Performance Benchmarks', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    metricsService = moduleFixture.get<MetricsService>(MetricsService);
+    _metricsService = moduleFixture.get<MetricsService>(MetricsService);
     cacheService = moduleFixture.get<CacheService>(CacheService);
 
     // Get performance interceptor instance for stats with proper null safety
-    const interceptors = moduleFixture.get('APP_INTERCEPTOR');
+    const interceptors: unknown = moduleFixture.get('APP_INTERCEPTOR');
     performanceInterceptor = Array.isArray(interceptors)
       ? (interceptors.find((i) => i instanceof PerformanceInterceptor) ?? null)
       : interceptors instanceof PerformanceInterceptor
@@ -87,7 +87,7 @@ describe('API Performance Benchmarks', () => {
       // Warm-up phase
       console.log('🔥 Warming up health endpoint...');
       for (let i = 0; i < LOAD_TEST_CONFIG.WARM_UP_REQUESTS; i++) {
-        await request(app.getHttpServer()).get('/health');
+        await request(app.getHttpServer() as any).get('/health');
       }
 
       // Benchmark phase
@@ -187,7 +187,7 @@ describe('API Performance Benchmarks', () => {
 
       const concurrentPromises = Array(LOAD_TEST_CONFIG.CONCURRENT_USERS)
         .fill(null)
-        .map(async (_, userIndex) => {
+        .map(async (_, _userIndex) => {
           const userResults: Array<{ duration: number; status: number }> = [];
 
           for (let i = 0; i < 20; i++) {
@@ -200,7 +200,7 @@ describe('API Performance Benchmarks', () => {
 
               const duration = Date.now() - start;
               userResults.push({ duration, status: response.status });
-            } catch (error) {
+            } catch (_error) {
               const duration = Date.now() - start;
               userResults.push({ duration, status: 500 });
             }
