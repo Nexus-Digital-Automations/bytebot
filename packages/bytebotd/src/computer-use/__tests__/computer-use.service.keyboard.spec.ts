@@ -643,7 +643,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: 'Hello, World!',
       };
 
-      nutService.typeText.mockResolvedValue({ success: true });
+      nutService.typeText.mockResolvedValue(undefined);
 
       // Act: Execute text typing
       await service.action(typeTextAction);
@@ -681,7 +681,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         delay: 200,
       };
 
-      nutService.typeText.mockResolvedValue({ success: true });
+      nutService.typeText.mockResolvedValue(undefined);
 
       // Act: Execute text typing with delay
       await service.action(typeTextAction);
@@ -710,7 +710,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         sensitive: true,
       };
 
-      nutService.typeText.mockResolvedValue({ success: true });
+      nutService.typeText.mockResolvedValue(undefined);
 
       // Act: Execute sensitive text typing
       await service.action(typeTextAction);
@@ -740,7 +740,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: '!@#$%^&*()_+-={}|[]\\:";\'<>?,./',
       };
 
-      nutService.typeText.mockResolvedValue({ success: true });
+      nutService.typeText.mockResolvedValue(undefined);
 
       // Act: Execute special character typing
       await service.action(typeTextAction);
@@ -764,7 +764,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: multilineText,
       };
 
-      nutService.typeText.mockResolvedValue({ success: true });
+      nutService.typeText.mockResolvedValue(undefined);
 
       // Act: Execute multiline text typing
       await service.action(typeTextAction);
@@ -826,7 +826,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         text: '',
       };
 
-      nutService.typeText.mockResolvedValue({ success: true });
+      nutService.typeText.mockResolvedValue(undefined);
 
       // Act: Execute empty text typing
       await service.action(typeTextAction);
@@ -1117,7 +1117,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
     it('should handle sequential keyboard operations', async () => {
       // Arrange: Setup multiple keyboard operations
       nutService.sendKeys.mockResolvedValue({ success: true });
-      nutService.typeText.mockResolvedValue({ success: true });
+      nutService.typeText.mockResolvedValue(undefined);
       nutService.pasteText.mockResolvedValue({ success: true });
 
       // Act: Execute sequential operations
@@ -1218,7 +1218,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       nutService.mouseWheelEvent.mockResolvedValue({ success: true });
       nutService.sendKeys.mockResolvedValue({ success: true });
       nutService.holdKeys.mockResolvedValue({ success: true });
-      nutService.typeText.mockResolvedValue({ success: true });
+      nutService.typeText.mockResolvedValue(undefined);
       nutService.pasteText.mockResolvedValue({ success: true });
 
       // Act: Execute all keyboard operation types
