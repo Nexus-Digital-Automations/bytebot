@@ -397,12 +397,12 @@ describe('Security E2E Tests', () => {
 
       const responseBody = response.body as LoginResponse;
       expect(responseBody).toMatchObject({
-        accessToken: expect.any(String),
-        refreshToken: expect.any(String),
+        accessToken: expect.any(String) as string,
+        refreshToken: expect.any(String) as string,
         user: expect.objectContaining({
           email: 'admin@bytebot.ai',
           role: 'admin',
-        }),
+        }) as Record<string, unknown>,
         expiresIn: 900,
       });
 
@@ -437,8 +437,8 @@ describe('Security E2E Tests', () => {
 
       const responseBody = response.body as RefreshTokenResponse;
       expect(responseBody).toMatchObject({
-        accessToken: expect.any(String),
-        refreshToken: expect.any(String),
+        accessToken: expect.any(String) as string,
+        refreshToken: expect.any(String) as string,
         expiresIn: 900,
       });
 
@@ -1093,9 +1093,7 @@ describe('Security E2E Tests', () => {
 
       for (const testCase of edgeCases) {
         try {
-          const requestAgent = request(
-            app.getHttpAdapter().getInstance() as any,
-          );
+          const requestAgent = request(getHttpServer());
 
           // Type-safe method dispatch to avoid TestAgent index signature errors
           let req: ReturnType<typeof requestAgent.get>;

@@ -37,7 +37,7 @@
       "description": "URGENT: Fix ESLint violations in deprecation.guard.ts (3), version.interceptor.ts (2), security-sanitization.pipe.ts (3). Zero tolerance mandate.",
       "priority": "medium",
       "category": "error",
-      "status": "in_progress",
+      "status": "completed",
       "dependencies": [],
       "important_files": [],
       "success_criteria": [],
@@ -57,7 +57,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-14T20:38:23.662Z",
+      "updated_at": "2025-09-14T20:38:23.662Z"
     },
     {
       "id": "error_1757738115000_58s4yy7lv",
@@ -93,7 +95,7 @@
       "description": "URGENT: Fix all 22 ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/computer-use/computer-use.service.spec.ts. Zero tolerance mandate.",
       "priority": "medium",
       "category": "error",
-      "status": "pending",
+      "status": "in_progress",
       "dependencies": [],
       "important_files": [],
       "success_criteria": [],
@@ -101,7 +103,19 @@
       "requires_research": false,
       "subtasks": [],
       "created_at": "2025-09-13T04:34:32.484Z",
-      "auto_research_created": false
+      "auto_research_created": false,
+      "assigned_agent": "dev_session_1757880766249_1_general_09b9d985",
+      "started_at": "2025-09-14T20:38:13.786Z",
+      "claimed_by": "dev_session_1757880766249_1_general_09b9d985",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757880766249_1_general_09b9d985",
+          "role": "primary",
+          "assignedAt": "2025-09-14T20:38:13.786Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "id": "error_1757738024547_lg9y2ur7i",
@@ -109,7 +123,7 @@
       "description": "URGENT: Fix all 218 ESLint violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/e2e/security-comprehensive.e2e-spec.ts. Focus on @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-* violations. Zero tolerance mandate.",
       "priority": "medium",
       "category": "error",
-      "status": "pending",
+      "status": "in_progress",
       "dependencies": [],
       "important_files": [],
       "success_criteria": [],
@@ -117,7 +131,19 @@
       "requires_research": false,
       "subtasks": [],
       "created_at": "2025-09-13T04:33:44.547Z",
-      "auto_research_created": false
+      "auto_research_created": false,
+      "assigned_agent": "dev_session_1757880763950_1_general_4d8eb1ac",
+      "started_at": "2025-09-14T20:39:02.170Z",
+      "claimed_by": "dev_session_1757880763950_1_general_4d8eb1ac",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757880763950_1_general_4d8eb1ac",
+          "role": "primary",
+          "assignedAt": "2025-09-14T20:39:02.170Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "id": "error_1757737596866_xtm3i58ao",
@@ -635,7 +661,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-14T20:13:03.380Z",
       "title": "Standardize NestJS Core versions across bytebot packages",
       "description": "Upgrade all bytebot packages from @nestjs/core ^11.0.1 to ^11.1.6 to match shared package and eliminate version conflicts",
@@ -652,7 +678,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-14T20:39:15.916Z",
+      "updated_at": "2025-09-14T20:39:15.916Z"
     },
     {
       "status": "pending",
