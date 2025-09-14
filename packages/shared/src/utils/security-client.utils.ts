@@ -300,13 +300,18 @@ export function validateFilePath(filePath: string): FilePathValidationResult {
     riskLevel = "high";
   }
 
-  return {
+  const result: FilePathValidationResult = {
     isValid: issues.length === 0,
-    errors: issues.length > 0 ? issues : undefined,
     riskScore: issues.length * 25,
     severity: riskLevel,
-    detectionContext: issues.length > 0 ? issues : undefined,
   };
+
+  if (issues.length > 0) {
+    result.errors = issues;
+    result.detectionContext = issues;
+  }
+
+  return result;
 }
 
 /**
@@ -330,9 +335,8 @@ export function validateCoordinates(
     issues.push("Coordinates too large");
   }
 
-  return {
+  const result: CoordinatesValidationResult = {
     isValid: issues.length === 0,
-    errors: issues.length > 0 ? issues : undefined,
     riskScore: issues.length * 20,
     severity: issues.length > 2 ? "high" : issues.length > 0 ? "medium" : "low",
     isOverflow: x > 10000 || y > 10000,
@@ -341,6 +345,12 @@ export function validateCoordinates(
       y: Math.max(0, Math.min(10000, Math.floor(y))),
     },
   };
+
+  if (issues.length > 0) {
+    result.errors = issues;
+  }
+
+  return result;
 }
 
 // ===========================

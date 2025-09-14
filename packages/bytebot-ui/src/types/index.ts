@@ -1,5 +1,8 @@
 import { MessageContentBlock } from "@bytebot/shared";
-import { BYTES_PER_MB, MAX_TYPE_VALIDATION_FILE_SIZE_MB } from "@/constants/ui";
+import {
+  BYTES_PER_MB,
+  MAX_TYPE_VALIDATION_FILE_SIZE_MB,
+} from "../constants/ui";
 
 export enum Role {
   USER = "USER",

@@ -42,12 +42,11 @@ function TextShimmerComponent({
         duration,
         ease: "linear",
       }}
-      style={
-        {
-          "--spread": `${dynamicSpread}px`,
-          backgroundImage: `var(--bg), linear-gradient(var(--base-color), var(--base-color))`,
-        } as any
-      }
+      // @ts-expect-error - CSS custom properties are not typed in MotionStyle
+      style={{
+        "--spread": `${dynamicSpread}px`,
+        backgroundImage: `var(--bg), linear-gradient(var(--base-color), var(--base-color))`,
+      }}
     >
       {children}
     </MotionComponent>

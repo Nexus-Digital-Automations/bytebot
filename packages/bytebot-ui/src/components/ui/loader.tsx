@@ -1,7 +1,7 @@
-import React from "react";
+import * as React from "react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
-import { DEFAULT_LOADER_SIZE_PX } from "@/constants/ui";
+import { cn } from "../../lib/utils";
+import { DEFAULT_LOADER_SIZE_PX } from "../../constants/ui";
 
 interface LoaderProps {
   size?: number;

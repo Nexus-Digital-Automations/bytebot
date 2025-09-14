@@ -15,8 +15,9 @@ import * as jwt from "jsonwebtoken";
 import { createHash, randomBytes, createHmac } from "crypto";
 import * as DOMPurify from "dompurify";
 import { Config } from "dompurify";
-import sanitizeHtml = require("sanitize-html");
+import sanitizeHtml from "sanitize-html";
 import { JSDOM } from "jsdom";
+import { SQLInjectionDetectionResult } from "../types/security.types";
 
 // Import proper WindowLike type from DOMPurify
 type WindowLikeWithDOMPurify = Pick<
@@ -55,15 +56,9 @@ type DOMPurifyInstance = {
   isValidAttribute: (_tag: string, _attr: string, _value: string) => boolean;
 };
 
-// Type for DOMPurify constructor function
-type DOMPurifyConstructor = (
-  window: WindowLikeWithDOMPurify,
-) => DOMPurifyInstance;
+// Removed unused DOMPurifyConstructor type
 
-// Type for DOMPurify module that handles both CommonJS and ES module exports
-type DOMPurifyModule = DOMPurifyConstructor & {
-  default?: DOMPurifyConstructor;
-};
+// Removed unused DOMPurifyModule type
 
 let purify: DOMPurifyInstance | null = null;
 
@@ -423,12 +418,17 @@ export function validatePassword(
     });
   }
 
-  return {
+  const result: ValidationResult = {
     isValid: errors.length === 0,
     errors,
-    sanitizedData: errors.length === 0 ? { password } : undefined,
     timestamp,
   };
+
+  if (errors.length === 0) {
+    result.sanitizedData = { password };
+  }
+
+  return result;
 }
 
 /**
@@ -559,8 +559,8 @@ function parseExpirationToSeconds(expiration: string): number {
     throw new Error("Invalid expiration format");
   }
 
-  const value = parseInt(match[1], 10);
-  const unit = match[2];
+  const value = parseInt(match[1]!, 10);
+  const unit = match[2]!;
 
   switch (unit) {
     case "s":
@@ -1476,15 +1476,20 @@ export function detectSQLInjection(input: string): {
     Math.floor(normalizedRiskScore * contextualRiskAdjustment),
   );
 
-  return {
+  const result: SQLInjectionDetectionResult = {
     hasInjection: threats.length > 0,
     threats,
     riskScore: adjustedRiskScore,
     severity,
     confidence: averageConfidence,
     detectionContext: uniqueContexts,
-    databaseType: detectedDatabaseType,
   };
+
+  if (detectedDatabaseType) {
+    result.databaseType = detectedDatabaseType;
+  }
+
+  return result;
 }
 
 /**
@@ -1827,7 +1832,7 @@ export function detectCommandInjection(
     score,
     confidence,
     context,
-    platform,
+    platform: _platform,
   } of encodingBypassPatterns) {
     const matches = originalInput.match(pattern);
     if (matches) {

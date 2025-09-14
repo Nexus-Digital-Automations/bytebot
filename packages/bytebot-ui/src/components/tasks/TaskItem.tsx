@@ -1,16 +1,25 @@
-import React from "react";
-import { Task, TaskStatus } from "@/types";
+import * as React from "react";
+import { Task, TaskStatus } from "../../types";
 import { format } from "date-fns";
-import { capitalizeFirstChar } from "@/utils/stringUtils";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { capitalizeFirstChar } from "../../utils/stringUtils";
 import {
   AlertCircleIcon,
   CancelCircleIcon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
-import { Loader } from "@/components/ui/loader";
+import { Loader } from "../ui/loader";
 import Link from "next/link";
-import { logError } from "@/utils/logger";
+import { logError } from "../../utils/logger";
+
+/**
+ * Type definition for HugeIcons icon component
+ * Based on @hugeicons/core-free-icons structure
+ */
+type IconSvgObject = readonly (readonly [
+  string,
+  { readonly [key: string]: string | number },
+])[];
+type HugeIconComponent = IconSvgObject;
 
 interface TaskItemProps {
   task: Task;
@@ -21,8 +30,8 @@ interface TaskItemProps {
  * Supports both HugeIcons components and loader states
  */
 interface StatusIconConfig {
-  /** HugeIcons icon name - IconSvgObject from @hugeicons/core-free-icons */
-  icon?: any;
+  /** HugeIcons icon component from @hugeicons/core-free-icons */
+  icon?: HugeIconComponent;
   /** Tailwind CSS color class for the icon */
   color?: string;
   /** Whether to show a loading spinner instead of an icon */
@@ -93,7 +102,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
     const config = STATUS_CONFIGS[status];
 
     // Defensive programming - handle missing config gracefully
-    if (config == null) {
+    if (config === null) {
       // Development warning for missing config
       if (process.env.NODE_ENV === "development") {
         logError(
@@ -121,7 +130,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
     }
 
     // Render icon with proper accessibility
-    if (IconComponent != null) {
+    if (IconComponent !== null) {
       return (
         <div
           className="flex items-center justify-center"

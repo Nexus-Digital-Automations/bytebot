@@ -95,6 +95,153 @@ interface _SecurityUser {
   password: string;
 }
 
+/**
+ * Properly typed E2E test request interfaces for type safety
+ */
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+interface AuthenticatedUser {
+  sub: string;
+  email: string;
+  role: UserRole;
+  sessionId?: string;
+  permissions?: Permission[];
+  clientInfo?: ClientInfo;
+}
+
+interface TypedExpressRequest extends Request {
+  user?: AuthenticatedUser;
+  body?: unknown;
+  headers: Record<string, string | string[] | undefined>;
+  ip?: string;
+}
+
+interface TypedExpressResponse extends Response {
+  json: (body: unknown) => TypedExpressResponse;
+  status: (code: number) => TypedExpressResponse;
+}
+
+/**
+ * Type-safe helper functions for E2E testing
+ */
+class E2ETypeHelpers {
+  /**
+   * Safely extract login credentials from request body
+   */
+  static extractLoginRequest(req: Request): LoginRequest {
+    const body = req.body as unknown;
+    if (!body || typeof body !== 'object') {
+      throw new Error('Invalid request body');
+    }
+
+    const { email, password } = body as Record<string, unknown>;
+
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      throw new Error('Invalid login credentials format');
+    }
+
+    return { email, password };
+  }
+
+  /**
+   * Safely extract refresh token from request body
+   */
+  static extractRefreshTokenRequest(req: Request): RefreshTokenRequest {
+    const body = req.body as unknown;
+    if (!body || typeof body !== 'object') {
+      throw new Error('Invalid request body');
+    }
+
+    const { refreshToken } = body as Record<string, unknown>;
+
+    if (typeof refreshToken !== 'string') {
+      throw new Error('Invalid refresh token format');
+    }
+
+    return { refreshToken };
+  }
+
+  /**
+   * Safely extract client info from request
+   */
+  static extractClientInfo(req: Request): ClientInfo {
+    const headers = req.headers as Record<
+      string,
+      string | string[] | undefined
+    >;
+    return {
+      ipAddress: req.ip ?? 'unknown',
+      userAgent:
+        (typeof headers['user-agent'] === 'string'
+          ? headers['user-agent']
+          : undefined) ?? 'unknown',
+      timestamp: Date.now().toString(),
+    };
+  }
+
+  /**
+   * Safely extract user from authenticated request
+   */
+  static extractAuthenticatedUser(req: Request): AuthenticatedUser {
+    const user = (req as TypedExpressRequest).user;
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    return user;
+  }
+
+  /**
+   * Safely extract task data from request body
+   */
+  static extractTaskData(req: Request): Partial<TaskData> {
+    const body = req.body as unknown;
+    if (!body || typeof body !== 'object') {
+      throw new Error('Invalid request body');
+    }
+    return body as Partial<TaskData>;
+  }
+
+  /**
+   * Type-safe JSON response helper
+   */
+  static sendJsonResponse(res: Response, data: unknown): void {
+    (res as TypedExpressResponse).json(data);
+  }
+
+  /**
+   * Type-safe error response helper
+   */
+  static sendErrorResponse(
+    res: Response,
+    statusCode: number,
+    error: unknown,
+  ): void {
+    const typedRes = res as TypedExpressResponse;
+    typedRes.status(statusCode).json({
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+
+  /**
+   * Safely extract route parameter
+   */
+  static extractRouteParam(req: Request, paramName: string): string {
+    const params = (req as Request & { params: Record<string, string> }).params;
+    const value = params[paramName];
+    if (typeof value !== 'string') {
+      throw new Error(`Route parameter '${paramName}' is required`);
+    }
+    return value;
+  }
+}
+
 // Type definition for Express app instance in tests
 type TestAppInstance = {
   address(): { port: number } | string | null;
@@ -863,12 +1010,14 @@ describe('Security E2E - Comprehensive Testing', () => {
       const sanitizeObject = (
         obj: Record<string, unknown>,
       ): Record<string, unknown> => {
-        if (typeof obj !== 'object' || obj === null) return obj;
+        if (typeof obj !== 'object' || obj === null) {
+          return obj;
+        }
 
         for (const key in obj) {
           if (typeof obj[key] === 'string') {
             // Remove potential XSS patterns
-            obj[key] = (obj[key] as string)
+            obj[key] = obj[key]
               .replace(/<script[^>]*>.*?<\/script>/gi, '')
               .replace(/<[^>]*>/g, '')
               .replace(/javascript:/gi, '')
@@ -897,104 +1046,102 @@ describe('Security E2E - Comprehensive Testing', () => {
     // Authentication routes
     app.getHttpAdapter().post('/auth/login', async (req, res) => {
       try {
-        const clientInfo: ClientInfo = {
-          ipAddress: (req as Request & { ip?: string }).ip ?? 'unknown',
-          userAgent: (req.headers as Record<string, string>)['user-agent'],
-          timestamp: Date.now().toString(),
-        };
+        const clientInfo = E2ETypeHelpers.extractClientInfo(req);
+        const loginData = E2ETypeHelpers.extractLoginRequest(req);
 
-        const result = await authController.login(
-          (req as Request & { body: { email: string; password: string } }).body,
-          clientInfo,
-        );
-        res.json(result);
+        const result = await authController.login(loginData, clientInfo);
+        E2ETypeHelpers.sendJsonResponse(res, result);
       } catch (error: unknown) {
+        const clientInfo = E2ETypeHelpers.extractClientInfo(req);
+        let email = 'unknown';
+
+        try {
+          const loginData = E2ETypeHelpers.extractLoginRequest(req);
+          email = loginData.email;
+        } catch {
+          // Ignore extraction error for failed login tracking
+        }
+
         securityMonitor.trackFailedAuthentication(
-          (req as Request & { body: { email?: string } }).body?.email ??
-            'unknown',
-          (req as Request & { ip?: string }).ip ?? 'unknown',
-          (req.headers as Record<string, string>)['user-agent'] ?? 'unknown',
+          email,
+          clientInfo.ipAddress,
+          clientInfo.userAgent,
         );
-        res.status(401).json({
-          error: error instanceof Error ? error.message : String(error),
-        });
+        E2ETypeHelpers.sendErrorResponse(res, 401, error);
       }
     });
 
     app.getHttpAdapter().post('/auth/refresh', async (req, res) => {
       try {
-        const result = await authController.refresh(
-          (req as Request & { body: { refreshToken: string } }).body,
-        );
-        res.json(result);
+        const refreshTokenData = E2ETypeHelpers.extractRefreshTokenRequest(req);
+        const result = await authController.refresh(refreshTokenData);
+        E2ETypeHelpers.sendJsonResponse(res, result);
       } catch (error: unknown) {
-        res.status(401).json({
-          error: error instanceof Error ? error.message : String(error),
-        });
+        E2ETypeHelpers.sendErrorResponse(res, 401, error);
       }
     });
 
     app.getHttpAdapter().post('/auth/logout', async (req, res) => {
       try {
-        const result = await authController.logout(
-          (req as Request & { user: { sub: string; sessionId?: string } }).user,
-        );
-        res.json(result);
+        const user = E2ETypeHelpers.extractAuthenticatedUser(req);
+        const result = await authController.logout(user);
+        E2ETypeHelpers.sendJsonResponse(res, result);
       } catch (error: unknown) {
-        res.status(500).json({
-          error: error instanceof Error ? error.message : String(error),
-        });
+        E2ETypeHelpers.sendErrorResponse(res, 500, error);
       }
     });
 
     // Protected routes
     app.getHttpAdapter().get('/api/user/profile', (req, res) => {
-      res.json(
-        protectedController.getUserData(
-          (
-            req as Request & {
-              user: {
-                sub: string;
-                email: string;
-                role: UserRole;
-                sessionId?: string;
-              };
-            }
-          ).user,
-        ),
-      );
+      try {
+        const user = E2ETypeHelpers.extractAuthenticatedUser(req);
+        const userData = protectedController.getUserData(user);
+        E2ETypeHelpers.sendJsonResponse(res, userData);
+      } catch (error: unknown) {
+        E2ETypeHelpers.sendErrorResponse(res, 401, error);
+      }
     });
 
     app.getHttpAdapter().get('/api/user/tasks', (req, res) => {
-      res.json(
-        protectedController.getUserTasks(
-          (req as Request & { user: { sub: string } }).user,
-        ),
-      );
+      try {
+        const user = E2ETypeHelpers.extractAuthenticatedUser(req);
+        const userTasks = protectedController.getUserTasks(user);
+        E2ETypeHelpers.sendJsonResponse(res, userTasks);
+      } catch (error: unknown) {
+        E2ETypeHelpers.sendErrorResponse(res, 401, error);
+      }
     });
 
     app.getHttpAdapter().post('/api/tasks', (req, res) => {
       const middleware = requireRole(UserRole._OPERATOR);
       middleware(req, res, () => {
-        res.json(
-          protectedController.createTask(
-            (req as Request & { user: { sub: string } }).user,
-            (req as Request & { body: Partial<TaskData> }).body,
-          ),
-        );
+        try {
+          const user = E2ETypeHelpers.extractAuthenticatedUser(req);
+          const taskData = E2ETypeHelpers.extractTaskData(req);
+          const createdTask = protectedController.createTask(user, taskData);
+          E2ETypeHelpers.sendJsonResponse(res, createdTask);
+        } catch (error: unknown) {
+          E2ETypeHelpers.sendErrorResponse(res, 400, error);
+        }
       });
     });
 
     app.getHttpAdapter().put('/api/tasks/:id', (req, res) => {
       const middleware = requireRole(UserRole._OPERATOR);
       middleware(req, res, () => {
-        res.json(
-          protectedController.updateTask(
-            (req as Request & { user: { sub: string } }).user,
-            (req as Request & { params: { id: string } }).params.id,
-            (req as Request & { body: Partial<TaskData> }).body,
-          ),
-        );
+        try {
+          const user = E2ETypeHelpers.extractAuthenticatedUser(req);
+          const taskId = E2ETypeHelpers.extractRouteParam(req, 'id');
+          const taskData = E2ETypeHelpers.extractTaskData(req);
+          const updatedTask = protectedController.updateTask(
+            user,
+            taskId,
+            taskData,
+          );
+          E2ETypeHelpers.sendJsonResponse(res, updatedTask);
+        } catch (error: unknown) {
+          E2ETypeHelpers.sendErrorResponse(res, 400, error);
+        }
       });
     });
 
@@ -1002,30 +1149,26 @@ describe('Security E2E - Comprehensive Testing', () => {
     app.getHttpAdapter().get('/api/admin/users', (req, res) => {
       const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
-        res.json(
-          adminController.getUserList(
-            (
-              req as Request & {
-                user: { sub: string; email: string; role: UserRole };
-              }
-            ).user,
-          ),
-        );
+        try {
+          const user = E2ETypeHelpers.extractAuthenticatedUser(req);
+          const userList = adminController.getUserList(user);
+          E2ETypeHelpers.sendJsonResponse(res, userList);
+        } catch (error: unknown) {
+          E2ETypeHelpers.sendErrorResponse(res, 403, error);
+        }
       });
     });
 
     app.getHttpAdapter().get('/api/admin/metrics', (req, res) => {
       const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
-        res.json(
-          adminController.getSystemMetrics(
-            (
-              req as Request & {
-                user: { sub: string; email: string; role: UserRole };
-              }
-            ).user,
-          ),
-        );
+        try {
+          const user = E2ETypeHelpers.extractAuthenticatedUser(req);
+          const systemMetrics = adminController.getSystemMetrics(user);
+          E2ETypeHelpers.sendJsonResponse(res, systemMetrics);
+        } catch (error: unknown) {
+          E2ETypeHelpers.sendErrorResponse(res, 403, error);
+        }
       });
     });
 

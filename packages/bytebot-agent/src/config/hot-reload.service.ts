@@ -295,8 +295,8 @@ export class ConfigurationHotReloadService
     // Add custom config paths from environment
     const customPaths = process.env.ADDITIONAL_CONFIG_PATHS?.split(',') || [];
 
-    return [...basePaths, ...customPaths].filter((path) => {
-      if (path && existsSync(path)) {
+    return [...basePaths, ...customPaths].filter((path): path is string => {
+      if (path && typeof path === 'string' && existsSync(path)) {
         this.logger.debug(`Configuration file found: ${path}`);
         return true;
       }
@@ -316,8 +316,8 @@ export class ConfigurationHotReloadService
       process.env.ENV_FILE_PATH,
     ].filter(Boolean);
 
-    return envPaths.filter((path) => {
-      if (path && existsSync(path)) {
+    return envPaths.filter((path): path is string => {
+      if (path && typeof path === 'string' && existsSync(path)) {
         this.logger.debug(`Environment file found: ${path}`);
         return true;
       }
@@ -338,8 +338,8 @@ export class ConfigurationHotReloadService
       process.env.DOCKER_COMPOSE_FILE,
     ].filter(Boolean);
 
-    return dockerPaths.filter((path) => {
-      if (path && existsSync(path)) {
+    return dockerPaths.filter((path): path is string => {
+      if (path && typeof path === 'string' && existsSync(path)) {
         this.logger.debug(`Docker Compose file found: ${path}`);
         return true;
       }
@@ -421,7 +421,7 @@ export class ConfigurationHotReloadService
           path,
           { recursive: this.config.watchRecursive },
           (eventType, filename) => {
-            this.handleFileChange(path, type, eventType, filename);
+            this.handleFileChange(path, type, eventType, filename || undefined);
           },
         );
 

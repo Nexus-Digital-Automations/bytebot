@@ -1,5 +1,4 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /**
  * Enterprise Security Validation E2E Tests
  *
@@ -15,7 +14,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
-import { Server } from 'http';
+import { Application } from 'express';
 
 // Define types for common response patterns
 interface ErrorResponse {
@@ -34,7 +33,7 @@ interface SecurityErrorResponse extends ErrorResponse {
 
 describe('Security Validation E2E Tests', () => {
   let app: INestApplication;
-  let server: Server;
+  let server: Application;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -43,7 +42,7 @@ describe('Security Validation E2E Tests', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-    server = app.getHttpServer();
+    server = app.getHttpServer() as Application;
   });
 
   afterAll(async () => {
