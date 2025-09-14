@@ -69,8 +69,8 @@ export class BytebotAgentSecurityConfigService {
    * Create Bytebot-Agent rate limit guard with moderate rate limits
    */
   createRateLimitGuard(
-    reflector: Reflector,
-    redisClient?: unknown,
+    _reflector: Reflector,
+    _redisClient?: unknown,
   ): StandardizedRateLimitGuard {
     try {
       const environment = this.configService.get<string>(
@@ -180,7 +180,7 @@ export class BytebotAgentSecurityConfigService {
       useFactory: (
         reflector: Reflector,
         configService: ConfigService,
-        redisClient?: unknown,
+        _redisClient?: unknown,
       ) => {
         const environment = configService.get<string>(
           'NODE_ENV',
@@ -247,8 +247,6 @@ export class BytebotAgentSecurityDeployment {
       );
 
       // Apply global rate limiting guard
-
-      const reflector = app.get(Reflector);
 
       const redisClient: unknown = app.get('REDIS_CLIENT', { strict: false });
 
