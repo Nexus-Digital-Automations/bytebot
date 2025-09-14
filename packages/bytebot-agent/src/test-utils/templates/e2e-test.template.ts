@@ -116,7 +116,7 @@ const withTiming = async (
   const startTime = Date.now();
   const response = await requestPromise;
   const duration = Date.now() - startTime;
-  return Object.assign(response, { duration });
+  return Object.assign(response as object, { duration });
 };
 
 /**
@@ -513,8 +513,8 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
             );
 
             logTestExecution('REGISTRATION_RESPONSE', {
-              statusCode: response.status,
-              hasBody: !!response.body,
+              statusCode: (response as any).status,
+              hasBody: !!(response as any).body,
               responseTime: (response as TimedResponse).duration,
             });
 
@@ -525,7 +525,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
         const registrationBody = validateApiResponse<{
           id?: string;
           email?: string;
-        }>(registerResponse.body, ['success', 'data']);
+        }>((registerResponse as any).body, ['success', 'data']);
 
         expect(registrationBody).toMatchObject({
           success: true,
@@ -587,7 +587,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
         const token = loginResponseBody.data?.token;
         expect(token).toBeDefined();
         expect(typeof token).toBe('string');
-        expect(token.length).toBeGreaterThan(10); // Basic token length validation
+        expect(token!.length).toBeGreaterThan(10); // Basic token length validation
 
         logTestExecution('LOGIN_VALIDATION_PASSED', {
           tokenReceived: !!token,
@@ -843,6 +843,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
 
         const readResponseBody = validateApiResponse<{
           id: string;
+          title?: string;
           createdAt: string;
           updatedAt: string;
         }>(readResponse.body, ['data']);
@@ -933,7 +934,8 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
 
             logTestExecution('LIST_RESPONSE', {
               statusCode: response.status,
-              itemCount: (response.body as ApiResponse)?.data?.length || 0,
+              itemCount:
+                (response.body as ApiResponse<unknown[]>)?.data?.length || 0,
               responseTime: (response as any).duration,
             });
 
@@ -1642,6 +1644,8 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
         const orderCreateResponseBody = validateApiResponse<{
           id?: string;
           status?: string;
+          total?: number;
+          items?: unknown[];
         }>(createOrderResponse.body, ['success', 'data']);
         const orderId = orderCreateResponseBody?.data?.id;
 
@@ -1862,6 +1866,11 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
           status?: string;
           id?: string;
           statusHistory?: unknown;
+          total?: number;
+          paymentStatus?: string;
+          fulfillmentStatus?: string;
+          trackingNumber?: string;
+          estimatedDelivery?: string;
         }>(finalOrderResponse.body, ['data']);
         expect(finalOrderResponseBody?.data?.status).toBe('fulfilled');
         expect(finalOrderResponseBody?.data?.id).toBe(orderId);
