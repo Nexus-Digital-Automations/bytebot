@@ -123,14 +123,14 @@ describe('Base64ImageCompressor', () => {
 
     // Setup mock logger
     mockLogger = createMockLogger();
-    (jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation(mockLogger.log);
-    (jest.spyOn(Logger.prototype, 'debug') as jest.MockedFunction<any>).mockImplementation(mockLogger.debug);
-    (jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation(mockLogger.warn);
-    (jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>).mockImplementation(mockLogger.error);
+    jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);
+    jest.spyOn(Logger.prototype, 'debug').mockImplementation(mockLogger.debug);
+    jest.spyOn(Logger.prototype, 'warn').mockImplementation(mockLogger.warn);
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(mockLogger.error);
 
     // Setup default sharp mocks
-    mockSharpInstance.toBuffer as jest.MockedFunction<any>).mockResolvedValue(Buffer.alloc(500 * 1024, 'B'));
-    mockSharpInstance.metadata as jest.MockedFunction<any>).mockResolvedValue(
+    mockSharpInstance.toBuffer.mockResolvedValue(Buffer.alloc(500 * 1024, 'B'));
+    mockSharpInstance.metadata.mockResolvedValue(
       TestDataGenerator.generateImageMetadata(),
     );
   });
@@ -205,7 +205,7 @@ describe('Base64ImageCompressor', () => {
     it('should use binary search to optimize quality', async () => {
       // Mock progressive compression results
       let callCount = 0;
-      mockSharpInstance.toBuffer as jest.MockedFunction<any>).mockImplementation(() => {
+      mockSharpInstance.toBuffer.mockImplementation(() => {
         callCount++;
         // Simulate decreasing file size with each iteration
         const size = Math.max(800 * 1024 - callCount * 100 * 1024, 500 * 1024);
@@ -276,7 +276,7 @@ describe('Base64ImageCompressor', () => {
      * Test maximum iterations limit
      */
     it('should respect maximum iterations limit', async () => {
-      mockSharpInstance.toBuffer as jest.MockedFunction<any>).mockResolvedValue(
+      mockSharpInstance.toBuffer.mockResolvedValue(
         Buffer.alloc(1500 * 1024, 'B'),
       );
 
@@ -306,7 +306,7 @@ describe('Base64ImageCompressor', () => {
      * Test error handling for sharp processing errors
      */
     it('should handle sharp processing errors', async () => {
-      mockSharpInstance.toBuffer as jest.MockedFunction<any>).mockRejectedValue(
+      mockSharpInstance.toBuffer.mockRejectedValue(
         new Error('Sharp processing failed'),
       );
 
@@ -365,7 +365,7 @@ describe('Base64ImageCompressor', () => {
      */
     it('should apply progressive scaling when needed', async () => {
       let _resizeCallCount = 0;
-      mockSharpInstance.resize as jest.MockedFunction<any>).mockImplementation((width, height, options) => {
+      mockSharpInstance.resize.mockImplementation((width, height, options) => {
         _resizeCallCount++;
         expect(width).toBeGreaterThan(0);
         expect(height).toBeGreaterThan(0);
@@ -375,7 +375,7 @@ describe('Base64ImageCompressor', () => {
       });
 
       // Mock consistently large results to trigger multiple resize attempts
-      mockSharpInstance.toBuffer as jest.MockedFunction<any>).mockResolvedValue(
+      mockSharpInstance.toBuffer.mockResolvedValue(
         Buffer.alloc(1500 * 1024, 'B'),
       );
 
@@ -394,7 +394,7 @@ describe('Base64ImageCompressor', () => {
      */
     it('should respect minimum scale limit', async () => {
       // Mock consistently large results
-      mockSharpInstance.toBuffer as jest.MockedFunction<any>).mockResolvedValue(
+      mockSharpInstance.toBuffer.mockResolvedValue(
         Buffer.alloc(2000 * 1024, 'B'),
       );
 
@@ -653,7 +653,7 @@ describe('Base64ImageCompressor', () => {
      * Test error logging
      */
     it('should log errors appropriately', async () => {
-      mockSharpInstance.toBuffer as jest.MockedFunction<any>).mockRejectedValue(new Error('Test error'));
+      mockSharpInstance.toBuffer.mockRejectedValue(new Error('Test error'));
 
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
@@ -686,7 +686,7 @@ describe('Base64ImageCompressor', () => {
       const _inputSize = 1000 * 1024; // 1MB
       const outputSize = 800 * 1024; // 800KB
 
-      mockSharpInstance.toBuffer as jest.MockedFunction<any>).mockResolvedValue(
+      mockSharpInstance.toBuffer.mockResolvedValue(
         Buffer.alloc(outputSize, 'B'),
       );
 

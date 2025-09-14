@@ -1,12 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-env jest */
- 
- 
- 
- 
+
 /**
  * Unit Tests for Metrics Service
  *
@@ -245,7 +238,7 @@ describe('MetricsService', () => {
       // Mock process.memoryUsage to throw error
       const mockMemoryUsage = jest
         .spyOn(process, 'memoryUsage')
-         as jest.MockedFunction<any>).mockImplementation(() => {
+        .mockImplementation(() => {
           throw new Error('Memory usage error');
         });
 
@@ -256,7 +249,7 @@ describe('MetricsService', () => {
       }).not.toThrow();
 
       // Restore original function
-      mockMemoryUsage as jest.MockedFunction<any>).mockRestore();
+      mockMemoryUsage.mockRestore();
     });
   });
 });

@@ -1,8 +1,4 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 /**
  * ComputerUseTools Test Suite
@@ -115,14 +111,14 @@ describe('ComputerUseTools', () => {
 
     // Setup mock computer use service with all required methods
     mockComputerUseService = {
-      action: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(undefined),
+      action: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<ComputerUseService>;
 
     // Setup mock compressor
     mockCompressor = compressPngBase64Under1MB as jest.MockedFunction<
       typeof compressPngBase64Under1MB
     >;
-    mockCompressor as jest.MockedFunction<any>).mockResolvedValue('compressed-base64-image-data');
+    mockCompressor.mockResolvedValue('compressed-base64-image-data');
 
     // Create testing module
     module = await Test.createTestingModule({
@@ -159,7 +155,8 @@ describe('ComputerUseTools', () => {
      * Test dependency injection
      */
     it('should have ComputerUseService injected correctly', () => {
-      const service = (computerUseTools as Record<string, unknown>).computerUseService;
+      const service = (computerUseTools as Record<string, unknown>)
+        .computerUseService;
       expect(service).toBeDefined();
       expect(service).toBe(mockComputerUseService);
     });
@@ -173,7 +170,7 @@ describe('ComputerUseTools', () => {
       it('should move mouse to specified coordinates', async () => {
         const coordinates = ComputerUseTestData.generateCoordinates(150, 250);
 
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        mockComputerUseService.action.mockResolvedValue(undefined);
 
         const result = await computerUseTools.moveMouse({ coordinates });
 
@@ -194,7 +191,7 @@ describe('ComputerUseTools', () => {
         const coordinates = ComputerUseTestData.generateCoordinates();
         const error = new Error('Mouse move failed');
 
-        mockComputerUseService.action as jest.MockedFunction<any>).mockRejectedValue(error);
+        mockComputerUseService.action.mockRejectedValue(error);
 
         const result = await computerUseTools.moveMouse({ coordinates });
 
@@ -217,7 +214,7 @@ describe('ComputerUseTools', () => {
         const path = ComputerUseTestData.generatePath(5);
         const holdKeys = ['shift', 'ctrl'];
 
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        mockComputerUseService.action.mockResolvedValue(undefined);
 
         const result = await computerUseTools.traceMouse({ path, holdKeys });
 
@@ -245,7 +242,7 @@ describe('ComputerUseTools', () => {
           clickCount: 2,
         };
 
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        mockComputerUseService.action.mockResolvedValue(undefined);
 
         const result = await computerUseTools.clickMouse(parameters);
 
@@ -272,7 +269,7 @@ describe('ComputerUseTools', () => {
           holdKeys: ['ctrl'],
         };
 
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        mockComputerUseService.action.mockResolvedValue(undefined);
 
         const result = await computerUseTools.scroll(parameters);
 
@@ -297,7 +294,7 @@ describe('ComputerUseTools', () => {
           delay: 100,
         };
 
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        mockComputerUseService.action.mockResolvedValue(undefined);
 
         const result = await computerUseTools.typeKeys(parameters);
 
@@ -320,7 +317,7 @@ describe('ComputerUseTools', () => {
           delay: 50,
         };
 
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        mockComputerUseService.action.mockResolvedValue(undefined);
 
         const result = await computerUseTools.typeText(parameters);
 
@@ -340,7 +337,7 @@ describe('ComputerUseTools', () => {
       it('should paste text correctly', async () => {
         const text = 'Pasted content here';
 
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        mockComputerUseService.action.mockResolvedValue(undefined);
 
         const result = await computerUseTools.pasteText({ text });
 
@@ -362,7 +359,7 @@ describe('ComputerUseTools', () => {
       it('should perform wait operation', async () => {
         const duration = 1000;
 
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        mockComputerUseService.action.mockResolvedValue(undefined);
 
         const result = await computerUseTools.wait({ duration });
 
@@ -380,7 +377,7 @@ describe('ComputerUseTools', () => {
        * Test application switching
        */
       it('should open firefox application', async () => {
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+        mockComputerUseService.action.mockResolvedValue(undefined);
 
         const result = await computerUseTools.application({
           application: 'firefox',
@@ -404,8 +401,8 @@ describe('ComputerUseTools', () => {
       it('should capture and compress screenshot', async () => {
         const screenshotData = ComputerUseTestData.generateScreenshotResponse();
 
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(screenshotData);
-        mockCompressor as jest.MockedFunction<any>).mockResolvedValue('compressed-image-data');
+        mockComputerUseService.action.mockResolvedValue(screenshotData);
+        mockCompressor.mockResolvedValue('compressed-image-data');
 
         const result = await computerUseTools.screenshot();
 
@@ -431,7 +428,7 @@ describe('ComputerUseTools', () => {
        */
       it('should handle screenshot errors gracefully', async () => {
         const error = new Error('Screenshot capture failed');
-        mockComputerUseService.action as jest.MockedFunction<any>).mockRejectedValue(error);
+        mockComputerUseService.action.mockRejectedValue(error);
 
         const result = await computerUseTools.screenshot();
 
@@ -455,7 +452,7 @@ describe('ComputerUseTools', () => {
           500,
           300,
         );
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(position);
+        mockComputerUseService.action.mockResolvedValue(position);
 
         const result = await computerUseTools.cursorPosition();
 
@@ -487,7 +484,7 @@ describe('ComputerUseTools', () => {
         };
 
         const writeResult = ComputerUseTestData.generateFileWriteResponse();
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(writeResult);
+        mockComputerUseService.action.mockResolvedValue(writeResult);
 
         const result = await computerUseTools.writeFile(parameters);
 
@@ -514,7 +511,7 @@ describe('ComputerUseTools', () => {
       it('should read file correctly', async () => {
         const readResult =
           ComputerUseTestData.generateFileReadResponse('Hello World');
-        mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(readResult);
+        mockComputerUseService.action.mockResolvedValue(readResult);
 
         const result = await computerUseTools.readFile({
           path: '/tmp/test.txt',
@@ -549,7 +546,7 @@ describe('ComputerUseTools', () => {
      */
     it('should handle service unavailable errors', async () => {
       const error = new Error('Service unavailable');
-      mockComputerUseService.action as jest.MockedFunction<any>).mockRejectedValue(error);
+      mockComputerUseService.action.mockRejectedValue(error);
 
       const result = await computerUseTools.moveMouse({
         coordinates: { x: 0, y: 0 },
@@ -562,7 +559,7 @@ describe('ComputerUseTools', () => {
      * Test with invalid coordinates
      */
     it('should handle invalid coordinates', async () => {
-      mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+      mockComputerUseService.action.mockResolvedValue(undefined);
 
       const invalidCoords = [
         { x: NaN, y: 100 },
@@ -583,7 +580,7 @@ describe('ComputerUseTools', () => {
      * Test MCP tool response format compliance
      */
     it('should return MCP-compliant response formats', async () => {
-      mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+      mockComputerUseService.action.mockResolvedValue(undefined);
 
       const result = await computerUseTools.moveMouse({
         coordinates: { x: 100, y: 100 },
@@ -601,7 +598,7 @@ describe('ComputerUseTools', () => {
      * Test service integration
      */
     it('should integrate correctly with ComputerUseService', async () => {
-      mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+      mockComputerUseService.action.mockResolvedValue(undefined);
 
       await computerUseTools.moveMouse({ coordinates: { x: 0, y: 0 } });
 
@@ -618,7 +615,7 @@ describe('ComputerUseTools', () => {
      */
     it('should complete operations within acceptable time limits', async () => {
       const coordinates = ComputerUseTestData.generateCoordinates();
-      mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+      mockComputerUseService.action.mockResolvedValue(undefined);
 
       const startTime = performance.now();
       await computerUseTools.moveMouse({ coordinates });
@@ -631,7 +628,7 @@ describe('ComputerUseTools', () => {
      * Test concurrent operation handling
      */
     it('should handle concurrent operations correctly', async () => {
-      mockComputerUseService.action as jest.MockedFunction<any>).mockResolvedValue(undefined);
+      mockComputerUseService.action.mockResolvedValue(undefined);
 
       const concurrentOps = [
         computerUseTools.moveMouse({ coordinates: { x: 100, y: 100 } }),

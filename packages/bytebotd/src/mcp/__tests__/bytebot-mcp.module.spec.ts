@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TypeScript safety note: This test file uses flexible typing for testing complex integrations
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+ 
+ 
 
 /**
  * BytebotMcpModule Test Suite
@@ -97,13 +98,21 @@ describe('BytebotMcpModule', () => {
     mockLogger = createMockLogger();
 
     // Mock Logger constructor to return our mock
-    (jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>).mockImplementation(mockLogger.log);
-    (jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>).mockImplementation(mockLogger.error);
-    (jest.spyOn(Logger.prototype, 'warn') as jest.MockedFunction<any>).mockImplementation(mockLogger.warn);
-    (jest.spyOn(Logger.prototype, 'debug') as jest.MockedFunction<any>).mockImplementation(mockLogger.debug);
-    jest
-      .spyOn(Logger.prototype, 'verbose')
-       as jest.MockedFunction<any>).mockImplementation(mockLogger.verbose);
+    (
+      jest.spyOn(Logger.prototype, 'log')
+    ).mockImplementation(mockLogger.log);
+    (
+      jest.spyOn(Logger.prototype, 'error')
+    ).mockImplementation(mockLogger.error);
+    (
+      jest.spyOn(Logger.prototype, 'warn')
+    ).mockImplementation(mockLogger.warn);
+    (
+      jest.spyOn(Logger.prototype, 'debug')
+    ).mockImplementation(mockLogger.debug);
+    (
+      jest.spyOn(Logger.prototype, 'verbose')
+    ).mockImplementation(mockLogger.verbose);
 
     // Mock external modules
     jest.doMock('@rekog/mcp-nest', () => ({
@@ -243,7 +252,7 @@ describe('BytebotMcpModule', () => {
      */
     it('should configure MCP server with correct settings', () => {
       // Reset mock to capture new calls
-      mockMcpModule.forRoot as jest.MockedFunction<any>).mockClear();
+      (mockMcpModule.forRoot).mockClear();
 
       // Import the module (this would normally happen during module loading)
       const expectedConfig = {
@@ -315,7 +324,8 @@ describe('BytebotMcpModule', () => {
       expect(computerUseTools).toBeDefined();
 
       // Test that tools have access to computer use service
-      const serviceInstance = (computerUseTools as Record<string, unknown>).computerUseService;
+      const serviceInstance = (computerUseTools as Record<string, unknown>)
+        .computerUseService;
       expect(serviceInstance).toBeDefined();
     });
   });
