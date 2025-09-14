@@ -1,5 +1,5 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+ 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Input Tracking Service Test Suite
@@ -212,7 +212,7 @@ describe('InputTrackingService', () => {
         {
           provide: ComputerUseService,
           useValue: {
-            screenshot: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue({
+            screenshot: (jest.fn() as jest.MockedFunction<() => Promise<{ image: string }>>).mockResolvedValue({
               image: 'mock-screenshot-base64-data',
             }),
           },

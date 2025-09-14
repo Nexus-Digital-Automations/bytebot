@@ -3,8 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-env jest */
- 
- 
+
 /**
  * Input Tracking Gateway Test Suite
  *
@@ -539,7 +538,9 @@ describe('InputTrackingGateway', () => {
       console.log(`[${testId}] Testing server emission error handling`);
 
       // Mock server emit to throw error
-      mockServer.emit = (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => {
+      mockServer.emit = (
+        jest.fn() as jest.MockedFunction<any>
+      ).mockImplementation(() => {
         throw new Error('Network error');
       });
 
@@ -742,14 +743,13 @@ describe('InputTrackingGateway', () => {
       console.log(`[${testId}] Testing server error recovery`);
 
       // First call fails
-      mockServer.emit = jest
-        .fn()
-        .mockImplementationOnce(() => {
+      mockServer.emit = (
+        jest.fn().mockImplementationOnce(() => {
           throw new Error('Temporary server error');
-        })
-         as jest.MockedFunction<any>).mockImplementation(() => {
-          return true;
-        });
+        }) as jest.MockedFunction<any>
+      ).mockImplementation(() => {
+        return true;
+      });
 
       // First emission should throw
       expect(() => {

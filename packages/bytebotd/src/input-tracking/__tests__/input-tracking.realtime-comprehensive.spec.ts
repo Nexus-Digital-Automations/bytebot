@@ -230,11 +230,15 @@ const mockComputerUseService = {
 const mockInputTrackingGateway = {
   broadcastInputEvent: jest.fn(),
   broadcastActionEvent: jest.fn(),
-  getConnectedClients: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(5),
+  getConnectedClients: (
+    jest.fn() as jest.MockedFunction<() => number>
+  ).mockReturnValue(5),
   broadcastToRoom: jest.fn(),
   joinRoom: jest.fn(),
   leaveRoom: jest.fn(),
-  getClientRooms: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(['desktop-session-1']),
+  getClientRooms: (
+    jest.fn() as jest.MockedFunction<() => string[]>
+  ).mockReturnValue(['desktop-session-1']),
   emitAction: jest.fn(),
   emitScreenshotAndAction: jest.fn(),
   handleConnection: jest.fn(),
@@ -1030,9 +1034,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Join specific rooms
-      mockInputTrackingGateway.getClientRooms = jest
-        .fn()
-         as jest.MockedFunction<any>).mockReturnValue(['desktop-session-1', 'automation-session-2']);
+      mockInputTrackingGateway.getClientRooms = (
+        jest.fn() as jest.MockedFunction<() => string[]>
+      ).mockReturnValue(['desktop-session-1', 'automation-session-2']);
 
       const mouseEvent = createMouseEvent({ x: 500, y: 600 });
       moveHandler?.(mouseEvent);
@@ -1132,7 +1136,9 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
   describe('Error Handling and Recovery', () => {
     it('should handle UIohook initialization failures gracefully', () => {
-      mockUIOhook.start = (jest.fn() as jest.MockedFunction<any>).mockImplementation(() => {
+      mockUIOhook.start = (
+        jest.fn() as jest.MockedFunction<() => void>
+      ).mockImplementation(() => {
         throw new Error('UIohook initialization failed');
       });
 
@@ -1146,11 +1152,11 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       service.startTracking();
 
       // Mock gateway failure
-      mockInputTrackingGateway.broadcastInputEvent = jest
-        .fn()
-         as jest.MockedFunction<any>).mockImplementation(() => {
-          throw new Error('WebSocket connection lost');
-        });
+      mockInputTrackingGateway.broadcastInputEvent = (
+        jest.fn() as jest.MockedFunction<(...args: unknown[]) => void>
+      ).mockImplementation(() => {
+        throw new Error('WebSocket connection lost');
+      });
 
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
