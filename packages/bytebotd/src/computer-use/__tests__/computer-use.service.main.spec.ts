@@ -37,7 +37,9 @@ jest.mock('child_process', () => {
       }
       return mockChildProcess as unknown as import('child_process').ChildProcess;
     }),
-    spawn: (jest.fn() as jest.MockedFunction<any>).mockReturnValue(
+    spawn: (
+      jest.fn() as jest.MockedFunction<typeof import('child_process').spawn>
+    ).mockReturnValue(
       mockChildProcess as unknown as import('child_process').ChildProcess,
     ),
   };
@@ -162,22 +164,24 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
       stderr: { on: jest.fn() },
     };
 
-    (childProcess.exec as jest.MockedFunction<any>).mockImplementation(
-      (command: string, options: any, callback?: any) => {
-        const cb = typeof options === 'function' ? options : callback;
-        // Simulate quick exec resolution
-        setTimeout(() => {
-          if (cb) {
-            if (command.includes('stat')) {
-              (cb as MockExecCallback)(null, '1024 1640995200', ''); // stdout, stderr
-            } else {
-              (cb as MockExecCallback)(null, '', '');
-            }
+    (
+      childProcess.exec as jest.MockedFunction<
+        typeof import('child_process').exec
+      >
+    ).mockImplementation((command: string, options: any, callback?: any) => {
+      const cb = typeof options === 'function' ? options : callback;
+      // Simulate quick exec resolution
+      setTimeout(() => {
+        if (cb) {
+          if (command.includes('stat')) {
+            (cb as MockExecCallback)(null, '1024 1640995200', ''); // stdout, stderr
+          } else {
+            (cb as MockExecCallback)(null, '', '');
           }
-        }, 10);
-        return mockChildProcess as unknown as import('child_process').ChildProcess;
-      },
-    );
+        }
+      }, 10);
+      return mockChildProcess as unknown as import('child_process').ChildProcess;
+    });
 
     // Mock Logger to prevent console output during tests
     jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});
@@ -430,7 +434,9 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         });
         const mockBuffer = Buffer.from('test-image-data', 'base64');
         (
-          mockNutService.screendump as jest.MockedFunction<any>
+          mockNutService.screendump as jest.MockedFunction<
+            typeof mockNutService.screendump
+          >
         ).mockResolvedValue(mockBuffer);
 
         // Act

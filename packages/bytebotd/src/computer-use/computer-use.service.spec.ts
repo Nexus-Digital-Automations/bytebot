@@ -713,7 +713,11 @@ describe('ComputerUseService', () => {
         };
 
         // Mock application not running (error code 1)
-        (mockExecAsync as jest.MockedFunction<any>).mockRejectedValue({
+        (
+          mockExecAsync as jest.MockedFunction<
+            () => Promise<{ stdout: string; stderr?: string }>
+          >
+        ).mockRejectedValue({
           code: 1,
         });
 
@@ -737,7 +741,11 @@ describe('ComputerUseService', () => {
         };
 
         // Mock application already running
-        (mockExecAsync as jest.MockedFunction<any>).mockResolvedValue({
+        (
+          mockExecAsync as jest.MockedFunction<
+            () => Promise<{ stdout: string; stderr?: string }>
+          >
+        ).mockResolvedValue({
           stdout: 'Navigator.code.Code running',
         });
 
