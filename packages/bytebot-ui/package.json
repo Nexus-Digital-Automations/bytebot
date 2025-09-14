@@ -7,7 +7,7 @@
     "dev": "tsx server.ts",
     "build": "npx next build",
     "start": "tsx server.ts",
-    "lint": "npx eslint 'src/**/*.{ts,tsx}' --fix --no-error-on-unmatched-pattern",
+    "lint": "npx eslint \"src/**/*.{ts,tsx}\" --fix --no-error-on-unmatched-pattern",
     "test": "jest --config jest.config.cjs",
     "test:watch": "jest --config jest.config.cjs --watch",
     "test:coverage": "jest --config jest.config.cjs --coverage",

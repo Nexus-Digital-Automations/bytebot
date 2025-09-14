@@ -14,7 +14,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "npx prisma migrate deploy && npx prisma generate && node dist/main",
-    "lint": "npx eslint \"src/**/*.ts\" --fix",
+    "lint": "npx eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest --config jest.config.js",
     "test:watch": "jest --config jest.config.js --watch",
     "test:coverage": "jest --config jest.config.js --coverage",

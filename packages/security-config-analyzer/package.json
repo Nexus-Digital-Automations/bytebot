@@ -8,7 +8,7 @@
     "build": "npx tsc",
     "dev": "tsc --watch",
     "test": "jest",
-    "lint": "npx eslint 'src/**/*.ts' --fix",
+    "lint": "npx eslint \"src/**/*.ts\" --fix",
     "security-scan": "node dist/cli.js scan --all",
     "docker-scan": "node dist/cli.js docker --all",
     "db-scan": "node dist/cli.js database --all",
