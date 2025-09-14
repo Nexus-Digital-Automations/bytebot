@@ -36,7 +36,7 @@ import { RolesGuard } from './guards/roles.guard';
     // Configure JWT module with shared secret
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET', 'bytebot-default-secret-change-in-production'),
         signOptions: {
           expiresIn: configService.get<string>('JWT_EXPIRES_IN', '15m'),

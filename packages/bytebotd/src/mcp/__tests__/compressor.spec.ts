@@ -205,7 +205,7 @@ describe('Base64ImageCompressor', () => {
     it('should use binary search to optimize quality', async () => {
       // Mock progressive compression results
       let callCount = 0;
-      mockSharpInstance.toBuffer.mockImplementation(async () => {
+      mockSharpInstance.toBuffer.mockImplementation(() => {
         callCount++;
         // Simulate decreasing file size with each iteration
         const size = Math.max(800 * 1024 - callCount * 100 * 1024, 500 * 1024);

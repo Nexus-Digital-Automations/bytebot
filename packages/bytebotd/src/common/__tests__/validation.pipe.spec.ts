@@ -36,6 +36,11 @@ import {
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
+interface ValidationError {
+  property: string;
+  constraints?: Record<string, string>;
+}
+
 // Mock Validation Pipe implementation for Phase 1 requirements
 class MockValidationPipe {
   private whitelist: boolean = true;
@@ -85,9 +90,9 @@ class MockValidationPipe {
     }
   }
 
-  private isBasicType(metatype: any): boolean {
+  private isBasicType(metatype: unknown): boolean {
     const types = [String, Boolean, Number, Array, Object];
-    return types.includes(metatype);
+    return types.includes(metatype as typeof String);
   }
 
   private sanitizeBasicValue(value: any): any {
@@ -102,7 +107,7 @@ class MockValidationPipe {
     return value;
   }
 
-  private async validateAndTransform(value: any, metatype: any): Promise<any> {
+  private validateAndTransform(value: any, metatype: any): any {
     // Mock validation logic - in real implementation would use class-validator
     const instance = new metatype();
     Object.assign(instance, value);
@@ -121,8 +126,8 @@ class MockValidationPipe {
     return this.sanitizeObject(instance);
   }
 
-  private mockValidate(instance: any, metatype: any): any[] {
-    const errors: any[] = [];
+  private mockValidate(instance: any, metatype: any): ValidationError[] {
+    const errors: ValidationError[] = [];
 
     // Mock validation rules based on common patterns
     if (metatype.name === 'CreateUserDto') {
@@ -153,7 +158,7 @@ class MockValidationPipe {
       }
       if (
         instance.priority &&
-        !['low', 'medium', 'high'].includes(instance.priority)
+        !['low', 'medium', 'high'].includes(instance.priority as string)
       ) {
         errors.push({
           property: 'priority',
@@ -180,7 +185,9 @@ class MockValidationPipe {
 
     if (typeof obj === 'object') {
       const sanitized: any = {};
-      for (const [key, value] of Object.entries(obj)) {
+      for (const [key, value] of Object.entries(
+        obj as Record<string, unknown>,
+      )) {
         // Remove potentially dangerous properties
         if (!this.isDangerousProperty(key)) {
           sanitized[key] = this.sanitizeObject(value);
@@ -266,7 +273,7 @@ describe('ValidationPipe', () => {
 
   const operationId = `validation_pipe_test_${Date.now()}`;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     console.log(`[${operationId}] Setting up ValidationPipe test module`);
 
     pipe = new MockValidationPipe({

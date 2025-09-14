@@ -158,7 +158,7 @@ describe('InputTrackingController', () => {
   });
 
   describe('Start Tracking Endpoint', () => {
-    it('should start tracking with admin user', async () => {
+    it('should start tracking with admin user', () => {
       const testId = `${operationId}_start_admin`;
       console.log(`[${testId}] Testing start tracking with admin user`);
 
@@ -184,7 +184,7 @@ describe('InputTrackingController', () => {
       console.log(`[${testId}] Start tracking with admin user test completed`);
     });
 
-    it('should start tracking with operator user', async () => {
+    it('should start tracking with operator user', () => {
       const testId = `${operationId}_start_operator`;
       console.log(`[${testId}] Testing start tracking with operator user`);
 
@@ -259,7 +259,7 @@ describe('InputTrackingController', () => {
   });
 
   describe('Stop Tracking Endpoint', () => {
-    it('should stop tracking with admin user', async () => {
+    it('should stop tracking with admin user', () => {
       const testId = `${operationId}_stop_admin`;
       console.log(`[${testId}] Testing stop tracking with admin user`);
 
@@ -285,7 +285,7 @@ describe('InputTrackingController', () => {
       console.log(`[${testId}] Stop tracking with admin user test completed`);
     });
 
-    it('should stop tracking with operator user', async () => {
+    it('should stop tracking with operator user', () => {
       const testId = `${operationId}_stop_operator`;
       console.log(`[${testId}] Testing stop tracking with operator user`);
 

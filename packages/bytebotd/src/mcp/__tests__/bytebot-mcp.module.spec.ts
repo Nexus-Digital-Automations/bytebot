@@ -3,7 +3,7 @@
 // TypeScript safety note: This test file uses flexible typing for testing complex integrations
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
- 
+
 /**
  * BytebotMcpModule Test Suite
  *
@@ -28,6 +28,7 @@ import { Logger } from '@nestjs/common';
 import { BytebotMcpModule } from '../bytebot-mcp.module';
 import { ComputerUseTools } from '../computer-use.tools';
 import { ComputerUseModule } from '../../computer-use/computer-use.module';
+import { ComputerUseService } from '../../computer-use/computer-use.service';
 import { McpModule as _McpModule } from '@rekog/mcp-nest';
 import {
   createMockService,
@@ -145,7 +146,9 @@ describe('BytebotMcpModule', () => {
       computerUseTools = module.get<ComputerUseTools>(ComputerUseTools);
     } catch {
       // If tools are not available, create mock instance
-      computerUseTools = new ComputerUseTools(mockComputerUseService);
+      computerUseTools = new ComputerUseTools(
+        mockComputerUseService as unknown as ComputerUseService,
+      );
     }
   });
 
@@ -493,7 +496,7 @@ describe('BytebotMcpModule', () => {
     /**
      * Test module with circular dependencies
      */
-    it('should detect and handle circular dependencies', async () => {
+    it('should detect and handle circular dependencies', () => {
       // This test would require more complex setup to create actual circular deps
       // For now, we just verify the module handles normal dependencies correctly
       expect(bytebotMcpModule).toBeDefined();

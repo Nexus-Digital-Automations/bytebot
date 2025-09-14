@@ -90,7 +90,7 @@ describe('HealthModule', () => {
   });
 
   describe('Module Initialization and Configuration', () => {
-    it('should initialize health module successfully', async () => {
+    it('should initialize health module successfully', () => {
       const testId = `${operationId}_module_initialization`;
       console.log(`[${testId}] Testing health module initialization`);
 
@@ -114,7 +114,7 @@ describe('HealthModule', () => {
       );
     });
 
-    it('should register required dependencies correctly', async () => {
+    it('should register required dependencies correctly', () => {
       const testId = `${operationId}_dependency_registration`;
       console.log(`[${testId}] Testing dependency registration`);
 
@@ -188,7 +188,7 @@ describe('HealthModule', () => {
       console.log(`[${testId}] Initialization error handling test completed`);
     });
 
-    it('should configure providers with correct scope and lifecycle', async () => {
+    it('should configure providers with correct scope and lifecycle', () => {
       const testId = `${operationId}_provider_configuration`;
       console.log(`[${testId}] Testing provider configuration and lifecycle`);
 
@@ -272,7 +272,7 @@ describe('HealthModule', () => {
       console.log(`[${testId}] HttpModule integration test completed`);
     });
 
-    it('should handle circular dependency scenarios', async () => {
+    it('should handle circular dependency scenarios', () => {
       const testId = `${operationId}_circular_dependency_prevention`;
       console.log(`[${testId}] Testing circular dependency prevention`);
 
@@ -410,7 +410,7 @@ describe('HealthModule', () => {
       );
     });
 
-    it('should support hot module replacement scenarios', async () => {
+    it('should support hot module replacement scenarios', () => {
       const testId = `${operationId}_hot_module_replacement`;
       console.log(`[${testId}] Testing hot module replacement compatibility`);
 
@@ -429,7 +429,7 @@ describe('HealthModule', () => {
   });
 
   describe('Integration Testing and API Surface', () => {
-    it('should expose correct module metadata', async () => {
+    it('should expose correct module metadata', () => {
       const testId = `${operationId}_module_metadata`;
       console.log(`[${testId}] Testing module metadata exposure`);
 
@@ -504,7 +504,7 @@ describe('HealthModule', () => {
       console.log(`[${testId}] Custom configuration test completed`);
     });
 
-    it('should maintain API compatibility across module versions', async () => {
+    it('should maintain API compatibility across module versions', () => {
       const testId = `${operationId}_api_compatibility`;
       console.log(`[${testId}] Testing API compatibility maintenance`);
 

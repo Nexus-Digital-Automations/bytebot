@@ -47,7 +47,7 @@ export function useScrollScreenshot({
         if (initialScreenshot) {
           setCurrentScreenshot(initialScreenshot);
         } else {
-          setCurrentScreenshot(screenshots[screenshots.length - 1] || null);
+          setCurrentScreenshot(screenshots[screenshots.length - 1] ?? null);
         }
       }, SCROLL_ANIMATION_DELAY_MS);
     } else if (screenshots.length === 0) {

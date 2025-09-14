@@ -821,7 +821,7 @@ export class DeprecationGuard implements CanActivate {
    * @param desktopClientInfo - Desktop client information
    * @param operationId - Operation ID
    */
-  private async logDeprecationAccess(
+  private logDeprecationAccess(
     request: Request,
     versionConfig: VersionConfig,
     deprecationResult: DeprecationResult,
@@ -863,7 +863,7 @@ export class DeprecationGuard implements CanActivate {
    * @param desktopClientInfo - Desktop client information
    * @param operationId - Operation ID
    */
-  private async logDeprecationBypass(
+  private logDeprecationBypass(
     request: Request,
     versionConfig: VersionConfig,
     desktopClientInfo: DesktopClientInfo,

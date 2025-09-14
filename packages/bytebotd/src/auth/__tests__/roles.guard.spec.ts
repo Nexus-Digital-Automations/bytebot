@@ -39,7 +39,7 @@ interface AuthenticatedUser {
 class MockRolesGuard {
   constructor(private reflector: Reflector) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
       'roles',
       [context.getHandler(), context.getClass()],
@@ -403,7 +403,7 @@ describe('RolesGuard', () => {
       console.log(`[${testId}] Operator admin denial test completed`);
     });
 
-    it('should validate role hierarchy structure', async () => {
+    it('should validate role hierarchy structure', () => {
       const testId = `${operationId}_role_hierarchy_structure`;
       console.log(`[${testId}] Testing role hierarchy structure`);
 
@@ -514,7 +514,7 @@ describe('RolesGuard', () => {
       console.log(`[${testId}] Partial permission denial test completed`);
     });
 
-    it('should validate default role permissions', async () => {
+    it('should validate default role permissions', () => {
       const testId = `${operationId}_default_permissions`;
       console.log(`[${testId}] Testing default role permission sets`);
 

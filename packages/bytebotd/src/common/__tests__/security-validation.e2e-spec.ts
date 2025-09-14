@@ -9,7 +9,6 @@
  * @author Input Validation & API Security Specialist
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TypeScript safety note: This test file uses flexible typing for security testing
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -18,11 +17,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { Server } from 'http';
 import { AppModule } from '../../app.module';
 
 describe('Security Validation E2E Tests', () => {
   let app: INestApplication;
-  let server: any;
+  let server: Server;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

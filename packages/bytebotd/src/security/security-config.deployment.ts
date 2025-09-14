@@ -176,7 +176,7 @@ export class BytebotDSecurityDeployment {
    * @param app - NestJS application instance
    * @param configService - Configuration service
    */
-  static async applySecurityToApp(
+  static applySecurityToApp(
     app: {
       useGlobalPipes: (pipe: unknown) => void;
       get: (token: string) => unknown;

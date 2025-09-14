@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+ 
+ 
+ 
+ 
 // @ts-nocheck
 
 /**
@@ -277,7 +277,7 @@ export class MockTestingModuleBuilder {
   /**
    * Build the testing module
    */
-  async build(): Promise<TestingModule> {
+  build(): TestingModule {
     return Test.createTestingModule(this.moduleMetadata).compile();
   }
 
@@ -289,7 +289,7 @@ export class MockTestingModuleBuilder {
     return {
       overrideModule: (moduleToOverride: string | symbol | Function) => ({
         useValue: (overrideValue: unknown) => ({
-          compile: async () => {
+          compile: () => {
             return Test.createTestingModule({
               ...this.moduleMetadata,
               providers: [
@@ -303,7 +303,7 @@ export class MockTestingModuleBuilder {
           },
         }),
       }),
-      compile: async () =>
+      compile: () =>
         Test.createTestingModule(this.moduleMetadata).compile(),
     };
   }

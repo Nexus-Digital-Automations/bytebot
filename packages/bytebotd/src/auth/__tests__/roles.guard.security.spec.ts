@@ -208,7 +208,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       const maliciousUsers = createMaliciousUsers();
       const context = createMockExecutionContext(
-        maliciousUsers.roleConfusion,
+        maliciousUsers.roleConfusion as ByteBotdUser,
         'sensitive-data',
         'GET',
       );
@@ -383,7 +383,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       } as any;
 
       const context = createMockExecutionContext(
-        spoofedUser,
+        spoofedUser as ByteBotdUser,
         'admin-panel',
         'GET',
       );

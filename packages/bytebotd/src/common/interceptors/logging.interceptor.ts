@@ -150,8 +150,9 @@ export class LoggingInterceptor implements NestInterceptor {
 
         // Record metrics for failed requests
         if (this.metricsService) {
-          const statusCode =
-            (_error as any)?.status ?? (_error as any)?.statusCode ?? 500;
+          const statusCode: number =
+            Number((_error as any)?.status ?? (_error as any)?.statusCode) ||
+            500;
           this.metricsService.recordApiRequestDuration(
             request.method,
             route,

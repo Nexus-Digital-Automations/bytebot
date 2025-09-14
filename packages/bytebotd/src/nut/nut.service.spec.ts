@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+ 
 
 /**
  * NUT Service Unit Tests
@@ -30,11 +30,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { NutService } from './nut.service';
-import {
-  TestableNutService,
-  KeyMappingInfo,
-  asTestable,
-} from '../types/test-interfaces';
+import { TestableNutService } from '../types/test-interfaces';
 import { spawn, type ChildProcessWithoutNullStreams } from 'child_process';
 import * as fs from 'fs';
 

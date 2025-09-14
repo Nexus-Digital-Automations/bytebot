@@ -48,7 +48,7 @@ const MIN_VISIBILITY_THRESHOLD = 0.1;
 
 export function getScreenshotForScrollPosition(
   screenshots: ScreenshotData[],
-  messages: Message[],
+  _messages: Message[],
   scrollContainer: HTMLElement | null,
 ): ScreenshotData | null {
   if (!scrollContainer || screenshots.length === 0) {

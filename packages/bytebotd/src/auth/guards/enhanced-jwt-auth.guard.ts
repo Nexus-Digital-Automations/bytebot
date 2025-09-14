@@ -420,7 +420,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   /**
    * Generate new access token from refresh token payload
    */
-  private async generateAccessToken(
+  private generateAccessToken(
     refreshPayload: EnhancedJwtPayload,
   ): Promise<string> {
     const accessPayload: Partial<EnhancedJwtPayload> = {
@@ -651,7 +651,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   /**
    * Validate computer use permissions for specific operations
    */
-  private async validateComputerUsePermissions(
+  private validateComputerUsePermissions(
     request: EnhancedAuthenticatedRequest,
     operationId: string,
   ): Promise<void> {
@@ -718,7 +718,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   /**
    * Validate VNC session if applicable
    */
-  private async validateVncSession(
+  private validateVncSession(
     request: EnhancedAuthenticatedRequest,
     operationId: string,
   ): Promise<void> {
@@ -796,7 +796,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   /**
    * Check if user exceeds concurrent session limit
    */
-  private async exceedsConcurrentSessionLimit(
+  private exceedsConcurrentSessionLimit(
     _userId: string,
   ): Promise<boolean> {
     // TODO: In a real implementation, check against session store

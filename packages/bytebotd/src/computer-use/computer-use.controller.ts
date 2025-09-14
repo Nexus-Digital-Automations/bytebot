@@ -326,7 +326,7 @@ export class ComputerUseController {
       const errorMessage = getErrorMessage(_error);
 
       this.logger.error(
-        `[${operationId}] Error submitting async computer action: ${errorMessage} (${processingTime}ms)`,
+        `[${operationId}] Error submitting computer action: ${errorMessage} (${processingTime}ms)`,
         getErrorStack(_error),
         {
           operationId,

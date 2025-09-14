@@ -18,9 +18,7 @@
  * @version 1.0.0
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// TypeScript safety note: This file uses flexible typing for NestJS integration
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+// TypeScript safety note: Type-safe implementation for database operations
 
 import {
   CallHandler,
@@ -158,8 +156,10 @@ export class DatabaseInterceptor implements NestInterceptor {
    * Intercept database operations for performance monitoring
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context.switchToHttp().getRequest();
-    const operationId = request.operationId ?? `db_${Date.now()}`;
+    const request = context.switchToHttp().getRequest<Request>();
+    const operationId: string =
+      (request as Request & { operationId?: string }).operationId ??
+      `db_${Date.now()}`;
 
     // Extract database operation metadata
     const dbOperation = this.extractDatabaseOperation(context, request);
@@ -214,16 +214,18 @@ export class DatabaseInterceptor implements NestInterceptor {
           resultCount: this.getResultCount(result),
         });
       }),
-      catchError((_error) => {
+      catchError((error: unknown) => {
+        const typedError =
+          error instanceof Error ? error : new Error(String(error));
         this.recordDatabaseMetrics({
           operationId,
           operation: dbOperation,
           startTime,
           endTime: Date.now(),
           duration: Date.now() - startTime,
-          error: _error,
+          error: typedError,
         });
-        throw _error;
+        throw typedError;
       }),
     );
   }
@@ -285,9 +287,11 @@ export class DatabaseInterceptor implements NestInterceptor {
             });
           }
         })
-        .catch((_error) => {
+        .catch((error: unknown) => {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
           this.logger.error(
-            `[${operationId}] Cache error, falling back to database: ${_error.message}`,
+            `[${operationId}] Cache error, falling back to database: ${errorMessage}`,
           );
 
           this.handleDatabaseOperation(

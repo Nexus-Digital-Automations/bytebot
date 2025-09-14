@@ -33,7 +33,7 @@ import { AuthenticatedRequest, ByteBotdUser } from '../guards/jwt-auth.guard';
  * ```typescript
  * @Roles(UserRole._ADMIN, UserRole._OPERATOR)
  * @Post('/computer-use/action')
- * async executeComputerAction() {
+ * executeComputerAction() {
  *   return this.computerUseService.executeAction();
  * }
  * ```
@@ -51,7 +51,7 @@ export const Roles = (...roles: UserRole[]) => SetMetadata('roles', roles);
  * ```typescript
  * @Permissions(_Permission._COMPUTER_CONTROL)
  * @Post('/computer-use/action')
- * async executeComputerAction() {
+ * executeComputerAction() {
  *   return this.computerUseService.executeAction();
  * }
  * ```
@@ -69,7 +69,7 @@ export const Permissions = (...permissions: Permission[]) =>
  * ```typescript
  * @Public()
  * @Get('/health')
- * async healthCheck() {
+ * healthCheck() {
  *   return { status: 'ok' };
  * }
  * ```
@@ -86,12 +86,12 @@ export const Public = () => SetMetadata('_isPublic', true);
  * @example
  * ```typescript
  * @Post('/computer-use/action')
- * async executeAction(@CurrentUser() user: ByteBotdUser) {
+ * executeAction(@CurrentUser() user: ByteBotdUser) {
  *   return this.computerUseService.executeAction(user);
  * }
  *
  * @Post('/user-profile')
- * async getProfile(@CurrentUser('id') userId: string) {
+ * getProfile(@CurrentUser('id') userId: string) {
  *   return { userId };
  * }
  * ```
@@ -122,7 +122,7 @@ export const CurrentUser = createParamDecorator(
  * ```typescript
  * @RequireRole(UserRole._ADMIN)
  * @Delete('/system/shutdown')
- * async shutdownSystem() {
+ * shutdownSystem() {
  *   return this.systemService.shutdown();
  * }
  * ```
@@ -140,7 +140,7 @@ export const RequireRole = (role: UserRole) => Roles(role);
  * ```typescript
  * @RequirePermission(_Permission._COMPUTER_CONTROL)
  * @Post('/computer-use/screenshot')
- * async takeScreenshot() {
+ * takeScreenshot() {
  *   return this.computerUseService.takeScreenshot();
  * }
  * ```
@@ -158,7 +158,7 @@ export const RequirePermission = (permission: Permission) =>
  * ```typescript
  * @AdminOnly()
  * @Get('/system/diagnostics')
- * async getSystemDiagnostics() {
+ * getSystemDiagnostics() {
  *   return this.systemService.getDiagnostics();
  * }
  * ```
@@ -175,7 +175,7 @@ export const AdminOnly = () => RequireRole(UserRole._ADMIN);
  * ```typescript
  * @OperatorOrAdmin()
  * @Post('/computer-use/action')
- * async executeComputerAction() {
+ * executeComputerAction() {
  *   return this.computerUseService.executeAction();
  * }
  * ```
@@ -192,7 +192,7 @@ export const OperatorOrAdmin = () => Roles(UserRole._OPERATOR, UserRole._ADMIN);
  * ```typescript
  * @ComputerControlRequired()
  * @Post('/computer-use/click')
- * async clickMouse() {
+ * clickMouse() {
  *   return this.computerUseService.click();
  * }
  * ```
@@ -210,7 +210,7 @@ export const ComputerControlRequired = () =>
  * ```typescript
  * @ComputerViewRequired()
  * @Get('/computer-use/screenshot')
- * async viewScreenshot() {
+ * viewScreenshot() {
  *   return this.computerUseService.getScreenshot();
  * }
  * ```
@@ -228,7 +228,7 @@ export const ComputerViewRequired = () =>
  * ```typescript
  * @Authenticated()
  * @Get('/user/profile')
- * async getUserProfile(@CurrentUser() user: ByteBotdUser) {
+ * getUserProfile(@CurrentUser() user: ByteBotdUser) {
  *   return this.userService.getProfile(user.id);
  * }
  * ```

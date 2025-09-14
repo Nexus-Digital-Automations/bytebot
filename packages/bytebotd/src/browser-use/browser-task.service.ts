@@ -124,7 +124,7 @@ export class BrowserTaskService {
   /**
    * Create a new browser automation task
    */
-  async createTask(taskData: TaskCreationData): Promise<BrowserTaskResultDto> {
+  createTask(taskData: TaskCreationData): BrowserTaskResultDto {
     const task: BrowserTaskResultDto = {
       taskId: taskData.taskId,
       status: taskData.status,
@@ -171,7 +171,7 @@ export class BrowserTaskService {
   /**
    * Get task by ID
    */
-  async getTask(taskId: string): Promise<BrowserTaskResultDto | null> {
+  getTask(taskId: string): BrowserTaskResultDto | null {
     const task = this.tasks.get(taskId);
 
     if (!task) {
@@ -189,7 +189,7 @@ export class BrowserTaskService {
   /**
    * Get all tasks
    */
-  async getAllTasks(): Promise<BrowserTaskResultDto[]> {
+  getAllTasks(): BrowserTaskResultDto[] {
     const tasks = Array.from(this.tasks.values());
 
     // Update execution times for running tasks
@@ -205,7 +205,7 @@ export class BrowserTaskService {
   /**
    * Update task status
    */
-  async updateTaskStatus(
+  updateTaskStatus(
     taskId: string,
     updates: TaskUpdateData,
   ): Promise<void> {
@@ -272,7 +272,7 @@ export class BrowserTaskService {
   /**
    * Update task progress
    */
-  async updateTaskProgress(
+  updateTaskProgress(
     taskId: string,
     progress: {
       actionsCompleted?: number;
@@ -321,7 +321,7 @@ export class BrowserTaskService {
   /**
    * Get tasks by status
    */
-  async getTasksByStatus(
+  getTasksByStatus(
     status: BrowserTaskStatus,
   ): Promise<BrowserTaskResultDto[]> {
     const tasks = Array.from(this.tasks.values()).filter(
@@ -343,7 +343,7 @@ export class BrowserTaskService {
   /**
    * Get next task from queue
    */
-  async getNextQueuedTask(): Promise<BrowserTaskResultDto | null> {
+  getNextQueuedTask(): BrowserTaskResultDto | null {
     if (this.taskQueue.length === 0) {
       return null;
     }
@@ -375,7 +375,7 @@ export class BrowserTaskService {
   /**
    * Cancel task
    */
-  async cancelTask(taskId: string): Promise<void> {
+  cancelTask(taskId: string): void {
     const task = this.tasks.get(taskId);
     if (!task) {
       throw new Error(`Task not found: ${taskId}`);
@@ -427,7 +427,7 @@ export class BrowserTaskService {
   /**
    * Delete task (cleanup)
    */
-  async deleteTask(taskId: string): Promise<void> {
+  deleteTask(taskId: string): void {
     const task = this.tasks.get(taskId);
     if (!task) {
       return;
@@ -459,7 +459,7 @@ export class BrowserTaskService {
   /**
    * Get task metrics and statistics
    */
-  async getTaskMetrics(): Promise<{
+  getTaskMetrics(): Promise<{
     totalTasks: number;
     completedTasks: number;
     failedTasks: number;
@@ -505,7 +505,7 @@ export class BrowserTaskService {
   /**
    * Clean up old completed tasks
    */
-  async cleanupOldTasks(maxAge: number = 86400000): Promise<number> {
+  cleanupOldTasks(maxAge: number = 86400000): number {
     // 24 hours default
     const now = Date.now();
     let cleanedCount = 0;

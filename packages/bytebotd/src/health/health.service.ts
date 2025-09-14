@@ -221,7 +221,7 @@ export class HealthService extends HealthIndicator {
    *
    * @returns Health indicator result for process health
    */
-  async checkProcessHealth(): Promise<HealthIndicatorResult> {
+  checkProcessHealth(): HealthIndicatorResult {
     const operationId = `process_health_${Date.now()}`;
     this.logger.debug(`[${operationId}] Checking process health`);
 
@@ -376,7 +376,7 @@ export class HealthService extends HealthIndicator {
    *
    * @returns Health indicator result for startup completion
    */
-  async checkStartupComplete(): Promise<HealthIndicatorResult> {
+  checkStartupComplete(): HealthIndicatorResult {
     const operationId = `startup_${Date.now()}`;
     this.logger.debug(`[${operationId}] Checking startup completion`);
 
@@ -423,7 +423,7 @@ export class HealthService extends HealthIndicator {
    *
    * @returns Health indicator result for module initialization
    */
-  async checkModuleInitialization(): Promise<HealthIndicatorResult> {
+  checkModuleInitialization(): HealthIndicatorResult {
     const operationId = `modules_${Date.now()}`;
     this.logger.debug(`[${operationId}] Checking module initialization`);
 

@@ -227,7 +227,7 @@ function calculateCoverageSummary(coverageData) {
   let totalLines = 0,
     coveredLines = 0;
 
-  for (const [filePath, fileData] of Object.entries(coverageData)) {
+  for (const [, fileData] of Object.entries(coverageData)) {
     if (fileData.s) {
       totalStatements += Object.keys(fileData.s).length;
       coveredStatements += Object.values(fileData.s).filter(

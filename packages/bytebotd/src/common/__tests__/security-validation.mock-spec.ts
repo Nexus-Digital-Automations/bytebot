@@ -400,7 +400,7 @@ describe('Security Validation Mock Tests', () => {
   });
 
   describe('Performance Security Tests', () => {
-    it('should complete validation within reasonable time', async () => {
+    it('should complete validation within reasonable time', () => {
       const sanitizationPipe = new SecuritySanitizationPipe({
         enableSanitization: true,
         strictMode: false,
@@ -425,7 +425,7 @@ describe('Security Validation Mock Tests', () => {
       expect(result).toBeDefined();
     });
 
-    it('should handle multiple concurrent validations', async () => {
+    it('should handle multiple concurrent validations', () => {
       const sanitizationPipe = new SecuritySanitizationPipe({
         enableSanitization: true,
         strictMode: false,

@@ -64,7 +64,7 @@ class Base64ImageCompressor {
    * Performance: Typically 50-200ms for standard screenshots
    * Quality: Maintains visual fidelity while meeting size constraints
    */
-  static async compressToSize(
+  static compressToSize(
     base64String: string,
     options: CompressionOptions = {},
   ): Promise<CompressionResult> {
@@ -225,7 +225,7 @@ class Base64ImageCompressor {
   /**
    * Compress buffer with specified quality
    */
-  private static async compressBuffer(
+  private static compressBuffer(
     inputBuffer: Buffer,
     quality: number,
     format: 'png' | 'jpeg' | 'webp',
@@ -274,7 +274,7 @@ class Base64ImageCompressor {
   /**
    * Compress with dimension reduction if quality alone isn't enough
    */
-  static async compressWithResize(
+  static compressWithResize(
     base64String: string,
     options: CompressionOptions & {
       maxWidth?: number;

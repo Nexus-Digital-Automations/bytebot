@@ -60,7 +60,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @returns Promise<ByteBotdUser> - User object for request context
    * @throws UnauthorizedException - When user is invalid or inactive
    */
-  async validate(payload: JwtPayload): Promise<ByteBotdUser> {
+  validate(payload: JwtPayload): ByteBotdUser {
     const operationId = `bytebotd-jwt-validate-${Date.now()}`;
 
     this.logger.debug(

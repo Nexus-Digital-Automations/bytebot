@@ -242,11 +242,10 @@ describe("TaskUtils", () => {
       const result = await fetchTaskMessages("task-123", {
         limit: 20,
         page: 2,
-        sort: "desc",
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        "/api/tasks/task-123/messages?limit=20&page=2&sort=desc",
+        "/api/tasks/task-123/messages?limit=20&page=2",
       );
       expect(result).toEqual(mockMessages);
     });
@@ -303,7 +302,7 @@ describe("TaskUtils", () => {
         json: async () => {
           throw new Error("Invalid JSON");
         },
-      } as Response);
+      } as unknown as Response);
 
       const result = await fetchTaskMessages("task-123");
 
@@ -707,7 +706,7 @@ describe("TaskUtils", () => {
         json: async () => {
           throw new Error("Malformed JSON");
         },
-      } as Response);
+      } as unknown as Response);
 
       const result = await fetchTaskMessages("task-123");
 

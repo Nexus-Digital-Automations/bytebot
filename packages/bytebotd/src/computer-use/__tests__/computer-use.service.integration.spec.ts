@@ -192,7 +192,7 @@ describe('ComputerUseService Integration Tests', () => {
       // Read file back
       const readAction: ReadFileActionDto = {
         action: 'read_file',
-        path: writeResult.path,
+        path: writeResult.path ?? '',
       };
 
       const readResult = (await context.service.action(
@@ -229,7 +229,7 @@ describe('ComputerUseService Integration Tests', () => {
 
         const readAction: ReadFileActionDto = {
           action: 'read_file',
-          path: writeResult.path,
+          path: writeResult.path ?? '',
         };
 
         const readResult = (await context.service.action(
@@ -323,7 +323,7 @@ describe('ComputerUseService Integration Tests', () => {
 
         const readAction: ReadFileActionDto = {
           action: 'read_file',
-          path: writeResult.path,
+          path: writeResult.path ?? '',
         };
 
         const readResult = (await context.service.action(
@@ -489,7 +489,7 @@ describe('ComputerUseService Integration Tests', () => {
       // Read document back to verify
       const readResult = (await context.service.action({
         action: 'read_file',
-        path: writeResult.path,
+        path: writeResult.path ?? '',
       })) as FileReadResult;
       expect(readResult.success).toBe(true);
 
@@ -520,7 +520,7 @@ describe('ComputerUseService Integration Tests', () => {
       // Verify results can be read back
       const readResults = (await context.service.action({
         action: 'read_file',
-        path: saveResult.path,
+        path: saveResult.path ?? '',
       })) as FileReadResult;
 
       expect(readResults.success).toBe(true);

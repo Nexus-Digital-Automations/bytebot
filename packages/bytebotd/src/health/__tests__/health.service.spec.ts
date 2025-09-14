@@ -102,7 +102,7 @@ describe('HealthService', () => {
     jest.clearAllMocks();
   });
   describe('Service Initialization', () => {
-    it('should initialize with proper configuration', async () => {
+    it('should initialize with proper configuration', () => {
       const testId = `${operationId}_initialization`;
       console.log(`[${testId}] Testing service initialization`);
       expect(service).toBeDefined();
@@ -114,7 +114,7 @@ describe('HealthService', () => {
         `[${testId}] Service initialization test completed successfully`,
       );
     });
-    it('should record accurate initialization timestamp', async () => {
+    it('should record accurate initialization timestamp', () => {
       const testId = `${operationId}_initialization_timestamp`;
       console.log(`[${testId}] Testing initialization timestamp accuracy`);
       const beforeInit = Date.now() - 1000; // Account for test setup time
@@ -126,7 +126,7 @@ describe('HealthService', () => {
     });
   });
   describe('Basic Health Monitoring', () => {
-    it('should return healthy status with valid memory and uptime data', async () => {
+    it('should return healthy status with valid memory and uptime data', () => {
       const testId = `${operationId}_basic_health`;
       console.log(`[${testId}] Testing basic health monitoring`);
       // Mock process.memoryUsage and process.uptime
@@ -160,7 +160,7 @@ describe('HealthService', () => {
         `[${testId}] Basic health monitoring test completed successfully`,
       );
     });
-    it('should handle memory usage edge cases', async () => {
+    it('should handle memory usage edge cases', () => {
       const testId = `${operationId}_memory_edge_cases`;
       console.log(`[${testId}] Testing memory usage edge cases`);
       const edgeCases = [
@@ -203,7 +203,7 @@ describe('HealthService', () => {
       }
       console.log(`[${testId}] Memory edge cases test completed`);
     });
-    it('should handle process.uptime variations', async () => {
+    it('should handle process.uptime variations', () => {
       const testId = `${operationId}_uptime_variations`;
       console.log(`[${testId}] Testing process uptime variations`);
       const uptimeValues = [0, 1, 60, 3600, 86400, 604800]; // 0s, 1s, 1m, 1h, 1d, 1w
@@ -264,7 +264,7 @@ describe('HealthService', () => {
     });
   });
   describe('Detailed Status Monitoring', () => {
-    it('should return comprehensive system status', async () => {
+    it('should return comprehensive system status', () => {
       const testId = `${operationId}_detailed_status`;
       console.log(`[${testId}] Testing detailed system status monitoring`);
       const mockMemoryUsage = {
@@ -393,7 +393,7 @@ describe('HealthService', () => {
     });
   });
   describe('Service Health Checking', () => {
-    it('should return unknown status for unimplemented health checks', async () => {
+    it('should return unknown status for unimplemented health checks', () => {
       const testId = `${operationId}_service_health_unknown`;
       console.log(`[${testId}] Testing unimplemented service health checks`);
       // Access the private method for testing
@@ -414,7 +414,7 @@ describe('HealthService', () => {
       expect(mockLogger.debug).toHaveBeenCalledWith('Checking service health');
       console.log(`[${testId}] Service health logging test completed`);
     });
-    it('should provide extensible service health structure', async () => {
+    it('should provide extensible service health structure', () => {
       const testId = `${operationId}_service_health_structure`;
       console.log(`[${testId}] Testing service health structure extensibility`);
       const result = service.getDetailedStatus() as DetailedStatusResponse;
@@ -444,7 +444,7 @@ describe('HealthService', () => {
     });
   });
   describe('Performance Metrics Collection', () => {
-    it('should return placeholder performance metrics', async () => {
+    it('should return placeholder performance metrics', () => {
       const testId = `${operationId}_performance_metrics`;
       console.log(`[${testId}] Testing performance metrics collection`);
       const result = service.getDetailedStatus() as DetailedStatusResponse;
@@ -457,7 +457,7 @@ describe('HealthService', () => {
       );
       console.log(`[${testId}] Performance metrics test completed`);
     });
-    it('should log performance metrics collection activity', async () => {
+    it('should log performance metrics collection activity', () => {
       const testId = `${operationId}_performance_metrics_logging`;
       console.log(`[${testId}] Testing performance metrics logging`);
       // Access the private method directly
@@ -471,7 +471,7 @@ describe('HealthService', () => {
       );
       console.log(`[${testId}] Performance metrics logging test completed`);
     });
-    it('should provide extensible performance metrics structure', async () => {
+    it('should provide extensible performance metrics structure', () => {
       const testId = `${operationId}_performance_structure`;
       console.log(`[${testId}] Testing performance metrics structure`);
       const result = service.getDetailedStatus() as DetailedStatusResponse;
@@ -496,14 +496,14 @@ describe('HealthService', () => {
       expect(isStable).toBe(true);
       console.log(`[${testId}] Service stability test completed`);
     });
-    it('should correctly identify unstable services', async () => {
+    it('should correctly identify unstable services', () => {
       const testId = `${operationId}_service_unstable`;
       console.log(`[${testId}] Testing unstable service identification`);
       const isStable = service.isServiceStable(3600); // 1 hour minimum
       expect(isStable).toBe(false);
       console.log(`[${testId}] Service instability test completed`);
     });
-    it('should use default minimum time when not specified', async () => {
+    it('should use default minimum time when not specified', () => {
       const testId = `${operationId}_default_minimum_time`;
       console.log(`[${testId}] Testing default minimum time for stability`);
       const isStable = service.isServiceStable(); // Should use default 30s
@@ -511,7 +511,7 @@ describe('HealthService', () => {
       expect(isStable).toBe(false);
       console.log(`[${testId}] Default minimum time test completed`);
     });
-    it('should log stability check results with context', async () => {
+    it('should log stability check results with context', () => {
       const testId = `${operationId}_stability_logging`;
       console.log(`[${testId}] Testing stability check logging`);
       service.isServiceStable(10);
@@ -524,7 +524,7 @@ describe('HealthService', () => {
       );
       console.log(`[${testId}] Stability logging test completed`);
     });
-    it('should handle edge cases in stability calculation', async () => {
+    it('should handle edge cases in stability calculation', () => {
       const testId = `${operationId}_stability_edge_cases`;
       console.log(`[${testId}] Testing stability calculation edge cases`);
       // Test with very small minimum time (should be stable)
@@ -682,7 +682,7 @@ describe('HealthService', () => {
       expect((result as BasicHealthResponse).memory.free).toBe(0); // No free memory
       console.log(`[${testId}] Resource constraints handling test completed`);
     });
-    it('should provide accurate uptime calculations across service lifecycle', async () => {
+    it('should provide accurate uptime calculations across service lifecycle', () => {
       const testId = `${operationId}_uptime_accuracy`;
       console.log(`[${testId}] Testing uptime calculation accuracy`);
       const testUptimes = [0.1, 1, 59.9, 60, 61, 3599, 3600, 3601];
@@ -923,7 +923,7 @@ describe('HealthService', () => {
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
         expect(result.database?.responseTime).toMatch(/\d+ms/);
         const responseTime = parseInt(
-          result.database?.responseTime?.replace('ms', '') ?? '0',
+          String(result.database?.responseTime ?? '').replace('ms', '') || '0',
         );
         expect(responseTime).toBeGreaterThan(40); // Should be at least 40ms due to delay
         console.log(`[${testId}] Database response time test completed`);
@@ -1115,19 +1115,21 @@ describe('HealthService', () => {
         // Mock setTimeout to reject immediately for some calls
         const originalSetTimeout = setTimeout;
         let timeoutCallCount = 0;
-        global.setTimeout = jest.fn().mockImplementation((callback, delay) => {
-          timeoutCallCount++;
-          if (timeoutCallCount % 2 === 0) {
-            // Simulate timeout/rejection on every other call
+        global.setTimeout = jest
+          .fn()
+          .mockImplementation((callback, delay: number) => {
+            timeoutCallCount++;
+            if (timeoutCallCount % 2 === 0) {
+              // Simulate timeout/rejection on every other call
 
-            originalSetTimeout(
-              () => callback(new Error('Service unavailable')),
-              1,
-            );
-          } else {
-            originalSetTimeout(() => callback(null, true), delay);
-          }
-        }) as unknown;
+              originalSetTimeout(
+                () => callback(new Error('Service unavailable')),
+                1,
+              );
+            } else {
+              originalSetTimeout(() => callback(null, true), delay);
+            }
+          }) as unknown;
         const results = await Promise.all([
           (service as unknown).checkExternalService(
             'service-1',
@@ -1231,10 +1233,11 @@ describe('HealthService', () => {
         if ('error' in result) {
           expect((result as unknown).error).toBeDefined();
         } else {
-          expect(['up', 'down']).toContain(
-            (Object.values(result)[0] as { status?: string })?.status ??
-              (result as { status?: string }).status,
-          );
+          const resultValues = Object.values(result as Record<string, unknown>);
+          const statusValue =
+            (resultValues[0] as { status?: string })?.status ??
+            (result as { status?: string }).status;
+          expect(['up', 'down']).toContain(statusValue);
         }
       });
       console.log(`[${testId}] Cascading failures test completed`);

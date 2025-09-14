@@ -845,7 +845,7 @@ export class BackgroundWorker
   /**
    * Stop the background worker
    */
-  async stop(): Promise<void> {
+  stop(): void {
     if (!this.isRunning) {
       this.logger.warn('Worker not running', { workerId: this.workerId });
       return;
@@ -867,7 +867,7 @@ export class BackgroundWorker
   /**
    * Get worker statistics
    */
-  async getWorkerStats(): Promise<WorkerStats> {
+  getWorkerStats(): WorkerStats {
     const memUsage = process.memoryUsage();
 
     return {
@@ -1169,11 +1169,11 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
     this.logger.log('JobCleanupManager initialized', this.config);
   }
 
-  async onModuleInit(): Promise<void> {
+  onModuleInit(): void {
     this.startCleanupSchedule();
   }
 
-  async onModuleDestroy(): Promise<void> {
+  onModuleDestroy(): void {
     this.stopCleanupSchedule();
   }
 
@@ -1250,12 +1250,12 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
     this.logger.log('JobManagementService initialized');
   }
 
-  async onModuleInit(): Promise<void> {
+  onModuleInit(): void {
     this.logger.log('JobManagementService starting...');
     // Components start themselves via their OnModuleInit
   }
 
-  async onModuleDestroy(): Promise<void> {
+  onModuleDestroy(): void {
     this.logger.log('JobManagementService shutting down...');
     // Components stop themselves via their OnModuleDestroy
   }
@@ -1263,7 +1263,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
   /**
    * Create a new job for async execution
    */
-  async createJob(
+  createJob(
     action: ComputerAction,
     options: JobOptions = {},
   ): Promise<string> {
@@ -1457,7 +1457,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
   /**
    * Execute action asynchronously (for backward compatibility)
    */
-  async executeActionAsync(
+  executeActionAsync(
     jobId: string,
     action: ComputerAction,
   ): Promise<void> {

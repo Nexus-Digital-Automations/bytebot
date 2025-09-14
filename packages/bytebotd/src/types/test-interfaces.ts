@@ -17,18 +17,23 @@ export interface KeyMappingInfo {
 }
 
 /**
- * Simple type aliases for testable services - using any for maximum compatibility
- * in test files where we need to access private methods and properties
+ * Typed interfaces for testable services - provides access to private methods
+ * and properties in test files with proper TypeScript compliance
  */
-export type TestableHealthService = any;
-export type TestableNutService = any;
+export type TestableHealthService = {
+  [key: string]: unknown;
+} & Record<string, unknown>;
+
+export type TestableNutService = {
+  [key: string]: unknown;
+} & Record<string, unknown>;
 
 /**
  * Helper function to cast services to testable interfaces
  * This allows access to private methods and properties in tests
  */
-export function asTestable<T>(service: T): any {
-  return service as any;
+export function asTestable<T>(service: T): T & Record<string, unknown> {
+  return service as T & Record<string, unknown>;
 }
 
 /**

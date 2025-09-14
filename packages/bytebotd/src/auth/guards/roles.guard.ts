@@ -87,7 +87,7 @@ export class RolesGuard implements CanActivate {
    * @returns Promise<boolean> - Whether the request is authorized
    * @throws ForbiddenException - When user lacks required permissions
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const operationId = `bytebotd-roles-guard-${Date.now()}`;
     const startTime = Date.now();
 

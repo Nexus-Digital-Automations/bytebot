@@ -313,7 +313,7 @@ describe('InputTrackingModule', () => {
   });
 
   describe('Module Integration', () => {
-    it('should allow service and gateway to communicate', async () => {
+    it('should allow service and gateway to communicate', () => {
       const testId = `${operationId}_service_gateway_integration`;
       console.log(`[${testId}] Testing service and gateway integration`);
 
@@ -367,7 +367,7 @@ describe('InputTrackingModule', () => {
   });
 
   describe('Module Lifecycle', () => {
-    it('should handle module initialization', async () => {
+    it('should handle module initialization', () => {
       const testId = `${operationId}_module_initialization`;
       console.log(`[${testId}] Testing module initialization`);
 
@@ -459,7 +459,7 @@ describe('InputTrackingModule', () => {
   });
 
   describe('Error Scenarios', () => {
-    it('should handle provider initialization errors', async () => {
+    it('should handle provider initialization errors', () => {
       const testId = `${operationId}_provider_init_errors`;
       console.log(`[${testId}] Testing provider initialization error handling`);
 

@@ -78,8 +78,10 @@ class Logger {
       message,
       data,
       timestamp: new Date(),
-      context,
     };
+    if (context !== undefined) {
+      entry.context = context;
+    }
 
     const formattedMessage = this.formatMessage(entry);
 

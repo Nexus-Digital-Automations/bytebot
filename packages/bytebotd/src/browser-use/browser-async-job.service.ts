@@ -88,11 +88,11 @@ export class BrowserAsyncJobService {
   /**
    * Create a new async job
    */
-  async createAsyncJob(_dto: CreateAsyncJobDto): Promise<AsyncJobResultDto> {
+  createAsyncJob(_dto: CreateAsyncJobDto): AsyncJobResultDto {
     const jobId = uuidv4();
     const now = new Date();
 
-    this.logger.log(`Creating async job: ${_dto.name}`, {
+    this.logger.log(`Creating job: ${_dto.name}`, {
       jobId,
       name: _dto.name,
       jobType: _dto.jobType,
@@ -149,7 +149,7 @@ export class BrowserAsyncJobService {
 
       return job;
     } catch (_err) {
-      this.logger.error(`Failed to create async job: ${_dto.name}`, _err);
+      this.logger.error(`Failed to create job: ${_dto.name}`, _err);
       throw _err;
     }
   }
@@ -206,7 +206,7 @@ export class BrowserAsyncJobService {
       throw new Error(`Cannot cancel job in status: ${job.status}`);
     }
 
-    this.logger.log(`Cancelling async job: ${jobId}`, {
+    this.logger.log(`Cancelling job: ${jobId}`, {
       jobId,
       currentStatus: job.status,
     });
@@ -306,7 +306,7 @@ export class BrowserAsyncJobService {
   /**
    * Get queue status and statistics
    */
-  async getQueueStatus(): Promise<{
+  getQueueStatus(): Promise<{
     queueLength: number;
     processingJobs: number;
     completedJobs: number;
@@ -370,7 +370,7 @@ export class BrowserAsyncJobService {
     }
 
     if (cleanedCount > 0) {
-      this.logger.log(`Cleaned up ${cleanedCount} old async jobs`, {
+      this.logger.log(`Cleaned up ${cleanedCount} old jobs`, {
         cleanedCount,
         maxAgeHours: maxAge / (1000 * 60 * 60),
         remainingJobs: this.jobs.size,
@@ -407,7 +407,7 @@ export class BrowserAsyncJobService {
     // Start processing job
     this.processingJobs.add(jobId);
 
-    this.logger.log(`Starting async job processing: ${jobId}`, {
+    this.logger.log(`Starting job processing: ${jobId}`, {
       jobId,
       jobType: job.jobType,
       priority: job.priority,
@@ -633,7 +633,7 @@ export class BrowserAsyncJobService {
   /**
    * Process other job types (placeholder implementations)
    */
-  private async processFormFilling(job: AsyncJobResultDto): Promise<void> {
+  private processFormFilling(job: AsyncJobResultDto): void {
     // Implementation for form filling jobs
     job.progress.currentStep = 'Processing form filling job';
     job.progress.completedSteps = 1;
@@ -641,7 +641,7 @@ export class BrowserAsyncJobService {
     job.progress.percentage = 100;
   }
 
-  private async processScreenshotCapture(
+  private processScreenshotCapture(
     job: AsyncJobResultDto,
   ): Promise<void> {
     // Implementation for screenshot capture jobs
@@ -651,7 +651,7 @@ export class BrowserAsyncJobService {
     job.progress.percentage = 100;
   }
 
-  private async processCustomWorkflow(job: AsyncJobResultDto): Promise<void> {
+  private processCustomWorkflow(job: AsyncJobResultDto): void {
     // Implementation for custom workflow jobs
     job.progress.currentStep = 'Processing custom workflow job';
     job.progress.completedSteps = 1;
@@ -662,7 +662,7 @@ export class BrowserAsyncJobService {
   /**
    * Complete job processing
    */
-  private async completeJob(job: AsyncJobResultDto): Promise<void> {
+  private completeJob(job: AsyncJobResultDto): void {
     job.status = AsyncJobStatus.COMPLETED;
     job.completedAt = new Date();
     job.progress.currentStep = 'Job completed successfully';
@@ -696,7 +696,7 @@ export class BrowserAsyncJobService {
   /**
    * Handle job failure
    */
-  private async handleJobFailure(
+  private handleJobFailure(
     jobId: string,
     error: StandardError | Error | unknown,
   ): Promise<void> {
@@ -754,7 +754,7 @@ export class BrowserAsyncJobService {
   /**
    * Update job progress
    */
-  private async updateJobProgress(jobId: string): Promise<void> {
+  private updateJobProgress(jobId: string): void {
     const job = this.jobs.get(jobId);
     if (!job || job.status !== AsyncJobStatus.RUNNING) {
       return;
@@ -853,7 +853,7 @@ export class BrowserAsyncJobService {
   /**
    * Create session for extraction
    */
-  private async createExtractionSession(): Promise<string> {
+  private createExtractionSession(): string {
     // This would create a browser session for data extraction
     // For now, return a mock session ID
     return `extraction_session_${Date.now()}`;

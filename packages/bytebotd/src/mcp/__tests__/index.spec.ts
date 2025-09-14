@@ -385,7 +385,7 @@ describe('MCP Index Module', () => {
     /**
      * Test that exports work together correctly
      */
-    it('should allow seamless integration between exported components', async () => {
+    it('should allow seamless integration between exported components', () => {
       // Test that module can be used with tools
       const module = new McpIndex.BytebotMcpModule();
       expect(module).toBeDefined();

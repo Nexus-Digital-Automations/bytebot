@@ -585,7 +585,7 @@ export const ErrorHandlerUtils = {
   /**
    * Safe async function execution
    */
-  async safeAsync<T>(
+  safeAsync<T>(
     operation: () => Promise<T>,
     context: Partial<ErrorLogContext>,
   ): AsyncResult<T> {

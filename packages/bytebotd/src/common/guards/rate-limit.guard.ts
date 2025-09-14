@@ -25,7 +25,12 @@ import {
   SetMetadata,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerException } from '@nestjs/throttler';
+import {
+  ThrottlerGuard,
+  ThrottlerException,
+  ThrottlerModuleOptions,
+  ThrottlerStorage,
+} from '@nestjs/throttler';
 import { Request } from 'express';
 
 /**
@@ -124,8 +129,8 @@ export class EnterpriseRateLimitGuard
   >();
 
   constructor(
-    options: any,
-    storageService: any,
+    options: ThrottlerModuleOptions,
+    storageService: ThrottlerStorage,
     protected reflector: Reflector,
   ) {
     super(options, storageService, reflector);

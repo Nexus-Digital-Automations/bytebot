@@ -27,6 +27,7 @@ import {
 } from './computer-use.service';
 import { NutService } from '../nut/nut.service';
 import {
+  ComputerAction,
   MoveMouseAction,
   TraceMouseAction,
   ClickMouseAction,
@@ -620,9 +621,8 @@ describe('ComputerUseService', () => {
         expect(result).toMatchObject({
           image: fakeImageBuffer.toString('base64'),
           metadata: expect.objectContaining({
-             
             captureTime: expect.any(Date),
-             
+
             operationId: expect.any(String),
             format: 'png',
           }),
@@ -1070,7 +1070,7 @@ describe('ComputerUseService', () => {
       it('should handle unknown action types', async () => {
         const invalidAction = {
           action: 'invalid_action',
-        } as any;
+        } as unknown as ComputerAction;
 
         await expect(service.action(invalidAction)).rejects.toThrow(
           'Unsupported computer action',

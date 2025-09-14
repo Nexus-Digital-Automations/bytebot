@@ -344,7 +344,7 @@ export const ComputerUseApi = (
  * @returns Version configuration or null
  */
 export function getVersionConfig(target: object): ApiVersionConfig | null {
-  const metadata = Reflect.getMetadata(VERSION_CONFIG_KEY, target);
+  const metadata: unknown = Reflect.getMetadata(VERSION_CONFIG_KEY, target);
   return metadata && typeof metadata === 'object' && 'version' in metadata
     ? (metadata as ApiVersionConfig)
     : null;
@@ -356,7 +356,7 @@ export function getVersionConfig(target: object): ApiVersionConfig | null {
  * @returns API version or null
  */
 export function getApiVersion(target: object): string | null {
-  const metadata = Reflect.getMetadata(VERSION_METADATA_KEY, target);
+  const metadata: unknown = Reflect.getMetadata(VERSION_METADATA_KEY, target);
   return typeof metadata === 'string' ? metadata : null;
 }
 
@@ -366,7 +366,7 @@ export function getApiVersion(target: object): string | null {
  * @returns Array of supported versions or null
  */
 export function getMultiVersions(target: object): SupportedVersion[] | null {
-  const metadata = Reflect.getMetadata('multi_version', target);
+  const metadata: unknown = Reflect.getMetadata('multi_version', target);
   return Array.isArray(metadata) && metadata.every((v) => typeof v === 'string')
     ? (metadata as SupportedVersion[])
     : null;
@@ -378,7 +378,7 @@ export function getMultiVersions(target: object): SupportedVersion[] | null {
  * @returns Boolean indicating if it's a desktop endpoint
  */
 export function isDesktopApiVersion(target: object): boolean {
-  const metadata = Reflect.getMetadata(DESKTOP_VERSION_KEY, target);
+  const metadata: unknown = Reflect.getMetadata(DESKTOP_VERSION_KEY, target);
   return Boolean(metadata);
 }
 

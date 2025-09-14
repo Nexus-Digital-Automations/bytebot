@@ -198,7 +198,7 @@ describe('Security Penetration Testing Suite', () => {
     },
 
     // Session replay attack simulation
-    simulateSessionReplayAttack: async (
+    simulateSessionReplayAttack: (
       validToken: string,
       targetFunction: (token: string) => Promise<unknown>,
     ): Promise<
@@ -236,7 +236,7 @@ describe('Security Penetration Testing Suite', () => {
     },
 
     // Race condition attack simulation
-    simulateRaceConditionAttack: async (
+    simulateRaceConditionAttack: (
       user: ByteBotdUser,
       targetFunction: (user: ByteBotdUser) => Promise<unknown>,
     ): Promise<
@@ -664,7 +664,7 @@ describe('Security Penetration Testing Suite', () => {
 
       for (const attackVector of attackVectors) {
         const context = createPentestExecutionContext(
-          attackVector.user,
+          attackVector.user as ByteBotdUser,
           {},
           { attackVector: attackVector.name },
         );

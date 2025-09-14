@@ -132,12 +132,12 @@ class MockAuthService {
     }
   }
 
-  async logout(): Promise<void> {
+  logout(): void {
     // In real implementation, would invalidate refresh tokens
     return;
   }
 
-  private async generateTokens(
+  private generateTokens(
     user: Omit<UserData, 'passwordHash'>,
   ): Promise<TokenResponse> {
     const payload: JwtPayload = {
@@ -205,7 +205,7 @@ class MockAuthService {
     return mockUsers.find((u) => u.email === email) ?? null;
   }
 
-  private async findUserById(
+  private findUserById(
     id: string,
   ): Promise<Omit<UserData, 'passwordHash'> | null> {
     const mockUsers: Omit<UserData, 'passwordHash'>[] = [
@@ -501,7 +501,7 @@ describe('AuthService', () => {
   });
 
   describe('Role-Based Permissions', () => {
-    it('should assign correct permissions for admin role', async () => {
+    it('should assign correct permissions for admin role', () => {
       const testId = `${operationId}_permissions_admin`;
       console.log(`[${testId}] Testing admin role permissions`);
 
@@ -517,7 +517,7 @@ describe('AuthService', () => {
       console.log(`[${testId}] Admin permissions test completed`);
     });
 
-    it('should assign correct permissions for operator role', async () => {
+    it('should assign correct permissions for operator role', () => {
       const testId = `${operationId}_permissions_operator`;
       console.log(`[${testId}] Testing operator role permissions`);
 
@@ -532,7 +532,7 @@ describe('AuthService', () => {
       console.log(`[${testId}] Operator permissions test completed`);
     });
 
-    it('should assign correct permissions for viewer role', async () => {
+    it('should assign correct permissions for viewer role', () => {
       const testId = `${operationId}_permissions_viewer`;
       console.log(`[${testId}] Testing viewer role permissions`);
 
@@ -543,7 +543,7 @@ describe('AuthService', () => {
       console.log(`[${testId}] Viewer permissions test completed`);
     });
 
-    it('should default to viewer permissions for unknown role', async () => {
+    it('should default to viewer permissions for unknown role', () => {
       const testId = `${operationId}_permissions_unknown`;
       console.log(`[${testId}] Testing unknown role permissions fallback`);
 

@@ -151,7 +151,7 @@ export class BrowserSessionService {
   /**
    * Get browser session by ID
    */
-  async getSession(sessionId: string): Promise<BrowserSessionDto | null> {
+  getSession(sessionId: string): BrowserSessionDto | null {
     const session = this.sessions.get(sessionId);
 
     if (!session) {
@@ -167,7 +167,7 @@ export class BrowserSessionService {
   /**
    * Get all browser sessions
    */
-  async getAllSessions(): Promise<BrowserSessionDto[]> {
+  getAllSessions(): BrowserSessionDto[] {
     const sessions = Array.from(this.sessions.values());
 
     // Update uptime for all sessions
@@ -228,7 +228,7 @@ export class BrowserSessionService {
   /**
    * Create new tab in session
    */
-  async createTab(
+  createTab(
     sessionId: string,
     options?: {
       url?: string;
@@ -285,7 +285,7 @@ export class BrowserSessionService {
   /**
    * Close tab in session
    */
-  async closeTab(sessionId: string, tabId: string): Promise<void> {
+  closeTab(sessionId: string, tabId: string): void {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error(`Session not found: ${sessionId}`);
@@ -324,7 +324,7 @@ export class BrowserSessionService {
   /**
    * Switch active tab
    */
-  async switchTab(sessionId: string, tabId: string): Promise<void> {
+  switchTab(sessionId: string, tabId: string): void {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error(`Session not found: ${sessionId}`);
@@ -357,7 +357,7 @@ export class BrowserSessionService {
   /**
    * Update session activity
    */
-  async updateActivity(
+  updateActivity(
     sessionId: string,
     activity: {
       actionType?: string;
@@ -387,7 +387,7 @@ export class BrowserSessionService {
   /**
    * Initialize browser session (mock implementation)
    */
-  private async initializeBrowserSession(
+  private initializeBrowserSession(
     session: BrowserSessionDto,
     _dto: CreateBrowserSessionDto,
   ): Promise<void> {
@@ -412,7 +412,7 @@ export class BrowserSessionService {
   /**
    * Terminate browser session (mock implementation)
    */
-  private async terminateBrowserSession(
+  private terminateBrowserSession(
     session: BrowserSessionDto,
   ): Promise<void> {
     // In production, this would:

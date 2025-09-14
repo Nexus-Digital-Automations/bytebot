@@ -3,15 +3,12 @@ import {
   Post,
   Get,
   Delete,
-  Put as _Put,
   Body,
   Param,
   Query,
   HttpCode,
   HttpStatus,
   Logger,
-  UseInterceptors as _UseInterceptors,
-  BadRequestException as _BadRequestException,
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -37,11 +34,7 @@ import {
   BrowserSessionDto,
   BrowserSessionStatus,
 } from './dto/browser-session.dto';
-import {
-  CreateAsyncJobDto,
-  AsyncJobResultDto,
-  AsyncJobStatus as _AsyncJobStatus,
-} from './dto/async-job.dto';
+import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';
 // Note: ResponseInterceptor and SecurityLoggingInterceptor imports removed as they don't exist in shared package
 
 /**
@@ -493,7 +486,7 @@ export class BrowserUseController {
     status: HttpStatus.CREATED,
     description: 'Tab created successfully',
   })
-  async createTab(
+  createTab(
     @Param('sessionId') sessionId: string,
     @Body()
     tabOptions?: {
@@ -598,7 +591,7 @@ export class BrowserUseController {
   async createAsyncJob(
     @Body() createJobDto: CreateAsyncJobDto,
   ): Promise<AsyncJobResultDto> {
-    this.logger.log(`Creating async job: ${createJobDto.name}`, {
+    this.logger.log(`Creating job: ${createJobDto.name}`, {
       jobName: createJobDto.name,
       jobType: createJobDto.jobType,
       priority: createJobDto.priority,
@@ -648,7 +641,7 @@ export class BrowserUseController {
     type: AsyncJobResultDto,
   })
   async getAsyncJob(@Param('jobId') jobId: string): Promise<AsyncJobResultDto> {
-    this.logger.log(`Getting async job: ${jobId}`);
+    this.logger.log(`Getting job: ${jobId}`);
 
     const job = await this.browserUseService.getAsyncJob(jobId);
     if (!job) {
@@ -677,7 +670,7 @@ export class BrowserUseController {
     description: 'Job cancelled successfully',
   })
   async cancelAsyncJob(@Param('jobId') jobId: string): Promise<void> {
-    this.logger.log(`Cancelling async job: ${jobId}`);
+    this.logger.log(`Cancelling job: ${jobId}`);
 
     try {
       await this.browserUseService.cancelAsyncJob(jobId);
@@ -727,7 +720,7 @@ export class BrowserUseController {
     status: HttpStatus.OK,
     description: 'Screenshot captured successfully',
   })
-  async takeScreenshot(
+  takeScreenshot(
     @Param('sessionId') sessionId: string,
     @Body()
     options?: {
@@ -814,7 +807,7 @@ export class BrowserUseController {
     status: HttpStatus.OK,
     description: 'Data extracted successfully',
   })
-  async extractPageData(
+  extractPageData(
     @Param('sessionId') sessionId: string,
     @Body()
     extractConfig: {

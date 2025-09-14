@@ -283,7 +283,7 @@ export class BrowserUseService {
   /**
    * Take screenshot of current browser state
    */
-  async captureScreenshot(
+  captureScreenshot(
     sessionId: string,
     config?: {
       fullPage?: boolean;
@@ -355,7 +355,7 @@ export class BrowserUseService {
   /**
    * Extract DOM data from current page
    */
-  async extractDomData(
+  extractDomData(
     sessionId: string,
     config?: {
       selector?: string;
@@ -410,7 +410,7 @@ export class BrowserUseService {
    * Create async job for long-running browser automation tasks
    */
   async createAsyncJob(_dto: CreateAsyncJobDto): Promise<AsyncJobResultDto> {
-    this.logger.log(`Creating async job: ${_dto.name}`, {
+    this.logger.log(`Creating job: ${_dto.name}`, {
       jobName: _dto.name,
       jobType: _dto.jobType,
       priority: _dto.priority,
@@ -423,7 +423,7 @@ export class BrowserUseService {
    * Get async job status and results
    */
   async getAsyncJob(jobId: string): Promise<AsyncJobResultDto | null> {
-    this.logger.log(`Getting async job: ${jobId}`);
+    this.logger.log(`Getting job: ${jobId}`);
 
     return await this.asyncJobService.getAsyncJob(jobId);
   }
@@ -432,7 +432,7 @@ export class BrowserUseService {
    * Cancel async job
    */
   async cancelAsyncJob(jobId: string): Promise<void> {
-    this.logger.log(`Cancelling async job: ${jobId}`);
+    this.logger.log(`Cancelling job: ${jobId}`);
 
     return await this.asyncJobService.cancelAsyncJob(jobId);
   }
@@ -440,7 +440,7 @@ export class BrowserUseService {
   /**
    * Take screenshot (wrapper for captureScreenshot with controller-expected interface)
    */
-  async takeScreenshot(
+  takeScreenshot(
     sessionId: string,
     options: {
       fullPage?: boolean;
@@ -487,7 +487,7 @@ export class BrowserUseService {
   /**
    * Extract page data (wrapper for extractDomData with controller-expected interface)
    */
-  async extractPageData(
+  extractPageData(
     sessionId: string,
     config: {
       selectors: Record<string, string>;
@@ -1148,7 +1148,7 @@ if __name__ == "__main__":
   /**
    * Get system load information
    */
-  private async getSystemLoad(): Promise<{
+  private getSystemLoad(): Promise<{
     cpuUsage: number;
     memoryUsage: number;
     diskUsage: number;

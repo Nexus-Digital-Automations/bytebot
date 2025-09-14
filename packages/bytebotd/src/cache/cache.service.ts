@@ -174,7 +174,7 @@ export class CacheService {
    * @param value Value to cache
    * @param options Cache options
    */
-  async set<T>(
+  set<T>(
     key: string,
     value: T,
     options: CacheOptions = {},
@@ -270,7 +270,7 @@ export class CacheService {
    * @param options Cache options
    * @returns Promise<Map<string, T>> Map of key-value pairs
    */
-  async mget<T>(
+  mget<T>(
     keys: string[],
     options: CacheOptions = {},
   ): Promise<Map<string, T>> {
@@ -319,7 +319,7 @@ export class CacheService {
    * @param entries Array of key-value pairs
    * @param options Cache options
    */
-  async mset<T>(
+  mset<T>(
     entries: Array<{ key: string; value: T }>,
     options: CacheOptions = {},
   ): Promise<void> {
@@ -364,7 +364,7 @@ export class CacheService {
    * @param keys Array of keys to warm
    * @param options Cache options
    */
-  async warmCache<T>(
+  warmCache<T>(
     dataProvider: (key: string) => Promise<T | null>,
     keys: string[],
     options: CacheOptions = {},
@@ -440,7 +440,7 @@ export class CacheService {
    * @param pattern Key pattern to match (supports wildcards)
    * @param namespace Optional namespace
    */
-  async invalidatePattern(pattern: string, _namespace?: string): Promise<void> {
+  invalidatePattern(pattern: string, _namespace?: string): void {
     const operationId = `cache_invalidate_${Date.now()}`;
 
     try {

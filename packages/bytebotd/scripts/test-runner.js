@@ -28,14 +28,16 @@ const CONFIG = {
   testSuites: [
     {
       name: 'Unit Tests',
-      command: 'npm test -- --coverage --testPathIgnorePatterns=integration.spec.ts --testPathIgnorePatterns=e2e-spec.ts',
+      command:
+        'npm test -- --coverage --testPathIgnorePatterns=integration.spec.ts --testPathIgnorePatterns=e2e-spec.ts',
       coverageDir: 'coverage',
       timeout: 300000, // 5 minutes
       required: true,
     },
     {
       name: 'Integration Tests',
-      command: 'npm test -- --testPathPattern=integration.spec.ts --coverage --coverageDirectory=../coverage-integration',
+      command:
+        'npm test -- --testPathPattern=integration.spec.ts --coverage --coverageDirectory=../coverage-integration',
       coverageDir: 'coverage-integration',
       timeout: 600000, // 10 minutes
       required: true,
@@ -81,7 +83,7 @@ const testState = {
 async function main() {
   console.log('🚀 Starting BytebotD Test Runner...');
   console.log(`📊 Executing ${CONFIG.testSuites.length} test suites`);
-  console.log('=' .repeat(80));
+  console.log('='.repeat(80));
 
   try {
     // Setup test environment
@@ -104,12 +106,15 @@ async function main() {
     // Cleanup
     await cleanup();
 
-    console.log('=' .repeat(80));
-    console.log(success ? '✅ All tests completed successfully!' : '❌ Some tests failed');
-    console.log(`⏱️  Total execution time: ${formatDuration(Date.now() - testState.startTime)}`);
+    console.log('='.repeat(80));
+    console.log(
+      success ? '✅ All tests completed successfully!' : '❌ Some tests failed',
+    );
+    console.log(
+      `⏱️  Total execution time: ${formatDuration(Date.now() - testState.startTime)}`,
+    );
 
     process.exit(success ? 0 : 1);
-
   } catch (error) {
     console.error('💥 Test runner failed:', error);
     await cleanup();
@@ -127,7 +132,7 @@ async function setupTestEnvironment() {
   const dirs = [
     CONFIG.reporting.outputDir,
     CONFIG.reporting.aggregatedCoverageDir,
-    ...CONFIG.testSuites.map(suite => suite.coverageDir),
+    ...CONFIG.testSuites.map((suite) => suite.coverageDir),
   ];
 
   for (const dir of dirs) {
@@ -184,24 +189,26 @@ async function executeTestSuite(suite) {
     }
 
     if (suiteResult.memoryDelta > CONFIG.performance.memoryLeakThreshold) {
-      console.warn(`⚠️ Potential memory leak in ${suite.name}: +${Math.round(suiteResult.memoryDelta / 1024 / 1024)}MB`);
+      console.warn(
+        `⚠️ Potential memory leak in ${suite.name}: +${Math.round(suiteResult.memoryDelta / 1024 / 1024)}MB`,
+      );
     }
 
     // Load coverage data
-    await loadSuiteCoverage(suite, suiteResult);
+    await loadSuiteCoverage(suite);
 
-    console.log(suiteResult.success ? 
-      `✅ ${suite.name} completed (${formatDuration(duration)})` : 
-      `❌ ${suite.name} failed (${formatDuration(duration)})`
+    console.log(
+      suiteResult.success
+        ? `✅ ${suite.name} completed (${formatDuration(duration)})`
+        : `❌ ${suite.name} failed (${formatDuration(duration)})`,
     );
 
     if (!suiteResult.success && suite.required) {
       throw new Error(`Required test suite "${suite.name}" failed`);
     }
-
   } catch (error) {
     console.error(`❌ ${suite.name} failed:`, error.message);
-    
+
     testState.results.push({
       name: suite.name,
       success: false,
@@ -222,10 +229,10 @@ async function executeTestSuite(suite) {
 function runCommand(command, options = {}) {
   return new Promise((resolve, reject) => {
     const { timeout = 300000, env = process.env } = options;
-    
+
     let stdout = '';
     let stderr = '';
-    
+
     const child = spawn('sh', ['-c', command], {
       env,
       stdio: 'pipe',
@@ -263,16 +270,19 @@ function runCommand(command, options = {}) {
 /**
  * Load coverage data for a test suite
  */
-async function loadSuiteCoverage(suite, result) {
+async function loadSuiteCoverage(suite) {
   const coverageFile = path.join(suite.coverageDir, 'coverage-final.json');
-  
+
   if (fs.existsSync(coverageFile)) {
     try {
       const coverageData = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
       testState.coverage.suites[suite.name] = coverageData;
       console.log(`📊 Loaded coverage data for ${suite.name}`);
     } catch (error) {
-      console.warn(`⚠️ Failed to load coverage data for ${suite.name}:`, error.message);
+      console.warn(
+        `⚠️ Failed to load coverage data for ${suite.name}:`,
+        error.message,
+      );
     }
   }
 }
@@ -285,8 +295,8 @@ async function aggregateResults() {
 
   // Aggregate coverage data
   const aggregatedCoverage = {};
-  
-  for (const [suiteName, coverage] of Object.entries(testState.coverage.suites)) {
+
+  for (const [, coverage] of Object.entries(testState.coverage.suites)) {
     for (const [filePath, fileData] of Object.entries(coverage)) {
       if (!aggregatedCoverage[filePath]) {
         aggregatedCoverage[filePath] = { ...fileData };
@@ -303,8 +313,14 @@ async function aggregateResults() {
   testState.coverage.combined = aggregatedCoverage;
 
   // Write aggregated coverage
-  const aggregatedCoverageFile = path.join(CONFIG.reporting.aggregatedCoverageDir, 'coverage-final.json');
-  fs.writeFileSync(aggregatedCoverageFile, JSON.stringify(aggregatedCoverage, null, 2));
+  const aggregatedCoverageFile = path.join(
+    CONFIG.reporting.aggregatedCoverageDir,
+    'coverage-final.json',
+  );
+  fs.writeFileSync(
+    aggregatedCoverageFile,
+    JSON.stringify(aggregatedCoverage, null, 2),
+  );
 
   console.log('✅ Results aggregated');
 }
@@ -354,31 +370,43 @@ async function generateHtmlReport() {
     <p><strong>Generated:</strong> ${new Date().toISOString()}</p>
     <p><strong>Total Duration:</strong> ${formatDuration(Date.now() - testState.startTime)}</p>
     <p><strong>Test Suites:</strong> ${testState.results.length}</p>
-    <p><strong>Success Rate:</strong> ${Math.round((testState.results.filter(r => r.success).length / testState.results.length) * 100)}%</p>
+    <p><strong>Success Rate:</strong> ${Math.round((testState.results.filter((r) => r.success).length / testState.results.length) * 100)}%</p>
   </div>
 
   <h2>Test Suite Results</h2>
-  ${testState.results.map(result => `
+  ${testState.results
+    .map(
+      (result) => `
     <div class="suite ${result.success ? 'success' : 'failure'}">
       <h3>${result.name} ${result.success ? '✅' : '❌'}</h3>
       <p><strong>Duration:</strong> ${formatDuration(result.duration)}</p>
       <p><strong>Memory Delta:</strong> ${result.memoryDelta ? `${Math.round(result.memoryDelta / 1024 / 1024)}MB` : 'N/A'}</p>
       ${result.error ? `<p><strong>Error:</strong> ${result.error}</p>` : ''}
     </div>
-  `).join('')}
+  `,
+    )
+    .join('')}
 
-  ${testState.performance.slowTests.length > 0 ? `
+  ${
+    testState.performance.slowTests.length > 0
+      ? `
     <h2>Performance Analysis</h2>
     <div class="performance">
       <h3>Slow Tests (>${CONFIG.performance.slowTestThreshold}ms)</h3>
       <table>
         <tr><th>Suite</th><th>Duration</th></tr>
-        ${testState.performance.slowTests.map(test => `
+        ${testState.performance.slowTests
+          .map(
+            (test) => `
           <tr><td>${test.suite}</td><td>${formatDuration(test.duration)}</td></tr>
-        `).join('')}
+        `,
+          )
+          .join('')}
       </table>
     </div>
-  ` : ''}
+  `
+      : ''
+  }
 
   <h2>Coverage Summary</h2>
   <div class="coverage">
@@ -388,7 +416,10 @@ async function generateHtmlReport() {
 </body>
 </html>`;
 
-  fs.writeFileSync(path.join(CONFIG.reporting.outputDir, CONFIG.reporting.htmlReportFile), htmlContent);
+  fs.writeFileSync(
+    path.join(CONFIG.reporting.outputDir, CONFIG.reporting.htmlReportFile),
+    htmlContent,
+  );
 }
 
 /**
@@ -406,15 +437,19 @@ async function generateJsonReport() {
     },
     summary: {
       totalSuites: testState.results.length,
-      successfulSuites: testState.results.filter(r => r.success).length,
-      failedSuites: testState.results.filter(r => !r.success).length,
-      successRate: Math.round((testState.results.filter(r => r.success).length / testState.results.length) * 100),
+      successfulSuites: testState.results.filter((r) => r.success).length,
+      failedSuites: testState.results.filter((r) => !r.success).length,
+      successRate: Math.round(
+        (testState.results.filter((r) => r.success).length /
+          testState.results.length) *
+          100,
+      ),
     },
   };
 
   fs.writeFileSync(
     path.join(CONFIG.reporting.outputDir, CONFIG.reporting.jsonReportFile),
-    JSON.stringify(jsonReport, null, 2)
+    JSON.stringify(jsonReport, null, 2),
   );
 }
 
@@ -429,12 +464,18 @@ async function generateCoverageReport() {
 
   try {
     // Generate HTML coverage report using nyc
-    execSync(`npx nyc report --reporter=html --report-dir=${CONFIG.reporting.aggregatedCoverageDir}/html --temp-dir=${CONFIG.reporting.aggregatedCoverageDir}`, {
-      cwd: process.cwd(),
-      stdio: 'inherit',
-    });
+    execSync(
+      `npx nyc report --reporter=html --report-dir=${CONFIG.reporting.aggregatedCoverageDir}/html --temp-dir=${CONFIG.reporting.aggregatedCoverageDir}`,
+      {
+        cwd: process.cwd(),
+        stdio: 'inherit',
+      },
+    );
   } catch (error) {
-    console.warn('⚠️ Failed to generate aggregated coverage report:', error.message);
+    console.warn(
+      '⚠️ Failed to generate aggregated coverage report:',
+      error.message,
+    );
   }
 }
 
@@ -454,8 +495,11 @@ async function generatePerformanceReport() {
     tests: {
       slowTests: testState.performance.slowTests,
       totalDuration: Date.now() - testState.startTime,
-      averageSuiteDuration: testState.results.length > 0 ? 
-        testState.results.reduce((sum, r) => sum + r.duration, 0) / testState.results.length : 0,
+      averageSuiteDuration:
+        testState.results.length > 0
+          ? testState.results.reduce((sum, r) => sum + r.duration, 0) /
+            testState.results.length
+          : 0,
     },
     thresholds: {
       slowTestThreshold: CONFIG.performance.slowTestThreshold,
@@ -465,7 +509,7 @@ async function generatePerformanceReport() {
 
   fs.writeFileSync(
     path.join(CONFIG.reporting.outputDir, 'performance-report.json'),
-    JSON.stringify(performanceData, null, 2)
+    JSON.stringify(performanceData, null, 2),
   );
 }
 
@@ -473,18 +517,22 @@ async function generatePerformanceReport() {
  * Validate test results and determine overall success
  */
 function validateResults() {
-  const requiredSuites = CONFIG.testSuites.filter(suite => suite.required);
-  const requiredResults = testState.results.filter(result => 
-    requiredSuites.some(suite => suite.name === result.name)
+  const requiredSuites = CONFIG.testSuites.filter((suite) => suite.required);
+  const requiredResults = testState.results.filter((result) =>
+    requiredSuites.some((suite) => suite.name === result.name),
   );
 
-  const allRequiredPassed = requiredResults.every(result => result.success);
+  const allRequiredPassed = requiredResults.every((result) => result.success);
   const overallSuccess = allRequiredPassed && testState.results.length > 0;
 
   console.log(`\n📊 Test Validation Results:`);
   console.log(`  Required suites: ${requiredResults.length}`);
-  console.log(`  Required passed: ${requiredResults.filter(r => r.success).length}`);
-  console.log(`  Optional suites: ${testState.results.length - requiredResults.length}`);
+  console.log(
+    `  Required passed: ${requiredResults.filter((r) => r.success).length}`,
+  );
+  console.log(
+    `  Optional suites: ${testState.results.length - requiredResults.length}`,
+  );
   console.log(`  Overall success: ${overallSuccess ? 'YES' : 'NO'}`);
 
   return overallSuccess;
@@ -495,7 +543,7 @@ function validateResults() {
  */
 async function cleanup() {
   console.log('\n🧹 Cleaning up...');
-  
+
   // Could add cleanup logic here if needed
   // For now, we keep all artifacts for inspection
 

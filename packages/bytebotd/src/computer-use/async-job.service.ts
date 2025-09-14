@@ -98,7 +98,7 @@ export class AsyncJobService {
    * @param options Job execution options
    * @returns JobSubmissionResponseDto Job submission details
    */
-  async submitJob(
+  submitJob(
     action: ComputerActionDto,
     options: {
       priority?: JobPriority;
@@ -188,7 +188,7 @@ export class AsyncJobService {
    * @param jobId Job identifier
    * @returns JobStatusResponseDto Current job status
    */
-  async getJobStatus(jobId: string): Promise<JobStatusResponseDto> {
+  getJobStatus(jobId: string): JobStatusResponseDto {
     const job = this.jobs.get(jobId);
 
     if (!job) {
@@ -213,7 +213,7 @@ export class AsyncJobService {
    * @param jobId Job identifier
    * @returns JobResultResponseDto Job result data
    */
-  async getJobResult(jobId: string): Promise<JobResultResponseDto> {
+  getJobResult(jobId: string): JobResultResponseDto {
     const job = this.jobs.get(jobId);
 
     if (!job) {
@@ -253,7 +253,7 @@ export class AsyncJobService {
    * @param jobId Job identifier
    * @returns boolean True if job was cancelled
    */
-  async cancelJob(jobId: string): Promise<boolean> {
+  cancelJob(jobId: string): boolean {
     const job = this.jobs.get(jobId);
 
     if (!job) {
@@ -366,7 +366,7 @@ export class AsyncJobService {
   /**
    * Process jobs from the queue
    */
-  private async processQueue(): Promise<void> {
+  private processQueue(): void {
     if (this.isProcessing ?? this.activeJobs >= this.maxConcurrentJobs) {
       return;
     }

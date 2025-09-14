@@ -293,7 +293,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
     ...overrides,
   });
 
-  const simulateHighFrequencyInput = async (
+  const simulateHighFrequencyInput = (
     eventCount: number,
     eventType: 'mouse' | 'keyboard' = 'mouse',
   ) => {
@@ -362,7 +362,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
   });
 
   describe('Service Lifecycle Management', () => {
-    it('should initialize and start tracking properly', async () => {
+    it('should initialize and start tracking properly', () => {
       expect(service['isTracking']).toBe(false);
 
       service.startTracking();
@@ -399,7 +399,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       );
     });
 
-    it('should stop tracking and clean up resources properly', async () => {
+    it('should stop tracking and clean up resources properly', () => {
       service.startTracking();
       expect(service['isTracking']).toBe(true);
 
@@ -410,7 +410,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(mockUIOhook.removeAllListeners).toHaveBeenCalled();
     });
 
-    it('should handle multiple start/stop cycles gracefully', async () => {
+    it('should handle multiple start/stop cycles gracefully', () => {
       // Multiple starts should not cause issues
       service.startTracking();
       service.startTracking();
@@ -428,7 +428,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(mockUIOhook.stop).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle module destruction gracefully', async () => {
+    it('should handle module destruction gracefully', () => {
       service.startTracking();
       expect(service['isTracking']).toBe(true);
 
@@ -486,7 +486,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(gateway.broadcastActionEvent).toHaveBeenCalled();
     });
 
-    it('should track mouse movement with coordinate accuracy', async () => {
+    it('should track mouse movement with coordinate accuracy', () => {
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
       expect(moveHandler).toBeDefined();
 
@@ -512,14 +512,14 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         expect.objectContaining({
           type: 'mouse_move',
           coordinates: expect.objectContaining({
-            x: expect.any(Number),
-            y: expect.any(Number),
-          }),
+            x: expect.any(Number) as unknown as number,
+            y: expect.any(Number) as unknown as number,
+          }) as unknown,
         }),
       );
     });
 
-    it('should handle mouse drag operations with state management', async () => {
+    it('should handle mouse drag operations with state management', () => {
       const downHandler = mockEventListeners['mousedown'] as MouseEventHandler;
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
       const upHandler = mockEventListeners['mouseup'] as MouseEventHandler;
@@ -626,7 +626,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       );
     });
 
-    it('should handle multi-monitor coordinate mapping', async () => {
+    it('should handle multi-monitor coordinate mapping', () => {
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Test coordinates across multiple monitors
@@ -697,7 +697,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           action: 'type_text',
-          text: expect.stringContaining('hello world'),
+          text: expect.stringContaining('hello world') as unknown,
         }),
       );
     });
@@ -755,7 +755,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           action: 'press_keys',
-          keys: expect.any(Array),
+          keys: expect.any(Array) as unknown,
         }),
       );
     });
@@ -812,7 +812,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(gateway.broadcastActionEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           action: 'type_text',
-          text: expect.stringMatching(/[àñäç€¥]/),
+          text: expect.stringMatching(/[àñäç€¥]/) as unknown,
         }),
       );
     });
@@ -961,7 +961,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       service.startTracking();
     });
 
-    it('should broadcast input events to connected clients', async () => {
+    it('should broadcast input events to connected clients', () => {
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       const mouseEvent = createMouseEvent({ x: 300, y: 400 });
@@ -973,7 +973,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
         expect.objectContaining({
           type: 'mouse_move',
           coordinates: { x: 300, y: 400 },
-          timestamp: expect.any(Number),
+          timestamp: expect.any(Number) as number,
         }),
       );
     });
@@ -1005,7 +1005,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       );
     });
 
-    it('should handle WebSocket connection management during high activity', async () => {
+    it('should handle WebSocket connection management during high activity', () => {
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Simulate high activity
@@ -1022,7 +1022,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(gateway.getConnectedClients()).toBe(5);
     });
 
-    it('should support room-based broadcasting for multi-session scenarios', async () => {
+    it('should support room-based broadcasting for multi-session scenarios', () => {
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Join specific rooms
@@ -1044,7 +1044,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       service.startTracking();
     });
 
-    it('should handle Windows-specific input behaviors', async () => {
+    it('should handle Windows-specific input behaviors', () => {
       // Mock Windows platform
       Object.defineProperty(process, 'platform', {
         value: 'win32',
@@ -1066,12 +1066,12 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
           type: 'keyboard_input',
           modifiers: expect.objectContaining({
             metaKey: true,
-          }),
+          }) as unknown,
         }),
       );
     });
 
-    it('should handle macOS-specific input behaviors', async () => {
+    it('should handle macOS-specific input behaviors', () => {
       // Mock macOS platform
       Object.defineProperty(process, 'platform', {
         value: 'darwin',
@@ -1093,12 +1093,12 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
           type: 'keyboard_input',
           modifiers: expect.objectContaining({
             metaKey: true,
-          }),
+          }) as unknown,
         }),
       );
     });
 
-    it('should handle Linux-specific input behaviors', async () => {
+    it('should handle Linux-specific input behaviors', () => {
       // Mock Linux platform
       Object.defineProperty(process, 'platform', {
         value: 'linux',
@@ -1120,14 +1120,14 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
           type: 'keyboard_input',
           modifiers: expect.objectContaining({
             metaKey: true,
-          }),
+          }) as unknown,
         }),
       );
     });
   });
 
   describe('Error Handling and Recovery', () => {
-    it('should handle UIohook initialization failures gracefully', async () => {
+    it('should handle UIohook initialization failures gracefully', () => {
       mockUIOhook.start = jest.fn().mockImplementation(() => {
         throw new Error('UIohook initialization failed');
       });
@@ -1138,7 +1138,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(service['isTracking']).toBe(false);
     });
 
-    it('should recover from WebSocket broadcasting failures', async () => {
+    it('should recover from WebSocket broadcasting failures', () => {
       service.startTracking();
 
       // Mock gateway failure
@@ -1204,7 +1204,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       service.startTracking();
     });
 
-    it('should validate and sanitize input coordinates', async () => {
+    it('should validate and sanitize input coordinates', () => {
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Test edge cases and potentially malicious coordinates
@@ -1217,12 +1217,12 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
 
       for (const event of edgeCaseEvents) {
         // Should handle edge cases gracefully without crashing
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
         expect(() => moveHandler(event)).not.toThrow();
       }
     });
 
-    it('should limit input event processing rate to prevent DoS', async () => {
+    it('should limit input event processing rate to prevent DoS', () => {
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
       const startTime = Date.now();
 
@@ -1237,7 +1237,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       expect(processingTime).toBeLessThan(5000); // Should not take more than 5 seconds
     });
 
-    it('should validate keyboard input and prevent injection attacks', async () => {
+    it('should validate keyboard input and prevent injection attacks', () => {
       const keydownHandler = mockEventListeners[
         'keydown'
       ] as KeyboardEventHandler;
@@ -1266,7 +1266,7 @@ describe('Input Tracking Service - Real-time Comprehensive Test Suite', () => {
       service.startTracking();
     });
 
-    it('should coordinate with screenshot capture during input tracking', async () => {
+    it('should coordinate with screenshot capture during input tracking', () => {
       const moveHandler = mockEventListeners['mousemove'] as MouseEventHandler;
 
       // Trigger mouse movement
