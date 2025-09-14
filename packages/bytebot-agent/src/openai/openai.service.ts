@@ -162,7 +162,7 @@ export class OpenAIService implements BytebotAgentService {
         messageContentBlocks.every((block) => isUserActionContentBlock(block))
       ) {
         const userActionContentBlocks = messageContentBlocks.flatMap(
-          (block) => block.content,
+          (block) => block.content ?? [],
         );
         for (const block of userActionContentBlocks) {
           if (isComputerToolUseContentBlock(block)) {

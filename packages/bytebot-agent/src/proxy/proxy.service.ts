@@ -140,7 +140,7 @@ export class ProxyService implements BytebotAgentService {
         messageContentBlocks.every((block) => isUserActionContentBlock(block))
       ) {
         const userActionBlocks = messageContentBlocks.flatMap(
-          (block) => block.content,
+          (block) => block.content ?? [],
         );
 
         for (const block of userActionBlocks) {

@@ -274,7 +274,9 @@ export class AgentProcessor {
               (block: MessageContentBlock) =>
                 block.type === MessageContentType._Text,
             )
-            .map((block: TextContentBlock) => block.text)
+            .map(
+              (block: MessageContentBlock) => (block as TextContentBlock).text,
+            )
             .join('\n');
 
           const summary = await this.summariesService.create({
