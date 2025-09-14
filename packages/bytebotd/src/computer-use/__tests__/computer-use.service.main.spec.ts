@@ -542,7 +542,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     describe('Invalid Action Handling', () => {
       it('should throw _error for unsupported action type', async () => {
         // Arrange - Create invalid action by type assertion
-        const invalidAction: unknown = {
+        const invalidAction = {
           action: 'invalid_action',
           someParam: 'value',
         } as any as ComputerAction;
@@ -555,7 +555,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should handle exhaustive check in default case', async () => {
         // Arrange - Create action with unknown type
-        const unknownAction: unknown = {
+        const unknownAction = {
           action: 'completely_unknown',
         } as any as ComputerAction;
 

@@ -414,7 +414,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         `[${testId}] Testing authorization timing consistency`,
       );
 
-      const users: unknown = [
+      const users = [
         { role: UserRole._ADMIN, expected: true },
         { role: UserRole._OPERATOR, expected: false },
         { role: UserRole._VIEWER, expected: false },

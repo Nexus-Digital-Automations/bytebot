@@ -1,7 +1,3 @@
- 
- 
- 
- 
 /* eslint-env jest */
 /**
  * Input Tracking Controller Test Suite
@@ -324,7 +320,7 @@ describe('InputTrackingController', () => {
       console.log(`[${testId}] Testing service error handling`);
 
       // Mock service to throw an error
-      (jest.spyOn(service, 'startTracking')).mockImplementation(() => {
+      jest.spyOn(service, 'startTracking').mockImplementation(() => {
         throw new Error('Service unavailable');
       });
 
@@ -520,7 +516,7 @@ describe('InputTrackingController', () => {
       console.log(`[${testId}] Testing service method exceptions`);
 
       // Test startTracking exception
-      (jest.spyOn(service, 'startTracking')).mockImplementation(() => {
+      jest.spyOn(service, 'startTracking').mockImplementation(() => {
         throw new Error('Hardware not available');
       });
 
@@ -529,7 +525,7 @@ describe('InputTrackingController', () => {
       );
 
       // Test stopTracking exception
-      (jest.spyOn(service, 'stopTracking')).mockImplementation(() => {
+      jest.spyOn(service, 'stopTracking').mockImplementation(() => {
         throw new Error('Cannot stop tracking');
       });
 
@@ -570,10 +566,10 @@ describe('InputTrackingController', () => {
 
       const logCalls = (logger.log as jest.Mock).mock.calls as unknown[][];
 
-      expect((logCalls[0][1] as Record<string, unknown>).securityEvent).toBe(
+      expect((logCalls[0]?.[1] as Record<string, unknown>)?.securityEvent).toBe(
         'input_tracking_started',
       );
-      expect((logCalls[1][1] as Record<string, unknown>).securityEvent).toBe(
+      expect((logCalls[1]?.[1] as Record<string, unknown>)?.securityEvent).toBe(
         'input_tracking_stopped',
       );
 

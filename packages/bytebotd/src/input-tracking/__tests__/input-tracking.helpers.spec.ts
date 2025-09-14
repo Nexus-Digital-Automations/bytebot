@@ -56,8 +56,8 @@ describe('InputTrackingHelpers', () => {
       Object.entries(keyInfoMap).forEach(([_keyCode, keyInfo]) => {
         expect(keyInfo).toHaveProperty('name');
         expect(keyInfo).toHaveProperty('isPrintable');
-        expect(typeof keyInfo.name).toBe('string');
-        expect(typeof keyInfo.isPrintable).toBe('boolean');
+        expect(typeof keyInfo?.name).toBe('string');
+        expect(typeof keyInfo?.isPrintable).toBe('boolean');
 
         // Optional properties should be strings if present
         if (keyInfo.string !== undefined) {
@@ -397,8 +397,8 @@ describe('InputTrackingHelpers', () => {
       navKeys.forEach(({ key, name }) => {
         const keyInfo = keyInfoMap[key];
         expect(keyInfo).toBeDefined();
-        expect(keyInfo.name).toBe(name);
-        expect(keyInfo.isPrintable).toBe(false);
+        expect(keyInfo?.name).toBe(name);
+        expect(keyInfo?.isPrintable).toBe(false);
       });
 
       console.log(`[${testId}] Numpad navigation keys mapping test completed`);
@@ -427,8 +427,8 @@ describe('InputTrackingHelpers', () => {
       specialKeys.forEach(({ key, name }) => {
         const keyInfo = keyInfoMap[key];
         expect(keyInfo).toBeDefined();
-        expect(keyInfo.name).toBe(name);
-        expect(keyInfo.isPrintable).toBe(false);
+        expect(keyInfo?.name).toBe(name);
+        expect(keyInfo?.isPrintable).toBe(false);
       });
 
       console.log(`[${testId}] Special control keys mapping test completed`);
@@ -444,15 +444,15 @@ describe('InputTrackingHelpers', () => {
       const leftBracket = keyInfoMap[UiohookKey.BracketLeft];
       const rightBracket = keyInfoMap[UiohookKey.BracketRight];
 
-      expect(leftBracket.name).toBe('LeftBracket');
-      expect(leftBracket.string).toBe('[');
-      expect(leftBracket.shiftString).toBe('{');
-      expect(leftBracket.isPrintable).toBe(true);
+      expect(leftBracket?.name).toBe('LeftBracket');
+      expect(leftBracket?.string).toBe('[');
+      expect(leftBracket?.shiftString).toBe('{');
+      expect(leftBracket?.isPrintable).toBe(true);
 
-      expect(rightBracket.name).toBe('RightBracket');
-      expect(rightBracket.string).toBe(']');
-      expect(rightBracket.shiftString).toBe('}');
-      expect(rightBracket.isPrintable).toBe(true);
+      expect(rightBracket?.name).toBe('RightBracket');
+      expect(rightBracket?.string).toBe(']');
+      expect(rightBracket?.shiftString).toBe('}');
+      expect(rightBracket?.isPrintable).toBe(true);
 
       console.log(`[${testId}] Bracket keys mapping test completed`);
     });
@@ -465,15 +465,15 @@ describe('InputTrackingHelpers', () => {
       const quote = keyInfoMap[UiohookKey.Quote];
       const backquote = keyInfoMap[UiohookKey.Backquote];
 
-      expect(quote.name).toBe('Quote');
-      expect(quote.string).toBe("'");
-      expect(quote.shiftString).toBe('"');
-      expect(quote.isPrintable).toBe(true);
+      expect(quote?.name).toBe('Quote');
+      expect(quote?.string).toBe("'");
+      expect(quote?.shiftString).toBe('"');
+      expect(quote?.isPrintable).toBe(true);
 
-      expect(backquote.name).toBe('Grave');
-      expect(backquote.string).toBe('`');
-      expect(backquote.shiftString).toBe('~');
-      expect(backquote.isPrintable).toBe(true);
+      expect(backquote?.name).toBe('Grave');
+      expect(backquote?.string).toBe('`');
+      expect(backquote?.shiftString).toBe('~');
+      expect(backquote?.isPrintable).toBe(true);
 
       console.log(`[${testId}] Quote keys mapping test completed`);
     });
@@ -485,15 +485,15 @@ describe('InputTrackingHelpers', () => {
       const slash = keyInfoMap[UiohookKey.Slash];
       const backslash = keyInfoMap[UiohookKey.Backslash];
 
-      expect(slash.name).toBe('Slash');
-      expect(slash.string).toBe('/');
-      expect(slash.shiftString).toBe('?');
-      expect(slash.isPrintable).toBe(true);
+      expect(slash?.name).toBe('Slash');
+      expect(slash?.string).toBe('/');
+      expect(slash?.shiftString).toBe('?');
+      expect(slash?.isPrintable).toBe(true);
 
-      expect(backslash.name).toBe('Backslash');
-      expect(backslash.string).toBe('\\');
-      expect(backslash.shiftString).toBe('|');
-      expect(backslash.isPrintable).toBe(true);
+      expect(backslash?.name).toBe('Backslash');
+      expect(backslash?.string).toBe('\\');
+      expect(backslash?.shiftString).toBe('|');
+      expect(backslash?.isPrintable).toBe(true);
 
       console.log(`[${testId}] Slash keys mapping test completed`);
     });
@@ -522,7 +522,7 @@ describe('InputTrackingHelpers', () => {
       // Test with key code 0 (special case)
       const zeroKey = keyInfoMap[0];
       expect(zeroKey).toBeDefined();
-      expect(zeroKey.name).toBe('Alt');
+      expect(zeroKey?.name).toBe('Alt');
 
       console.log(`[${testId}] Boundary key codes test completed`);
     });
@@ -533,11 +533,11 @@ describe('InputTrackingHelpers', () => {
 
       Object.entries(keyInfoMap).forEach(([_keyCode, keyInfo]) => {
         // Name should always be a non-empty string
-        expect(typeof keyInfo.name).toBe('string');
-        expect(keyInfo.name.length).toBeGreaterThan(0);
+        expect(typeof keyInfo?.name).toBe('string');
+        expect(keyInfo?.name.length).toBeGreaterThan(0);
 
         // isPrintable should always be boolean
-        expect(typeof keyInfo.isPrintable).toBe('boolean');
+        expect(typeof keyInfo?.isPrintable).toBe('boolean');
 
         // string and shiftString, if defined, should be strings
         if (keyInfo.string !== undefined) {
@@ -548,7 +548,7 @@ describe('InputTrackingHelpers', () => {
         }
 
         // If printable, should have string property
-        if (keyInfo.isPrintable) {
+        if (keyInfo?.isPrintable) {
           expect(keyInfo.string).toBeDefined();
         }
       });
@@ -571,7 +571,7 @@ describe('InputTrackingHelpers', () => {
         const keyInfo = keyInfoMap[randomKeyCode];
         // Just access the property to ensure lookup is performed
         if (keyInfo) {
-          const _ = keyInfo.name;
+          const _ = keyInfo?.name;
         }
       }
 
@@ -597,7 +597,7 @@ describe('InputTrackingHelpers', () => {
 
       // Each entry should be reasonably sized
       Object.values(keyInfoMap).forEach((keyInfo) => {
-        expect(keyInfo.name.length).toBeLessThan(50); // Reasonable name length
+        expect(keyInfo?.name.length).toBeLessThan(50); // Reasonable name length
         if (keyInfo.string) {
           expect(keyInfo.string.length).toBeLessThan(10); // Characters should be short
         }
@@ -619,13 +619,13 @@ describe('InputTrackingHelpers', () => {
 
       Object.values(keyInfoMap).forEach((keyInfo) => {
         // Name should be properly formatted (either starts with uppercase letter or digit)
-        expect(keyInfo.name[0]).toMatch(/[A-Z0-9]/);
+        expect(keyInfo?.name[0]).toMatch(/[A-Z0-9]/);
 
         // Should not have trailing spaces
-        expect(keyInfo.name.trim()).toBe(keyInfo.name);
+        expect(keyInfo?.name.trim()).toBe(keyInfo?.name);
 
         // Should not be empty
-        expect(keyInfo.name.length).toBeGreaterThan(0);
+        expect(keyInfo?.name.length).toBeGreaterThan(0);
       });
 
       console.log(`[${testId}] Naming conventions consistency test completed`);
@@ -636,7 +636,7 @@ describe('InputTrackingHelpers', () => {
       console.log(`[${testId}] Testing printable classification logic`);
 
       Object.values(keyInfoMap).forEach((keyInfo) => {
-        if (keyInfo.isPrintable) {
+        if (keyInfo?.isPrintable) {
           // Printable keys should have a string representation
           expect(keyInfo.string).toBeDefined();
           expect(typeof keyInfo.string).toBe('string');
@@ -691,8 +691,8 @@ describe('InputTrackingHelpers', () => {
 
       // Test keys that produce special characters with shift
       const minusKey = keyInfoMap[UiohookKey.Minus];
-      expect(minusKey.string).toBe('-');
-      expect(minusKey.shiftString).toBe('_');
+      expect(minusKey?.string).toBe('-');
+      expect(minusKey?.shiftString).toBe('_');
 
       const equalKey = keyInfoMap[UiohookKey.Equal];
       expect(equalKey?.string).toBe('=');

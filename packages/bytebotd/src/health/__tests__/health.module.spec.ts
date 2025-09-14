@@ -145,10 +145,8 @@ describe('HealthModule', () => {
         ],
       }).compile();
 
-      const testService: unknown = testModule.get(
-        'TestServiceUsingHealth',
-      ) as any;
-      const exportedHealthService = testService.getHealthService();
+      const testService = testModule.get('TestServiceUsingHealth') as any;
+      const exportedHealthService = (testService as any).getHealthService();
 
       expect(exportedHealthService).toBeDefined();
       expect(exportedHealthService).toBeInstanceOf(HealthService);
@@ -494,7 +492,7 @@ describe('HealthModule', () => {
         ],
       }).compile();
 
-      const customHealthIndicator: unknown = extendedModule.get(
+      const customHealthIndicator = extendedModule.get(
         'CustomHealthIndicator',
       ) as any;
       expect(customHealthIndicator).toBeDefined();

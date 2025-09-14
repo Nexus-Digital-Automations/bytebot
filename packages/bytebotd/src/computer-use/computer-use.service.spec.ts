@@ -751,7 +751,7 @@ describe('ComputerUseService', () => {
       });
 
       it('should handle unsupported application', async () => {
-        const action: unknown = {
+        const action = {
           action: 'application' as const,
           application: 'unsupported-app' as any,
         };

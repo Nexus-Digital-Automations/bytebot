@@ -648,7 +648,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_null_role`;
       console.log(`[${testId}] Testing null role handling`);
 
-      const user: unknown = createMockUser(UserRole._VIEWER, [], {
+      const user = createMockUser(UserRole._VIEWER, [], {
         role: null as any,
       });
       const context = createMockExecutionContext(user);

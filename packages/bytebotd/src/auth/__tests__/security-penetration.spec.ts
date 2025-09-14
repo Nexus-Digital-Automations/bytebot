@@ -618,7 +618,7 @@ describe('Security Penetration Testing Suite', () => {
         `[${testId}] EXECUTING: Object manipulation privilege escalation attack`,
       );
 
-      const attackVectors: unknown = [
+      const attackVectors = [
         {
           name: 'prototype-pollution',
           user: {
@@ -793,7 +793,7 @@ describe('Security Penetration Testing Suite', () => {
         `[${testId}] EXECUTING: Authorization timing side-channel analysis`,
       );
 
-      const roleTestCases: unknown = [
+      const roleTestCases = [
         {
           role: UserRole._ADMIN,
           requiredRole: UserRole._ADMIN,
