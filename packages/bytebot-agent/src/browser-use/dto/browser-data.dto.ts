@@ -38,7 +38,7 @@ export class ExtractionRule {
   @ApiProperty({ description: 'Field name for extracted data' })
   @IsString()
   @MinLength(1)
-  fieldName: string;
+  fieldName!: string;
 
   @ApiProperty({ description: 'CSS selector for data extraction' })
   @IsOptional()
@@ -180,10 +180,10 @@ export class ExtractDataDto {
 
 export class ExtractedDataItem {
   @ApiProperty({ description: 'Extracted field values' })
-  data: Record<string, any>;
+  data!: Record<string, any>;
 
   @ApiProperty({ description: 'Source element information' })
-  source: {
+  source!: {
     selector?: string;
     xpath?: string;
     tagName: string;
@@ -192,39 +192,39 @@ export class ExtractedDataItem {
   };
 
   @ApiProperty({ description: 'Extraction confidence score (0-1)' })
-  confidence: number;
+  confidence!: number;
 
   @ApiProperty({ description: 'Item index in extraction results' })
-  index: number;
+  index!: number;
 }
 
 export class DataExtractionResponseDto {
   @ApiProperty({ description: 'Whether extraction was successful' })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({
     description: 'Extraction method used',
     enum: ExtractionMethod,
   })
-  method: ExtractionMethod;
+  method!: ExtractionMethod;
 
   @ApiProperty({ description: 'Output format', enum: OutputFormat })
-  outputFormat: OutputFormat;
+  outputFormat!: OutputFormat;
 
   @ApiProperty({ description: 'Number of items extracted' })
-  itemsExtracted: number;
+  itemsExtracted!: number;
 
   @ApiProperty({
     description: 'Extracted data items',
     type: [ExtractedDataItem],
   })
-  extractedData: ExtractedDataItem[];
+  extractedData!: ExtractedDataItem[];
 
   @ApiProperty({ description: 'Raw extracted data in requested format' })
-  rawData: string;
+  rawData!: string;
 
   @ApiProperty({ description: 'Page metadata' })
-  pageMetadata: {
+  pageMetadata!: {
     url: string;
     title: string;
     description?: string;
@@ -240,7 +240,7 @@ export class DataExtractionResponseDto {
   };
 
   @ApiProperty({ description: 'Extraction statistics' })
-  statistics: {
+  statistics!: {
     totalElements: number;
     processedElements: number;
     matchedElements: number;
@@ -268,7 +268,7 @@ export class DataExtractionResponseDto {
   }>;
 
   @ApiProperty({ description: 'Extraction timestamp' })
-  timestamp: Date;
+  timestamp!: Date;
 
   @ApiProperty({ description: 'Screenshot after extraction (base64)' })
   screenshot?: string;

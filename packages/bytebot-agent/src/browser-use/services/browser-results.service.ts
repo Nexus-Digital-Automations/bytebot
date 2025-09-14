@@ -725,7 +725,7 @@ export class BrowserResultsService {
           pageLoadTimes: taskResults
             .filter((r) => r.data.url)
             .map((r) => ({
-              url: r.data.url,
+              url: r.data.url!,
               loadTimeMs: r.data.metrics?.loadTime || 0,
               timestamp: r.timestamp,
             })),

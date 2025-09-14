@@ -406,7 +406,7 @@ export class BrowserDomService {
       const response: BrowserElementResponseDto = {
         success: true,
         message: 'Element clicked successfully',
-        element: elementInfo,
+        element: elementInfo || undefined,
         timestamp: new Date(),
         executionTimeMs: result.executionTime || 0,
       };
@@ -469,15 +469,14 @@ export class BrowserDomService {
       }
 
       // Get element information after typing
-      const elementInfo = await this.getElementInfo(
-        browserProcess.id,
-        typeDto.selector,
-      );
+      const elementInfo = typeDto.selector
+        ? await this.getElementInfo(browserProcess.id, typeDto.selector)
+        : null;
 
       const response: BrowserElementResponseDto = {
         success: true,
         message: 'Text typed successfully',
-        element: elementInfo,
+        element: elementInfo || undefined,
         timestamp: new Date(),
         executionTimeMs: result.executionTime || 0,
       };
@@ -969,7 +968,7 @@ export class BrowserDomService {
       const response: BrowserElementResponseDto = {
         success: true,
         message: 'Text typed successfully',
-        element: elementInfo,
+        element: elementInfo || undefined,
         timestamp: new Date(),
         executionTimeMs: result.executionTime || 0,
       };
@@ -1044,7 +1043,7 @@ export class BrowserDomService {
       const response: BrowserElementResponseDto = {
         success: true,
         message: 'Element clicked successfully',
-        element: elementInfo,
+        element: elementInfo || undefined,
         timestamp: new Date(),
         executionTimeMs: result.executionTime || 0,
       };
@@ -1185,7 +1184,7 @@ export class BrowserDomService {
       const response: BrowserElementResponseDto = {
         success: true,
         message: 'Element found successfully',
-        element: elementInfo,
+        element: elementInfo || undefined,
         timestamp: new Date(),
         executionTimeMs: 0,
       };

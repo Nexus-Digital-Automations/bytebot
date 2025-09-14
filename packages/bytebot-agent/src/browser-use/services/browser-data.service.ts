@@ -687,6 +687,9 @@ export class BrowserDataService {
         await this.delay(1000 * Math.pow(2, attempt - 1));
       }
     }
+
+    // Fallback return (should never reach here due to throws above)
+    throw new Error('Maximum retry attempts exceeded');
   }
 
   /**

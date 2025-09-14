@@ -215,28 +215,28 @@ export class CaptureScreenshotDto {
 
 export class ScreenshotResponseDto {
   @ApiProperty({ description: 'Unique screenshot identifier' })
-  id: string;
+  id!: string;
 
   @ApiProperty({ description: 'Screenshot data as base64 string' })
-  data: string;
+  data!: string;
 
   @ApiProperty({ description: 'Screenshot format', enum: ScreenshotFormat })
-  format: ScreenshotFormat;
+  format!: ScreenshotFormat;
 
   @ApiProperty({ description: 'Screenshot type', enum: ScreenshotType })
-  type: ScreenshotType;
+  type!: ScreenshotType;
 
   @ApiProperty({ description: 'File size in bytes' })
-  sizeBytes: number;
+  sizeBytes!: number;
 
   @ApiProperty({ description: 'Screenshot dimensions' })
-  dimensions: {
+  dimensions!: {
     width: number;
     height: number;
   };
 
   @ApiProperty({ description: 'Screenshot metadata' })
-  metadata: {
+  metadata!: {
     capturedAt: Date;
     sessionId: string;
     url: string;
@@ -250,10 +250,10 @@ export class ScreenshotResponseDto {
   filePath?: string;
 
   @ApiProperty({ description: 'Screenshot capture duration in milliseconds' })
-  captureDurationMs: number;
+  captureDurationMs!: number;
 
   @ApiProperty({ description: 'Whether screenshot was successful' })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({ description: 'Screenshot identifier (legacy)' })
   screenshotId?: string;

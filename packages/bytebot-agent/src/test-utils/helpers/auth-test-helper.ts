@@ -206,8 +206,8 @@ export class AuthTestDataFactory {
  */
 export class AuthTestHelper {
   private config: AuthTestConfig;
-  private mockJwtService: Partial<JwtService>;
-  private mockReflector: Partial<Reflector>;
+  private mockJwtService!: Partial<JwtService>;
+  private mockReflector!: Partial<Reflector>;
 
   constructor(config: AuthTestConfig = {}) {
     this.config = {

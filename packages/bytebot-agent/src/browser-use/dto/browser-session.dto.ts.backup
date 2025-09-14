@@ -157,7 +157,7 @@ export class CreateBrowserSessionDto {
   @IsString()
   @MinLength(1)
   @MaxLength(255)
-  name!: string;
+  name: string;
 
   @ApiPropertyOptional({
     description: 'Description of the session purpose',
@@ -246,110 +246,110 @@ export class CreateBrowserSessionDto {
 
 export class BrowserTabInfo {
   @ApiProperty({ description: 'Tab identifier' })
-  id!: string;
+  id: string;
 
   @ApiProperty({ description: 'Tab title' })
-  title!: string;
+  title: string;
 
   @ApiProperty({ description: 'Tab URL' })
-  url!: string;
+  url: string;
 
   @ApiProperty({ description: 'Whether this tab is active' })
-  active!: boolean;
+  active: boolean;
 
   @ApiProperty({ description: 'Tab creation timestamp' })
-  createdAt!: Date;
+  createdAt: Date;
 
   @ApiProperty({ description: 'Last activity timestamp' })
-  lastActivity!: Date;
+  lastActivity: Date;
 
   @ApiProperty({ description: 'Tab loading status' })
-  loadingStatus!: 'loading' | 'complete' | 'error';
+  loadingStatus: 'loading' | 'complete' | 'error';
 }
 
 export class BrowserSessionMetrics {
   @ApiProperty({ description: 'Total session duration in seconds' })
-  totalDurationSeconds!: number;
+  totalDurationSeconds: number;
 
   @ApiProperty({ description: 'Number of pages visited' })
-  pagesVisited!: number;
+  pagesVisited: number;
 
   @ApiProperty({ description: 'Number of actions performed' })
-  actionsPerformed!: number;
+  actionsPerformed: number;
 
   @ApiProperty({ description: 'Number of screenshots taken' })
-  screenshotsTaken!: number;
+  screenshotsTaken: number;
 
   @ApiProperty({ description: 'Number of errors encountered' })
-  errorsEncountered!: number;
+  errorsEncountered: number;
 
   @ApiProperty({ description: 'Number of network requests' })
-  networkRequests!: number;
+  networkRequests: number;
 
   @ApiProperty({ description: 'Total data transferred in bytes' })
-  dataTransferredBytes!: number;
+  dataTransferredBytes: number;
 
   @ApiProperty({ description: 'Average page load time in milliseconds' })
-  averagePageLoadTime!: number;
+  averagePageLoadTime: number;
 
   @ApiProperty({ description: 'Memory usage in MB' })
-  memoryUsageMB!: number;
+  memoryUsageMB: number;
 
   @ApiProperty({ description: 'CPU usage percentage' })
-  cpuUsagePercent!: number;
+  cpuUsagePercent: number;
 }
 
 export class BrowserSessionResponseDto {
   @ApiProperty({ description: 'Unique session identifier' })
-  id!: string;
+  id: string;
 
   @ApiProperty({ description: 'Session name' })
-  name!: string;
+  name: string;
 
   @ApiProperty({ description: 'Session description' })
   description?: string;
 
   @ApiProperty({ description: 'Whether session operation was successful' })
-  success!: boolean;
+  success: boolean;
 
   @ApiProperty({
     description: 'Current session status',
     enum: BrowserSessionStatus,
   })
-  status!: BrowserSessionStatus;
+  status: BrowserSessionStatus;
 
   @ApiProperty({ description: 'Browser profile configuration' })
-  profile!: BrowserProfileConfig;
+  profile: BrowserProfileConfig;
 
   @ApiProperty({ description: 'Session timeout in seconds' })
-  timeoutSeconds!: number;
+  timeoutSeconds: number;
 
   @ApiProperty({ description: 'Screenshot capture enabled' })
-  enableScreenshots!: boolean;
+  enableScreenshots: boolean;
 
   @ApiProperty({ description: 'Video recording enabled' })
-  enableVideoRecording!: boolean;
+  enableVideoRecording: boolean;
 
   @ApiProperty({ description: 'Network logging enabled' })
-  enableNetworkLogging!: boolean;
+  enableNetworkLogging: boolean;
 
   @ApiProperty({ description: 'Console logging enabled' })
-  enableConsoleLogging!: boolean;
+  enableConsoleLogging: boolean;
 
   @ApiProperty({ description: 'Session tags', type: [String] })
   tags?: string[];
 
   @ApiProperty({ description: 'Session creation timestamp' })
-  createdAt!: Date;
+  createdAt: Date;
 
   @ApiProperty({ description: 'Last activity timestamp' })
-  lastActivity!: Date;
+  lastActivity: Date;
 
   @ApiProperty({ description: 'Session expiration timestamp' })
-  expiresAt!: Date;
+  expiresAt: Date;
 
   @ApiProperty({ description: 'User who created the session' })
-  createdBy!: string;
+  createdBy: string;
 
   @ApiProperty({ description: 'Current URL in active tab' })
   currentUrl?: string;
@@ -361,13 +361,13 @@ export class BrowserSessionResponseDto {
   pageTitle?: string;
 
   @ApiProperty({ description: 'Open browser tabs', type: [BrowserTabInfo] })
-  tabs!: BrowserTabInfo[];
+  tabs: BrowserTabInfo[];
 
   @ApiProperty({ description: 'Number of active tabs' })
-  activeTabsCount!: number;
+  activeTabsCount: number;
 
   @ApiProperty({ description: 'Session performance metrics' })
-  metrics!: BrowserSessionMetrics;
+  metrics: BrowserSessionMetrics;
 
   @ApiProperty({ description: 'Browser process ID' })
   processId?: string;
@@ -391,25 +391,25 @@ export class BrowserSessionListResponseDto {
     description: 'List of browser sessions',
     type: [BrowserSessionResponseDto],
   })
-  sessions!: BrowserSessionResponseDto[];
+  sessions: BrowserSessionResponseDto[];
 
   @ApiProperty({ description: 'Total number of sessions' })
-  total!: number;
+  total: number;
 
   @ApiProperty({ description: 'Number of active sessions' })
-  activeCount!: number;
+  activeCount: number;
 
   @ApiProperty({ description: 'Number of idle sessions' })
-  idleCount!: number;
+  idleCount: number;
 
   @ApiProperty({ description: 'Number of sessions with errors' })
-  errorCount!: number;
+  errorCount: number;
 
   @ApiProperty({ description: 'Total memory usage across all sessions in MB' })
-  totalMemoryUsageMB!: number;
+  totalMemoryUsageMB: number;
 
   @ApiProperty({ description: 'Summary statistics' })
-  summary!: {
+  summary: {
     totalSessions: number;
     activeSessions: number;
     idleSessions: number;

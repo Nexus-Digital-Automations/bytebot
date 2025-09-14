@@ -125,6 +125,15 @@ interface RateLimitConfig {
 }
 
 /**
+ * Extended Express Request interface with custom properties
+ */
+interface AuthenticatedRequest extends Request {
+  requestId?: string;
+  user?: EnhancedJwtPayload;
+  securityContext?: SecurityContext;
+}
+
+/**
  * Enterprise Authentication Guard
  */
 @Injectable()
@@ -170,12 +179,12 @@ export class EnterpriseAuthGuard implements CanActivate {
    */
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const startTime = performance.now();
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
     try {
       // Generate request ID for tracking
       const requestId = crypto.randomUUID();
-      request['requestId'] = requestId;
+      request.requestId = requestId;
 
       // Create security context
       const securityContext = this.createSecurityContext(request);
@@ -208,8 +217,8 @@ export class EnterpriseAuthGuard implements CanActivate {
       this.updateSessionActivity(payload, request);
 
       // Attach security context to request
-      request['user'] = payload;
-      request['securityContext'] = securityContext;
+      request.user = payload;
+      request.securityContext = securityContext;
 
       const processingTime = performance.now() - startTime;
       this.logger.debug('Authentication successful', {
@@ -236,7 +245,7 @@ export class EnterpriseAuthGuard implements CanActivate {
       });
 
       this.logger.warn('Authentication failed', {
-        requestId: request['requestId'] as string,
+        requestId: request.requestId!,
         error: error instanceof Error ? error.message : String(error),
         processingTimeMs: processingTime.toFixed(2),
         ipAddress: this.getClientIP(request),

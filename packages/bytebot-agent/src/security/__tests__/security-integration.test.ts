@@ -149,7 +149,7 @@ describe('🔐 Security Integration & Performance Testing', () => {
           'security.maxConcurrentSessions': 10,
           'security.tokenCacheTimeout': 5 * 60 * 1000,
         };
-        return configMap[key] || defaultValue;
+        return (configMap as any)[key] || defaultValue;
       }),
     } as any;
 

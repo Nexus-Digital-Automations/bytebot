@@ -191,7 +191,7 @@ export class AnthropicService implements BytebotAgentService {
       }
 
       if (index === messages.length - 1) {
-        content[content.length - 1]['cache_control'] = {
+        (content[content.length - 1] as any).cache_control = {
           type: 'ephemeral',
         };
       }

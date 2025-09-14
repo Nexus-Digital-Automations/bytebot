@@ -107,7 +107,7 @@ export class CreateTaskDto {
   })
   @IsString()
   @Length(1, 200)
-  title!: string;
+  title: string;
 
   @ApiPropertyOptional({
     description: 'Detailed task description',
@@ -125,7 +125,7 @@ export class CreateTaskDto {
     example: TaskCategory.FILE_PROCESSING,
   })
   @IsEnum(TaskCategory)
-  category!: TaskCategory;
+  category: TaskCategory;
 
   @ApiPropertyOptional({
     description: 'Task priority level',
@@ -292,14 +292,14 @@ export class TaskResponseDto {
     example: 'task-123e4567-e89b-12d3-a456-426614174000',
   })
   @IsUUID()
-  id!: string;
+  id: string;
 
   @ApiProperty({
     description: 'Task title',
     example: 'Process document upload',
   })
   @IsString()
-  title!: string;
+  title: string;
 
   @ApiPropertyOptional({
     description: 'Task description',
@@ -315,7 +315,7 @@ export class TaskResponseDto {
     example: TaskStatus.COMPLETED,
   })
   @IsEnum(TaskStatus)
-  status!: TaskStatus;
+  status: TaskStatus;
 
   @ApiProperty({
     description: 'Task category',
@@ -323,7 +323,7 @@ export class TaskResponseDto {
     example: TaskCategory.FILE_PROCESSING,
   })
   @IsEnum(TaskCategory)
-  category!: TaskCategory;
+  category: TaskCategory;
 
   @ApiPropertyOptional({
     description: 'Task priority',
@@ -347,7 +347,7 @@ export class TaskResponseDto {
     example: '2024-01-01T10:00:00Z',
   })
   @IsDateString()
-  createdAt!: string;
+  createdAt: string;
 
   @ApiPropertyOptional({
     description: 'Task completion timestamp',
@@ -436,7 +436,7 @@ export class TaskResponseDtoV2 extends TaskResponseDto {
     example: '2024-01-01T10:05:00Z',
   })
   @IsDateString()
-  updatedAt!: string;
+  updatedAt: string;
 }
 
 /**
@@ -521,7 +521,7 @@ export class PaginatedTaskResponseDto<T = TaskResponseDto> {
     description: 'Array of tasks',
     isArray: true,
   })
-  data!: T[];
+  data: T[];
 
   @ApiProperty({
     description: 'Pagination metadata',
@@ -532,7 +532,7 @@ export class PaginatedTaskResponseDto<T = TaskResponseDto> {
       pages: 5,
     },
   })
-  pagination!: {
+  pagination: {
     page: number;
     limit: number;
     total: number;

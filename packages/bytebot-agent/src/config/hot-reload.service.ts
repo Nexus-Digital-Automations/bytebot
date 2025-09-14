@@ -296,7 +296,7 @@ export class ConfigurationHotReloadService
     const customPaths = process.env.ADDITIONAL_CONFIG_PATHS?.split(',') || [];
 
     return [...basePaths, ...customPaths].filter((path) => {
-      if (existsSync(path)) {
+      if (path && existsSync(path)) {
         this.logger.debug(`Configuration file found: ${path}`);
         return true;
       }
@@ -317,7 +317,7 @@ export class ConfigurationHotReloadService
     ].filter(Boolean);
 
     return envPaths.filter((path) => {
-      if (existsSync(path)) {
+      if (path && existsSync(path)) {
         this.logger.debug(`Environment file found: ${path}`);
         return true;
       }
@@ -339,7 +339,7 @@ export class ConfigurationHotReloadService
     ].filter(Boolean);
 
     return dockerPaths.filter((path) => {
-      if (existsSync(path)) {
+      if (path && existsSync(path)) {
         this.logger.debug(`Docker Compose file found: ${path}`);
         return true;
       }

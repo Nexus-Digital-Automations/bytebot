@@ -217,7 +217,7 @@ export class ProxyService implements BytebotAgentService {
                 role: 'assistant',
                 content: null,
               };
-              message['reasoning_content'] = thinkingBlock.thinking;
+              (message as any)['reasoning_content'] = thinkingBlock.thinking;
               chatMessages.push(message);
               break;
             }
@@ -290,11 +290,11 @@ export class ProxyService implements BytebotAgentService {
       } as TextContentBlock);
     }
 
-    if (message['reasoning_content']) {
+    if ((message as any)['reasoning_content']) {
       contentBlocks.push({
         type: MessageContentType._Thinking,
-        thinking: String(message['reasoning_content']),
-        signature: String(message['reasoning_content']),
+        thinking: String((message as any)['reasoning_content']),
+        signature: String((message as any)['reasoning_content']),
       } as ThinkingContentBlock);
     }
 

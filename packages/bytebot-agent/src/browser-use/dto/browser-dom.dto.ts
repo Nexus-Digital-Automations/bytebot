@@ -48,12 +48,12 @@ export class Coordinates {
   @ApiProperty({ description: 'X coordinate in pixels', minimum: 0 })
   @IsNumber()
   @Min(0)
-  x: number;
+  x!: number;
 
   @ApiProperty({ description: 'Y coordinate in pixels', minimum: 0 })
   @IsNumber()
   @Min(0)
-  y: number;
+  y!: number;
 }
 
 export class BrowserNavigateDto {
@@ -61,7 +61,7 @@ export class BrowserNavigateDto {
     description: 'URL to navigate to',
   })
   @IsUrl()
-  url: string;
+  url!: string;
 
   @ApiPropertyOptional({
     description: 'Wait for page load completion',
@@ -289,7 +289,7 @@ export class BrowserTypeDto {
   })
   @IsString()
   @MaxLength(10000)
-  text: string;
+  text!: string;
 
   @ApiPropertyOptional({
     description: 'Input method for typing',
@@ -377,7 +377,7 @@ export class BrowserScrollDto {
     enum: ScrollDirection,
   })
   @IsEnum(ScrollDirection)
-  direction: ScrollDirection;
+  direction!: ScrollDirection;
 
   @ApiPropertyOptional({
     description: 'Number of pixels to scroll',
@@ -453,19 +453,19 @@ export class BrowserScrollDto {
 
 export class DOMElement {
   @ApiProperty({ description: 'Element index for interactions' })
-  index: number;
+  index!: number;
 
   @ApiProperty({ description: 'HTML tag name' })
-  tagName: string;
+  tagName!: string;
 
   @ApiProperty({ description: 'Element text content (truncated)' })
-  text: string;
+  text!: string;
 
   @ApiProperty({ description: 'Legacy text content property' })
   textContent?: string;
 
   @ApiProperty({ description: 'Element attributes' })
-  attributes: Record<string, string>;
+  attributes!: Record<string, string>;
 
   @ApiProperty({ description: 'Element bounding box coordinates' })
   boundingBox?: {
@@ -476,16 +476,16 @@ export class DOMElement {
   };
 
   @ApiProperty({ description: 'Whether element is visible' })
-  visible: boolean;
+  visible!: boolean;
 
   @ApiProperty({ description: 'Whether element is clickable' })
-  clickable: boolean;
+  clickable!: boolean;
 
   @ApiProperty({ description: 'Whether element is an input field' })
-  inputField: boolean;
+  inputField!: boolean;
 
   @ApiProperty({ description: 'CSS selector for this element' })
-  selector: string;
+  selector!: string;
 
   @ApiProperty({ description: 'XPath for this element' })
   xpath?: string;
@@ -493,16 +493,16 @@ export class DOMElement {
 
 export class PageInfo {
   @ApiProperty({ description: 'Page URL' })
-  url: string;
+  url!: string;
 
   @ApiProperty({ description: 'Page title' })
-  title: string;
+  title!: string;
 
   @ApiProperty({ description: 'Page loading status' })
-  loadingStatus: 'loading' | 'complete' | 'error';
+  loadingStatus!: 'loading' | 'complete' | 'error';
 
   @ApiProperty({ description: 'Page dimensions' })
-  dimensions: {
+  dimensions!: {
     width: number;
     height: number;
     scrollWidth: number;
@@ -510,7 +510,7 @@ export class PageInfo {
   };
 
   @ApiProperty({ description: 'Current scroll position' })
-  scrollPosition: {
+  scrollPosition!: {
     x: number;
     y: number;
   };
@@ -552,10 +552,10 @@ export class PageInfo {
 
 export class BrowserElementResponseDto {
   @ApiProperty({ description: 'Whether the operation was successful' })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({ description: 'Operation result message' })
-  message: string;
+  message!: string;
 
   @ApiProperty({ description: 'Target element information' })
   element?: DOMElement;
@@ -564,13 +564,13 @@ export class BrowserElementResponseDto {
   pageInfo?: PageInfo;
 
   @ApiProperty({ description: 'Operation timestamp' })
-  timestamp: Date;
+  timestamp!: Date;
 
   @ApiProperty({ description: 'Operation duration in milliseconds' })
   durationMs?: number;
 
   @ApiProperty({ description: 'Operation execution time in milliseconds' })
-  executionTimeMs: number;
+  executionTimeMs!: number;
 
   @ApiProperty({ description: 'Screenshot after operation (base64)' })
   screenshot?: string;
@@ -591,13 +591,13 @@ export class BrowserStateResponseDto {
   sessionId?: string;
 
   @ApiProperty({ description: 'Current page information' })
-  pageInfo: PageInfo;
+  pageInfo!: PageInfo;
 
   @ApiProperty({
     description: 'Interactive elements on the page',
     type: [DOMElement],
   })
-  interactiveElements: DOMElement[];
+  interactiveElements!: DOMElement[];
 
   @ApiProperty({
     description: 'All form elements on the page',
@@ -631,7 +631,7 @@ export class BrowserStateResponseDto {
   };
 
   @ApiProperty({ description: 'State capture timestamp' })
-  timestamp: Date;
+  timestamp!: Date;
 
   @ApiProperty({ description: 'Total number of elements found' })
   totalElements?: number;

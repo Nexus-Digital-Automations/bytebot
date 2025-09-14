@@ -424,21 +424,21 @@ export class SecurityAuditService {
       // Apply type filter
       if (filters.types && filters.types.length > 0) {
         filteredEvents = filteredEvents.filter((event) =>
-          filters.types.includes(event.type),
+          filters.types?.includes(event.type),
         );
       }
 
       // Apply severity filter
       if (filters.severities && filters.severities.length > 0) {
         filteredEvents = filteredEvents.filter((event) =>
-          filters.severities.includes(event.severity),
+          filters.severities?.includes(event.severity),
         );
       }
 
       // Apply outcome filter
       if (filters.outcomes && filters.outcomes.length > 0) {
         filteredEvents = filteredEvents.filter((event) =>
-          filters.outcomes.includes(event.outcome),
+          filters.outcomes?.includes(event.outcome),
         );
       }
 

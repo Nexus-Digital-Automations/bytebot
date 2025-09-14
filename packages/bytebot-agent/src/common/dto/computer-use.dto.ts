@@ -92,7 +92,7 @@ export class ScreenCoordinatesDto {
   @Min(0, { message: 'X coordinate cannot be negative' })
   @Max(7680, { message: 'X coordinate exceeds maximum screen width' })
   @Expose()
-  x: number;
+  x!: number;
 
   @ApiProperty({
     description: 'Y coordinate on screen',
@@ -104,7 +104,7 @@ export class ScreenCoordinatesDto {
   @Min(0, { message: 'Y coordinate cannot be negative' })
   @Max(4320, { message: 'Y coordinate exceeds maximum screen height' })
   @Expose()
-  y: number;
+  y!: number;
 }
 
 /**
@@ -121,7 +121,7 @@ export class ScreenRegionDto extends ScreenCoordinatesDto {
   @Min(1, { message: 'Width must be at least 1 pixel' })
   @Max(7680, { message: 'Width exceeds maximum screen width' })
   @Expose()
-  width: number;
+  width!: number;
 
   @ApiProperty({
     description: 'Height of the region',
@@ -133,7 +133,7 @@ export class ScreenRegionDto extends ScreenCoordinatesDto {
   @Min(1, { message: 'Height must be at least 1 pixel' })
   @Max(4320, { message: 'Height exceeds maximum screen height' })
   @Expose()
-  height: number;
+  height!: number;
 }
 
 /**
@@ -147,7 +147,7 @@ export abstract class BaseComputerActionDto {
   })
   @IsEnum(ComputerActionType, { message: 'Invalid computer action type' })
   @Expose()
-  action: ComputerActionType;
+  action!: ComputerActionType;
 
   @ApiPropertyOptional({
     description: 'Action timeout in milliseconds',
@@ -268,7 +268,7 @@ export class ClickActionDto extends BaseComputerActionDto {
   @ValidateNested()
   @Type(() => ScreenCoordinatesDto)
   @Expose()
-  coordinates: ScreenCoordinatesDto;
+  coordinates!: ScreenCoordinatesDto;
 
   @ApiPropertyOptional({
     description: 'Mouse button to click',
@@ -321,7 +321,7 @@ export class DragActionDto extends BaseComputerActionDto {
   @ValidateNested()
   @Type(() => ScreenCoordinatesDto)
   @Expose()
-  from: ScreenCoordinatesDto;
+  from!: ScreenCoordinatesDto;
 
   @ApiProperty({
     description: 'Ending coordinates for drag',
@@ -330,7 +330,7 @@ export class DragActionDto extends BaseComputerActionDto {
   @ValidateNested()
   @Type(() => ScreenCoordinatesDto)
   @Expose()
-  to: ScreenCoordinatesDto;
+  to!: ScreenCoordinatesDto;
 
   @ApiPropertyOptional({
     description: 'Drag duration in milliseconds',
@@ -377,7 +377,7 @@ export class TypeActionDto extends BaseComputerActionDto {
     message: 'Text contains invalid characters',
   })
   @Expose()
-  text: string;
+  text!: string;
 
   @ApiPropertyOptional({
     description: 'Typing speed in characters per minute',
@@ -423,7 +423,7 @@ export class KeyActionDto extends BaseComputerActionDto {
     message: 'Invalid key format',
   })
   @Expose()
-  key: string;
+  key!: string;
 
   @ApiPropertyOptional({
     description: 'Modifier keys to hold',
@@ -464,7 +464,7 @@ export class ScrollActionDto extends BaseComputerActionDto {
   })
   @IsEnum(ScrollDirection, { message: 'Invalid scroll direction' })
   @Expose()
-  direction: ScrollDirection;
+  direction!: ScrollDirection;
 
   @ApiPropertyOptional({
     description: 'Number of scroll units (lines or pixels)',
@@ -507,7 +507,7 @@ export class WaitActionDto extends BaseComputerActionDto {
   @Min(100, { message: 'Wait duration must be at least 100ms' })
   @Max(30000, { message: 'Wait duration cannot exceed 30 seconds' })
   @Expose()
-  duration: number;
+  duration!: number;
 
   @ApiPropertyOptional({
     description: 'Reason for waiting (for logging)',
@@ -600,7 +600,7 @@ export class ExecuteComputerActionDto {
     },
   })
   @Expose()
-  action: BaseComputerActionDto;
+  action!: BaseComputerActionDto;
 
   @ApiPropertyOptional({
     description: 'Execution context metadata',
@@ -635,7 +635,7 @@ export class ComputerActionResultDto extends BaseResponseDto {
   })
   @IsObject()
   @Expose()
-  action: Record<string, any>;
+  action!: Record<string, any>;
 
   @ApiPropertyOptional({
     description: 'Action execution result data',
@@ -658,7 +658,7 @@ export class ComputerActionResultDto extends BaseResponseDto {
   @IsNumber()
   @Min(0)
   @Expose()
-  executionTime: number;
+  executionTime!: number;
 
   @ApiPropertyOptional({
     description: 'Debug information if debug mode enabled',
@@ -702,7 +702,7 @@ export class BatchComputerActionsDto {
   @ValidateNested({ each: true })
   @Type(() => ExecuteComputerActionDto)
   @Expose()
-  actions: ExecuteComputerActionDto[];
+  actions!: ExecuteComputerActionDto[];
 
   @ApiPropertyOptional({
     description: 'Stop execution on first failure',
@@ -747,14 +747,14 @@ export class ComputerActionHistoryDto extends BaseEntityDto {
   })
   @IsEnum(ComputerActionType)
   @Expose()
-  actionType: ComputerActionType;
+  actionType!: ComputerActionType;
 
   @ApiProperty({
     description: 'Action parameters used',
   })
   @IsObject()
   @Expose()
-  parameters: Record<string, any>;
+  parameters!: Record<string, any>;
 
   @ApiProperty({
     description: 'Whether the action succeeded',
@@ -762,7 +762,7 @@ export class ComputerActionHistoryDto extends BaseEntityDto {
   })
   @IsBoolean()
   @Expose()
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({
     description: 'Execution duration in milliseconds',
@@ -771,7 +771,7 @@ export class ComputerActionHistoryDto extends BaseEntityDto {
   @IsNumber()
   @Min(0)
   @Expose()
-  executionTime: number;
+  executionTime!: number;
 
   @ApiPropertyOptional({
     description: 'Error message if action failed',

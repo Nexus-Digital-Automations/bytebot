@@ -109,16 +109,16 @@ export class ExportResultsDto {
 
 export class TaskExecutionStep {
   @ApiProperty({ description: 'Step number in execution sequence' })
-  stepNumber: number;
+  stepNumber!: number;
 
   @ApiProperty({ description: 'Action type performed' })
-  action: string;
+  action!: string;
 
   @ApiProperty({ description: 'Step execution status' })
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  status!: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
 
   @ApiProperty({ description: 'Step start timestamp' })
-  startedAt: Date;
+  startedAt!: Date;
 
   @ApiProperty({ description: 'Step completion timestamp' })
   completedAt?: Date;
@@ -149,49 +149,49 @@ export class TaskExecutionStep {
 
 export class ExtractedDataResult {
   @ApiProperty({ description: 'Extraction method used' })
-  method: 'ai_query' | 'css_selectors' | 'xpath_selectors' | 'regex_patterns';
+  method!: 'ai_query' | 'css_selectors' | 'xpath_selectors' | 'regex_patterns';
 
   @ApiProperty({ description: 'Number of items extracted' })
-  itemCount: number;
+  itemCount!: number;
 
   @ApiProperty({ description: 'Extracted data items' })
-  data: Array<Record<string, any>>;
+  data!: Array<Record<string, any>>;
 
   @ApiProperty({ description: 'Data quality score (0-1)' })
-  qualityScore: number;
+  qualityScore!: number;
 
   @ApiProperty({ description: 'Extraction confidence score (0-1)' })
-  confidence: number;
+  confidence!: number;
 
   @ApiProperty({ description: 'Source page URL' })
-  sourceUrl: string;
+  sourceUrl!: string;
 
   @ApiProperty({ description: 'Extraction timestamp' })
-  extractedAt: Date;
+  extractedAt!: Date;
 
   @ApiProperty({ description: 'Extraction duration in milliseconds' })
-  extractionTimeMs: number;
+  extractionTimeMs!: number;
 }
 
 export class TaskPerformanceMetrics {
   @ApiProperty({ description: 'Total task execution time in milliseconds' })
-  totalExecutionTimeMs: number;
+  totalExecutionTimeMs!: number;
 
   @ApiProperty({ description: 'Average step execution time in milliseconds' })
-  averageStepTimeMs: number;
+  averageStepTimeMs!: number;
 
   @ApiProperty({ description: 'Browser session startup time in milliseconds' })
-  sessionStartupTimeMs: number;
+  sessionStartupTimeMs!: number;
 
   @ApiProperty({ description: 'Page load times for each navigation' })
-  pageLoadTimes: Array<{
+  pageLoadTimes!: Array<{
     url: string;
     loadTimeMs: number;
     timestamp: Date;
   }>;
 
   @ApiProperty({ description: 'Memory usage statistics' })
-  memoryUsage: {
+  memoryUsage!: {
     peakMemoryMB: number;
     averageMemoryMB: number;
     memoryLeaks?: Array<{
@@ -201,13 +201,13 @@ export class TaskPerformanceMetrics {
   };
 
   @ApiProperty({ description: 'CPU usage statistics' })
-  cpuUsage: {
+  cpuUsage!: {
     peakCpuPercent: number;
     averageCpuPercent: number;
   };
 
   @ApiProperty({ description: 'Network activity metrics' })
-  networkActivity: {
+  networkActivity!: {
     totalRequests: number;
     totalDataTransferred: number;
     slowestRequest?: {
@@ -219,39 +219,39 @@ export class TaskPerformanceMetrics {
 
 export class BrowserResultsResponseDto {
   @ApiProperty({ description: 'Task identifier' })
-  taskId: string;
+  taskId!: string;
 
   @ApiProperty({ description: 'Task execution status' })
-  status: ResultStatus;
+  status!: ResultStatus;
 
   @ApiProperty({ description: 'Task name/title' })
-  taskName: string;
+  taskName!: string;
 
   @ApiProperty({ description: 'Task execution start time' })
-  startedAt: Date;
+  startedAt!: Date;
 
   @ApiProperty({ description: 'Task completion time' })
   completedAt?: Date;
 
   @ApiProperty({ description: 'Total execution duration in milliseconds' })
-  executionTimeMs: number;
+  executionTimeMs!: number;
 
   @ApiProperty({
     description: 'Detailed execution steps',
     type: [TaskExecutionStep],
   })
-  executionSteps: TaskExecutionStep[];
+  executionSteps!: TaskExecutionStep[];
 
   @ApiProperty({
     description: 'Extracted data results',
     type: [ExtractedDataResult],
   })
-  extractedData: ExtractedDataResult[];
+  extractedData!: ExtractedDataResult[];
 
   @ApiProperty({
     description: 'Screenshots captured during task execution',
   })
-  screenshots: Array<{
+  screenshots!: Array<{
     screenshotId: string;
     sessionId: string;
     capturedAt: Date;
@@ -267,10 +267,10 @@ export class BrowserResultsResponseDto {
     description: 'Task performance metrics',
     type: TaskPerformanceMetrics,
   })
-  performanceMetrics: TaskPerformanceMetrics;
+  performanceMetrics!: TaskPerformanceMetrics;
 
   @ApiProperty({ description: 'Task execution logs' })
-  executionLogs: Array<{
+  executionLogs!: Array<{
     timestamp: Date;
     level: 'debug' | 'info' | 'warning' | 'error';
     message: string;
@@ -279,7 +279,7 @@ export class BrowserResultsResponseDto {
   }>;
 
   @ApiProperty({ description: 'Browser session information' })
-  sessionInfo: {
+  sessionInfo!: {
     sessionId: string;
     browserType: string;
     browserVersion: string;
@@ -292,10 +292,10 @@ export class BrowserResultsResponseDto {
   };
 
   @ApiProperty({ description: 'Task configuration used' })
-  taskConfiguration: Record<string, any>;
+  taskConfiguration!: Record<string, any>;
 
   @ApiProperty({ description: 'Final result summary' })
-  resultSummary: {
+  resultSummary!: {
     totalSteps: number;
     successfulSteps: number;
     failedSteps: number;
@@ -329,37 +329,37 @@ export class BrowserResultsResponseDto {
   };
 
   @ApiProperty({ description: 'Task archival status' })
-  archived: boolean;
+  archived!: boolean;
 
   @ApiProperty({ description: 'Results retrieval timestamp' })
-  retrievedAt: Date;
+  retrievedAt!: Date;
 }
 
 export class BrowserResultsListResponseDto {
   @ApiProperty({ description: 'Total number of results available' })
-  total: number;
+  total!: number;
 
   @ApiProperty({ description: 'Current page number' })
-  page: number;
+  page!: number;
 
   @ApiProperty({ description: 'Results per page' })
-  limit: number;
+  limit!: number;
 
   @ApiProperty({
     description: 'List of task results',
     type: [BrowserResultsResponseDto],
   })
-  results: BrowserResultsResponseDto[];
+  results!: BrowserResultsResponseDto[];
 
   @ApiProperty({ description: 'Result retrieval timestamp' })
-  retrievedAt: Date;
+  retrievedAt!: Date;
 }
 
 export class ArchiveResultsDto {
   @ApiProperty({ description: 'Array of task IDs to archive' })
   @IsArray()
   @IsString({ each: true })
-  taskIds: string[];
+  taskIds!: string[];
 
   @ApiPropertyOptional({
     description: 'Archive compression level (1-9)',
@@ -395,25 +395,25 @@ export class ArchiveResultsDto {
 
 export class ResultsStatisticsDto {
   @ApiProperty({ description: 'Total number of completed tasks' })
-  totalTasks: number;
+  totalTasks!: number;
 
   @ApiProperty({ description: 'Number of successful tasks' })
-  successfulTasks: number;
+  successfulTasks!: number;
 
   @ApiProperty({ description: 'Number of failed tasks' })
-  failedTasks: number;
+  failedTasks!: number;
 
   @ApiProperty({ description: 'Average task execution time in milliseconds' })
-  averageExecutionTimeMs: number;
+  averageExecutionTimeMs!: number;
 
   @ApiProperty({ description: 'Total data extraction count' })
-  totalDataExtracted: number;
+  totalDataExtracted!: number;
 
   @ApiProperty({ description: 'Total screenshots captured' })
-  totalScreenshots: number;
+  totalScreenshots!: number;
 
   @ApiProperty({ description: 'Disk usage statistics' })
-  diskUsage: {
+  diskUsage!: {
     totalSizeBytes: number;
     resultFilesCount: number;
     screenshotsCount: number;
@@ -421,18 +421,18 @@ export class ResultsStatisticsDto {
   };
 
   @ApiProperty({ description: 'Most common task types' })
-  taskTypeDistribution: Record<string, number>;
+  taskTypeDistribution!: Record<string, number>;
 
   @ApiProperty({ description: 'Success rate by task type' })
-  successRateByType: Record<string, number>;
+  successRateByType!: Record<string, number>;
 
   @ApiProperty({ description: 'Performance trends over time' })
-  performanceTrends: Array<{
+  performanceTrends!: Array<{
     date: Date;
     averageExecutionTimeMs: number;
     successRate: number;
   }>;
 
   @ApiProperty({ description: 'Statistics generation timestamp' })
-  generatedAt: Date;
+  generatedAt!: Date;
 }

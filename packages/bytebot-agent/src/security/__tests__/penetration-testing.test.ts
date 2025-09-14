@@ -181,7 +181,7 @@ describe('🚨 Penetration Testing Suite', () => {
           'security.tokenCacheTimeout': 5 * 60 * 1000,
           JWT_SECRET: 'test-jwt-secret-key-for-penetration-testing',
         };
-        return configMap[key] || defaultValue;
+        return (configMap as any)[key] || defaultValue;
       }),
     } as any;
 

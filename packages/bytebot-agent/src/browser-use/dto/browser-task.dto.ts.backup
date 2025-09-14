@@ -224,25 +224,25 @@ export class UpdateBrowserTaskDto {
 
 export class BrowserTaskExecutionStep {
   @ApiProperty({ description: 'Step number in execution sequence' })
-  stepNumber!: number;
+  stepNumber: number;
 
   @ApiProperty({ description: 'Action performed in this step' })
-  action!: string;
+  action: string;
 
   @ApiProperty({ description: 'Target element or URL for the action' })
-  target!: string;
+  target: string;
 
   @ApiProperty({ description: 'Result of the action' })
-  result!: string;
+  result: string;
 
   @ApiProperty({ description: 'Timestamp of step execution' })
-  timestamp!: Date;
+  timestamp: Date;
 
   @ApiProperty({ description: 'Screenshot captured during this step (base64)' })
   screenshot?: string;
 
   @ApiProperty({ description: 'Whether this step was successful' })
-  success!: boolean;
+  success: boolean;
 
   @ApiProperty({ description: 'Error message if step failed' })
   error?: string;
@@ -250,22 +250,22 @@ export class BrowserTaskExecutionStep {
 
 export class BrowserTaskResponseDto {
   @ApiProperty({ description: 'Unique task identifier' })
-  id!: string;
+  id: string;
 
   @ApiProperty({ description: 'Task name' })
-  name!: string;
+  name: string;
 
   @ApiProperty({ description: 'Task description' })
-  description!: string;
+  description: string;
 
   @ApiProperty({ description: 'Current task status', enum: BrowserTaskStatus })
-  status!: BrowserTaskStatus;
+  status: BrowserTaskStatus;
 
   @ApiProperty({
     description: 'Task priority level',
     enum: BrowserTaskPriority,
   })
-  priority!: BrowserTaskPriority;
+  priority: BrowserTaskPriority;
 
   @ApiProperty({ description: 'Initial URL for the task' })
   startUrl?: string;
@@ -280,10 +280,10 @@ export class BrowserTaskResponseDto {
   tags?: string[];
 
   @ApiProperty({ description: 'Task creation timestamp' })
-  createdAt!: Date;
+  createdAt: Date;
 
   @ApiProperty({ description: 'Task last updated timestamp' })
-  updatedAt!: Date;
+  updatedAt: Date;
 
   @ApiProperty({ description: 'Task execution start timestamp' })
   startedAt?: Date;
@@ -292,19 +292,19 @@ export class BrowserTaskResponseDto {
   completedAt?: Date;
 
   @ApiProperty({ description: 'User who created the task' })
-  createdBy!: string;
+  createdBy: string;
 
   @ApiProperty({ description: 'Browser session ID associated with this task' })
   sessionId?: string;
 
   @ApiProperty({ description: 'Current execution progress (0-100)' })
-  progress!: number;
+  progress: number;
 
   @ApiProperty({ description: 'Total number of execution steps' })
-  totalSteps!: number;
+  totalSteps: number;
 
   @ApiProperty({ description: 'Number of completed steps' })
-  completedSteps!: number;
+  completedSteps: number;
 
   @ApiProperty({
     description: 'Detailed execution steps',
@@ -335,13 +335,13 @@ export class BrowserTaskResponseDto {
 
 export class BrowserTaskStatusDto {
   @ApiProperty({ description: 'Operation success status' })
-  success!: boolean;
+  success: boolean;
 
   @ApiProperty({ description: 'Task identifier' })
-  taskId!: string;
+  taskId: string;
 
   @ApiProperty({ description: 'Whether the task was found' })
-  found!: boolean;
+  found: boolean;
 
   @ApiProperty({ description: 'Current task status', enum: TaskStatus })
   status?: TaskStatus;

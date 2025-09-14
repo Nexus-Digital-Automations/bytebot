@@ -187,6 +187,14 @@ export const PUBLIC_ENDPOINT_KEY = 'isPublic';
 export const RESOURCE_OWNERSHIP_KEY = 'resourceOwnership';
 
 /**
+ * Extended Express Request interface with authentication properties
+ */
+interface AuthenticatedRequest extends Request {
+  user?: Record<string, unknown>;
+  securityContext?: Record<string, unknown>;
+}
+
+/**
  * Role hierarchy mapping for inheritance
  */
 export const ROLE_HIERARCHY = new Map<Role, Role[]>([
@@ -497,8 +505,8 @@ export const OperatorOrAbove = () => {
  */
 export const CurrentUser = createParamDecorator(
   (data: string | undefined, context: ExecutionContext): unknown => {
-    const request = context.switchToHttp().getRequest<Request>();
-    const user = request['user'] as Record<string, unknown> | undefined;
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const user = request.user;
 
     return data && user ? user[data] : user;
   },
@@ -509,10 +517,8 @@ export const CurrentUser = createParamDecorator(
  */
 export const SecurityContext = createParamDecorator(
   (data: string | undefined, context: ExecutionContext): unknown => {
-    const request = context.switchToHttp().getRequest<Request>();
-    const securityContext = request['securityContext'] as
-      | Record<string, unknown>
-      | undefined;
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const securityContext = request.securityContext;
 
     return data && securityContext ? securityContext[data] : securityContext;
   },
@@ -526,7 +532,7 @@ export const Resource = createParamDecorator(
     data: { type: ResourceType; idParam?: string },
     context: ExecutionContext,
   ) => {
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const resourceId = request.params[data.idParam || 'id'];
 
     return {

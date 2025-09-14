@@ -48,11 +48,11 @@ export class FormField {
   @ApiProperty({ description: 'Field name or identifier' })
   @IsString()
   @MinLength(1)
-  name: string;
+  name!: string;
 
   @ApiProperty({ description: 'Field value to set' })
   @IsString()
-  value: string;
+  value!: string;
 
   @ApiPropertyOptional({ description: 'Field type', enum: FormFieldType })
   @IsOptional()
@@ -121,7 +121,7 @@ export class FillFormDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => FormField)
-  fields: FormField[];
+  fields!: FormField[];
 
   @ApiPropertyOptional({
     description: 'Clear existing field values before filling',
@@ -249,13 +249,13 @@ export class SubmitFormDto {
 
 export class FormValidationResult {
   @ApiProperty({ description: 'Field name' })
-  field: string;
+  field!: string;
 
   @ApiProperty({ description: 'Whether field is valid' })
-  valid: boolean;
+  valid!: boolean;
 
   @ApiProperty({ description: 'Field current value' })
-  value: string;
+  value!: string;
 
   @ApiProperty({ description: 'Validation error message if invalid' })
   error?: string;
@@ -264,7 +264,7 @@ export class FormValidationResult {
   expectedType?: FormFieldType;
 
   @ApiProperty({ description: 'Whether field was found' })
-  found: boolean;
+  found!: boolean;
 
   @ApiProperty({ description: 'Field selector used' })
   selector?: string;
@@ -272,34 +272,34 @@ export class FormValidationResult {
 
 export class FormValidationResponseDto {
   @ApiProperty({ description: 'Whether form filling was successful' })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({ description: 'Overall operation message' })
-  message: string;
+  message!: string;
 
   @ApiProperty({ description: 'Form selector that was targeted' })
   formSelector?: string;
 
   @ApiProperty({ description: 'Number of fields processed' })
-  fieldsProcessed: number;
+  fieldsProcessed!: number;
 
   @ApiProperty({ description: 'Number of fields successfully filled' })
-  fieldsSuccessful: number;
+  fieldsSuccessful!: number;
 
   @ApiProperty({ description: 'Number of fields that failed' })
-  fieldsFailed: number;
+  fieldsFailed!: number;
 
   @ApiProperty({
     description: 'Validation results for each field',
     type: [FormValidationResult],
   })
-  fieldResults: FormValidationResult[];
+  fieldResults!: FormValidationResult[];
 
   @ApiProperty({ description: 'Operation timestamp' })
-  timestamp: Date;
+  timestamp!: Date;
 
   @ApiProperty({ description: 'Operation duration in milliseconds' })
-  durationMs: number;
+  durationMs!: number;
 
   @ApiProperty({ description: 'Form information discovered' })
   formInfo?: {

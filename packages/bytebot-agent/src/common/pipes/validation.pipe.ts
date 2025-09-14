@@ -260,7 +260,10 @@ export class GlobalValidationPipe implements PipeTransform<any> {
     try {
       const payloadSize = JSON.stringify(value).length;
 
-      if (payloadSize > this.options.maxPayloadSize) {
+      if (
+        this.options.maxPayloadSize &&
+        payloadSize > this.options.maxPayloadSize
+      ) {
         this.logger.warn(`[${operationId}] Payload size limit exceeded`, {
           operationId,
           payloadSize,
@@ -277,10 +280,9 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         operationId,
         payloadSize,
         maxPayloadSize: this.options.maxPayloadSize,
-        utilizationPercent: (
-          (payloadSize / this.options.maxPayloadSize) *
-          100
-        ).toFixed(1),
+        utilizationPercent: this.options.maxPayloadSize
+          ? ((payloadSize / this.options.maxPayloadSize) * 100).toFixed(1)
+          : 'N/A',
       });
     } catch (error) {
       if (error instanceof PayloadTooLargeException) {

@@ -5137,6 +5137,95 @@
       "createdAt": "2025-09-13T17:16:18.123Z",
       "sessionId": "session_1757783778117",
       "metadata": {}
+    },
+    "dev_session_1757870112379_1_general_a890b92e": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T17:15:12.380Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T17:15:12.380Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757871405936_1_general_1ee0aa32": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T17:36:45.937Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T17:36:45.937Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757873071496_1_general_cc3b2010": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T18:23:58.407Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T18:04:31.497Z",
+      "sessionId": null,
+      "metadata": {
+        "renewedAt": "2025-09-14T18:23:58.407Z",
+        "renewalReason": "Agent reinitialization requested"
+      },
+      "lastRenewal": "2025-09-14T18:23:58.407Z",
+      "renewalCount": 2
+    },
+    "dev_session_1757874673586_1_general_fc09cabc": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-14T18:31:13.587Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-14T18:31:13.587Z",
+      "sessionId": null,
+      "metadata": {}
     }
   },
   "settings": {

@@ -593,13 +593,13 @@ export class SecurityMonitoringService implements OnModuleInit {
     }
 
     const events = this.eventCache.get(cacheKey);
-    events.push(event);
+    events?.push(event);
 
     // Keep only recent events (last hour)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     this.eventCache.set(
       cacheKey,
-      events.filter((e) => e.timestamp > oneHourAgo),
+      events?.filter((e) => e.timestamp > oneHourAgo) ?? [],
     );
   }
 

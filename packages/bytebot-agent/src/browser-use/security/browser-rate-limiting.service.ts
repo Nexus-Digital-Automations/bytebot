@@ -287,9 +287,10 @@ export class BrowserRateLimitingService {
         allowed: false,
         limit: 0,
         remaining: 0,
-        resetTime: this.circuitBreakerOpenUntil,
+        resetTime: this.circuitBreakerOpenUntil || new Date(),
         retryAfter: Math.ceil(
-          (this.circuitBreakerOpenUntil.getTime() - Date.now()) / 1000,
+          (this.circuitBreakerOpenUntil?.getTime() ??
+            Date.now() + 60000 - Date.now()) / 1000,
         ),
         blocked: true,
         reason: 'Service overloaded - circuit breaker open',
@@ -699,7 +700,7 @@ export class BrowserRateLimitingService {
       this.violations.set(identifier, []);
     }
 
-    const violations = this.violations.get(identifier);
+    const violations = this.violations.get(identifier)!; // Non-null assertion safe because we just ensured it exists above
     violations.push(violation);
 
     // Keep only recent violations

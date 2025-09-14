@@ -41,7 +41,7 @@ export class LoginDto {
   @Transform(({ value }: { value: string | undefined }) =>
     typeof value === 'string' ? value.toLowerCase().trim() : value,
   )
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'User password',
@@ -53,7 +53,7 @@ export class LoginDto {
   @IsNotEmpty({ message: 'Password is required' })
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
   @MaxLength(128, { message: 'Password must not exceed 128 characters' })
-  password: string;
+  password!: string;
 
   @ApiProperty({
     description: 'Remember login session (extends token lifetime)',
@@ -80,7 +80,7 @@ export class RegisterDto {
   @Transform(({ value }: { value: string | undefined }) =>
     typeof value === 'string' ? value.toLowerCase().trim() : value,
   )
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'Unique username',
@@ -99,7 +99,7 @@ export class RegisterDto {
   @Transform(({ value }: { value: string | undefined }) =>
     typeof value === 'string' ? value.toLowerCase().trim() : value,
   )
-  username: string;
+  username!: string;
 
   @ApiProperty({
     description: 'User first name',
@@ -142,7 +142,7 @@ export class RegisterDto {
     message:
       'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
   })
-  password: string;
+  password!: string;
 
   @ApiProperty({
     description: 'Password confirmation (must match password)',
@@ -150,7 +150,7 @@ export class RegisterDto {
   })
   @IsString({ message: 'Password confirmation must be a string' })
   @IsNotEmpty({ message: 'Password confirmation is required' })
-  confirmPassword: string;
+  confirmPassword!: string;
 }
 
 /**
@@ -164,7 +164,7 @@ export class RefreshTokenDto {
   })
   @IsString({ message: 'Refresh token must be a string' })
   @IsNotEmpty({ message: 'Refresh token is required' })
-  refreshToken: string;
+  refreshToken!: string;
 }
 
 /**
@@ -178,7 +178,7 @@ export class ChangePasswordDto {
   })
   @IsString({ message: 'Current password must be a string' })
   @IsNotEmpty({ message: 'Current password is required' })
-  currentPassword: string;
+  currentPassword!: string;
 
   @ApiProperty({
     description: 'New password',
@@ -194,7 +194,7 @@ export class ChangePasswordDto {
     message:
       'New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
   })
-  newPassword: string;
+  newPassword!: string;
 
   @ApiProperty({
     description: 'New password confirmation (must match new password)',
@@ -202,5 +202,5 @@ export class ChangePasswordDto {
   })
   @IsString({ message: 'Password confirmation must be a string' })
   @IsNotEmpty({ message: 'Password confirmation is required' })
-  confirmNewPassword: string;
+  confirmNewPassword!: string;
 }

@@ -140,7 +140,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   private readonly processes = new Map<string, BrowserUseProcess>();
   private readonly sessionProcessMap = new Map<string, string>(); // sessionId -> processId
   private readonly taskProcessMap = new Map<string, string>(); // taskId -> processId
-  private config: BrowserUseConfig;
+  private config!: BrowserUseConfig;
   private isShuttingDown = false;
 
   constructor(private readonly configService: ConfigService) {
@@ -343,6 +343,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       // Prepare browser-use configuration with proper typing
       const configObject = config as BrowserConfig;
       const browserConfig: BrowserConfig = {
+        ...configObject,
         headless: configObject.headless ?? this.config.enableHeadless,
         screenshots: configObject.screenshots ?? this.config.enableScreenshots,
         video_recording:
@@ -357,7 +358,6 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
           configObject.chromeExecutable || this.config.chromeExecutable,
         log_level: configObject.logLevel || this.config.logLevel,
         session_timeout: this.config.sessionTimeout,
-        ...configObject,
       };
 
       // Create working directory for this process
@@ -429,14 +429,14 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
     if (this.config.enableLogging) {
       const logFile = join(this.config.workingDirectory, 'logs', `${id}.log`);
 
-      process.stdout.on('data', (data: Buffer) => {
+      process.stdout?.on('data', (data: Buffer) => {
         const output = data.toString();
         this.logger.debug(`[${id}] STDOUT: ${output}`);
         void this.appendToLogFile(logFile, `STDOUT: ${output}`);
         this.updateProcessActivity(id);
       });
 
-      process.stderr.on('data', (data: Buffer) => {
+      process.stderr?.on('data', (data: Buffer) => {
         const output = data.toString();
         this.logger.debug(`[${id}] STDERR: ${output}`);
         void this.appendToLogFile(logFile, `STDERR: ${output}`);
@@ -828,7 +828,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
 
       // Send command via stdin as JSON
       const commandData = JSON.stringify(command) + '\n';
-      browserProcess.process.stdin.write(commandData);
+      browserProcess.process.stdin?.write(commandData);
 
       // Wait for response (simplified for now)
       // In a real implementation, you'd set up proper JSON-RPC communication

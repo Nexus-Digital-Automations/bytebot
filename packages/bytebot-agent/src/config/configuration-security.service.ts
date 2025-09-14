@@ -82,7 +82,7 @@ export class ConfigurationSecurityService
   private readonly logger = new Logger('ConfigurationSecurityService');
   private readonly auditLog: ConfigurationAuditEntry[] = [];
   private readonly maxAuditEntries = 1000;
-  private securityPatterns: SecureConfigurationPatterns;
+  private securityPatterns!: SecureConfigurationPatterns;
   private lastSecurityAudit?: Date;
   private currentSecurityScore = 0;
 

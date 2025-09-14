@@ -223,7 +223,7 @@ export class SecurityMonitoringService implements OnModuleInit {
         email,
         ipAddress,
         userAgent,
-        geolocation,
+        geolocation: geolocation || undefined,
         riskScore,
         metadata: {
           bruteForceAttempts: bruteForceData.attemptCount,

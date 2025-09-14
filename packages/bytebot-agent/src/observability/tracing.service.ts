@@ -79,7 +79,7 @@ export interface TracingConfig {
 @Injectable()
 export class TracingService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(TracingService.name);
-  private config: TracingConfig;
+  private config!: TracingConfig;
   private activeSpans = new Map<string, TraceSpan>();
   private traceStorage = new Map<string, TraceSpan[]>();
   private isInitialized = false;

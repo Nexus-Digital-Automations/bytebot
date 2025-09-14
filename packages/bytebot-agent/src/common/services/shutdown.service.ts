@@ -303,7 +303,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       // Wait for health check grace period
       await this.sleep(this.config.healthCheckGracePeriod);
 
-      this.shutdownState.shutdownMetrics.cleanupStepsCompleted.push(
+      this.shutdownState.shutdownMetrics?.cleanupStepsCompleted.push(
         'stop_new_connections',
       );
 
@@ -312,7 +312,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
         duration: Date.now() - startTime,
       });
     } catch (error) {
-      this.shutdownState.shutdownMetrics.cleanupStepsFailed.push(
+      this.shutdownState.shutdownMetrics?.cleanupStepsFailed.push(
         'stop_new_connections',
       );
       this.logger.error('Phase 1 failed: Could not stop new connections', {

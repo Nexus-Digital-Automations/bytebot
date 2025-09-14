@@ -84,7 +84,7 @@ export class ResponseMetadata {
     message: 'Invalid request ID format',
   })
   @Expose()
-  requestId: string;
+  requestId!: string;
 
   @ApiProperty({
     description: 'API version that processed this request',
@@ -201,7 +201,7 @@ export class ValidationErrorDetail {
   @IsString()
   @IsNotEmpty()
   @Expose()
-  field: string;
+  field!: string;
 
   @ApiProperty({
     description: 'Validation constraint that was violated',
@@ -210,7 +210,7 @@ export class ValidationErrorDetail {
   @IsString()
   @IsNotEmpty()
   @Expose()
-  constraint: string;
+  constraint!: string;
 
   @ApiProperty({
     description: 'Human-readable error message',
@@ -219,7 +219,7 @@ export class ValidationErrorDetail {
   @IsString()
   @IsNotEmpty()
   @Expose()
-  message: string;
+  message!: string;
 
   @ApiPropertyOptional({
     description: 'Invalid value provided',
@@ -489,7 +489,7 @@ export class BaseEntityDto {
   })
   @IsUUID(4, { message: 'Invalid UUID format' })
   @Expose()
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'Entity creation timestamp',
@@ -499,7 +499,7 @@ export class BaseEntityDto {
   @IsDate()
   @ClassTransformerType(() => Date)
   @Expose()
-  createdAt: Date;
+  createdAt!: Date;
 
   @ApiProperty({
     description: 'Entity last update timestamp',
@@ -509,7 +509,7 @@ export class BaseEntityDto {
   @IsDate()
   @ClassTransformerType(() => Date)
   @Expose()
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @ApiPropertyOptional({
     description: 'Entity version for optimistic locking',
@@ -585,7 +585,7 @@ export class SanitizedStringField {
   @IsString()
   @IsNotEmpty()
   @Length(1, 1000)
-  value: string;
+  value!: string;
 }
 
 /**
@@ -603,7 +603,7 @@ export class SecureEmailField {
   @Matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
     message: 'Email format is invalid',
   })
-  value: string;
+  value!: string;
 }
 
 /**
@@ -624,7 +624,7 @@ export class SecureUrlField {
     { message: 'Must be a valid HTTP or HTTPS URL' },
   )
   @Length(10, 2048, { message: 'URL must be between 10 and 2048 characters' })
-  value: string;
+  value!: string;
 }
 
 /**
@@ -638,7 +638,7 @@ export class HealthCheckResponseDto extends BaseResponseDto {
   })
   @IsEnum(['healthy', 'degraded', 'unhealthy'])
   @Expose()
-  health: 'healthy' | 'degraded' | 'unhealthy';
+  health!: 'healthy' | 'degraded' | 'unhealthy';
 
   @ApiProperty({
     description: 'Service uptime in seconds',
@@ -648,7 +648,7 @@ export class HealthCheckResponseDto extends BaseResponseDto {
   @IsNumber()
   @Min(0)
   @Expose()
-  uptime: number;
+  uptime!: number;
 
   @ApiProperty({
     description: 'Application version',
@@ -658,7 +658,7 @@ export class HealthCheckResponseDto extends BaseResponseDto {
   @IsString()
   @Matches(/^\d+\.\d+\.\d+/, { message: 'Invalid version format' })
   @Expose()
-  version: string;
+  version!: string;
 
   @ApiProperty({
     description: 'Service dependencies status',
@@ -672,7 +672,7 @@ export class HealthCheckResponseDto extends BaseResponseDto {
   })
   @IsObject()
   @Expose()
-  dependencies: Record<string, string>;
+  dependencies!: Record<string, string>;
 }
 
 export default {

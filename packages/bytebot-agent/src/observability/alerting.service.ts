@@ -151,7 +151,7 @@ export class AlertingService implements OnModuleInit {
     string,
     { start: Date; end: Date; reason: string }
   >();
-  private notificationConfig: NotificationConfig;
+  private notificationConfig!: NotificationConfig;
   private alertHistory: Alert[] = [];
 
   constructor(

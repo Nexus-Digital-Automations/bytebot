@@ -9,7 +9,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class BrowserMonitoringResponseDto {
   @ApiProperty({ description: 'Overall service health status' })
-  serviceHealth: {
+  serviceHealth!: {
     status: 'healthy' | 'degraded' | 'unhealthy';
     message: string;
     uptime: number; // seconds
@@ -17,7 +17,7 @@ export class BrowserMonitoringResponseDto {
   };
 
   @ApiProperty({ description: 'Browser process information' })
-  browserProcesses: {
+  browserProcesses!: {
     totalProcesses: number;
     activeProcesses: number;
     idleProcesses: number;
@@ -27,7 +27,7 @@ export class BrowserMonitoringResponseDto {
   };
 
   @ApiProperty({ description: 'System resource usage' })
-  systemResources: {
+  systemResources!: {
     totalMemoryMB: number;
     availableMemoryMB: number;
     memoryUsagePercent: number;
@@ -37,7 +37,7 @@ export class BrowserMonitoringResponseDto {
   };
 
   @ApiProperty({ description: 'Service configuration' })
-  configuration: {
+  configuration!: {
     maxConcurrentSessions: number;
     sessionTimeoutSeconds: number;
     enableHeadless: boolean;
@@ -47,7 +47,7 @@ export class BrowserMonitoringResponseDto {
   };
 
   @ApiProperty({ description: 'Component status' })
-  components: {
+  components!: {
     browserUseFramework: 'online' | 'offline' | 'error';
     pythonRuntime: 'online' | 'offline' | 'error';
     chromeDriver: 'online' | 'offline' | 'error';
@@ -55,7 +55,7 @@ export class BrowserMonitoringResponseDto {
   };
 
   @ApiProperty({ description: 'Recent errors and warnings' })
-  recentIssues: Array<{
+  recentIssues!: Array<{
     timestamp: Date;
     level: 'error' | 'warning' | 'info';
     message: string;
@@ -64,18 +64,18 @@ export class BrowserMonitoringResponseDto {
   }>;
 
   @ApiProperty({ description: 'Health check timestamp' })
-  timestamp: Date;
+  timestamp!: Date;
 }
 
 export class TaskStatusResponseDto {
   @ApiProperty({ description: 'Task identifier' })
-  taskId: string;
+  taskId!: string;
 
   @ApiProperty({ description: 'Current task status' })
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status!: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
   @ApiProperty({ description: 'Task progress information' })
-  progress: {
+  progress!: {
     currentStep: number;
     totalSteps: number;
     percentComplete: number;
@@ -84,7 +84,7 @@ export class TaskStatusResponseDto {
   };
 
   @ApiProperty({ description: 'Execution timing' })
-  timing: {
+  timing!: {
     queuedAt: Date;
     startedAt?: Date;
     lastActivityAt?: Date;
@@ -94,7 +94,7 @@ export class TaskStatusResponseDto {
   };
 
   @ApiProperty({ description: 'Resource usage during execution' })
-  resourceUsage: {
+  resourceUsage!: {
     memoryUsageMB: number;
     cpuUsagePercent: number;
     networkRequests: number;
@@ -112,7 +112,7 @@ export class TaskStatusResponseDto {
   };
 
   @ApiProperty({ description: 'Task execution steps' })
-  executionSteps: Array<{
+  executionSteps!: Array<{
     stepNumber: number;
     action: string;
     status: 'pending' | 'running' | 'completed' | 'failed';
@@ -123,7 +123,7 @@ export class TaskStatusResponseDto {
   }>;
 
   @ApiProperty({ description: 'Real-time logs' })
-  recentLogs: Array<{
+  recentLogs!: Array<{
     timestamp: Date;
     level: 'debug' | 'info' | 'warning' | 'error';
     message: string;
@@ -140,5 +140,5 @@ export class TaskStatusResponseDto {
   };
 
   @ApiProperty({ description: 'Status check timestamp' })
-  timestamp: Date;
+  timestamp!: Date;
 }

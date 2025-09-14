@@ -233,7 +233,7 @@ export class BrowserFormService {
 
       const durationMs = Date.now() - startTime;
       const success =
-        failedFields.length === 0 || fillFormDto.skipMissingFields;
+        failedFields.length === 0 || (fillFormDto.skipMissingFields ?? false);
 
       this.logger.log(
         `Form filling completed: ${successfulFields.length}/${fieldResults.length} fields successful`,
@@ -605,7 +605,7 @@ export class BrowserFormService {
   ): FormInfo | undefined {
     if (fillFormDto.formSelector) {
       return forms.find((form) =>
-        form.selector.includes(fillFormDto.formSelector),
+        form.selector.includes(fillFormDto.formSelector!),
       );
     }
 

@@ -141,7 +141,7 @@ export class BrowserSessionService {
         videoRecording: createDto.enableVideoRecording,
         networkLogging: createDto.enableNetworkLogging,
         consoleLogging: createDto.enableConsoleLogging,
-        timeout: createDto.timeoutSeconds * 1000,
+        timeout: (createDto.timeoutSeconds ?? 30) * 1000,
       };
 
       const processId = await this.browserUseService.createBrowserProcess(

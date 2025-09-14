@@ -769,7 +769,7 @@ export class BrowserTaskService {
 
     const executionTimes = completedTasks
       .filter((t) => t.completedAt)
-      .map((t) => t.completedAt.getTime() - t.startedAt.getTime());
+      .map((t) => t.completedAt!.getTime() - t.startedAt.getTime());
 
     const averageExecutionTimeMs =
       executionTimes.length > 0

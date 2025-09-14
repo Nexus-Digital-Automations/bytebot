@@ -208,7 +208,7 @@ export class InMemoryDatabase {
    */
   private simulateSelect(query: string, table?: string): DatabaseRecord[] {
     if (table && this.tables.has(table)) {
-      const tableData = this.tables.get(table);
+      const tableData = this.tables.get(table)!;
       return Array.from(tableData.values());
     }
 
@@ -230,7 +230,7 @@ export class InMemoryDatabase {
     table?: string,
   ): DatabaseRecord {
     if (table && this.tables.has(table)) {
-      const tableData = this.tables.get(table);
+      const tableData = this.tables.get(table)!;
       const id = this.generateId();
       const insertData = this.extractInsertData(params);
       const record: DatabaseRecord = {
@@ -256,7 +256,7 @@ export class InMemoryDatabase {
     table?: string,
   ): QueryResult {
     if (table && this.tables.has(table)) {
-      const tableData = this.tables.get(table);
+      const tableData = this.tables.get(table)!;
       let affected = 0;
 
       // Update all records (simplified mock)
@@ -282,7 +282,7 @@ export class InMemoryDatabase {
    */
   private simulateDelete(_query: string, table?: string): QueryResult {
     if (table && this.tables.has(table)) {
-      const tableData = this.tables.get(table);
+      const tableData = this.tables.get(table)!;
       const beforeSize = tableData.size;
 
       // Delete some records (simplified mock)
@@ -478,11 +478,11 @@ export class MockPrismaClient {
   private queryDelay = 50;
 
   // Mock models - using specific interfaces instead of any
-  public task: MockPrismaModel;
-  public message: MockPrismaModel;
-  public summary: MockPrismaModel;
-  public file: MockPrismaModel;
-  public user: MockPrismaModel;
+  public task!: MockPrismaModel;
+  public message!: MockPrismaModel;
+  public summary!: MockPrismaModel;
+  public file!: MockPrismaModel;
+  public user!: MockPrismaModel;
 
   constructor() {
     this.initializeMockModels();

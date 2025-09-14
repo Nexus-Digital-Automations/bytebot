@@ -449,9 +449,9 @@ export function setupApiDocumentation(
 
   // Enhance document with additional metadata
   document.info.version = configService.get('api.version', '1.0.0');
-  document.info['x-api-build'] = process.env.BUILD_NUMBER || 'dev';
-  document.info['x-api-commit'] = process.env.GIT_COMMIT || 'unknown';
-  document.info['x-generation-date'] = new Date().toISOString();
+  (document.info as any)['x-api-build'] = process.env.BUILD_NUMBER || 'dev';
+  (document.info as any)['x-api-commit'] = process.env.GIT_COMMIT || 'unknown';
+  (document.info as any)['x-generation-date'] = new Date().toISOString();
 
   // Add security requirements globally
   if (!document.security) {
