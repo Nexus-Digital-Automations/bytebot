@@ -23,6 +23,7 @@ import { MetricsService } from '../src/metrics/metrics.service';
 import { CacheService } from '../src/cache/cache.service';
 import { PerformanceInterceptor } from '../src/common/interceptors/performance.interceptor';
 import { Optional } from '../src/types';
+import { Server } from 'http';
 import request from 'supertest';
 
 describe('API Performance Benchmarks', () => {
@@ -87,7 +88,7 @@ describe('API Performance Benchmarks', () => {
       // Warm-up phase
       console.log('🔥 Warming up health endpoint...');
       for (let i = 0; i < LOAD_TEST_CONFIG.WARM_UP_REQUESTS; i++) {
-        await request(app.getHttpServer() as any).get('/health');
+        await request(app.getHttpServer() as Server).get('/health');
       }
 
       // Benchmark phase
@@ -96,7 +97,9 @@ describe('API Performance Benchmarks', () => {
 
       for (let i = 0; i < LOAD_TEST_CONFIG.BENCHMARK_REQUESTS; i++) {
         const requestStart = Date.now();
-        const response = await request(app.getHttpServer()).get('/health');
+        const response = await request(app.getHttpServer() as any).get(
+          '/health',
+        );
         const requestDuration = Date.now() - requestStart;
 
         responseTimes.push(requestDuration);
@@ -138,7 +141,7 @@ describe('API Performance Benchmarks', () => {
       // Warm-up
       console.log('🔥 Warming up metrics endpoint...');
       for (let i = 0; i < LOAD_TEST_CONFIG.WARM_UP_REQUESTS; i++) {
-        await request(app.getHttpServer()).get('/metrics');
+        await request(app.getHttpServer() as Server).get('/metrics');
       }
 
       // Benchmark
@@ -147,7 +150,9 @@ describe('API Performance Benchmarks', () => {
 
       for (let i = 0; i < LOAD_TEST_CONFIG.BENCHMARK_REQUESTS; i++) {
         const requestStart = Date.now();
-        const response = await request(app.getHttpServer()).get('/metrics');
+        const response = await request(app.getHttpServer() as any).get(
+          '/metrics',
+        );
         const requestDuration = Date.now() - requestStart;
 
         responseTimes.push(requestDuration);
@@ -252,9 +257,11 @@ describe('API Performance Benchmarks', () => {
       const sustainedLoadPromises = [];
 
       for (let i = 0; i < 500; i++) {
-        sustainedLoadPromises.push(request(app.getHttpServer()).get('/health'));
         sustainedLoadPromises.push(
-          request(app.getHttpServer()).get('/metrics'),
+          request(app.getHttpServer() as any).get('/health'),
+        );
+        sustainedLoadPromises.push(
+          request(app.getHttpServer() as any).get('/metrics'),
         );
       }
 
@@ -309,7 +316,7 @@ describe('API Performance Benchmarks', () => {
       );
 
       for (let i = 0; i < testRequests; i++) {
-        await request(app.getHttpServer()).get('/health');
+        await request(app.getHttpServer() as Server).get('/health');
       }
 
       const stats = performanceInterceptor.getStats();

@@ -205,10 +205,7 @@ export class BrowserTaskService {
   /**
    * Update task status
    */
-  updateTaskStatus(
-    taskId: string,
-    updates: TaskUpdateData,
-  ): Promise<void> {
+  updateTaskStatus(taskId: string, updates: TaskUpdateData): void {
     const task = this.tasks.get(taskId);
     if (!task) {
       throw new Error(`Task not found: ${taskId}`);
@@ -279,7 +276,7 @@ export class BrowserTaskService {
       currentStep?: string;
       progress?: number;
     },
-  ): Promise<void> {
+  ): void {
     const task = this.tasks.get(taskId);
     if (!task) {
       return;
@@ -321,9 +318,7 @@ export class BrowserTaskService {
   /**
    * Get tasks by status
    */
-  getTasksByStatus(
-    status: BrowserTaskStatus,
-  ): Promise<BrowserTaskResultDto[]> {
+  getTasksByStatus(status: BrowserTaskStatus): BrowserTaskResultDto[] {
     const tasks = Array.from(this.tasks.values()).filter(
       (task) => task.status === status,
     );
@@ -459,7 +454,7 @@ export class BrowserTaskService {
   /**
    * Get task metrics and statistics
    */
-  getTaskMetrics(): Promise<{
+  getTaskMetrics(): {
     totalTasks: number;
     completedTasks: number;
     failedTasks: number;
@@ -469,7 +464,7 @@ export class BrowserTaskService {
     averageExecutionTime: number;
     successRate: number;
     queueLength: number;
-  }> {
+  } {
     const tasks = Array.from(this.tasks.values());
 
     const runningTasks = tasks.filter(

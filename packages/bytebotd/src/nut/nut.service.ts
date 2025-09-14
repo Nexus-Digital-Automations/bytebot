@@ -610,7 +610,7 @@ export class NutService {
    *
    * @param ms Milliseconds to wait
    */
-  private delay(ms: number): void {
+  private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 

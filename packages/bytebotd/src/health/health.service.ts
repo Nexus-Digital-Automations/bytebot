@@ -27,6 +27,9 @@ import {
   DetailedStatusResponse,
 } from './interfaces/health.interfaces';
 
+// Re-export interfaces for test files
+export { BasicHealthResponse, DetailedStatusResponse };
+
 /**
  * Enterprise health monitoring service optimized for local deployment
  */

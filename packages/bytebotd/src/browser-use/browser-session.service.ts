@@ -235,7 +235,7 @@ export class BrowserSessionService {
       title?: string;
       makeActive?: boolean;
     },
-  ): Promise<BrowserTabInfoDto> {
+  ): BrowserTabInfoDto {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error(`Session not found: ${sessionId}`);
@@ -364,7 +364,7 @@ export class BrowserSessionService {
       screenshot?: boolean;
       pageLoad?: boolean;
     },
-  ): Promise<void> {
+  ): void {
     const session = this.sessions.get(sessionId);
     if (!session) {
       return;
@@ -390,7 +390,7 @@ export class BrowserSessionService {
   private initializeBrowserSession(
     session: BrowserSessionDto,
     _dto: CreateBrowserSessionDto,
-  ): Promise<void> {
+  ): void {
     // In production, this would:
     // 1. Start browser process with specified configuration
     // 2. Connect to CDP (Chrome DevTools Protocol)
@@ -412,9 +412,7 @@ export class BrowserSessionService {
   /**
    * Terminate browser session (mock implementation)
    */
-  private terminateBrowserSession(
-    session: BrowserSessionDto,
-  ): Promise<void> {
+  private terminateBrowserSession(session: BrowserSessionDto): void {
     // In production, this would:
     // 1. Close all browser tabs
     // 2. Disconnect from CDP

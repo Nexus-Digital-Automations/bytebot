@@ -486,7 +486,7 @@ export class BrowserUseController {
     status: HttpStatus.CREATED,
     description: 'Tab created successfully',
   })
-  createTab(
+  async createTab(
     @Param('sessionId') sessionId: string,
     @Body()
     tabOptions?: {
@@ -720,7 +720,7 @@ export class BrowserUseController {
     status: HttpStatus.OK,
     description: 'Screenshot captured successfully',
   })
-  takeScreenshot(
+  async takeScreenshot(
     @Param('sessionId') sessionId: string,
     @Body()
     options?: {
@@ -807,7 +807,7 @@ export class BrowserUseController {
     status: HttpStatus.OK,
     description: 'Data extracted successfully',
   })
-  extractPageData(
+  async extractPageData(
     @Param('sessionId') sessionId: string,
     @Body()
     extractConfig: {

@@ -306,14 +306,14 @@ export class BrowserAsyncJobService {
   /**
    * Get queue status and statistics
    */
-  getQueueStatus(): Promise<{
+  getQueueStatus(): {
     queueLength: number;
     processingJobs: number;
     completedJobs: number;
     failedJobs: number;
     totalJobs: number;
     averageProcessingTime: number;
-  }> {
+  } {
     const jobs = Array.from(this.jobs.values());
 
     const completedJobs = jobs.filter(
@@ -641,9 +641,7 @@ export class BrowserAsyncJobService {
     job.progress.percentage = 100;
   }
 
-  private processScreenshotCapture(
-    job: AsyncJobResultDto,
-  ): Promise<void> {
+  private processScreenshotCapture(job: AsyncJobResultDto): void {
     // Implementation for screenshot capture jobs
     job.progress.currentStep = 'Processing screenshot capture job';
     job.progress.completedSteps = 1;

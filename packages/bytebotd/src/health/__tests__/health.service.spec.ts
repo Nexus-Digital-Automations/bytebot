@@ -28,7 +28,7 @@ import { HealthService } from '../health.service';
 import {
   BasicHealthResponse,
   DetailedStatusResponse,
-  _ServiceHealthResponse,
+  ServiceHealthResponse,
 } from '../interfaces/health.interfaces';
 
 /**
@@ -64,7 +64,7 @@ type TestableHealthService = HealthService & {
   checkExternalService(
     url: string,
   ): Promise<{ status: string; responseTime: string }>;
-  startTime: number;
+  getInitializationTime(): number;
 };
 
 interface _PerformanceMetrics {
