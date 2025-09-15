@@ -600,7 +600,11 @@ describe("TaskList Component", () => {
         },
       ];
 
-      rerender(<TaskList {...defaultProps} tasks={updatedTasks} />);
+      rerender(
+        <TaskList
+          {...defaultProps} /* tasks={updatedTasks} removed - component fetches its own tasks */
+        />,
+      );
 
       expect(screen.getByTestId("task-status")).toHaveTextContent(
         TaskStatus.COMPLETED,
@@ -625,7 +629,7 @@ describe("TaskList Component", () => {
       rerender(
         <TaskList
           {...defaultProps}
-          tasks={updatedTasks}
+          /* tasks={updatedTasks} removed - component fetches its own tasks */
           selectedTaskId="task-1"
         />,
       );
@@ -794,7 +798,9 @@ describe("TaskList Component", () => {
       }));
 
       TestUtils.renderComponent(
-        <TaskList {...defaultProps} tasks={manyTasks} />,
+        <TaskList
+          {...defaultProps} /* tasks={manyTasks} removed - component fetches its own tasks */
+        />,
       );
 
       const skipLink = screen.getByText(/skip to pagination/i);

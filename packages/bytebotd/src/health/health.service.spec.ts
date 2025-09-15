@@ -224,19 +224,25 @@ describe('HealthService', () => {
   describe('Private Methods', () => {
     describe('Database Ping', () => {
       it('should simulate database ping successfully', async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = await (service as any).performDatabasePing();
+        const result = await (
+          service as HealthService & {
+            performDatabasePing: () => Promise<boolean>;
+          }
+        ).performDatabasePing();
         expect(result).toBe(true);
       });
     });
 
     describe('External Service Check', () => {
       it('should check individual external service', async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = await (service as any).checkExternalService(
-          'test-service',
-          'http://test.com/health',
-        );
+        const result = await (
+          service as HealthService & {
+            checkExternalService: (
+              name: string,
+              url: string,
+            ) => Promise<{ status: string; responseTime: number }>;
+          }
+        ).checkExternalService('test-service', 'http://test.com/health');
 
         expect(result).toHaveProperty('status');
         expect(result).toHaveProperty('responseTime');
