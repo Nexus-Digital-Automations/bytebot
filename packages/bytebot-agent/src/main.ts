@@ -378,7 +378,9 @@ function setupGracefulShutdown(): void {
         reason instanceof Error
           ? reason.message
           : (() => {
-              if (typeof reason === 'string') return reason;
+              if (typeof reason === 'string') {
+                return reason;
+              }
               try {
                 return JSON.stringify(reason);
               } catch {

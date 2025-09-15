@@ -27,8 +27,12 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-// Note: SecurityThreatDetector to be implemented in shared package
-// import { SecurityThreatDetector } from '../../shared/src/validation/services/security-threat-detector.service';
+import { SecurityThreatDetector } from '@bytebot/shared/server';
+import {
+  SecurityThreatContext,
+  ThreatAnalysisResult,
+} from '@bytebot/shared/server';
+import { ValidationServiceType } from '@bytebot/shared/server';
 import {
   SecurityAuditService,
   SecurityEventType,
@@ -105,7 +109,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
 
   constructor(
     private readonly configService: ConfigService,
-    // private readonly threatDetector: SecurityThreatDetector, // TODO: Implement when shared package is ready
+    private readonly threatDetector: SecurityThreatDetector,
     private readonly auditService: SecurityAuditService,
   ) {
     this.config = this.loadSecurityConfig();
@@ -660,8 +664,7 @@ export class SecurityValidationInterceptor implements NestInterceptor {
     issues: ValidationResult['issues'],
   ): Promise<void> {
     try {
-      // Combine relevant request data for threat analysis
-      // TODO: Use analysisData when SecurityThreatDetector is implemented
+      // Prepare request data for threat analysis
       const analysisData = {
         url: request.url,
         path: request.path,
@@ -671,29 +674,33 @@ export class SecurityValidationInterceptor implements NestInterceptor {
         method: request.method,
       };
 
-      // Use analysisData for logging and future threat detection
+      // Use analysisData for logging
       this.logger.debug('Threat analysis data prepared', {
         url: analysisData.url,
         method: analysisData.method,
         hasBody: !!analysisData.body,
       });
 
-      // TODO: Implement threat analysis when SecurityThreatDetector is available
-      // const threatAnalysis = await this.threatDetector.analyzeThreat(
-      //   analysisData,
-      //   {
-      //     serviceType: 'bytebot_agent' as any,
-      //     environment: this.configService.get('app.environment', 'development'),
-      //     operationId: metadata.id,
-      //   },
-      // );
-      const threatAnalysis = {
-        riskScore: 0,
-        threats: [],
-        isHighRisk: false,
-        threatTypes: [],
-        threatDetails: {},
-      }; // Placeholder
+      // Perform comprehensive threat analysis using SecurityThreatDetector
+      const threatContext: SecurityThreatContext = {
+        serviceType: ValidationServiceType._BYTEBOT_AGENT,
+        environment: this.configService.get('app.environment', 'development'),
+        operationId: metadata.id,
+        userContext: {
+          sessionId: metadata.sessionId,
+          ipAddress: metadata.ipAddress,
+          userAgent: metadata.userAgent,
+          userId: metadata.userId,
+        },
+        requestContext: {
+          method: request.method,
+          path: request.path,
+          headers: request.headers as Record<string, string>,
+        },
+      };
+
+      const threatAnalysis: ThreatAnalysisResult =
+        this.threatDetector.analyzeThreat(analysisData, threatContext);
 
       if (threatAnalysis.isHighRisk) {
         const severity = threatAnalysis.riskScore >= 0.8 ? 'critical' : 'error';
