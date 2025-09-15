@@ -5441,6 +5441,27 @@
       },
       "lastRenewal": "2025-09-15T00:29:55.796Z",
       "renewalCount": 1
+    },
+    "dev_session_1757897211315_1_general_3e0123fb": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-15T00:46:51.316Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-15T00:46:51.316Z",
+      "sessionId": null,
+      "metadata": {}
     }
   },
   "settings": {

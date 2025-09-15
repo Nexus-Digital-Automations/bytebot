@@ -316,11 +316,7 @@ async function bootstrap(): Promise<void> {
     // Enable graceful shutdown with enhanced reliability
     app.enableShutdownHooks();
 
-    // Initialize shutdown service for enterprise-grade graceful shutdown
-    const shutdownService: unknown = app.get('ShutdownService');
-    if (shutdownService) {
-      logger.log('Enterprise graceful shutdown service initialized');
-    }
+    // Graceful shutdown handled by NestJS hooks (app.enableShutdownHooks() above)
 
     // Start the application
     const port = config.port;

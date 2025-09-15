@@ -126,6 +126,10 @@ import { AppConfig } from '../config/configuration';
       useClass: AuthSecurityMonitoringService,
     },
     {
+      provide: 'REDIS_CLIENT',
+      useValue: null, // Mock Redis client for development
+    },
+    {
       provide: 'AUTH_CONFIG',
       useFactory: (configService: ConfigService<AppConfig>) => {
         const logger = new Logger('AuthModule');

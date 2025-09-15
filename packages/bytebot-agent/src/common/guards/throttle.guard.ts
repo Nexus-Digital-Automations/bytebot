@@ -18,9 +18,15 @@ import {
   Logger,
   HttpException,
   HttpStatus,
+  Inject,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerException } from '@nestjs/throttler';
+import {
+  ThrottlerGuard,
+  ThrottlerException,
+  ThrottlerStorage,
+} from '@nestjs/throttler';
+import type { ThrottlerModuleOptions } from '@nestjs/throttler';
 import { Request } from 'express';
 import {
   UserRole,
@@ -129,27 +135,14 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
   private readonly requestCounts = new Map<string, number>();
   private readonly suspiciousActivities = new Map<string, number>();
 
-  constructor(protected readonly reflector: Reflector) {
-    super(
-      {
-        throttlers: [
-          {
-            ttl: 60000, // 1 minute
-            limit: 100, // 100 requests per minute
-          },
-        ],
-      },
-      {
-        increment: () =>
-          Promise.resolve({
-            totalHits: 0,
-            timeToExpire: 0,
-            timeToBlockExpire: 0,
-            isBlocked: false,
-          }),
-      },
-      reflector,
-    );
+  constructor(
+    @Inject('THROTTLER:MODULE_OPTIONS')
+    protected readonly options: ThrottlerModuleOptions,
+    @Inject('THROTTLER_STORAGE')
+    protected readonly storageService: ThrottlerStorage,
+    protected readonly reflector: Reflector,
+  ) {
+    super(options, storageService, reflector);
 
     this.logger.log('Advanced throttle guard initialized', {
       defaultRoleLimits: DEFAULT_ROLE_LIMITS,
