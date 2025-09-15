@@ -6215,5 +6215,387 @@ export interface DockerContainerInspectData {
 
 // DockerResourceLimits interface already defined above with better documentation
 
-// Note: Remove default export to fix TypeScript errors
-// Individual types are already exported above
+/**
+ * ===============================================================================
+ * ENTERPRISE-GRADE TYPE DEFINITIONS - ADDITIONAL CORE INTERFACES
+ * ===============================================================================
+ */
+
+/**
+ * General Analyzer Result Interface
+ * Provides a standardized result structure for all security analyzers
+ */
+export interface AnalyzerResult<T = unknown> {
+  /** Unique identifier for this analysis result */
+  id: string;
+
+  /** Timestamp when analysis was performed */
+  timestamp: Date;
+
+  /** Duration of analysis in milliseconds */
+  duration: number;
+
+  /** Success status of the analysis */
+  success: boolean;
+
+  /** Type of analyzer that produced this result */
+  analyzerType: "docker" | "database" | "service" | "system";
+
+  /** Target that was analyzed */
+  target: {
+    type: string;
+    name: string;
+    location: string;
+    configuration?: Record<string, unknown>;
+  };
+
+  /** Analysis results data */
+  data: T;
+
+  /** Error information if analysis failed */
+  error?: ErrorContext;
+
+  /** Metadata about the analysis process */
+  metadata: {
+    analyzerVersion: string;
+    configurationVersion: string;
+    analysisScope: string[];
+    excludedItems: string[];
+    analysisParameters: Record<string, unknown>;
+  };
+}
+
+/**
+ * System Resource Configuration Interface
+ * Defines system-level resources and their security configurations
+ */
+export interface SystemResource {
+  /** Resource identifier */
+  id: string;
+
+  /** Resource name */
+  name: string;
+
+  /** Type of system resource */
+  type:
+    | "process"
+    | "service"
+    | "file"
+    | "directory"
+    | "network"
+    | "user"
+    | "group";
+
+  /** Resource location or path */
+  location: string;
+
+  /** Owner information */
+  owner: {
+    user: string;
+    group: string;
+    uid?: number;
+    gid?: number;
+  };
+
+  /** Permission configuration */
+  permissions: {
+    mode: string;
+    readable: boolean;
+    writable: boolean;
+    executable: boolean;
+    sticky?: boolean;
+    setuid?: boolean;
+    setgid?: boolean;
+  };
+
+  /** Resource status */
+  status: "active" | "inactive" | "unknown";
+
+  /** Security-related properties */
+  security: {
+    encrypted?: boolean;
+    secureTransport?: boolean;
+    authenticationRequired?: boolean;
+    accessControls?: string[];
+    vulnerabilities?: SecurityFinding[];
+  };
+
+  /** Additional metadata */
+  metadata: Record<string, unknown>;
+}
+
+/**
+ * Top-Level Docker Configuration Interface
+ * Comprehensive Docker environment security configuration
+ */
+export interface DockerConfiguration {
+  /** Docker daemon configuration */
+  daemon: {
+    version: string;
+    rootDir: string;
+    storageDriver: string;
+    loggingDriver: string;
+    securityOptions: string[];
+    userNamespaces?: boolean;
+    contentTrust?: boolean;
+    registryMirrors?: string[];
+    insecureRegistries?: string[];
+  };
+
+  /** Container configurations */
+  containers: DockerContainerConfig[];
+
+  /** Image configurations */
+  images: DockerImageConfig[];
+
+  /** Network configurations */
+  networks: DockerNetworkConfig[];
+
+  /** Volume configurations */
+  volumes: DockerVolumeConfig[];
+
+  /** Compose file configurations */
+  compose: DockerComposeConfig[];
+
+  /** Dockerfile configurations */
+  dockerfiles: DockerfileConfig[];
+
+  /** Registry configurations */
+  registries: {
+    name: string;
+    url: string;
+    secure: boolean;
+    credentials?: {
+      username?: string;
+      password?: string;
+      token?: string;
+    };
+  }[];
+
+  /** Security policies */
+  security: {
+    allowPrivileged: boolean;
+    defaultSeccomp: boolean;
+    defaultApparmor: boolean;
+    defaultSelinux: boolean;
+    userNamespaceMode?: string;
+    cgroupParent?: string;
+  };
+}
+
+/**
+ * Error Context Interface
+ * Standardized error information for security analysis
+ */
+export interface ErrorContext {
+  /** Error code identifier */
+  code: string;
+
+  /** Human-readable error message */
+  message: string;
+
+  /** Detailed error description */
+  details?: string;
+
+  /** Error severity level */
+  severity: "low" | "medium" | "high" | "critical";
+
+  /** Error category */
+  category:
+    | "validation"
+    | "configuration"
+    | "network"
+    | "authentication"
+    | "authorization"
+    | "system"
+    | "unknown";
+
+  /** Source of the error */
+  source: {
+    file?: string;
+    line?: number;
+    column?: number;
+    function?: string;
+    component: string;
+  };
+
+  /** Error stack trace */
+  stack?: string;
+
+  /** Timestamp when error occurred */
+  timestamp: Date;
+
+  /** Inner/caused by error */
+  innerError?: ErrorContext;
+
+  /** Remediation suggestions */
+  remediation?: {
+    description: string;
+    steps: string[];
+    resources: string[];
+  };
+
+  /** Additional error metadata */
+  metadata: Record<string, unknown>;
+}
+
+/**
+ * General Security Configuration Interface
+ * Top-level security configuration for any system or service
+ */
+export interface SecurityConfiguration {
+  /** Configuration identifier */
+  id: string;
+
+  /** Configuration name */
+  name: string;
+
+  /** Configuration version */
+  version: string;
+
+  /** Environment (development, staging, production) */
+  environment: "development" | "staging" | "production";
+
+  /** Authentication configuration */
+  authentication: {
+    enabled: boolean;
+    methods: ("password" | "oauth" | "jwt" | "certificate" | "multifactor")[];
+    passwordPolicy?: {
+      minLength: number;
+      requireUppercase: boolean;
+      requireLowercase: boolean;
+      requireNumbers: boolean;
+      requireSpecialChars: boolean;
+      maxAge: number;
+    };
+    sessionConfig?: {
+      timeout: number;
+      secure: boolean;
+      httpOnly: boolean;
+      sameSite: "strict" | "lax" | "none";
+    };
+  };
+
+  /** Authorization configuration */
+  authorization: {
+    enabled: boolean;
+    model: "rbac" | "abac" | "acl" | "custom";
+    roles?: string[];
+    permissions?: string[];
+    policies?: Record<string, unknown>;
+  };
+
+  /** Encryption configuration */
+  encryption: {
+    atRest: {
+      enabled: boolean;
+      algorithm?: string;
+      keyRotation?: boolean;
+    };
+    inTransit: {
+      enabled: boolean;
+      tlsVersion?: string;
+      cipherSuites?: string[];
+      certificateValidation?: boolean;
+    };
+  };
+
+  /** Network security configuration */
+  network: {
+    firewallEnabled: boolean;
+    allowedPorts?: number[];
+    blockedPorts?: number[];
+    ipWhitelist?: string[];
+    ipBlacklist?: string[];
+    rateLimiting?: {
+      enabled: boolean;
+      requestsPerMinute: number;
+      burstSize: number;
+    };
+  };
+
+  /** Logging and monitoring configuration */
+  monitoring: {
+    auditLogging: boolean;
+    securityEventLogging: boolean;
+    performanceMonitoring: boolean;
+    alerting: {
+      enabled: boolean;
+      channels: ("email" | "sms" | "webhook" | "slack")[];
+      thresholds: Record<string, number>;
+    };
+  };
+
+  /** Compliance requirements */
+  compliance: {
+    frameworks: (
+      | "owasp"
+      | "nist"
+      | "iso27001"
+      | "pci-dss"
+      | "hipaa"
+      | "gdpr"
+    )[];
+    requirements: string[];
+    attestations: Record<string, boolean>;
+  };
+
+  /** Additional security metadata */
+  metadata: Record<string, unknown>;
+}
+
+/**
+ * Network Service Configuration Interface
+ * Extended definition for network service security analysis
+ */
+export interface NetworkServiceConfiguration {
+  /** Service identifier */
+  id: string;
+
+  /** Service name */
+  name: string;
+
+  /** Service type */
+  type:
+    | "web"
+    | "api"
+    | "database"
+    | "cache"
+    | "queue"
+    | "proxy"
+    | "load-balancer"
+    | "custom";
+
+  /** Network binding configuration */
+  binding: {
+    host: string;
+    port: number;
+    protocol: "tcp" | "udp" | "http" | "https" | "websocket";
+    interfaces: string[];
+  };
+
+  /** Security configuration specific to network services */
+  security: SecurityConfiguration;
+
+  /** Health check configuration */
+  healthCheck: {
+    enabled: boolean;
+    endpoint?: string;
+    interval?: number;
+    timeout?: number;
+    retries?: number;
+  };
+
+  /** Dependencies */
+  dependencies: {
+    services: string[];
+    databases: string[];
+    caches: string[];
+    externalApis: string[];
+  };
+
+  /** Configuration metadata */
+  metadata: Record<string, unknown>;
+}
+
+// Note: Individual types are exported above with comprehensive documentation

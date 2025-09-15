@@ -25,16 +25,34 @@
  * @since 2024-01-01
  */
 
-import sharp from 'sharp';
 import { Logger } from '@nestjs/common';
 import { CompressionOptions, CompressionResult } from './types';
 
 // Initialize logger for compression operations
 const _logger = new Logger('Base64ImageCompressor');
 
-// Type-safe sharp function call helper
-const createSharp = (input: string | Buffer): sharp.Sharp => {
-  return sharp(input);
+// Lazy-loaded sharp module
+let sharpModule: typeof import('sharp') | null = null;
+
+// Type-safe sharp function call helper with lazy loading
+const createSharp = async (
+  input: string | Buffer,
+): Promise<ReturnType<typeof import('sharp')>> => {
+  if (!sharpModule) {
+    try {
+      sharpModule = (await import('sharp')).default;
+      _logger.log('Sharp module loaded successfully');
+    } catch (error) {
+      _logger.error('Failed to load sharp module for image processing', {
+        error: (error as Error).message,
+        fallback: 'Image compression features will be unavailable',
+      });
+      throw new Error(
+        'Sharp module unavailable: Image compression features disabled',
+      );
+    }
+  }
+  return sharpModule(input);
 };
 
 /**
@@ -225,12 +243,12 @@ class Base64ImageCompressor {
   /**
    * Compress buffer with specified quality
    */
-  private static compressBuffer(
+  private static async compressBuffer(
     inputBuffer: Buffer,
     quality: number,
     format: 'png' | 'jpeg' | 'webp',
   ): Promise<Buffer> {
-    const sharpInstance = createSharp(inputBuffer);
+    const sharpInstance = await createSharp(inputBuffer);
 
     switch (format) {
       case 'png':
@@ -296,7 +314,8 @@ class Base64ImageCompressor {
       const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
       const inputBuffer = Buffer.from(base64Data, 'base64');
 
-      const metadata = await createSharp(inputBuffer).metadata();
+      const sharpInstance = await createSharp(inputBuffer);
+      const metadata = await sharpInstance.metadata();
       const originalWidth = metadata.width ?? maxWidth;
       const originalHeight = metadata.height ?? maxHeight;
 
@@ -306,7 +325,8 @@ class Base64ImageCompressor {
         const newWidth = Math.floor(originalWidth * scale);
         const newHeight = Math.floor(originalHeight * scale);
 
-        const resizedBuffer = await createSharp(inputBuffer)
+        const resizedSharpInstance = await createSharp(inputBuffer);
+        const resizedBuffer = await resizedSharpInstance
           .resize(newWidth, newHeight, {
             fit: 'inside',
             withoutEnlargement: true,

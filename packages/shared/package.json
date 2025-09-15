@@ -12,6 +12,10 @@
     "./server": {
       "types": "./dist/index-server.d.ts",
       "default": "./dist/index-server.js"
+    },
+    "./dist/index-server": {
+      "types": "./dist/index-server.d.ts",
+      "default": "./dist/index-server.js"
     }
   },
   "private": true,

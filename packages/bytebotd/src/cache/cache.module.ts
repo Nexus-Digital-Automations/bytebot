@@ -21,6 +21,7 @@ import { Module, Global, Logger } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
 import { CacheService } from './cache.service';
 import { CacheKeyGenerator } from './cache-key.generator';
+import { MetricsModule } from '../metrics/metrics.module';
 import * as redisStore from 'cache-manager-redis-store';
 
 /**
@@ -42,6 +43,7 @@ interface CacheConfig {
 @Global()
 @Module({
   imports: [
+    MetricsModule, // Import MetricsModule to provide MetricsService dependency
     NestCacheModule.registerAsync({
       useFactory: (): CacheConfig => {
         const _logger = new Logger('CacheModule');

@@ -23,6 +23,7 @@ import {
   HttpStatus,
   Logger,
   SetMetadata,
+  Inject,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import {
@@ -129,7 +130,9 @@ export class EnterpriseRateLimitGuard
   >();
 
   constructor(
+    @Inject('THROTTLER:MODULE_OPTIONS')
     options: ThrottlerModuleOptions,
+    @Inject('THROTTLER_STORAGE')
     storageService: ThrottlerStorage,
     protected reflector: Reflector,
   ) {

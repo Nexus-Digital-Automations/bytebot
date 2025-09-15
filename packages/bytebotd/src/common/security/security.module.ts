@@ -13,10 +13,7 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { APP_PIPE, APP_GUARD, APP_INTERCEPTOR, Reflector } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import {
-  GlobalValidationPipe,
-  BytebotDValidationPipes,
-} from '../pipes/global-validation.pipe';
+import { BytebotDValidationPipes } from '../pipes/global-validation.pipe';
 import { EnterpriseRateLimitGuard } from '../guards/rate-limit.guard';
 import { SecurityHeadersMiddleware } from '../middleware/security-headers.middleware';
 import { DeprecationGuard } from '../versioning/deprecation.guard';
@@ -70,6 +67,29 @@ import Redis from 'ioredis';
       inject: [ConfigService],
     },
 
+    // Throttler module options for EnterpriseRateLimitGuard
+    {
+      provide: 'THROTTLER:MODULE_OPTIONS',
+      useValue: {
+        throttlers: [
+          {
+            name: 'default',
+            ttl: 60000, // 60 seconds
+            limit: 100, // 100 requests per minute for desktop operations
+          },
+        ],
+      },
+    },
+
+    // Throttler storage for EnterpriseRateLimitGuard
+    {
+      provide: 'THROTTLER_STORAGE',
+      useValue: {
+        getRecord: async () => ({ totalHits: 0, timeToExpire: 0 }),
+        addRecord: async () => ({ totalHits: 1, timeToExpire: 60000 }),
+      },
+    },
+
     // Global rate limiting guard (first in guard chain)
     {
       provide: APP_GUARD,
@@ -96,11 +116,12 @@ import Redis from 'ioredis';
   ],
   exports: [
     'REDIS_CLIENT',
+    'THROTTLER:MODULE_OPTIONS',
+    'THROTTLER_STORAGE',
     SecurityHeadersMiddleware,
     EnterpriseRateLimitGuard,
     DeprecationGuard,
     VersionInterceptor,
-    GlobalValidationPipe,
   ],
 })
 export class SecurityModule implements NestModule {

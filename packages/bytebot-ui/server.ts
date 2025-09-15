@@ -1,8 +1,10 @@
+import "reflect-metadata";
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import { createProxyServer } from "http-proxy";
+import httpProxy from "http-proxy";
 import next from "next";
 import { createServer } from "http";
+import type { Socket } from "net";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import cors from "cors";
@@ -46,7 +48,10 @@ app
     const handle = app.getRequestHandler();
     const nextUpgradeHandler = app.getUpgradeHandler();
 
-    const vncProxy = createProxyServer({ changeOrigin: true, ws: true });
+    const vncProxy = httpProxy.createProxyServer({
+      changeOrigin: true,
+      ws: true,
+    });
 
     const expressApp = express();
 
@@ -131,12 +136,14 @@ app
         origin: (origin, callback) => {
           // Allow requests with no origin (mobile apps, curl, postman, etc.)
           if (!origin) {
-            return callback(null, true);
+            callback(null, true);
+            return;
           }
 
           // Check if origin is in allowed list
           if (ALLOWED_ORIGINS.includes(origin)) {
-            return callback(null, true);
+            callback(null, true);
+            return;
           }
 
           // Allow localhost with any port in development
@@ -145,7 +152,8 @@ app
             (origin.startsWith("http://localhost:") ||
               origin.startsWith("https://localhost:"))
           ) {
-            return callback(null, true);
+            callback(null, true);
+            return;
           }
 
           // Block unauthorized origins
@@ -155,7 +163,7 @@ app
             timestamp: new Date().toISOString(),
           });
 
-          return callback(
+          callback(
             new Error(`Origin ${origin} not allowed by CORS policy`),
             false,
           );
@@ -209,7 +217,7 @@ app
     expressApp.use("/api/proxy/websockify", (req, res) => {
       console.log("Proxying websockify request");
       // Rewrite path
-      const targetUrl = new URL(BYTEBOT_DESKTOP_VNC_URL!);
+      const targetUrl = new URL(BYTEBOT_DESKTOP_VNC_URL);
       req.url =
         targetUrl.pathname +
         (req.url?.replace(/^\/api\/proxy\/websockify/, "") || "");
@@ -229,18 +237,20 @@ app
       );
 
       if (pathname.startsWith("/api/proxy/tasks")) {
-        return tasksProxy.upgrade(request, socket as any, head);
+        tasksProxy.upgrade(request, socket as Socket, head);
+        return;
       }
 
       if (pathname.startsWith("/api/proxy/websockify")) {
-        const targetUrl = new URL(BYTEBOT_DESKTOP_VNC_URL!);
+        const targetUrl = new URL(BYTEBOT_DESKTOP_VNC_URL);
         request.url =
           targetUrl.pathname +
           (request.url?.replace(/^\/api\/proxy\/websockify/, "") || "");
         console.log("Proxying websockify upgrade request: ", request.url);
-        return vncProxy.ws(request, socket as any, head, {
+        vncProxy.ws(request, socket as Socket, head, {
           target: `${targetUrl.protocol}//${targetUrl.host}`,
         });
+        return;
       }
 
       nextUpgradeHandler(request, socket, head);

@@ -153,8 +153,8 @@ CREATE TABLE "browser_data_extractions" (
 -- AddForeignKey
 ALTER TABLE "browser_tasks" ADD CONSTRAINT "browser_tasks_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "browser_sessions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
--- AddForeignKey
-ALTER TABLE "browser_tasks" ADD CONSTRAINT "browser_tasks_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+-- Note: userId foreign key constraint removed as users table doesn't exist in current schema
+-- ALTER TABLE "browser_tasks" ADD CONSTRAINT "browser_tasks_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "browser_task_steps" ADD CONSTRAINT "browser_task_steps_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "browser_tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
