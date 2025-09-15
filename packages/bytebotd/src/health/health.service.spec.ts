@@ -253,8 +253,11 @@ describe('HealthService', () => {
 
     describe('Legacy Service Health Check', () => {
       it('should return legacy service health status', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const services = (service as any).checkServiceHealth();
+        const services = (
+          service as HealthService & {
+            checkServiceHealth: () => Record<string, string>;
+          }
+        ).checkServiceHealth();
 
         expect(services).toHaveProperty('database', 'unknown');
         expect(services).toHaveProperty('cache', 'unknown');

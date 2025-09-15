@@ -547,7 +547,9 @@ describe("TaskList Component", () => {
       const user = TestUtils.createUserEvent();
 
       TestUtils.renderComponent(
-        <TaskList {...defaultProps} onRefresh={onRefresh} />,
+        <TaskList
+          {...defaultProps} /* onRefresh={onRefresh} removed - not in TaskListProps interface */
+        />,
       );
 
       const refreshButton = screen.getByText(/refresh/i);
@@ -568,7 +570,9 @@ describe("TaskList Component", () => {
       const user = TestUtils.createUserEvent();
 
       TestUtils.renderComponent(
-        <TaskList {...defaultProps} onCreateTask={onCreateTask} />,
+        <TaskList
+          {...defaultProps} /* onCreateTask={onCreateTask} removed - not in TaskListProps interface */
+        />,
       );
 
       const createButton = screen.getByText(/create task/i);
@@ -613,7 +617,9 @@ describe("TaskList Component", () => {
 
     it("maintains selection state across updates", () => {
       const { rerender } = TestUtils.renderComponent(
-        <TaskList {...defaultProps} selectedTaskId="task-1" />,
+        <TaskList
+          {...defaultProps} /* selectedTaskId="task-1" removed - not in TaskListProps interface */
+        />,
       );
 
       expect(screen.getByTestId("task-item-task-1")).toHaveClass("selected");
@@ -630,7 +636,7 @@ describe("TaskList Component", () => {
         <TaskList
           {...defaultProps}
           /* tasks={updatedTasks} removed - component fetches its own tasks */
-          selectedTaskId="task-1"
+          /* selectedTaskId="task-1" removed - not in TaskListProps interface */
         />,
       );
 
@@ -661,7 +667,11 @@ describe("TaskList Component", () => {
         updatedAt: new Date().toISOString(),
       };
 
-      rerender(<TaskList {...defaultProps} tasks={[...mockTasks, newTask]} />);
+      rerender(
+        <TaskList
+          {...defaultProps} /* tasks={[...mockTasks, newTask]} removed - component fetches its own tasks */
+        />,
+      );
 
       expect(screen.getAllByTestId(/task-item-/)).toHaveLength(
         _TEST_TASK_COUNT_MEDIUM,
@@ -678,7 +688,11 @@ describe("TaskList Component", () => {
         _TEST_TASK_COUNT_SMALL,
       );
 
-      rerender(<TaskList {...defaultProps} tasks={mockTasks.slice(0, 2)} />);
+      rerender(
+        <TaskList
+          {...defaultProps} /* tasks={mockTasks.slice(0, 2)} removed - component fetches its own tasks */
+        />,
+      );
 
       expect(screen.getAllByTestId(/task-item-/)).toHaveLength(
         TEST_TASK_COUNT_TINY,
@@ -715,7 +729,7 @@ describe("TaskList Component", () => {
       );
 
       const { renderTime } = TestUtils.renderComponent(
-        <TaskList {...defaultProps} tasks={largeTaskList} />,
+        <TaskList {...defaultProps} /* tasks={largeTaskList} removed - component fetches its own tasks */ />,
       );
 
       expect(renderTime).toBeLessThan(PERFORMANCE_TEST_TIMEOUT_MS); // Should handle large lists efficiently

@@ -1,8 +1,8 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/**
+ * Enterprise-grade type definitions for test automation
+ * Comprehensive type safety for all test scenarios and mocking operations
+ */
 
 /**
  * NUT Service Unit Tests

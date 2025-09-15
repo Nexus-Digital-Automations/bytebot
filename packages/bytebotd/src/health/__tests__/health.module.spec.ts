@@ -1,9 +1,8 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+/**
+ * Enterprise-grade TypeScript interfaces for comprehensive health module testing
+ * Type-safe testing patterns for NestJS modules and dependency injection
+ */
 
 /**
  * Health Module Test Suite
