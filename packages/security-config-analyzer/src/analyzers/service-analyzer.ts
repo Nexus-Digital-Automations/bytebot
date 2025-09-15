@@ -3079,7 +3079,7 @@ export class ServiceConfigurationSecurityAnalyzer extends EventEmitter {
       configFiles.push(...matches);
     }
 
-    return [...new Set(configFiles)]; // Remove duplicates
+    return Array.from(new Set(configFiles)); // Remove duplicates
   }
 
   /**
@@ -3449,9 +3449,9 @@ export class ServiceConfigurationSecurityAnalyzer extends EventEmitter {
           (f) => f.false_positive_likelihood === "very_high",
         ).length,
       },
-      attack_vectors: [
-        ...new Set(this.findings.flatMap((f) => f.cwe_ids || [])),
-      ],
+      attack_vectors: Array.from(
+        new Set(this.findings.flatMap((f) => f.cwe_ids || [])),
+      ),
       affected_assets: [this.findings[0]?.source || "service"].filter(Boolean),
     };
   }
