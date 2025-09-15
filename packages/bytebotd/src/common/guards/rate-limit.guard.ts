@@ -195,7 +195,10 @@ export class EnterpriseRateLimitGuard
     } catch (_error) {
       if (
         _error instanceof ThrottlerException ||
-        (_error as any).status === HttpStatus.TOO_MANY_REQUESTS
+        (typeof _error === 'object' &&
+          _error !== null &&
+          'status' in _error &&
+          _error.status === HttpStatus.TOO_MANY_REQUESTS)
       ) {
         const clientIdentifier = this.getClientIdentifier(request);
         const rateLimitConfig = this.getRateLimitConfig(context);
@@ -256,7 +259,7 @@ export class EnterpriseRateLimitGuard
         RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
-    } else if (path.includes('auth') ?? path.includes('login')) {
+    } else if (path.includes('auth') || path.includes('login')) {
       return (
         RATE_LIMIT_CONFIGS.auth ??
         RATE_LIMIT_CONFIGS.general ??
