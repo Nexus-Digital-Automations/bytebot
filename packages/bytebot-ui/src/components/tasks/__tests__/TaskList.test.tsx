@@ -511,9 +511,7 @@ describe("TaskList Component", () => {
     it("navigates between pages correctly", async () => {
       const user = TestUtils.createUserEvent();
 
-      TestUtils.renderComponent(
-        <TaskList {...defaultProps} />,
-      );
+      TestUtils.renderComponent(<TaskList {...defaultProps} />);
 
       const nextButton = screen.getByTestId("next-page");
       await user.click(nextButton);
@@ -522,18 +520,14 @@ describe("TaskList Component", () => {
     });
 
     it("disables navigation buttons appropriately", () => {
-      TestUtils.renderComponent(
-        <TaskList {...defaultProps} tasks={manyTasks} />,
-      );
+      TestUtils.renderComponent(<TaskList {...defaultProps} />);
 
       const prevButton = screen.getByTestId("prev-page");
       expect(prevButton).toBeDisabled(); // Should be disabled on first page
     });
 
     it("shows correct number of tasks per page", () => {
-      TestUtils.renderComponent(
-        <TaskList {...defaultProps} tasks={manyTasks} />,
-      );
+      TestUtils.renderComponent(<TaskList {...defaultProps} />);
 
       const taskItems = screen.getAllByTestId(/task-item-/);
       expect(taskItems).toHaveLength(PAGINATION_DEFAULT_PAGE_SIZE); // Default page size

@@ -137,7 +137,12 @@ describe('HealthService', () => {
       it('should handle external service check errors', async () => {
         // Mock checkExternalService to throw error
         jest
-          .spyOn(service as HealthService & { checkExternalService: (service: string) => Promise<unknown> }, 'checkExternalService')
+          .spyOn(
+            service as HealthService & {
+              checkExternalService: (service: string) => Promise<unknown>;
+            },
+            'checkExternalService',
+          )
           .mockRejectedValue(new Error('Service error'));
 
         const result = await service.checkExternalServices();
@@ -163,8 +168,8 @@ describe('HealthService', () => {
 
       it('should pass startup check after sufficient uptime', async () => {
         // Mock the start time to be old enough
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        (service as any).startTime = Date.now() - 15000; // 15 seconds ago
+        (service as HealthService & { startTime: number }).startTime =
+          Date.now() - 15000; // 15 seconds ago
 
         const result = await service.checkStartupComplete();
 
@@ -181,7 +186,6 @@ describe('HealthService', () => {
         expect(result.modules).toHaveProperty('status', 'up');
         expect(result.modules).toHaveProperty('modules');
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const _modules = result.modules?.modules;
         expect(_modules).toHaveProperty('computer-use', true);
         expect(_modules).toHaveProperty('input-tracking', true);
@@ -194,8 +198,8 @@ describe('HealthService', () => {
   describe('Service Stability', () => {
     it('should check service stability with default threshold', () => {
       // Mock start time to be 35 seconds ago
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      (service as any).startTime = Date.now() - 35000;
+      (service as HealthService & { startTime: number }).startTime =
+        Date.now() - 35000;
 
       const isStable = service.isServiceStable();
       expect(isStable).toBe(true);
@@ -203,8 +207,8 @@ describe('HealthService', () => {
 
     it('should check service stability with custom threshold', () => {
       // Mock start time to be 25 seconds ago
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      (service as any).startTime = Date.now() - 25000;
+      (service as HealthService & { startTime: number }).startTime =
+        Date.now() - 25000;
 
       const isStable = service.isServiceStable(60); // 60 second threshold
       expect(isStable).toBe(false);
@@ -220,7 +224,7 @@ describe('HealthService', () => {
   describe('Private Methods', () => {
     describe('Database Ping', () => {
       it('should simulate database ping successfully', async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = await (service as any).performDatabasePing();
         expect(result).toBe(true);
       });
@@ -228,7 +232,7 @@ describe('HealthService', () => {
 
     describe('External Service Check', () => {
       it('should check individual external service', async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = await (service as any).checkExternalService(
           'test-service',
           'http://test.com/health',
@@ -236,14 +240,14 @@ describe('HealthService', () => {
 
         expect(result).toHaveProperty('status');
         expect(result).toHaveProperty('responseTime');
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
         expect(['healthy', 'unhealthy']).toContain(result.status);
       });
     });
 
     describe('Legacy Service Health Check', () => {
       it('should return legacy service health status', () => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const services = (service as any).checkServiceHealth();
 
         expect(services).toHaveProperty('database', 'unknown');
