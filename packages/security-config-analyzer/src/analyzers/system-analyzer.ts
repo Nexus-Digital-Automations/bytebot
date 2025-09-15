@@ -1007,7 +1007,7 @@ export class SystemSecurityConfigurationAnalyzer extends EventEmitter {
         }
       }
 
-      for (const filePath of [...new Set(sensitiveFiles)].slice(0, 50)) {
+      for (const filePath of Array.from(new Set(sensitiveFiles)).slice(0, 50)) {
         try {
           const stats = await fs.stat(filePath);
           if (!stats.isFile()) continue;
@@ -2769,9 +2769,9 @@ export class SystemSecurityConfigurationAnalyzer extends EventEmitter {
           (f) => f.false_positive_likelihood === "very_high",
         ).length,
       },
-      attack_vectors: [
-        ...new Set(this.findings.flatMap((f) => f.cwe_ids || [])),
-      ],
+      attack_vectors: Array.from(
+        new Set(this.findings.flatMap((f) => f.cwe_ids || [])),
+      ),
       affected_assets: [
         "system",
         "environment",
