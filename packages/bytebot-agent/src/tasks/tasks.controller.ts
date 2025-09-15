@@ -33,11 +33,7 @@ import { ANTHROPIC_MODELS } from '../anthropic/anthropic.constants';
 import { OPENAI_MODELS } from '../openai/openai.constants';
 import { GOOGLE_MODELS } from '../google/google.constants';
 import { BytebotAgentModel } from 'src/agent/agent.types';
-import { GlobalValidationPipe } from '../common/pipes/validation.pipe';
-import { SanitizationPipe } from '../common/pipes/sanitization.pipe';
-import { RateLimitGuard } from '../common/guards/rate-limit.guard';
 import { VersionInterceptor } from '../common/versioning/version.interceptor';
-import { DeprecationGuard } from '../common/versioning/deprecation.guard';
 import {
   ForVersion,
   MultiVersion,
