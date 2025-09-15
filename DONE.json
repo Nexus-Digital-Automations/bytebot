@@ -2096,10 +2096,34 @@
       "updated_at": "2025-09-15T09:00:02.351Z",
       "archived_at": "2025-09-15T09:00:02.354Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-15T22:58:50.157Z",
+      "title": "Complete critical infrastructure recovery for bytebot-agent build process",
+      "description": "Core Issue: Build process not generating dist/main.js properly, preventing application startup. Investigation: Determine why build configuration is failing despite successful compilation. Root Cause: Identify NestJS build pipeline issues, tsconfig problems, or missing dependencies. Recovery: Restore complete build functionality to enable application startup. Key Areas: NestJS CLI build configuration, TypeScript configuration, package.json build scripts, missing dependencies, build output directory structure. Success Criteria: pnpm run build generates complete dist directory, dist/main.js file exists and is executable, application starts successfully with pnpm start, all build dependencies resolved.",
+      "category": "error",
+      "id": "error_1757977130157_sxcekdtqv",
+      "assigned_agent": "dev_session_1757977101731_1_general_d7681fbb",
+      "started_at": "2025-09-15T22:59:23.623Z",
+      "claimed_by": "dev_session_1757977101731_1_general_d7681fbb",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757977101731_1_general_d7681fbb",
+          "role": "primary",
+          "assignedAt": "2025-09-15T22:59:23.623Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-15T23:08:32.079Z",
+      "updated_at": "2025-09-15T23:08:32.079Z",
+      "archived_at": "2025-09-15T23:08:32.082Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 48,
+  "total_completed": 49,
   "last_completion": "2025-09-13T05:08:39.544Z",
   "created_at": "2025-09-11T09:00:29.533Z",
-  "last_archived": "2025-09-15T09:00:02.354Z"
+  "last_archived": "2025-09-15T23:08:32.082Z"
 }

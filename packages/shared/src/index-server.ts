@@ -78,6 +78,12 @@ export {
   isSecurityFeatureEnabled,
 } from "./config/environment-security.config";
 
+// Security Middleware Types - server environment
+export {
+  SecurityLevel as SecurityLevelMiddleware,
+  ServiceType,
+} from "./middleware/security-middleware.standardized";
+
 // Standardized Validation Pipes - server-only (NestJS)
 export {
   StandardizedValidationPipe,
