@@ -65,8 +65,21 @@ import { BrowserResultsService } from './services/browser-results.service';
     {
       provide: 'THROTTLER:MODULE_OPTIONS',
       useValue: {
-        ttl: 60,
-        limit: 10,
+        throttlers: [
+          {
+            name: 'default',
+            ttl: 60000,
+            limit: 10,
+          },
+        ],
+        skipIf: () => false,
+        ignoreUserAgents: [],
+        storage: undefined,
+        generateKey: undefined,
+        errorMessage: 'Too Many Requests',
+        getTracker: undefined,
+        skipSuccessfulRequests: false,
+        skipFailedRequests: false,
       }, // Mock throttler options for development
     },
     {
