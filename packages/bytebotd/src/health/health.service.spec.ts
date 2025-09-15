@@ -84,10 +84,9 @@ describe('HealthService', () => {
         // Mock process.memoryUsage to throw error
         const originalMemoryUsage = process.memoryUsage;
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         process.memoryUsage = jest.fn(() => {
           throw new Error('Memory error');
-        }) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+        }) as jest.MockedFunction<typeof process.memoryUsage>;
 
         const result = await service.checkProcessHealth();
 
@@ -112,8 +111,7 @@ describe('HealthService', () => {
       it('should handle database connection failures', async () => {
         // Mock performDatabasePing to return false
         jest
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .spyOn(service as any, 'performDatabasePing')
+          .spyOn(service as HealthService & { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing')
           .mockResolvedValueOnce(false);
 
         const result = await service.checkDatabaseHealth();
