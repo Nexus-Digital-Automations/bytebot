@@ -22,7 +22,7 @@
     "test-*",
     "**/test-*",
     "src/test-utils/**/*",
-    "src/interceptors/*.d.ts"
+    "src/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",
