@@ -416,12 +416,19 @@ export class ComplianceDashboardService {
   public async exportDashboardData(
     format: "json" | "csv" | "xlsx" = "json",
   ): Promise<string | Blob> {
+    const executiveData = this.executiveDashboardSubject.value;
     const dashboardData = {
       frameworks: this.frameworkStatusSubject.value,
       metrics: this.securityMetricsSubject.value,
       gaps: this.complianceGapsSubject.value,
       events: this.securityEventsSubject.value,
-      executive: this.executiveDashboardSubject.value,
+      executive: executiveData
+        ? {
+            compliancePercentage: executiveData.compliancePercentage,
+            criticalIssuesRequiringAttention:
+              executiveData.criticalIssuesRequiringAttention,
+          }
+        : undefined,
       exportTimestamp: new Date().toISOString(),
       exportFormat: format,
     };
