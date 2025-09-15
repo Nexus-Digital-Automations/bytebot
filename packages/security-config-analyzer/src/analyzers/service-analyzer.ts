@@ -41,6 +41,7 @@ const safeGlob = async (
 };
 
 import { parse as parseYaml } from "yaml";
+import { randomBytes as cryptoRandomBytes } from "crypto";
 import {
   SecurityFinding,
   SecurityAnalysisResult,
@@ -73,6 +74,305 @@ import {
   ServiceValidationRule,
   RiskFactor,
 } from "../types/index.js";
+
+/**
+ * Enterprise-grade typed error classes for comprehensive service analyzer error handling
+ */
+export class ServiceAnalyzerError extends Error {
+  public readonly code: string;
+  public readonly context: Record<string, unknown>;
+  public readonly originalError?: Error;
+  public readonly isRecoverable: boolean;
+
+  constructor(
+    message: string,
+    _code: string,
+    _context: Record<string, unknown> = {},
+    _originalError?: Error,
+    _isRecoverable: boolean = false,
+  ) {
+    super(message);
+    this.name = "ServiceAnalyzerError";
+    this.code = _code;
+    this.context = _context;
+    this.originalError = _originalError;
+    this.isRecoverable = _isRecoverable;
+  }
+}
+
+export class ServiceConnectionError extends ServiceAnalyzerError {
+  constructor(
+    message: string,
+    context: Record<string, unknown> = {},
+    originalError?: Error,
+  ) {
+    super(message, "SERVICE_CONNECTION_ERROR", context, originalError, true);
+    this.name = "ServiceConnectionError";
+  }
+}
+
+export class ServiceConfigurationError extends ServiceAnalyzerError {
+  constructor(
+    message: string,
+    context: Record<string, unknown> = {},
+    originalError?: Error,
+  ) {
+    super(
+      message,
+      "SERVICE_CONFIGURATION_ERROR",
+      context,
+      originalError,
+      false,
+    );
+    this.name = "ServiceConfigurationError";
+  }
+}
+
+export class ServiceParseError extends ServiceAnalyzerError {
+  constructor(
+    message: string,
+    context: Record<string, unknown> = {},
+    originalError?: Error,
+  ) {
+    super(message, "SERVICE_PARSE_ERROR", context, originalError, false);
+    this.name = "ServiceParseError";
+  }
+}
+
+export class ServiceNetworkError extends ServiceAnalyzerError {
+  constructor(
+    message: string,
+    context: Record<string, unknown> = {},
+    originalError?: Error,
+  ) {
+    super(message, "SERVICE_NETWORK_ERROR", context, originalError, true);
+    this.name = "ServiceNetworkError";
+  }
+}
+
+export class ServiceValidationError extends ServiceAnalyzerError {
+  constructor(
+    message: string,
+    context: Record<string, unknown> = {},
+    originalError?: Error,
+  ) {
+    super(message, "SERVICE_VALIDATION_ERROR", context, originalError, false);
+    this.name = "ServiceValidationError";
+  }
+}
+
+/**
+ * Enterprise logging interface for comprehensive service operation tracking
+ */
+interface ServiceAnalyzerLogger {
+  readonly operationId: string;
+  info: (_message: string, _context?: Record<string, unknown>) => void;
+  warn: (_message: string, _context?: Record<string, unknown>) => void;
+  error: (
+    _message: string,
+    _error?: Error,
+    _context?: Record<string, unknown>,
+  ) => void;
+  debug: (_message: string, _context?: Record<string, unknown>) => void;
+  startOperation: (
+    _operation: string,
+    _context?: Record<string, unknown>,
+  ) => void;
+  endOperation: (
+    _operation: string,
+    _duration: number,
+    _context?: Record<string, unknown>,
+  ) => void;
+}
+
+/**
+ * Create enterprise-grade logger with operation tracking for service analysis
+ */
+function _createServiceAnalyzerLogger(
+  baseLogger: Console,
+  componentName: string,
+): ServiceAnalyzerLogger {
+  const operationId = cryptoRandomBytes(8).toString("hex");
+
+  return {
+    operationId,
+    info: (message: string, context?: Record<string, unknown>) => {
+      baseLogger.log(
+        `[${componentName}:${operationId}] INFO: ${message}`,
+        context ? JSON.stringify(context) : "",
+      );
+    },
+    warn: (message: string, context?: Record<string, unknown>) => {
+      baseLogger.warn(
+        `[${componentName}:${operationId}] WARN: ${message}`,
+        context ? JSON.stringify(context) : "",
+      );
+    },
+    error: (
+      message: string,
+      error?: Error,
+      context?: Record<string, unknown>,
+    ) => {
+      const errorDetails = error
+        ? { message: error.message, stack: error.stack }
+        : {};
+      baseLogger.error(`[${componentName}:${operationId}] ERROR: ${message}`, {
+        ...errorDetails,
+        ...context,
+      });
+    },
+    debug: (message: string, context?: Record<string, unknown>) => {
+      baseLogger.debug(
+        `[${componentName}:${operationId}] DEBUG: ${message}`,
+        context ? JSON.stringify(context) : "",
+      );
+    },
+    startOperation: (operation: string, context?: Record<string, unknown>) => {
+      baseLogger.log(
+        `[${componentName}:${operationId}] START: ${operation}`,
+        context ? JSON.stringify(context) : "",
+      );
+    },
+    endOperation: (
+      operation: string,
+      duration: number,
+      context?: Record<string, unknown>,
+    ) => {
+      baseLogger.log(
+        `[${componentName}:${operationId}] END: ${operation} (${duration.toFixed(2)}ms)`,
+        context ? JSON.stringify(context) : "",
+      );
+    },
+  };
+}
+
+/**
+ * Safe wrapper for file system operations with comprehensive error handling for service analysis
+ */
+async function _safeServiceFileOperation<T>(
+  operation: () => Promise<T>,
+  operationName: string,
+  filePath: string,
+  logger: ServiceAnalyzerLogger,
+  fallbackValue?: T,
+): Promise<T> {
+  const context = { operationName, filePath };
+  logger.startOperation("ServiceFileOperation", context);
+  const startTime = performance.now();
+
+  try {
+    const result = await operation();
+    const duration = performance.now() - startTime;
+    logger.endOperation("ServiceFileOperation", duration, {
+      success: true,
+      ...context,
+    });
+    return result;
+  } catch (error) {
+    const duration = performance.now() - startTime;
+    const fsError = error as Error;
+
+    logger.error(
+      `Service file operation failed: ${operationName}`,
+      fsError,
+      context,
+    );
+    logger.endOperation("ServiceFileOperation", duration, {
+      success: false,
+      ...context,
+    });
+
+    // Check if we have a fallback value for graceful degradation
+    if (fallbackValue !== undefined) {
+      logger.warn(
+        `Using fallback value for failed service file operation: ${operationName}`,
+        { filePath, fallbackType: typeof fallbackValue },
+      );
+      return fallbackValue;
+    }
+
+    throw new ServiceConfigurationError(
+      `Service file operation failed: ${operationName} at ${filePath}`,
+      context,
+      fsError,
+    );
+  }
+}
+
+/**
+ * Safe wrapper for network operations with comprehensive error handling and retry logic
+ */
+async function _safeServiceNetworkOperation<T>(
+  operation: () => Promise<T>,
+  operationName: string,
+  logger: ServiceAnalyzerLogger,
+  context: Record<string, unknown> = {},
+  maxRetries: number = 3,
+  retryDelay: number = 1000,
+): Promise<T> {
+  const operationContext = { operationName, ...context };
+  logger.startOperation("ServiceNetworkOperation", operationContext);
+
+  let lastError: Error | null = null;
+  const startTime = performance.now();
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      logger.debug(
+        `Service network operation attempt ${attempt}/${maxRetries}`,
+        { operationName, attempt },
+      );
+
+      const result = await operation();
+      const duration = performance.now() - startTime;
+
+      logger.endOperation("ServiceNetworkOperation", duration, {
+        success: true,
+        attempt,
+        operationName,
+      });
+      return result;
+    } catch (error) {
+      lastError = error as Error;
+      logger.warn(
+        `Service network operation attempt ${attempt}/${maxRetries} failed`,
+        {
+          operationName,
+          attempt,
+          error: lastError.message,
+          will_retry: attempt < maxRetries,
+        },
+      );
+
+      // Check if error is recoverable
+      const isRecoverable =
+        lastError.message.includes("temporarily unavailable") ||
+        lastError.message.includes("connection refused") ||
+        lastError.message.includes("timeout") ||
+        lastError.message.includes("ECONNRESET");
+
+      if (!isRecoverable || attempt === maxRetries) {
+        break;
+      }
+
+      // Exponential backoff for retries
+      const delay = retryDelay * Math.pow(2, attempt - 1);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  const duration = performance.now() - startTime;
+  logger.endOperation("ServiceNetworkOperation", duration, {
+    success: false,
+    final_attempt: maxRetries,
+  });
+
+  throw new ServiceNetworkError(
+    `Service network operation failed after ${maxRetries} attempts: ${operationName}`,
+    operationContext,
+    lastError || undefined,
+  );
+}
 
 /**
  * Type-safe HTTP response structure for service analysis
@@ -1589,7 +1889,9 @@ export class ServiceConfigurationSecurityAnalyzer extends EventEmitter {
     ];
 
     for (const method of httpMethods) {
-      if (!isValidHttpMethod(method)) continue;
+      if (!isValidHttpMethod(method)) {
+        continue;
+      }
 
       try {
         const response = this.makeHTTPRequest(options.target, {
@@ -1896,7 +2198,9 @@ export class ServiceConfigurationSecurityAnalyzer extends EventEmitter {
     const lines = content.split("\n");
 
     for (const line of lines) {
-      if (typeof line !== "string") continue;
+      if (typeof line !== "string") {
+        continue;
+      }
 
       const trimmed = line.trim();
       if (trimmed && !trimmed.startsWith("#") && !trimmed.startsWith("//")) {

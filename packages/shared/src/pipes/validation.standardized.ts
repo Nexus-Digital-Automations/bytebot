@@ -366,22 +366,22 @@ export class StandardizedValidationPipe implements PipeTransform<unknown> {
   private readonly config: StandardizedValidationConfig;
 
   constructor(
-    serviceType: ValidationServiceType = ValidationServiceType._SHARED,
-    environment: string = "development",
-    customOptions?: Partial<StandardizedValidationConfig>,
+    _serviceType: ValidationServiceType = ValidationServiceType._SHARED,
+    _environment: string = "development",
+    _customOptions?: Partial<StandardizedValidationConfig>,
   ) {
     // Build standardized configuration
     this.config = this.buildStandardizedConfig(
-      serviceType,
-      environment,
-      customOptions,
+      _serviceType,
+      _environment,
+      _customOptions,
     );
 
     this.logger.log(
-      `Standardized validation pipe initialized for ${serviceType}`,
+      `Standardized validation pipe initialized for ${_serviceType}`,
       {
-        serviceType,
-        environment,
+        serviceType: _serviceType,
+        environment: _environment,
         securityLevel: this.config.securityLevel,
         enableSanitization: this.config.enableSanitization,
         enableThreatDetection: this.config.enableThreatDetection,
@@ -473,8 +473,8 @@ export class StandardizedValidationPipe implements PipeTransform<unknown> {
    * Transform and validate incoming data with comprehensive security checks
    */
   async transform(
-    value: unknown,
-    metadata: ArgumentMetadata,
+    _value: unknown,
+    _metadata: ArgumentMetadata,
   ): Promise<unknown> {
     const operationId = `validation-${this.config.serviceType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
@@ -486,56 +486,56 @@ export class StandardizedValidationPipe implements PipeTransform<unknown> {
           operationId,
           serviceType: this.config.serviceType,
           securityLevel: this.config.securityLevel,
-          type: metadata.type,
-          metatype: metadata.metatype?.name,
-          hasValue: value !== undefined && value !== null,
-          valueType: typeof value,
+          type: _metadata.type,
+          metatype: _metadata.metatype?.name,
+          hasValue: _value !== undefined && _value !== null,
+          valueType: typeof _value,
         },
       );
     }
 
     try {
       // Skip validation for primitive types or when no metatype is provided
-      if (!metadata.metatype || this.isBasicType(metadata.metatype)) {
+      if (!_metadata.metatype || this.isBasicType(_metadata.metatype)) {
         if (this.config.enableDebugLogging) {
           this.logger.debug(
             `[${operationId}] Skipping validation for basic type`,
             {
               operationId,
-              type: metadata.type,
-              metatype: metadata.metatype?.name,
+              type: _metadata.type,
+              metatype: _metadata.metatype?.name,
             },
           );
         }
-        return this.sanitizeBasicValue(value, operationId);
+        return this.sanitizeBasicValue(_value, operationId);
       }
 
       // Check payload size if it's an object
-      if (typeof value === "object" && value !== null) {
-        this.validatePayloadSize(value, operationId);
+      if (typeof _value === "object" && _value !== null) {
+        this.validatePayloadSize(_value, operationId);
       }
 
       // Perform security threat detection
       if (this.config.enableThreatDetection) {
-        this.detectSecurityThreats(value, operationId);
+        this.detectSecurityThreats(_value, operationId);
       }
 
       // Sanitize input if enabled
-      let sanitizedValue: unknown = value;
+      let sanitizedValue: unknown = _value;
       if (this.config.enableSanitization) {
-        sanitizedValue = this.sanitizeValue(value, operationId);
+        sanitizedValue = this.sanitizeValue(_value, operationId);
       }
 
       // Transform to class instance
       const transformedValue: unknown = this.config.transform
-        ? plainToClass(metadata.metatype as new () => unknown, sanitizedValue)
+        ? plainToClass(_metadata.metatype as new () => unknown, sanitizedValue)
         : sanitizedValue;
 
       // Perform class-validator validation
-      if (this.shouldValidate(metadata)) {
+      if (this.shouldValidate(_metadata)) {
         await this.validateValue(
           transformedValue,
-          metadata.metatype,
+          _metadata.metatype,
           operationId,
         );
       }
@@ -548,8 +548,8 @@ export class StandardizedValidationPipe implements PipeTransform<unknown> {
           {
             operationId,
             serviceType: this.config.serviceType,
-            type: metadata.type,
-            metatype: metadata.metatype?.name,
+            type: _metadata.type,
+            metatype: _metadata.metatype?.name,
             processingTimeMs: processingTime,
             sanitized: this.config.enableSanitization,
             threatDetected: false,
@@ -567,8 +567,8 @@ export class StandardizedValidationPipe implements PipeTransform<unknown> {
           operationId,
           serviceType: this.config.serviceType,
           securityLevel: this.config.securityLevel,
-          type: metadata.type,
-          metatype: metadata.metatype?.name,
+          type: _metadata.type,
+          metatype: _metadata.metatype?.name,
           error: err instanceof Error ? err.message : String(err),
           processingTimeMs: processingTime,
         },
@@ -579,7 +579,7 @@ export class StandardizedValidationPipe implements PipeTransform<unknown> {
         this.config.auditLogging.enabled &&
         this.config.auditLogging.logFailedValidation
       ) {
-        this.logSecurityEvent(operationId, err, value, metadata);
+        this.logSecurityEvent(operationId, err, _value, _metadata);
       }
 
       throw err;
@@ -618,7 +618,7 @@ export class StandardizedValidationPipe implements PipeTransform<unknown> {
           {
             operationId,
             serviceType: this.config.serviceType,
-            originalLength: value.length,
+            originalLength: (value as string).length,
             sanitizedLength: sanitized.length,
             changed: true,
           },
@@ -1029,35 +1029,35 @@ export class StandardizedValidationPipe implements PipeTransform<unknown> {
    * Factory methods for creating service-specific validation pipes
    */
   static createBytebotDPipe(
-    environment: string = "development",
-    customOptions?: Partial<StandardizedValidationConfig>,
+    _environment: string = "development",
+    _customOptions?: Partial<StandardizedValidationConfig>,
   ): StandardizedValidationPipe {
     return new StandardizedValidationPipe(
       ValidationServiceType._BYTEBOTD,
-      environment,
-      customOptions,
+      _environment,
+      _customOptions,
     );
   }
 
   static createBytebotAgentPipe(
-    environment: string = "development",
-    customOptions?: Partial<StandardizedValidationConfig>,
+    _environment: string = "development",
+    _customOptions?: Partial<StandardizedValidationConfig>,
   ): StandardizedValidationPipe {
     return new StandardizedValidationPipe(
       ValidationServiceType._BYTEBOT_AGENT,
-      environment,
-      customOptions,
+      _environment,
+      _customOptions,
     );
   }
 
   static createBytebotUIPipe(
-    environment: string = "development",
-    customOptions?: Partial<StandardizedValidationConfig>,
+    _environment: string = "development",
+    _customOptions?: Partial<StandardizedValidationConfig>,
   ): StandardizedValidationPipe {
     return new StandardizedValidationPipe(
       ValidationServiceType._BYTEBOT_UI,
-      environment,
-      customOptions,
+      _environment,
+      _customOptions,
     );
   }
 }
@@ -1069,8 +1069,8 @@ export const StandardizedValidationPipes = {
   /**
    * Maximum security validation for BytebotD
    */
-  MAXIMUM_SECURITY: (environment: string = "production") =>
-    StandardizedValidationPipe.createBytebotDPipe(environment, {
+  MAXIMUM_SECURITY: (_environment: string = "production") =>
+    StandardizedValidationPipe.createBytebotDPipe(_environment, {
       securityLevel: ValidationSecurityLevel._MAXIMUM,
       enableSanitization: true,
       enableThreatDetection: true,
@@ -1087,8 +1087,8 @@ export const StandardizedValidationPipes = {
   /**
    * High security validation for Bytebot-Agent
    */
-  HIGH_SECURITY: (environment: string = "production") =>
-    StandardizedValidationPipe.createBytebotAgentPipe(environment, {
+  HIGH_SECURITY: (_environment: string = "production") =>
+    StandardizedValidationPipe.createBytebotAgentPipe(_environment, {
       securityLevel: ValidationSecurityLevel._HIGH,
       enableSanitization: true,
       enableThreatDetection: true,
@@ -1104,8 +1104,8 @@ export const StandardizedValidationPipes = {
   /**
    * Standard security validation for Bytebot-UI
    */
-  STANDARD_SECURITY: (environment: string = "production") =>
-    StandardizedValidationPipe.createBytebotUIPipe(environment, {
+  STANDARD_SECURITY: (_environment: string = "production") =>
+    StandardizedValidationPipe.createBytebotUIPipe(_environment, {
       securityLevel: ValidationSecurityLevel._STANDARD,
       enableSanitization: true,
       enableThreatDetection: true,
@@ -1117,9 +1117,9 @@ export const StandardizedValidationPipes = {
    * Development-friendly validation for all services
    */
   DEVELOPMENT: (
-    serviceType: ValidationServiceType = ValidationServiceType._SHARED,
+    _serviceType: ValidationServiceType = ValidationServiceType._SHARED,
   ) =>
-    new StandardizedValidationPipe(serviceType, "development", {
+    new StandardizedValidationPipe(_serviceType, "development", {
       securityLevel: ValidationSecurityLevel._DEVELOPMENT,
       enableSanitization: false,
       enableThreatDetection: false,

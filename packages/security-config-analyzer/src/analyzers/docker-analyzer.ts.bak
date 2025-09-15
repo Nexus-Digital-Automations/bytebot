@@ -1328,11 +1328,7 @@ export class DockerSecurityAnalyzer extends EventEmitter {
           const containerConfig = await this.analyzeContainer(containerId);
           containers.push(containerConfig);
         } catch (err) {
-          const logError = err instanceof Error ? err : new Error(String(err));
-          this.logger.error(
-            `Failed to analyze container ${containerId}:`,
-            logError,
-          );
+          this.logger.error(`Failed to analyze container ${containerId}:`, err);
           this.addFinding({
             id: this.generateFindingId(),
             title: `Container Analysis Failed`,
@@ -1815,8 +1811,7 @@ export class DockerSecurityAnalyzer extends EventEmitter {
           const imageConfig = await this.analyzeImage(imageName);
           images.push(imageConfig);
         } catch (err) {
-          const logError = err instanceof Error ? err : new Error(String(err));
-          this.logger.error(`Failed to analyze image ${imageName}:`, logError);
+          this.logger.error(`Failed to analyze image ${imageName}:`, err);
           this.addFinding({
             id: this.generateFindingId(),
             title: `Image Analysis Failed`,
@@ -1836,8 +1831,7 @@ export class DockerSecurityAnalyzer extends EventEmitter {
         }
       }
     } catch (err) {
-      const logError = err instanceof Error ? err : new Error(String(err));
-      this.logger.error("Failed to list Docker images:", logError);
+      this.logger.error("Failed to list Docker images:", err);
       throw err;
     }
 
@@ -2099,10 +2093,9 @@ export class DockerSecurityAnalyzer extends EventEmitter {
         }
       }
     } catch (err) {
-      const scanError = err instanceof Error ? err : new Error(String(err));
       this.logger.error(
         `Failed to scan vulnerabilities for image ${imageName}:`,
-        scanError,
+        err,
       );
     }
   }
@@ -2125,11 +2118,9 @@ export class DockerSecurityAnalyzer extends EventEmitter {
         const composeConfig = await this.analyzeDockerComposeFile(filePath);
         composeConfigs.push(composeConfig);
       } catch (err) {
-        const composeError =
-          err instanceof Error ? err : new Error(String(err));
         this.logger.error(
           `Failed to analyze Docker Compose file ${filePath}:`,
-          composeError,
+          err,
         );
         this.addFinding({
           id: this.generateFindingId(),
@@ -2402,11 +2393,7 @@ export class DockerSecurityAnalyzer extends EventEmitter {
         const dockerfileConfig = await this.analyzeDockerfile(filePath);
         dockerfileConfigs.push(dockerfileConfig);
       } catch (err) {
-        const logError = err instanceof Error ? err : new Error(String(err));
-        this.logger.error(
-          `Failed to analyze Dockerfile ${filePath}:`,
-          logError,
-        );
+        this.logger.error(`Failed to analyze Dockerfile ${filePath}:`, err);
         this.addFinding({
           id: this.generateFindingId(),
           title: `Dockerfile Analysis Failed`,
@@ -2731,16 +2718,11 @@ export class DockerSecurityAnalyzer extends EventEmitter {
           const networkConfig = await this.analyzeDockerNetwork(networkId);
           networks.push(networkConfig);
         } catch (err) {
-          const logError = err instanceof Error ? err : new Error(String(err));
-          this.logger.error(
-            `Failed to analyze network ${networkId}:`,
-            logError,
-          );
+          this.logger.error(`Failed to analyze network ${networkId}:`, err);
         }
       }
     } catch (err) {
-      const logError = err instanceof Error ? err : new Error(String(err));
-      this.logger.error("Failed to list Docker networks:", logError);
+      this.logger.error("Failed to list Docker networks:", err);
       throw err;
     }
 
@@ -2882,16 +2864,11 @@ export class DockerSecurityAnalyzer extends EventEmitter {
         try {
           await this.analyzeDockerVolume(volumeName);
         } catch (err) {
-          const logError = err instanceof Error ? err : new Error(String(err));
-          this.logger.error(
-            `Failed to analyze volume ${volumeName}:`,
-            logError,
-          );
+          this.logger.error(`Failed to analyze volume ${volumeName}:`, err);
         }
       }
     } catch (err) {
-      const logError = err instanceof Error ? err : new Error(String(err));
-      this.logger.error("Failed to list Docker volumes:", logError);
+      this.logger.error("Failed to list Docker volumes:", err);
       throw err;
     }
   }
@@ -3296,8 +3273,7 @@ export class DockerSecurityAnalyzer extends EventEmitter {
 
       this.logger.info(`Analysis results saved to: ${outputPath}`);
     } catch (err) {
-      const logError = err instanceof Error ? err : new Error(String(err));
-      this.logger.error(`Failed to save analysis results:`, logError);
+      this.logger.error(`Failed to save analysis results:`, err);
       throw err;
     }
   }

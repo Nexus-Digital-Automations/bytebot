@@ -43,13 +43,13 @@ export declare class StandardizedValidationPipe
   private readonly logger;
   private readonly config;
   constructor(
-    _serviceType?: ValidationServiceType,
-    _environment?: string,
-    _customOptions?: Partial<StandardizedValidationConfig>,
+    serviceType?: ValidationServiceType,
+    environment?: string,
+    customOptions?: Partial<StandardizedValidationConfig>,
   );
   private buildStandardizedConfig;
   private deepMerge;
-  transform(_value: unknown, _metadata: ArgumentMetadata): Promise<unknown>;
+  transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown>;
   private isBasicType;
   private sanitizeBasicValue;
   private validatePayloadSize;
@@ -61,28 +61,28 @@ export declare class StandardizedValidationPipe
   private logSecurityEvent;
   getValidationConfig(): StandardizedValidationConfig;
   static createBytebotDPipe(
-    _environment?: string,
-    _customOptions?: Partial<StandardizedValidationConfig>,
+    environment?: string,
+    customOptions?: Partial<StandardizedValidationConfig>,
   ): StandardizedValidationPipe;
   static createBytebotAgentPipe(
-    _environment?: string,
-    _customOptions?: Partial<StandardizedValidationConfig>,
+    environment?: string,
+    customOptions?: Partial<StandardizedValidationConfig>,
   ): StandardizedValidationPipe;
   static createBytebotUIPipe(
-    _environment?: string,
-    _customOptions?: Partial<StandardizedValidationConfig>,
+    environment?: string,
+    customOptions?: Partial<StandardizedValidationConfig>,
   ): StandardizedValidationPipe;
 }
 export declare const StandardizedValidationPipes: {
   readonly MAXIMUM_SECURITY: (
-    _environment?: string,
+    environment?: string,
   ) => StandardizedValidationPipe;
-  readonly HIGH_SECURITY: (_environment?: string) => StandardizedValidationPipe;
+  readonly HIGH_SECURITY: (environment?: string) => StandardizedValidationPipe;
   readonly STANDARD_SECURITY: (
-    _environment?: string,
+    environment?: string,
   ) => StandardizedValidationPipe;
   readonly DEVELOPMENT: (
-    _serviceType?: ValidationServiceType,
+    serviceType?: ValidationServiceType,
   ) => StandardizedValidationPipe;
 };
 export default StandardizedValidationPipe;

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import type { Configuration } from "webpack";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -24,11 +25,12 @@ const nextConfig: NextConfig = {
    * @param config - Webpack configuration object
    * @param param1 - Build context containing buildId, dev, isServer flags
    */
-  webpack: (config, { isServer }) => {
+  webpack: (config: Configuration, { isServer }: { isServer: boolean }) => {
     // Only apply Node.js module fallbacks for client-side builds
     if (!isServer) {
+      config.resolve = config.resolve ?? {};
       config.resolve.fallback = {
-        ...config.resolve.fallback,
+        ...(config.resolve.fallback as Record<string, unknown>),
         // File system - not available in browser
         fs: false,
         // Performance hooks - not available in browser
@@ -70,8 +72,8 @@ const nextConfig: NextConfig = {
       };
 
       // Add externals configuration to ignore Node.js specific modules
-      config.externals = config.externals || [];
-      config.externals.push({
+      config.externals = config.externals ?? [];
+      (config.externals as unknown[]).push({
         // Ignore optional NestJS modules that we've mocked
         "@nestjs/websockets": "commonjs @nestjs/websockets",
         "@nestjs/microservices": "commonjs @nestjs/microservices",
@@ -106,8 +108,9 @@ const nextConfig: NextConfig = {
     }
 
     // Add aliases for problematic modules
+    config.resolve = config.resolve ?? {};
     config.resolve.alias = {
-      ...config.resolve.alias,
+      ...(config.resolve.alias as Record<string, unknown>),
       // Provide browser-compatible alternatives
       perf_hooks: false,
       async_hooks: false,

@@ -26,7 +26,37 @@ import {
   type ConfidenceResult,
 } from "./confidence-scorer";
 
+// Import real security class implementations
+import {
+  VulnerabilityAssessmentEngine,
+  type VulnerabilityAssessmentConfig,
+  type VulnerabilityAssessmentResult,
+  type Vulnerability,
+} from "./vulnerability-assessment-engine";
+import {
+  ConfigurationAnalyzer,
+  type ConfigurationAnalysisResult,
+} from "./configuration-analyzer";
+import {
+  VulnerabilityReportingEngine,
+  type GeneratedReport,
+  type ReportConfiguration,
+} from "./vulnerability-reporting-engine";
+
+// Export all core security classes and types
 export { ConfidenceScorer, type ConfidenceScorerConfig, type ConfidenceResult };
+export {
+  VulnerabilityAssessmentEngine,
+  type VulnerabilityAssessmentConfig,
+  type VulnerabilityAssessmentResult,
+  type Vulnerability,
+};
+export { ConfigurationAnalyzer, type ConfigurationAnalysisResult };
+export {
+  VulnerabilityReportingEngine,
+  type GeneratedReport,
+  type ReportConfiguration,
+};
 
 // ===========================
 // OWASP TOP 10 INTEGRATION - AVAILABLE
@@ -153,53 +183,11 @@ export {
 // ===========================
 // These provide type safety until the large files can be processed
 
-export interface Vulnerability {
-  readonly id: string;
-  readonly title: string;
-  readonly description: string;
-  readonly severity: "info" | "low" | "medium" | "high" | "critical";
-  readonly category: string;
-  readonly confidence: number;
-  readonly riskScore: number;
-}
-
-export interface VulnerabilityAssessmentResult {
-  readonly scanId: string;
-  readonly vulnerabilities: readonly Vulnerability[];
-  readonly summary: {
-    readonly total: number;
-    readonly critical: number;
-    readonly high: number;
-    readonly medium: number;
-    readonly low: number;
-    readonly info: number;
-  };
-}
-
-export interface VulnerabilityAssessmentConfig {
-  readonly targets: string[];
-  readonly scanType: "comprehensive" | "quick" | "focused";
-}
-
-export interface ConfigurationAnalysisResult {
-  readonly issues: unknown[];
-  readonly summary: { total: number };
-}
+// Placeholder interfaces removed - using real implementations from imported files
 
 export interface ConfigurationIssue {
   readonly id: string;
   readonly severity: string;
-}
-
-export interface GeneratedReport {
-  readonly reportId: string;
-  readonly generatedAt: Date;
-  readonly content: string;
-}
-
-export interface ReportConfiguration {
-  readonly format: string;
-  readonly includeDetails: boolean;
 }
 
 export interface ReportTemplate {
@@ -208,37 +196,9 @@ export interface ReportTemplate {
 }
 
 // ===========================
-// MOCK CLASSES FOR IGNORED IMPLEMENTATIONS
+// REAL SECURITY CLASS IMPLEMENTATIONS
 // ===========================
-// These provide runtime compatibility until the large files are available
-
-export class VulnerabilityAssessmentEngine {
-  async assess(
-    _config: VulnerabilityAssessmentConfig,
-  ): Promise<VulnerabilityAssessmentResult> {
-    throw new Error(
-      "VulnerabilityAssessmentEngine is temporarily unavailable - implementation ignored due to ESLint timeout",
-    );
-  }
-}
-
-export class ConfigurationAnalyzer {
-  async analyze(): Promise<ConfigurationAnalysisResult> {
-    throw new Error(
-      "ConfigurationAnalyzer is temporarily unavailable - implementation ignored due to ESLint timeout",
-    );
-  }
-}
-
-export class VulnerabilityReportingEngine {
-  async generateReport(
-    _results: VulnerabilityAssessmentResult,
-  ): Promise<GeneratedReport> {
-    throw new Error(
-      "VulnerabilityReportingEngine is temporarily unavailable - implementation ignored due to ESLint timeout",
-    );
-  }
-}
+// Exported above with imports
 
 // ===========================
 // SECURITY POLICY
@@ -317,7 +277,7 @@ export function createVulnerabilityAssessmentSystem(
     ): Promise<VulnerabilityAssessmentResult> {
       try {
         const results: VulnerabilityAssessmentResult =
-          await assessmentEngine.assess(assessmentConfig);
+          await assessmentEngine.assessVulnerabilities(assessmentConfig);
 
         if (confidenceScorer) {
           // Apply confidence scoring to results
@@ -353,6 +313,27 @@ export function createVulnerabilityAssessmentSystem(
 
     async generateReport(
       results: VulnerabilityAssessmentResult,
+      reportConfig?: Partial<{
+        format:
+          | "json"
+          | "xml"
+          | "html"
+          | "pdf"
+          | "csv"
+          | "sarif"
+          | "markdown"
+          | "xlsx";
+        reportType:
+          | "vulnerability"
+          | "configuration"
+          | "compliance"
+          | "executive"
+          | "technical"
+          | "trend";
+        scope: "full" | "summary" | "critical_only";
+        title: string;
+        description: string;
+      }>,
     ): Promise<GeneratedReport> {
       if (!reportingEngine) {
         throw new Error("Reporting engine not enabled");
@@ -363,7 +344,17 @@ export function createVulnerabilityAssessmentSystem(
       }
 
       try {
-        return await reportingEngine.generateReport(results);
+        const config = {
+          reportType: reportConfig?.reportType || ("vulnerability" as const),
+          format: reportConfig?.format || ("json" as const),
+          scope: reportConfig?.scope || ("full" as const),
+          title: reportConfig?.title || "Vulnerability Assessment Report",
+          description:
+            reportConfig?.description ||
+            "Generated vulnerability assessment report",
+        };
+
+        return await reportingEngine.generateReport(config, [results]);
       } catch (error) {
         throw new Error(`Report generation failed: ${String(error)}`);
       }

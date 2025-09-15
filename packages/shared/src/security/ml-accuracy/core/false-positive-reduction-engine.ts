@@ -271,7 +271,7 @@ export class FalsePositiveReductionEngine extends EventEmitter {
     const metrics: FalsePositiveMetric[] = [];
     const now = new Date();
 
-    for (const [patternId, pattern] of this.learningPatterns) {
+    for (const [patternId, pattern] of Array.from(this.learningPatterns)) {
       const validationFeedback = Array.from(this.validationHistory.values())
         .flat()
         .filter((feedback) => {
@@ -425,7 +425,9 @@ export class FalsePositiveReductionEngine extends EventEmitter {
   }
 
   private startAdaptationCycle(): void {
-    if (!this.isRunning) return;
+    if (!this.isRunning) {
+      return;
+    }
 
     this.adaptationTimer = setTimeout(async () => {
       try {
@@ -443,7 +445,7 @@ export class FalsePositiveReductionEngine extends EventEmitter {
     let adaptationsMade = 0;
 
     // Update learning patterns based on recent validations
-    for (const [patternId, pattern] of this.learningPatterns) {
+    for (const [patternId, pattern] of Array.from(this.learningPatterns)) {
       const recentValidations = this.getRecentValidations(pattern.signature);
 
       if (recentValidations.length >= 5) {
@@ -520,7 +522,7 @@ export class FalsePositiveReductionEngine extends EventEmitter {
     category: SecurityThreatCategory,
     pattern: string,
   ): LearningPattern | undefined {
-    for (const learningPattern of this.learningPatterns.values()) {
+    for (const learningPattern of Array.from(this.learningPatterns.values())) {
       if (
         learningPattern.category === category &&
         learningPattern.signature === pattern
@@ -669,7 +671,7 @@ export class FalsePositiveReductionEngine extends EventEmitter {
   private cleanupValidationHistory(): void {
     const cutoffTime = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days
 
-    for (const [detectionId, feedbacks] of this.validationHistory) {
+    for (const [detectionId, feedbacks] of Array.from(this.validationHistory)) {
       const recentFeedbacks = feedbacks.filter(
         (f) => f.timestamp >= cutoffTime,
       );
@@ -699,10 +701,18 @@ export class FalsePositiveReductionEngine extends EventEmitter {
   }
 
   private getSeverityFromFPRate(fpRate: number): SecuritySeverity {
-    if (fpRate >= 0.7) return "critical";
-    if (fpRate >= 0.5) return "high";
-    if (fpRate >= 0.3) return "medium";
-    if (fpRate >= 0.1) return "low";
+    if (fpRate >= 0.7) {
+      return "critical";
+    }
+    if (fpRate >= 0.5) {
+      return "high";
+    }
+    if (fpRate >= 0.3) {
+      return "medium";
+    }
+    if (fpRate >= 0.1) {
+      return "low";
+    }
     return "info";
   }
 
@@ -738,7 +748,7 @@ export class FalsePositiveReductionEngine extends EventEmitter {
     const trendingPatterns: Array<LearningPattern & { trend: TrendDirection }> =
       [];
 
-    for (const pattern of this.learningPatterns.values()) {
+    for (const pattern of Array.from(this.learningPatterns.values())) {
       if (pattern.adaptationHistory.length >= 3) {
         const recentAdaptations = pattern.adaptationHistory.slice(-3);
         const trend = this.calculateTrend(
@@ -756,15 +766,23 @@ export class FalsePositiveReductionEngine extends EventEmitter {
   }
 
   private calculateTrend(values: number[]): TrendDirection {
-    if (values.length < 2) return "stable";
+    if (values.length < 2) {
+      return "stable";
+    }
 
     const first = values[0];
     const last = values[values.length - 1];
     const change = (last - first) / first;
 
-    if (Math.abs(change) < 0.1) return "stable";
-    if (change > 0.3) return "increasing";
-    if (change < -0.3) return "decreasing";
+    if (Math.abs(change) < 0.1) {
+      return "stable";
+    }
+    if (change > 0.3) {
+      return "increasing";
+    }
+    if (change < -0.3) {
+      return "decreasing";
+    }
     return change > 0 ? "increasing" : "decreasing";
   }
 
@@ -805,7 +823,7 @@ export class FalsePositiveReductionEngine extends EventEmitter {
     const recentValidations: ValidationFeedback[] = [];
     const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours
 
-    for (const feedbacks of this.validationHistory.values()) {
+    for (const feedbacks of Array.from(this.validationHistory.values())) {
       for (const feedback of feedbacks) {
         if (feedback.timestamp >= cutoffTime) {
           const detection = this.recentDetections.find(
@@ -824,7 +842,9 @@ export class FalsePositiveReductionEngine extends EventEmitter {
   private calculateFalsePositiveRate(
     validations: ValidationFeedback[],
   ): number {
-    if (validations.length === 0) return 0;
+    if (validations.length === 0) {
+      return 0;
+    }
 
     const falsePositives = validations.filter((v) => !v.isValid).length;
     return falsePositives / validations.length;

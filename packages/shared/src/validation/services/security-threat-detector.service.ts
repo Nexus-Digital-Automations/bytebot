@@ -103,14 +103,13 @@ const ENTERPRISE_THREAT_PATTERNS = {
 /**
  * Threat severity levels
  */
-/* eslint-disable no-unused-vars */
+
 enum ThreatSeverity {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  CRITICAL = "critical",
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
 }
-/* eslint-enable no-unused-vars */
 
 /**
  * Security Threat Detector Service
@@ -127,16 +126,16 @@ export class SecurityThreatDetector {
    * @returns Comprehensive threat analysis result
    */
   analyzeThreat(
-    value: unknown,
-    context: SecurityThreatContext,
+    _value: unknown,
+    _context: SecurityThreatContext,
   ): ThreatAnalysisResult {
     const analysisId = generateEventId();
     const startTime = Date.now();
 
     this.logger.debug(`Starting threat analysis: ${analysisId}`, {
       analysisId,
-      serviceType: context.serviceType,
-      operationId: context.operationId,
+      serviceType: _context.serviceType,
+      operationId: _context.operationId,
     });
 
     try {
@@ -150,7 +149,7 @@ export class SecurityThreatDetector {
       }> = [];
 
       // Convert input to analyzable string
-      const inputString = this.convertToAnalyzableString(value);
+      const inputString = this.convertToAnalyzableString(_value);
 
       // Perform basic threat detection
       const basicThreats = this.detectBasicThreats(inputString);
@@ -163,7 +162,7 @@ export class SecurityThreatDetector {
       // Perform context-aware analysis
       const contextualThreats = this.detectContextualThreats(
         inputString,
-        context,
+        _context,
       );
       threats.push(...contextualThreats);
 
@@ -171,7 +170,7 @@ export class SecurityThreatDetector {
       const riskScore = this.calculateOverallRiskScore(threats);
       const isHighRisk =
         riskScore >= 70 ||
-        threats.some((t) => t.severity === ThreatSeverity.CRITICAL);
+        threats.some((t) => t.severity === ThreatSeverity._CRITICAL);
 
       const analysisDurationMs = Date.now() - startTime;
 
@@ -188,9 +187,9 @@ export class SecurityThreatDetector {
           description: threat.description,
         })),
         metadata: {
-          serviceType: context.serviceType,
-          environment: context.environment,
-          operationId: context.operationId,
+          serviceType: _context.serviceType,
+          environment: _context.environment,
+          operationId: _context.operationId,
           timestamp: new Date(),
           analysisDurationMs,
         },
@@ -222,15 +221,15 @@ export class SecurityThreatDetector {
         threatTypes: ["ANALYSIS_FAILURE"],
         threatDetails: [
           {
-            severity: ThreatSeverity.CRITICAL,
+            severity: ThreatSeverity._CRITICAL,
             confidence: 1.0,
             description: `Threat analysis failed: ${(err as Error).message}`,
           },
         ],
         metadata: {
-          serviceType: context.serviceType,
-          environment: context.environment,
-          operationId: context.operationId,
+          serviceType: _context.serviceType,
+          environment: _context.environment,
+          operationId: _context.operationId,
           timestamp: new Date(),
           analysisDurationMs,
         },
@@ -302,7 +301,7 @@ export class SecurityThreatDetector {
     if (detectXSS(input)) {
       threats.push({
         type: "XSS",
-        severity: ThreatSeverity.HIGH,
+        severity: ThreatSeverity._HIGH,
         confidence: 0.85,
         description: "Cross-Site Scripting (XSS) attack patterns detected",
       });
@@ -312,7 +311,7 @@ export class SecurityThreatDetector {
     if (detectSQLInjection(input)) {
       threats.push({
         type: "SQL_INJECTION",
-        severity: ThreatSeverity.CRITICAL,
+        severity: ThreatSeverity._CRITICAL,
         confidence: 0.9,
         description: "SQL injection attack patterns detected",
       });
@@ -322,7 +321,7 @@ export class SecurityThreatDetector {
     if (detectMaliciousFileContent(input)) {
       threats.push({
         type: "MALICIOUS_FILE",
-        severity: ThreatSeverity.HIGH,
+        severity: ThreatSeverity._HIGH,
         confidence: 0.8,
         description: "Malicious file content or executable patterns detected",
       });
@@ -360,7 +359,7 @@ export class SecurityThreatDetector {
         threats.push({
           type: "ADVANCED_XSS",
           pattern: pattern.source,
-          severity: ThreatSeverity.HIGH,
+          severity: ThreatSeverity._HIGH,
           confidence: 0.75,
           description: `Advanced XSS pattern detected: ${matches[0].substring(0, 50)}...`,
         });
@@ -374,7 +373,7 @@ export class SecurityThreatDetector {
         threats.push({
           type: "ADVANCED_SQL_INJECTION",
           pattern: pattern.source,
-          severity: ThreatSeverity.CRITICAL,
+          severity: ThreatSeverity._CRITICAL,
           confidence: 0.85,
           description: `Advanced SQL injection pattern detected: ${matches[0].substring(0, 50)}...`,
         });
@@ -388,7 +387,7 @@ export class SecurityThreatDetector {
         threats.push({
           type: "COMMAND_INJECTION",
           pattern: pattern.source,
-          severity: ThreatSeverity.CRITICAL,
+          severity: ThreatSeverity._CRITICAL,
           confidence: 0.8,
           description: `Command injection pattern detected: ${matches[0].substring(0, 50)}...`,
         });
@@ -402,7 +401,7 @@ export class SecurityThreatDetector {
         threats.push({
           type: "TEMPLATE_INJECTION",
           pattern: pattern.source,
-          severity: ThreatSeverity.HIGH,
+          severity: ThreatSeverity._HIGH,
           confidence: 0.75,
           description: `Template injection pattern detected: ${matches[0].substring(0, 50)}...`,
         });
@@ -416,7 +415,7 @@ export class SecurityThreatDetector {
         threats.push({
           type: "LDAP_INJECTION",
           pattern: pattern.source,
-          severity: ThreatSeverity.MEDIUM,
+          severity: ThreatSeverity._MEDIUM,
           confidence: 0.7,
           description: `LDAP injection pattern detected: ${matches[0].substring(0, 50)}...`,
         });
@@ -430,7 +429,7 @@ export class SecurityThreatDetector {
         threats.push({
           type: "XML_XXE",
           pattern: pattern.source,
-          severity: ThreatSeverity.HIGH,
+          severity: ThreatSeverity._HIGH,
           confidence: 0.85,
           description: `XML External Entity (XXE) pattern detected: ${matches[0].substring(0, 50)}...`,
         });
@@ -444,7 +443,7 @@ export class SecurityThreatDetector {
         threats.push({
           type: "NOSQL_INJECTION",
           pattern: pattern.source,
-          severity: ThreatSeverity.HIGH,
+          severity: ThreatSeverity._HIGH,
           confidence: 0.8,
           description: `NoSQL injection pattern detected: ${matches[0].substring(0, 50)}...`,
         });
@@ -458,7 +457,7 @@ export class SecurityThreatDetector {
         threats.push({
           type: "DESERIALIZATION_ATTACK",
           pattern: pattern.source,
-          severity: ThreatSeverity.CRITICAL,
+          severity: ThreatSeverity._CRITICAL,
           confidence: 0.9,
           description: `Deserialization attack pattern detected: ${matches[0].substring(0, 50)}...`,
         });
@@ -476,7 +475,7 @@ export class SecurityThreatDetector {
    */
   private detectContextualThreats(
     input: string,
-    context: SecurityThreatContext,
+    _context: SecurityThreatContext,
   ): Array<{
     type: string;
     pattern?: string;
@@ -495,7 +494,7 @@ export class SecurityThreatDetector {
     }> = [];
 
     // Context-specific threat detection based on service type
-    switch (context.serviceType) {
+    switch (_context.serviceType) {
       case ValidationServiceType._BYTEBOTD:
         // Additional computer-use specific threats
         if (
@@ -503,7 +502,7 @@ export class SecurityThreatDetector {
         ) {
           threats.push({
             type: "SYSTEM_CONTROL_ABUSE",
-            severity: ThreatSeverity.CRITICAL,
+            severity: ThreatSeverity._CRITICAL,
             confidence: 0.95,
             description:
               "System control commands detected in computer-use context",
@@ -518,7 +517,7 @@ export class SecurityThreatDetector {
         ) {
           threats.push({
             type: "PROTOTYPE_POLLUTION",
-            severity: ThreatSeverity.HIGH,
+            severity: ThreatSeverity._HIGH,
             confidence: 0.8,
             description:
               "Prototype pollution attempt detected in task management context",
@@ -531,7 +530,7 @@ export class SecurityThreatDetector {
         if (/(?:postMessage|origin|parent\.)/gi.test(input)) {
           threats.push({
             type: "CROSS_FRAME_ATTACK",
-            severity: ThreatSeverity.MEDIUM,
+            severity: ThreatSeverity._MEDIUM,
             confidence: 0.7,
             description:
               "Cross-frame communication abuse detected in UI context",
@@ -541,12 +540,12 @@ export class SecurityThreatDetector {
     }
 
     // Environment-specific threat detection
-    if (context.environment === "production") {
+    if (_context.environment === "production") {
       // More strict detection in production
       if (/(?:debug|test|development|dev|staging)/gi.test(input)) {
         threats.push({
           type: "ENVIRONMENT_PROBE",
-          severity: ThreatSeverity.MEDIUM,
+          severity: ThreatSeverity._MEDIUM,
           confidence: 0.6,
           description: "Environment probing attempt detected in production",
         });
@@ -573,10 +572,10 @@ export class SecurityThreatDetector {
     }
 
     const severityWeights = {
-      [ThreatSeverity.LOW]: 10,
-      [ThreatSeverity.MEDIUM]: 25,
-      [ThreatSeverity.HIGH]: 50,
-      [ThreatSeverity.CRITICAL]: 100,
+      [ThreatSeverity._LOW]: 10,
+      [ThreatSeverity._MEDIUM]: 25,
+      [ThreatSeverity._HIGH]: 50,
+      [ThreatSeverity._CRITICAL]: 100,
     };
 
     let totalScore = 0;

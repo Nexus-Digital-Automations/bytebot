@@ -949,6 +949,27 @@
           "claimPriority": "normal"
         }
       ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-15T00:41:41.083Z",
+      "title": "CRITICAL: Complete bytebot-agent infrastructure recovery - fix build process",
+      "description": "Final infrastructure recovery task. Despite successful authentication system recovery, the build process is still not generating dist/main.js properly. Need to investigate and fix build configuration to complete the infrastructure recovery. This is the final blocking issue preventing application startup.",
+      "category": "error",
+      "priority": "normal",
+      "id": "error_1757896901083_wvfws3hh0h",
+      "assigned_agent": "dev_session_1757896859772_1_general_90268fad",
+      "started_at": "2025-09-15T00:41:57.543Z",
+      "claimed_by": "dev_session_1757896859772_1_general_90268fad",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757896859772_1_general_90268fad",
+          "role": "primary",
+          "assignedAt": "2025-09-15T00:41:57.543Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -2488,6 +2509,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-15T00:18:36.921Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757896859772_1_general_90268fad": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-15T00:40:59.774Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-15T00:40:59.774Z",
       "sessionId": null,
       "metadata": {}
     }

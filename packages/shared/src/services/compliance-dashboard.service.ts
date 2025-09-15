@@ -421,7 +421,11 @@ export class ComplianceDashboardService {
       frameworks: this.frameworkStatusSubject.value,
       metrics: this.securityMetricsSubject.value,
       gaps: this.complianceGapsSubject.value,
-      events: this.securityEventsSubject.value,
+      events: this.securityEventsSubject.value
+        ? {
+            totalEvents: this.securityEventsSubject.value.totalEvents,
+          }
+        : undefined,
       executive: executiveData
         ? {
             compliancePercentage: executiveData.compliancePercentage,

@@ -34,6 +34,7 @@ export default tseslint.config(
       "coverage/",
       "node_modules/",
       "**/*.js",
+      "**/*.d.ts",
       "src/types/security.types.js",
       // Development and documentation files
       "development/guides/**/*.mjs",

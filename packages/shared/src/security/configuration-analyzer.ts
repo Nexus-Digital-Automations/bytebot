@@ -16,6 +16,8 @@ import * as yaml from "js-yaml";
 import { performance } from "perf_hooks";
 import { EventEmitter } from "events";
 import { randomBytes } from "crypto";
+import { exec } from "child_process";
+import { promisify } from "util";
 
 // ===========================
 // CORE TYPES AND INTERFACES
@@ -2794,8 +2796,6 @@ SET GLOBAL log_error_verbosity = 2;`,
 
     try {
       // Check for open network listeners (requires system access)
-      const { exec } = require("child_process");
-      const { promisify } = require("util");
       const execAsync = promisify(exec);
 
       // Check for processes listening on all interfaces (0.0.0.0)
@@ -3010,8 +3010,6 @@ SET GLOBAL log_error_verbosity = 2;`,
     const issues: ConfigurationIssue[] = [];
 
     try {
-      const { exec } = require("child_process");
-      const { promisify } = require("util");
       const execAsync = promisify(exec);
 
       // Check for processes running as root/privileged users
@@ -3233,7 +3231,7 @@ SET GLOBAL log_error_verbosity = 2;`,
 
     for (const secretPath of secretPaths) {
       try {
-        const fullPath = path.resolve(secretPath);
+        const _fullPath = path.resolve(secretPath);
         // Note: In production, you'd want to actually check these files
         // For this implementation, we'll simulate findings
 
@@ -3326,7 +3324,7 @@ SET GLOBAL log_error_verbosity = 2;`,
             tags: ["secrets", "ssh", "private-keys"],
           });
         }
-      } catch (err) {
+      } catch (_err) {
         // File doesn't exist or can't be accessed - this is actually good for security
       }
     }

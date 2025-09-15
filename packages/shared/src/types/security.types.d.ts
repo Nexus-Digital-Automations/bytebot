@@ -101,15 +101,15 @@ export interface SecurityEvent {
   blocked?: boolean;
 }
 export declare function createSecurityEvent(
-  _type: SecurityEventType,
-  _endpoint: string,
-  _method: string,
-  _success?: boolean,
-  _message?: string,
-  _metadata?: Record<string, unknown>,
-  _userId?: string,
-  _ipAddress?: string,
-  _userAgent?: string,
+  type: SecurityEventType,
+  endpoint: string,
+  method: string,
+  success?: boolean,
+  message?: string,
+  metadata?: Record<string, unknown>,
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string,
 ): SecurityEvent;
 export declare const DEFAULT_SANITIZATION_OPTIONS: {
   stripHtml: boolean;

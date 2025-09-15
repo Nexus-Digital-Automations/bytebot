@@ -2,8 +2,8 @@ import { ThreatAnalysisResult, SecurityThreatContext } from "./types";
 export declare class SecurityThreatDetector {
   private readonly logger;
   analyzeThreat(
-    _value: unknown,
-    _context: SecurityThreatContext,
+    value: unknown,
+    context: SecurityThreatContext,
   ): ThreatAnalysisResult;
   private convertToAnalyzableString;
   private detectBasicThreats;
