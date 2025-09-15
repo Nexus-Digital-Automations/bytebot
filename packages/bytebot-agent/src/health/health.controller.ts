@@ -31,8 +31,6 @@ import type { Response } from 'express';
 import { HealthService, HealthCheckResult } from './health.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { MetricsService } from '../metrics/metrics.service';
-import { TracingService } from '../observability/tracing.service';
-import { AlertingService } from '../observability/alerting.service';
 
 /**
  * Health monitoring controller providing system status endpoints
@@ -45,8 +43,6 @@ export class HealthController {
   constructor(
     private readonly healthService: HealthService,
     private readonly metricsService: MetricsService,
-    private readonly tracingService: TracingService,
-    private readonly alertingService: AlertingService,
   ) {
     this.logger.log('Enterprise Health Controller initialized');
     this.logger.log(

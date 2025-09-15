@@ -17,7 +17,7 @@
 import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import { TaskList } from "../TaskList";
-import { Role, TaskStatus } from "@/types";
+import { Role, Task, TaskPriority, TaskStatus, TaskType } from "@/types";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 import {
   BYTES_PER_MB,
@@ -204,15 +204,21 @@ jest.mock("@/components/ui/pagination", () => ({
 }));
 
 describe("TaskList Component", () => {
-  const mockTasks = [
+  const mockTasks: Task[] = [
     {
       id: "task-1",
       title: "First Task",
       description: "First task description",
+      type: TaskType.IMMEDIATE,
       status: TaskStatus.RUNNING,
+      priority: TaskPriority.HIGH,
       control: Role.ASSISTANT,
-      priority: "high",
-      tags: ["frontend", "urgent"],
+      createdBy: Role.USER,
+      model: {
+        provider: "openai",
+        name: "gpt-4",
+        title: "GPT-4",
+      },
       createdAt: "2023-01-01T00:00:00Z",
       updatedAt: "2023-01-01T00:00:00Z",
     },
@@ -220,10 +226,16 @@ describe("TaskList Component", () => {
       id: "task-2",
       title: "Second Task",
       description: "Second task description",
+      type: TaskType.SCHEDULED,
       status: TaskStatus.COMPLETED,
+      priority: TaskPriority.MEDIUM,
       control: Role.USER,
-      priority: "medium",
-      tags: ["backend"],
+      createdBy: Role.ASSISTANT,
+      model: {
+        provider: "anthropic",
+        name: "claude-3-sonnet",
+        title: "Claude 3 Sonnet",
+      },
       createdAt: "2023-01-01T01:00:00Z",
       updatedAt: "2023-01-01T01:00:00Z",
     },
@@ -231,10 +243,16 @@ describe("TaskList Component", () => {
       id: "task-3",
       title: "Third Task",
       description: "Third task description",
+      type: TaskType.IMMEDIATE,
       status: TaskStatus.PENDING,
+      priority: TaskPriority.LOW,
       control: Role.ASSISTANT,
-      priority: "low",
-      tags: ["documentation"],
+      createdBy: Role.USER,
+      model: {
+        provider: "openai",
+        name: "gpt-3.5-turbo",
+        title: "GPT-3.5 Turbo",
+      },
       createdAt: "2023-01-01T02:00:00Z",
       updatedAt: "2023-01-01T02:00:00Z",
     },
@@ -250,8 +268,12 @@ describe("TaskList Component", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Mock fetchTasks to return our mock data - component expects { tasks: Task[] }
-    mockFetchTasks.mockResolvedValue({ tasks: mockTasks });
+    // Mock fetchTasks to return our mock data - component expects { tasks: Task[], total: number, totalPages: number }
+    mockFetchTasks.mockResolvedValue({
+      tasks: mockTasks,
+      total: mockTasks.length,
+      totalPages: 1,
+    });
     // Mock useWebSocket to not do anything
     mockUseWebSocket.mockImplementation(
       () => ({}) as ReturnType<typeof useWebSocket>,
@@ -279,7 +301,7 @@ describe("TaskList Component", () => {
     });
 
     it("shows empty state when no tasks", async () => {
-      mockFetchTasks.mockResolvedValue({ tasks: [] });
+      mockFetchTasks.mockResolvedValue({ tasks: [], total: 0, totalPages: 0 });
       TestUtils.renderComponent(<TaskList {...defaultProps} />);
 
       await waitFor(() => {
@@ -299,53 +321,8 @@ describe("TaskList Component", () => {
     });
   });
 
-  describe("Task Selection", () => {
-    it("calls onTaskSelect when task is clicked", async () => {
-      const onTaskSelect = jest.fn();
-      const user = TestUtils.createUserEvent();
-
-      TestUtils.renderComponent(
-        <TaskList {...defaultProps} onTaskSelect={onTaskSelect} />,
-      );
-
-      const taskItem = screen.getByTestId("task-item-task-1");
-      await user.click(taskItem);
-
-      expect(onTaskSelect).toHaveBeenCalledWith(mockTasks[0]);
-    });
-
-    it("highlights selected task", () => {
-      TestUtils.renderComponent(
-        <TaskList {...defaultProps} selectedTaskId="task-2" />,
-      );
-
-      const selectedTask = screen.getByTestId("task-item-task-2");
-      expect(selectedTask).toHaveClass("selected");
-    });
-
-    it("does not highlight unselected tasks", () => {
-      TestUtils.renderComponent(
-        <TaskList {...defaultProps} selectedTaskId="task-2" />,
-      );
-
-      const unselectedTask = screen.getByTestId("task-item-task-1");
-      expect(unselectedTask).not.toHaveClass("selected");
-    });
-
-    it("handles keyboard navigation for task selection", async () => {
-      const onTaskSelect = jest.fn();
-      const user = TestUtils.createUserEvent();
-
-      TestUtils.renderComponent(
-        <TaskList {...defaultProps} onTaskSelect={onTaskSelect} />,
-      );
-
-      await user.tab(); // Focus on first task
-      await user.keyboard("{Enter}");
-
-      expect(onTaskSelect).toHaveBeenCalledWith(mockTasks[0]);
-    });
-  });
+  // Note: Task Selection functionality is not implemented in the current TaskList component
+  // The component is display-only and fetches tasks internally without selection callbacks
 
   describe("Task Filtering", () => {
     it("renders search input", () => {

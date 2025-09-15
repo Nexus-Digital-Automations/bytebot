@@ -42,8 +42,8 @@ function TextShimmerComponent({
         duration,
         ease: "linear",
       }}
-      // @ts-expect-error - CSS custom properties are not typed in MotionStyle
       style={{
+        // @ts-expect-error - CSS custom properties are not typed in MotionStyle
         "--spread": `${dynamicSpread}px`,
         backgroundImage: `var(--bg), linear-gradient(var(--base-color), var(--base-color))`,
       }}

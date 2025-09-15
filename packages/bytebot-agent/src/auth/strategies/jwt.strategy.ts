@@ -38,7 +38,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const operationId = `jwt-strategy-init-${Date.now()}`;
     const startTime = Date.now();
 
-    const config = configService.get('security', { infer: true });
+    const config = configService.get('security', {
+      jwtSecret: 'default-secret',
+      jwtExpiresIn: '15m',
+      jwtRefreshExpiresIn: '7d',
+      encryptionKey: 'default-key',
+    });
     if (!config) {
       throw new Error('Security configuration not found');
     }

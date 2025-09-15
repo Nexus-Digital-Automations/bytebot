@@ -22,6 +22,8 @@ import { ConfigModule } from '@nestjs/config';
 import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { SecurityMonitoringModule } from '../security/security-monitoring.module';
+import { MetricsModule } from '../metrics/metrics.module';
 
 /**
  * Health monitoring module providing comprehensive observability
@@ -33,6 +35,12 @@ import { PrismaModule } from '../prisma/prisma.module';
 
     // Database module for health checks
     PrismaModule,
+
+    // Security monitoring module for security health checks
+    SecurityMonitoringModule,
+
+    // Metrics module for performance monitoring
+    MetricsModule,
   ],
   controllers: [HealthController],
   providers: [HealthService],

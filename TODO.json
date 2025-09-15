@@ -841,6 +841,114 @@
       ],
       "completed_at": "2025-09-14T21:03:39.048Z",
       "updated_at": "2025-09-14T21:03:39.048Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-15T00:08:32.334Z",
+      "title": "Fix bytebot-agent build missing dist/main module",
+      "description": "The bytebot-agent package fails to start with MODULE_NOT_FOUND error for dist/main. Need to ensure proper build process creates the dist directory and main.js file before start command execution.",
+      "category": "error",
+      "id": "error_1757894912334_obdwryhah9",
+      "assigned_agent": "dev_session_1757894888559_1_general_941bf1a7",
+      "started_at": "2025-09-15T00:08:52.791Z",
+      "claimed_by": "dev_session_1757894888559_1_general_941bf1a7",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757894888559_1_general_941bf1a7",
+          "role": "primary",
+          "assignedAt": "2025-09-15T00:08:52.791Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-15T00:11:29.090Z",
+      "updated_at": "2025-09-15T00:11:29.090Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-15T00:11:47.295Z",
+      "title": "Fix HealthModule SecurityMonitoringService dependency injection error",
+      "description": "HealthService cannot resolve SecurityMonitoringService dependency. Need to ensure SecurityMonitoringService is properly imported and available in HealthModule context or fix the dependency injection configuration.",
+      "category": "error",
+      "id": "error_1757895107295_0fn1b3lp4q4v",
+      "assigned_agent": "dev_session_1757894888559_1_general_941bf1a7",
+      "started_at": "2025-09-15T00:12:03.304Z",
+      "claimed_by": "dev_session_1757894888559_1_general_941bf1a7",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757894888559_1_general_941bf1a7",
+          "role": "primary",
+          "assignedAt": "2025-09-15T00:12:03.304Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-15T00:13:36.690Z",
+      "updated_at": "2025-09-15T00:13:36.690Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-15T00:13:52.238Z",
+      "title": "Fix AuthModule SecurityMonitoringService dependency injection error",
+      "description": "AuthService cannot resolve SecurityMonitoringService dependency. Need to ensure SecurityMonitoringService is properly imported and available in AuthModule context by importing SecurityMonitoringModule.",
+      "category": "error",
+      "id": "error_1757895232237_jpq4vkez94",
+      "assigned_agent": "dev_session_1757894888559_1_general_941bf1a7",
+      "started_at": "2025-09-15T00:14:08.334Z",
+      "claimed_by": "dev_session_1757894888559_1_general_941bf1a7",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757894888559_1_general_941bf1a7",
+          "role": "primary",
+          "assignedAt": "2025-09-15T00:14:08.334Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-15T00:16:12.215Z",
+      "updated_at": "2025-09-15T00:16:12.215Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-15T00:16:28.967Z",
+      "title": "Fix AuthModule JwtAuthGuard CACHE_MANAGER dependency injection error",
+      "description": "JwtAuthGuard cannot resolve CACHE_MANAGER dependency. Need to import CacheModule to provide cache manager functionality for JWT authentication guard.",
+      "category": "error",
+      "id": "error_1757895388967_q6gr6mng79",
+      "assigned_agent": "dev_session_1757894888559_1_general_941bf1a7",
+      "started_at": "2025-09-15T00:16:50.447Z",
+      "claimed_by": "dev_session_1757894888559_1_general_941bf1a7",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757894888559_1_general_941bf1a7",
+          "role": "primary",
+          "assignedAt": "2025-09-15T00:16:50.447Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-15T00:17:50.856Z",
+      "updated_at": "2025-09-15T00:17:50.856Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-15T00:19:43.401Z",
+      "title": "Continue bytebot-agent infrastructure recovery - build still failing",
+      "description": "Despite previous fixes, bytebot-agent still fails to start with MODULE_NOT_FOUND for dist/main. Need to investigate why build process is not generating the dist directory and main.js file. Previous configuration fixes addressed startup issues but build process itself needs resolution.",
+      "category": "error",
+      "id": "error_1757895583401_5hyutiz09g",
+      "assigned_agent": "dev_session_1757895516921_1_general_e917e0b3",
+      "started_at": "2025-09-15T00:20:00.443Z",
+      "claimed_by": "dev_session_1757895516921_1_general_e917e0b3",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757895516921_1_general_e917e0b3",
+          "role": "primary",
+          "assignedAt": "2025-09-15T00:20:00.443Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -2338,6 +2446,48 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-14T20:12:46.249Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757894888559_1_general_941bf1a7": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-15T00:08:08.560Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-15T00:08:08.560Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757895516921_1_general_e917e0b3": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-15T00:18:36.921Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-15T00:18:36.921Z",
       "sessionId": null,
       "metadata": {}
     }

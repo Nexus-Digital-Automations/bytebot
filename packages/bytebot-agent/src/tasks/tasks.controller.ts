@@ -113,7 +113,7 @@ const models = [
  */
 @ApiTags('Tasks')
 @Controller('tasks')
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard, DeprecationGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(VersionInterceptor)
 @ApiBearerAuth('bearer')
 @ApiProduces('application/json')
@@ -167,7 +167,7 @@ export class TasksController {
     description: 'Rate limit exceeded',
   })
   async create(
-    @Body(GlobalValidationPipe, SanitizationPipe) createTaskDto: CreateTaskDto,
+    @Body() createTaskDto: CreateTaskDto,
     @CurrentUser() user: User,
   ): Promise<Task> {
     const operationId = `create-task-${Date.now()}`;

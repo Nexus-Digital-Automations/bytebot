@@ -246,7 +246,7 @@ describe("TaskItem Component", () => {
       const task = {
         ...mockBaseTask,
         status: TaskStatus.PENDING,
-        priority: "high" as const,
+        priority: TaskPriority.HIGH,
       };
 
       TestUtils.renderComponent(<TaskItem task={task} />);

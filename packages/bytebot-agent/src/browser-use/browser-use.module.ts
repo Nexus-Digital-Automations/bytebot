@@ -22,9 +22,11 @@
  */
 
 import { Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigurationModule } from '../config/config.module';
 import { AuthModule } from '../auth/auth.module';
 import { DatabaseModule } from '../database/database.module';
+import { SecurityMonitoringModule } from '../security/security-monitoring.module';
 
 import { BrowserUseController } from './browser-use.controller';
 import { BrowserUseService } from './browser-use.service';
@@ -38,7 +40,13 @@ import { BrowserMonitoringService } from './services/browser-monitoring.service'
 import { BrowserResultsService } from './services/browser-results.service';
 
 @Module({
-  imports: [ConfigurationModule, AuthModule, DatabaseModule],
+  imports: [
+    ConfigurationModule,
+    AuthModule,
+    DatabaseModule,
+    SecurityMonitoringModule,
+    CacheModule.register(),
+  ],
   controllers: [BrowserUseController],
   providers: [
     BrowserUseService,
@@ -50,6 +58,24 @@ import { BrowserResultsService } from './services/browser-results.service';
     BrowserDataService,
     BrowserMonitoringService,
     BrowserResultsService,
+    {
+      provide: 'REDIS_CLIENT',
+      useValue: null, // Mock Redis client for development
+    },
+    {
+      provide: 'THROTTLER:MODULE_OPTIONS',
+      useValue: {
+        ttl: 60,
+        limit: 10,
+      }, // Mock throttler options for development
+    },
+    {
+      provide: 'THROTTLER_STORAGE',
+      useValue: {
+        getRecord: async () => ({ totalHits: 0, timeToExpire: 0 }),
+        addRecord: async () => ({ totalHits: 1, timeToExpire: 60000 }),
+      }, // Mock throttler storage for development
+    },
   ],
   exports: [
     BrowserUseService,

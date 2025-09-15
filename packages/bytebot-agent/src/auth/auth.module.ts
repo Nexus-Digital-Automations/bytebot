@@ -19,12 +19,16 @@ import { Module, Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { CacheModule } from '@nestjs/cache-manager';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { PrismaModule } from '../prisma/prisma.module';
+import { SecurityMonitoringModule } from '../security/security-monitoring.module';
+import { SecurityMonitoringService as AuthSecurityMonitoringService } from './services/security-monitoring.service';
+import { SecurityMonitoringService } from '../security/security-monitoring.service';
 import { AppConfig } from '../config/configuration';
 
 /**
@@ -52,7 +56,12 @@ import { AppConfig } from '../config/configuration';
           operationId,
         });
 
-        const securityConfig = configService.get('security', { infer: true });
+        const securityConfig = configService.get('security', {
+          jwtSecret: 'default-secret',
+          jwtExpiresIn: '15m',
+          jwtRefreshExpiresIn: '7d',
+          encryptionKey: 'default-key',
+        });
         if (!securityConfig) {
           logger.error(`[${operationId}] Security configuration not found`, {
             operationId,
@@ -98,6 +107,12 @@ import { AppConfig } from '../config/configuration';
 
     // Import required modules
     PrismaModule,
+
+    // Security monitoring module for security service dependencies
+    SecurityMonitoringModule,
+
+    // Cache module for JWT guard caching functionality
+    CacheModule.register(),
   ],
   controllers: [AuthController],
   providers: [
@@ -105,6 +120,11 @@ import { AppConfig } from '../config/configuration';
     JwtStrategy,
     JwtAuthGuard,
     RolesGuard,
+    AuthSecurityMonitoringService,
+    {
+      provide: SecurityMonitoringService,
+      useClass: AuthSecurityMonitoringService,
+    },
     {
       provide: 'AUTH_CONFIG',
       useFactory: (configService: ConfigService<AppConfig>) => {
@@ -116,8 +136,19 @@ import { AppConfig } from '../config/configuration';
         });
 
         const config = {
-          security: configService.get('security', { infer: true }),
-          features: configService.get('features', { infer: true }),
+          security: configService.get('security', {
+            jwtSecret: 'default-secret',
+            jwtExpiresIn: '15m',
+            jwtRefreshExpiresIn: '7d',
+            encryptionKey: 'default-key',
+          }),
+          features: configService.get('features', {
+            authentication: false,
+            rateLimiting: false,
+            metricsCollection: false,
+            healthChecks: true,
+            circuitBreaker: false,
+          }),
         };
 
         if (!config.security || !config.features) {
@@ -144,7 +175,15 @@ import { AppConfig } from '../config/configuration';
       inject: [ConfigService],
     },
   ],
-  exports: [AuthService, JwtAuthGuard, RolesGuard, PassportModule, JwtModule],
+  exports: [
+    AuthService,
+    JwtAuthGuard,
+    RolesGuard,
+    PassportModule,
+    JwtModule,
+    AuthSecurityMonitoringService,
+    SecurityMonitoringService,
+  ],
 })
 export class AuthModule {
   private readonly logger = new Logger(AuthModule.name);
@@ -158,8 +197,19 @@ export class AuthModule {
     });
 
     // Log authentication configuration status
-    const features = this.configService.get('features', { infer: true });
-    const security = this.configService.get('security', { infer: true });
+    const features = this.configService.get('features', {
+      authentication: false,
+      rateLimiting: false,
+      metricsCollection: false,
+      healthChecks: true,
+      circuitBreaker: false,
+    });
+    const security = this.configService.get('security', {
+      jwtSecret: 'default-secret',
+      jwtExpiresIn: '15m',
+      jwtRefreshExpiresIn: '7d',
+      encryptionKey: 'default-key',
+    });
 
     if (!features || !security) {
       this.logger.error(`[${operationId}] Critical configuration missing`, {

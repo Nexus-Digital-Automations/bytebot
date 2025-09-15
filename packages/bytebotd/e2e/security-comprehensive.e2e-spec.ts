@@ -16,6 +16,10 @@
  * @security-focus Critical
  */
 
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 
@@ -239,6 +243,30 @@ class E2ETypeHelpers {
       throw new Error(`Route parameter '${paramName}' is required`);
     }
     return value;
+  }
+
+  /**
+   * Type-safe middleware wrapper for role-based access control
+   */
+  static createTypedRoleMiddleware(
+    role: UserRole,
+    requireRole: (
+      role: UserRole,
+    ) => (req: Request, res: Response, next: NextFunction) => void,
+  ) {
+    return (
+      req: Request,
+      res: Response,
+      handler: (req: Request, res: Response) => void,
+    ): void => {
+      const middleware = requireRole(role);
+      const typedReq = req as TypedExpressRequest;
+      const typedRes = res as TypedExpressResponse;
+
+      middleware(typedReq, typedRes, () => {
+        handler(typedReq, typedRes);
+      });
+    };
   }
 }
 
@@ -1044,52 +1072,59 @@ describe('Security E2E - Comprehensive Testing', () => {
     // Route definitions
 
     // Authentication routes
-    app.getHttpAdapter().post('/auth/login', async (req, res) => {
-      try {
-        const clientInfo = E2ETypeHelpers.extractClientInfo(req);
-        const loginData = E2ETypeHelpers.extractLoginRequest(req);
-
-        const result = await authController.login(loginData, clientInfo);
-        E2ETypeHelpers.sendJsonResponse(res, result);
-      } catch (error: unknown) {
-        const clientInfo = E2ETypeHelpers.extractClientInfo(req);
-        let email = 'unknown';
-
+    app
+      .getHttpAdapter()
+      .post('/auth/login', async (req: Request, res: Response) => {
         try {
+          const clientInfo = E2ETypeHelpers.extractClientInfo(req);
           const loginData = E2ETypeHelpers.extractLoginRequest(req);
-          email = loginData.email;
-        } catch {
-          // Ignore extraction error for failed login tracking
+
+          const result = await authController.login(loginData, clientInfo);
+          E2ETypeHelpers.sendJsonResponse(res, result);
+        } catch (error: unknown) {
+          const clientInfo = E2ETypeHelpers.extractClientInfo(req);
+          let email = 'unknown';
+
+          try {
+            const loginData = E2ETypeHelpers.extractLoginRequest(req);
+            email = loginData.email;
+          } catch {
+            // Ignore extraction error for failed login tracking
+          }
+
+          securityMonitor.trackFailedAuthentication(
+            email,
+            clientInfo.ipAddress,
+            clientInfo.userAgent,
+          );
+          E2ETypeHelpers.sendErrorResponse(res, 401, error);
         }
+      });
 
-        securityMonitor.trackFailedAuthentication(
-          email,
-          clientInfo.ipAddress,
-          clientInfo.userAgent,
-        );
-        E2ETypeHelpers.sendErrorResponse(res, 401, error);
-      }
-    });
+    app
+      .getHttpAdapter()
+      .post('/auth/refresh', async (req: Request, res: Response) => {
+        try {
+          const refreshTokenData =
+            E2ETypeHelpers.extractRefreshTokenRequest(req);
+          const result = await authController.refresh(refreshTokenData);
+          E2ETypeHelpers.sendJsonResponse(res, result);
+        } catch (error: unknown) {
+          E2ETypeHelpers.sendErrorResponse(res, 401, error);
+        }
+      });
 
-    app.getHttpAdapter().post('/auth/refresh', async (req, res) => {
-      try {
-        const refreshTokenData = E2ETypeHelpers.extractRefreshTokenRequest(req);
-        const result = await authController.refresh(refreshTokenData);
-        E2ETypeHelpers.sendJsonResponse(res, result);
-      } catch (error: unknown) {
-        E2ETypeHelpers.sendErrorResponse(res, 401, error);
-      }
-    });
-
-    app.getHttpAdapter().post('/auth/logout', async (req, res) => {
-      try {
-        const user = E2ETypeHelpers.extractAuthenticatedUser(req);
-        const result = await authController.logout(user);
-        E2ETypeHelpers.sendJsonResponse(res, result);
-      } catch (error: unknown) {
-        E2ETypeHelpers.sendErrorResponse(res, 500, error);
-      }
-    });
+    app
+      .getHttpAdapter()
+      .post('/auth/logout', async (req: Request, res: Response) => {
+        try {
+          const user = E2ETypeHelpers.extractAuthenticatedUser(req);
+          const result = await authController.logout(user);
+          E2ETypeHelpers.sendJsonResponse(res, result);
+        } catch (error: unknown) {
+          E2ETypeHelpers.sendErrorResponse(res, 500, error);
+        }
+      });
 
     // Protected routes
     app.getHttpAdapter().get('/api/user/profile', (req, res) => {
@@ -1175,41 +1210,39 @@ describe('Security E2E - Comprehensive Testing', () => {
     app.getHttpAdapter().delete('/api/admin/users/:id', (req, res) => {
       const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
-        res.json(
-          adminController.deleteUser(
-            (
-              req as Request & {
-                user: { sub: string; email: string; role: UserRole };
-              }
-            ).user,
-            (req as Request & { params: { id: string } }).params.id,
-          ),
-        );
+        try {
+          const user = E2ETypeHelpers.extractAuthenticatedUser(req);
+          const userId = E2ETypeHelpers.extractRouteParam(req, 'id');
+          const deleteResult = adminController.deleteUser(user, userId);
+          E2ETypeHelpers.sendJsonResponse(res, deleteResult);
+        } catch (error: unknown) {
+          E2ETypeHelpers.sendErrorResponse(res, 403, error);
+        }
       });
     });
 
     app.getHttpAdapter().get('/api/admin/audit-logs', (req, res) => {
       const middleware = requireRole(UserRole._ADMIN);
       middleware(req, res, () => {
-        res.json(
-          adminController.getAuditLogs(
-            (
-              req as Request & {
-                user: { sub: string; email: string; role: UserRole };
-              }
-            ).user,
-          ),
-        );
+        try {
+          const user = E2ETypeHelpers.extractAuthenticatedUser(req);
+          const auditLogs = adminController.getAuditLogs(user);
+          E2ETypeHelpers.sendJsonResponse(res, auditLogs);
+        } catch (error: unknown) {
+          E2ETypeHelpers.sendErrorResponse(res, 403, error);
+        }
       });
     });
 
     // Health endpoints
     app.getHttpAdapter().get('/health', (req, res) => {
-      res.json(healthController.getHealth());
+      const healthData = healthController.getHealth();
+      E2ETypeHelpers.sendJsonResponse(res, healthData);
     });
 
     app.getHttpAdapter().get('/api/health', (req, res) => {
-      res.json(healthController.getDetailedHealth());
+      const detailedHealthData = healthController.getDetailedHealth();
+      E2ETypeHelpers.sendJsonResponse(res, detailedHealthData);
     });
 
     await app.init();

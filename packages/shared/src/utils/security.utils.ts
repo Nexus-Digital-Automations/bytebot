@@ -1887,7 +1887,6 @@ export function detectCommandInjection(
       score,
       confidence,
       context,
-      platform,
     } of contextualPatterns) {
       const matches = originalInput.match(pattern);
       if (matches) {
@@ -1927,7 +1926,7 @@ export function detectCommandInjection(
   const hasHighConfidenceThreats = threats.some(
     (_, index) =>
       index < criticalPatterns.length &&
-      criticalPatterns[index]?.confidence >= 90,
+      (criticalPatterns[index]?.confidence ?? 0) >= 90,
   );
 
   if (
@@ -1982,7 +1981,7 @@ export function detectCommandInjection(
     severity,
     confidence: averageConfidence,
     detectionContext: uniqueContexts,
-    platformType: detectedPlatformType,
+    platformType: detectedPlatformType || "unknown",
     attackVectors: attackVectors.slice(0, 10), // Limit attack vectors for response size
   };
 }
@@ -2173,22 +2172,26 @@ export function createSecurityEvent(
   userAgent?: string,
   sessionId?: string,
 ): SecurityEvent {
-  return {
+  const event: SecurityEvent = {
     eventId: generateEventId(),
     type,
     timestamp: new Date(),
-    userId,
-    ipAddress: ipAddress || "unknown",
-    userAgent,
     endpoint: resource,
-    resource,
     method,
-    success,
-    message,
-    metadata,
-    sessionId,
     riskScore: calculateRiskScore(type, metadata),
   };
+
+  // Only add optional properties if they have values
+  if (userId !== undefined) event.userId = userId;
+  if (ipAddress !== undefined) event.ipAddress = ipAddress;
+  if (userAgent !== undefined) event.userAgent = userAgent;
+  if (sessionId !== undefined) event.sessionId = sessionId;
+  if (success !== undefined) event.success = success;
+  if (message !== undefined) event.message = message;
+  if (metadata !== undefined) event.metadata = metadata;
+  if (resource !== undefined) event.resource = resource;
+
+  return event;
 }
 
 // ===========================
@@ -2217,9 +2220,7 @@ export const DEFAULT_RATE_LIMITS: Record<RateLimitPreset, RateLimitConfig> = {
     windowMs: 15 * 60 * 1000, // 15 minutes
     message: "Too many authentication attempts. Please try again later.",
     // Custom skip function can be added for trusted IPs if needed
-    skip: undefined,
     // Custom key generator can be added for more granular control
-    keyGenerator: undefined,
   },
 
   // Computer control operations - Moderate limits for automation safety
@@ -2228,8 +2229,6 @@ export const DEFAULT_RATE_LIMITS: Record<RateLimitPreset, RateLimitConfig> = {
     windowMs: 60 * 1000, // 1 minute
     message:
       "Computer control rate limit exceeded. Please slow down your requests.",
-    skip: undefined,
-    keyGenerator: undefined,
   },
 
   // Task management operations - Balanced limits for productivity
@@ -2237,8 +2236,6 @@ export const DEFAULT_RATE_LIMITS: Record<RateLimitPreset, RateLimitConfig> = {
     max: 50,
     windowMs: 60 * 1000, // 1 minute
     message: "Task operation rate limit exceeded. Please wait before retrying.",
-    skip: undefined,
-    keyGenerator: undefined,
   },
 
   // Read operations - Generous limits for data access needs
@@ -2247,8 +2244,6 @@ export const DEFAULT_RATE_LIMITS: Record<RateLimitPreset, RateLimitConfig> = {
     windowMs: 60 * 1000, // 1 minute
     message:
       "Read operation rate limit exceeded. Please reduce request frequency.",
-    skip: undefined,
-    keyGenerator: undefined,
   },
 
   // WebSocket connections - Conservative limits for resource protection
@@ -2257,8 +2252,6 @@ export const DEFAULT_RATE_LIMITS: Record<RateLimitPreset, RateLimitConfig> = {
     windowMs: 60 * 1000, // 1 minute
     message:
       "WebSocket connection rate limit exceeded. Please wait before reconnecting.",
-    skip: undefined,
-    keyGenerator: undefined,
   },
 };
 
@@ -2285,6 +2278,7 @@ const _presetKeys = Object.keys(
 // This will cause a TypeScript error if any preset is missing from DEFAULT_RATE_LIMITS
 type _ValidateCompleteness =
   typeof _defaultRateLimitsKeys extends typeof _presetKeys ? true : never;
+// @ts-ignore - Intentionally unused variable for compile-time type validation
 const _completenessCheck: _ValidateCompleteness = true; // This line validates completeness at compile time
 
 /**
@@ -2919,12 +2913,18 @@ export function validateFilePath(
     `[PATH_VALIDATION] Completed in ${validationTime}ms - Valid: ${errors.length === 0}`,
   );
 
-  return {
+  const result: ValidationResult = {
     isValid: errors.length === 0,
     errors,
-    sanitizedData: sanitizedPath ? { path: sanitizedPath } : undefined,
     timestamp,
   };
+
+  // Only add sanitizedData if it has a value
+  if (sanitizedPath) {
+    result.sanitizedData = { path: sanitizedPath };
+  }
+
+  return result;
 }
 
 /**
@@ -3386,29 +3386,41 @@ export function validateCoordinates(
     );
   }
 
-  const result = {
+  const result: ValidationResult & {
+    metrics?: CoordinateValidationMetrics;
+    threatAnalysis?: {
+      suspiciousPatterns: string[];
+      riskScore: number;
+      recommendations: string[];
+    };
+  } = {
     isValid: errors.length === 0,
     errors,
-    sanitizedData,
     timestamp,
-    metrics: config.performanceMonitoring
-      ? {
-          startTime: Number(startTime),
-          endTime: Number(endTime),
-          duration,
-          checksPerformed,
-          threatLevel,
-        }
-      : undefined,
-    threatAnalysis:
-      suspiciousPatterns.length > 0
-        ? {
-            suspiciousPatterns,
-            riskScore,
-            recommendations,
-          }
-        : undefined,
   };
+
+  // Only add optional properties if they have values
+  if (sanitizedData) {
+    result.sanitizedData = sanitizedData;
+  }
+
+  if (config.performanceMonitoring) {
+    result.metrics = {
+      startTime: Number(startTime),
+      endTime: Number(endTime),
+      duration,
+      checksPerformed,
+      threatLevel,
+    };
+  }
+
+  if (suspiciousPatterns.length > 0) {
+    result.threatAnalysis = {
+      suspiciousPatterns,
+      riskScore,
+      recommendations,
+    };
+  }
 
   // Log successful validation
   console.info("✅ [COORDINATE_VALIDATION] Coordinate validation completed", {
@@ -4334,6 +4346,7 @@ export function sanitizeContentByContext(
 
   const purifyConstructor =
     (DOMPurify as { default?: unknown } & unknown).default || DOMPurify;
+  // @ts-ignore - Variable used for DOMPurify initialization side effects
   const _purify = (
     purifyConstructor as (window: WindowLikeWithDOMPurify) => DOMPurifyInstance
   )(window);
@@ -4601,15 +4614,29 @@ export function scanFileContent(
     }
   }
 
+  const metadata: {
+    fileSize: number;
+    contentType?: string;
+    encoding?: string;
+  } = {
+    fileSize,
+  };
+
+  // Only add optional properties if they have values
+  if (mimeType !== undefined) {
+    metadata.contentType = mimeType;
+  }
+
+  const encoding = Buffer.isBuffer(content) ? "binary" : "utf8";
+  if (encoding !== undefined) {
+    metadata.encoding = encoding;
+  }
+
   return {
     isSafe: threats.length === 0,
     threats,
     riskScore: Math.min(10, Math.floor(riskScore / 10)),
-    metadata: {
-      fileSize,
-      contentType: mimeType,
-      encoding: Buffer.isBuffer(content) ? "binary" : "utf8",
-    },
+    metadata,
   };
 }
 

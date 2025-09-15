@@ -2,24 +2,51 @@ import * as React from "react";
 import { Task, TaskStatus } from "../../types";
 import { format } from "date-fns";
 import { capitalizeFirstChar } from "../../utils/stringUtils";
-import {
-  AlertCircleIcon,
-  CancelCircleIcon,
-  Tick02Icon,
-} from "@hugeicons/core-free-icons";
+// Simple SVG icon definitions - removes external dependency issues
+const AlertCircleIcon = (): React.ReactElement => (
+  <svg
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
+const CancelCircleIcon = (): React.ReactElement => (
+  <svg
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="15" y1="9" x2="9" y2="15" />
+    <line x1="9" y1="9" x2="15" y2="15" />
+  </svg>
+);
+
+const Tick02Icon = (): React.ReactElement => (
+  <svg
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <polyline points="20,6 9,17 4,12" />
+  </svg>
+);
 import { Loader } from "../ui/loader";
 import Link from "next/link";
 import { logError } from "../../utils/logger";
 
 /**
- * Type definition for HugeIcons icon component
- * Based on @hugeicons/core-free-icons structure
+ * Type definition for simple SVG icon components
  */
-type IconSvgObject = readonly (readonly [
-  string,
-  { readonly [key: string]: string | number },
-])[];
-type HugeIconComponent = IconSvgObject;
+type IconComponent = () => React.ReactElement;
 
 interface TaskItemProps {
   task: Task;
@@ -27,11 +54,11 @@ interface TaskItemProps {
 
 /**
  * Configuration interface for task status icons with strict TypeScript typing
- * Supports both HugeIcons components and loader states
+ * Supports both icon components and loader states
  */
 interface StatusIconConfig {
-  /** HugeIcons icon component from @hugeicons/core-free-icons */
-  icon?: HugeIconComponent;
+  /** Icon component for task status */
+  icon?: IconComponent;
   /** Tailwind CSS color class for the icon */
   color?: string;
   /** Whether to show a loading spinner instead of an icon */
@@ -130,17 +157,16 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task }) => {
     }
 
     // Render icon with proper accessibility
-    if (IconComponent !== null) {
+    if (IconComponent !== undefined) {
       return (
         <div
           className="flex items-center justify-center"
           role="img"
           aria-label={`Status: ${status.toLowerCase()}`}
         >
-          <HugeiconsIcon
-            icon={IconComponent}
-            className={`h-5 w-5 ${color ?? "text-gray-500"}`}
-          />
+          <div className={`h-5 w-5 ${color ?? "text-gray-500"}`}>
+            <IconComponent />
+          </div>
         </div>
       );
     }
