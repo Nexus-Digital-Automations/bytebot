@@ -653,17 +653,19 @@ export const ComputerUseAccess = () => {
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
-    SetMetadata(ROLES_KEY, [Role._USER, Role._ADMIN, Role._OPERATOR])(
-      target,
-      propertyKey,
-      descriptor,
-    );
-    SetMetadata(PERMISSIONS_KEY, [Permission._COMPUTER_USE])(
-      target,
-      propertyKey,
-      descriptor,
-    );
-    SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
+    if (propertyKey !== undefined && descriptor !== undefined) {
+      SetMetadata(ROLES_KEY, [Role._USER, Role._ADMIN, Role._OPERATOR])(
+        target,
+        propertyKey,
+        descriptor,
+      );
+      SetMetadata(PERMISSIONS_KEY, [Permission._COMPUTER_USE])(
+        target,
+        propertyKey,
+        descriptor,
+      );
+      SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
+    }
   };
 };
 
@@ -687,16 +689,18 @@ export const TaskManagementAccess = () => {
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
-    SetMetadata(ROLES_KEY, [Role._USER, Role._ADMIN, Role._OPERATOR])(
-      target,
-      propertyKey,
-      descriptor,
-    );
-    SetMetadata(PERMISSIONS_KEY, [Permission._TASK_MANAGEMENT])(
-      target,
-      propertyKey,
-      descriptor,
-    );
+    if (propertyKey !== undefined && descriptor !== undefined) {
+      SetMetadata(ROLES_KEY, [Role._USER, Role._ADMIN, Role._OPERATOR])(
+        target,
+        propertyKey,
+        descriptor,
+      );
+      SetMetadata(PERMISSIONS_KEY, [Permission._TASK_MANAGEMENT])(
+        target,
+        propertyKey,
+        descriptor,
+      );
+    }
   };
 };
 
@@ -720,17 +724,19 @@ export const APIAdminAccess = () => {
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
-    SetMetadata(ROLES_KEY, [Role._ADMIN, Role._SUPER_ADMIN])(
-      target,
-      propertyKey,
-      descriptor,
-    );
-    SetMetadata(PERMISSIONS_KEY, [Permission._API_ADMIN, Permission._ADMIN])(
-      target,
-      propertyKey,
-      descriptor,
-    );
-    SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
+    if (propertyKey !== undefined && descriptor !== undefined) {
+      SetMetadata(ROLES_KEY, [Role._ADMIN, Role._SUPER_ADMIN])(
+        target,
+        propertyKey,
+        descriptor,
+      );
+      SetMetadata(PERMISSIONS_KEY, [Permission._API_ADMIN, Permission._ADMIN])(
+        target,
+        propertyKey,
+        descriptor,
+      );
+      SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
+    }
   };
 };
 
@@ -754,21 +760,23 @@ export const SecurityManagementAccess = () => {
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
-    SetMetadata(ROLES_KEY, [Role._ADMIN, Role._SUPER_ADMIN])(
-      target,
-      propertyKey,
-      descriptor,
-    );
-    SetMetadata(PERMISSIONS_KEY, [
-      Permission._SECURITY_MANAGEMENT,
-      Permission._ADMIN,
-    ])(target, propertyKey, descriptor);
-    SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
-    SetMetadata(SECURE_ENDPOINT_KEY, {
-      requireEncryption: true,
-      httpsOnly: true,
-      auditLogging: true,
-    })(target, propertyKey, descriptor);
+    if (propertyKey !== undefined && descriptor !== undefined) {
+      SetMetadata(ROLES_KEY, [Role._ADMIN, Role._SUPER_ADMIN])(
+        target,
+        propertyKey,
+        descriptor,
+      );
+      SetMetadata(PERMISSIONS_KEY, [
+        Permission._SECURITY_MANAGEMENT,
+        Permission._ADMIN,
+      ])(target, propertyKey, descriptor);
+      SetMetadata(AUDIT_ACCESS_KEY, true)(target, propertyKey, descriptor);
+      SetMetadata(SECURE_ENDPOINT_KEY, {
+        requireEncryption: true,
+        httpsOnly: true,
+        auditLogging: true,
+      })(target, propertyKey, descriptor);
+    }
   };
 };
 
