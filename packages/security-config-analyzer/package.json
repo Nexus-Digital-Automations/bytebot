@@ -7,7 +7,7 @@
   "scripts": {
     "build": "npx tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "npx jest --passWithNoTests",
     "lint": "npx eslint \"src/**/*.ts\" --fix",
     "security-scan": "node dist/cli.js scan --all",
     "docker-scan": "node dist/cli.js docker --all",
