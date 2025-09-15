@@ -100,9 +100,7 @@ jest.mock("../ui/loader", () => ({
 }));
 
 // Test data setup - moved outside describe block for export
-const mockScrollRef: React.RefObject<HTMLDivElement> = {
-  current: null,
-};
+const mockScrollRef = React.createRef<HTMLDivElement>();
 const mockMessageIdToIndex = { "msg-1": 0, "msg-2": 1 };
 
 // Create mock data function

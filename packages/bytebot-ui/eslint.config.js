@@ -21,6 +21,7 @@ import tseslint from "typescript-eslint";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
+import nextPlugin from "@next/eslint-plugin-next";
 
 export default tseslint.config(
   // Global ignore patterns - exclude build and generated files
@@ -54,13 +55,14 @@ export default tseslint.config(
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
 
-  // React plugin configuration
+  // React and Next.js plugin configuration
   {
     files: ["**/*.{ts,tsx,js,jsx}"],
     plugins: {
       react: reactPlugin,
       "react-hooks": reactHooksPlugin,
       "jsx-a11y": jsxA11yPlugin,
+      "@next/next": nextPlugin,
     },
     settings: {
       react: {
@@ -96,6 +98,22 @@ export default tseslint.config(
         "warn",
         { props: "never", children: "never" },
       ], // Enforce curly braces or not in JSX props and children
+
+      // ===== NEXT.JS RULES =====
+      "@next/next/google-font-display": "warn",
+      "@next/next/google-font-preconnect": "warn",
+      "@next/next/next-script-for-ga": "warn",
+      "@next/next/no-before-interactive-script-outside-document": "error",
+      "@next/next/no-css-tags": "error",
+      "@next/next/no-head-element": "error",
+      "@next/next/no-head-import-in-document": "error",
+      "@next/next/no-html-link-for-pages": "error",
+      "@next/next/no-img-element": "error",
+      "@next/next/no-page-custom-font": "warn",
+      "@next/next/no-styled-jsx-in-document": "error",
+      "@next/next/no-sync-scripts": "error",
+      "@next/next/no-title-in-document-head": "error",
+      "@next/next/no-unwanted-polyfillio": "error",
 
       // ===== ACCESSIBILITY (A11Y) RULES =====
       "jsx-a11y/alt-text": "error", // Enforce img alt attribute

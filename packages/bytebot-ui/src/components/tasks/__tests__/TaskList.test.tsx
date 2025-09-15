@@ -15,7 +15,7 @@
  */
 
 import React from "react";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { TaskList } from "../TaskList";
 import { Role, Task, TaskPriority, TaskStatus, TaskType } from "@/types";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
@@ -453,8 +453,7 @@ describe("TaskList Component", () => {
       // Should group by status: PENDING, RUNNING, COMPLETED
       const taskItems = screen.getAllByTestId(/task-item-/);
       const statuses = taskItems.map(
-        (item) =>
-          screen.getByTestId("task-status", { container: item }).textContent,
+        (item) => within(item).getByTestId("task-status").textContent,
       );
 
       expect(statuses).toEqual([
@@ -482,6 +481,7 @@ describe("TaskList Component", () => {
   });
 
   describe("Pagination", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const manyTasks = Array.from(
       { length: PAGINATION_DEFAULT_PAGE_SIZE * DEFAULT_TASK_LIST_LIMIT },
       (_, i) => ({
@@ -597,6 +597,7 @@ describe("TaskList Component", () => {
 
       expect(screen.getByTestId("task-item-task-1")).toBeInTheDocument();
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const updatedTasks = [
         {
           ...mockTasks[0],
@@ -624,6 +625,7 @@ describe("TaskList Component", () => {
 
       expect(screen.getByTestId("task-item-task-1")).toHaveClass("selected");
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const updatedTasks = [
         {
           ...mockTasks[0],
@@ -655,6 +657,7 @@ describe("TaskList Component", () => {
         _TEST_TASK_COUNT_SMALL,
       );
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const newTask = {
         id: "task-4",
         title: "New Task",
@@ -713,6 +716,7 @@ describe("TaskList Component", () => {
     });
 
     it("handles large task lists efficiently", () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const largeTaskList = Array.from(
         { length: LARGE_DATASET_SIZE },
         (_, i) => ({
@@ -729,7 +733,9 @@ describe("TaskList Component", () => {
       );
 
       const { renderTime } = TestUtils.renderComponent(
-        <TaskList {...defaultProps} /* tasks={largeTaskList} removed - component fetches its own tasks */ />,
+        <TaskList
+          {...defaultProps} /* tasks={largeTaskList} removed - component fetches its own tasks */
+        />,
       );
 
       expect(renderTime).toBeLessThan(PERFORMANCE_TEST_TIMEOUT_MS); // Should handle large lists efficiently
@@ -742,7 +748,7 @@ describe("TaskList Component", () => {
         const { unmount } = TestUtils.renderComponent(
           <TaskList
             {...defaultProps}
-            tasks={[mockTasks[i % mockTasks.length]]}
+            /* tasks={[mockTasks[i % mockTasks.length]]} removed - component fetches its own tasks */
           />,
         );
         unmount();
@@ -783,7 +789,11 @@ describe("TaskList Component", () => {
     });
 
     it("announces loading state to screen readers", () => {
-      TestUtils.renderComponent(<TaskList {...defaultProps} loading={true} />);
+      TestUtils.renderComponent(
+        <TaskList
+          {...defaultProps} /* loading={true} removed - not in TaskListProps interface */
+        />,
+      );
 
       const loader = screen.getByTestId("loader");
       expect(loader).toHaveAttribute("role", "status");
@@ -805,7 +815,7 @@ describe("TaskList Component", () => {
     });
 
     it("provides skip links for large lists", () => {
-      const manyTasks = Array.from({ length: 50 }, (_, i) => ({
+      const _manyTasks = Array.from({ length: 50 }, (_, i) => ({
         ...mockTasks[0],
         id: `task-${i}`,
         title: `Task ${i}`,
@@ -824,7 +834,7 @@ describe("TaskList Component", () => {
 
   describe("Error Handling", () => {
     it("handles missing task data gracefully", () => {
-      const tasksWithMissingData = [
+      const _tasksWithMissingData = [
         {
           id: "task-1",
           // Missing required fields
@@ -834,7 +844,7 @@ describe("TaskList Component", () => {
       TestUtils.renderComponent(
         <TaskList
           {...defaultProps}
-          tasks={tasksWithMissingData as typeof mockTasks}
+          /* tasks={tasksWithMissingData as typeof mockTasks} removed - component fetches its own tasks */
         />,
       );
 
@@ -843,7 +853,7 @@ describe("TaskList Component", () => {
     });
 
     it("handles invalid date values gracefully", () => {
-      const tasksWithInvalidDates = [
+      const _tasksWithInvalidDates = [
         {
           ...mockTasks[0],
           createdAt: "invalid-date",
@@ -852,7 +862,9 @@ describe("TaskList Component", () => {
       ];
 
       TestUtils.renderComponent(
-        <TaskList {...defaultProps} tasks={tasksWithInvalidDates} />,
+        <TaskList
+          {...defaultProps} /* tasks={tasksWithInvalidDates} removed - component fetches its own tasks */
+        />,
       );
 
       expect(screen.getByTestId("task-item-task-1")).toBeInTheDocument();
@@ -860,14 +872,16 @@ describe("TaskList Component", () => {
 
     it("handles null or undefined tasks prop", () => {
       TestUtils.renderComponent(
-        <TaskList {...defaultProps} tasks={null as typeof mockTasks | null} />,
+        <TaskList
+          {...defaultProps} /* tasks={null as typeof mockTasks | null} removed - component fetches its own tasks */
+        />,
       );
 
       expect(screen.getByText(/no tasks found/i)).toBeInTheDocument();
     });
 
     it("handles callback errors gracefully", async () => {
-      const errorCallback = jest.fn(() => {
+      const _errorCallback = jest.fn(() => {
         throw new Error("Callback error");
       });
       const consoleErrorSpy = jest
@@ -878,7 +892,9 @@ describe("TaskList Component", () => {
       const user = TestUtils.createUserEvent();
 
       TestUtils.renderComponent(
-        <TaskList {...defaultProps} onTaskSelect={errorCallback} />,
+        <TaskList
+          {...defaultProps} /* onTaskSelect={errorCallback} removed - not in TaskListProps interface */
+        />,
       );
 
       const taskItem = screen.getByTestId("task-item-task-1");

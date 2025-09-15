@@ -26,7 +26,9 @@ export function MessageContent({
     // Filter logic from the original code
     if (
       isToolResultContentBlock(block) &&
-      block.content?.some((contentBlock) => isImageContentBlock(contentBlock))
+      block.content?.some((contentBlock: MessageContentBlock) =>
+        isImageContentBlock(contentBlock),
+      )
     ) {
       return true;
     }
@@ -53,14 +55,22 @@ export function MessageContent({
 
           {isToolResultContentBlock(block) &&
             block.is_error === false &&
-            block.content.map((contentBlock, contentBlockIndex) => {
-              if (isImageContentBlock(contentBlock)) {
-                return (
-                  <ImageContent key={contentBlockIndex} block={contentBlock} />
-                );
-              }
-              return null;
-            })}
+            block.content.map(
+              (
+                contentBlock: MessageContentBlock,
+                contentBlockIndex: number,
+              ) => {
+                if (isImageContentBlock(contentBlock)) {
+                  return (
+                    <ImageContent
+                      key={contentBlockIndex}
+                      block={contentBlock}
+                    />
+                  );
+                }
+                return null;
+              },
+            )}
 
           {isComputerToolUseContentBlock(block) && (
             <ComputerToolContent block={block} isTakeOver={isTakeOver} />

@@ -3,10 +3,26 @@ import ReactMarkdown from "react-markdown";
 import { GroupedMessages } from "@/types";
 import { MessageAvatar } from "./MessageAvatar";
 import {
+  MessageContentBlock,
+  ToolResultContentBlock,
   isImageContentBlock,
   isTextContentBlock,
   isToolResultContentBlock,
 } from "@bytebot/shared";
+
+/**
+ * Type guard to check if a ToolResultContentBlock has valid content
+ * Provides type-safe access to tool result content
+ */
+function isValidToolResultContent(
+  block: MessageContentBlock,
+): block is ToolResultContentBlock & { content: MessageContentBlock[] } {
+  return (
+    isToolResultContentBlock(block) &&
+    Array.isArray(block.content) &&
+    block.content.length > 0
+  );
+}
 
 interface UserMessageProps {
   group: GroupedMessages;
@@ -32,31 +48,32 @@ export function UserMessage({
               >
                 {/* Render hidden divs for each screenshot block */}
                 {message.content.map((block, blockIndex) => {
-                  if (
-                    isToolResultContentBlock(block) &&
-                    block.content != null &&
-                    block.content.length > 0
-                  ) {
+                  if (isValidToolResultContent(block)) {
                     // Check ALL content items in the tool result, not just the first one
                     const markers: React.ReactNode[] = [];
-                    block.content.forEach((contentItem, contentIndex) => {
-                      if (isImageContentBlock(contentItem)) {
-                        markers.push(
-                          <div
-                            key={`${blockIndex}-${contentIndex}`}
-                            data-message-index={messageIdToIndex[message.id]}
-                            data-block-index={blockIndex}
-                            data-content-index={contentIndex}
-                            style={{
-                              position: "absolute",
-                              width: 0,
-                              height: 0,
-                              overflow: "hidden",
-                            }}
-                          />,
-                        );
-                      }
-                    });
+                    block.content.forEach(
+                      (
+                        contentItem: MessageContentBlock,
+                        contentIndex: number,
+                      ) => {
+                        if (isImageContentBlock(contentItem)) {
+                          markers.push(
+                            <div
+                              key={`${blockIndex}-${contentIndex}`}
+                              data-message-index={messageIdToIndex[message.id]}
+                              data-block-index={blockIndex}
+                              data-content-index={contentIndex}
+                              style={{
+                                position: "absolute",
+                                width: 0,
+                                height: 0,
+                                overflow: "hidden",
+                              }}
+                            />,
+                          );
+                        }
+                      },
+                    );
                     return markers;
                   }
                   return null;
@@ -91,31 +108,29 @@ export function UserMessage({
           >
             {/* Render hidden divs for each screenshot block */}
             {message.content.map((block, blockIndex) => {
-              if (
-                isToolResultContentBlock(block) &&
-                block.content != null &&
-                block.content.length > 0
-              ) {
+              if (isValidToolResultContent(block)) {
                 // Check ALL content items in the tool result, not just the first one
                 const markers: React.ReactNode[] = [];
-                block.content.forEach((contentItem, contentIndex) => {
-                  if (isImageContentBlock(contentItem)) {
-                    markers.push(
-                      <div
-                        key={`${blockIndex}-${contentIndex}`}
-                        data-message-index={messageIdToIndex[message.id]}
-                        data-block-index={blockIndex}
-                        data-content-index={contentIndex}
-                        style={{
-                          position: "absolute",
-                          width: 0,
-                          height: 0,
-                          overflow: "hidden",
-                        }}
-                      />,
-                    );
-                  }
-                });
+                block.content.forEach(
+                  (contentItem: MessageContentBlock, contentIndex: number) => {
+                    if (isImageContentBlock(contentItem)) {
+                      markers.push(
+                        <div
+                          key={`${blockIndex}-${contentIndex}`}
+                          data-message-index={messageIdToIndex[message.id]}
+                          data-block-index={blockIndex}
+                          data-content-index={contentIndex}
+                          style={{
+                            position: "absolute",
+                            width: 0,
+                            height: 0,
+                            overflow: "hidden",
+                          }}
+                        />,
+                      );
+                    }
+                  },
+                );
                 return markers;
               }
               return null;

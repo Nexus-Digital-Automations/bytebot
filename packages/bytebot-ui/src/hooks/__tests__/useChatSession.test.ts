@@ -16,7 +16,14 @@
 
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useChatSession } from "../useChatSession";
-import { Message, Role, Task, TaskStatus } from "@/types";
+import {
+  Message,
+  Role,
+  Task,
+  TaskPriority,
+  TaskStatus,
+  TaskType,
+} from "@/types";
 import { MessageContentType } from "@bytebot/shared";
 import {
   LARGE_DATASET_SIZE,
@@ -101,6 +108,14 @@ describe("useChatSession Hook", () => {
       control: Role.ASSISTANT,
       title: "Test Task",
       description: "Test Description",
+      type: TaskType.IMMEDIATE,
+      priority: TaskPriority.MEDIUM,
+      createdBy: Role.USER,
+      model: {
+        provider: "anthropic",
+        name: "claude-3-5-sonnet-20241022",
+        title: "Claude 3.5 Sonnet",
+      },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
@@ -247,6 +262,14 @@ describe("useChatSession Hook", () => {
         control: Role.USER,
         title: "Test Task",
         description: "Test Description",
+        type: TaskType.IMMEDIATE,
+        priority: TaskPriority.HIGH,
+        createdBy: Role.USER,
+        model: {
+          provider: "anthropic",
+          name: "claude-3-5-sonnet-20241022",
+          title: "Claude 3.5 Sonnet",
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -641,6 +664,14 @@ describe("useChatSession Hook", () => {
         status: TaskStatus.NEEDS_HELP,
         title: "Test Task",
         description: "Test Description",
+        type: TaskType.IMMEDIATE,
+        priority: TaskPriority.HIGH,
+        createdBy: Role.USER,
+        model: {
+          provider: "anthropic",
+          name: "claude-3-5-sonnet-20241022",
+          title: "Claude 3.5 Sonnet",
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -651,6 +682,14 @@ describe("useChatSession Hook", () => {
         status: TaskStatus.RUNNING,
         title: "Test Task",
         description: "Test Description",
+        type: TaskType.IMMEDIATE,
+        priority: TaskPriority.MEDIUM,
+        createdBy: Role.USER,
+        model: {
+          provider: "anthropic",
+          name: "claude-3-5-sonnet-20241022",
+          title: "Claude 3.5 Sonnet",
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -661,6 +700,14 @@ describe("useChatSession Hook", () => {
         status: TaskStatus.CANCELLED,
         title: "Test Task",
         description: "Test Description",
+        type: TaskType.IMMEDIATE,
+        priority: TaskPriority.MEDIUM,
+        createdBy: Role.USER,
+        model: {
+          provider: "anthropic",
+          name: "claude-3-5-sonnet-20241022",
+          title: "Claude 3.5 Sonnet",
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -936,6 +983,14 @@ describe("useChatSession Hook", () => {
           control: Role.ASSISTANT,
           title: "Test Task",
           description: "Test Description",
+          type: TaskType.IMMEDIATE,
+          priority: TaskPriority.MEDIUM,
+          createdBy: Role.USER,
+          model: {
+            provider: "anthropic",
+            name: "claude-3-5-sonnet-20241022",
+            title: "Claude 3.5 Sonnet",
+          },
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
@@ -964,6 +1019,14 @@ export const ChatSessionTestUtils = {
     control: Role.ASSISTANT,
     title: "Test Task",
     description: "Test Description",
+    type: TaskType.IMMEDIATE,
+    priority: TaskPriority.MEDIUM,
+    createdBy: Role.USER,
+    model: {
+      provider: "anthropic",
+      name: "claude-3-5-sonnet-20241022",
+      title: "Claude 3.5 Sonnet",
+    },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...overrides,
@@ -983,8 +1046,11 @@ export const ChatSessionTestUtils = {
     };
 
     mockUseWebSocket.mockReturnValue({
+      socket: null,
       joinTask: jest.fn(),
       leaveTask: jest.fn(),
+      disconnect: jest.fn(),
+      isConnected: false,
     });
 
     return mockHandlers;
