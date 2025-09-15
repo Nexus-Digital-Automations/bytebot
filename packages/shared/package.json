@@ -4,6 +4,16 @@
   "description": "Shared utilities and types for Bytebot packages",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/index-server.d.ts",
+      "default": "./dist/index-server.js"
+    }
+  },
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -20,33 +30,6 @@
     "security:network": "ts-node src/test-utils/run-security-tests.ts network",
     "security:validate": "ts-node src/test-utils/run-security-tests.ts validate",
     "security:config": "ts-node src/test-utils/run-security-tests.ts config"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
-    },
-    "./client": {
-      "types": "./dist/index-client.d.ts",
-      "import": "./dist/index-client.js",
-      "require": "./dist/index-client.js"
-    },
-    "./server": {
-      "types": "./dist/index-server.d.ts",
-      "import": "./dist/index-server.js",
-      "require": "./dist/index-server.js"
-    },
-    "./minimal": {
-      "types": "./dist/index-minimal.d.ts",
-      "import": "./dist/index-minimal.js",
-      "require": "./dist/index-minimal.js"
-    },
-    "./middleware/security-middleware.standardized": {
-      "types": "./dist/middleware/security-middleware.standardized.d.ts",
-      "import": "./dist/middleware/security-middleware.standardized.js",
-      "require": "./dist/middleware/security-middleware.standardized.js"
-    }
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
