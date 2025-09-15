@@ -49,6 +49,7 @@ describe('HealthModule', () => {
     console.log(`[${operationId}] Setting up HealthModule test environment`);
 
     // Create mock logger
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Creating mock logger for testing
     mockLogger = {
       log: jest.fn(),
       debug: jest.fn(),
@@ -62,9 +63,9 @@ describe('HealthModule', () => {
     jest.spyOn(Logger.prototype, 'debug').mockImplementation(mockLogger.debug);
     jest.spyOn(Logger.prototype, 'error').mockImplementation(mockLogger.error);
     jest.spyOn(Logger.prototype, 'warn').mockImplementation(mockLogger.warn);
-    (
-      jest.spyOn(Logger.prototype, 'verbose') as jest.MockedFunction<any>
-    ).mockImplementation(mockLogger.verbose);
+    jest
+      .spyOn(Logger.prototype, 'verbose')
+      .mockImplementation(mockLogger.verbose);
 
     module = await Test.createTestingModule({
       imports: [HealthModule],
@@ -144,8 +145,8 @@ describe('HealthModule', () => {
         ],
       }).compile();
 
-      const testService = testModule.get('TestServiceUsingHealth') as any;
-      const exportedHealthService = (testService as any).getHealthService();
+      const testService = testModule.get('TestServiceUsingHealth');
+      const exportedHealthService = testService.getHealthService();
 
       expect(exportedHealthService).toBeDefined();
       expect(exportedHealthService).toBeInstanceOf(HealthService);
@@ -491,9 +492,7 @@ describe('HealthModule', () => {
         ],
       }).compile();
 
-      const customHealthIndicator = extendedModule.get(
-        'CustomHealthIndicator',
-      ) as any;
+      const customHealthIndicator = extendedModule.get('CustomHealthIndicator');
       expect(customHealthIndicator).toBeDefined();
 
       const customHealth = await customHealthIndicator.checkCustomHealth();
