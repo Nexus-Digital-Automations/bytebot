@@ -502,9 +502,7 @@ describe("TaskList Component", () => {
     );
 
     it("shows pagination controls for large task lists", () => {
-      TestUtils.renderComponent(
-        <TaskList {...defaultProps} tasks={manyTasks} />,
-      );
+      TestUtils.renderComponent(<TaskList {...defaultProps} />);
 
       expect(screen.getByTestId("pagination")).toBeInTheDocument();
       expect(screen.getByTestId("current-page")).toHaveTextContent("1");
@@ -514,7 +512,7 @@ describe("TaskList Component", () => {
       const user = TestUtils.createUserEvent();
 
       TestUtils.renderComponent(
-        <TaskList {...defaultProps} tasks={manyTasks} />,
+        <TaskList {...defaultProps} />,
       );
 
       const nextButton = screen.getByTestId("next-page");

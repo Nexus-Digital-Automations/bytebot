@@ -111,7 +111,12 @@ describe('HealthService', () => {
       it('should handle database connection failures', async () => {
         // Mock performDatabasePing to return false
         jest
-          .spyOn(service as HealthService & { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing')
+          .spyOn(
+            service as HealthService & {
+              performDatabasePing: () => Promise<boolean>;
+            },
+            'performDatabasePing',
+          )
           .mockResolvedValueOnce(false);
 
         const result = await service.checkDatabaseHealth();
@@ -132,8 +137,7 @@ describe('HealthService', () => {
       it('should handle external service check errors', async () => {
         // Mock checkExternalService to throw error
         jest
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .spyOn(service as any, 'checkExternalService')
+          .spyOn(service as HealthService & { checkExternalService: (service: string) => Promise<unknown> }, 'checkExternalService')
           .mockRejectedValue(new Error('Service error'));
 
         const result = await service.checkExternalServices();
