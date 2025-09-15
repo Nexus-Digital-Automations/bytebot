@@ -445,7 +445,13 @@ export class MLAdaptiveLearningEngine {
    */
   public getAdaptiveLearningStats(): {
     readonly model: AdaptiveLearningModel | null;
-    readonly stats: typeof this.stats;
+    readonly stats: {
+      readonly totalAdaptations: number;
+      readonly totalFeedback: number;
+      readonly adaptiveAccuracy: number;
+      readonly driftDetections: number;
+      readonly averageAdaptationTime: number;
+    };
     readonly currentState: {
       readonly feedbackQueueSize: number;
       readonly onlineBatchQueueSize: number;
