@@ -530,6 +530,8 @@ const getStepStatusColor = (status: WorkflowStepStatus): string => {
       return 'text-orange-600 bg-orange-100';
     case WorkflowStepStatus.SKIPPED:
       return 'text-gray-600 bg-gray-100';
+    case WorkflowStepStatus.PENDING:
+      return 'text-gray-500 bg-gray-50';
     default:
       return 'text-gray-500 bg-gray-50';
   }
@@ -538,7 +540,7 @@ const getStepStatusColor = (status: WorkflowStepStatus): string => {
 /**
  * Get step status icon
  */
-const getStepStatusIcon = (status: WorkflowStepStatus) => {
+const getStepStatusIcon = (status: WorkflowStepStatus): typeof CheckmarkCircle02Icon => {
   switch (status) {
     case WorkflowStepStatus.COMPLETED:
       return CheckmarkCircle02Icon;
@@ -550,6 +552,8 @@ const getStepStatusIcon = (status: WorkflowStepStatus) => {
       return AlertTriangleIcon;
     case WorkflowStepStatus.SKIPPED:
       return FastForwardIcon;
+    case WorkflowStepStatus.PENDING:
+      return ClockIcon;
     default:
       return ClockIcon;
   }
@@ -640,7 +644,7 @@ const WorkflowStepComponent: React.FC<{
             {/* Participants */}
             {step.currentParticipants.length > 0 && (
               <div className="flex -space-x-1">
-                {step.currentParticipants.slice(0, 3).map((participant, index) => (
+                {step.currentParticipants.slice(0, 3).map((participant) => (
                   <div
                     key={participant.id}
                     className="w-6 h-6 bg-gray-300 rounded-full border-2 border-white flex items-center justify-center"
@@ -873,19 +877,19 @@ const MetricsDashboard: React.FC<{
  */
 export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisualizationProps> = ({
   validationRequest,
-  workflowId,
+  workflowId: _workflowId,
   config: userConfig = {},
   className,
   height = '600px',
   onStepClick,
   onParticipantClick,
-  onDecisionPointClick,
+  onDecisionPointClick: _onDecisionPointClick,
   onWorkflowComplete,
   onSLABreach,
-  onEscalationTriggered,
+  onEscalationTriggered: _onEscalationTriggered,
   customStepRenderer,
   customMetricsRenderer,
-  theme = 'light'
+  theme: _theme = 'light'
 }) => {
   // ===========================
   // STATE AND CONFIGURATION
@@ -1209,7 +1213,7 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
           {/* Timeline line */}
           <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-300" />
           
-          {workflow.participantTimeline.map((activity, index) => (
+          {workflow.participantTimeline.map((activity) => (
             <div key={activity.id} className="relative flex items-start gap-4 pb-4">
               {/* Timeline node */}
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center relative z-10">

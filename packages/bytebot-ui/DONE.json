@@ -1626,10 +1626,34 @@
       "updated_at": "2025-09-16T11:04:11.545Z",
       "archived_at": "2025-09-16T11:04:11.549Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T19:18:14.109Z",
+      "title": "Fix 37 ESLint errors in useConversationContext.ts hook",
+      "description": "Critical ESLint error fixing in React hook file - analyze and fix hook-specific violations, dependency arrays, state management, effect cleanup, types, unused variables, promise handling",
+      "category": "error",
+      "id": "error_1758050294109_k5h9hq8vwvo",
+      "assigned_agent": "dev_session_1758050224353_1_general_b9fdb6e6",
+      "started_at": "2025-09-16T19:22:32.773Z",
+      "claimed_by": "dev_session_1758050224353_1_general_b9fdb6e6",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758050224353_1_general_b9fdb6e6",
+          "role": "primary",
+          "assignedAt": "2025-09-16T19:22:32.773Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T19:57:28.414Z",
+      "updated_at": "2025-09-16T19:57:28.414Z",
+      "archived_at": "2025-09-16T19:57:28.418Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 43,
+  "total_completed": 44,
   "last_completion": "2025-09-11T08:31:32.558Z",
   "created_at": "2025-09-11T06:47:03.082Z",
-  "last_archived": "2025-09-16T11:04:11.549Z"
+  "last_archived": "2025-09-16T19:57:28.418Z"
 }

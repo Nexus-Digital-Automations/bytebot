@@ -565,7 +565,7 @@ class NavigationNLU {
   private findBestAction(
     intent: NavigationIntent,
     entity?: NavigationEntity,
-    parameters: Record<string, any> = {}
+    parameters: Record<string, unknown> = {}
   ): NavigationAction | undefined {
     let bestAction: NavigationAction | undefined;
     let bestScore = 0;
@@ -594,7 +594,7 @@ class NavigationNLU {
       // Score based on required parameters
       if (action.requiredParams) {
         const hasAllParams = action.requiredParams.every(param => 
-          parameters.hasOwnProperty(param)
+          Object.prototype.hasOwnProperty.call(parameters, param)
         );
         if (hasAllParams) {
           score += 0.3;
@@ -739,7 +739,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   
   // ===========================
   // NAVIGATION SETUP
@@ -774,7 +774,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   // ===========================
   
   const processCommand = useCallback(async (commandText: string) => {
-    if (!commandText.trim()) {return;}
+    if (!commandText.trim()) { return; }
     
     setIsProcessing(true);
     
@@ -794,7 +794,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         if (result.suggestedAction.handler) {
           await result.suggestedAction.handler();
         } else if (result.suggestedAction.path) {
-          router.push(result.suggestedAction.path);
+          await router.push(result.suggestedAction.path);
           onNavigate?.(result.suggestedAction.path, result.parameters);
         }
         
@@ -805,8 +805,8 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       } else {
         // Handle low confidence or no action found
         const errorMessage = result.confidence < 0.5 
-          ? `I'm not sure what you mean by \"${commandText}\". Could you try rephrasing?`
-          : `I couldn't find an action for \"${commandText}\".`;
+          ? `I'm not sure what you mean by "${commandText}". Could you try rephrasing?`
+          : `I couldn't find an action for "${commandText}".`;
         
         onError?.(errorMessage);
         logWarning('Command not understood', { command: commandText, confidence: result.confidence }, 'ChatFirstNavigation');
@@ -852,9 +852,13 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         e.preventDefault();
         if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
           setCommand(suggestions[selectedSuggestionIndex].text);
-          processCommand(suggestions[selectedSuggestionIndex].text);
+          processCommand(suggestions[selectedSuggestionIndex].text).catch((error) => {
+            console.error('Command processing failed:', error);
+          });
         } else {
-          processCommand(command);
+          processCommand(command).catch((error) => {
+            console.error('Command processing failed:', error);
+          });
         }
         break;
         
@@ -897,7 +901,9 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   
   const handleSuggestionClick = useCallback((suggestion: CommandSuggestion) => {
     setCommand(suggestion.text);
-    processCommand(suggestion.text);
+    processCommand(suggestion.text).catch((error) => {
+      console.error('Command processing failed:', error);
+    });
   }, [processCommand]);
   
   // ===========================
@@ -922,10 +928,10 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       logDebug('Voice recognition started', null, 'ChatFirstNavigation');
     };
     
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const results = Array.from(event.results);
       const transcript = results
-        .map((result: any) => result[0].transcript)
+        .map((result: SpeechRecognitionResult) => result[0].transcript)
         .join('');
       
       setVoiceState(prev => ({
@@ -936,11 +942,13 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       
       if (event.results[event.results.length - 1].isFinal) {
         setCommand(transcript);
-        processCommand(transcript);
+        processCommand(transcript).catch((error) => {
+          console.error('Command processing failed:', error);
+        });
       }
     };
     
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       logWarning('Voice recognition error', event.error, 'ChatFirstNavigation');
       setVoiceState(prev => ({
         ...prev,
@@ -974,7 +982,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   // ===========================
   
   useEffect(() => {
-    if (!enableKeyboard) {return;}
+    if (!enableKeyboard) { return; }
     
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       // Global command palette trigger
@@ -988,9 +996,13 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         if (action.shortcut && isKeyboardShortcut(e, action.shortcut)) {
           e.preventDefault();
           if (action.handler) {
-            action.handler();
+            action.handler().catch((error) => {
+              console.error('Action handler failed:', error);
+            });
           } else if (action.path) {
-            router.push(action.path);
+            router.push(action.path).catch((error) => {
+              console.error('Navigation failed:', error);
+            });
             onNavigate?.(action.path);
           }
         }
@@ -998,7 +1010,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
     };
     
     document.addEventListener('keydown', handleGlobalKeyDown);
-    return () => { document.removeEventListener('keydown', handleGlobalKeyDown); };
+    return (): void => { document.removeEventListener('keydown', handleGlobalKeyDown); };
   }, [enableKeyboard, allActions, router, onNavigate]);
   
   const isKeyboardShortcut = (e: KeyboardEvent, shortcut: string): boolean => {
@@ -1204,10 +1216,16 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
                     </Badge>
                   )}
                   
-                  <div className="w-2 h-2 rounded-full bg-gray-300" style={{
-                    backgroundColor: suggestion.confidence > 0.7 ? '#10b981' : 
-                                   suggestion.confidence > 0.4 ? '#f59e0b' : '#ef4444'
-                  }} />
+                  <div 
+                    className="w-2 h-2 rounded-full bg-gray-300" 
+                    style={{
+                      backgroundColor: (() => {
+                        if (suggestion.confidence > 0.7) {return '#10b981';}
+                        if (suggestion.confidence > 0.4) {return '#f59e0b';}
+                        return '#ef4444';
+                      })()
+                    }} 
+                  />
                 </div>
               </button>
             ))}
@@ -1218,7 +1236,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       {/* Screen reader help text */}
       <div id="command-help" className="sr-only">
         Use natural language to navigate and control the application. 
-        For example, say "go to dashboard" or "show my tasks". 
+        For example, say &quot;go to dashboard&quot; or &quot;show my tasks&quot;. 
         Press Tab to browse suggestions, Enter to execute, Escape to cancel.
       </div>
     </div>
