@@ -487,7 +487,7 @@ export class ParlantValidatedComputerUseService {
       
       case 'application':
         const appAction = params as ApplicationAction;
-        return `Control application: ${appAction.name} (${appAction.action})`;
+        return `Control application: ${appAction.application} (${appAction.action})`;
       
       default:
         return `Execute computer action: ${params.action}`;

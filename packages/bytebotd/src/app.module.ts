@@ -13,6 +13,7 @@ import { SecurityModule } from './common/security/security.module';
 import { AuthModule } from './auth/auth.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { MetricsService } from './metrics/metrics.service';
+import { ParlantModule } from './parlant/parlant.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { MetricsService } from './metrics/metrics.service';
     BytebotMcpModule,
     HealthModule, // Enterprise health monitoring with Kubernetes support
     MetricsModule, // Prometheus metrics collection
+    ParlantModule, // MAXIMUM IMPLEMENTATION - Parlant conversational AI validation for ALL functions
   ],
   controllers: [AppController],
   providers: [
