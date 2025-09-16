@@ -1,7 +1,6 @@
 import React from "react";
 import {
   MessageContentBlock,
-  MessageContentType,
   ToolResultContentBlock,
   isComputerToolUseContentBlock,
   isImageContentBlock,
@@ -49,28 +48,31 @@ export function MessageContent({
   isTakeOver = false,
 }: MessageContentProps): React.JSX.Element | null {
   // Filter content blocks and check if any visible content remains
-  const visibleBlocks = content.filter((block): block is MessageContentBlock => {
-    // Filter logic with type-safe operations
-    if (isValidToolResultContent(block)) {
-      // Safe access to content after successful type guard check
-      const hasImageContent = block.content.some((contentBlock: MessageContentBlock) =>
-        isImageContentBlock(contentBlock)
-      );
-      if (hasImageContent) {
-        return true;
+  const visibleBlocks = content.filter(
+    (block): block is MessageContentBlock => {
+      // Filter logic with type-safe operations
+      if (isValidToolResultContent(block)) {
+        // Safe access to content after successful type guard check
+        const hasImageContent = block.content.some(
+          (contentBlock: MessageContentBlock) =>
+            isImageContentBlock(contentBlock),
+        );
+        if (hasImageContent) {
+          return true;
+        }
       }
-    }
-    
-    if (
-      isToolResultContentBlock(block) &&
-      typeof block.tool_use_id === 'string' &&
-      block.tool_use_id !== "set_task_status" &&
-      block.is_error === false
-    ) {
-      return false;
-    }
-    return true;
-  });
+
+      if (
+        isToolResultContentBlock(block) &&
+        typeof block.tool_use_id === "string" &&
+        block.tool_use_id !== "set_task_status" &&
+        block.is_error === false
+      ) {
+        return false;
+      }
+      return true;
+    },
+  );
 
   // Skip rendering if no visible content
   if (!Array.isArray(visibleBlocks) || visibleBlocks.length === 0) {
@@ -106,15 +108,13 @@ export function MessageContent({
             <ComputerToolContent block={block} isTakeOver={isTakeOver} />
           )}
 
-          {isToolResultContentBlock(block) && 
-            typeof block.is_error === 'boolean' && 
-            block.is_error === true && (
-            <ErrorContent block={block} />
-          )}
+          {isToolResultContentBlock(block) &&
+            typeof block.is_error === "boolean" &&
+            block.is_error && <ErrorContent block={block} />}
 
           {isNonErrorToolResult(block) &&
             isValidToolResultContent(block) &&
-            typeof block.tool_use_id === 'string' &&
+            typeof block.tool_use_id === "string" &&
             block.tool_use_id === "set_task_status" &&
             block.content.length > 0 &&
             isTextContentBlock(block.content[0]) && (
