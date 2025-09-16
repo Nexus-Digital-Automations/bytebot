@@ -63,22 +63,22 @@ export interface ParlantIntegrationModuleOptions {
 export interface ParlantIntegrationModuleAsyncOptions {
   /** Configuration factory function */
   useFactory?: (
-    ...args: any[]
+    ...args: unknown[]
   ) =>
     | ParlantIntegrationModuleOptions
     | Promise<ParlantIntegrationModuleOptions>;
 
   /** Dependencies to inject into useFactory */
-  inject?: any[];
+  inject?: unknown[];
 
   /** Imports for configuration dependencies */
-  imports?: any[];
+  imports?: unknown[];
 
   /** Use existing provider */
-  useExisting?: any;
+  useExisting?: unknown;
 
   /** Use class for configuration */
-  useClass?: any;
+  useClass?: unknown;
 }
 
 /**
@@ -233,7 +233,7 @@ export class ParlantIntegrationModule {
     if (options.useFactory) {
       return {
         provide: "PARLANT_CONFIG",
-        useFactory: async (...args: any[]) => {
+        useFactory: async (...args: unknown[]) => {
           const moduleOptions = await options.useFactory!(...args);
           return this.createConfiguration(moduleOptions);
         },
@@ -244,7 +244,7 @@ export class ParlantIntegrationModule {
     if (options.useClass) {
       return {
         provide: "PARLANT_CONFIG",
-        useFactory: async (configService: any) => {
+        useFactory: async (configService: unknown) => {
           const moduleOptions = await configService.createParlantConfig();
           return this.createConfiguration(moduleOptions);
         },
@@ -255,7 +255,7 @@ export class ParlantIntegrationModule {
     if (options.useExisting) {
       return {
         provide: "PARLANT_CONFIG",
-        useFactory: async (configService: any) => {
+        useFactory: async (configService: unknown) => {
           const moduleOptions = await configService.createParlantConfig();
           return this.createConfiguration(moduleOptions);
         },
@@ -535,9 +535,9 @@ export function ParlantEnabled(options?: {
   securityLevel?: string;
   cacheResponses?: boolean;
 }) {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+  return function <T extends { new (...args: unknown[]): Record<string, unknown> }>(constructor: T) {
     return class extends constructor {
-      constructor(...args: any[]) {
+      constructor(...args: unknown[]) {
         super(...args);
 
         // Mark as Parlant-enabled for automatic function wrapping

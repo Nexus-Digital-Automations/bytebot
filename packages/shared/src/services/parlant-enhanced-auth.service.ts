@@ -1180,7 +1180,7 @@ export class ParlantEnhancedAuthService {
   }
 
   private mapRecommendationsToActions(
-    recommendations: any[],
+    recommendations: Array<Record<string, unknown>>,
   ): RequiredAction[] {
     // Implementation would map Parlant recommendations to required actions
     return [];

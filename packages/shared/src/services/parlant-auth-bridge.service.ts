@@ -258,7 +258,7 @@ export class ParlantAuthBridgeService
    */
   async authenticateWithJWT(
     jwtToken: string,
-    requestMetadata?: any,
+    requestMetadata?: Record<string, unknown>,
   ): Promise<ParlantUserContext> {
     const startTime = Date.now();
     this.stats.totalAuthentications++;
@@ -361,7 +361,7 @@ export class ParlantAuthBridgeService
     userId: string,
     roles: string[],
     permissions: string[],
-    metadata?: any,
+    metadata?: Record<string, unknown>,
   ): Promise<{ sessionId: string; userId: string }> {
     try {
       const response = await this.parlantClient.post("/auth/sessions", {
@@ -671,7 +671,7 @@ export class ParlantAuthBridgeService
 
   private createUserContext(
     sessionMapping: SessionMapping,
-    requestMetadata?: any,
+    requestMetadata?: Record<string, unknown>,
   ): ParlantUserContext {
     return {
       userId: sessionMapping.aigentUserId,
@@ -765,7 +765,7 @@ export class ParlantAuthBridgeService
     }
   }
 
-  private async syncUserProfile(userId: string, basicInfo: any): Promise<void> {
+  private async syncUserProfile(userId: string, basicInfo: Record<string, unknown>): Promise<void> {
     const existingProfile = this.userProfiles.get(userId);
 
     const profile: SynchronizedUserProfile = {

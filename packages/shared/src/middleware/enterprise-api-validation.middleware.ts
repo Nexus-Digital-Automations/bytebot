@@ -30,8 +30,8 @@
 import {
   Injectable,
   NestMiddleware,
-  HttpException,
-  HttpStatus,
+  _HttpException,
+  _HttpStatus,
   Logger,
   Inject,
 } from "@nestjs/common";
@@ -42,16 +42,16 @@ import { Cache } from "cache-manager";
 
 // Import Parlant integration types and services
 import {
-  ParlantValidationRequest,
-  ParlantValidationResponse,
+  _ParlantValidationRequest,
+  _ParlantValidationResponse,
   ParlantIntegrationError,
-  ParlantValidationError,
+  _ParlantValidationError,
   ParlantTimeoutError,
   SecurityLevel,
-  ParlantUserContext,
-  ParlantExecutionContext,
-  ParlantValidationMetadata,
-  ParlantRiskAssessment,
+  _ParlantUserContext,
+  _ParlantExecutionContext,
+  _ParlantValidationMetadata,
+  _ParlantRiskAssessment,
   ParlantAuditEntry,
   ParlantHealthStatus,
 } from "../types/parlant-integration.types";

@@ -110,7 +110,7 @@ export class ParlantCacheService
 
   // Multi-level cache storage
   private memoryCache = new Map<string, ParlantCacheEntry>();
-  private redisClient: any = null; // Redis client will be injected
+  private redisClient: unknown = null; // Redis client will be injected
   private persistentCachePath: string;
 
   // Cache metadata and monitoring
@@ -838,9 +838,9 @@ export class ParlantCacheService
       .digest("hex");
   }
 
-  private sanitizeParameters(params: Record<string, any>): any {
+  private sanitizeParameters(params: Record<string, unknown>): unknown {
     const sensitiveKeys = ["password", "token", "secret", "key", "auth"];
-    const sanitized: any = {};
+    const sanitized: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(params)) {
       if (
@@ -889,7 +889,7 @@ export class ParlantCacheService
     return Math.min(priority, 10);
   }
 
-  private estimateSize(data: any): number {
+  private estimateSize(data: unknown): number {
     return JSON.stringify(data).length;
   }
 

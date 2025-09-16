@@ -22,7 +22,7 @@ import {
 import { Reflector } from "@nestjs/core";
 import { Observable, from, throwError } from "rxjs";
 import { switchMap, catchError, tap } from "rxjs/operators";
-import { Request, _Response } from "express";
+import { Request } from "express";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
@@ -42,19 +42,12 @@ import {
   SessionContext,
   ValidationParameters,
   ParlantConversationContext,
-  _PerformanceMetrics,
-  _ErrorSeverity,
   ParlantAuditEntry,
   AuditEntryType,
   ActorType,
   AuditAction,
 } from "../types/parlant.types";
 import {
-  _PARLANT_VALIDATION_KEY,
-  _PARLANT_CONVERSATION_KEY,
-  _PARLANT_SECURITY_KEY,
-  _PARLANT_APPROVAL_KEY,
-  _PARLANT_RULES_KEY,
   getParlantValidationMetadata,
   getConversationContextMetadata,
   getSecurityClassificationMetadata,
@@ -97,7 +90,10 @@ export interface ParlantValidationInterceptorConfig {
   skipEnvironments: string[];
 
   /** Custom error handler */
-  customErrorHandler?: (_error: any, _context: ExecutionContext) => any;
+  customErrorHandler?: (
+    _error: Error | unknown,
+    _context: ExecutionContext,
+  ) => unknown;
 }
 
 /**
@@ -147,7 +143,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
     });
   }
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const startTime = performance.now();
 
     // Skip if interceptor is disabled
@@ -279,7 +275,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
   private async performValidation(
     context: ExecutionContext,
     operationId: string,
-    metadata: any,
+    metadata: Record<string, unknown>,
   ): Promise<ParlantValidationResponse> {
     try {
       // Create validation request
@@ -357,7 +353,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
   private createValidationRequest(
     context: ExecutionContext,
     operationId: string,
-    metadata: any,
+    metadata: Record<string, unknown>,
   ): ParlantValidationRequest {
     const handler = context.getHandler();
     const target = context.getClass();
@@ -421,7 +417,10 @@ export class ParlantValidationInterceptor implements NestInterceptor {
   /**
    * Create source location information
    */
-  private createSourceLocation(target: any, handler: Function): SourceLocation {
+  private createSourceLocation(
+    target: unknown,
+    handler: (...args: unknown[]) => unknown,
+  ): SourceLocation {
     return {
       filePath: target.name + ".ts", // Simplified
       methodName: handler.name,
@@ -474,25 +473,25 @@ export class ParlantValidationInterceptor implements NestInterceptor {
   /**
    * Extract method arguments safely
    */
-  private extractMethodArguments(args: any[]): Record<string, unknown> {
-    const arguments: Record<string, unknown> = {};
+  private extractMethodArguments(args: unknown[]): Record<string, unknown> {
+    const methodArguments: Record<string, unknown> = {};
 
     // Skip first 3 args which are typically request, response, next in NestJS
     const methodArgs = args.slice(3);
 
     methodArgs.forEach((arg, index) => {
       if (arg !== null && arg !== undefined) {
-        arguments[`arg${index}`] = this.sanitizeArgument(arg);
+        methodArguments[`arg${index}`] = this.sanitizeArgument(arg);
       }
     });
 
-    return arguments;
+    return methodArguments;
   }
 
   /**
    * Sanitize argument for logging/validation
    */
-  private sanitizeArgument(arg: any): any {
+  private sanitizeArgument(arg: unknown): unknown {
     if (typeof arg !== "object" || arg === null) {
       return arg;
     }
@@ -525,7 +524,9 @@ export class ParlantValidationInterceptor implements NestInterceptor {
   /**
    * Sanitize request headers
    */
-  private sanitizeHeaders(headers: any): Record<string, string> {
+  private sanitizeHeaders(
+    headers: Record<string, unknown>,
+  ): Record<string, string> {
     const sanitized: Record<string, string> = {};
     const sensitiveHeaders = ["authorization", "cookie", "x-api-key"];
 
@@ -731,7 +732,7 @@ export class ParlantValidationDenialError extends Error {
 export class ParlantServiceUnavailableError extends Error {
   constructor(
     message: string,
-    public readonly _originalError?: any,
+    public readonly _originalError?: Error | unknown,
   ) {
     super(message);
     this.name = "ParlantServiceUnavailableError";

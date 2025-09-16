@@ -112,9 +112,10 @@ export interface EnhancedAuthenticationState {
 /**
  * Authentication methods - Exported for external module use
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export enum AuthMethod {
   JWT_TOKEN = "jwt_token",
-  API_KEY = "api_key", 
+  API_KEY = "api_key",
   CERTIFICATE = "certificate",
   SSO = "sso",
   CONVERSATIONAL = "conversational",
@@ -187,6 +188,7 @@ export interface SecurityContext {
 /**
  * Threat levels - Exported for external module use
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export enum ThreatLevel {
   NONE = "none",
   LOW = "low",
@@ -216,6 +218,7 @@ export interface SecurityMeasure {
 /**
  * Security measure types - Exported for external module use
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export enum SecurityMeasureType {
   RATE_LIMITING = "rate_limiting",
   IP_FILTERING = "ip_filtering",
@@ -266,6 +269,7 @@ export interface RequestRiskFactor {
 /**
  * Request risk types - Exported for external module use
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export enum RequestRiskType {
   UNUSUAL_IP = "unusual_ip",
   SUSPICIOUS_USER_AGENT = "suspicious_user_agent",
@@ -315,8 +319,8 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly parlantService: ParlantIntegrationService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly _parlantService: ParlantIntegrationService,
+    @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
   ) {
     // Load configuration
     this.riskThresholds = {
@@ -1237,15 +1241,15 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   }
 
   private async cacheAuthenticationDecision(
-    req: ParlantAuthenticatedRequest,
-    result: ConversationalAuthResult,
+    _req: ParlantAuthenticatedRequest,
+    _result: ConversationalAuthResult,
   ): Promise<void> {
     // Implementation would cache authentication decisions
   }
 
   private async applyCriticalSecurityMeasures(
-    req: ParlantAuthenticatedRequest,
-    res: Response,
+    _req: ParlantAuthenticatedRequest,
+    _res: Response,
     operationId: string,
   ): Promise<void> {
     // Implementation would apply critical security measures
@@ -1253,8 +1257,8 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   }
 
   private async applyHighSecurityMeasures(
-    req: ParlantAuthenticatedRequest,
-    res: Response,
+    _req: ParlantAuthenticatedRequest,
+    _res: Response,
     operationId: string,
   ): Promise<void> {
     // Implementation would apply high security measures
@@ -1262,8 +1266,8 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   }
 
   private async applyModerateSecurityMeasures(
-    req: ParlantAuthenticatedRequest,
-    res: Response,
+    _req: ParlantAuthenticatedRequest,
+    _res: Response,
     operationId: string,
   ): Promise<void> {
     // Implementation would apply moderate security measures

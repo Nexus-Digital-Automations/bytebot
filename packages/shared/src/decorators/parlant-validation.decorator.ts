@@ -241,11 +241,11 @@ export function ParlantValidatedClass(classOptions: {
   defaultSecurityLevel?: SecurityLevel;
   enableValidation?: boolean;
 }) {
-  return function <T extends { new (..._args: any[]): object }>(
+  return function <T extends new (..._args: unknown[]) => object>(
     constructor: T,
   ) {
     return class extends constructor {
-      constructor(..._args: any[]) {
+      constructor(..._args: ConstructorParameters<T>) {
         super(..._args);
 
         if (classOptions.enableValidation !== false) {
@@ -618,7 +618,9 @@ function extractParameterSchemas(
 /**
  * Extract return schema for validation
  */
-function extractReturnSchema(_method: GenericFunction): Record<string, unknown> {
+function extractReturnSchema(
+  _method: GenericFunction,
+): Record<string, unknown> {
   // This would typically use reflection metadata
   return { type: "unknown" };
 }

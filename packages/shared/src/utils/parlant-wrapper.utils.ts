@@ -172,7 +172,7 @@ export interface WrapperContext {
  * );
  * ```
  */
-export function createParlantWrapper<T extends (...args: unknown[]) => unknown>(
+export function createParlantWrapper<T extends (..._args: unknown[]) => unknown>(
   originalFunction: T,
   config: FunctionWrapperConfig,
   parlantService: unknown, // ParlantIntegrationService type would be imported
@@ -283,7 +283,7 @@ export function createParlantWrapper<T extends (...args: unknown[]) => unknown>(
  * @param parlantService - Parlant integration service
  * @returns Wrapped function with decorator-based configuration
  */
-export function wrapFunctionWithMetadata<T extends (...args: unknown[]) => unknown>(
+export function wrapFunctionWithMetadata<T extends (..._args: unknown[]) => unknown>(
   originalFunction: T,
   target: unknown,
   propertyKey: string,
@@ -431,7 +431,7 @@ function createExecutionContext(): ExecutionContext {
 /**
  * Create validation request for function execution
  */
-function createValidationRequest<T extends (...args: unknown[]) => unknown>(
+function createValidationRequest<T extends (..._args: unknown[]) => unknown>(
   originalFunction: T,
   args: Parameters<T>,
   context: WrapperContext,
@@ -589,7 +589,7 @@ function generateConversationId(): string {
 async function logValidationRejection(
   error: ParlantValidationRejection,
   context: WrapperContext,
-  parlantService: unknown,
+  _parlantService: unknown,
 ): Promise<void> {
   try {
     // Create audit entry for rejection
@@ -626,9 +626,9 @@ async function logValidationRejection(
 export class ParlantValidationRejection extends Error {
   constructor(
     message: string,
-    public readonly decision: ValidationDecision,
-    public readonly confidence: number,
-    public readonly validationResponse: ParlantValidationResponse,
+    public readonly _decision: ValidationDecision,
+    public readonly _confidence: number,
+    public readonly _validationResponse: ParlantValidationResponse,
   ) {
     super(message);
     this.name = "ParlantValidationRejection";
@@ -642,8 +642,8 @@ export class ParlantWrapperBuilder<T extends (...args: unknown[]) => unknown> {
   private config: Partial<FunctionWrapperConfig> = {};
 
   constructor(
-    private originalFunction: T,
-    private parlantService: unknown,
+    private _originalFunction: T,
+    private _parlantService: unknown,
   ) {}
 
   /**

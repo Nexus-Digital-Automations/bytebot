@@ -45,9 +45,9 @@ import {
 } from "../types/parlant-integration.types";
 
 // Import Parlant decorators and utilities
-import { ParlantValidation } from "../decorators/parlant-validation.decorator";
+import { ParlantValidated } from "../decorators/parlant-validation.decorator";
 
-import { ParlantWrapperUtils } from "./parlant-wrapper.utils";
+import { parlantWrapper } from "./parlant-wrapper.utils";
 
 // ===== PERFORMANCE OPTIMIZATION TYPES =====
 
@@ -815,7 +815,7 @@ export class PerformanceOptimizerUtils {
 
   constructor(
     private readonly _configService: ConfigService,
-    private readonly _parlantWrapperUtils: ParlantWrapperUtils,
+    private readonly _parlantWrapper: typeof parlantWrapper,
     @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
   ) {
     // Load configuration
@@ -847,10 +847,10 @@ export class PerformanceOptimizerUtils {
   /**
    * Initialize comprehensive performance optimization
    */
-  @ParlantValidation({
+  @ParlantValidated({
     description:
       "Initialize comprehensive performance optimization with Parlant conversational enhancement",
-    securityLevel: SecurityLevel.MEDIUM,
+    securityLevel: SecurityLevel._MEDIUM,
     cacheable: false,
   })
   private async initializePerformanceOptimization(): Promise<void> {
@@ -901,10 +901,10 @@ export class PerformanceOptimizerUtils {
   /**
    * Optimize API validation performance with Parlant enhancement
    */
-  @ParlantValidation({
+  @ParlantValidated({
     description:
       "Optimize API validation performance with conversational AI enhancement and intelligent caching",
-    securityLevel: SecurityLevel.HIGH,
+    securityLevel: SecurityLevel._HIGH,
     cacheable: true,
     cacheTtl: 300000,
   })
@@ -1028,10 +1028,10 @@ export class PerformanceOptimizerUtils {
   /**
    * Get real-time performance metrics
    */
-  @ParlantValidation({
+  @ParlantValidated({
     description:
       "Get comprehensive real-time performance metrics with conversation correlation",
-    securityLevel: SecurityLevel.MEDIUM,
+    securityLevel: SecurityLevel._MEDIUM,
     cacheable: true,
     cacheTtl: 10000, // 10 seconds
   })

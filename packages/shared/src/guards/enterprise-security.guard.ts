@@ -805,8 +805,8 @@ export class EnterpriseSecurityGuard implements CanActivate {
       request.threatAssessment = threatAssessment;
 
       if (
-        threatAssessment.threatLevel === ThreatLevel.CRITICAL ||
-        threatAssessment.threatLevel === ThreatLevel.IMMINENT
+        threatAssessment.threatLevel === ThreatLevel._CRITICAL ||
+        threatAssessment.threatLevel === ThreatLevel._IMMINENT
       ) {
         this.logSecurityEvent(
           "CRITICAL_THREAT_DETECTED",

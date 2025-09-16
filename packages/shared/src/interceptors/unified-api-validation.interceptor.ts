@@ -75,10 +75,10 @@ import { ParlantWrapperUtils } from "../utils/parlant-wrapper.utils";
  * API type enumeration for unified handling
  */
 export enum ApiType {
-  REST = "rest",
-  GRAPHQL = "graphql",
-  WEBSOCKET = "websocket",
-  GRPC = "grpc",
+  _REST = "rest",
+  _GRAPHQL = "graphql",
+  _WEBSOCKET = "websocket",
+  _GRPC = "grpc",
 }
 
 /**
@@ -143,12 +143,12 @@ export interface ApiOperation {
  * Operation types
  */
 export enum OperationType {
-  QUERY = "query",
-  MUTATION = "mutation",
-  SUBSCRIPTION = "subscription",
-  HTTP_GET = "http_get",
-  HTTP_POST = "http_post",
-  HTTP_PUT = "http_put",
+  _QUERY = "query",
+  _MUTATION = "mutation",
+  _SUBSCRIPTION = "subscription",
+  _HTTP_GET = "http_get",
+  _HTTP_POST = "http_post",
+  _HTTP_PUT = "http_put",
   HTTP_DELETE = "http_delete",
   HTTP_PATCH = "http_patch",
   HTTP_OPTIONS = "http_options",

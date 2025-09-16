@@ -373,7 +373,7 @@ export function ApprovalWorkflow(config: ApprovalWorkflowConfig) {
  * ```
  */
 export function ParlantWrapper(config: Partial<ParlantWrapperConfig>) {
-  return function (target: new (..._args: any[]) => unknown) {
+  return function (target: new (..._args: unknown[]) => unknown) {
     SetMetadata(PARLANT_WRAPPER_CONFIG_KEY, config)(target);
   };
 }
