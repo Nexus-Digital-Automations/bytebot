@@ -13,8 +13,13 @@ import {
  */
 function safeIsImageContentBlock(contentItem: MessageContentBlock): boolean {
   try {
-    const result = isImageContentBlock(contentItem);
-    return Boolean(result);
+    // Safe call with explicit type checking
+    if (contentItem !== null && typeof contentItem === "object") {
+      // Type-safe call with explicit boolean conversion
+      const checkResult: unknown = isImageContentBlock(contentItem);
+      return Boolean(checkResult);
+    }
+    return false;
   } catch {
     return false;
   }
@@ -99,8 +104,17 @@ function getValidToolResultContent(
     if ("content" in validBlock && Array.isArray(validBlock.content)) {
       // Ensure proper typing by validating each item
       const contentArray = validBlock.content as unknown[];
-      if (contentArray.every((item) => item && typeof item === "object")) {
-        return contentArray as MessageContentBlock[];
+      if (
+        contentArray.every((item) => Boolean(item) && typeof item === "object")
+      ) {
+        // Safe type assertion with explicit return type
+        const typedArray: MessageContentBlock[] = [];
+        contentArray.forEach((item) => {
+          if (Boolean(item) && typeof item === "object") {
+            typedArray.push(item as MessageContentBlock);
+          }
+        });
+        return typedArray;
       }
     }
   } catch {
@@ -127,8 +141,17 @@ function getNonErrorToolResultContent(
     if ("content" in validBlock && Array.isArray(validBlock.content)) {
       // Ensure proper typing by validating each item
       const contentArray = validBlock.content as unknown[];
-      if (contentArray.every((item) => item && typeof item === "object")) {
-        return contentArray as MessageContentBlock[];
+      if (
+        contentArray.every((item) => Boolean(item) && typeof item === "object")
+      ) {
+        // Safe type assertion with explicit return type
+        const typedArray: MessageContentBlock[] = [];
+        contentArray.forEach((item) => {
+          if (Boolean(item) && typeof item === "object") {
+            typedArray.push(item as MessageContentBlock);
+          }
+        });
+        return typedArray;
       }
     }
   } catch {
@@ -193,7 +216,7 @@ export function AssistantMessage({
                         contentItem: MessageContentBlock,
                         contentIndex: number,
                       ) => {
-                        if (isImageContentBlock(contentItem)) {
+                        if (safeIsImageContentBlock(contentItem)) {
                           markers.push(
                             <div
                               key={`${blockIndex}-${contentIndex}`}
