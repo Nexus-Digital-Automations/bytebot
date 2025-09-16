@@ -31,34 +31,23 @@
  * @author Agent #6 - Enterprise API Layer Parlant Integration
  */
 
-import {
-  Injectable,
-  Logger,
-  Inject,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { Observable, Subject, BehaviorSubject } from 'rxjs';
+import { Injectable, Logger, Inject } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
+import { Observable, Subject, BehaviorSubject } from "rxjs";
 
 // Import Parlant integration types and services
 import {
-  ParlantValidationRequest,
-  ParlantValidationResponse,
   ParlantIntegrationError,
   SecurityLevel,
   ParlantUserContext,
-  ParlantExecutionContext,
-  ParlantValidationMetadata,
-} from '../types/parlant-integration.types';
+} from "../types/parlant-integration.types";
 
 // Import Parlant decorators and utilities
-import {
-  ParlantValidation,
-  ParlantDecoratorOptions,
-} from '../decorators/parlant-validation.decorator';
+import { ParlantValidation } from "../decorators/parlant-validation.decorator";
 
-import { ParlantWrapperUtils } from './parlant-wrapper.utils';
+import { ParlantWrapperUtils } from "./parlant-wrapper.utils";
 
 // ===== PERFORMANCE OPTIMIZATION TYPES =====
 
@@ -68,31 +57,31 @@ import { ParlantWrapperUtils } from './parlant-wrapper.utils';
 export interface PerformanceOptimizationConfig {
   /** Enable performance optimization */
   enabled: boolean;
-  
+
   /** Performance targets */
   targets: PerformanceTargets;
-  
+
   /** Caching configuration */
   caching: CachingConfiguration;
-  
+
   /** Circuit breaker configuration */
   circuitBreaker: CircuitBreakerConfiguration;
-  
+
   /** Memory management configuration */
   memoryManagement: MemoryManagementConfiguration;
-  
+
   /** CPU optimization configuration */
   cpuOptimization: CpuOptimizationConfiguration;
-  
+
   /** Network optimization configuration */
   networkOptimization: NetworkOptimizationConfiguration;
-  
+
   /** Database optimization configuration */
   databaseOptimization: DatabaseOptimizationConfiguration;
-  
+
   /** Monitoring configuration */
   monitoring: PerformanceMonitoringConfiguration;
-  
+
   /** Auto-scaling configuration */
   autoScaling: AutoScalingConfiguration;
 }
@@ -103,31 +92,31 @@ export interface PerformanceOptimizationConfig {
 export interface PerformanceTargets {
   /** API validation time target (ms) */
   apiValidationTime: number;
-  
+
   /** Security assessment time target (ms) */
   securityAssessmentTime: number;
-  
+
   /** Compliance validation time target (ms) */
   complianceValidationTime: number;
-  
+
   /** Parlant validation time target (ms) */
   parlantValidationTime: number;
-  
+
   /** Cache hit rate target (percentage) */
   cacheHitRate: number;
-  
+
   /** Memory utilization target (percentage) */
   memoryUtilization: number;
-  
+
   /** CPU utilization target (percentage) */
   cpuUtilization: number;
-  
+
   /** Network latency target (ms) */
   networkLatency: number;
-  
+
   /** Database query time target (ms) */
   databaseQueryTime: number;
-  
+
   /** Overall response time target (ms) */
   overallResponseTime: number;
 }
@@ -138,28 +127,28 @@ export interface PerformanceTargets {
 export interface CachingConfiguration {
   /** Enable intelligent caching */
   enabled: boolean;
-  
+
   /** Cache type */
   type: CacheType;
-  
+
   /** Default TTL (ms) */
   defaultTtl: number;
-  
+
   /** Maximum cache size (MB) */
   maxSize: number;
-  
+
   /** Cache eviction policy */
   evictionPolicy: CacheEvictionPolicy;
-  
+
   /** Enable conversation context caching */
   conversationContextCaching: boolean;
-  
+
   /** Cache warming strategies */
   warmingStrategies: CacheWarmingStrategy[];
-  
+
   /** Cache compression */
   compression: CacheCompressionConfig;
-  
+
   /** Distributed caching */
   distributedCaching: DistributedCachingConfig;
 }
@@ -168,33 +157,33 @@ export interface CachingConfiguration {
  * Cache types
  */
 export enum CacheType {
-  MEMORY = 'memory',
-  REDIS = 'redis',
-  MEMCACHED = 'memcached',
-  HYBRID = 'hybrid', // Memory + Redis
-  DISTRIBUTED = 'distributed',
+  _MEMORY = "memory",
+  _REDIS = "redis",
+  _MEMCACHED = "memcached",
+  HYBRID = "hybrid", // Memory + Redis
+  _DISTRIBUTED = "distributed",
 }
 
 /**
  * Cache eviction policies
  */
 export enum CacheEvictionPolicy {
-  LRU = 'lru', // Least Recently Used
-  LFU = 'lfu', // Least Frequently Used
-  FIFO = 'fifo', // First In First Out
-  TTL = 'ttl', // Time To Live
-  ADAPTIVE = 'adaptive', // AI-powered adaptive eviction
+  _LRU = "lru", // Least Recently Used
+  _LFU = "lfu", // Least Frequently Used
+  _FIFO = "fifo", // First In First Out
+  _TTL = "ttl", // Time To Live
+  ADAPTIVE = "adaptive", // AI-powered adaptive eviction
 }
 
 /**
  * Cache warming strategies
  */
 export enum CacheWarmingStrategy {
-  PRELOAD = 'preload', // Preload common data
-  PREDICTIVE = 'predictive', // AI-predicted cache warming
-  SCHEDULED = 'scheduled', // Scheduled cache warming
-  REACTIVE = 'reactive', // React to cache misses
-  CONVERSATION_BASED = 'conversation_based', // Based on conversation patterns
+  _PRELOAD = "preload", // Preload common data
+  PREDICTIVE = "predictive", // AI-predicted cache warming
+  _SCHEDULED = "scheduled", // Scheduled cache warming
+  _REACTIVE = "reactive", // React to cache misses
+  CONVERSATION_BASED = "conversation_based", // Based on conversation patterns
 }
 
 /**
@@ -203,22 +192,22 @@ export enum CacheWarmingStrategy {
 export interface CircuitBreakerConfiguration {
   /** Enable circuit breakers */
   enabled: boolean;
-  
+
   /** Failure threshold */
   failureThreshold: number;
-  
+
   /** Recovery timeout (ms) */
   recoveryTimeout: number;
-  
+
   /** Half-open retry count */
   halfOpenRetryCount: number;
-  
+
   /** Enable conversational recovery */
   conversationalRecovery: boolean;
-  
+
   /** Custom recovery strategies */
   customRecoveryStrategies: RecoveryStrategy[];
-  
+
   /** Performance-based thresholds */
   performanceThresholds: PerformanceThreshold[];
 }
@@ -229,19 +218,19 @@ export interface CircuitBreakerConfiguration {
 export interface MemoryManagementConfiguration {
   /** Enable memory optimization */
   enabled: boolean;
-  
+
   /** Memory usage threshold (percentage) */
   usageThreshold: number;
-  
+
   /** Garbage collection optimization */
   gcOptimization: GcOptimizationConfig;
-  
+
   /** Object pooling */
   objectPooling: ObjectPoolingConfig;
-  
+
   /** Memory leak detection */
   leakDetection: MemoryLeakDetectionConfig;
-  
+
   /** Memory profiling */
   profiling: MemoryProfilingConfig;
 }
@@ -252,19 +241,19 @@ export interface MemoryManagementConfiguration {
 export interface CpuOptimizationConfiguration {
   /** Enable CPU optimization */
   enabled: boolean;
-  
+
   /** CPU usage threshold (percentage) */
   usageThreshold: number;
-  
+
   /** Thread pool optimization */
   threadPoolOptimization: ThreadPoolOptimizationConfig;
-  
+
   /** Task scheduling optimization */
   taskScheduling: TaskSchedulingConfig;
-  
+
   /** CPU affinity settings */
   cpuAffinity: CpuAffinityConfig;
-  
+
   /** Performance profiling */
   profiling: CpuProfilingConfig;
 }
@@ -275,19 +264,19 @@ export interface CpuOptimizationConfiguration {
 export interface NetworkOptimizationConfiguration {
   /** Enable network optimization */
   enabled: boolean;
-  
+
   /** Connection pooling */
   connectionPooling: ConnectionPoolingConfig;
-  
+
   /** Request batching */
   requestBatching: RequestBatchingConfig;
-  
+
   /** Compression settings */
   compression: NetworkCompressionConfig;
-  
+
   /** Keep-alive settings */
   keepAlive: KeepAliveConfig;
-  
+
   /** Load balancing */
   loadBalancing: LoadBalancingConfig;
 }
@@ -298,19 +287,19 @@ export interface NetworkOptimizationConfiguration {
 export interface DatabaseOptimizationConfiguration {
   /** Enable database optimization */
   enabled: boolean;
-  
+
   /** Query optimization */
   queryOptimization: QueryOptimizationConfig;
-  
+
   /** Connection pooling */
   connectionPooling: DatabaseConnectionPoolingConfig;
-  
+
   /** Index optimization */
   indexOptimization: IndexOptimizationConfig;
-  
+
   /** Query caching */
   queryCaching: QueryCachingConfig;
-  
+
   /** Performance monitoring */
   performanceMonitoring: DatabasePerformanceMonitoringConfig;
 }
@@ -321,22 +310,22 @@ export interface DatabaseOptimizationConfiguration {
 export interface PerformanceMonitoringConfiguration {
   /** Enable performance monitoring */
   enabled: boolean;
-  
+
   /** Metrics collection interval (ms) */
   metricsInterval: number;
-  
+
   /** Enable real-time monitoring */
   realTimeMonitoring: boolean;
-  
+
   /** Enable conversation correlation */
   conversationCorrelation: boolean;
-  
+
   /** Alerting configuration */
   alerting: PerformanceAlertingConfig;
-  
+
   /** Reporting configuration */
   reporting: PerformanceReportingConfig;
-  
+
   /** Analytics configuration */
   analytics: PerformanceAnalyticsConfig;
 }
@@ -347,16 +336,16 @@ export interface PerformanceMonitoringConfiguration {
 export interface AutoScalingConfiguration {
   /** Enable auto-scaling */
   enabled: boolean;
-  
+
   /** Scaling policies */
   policies: ScalingPolicy[];
-  
+
   /** Conversation-based scaling */
   conversationBasedScaling: ConversationBasedScalingConfig;
-  
+
   /** Resource allocation */
   resourceAllocation: ResourceAllocationConfig;
-  
+
   /** Prediction models */
   predictionModels: ScalingPredictionModel[];
 }
@@ -367,28 +356,28 @@ export interface AutoScalingConfiguration {
 export interface PerformanceMetrics {
   /** Metrics timestamp */
   timestamp: Date;
-  
+
   /** API performance metrics */
   api: ApiPerformanceMetrics;
-  
+
   /** System performance metrics */
   system: SystemPerformanceMetrics;
-  
+
   /** Cache performance metrics */
   cache: CachePerformanceMetrics;
-  
+
   /** Database performance metrics */
   database: DatabasePerformanceMetrics;
-  
+
   /** Network performance metrics */
   network: NetworkPerformanceMetrics;
-  
+
   /** Conversation performance metrics */
   conversation: ConversationPerformanceMetrics;
-  
+
   /** Overall performance score */
   overallScore: number;
-  
+
   /** Performance grade */
   grade: PerformanceGrade;
 }
@@ -399,25 +388,25 @@ export interface PerformanceMetrics {
 export interface ApiPerformanceMetrics {
   /** Average response time (ms) */
   averageResponseTime: number;
-  
+
   /** P50 response time (ms) */
   p50ResponseTime: number;
-  
+
   /** P95 response time (ms) */
   p95ResponseTime: number;
-  
+
   /** P99 response time (ms) */
   p99ResponseTime: number;
-  
+
   /** Request throughput (requests/second) */
   throughput: number;
-  
+
   /** Error rate (percentage) */
   errorRate: number;
-  
+
   /** Validation performance */
   validation: ValidationPerformanceMetrics;
-  
+
   /** Conversation performance */
   conversationPerformance: ConversationApiPerformanceMetrics;
 }
@@ -428,19 +417,19 @@ export interface ApiPerformanceMetrics {
 export interface ValidationPerformanceMetrics {
   /** Security validation time (ms) */
   securityValidationTime: number;
-  
+
   /** Compliance validation time (ms) */
   complianceValidationTime: number;
-  
+
   /** Parlant validation time (ms) */
   parlantValidationTime: number;
-  
+
   /** Total validation time (ms) */
   totalValidationTime: number;
-  
+
   /** Validation success rate (percentage) */
   successRate: number;
-  
+
   /** Cache hit rate for validations (percentage) */
   cacheHitRate: number;
 }
@@ -451,22 +440,22 @@ export interface ValidationPerformanceMetrics {
 export interface SystemPerformanceMetrics {
   /** CPU utilization (percentage) */
   cpuUtilization: number;
-  
+
   /** Memory usage (MB) */
   memoryUsage: number;
-  
+
   /** Memory utilization (percentage) */
   memoryUtilization: number;
-  
+
   /** Disk I/O (MB/s) */
   diskIo: number;
-  
+
   /** Network I/O (MB/s) */
   networkIo: number;
-  
+
   /** Garbage collection metrics */
   garbageCollection: GarbageCollectionMetrics;
-  
+
   /** Thread metrics */
   threads: ThreadMetrics;
 }
@@ -477,22 +466,22 @@ export interface SystemPerformanceMetrics {
 export interface CachePerformanceMetrics {
   /** Hit rate (percentage) */
   hitRate: number;
-  
+
   /** Miss rate (percentage) */
   missRate: number;
-  
+
   /** Average lookup time (ms) */
   averageLookupTime: number;
-  
+
   /** Cache size (MB) */
   cacheSize: number;
-  
+
   /** Eviction rate (evictions/minute) */
   evictionRate: number;
-  
+
   /** Memory usage (MB) */
   memoryUsage: number;
-  
+
   /** Conversation context cache metrics */
   conversationContextMetrics: ConversationCacheMetrics;
 }
@@ -503,31 +492,31 @@ export interface CachePerformanceMetrics {
 export interface PerformanceOptimizationResult {
   /** Optimization ID */
   optimizationId: string;
-  
+
   /** Optimization timestamp */
   timestamp: Date;
-  
+
   /** Performance metrics before optimization */
   beforeMetrics: PerformanceMetrics;
-  
+
   /** Performance metrics after optimization */
   afterMetrics: PerformanceMetrics;
-  
+
   /** Optimizations applied */
   optimizationsApplied: OptimizationAction[];
-  
+
   /** Performance improvements */
   improvements: PerformanceImprovement[];
-  
+
   /** Recommendations for further optimization */
   recommendations: OptimizationRecommendation[];
-  
+
   /** Conversation insights */
   conversationInsights?: ConversationPerformanceInsights;
-  
+
   /** Overall optimization success */
   success: boolean;
-  
+
   /** Optimization duration (ms) */
   duration: number;
 }
@@ -538,25 +527,25 @@ export interface PerformanceOptimizationResult {
 export interface OptimizationAction {
   /** Action ID */
   id: string;
-  
+
   /** Action type */
   type: OptimizationType;
-  
+
   /** Action description */
   description: string;
-  
+
   /** Target component */
   target: string;
-  
+
   /** Configuration changes */
   configChanges: Record<string, unknown>;
-  
+
   /** Expected improvement */
   expectedImprovement: number;
-  
+
   /** Actual improvement */
   actualImprovement?: number;
-  
+
   /** Success indicator */
   success: boolean;
 }
@@ -565,15 +554,15 @@ export interface OptimizationAction {
  * Optimization types
  */
 export enum OptimizationType {
-  CACHE_OPTIMIZATION = 'cache_optimization',
-  MEMORY_OPTIMIZATION = 'memory_optimization',
-  CPU_OPTIMIZATION = 'cpu_optimization',
-  NETWORK_OPTIMIZATION = 'network_optimization',
-  DATABASE_OPTIMIZATION = 'database_optimization',
-  ALGORITHM_OPTIMIZATION = 'algorithm_optimization',
-  CONVERSATION_OPTIMIZATION = 'conversation_optimization',
-  CIRCUIT_BREAKER_ADJUSTMENT = 'circuit_breaker_adjustment',
-  SCALING_ADJUSTMENT = 'scaling_adjustment',
+  _CACHE_OPTIMIZATION = "cache_optimization",
+  _MEMORY_OPTIMIZATION = "memory_optimization",
+  _CPU_OPTIMIZATION = "cpu_optimization",
+  _NETWORK_OPTIMIZATION = "network_optimization",
+  _DATABASE_OPTIMIZATION = "database_optimization",
+  _ALGORITHM_OPTIMIZATION = "algorithm_optimization",
+  _CONVERSATION_OPTIMIZATION = "conversation_optimization",
+  _CIRCUIT_BREAKER_ADJUSTMENT = "circuit_breaker_adjustment",
+  _SCALING_ADJUSTMENT = "scaling_adjustment",
 }
 
 /**
@@ -582,16 +571,16 @@ export enum OptimizationType {
 export interface PerformanceImprovement {
   /** Metric name */
   metric: string;
-  
+
   /** Before value */
   before: number;
-  
+
   /** After value */
   after: number;
-  
+
   /** Improvement percentage */
   improvementPercentage: number;
-  
+
   /** Improvement type */
   type: ImprovementType;
 }
@@ -600,25 +589,25 @@ export interface PerformanceImprovement {
  * Improvement types
  */
 export enum ImprovementType {
-  LATENCY_REDUCTION = 'latency_reduction',
-  THROUGHPUT_INCREASE = 'throughput_increase',
-  CACHE_HIT_IMPROVEMENT = 'cache_hit_improvement',
-  MEMORY_REDUCTION = 'memory_reduction',
-  CPU_OPTIMIZATION = 'cpu_optimization',
-  ERROR_RATE_REDUCTION = 'error_rate_reduction',
+  _LATENCY_REDUCTION = "latency_reduction",
+  _THROUGHPUT_INCREASE = "throughput_increase",
+  _CACHE_HIT_IMPROVEMENT = "cache_hit_improvement",
+  _MEMORY_REDUCTION = "memory_reduction",
+  _CPU_OPTIMIZATION = "cpu_optimization",
+  _ERROR_RATE_REDUCTION = "error_rate_reduction",
 }
 
 /**
  * Performance grades
  */
 export enum PerformanceGrade {
-  A_PLUS = 'A+', // Exceptional performance (>95% of targets met)
-  A = 'A',       // Excellent performance (>90% of targets met)
-  B_PLUS = 'B+', // Good performance (>80% of targets met)
-  B = 'B',       // Satisfactory performance (>70% of targets met)
-  C = 'C',       // Needs improvement (>50% of targets met)
-  D = 'D',       // Poor performance (<50% of targets met)
-  F = 'F',       // Failing performance (critical targets not met)
+  _A_PLUS = "A+", // Exceptional performance (>95% of targets met)
+  _A = "A", // Excellent performance (>90% of targets met)
+  _B_PLUS = "B+", // Good performance (>80% of targets met)
+  _B = "B", // Satisfactory performance (>70% of targets met)
+  _C = "C", // Needs improvement (>50% of targets met)
+  _D = "D", // Poor performance (<50% of targets met)
+  _F = "F", // Failing performance (critical targets not met)
 }
 
 // Additional supporting interfaces continue...
@@ -672,7 +661,7 @@ export interface MemoryProfilingConfig {
 @Injectable()
 export class PerformanceOptimizerUtils {
   private readonly logger = new Logger(PerformanceOptimizerUtils.name);
-  
+
   /** Default performance configuration */
   private readonly defaultConfig: PerformanceOptimizationConfig = {
     enabled: true,
@@ -695,8 +684,11 @@ export class PerformanceOptimizerUtils {
       maxSize: 1000, // 1GB
       evictionPolicy: CacheEvictionPolicy.ADAPTIVE,
       conversationContextCaching: true,
-      warmingStrategies: [CacheWarmingStrategy.PREDICTIVE, CacheWarmingStrategy.CONVERSATION_BASED],
-      compression: { enabled: true, algorithm: 'gzip', level: 6 },
+      warmingStrategies: [
+        CacheWarmingStrategy.PREDICTIVE,
+        CacheWarmingStrategy.CONVERSATION_BASED,
+      ],
+      compression: { enabled: true, algorithm: "gzip", level: 6 },
       distributedCaching: { enabled: true, nodes: [], replicationFactor: 2 },
     },
     circuitBreaker: {
@@ -711,92 +703,136 @@ export class PerformanceOptimizerUtils {
     memoryManagement: {
       enabled: true,
       usageThreshold: 80,
-      gcOptimization: { enabled: true, strategy: 'adaptive', thresholds: {} },
+      gcOptimization: { enabled: true, strategy: "adaptive", thresholds: {} },
       objectPooling: { enabled: true, poolSize: 1000, objectTypes: [] },
-      leakDetection: { enabled: true, detectionInterval: 60000, alertThreshold: 10 },
+      leakDetection: {
+        enabled: true,
+        detectionInterval: 60000,
+        alertThreshold: 10,
+      },
       profiling: { enabled: false, samplingRate: 0.1, profileDuration: 300000 },
     },
     cpuOptimization: {
       enabled: true,
       usageThreshold: 70,
-      threadPoolOptimization: { enabled: true, minThreads: 10, maxThreads: 100 },
-      taskScheduling: { enabled: true, scheduler: 'adaptive' },
+      threadPoolOptimization: {
+        enabled: true,
+        minThreads: 10,
+        maxThreads: 100,
+      },
+      taskScheduling: { enabled: true, scheduler: "adaptive" },
       cpuAffinity: { enabled: false, affinityMask: [] },
-      profiling: { enabled: false, samplingRate: 0.05, profileDuration: 300000 },
+      profiling: {
+        enabled: false,
+        samplingRate: 0.05,
+        profileDuration: 300000,
+      },
     },
     networkOptimization: {
       enabled: true,
-      connectionPooling: { enabled: true, maxConnections: 100, keepAliveTimeout: 30000 },
+      connectionPooling: {
+        enabled: true,
+        maxConnections: 100,
+        keepAliveTimeout: 30000,
+      },
       requestBatching: { enabled: true, batchSize: 10, batchTimeout: 100 },
-      compression: { enabled: true, algorithm: 'gzip', minSize: 1024 },
+      compression: { enabled: true, algorithm: "gzip", minSize: 1024 },
       keepAlive: { enabled: true, timeout: 30000, interval: 5000 },
-      loadBalancing: { enabled: true, strategy: 'round_robin', healthCheck: true },
+      loadBalancing: {
+        enabled: true,
+        strategy: "round_robin",
+        healthCheck: true,
+      },
     },
     databaseOptimization: {
       enabled: true,
-      queryOptimization: { enabled: true, analyzeQueries: true, suggestIndexes: true },
-      connectionPooling: { enabled: true, minConnections: 5, maxConnections: 50 },
-      indexOptimization: { enabled: true, autoCreateIndexes: false, analyzeUsage: true },
+      queryOptimization: {
+        enabled: true,
+        analyzeQueries: true,
+        suggestIndexes: true,
+      },
+      connectionPooling: {
+        enabled: true,
+        minConnections: 5,
+        maxConnections: 50,
+      },
+      indexOptimization: {
+        enabled: true,
+        autoCreateIndexes: false,
+        analyzeUsage: true,
+      },
       queryCaching: { enabled: true, ttl: 300000, maxSize: 100 },
-      performanceMonitoring: { enabled: true, slowQueryThreshold: 1000, logSlowQueries: true },
+      performanceMonitoring: {
+        enabled: true,
+        slowQueryThreshold: 1000,
+        logSlowQueries: true,
+      },
     },
     monitoring: {
       enabled: true,
       metricsInterval: 10000, // 10 seconds
       realTimeMonitoring: true,
       conversationCorrelation: true,
-      alerting: { enabled: true, channels: ['email'], thresholds: {} },
-      reporting: { enabled: true, interval: 'daily', retention: 30 },
+      alerting: { enabled: true, channels: ["email"], thresholds: {} },
+      reporting: { enabled: true, interval: "daily", retention: 30 },
       analytics: { enabled: true, aiInsights: true, trendAnalysis: true },
     },
     autoScaling: {
       enabled: true,
       policies: [],
       conversationBasedScaling: { enabled: true, predictionWindow: 300000 },
-      resourceAllocation: { strategy: 'dynamic', reserveCapacity: 20 },
+      resourceAllocation: { strategy: "dynamic", reserveCapacity: 20 },
       predictionModels: [],
     },
   };
-  
+
   /** Current performance configuration */
   private config: PerformanceOptimizationConfig;
-  
+
   /** Performance metrics storage */
   private readonly metricsHistory = new Map<string, PerformanceMetrics[]>();
-  
+
   /** Real-time performance metrics */
-  private readonly currentMetrics$ = new BehaviorSubject<PerformanceMetrics | null>(null);
-  
+  private readonly currentMetrics$ =
+    new BehaviorSubject<PerformanceMetrics | null>(null);
+
   /** Optimization events */
-  private readonly optimizationEvents$ = new Subject<PerformanceOptimizationResult>();
-  
+  private readonly optimizationEvents$ =
+    new Subject<PerformanceOptimizationResult>();
+
   /** Performance monitoring interval */
   private monitoringInterval?: NodeJS.Timeout;
-  
+
   /** Circuit breaker states */
   private readonly circuitBreakers = new Map<string, CircuitBreakerState>();
-  
+
   /** Cache instances */
   private readonly cacheInstances = new Map<string, Cache>();
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly parlantWrapperUtils: ParlantWrapperUtils,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly _configService: ConfigService,
+    private readonly _parlantWrapperUtils: ParlantWrapperUtils,
+    @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
   ) {
     // Load configuration
     this.config = {
       ...this.defaultConfig,
-      ...this.configService.get<Partial<PerformanceOptimizationConfig>>('performance', {}),
+      ...this._configService.get<Partial<PerformanceOptimizationConfig>>(
+        "performance",
+        {},
+      ),
     };
 
-    this.logger.log('Performance Optimizer Utilities initialized with MAXIMUM Parlant integration', {
-      enabled: this.config.enabled,
-      targets: this.config.targets,
-      cachingEnabled: this.config.caching.enabled,
-      monitoringEnabled: this.config.monitoring.enabled,
-      autoScalingEnabled: this.config.autoScaling.enabled,
-    });
+    this.logger.log(
+      "Performance Optimizer Utilities initialized with MAXIMUM Parlant integration",
+      {
+        enabled: this.config.enabled,
+        targets: this.config.targets,
+        cachingEnabled: this.config.caching.enabled,
+        monitoringEnabled: this.config.monitoring.enabled,
+        autoScalingEnabled: this.config.autoScaling.enabled,
+      },
+    );
 
     // Initialize performance optimization
     if (this.config.enabled) {
@@ -808,7 +844,8 @@ export class PerformanceOptimizerUtils {
    * Initialize comprehensive performance optimization
    */
   @ParlantValidation({
-    description: 'Initialize comprehensive performance optimization with Parlant conversational enhancement',
+    description:
+      "Initialize comprehensive performance optimization with Parlant conversational enhancement",
     securityLevel: SecurityLevel.MEDIUM,
     cacheable: false,
   })
@@ -816,44 +853,43 @@ export class PerformanceOptimizerUtils {
     try {
       // Initialize caching system
       await this.initializeCaching();
-      
+
       // Initialize circuit breakers
       this.initializeCircuitBreakers();
-      
+
       // Initialize memory management
       this.initializeMemoryManagement();
-      
+
       // Initialize CPU optimization
       this.initializeCpuOptimization();
-      
+
       // Initialize network optimization
       this.initializeNetworkOptimization();
-      
+
       // Initialize database optimization
       this.initializeDatabaseOptimization();
-      
+
       // Start performance monitoring
       this.startPerformanceMonitoring();
-      
+
       // Initialize auto-scaling
       this.initializeAutoScaling();
 
-      this.logger.log('Performance optimization initialized successfully', {
+      this.logger.log("Performance optimization initialized successfully", {
         cachingEnabled: this.config.caching.enabled,
         circuitBreakersEnabled: this.config.circuitBreaker.enabled,
         monitoringEnabled: this.config.monitoring.enabled,
         autoScalingEnabled: this.config.autoScaling.enabled,
       });
-
     } catch (error) {
-      this.logger.error('Failed to initialize performance optimization', {
+      this.logger.error("Failed to initialize performance optimization", {
         error: error instanceof Error ? error.message : String(error),
       });
-      
+
       throw new ParlantIntegrationError(
-        'Performance optimization initialization failed',
-        'PERFORMANCE_INIT_ERROR',
-        { originalError: error }
+        "Performance optimization initialization failed",
+        "PERFORMANCE_INIT_ERROR",
+        { originalError: error },
       );
     }
   }
@@ -862,7 +898,8 @@ export class PerformanceOptimizerUtils {
    * Optimize API validation performance with Parlant enhancement
    */
   @ParlantValidation({
-    description: 'Optimize API validation performance with conversational AI enhancement and intelligent caching',
+    description:
+      "Optimize API validation performance with conversational AI enhancement and intelligent caching",
     securityLevel: SecurityLevel.HIGH,
     cacheable: true,
     cacheTtl: 300000,
@@ -873,37 +910,56 @@ export class PerformanceOptimizerUtils {
     const operationId = `perf-opt-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
-    this.logger.debug(`[${operationId}] Starting API validation performance optimization`, {
-      operationId,
-      validationType: validationContext.type,
-      currentPerformance: validationContext.currentMetrics,
-      targets: this.config.targets,
-    });
+    this.logger.debug(
+      `[${operationId}] Starting API validation performance optimization`,
+      {
+        operationId,
+        validationType: validationContext.type,
+        currentPerformance: validationContext.currentMetrics,
+        targets: this.config.targets,
+      },
+    );
 
     try {
       // Get current performance metrics
       const beforeMetrics = await this.getCurrentPerformanceMetrics();
-      
+
       // Analyze performance bottlenecks
-      const bottlenecks = await this.analyzePerformanceBottlenecks(validationContext, beforeMetrics);
-      
+      const bottlenecks = await this.analyzePerformanceBottlenecks(
+        validationContext,
+        beforeMetrics,
+      );
+
       // Generate optimization actions based on bottlenecks
-      const optimizationActions = await this.generateOptimizationActions(bottlenecks, validationContext);
-      
+      const optimizationActions = await this.generateOptimizationActions(
+        bottlenecks,
+        validationContext,
+      );
+
       // Apply optimizations with Parlant enhancement
-      const appliedOptimizations = await this.applyOptimizations(optimizationActions, operationId);
-      
+      const appliedOptimizations = await this.applyOptimizations(
+        optimizationActions,
+        operationId,
+      );
+
       // Measure performance after optimizations
       const afterMetrics = await this.getCurrentPerformanceMetrics();
-      
+
       // Calculate improvements
-      const improvements = this.calculatePerformanceImprovements(beforeMetrics, afterMetrics);
-      
+      const improvements = this.calculatePerformanceImprovements(
+        beforeMetrics,
+        afterMetrics,
+      );
+
       // Generate additional recommendations
-      const recommendations = await this.generateOptimizationRecommendations(afterMetrics, validationContext);
-      
+      const recommendations = await this.generateOptimizationRecommendations(
+        afterMetrics,
+        validationContext,
+      );
+
       // Get conversation insights if available
-      const conversationInsights = await this.generateConversationPerformanceInsights(validationContext);
+      const conversationInsights =
+        await this.generateConversationPerformanceInsights(validationContext);
 
       const result: PerformanceOptimizationResult = {
         optimizationId: operationId,
@@ -924,20 +980,27 @@ export class PerformanceOptimizerUtils {
       // Update performance history
       this.updatePerformanceHistory(operationId, result);
 
-      this.logger.log(`[${operationId}] API validation performance optimization completed`, {
-        operationId,
-        success: result.success,
-        optimizationsApplied: appliedOptimizations.length,
-        averageImprovement: improvements.reduce((sum, imp) => sum + imp.improvementPercentage, 0) / improvements.length,
-        duration: result.duration,
-        performanceMet: result.duration <= this.config.targets.apiValidationTime,
-      });
+      this.logger.log(
+        `[${operationId}] API validation performance optimization completed`,
+        {
+          operationId,
+          success: result.success,
+          optimizationsApplied: appliedOptimizations.length,
+          averageImprovement:
+            improvements.reduce(
+              (sum, imp) => sum + imp.improvementPercentage,
+              0,
+            ) / improvements.length,
+          duration: result.duration,
+          performanceMet:
+            result.duration <= this.config.targets.apiValidationTime,
+        },
+      );
 
       return result;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       this.logger.error(`[${operationId}] Performance optimization failed`, {
         operationId,
         error: error instanceof Error ? error.message : String(error),
@@ -962,7 +1025,8 @@ export class PerformanceOptimizerUtils {
    * Get real-time performance metrics
    */
   @ParlantValidation({
-    description: 'Get comprehensive real-time performance metrics with conversation correlation',
+    description:
+      "Get comprehensive real-time performance metrics with conversation correlation",
     securityLevel: SecurityLevel.MEDIUM,
     cacheable: true,
     cacheTtl: 10000, // 10 seconds
@@ -973,22 +1037,23 @@ export class PerformanceOptimizerUtils {
     try {
       // Collect API performance metrics
       const apiMetrics = await this.collectApiPerformanceMetrics();
-      
+
       // Collect system performance metrics
       const systemMetrics = await this.collectSystemPerformanceMetrics();
-      
+
       // Collect cache performance metrics
       const cacheMetrics = await this.collectCachePerformanceMetrics();
-      
+
       // Collect database performance metrics
       const databaseMetrics = await this.collectDatabasePerformanceMetrics();
-      
+
       // Collect network performance metrics
       const networkMetrics = await this.collectNetworkPerformanceMetrics();
-      
+
       // Collect conversation performance metrics
-      const conversationMetrics = await this.collectConversationPerformanceMetrics();
-      
+      const conversationMetrics =
+        await this.collectConversationPerformanceMetrics();
+
       // Calculate overall performance score
       const overallScore = this.calculateOverallPerformanceScore({
         api: apiMetrics,
@@ -998,7 +1063,7 @@ export class PerformanceOptimizerUtils {
         network: networkMetrics,
         conversation: conversationMetrics,
       });
-      
+
       // Determine performance grade
       const grade = this.determinePerformanceGrade(overallScore);
 
@@ -1018,9 +1083,8 @@ export class PerformanceOptimizerUtils {
       this.currentMetrics$.next(metrics);
 
       return metrics;
-
     } catch (error) {
-      this.logger.error('Failed to collect performance metrics', {
+      this.logger.error("Failed to collect performance metrics", {
         error: error instanceof Error ? error.message : String(error),
       });
 
@@ -1033,32 +1097,32 @@ export class PerformanceOptimizerUtils {
   // This utility class would continue with complete implementation of all optimization methods
 
   private async initializeCaching(): Promise<void> {
-    this.logger.log('Initializing intelligent caching system');
+    this.logger.log("Initializing intelligent caching system");
     // Implementation for cache initialization
   }
 
   private initializeCircuitBreakers(): void {
-    this.logger.log('Initializing circuit breaker system');
+    this.logger.log("Initializing circuit breaker system");
     // Implementation for circuit breaker initialization
   }
 
   private initializeMemoryManagement(): void {
-    this.logger.log('Initializing memory management system');
+    this.logger.log("Initializing memory management system");
     // Implementation for memory management
   }
 
   private initializeCpuOptimization(): void {
-    this.logger.log('Initializing CPU optimization system');
+    this.logger.log("Initializing CPU optimization system");
     // Implementation for CPU optimization
   }
 
   private initializeNetworkOptimization(): void {
-    this.logger.log('Initializing network optimization system');
+    this.logger.log("Initializing network optimization system");
     // Implementation for network optimization
   }
 
   private initializeDatabaseOptimization(): void {
-    this.logger.log('Initializing database optimization system');
+    this.logger.log("Initializing database optimization system");
     // Implementation for database optimization
   }
 
@@ -1072,20 +1136,20 @@ export class PerformanceOptimizerUtils {
         const metrics = await this.getCurrentPerformanceMetrics();
         await this.processPerformanceMetrics(metrics);
       } catch (error) {
-        this.logger.error('Performance monitoring error', {
+        this.logger.error("Performance monitoring error", {
           error: error instanceof Error ? error.message : String(error),
         });
       }
     }, this.config.monitoring.metricsInterval);
 
-    this.logger.log('Performance monitoring started', {
+    this.logger.log("Performance monitoring started", {
       interval: this.config.monitoring.metricsInterval,
       realTime: this.config.monitoring.realTimeMonitoring,
     });
   }
 
   private initializeAutoScaling(): void {
-    this.logger.log('Initializing auto-scaling system');
+    this.logger.log("Initializing auto-scaling system");
     // Implementation for auto-scaling
   }
 
@@ -1112,19 +1176,19 @@ export class PerformanceOptimizerUtils {
     if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval);
     }
-    
+
     this.currentMetrics$.complete();
     this.optimizationEvents$.complete();
-    
-    this.logger.log('Performance optimizer utilities destroyed');
+
+    this.logger.log("Performance optimizer utilities destroyed");
   }
 }
 
 // Supporting interfaces for validation context
 export interface ValidationOptimizationContext {
   type: string;
-  currentMetrics: any;
-  conversationContext?: any;
+  currentMetrics: PerformanceMetrics;
+  conversationContext?: ParlantUserContext;
 }
 
 interface CircuitBreakerState {
@@ -1134,4 +1198,197 @@ interface CircuitBreakerState {
   successCount: number;
 }
 
-// Additional supporting type definitions continue...
+// Additional supporting type definitions
+interface ConversationCacheMetrics {
+  hitRate: number;
+  missRate: number;
+  size: number;
+}
+
+interface ConversationPerformanceMetrics {
+  responseTime: number;
+  throughput: number;
+  accuracy: number;
+}
+
+interface ConversationApiPerformanceMetrics {
+  averageResponseTime: number;
+  throughput: number;
+  errorRate: number;
+}
+
+interface GarbageCollectionMetrics {
+  frequency: number;
+  duration: number;
+  memoryReclaimed: number;
+}
+
+interface ThreadMetrics {
+  activeThreads: number;
+  totalThreads: number;
+  utilization: number;
+}
+
+interface ConversationPerformanceInsights {
+  trends: string[];
+  recommendations: string[];
+  predictions: Record<string, unknown>;
+}
+
+interface OptimizationRecommendation {
+  id: string;
+  type: string;
+  description: string;
+  priority: number;
+  expectedImpact: number;
+}
+
+// Configuration interfaces
+interface CacheCompressionConfig {
+  enabled: boolean;
+  algorithm: string;
+  level: number;
+}
+
+interface DistributedCachingConfig {
+  enabled: boolean;
+  nodes: string[];
+  replicationFactor: number;
+}
+
+interface ThreadPoolOptimizationConfig {
+  enabled: boolean;
+  minThreads: number;
+  maxThreads: number;
+}
+
+interface TaskSchedulingConfig {
+  enabled: boolean;
+  scheduler: string;
+}
+
+interface CpuAffinityConfig {
+  enabled: boolean;
+  affinityMask: number[];
+}
+
+interface CpuProfilingConfig {
+  enabled: boolean;
+  samplingRate: number;
+  profileDuration: number;
+}
+
+interface ConnectionPoolingConfig {
+  enabled: boolean;
+  maxConnections: number;
+  keepAliveTimeout: number;
+}
+
+interface RequestBatchingConfig {
+  enabled: boolean;
+  batchSize: number;
+  batchTimeout: number;
+}
+
+interface NetworkCompressionConfig {
+  enabled: boolean;
+  algorithm: string;
+  minSize: number;
+}
+
+interface KeepAliveConfig {
+  enabled: boolean;
+  timeout: number;
+  interval: number;
+}
+
+interface LoadBalancingConfig {
+  enabled: boolean;
+  strategy: string;
+  healthCheck: boolean;
+}
+
+interface QueryOptimizationConfig {
+  enabled: boolean;
+  analyzeQueries: boolean;
+  suggestIndexes: boolean;
+}
+
+interface DatabaseConnectionPoolingConfig {
+  enabled: boolean;
+  minConnections: number;
+  maxConnections: number;
+}
+
+interface IndexOptimizationConfig {
+  enabled: boolean;
+  autoCreateIndexes: boolean;
+  analyzeUsage: boolean;
+}
+
+interface QueryCachingConfig {
+  enabled: boolean;
+  ttl: number;
+  maxSize: number;
+}
+
+interface DatabasePerformanceMonitoringConfig {
+  enabled: boolean;
+  slowQueryThreshold: number;
+  logSlowQueries: boolean;
+}
+
+interface PerformanceAlertingConfig {
+  enabled: boolean;
+  channels: string[];
+  thresholds: Record<string, number>;
+}
+
+interface PerformanceReportingConfig {
+  enabled: boolean;
+  interval: string;
+  retention: number;
+}
+
+interface PerformanceAnalyticsConfig {
+  enabled: boolean;
+  aiInsights: boolean;
+  trendAnalysis: boolean;
+}
+
+interface ScalingPolicy {
+  id: string;
+  type: string;
+  thresholds: Record<string, number>;
+  actions: string[];
+}
+
+interface ConversationBasedScalingConfig {
+  enabled: boolean;
+  predictionWindow: number;
+}
+
+interface ResourceAllocationConfig {
+  strategy: string;
+  reserveCapacity: number;
+}
+
+interface ScalingPredictionModel {
+  id: string;
+  type: string;
+  configuration: Record<string, unknown>;
+}
+
+interface NetworkPerformanceMetrics {
+  latency: number;
+  throughput: number;
+  packetLoss: number;
+  errorRate: number;
+}
+
+interface DatabasePerformanceMetrics {
+  averageQueryTime: number;
+  connectionUtilization: number;
+  cacheHitRate: number;
+  slowQueryCount: number;
+}

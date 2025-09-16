@@ -48,14 +48,14 @@ export interface ParlantConversationContext {
  * Conversation state enumeration
  */
 export enum ConversationState {
-  INITIATED = "initiated",
-  ACTIVE = "active",
-  VALIDATING = "validating",
-  APPROVED = "approved",
-  DENIED = "denied",
-  COMPLETED = "completed",
-  SUSPENDED = "suspended",
-  ERROR = "error",
+  _INITIATED = "initiated",
+  _ACTIVE = "active",
+  _VALIDATING = "validating",
+  _APPROVED = "approved",
+  _DENIED = "denied",
+  _COMPLETED = "completed",
+  _SUSPENDED = "suspended",
+  _ERROR = "error",
 }
 
 /**
@@ -82,11 +82,11 @@ export interface ConversationMetadata {
  * Conversation priority levels
  */
 export enum ConversationPriority {
-  LOW = "low",
-  NORMAL = "normal",
-  HIGH = "high",
-  CRITICAL = "critical",
-  EMERGENCY = "emergency",
+  _LOW = "low",
+  _NORMAL = "normal",
+  _HIGH = "high",
+  _CRITICAL = "critical",
+  _EMERGENCY = "emergency",
 }
 
 /**
@@ -116,13 +116,13 @@ export interface ConversationHistoryEntry {
  * Conversation history entry types
  */
 export enum ConversationHistoryType {
-  MESSAGE = "message",
-  VALIDATION_REQUEST = "validation_request",
-  VALIDATION_RESPONSE = "validation_response",
-  APPROVAL = "approval",
-  DENIAL = "denial",
-  ERROR = "error",
-  STATE_CHANGE = "state_change",
+  _MESSAGE = "message",
+  _VALIDATION_REQUEST = "validation_request",
+  _VALIDATION_RESPONSE = "validation_response",
+  _APPROVAL = "approval",
+  _DENIAL = "denial",
+  _ERROR = "error",
+  _STATE_CHANGE = "state_change",
 }
 
 /**
@@ -152,33 +152,33 @@ export interface ConversationParticipant {
  * Participant types
  */
 export enum ParticipantType {
-  HUMAN = "human",
-  AI_AGENT = "ai_agent",
-  SYSTEM = "system",
-  BOT = "bot",
+  _HUMAN = "human",
+  _AI_AGENT = "ai_agent",
+  _SYSTEM = "system",
+  _BOT = "bot",
 }
 
 /**
  * Participant roles in conversation
  */
 export enum ParticipantRole {
-  REQUESTOR = "requestor",
-  APPROVER = "approver",
-  OBSERVER = "observer",
-  MODERATOR = "moderator",
-  VALIDATOR = "validator",
+  _REQUESTOR = "requestor",
+  _APPROVER = "approver",
+  _OBSERVER = "observer",
+  _MODERATOR = "moderator",
+  _VALIDATOR = "validator",
 }
 
 /**
  * Participant capabilities
  */
 export enum ParticipantCapability {
-  VALIDATE_FUNCTIONS = "validate_functions",
-  APPROVE_ACTIONS = "approve_actions",
-  DENY_ACTIONS = "deny_actions",
-  MODIFY_REQUESTS = "modify_requests",
-  VIEW_AUDIT = "view_audit",
-  MANAGE_CONVERSATION = "manage_conversation",
+  _VALIDATE_FUNCTIONS = "validate_functions",
+  _APPROVE_ACTIONS = "approve_actions",
+  _DENY_ACTIONS = "deny_actions",
+  _MODIFY_REQUESTS = "modify_requests",
+  _VIEW_AUDIT = "view_audit",
+  _MANAGE_CONVERSATION = "manage_conversation",
 }
 
 // ===========================
@@ -264,23 +264,23 @@ export interface SourceLocation {
  * Function security levels
  */
 export enum FunctionSecurityLevel {
-  PUBLIC = "public",
-  INTERNAL = "internal",
-  RESTRICTED = "restricted",
-  CONFIDENTIAL = "confidential",
-  SECRET = "secret",
+  _PUBLIC = "public",
+  _INTERNAL = "internal",
+  _RESTRICTED = "restricted",
+  _CONFIDENTIAL = "confidential",
+  _SECRET = "secret",
 }
 
 /**
  * Risk assessment levels
  */
 export enum RiskLevel {
-  MINIMAL = "minimal",
-  LOW = "low",
-  MODERATE = "moderate",
-  HIGH = "high",
-  CRITICAL = "critical",
-  EXTREME = "extreme",
+  _MINIMAL = "minimal",
+  _LOW = "low",
+  _MODERATE = "moderate",
+  _HIGH = "high",
+  _CRITICAL = "critical",
+  _EXTREME = "extreme",
 }
 
 /**
@@ -307,11 +307,11 @@ export interface ExecutionContext {
  * Execution environments
  */
 export enum ExecutionEnvironment {
-  DEVELOPMENT = "development",
-  TESTING = "testing",
-  STAGING = "staging",
-  PRODUCTION = "production",
-  LOCAL = "local",
+  _DEVELOPMENT = "development",
+  _TESTING = "testing",
+  _STAGING = "staging",
+  _PRODUCTION = "production",
+  _LOCAL = "local",
 }
 
 /**
@@ -398,22 +398,22 @@ export interface ValidationParameters {
  * Validation modes
  */
 export enum ValidationMode {
-  SYNCHRONOUS = "synchronous",
-  ASYNCHRONOUS = "asynchronous",
-  INTERACTIVE = "interactive",
-  BATCH = "batch",
-  STREAMING = "streaming",
+  _SYNCHRONOUS = "synchronous",
+  _ASYNCHRONOUS = "asynchronous",
+  _INTERACTIVE = "interactive",
+  _BATCH = "batch",
+  _STREAMING = "streaming",
 }
 
 /**
  * Approval levels required for validation
  */
 export enum ApprovalLevel {
-  AUTOMATIC = "automatic",
-  SINGLE_APPROVAL = "single_approval",
-  DUAL_APPROVAL = "dual_approval",
-  COMMITTEE_APPROVAL = "committee_approval",
-  UNANIMOUS_APPROVAL = "unanimous_approval",
+  _AUTOMATIC = "automatic",
+  _SINGLE_APPROVAL = "single_approval",
+  _DUAL_APPROVAL = "dual_approval",
+  _COMMITTEE_APPROVAL = "committee_approval",
+  _UNANIMOUS_APPROVAL = "unanimous_approval",
 }
 
 /**
@@ -443,12 +443,12 @@ export interface ValidationRule {
  * Validation rule types
  */
 export enum ValidationRuleType {
-  SECURITY_CHECK = "security_check",
-  AUTHORIZATION = "authorization",
-  INPUT_VALIDATION = "input_validation",
-  BUSINESS_LOGIC = "business_logic",
-  COMPLIANCE = "compliance",
-  CUSTOM = "custom",
+  _SECURITY_CHECK = "security_check",
+  _AUTHORIZATION = "authorization",
+  _INPUT_VALIDATION = "input_validation",
+  _BUSINESS_LOGIC = "business_logic",
+  _COMPLIANCE = "compliance",
+  _CUSTOM = "custom",
 }
 
 // ===========================
@@ -508,12 +508,12 @@ export interface ValidationResult {
  * Validation decisions
  */
 export enum ValidationDecision {
-  APPROVED = "approved",
-  DENIED = "denied",
-  CONDITIONAL_APPROVAL = "conditional_approval",
-  REQUEST_MORE_INFO = "request_more_info",
-  ESCALATE = "escalate",
-  DEFER = "defer",
+  _APPROVED = "approved",
+  _DENIED = "denied",
+  _CONDITIONAL_APPROVAL = "conditional_approval",
+  _REQUEST_MORE_INFO = "request_more_info",
+  _ESCALATE = "escalate",
+  _DEFER = "defer",
 }
 
 /**
@@ -563,12 +563,12 @@ export interface ValidationRecommendation {
  * Recommendation types
  */
 export enum RecommendationType {
-  SECURITY_IMPROVEMENT = "security_improvement",
-  PERFORMANCE_OPTIMIZATION = "performance_optimization",
-  CODE_QUALITY = "code_quality",
-  COMPLIANCE_ENHANCEMENT = "compliance_enhancement",
-  USER_EXPERIENCE = "user_experience",
-  OPERATIONAL = "operational",
+  _SECURITY_IMPROVEMENT = "security_improvement",
+  _PERFORMANCE_OPTIMIZATION = "performance_optimization",
+  _CODE_QUALITY = "code_quality",
+  _COMPLIANCE_ENHANCEMENT = "compliance_enhancement",
+  _USER_EXPERIENCE = "user_experience",
+  _OPERATIONAL = "operational",
 }
 
 /**
@@ -595,23 +595,23 @@ export interface RecommendedAction {
  * Action types
  */
 export enum ActionType {
-  MODIFY_FUNCTION = "modify_function",
-  ADD_VALIDATION = "add_validation",
-  UPDATE_PERMISSIONS = "update_permissions",
-  ENHANCE_LOGGING = "enhance_logging",
-  IMPROVE_ERROR_HANDLING = "improve_error_handling",
-  OPTIMIZE_PERFORMANCE = "optimize_performance",
+  _MODIFY_FUNCTION = "modify_function",
+  _ADD_VALIDATION = "add_validation",
+  _UPDATE_PERMISSIONS = "update_permissions",
+  _ENHANCE_LOGGING = "enhance_logging",
+  _IMPROVE_ERROR_HANDLING = "improve_error_handling",
+  _OPTIMIZE_PERFORMANCE = "optimize_performance",
 }
 
 /**
  * Action urgency levels
  */
 export enum ActionUrgency {
-  IMMEDIATE = "immediate",
-  HIGH = "high",
-  NORMAL = "normal",
-  LOW = "low",
-  DEFERRED = "deferred",
+  _IMMEDIATE = "immediate",
+  _HIGH = "high",
+  _NORMAL = "normal",
+  _LOW = "low",
+  _DEFERRED = "deferred",
 }
 
 /**
@@ -638,12 +638,12 @@ export interface FunctionModification {
  * Modification types
  */
 export enum ModificationType {
-  PARAMETER_VALIDATION = "parameter_validation",
-  RETURN_SANITIZATION = "return_sanitization",
-  ERROR_HANDLING = "error_handling",
-  LOGGING_ENHANCEMENT = "logging_enhancement",
-  PERFORMANCE_OPTIMIZATION = "performance_optimization",
-  SECURITY_HARDENING = "security_hardening",
+  _PARAMETER_VALIDATION = "parameter_validation",
+  _RETURN_SANITIZATION = "return_sanitization",
+  _ERROR_HANDLING = "error_handling",
+  _LOGGING_ENHANCEMENT = "logging_enhancement",
+  _PERFORMANCE_OPTIMIZATION = "performance_optimization",
+  _SECURITY_HARDENING = "security_hardening",
 }
 
 /**
@@ -670,24 +670,24 @@ export interface ModificationImpact {
  * Impact levels
  */
 export enum ImpactLevel {
-  NONE = "none",
-  MINIMAL = "minimal",
-  LOW = "low",
-  MODERATE = "moderate",
-  HIGH = "high",
-  SEVERE = "severe",
+  _NONE = "none",
+  _MINIMAL = "minimal",
+  _LOW = "low",
+  _MODERATE = "moderate",
+  _HIGH = "high",
+  _SEVERE = "severe",
 }
 
 /**
  * Testing requirements
  */
 export enum TestingRequirement {
-  UNIT_TESTS = "unit_tests",
-  INTEGRATION_TESTS = "integration_tests",
-  END_TO_END_TESTS = "end_to_end_tests",
-  SECURITY_TESTS = "security_tests",
-  PERFORMANCE_TESTS = "performance_tests",
-  REGRESSION_TESTS = "regression_tests",
+  _UNIT_TESTS = "unit_tests",
+  _INTEGRATION_TESTS = "integration_tests",
+  _END_TO_END_TESTS = "end_to_end_tests",
+  _SECURITY_TESTS = "security_tests",
+  _PERFORMANCE_TESTS = "performance_tests",
+  _REGRESSION_TESTS = "regression_tests",
 }
 
 /**
@@ -734,12 +734,12 @@ export interface EvidenceArtifact {
  * Evidence artifact types
  */
 export enum ArtifactType {
-  LOG_ENTRY = "log_entry",
-  SCREENSHOT = "screenshot",
-  CODE_SNIPPET = "code_snippet",
-  NETWORK_TRACE = "network_trace",
-  SECURITY_SCAN = "security_scan",
-  PERFORMANCE_METRIC = "performance_metric",
+  _LOG_ENTRY = "log_entry",
+  _SCREENSHOT = "screenshot",
+  _CODE_SNIPPET = "code_snippet",
+  _NETWORK_TRACE = "network_trace",
+  _SECURITY_SCAN = "security_scan",
+  _PERFORMANCE_METRIC = "performance_metric",
 }
 
 /**
@@ -766,12 +766,12 @@ export interface EvidenceSource {
  * Evidence source types
  */
 export enum SourceType {
-  SYSTEM_LOG = "system_log",
-  USER_INPUT = "user_input",
-  AUTOMATED_SCAN = "automated_scan",
-  HUMAN_REVIEW = "human_review",
-  EXTERNAL_API = "external_api",
-  DATABASE_QUERY = "database_query",
+  _SYSTEM_LOG = "system_log",
+  _USER_INPUT = "user_input",
+  _AUTOMATED_SCAN = "automated_scan",
+  _HUMAN_REVIEW = "human_review",
+  _EXTERNAL_API = "external_api",
+  _DATABASE_QUERY = "database_query",
 }
 
 // ===========================
@@ -828,21 +828,21 @@ export interface CacheConfiguration {
  * Cache key strategies
  */
 export enum CacheKeyStrategy {
-  FUNCTION_SIGNATURE = "function_signature",
-  PARAMETER_HASH = "parameter_hash",
-  FULL_CONTEXT = "full_context",
-  CUSTOM = "custom",
+  _FUNCTION_SIGNATURE = "function_signature",
+  _PARAMETER_HASH = "parameter_hash",
+  _FULL_CONTEXT = "full_context",
+  _CUSTOM = "custom",
 }
 
 /**
  * Cache eviction policies
  */
 export enum CacheEvictionPolicy {
-  LRU = "lru",
-  LFU = "lfu",
-  FIFO = "fifo",
-  TTL = "ttl",
-  CUSTOM = "custom",
+  _LRU = "lru",
+  _LFU = "lfu",
+  _FIFO = "fifo",
+  _TTL = "ttl",
+  _CUSTOM = "custom",
 }
 
 /**
@@ -869,32 +869,32 @@ export interface LoggingConfiguration {
  * Log levels
  */
 export enum LogLevel {
-  DEBUG = "debug",
-  INFO = "info",
-  WARN = "warn",
-  ERROR = "error",
-  FATAL = "fatal",
+  _DEBUG = "debug",
+  _INFO = "info",
+  _WARN = "warn",
+  _ERROR = "error",
+  _FATAL = "fatal",
 }
 
 /**
  * Log destinations
  */
 export enum LogDestination {
-  CONSOLE = "console",
-  FILE = "file",
-  DATABASE = "database",
-  REMOTE_SERVICE = "remote_service",
-  MULTIPLE = "multiple",
+  _CONSOLE = "console",
+  _FILE = "file",
+  _DATABASE = "database",
+  _REMOTE_SERVICE = "remote_service",
+  _MULTIPLE = "multiple",
 }
 
 /**
  * Log formats
  */
 export enum LogFormat {
-  JSON = "json",
-  TEXT = "text",
-  STRUCTURED = "structured",
-  CUSTOM = "custom",
+  _JSON = "json",
+  _TEXT = "text",
+  _STRUCTURED = "structured",
+  _CUSTOM = "custom",
 }
 
 /**
@@ -918,11 +918,11 @@ export interface ErrorHandlingConfiguration {
  * Error handling strategies
  */
 export enum ErrorHandlingStrategy {
-  FAIL_FAST = "fail_fast",
-  RETRY_WITH_BACKOFF = "retry_with_backoff",
-  FALLBACK_TO_DEFAULT = "fallback_to_default",
-  GRACEFUL_DEGRADATION = "graceful_degradation",
-  CIRCUIT_BREAKER = "circuit_breaker",
+  _FAIL_FAST = "fail_fast",
+  _RETRY_WITH_BACKOFF = "retry_with_backoff",
+  _FALLBACK_TO_DEFAULT = "fallback_to_default",
+  _GRACEFUL_DEGRADATION = "graceful_degradation",
+  _CIRCUIT_BREAKER = "circuit_breaker",
 }
 
 /**
@@ -949,23 +949,23 @@ export interface RetryConfiguration {
  * Retry conditions
  */
 export enum RetryCondition {
-  NETWORK_ERROR = "network_error",
-  TIMEOUT = "timeout",
-  SERVER_ERROR = "server_error",
-  RATE_LIMIT = "rate_limit",
-  TEMPORARY_FAILURE = "temporary_failure",
-  CUSTOM = "custom",
+  _NETWORK_ERROR = "network_error",
+  _TIMEOUT = "timeout",
+  _SERVER_ERROR = "server_error",
+  _RATE_LIMIT = "rate_limit",
+  _TEMPORARY_FAILURE = "temporary_failure",
+  _CUSTOM = "custom",
 }
 
 /**
  * Fallback behaviors
  */
 export enum FallbackBehavior {
-  ALLOW_EXECUTION = "allow_execution",
-  DENY_EXECUTION = "deny_execution",
-  USE_CACHED_RESULT = "use_cached_result",
-  ESCALATE_TO_HUMAN = "escalate_to_human",
-  LOG_AND_CONTINUE = "log_and_continue",
+  _ALLOW_EXECUTION = "allow_execution",
+  _DENY_EXECUTION = "deny_execution",
+  _USE_CACHED_RESULT = "use_cached_result",
+  _ESCALATE_TO_HUMAN = "escalate_to_human",
+  _LOG_AND_CONTINUE = "log_and_continue",
 }
 
 /**
@@ -1028,14 +1028,14 @@ export interface ParlantAuditEntry {
  * Audit entry types
  */
 export enum AuditEntryType {
-  VALIDATION_REQUEST = "validation_request",
-  VALIDATION_RESPONSE = "validation_response",
-  APPROVAL = "approval",
-  DENIAL = "denial",
-  ESCALATION = "escalation",
-  CONVERSATION_START = "conversation_start",
-  CONVERSATION_END = "conversation_end",
-  ERROR = "error",
+  _VALIDATION_REQUEST = "validation_request",
+  _VALIDATION_RESPONSE = "validation_response",
+  _APPROVAL = "approval",
+  _DENIAL = "denial",
+  _ESCALATION = "escalation",
+  _CONVERSATION_START = "conversation_start",
+  _CONVERSATION_END = "conversation_end",
+  _ERROR = "error",
 }
 
 /**
@@ -1062,24 +1062,24 @@ export interface AuditActor {
  * Actor types for audit
  */
 export enum ActorType {
-  USER = "user",
-  SYSTEM = "system",
-  AI_AGENT = "ai_agent",
-  SERVICE = "service",
-  ADMIN = "admin",
+  _USER = "user",
+  _SYSTEM = "system",
+  _AI_AGENT = "ai_agent",
+  _SERVICE = "service",
+  _ADMIN = "admin",
 }
 
 /**
  * Audit actions
  */
 export enum AuditAction {
-  REQUEST_VALIDATION = "request_validation",
-  PROVIDE_VALIDATION = "provide_validation",
-  APPROVE_REQUEST = "approve_request",
-  DENY_REQUEST = "deny_request",
-  ESCALATE_REQUEST = "escalate_request",
-  MODIFY_REQUEST = "modify_request",
-  CANCEL_REQUEST = "cancel_request",
+  _REQUEST_VALIDATION = "request_validation",
+  _PROVIDE_VALIDATION = "provide_validation",
+  _APPROVE_REQUEST = "approve_request",
+  _DENY_REQUEST = "deny_request",
+  _ESCALATE_REQUEST = "escalate_request",
+  _MODIFY_REQUEST = "modify_request",
+  _CANCEL_REQUEST = "cancel_request",
 }
 
 /**
@@ -1126,11 +1126,11 @@ export interface ErrorDetails {
  * Error severity levels
  */
 export enum ErrorSeverity {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  CRITICAL = "critical",
-  FATAL = "fatal",
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
+  _FATAL = "fatal",
 }
 
 /**
@@ -1188,26 +1188,26 @@ export interface NetworkMetrics {
  */
 export interface ParlantWebSocketEvents {
   // Client to Server Events
-  "parlant:validate_function": (request: ParlantValidationRequest) => void;
+  "parlant:validate_function": (_request: ParlantValidationRequest) => void;
   "parlant:conversation_update": (
-    conversationId: string,
-    context: Partial<ParlantConversationContext>,
+    _conversationId: string,
+    _context: Partial<ParlantConversationContext>,
   ) => void;
-  "parlant:join_conversation": (conversationId: string) => void;
-  "parlant:leave_conversation": (conversationId: string) => void;
+  "parlant:join_conversation": (_conversationId: string) => void;
+  "parlant:leave_conversation": (_conversationId: string) => void;
   "parlant:send_message": (
-    conversationId: string,
-    message: ConversationMessage,
+    _conversationId: string,
+    _message: ConversationMessage,
   ) => void;
 
   // Server to Client Events
-  "parlant:validation_result": (response: ParlantValidationResponse) => void;
-  "parlant:conversation_status": (status: ConversationStatusUpdate) => void;
-  "parlant:intent_analysis": (analysis: IntentAnalysis) => void;
-  "parlant:message_received": (message: ConversationMessage) => void;
-  "parlant:participant_joined": (participant: ConversationParticipant) => void;
-  "parlant:participant_left": (participantId: string) => void;
-  "parlant:error": (error: ParlantError) => void;
+  "parlant:validation_result": (_response: ParlantValidationResponse) => void;
+  "parlant:conversation_status": (_status: ConversationStatusUpdate) => void;
+  "parlant:intent_analysis": (_analysis: IntentAnalysis) => void;
+  "parlant:message_received": (_message: ConversationMessage) => void;
+  "parlant:participant_joined": (_participant: ConversationParticipant) => void;
+  "parlant:participant_left": (_participantId: string) => void;
+  "parlant:error": (_error: ParlantError) => void;
 }
 
 /**
@@ -1240,12 +1240,12 @@ export interface ConversationMessage {
  * Message types
  */
 export enum MessageType {
-  TEXT = "text",
-  VALIDATION_REQUEST = "validation_request",
-  VALIDATION_RESPONSE = "validation_response",
-  SYSTEM_NOTIFICATION = "system_notification",
-  ERROR = "error",
-  COMMAND = "command",
+  _TEXT = "text",
+  _VALIDATION_REQUEST = "validation_request",
+  _VALIDATION_RESPONSE = "validation_response",
+  _SYSTEM_NOTIFICATION = "system_notification",
+  _ERROR = "error",
+  _COMMAND = "command",
 }
 
 /**
@@ -1315,12 +1315,12 @@ export interface DetectedIntent {
  * Intent categories
  */
 export enum IntentCategory {
-  VALIDATION_REQUEST = "validation_request",
-  APPROVAL_RESPONSE = "approval_response",
-  INFORMATION_REQUEST = "information_request",
-  STATUS_INQUIRY = "status_inquiry",
-  ERROR_REPORT = "error_report",
-  ESCALATION = "escalation",
+  _VALIDATION_REQUEST = "validation_request",
+  _APPROVAL_RESPONSE = "approval_response",
+  _INFORMATION_REQUEST = "information_request",
+  _STATUS_INQUIRY = "status_inquiry",
+  _ERROR_REPORT = "error_report",
+  _ESCALATION = "escalation",
 }
 
 /**

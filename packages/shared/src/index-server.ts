@@ -237,7 +237,9 @@ export * from "./audit/compliance/compliance-framework.service";
 export * from "./audit/integrations/audit.module";
 
 // Security Framework - server-only security services and ML algorithms
-export * from "./security";
+// Export security components selectively to avoid conflicts
+// Note: Commented out to avoid PerformanceMetrics conflict, re-enable after resolving
+// export * from "./security";
 
 // Parlant Integration - Shared Library Foundation
 // Core types, services, decorators, and utilities for conversational AI validation

@@ -34,11 +34,11 @@ import {
   HttpStatus,
   Logger,
   Inject,
-} from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+} from "@nestjs/common";
+import { Request, Response, NextFunction } from "express";
+import { ConfigService } from "@nestjs/config";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 
 // Import Parlant integration types and services
 import {
@@ -54,16 +54,16 @@ import {
   ParlantRiskAssessment,
   ParlantAuditEntry,
   ParlantHealthStatus,
-} from '../types/parlant-integration.types';
+} from "../types/parlant-integration.types";
 
 // Import Parlant decorators
 import {
   ParlantValidation,
   ParlantDecoratorOptions,
-} from '../decorators/parlant-validation.decorator';
+} from "../decorators/parlant-validation.decorator";
 
 // Import Parlant utility functions
-import { ParlantWrapperUtils } from '../utils/parlant-wrapper.utils';
+import { ParlantWrapperUtils } from "../utils/parlant-wrapper.utils";
 
 // ===== ENTERPRISE API VALIDATION TYPES =====
 
@@ -73,19 +73,19 @@ import { ParlantWrapperUtils } from '../utils/parlant-wrapper.utils';
 export interface EnterpriseValidatedRequest extends Request {
   /** Enterprise validation context */
   enterpriseValidation?: EnterpriseValidationContext;
-  
+
   /** Parlant conversation context */
   parlantContext?: ParlantConversationContext;
-  
+
   /** Security assessment results */
   securityAssessment?: SecurityAssessmentResult;
-  
+
   /** Performance metrics tracking */
   performanceMetrics?: RequestPerformanceMetrics;
-  
+
   /** Compliance validation results */
   complianceValidation?: ComplianceValidationResult;
-  
+
   /** Original request metadata */
   requestMetadata?: RequestMetadata;
 }
@@ -96,31 +96,31 @@ export interface EnterpriseValidatedRequest extends Request {
 export interface EnterpriseValidationContext {
   /** Validation operation ID */
   operationId: string;
-  
+
   /** Validation start time */
   startTime: Date;
-  
+
   /** Whether validation was performed */
   validated: boolean;
-  
+
   /** Validation result */
-  validationResult?: 'APPROVED' | 'DENIED' | 'CONDITIONAL' | 'ESCALATED';
-  
+  validationResult?: "APPROVED" | "DENIED" | "CONDITIONAL" | "ESCALATED";
+
   /** Validation reasoning */
   reasoning?: string;
-  
+
   /** Conversation ID from Parlant */
   conversationId?: string;
-  
+
   /** Security measures applied */
   appliedMeasures: string[];
-  
+
   /** Compliance requirements satisfied */
   complianceRequirements: string[];
-  
+
   /** Performance benchmarks met */
   performanceBenchmarks: PerformanceBenchmark[];
-  
+
   /** Audit trail entry ID */
   auditTrailId?: string;
 }
@@ -131,19 +131,19 @@ export interface EnterpriseValidationContext {
 export interface ParlantConversationContext {
   /** Conversation session ID */
   sessionId: string;
-  
+
   /** Conversation history */
   conversationHistory: ConversationHistoryEntry[];
-  
+
   /** Current conversation state */
   currentState: ConversationState;
-  
+
   /** User interaction context */
   userInteractionContext?: UserInteractionContext;
-  
+
   /** Business context for the operation */
   businessContext?: BusinessOperationContext;
-  
+
   /** API operation metadata */
   operationMetadata: ApiOperationMetadata;
 }
@@ -154,16 +154,16 @@ export interface ParlantConversationContext {
 export interface ConversationHistoryEntry {
   /** Entry timestamp */
   timestamp: Date;
-  
+
   /** Speaker role */
-  speaker: 'USER' | 'ASSISTANT' | 'SYSTEM' | 'VALIDATOR';
-  
+  speaker: "USER" | "ASSISTANT" | "SYSTEM" | "VALIDATOR";
+
   /** Message content */
   message: string;
-  
+
   /** Message intent or purpose */
   intent?: string;
-  
+
   /** Associated metadata */
   metadata?: Record<string, unknown>;
 }
@@ -173,17 +173,17 @@ export interface ConversationHistoryEntry {
  */
 export interface ConversationState {
   /** Current phase of conversation */
-  phase: 'INITIATION' | 'VALIDATION' | 'EXECUTION' | 'COMPLETION' | 'ERROR';
-  
+  phase: "INITIATION" | "VALIDATION" | "EXECUTION" | "COMPLETION" | "ERROR";
+
   /** Pending validations */
   pendingValidations: string[];
-  
+
   /** Completed validations */
   completedValidations: string[];
-  
+
   /** Active security measures */
   activeSecurityMeasures: string[];
-  
+
   /** Context variables */
   contextVariables: Record<string, unknown>;
 }
@@ -194,16 +194,16 @@ export interface ConversationState {
 export interface UserInteractionContext {
   /** User ID */
   userId: string;
-  
+
   /** User role */
   userRole: string;
-  
+
   /** User session information */
   sessionInfo: UserSessionInfo;
-  
+
   /** User preferences */
   preferences?: UserPreferences;
-  
+
   /** Interaction history summary */
   interactionHistory?: InteractionHistorySummary;
 }
@@ -214,16 +214,16 @@ export interface UserInteractionContext {
 export interface BusinessOperationContext {
   /** Business purpose of the API operation */
   purpose: string;
-  
+
   /** Expected business outcome */
   expectedOutcome: string;
-  
+
   /** Business criticality level */
-  criticalityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  
+  criticalityLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
   /** Business approval requirements */
   approvalRequirements: BusinessApprovalRequirement[];
-  
+
   /** Compliance requirements */
   complianceRequirements: ComplianceRequirement[];
 }
@@ -234,22 +234,22 @@ export interface BusinessOperationContext {
 export interface ApiOperationMetadata {
   /** API endpoint being accessed */
   endpoint: string;
-  
+
   /** HTTP method */
   method: string;
-  
+
   /** Service or controller name */
   serviceName?: string;
-  
+
   /** Controller method name */
   controllerMethod?: string;
-  
+
   /** Operation description */
   description?: string;
-  
+
   /** Expected response type */
   expectedResponseType?: string;
-  
+
   /** Operation tags or categories */
   tags: string[];
 }
@@ -260,22 +260,22 @@ export interface ApiOperationMetadata {
 export interface SecurityAssessmentResult {
   /** Overall security score (0-100) */
   overallScore: number;
-  
+
   /** Security level assigned */
   securityLevel: SecurityLevel;
-  
+
   /** Security threats identified */
   identifiedThreats: SecurityThreat[];
-  
+
   /** Security measures recommended */
   recommendedMeasures: SecurityMeasure[];
-  
+
   /** Compliance violations found */
   complianceViolations: ComplianceViolation[];
-  
+
   /** Assessment timestamp */
   assessedAt: Date;
-  
+
   /** Assessment duration */
   assessmentDuration: number;
 }
@@ -286,16 +286,16 @@ export interface SecurityAssessmentResult {
 export interface SecurityThreat {
   /** Threat type */
   type: SecurityThreatType;
-  
+
   /** Threat severity */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
   /** Threat description */
   description: string;
-  
+
   /** Threat indicators */
   indicators: string[];
-  
+
   /** Mitigation recommendations */
   mitigations: string[];
 }
@@ -304,14 +304,14 @@ export interface SecurityThreat {
  * Security threat types
  */
 export enum SecurityThreatType {
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  DATA_EXFILTRATION = 'data_exfiltration',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  INJECTION_ATTACK = 'injection_attack',
-  DENIAL_OF_SERVICE = 'denial_of_service',
-  MALICIOUS_PAYLOAD = 'malicious_payload',
-  SUSPICIOUS_PATTERN = 'suspicious_pattern',
-  ANOMALOUS_BEHAVIOR = 'anomalous_behavior',
+  UNAUTHORIZED_ACCESS = "unauthorized_access",
+  DATA_EXFILTRATION = "data_exfiltration",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  INJECTION_ATTACK = "injection_attack",
+  DENIAL_OF_SERVICE = "denial_of_service",
+  MALICIOUS_PAYLOAD = "malicious_payload",
+  SUSPICIOUS_PATTERN = "suspicious_pattern",
+  ANOMALOUS_BEHAVIOR = "anomalous_behavior",
 }
 
 /**
@@ -320,16 +320,16 @@ export enum SecurityThreatType {
 export interface SecurityMeasure {
   /** Measure type */
   type: SecurityMeasureType;
-  
+
   /** Measure configuration */
   configuration: Record<string, unknown>;
-  
+
   /** Implementation priority */
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'IMMEDIATE';
-  
+  priority: "LOW" | "MEDIUM" | "HIGH" | "IMMEDIATE";
+
   /** Estimated implementation time */
   implementationTime?: number;
-  
+
   /** Expected effectiveness */
   effectiveness: number;
 }
@@ -338,14 +338,14 @@ export interface SecurityMeasure {
  * Security measure types
  */
 export enum SecurityMeasureType {
-  ENHANCED_AUTHENTICATION = 'enhanced_authentication',
-  RATE_LIMITING = 'rate_limiting',
-  IP_FILTERING = 'ip_filtering',
-  REQUEST_VALIDATION = 'request_validation',
-  RESPONSE_FILTERING = 'response_filtering',
-  SESSION_MONITORING = 'session_monitoring',
-  AUDIT_LOGGING = 'audit_logging',
-  CIRCUIT_BREAKING = 'circuit_breaking',
+  ENHANCED_AUTHENTICATION = "enhanced_authentication",
+  RATE_LIMITING = "rate_limiting",
+  IP_FILTERING = "ip_filtering",
+  REQUEST_VALIDATION = "request_validation",
+  RESPONSE_FILTERING = "response_filtering",
+  SESSION_MONITORING = "session_monitoring",
+  AUDIT_LOGGING = "audit_logging",
+  CIRCUIT_BREAKING = "circuit_breaking",
 }
 
 /**
@@ -354,25 +354,25 @@ export enum SecurityMeasureType {
 export interface RequestPerformanceMetrics {
   /** Request processing start time */
   startTime: Date;
-  
+
   /** Validation duration in milliseconds */
   validationDuration?: number;
-  
+
   /** Conversation duration in milliseconds */
   conversationDuration?: number;
-  
+
   /** Security assessment duration */
   securityAssessmentDuration?: number;
-  
+
   /** Compliance check duration */
   complianceCheckDuration?: number;
-  
+
   /** Total middleware duration */
   totalMiddlewareDuration?: number;
-  
+
   /** Performance benchmarks */
   benchmarks: PerformanceBenchmark[];
-  
+
   /** Cache hit/miss information */
   cacheMetrics: CacheMetrics;
 }
@@ -383,16 +383,16 @@ export interface RequestPerformanceMetrics {
 export interface PerformanceBenchmark {
   /** Benchmark name */
   name: string;
-  
+
   /** Target value */
   target: number;
-  
+
   /** Actual value achieved */
   actual: number;
-  
+
   /** Whether benchmark was met */
   met: boolean;
-  
+
   /** Performance score (0-100) */
   score: number;
 }
@@ -403,16 +403,16 @@ export interface PerformanceBenchmark {
 export interface CacheMetrics {
   /** Cache hit count */
   hitCount: number;
-  
+
   /** Cache miss count */
   missCount: number;
-  
+
   /** Cache hit rate percentage */
   hitRate: number;
-  
+
   /** Cache response time */
   responseTime: number;
-  
+
   /** Cache size used */
   cacheSize: number;
 }
@@ -423,19 +423,19 @@ export interface CacheMetrics {
 export interface ComplianceValidationResult {
   /** Overall compliance score */
   overallScore: number;
-  
+
   /** Compliance status */
-  status: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL' | 'NEEDS_REVIEW';
-  
+  status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIAL" | "NEEDS_REVIEW";
+
   /** Regulatory frameworks checked */
   frameworksChecked: ComplianceFramework[];
-  
+
   /** Violations found */
   violations: ComplianceViolation[];
-  
+
   /** Recommendations for improvement */
   recommendations: ComplianceRecommendation[];
-  
+
   /** Audit trail requirements */
   auditRequirements: AuditRequirement[];
 }
@@ -446,18 +446,18 @@ export interface ComplianceValidationResult {
 export interface ComplianceFramework {
   /** Framework name */
   name: string;
-  
+
   /** Framework version */
   version: string;
-  
+
   /** Applicable regulations */
   regulations: string[];
-  
+
   /** Compliance level required */
-  requiredLevel: 'BASIC' | 'STANDARD' | 'ENHANCED' | 'MAXIMUM';
-  
+  requiredLevel: "BASIC" | "STANDARD" | "ENHANCED" | "MAXIMUM";
+
   /** Current compliance status */
-  currentStatus: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL';
+  currentStatus: "COMPLIANT" | "NON_COMPLIANT" | "PARTIAL";
 }
 
 /**
@@ -466,19 +466,19 @@ export interface ComplianceFramework {
 export interface ComplianceViolation {
   /** Violation type */
   type: ComplianceViolationType;
-  
+
   /** Violation severity */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
   /** Violation description */
   description: string;
-  
+
   /** Affected regulations */
   affectedRegulations: string[];
-  
+
   /** Required remediation actions */
   remediationActions: string[];
-  
+
   /** Remediation deadline */
   remediationDeadline?: Date;
 }
@@ -487,14 +487,14 @@ export interface ComplianceViolation {
  * Compliance violation types
  */
 export enum ComplianceViolationType {
-  DATA_RETENTION = 'data_retention',
-  ACCESS_CONTROL = 'access_control',
-  AUDIT_TRAIL = 'audit_trail',
-  ENCRYPTION = 'encryption',
-  PRIVACY = 'privacy',
-  CONSENT = 'consent',
-  DATA_MINIMIZATION = 'data_minimization',
-  CROSS_BORDER_TRANSFER = 'cross_border_transfer',
+  DATA_RETENTION = "data_retention",
+  ACCESS_CONTROL = "access_control",
+  AUDIT_TRAIL = "audit_trail",
+  ENCRYPTION = "encryption",
+  PRIVACY = "privacy",
+  CONSENT = "consent",
+  DATA_MINIMIZATION = "data_minimization",
+  CROSS_BORDER_TRANSFER = "cross_border_transfer",
 }
 
 /**
@@ -503,22 +503,22 @@ export enum ComplianceViolationType {
 export interface RequestMetadata {
   /** Request ID */
   requestId: string;
-  
+
   /** Request timestamp */
   timestamp: Date;
-  
+
   /** Client IP address */
   clientIp: string;
-  
+
   /** User agent */
   userAgent?: string;
-  
+
   /** Request size in bytes */
   requestSize: number;
-  
+
   /** Request headers (sanitized) */
   headers: Record<string, string>;
-  
+
   /** Geolocation information */
   geolocation?: GeolocationInfo;
 }
@@ -548,7 +548,7 @@ export interface InteractionHistorySummary {
 
 export interface BusinessApprovalRequirement {
   approverRole: string;
-  approvalType: 'MANUAL' | 'AUTOMATED' | 'CONDITIONAL';
+  approvalType: "MANUAL" | "AUTOMATED" | "CONDITIONAL";
   required: boolean;
   deadline?: Date;
 }
@@ -563,7 +563,7 @@ export interface ComplianceRequirement {
 export interface ComplianceRecommendation {
   category: string;
   description: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   implementationGuide: string;
 }
 
@@ -596,7 +596,7 @@ export interface GeolocationInfo {
 @Injectable()
 export class EnterpriseApiValidationMiddleware implements NestMiddleware {
   private readonly logger = new Logger(EnterpriseApiValidationMiddleware.name);
-  
+
   /** Performance targets and thresholds */
   private readonly performanceTargets = {
     maxValidationTime: 200, // ms
@@ -605,7 +605,7 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
     maxTotalMiddlewareTime: 300, // ms
     cacheHitRateTarget: 80, // percentage
   };
-  
+
   /** Security configuration */
   private readonly securityConfig = {
     enableZeroTrust: true,
@@ -614,19 +614,22 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
     criticalRiskThreshold: 90,
     enableRealTimeMonitoring: true,
   };
-  
+
   /** Compliance configuration */
   private readonly complianceConfig = {
     enableComplianceValidation: true,
-    requiredFrameworks: ['SOX', 'GDPR', 'HIPAA', 'PCI_DSS'],
+    requiredFrameworks: ["SOX", "GDPR", "HIPAA", "PCI_DSS"],
     auditTrailRetention: 2555, // days (7 years)
     realTimeViolationDetection: true,
   };
-  
+
   /** Cache for validation results and conversation contexts */
   private readonly validationCache = new Map<string, CachedValidationResult>();
-  private readonly conversationCache = new Map<string, CachedConversationContext>();
-  
+  private readonly conversationCache = new Map<
+    string,
+    CachedConversationContext
+  >();
+
   /** Circuit breaker for Parlant service */
   private circuitBreakerState = {
     isOpen: false,
@@ -640,18 +643,21 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
     private readonly parlantWrapperUtils: ParlantWrapperUtils,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
-    this.logger.log('Enterprise API Validation Middleware initialized with MAXIMUM Parlant integration', {
-      performanceTargets: this.performanceTargets,
-      securityConfig: this.securityConfig,
-      complianceConfig: this.complianceConfig,
-    });
+    this.logger.log(
+      "Enterprise API Validation Middleware initialized with MAXIMUM Parlant integration",
+      {
+        performanceTargets: this.performanceTargets,
+        securityConfig: this.securityConfig,
+        complianceConfig: this.complianceConfig,
+      },
+    );
 
     // Initialize performance monitoring
     this.initializePerformanceMonitoring();
-    
+
     // Initialize cache cleanup
     this.initializeCacheManagement();
-    
+
     // Initialize circuit breaker monitoring
     this.initializeCircuitBreakerMonitoring();
   }
@@ -702,24 +708,28 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       this.setEnterpriseSecurityHeaders(req, res);
 
       // Log successful validation
-      this.logger.log(`[${operationId}] Enterprise API validation completed successfully`, {
-        operationId,
-        totalTime,
-        validationResult: req.enterpriseValidation?.validationResult,
-        securityScore: req.securityAssessment?.overallScore,
-        complianceStatus: req.complianceValidation?.status,
-        performanceBenchmarks: req.performanceMetrics?.benchmarks?.filter(b => b.met).length,
-      });
+      this.logger.log(
+        `[${operationId}] Enterprise API validation completed successfully`,
+        {
+          operationId,
+          totalTime,
+          validationResult: req.enterpriseValidation?.validationResult,
+          securityScore: req.securityAssessment?.overallScore,
+          complianceStatus: req.complianceValidation?.status,
+          performanceBenchmarks: req.performanceMetrics?.benchmarks?.filter(
+            (b) => b.met,
+          ).length,
+        },
+      );
 
       // Proceed to next middleware
       next();
-
     } catch (error) {
       const totalTime = Date.now() - startTime;
-      
+
       // Handle different types of errors
       await this.handleValidationError(req, res, error, operationId, totalTime);
-      
+
       // Log error with full context
       this.logger.error(`[${operationId}] Enterprise API validation failed`, {
         operationId,
@@ -736,15 +746,17 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
 
       // Determine response strategy based on error type and configuration
       if (this.shouldFailOpen(error)) {
-        this.logger.warn(`[${operationId}] Failing open due to error type or configuration`);
+        this.logger.warn(
+          `[${operationId}] Failing open due to error type or configuration`,
+        );
         next();
       } else {
         // Return appropriate HTTP error response
         const statusCode = this.determineErrorStatusCode(error);
         res.status(statusCode).json({
           statusCode,
-          message: 'Enterprise API validation failed',
-          error: error instanceof Error ? error.message : 'Unknown error',
+          message: "Enterprise API validation failed",
+          error: error instanceof Error ? error.message : "Unknown error",
           operationId,
           timestamp: new Date(),
           details: this.sanitizeErrorDetails(error),
@@ -757,7 +769,7 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    * Initialize request context with enterprise validation metadata
    */
   @ParlantValidation({
-    description: 'Initialize enterprise request context and metadata',
+    description: "Initialize enterprise request context and metadata",
     securityLevel: SecurityLevel.MEDIUM,
     cacheable: false,
   })
@@ -766,13 +778,13 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
     operationId: string,
   ): Promise<void> {
     const requestId = `req-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-    
+
     // Initialize request metadata
     req.requestMetadata = {
       requestId,
       timestamp: new Date(),
       clientIp: this.extractClientIp(req),
-      userAgent: req.get('User-Agent'),
+      userAgent: req.get("User-Agent"),
       requestSize: this.calculateRequestSize(req),
       headers: this.sanitizeHeaders(req.headers),
       geolocation: await this.getGeolocation(req),
@@ -790,17 +802,17 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
 
     // Initialize Parlant conversation context
     req.parlantContext = {
-      sessionId: req.get('x-session-id') || `session-${Date.now()}`,
+      sessionId: req.get("x-session-id") || `session-${Date.now()}`,
       conversationHistory: [],
       currentState: {
-        phase: 'INITIATION',
+        phase: "INITIATION",
         pendingValidations: [],
         completedValidations: [],
         activeSecurityMeasures: [],
         contextVariables: {},
       },
       operationMetadata: {
-        endpoint: req.url || '',
+        endpoint: req.url || "",
         method: req.method,
         serviceName: this.extractServiceName(req),
         controllerMethod: this.extractControllerMethod(req),
@@ -834,7 +846,7 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    * Perform pre-validation setup and checks
    */
   @ParlantValidation({
-    description: 'Perform pre-validation setup and preliminary security checks',
+    description: "Perform pre-validation setup and preliminary security checks",
     securityLevel: SecurityLevel.LOW,
     cacheable: true,
     cacheTtl: 60000, // 1 minute
@@ -849,19 +861,19 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       // Check circuit breaker state
       if (this.circuitBreakerState.isOpen) {
         throw new ParlantIntegrationError(
-          'Parlant service circuit breaker is open',
-          'CIRCUIT_BREAKER_OPEN'
+          "Parlant service circuit breaker is open",
+          "CIRCUIT_BREAKER_OPEN",
         );
       }
 
       // Check cache for recent validation
       const cacheKey = this.generateValidationCacheKey(req);
       const cachedResult = await this.getCachedValidationResult(cacheKey);
-      
+
       if (cachedResult) {
         this.applyCachedValidationResult(req, cachedResult);
         req.performanceMetrics!.cacheMetrics.hitCount++;
-        
+
         this.logger.debug(`[${operationId}] Using cached validation result`, {
           operationId,
           cacheKey,
@@ -882,22 +894,21 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
 
       const setupTime = Date.now() - startTime;
       req.performanceMetrics!.benchmarks.push({
-        name: 'pre_validation_setup',
+        name: "pre_validation_setup",
         target: 20,
         actual: setupTime,
         met: setupTime <= 20,
         score: Math.max(0, 100 - (setupTime - 20) * 5),
       });
-
     } catch (error) {
       const setupTime = Date.now() - startTime;
-      
+
       this.logger.warn(`[${operationId}] Pre-validation setup failed`, {
         operationId,
         error: error instanceof Error ? error.message : String(error),
         setupTime,
       });
-      
+
       throw error;
     }
   }
@@ -906,7 +917,8 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    * Perform comprehensive security assessment
    */
   @ParlantValidation({
-    description: 'Perform comprehensive security assessment and threat analysis',
+    description:
+      "Perform comprehensive security assessment and threat analysis",
     securityLevel: SecurityLevel.HIGH,
     cacheable: true,
     cacheTtl: 300000, // 5 minutes
@@ -922,28 +934,40 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       const identifiedThreats: SecurityThreat[] = [];
       const recommendedMeasures: SecurityMeasure[] = [];
       const complianceViolations: ComplianceViolation[] = [];
-      
+
       let overallScore = 100; // Start with perfect score and deduct for threats
 
       // Threat Analysis 1: Request pattern analysis
       const patternThreats = await this.analyzeRequestPatterns(req);
       identifiedThreats.push(...patternThreats);
-      overallScore -= patternThreats.reduce((sum, threat) => sum + this.getThreatScoreDeduction(threat), 0);
+      overallScore -= patternThreats.reduce(
+        (sum, threat) => sum + this.getThreatScoreDeduction(threat),
+        0,
+      );
 
       // Threat Analysis 2: Authentication and authorization
       const authThreats = await this.analyzeAuthenticationSecurity(req);
       identifiedThreats.push(...authThreats);
-      overallScore -= authThreats.reduce((sum, threat) => sum + this.getThreatScoreDeduction(threat), 0);
+      overallScore -= authThreats.reduce(
+        (sum, threat) => sum + this.getThreatScoreDeduction(threat),
+        0,
+      );
 
       // Threat Analysis 3: Data security and encryption
       const dataThreats = await this.analyzeDataSecurity(req);
       identifiedThreats.push(...dataThreats);
-      overallScore -= dataThreats.reduce((sum, threat) => sum + this.getThreatScoreDeduction(threat), 0);
+      overallScore -= dataThreats.reduce(
+        (sum, threat) => sum + this.getThreatScoreDeduction(threat),
+        0,
+      );
 
       // Threat Analysis 4: Network and infrastructure security
       const infraThreats = await this.analyzeInfrastructureSecurity(req);
       identifiedThreats.push(...infraThreats);
-      overallScore -= infraThreats.reduce((sum, threat) => sum + this.getThreatScoreDeduction(threat), 0);
+      overallScore -= infraThreats.reduce(
+        (sum, threat) => sum + this.getThreatScoreDeduction(threat),
+        0,
+      );
 
       // Generate security measures based on identified threats
       for (const threat of identifiedThreats) {
@@ -952,7 +976,10 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       }
 
       // Determine security level based on overall score
-      const securityLevel = this.determineSecurityLevel(overallScore, identifiedThreats);
+      const securityLevel = this.determineSecurityLevel(
+        overallScore,
+        identifiedThreats,
+      );
 
       // Create security assessment result
       req.securityAssessment = {
@@ -968,11 +995,18 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       // Record performance benchmark
       const assessmentTime = Date.now() - startTime;
       req.performanceMetrics!.benchmarks.push({
-        name: 'security_assessment',
+        name: "security_assessment",
         target: this.performanceTargets.maxSecurityAssessmentTime,
         actual: assessmentTime,
-        met: assessmentTime <= this.performanceTargets.maxSecurityAssessmentTime,
-        score: Math.max(0, 100 - (assessmentTime - this.performanceTargets.maxSecurityAssessmentTime) * 2),
+        met:
+          assessmentTime <= this.performanceTargets.maxSecurityAssessmentTime,
+        score: Math.max(
+          0,
+          100 -
+            (assessmentTime -
+              this.performanceTargets.maxSecurityAssessmentTime) *
+              2,
+        ),
       });
 
       this.logger.debug(`[${operationId}] Security assessment completed`, {
@@ -983,33 +1017,35 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
         measureCount: recommendedMeasures.length,
         assessmentTime,
       });
-
     } catch (error) {
       const assessmentTime = Date.now() - startTime;
-      
+
       this.logger.error(`[${operationId}] Security assessment failed`, {
         operationId,
         error: error instanceof Error ? error.message : String(error),
         assessmentTime,
       });
-      
+
       // Create fallback security assessment
       req.securityAssessment = {
         overallScore: 50, // Conservative fallback score
         securityLevel: SecurityLevel.MEDIUM,
-        identifiedThreats: [{
-          type: SecurityThreatType.ANOMALOUS_BEHAVIOR,
-          severity: 'MEDIUM',
-          description: 'Security assessment failed - using fallback assessment',
-          indicators: ['assessment_failure'],
-          mitigations: ['manual_review_required'],
-        }],
+        identifiedThreats: [
+          {
+            type: SecurityThreatType.ANOMALOUS_BEHAVIOR,
+            severity: "MEDIUM",
+            description:
+              "Security assessment failed - using fallback assessment",
+            indicators: ["assessment_failure"],
+            mitigations: ["manual_review_required"],
+          },
+        ],
         recommendedMeasures: [],
         complianceViolations: [],
         assessedAt: new Date(),
         assessmentDuration: Date.now() - startTime,
       };
-      
+
       throw error;
     }
   }
@@ -1018,7 +1054,7 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    * Perform Parlant conversational validation
    */
   @ParlantValidation({
-    description: 'Perform comprehensive Parlant conversational AI validation',
+    description: "Perform comprehensive Parlant conversational AI validation",
     securityLevel: SecurityLevel.HIGH,
     cacheable: false, // Conversations are unique and shouldn't be cached
   })
@@ -1031,12 +1067,17 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
     try {
       // Skip Parlant validation if circuit breaker is open
       if (this.circuitBreakerState.isOpen) {
-        this.logger.warn(`[${operationId}] Skipping Parlant validation - circuit breaker open`);
+        this.logger.warn(
+          `[${operationId}] Skipping Parlant validation - circuit breaker open`,
+        );
         return this.applyFallbackValidation(req, operationId);
       }
 
       // Create comprehensive Parlant validation request
-      const validationRequest = await this.createParlantValidationRequest(req, operationId);
+      const validationRequest = await this.createParlantValidationRequest(
+        req,
+        operationId,
+      );
 
       // Execute Parlant validation with timeout
       const validationResponse = await Promise.race([
@@ -1045,7 +1086,11 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       ]);
 
       // Process validation response
-      await this.processParlantValidationResponse(req, validationResponse, operationId);
+      await this.processParlantValidationResponse(
+        req,
+        validationResponse,
+        operationId,
+      );
 
       // Update circuit breaker on success
       this.updateCircuitBreakerOnSuccess();
@@ -1053,11 +1098,15 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       // Record performance benchmark
       const validationTime = Date.now() - startTime;
       req.performanceMetrics!.benchmarks.push({
-        name: 'parlant_validation',
+        name: "parlant_validation",
         target: this.performanceTargets.maxValidationTime,
         actual: validationTime,
         met: validationTime <= this.performanceTargets.maxValidationTime,
-        score: Math.max(0, 100 - (validationTime - this.performanceTargets.maxValidationTime) * 0.5),
+        score: Math.max(
+          0,
+          100 -
+            (validationTime - this.performanceTargets.maxValidationTime) * 0.5,
+        ),
       });
 
       req.performanceMetrics!.validationDuration = validationTime;
@@ -1068,31 +1117,30 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
         validationResult: req.enterpriseValidation?.validationResult,
         conversationId: req.enterpriseValidation?.conversationId,
       });
-
     } catch (error) {
       const validationTime = Date.now() - startTime;
       req.performanceMetrics!.validationDuration = validationTime;
-      
+
       // Update circuit breaker on failure
       this.updateCircuitBreakerOnFailure();
-      
+
       if (error instanceof ParlantTimeoutError) {
         this.logger.warn(`[${operationId}] Parlant validation timeout`, {
           operationId,
           timeout: this.performanceTargets.maxValidationTime,
           validationTime,
         });
-        
+
         // Apply fallback validation for timeout
         return this.applyFallbackValidation(req, operationId);
       }
-      
+
       this.logger.error(`[${operationId}] Parlant validation failed`, {
         operationId,
         error: error instanceof Error ? error.message : String(error),
         validationTime,
       });
-      
+
       throw error;
     }
   }
@@ -1101,7 +1149,8 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    * Perform comprehensive compliance validation
    */
   @ParlantValidation({
-    description: 'Perform comprehensive compliance validation across regulatory frameworks',
+    description:
+      "Perform comprehensive compliance validation across regulatory frameworks",
     securityLevel: SecurityLevel.CRITICAL,
     cacheable: true,
     cacheTtl: 600000, // 10 minutes
@@ -1124,24 +1173,35 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       const auditRequirements: AuditRequirement[] = [];
 
       let overallScore = 100;
-      let complianceStatus: 'COMPLIANT' | 'NON_COMPLIANT' | 'PARTIAL' | 'NEEDS_REVIEW' = 'COMPLIANT';
+      let complianceStatus:
+        | "COMPLIANT"
+        | "NON_COMPLIANT"
+        | "PARTIAL"
+        | "NEEDS_REVIEW" = "COMPLIANT";
 
       // Check each required compliance framework
       for (const frameworkName of this.complianceConfig.requiredFrameworks) {
-        const frameworkResult = await this.validateComplianceFramework(req, frameworkName, operationId);
+        const frameworkResult = await this.validateComplianceFramework(
+          req,
+          frameworkName,
+          operationId,
+        );
         frameworksChecked.push(frameworkResult.framework);
-        
+
         if (frameworkResult.violations.length > 0) {
           violations.push(...frameworkResult.violations);
           overallScore -= frameworkResult.scoreDeduction;
-          
-          if (frameworkResult.framework.currentStatus === 'NON_COMPLIANT') {
-            complianceStatus = 'NON_COMPLIANT';
-          } else if (complianceStatus === 'COMPLIANT' && frameworkResult.framework.currentStatus === 'PARTIAL') {
-            complianceStatus = 'PARTIAL';
+
+          if (frameworkResult.framework.currentStatus === "NON_COMPLIANT") {
+            complianceStatus = "NON_COMPLIANT";
+          } else if (
+            complianceStatus === "COMPLIANT" &&
+            frameworkResult.framework.currentStatus === "PARTIAL"
+          ) {
+            complianceStatus = "PARTIAL";
           }
         }
-        
+
         recommendations.push(...frameworkResult.recommendations);
         auditRequirements.push(...frameworkResult.auditRequirements);
       }
@@ -1159,11 +1219,16 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       // Record performance benchmark
       const complianceTime = Date.now() - startTime;
       req.performanceMetrics!.benchmarks.push({
-        name: 'compliance_validation',
+        name: "compliance_validation",
         target: this.performanceTargets.maxComplianceCheckTime,
         actual: complianceTime,
         met: complianceTime <= this.performanceTargets.maxComplianceCheckTime,
-        score: Math.max(0, 100 - (complianceTime - this.performanceTargets.maxComplianceCheckTime) * 1),
+        score: Math.max(
+          0,
+          100 -
+            (complianceTime - this.performanceTargets.maxComplianceCheckTime) *
+              1,
+        ),
       });
 
       req.performanceMetrics!.complianceCheckDuration = complianceTime;
@@ -1176,33 +1241,35 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
         violationCount: violations.length,
         complianceTime,
       });
-
     } catch (error) {
       const complianceTime = Date.now() - startTime;
       req.performanceMetrics!.complianceCheckDuration = complianceTime;
-      
+
       this.logger.error(`[${operationId}] Compliance validation failed`, {
         operationId,
         error: error instanceof Error ? error.message : String(error),
         complianceTime,
       });
-      
+
       // Create fallback compliance result
       req.complianceValidation = {
         overallScore: 75, // Conservative fallback
-        status: 'NEEDS_REVIEW',
+        status: "NEEDS_REVIEW",
         frameworksChecked: [],
-        violations: [{
-          type: ComplianceViolationType.AUDIT_TRAIL,
-          severity: 'MEDIUM',
-          description: 'Compliance validation failed - manual review required',
-          affectedRegulations: ['GENERAL'],
-          remediationActions: ['manual_compliance_review'],
-        }],
+        violations: [
+          {
+            type: ComplianceViolationType.AUDIT_TRAIL,
+            severity: "MEDIUM",
+            description:
+              "Compliance validation failed - manual review required",
+            affectedRegulations: ["GENERAL"],
+            remediationActions: ["manual_compliance_review"],
+          },
+        ],
         recommendations: [],
         auditRequirements: [],
       };
-      
+
       throw error;
     }
   }
@@ -1210,27 +1277,39 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
   // Additional helper methods will be implemented here...
   // This file continues with the implementation of all helper methods,
   // validation logic, caching, circuit breaker management, etc.
-  
-  private async initializeConversationHistory(req: EnterpriseValidatedRequest, operationId: string): Promise<void> {
+
+  private async initializeConversationHistory(
+    req: EnterpriseValidatedRequest,
+    operationId: string,
+  ): Promise<void> {
     // Implementation for initializing conversation history
   }
 
-  private async performBasicSecurityChecks(req: EnterpriseValidatedRequest, operationId: string): Promise<void> {
+  private async performBasicSecurityChecks(
+    req: EnterpriseValidatedRequest,
+    operationId: string,
+  ): Promise<void> {
     // Implementation for basic security checks
   }
 
   // ... (remaining methods to be implemented)
-  
+
   private initializePerformanceMonitoring(): void {
-    this.logger.log('Performance monitoring initialized for enterprise API validation');
+    this.logger.log(
+      "Performance monitoring initialized for enterprise API validation",
+    );
   }
-  
+
   private initializeCacheManagement(): void {
-    this.logger.log('Cache management initialized for enterprise API validation');
+    this.logger.log(
+      "Cache management initialized for enterprise API validation",
+    );
   }
-  
+
   private initializeCircuitBreakerMonitoring(): void {
-    this.logger.log('Circuit breaker monitoring initialized for Parlant service');
+    this.logger.log(
+      "Circuit breaker monitoring initialized for Parlant service",
+    );
   }
 
   // ... (all other helper methods implementations)

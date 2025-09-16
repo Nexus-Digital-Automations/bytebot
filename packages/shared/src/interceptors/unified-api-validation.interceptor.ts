@@ -36,15 +36,15 @@ import {
   HttpStatus,
   Logger,
   Inject,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { Observable, throwError, of } from 'rxjs';
-import { catchError, map, tap, timeout } from 'rxjs/operators';
-import { Request, Response } from 'express';
-import { GqlExecutionContext } from '@nestjs/graphql';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { ConfigService } from "@nestjs/config";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
+import { Observable, throwError, of } from "rxjs";
+import { catchError, map, tap, timeout } from "rxjs/operators";
+import { Request, Response } from "express";
+import { GqlExecutionContext } from "@nestjs/graphql";
 
 // Import Parlant integration types and services
 import {
@@ -59,15 +59,15 @@ import {
   ParlantValidationMetadata,
   ParlantRiskAssessment,
   ParlantAuditEntry,
-} from '../types/parlant-integration.types';
+} from "../types/parlant-integration.types";
 
 // Import Parlant decorators and utilities
 import {
   ParlantValidation,
   ParlantDecoratorOptions,
-} from '../decorators/parlant-validation.decorator';
+} from "../decorators/parlant-validation.decorator";
 
-import { ParlantWrapperUtils } from '../utils/parlant-wrapper.utils';
+import { ParlantWrapperUtils } from "../utils/parlant-wrapper.utils";
 
 // ===== UNIFIED API VALIDATION TYPES =====
 
@@ -75,10 +75,10 @@ import { ParlantWrapperUtils } from '../utils/parlant-wrapper.utils';
  * API type enumeration for unified handling
  */
 export enum ApiType {
-  REST = 'rest',
-  GRAPHQL = 'graphql',
-  WEBSOCKET = 'websocket',
-  GRPC = 'grpc',
+  REST = "rest",
+  GRAPHQL = "graphql",
+  WEBSOCKET = "websocket",
+  GRPC = "grpc",
 }
 
 /**
@@ -87,28 +87,28 @@ export enum ApiType {
 export interface UnifiedApiContext {
   /** API type being processed */
   apiType: ApiType;
-  
+
   /** Operation identification */
   operation: ApiOperation;
-  
+
   /** Request context */
   requestContext: UnifiedRequestContext;
-  
+
   /** Response context */
   responseContext?: UnifiedResponseContext;
-  
+
   /** Validation context */
   validationContext: ValidationContext;
-  
+
   /** Performance metrics */
   performanceMetrics: PerformanceMetrics;
-  
+
   /** Security context */
   securityContext: SecurityContext;
-  
+
   /** Compliance context */
   complianceContext: ComplianceContext;
-  
+
   /** Audit context */
   auditContext: AuditContext;
 }
@@ -119,22 +119,22 @@ export interface UnifiedApiContext {
 export interface ApiOperation {
   /** Operation name or identifier */
   name: string;
-  
+
   /** Operation type (query, mutation, subscription for GraphQL) */
   type: OperationType;
-  
+
   /** HTTP method for REST APIs */
   httpMethod?: string;
-  
+
   /** GraphQL operation type */
   graphqlOperationType?: GraphQLOperationType;
-  
+
   /** Operation description */
   description?: string;
-  
+
   /** Operation tags */
   tags: string[];
-  
+
   /** Operation metadata */
   metadata: Record<string, unknown>;
 }
@@ -143,28 +143,28 @@ export interface ApiOperation {
  * Operation types
  */
 export enum OperationType {
-  QUERY = 'query',
-  MUTATION = 'mutation',
-  SUBSCRIPTION = 'subscription',
-  HTTP_GET = 'http_get',
-  HTTP_POST = 'http_post',
-  HTTP_PUT = 'http_put',
-  HTTP_DELETE = 'http_delete',
-  HTTP_PATCH = 'http_patch',
-  HTTP_OPTIONS = 'http_options',
-  HTTP_HEAD = 'http_head',
-  WEBSOCKET_MESSAGE = 'websocket_message',
-  GRPC_UNARY = 'grpc_unary',
-  GRPC_STREAM = 'grpc_stream',
+  QUERY = "query",
+  MUTATION = "mutation",
+  SUBSCRIPTION = "subscription",
+  HTTP_GET = "http_get",
+  HTTP_POST = "http_post",
+  HTTP_PUT = "http_put",
+  HTTP_DELETE = "http_delete",
+  HTTP_PATCH = "http_patch",
+  HTTP_OPTIONS = "http_options",
+  HTTP_HEAD = "http_head",
+  WEBSOCKET_MESSAGE = "websocket_message",
+  GRPC_UNARY = "grpc_unary",
+  GRPC_STREAM = "grpc_stream",
 }
 
 /**
  * GraphQL operation types
  */
 export enum GraphQLOperationType {
-  QUERY = 'query',
-  MUTATION = 'mutation',
-  SUBSCRIPTION = 'subscription',
+  QUERY = "query",
+  MUTATION = "mutation",
+  SUBSCRIPTION = "subscription",
 }
 
 /**
@@ -173,22 +173,22 @@ export enum GraphQLOperationType {
 export interface UnifiedRequestContext {
   /** Request ID */
   requestId: string;
-  
+
   /** Request timestamp */
   timestamp: Date;
-  
+
   /** Client information */
   client: ClientInformation;
-  
+
   /** Request payload */
   payload: RequestPayload;
-  
+
   /** Request headers */
   headers: Record<string, string>;
-  
+
   /** Request parameters */
   parameters: Record<string, unknown>;
-  
+
   /** Request metadata */
   metadata: Record<string, unknown>;
 }
@@ -199,19 +199,19 @@ export interface UnifiedRequestContext {
 export interface ClientInformation {
   /** Client IP address */
   ipAddress: string;
-  
+
   /** User agent */
   userAgent?: string;
-  
+
   /** Client ID if available */
   clientId?: string;
-  
+
   /** Session ID */
   sessionId?: string;
-  
+
   /** Geographic information */
   geographic?: GeographicInfo;
-  
+
   /** Device information */
   device?: DeviceInfo;
 }
@@ -222,16 +222,16 @@ export interface ClientInformation {
 export interface RequestPayload {
   /** Payload size in bytes */
   size: number;
-  
+
   /** Payload type */
   type: PayloadType;
-  
+
   /** Payload structure */
   structure: PayloadStructure;
-  
+
   /** Sensitive data indicators */
   sensitiveDataIndicators: string[];
-  
+
   /** Validation results */
   validationResults: PayloadValidationResult[];
 }
@@ -240,14 +240,14 @@ export interface RequestPayload {
  * Payload types
  */
 export enum PayloadType {
-  JSON = 'json',
-  XML = 'xml',
-  FORM_DATA = 'form_data',
-  MULTIPART = 'multipart',
-  BINARY = 'binary',
-  TEXT = 'text',
-  GRAPHQL_QUERY = 'graphql_query',
-  PROTOBUF = 'protobuf',
+  JSON = "json",
+  XML = "xml",
+  FORM_DATA = "form_data",
+  MULTIPART = "multipart",
+  BINARY = "binary",
+  TEXT = "text",
+  GRAPHQL_QUERY = "graphql_query",
+  PROTOBUF = "protobuf",
 }
 
 /**
@@ -256,13 +256,13 @@ export enum PayloadType {
 export interface PayloadStructure {
   /** Schema validation results */
   schemaValidation: SchemaValidationResult;
-  
+
   /** Field analysis */
   fieldAnalysis: FieldAnalysis[];
-  
+
   /** Complexity metrics */
   complexityMetrics: ComplexityMetrics;
-  
+
   /** Security analysis */
   securityAnalysis: PayloadSecurityAnalysis;
 }
@@ -273,16 +273,16 @@ export interface PayloadStructure {
 export interface SchemaValidationResult {
   /** Whether schema validation passed */
   valid: boolean;
-  
+
   /** Validation errors */
   errors: ValidationError[];
-  
+
   /** Validation warnings */
   warnings: ValidationWarning[];
-  
+
   /** Schema version used */
   schemaVersion?: string;
-  
+
   /** Validation metadata */
   metadata: Record<string, unknown>;
 }
@@ -293,16 +293,16 @@ export interface SchemaValidationResult {
 export interface FieldAnalysis {
   /** Field name */
   fieldName: string;
-  
+
   /** Field type */
   fieldType: string;
-  
+
   /** Field value analysis */
   valueAnalysis: FieldValueAnalysis;
-  
+
   /** Security classification */
   securityClassification: string;
-  
+
   /** Compliance requirements */
   complianceRequirements: string[];
 }
@@ -313,18 +313,18 @@ export interface FieldAnalysis {
 export interface FieldValueAnalysis {
   /** Value type */
   type: string;
-  
+
   /** Value size */
   size: number;
-  
+
   /** Value pattern */
   pattern?: string;
-  
+
   /** Suspicious indicators */
   suspiciousIndicators: string[];
-  
+
   /** Validation status */
-  validationStatus: 'VALID' | 'INVALID' | 'SUSPICIOUS' | 'UNKNOWN';
+  validationStatus: "VALID" | "INVALID" | "SUSPICIOUS" | "UNKNOWN";
 }
 
 /**
@@ -333,19 +333,19 @@ export interface FieldValueAnalysis {
 export interface ComplexityMetrics {
   /** Overall complexity score */
   overallComplexity: number;
-  
+
   /** Field count */
   fieldCount: number;
-  
+
   /** Nesting depth */
   nestingDepth: number;
-  
+
   /** Array complexity */
   arrayComplexity: number;
-  
+
   /** Object complexity */
   objectComplexity: number;
-  
+
   /** GraphQL query complexity (if applicable) */
   graphqlComplexity?: number;
 }
@@ -356,13 +356,13 @@ export interface ComplexityMetrics {
 export interface PayloadSecurityAnalysis {
   /** Security threats detected */
   threatsDetected: SecurityThreat[];
-  
+
   /** Risk score */
   riskScore: number;
-  
+
   /** Security measures recommended */
   recommendedMeasures: string[];
-  
+
   /** Encryption requirements */
   encryptionRequirements: EncryptionRequirement[];
 }
@@ -373,16 +373,16 @@ export interface PayloadSecurityAnalysis {
 export interface SecurityThreat {
   /** Threat type */
   type: string;
-  
+
   /** Threat severity */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
   /** Threat description */
   description: string;
-  
+
   /** Affected fields */
   affectedFields: string[];
-  
+
   /** Mitigation recommendations */
   mitigations: string[];
 }
@@ -393,13 +393,13 @@ export interface SecurityThreat {
 export interface EncryptionRequirement {
   /** Field or data requiring encryption */
   target: string;
-  
+
   /** Encryption type required */
-  encryptionType: 'AT_REST' | 'IN_TRANSIT' | 'END_TO_END';
-  
+  encryptionType: "AT_REST" | "IN_TRANSIT" | "END_TO_END";
+
   /** Encryption algorithm required */
   algorithm?: string;
-  
+
   /** Key management requirements */
   keyManagement: string[];
 }
@@ -410,16 +410,16 @@ export interface EncryptionRequirement {
 export interface UnifiedResponseContext {
   /** Response timestamp */
   timestamp: Date;
-  
+
   /** Response status */
   status: ResponseStatus;
-  
+
   /** Response payload */
   payload: ResponsePayload;
-  
+
   /** Response headers */
   headers: Record<string, string>;
-  
+
   /** Response metadata */
   metadata: Record<string, unknown>;
 }
@@ -430,16 +430,16 @@ export interface UnifiedResponseContext {
 export interface ResponseStatus {
   /** HTTP status code */
   httpCode?: number;
-  
+
   /** GraphQL status */
   graphqlStatus?: GraphQLResponseStatus;
-  
+
   /** Custom status information */
   customStatus?: Record<string, unknown>;
-  
+
   /** Success indicator */
   success: boolean;
-  
+
   /** Error information */
   error?: ErrorInformation;
 }
@@ -450,10 +450,10 @@ export interface ResponseStatus {
 export interface GraphQLResponseStatus {
   /** Whether GraphQL operation was successful */
   success: boolean;
-  
+
   /** GraphQL errors */
   errors?: GraphQLError[];
-  
+
   /** Extensions */
   extensions?: Record<string, unknown>;
 }
@@ -464,13 +464,13 @@ export interface GraphQLResponseStatus {
 export interface GraphQLError {
   /** Error message */
   message: string;
-  
+
   /** Error locations */
   locations?: ErrorLocation[];
-  
+
   /** Error path */
   path?: Array<string | number>;
-  
+
   /** Error extensions */
   extensions?: Record<string, unknown>;
 }
@@ -481,7 +481,7 @@ export interface GraphQLError {
 export interface ErrorLocation {
   /** Line number */
   line: number;
-  
+
   /** Column number */
   column: number;
 }
@@ -492,13 +492,13 @@ export interface ErrorLocation {
 export interface ResponsePayload {
   /** Payload size */
   size: number;
-  
+
   /** Payload type */
   type: PayloadType;
-  
+
   /** Data sensitivity analysis */
   sensitivityAnalysis: DataSensitivityAnalysis;
-  
+
   /** Compliance validation */
   complianceValidation: ResponseComplianceValidation;
 }
@@ -509,13 +509,13 @@ export interface ResponsePayload {
 export interface DataSensitivityAnalysis {
   /** Sensitivity level */
   level: DataSensitivityLevel;
-  
+
   /** Sensitive fields identified */
   sensitiveFields: SensitiveField[];
-  
+
   /** Data classification */
   classification: string[];
-  
+
   /** Protection requirements */
   protectionRequirements: DataProtectionRequirement[];
 }
@@ -524,11 +524,11 @@ export interface DataSensitivityAnalysis {
  * Data sensitivity levels
  */
 export enum DataSensitivityLevel {
-  PUBLIC = 'public',
-  INTERNAL = 'internal',
-  CONFIDENTIAL = 'confidential',
-  RESTRICTED = 'restricted',
-  SECRET = 'secret',
+  PUBLIC = "public",
+  INTERNAL = "internal",
+  CONFIDENTIAL = "confidential",
+  RESTRICTED = "restricted",
+  SECRET = "secret",
 }
 
 /**
@@ -537,13 +537,13 @@ export enum DataSensitivityLevel {
 export interface SensitiveField {
   /** Field path */
   path: string;
-  
+
   /** Sensitivity type */
   type: SensitiveDataType;
-  
+
   /** Regulation compliance */
   regulations: string[];
-  
+
   /** Required protections */
   protections: string[];
 }
@@ -552,14 +552,14 @@ export interface SensitiveField {
  * Sensitive data types
  */
 export enum SensitiveDataType {
-  PII = 'pii', // Personally Identifiable Information
-  PHI = 'phi', // Protected Health Information
-  PCI = 'pci', // Payment Card Information
-  FINANCIAL = 'financial',
-  BIOMETRIC = 'biometric',
-  LOCATION = 'location',
-  BEHAVIORAL = 'behavioral',
-  TECHNICAL = 'technical',
+  PII = "pii", // Personally Identifiable Information
+  PHI = "phi", // Protected Health Information
+  PCI = "pci", // Payment Card Information
+  FINANCIAL = "financial",
+  BIOMETRIC = "biometric",
+  LOCATION = "location",
+  BEHAVIORAL = "behavioral",
+  TECHNICAL = "technical",
 }
 
 /**
@@ -568,27 +568,27 @@ export enum SensitiveDataType {
 export interface DataProtectionRequirement {
   /** Protection type */
   type: DataProtectionType;
-  
+
   /** Implementation details */
   implementation: string;
-  
+
   /** Compliance frameworks */
   frameworks: string[];
-  
+
   /** Priority level */
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 }
 
 /**
  * Data protection types
  */
 export enum DataProtectionType {
-  ENCRYPTION = 'encryption',
-  MASKING = 'masking',
-  TOKENIZATION = 'tokenization',
-  REDACTION = 'redaction',
-  ACCESS_CONTROL = 'access_control',
-  AUDIT_LOGGING = 'audit_logging',
+  ENCRYPTION = "encryption",
+  MASKING = "masking",
+  TOKENIZATION = "tokenization",
+  REDACTION = "redaction",
+  ACCESS_CONTROL = "access_control",
+  AUDIT_LOGGING = "audit_logging",
 }
 
 /**
@@ -597,13 +597,13 @@ export enum DataProtectionType {
 export interface ResponseComplianceValidation {
   /** Overall compliance status */
   status: ComplianceStatus;
-  
+
   /** Compliance checks performed */
   checksPerformed: ComplianceCheck[];
-  
+
   /** Violations found */
   violations: ComplianceViolation[];
-  
+
   /** Recommendations */
   recommendations: ComplianceRecommendation[];
 }
@@ -612,11 +612,11 @@ export interface ResponseComplianceValidation {
  * Compliance status
  */
 export enum ComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  PARTIAL_COMPLIANCE = 'partial_compliance',
-  PENDING_REVIEW = 'pending_review',
-  NOT_APPLICABLE = 'not_applicable',
+  COMPLIANT = "compliant",
+  NON_COMPLIANT = "non_compliant",
+  PARTIAL_COMPLIANCE = "partial_compliance",
+  PENDING_REVIEW = "pending_review",
+  NOT_APPLICABLE = "not_applicable",
 }
 
 // Additional supporting interfaces for complete type coverage
@@ -634,12 +634,12 @@ export interface ValidationRule {
   ruleName: string;
   ruleType: string;
   parameters: Record<string, unknown>;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 }
 
 export interface ValidationResult {
   ruleId: string;
-  result: 'PASS' | 'FAIL' | 'WARNING' | 'SKIP';
+  result: "PASS" | "FAIL" | "WARNING" | "SKIP";
   message: string;
   details?: Record<string, unknown>;
 }
@@ -734,7 +734,7 @@ export interface DeviceInfo {
 
 export interface PayloadValidationResult {
   validator: string;
-  result: 'VALID' | 'INVALID' | 'WARNING';
+  result: "VALID" | "INVALID" | "WARNING";
   message: string;
 }
 
@@ -742,7 +742,7 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  severity: 'ERROR' | 'WARNING';
+  severity: "ERROR" | "WARNING";
 }
 
 export interface ValidationWarning {
@@ -768,14 +768,14 @@ export interface ComplianceCheck {
 export interface ComplianceViolation {
   framework: string;
   violation: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   remediation: string;
 }
 
 export interface ComplianceRecommendation {
   type: string;
   description: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 }
 
 // ===== UNIFIED API VALIDATION INTERCEPTOR =====
@@ -790,7 +790,7 @@ export interface ComplianceRecommendation {
 @Injectable()
 export class UnifiedApiValidationInterceptor implements NestInterceptor {
   private readonly logger = new Logger(UnifiedApiValidationInterceptor.name);
-  
+
   /** Performance targets for unified validation */
   private readonly performanceTargets = {
     maxTotalValidationTime: 200, // ms
@@ -800,7 +800,7 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     maxParlantValidationTime: 150, // ms
     cacheHitRateTarget: 85, // percentage
   };
-  
+
   /** Validation configuration */
   private readonly validationConfig = {
     enableUnifiedValidation: true,
@@ -813,15 +813,15 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     failOnValidationError: true,
     enableCaching: true,
   };
-  
+
   /** API type detection patterns */
   private readonly apiTypePatterns = {
-    graphql: ['/graphql', 'application/graphql'],
-    rest: ['application/json', 'application/xml'],
-    websocket: ['websocket'],
-    grpc: ['application/grpc'],
+    graphql: ["/graphql", "application/graphql"],
+    rest: ["application/json", "application/xml"],
+    websocket: ["websocket"],
+    grpc: ["application/grpc"],
   };
-  
+
   /** Circuit breaker for validation services */
   private circuitBreakerState = {
     isOpen: false,
@@ -831,7 +831,7 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     failureThreshold: 10,
     recoveryTimeout: 30000,
   };
-  
+
   /** Validation cache */
   private readonly validationCache = new Map<string, CachedValidationResult>();
 
@@ -841,11 +841,14 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     private readonly parlantWrapperUtils: ParlantWrapperUtils,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
-    this.logger.log('Unified API Validation Interceptor initialized with MAXIMUM Parlant integration', {
-      performanceTargets: this.performanceTargets,
-      validationConfig: this.validationConfig,
-      supportedApiTypes: Object.keys(this.apiTypePatterns),
-    });
+    this.logger.log(
+      "Unified API Validation Interceptor initialized with MAXIMUM Parlant integration",
+      {
+        performanceTargets: this.performanceTargets,
+        validationConfig: this.validationConfig,
+        supportedApiTypes: Object.keys(this.apiTypePatterns),
+      },
+    );
 
     // Initialize monitoring and management
     this.initializePerformanceMonitoring();
@@ -857,12 +860,13 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
    * Main interceptor method providing unified validation across API types
    */
   @ParlantValidation({
-    description: 'Unified API validation across REST, GraphQL, and other API types with comprehensive enterprise validation',
+    description:
+      "Unified API validation across REST, GraphQL, and other API types with comprehensive enterprise validation",
     securityLevel: SecurityLevel.HIGH,
     cacheable: true,
     cacheTtl: 300000, // 5 minutes
   })
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     if (!this.validationConfig.enableUnifiedValidation) {
       return next.handle();
     }
@@ -870,30 +874,59 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     const operationId = `unified-api-validation-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
-    return new Observable(subscriber => {
+    return new Observable((subscriber) => {
       this.performUnifiedValidation(context, operationId)
-        .then(validationResult => {
-          if (!validationResult.success && this.validationConfig.failOnValidationError) {
-            subscriber.error(new HttpException(validationResult.error!, validationResult.statusCode || HttpStatus.BAD_REQUEST));
+        .then((validationResult) => {
+          if (
+            !validationResult.success &&
+            this.validationConfig.failOnValidationError
+          ) {
+            subscriber.error(
+              new HttpException(
+                validationResult.error!,
+                validationResult.statusCode || HttpStatus.BAD_REQUEST,
+              ),
+            );
             return;
           }
 
           // Continue with request processing
-          return next.handle().pipe(
-            // Apply response validation and transformation
-            map(response => this.processUnifiedResponse(response, validationResult.apiContext!, operationId)),
-            
-            // Handle errors
-            catchError(error => this.handleUnifiedError(error, validationResult.apiContext!, operationId)),
-            
-            // Apply timeout
-            timeout(this.configService.get<number>('api.timeout', 30000)),
-            
-            // Final processing
-            tap(finalResponse => this.finalizeUnifiedValidation(finalResponse, validationResult.apiContext!, operationId))
-          ).subscribe(subscriber);
+          return next
+            .handle()
+            .pipe(
+              // Apply response validation and transformation
+              map((response) =>
+                this.processUnifiedResponse(
+                  response,
+                  validationResult.apiContext!,
+                  operationId,
+                ),
+              ),
+
+              // Handle errors
+              catchError((error) =>
+                this.handleUnifiedError(
+                  error,
+                  validationResult.apiContext!,
+                  operationId,
+                ),
+              ),
+
+              // Apply timeout
+              timeout(this.configService.get<number>("api.timeout", 30000)),
+
+              // Final processing
+              tap((finalResponse) =>
+                this.finalizeUnifiedValidation(
+                  finalResponse,
+                  validationResult.apiContext!,
+                  operationId,
+                ),
+              ),
+            )
+            .subscribe(subscriber);
         })
-        .catch(error => {
+        .catch((error) => {
           this.logger.error(`[${operationId}] Unified validation failed`, {
             operationId,
             error: error instanceof Error ? error.message : String(error),
@@ -901,10 +934,17 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
           });
 
           if (this.shouldFailOpen(error)) {
-            this.logger.warn(`[${operationId}] Failing open due to validation error`);
+            this.logger.warn(
+              `[${operationId}] Failing open due to validation error`,
+            );
             next.handle().subscribe(subscriber);
           } else {
-            subscriber.error(new HttpException('API validation failed', HttpStatus.INTERNAL_SERVER_ERROR));
+            subscriber.error(
+              new HttpException(
+                "API validation failed",
+                HttpStatus.INTERNAL_SERVER_ERROR,
+              ),
+            );
           }
         });
     });
@@ -914,7 +954,8 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
    * Perform comprehensive unified validation across all API types
    */
   @ParlantValidation({
-    description: 'Perform comprehensive unified validation with API type detection and standardized patterns',
+    description:
+      "Perform comprehensive unified validation with API type detection and standardized patterns",
     securityLevel: SecurityLevel.HIGH,
     cacheable: true,
   })
@@ -926,28 +967,35 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
 
     try {
       // Phase 1: Detect API type and initialize context
-      const apiContext = await this.initializeUnifiedApiContext(context, operationId);
-      
-      this.logger.debug(`[${operationId}] API type detected and context initialized`, {
+      const apiContext = await this.initializeUnifiedApiContext(
+        context,
         operationId,
-        apiType: apiContext.apiType,
-        operationType: apiContext.operation.type,
-        operationName: apiContext.operation.name,
-      });
+      );
+
+      this.logger.debug(
+        `[${operationId}] API type detected and context initialized`,
+        {
+          operationId,
+          apiType: apiContext.apiType,
+          operationType: apiContext.operation.type,
+          operationName: apiContext.operation.name,
+        },
+      );
 
       // Phase 2: Check validation cache
       const cacheKey = this.generateValidationCacheKey(apiContext);
       const cachedResult = await this.getCachedValidationResult(cacheKey);
-      
+
       if (cachedResult && this.validationConfig.enableCaching) {
         apiContext.performanceMetrics.cachingMetrics.cacheHit = true;
-        apiContext.performanceMetrics.cachingMetrics.cacheAge = Date.now() - cachedResult.timestamp.getTime();
-        
+        apiContext.performanceMetrics.cachingMetrics.cacheAge =
+          Date.now() - cachedResult.timestamp.getTime();
+
         this.logger.debug(`[${operationId}] Using cached validation result`, {
           operationId,
           cacheAge: apiContext.performanceMetrics.cachingMetrics.cacheAge,
         });
-        
+
         return {
           success: true,
           apiContext,
@@ -960,21 +1008,24 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
 
       // Phase 3: Schema validation (API-specific)
       await this.performSchemaValidation(apiContext, operationId);
-      
+
       // Phase 4: Security validation
       await this.performSecurityValidation(apiContext, operationId);
-      
+
       // Phase 5: Compliance validation
       await this.performComplianceValidation(apiContext, operationId);
-      
+
       // Phase 6: Parlant conversational validation
       await this.performParlantValidation(apiContext, operationId);
-      
+
       // Phase 7: Finalize validation results
       const validationResults = this.finalizeValidationResults(apiContext);
-      
+
       // Cache successful validation results
-      if (this.validationConfig.enableCaching && validationResults.every(r => r.result === 'PASS')) {
+      if (
+        this.validationConfig.enableCaching &&
+        validationResults.every((r) => r.result === "PASS")
+      ) {
         await this.cacheValidationResult(cacheKey, validationResults);
       }
 
@@ -982,14 +1033,20 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
       apiContext.performanceMetrics.totalDuration = totalTime;
       apiContext.performanceMetrics.endTime = new Date();
 
-      this.logger.log(`[${operationId}] Unified validation completed successfully`, {
-        operationId,
-        apiType: apiContext.apiType,
-        totalTime,
-        validationsPassed: validationResults.filter(r => r.result === 'PASS').length,
-        validationsTotal: validationResults.length,
-        performanceMet: totalTime <= this.performanceTargets.maxTotalValidationTime,
-      });
+      this.logger.log(
+        `[${operationId}] Unified validation completed successfully`,
+        {
+          operationId,
+          apiType: apiContext.apiType,
+          totalTime,
+          validationsPassed: validationResults.filter(
+            (r) => r.result === "PASS",
+          ).length,
+          validationsTotal: validationResults.length,
+          performanceMet:
+            totalTime <= this.performanceTargets.maxTotalValidationTime,
+        },
+      );
 
       return {
         success: true,
@@ -997,10 +1054,9 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
         validationResults,
         fromCache: false,
       };
-
     } catch (error) {
       const totalTime = Date.now() - startTime;
-      
+
       this.logger.error(`[${operationId}] Unified validation failed`, {
         operationId,
         error: error instanceof Error ? error.message : String(error),
@@ -1010,7 +1066,10 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
       return {
         success: false,
         error: error instanceof Error ? error.message : String(error),
-        statusCode: error instanceof HttpException ? error.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR,
+        statusCode:
+          error instanceof HttpException
+            ? error.getStatus()
+            : HttpStatus.INTERNAL_SERVER_ERROR,
         apiContext: undefined,
         validationResults: [],
         fromCache: false,
@@ -1026,7 +1085,7 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     operationId: string,
   ): Promise<UnifiedApiContext> {
     // Implementation for initializing unified API context
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 
   private generateValidationCacheKey(apiContext: UnifiedApiContext): string {
@@ -1034,7 +1093,9 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     return `validation-${apiContext.apiType}-${apiContext.operation.name}`;
   }
 
-  private async getCachedValidationResult(cacheKey: string): Promise<CachedValidationResult | null> {
+  private async getCachedValidationResult(
+    cacheKey: string,
+  ): Promise<CachedValidationResult | null> {
     // Implementation for cache retrieval
     return this.validationCache.get(cacheKey) || null;
   }
@@ -1042,20 +1103,26 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
   // ... (all other method implementations)
 
   private initializePerformanceMonitoring(): void {
-    this.logger.log('Performance monitoring initialized for unified API validation');
+    this.logger.log(
+      "Performance monitoring initialized for unified API validation",
+    );
   }
 
   private initializeCacheManagement(): void {
-    this.logger.log('Cache management initialized for unified API validation');
+    this.logger.log("Cache management initialized for unified API validation");
   }
 
   private initializeCircuitBreakerMonitoring(): void {
-    this.logger.log('Circuit breaker monitoring initialized for validation services');
+    this.logger.log(
+      "Circuit breaker monitoring initialized for validation services",
+    );
   }
 
-  private shouldFailOpen(error: any): boolean {
+  private shouldFailOpen(error: Error | unknown): boolean {
     // Implementation for fail-open decision logic
-    return this.circuitBreakerState.isOpen || error instanceof ParlantTimeoutError;
+    return (
+      this.circuitBreakerState.isOpen || error instanceof ParlantTimeoutError
+    );
   }
 }
 

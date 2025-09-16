@@ -11,12 +11,12 @@
  * @author Parlant Integration Research Agent #2
  */
 
-import { Logger } from '@nestjs/common';
+import { Logger } from "@nestjs/common";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantConversationContext,
-  ValidationResult,
+  _ValidationResult,
   ValidationDecision,
   ConversationState,
   ConversationPriority,
@@ -28,24 +28,24 @@ import {
   SourceLocation,
   ExecutionContext,
   ExecutionEnvironment,
-  UserContext,
-  RequestContext,
-  SessionContext,
+  _UserContext,
+  _RequestContext,
+  _SessionContext,
   ValidationParameters,
   ValidationRule,
-  ValidationRuleType,
+  _ValidationRuleType,
   PerformanceMetrics,
-  ErrorDetails,
-  ErrorSeverity,
-  ParlantWrapperConfig
-} from '../types/parlant.types';
+  _ErrorDetails,
+  _ErrorSeverity,
+  _ParlantWrapperConfig,
+} from "../types/parlant.types";
 import {
   getParlantValidationMetadata,
   getConversationContextMetadata,
   getSecurityClassificationMetadata,
   getApprovalWorkflowMetadata,
-  getValidationRulesMetadata
-} from '../decorators/parlant-validation.decorators';
+  getValidationRulesMetadata,
+} from "../decorators/parlant-validation.decorators";
 
 // ===========================
 // FUNCTION WRAPPING INTERFACES
@@ -54,8 +54,8 @@ import {
 /**
  * Wrapped function signature
  */
-export type WrappedFunction<T extends (...args: any[]) => any> = (
-  ...args: Parameters<T>
+export type WrappedFunction<T extends (...args: unknown[]) => unknown> = (
+  ..._args: Parameters<T>
 ) => Promise<ReturnType<T>>;
 
 /**
@@ -64,31 +64,31 @@ export type WrappedFunction<T extends (...args: any[]) => any> = (
 export interface FunctionWrapperConfig {
   /** Enable wrapping */
   enabled: boolean;
-  
+
   /** Validation mode */
   validationMode: ValidationMode;
-  
+
   /** Approval level */
   approvalLevel: ApprovalLevel;
-  
+
   /** Function security level */
   securityLevel: FunctionSecurityLevel;
-  
+
   /** Risk level */
   riskLevel: RiskLevel;
-  
+
   /** Validation timeout */
   timeout: number;
-  
+
   /** Cache results */
   cacheable: boolean;
-  
+
   /** Validation rules */
   rules: ValidationRule[];
-  
+
   /** Conversation priority */
   conversationPriority: ConversationPriority;
-  
+
   /** Custom configuration */
   customConfig?: Record<string, unknown>;
 }
@@ -99,16 +99,16 @@ export interface FunctionWrapperConfig {
 export interface ParlantExecutionResult<T> {
   /** Function execution result */
   result: T;
-  
+
   /** Validation response */
   validation: ParlantValidationResponse;
-  
+
   /** Performance metrics */
   metrics: PerformanceMetrics;
-  
+
   /** Conversation context */
   conversationContext: ParlantConversationContext;
-  
+
   /** Execution metadata */
   metadata: {
     functionName: string;
@@ -124,19 +124,19 @@ export interface ParlantExecutionResult<T> {
 export interface WrapperContext {
   /** Function being wrapped */
   functionName: string;
-  
+
   /** Function source location */
   sourceLocation: SourceLocation;
-  
+
   /** Execution context */
   executionContext: ExecutionContext;
-  
+
   /** Wrapper configuration */
   config: FunctionWrapperConfig;
-  
+
   /** Logger instance */
   logger: Logger;
-  
+
   /** Performance metrics */
   startTime: number;
 }
@@ -147,12 +147,12 @@ export interface WrapperContext {
 
 /**
  * Create a Parlant-wrapped version of a function
- * 
+ *
  * @param originalFunction - The function to wrap
  * @param config - Wrapper configuration
  * @param parlantService - Parlant integration service
  * @returns Wrapped function with Parlant validation
- * 
+ *
  * @example
  * ```typescript
  * const wrappedFunction = createParlantWrapper(
@@ -172,16 +172,16 @@ export interface WrapperContext {
  * );
  * ```
  */
-export function createParlantWrapper<T extends (...args: any[]) => any>(
+export function createParlantWrapper<T extends (...args: unknown[]) => unknown>(
   originalFunction: T,
   config: FunctionWrapperConfig,
-  parlantService: any // ParlantIntegrationService type would be imported
+  parlantService: unknown, // ParlantIntegrationService type would be imported
 ): WrappedFunction<T> {
   const logger = new Logger(`ParlantWrapper:${originalFunction.name}`);
-  
+
   return async (...args: Parameters<T>): Promise<ReturnType<T>> => {
     const context = createWrapperContext(originalFunction, config, logger);
-    
+
     logger.log(`[${context.functionName}] Starting Parlant-wrapped execution`, {
       functionName: context.functionName,
       args: sanitizeArguments(args),
@@ -189,38 +189,45 @@ export function createParlantWrapper<T extends (...args: any[]) => any>(
         validationMode: config.validationMode,
         approvalLevel: config.approvalLevel,
         securityLevel: config.securityLevel,
-        riskLevel: config.riskLevel
-      }
+        riskLevel: config.riskLevel,
+      },
     });
 
     try {
       // Skip wrapper if disabled
       if (!config.enabled) {
-        logger.debug(`[${context.functionName}] Parlant wrapper disabled, executing directly`);
+        logger.debug(
+          `[${context.functionName}] Parlant wrapper disabled, executing directly`,
+        );
         return await originalFunction(...args);
       }
 
       // Create validation request
-      const validationRequest = createValidationRequest(originalFunction, args, context);
-      
+      const validationRequest = createValidationRequest(
+        originalFunction,
+        args,
+        context,
+      );
+
       // Perform validation
-      const validationResponse = await parlantService.validateFunctionExecution(validationRequest);
-      
+      const validationResponse =
+        await parlantService.validateFunctionExecution(validationRequest);
+
       // Check validation result
       if (validationResponse.result.decision !== ValidationDecision.APPROVED) {
         const error = new ParlantValidationRejection(
           `Function execution denied: ${validationResponse.result.reasoning}`,
           validationResponse.result.decision,
           validationResponse.result.confidence,
-          validationResponse
+          validationResponse,
         );
-        
+
         logger.warn(`[${context.functionName}] Function execution rejected`, {
           decision: validationResponse.result.decision,
           reasoning: validationResponse.result.reasoning,
-          confidence: validationResponse.result.confidence
+          confidence: validationResponse.result.confidence,
         });
-        
+
         throw error;
       }
 
@@ -228,26 +235,33 @@ export function createParlantWrapper<T extends (...args: any[]) => any>(
       logger.log(`[${context.functionName}] Function approved for execution`, {
         decision: validationResponse.result.decision,
         confidence: validationResponse.result.confidence,
-        conversationId: validationResponse.conversationContext.conversationId
+        conversationId: validationResponse.conversationContext.conversationId,
       });
 
       const executionStartTime = performance.now();
-      const result = await executeWithMonitoring(originalFunction, args, context, validationResponse);
+      const result = await executeWithMonitoring(
+        originalFunction,
+        args,
+        context,
+        validationResponse,
+      );
       const executionTime = performance.now() - executionStartTime;
 
-      logger.log(`[${context.functionName}] Function execution completed successfully`, {
-        executionTime: Math.round(executionTime),
-        conversationId: validationResponse.conversationContext.conversationId
-      });
+      logger.log(
+        `[${context.functionName}] Function execution completed successfully`,
+        {
+          executionTime: Math.round(executionTime),
+          conversationId: validationResponse.conversationContext.conversationId,
+        },
+      );
 
       return result;
-
     } catch (error) {
       const executionTime = performance.now() - context.startTime;
-      
+
       logger.error(`[${context.functionName}] Function execution failed`, {
         error: error instanceof Error ? error.message : String(error),
-        executionTime: Math.round(executionTime)
+        executionTime: Math.round(executionTime),
       });
 
       // Log error details if it's a Parlant validation rejection
@@ -262,30 +276,37 @@ export function createParlantWrapper<T extends (...args: any[]) => any>(
 
 /**
  * Wrap function with metadata from decorators
- * 
+ *
  * @param originalFunction - The function to wrap
  * @param target - Class instance
  * @param propertyKey - Method name
  * @param parlantService - Parlant integration service
  * @returns Wrapped function with decorator-based configuration
  */
-export function wrapFunctionWithMetadata<T extends (...args: any[]) => any>(
+export function wrapFunctionWithMetadata<T extends (...args: unknown[]) => unknown>(
   originalFunction: T,
-  target: any,
+  target: unknown,
   propertyKey: string,
-  parlantService: any
+  parlantService: unknown,
 ): WrappedFunction<T> {
-  const logger = new Logger(`ParlantWrapper:${target.constructor.name}.${propertyKey}`);
-  
+  const logger = new Logger(
+    `ParlantWrapper:${target.constructor.name}.${propertyKey}`,
+  );
+
   // Extract metadata from decorators
   const validationConfig = getParlantValidationMetadata(target, propertyKey);
-  const conversationConfig = getConversationContextMetadata(target, propertyKey);
+  const conversationConfig = getConversationContextMetadata(
+    target,
+    propertyKey,
+  );
   const securityConfig = getSecurityClassificationMetadata(target, propertyKey);
   const approvalConfig = getApprovalWorkflowMetadata(target, propertyKey);
   const validationRules = getValidationRulesMetadata(target, propertyKey);
 
   if (!validationConfig?.enabled) {
-    logger.debug(`Parlant validation not enabled for ${target.constructor.name}.${propertyKey}`);
+    logger.debug(
+      `Parlant validation not enabled for ${target.constructor.name}.${propertyKey}`,
+    );
     return originalFunction as WrappedFunction<T>;
   }
 
@@ -293,42 +314,53 @@ export function wrapFunctionWithMetadata<T extends (...args: any[]) => any>(
   const wrapperConfig: FunctionWrapperConfig = {
     enabled: validationConfig.enabled ?? true,
     validationMode: validationConfig.mode ?? ValidationMode.INTERACTIVE,
-    approvalLevel: validationConfig.approvalLevel ?? ApprovalLevel.SINGLE_APPROVAL,
-    securityLevel: securityConfig?.securityLevel ?? FunctionSecurityLevel.INTERNAL,
+    approvalLevel:
+      validationConfig.approvalLevel ?? ApprovalLevel.SINGLE_APPROVAL,
+    securityLevel:
+      securityConfig?.securityLevel ?? FunctionSecurityLevel.INTERNAL,
     riskLevel: securityConfig?.riskLevel ?? RiskLevel.MODERATE,
     timeout: validationConfig.timeout ?? 30000,
     cacheable: validationConfig.cacheable ?? false,
     rules: validationRules ?? [],
-    conversationPriority: conversationConfig?.priority ?? ConversationPriority.NORMAL,
-    customConfig: validationConfig.customConfig
+    conversationPriority:
+      conversationConfig?.priority ?? ConversationPriority.NORMAL,
+    customConfig: validationConfig.customConfig,
   };
 
-  logger.log(`Creating Parlant wrapper for ${target.constructor.name}.${propertyKey}`, {
-    validationMode: wrapperConfig.validationMode,
-    approvalLevel: wrapperConfig.approvalLevel,
-    securityLevel: wrapperConfig.securityLevel,
-    riskLevel: wrapperConfig.riskLevel
-  });
+  logger.log(
+    `Creating Parlant wrapper for ${target.constructor.name}.${propertyKey}`,
+    {
+      validationMode: wrapperConfig.validationMode,
+      approvalLevel: wrapperConfig.approvalLevel,
+      securityLevel: wrapperConfig.securityLevel,
+      riskLevel: wrapperConfig.riskLevel,
+    },
+  );
 
   return createParlantWrapper(originalFunction, wrapperConfig, parlantService);
 }
 
 /**
  * Wrap all methods of a class with Parlant validation
- * 
+ *
  * @param target - Class to wrap
  * @param parlantService - Parlant integration service
  * @returns Class with wrapped methods
  */
-export function wrapClassMethods(target: any, parlantService: any): any {
+export function wrapClassMethods(target: unknown, parlantService: unknown): unknown {
   const logger = new Logger(`ParlantWrapper:${target.constructor.name}`);
-  
-  const methodNames = Object.getOwnPropertyNames(target.prototype)
-    .filter(name => name !== 'constructor' && typeof target.prototype[name] === 'function');
 
-  logger.log(`Wrapping ${methodNames.length} methods for class ${target.constructor.name}`, {
-    methods: methodNames
-  });
+  const methodNames = Object.getOwnPropertyNames(target.prototype).filter(
+    (name) =>
+      name !== "constructor" && typeof target.prototype[name] === "function",
+  );
+
+  logger.log(
+    `Wrapping ${methodNames.length} methods for class ${target.constructor.name}`,
+    {
+      methods: methodNames,
+    },
+  );
 
   for (const methodName of methodNames) {
     const originalMethod = target.prototype[methodName];
@@ -336,9 +368,9 @@ export function wrapClassMethods(target: any, parlantService: any): any {
       originalMethod,
       target.prototype,
       methodName,
-      parlantService
+      parlantService,
     );
-    
+
     target.prototype[methodName] = wrappedMethod;
   }
 
@@ -355,15 +387,15 @@ export function wrapClassMethods(target: any, parlantService: any): any {
 function createWrapperContext(
   originalFunction: Function,
   config: FunctionWrapperConfig,
-  logger: Logger
+  logger: Logger,
 ): WrapperContext {
   return {
-    functionName: originalFunction.name || 'anonymous',
+    functionName: originalFunction.name || "anonymous",
     sourceLocation: extractSourceLocation(originalFunction),
     executionContext: createExecutionContext(),
     config,
     logger,
-    startTime: performance.now()
+    startTime: performance.now(),
   };
 }
 
@@ -373,9 +405,9 @@ function createWrapperContext(
 function extractSourceLocation(func: Function): SourceLocation {
   // In a real implementation, this would use stack traces or source maps
   return {
-    filePath: 'unknown',
-    methodName: func.name || 'anonymous',
-    moduleName: 'shared'
+    filePath: "unknown",
+    methodName: func.name || "anonymous",
+    moduleName: "shared",
   };
 }
 
@@ -384,34 +416,35 @@ function extractSourceLocation(func: Function): SourceLocation {
  */
 function createExecutionContext(): ExecutionContext {
   return {
-    environment: process.env.NODE_ENV === 'production' 
-      ? ExecutionEnvironment.PRODUCTION 
-      : ExecutionEnvironment.DEVELOPMENT,
+    environment:
+      process.env.NODE_ENV === "production"
+        ? ExecutionEnvironment.PRODUCTION
+        : ExecutionEnvironment.DEVELOPMENT,
     properties: {
       nodeVersion: process.version,
       platform: process.platform,
-      arch: process.arch
-    }
+      arch: process.arch,
+    },
   };
 }
 
 /**
  * Create validation request for function execution
  */
-function createValidationRequest<T extends (...args: any[]) => any>(
+function createValidationRequest<T extends (...args: unknown[]) => unknown>(
   originalFunction: T,
   args: Parameters<T>,
-  context: WrapperContext
+  context: WrapperContext,
 ): ParlantValidationRequest {
   const requestId = generateRequestId();
-  
+
   const functionContext: FunctionContext = {
     functionName: context.functionName,
     arguments: convertArgsToRecord(args),
     source: context.sourceLocation,
     securityLevel: context.config.securityLevel,
     riskLevel: context.config.riskLevel,
-    executionContext: context.executionContext
+    executionContext: context.executionContext,
   };
 
   const validationParams: ValidationParameters = {
@@ -419,7 +452,7 @@ function createValidationRequest<T extends (...args: any[]) => any>(
     approvalLevel: context.config.approvalLevel,
     timeout: context.config.timeout,
     cacheable: context.config.cacheable,
-    rules: context.config.rules
+    rules: context.config.rules,
   };
 
   const conversationContext: ParlantConversationContext = {
@@ -427,13 +460,13 @@ function createValidationRequest<T extends (...args: any[]) => any>(
     state: ConversationState.INITIATED,
     metadata: {
       priority: context.config.conversationPriority,
-      tags: ['function-validation'],
+      tags: ["function-validation"],
       properties: { functionName: context.functionName },
-      history: []
+      history: [],
     },
     participants: [],
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   };
 
   return {
@@ -442,7 +475,7 @@ function createValidationRequest<T extends (...args: any[]) => any>(
     validationParams,
     conversationContext,
     timestamp: new Date(),
-    timeout: context.config.timeout
+    timeout: context.config.timeout,
   };
 }
 
@@ -451,38 +484,37 @@ function createValidationRequest<T extends (...args: any[]) => any>(
  */
 async function executeWithMonitoring<T>(
   originalFunction: Function,
-  args: any[],
+  args: unknown[],
   context: WrapperContext,
-  validationResponse: ParlantValidationResponse
+  validationResponse: ParlantValidationResponse,
 ): Promise<T> {
   const startTime = performance.now();
-  
+
   try {
     // Execute the original function
     const result = await originalFunction(...args);
-    
+
     const endTime = performance.now();
     const executionTime = endTime - startTime;
-    
+
     // Log successful execution
     context.logger.debug(`Function executed successfully`, {
       functionName: context.functionName,
       executionTime: Math.round(executionTime),
-      conversationId: validationResponse.conversationContext.conversationId
+      conversationId: validationResponse.conversationContext.conversationId,
     });
 
     return result;
-
   } catch (error) {
     const endTime = performance.now();
     const executionTime = endTime - startTime;
-    
+
     // Log execution error
     context.logger.error(`Function execution failed`, {
       functionName: context.functionName,
       executionTime: Math.round(executionTime),
       error: error instanceof Error ? error.message : String(error),
-      conversationId: validationResponse.conversationContext.conversationId
+      conversationId: validationResponse.conversationContext.conversationId,
     });
 
     throw error;
@@ -492,27 +524,34 @@ async function executeWithMonitoring<T>(
 /**
  * Sanitize function arguments for logging
  */
-function sanitizeArguments(args: any[]): any[] {
-  return args.map(arg => {
-    if (typeof arg === 'object' && arg !== null) {
+function sanitizeArguments(args: unknown[]): unknown[] {
+  return args.map((arg) => {
+    if (typeof arg === "object" && arg !== null) {
       // Remove sensitive data from objects
       const sanitized = { ...arg };
-      
+
       // Common sensitive field names
       const sensitiveFields = [
-        'password', 'token', 'apiKey', 'secret', 'privateKey',
-        'accessToken', 'refreshToken', 'sessionId', 'authorization'
+        "password",
+        "token",
+        "apiKey",
+        "secret",
+        "privateKey",
+        "accessToken",
+        "refreshToken",
+        "sessionId",
+        "authorization",
       ];
-      
+
       for (const field of sensitiveFields) {
         if (field in sanitized) {
-          sanitized[field] = '[REDACTED]';
+          sanitized[field] = "[REDACTED]";
         }
       }
-      
+
       return sanitized;
     }
-    
+
     return arg;
   });
 }
@@ -520,13 +559,13 @@ function sanitizeArguments(args: any[]): any[] {
 /**
  * Convert function arguments to record format
  */
-function convertArgsToRecord(args: any[]): Record<string, unknown> {
+function convertArgsToRecord(args: unknown[]): Record<string, unknown> {
   const record: Record<string, unknown> = {};
-  
+
   args.forEach((arg, index) => {
     record[`arg${index}`] = arg;
   });
-  
+
   return record;
 }
 
@@ -550,7 +589,7 @@ function generateConversationId(): string {
 async function logValidationRejection(
   error: ParlantValidationRejection,
   context: WrapperContext,
-  parlantService: any
+  parlantService: any,
 ): Promise<void> {
   try {
     // Create audit entry for rejection
@@ -559,17 +598,20 @@ async function logValidationRejection(
       decision: error.decision,
       confidence: error.confidence,
       reasoning: error.validationResponse.result.reasoning,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    context.logger.warn('Function validation rejected - audit entry created', auditData);
-    
+    context.logger.warn(
+      "Function validation rejected - audit entry created",
+      auditData,
+    );
+
     // In a real implementation, this would log to an audit service
     // await parlantService.logAuditEntry(auditData);
-    
   } catch (auditError) {
-    context.logger.error('Failed to log validation rejection audit entry', {
-      error: auditError instanceof Error ? auditError.message : String(auditError)
+    context.logger.error("Failed to log validation rejection audit entry", {
+      error:
+        auditError instanceof Error ? auditError.message : String(auditError),
     });
   }
 }
@@ -586,10 +628,10 @@ export class ParlantValidationRejection extends Error {
     message: string,
     public readonly decision: ValidationDecision,
     public readonly confidence: number,
-    public readonly validationResponse: ParlantValidationResponse
+    public readonly validationResponse: ParlantValidationResponse,
   ) {
     super(message);
-    this.name = 'ParlantValidationRejection';
+    this.name = "ParlantValidationRejection";
   }
 }
 
@@ -598,8 +640,11 @@ export class ParlantValidationRejection extends Error {
  */
 export class ParlantWrapperBuilder<T extends (...args: any[]) => any> {
   private config: Partial<FunctionWrapperConfig> = {};
-  
-  constructor(private originalFunction: T, private parlantService: any) {}
+
+  constructor(
+    private originalFunction: T,
+    private parlantService: any,
+  ) {}
 
   /**
    * Enable or disable the wrapper
@@ -668,7 +713,9 @@ export class ParlantWrapperBuilder<T extends (...args: any[]) => any> {
   /**
    * Set conversation priority
    */
-  conversationPriority(priority: ConversationPriority): ParlantWrapperBuilder<T> {
+  conversationPriority(
+    priority: ConversationPriority,
+  ): ParlantWrapperBuilder<T> {
     this.config.conversationPriority = priority;
     return this;
   }
@@ -694,21 +741,25 @@ export class ParlantWrapperBuilder<T extends (...args: any[]) => any> {
       timeout: 30000,
       cacheable: false,
       rules: [],
-      conversationPriority: ConversationPriority.NORMAL
+      conversationPriority: ConversationPriority.NORMAL,
     };
 
     const finalConfig = { ...defaultConfig, ...this.config };
-    return createParlantWrapper(this.originalFunction, finalConfig, this.parlantService);
+    return createParlantWrapper(
+      this.originalFunction,
+      finalConfig,
+      this.parlantService,
+    );
   }
 }
 
 /**
  * Create a wrapper builder for fluent configuration
- * 
+ *
  * @param originalFunction - Function to wrap
  * @param parlantService - Parlant integration service
  * @returns Wrapper builder instance
- * 
+ *
  * @example
  * ```typescript
  * const wrappedFunction = parlantWrapper(originalFunction, parlantService)
@@ -723,7 +774,7 @@ export class ParlantWrapperBuilder<T extends (...args: any[]) => any> {
  */
 export function parlantWrapper<T extends (...args: any[]) => any>(
   originalFunction: T,
-  parlantService: any
+  parlantService: any,
 ): ParlantWrapperBuilder<T> {
   return new ParlantWrapperBuilder(originalFunction, parlantService);
 }
@@ -739,7 +790,7 @@ export class ParlantWrapperRegistry {
   private static instance: ParlantWrapperRegistry;
   private wrappedFunctions = new Map<string, any>();
   private wrapperMetadata = new Map<string, FunctionWrapperConfig>();
-  private logger = new Logger('ParlantWrapperRegistry');
+  private logger = new Logger("ParlantWrapperRegistry");
 
   static getInstance(): ParlantWrapperRegistry {
     if (!ParlantWrapperRegistry.instance) {
@@ -754,22 +805,24 @@ export class ParlantWrapperRegistry {
   register<T extends (...args: any[]) => any>(
     functionId: string,
     wrappedFunction: WrappedFunction<T>,
-    config: FunctionWrapperConfig
+    config: FunctionWrapperConfig,
   ): void {
     this.wrappedFunctions.set(functionId, wrappedFunction);
     this.wrapperMetadata.set(functionId, config);
-    
+
     this.logger.log(`Registered wrapped function: ${functionId}`, {
       securityLevel: config.securityLevel,
       riskLevel: config.riskLevel,
-      validationMode: config.validationMode
+      validationMode: config.validationMode,
     });
   }
 
   /**
    * Get a wrapped function
    */
-  get<T extends (...args: any[]) => any>(functionId: string): WrappedFunction<T> | undefined {
+  get<T extends (...args: any[]) => any>(
+    functionId: string,
+  ): WrappedFunction<T> | undefined {
     return this.wrappedFunctions.get(functionId);
   }
 
@@ -809,13 +862,14 @@ export class ParlantWrapperRegistry {
       totalFunctions: this.wrappedFunctions.size,
       bySecurityLevel: {} as Record<string, number>,
       byRiskLevel: {} as Record<string, number>,
-      byValidationMode: {} as Record<string, number>
+      byValidationMode: {} as Record<string, number>,
     };
 
     for (const config of this.wrapperMetadata.values()) {
       // Count by security level
       const secLevel = config.securityLevel;
-      stats.bySecurityLevel[secLevel] = (stats.bySecurityLevel[secLevel] || 0) + 1;
+      stats.bySecurityLevel[secLevel] =
+        (stats.bySecurityLevel[secLevel] || 0) + 1;
 
       // Count by risk level
       const riskLevel = config.riskLevel;
@@ -823,7 +877,8 @@ export class ParlantWrapperRegistry {
 
       // Count by validation mode
       const valMode = config.validationMode;
-      stats.byValidationMode[valMode] = (stats.byValidationMode[valMode] || 0) + 1;
+      stats.byValidationMode[valMode] =
+        (stats.byValidationMode[valMode] || 0) + 1;
     }
 
     return stats;

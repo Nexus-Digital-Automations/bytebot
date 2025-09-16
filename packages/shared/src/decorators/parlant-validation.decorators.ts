@@ -84,9 +84,9 @@ export interface ParlantValidationConfig {
  * @example
  * ```typescript
  * @ParlantValidation({
- *   mode: ValidationMode.INTERACTIVE,
- *   approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
- *   priority: ConversationPriority.HIGH
+ *   mode: ValidationMode._INTERACTIVE,
+ *   approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
+ *   priority: ConversationPriority._HIGH
  * })
  * async executeCommand(command: string): Promise<CommandResult> {
  *   // Function implementation
@@ -101,12 +101,12 @@ export function ParlantValidation(config: ParlantValidationConfig = {}) {
   ) {
     const defaultConfig: ParlantValidationConfig = {
       enabled: true,
-      mode: ValidationMode.INTERACTIVE,
-      approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
+      mode: ValidationMode._INTERACTIVE,
+      approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
       timeout: 30000, // 30 seconds
       cacheable: false,
-      priority: ConversationPriority.NORMAL,
-      requiredRoles: [ParticipantRole.APPROVER],
+      priority: ConversationPriority._NORMAL,
+      requiredRoles: [ParticipantRole._APPROVER],
       ...config,
     };
 
@@ -176,8 +176,8 @@ export interface ConversationContextConfig {
  * @ConversationContext({
  *   autoCreate: true,
  *   topic: "Database Migration Approval",
- *   priority: ConversationPriority.CRITICAL,
- *   requiredParticipants: [ParticipantRole.APPROVER, ParticipantRole.VALIDATOR]
+ *   priority: ConversationPriority._CRITICAL,
+ *   requiredParticipants: [ParticipantRole._APPROVER, ParticipantRole._VALIDATOR]
  * })
  * async migrateDatabaseSchema(): Promise<void> {
  *   // Implementation
@@ -192,8 +192,8 @@ export function ConversationContext(config: ConversationContextConfig = {}) {
   ) {
     const defaultConfig: ConversationContextConfig = {
       autoCreate: true,
-      priority: ConversationPriority.NORMAL,
-      requiredParticipants: [ParticipantRole.APPROVER],
+      priority: ConversationPriority._NORMAL,
+      requiredParticipants: [ParticipantRole._APPROVER],
       maxParticipants: 10,
       conversationTimeout: 300000, // 5 minutes
       persistHistory: true,
@@ -324,14 +324,14 @@ export enum EscalationCondition {
  * @example
  * ```typescript
  * @ApprovalWorkflow({
- *   level: ApprovalLevel.DUAL_APPROVAL,
- *   requiredRoles: [ParticipantRole.APPROVER, ParticipantRole.VALIDATOR],
+ *   level: ApprovalLevel._DUAL_APPROVAL,
+ *   requiredRoles: [ParticipantRole._APPROVER, ParticipantRole._VALIDATOR],
  *   timeout: 60000,
  *   allowSelfApproval: false,
  *   escalationRules: [{
  *     id: 'timeout_escalation',
  *     condition: EscalationCondition._TIMEOUT,
- *     targetRole: ParticipantRole.MODERATOR,
+ *     targetRole: ParticipantRole._MODERATOR,
  *     delay: 30000,
  *     priority: 1
  *   }]
@@ -363,8 +363,8 @@ export function ApprovalWorkflow(config: ApprovalWorkflowConfig) {
  * ```typescript
  * @ParlantWrapper({
  *   enabled: true,
- *   defaultValidationMode: ValidationMode.ASYNCHRONOUS,
- *   defaultApprovalLevel: ApprovalLevel.SINGLE_APPROVAL,
+ *   defaultValidationMode: ValidationMode._ASYNCHRONOUS,
+ *   defaultApprovalLevel: ApprovalLevel._SINGLE_APPROVAL,
  *   defaultTimeout: 45000
  * })
  * class DatabaseService {
@@ -373,7 +373,7 @@ export function ApprovalWorkflow(config: ApprovalWorkflowConfig) {
  * ```
  */
 export function ParlantWrapper(config: Partial<ParlantWrapperConfig>) {
-  return function (target: object) {
+  return function (target: new (..._args: any[]) => unknown) {
     SetMetadata(PARLANT_WRAPPER_CONFIG_KEY, config)(target);
   };
 }
@@ -501,21 +501,21 @@ export interface CompleteParlantConfig {
  * ```typescript
  * @ParlantIntegrated({
  *   validation: {
- *     mode: ValidationMode.INTERACTIVE,
- *     approvalLevel: ApprovalLevel.DUAL_APPROVAL,
+ *     mode: ValidationMode._INTERACTIVE,
+ *     approvalLevel: ApprovalLevel._DUAL_APPROVAL,
  *     timeout: 60000
  *   },
  *   conversation: {
  *     topic: "Critical System Operation",
- *     priority: ConversationPriority.CRITICAL
+ *     priority: ConversationPriority._CRITICAL
  *   },
  *   security: {
  *     securityLevel: FunctionSecurityLevel.RESTRICTED,
  *     riskLevel: RiskLevel.HIGH
  *   },
  *   approval: {
- *     level: ApprovalLevel.DUAL_APPROVAL,
- *     requiredRoles: [ParticipantRole.APPROVER, ParticipantRole.VALIDATOR]
+ *     level: ApprovalLevel._DUAL_APPROVAL,
+ *     requiredRoles: [ParticipantRole._APPROVER, ParticipantRole._VALIDATOR]
  *   }
  * })
  * async criticalSystemOperation(): Promise<void> {

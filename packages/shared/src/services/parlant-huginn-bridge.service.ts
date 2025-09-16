@@ -1,27 +1,27 @@
 /**
  * Parlant Huginn Bridge Service
- * 
+ *
  * Cross-language integration service providing seamless communication between
  * TypeScript AIgent packages and Ruby Huginn intelligence workflows with
  * unified Parlant validation and performance optimization <300ms.
- * 
+ *
  * This service enables:
  * - Ruby ↔ TypeScript seamless integration with type safety
- * - Unified Parlant validation across language boundaries  
+ * - Unified Parlant validation across language boundaries
  * - Performance-optimized cross-language communication
  * - Intelligent workflow coordination between systems
  * - Enterprise-grade error handling and recovery
  * - Real-time performance monitoring and optimization
- * 
+ *
  * @module ParlantHuginnBridgeService
  * @version 2.0.0
  * @author AIgent Cross-Language Integration Team
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import axios, { AxiosInstance } from 'axios';
-import * as WebSocket from 'ws';
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { EventEmitter } from "events";
+import axios, { AxiosInstance } from "axios";
+import * as WebSocket from "ws";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
@@ -30,8 +30,8 @@ import {
   ParlantIntegrationError,
   ParlantValidationError,
   ParlantConnectionError,
-  ParlantTimeoutError
-} from '../types/parlant-integration.types';
+  ParlantTimeoutError,
+} from "../types/parlant-integration.types";
 
 /**
  * Huginn Integration Configuration
@@ -60,9 +60,9 @@ interface RubyServiceCallConfig {
   /** Method name to call */
   method: string;
   /** Method parameters */
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   /** Validation context */
-  validationContext?: Record<string, any>;
+  validationContext?: Record<string, unknown>;
   /** Skip Parlant validation */
   skipValidation?: boolean;
   /** Performance requirements */
@@ -79,9 +79,9 @@ interface MultiLanguageWorkflowStep {
   /** Step identifier */
   stepId: string;
   /** Target language */
-  language: 'typescript' | 'ruby' | 'python';
+  language: "typescript" | "ruby" | "python";
   /** Service configuration */
-  serviceConfig: any;
+  serviceConfig: Record<string, unknown>;
   /** Step dependencies */
   dependsOn: string[];
   /** Parallel execution allowed */
@@ -109,36 +109,39 @@ interface CrossLanguageMetrics {
  */
 const TYPE_MAPPINGS = {
   typescriptToRuby: {
-    string: 'String',
-    number: 'Numeric',
-    boolean: 'Boolean',
-    object: 'Hash',
-    array: 'Array',
-    null: 'NilClass',
-    undefined: 'NilClass'
+    string: "String",
+    number: "Numeric",
+    boolean: "Boolean",
+    object: "Hash",
+    array: "Array",
+    null: "NilClass",
+    undefined: "NilClass",
   },
   rubyToTypescript: {
-    String: 'string',
-    Integer: 'number',
-    Float: 'number',
-    TrueClass: 'boolean',
-    FalseClass: 'boolean',
-    Hash: 'object',
-    Array: 'Array',
-    NilClass: 'null',
-    Symbol: 'string'
-  }
+    String: "string",
+    Integer: "number",
+    Float: "number",
+    TrueClass: "boolean",
+    FalseClass: "boolean",
+    Hash: "object",
+    Array: "Array",
+    NilClass: "null",
+    Symbol: "string",
+  },
 };
 
 @Injectable()
-export class ParlantHuginnBridgeService extends EventEmitter implements OnModuleInit {
+export class ParlantHuginnBridgeService
+  extends EventEmitter
+  implements OnModuleInit
+{
   private readonly logger = new Logger(ParlantHuginnBridgeService.name);
-  
+
   // Core connections
   private httpClient: AxiosInstance;
   private websocket: WebSocket | null = null;
   private isConnected: boolean = false;
-  
+
   // Performance monitoring
   private metrics: CrossLanguageMetrics = {
     totalCalls: 0,
@@ -150,112 +153,129 @@ export class ParlantHuginnBridgeService extends EventEmitter implements OnModule
     typescriptCalls: 0,
     pythonCalls: 0,
     typeConversions: 0,
-    workflowsExecuted: 0
+    workflowsExecuted: 0,
   };
-  
+
   // Configuration
   private config: HuginnIntegrationConfig;
-  
+
   // Call tracking
-  private activeCalls: Map<string, any> = new Map();
+  private activeCalls: Map<string, Record<string, unknown>> = new Map();
   private callCounter: number = 0;
 
   constructor() {
     super();
-    this.logger.log('🚀 Initializing Parlant Huginn Bridge Service');
+    this.logger.log("🚀 Initializing Parlant Huginn Bridge Service");
   }
 
   /**
    * Initialize the Huginn Bridge Service
    */
   async onModuleInit(): Promise<void> {
-    this.logger.log('🔄 Starting Huginn Bridge Service initialization...');
-    
+    this.logger.log("🔄 Starting Huginn Bridge Service initialization...");
+
     try {
       await this.loadConfiguration();
       await this.initializeHttpClient();
       await this.initializeWebSocketConnection();
       await this.startPerformanceMonitoring();
-      
-      this.logger.log('✅ Huginn Bridge Service initialized successfully');
-      this.emit('service:initialized');
-      
+
+      this.logger.log("✅ Huginn Bridge Service initialized successfully");
+      this.emit("service:initialized");
     } catch (error) {
-      this.logger.error('❌ Failed to initialize Huginn Bridge Service', error);
+      this.logger.error("❌ Failed to initialize Huginn Bridge Service", error);
       throw new ParlantIntegrationError(
-        'Huginn bridge initialization failed',
-        'HUGINN_BRIDGE_INIT_ERROR',
-        { error: error.message }
+        "Huginn bridge initialization failed",
+        "HUGINN_BRIDGE_INIT_ERROR",
+        { error: error.message },
       );
     }
   }
 
   /**
    * Call Huginn Ruby Service with Performance Optimization
-   * 
+   *
    * Executes Ruby service calls on Huginn with unified Parlant validation,
    * type conversion, and performance monitoring targeting <300ms response times.
    */
-  async callHuginnService(callConfig: RubyServiceCallConfig): Promise<any> {
-    const callId = this.generateCallId('huginn');
+  async callHuginnService(callConfig: RubyServiceCallConfig): Promise<unknown> {
+    const callId = this.generateCallId("huginn");
     const startTime = Date.now();
-    
-    this.logger.debug(`🔍 Calling Huginn service: ${callConfig.service}.${callConfig.method}`, { callId });
-    
+
+    this.logger.debug(
+      `🔍 Calling Huginn service: ${callConfig.service}.${callConfig.method}`,
+      { callId },
+    );
+
     try {
       // Track active call
       this.activeCalls.set(callId, {
         service: callConfig.service,
         method: callConfig.method,
         startTime,
-        status: 'active'
+        status: "active",
       });
 
       // Convert TypeScript parameters to Ruby-compatible format
-      const convertedParameters = this.convertParametersToRuby(callConfig.parameters);
-      
+      const convertedParameters = this.convertParametersToRuby(
+        callConfig.parameters,
+      );
+
       // Parlant validation for cross-language call
       if (!callConfig.skipValidation) {
-        const validationResult = await this.validateHuginnServiceCall(callId, callConfig);
+        const validationResult = await this.validateHuginnServiceCall(
+          callId,
+          callConfig,
+        );
         if (!validationResult.approved) {
           throw new ParlantValidationError(
             `Huginn service call validation failed: ${validationResult.reason}`,
-            { callId, callConfig, validationResult }
+            { callId, callConfig, validationResult },
           );
         }
       }
 
       // Execute Huginn service call
-      const huginnResult = await this.executeHuginnServiceCall(callId, callConfig, convertedParameters);
-      
+      const huginnResult = await this.executeHuginnServiceCall(
+        callId,
+        callConfig,
+        convertedParameters,
+      );
+
       // Convert Ruby response back to TypeScript types
-      const convertedResult = this.convertRubyResponseToTypeScript(huginnResult);
-      
+      const convertedResult =
+        this.convertRubyResponseToTypeScript(huginnResult);
+
       // Update metrics
       const executionTime = Date.now() - startTime;
       this.updateHuginnCallMetrics(executionTime, true);
-      
+
       // Clean up active call tracking
       this.activeCalls.delete(callId);
-      
-      this.logger.debug(`✅ Huginn service call completed: ${callConfig.service}.${callConfig.method} (${executionTime}ms)`, { callId });
-      
+
+      this.logger.debug(
+        `✅ Huginn service call completed: ${callConfig.service}.${callConfig.method} (${executionTime}ms)`,
+        { callId },
+      );
+
       return {
         callId,
         success: true,
         result: convertedResult,
         executionTimeMs: executionTime,
-        performanceAchieved: executionTime < (callConfig.performanceRequirements?.targetTimeMs || this.config.performanceTarget),
+        performanceAchieved:
+          executionTime <
+          (callConfig.performanceRequirements?.targetTimeMs ||
+            this.config.performanceTarget),
         bridgeMetadata: {
-          sourceLanguage: 'typescript',
-          targetLanguage: 'ruby',
+          sourceLanguage: "typescript",
+          targetLanguage: "ruby",
           service: callConfig.service,
           method: callConfig.method,
           typeConversionsApplied: true,
-          validationApplied: !callConfig.skipValidation
-        }
+          validationApplied: !callConfig.skipValidation,
+        },
       };
-
     } catch (error) {
       return this.handleHuginnServiceCallError(callId, callConfig, error);
     }
@@ -263,41 +283,51 @@ export class ParlantHuginnBridgeService extends EventEmitter implements OnModule
 
   /**
    * Execute Huginn Intelligence Workflow
-   * 
+   *
    * Orchestrates intelligent workflows on Huginn with advanced conversational
    * AI validation and autonomous decision processing.
    */
   async executeHuginnIntelligenceWorkflow(workflowConfig: {
     workflowName: string;
-    workflowType: 'intelligence_processing' | 'autonomous_decision' | 'agent_coordination';
-    parameters: Record<string, any>;
+    workflowType:
+      | "intelligence_processing"
+      | "autonomous_decision"
+      | "agent_coordination";
+    parameters: Record<string, unknown>;
     validationLevel: SecurityLevel;
     autonomousApproval?: boolean;
-  }): Promise<any> {
+  }): Promise<Record<string, unknown>> {
     const workflowId = this.generateWorkflowId();
     const startTime = Date.now();
-    
-    this.logger.log(`🧠 Executing Huginn intelligence workflow: ${workflowConfig.workflowName}`, { workflowId });
+
+    this.logger.log(
+      `🧠 Executing Huginn intelligence workflow: ${workflowConfig.workflowName}`,
+      { workflowId },
+    );
 
     try {
       // Route to appropriate Huginn service based on workflow type
-      const serviceCallConfig: RubyServiceCallConfig = this.buildHuginnServiceConfig(workflowConfig);
-      
+      const serviceCallConfig: RubyServiceCallConfig =
+        this.buildHuginnServiceConfig(workflowConfig);
+
       // Execute workflow through Huginn
       const workflowResult = await this.callHuginnService(serviceCallConfig);
-      
+
       // Enhanced result processing for intelligence workflows
       const enhancedResult = await this.processIntelligenceWorkflowResult(
-        workflowId, 
-        workflowResult, 
-        workflowConfig
+        workflowId,
+        workflowResult,
+        workflowConfig,
       );
-      
+
       const totalExecutionTime = Date.now() - startTime;
       this.metrics.workflowsExecuted++;
-      
-      this.logger.log(`✅ Intelligence workflow completed: ${workflowConfig.workflowName} (${totalExecutionTime}ms)`, { workflowId });
-      
+
+      this.logger.log(
+        `✅ Intelligence workflow completed: ${workflowConfig.workflowName} (${totalExecutionTime}ms)`,
+        { workflowId },
+      );
+
       return {
         workflowId,
         workflowName: workflowConfig.workflowName,
@@ -309,18 +339,21 @@ export class ParlantHuginnBridgeService extends EventEmitter implements OnModule
         intelligenceMetadata: {
           validationLevel: workflowConfig.validationLevel,
           autonomousApproval: workflowConfig.autonomousApproval || false,
-          crossLanguageIntegration: true
-        }
+          crossLanguageIntegration: true,
+        },
       };
-
     } catch (error) {
-      return this.handleIntelligenceWorkflowError(workflowId, workflowConfig, error);
+      return this.handleIntelligenceWorkflowError(
+        workflowId,
+        workflowConfig,
+        error,
+      );
     }
   }
 
   /**
    * Execute Multi-Language Coordinated Workflow
-   * 
+   *
    * Orchestrates complex workflows spanning TypeScript, Ruby, and Python
    * with unified Parlant validation and performance optimization.
    */
@@ -328,38 +361,56 @@ export class ParlantHuginnBridgeService extends EventEmitter implements OnModule
     workflowName: string;
     steps: MultiLanguageWorkflowStep[];
     parallelExecution: boolean;
-    sharedContext: Record<string, any>;
+    sharedContext: Record<string, unknown>;
     performanceTarget?: number;
-  }): Promise<any> {
+  }): Promise<Record<string, unknown>> {
     const workflowId = this.generateWorkflowId();
     const startTime = Date.now();
-    
-    this.logger.log(`🌐 Executing multi-language workflow: ${workflowConfig.workflowName}`, { workflowId });
+
+    this.logger.log(
+      `🌐 Executing multi-language workflow: ${workflowConfig.workflowName}`,
+      { workflowId },
+    );
 
     try {
       // Validate entire workflow
-      const workflowValidation = await this.validateMultiLanguageWorkflow(workflowId, workflowConfig);
+      const workflowValidation = await this.validateMultiLanguageWorkflow(
+        workflowId,
+        workflowConfig,
+      );
       if (!workflowValidation.approved) {
         throw new ParlantValidationError(
           `Multi-language workflow validation failed: ${workflowValidation.reason}`,
-          { workflowId, workflowConfig }
+          { workflowId, workflowConfig },
         );
       }
 
       // Plan execution order based on dependencies
-      const executionPlan = this.createWorkflowExecutionPlan(workflowConfig.steps);
-      
+      const executionPlan = this.createWorkflowExecutionPlan(
+        workflowConfig.steps,
+      );
+
       // Execute workflow steps
-      const stepResults = await this.executeWorkflowSteps(workflowId, executionPlan, workflowConfig);
-      
+      const stepResults = await this.executeWorkflowSteps(
+        workflowId,
+        executionPlan,
+        workflowConfig,
+      );
+
       // Aggregate results
-      const aggregatedResult = this.aggregateWorkflowResults(stepResults, workflowConfig);
-      
+      const aggregatedResult = this.aggregateWorkflowResults(
+        stepResults,
+        workflowConfig,
+      );
+
       const totalExecutionTime = Date.now() - startTime;
       this.metrics.workflowsExecuted++;
-      
-      this.logger.log(`✅ Multi-language workflow completed: ${workflowConfig.workflowName} (${totalExecutionTime}ms)`, { workflowId });
-      
+
+      this.logger.log(
+        `✅ Multi-language workflow completed: ${workflowConfig.workflowName} (${totalExecutionTime}ms)`,
+        { workflowId },
+      );
+
       return {
         workflowId,
         workflowName: workflowConfig.workflowName,
@@ -367,27 +418,35 @@ export class ParlantHuginnBridgeService extends EventEmitter implements OnModule
         result: aggregatedResult,
         stepResults,
         totalExecutionTimeMs: totalExecutionTime,
-        performanceAnalysis: this.analyzeWorkflowPerformance(stepResults, totalExecutionTime),
+        performanceAnalysis: this.analyzeWorkflowPerformance(
+          stepResults,
+          totalExecutionTime,
+        ),
         workflowMetadata: {
           stepsExecuted: stepResults.length,
-          languagesInvolved: this.extractLanguagesFromSteps(workflowConfig.steps),
+          languagesInvolved: this.extractLanguagesFromSteps(
+            workflowConfig.steps,
+          ),
           parallelExecutionUsed: workflowConfig.parallelExecution,
-          validationApplied: true
-        }
+          validationApplied: true,
+        },
       };
-
     } catch (error) {
-      return this.handleMultiLanguageWorkflowError(workflowId, workflowConfig, error);
+      return this.handleMultiLanguageWorkflowError(
+        workflowId,
+        workflowConfig,
+        error,
+      );
     }
   }
 
   /**
    * Get Huginn Bridge Health Status
-   * 
+   *
    * Returns comprehensive health status of the Huginn bridge including
    * connection status, performance metrics, and system health indicators.
    */
-  async getHuginnBridgeHealth(): Promise<any> {
+  async getHuginnBridgeHealth(): Promise<Record<string, unknown>> {
     return {
       bridgeStatus: this.determineBridgeHealthStatus(),
       huginnConnectivity: await this.testHuginnConnectivity(),
@@ -397,21 +456,24 @@ export class ParlantHuginnBridgeService extends EventEmitter implements OnModule
       crossLanguageStatistics: this.getCrossLanguageStatistics(),
       errorRates: this.getErrorRates(),
       systemResources: this.getSystemResourceMetrics(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
   private async loadConfiguration(): Promise<void> {
     this.config = {
-      huginnBaseUrl: process.env.HUGINN_BASE_URL || 'http://localhost:3000',
-      huginnWebSocketUrl: process.env.HUGINN_WS_URL || 'ws://localhost:3000/cable',
-      apiKey: process.env.HUGINN_API_KEY || '',
-      requestTimeout: parseInt(process.env.HUGINN_REQUEST_TIMEOUT || '10000'),
-      performanceTarget: parseInt(process.env.HUGINN_PERFORMANCE_TARGET || '300'),
-      debugMode: process.env.NODE_ENV === 'development'
+      huginnBaseUrl: process.env.HUGINN_BASE_URL || "http://localhost:3000",
+      huginnWebSocketUrl:
+        process.env.HUGINN_WS_URL || "ws://localhost:3000/cable",
+      apiKey: process.env.HUGINN_API_KEY || "",
+      requestTimeout: parseInt(process.env.HUGINN_REQUEST_TIMEOUT || "10000"),
+      performanceTarget: parseInt(
+        process.env.HUGINN_PERFORMANCE_TARGET || "300",
+      ),
+      debugMode: process.env.NODE_ENV === "development",
     };
-    
-    this.logger.log('✅ Huginn bridge configuration loaded');
+
+    this.logger.log("✅ Huginn bridge configuration loaded");
   }
 
   private async initializeHttpClient(): Promise<void> {
@@ -419,11 +481,11 @@ export class ParlantHuginnBridgeService extends EventEmitter implements OnModule
       baseURL: this.config.huginnBaseUrl,
       timeout: this.config.requestTimeout,
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'AIgent-Huginn-Bridge/2.0.0',
-        'X-Bridge-Version': '2.0.0'
-      }
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "User-Agent": "AIgent-Huginn-Bridge/2.0.0",
+        "X-Bridge-Version": "2.0.0",
+      },
     });
 
     // Add request interceptor for performance monitoring
@@ -440,143 +502,156 @@ export class ParlantHuginnBridgeService extends EventEmitter implements OnModule
         return response;
       },
       (error) => {
-        const duration = Date.now() - (error.config?.metadata?.startTime || Date.now());
+        const duration =
+          Date.now() - (error.config?.metadata?.startTime || Date.now());
         this.updateRequestMetrics(duration, false);
         return Promise.reject(error);
-      }
+      },
     );
 
-    this.logger.log('✅ HTTP client initialized for Huginn communication');
+    this.logger.log("✅ HTTP client initialized for Huginn communication");
   }
 
   private async initializeWebSocketConnection(): Promise<void> {
     // WebSocket implementation for real-time communication with Huginn
     try {
       this.websocket = new WebSocket(this.config.huginnWebSocketUrl);
-      
-      this.websocket.on('open', () => {
+
+      this.websocket.on("open", () => {
         this.isConnected = true;
-        this.logger.log('✅ WebSocket connection established with Huginn');
+        this.logger.log("✅ WebSocket connection established with Huginn");
       });
 
-      this.websocket.on('message', (data) => {
+      this.websocket.on("message", (data) => {
         this.handleHuginnWebSocketMessage(JSON.parse(data.toString()));
       });
 
-      this.websocket.on('close', () => {
+      this.websocket.on("close", () => {
         this.isConnected = false;
-        this.logger.warn('⚠️ WebSocket connection to Huginn closed');
+        this.logger.warn("⚠️ WebSocket connection to Huginn closed");
       });
 
-      this.websocket.on('error', (error) => {
-        this.logger.error('❌ WebSocket error with Huginn', error);
+      this.websocket.on("error", (error) => {
+        this.logger.error("❌ WebSocket error with Huginn", error);
       });
-      
     } catch (error) {
-      this.logger.warn('⚠️ Could not establish WebSocket connection to Huginn', error);
+      this.logger.warn(
+        "⚠️ Could not establish WebSocket connection to Huginn",
+        error,
+      );
     }
   }
 
-  private async executeHuginnServiceCall(callId: string, callConfig: RubyServiceCallConfig, parameters: any): Promise<any> {
+  private async executeHuginnServiceCall(
+    callId: string,
+    callConfig: RubyServiceCallConfig,
+    parameters: Record<string, unknown>,
+  ): Promise<unknown> {
     const endpoint = `/api/v1/bridge/service_call`;
-    
+
     const requestPayload = {
       call_id: callId,
       service: callConfig.service,
       method: callConfig.method,
       parameters: parameters,
       metadata: {
-        source: 'typescript-bridge',
+        source: "typescript-bridge",
         timestamp: new Date().toISOString(),
-        performance_target_ms: this.config.performanceTarget
-      }
+        performance_target_ms: this.config.performanceTarget,
+      },
     };
 
     const response = await this.httpClient.post(endpoint, requestPayload, {
       headers: {
-        'X-Call-ID': callId,
-        'X-Source-Language': 'typescript',
-        'X-Target-Language': 'ruby',
-        'Authorization': `Bearer ${this.config.apiKey}`
-      }
+        "X-Call-ID": callId,
+        "X-Source-Language": "typescript",
+        "X-Target-Language": "ruby",
+        Authorization: `Bearer ${this.config.apiKey}`,
+      },
     });
 
     return response.data;
   }
 
-  private convertParametersToRuby(parameters: Record<string, any>): Record<string, any> {
+  private convertParametersToRuby(
+    parameters: Record<string, unknown>,
+  ): Record<string, unknown> {
     this.metrics.typeConversions++;
-    
-    const converted: Record<string, any> = {};
-    
+
+    const converted: Record<string, unknown> = {};
+
     for (const [key, value] of Object.entries(parameters)) {
       converted[key] = this.convertValueToRuby(value);
     }
-    
+
     return converted;
   }
 
-  private convertValueToRuby(value: any): any {
+  private convertValueToRuby(value: unknown): unknown {
     if (value === null || value === undefined) {
       return null;
     }
-    
+
     if (Array.isArray(value)) {
-      return value.map(item => this.convertValueToRuby(item));
+      return value.map((item) => this.convertValueToRuby(item));
     }
-    
-    if (typeof value === 'object') {
-      const converted: Record<string, any> = {};
+
+    if (typeof value === "object") {
+      const converted: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(value)) {
         converted[key] = this.convertValueToRuby(val);
       }
       return converted;
     }
-    
+
     // Primitive types are handled directly
     return value;
   }
 
-  private convertRubyResponseToTypeScript(rubyResponse: any): any {
+  private convertRubyResponseToTypeScript(rubyResponse: unknown): unknown {
     // Convert Ruby response format to TypeScript-compatible format
     if (rubyResponse === null) {
       return null;
     }
-    
+
     if (Array.isArray(rubyResponse)) {
-      return rubyResponse.map(item => this.convertRubyResponseToTypeScript(item));
+      return rubyResponse.map((item) =>
+        this.convertRubyResponseToTypeScript(item),
+      );
     }
-    
-    if (typeof rubyResponse === 'object') {
-      const converted: Record<string, any> = {};
+
+    if (typeof rubyResponse === "object") {
+      const converted: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(rubyResponse)) {
         converted[key] = this.convertRubyResponseToTypeScript(value);
       }
       return converted;
     }
-    
+
     return rubyResponse;
   }
 
-  private buildHuginnServiceConfig(workflowConfig: any): RubyServiceCallConfig {
+  private buildHuginnServiceConfig(
+    workflowConfig: Record<string, unknown>,
+  ): RubyServiceCallConfig {
     // Map workflow types to appropriate Huginn services
     const serviceMapping = {
-      'intelligence_processing': {
-        service: 'ParlantIntelligenceWorkflowService',
-        method: 'process_intelligence_data'
+      intelligence_processing: {
+        service: "ParlantIntelligenceWorkflowService",
+        method: "process_intelligence_data",
       },
-      'autonomous_decision': {
-        service: 'ParlantAutonomousDecisionService', 
-        method: 'validate_autonomous_decision'
+      autonomous_decision: {
+        service: "ParlantAutonomousDecisionService",
+        method: "validate_autonomous_decision",
       },
-      'agent_coordination': {
-        service: 'ParlantIntelligenceWorkflowService',
-        method: 'execute_agent_communication_coordination'
-      }
+      agent_coordination: {
+        service: "ParlantIntelligenceWorkflowService",
+        method: "execute_agent_communication_coordination",
+      },
     };
 
     const serviceConfig = serviceMapping[workflowConfig.workflowType];
-    
+
     return {
       service: serviceConfig.service,
       method: serviceConfig.method,
@@ -584,36 +659,39 @@ export class ParlantHuginnBridgeService extends EventEmitter implements OnModule
         workflow_name: workflowConfig.workflowName,
         workflow_config: workflowConfig.parameters,
         validation_level: workflowConfig.validationLevel,
-        autonomous_approval: workflowConfig.autonomousApproval || false
+        autonomous_approval: workflowConfig.autonomousApproval || false,
       },
       performanceRequirements: {
         targetTimeMs: this.config.performanceTarget,
-        maxTimeMs: this.config.requestTimeout
-      }
+        maxTimeMs: this.config.requestTimeout,
+      },
     };
   }
 
-  private async validateHuginnServiceCall(callId: string, callConfig: RubyServiceCallConfig): Promise<ParlantValidationResponse> {
+  private async validateHuginnServiceCall(
+    callId: string,
+    callConfig: RubyServiceCallConfig,
+  ): Promise<ParlantValidationResponse> {
     // Implementation would integrate with the main Parlant validation service
     // For now, return a basic validation structure
     return {
       approved: true,
       conversationId: `conv_${callId}`,
-      reason: 'Huginn service call validated',
+      reason: "Huginn service call validated",
       confidence: 0.95,
       metadata: {
         startTime: new Date(),
         endTime: new Date(),
         processingTime: 50,
-        cacheStatus: 'miss',
-        source: 'parlant',
+        cacheStatus: "miss",
+        source: "parlant",
         riskAssessment: {
           level: SecurityLevel.MEDIUM,
           factors: [],
           score: 30,
-          mitigations: []
-        }
-      }
+          mitigations: [],
+        },
+      },
     };
   }
 
@@ -626,23 +704,28 @@ export class ParlantHuginnBridgeService extends EventEmitter implements OnModule
     return `workflow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private updateHuginnCallMetrics(executionTime: number, success: boolean): void {
+  private updateHuginnCallMetrics(
+    executionTime: number,
+    success: boolean,
+  ): void {
     this.metrics.totalCalls++;
     this.metrics.huginnCalls++;
-    
+
     if (success) {
       this.metrics.successfulCalls++;
     } else {
       this.metrics.failedCalls++;
     }
-    
+
     if (executionTime < this.config.performanceTarget) {
       this.metrics.sub300msCalls++;
     }
-    
+
     // Update average response time
-    this.metrics.averageResponseTime = 
-      (this.metrics.averageResponseTime * (this.metrics.totalCalls - 1) + executionTime) / this.metrics.totalCalls;
+    this.metrics.averageResponseTime =
+      (this.metrics.averageResponseTime * (this.metrics.totalCalls - 1) +
+        executionTime) /
+      this.metrics.totalCalls;
   }
 
   private async startPerformanceMonitoring(): Promise<void> {
@@ -657,74 +740,100 @@ export class ParlantHuginnBridgeService extends EventEmitter implements OnModule
       timestamp: new Date().toISOString(),
       totalCalls: this.metrics.totalCalls,
       averageResponseTime: this.metrics.averageResponseTime,
-      successRate: this.metrics.totalCalls > 0 ? (this.metrics.successfulCalls / this.metrics.totalCalls) * 100 : 0,
-      sub300msRate: this.metrics.totalCalls > 0 ? (this.metrics.sub300msCalls / this.metrics.totalCalls) * 100 : 0
+      successRate:
+        this.metrics.totalCalls > 0
+          ? (this.metrics.successfulCalls / this.metrics.totalCalls) * 100
+          : 0,
+      sub300msRate:
+        this.metrics.totalCalls > 0
+          ? (this.metrics.sub300msCalls / this.metrics.totalCalls) * 100
+          : 0,
     };
-    
-    this.logger.debug('📊 Performance metrics update', performanceData);
+
+    this.logger.debug("📊 Performance metrics update", performanceData);
   }
 
-  private handleHuginnServiceCallError(callId: string, callConfig: RubyServiceCallConfig, error: any): any {
+  private handleHuginnServiceCallError(
+    callId: string,
+    callConfig: RubyServiceCallConfig,
+    error: Error | unknown,
+  ): Record<string, unknown> {
     this.metrics.failedCalls++;
     this.activeCalls.delete(callId);
-    
-    this.logger.error(`❌ Huginn service call failed: ${callConfig.service}.${callConfig.method}`, {
-      callId,
-      error: error.message,
-      stack: error.stack
-    });
-    
+
+    this.logger.error(
+      `❌ Huginn service call failed: ${callConfig.service}.${callConfig.method}`,
+      {
+        callId,
+        error: error.message,
+        stack: error.stack,
+      },
+    );
+
     return {
       callId,
       success: false,
       error: error.message,
-      executionTimeMs: Date.now() - (this.activeCalls.get(callId)?.startTime || Date.now()),
+      executionTimeMs:
+        Date.now() - (this.activeCalls.get(callId)?.startTime || Date.now()),
       bridgeMetadata: {
-        sourceLanguage: 'typescript',
-        targetLanguage: 'ruby',
+        sourceLanguage: "typescript",
+        targetLanguage: "ruby",
         service: callConfig.service,
         method: callConfig.method,
-        errorType: error.constructor.name
-      }
+        errorType: error.constructor.name,
+      },
     };
   }
 
   // Additional methods would be implemented here for workflow management,
   // WebSocket message handling, health monitoring, etc.
 
-  private handleHuginnWebSocketMessage(message: any): void {
-    this.logger.debug('📡 Received WebSocket message from Huginn', message);
-    this.emit('huginn:message', message);
+  private handleHuginnWebSocketMessage(message: Record<string, unknown>): void {
+    this.logger.debug("📡 Received WebSocket message from Huginn", message);
+    this.emit("huginn:message", message);
   }
 
-  private getPerformanceMetrics(): any {
+  private getPerformanceMetrics(): CrossLanguageMetrics {
     return {
       totalCalls: this.metrics.totalCalls,
       successfulCalls: this.metrics.successfulCalls,
       failedCalls: this.metrics.failedCalls,
-      successRate: this.metrics.totalCalls > 0 ? (this.metrics.successfulCalls / this.metrics.totalCalls) * 100 : 0,
+      successRate:
+        this.metrics.totalCalls > 0
+          ? (this.metrics.successfulCalls / this.metrics.totalCalls) * 100
+          : 0,
       averageResponseTime: this.metrics.averageResponseTime,
       sub300msCalls: this.metrics.sub300msCalls,
-      performanceRate: this.metrics.totalCalls > 0 ? (this.metrics.sub300msCalls / this.metrics.totalCalls) * 100 : 0
+      performanceRate:
+        this.metrics.totalCalls > 0
+          ? (this.metrics.sub300msCalls / this.metrics.totalCalls) * 100
+          : 0,
     };
   }
 
   private determineBridgeHealthStatus(): string {
-    const successRate = this.metrics.totalCalls > 0 ? (this.metrics.successfulCalls / this.metrics.totalCalls) * 100 : 100;
-    const performanceRate = this.metrics.totalCalls > 0 ? (this.metrics.sub300msCalls / this.metrics.totalCalls) * 100 : 100;
-    
+    const successRate =
+      this.metrics.totalCalls > 0
+        ? (this.metrics.successfulCalls / this.metrics.totalCalls) * 100
+        : 100;
+    const performanceRate =
+      this.metrics.totalCalls > 0
+        ? (this.metrics.sub300msCalls / this.metrics.totalCalls) * 100
+        : 100;
+
     if (successRate >= 95 && performanceRate >= 80) {
-      return 'healthy';
+      return "healthy";
     } else if (successRate >= 85 && performanceRate >= 60) {
-      return 'degraded';
+      return "degraded";
     } else {
-      return 'unhealthy';
+      return "unhealthy";
     }
   }
 
   private async testHuginnConnectivity(): Promise<boolean> {
     try {
-      await this.httpClient.get('/api/v1/health');
+      await this.httpClient.get("/api/v1/health");
       return true;
     } catch (error) {
       return false;

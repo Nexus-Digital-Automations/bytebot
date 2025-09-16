@@ -23,11 +23,11 @@ import {
   UnauthorizedException,
   Logger,
   Inject,
-} from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+} from "@nestjs/common";
+import { Request, Response, NextFunction } from "express";
+import { ConfigService } from "@nestjs/config";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 
 // Import Parlant types and services
 import {
@@ -43,19 +43,19 @@ import {
   FunctionContext,
   ValidationParameters,
   ExecutionEnvironment,
-  UserContext,
+  // UserContext, // Exported type - used by other modules
   RequestContext,
-} from '../types/parlant.types';
+} from "../types/parlant.types";
 
 // Import Parlant decorators
 import {
   ParlantValidation,
   SecurityClassification,
   ConversationContext,
-} from '../decorators/parlant-validation.decorators';
+} from "../decorators/parlant-validation.decorators";
 
 // Import Parlant service
-import { ParlantIntegrationService } from '../services/parlant-integration.service';
+import { ParlantIntegrationService } from "../services/parlant-integration.service";
 
 /**
  * Enhanced authentication request interface
@@ -63,18 +63,18 @@ import { ParlantIntegrationService } from '../services/parlant-integration.servi
 export interface ParlantAuthenticatedRequest extends Request {
   /** Authenticated user information */
   user?: AuthenticatedUser;
-  
+
   /** Enhanced authentication state */
   authenticationState?: EnhancedAuthenticationState;
-  
+
   /** Security context */
   securityContext?: SecurityContext;
-  
+
   /** Risk assessment */
   riskAssessment?: RequestRiskAssessment;
-  
+
   /** Conversation context */
-  conversationContext?: any;
+  conversationContext?: unknown;
 }
 
 /**
@@ -83,42 +83,43 @@ export interface ParlantAuthenticatedRequest extends Request {
 export interface EnhancedAuthenticationState {
   /** Whether user is authenticated */
   isAuthenticated: boolean;
-  
+
   /** Authentication token */
   authToken?: string;
-  
+
   /** Authentication error */
   authError?: string;
-  
+
   /** Authentication method used */
   authMethod?: AuthMethod;
-  
+
   /** Whether conversational validation was performed */
   conversationalValidation: boolean;
-  
+
   /** Authentication risk score */
   riskScore: number;
-  
+
   /** Additional security measures applied */
   securityMeasures: string[];
-  
+
   /** Authentication timestamp */
   authenticatedAt?: Date;
-  
+
   /** Session information */
   sessionInfo?: SessionInfo;
 }
 
 /**
- * Authentication methods
+ * Authentication methods - Exported for external module use
  */
 export enum AuthMethod {
-  JWT_TOKEN = 'jwt_token',
-  API_KEY = 'api_key',
-  CERTIFICATE = 'certificate',
-  SSO = 'sso',
-  CONVERSATIONAL = 'conversational',
+  JWT_TOKEN = "jwt_token",
+  API_KEY = "api_key", 
+  CERTIFICATE = "certificate",
+  SSO = "sso",
+  CONVERSATIONAL = "conversational",
 }
+// AuthMethod enum values exported for external consumption
 
 /**
  * Session information
@@ -126,13 +127,13 @@ export enum AuthMethod {
 export interface SessionInfo {
   /** Session identifier */
   sessionId: string;
-  
+
   /** Session start time */
   startTime: Date;
-  
+
   /** Last activity time */
   lastActivity: Date;
-  
+
   /** Session metadata */
   metadata: Record<string, unknown>;
 }
@@ -143,22 +144,22 @@ export interface SessionInfo {
 export interface AuthenticatedUser {
   /** User identifier */
   id: string;
-  
+
   /** Username */
   username: string;
-  
+
   /** Email address */
   email: string;
-  
+
   /** User roles */
   roles: string[];
-  
+
   /** User permissions */
   permissions: string[];
-  
+
   /** Whether user is active */
   isActive: boolean;
-  
+
   /** User metadata */
   metadata?: Record<string, unknown>;
 }
@@ -169,30 +170,31 @@ export interface AuthenticatedUser {
 export interface SecurityContext {
   /** Security classification */
   classification: FunctionSecurityLevel;
-  
+
   /** Threat level */
   threatLevel: ThreatLevel;
-  
+
   /** Security policies applied */
   appliedPolicies: string[];
-  
+
   /** Security measures active */
   activeMeasures: SecurityMeasure[];
-  
+
   /** Compliance requirements */
   complianceRequirements: string[];
 }
 
 /**
- * Threat levels
+ * Threat levels - Exported for external module use
  */
 export enum ThreatLevel {
-  NONE = 'none',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  NONE = "none",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
+// ThreatLevel enum values exported for external consumption
 
 /**
  * Security measures
@@ -200,28 +202,29 @@ export enum ThreatLevel {
 export interface SecurityMeasure {
   /** Measure type */
   type: SecurityMeasureType;
-  
+
   /** Measure parameters */
   parameters: Record<string, unknown>;
-  
+
   /** When measure was applied */
   appliedAt: Date;
-  
+
   /** Measure expiry */
   expiresAt?: Date;
 }
 
 /**
- * Security measure types
+ * Security measure types - Exported for external module use
  */
 export enum SecurityMeasureType {
-  RATE_LIMITING = 'rate_limiting',
-  IP_FILTERING = 'ip_filtering',
-  ENHANCED_LOGGING = 'enhanced_logging',
-  SESSION_MONITORING = 'session_monitoring',
-  MFA_REQUIRED = 'mfa_required',
-  CONVERSATION_REQUIRED = 'conversation_required',
+  RATE_LIMITING = "rate_limiting",
+  IP_FILTERING = "ip_filtering",
+  ENHANCED_LOGGING = "enhanced_logging",
+  SESSION_MONITORING = "session_monitoring",
+  MFA_REQUIRED = "mfa_required",
+  CONVERSATION_REQUIRED = "conversation_required",
 }
+// SecurityMeasureType enum values exported for external consumption
 
 /**
  * Request risk assessment
@@ -229,16 +232,16 @@ export enum SecurityMeasureType {
 export interface RequestRiskAssessment {
   /** Overall risk score (0-100) */
   overallRisk: number;
-  
+
   /** Risk factors */
   riskFactors: RequestRiskFactor[];
-  
+
   /** Risk level */
   riskLevel: RiskLevel;
-  
+
   /** Assessment timestamp */
   assessedAt: Date;
-  
+
   /** Assessment metadata */
   metadata: Record<string, unknown>;
 }
@@ -249,30 +252,31 @@ export interface RequestRiskAssessment {
 export interface RequestRiskFactor {
   /** Factor type */
   type: RequestRiskType;
-  
+
   /** Risk contribution */
   contribution: number;
-  
+
   /** Factor description */
   description: string;
-  
+
   /** Whether factor is critical */
   critical: boolean;
 }
 
 /**
- * Request risk types
+ * Request risk types - Exported for external module use
  */
 export enum RequestRiskType {
-  UNUSUAL_IP = 'unusual_ip',
-  SUSPICIOUS_USER_AGENT = 'suspicious_user_agent',
-  HIGH_REQUEST_RATE = 'high_request_rate',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  SENSITIVE_ENDPOINT = 'sensitive_endpoint',
-  ANOMALOUS_PATTERN = 'anomalous_pattern',
-  GEOGRAPHIC_ANOMALY = 'geographic_anomaly',
-  TIME_ANOMALY = 'time_anomaly',
+  UNUSUAL_IP = "unusual_ip",
+  SUSPICIOUS_USER_AGENT = "suspicious_user_agent",
+  HIGH_REQUEST_RATE = "high_request_rate",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  SENSITIVE_ENDPOINT = "sensitive_endpoint",
+  ANOMALOUS_PATTERN = "anomalous_pattern",
+  GEOGRAPHIC_ANOMALY = "geographic_anomaly",
+  TIME_ANOMALY = "time_anomaly",
 }
+// RequestRiskType enum values exported for external consumption
 
 /**
  * Conversational authentication result
@@ -280,19 +284,19 @@ export enum RequestRiskType {
 export interface ConversationalAuthResult {
   /** Whether authentication was successful */
   success: boolean;
-  
+
   /** Authenticated user if successful */
   user?: AuthenticatedUser;
-  
+
   /** Error message if failed */
   error?: string;
-  
+
   /** Conversation context */
-  conversationContext?: any;
-  
+  conversationContext?: unknown;
+
   /** Additional security measures required */
   requiredMeasures: SecurityMeasure[];
-  
+
   /** Authentication metadata */
   metadata: Record<string, unknown>;
 }
@@ -316,33 +320,36 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   ) {
     // Load configuration
     this.riskThresholds = {
-      low: configService.get<number>('security.risk.lowThreshold', 25),
-      medium: configService.get<number>('security.risk.mediumThreshold', 50),
-      high: configService.get<number>('security.risk.highThreshold', 75),
-      critical: configService.get<number>('security.risk.criticalThreshold', 90),
+      low: configService.get<number>("security.risk.lowThreshold", 25),
+      medium: configService.get<number>("security.risk.mediumThreshold", 50),
+      high: configService.get<number>("security.risk.highThreshold", 75),
+      critical: configService.get<number>(
+        "security.risk.criticalThreshold",
+        90,
+      ),
     };
 
     this.securityConfig = {
       enableConversationalAuth: configService.get<boolean>(
-        'security.conversationalAuth.enabled',
+        "security.conversationalAuth.enabled",
         true,
       ),
       riskAssessmentTimeout: configService.get<number>(
-        'security.riskAssessment.timeout',
+        "security.riskAssessment.timeout",
         5000,
       ),
       conversationTimeout: configService.get<number>(
-        'security.conversation.timeout',
+        "security.conversation.timeout",
         30000,
       ),
-      cacheTTL: configService.get<number>('security.cache.ttl', 300000),
+      cacheTTL: configService.get<number>("security.cache.ttl", 300000),
       fallbackToStandardAuth: configService.get<boolean>(
-        'security.fallback.enabled',
+        "security.fallback.enabled",
         true,
       ),
     };
 
-    this.logger.log('Parlant Enhanced Authentication Middleware initialized', {
+    this.logger.log("Parlant Enhanced Authentication Middleware initialized", {
       riskThresholds: this.riskThresholds,
       conversationalAuthEnabled: this.securityConfig.enableConversationalAuth,
     });
@@ -366,12 +373,15 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     // Initialize request state
     this.initializeRequestState(req);
 
-    this.logger.debug(`[${operationId}] Enhanced authentication middleware initiated`, {
-      operationId,
-      method: req.method,
-      url: req.url,
-      clientIp: this.getClientIP(req),
-    });
+    this.logger.debug(
+      `[${operationId}] Enhanced authentication middleware initiated`,
+      {
+        operationId,
+        method: req.method,
+        url: req.url,
+        clientIp: this.getClientIP(req),
+      },
+    );
 
     try {
       // Step 1: Perform risk assessment
@@ -403,17 +413,17 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
       this.setEnhancedSecurityHeaders(req, res);
 
       const processingTime = Date.now() - startTime;
-      
+
       this.logger.log(`[${operationId}] Enhanced authentication completed`, {
         operationId,
         authenticated: req.authenticationState?.isAuthenticated,
-        conversationalValidation: req.authenticationState?.conversationalValidation,
+        conversationalValidation:
+          req.authenticationState?.conversationalValidation,
         riskScore: riskAssessment.overallRisk,
         processingTime,
       });
 
       next();
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
 
@@ -427,21 +437,23 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
 
       // Set error state
       if (req.authenticationState) {
-        req.authenticationState.authError = 
+        req.authenticationState.authError =
           error instanceof Error ? error.message : String(error);
       }
 
       // Handle error based on configuration
       if (this.securityConfig.fallbackToStandardAuth) {
-        this.logger.log(`[${operationId}] Falling back to standard authentication`);
+        this.logger.log(
+          `[${operationId}] Falling back to standard authentication`,
+        );
         try {
           await this.performStandardAuthentication(req, operationId);
           next();
-        } catch (fallbackError) {
-          throw new UnauthorizedException('Authentication failed');
+        } catch (_fallbackError) {
+          throw new UnauthorizedException("Authentication failed");
         }
       } else {
-        throw new UnauthorizedException('Enhanced authentication required');
+        throw new UnauthorizedException("Enhanced authentication required");
       }
     }
   }
@@ -463,7 +475,7 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     riskLevel: RiskLevel.HIGH,
   })
   @ConversationContext({
-    topic: 'Authentication Security Validation',
+    topic: "Authentication Security Validation",
     priority: ConversationPriority.HIGH,
     requiredParticipants: [ParticipantRole.VALIDATOR],
   })
@@ -473,12 +485,15 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   ): Promise<void> {
     const startTime = Date.now();
 
-    this.logger.log(`[${operationId}] Conversational authentication initiated`, {
-      operationId,
-      riskScore: req.riskAssessment?.overallRisk,
-      url: req.url,
-      clientIp: this.getClientIP(req),
-    });
+    this.logger.log(
+      `[${operationId}] Conversational authentication initiated`,
+      {
+        operationId,
+        riskScore: req.riskAssessment?.overallRisk,
+        url: req.url,
+        clientIp: this.getClientIP(req),
+      },
+    );
 
     try {
       // Step 1: Check cache for recent authentication decisions
@@ -495,9 +510,8 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
       );
 
       // Step 3: Perform Parlant validation
-      const validationResponse = await this.parlantService.validateFunctionExecution(
-        validationRequest,
-      );
+      const validationResponse =
+        await this.parlantService.validateFunctionExecution(validationRequest);
 
       // Step 4: Process validation result
       const authResult = this.processAuthenticationValidationResponse(
@@ -512,25 +526,31 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
       await this.cacheAuthenticationDecision(req, authResult);
 
       const processingTime = Date.now() - startTime;
-      
-      this.logger.log(`[${operationId}] Conversational authentication completed`, {
-        operationId,
-        success: authResult.success,
-        processingTime,
-        conversationId: authResult.conversationContext?.conversationId,
-      });
 
+      this.logger.log(
+        `[${operationId}] Conversational authentication completed`,
+        {
+          operationId,
+          success: authResult.success,
+          processingTime,
+          conversationId: authResult.conversationContext?.conversationId,
+        },
+      );
     } catch (error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] Conversational authentication error`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        processingTime,
-      });
+      this.logger.error(
+        `[${operationId}] Conversational authentication error`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          processingTime,
+        },
+      );
 
       // Set authentication failure state
-      req.authenticationState!.authError = 'Conversational authentication failed';
+      req.authenticationState!.authError =
+        "Conversational authentication failed";
       req.authenticationState!.conversationalValidation = false;
 
       throw error;
@@ -553,7 +573,7 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     riskLevel: RiskLevel.CRITICAL,
   })
   @ConversationContext({
-    topic: 'High-Risk Authentication Validation',
+    topic: "High-Risk Authentication Validation",
     priority: ConversationPriority.CRITICAL,
     requiredParticipants: [ParticipantRole.APPROVER, ParticipantRole.VALIDATOR],
   })
@@ -564,7 +584,8 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     this.logger.warn(`[${operationId}] High-risk authentication initiated`, {
       operationId,
       riskScore: req.riskAssessment?.overallRisk,
-      criticalFactors: req.riskAssessment?.riskFactors.filter(f => f.critical).length,
+      criticalFactors: req.riskAssessment?.riskFactors.filter((f) => f.critical)
+        .length,
       url: req.url,
       clientIp: this.getClientIP(req),
     });
@@ -575,9 +596,8 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
       operationId,
     );
 
-    const validationResponse = await this.parlantService.validateFunctionExecution(
-      validationRequest,
-    );
+    const validationResponse =
+      await this.parlantService.validateFunctionExecution(validationRequest);
 
     const authResult = this.processAuthenticationValidationResponse(
       req,
@@ -608,7 +628,7 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     let totalRisk = 0;
 
     // Analyze various risk factors
-    
+
     // IP-based risk assessment
     const ipRisk = await this.assessIPRisk(req);
     if (ipRisk.contribution > 0) {
@@ -653,9 +673,11 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
 
     // Determine risk level
     let riskLevel: RiskLevel;
-    if (totalRisk >= this.riskThresholds.critical) riskLevel = RiskLevel.CRITICAL;
+    if (totalRisk >= this.riskThresholds.critical)
+      riskLevel = RiskLevel.CRITICAL;
     else if (totalRisk >= this.riskThresholds.high) riskLevel = RiskLevel.HIGH;
-    else if (totalRisk >= this.riskThresholds.medium) riskLevel = RiskLevel.MODERATE;
+    else if (totalRisk >= this.riskThresholds.medium)
+      riskLevel = RiskLevel.MODERATE;
     else if (totalRisk >= this.riskThresholds.low) riskLevel = RiskLevel.LOW;
     else riskLevel = RiskLevel.MINIMAL;
 
@@ -703,7 +725,9 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     }
 
     // Check for critical risk factors
-    const hasCriticalFactors = riskAssessment.riskFactors.some(f => f.critical);
+    const hasCriticalFactors = riskAssessment.riskFactors.some(
+      (f) => f.critical,
+    );
     if (hasCriticalFactors) {
       return true;
     }
@@ -755,11 +779,11 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     operationId: string,
   ): ParlantValidationRequest {
     const functionContext: FunctionContext = {
-      functionName: 'authenticateRequest',
+      functionName: "authenticateRequest",
       arguments: this.sanitizeRequestArguments(req),
       source: {
         filePath: __filename,
-        methodName: 'performConversationalAuthentication',
+        methodName: "performConversationalAuthentication",
         className: ParlantEnhancedAuthMiddleware.name,
       },
       securityLevel: this.determineSecurityLevel(req),
@@ -770,7 +794,9 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
         properties: {
           riskScore: req.riskAssessment!.overallRisk,
           riskFactors: req.riskAssessment!.riskFactors.length,
-          criticalFactors: req.riskAssessment!.riskFactors.filter(f => f.critical).length,
+          criticalFactors: req.riskAssessment!.riskFactors.filter(
+            (f) => f.critical,
+          ).length,
         },
       },
     };
@@ -803,7 +829,10 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     req: ParlantAuthenticatedRequest,
     operationId: string,
   ): ParlantValidationRequest {
-    const baseRequest = this.createAuthenticationValidationRequest(req, operationId);
+    const baseRequest = this.createAuthenticationValidationRequest(
+      req,
+      operationId,
+    );
 
     // Enhanced parameters for high-risk scenarios
     baseRequest.validationParams = {
@@ -814,11 +843,14 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     };
 
     // Update conversation context for high-risk
-    baseRequest.conversationContext.metadata.priority = ConversationPriority.CRITICAL;
+    baseRequest.conversationContext.metadata.priority =
+      ConversationPriority.CRITICAL;
     baseRequest.conversationContext.metadata.properties = {
       ...baseRequest.conversationContext.metadata.properties,
       highRisk: true,
-      criticalFactors: req.riskAssessment!.riskFactors.filter(f => f.critical),
+      criticalFactors: req.riskAssessment!.riskFactors.filter(
+        (f) => f.critical,
+      ),
     };
 
     return baseRequest;
@@ -867,17 +899,17 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
 
       case ValidationDecision.REQUEST_MORE_INFO:
         result.success = false;
-        result.error = 'Additional authentication information required';
+        result.error = "Additional authentication information required";
         break;
 
       case ValidationDecision.ESCALATE:
         result.success = false;
-        result.error = 'Authentication requires manual review';
+        result.error = "Authentication requires manual review";
         break;
 
       default:
         result.success = false;
-        result.error = 'Unexpected validation decision';
+        result.error = "Unexpected validation decision";
         break;
     }
 
@@ -962,24 +994,26 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     res: Response,
   ): void {
     const headers: Record<string, string> = {
-      'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
-      'X-XSS-Protection': '1; mode=block',
-      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
     };
 
     if (req.authenticationState?.isAuthenticated) {
-      headers['X-Authenticated'] = 'true';
-      headers['X-Auth-Method'] = req.authenticationState.authMethod || 'unknown';
-      headers['X-Risk-Score'] = req.riskAssessment?.overallRisk.toString() || '0';
+      headers["X-Authenticated"] = "true";
+      headers["X-Auth-Method"] =
+        req.authenticationState.authMethod || "unknown";
+      headers["X-Risk-Score"] =
+        req.riskAssessment?.overallRisk.toString() || "0";
     }
 
     if (req.authenticationState?.conversationalValidation) {
-      headers['X-Conversational-Auth'] = 'true';
+      headers["X-Conversational-Auth"] = "true";
     }
 
     if (req.conversationContext?.conversationId) {
-      headers['X-Conversation-ID'] = req.conversationContext.conversationId;
+      headers["X-Conversation-ID"] = req.conversationContext.conversationId;
     }
 
     res.set(headers);
@@ -999,17 +1033,19 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   }
 
   private assessUserAgentRisk(req: Request): RequestRiskFactor {
-    const userAgent = req.get('User-Agent') || '';
+    const userAgent = req.get("User-Agent") || "";
     // Implementation would analyze user agent for suspicious patterns
     return {
       type: RequestRiskType.SUSPICIOUS_USER_AGENT,
       contribution: 0, // Mock implementation
-      description: 'User agent analysis',
+      description: `User agent analysis: ${userAgent.substring(0, 50)}...`,
       critical: false,
     };
   }
 
-  private async assessRequestRateRisk(req: Request): Promise<RequestRiskFactor> {
+  private async assessRequestRateRisk(
+    req: Request,
+  ): Promise<RequestRiskFactor> {
     const clientIP = this.getClientIP(req);
     // Implementation would check request rate from this IP
     return {
@@ -1023,23 +1059,23 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   private assessEndpointRisk(req: Request): RequestRiskFactor {
     // Implementation would check endpoint sensitivity
     const isSensitive = this.isSensitiveEndpoint(req);
-    
+
     return {
       type: RequestRiskType.SENSITIVE_ENDPOINT,
       contribution: isSensitive ? 30 : 0,
       description: `Endpoint sensitivity analysis for ${req.url}`,
-      critical: isSensitive && req.method !== 'GET',
+      critical: isSensitive && req.method !== "GET",
     };
   }
 
   private assessTimeRisk(req: Request): RequestRiskFactor {
     const hour = new Date().getHours();
     const isUnusualTime = hour >= 23 || hour <= 6;
-    
+
     return {
       type: RequestRiskType.TIME_ANOMALY,
       contribution: isUnusualTime ? 15 : 0,
-      description: 'Time-based risk analysis',
+      description: "Time-based risk analysis",
       critical: false,
     };
   }
@@ -1049,7 +1085,7 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     return {
       type: RequestRiskType.GEOGRAPHIC_ANOMALY,
       contribution: 0, // Mock implementation
-      description: 'Geographic location analysis',
+      description: "Geographic location analysis",
       critical: false,
     };
   }
@@ -1057,63 +1093,71 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   // Helper methods
 
   private getClientIP(req: Request): string {
-    const forwarded = req.get('X-Forwarded-For');
+    const forwarded = req.get("X-Forwarded-For");
     if (forwarded) {
-      return forwarded.split(',')[0]?.trim() ?? 'unknown';
+      return forwarded.split(",")[0]?.trim() ?? "unknown";
     }
-    
-    return req.get('X-Real-IP') ?? req.socket?.remoteAddress ?? 'unknown';
+
+    return req.get("X-Real-IP") ?? req.socket?.remoteAddress ?? "unknown";
   }
 
   private isSensitiveEndpoint(req: Request): boolean {
     const sensitivePatterns = [
-      '/admin',
-      '/api/admin',
-      '/users',
-      '/auth',
-      '/config',
-      '/system',
+      "/admin",
+      "/api/admin",
+      "/users",
+      "/auth",
+      "/config",
+      "/system",
     ];
-    
-    return sensitivePatterns.some(pattern => req.url?.startsWith(pattern));
+
+    return sensitivePatterns.some((pattern) => req.url?.startsWith(pattern));
   }
 
   private isAdministrativeOperation(req: Request): boolean {
-    return req.url?.includes('/admin') || false;
+    return req.url?.includes("/admin") || false;
   }
 
-  private determineSecurityLevel(req: ParlantAuthenticatedRequest): FunctionSecurityLevel {
+  private determineSecurityLevel(
+    req: ParlantAuthenticatedRequest,
+  ): FunctionSecurityLevel {
     if (req.riskAssessment?.riskLevel === RiskLevel.CRITICAL) {
       return FunctionSecurityLevel.SECRET;
     }
-    
+
     if (this.isSensitiveEndpoint(req)) {
       return FunctionSecurityLevel.RESTRICTED;
     }
-    
+
     return FunctionSecurityLevel.INTERNAL;
   }
 
-  private determineApprovalLevel(req: ParlantAuthenticatedRequest): ApprovalLevel {
+  private determineApprovalLevel(
+    req: ParlantAuthenticatedRequest,
+  ): ApprovalLevel {
     if (req.riskAssessment?.riskLevel === RiskLevel.CRITICAL) {
       return ApprovalLevel.DUAL_APPROVAL;
     }
-    
+
     if (req.riskAssessment?.riskLevel === RiskLevel.HIGH) {
       return ApprovalLevel.SINGLE_APPROVAL;
     }
-    
+
     return ApprovalLevel.AUTOMATIC;
   }
 
   private getExecutionEnvironment(): ExecutionEnvironment {
-    const env = this.configService.get<string>('NODE_ENV', 'development');
-    
+    const env = this.configService.get<string>("NODE_ENV", "development");
+
     switch (env.toLowerCase()) {
-      case 'production': return ExecutionEnvironment.PRODUCTION;
-      case 'staging': return ExecutionEnvironment.STAGING;
-      case 'test': return ExecutionEnvironment.TESTING;
-      default: return ExecutionEnvironment.DEVELOPMENT;
+      case "production":
+        return ExecutionEnvironment.PRODUCTION;
+      case "staging":
+        return ExecutionEnvironment.STAGING;
+      case "test":
+        return ExecutionEnvironment.TESTING;
+      default:
+        return ExecutionEnvironment.DEVELOPMENT;
     }
   }
 
@@ -1132,16 +1176,18 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
       url: req.url,
       headers: req.headers as Record<string, string>,
       clientIp: this.getClientIP(req),
-      userAgent: req.get('User-Agent'),
+      userAgent: req.get("User-Agent"),
     };
   }
 
-  private createAuthenticationConversation(req: ParlantAuthenticatedRequest): any {
+  private createAuthenticationConversation(
+    req: ParlantAuthenticatedRequest,
+  ): any {
     // Implementation would create conversation context
     return {
       conversationId: `auth-conv-${Date.now()}`,
       metadata: {
-        topic: 'Request Authentication Validation',
+        topic: "Request Authentication Validation",
         priority: ConversationPriority.HIGH,
         properties: {
           url: req.url,
@@ -1168,7 +1214,9 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     return undefined;
   }
 
-  private mapRecommendationsToMeasures(recommendations: any[]): SecurityMeasure[] {
+  private mapRecommendationsToMeasures(
+    recommendations: any[],
+  ): SecurityMeasure[] {
     // Implementation would map Parlant recommendations to security measures
     return [];
   }
@@ -1234,7 +1282,9 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     operationId: string,
   ): Promise<void> {
     // Implementation would add high-risk security measures
-    this.logger.warn(`[${operationId}] Implementing high-risk security measures`);
+    this.logger.warn(
+      `[${operationId}] Implementing high-risk security measures`,
+    );
   }
 }
 

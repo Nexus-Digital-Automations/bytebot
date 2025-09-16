@@ -23,10 +23,10 @@ import {
   UnauthorizedException,
   Logger,
   Inject,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 
 // Import Parlant types and services
 import {
@@ -46,42 +46,42 @@ import {
   ExecutionEnvironment,
   UserContext,
   RequestContext,
-} from '../types/parlant.types';
+} from "../types/parlant.types";
 
 // Import Parlant decorators
 import {
   ParlantValidation,
   SecurityClassification,
   ConversationContext,
-} from '../decorators/parlant-validation.decorators';
+} from "../decorators/parlant-validation.decorators";
 
 // Import Parlant service
-import { ParlantIntegrationService } from './parlant-integration.service';
+import { ParlantIntegrationService } from "./parlant-integration.service";
 
 /**
  * MFA method types
  */
 export enum MFAMethod {
-  SMS = 'sms',
-  EMAIL = 'email',
-  TOTP = 'totp',
-  BIOMETRIC = 'biometric',
-  HARDWARE_TOKEN = 'hardware_token',
-  PUSH_NOTIFICATION = 'push_notification',
-  VOICE_CALL = 'voice_call',
-  BACKUP_CODES = 'backup_codes',
+  SMS = "sms",
+  EMAIL = "email",
+  TOTP = "totp",
+  BIOMETRIC = "biometric",
+  HARDWARE_TOKEN = "hardware_token",
+  PUSH_NOTIFICATION = "push_notification",
+  VOICE_CALL = "voice_call",
+  BACKUP_CODES = "backup_codes",
 }
 
 /**
  * MFA challenge status
  */
 export enum MFAChallengeStatus {
-  PENDING = 'pending',
-  SENT = 'sent',
-  VERIFIED = 'verified',
-  FAILED = 'failed',
-  EXPIRED = 'expired',
-  CANCELLED = 'cancelled',
+  PENDING = "pending",
+  SENT = "sent",
+  VERIFIED = "verified",
+  FAILED = "failed",
+  EXPIRED = "expired",
+  CANCELLED = "cancelled",
 }
 
 /**
@@ -90,37 +90,37 @@ export enum MFAChallengeStatus {
 export interface MFAChallenge {
   /** Challenge identifier */
   challengeId: string;
-  
+
   /** User identifier */
   userId: string;
-  
+
   /** MFA method used */
   method: MFAMethod;
-  
+
   /** Challenge status */
   status: MFAChallengeStatus;
-  
+
   /** Associated conversation ID */
   conversationId?: string;
-  
+
   /** Challenge creation time */
   createdAt: Date;
-  
+
   /** Challenge expiry time */
   expiresAt: Date;
-  
+
   /** Whether challenge is verified */
   verified: boolean;
-  
+
   /** Number of attempts made */
   attempts: number;
-  
+
   /** Maximum allowed attempts */
   maxAttempts: number;
-  
+
   /** Challenge metadata */
   metadata: MFAChallengeMetadata;
-  
+
   /** Risk assessment for this challenge */
   riskAssessment: MFARiskAssessment;
 }
@@ -131,19 +131,19 @@ export interface MFAChallenge {
 export interface MFAChallengeMetadata {
   /** Client IP address */
   clientIp?: string;
-  
+
   /** User agent */
   userAgent?: string;
-  
+
   /** Device fingerprint */
   deviceFingerprint?: string;
-  
+
   /** Geographic location */
   location?: GeographicLocation;
-  
+
   /** Authentication context */
   authContext?: AuthenticationContext;
-  
+
   /** Additional properties */
   properties: Record<string, unknown>;
 }
@@ -168,13 +168,13 @@ export interface GeographicLocation {
 export interface AuthenticationContext {
   /** Session identifier */
   sessionId?: string;
-  
+
   /** Authentication method used */
   primaryAuthMethod?: string;
-  
+
   /** Request metadata */
   requestMetadata?: Record<string, unknown>;
-  
+
   /** Security context */
   securityContext?: SecurityContext;
 }
@@ -185,13 +185,13 @@ export interface AuthenticationContext {
 export interface SecurityContext {
   /** Security classification */
   classification: FunctionSecurityLevel;
-  
+
   /** Threat indicators */
   threatIndicators: ThreatIndicator[];
-  
+
   /** Active security policies */
   activePolicies: string[];
-  
+
   /** Compliance requirements */
   complianceRequirements: string[];
 }
@@ -202,16 +202,16 @@ export interface SecurityContext {
 export interface ThreatIndicator {
   /** Indicator type */
   type: ThreatIndicatorType;
-  
+
   /** Severity level */
   severity: ThreatSeverity;
-  
+
   /** Indicator description */
   description: string;
-  
+
   /** Detection timestamp */
   detectedAt: Date;
-  
+
   /** Indicator metadata */
   metadata?: Record<string, unknown>;
 }
@@ -220,22 +220,22 @@ export interface ThreatIndicator {
  * Threat indicator types
  */
 export enum ThreatIndicatorType {
-  SUSPICIOUS_LOCATION = 'suspicious_location',
-  UNUSUAL_DEVICE = 'unusual_device',
-  ANOMALOUS_BEHAVIOR = 'anomalous_behavior',
-  KNOWN_BAD_IP = 'known_bad_ip',
-  CREDENTIAL_STUFFING = 'credential_stuffing',
-  BRUTE_FORCE = 'brute_force',
+  SUSPICIOUS_LOCATION = "suspicious_location",
+  UNUSUAL_DEVICE = "unusual_device",
+  ANOMALOUS_BEHAVIOR = "anomalous_behavior",
+  KNOWN_BAD_IP = "known_bad_ip",
+  CREDENTIAL_STUFFING = "credential_stuffing",
+  BRUTE_FORCE = "brute_force",
 }
 
 /**
  * Threat severity levels
  */
 export enum ThreatSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 /**
@@ -244,16 +244,16 @@ export enum ThreatSeverity {
 export interface MFARiskAssessment {
   /** Overall risk score (0-100) */
   riskScore: number;
-  
+
   /** Risk factors */
   riskFactors: MFARiskFactor[];
-  
+
   /** Risk level */
   riskLevel: RiskLevel;
-  
+
   /** Recommended MFA methods */
   recommendedMethods: MFAMethod[];
-  
+
   /** Assessment timestamp */
   assessedAt: Date;
 }
@@ -264,13 +264,13 @@ export interface MFARiskAssessment {
 export interface MFARiskFactor {
   /** Factor type */
   type: MFARiskType;
-  
+
   /** Risk contribution */
   contribution: number;
-  
+
   /** Factor description */
   description: string;
-  
+
   /** Whether factor is critical */
   critical: boolean;
 }
@@ -279,12 +279,12 @@ export interface MFARiskFactor {
  * MFA risk types
  */
 export enum MFARiskType {
-  NEW_DEVICE = 'new_device',
-  UNUSUAL_LOCATION = 'unusual_location',
-  HIGH_VALUE_TRANSACTION = 'high_value_transaction',
-  ADMIN_OPERATION = 'admin_operation',
-  SUSPICIOUS_PATTERN = 'suspicious_pattern',
-  RECENT_SECURITY_EVENT = 'recent_security_event',
+  NEW_DEVICE = "new_device",
+  UNUSUAL_LOCATION = "unusual_location",
+  HIGH_VALUE_TRANSACTION = "high_value_transaction",
+  ADMIN_OPERATION = "admin_operation",
+  SUSPICIOUS_PATTERN = "suspicious_pattern",
+  RECENT_SECURITY_EVENT = "recent_security_event",
 }
 
 /**
@@ -293,13 +293,13 @@ export enum MFARiskType {
 export interface MFAValidationRequest {
   /** Challenge identifier */
   challengeId: string;
-  
+
   /** User-provided response */
   response: string;
-  
+
   /** Additional validation context */
   context?: MFAValidationContext;
-  
+
   /** Request timestamp */
   timestamp: Date;
 }
@@ -310,13 +310,13 @@ export interface MFAValidationRequest {
 export interface MFAValidationContext {
   /** Client information */
   clientInfo?: ClientInfo;
-  
+
   /** Security context */
   securityContext?: SecurityContext;
-  
+
   /** Session information */
   sessionInfo?: SessionInfo;
-  
+
   /** Additional properties */
   properties?: Record<string, unknown>;
 }
@@ -327,13 +327,13 @@ export interface MFAValidationContext {
 export interface ClientInfo {
   /** Client IP address */
   ipAddress?: string;
-  
+
   /** User agent */
   userAgent?: string;
-  
+
   /** Device fingerprint */
   deviceFingerprint?: string;
-  
+
   /** Platform information */
   platform?: PlatformInfo;
 }
@@ -344,16 +344,16 @@ export interface ClientInfo {
 export interface PlatformInfo {
   /** Operating system */
   os?: string;
-  
+
   /** Browser */
   browser?: string;
-  
+
   /** Device type */
   deviceType?: DeviceType;
-  
+
   /** Screen resolution */
   screenResolution?: string;
-  
+
   /** Timezone */
   timezone?: string;
 }
@@ -362,10 +362,10 @@ export interface PlatformInfo {
  * Device types
  */
 export enum DeviceType {
-  DESKTOP = 'desktop',
-  MOBILE = 'mobile',
-  TABLET = 'tablet',
-  UNKNOWN = 'unknown',
+  DESKTOP = "desktop",
+  MOBILE = "mobile",
+  TABLET = "tablet",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -374,13 +374,13 @@ export enum DeviceType {
 export interface SessionInfo {
   /** Session identifier */
   sessionId: string;
-  
+
   /** Session start time */
   startTime: Date;
-  
+
   /** Last activity time */
   lastActivity: Date;
-  
+
   /** Session metadata */
   metadata: Record<string, unknown>;
 }
@@ -391,19 +391,19 @@ export interface SessionInfo {
 export interface MFAValidationResult {
   /** Whether validation was successful */
   valid: boolean;
-  
+
   /** Remaining attempts */
   remainingAttempts: number;
-  
+
   /** Error message if invalid */
   error?: string;
-  
+
   /** Associated conversation ID */
   conversationId?: string;
-  
+
   /** Validation metadata */
   metadata: MFAValidationMetadata;
-  
+
   /** Additional security actions required */
   requiredActions: SecurityAction[];
 }
@@ -414,19 +414,19 @@ export interface MFAValidationResult {
 export interface MFAValidationMetadata {
   /** Validation timestamp */
   validatedAt: Date;
-  
+
   /** Validation duration */
   validationDuration: number;
-  
+
   /** Method used for validation */
   method: MFAMethod;
-  
+
   /** Risk score at validation */
   riskScore: number;
-  
+
   /** Conversational validation used */
   conversationalValidation: boolean;
-  
+
   /** Additional properties */
   properties: Record<string, unknown>;
 }
@@ -437,16 +437,16 @@ export interface MFAValidationMetadata {
 export interface SecurityAction {
   /** Action type */
   type: SecurityActionType;
-  
+
   /** Action description */
   description: string;
-  
+
   /** Action parameters */
   parameters: Record<string, unknown>;
-  
+
   /** Whether action is mandatory */
   mandatory: boolean;
-  
+
   /** Action timeout */
   timeout?: number;
 }
@@ -455,12 +455,12 @@ export interface SecurityAction {
  * Security action types
  */
 export enum SecurityActionType {
-  ADDITIONAL_MFA = 'additional_mfa',
-  SECURITY_QUESTION = 'security_question',
-  DEVICE_VERIFICATION = 'device_verification',
-  ADMIN_APPROVAL = 'admin_approval',
-  ACCOUNT_VERIFICATION = 'account_verification',
-  PASSWORD_CHANGE = 'password_change',
+  ADDITIONAL_MFA = "additional_mfa",
+  SECURITY_QUESTION = "security_question",
+  DEVICE_VERIFICATION = "device_verification",
+  ADMIN_APPROVAL = "admin_approval",
+  ACCOUNT_VERIFICATION = "account_verification",
+  PASSWORD_CHANGE = "password_change",
 }
 
 /**
@@ -469,13 +469,13 @@ export enum SecurityActionType {
 export interface MFASetupRequest {
   /** User identifier */
   userId: string;
-  
+
   /** MFA method to set up */
   method: MFAMethod;
-  
+
   /** Setup parameters */
   parameters: Record<string, unknown>;
-  
+
   /** Request context */
   context: MFAValidationContext;
 }
@@ -486,19 +486,19 @@ export interface MFASetupRequest {
 export interface MFASetupResult {
   /** Whether setup was successful */
   success: boolean;
-  
+
   /** Setup identifier */
   setupId?: string;
-  
+
   /** Setup data (e.g., QR code for TOTP) */
   setupData?: Record<string, unknown>;
-  
+
   /** Error message if failed */
   error?: string;
-  
+
   /** Conversation context */
   conversationContext?: ParlantConversationContext;
-  
+
   /** Next steps required */
   nextSteps: SetupStep[];
 }
@@ -509,13 +509,13 @@ export interface MFASetupResult {
 export interface SetupStep {
   /** Step type */
   type: SetupStepType;
-  
+
   /** Step description */
   description: string;
-  
+
   /** Step parameters */
   parameters: Record<string, unknown>;
-  
+
   /** Whether step is required */
   required: boolean;
 }
@@ -524,12 +524,12 @@ export interface SetupStep {
  * Setup step types
  */
 export enum SetupStepType {
-  SCAN_QR_CODE = 'scan_qr_code',
-  ENTER_CODE = 'enter_code',
-  VERIFY_PHONE = 'verify_phone',
-  VERIFY_EMAIL = 'verify_email',
-  REGISTER_DEVICE = 'register_device',
-  DOWNLOAD_APP = 'download_app',
+  SCAN_QR_CODE = "scan_qr_code",
+  ENTER_CODE = "enter_code",
+  VERIFY_PHONE = "verify_phone",
+  VERIFY_EMAIL = "verify_email",
+  REGISTER_DEVICE = "register_device",
+  DOWNLOAD_APP = "download_app",
 }
 
 /**
@@ -550,19 +550,28 @@ export class ParlantMFAService {
   ) {
     // Load MFA configuration
     this.mfaConfig = {
-      defaultChallengeExpiry: configService.get<number>('mfa.challengeExpiry', 300000), // 5 minutes
-      maxAttempts: configService.get<number>('mfa.maxAttempts', 3),
-      enableConversationalMFA: configService.get<boolean>('mfa.conversational.enabled', true),
-      conversationTimeout: configService.get<number>('mfa.conversation.timeout', 120000), // 2 minutes
-      supportedMethods: configService.get<MFAMethod[]>('mfa.supportedMethods', [
+      defaultChallengeExpiry: configService.get<number>(
+        "mfa.challengeExpiry",
+        300000,
+      ), // 5 minutes
+      maxAttempts: configService.get<number>("mfa.maxAttempts", 3),
+      enableConversationalMFA: configService.get<boolean>(
+        "mfa.conversational.enabled",
+        true,
+      ),
+      conversationTimeout: configService.get<number>(
+        "mfa.conversation.timeout",
+        120000,
+      ), // 2 minutes
+      supportedMethods: configService.get<MFAMethod[]>("mfa.supportedMethods", [
         MFAMethod.SMS,
         MFAMethod.EMAIL,
         MFAMethod.TOTP,
       ]),
-      riskBasedMFA: configService.get<boolean>('mfa.riskBased.enabled', true),
+      riskBasedMFA: configService.get<boolean>("mfa.riskBased.enabled", true),
     };
 
-    this.logger.log('Parlant MFA Service initialized', {
+    this.logger.log("Parlant MFA Service initialized", {
       supportedMethods: this.mfaConfig.supportedMethods,
       conversationalMFA: this.mfaConfig.enableConversationalMFA,
       riskBasedMFA: this.mfaConfig.riskBasedMFA,
@@ -583,7 +592,7 @@ export class ParlantMFAService {
     timeout: 15000,
   })
   @ConversationContext({
-    topic: 'Multi-Factor Authentication Challenge',
+    topic: "Multi-Factor Authentication Challenge",
     priority: ConversationPriority.NORMAL,
   })
   async createConversationalMFAChallenge(
@@ -645,7 +654,6 @@ export class ParlantMFAService {
       });
 
       return challenge;
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
 
@@ -657,7 +665,7 @@ export class ParlantMFAService {
         processingTime,
       });
 
-      throw new BadRequestException('Failed to create MFA challenge');
+      throw new BadRequestException("Failed to create MFA challenge");
     }
   }
 
@@ -678,7 +686,7 @@ export class ParlantMFAService {
     riskLevel: RiskLevel.HIGH,
   })
   @ConversationContext({
-    topic: 'High-Risk Multi-Factor Authentication',
+    topic: "High-Risk Multi-Factor Authentication",
     priority: ConversationPriority.CRITICAL,
     requiredParticipants: [ParticipantRole.VALIDATOR, ParticipantRole.APPROVER],
   })
@@ -758,7 +766,7 @@ export class ParlantMFAService {
 
       if (!challenge) {
         return this.createFailedValidationResult(
-          'Invalid or expired MFA challenge',
+          "Invalid or expired MFA challenge",
           0,
         );
       }
@@ -780,9 +788,8 @@ export class ParlantMFAService {
       );
 
       // Step 4: Perform conversational validation
-      const validationResponse = await this.parlantService.validateFunctionExecution(
-        validationContext,
-      );
+      const validationResponse =
+        await this.parlantService.validateFunctionExecution(validationContext);
 
       // Step 5: Process validation result
       const result = await this.processMFAValidationResponse(
@@ -806,7 +813,6 @@ export class ParlantMFAService {
       });
 
       return result;
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
 
@@ -818,7 +824,7 @@ export class ParlantMFAService {
       });
 
       return this.createFailedValidationResult(
-        'MFA validation service error',
+        "MFA validation service error",
         0,
       );
     }
@@ -836,7 +842,7 @@ export class ParlantMFAService {
     timeout: 300000, // 5 minutes for setup
   })
   @ConversationContext({
-    topic: 'Multi-Factor Authentication Setup',
+    topic: "Multi-Factor Authentication Setup",
     priority: ConversationPriority.NORMAL,
     requiredParticipants: [ParticipantRole.VALIDATOR],
   })
@@ -868,10 +874,7 @@ export class ParlantMFAService {
       );
 
       // Step 4: Create setup steps
-      const nextSteps = this.createSetupSteps(
-        setupRequest.method,
-        setupData,
-      );
+      const nextSteps = this.createSetupSteps(setupRequest.method, setupData);
 
       // Step 5: Store setup state
       const setupId = await this.storeSetupState(setupRequest, setupData);
@@ -883,7 +886,6 @@ export class ParlantMFAService {
         conversationContext: conversation,
         nextSteps,
       };
-
     } catch (error) {
       this.logger.error(`[${operationId}] MFA setup failed`, {
         operationId,
@@ -894,7 +896,7 @@ export class ParlantMFAService {
 
       return {
         success: false,
-        error: 'MFA setup failed',
+        error: "MFA setup failed",
         nextSteps: [],
       };
     }
@@ -917,7 +919,7 @@ export class ParlantMFAService {
     riskLevel: RiskLevel.HIGH,
   })
   @ConversationContext({
-    topic: 'MFA Account Recovery',
+    topic: "MFA Account Recovery",
     priority: ConversationPriority.HIGH,
     requiredParticipants: [
       ParticipantRole.APPROVER,
@@ -951,7 +953,7 @@ export class ParlantMFAService {
     );
 
     if (!identityVerification.verified) {
-      throw new UnauthorizedException('Identity verification failed');
+      throw new UnauthorizedException("Identity verification failed");
     }
 
     // Generate recovery challenge
@@ -982,7 +984,7 @@ export class ParlantMFAService {
       riskFactors.push({
         type: MFARiskType.NEW_DEVICE,
         contribution: 25,
-        description: 'Authentication from new device',
+        description: "Authentication from new device",
         critical: false,
       });
     }
@@ -991,7 +993,7 @@ export class ParlantMFAService {
       riskFactors.push({
         type: MFARiskType.UNUSUAL_LOCATION,
         contribution: 30,
-        description: 'Authentication from unusual location',
+        description: "Authentication from unusual location",
         critical: false,
       });
     }
@@ -1000,7 +1002,7 @@ export class ParlantMFAService {
       riskFactors.push({
         type: MFARiskType.ADMIN_OPERATION,
         contribution: 35,
-        description: 'Administrative operation requested',
+        description: "Administrative operation requested",
         critical: true,
       });
     }
@@ -1009,13 +1011,16 @@ export class ParlantMFAService {
       riskFactors.push({
         type: MFARiskType.RECENT_SECURITY_EVENT,
         contribution: 20,
-        description: 'Recent security events on account',
+        description: "Recent security events on account",
         critical: false,
       });
     }
 
     // Calculate total risk
-    totalRisk = riskFactors.reduce((sum, factor) => sum + factor.contribution, 0);
+    totalRisk = riskFactors.reduce(
+      (sum, factor) => sum + factor.contribution,
+      0,
+    );
 
     // Determine risk level
     let riskLevel: RiskLevel;
@@ -1046,9 +1051,10 @@ export class ParlantMFAService {
     riskAssessment: MFARiskAssessment,
   ): Promise<ParlantConversationContext> {
     const topic = `MFA Challenge - ${method} (Risk: ${riskAssessment.riskLevel})`;
-    const priority = riskAssessment.riskLevel === RiskLevel.CRITICAL
-      ? ConversationPriority.CRITICAL
-      : ConversationPriority.NORMAL;
+    const priority =
+      riskAssessment.riskLevel === RiskLevel.CRITICAL
+        ? ConversationPriority.CRITICAL
+        : ConversationPriority.NORMAL;
 
     return this.parlantService.createConversation(topic, priority);
   }
@@ -1064,7 +1070,9 @@ export class ParlantMFAService {
     conversationId: string,
   ): Promise<MFAChallenge> {
     const challengeId = `mfa-${method}-${Date.now()}-${userId}`;
-    const expiresAt = new Date(Date.now() + this.mfaConfig.defaultChallengeExpiry);
+    const expiresAt = new Date(
+      Date.now() + this.mfaConfig.defaultChallengeExpiry,
+    );
 
     return {
       challengeId,
@@ -1096,7 +1104,7 @@ export class ParlantMFAService {
     operationId: string,
   ): Promise<ParlantValidationRequest> {
     const functionContext: FunctionContext = {
-      functionName: 'validateMFAResponse',
+      functionName: "validateMFAResponse",
       arguments: {
         challengeId: challenge.challengeId,
         method: challenge.method,
@@ -1107,7 +1115,7 @@ export class ParlantMFAService {
       },
       source: {
         filePath: __filename,
-        methodName: 'validateConversationalMFA',
+        methodName: "validateConversationalMFA",
         className: ParlantMFAService.name,
       },
       securityLevel: FunctionSecurityLevel.RESTRICTED,
@@ -1139,17 +1147,19 @@ export class ParlantMFAService {
       requestId: operationId,
       functionContext,
       validationParams,
-      conversationContext: challenge.conversationId ? {
-        conversationId: challenge.conversationId,
-        metadata: {
-          topic: 'MFA Validation',
-          priority: ConversationPriority.HIGH,
-          properties: {
-            challengeId: challenge.challengeId,
-            method: challenge.method,
-          },
-        },
-      } as any : undefined,
+      conversationContext: challenge.conversationId
+        ? ({
+            conversationId: challenge.conversationId,
+            metadata: {
+              topic: "MFA Validation",
+              priority: ConversationPriority.HIGH,
+              properties: {
+                challengeId: challenge.challengeId,
+                method: challenge.method,
+              },
+            },
+          } as any)
+        : undefined,
       timestamp: new Date(),
     };
   }
@@ -1159,11 +1169,13 @@ export class ParlantMFAService {
   private async cacheMFAChallenge(challenge: MFAChallenge): Promise<void> {
     const cacheKey = `mfa-challenge:${challenge.challengeId}`;
     const ttl = challenge.expiresAt.getTime() - Date.now();
-    
+
     await this.cacheManager.set(cacheKey, challenge, ttl);
   }
 
-  private async getCachedMFAChallenge(challengeId: string): Promise<MFAChallenge | null> {
+  private async getCachedMFAChallenge(
+    challengeId: string,
+  ): Promise<MFAChallenge | null> {
     const cacheKey = `mfa-challenge:${challengeId}`;
     return this.cacheManager.get<MFAChallenge>(cacheKey);
   }
@@ -1173,7 +1185,7 @@ export class ParlantMFAService {
     result: MFAValidationResult,
   ): Promise<void> {
     challenge.attempts++;
-    
+
     if (result.valid) {
       challenge.verified = true;
       challenge.status = MFAChallengeStatus.VERIFIED;
@@ -1186,26 +1198,29 @@ export class ParlantMFAService {
 
   // Validation helper methods
 
-  private validateChallengeState(challenge: MFAChallenge): { valid: boolean; error?: string } {
+  private validateChallengeState(challenge: MFAChallenge): {
+    valid: boolean;
+    error?: string;
+  } {
     if (challenge.status === MFAChallengeStatus.EXPIRED) {
-      return { valid: false, error: 'MFA challenge has expired' };
+      return { valid: false, error: "MFA challenge has expired" };
     }
 
     if (challenge.status === MFAChallengeStatus.VERIFIED) {
-      return { valid: false, error: 'MFA challenge already verified' };
+      return { valid: false, error: "MFA challenge already verified" };
     }
 
     if (challenge.status === MFAChallengeStatus.FAILED) {
-      return { valid: false, error: 'MFA challenge has failed' };
+      return { valid: false, error: "MFA challenge has failed" };
     }
 
     if (challenge.expiresAt < new Date()) {
       challenge.status = MFAChallengeStatus.EXPIRED;
-      return { valid: false, error: 'MFA challenge has expired' };
+      return { valid: false, error: "MFA challenge has expired" };
     }
 
     if (challenge.attempts >= challenge.maxAttempts) {
-      return { valid: false, error: 'Maximum MFA attempts exceeded' };
+      return { valid: false, error: "Maximum MFA attempts exceeded" };
     }
 
     return { valid: true };
@@ -1218,7 +1233,7 @@ export class ParlantMFAService {
     startTime: number,
   ): Promise<MFAValidationResult> {
     const validationDuration = Date.now() - startTime;
-    
+
     // Perform actual MFA validation based on method
     const methodValidation = await this.validateByMethod(
       challenge.method,
@@ -1226,13 +1241,14 @@ export class ParlantMFAService {
       challenge,
     );
 
-    const finalResult = methodValidation && 
+    const finalResult =
+      methodValidation &&
       validationResponse.result.decision === ValidationDecision.APPROVED;
 
     return {
       valid: finalResult,
       remainingAttempts: challenge.maxAttempts - challenge.attempts - 1,
-      error: finalResult ? undefined : 'Invalid MFA code',
+      error: finalResult ? undefined : "Invalid MFA code",
       conversationId: challenge.conversationId,
       metadata: {
         validatedAt: new Date(),
@@ -1280,19 +1296,22 @@ export class ParlantMFAService {
       case MFAMethod.SMS:
       case MFAMethod.EMAIL:
         return this.validateCodeChallenge(response, challenge);
-      
+
       case MFAMethod.TOTP:
         return this.validateTOTPCode(response, challenge);
-      
+
       case MFAMethod.BACKUP_CODES:
         return this.validateBackupCode(response, challenge);
-      
+
       default:
         return false;
     }
   }
 
-  private validateCodeChallenge(response: string, challenge: MFAChallenge): boolean {
+  private validateCodeChallenge(
+    response: string,
+    challenge: MFAChallenge,
+  ): boolean {
     // Implementation would validate SMS/Email code
     // For now, mock validation (accept any 6-digit code)
     return /^\d{6}$/.test(response);
@@ -1304,7 +1323,10 @@ export class ParlantMFAService {
     return /^\d{6}$/.test(response);
   }
 
-  private validateBackupCode(response: string, challenge: MFAChallenge): boolean {
+  private validateBackupCode(
+    response: string,
+    challenge: MFAChallenge,
+  ): boolean {
     // Implementation would validate backup code against stored codes
     // For now, mock validation
     return response.length >= 8;
@@ -1329,7 +1351,10 @@ export class ParlantMFAService {
   }
 
   private isAdminOperation(context: AuthenticationContext): boolean {
-    return context.securityContext?.classification === FunctionSecurityLevel.RESTRICTED;
+    return (
+      context.securityContext?.classification ===
+      FunctionSecurityLevel.RESTRICTED
+    );
   }
 
   private async hasRecentSecurityEvents(userId: string): Promise<boolean> {
@@ -1337,9 +1362,12 @@ export class ParlantMFAService {
     return false;
   }
 
-  private getRecommendedMFAMethods(riskLevel: RiskLevel, preferredMethod: MFAMethod): MFAMethod[] {
+  private getRecommendedMFAMethods(
+    riskLevel: RiskLevel,
+    preferredMethod: MFAMethod,
+  ): MFAMethod[] {
     const methods: MFAMethod[] = [];
-    
+
     if (riskLevel === RiskLevel.CRITICAL) {
       methods.push(MFAMethod.HARDWARE_TOKEN, MFAMethod.BIOMETRIC);
     } else if (riskLevel === RiskLevel.HIGH) {
@@ -1348,13 +1376,17 @@ export class ParlantMFAService {
       methods.push(preferredMethod);
     }
 
-    return methods.filter(method => this.mfaConfig.supportedMethods.includes(method));
+    return methods.filter((method) =>
+      this.mfaConfig.supportedMethods.includes(method),
+    );
   }
 
   // Additional helper methods
 
   private requiresDelivery(method: MFAMethod): boolean {
-    return [MFAMethod.SMS, MFAMethod.EMAIL, MFAMethod.VOICE_CALL].includes(method);
+    return [MFAMethod.SMS, MFAMethod.EMAIL, MFAMethod.VOICE_CALL].includes(
+      method,
+    );
   }
 
   private async deliverMFAChallenge(
@@ -1366,18 +1398,22 @@ export class ParlantMFAService {
       challengeId: challenge.challengeId,
       method: challenge.method,
     });
-    
+
     challenge.status = MFAChallengeStatus.SENT;
   }
 
   private getExecutionEnvironment(): ExecutionEnvironment {
-    const env = this.configService.get<string>('NODE_ENV', 'development');
-    
+    const env = this.configService.get<string>("NODE_ENV", "development");
+
     switch (env.toLowerCase()) {
-      case 'production': return ExecutionEnvironment.PRODUCTION;
-      case 'staging': return ExecutionEnvironment.STAGING;
-      case 'test': return ExecutionEnvironment.TESTING;
-      default: return ExecutionEnvironment.DEVELOPMENT;
+      case "production":
+        return ExecutionEnvironment.PRODUCTION;
+      case "staging":
+        return ExecutionEnvironment.STAGING;
+      case "test":
+        return ExecutionEnvironment.TESTING;
+      default:
+        return ExecutionEnvironment.DEVELOPMENT;
     }
   }
 
@@ -1405,7 +1441,10 @@ export class ParlantMFAService {
     context: AuthenticationContext,
   ): Promise<ParlantConversationContext> {
     const topic = `High-Risk MFA - User ${userId}`;
-    return this.parlantService.createConversation(topic, ConversationPriority.CRITICAL);
+    return this.parlantService.createConversation(
+      topic,
+      ConversationPriority.CRITICAL,
+    );
   }
 
   private async generateHighRiskMFAChallenge(
@@ -1416,7 +1455,13 @@ export class ParlantMFAService {
     conversationId: string,
   ): Promise<MFAChallenge> {
     // Generate challenge with enhanced security for high-risk
-    return this.generateMFAChallenge(userId, method, context, riskAssessment, conversationId);
+    return this.generateMFAChallenge(
+      userId,
+      method,
+      context,
+      riskAssessment,
+      conversationId,
+    );
   }
 
   private async applyHighRiskSecurityMeasures(
@@ -1424,12 +1469,14 @@ export class ParlantMFAService {
     context: AuthenticationContext,
   ): Promise<void> {
     // Apply additional security measures
-    this.logger.warn('Applying high-risk security measures for MFA', {
+    this.logger.warn("Applying high-risk security measures for MFA", {
       challengeId: challenge.challengeId,
     });
   }
 
-  private async validateSetupParameters(setupRequest: MFASetupRequest): Promise<void> {
+  private async validateSetupParameters(
+    setupRequest: MFASetupRequest,
+  ): Promise<void> {
     // Validate MFA setup parameters
   }
 
@@ -1462,7 +1509,10 @@ export class ParlantMFAService {
     method: MFAMethod,
   ): Promise<ParlantConversationContext> {
     const topic = `MFA Setup - ${method}`;
-    return this.parlantService.createConversation(topic, ConversationPriority.NORMAL);
+    return this.parlantService.createConversation(
+      topic,
+      ConversationPriority.NORMAL,
+    );
   }
 
   private async createMFARecoveryConversation(
@@ -1470,7 +1520,10 @@ export class ParlantMFAService {
     recoveryContext: AuthenticationContext,
   ): Promise<ParlantConversationContext> {
     const topic = `MFA Recovery - User ${userId}`;
-    return this.parlantService.createConversation(topic, ConversationPriority.HIGH);
+    return this.parlantService.createConversation(
+      topic,
+      ConversationPriority.HIGH,
+    );
   }
 
   private async performIdentityVerification(

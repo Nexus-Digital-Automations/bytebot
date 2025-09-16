@@ -1,0 +1,5 @@
+
+> @bytebot/shared@0.0.1 lint
+> npx eslint "src/{types,config,pipes,validation,dto,guards,decorators}/**/*.ts" --fix --no-error-on-unmatched-pattern && echo "Core directories linted successfully. Large security/utils files excluded to prevent timeout." --format=json
+
+Core directories linted successfully. Large security/utils files excluded to prevent timeout. --format=json

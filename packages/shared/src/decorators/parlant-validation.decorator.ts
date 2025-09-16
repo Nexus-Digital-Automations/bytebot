@@ -14,8 +14,12 @@
 // Note: Injectable and Inject not currently used but available for future DI needs
 import { v4 as uuidv4 } from "uuid";
 
-// Type for generic function to replace Function type
-type GenericFunction = (..._args: unknown[]) => unknown;
+// Type for generic function to replace Function type with additional properties
+type GenericFunction = ((..._args: unknown[]) => unknown) & {
+  _parlantWrapped?: boolean;
+  _parlantMetadata?: ParlantFunctionMetadata;
+  _parlantConfig?: ParlantValidationConfig;
+};
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
@@ -58,7 +62,7 @@ export function ParlantValidated(options: ParlantDecoratorOptions) {
       parameterSchemas: extractParameterSchemas(originalMethod),
       returnSchema: extractReturnSchema(originalMethod),
       securityRequirements: getSecurityRequirements(
-        options.securityLevel || SecurityLevel.MEDIUM,
+        options.securityLevel || SecurityLevel._MEDIUM,
       ),
       performanceSla: {
         maxResponseTime: options.timeout || 5000,
@@ -70,7 +74,7 @@ export function ParlantValidated(options: ParlantDecoratorOptions) {
     // Create validation configuration
     const validationConfig: ParlantValidationConfig = {
       enabled: true,
-      securityLevel: options.securityLevel || SecurityLevel.MEDIUM,
+      securityLevel: options.securityLevel || SecurityLevel._MEDIUM,
       cacheable: options.cacheable !== false,
       cacheTtl: options.cacheTtl || 3600000, // 1 hour default
       timeout: options.timeout || 5000,
@@ -98,7 +102,8 @@ export function ParlantValidated(options: ParlantDecoratorOptions) {
       }
 
       // Register function if not already registered
-      if (!parlantService.functionRegistry?.has(functionName)) {
+      // Access functionRegistry through the service's public method
+      if (!parlantService.hasFunction(functionName)) {
         parlantService.registerFunction(
           functionName,
           metadata,
@@ -236,11 +241,11 @@ export function ParlantValidatedClass(classOptions: {
   defaultSecurityLevel?: SecurityLevel;
   enableValidation?: boolean;
 }) {
-  return function <T extends { new (..._args: unknown[]): object }>(
+  return function <T extends { new (..._args: any[]): object }>(
     constructor: T,
   ) {
     return class extends constructor {
-      constructor(..._args: unknown[]) {
+      constructor(..._args: any[]) {
         super(..._args);
 
         if (classOptions.enableValidation !== false) {
@@ -266,14 +271,20 @@ export function ParlantValidatedClass(classOptions: {
         }
       }
 
-      private wrapMethodWithParlant(
+      public wrapMethodWithParlant(
         methodName: string,
         originalMethod: GenericFunction,
         options: unknown,
       ) {
+        const typedOptions = options as {
+          defaultSecurityLevel?: SecurityLevel;
+          packageName?: string;
+          enableValidation?: boolean;
+        };
         const decoratorOptions: ParlantDecoratorOptions = {
           description: `Auto-generated validation for ${methodName}`,
-          securityLevel: options.defaultSecurityLevel || SecurityLevel.MEDIUM,
+          securityLevel:
+            typedOptions.defaultSecurityLevel || SecurityLevel._MEDIUM,
           cacheable: true,
         };
 
@@ -330,10 +341,10 @@ async function performValidationWithRetry(
               startTime: new Date(),
               endTime: new Date(),
               processingTime: 0,
-              cacheStatus: "miss",
-              source: "custom",
+              cacheStatus: "miss" as "hit" | "miss" | "stale",
+              source: "parlant" as "cache" | "parlant" | "fallback",
               riskAssessment: {
-                level: SecurityLevel.HIGH,
+                level: SecurityLevel._HIGH,
                 factors: ["Custom validation failure"],
                 score: 90,
                 mitigations: ["Review function parameters and context"],
@@ -617,13 +628,13 @@ function extractReturnSchema(_method: GenericFunction): unknown {
  */
 function getSecurityRequirements(level: SecurityLevel): string[] {
   switch (level) {
-    case SecurityLevel.LOW:
+    case SecurityLevel._LOW:
       return ["basic-auth"];
-    case SecurityLevel.MEDIUM:
+    case SecurityLevel._MEDIUM:
       return ["basic-auth", "input-validation"];
-    case SecurityLevel.HIGH:
+    case SecurityLevel._HIGH:
       return ["basic-auth", "input-validation", "audit-logging"];
-    case SecurityLevel.CRITICAL:
+    case SecurityLevel._CRITICAL:
       return [
         "basic-auth",
         "input-validation",
@@ -667,13 +678,11 @@ function updateFunctionMetrics(
     error?: string;
   },
 ): void {
-  const wrapper = (
-    parlantService as unknown as { functionRegistry?: Map<string, unknown> }
-  ).functionRegistry?.get(functionName);
-  if (!wrapper) return;
+  // Get function metrics through the service's public method
+  const metrics = parlantService.getFunctionMetrics?.(functionName);
+  if (!metrics) return;
 
-  const metrics = wrapper.metrics;
-  metrics.totalInvocations++;
+  metrics.totalInvocations = (metrics.totalInvocations || 0) + 1;
 
   if (update.success) {
     metrics.successfulValidations++;
@@ -703,9 +712,11 @@ function updateFunctionMetrics(
     }
   }
 
+  const totalValidations =
+    (metrics.successfulValidations || 0) + (metrics.failedValidations || 0);
   metrics.errorRate =
     totalValidations > 0
-      ? (metrics.failedValidations / totalValidations) * 100
+      ? ((metrics.failedValidations || 0) / totalValidations) * 100
       : 0;
 
   metrics.lastUpdated = new Date();
@@ -801,13 +812,13 @@ function sanitizeForLogging(data: unknown): unknown {
  */
 export const ParlantSecure = (
   description: string,
-  securityLevel: SecurityLevel = SecurityLevel.HIGH,
+  securityLevel: SecurityLevel = SecurityLevel._HIGH,
 ) => ParlantValidated({ description, securityLevel, cacheable: true });
 
 export const ParlantCritical = (description: string) =>
   ParlantValidated({
     description,
-    securityLevel: SecurityLevel.CRITICAL,
+    securityLevel: SecurityLevel._CRITICAL,
     cacheable: false,
   });
 

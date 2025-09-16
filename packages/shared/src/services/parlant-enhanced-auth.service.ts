@@ -24,10 +24,10 @@ import {
   Logger,
   ForbiddenException,
   Inject,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 
 // Import Parlant types and services
 import {
@@ -49,20 +49,20 @@ import {
   ValidationParameters,
   SourceLocation,
   ExecutionContext,
-} from '../types/parlant.types';
+} from "../types/parlant.types";
 
 // Import existing auth types
-import { JwtPayload, TokenPair, RefreshTokenPayload } from '../types/jwt.types';
+import { JwtPayload, TokenPair, RefreshTokenPayload } from "../types/jwt.types";
 
 // Import decorators
 import {
   ParlantValidation,
   SecurityClassification,
   ConversationContext,
-} from '../decorators/parlant-validation.decorators';
+} from "../decorators/parlant-validation.decorators";
 
 // Import service interfaces
-import { ParlantIntegrationService } from './parlant-integration.service';
+import { ParlantIntegrationService } from "./parlant-integration.service";
 
 /**
  * Enhanced authentication context for conversational validation
@@ -70,16 +70,16 @@ import { ParlantIntegrationService } from './parlant-integration.service';
 export interface ConversationalAuthContext {
   /** User identifier requesting authentication */
   userId?: string;
-  
+
   /** Authentication method being used */
   authMethod: AuthenticationMethod;
-  
+
   /** Risk assessment for the authentication attempt */
   riskAssessment: RiskAssessment;
-  
+
   /** Request metadata */
   requestMetadata: AuthRequestMetadata;
-  
+
   /** Security context */
   securityContext: AuthSecurityContext;
 }
@@ -88,13 +88,13 @@ export interface ConversationalAuthContext {
  * Authentication methods
  */
 export enum AuthenticationMethod {
-  PASSWORD = 'password',
-  MFA_SMS = 'mfa_sms',
-  MFA_TOTP = 'mfa_totp',
-  MFA_BIOMETRIC = 'mfa_biometric',
-  SSO = 'sso',
-  API_KEY = 'api_key',
-  CERTIFICATE = 'certificate',
+  PASSWORD = "password",
+  MFA_SMS = "mfa_sms",
+  MFA_TOTP = "mfa_totp",
+  MFA_BIOMETRIC = "mfa_biometric",
+  SSO = "sso",
+  API_KEY = "api_key",
+  CERTIFICATE = "certificate",
 }
 
 /**
@@ -103,16 +103,16 @@ export enum AuthenticationMethod {
 export interface RiskAssessment {
   /** Overall risk score (0-100) */
   overallRiskScore: number;
-  
+
   /** Individual risk factors */
   riskFactors: RiskFactor[];
-  
+
   /** Risk level classification */
   riskLevel: RiskLevel;
-  
+
   /** Whether conversational validation is recommended */
   requiresConversation: boolean;
-  
+
   /** Risk assessment timestamp */
   assessedAt: Date;
 }
@@ -123,16 +123,16 @@ export interface RiskAssessment {
 export interface RiskFactor {
   /** Risk factor type */
   type: RiskFactorType;
-  
+
   /** Risk score contribution (0-100) */
   score: number;
-  
+
   /** Risk factor description */
   description: string;
-  
+
   /** Whether this factor triggers immediate action */
   critical: boolean;
-  
+
   /** Factor metadata */
   metadata?: Record<string, unknown>;
 }
@@ -141,15 +141,15 @@ export interface RiskFactor {
  * Risk factor types
  */
 export enum RiskFactorType {
-  UNUSUAL_LOCATION = 'unusual_location',
-  UNUSUAL_TIME = 'unusual_time',
-  MULTIPLE_FAILED_ATTEMPTS = 'multiple_failed_attempts',
-  NEW_DEVICE = 'new_device',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  SUSPICIOUS_IP = 'suspicious_ip',
-  RAPID_REQUESTS = 'rapid_requests',
-  ACCOUNT_COMPROMISE = 'account_compromise',
-  POLICY_VIOLATION = 'policy_violation',
+  UNUSUAL_LOCATION = "unusual_location",
+  UNUSUAL_TIME = "unusual_time",
+  MULTIPLE_FAILED_ATTEMPTS = "multiple_failed_attempts",
+  NEW_DEVICE = "new_device",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  SUSPICIOUS_IP = "suspicious_ip",
+  RAPID_REQUESTS = "rapid_requests",
+  ACCOUNT_COMPROMISE = "account_compromise",
+  POLICY_VIOLATION = "policy_violation",
 }
 
 /**
@@ -158,22 +158,22 @@ export enum RiskFactorType {
 export interface AuthRequestMetadata {
   /** Request identifier */
   requestId: string;
-  
+
   /** Client IP address */
   ipAddress?: string;
-  
+
   /** User agent string */
   userAgent?: string;
-  
+
   /** Request timestamp */
   timestamp: Date;
-  
+
   /** Geographic location if available */
   location?: GeographicLocation;
-  
+
   /** Device fingerprint */
   deviceFingerprint?: string;
-  
+
   /** Session identifier */
   sessionId?: string;
 }
@@ -184,16 +184,16 @@ export interface AuthRequestMetadata {
 export interface GeographicLocation {
   /** Country code */
   country?: string;
-  
+
   /** State/region */
   region?: string;
-  
+
   /** City */
   city?: string;
-  
+
   /** Timezone */
   timezone?: string;
-  
+
   /** Approximate coordinates */
   coordinates?: {
     latitude: number;
@@ -207,16 +207,16 @@ export interface GeographicLocation {
 export interface AuthSecurityContext {
   /** Whether this is a privileged account */
   isPrivilegedAccount: boolean;
-  
+
   /** Account security level */
   accountSecurityLevel: FunctionSecurityLevel;
-  
+
   /** Recent security events */
   recentSecurityEvents: SecurityEvent[];
-  
+
   /** Active security restrictions */
   securityRestrictions: SecurityRestriction[];
-  
+
   /** Compliance requirements */
   complianceRequirements: string[];
 }
@@ -227,16 +227,16 @@ export interface AuthSecurityContext {
 export interface SecurityEvent {
   /** Event type */
   type: SecurityEventType;
-  
+
   /** Event timestamp */
   timestamp: Date;
-  
+
   /** Event severity */
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  
+  severity: "low" | "medium" | "high" | "critical";
+
   /** Event description */
   description: string;
-  
+
   /** Event metadata */
   metadata?: Record<string, unknown>;
 }
@@ -245,12 +245,12 @@ export interface SecurityEvent {
  * Security event types
  */
 export enum SecurityEventType {
-  LOGIN_FAILURE = 'login_failure',
-  PASSWORD_CHANGE = 'password_change',
-  ACCOUNT_LOCKOUT = 'account_lockout',
-  PRIVILEGE_CHANGE = 'privilege_change',
-  SUSPICIOUS_ACTIVITY = 'suspicious_activity',
-  POLICY_VIOLATION = 'policy_violation',
+  LOGIN_FAILURE = "login_failure",
+  PASSWORD_CHANGE = "password_change",
+  ACCOUNT_LOCKOUT = "account_lockout",
+  PRIVILEGE_CHANGE = "privilege_change",
+  SUSPICIOUS_ACTIVITY = "suspicious_activity",
+  POLICY_VIOLATION = "policy_violation",
 }
 
 /**
@@ -259,13 +259,13 @@ export enum SecurityEventType {
 export interface SecurityRestriction {
   /** Restriction type */
   type: SecurityRestrictionType;
-  
+
   /** Restriction parameters */
   parameters: Record<string, unknown>;
-  
+
   /** Restriction expiry */
   expiresAt?: Date;
-  
+
   /** Whether restriction is active */
   active: boolean;
 }
@@ -274,11 +274,11 @@ export interface SecurityRestriction {
  * Security restriction types
  */
 export enum SecurityRestrictionType {
-  IP_RESTRICTION = 'ip_restriction',
-  TIME_RESTRICTION = 'time_restriction',
-  LOCATION_RESTRICTION = 'location_restriction',
-  RATE_LIMIT = 'rate_limit',
-  MFA_REQUIRED = 'mfa_required',
+  IP_RESTRICTION = "ip_restriction",
+  TIME_RESTRICTION = "time_restriction",
+  LOCATION_RESTRICTION = "location_restriction",
+  RATE_LIMIT = "rate_limit",
+  MFA_REQUIRED = "mfa_required",
 }
 
 /**
@@ -287,19 +287,19 @@ export enum SecurityRestrictionType {
 export interface ConversationalAuthResult {
   /** Whether authentication was successful */
   success: boolean;
-  
+
   /** Token pair if successful */
   tokens?: TokenPair;
-  
+
   /** Conversation context */
   conversationContext?: ParlantConversationContext;
-  
+
   /** Error information if failed */
   error?: string;
-  
+
   /** Additional actions required */
   requiredActions: RequiredAction[];
-  
+
   /** Authentication metadata */
   metadata: Record<string, unknown>;
 }
@@ -310,16 +310,16 @@ export interface ConversationalAuthResult {
 export interface RequiredAction {
   /** Action type */
   type: RequiredActionType;
-  
+
   /** Action description */
   description: string;
-  
+
   /** Action parameters */
   parameters: Record<string, unknown>;
-  
+
   /** Action timeout */
   timeout?: number;
-  
+
   /** Whether action is mandatory */
   mandatory: boolean;
 }
@@ -328,12 +328,12 @@ export interface RequiredAction {
  * Required action types
  */
 export enum RequiredActionType {
-  MFA_VERIFICATION = 'mfa_verification',
-  PASSWORD_CHANGE = 'password_change',
-  SECURITY_QUESTION = 'security_question',
-  EMAIL_VERIFICATION = 'email_verification',
-  TERMS_ACCEPTANCE = 'terms_acceptance',
-  SECURITY_ACKNOWLEDGMENT = 'security_acknowledgment',
+  MFA_VERIFICATION = "mfa_verification",
+  PASSWORD_CHANGE = "password_change",
+  SECURITY_QUESTION = "security_question",
+  EMAIL_VERIFICATION = "email_verification",
+  TERMS_ACCEPTANCE = "terms_acceptance",
+  SECURITY_ACKNOWLEDGMENT = "security_acknowledgment",
 }
 
 /**
@@ -345,14 +345,14 @@ export enum RequiredActionType {
 @Injectable()
 export class ParlantEnhancedAuthService {
   private readonly logger = new Logger(ParlantEnhancedAuthService.name);
-  
+
   constructor(
     private readonly configService: ConfigService,
     private readonly parlantService: ParlantIntegrationService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
-    this.logger.log('Parlant Enhanced Authentication Service initialized', {
-      service: 'ParlantEnhancedAuthService',
+    this.logger.log("Parlant Enhanced Authentication Service initialized", {
+      service: "ParlantEnhancedAuthService",
       timestamp: new Date().toISOString(),
     });
   }
@@ -375,7 +375,7 @@ export class ParlantEnhancedAuthService {
     riskLevel: RiskLevel.HIGH,
   })
   @ConversationContext({
-    topic: 'User Authentication Validation',
+    topic: "User Authentication Validation",
     priority: ConversationPriority.HIGH,
     requiredParticipants: [ParticipantRole.VALIDATOR],
   })
@@ -386,19 +386,21 @@ export class ParlantEnhancedAuthService {
     const operationId = `conv-auth-${Date.now()}`;
     const startTime = Date.now();
 
-    this.logger.log(`[${operationId}] Conversational authentication initiated`, {
-      operationId,
-      userId: authContext.userId,
-      authMethod: authContext.authMethod,
-      riskScore: authContext.riskAssessment.overallRiskScore,
-      requiresConversation: authContext.riskAssessment.requiresConversation,
-    });
+    this.logger.log(
+      `[${operationId}] Conversational authentication initiated`,
+      {
+        operationId,
+        userId: authContext.userId,
+        authMethod: authContext.authMethod,
+        riskScore: authContext.riskAssessment.overallRiskScore,
+        requiresConversation: authContext.riskAssessment.requiresConversation,
+      },
+    );
 
     try {
       // Step 1: Assess if conversational validation is required
-      const requiresConversation = await this.shouldRequireConversationalValidation(
-        authContext,
-      );
+      const requiresConversation =
+        await this.shouldRequireConversationalValidation(authContext);
 
       if (!requiresConversation) {
         // Standard authentication flow
@@ -406,16 +408,16 @@ export class ParlantEnhancedAuthService {
       }
 
       // Step 2: Create validation request
-      const validationRequest = await this.createAuthenticationValidationRequest(
-        operationId,
-        credentials,
-        authContext,
-      );
+      const validationRequest =
+        await this.createAuthenticationValidationRequest(
+          operationId,
+          credentials,
+          authContext,
+        );
 
       // Step 3: Perform conversational validation
-      const validationResponse = await this.parlantService.validateFunctionExecution(
-        validationRequest,
-      );
+      const validationResponse =
+        await this.parlantService.validateFunctionExecution(validationRequest);
 
       // Step 4: Process validation result
       const authResult = await this.processValidationResponse(
@@ -425,32 +427,38 @@ export class ParlantEnhancedAuthService {
       );
 
       const processingTime = Date.now() - startTime;
-      this.logger.log(`[${operationId}] Conversational authentication completed`, {
-        operationId,
-        success: authResult.success,
-        decision: validationResponse.result.decision,
-        processingTime,
-        conversationId: validationResponse.conversationContext.conversationId,
-      });
+      this.logger.log(
+        `[${operationId}] Conversational authentication completed`,
+        {
+          operationId,
+          success: authResult.success,
+          decision: validationResponse.result.decision,
+          processingTime,
+          conversationId: validationResponse.conversationContext.conversationId,
+        },
+      );
 
       return authResult;
     } catch (error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] Conversational authentication failed`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        processingTime,
-        authContext: {
-          userId: authContext.userId,
-          authMethod: authContext.authMethod,
-          riskScore: authContext.riskAssessment.overallRiskScore,
+      this.logger.error(
+        `[${operationId}] Conversational authentication failed`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          processingTime,
+          authContext: {
+            userId: authContext.userId,
+            authMethod: authContext.authMethod,
+            riskScore: authContext.riskAssessment.overallRiskScore,
+          },
         },
-      });
+      );
 
       return {
         success: false,
-        error: 'Conversational authentication failed',
+        error: "Conversational authentication failed",
         requiredActions: [],
         metadata: {
           operationId,
@@ -478,7 +486,7 @@ export class ParlantEnhancedAuthService {
     riskLevel: RiskLevel.CRITICAL,
   })
   @ConversationContext({
-    topic: 'High-Risk Authentication Validation',
+    topic: "High-Risk Authentication Validation",
     priority: ConversationPriority.CRITICAL,
     requiredParticipants: [ParticipantRole.APPROVER, ParticipantRole.VALIDATOR],
   })
@@ -487,13 +495,15 @@ export class ParlantEnhancedAuthService {
     authContext: ConversationalAuthContext,
   ): Promise<ConversationalAuthResult> {
     const operationId = `high-risk-auth-${Date.now()}`;
-    
+
     this.logger.warn(`[${operationId}] High-risk authentication initiated`, {
       operationId,
       userId: authContext.userId,
       riskScore: authContext.riskAssessment.overallRiskScore,
       riskFactors: authContext.riskAssessment.riskFactors.length,
-      criticalFactors: authContext.riskAssessment.riskFactors.filter(f => f.critical).length,
+      criticalFactors: authContext.riskAssessment.riskFactors.filter(
+        (f) => f.critical,
+      ).length,
     });
 
     // Enhanced validation for high-risk scenarios
@@ -503,16 +513,19 @@ export class ParlantEnhancedAuthService {
       authContext,
     );
 
-    const validationResponse = await this.parlantService.validateFunctionExecution(
-      validationRequest,
-    );
+    const validationResponse =
+      await this.parlantService.validateFunctionExecution(validationRequest);
 
     // Additional security measures for high-risk authentication
     if (validationResponse.result.decision === ValidationDecision.APPROVED) {
       await this.implementAdditionalSecurityMeasures(authContext);
     }
 
-    return this.processValidationResponse(validationResponse, credentials, authContext);
+    return this.processValidationResponse(
+      validationResponse,
+      credentials,
+      authContext,
+    );
   }
 
   /**
@@ -532,7 +545,7 @@ export class ParlantEnhancedAuthService {
     riskLevel: RiskLevel.HIGH,
   })
   @ConversationContext({
-    topic: 'Token Operation Validation',
+    topic: "Token Operation Validation",
     priority: ConversationPriority.HIGH,
   })
   async validateTokenOperation(
@@ -551,14 +564,14 @@ export class ParlantEnhancedAuthService {
     const validationRequest: ParlantValidationRequest = {
       requestId: operationId,
       functionContext: {
-        functionName: 'validateTokenOperation',
+        functionName: "validateTokenOperation",
         arguments: {
           tokenOperation,
           requestingUser,
         },
         source: {
           filePath: __filename,
-          methodName: 'validateTokenOperation',
+          methodName: "validateTokenOperation",
           className: ParlantEnhancedAuthService.name,
         },
         securityLevel: FunctionSecurityLevel.RESTRICTED,
@@ -583,9 +596,8 @@ export class ParlantEnhancedAuthService {
       timestamp: new Date(),
     };
 
-    const response = await this.parlantService.validateFunctionExecution(
-      validationRequest,
-    );
+    const response =
+      await this.parlantService.validateFunctionExecution(validationRequest);
 
     return response.result.decision === ValidationDecision.APPROVED;
   }
@@ -604,7 +616,7 @@ export class ParlantEnhancedAuthService {
     timeout: 15000,
   })
   @ConversationContext({
-    topic: 'Multi-Factor Authentication Setup',
+    topic: "Multi-Factor Authentication Setup",
     priority: ConversationPriority.NORMAL,
   })
   async createConversationalMFAChallenge(
@@ -683,7 +695,7 @@ export class ParlantEnhancedAuthService {
     if (!challenge) {
       return {
         valid: false,
-        error: 'Invalid or expired MFA challenge',
+        error: "Invalid or expired MFA challenge",
         remainingAttempts: 0,
       };
     }
@@ -692,7 +704,7 @@ export class ParlantEnhancedAuthService {
     if (challenge.expiresAt < new Date()) {
       return {
         valid: false,
-        error: 'MFA challenge has expired',
+        error: "MFA challenge has expired",
         remainingAttempts: 0,
       };
     }
@@ -701,7 +713,7 @@ export class ParlantEnhancedAuthService {
     if (challenge.attempts >= challenge.maxAttempts) {
       return {
         valid: false,
-        error: 'Maximum MFA attempts exceeded',
+        error: "Maximum MFA attempts exceeded",
         remainingAttempts: 0,
       };
     }
@@ -746,7 +758,7 @@ export class ParlantEnhancedAuthService {
       riskFactors.push({
         type: RiskFactorType.UNUSUAL_LOCATION,
         score: 30,
-        description: 'Login from unusual geographic location',
+        description: "Login from unusual geographic location",
         critical: false,
       });
     }
@@ -755,7 +767,7 @@ export class ParlantEnhancedAuthService {
       riskFactors.push({
         type: RiskFactorType.UNUSUAL_TIME,
         score: 15,
-        description: 'Login at unusual time',
+        description: "Login at unusual time",
         critical: false,
       });
     }
@@ -764,7 +776,7 @@ export class ParlantEnhancedAuthService {
       riskFactors.push({
         type: RiskFactorType.PRIVILEGE_ESCALATION,
         score: 25,
-        description: 'Privileged account access',
+        description: "Privileged account access",
         critical: false,
       });
     }
@@ -784,7 +796,8 @@ export class ParlantEnhancedAuthService {
       overallRiskScore: totalRiskScore,
       riskFactors,
       riskLevel,
-      requiresConversation: totalRiskScore >= 40 || authContext.securityContext.isPrivilegedAccount,
+      requiresConversation:
+        totalRiskScore >= 40 || authContext.securityContext.isPrivilegedAccount,
       assessedAt: new Date(),
     };
   }
@@ -809,9 +822,12 @@ export class ParlantEnhancedAuthService {
     }
 
     // Require conversation for critical security events
-    const hasRecentCriticalEvents = authContext.securityContext.recentSecurityEvents
-      .some(event => event.severity === 'critical' && 
-        (Date.now() - event.timestamp.getTime()) < 24 * 60 * 60 * 1000); // 24 hours
+    const hasRecentCriticalEvents =
+      authContext.securityContext.recentSecurityEvents.some(
+        (event) =>
+          event.severity === "critical" &&
+          Date.now() - event.timestamp.getTime() < 24 * 60 * 60 * 1000,
+      ); // 24 hours
 
     return hasRecentCriticalEvents;
   }
@@ -830,7 +846,7 @@ export class ParlantEnhancedAuthService {
     authContext: ConversationalAuthContext,
   ): Promise<ParlantValidationRequest> {
     const functionContext: FunctionContext = {
-      functionName: 'authenticateUser',
+      functionName: "authenticateUser",
       arguments: {
         userId: authContext.userId,
         authMethod: authContext.authMethod,
@@ -840,18 +856,20 @@ export class ParlantEnhancedAuthService {
       },
       source: {
         filePath: __filename,
-        methodName: 'validateConversationalAuthentication',
+        methodName: "validateConversationalAuthentication",
         className: ParlantEnhancedAuthService.name,
       },
       securityLevel: authContext.securityContext.accountSecurityLevel,
       riskLevel: authContext.riskAssessment.riskLevel,
       executionContext: {
         environment: this.getExecutionEnvironment(),
-        user: authContext.userId ? {
-          userId: authContext.userId,
-          roles: [], // Will be populated after authentication
-          permissions: [],
-        } : undefined,
+        user: authContext.userId
+          ? {
+              userId: authContext.userId,
+              roles: [], // Will be populated after authentication
+              permissions: [],
+            }
+          : undefined,
         request: this.mapToRequestContext(authContext.requestMetadata),
         properties: {
           authMethod: authContext.authMethod,
@@ -868,9 +886,8 @@ export class ParlantEnhancedAuthService {
       rules: [],
     };
 
-    const conversationContext = await this.createAuthenticationConversation(
-      authContext,
-    );
+    const conversationContext =
+      await this.createAuthenticationConversation(authContext);
 
     return {
       requestId: operationId,
@@ -910,11 +927,14 @@ export class ParlantEnhancedAuthService {
     };
 
     // Update conversation context for high-risk
-    baseRequest.conversationContext.metadata.priority = ConversationPriority.CRITICAL;
+    baseRequest.conversationContext.metadata.priority =
+      ConversationPriority.CRITICAL;
     baseRequest.conversationContext.metadata.properties = {
       ...baseRequest.conversationContext.metadata.properties,
       highRisk: true,
-      criticalRiskFactors: authContext.riskAssessment.riskFactors.filter(f => f.critical),
+      criticalRiskFactors: authContext.riskAssessment.riskFactors.filter(
+        (f) => f.critical,
+      ),
     };
 
     return baseRequest;
@@ -930,9 +950,10 @@ export class ParlantEnhancedAuthService {
     authContext: ConversationalAuthContext,
   ): Promise<ParlantConversationContext> {
     const topic = `Authentication Request - ${authContext.authMethod} (Risk: ${authContext.riskAssessment.riskLevel})`;
-    const priority = authContext.riskAssessment.riskLevel === RiskLevel.CRITICAL
-      ? ConversationPriority.CRITICAL
-      : ConversationPriority.HIGH;
+    const priority =
+      authContext.riskAssessment.riskLevel === RiskLevel.CRITICAL
+        ? ConversationPriority.CRITICAL
+        : ConversationPriority.HIGH;
 
     return this.parlantService.createConversation(topic, priority);
   }
@@ -979,26 +1000,30 @@ export class ParlantEnhancedAuthService {
         break;
 
       case ValidationDecision.REQUEST_MORE_INFO:
-        result.requiredActions = [{
-          type: RequiredActionType.SECURITY_QUESTION,
-          description: 'Additional information required for authentication',
-          parameters: { questions: response.result.reasoning },
-          mandatory: true,
-        }];
+        result.requiredActions = [
+          {
+            type: RequiredActionType.SECURITY_QUESTION,
+            description: "Additional information required for authentication",
+            parameters: { questions: response.result.reasoning },
+            mandatory: true,
+          },
+        ];
         break;
 
       case ValidationDecision.ESCALATE:
-        result.error = 'Authentication requires manual review';
-        result.requiredActions = [{
-          type: RequiredActionType.SECURITY_ACKNOWLEDGMENT,
-          description: 'Manual security review initiated',
-          parameters: { escalationReason: response.result.reasoning },
-          mandatory: false,
-        }];
+        result.error = "Authentication requires manual review";
+        result.requiredActions = [
+          {
+            type: RequiredActionType.SECURITY_ACKNOWLEDGMENT,
+            description: "Manual security review initiated",
+            parameters: { escalationReason: response.result.reasoning },
+            mandatory: false,
+          },
+        ];
         break;
 
       default:
-        result.error = 'Unexpected validation decision';
+        result.error = "Unexpected validation decision";
         break;
     }
 
@@ -1043,7 +1068,7 @@ export class ParlantEnhancedAuthService {
     return {
       accessToken: `access-token-${Date.now()}`,
       refreshToken: `refresh-token-${Date.now()}`,
-      tokenType: 'Bearer',
+      tokenType: "Bearer",
       expiresIn: 900, // 15 minutes
     };
   }
@@ -1054,15 +1079,17 @@ export class ParlantEnhancedAuthService {
    * @param authContext - Authentication context
    * @returns ApprovalLevel - Required approval level
    */
-  private determineApprovalLevel(authContext: ConversationalAuthContext): ApprovalLevel {
+  private determineApprovalLevel(
+    authContext: ConversationalAuthContext,
+  ): ApprovalLevel {
     if (authContext.riskAssessment.riskLevel === RiskLevel.CRITICAL) {
       return ApprovalLevel.DUAL_APPROVAL;
     }
-    
+
     if (authContext.securityContext.isPrivilegedAccount) {
       return ApprovalLevel.SINGLE_APPROVAL;
     }
-    
+
     return ApprovalLevel.AUTOMATIC;
   }
 
@@ -1072,14 +1099,19 @@ export class ParlantEnhancedAuthService {
    * @returns ExecutionEnvironment - Current environment
    */
   private getExecutionEnvironment(): ExecutionEnvironment {
-    const env = this.configService.get<string>('NODE_ENV', 'development');
-    
+    const env = this.configService.get<string>("NODE_ENV", "development");
+
     switch (env.toLowerCase()) {
-      case 'production': return ExecutionEnvironment.PRODUCTION;
-      case 'staging': return ExecutionEnvironment.STAGING;
-      case 'test': return ExecutionEnvironment.TESTING;
-      case 'local': return ExecutionEnvironment.LOCAL;
-      default: return ExecutionEnvironment.DEVELOPMENT;
+      case "production":
+        return ExecutionEnvironment.PRODUCTION;
+      case "staging":
+        return ExecutionEnvironment.STAGING;
+      case "test":
+        return ExecutionEnvironment.TESTING;
+      case "local":
+        return ExecutionEnvironment.LOCAL;
+      default:
+        return ExecutionEnvironment.DEVELOPMENT;
     }
   }
 
@@ -1112,10 +1144,14 @@ export class ParlantEnhancedAuthService {
 
   private assessTokenOperationRisk(operation: TokenOperation): RiskLevel {
     switch (operation.type) {
-      case 'revoke_all': return RiskLevel.CRITICAL;
-      case 'revoke_user': return RiskLevel.HIGH;
-      case 'refresh': return RiskLevel.LOW;
-      default: return RiskLevel.MODERATE;
+      case "revoke_all":
+        return RiskLevel.CRITICAL;
+      case "revoke_user":
+        return RiskLevel.HIGH;
+      case "refresh":
+        return RiskLevel.LOW;
+      default:
+        return RiskLevel.MODERATE;
     }
   }
 
@@ -1124,17 +1160,23 @@ export class ParlantEnhancedAuthService {
     user: UserContext,
   ): Promise<ParlantConversationContext> {
     const topic = `Token Operation: ${operation.type}`;
-    return this.parlantService.createConversation(topic, ConversationPriority.HIGH);
+    return this.parlantService.createConversation(
+      topic,
+      ConversationPriority.HIGH,
+    );
   }
 
   private async implementAdditionalSecurityMeasures(
     authContext: ConversationalAuthContext,
   ): Promise<void> {
     // Implementation would add additional security measures for high-risk auth
-    this.logger.log('Implementing additional security measures for high-risk authentication', {
-      userId: authContext.userId,
-      riskScore: authContext.riskAssessment.overallRiskScore,
-    });
+    this.logger.log(
+      "Implementing additional security measures for high-risk authentication",
+      {
+        userId: authContext.userId,
+        riskScore: authContext.riskAssessment.overallRiskScore,
+      },
+    );
   }
 
   private mapRecommendationsToActions(
@@ -1160,14 +1202,14 @@ export class ParlantEnhancedAuthService {
  */
 export interface TokenOperation {
   /** Operation type */
-  type: 'refresh' | 'revoke' | 'revoke_user' | 'revoke_all';
-  
+  type: "refresh" | "revoke" | "revoke_user" | "revoke_all";
+
   /** Target user ID */
   targetUserId?: string;
-  
+
   /** Operation reason */
   reason?: string;
-  
+
   /** Operation metadata */
   metadata?: Record<string, unknown>;
 }
@@ -1176,11 +1218,11 @@ export interface TokenOperation {
  * MFA methods
  */
 export enum MFAMethod {
-  SMS = 'sms',
-  EMAIL = 'email',
-  TOTP = 'totp',
-  BIOMETRIC = 'biometric',
-  HARDWARE_TOKEN = 'hardware_token',
+  SMS = "sms",
+  EMAIL = "email",
+  TOTP = "totp",
+  BIOMETRIC = "biometric",
+  HARDWARE_TOKEN = "hardware_token",
 }
 
 /**
@@ -1189,28 +1231,28 @@ export enum MFAMethod {
 export interface MFAChallenge {
   /** Challenge identifier */
   challengeId: string;
-  
+
   /** User identifier */
   userId: string;
-  
+
   /** MFA method */
   method: MFAMethod;
-  
+
   /** Associated conversation ID */
   conversationId?: string;
-  
+
   /** Challenge creation time */
   createdAt: Date;
-  
+
   /** Challenge expiry time */
   expiresAt: Date;
-  
+
   /** Whether challenge is verified */
   verified: boolean;
-  
+
   /** Number of attempts */
   attempts: number;
-  
+
   /** Maximum allowed attempts */
   maxAttempts: number;
 }
@@ -1221,13 +1263,13 @@ export interface MFAChallenge {
 export interface MFAValidationResult {
   /** Whether validation was successful */
   valid: boolean;
-  
+
   /** Remaining attempts */
   remainingAttempts: number;
-  
+
   /** Error message if invalid */
   error?: string;
-  
+
   /** Associated conversation ID */
   conversationId?: string;
 }
