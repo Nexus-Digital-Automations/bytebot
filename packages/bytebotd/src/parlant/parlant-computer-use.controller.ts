@@ -198,7 +198,7 @@ export class ParlantSystemStatusDto {
 @ApiTags('Parlant Computer Use - Conversational AI Validation')
 @Controller('parlant/computer-use')
 @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
-@UsePipes(SecuritySanitizationPipes)
+@UsePipes(SecuritySanitizationPipes.MAXIMUM_SECURITY)
 @UseInterceptors(LoggingInterceptor)
 @ApiBearerAuth()
 export class ParlantComputerUseController {
@@ -310,7 +310,7 @@ export class ParlantComputerUseController {
       const validationStartTime = Date.now();
 
       // Execute with Parlant validation
-      const result = await this.parlantComputerUseService.action(params, validationContext);
+      const result = await this.parlantComputerUseService.action(params as any, validationContext);
 
       const executionTime = Date.now() - validationStartTime;
       const totalTime = Date.now() - startTime;
@@ -385,7 +385,7 @@ export class ParlantComputerUseController {
         {
           operationId,
           actionType: params.action,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           duration,
         }
       );
@@ -394,7 +394,7 @@ export class ParlantComputerUseController {
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'Computer action execution failed',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         },
         HttpStatus.INTERNAL_SERVER_ERROR
       );
@@ -513,7 +513,7 @@ export class ParlantComputerUseController {
         `[${operationId}] Pre-validation failed`,
         {
           operationId,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         }
       );
 
@@ -521,7 +521,7 @@ export class ParlantComputerUseController {
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'Validation service error',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         },
         HttpStatus.INTERNAL_SERVER_ERROR
       );
@@ -571,7 +571,7 @@ export class ParlantComputerUseController {
         lastHealthCheck: new Date(),
       };
     } catch (error) {
-      this.logger.error('Failed to get Parlant system status', { error: error.message });
+      this.logger.error('Failed to get Parlant system status', { error: error instanceof Error ? error.message : String(error) });
       throw new HttpException(
         'Failed to retrieve system status',
         HttpStatus.INTERNAL_SERVER_ERROR

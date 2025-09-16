@@ -229,11 +229,11 @@ export class ParlantIntegrationService {
       const duration = Date.now() - startTime;
       
       this.logger.error(
-        `[${request.operationId}] Parlant validation error: ${error.message}`,
+        `[${request.operationId}] Parlant validation error: ${error instanceof Error ? error.message : String(error)}`,
         {
           operationId: request.operationId,
-          error: error.message,
-          stack: error.stack,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
           duration,
         }
       );
@@ -250,12 +250,12 @@ export class ParlantIntegrationService {
         duration,
         userId: request.context.userId,
         riskLevel: request.riskLevel,
-        conversationSummary: `Validation error: ${error.message}`,
+        conversationSummary: `Validation error: ${error instanceof Error ? error.message : String(error)}`,
       });
 
       throw new ConversationalValidationError(
         'ERROR',
-        `Parlant validation system error: ${error.message}`,
+        `Parlant validation system error: ${error instanceof Error ? error.message : String(error)}`,
         ['Retry the operation', 'Contact system administrator']
       );
     }
@@ -378,7 +378,9 @@ export class ParlantIntegrationService {
       // Cleanup old cache entries periodically
       if (this.validationCache.size > 1000) {
         const oldestKey = this.validationCache.keys().next().value;
-        this.validationCache.delete(oldestKey);
+        if (oldestKey) {
+          this.validationCache.delete(oldestKey);
+        }
       }
     }
   }

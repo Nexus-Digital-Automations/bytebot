@@ -250,7 +250,7 @@ export class ParlantValidatedComputerUseService {
           {
             operationId,
             actionType: params.action,
-            error: executionError.message,
+            error: executionError instanceof Error ? executionError.message : String(executionError),
             executionTime: Date.now() - executionStartTime,
           }
         );
@@ -283,7 +283,7 @@ export class ParlantValidatedComputerUseService {
         {
           operationId,
           actionType: params.action,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           duration,
         }
       );
@@ -294,7 +294,7 @@ export class ParlantValidatedComputerUseService {
       }
 
       // Wrap other errors with context
-      throw new Error(`Computer action failed after validation: ${error.message}`);
+      throw new Error(`Computer action failed after validation: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -467,11 +467,11 @@ export class ParlantValidatedComputerUseService {
       
       case 'move_mouse':
         const moveAction = params as MoveMouseAction;
-        return `Move mouse to coordinates (${moveAction.coordinates?.[0]}, ${moveAction.coordinates?.[1]})`;
+        return `Move mouse to coordinates (${moveAction.coordinates?.x}, ${moveAction.coordinates?.y})`;
       
       case 'click_mouse':
         const clickAction = params as ClickMouseAction;
-        return `Click mouse at coordinates (${clickAction.coordinates?.[0]}, ${clickAction.coordinates?.[1]}) with ${clickAction.button || 'left'} button`;
+        return `Click mouse at coordinates (${clickAction.coordinates?.x}, ${clickAction.coordinates?.y}) with ${clickAction.button || 'left'} button`;
       
       case 'type_text':
         const typeAction = params as TypeTextAction;
