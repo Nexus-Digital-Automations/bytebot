@@ -22,6 +22,31 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 
+// Type definitions for JWT operations
+interface JwtPayload {
+  sub: string;
+  email: string;
+  role: string;
+  permissions?: string[];
+  exp?: number;
+  iat?: number;
+}
+
+interface AuthenticatedRequest {
+  headers: Record<string, string | string[] | undefined>;
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+    permissions: string[];
+  };
+}
+
+interface RequestHeaders {
+  authorization?: string;
+  [key: string]: string | string[] | undefined;
+}
+
 // Mock JWT Authentication Guard implementation for Phase 1 requirements
 class MockJwtAuthGuard {
   constructor(
@@ -40,7 +65,7 @@ class MockJwtAuthGuard {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
@@ -50,7 +75,7 @@ class MockJwtAuthGuard {
     try {
       const _payload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
-      });
+      }) as JwtPayload;
 
       // Validate token payload structure
       if (!_payload.sub || !_payload.email || !_payload.role) {
@@ -80,13 +105,13 @@ class MockJwtAuthGuard {
     }
   }
 
-  private extractTokenFromHeader(request: any): string | undefined {
-    const authHeader = request.headers?.authorization;
+  private extractTokenFromHeader(request: AuthenticatedRequest): string | undefined {
+    const authHeader = request.headers?.authorization as string | undefined;
     if (!authHeader) {
       return undefined;
     }
 
-    const [type, token] = authHeader.split(' ');
+    const [type, token] = (authHeader as string).split(' ');
     return type === 'Bearer' ? token : undefined;
   }
 }
@@ -101,10 +126,10 @@ describe('JwtAuthGuard', () => {
 
   // Mock execution context
   const createMockExecutionContext = (
-    headers: any = {},
+    headers: RequestHeaders = {},
     _isPublic = false,
   ): ExecutionContext => {
-    const mockRequest = {
+    const mockRequest: AuthenticatedRequest = {
       headers,
       user: undefined,
     };
@@ -116,7 +141,7 @@ describe('JwtAuthGuard', () => {
       }),
       getHandler: jest.fn(),
       getClass: jest.fn(),
-    } as any;
+    } as ExecutionContext;
   };
 
   beforeEach(async () => {
@@ -313,7 +338,7 @@ describe('JwtAuthGuard', () => {
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(validPayload);
 
       const result = await guard.canActivate(context);
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
 
       expect(result).toBe(true);
       expect(request.user).toEqual({
@@ -342,8 +367,8 @@ describe('JwtAuthGuard', () => {
 
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
       (
-        jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<any>
-      ).mockResolvedValue(incompletePayload);
+        jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<typeof jwtService.verifyAsync>
+      ).mockResolvedValue(incompletePayload as JwtPayload);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         new UnauthorizedException('Invalid token _payload structure'),
@@ -424,7 +449,7 @@ describe('JwtAuthGuard', () => {
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(userPayload);
 
       await guard.canActivate(context);
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
 
       expect(request.user).toEqual({
         id: userPayload.sub,
@@ -459,7 +484,7 @@ describe('JwtAuthGuard', () => {
         .mockResolvedValue(payloadWithoutPermissions);
 
       await guard.canActivate(context);
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
 
       expect(request.user.permissions).toEqual([]);
 
@@ -504,7 +529,7 @@ describe('JwtAuthGuard', () => {
 
       // Verify user information is correctly attached to each request
       contexts.forEach((context) => {
-        const request = context.switchToHttp().getRequest();
+        const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
         expect(request.user.id).toBe(_payload.sub);
         expect(request.user.email).toBe(_payload.email);
       });
@@ -717,7 +742,7 @@ describe('JwtAuthGuard', () => {
       expect(result).toBe(true);
 
       // Verify no persistent references or leaks
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
       expect(request.user).toBeDefined();
 
       console.log(`[${testId}] Resource cleanup test completed`);

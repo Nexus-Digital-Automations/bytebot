@@ -26,10 +26,37 @@ import { RolesGuard } from '../guards/roles.guard';
 import { UserRole, Permission as Permission } from '@bytebot/shared';
 import { ByteBotdUser } from '../guards/jwt-auth.guard';
 
+// Type definitions for secure test operations
+interface AuthenticatedRequest {
+  user?: ByteBotdUser;
+  url: string;
+  method: string;
+  ip: string;
+  headers: Record<string, string | string[] | undefined>;
+  connection: { remoteAddress: string };
+  socket: { remoteAddress: string };
+}
+
+interface MockExecutionContext extends ExecutionContext {
+  switchToHttp(): {
+    getRequest(): AuthenticatedRequest;
+    getResponse(): Record<string, unknown>;
+  };
+}
+
 /**
  * Advanced Security-Focused RBAC Tests
  * Tests critical authorization vulnerabilities and attack vectors
  */
+// Type for malicious test user objects (security testing)
+interface MaliciousTestUser extends Partial<ByteBotdUser> {
+  [key: string]: unknown; // Allow additional properties for security testing
+  __proto__?: unknown;
+  constructor?: unknown;
+  admin?: boolean;
+  roles?: UserRole[];
+}
+
 describe('RolesGuard - Advanced Security Tests', () => {
   let guard: RolesGuard;
   let reflector: Reflector;
@@ -72,7 +99,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       }),
       getHandler: jest.fn().mockReturnValue({ name: 'testHandler' }),
       getClass: jest.fn().mockReturnValue({ name: 'TestController' }),
-    } as any;
+    } as MockExecutionContext;
   };
 
   // Create malicious user objects for security testing
@@ -100,7 +127,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         isActive: true,
         admin: true, // Additional admin flag
         roles: [UserRole._ADMIN], // Array of roles
-      } as any,
+      } as MaliciousTestUser,
 
       // User with XSS in properties
       xssPayload: {
@@ -218,7 +245,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       try {
         await guard.canActivate(context);
         // If it passes, verify it's because of proper role validation, not confusion
-        const request = context.switchToHttp().getRequest();
+        const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
         expect(request.user.role).toBe(UserRole._ADMIN);
       } catch (error) {
         // Should throw ForbiddenException if role validation is strict
@@ -340,7 +367,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       // Attempt to manipulate permissions during request
       const _originalPermissions = Object.values(Permission);
-      const maliciousRequest = context.switchToHttp().getRequest();
+      const maliciousRequest = context.switchToHttp().getRequest() as AuthenticatedRequest;
 
       // Try to inject permissions
       (maliciousRequest.user as Record<string, unknown>).permissions = [
@@ -380,7 +407,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
             permissions: [Permission._SYSTEM_ADMIN],
           },
         },
-      } as any;
+      } as MaliciousTestUser;
 
       const context = createMockExecutionContext(
         spoofedUser as ByteBotdUser,
@@ -415,7 +442,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         { role: UserRole._OPERATOR, expected: false },
         { role: UserRole._VIEWER, expected: false },
         { role: 'invalid' as UserRole, expected: false },
-        { role: null as any, expected: false },
+        { role: null as unknown as UserRole, expected: false },
       ];
 
       const timings: number[] = [];
@@ -533,7 +560,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       expect(result).toBe(true);
 
       // Verify user properties are handled safely (no script execution)
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
       expect(request.user.id).toBeDefined();
       expect(request.user.email).toBeDefined();
       expect(request.user.username).toBeDefined();
@@ -566,7 +593,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       expect(result).toBe(true);
 
       // Verify SQL injection payloads are safely handled
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
       expect(request.user.id).toBeDefined();
       expect(request.user.email).toBeDefined();
       expect(request.user.username).toBeDefined();
