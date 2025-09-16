@@ -247,7 +247,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
 
     logDebug(
       "New task created",
-      { taskId: task.id, title: task.title },
+      { taskId: task.id, description: task.description },
       "useChatSession",
     );
   }, []);

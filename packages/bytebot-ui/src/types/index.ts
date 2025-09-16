@@ -88,3 +88,65 @@ export interface Task {
   model: Model;
   files?: File[];
 }
+
+// File validation constants
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_FILE_TYPES = [
+  'image/jpeg',
+  'image/jpg', 
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'text/plain',
+  'text/csv',
+  'application/json',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+];
+
+/**
+ * Enhanced file validation function with comprehensive security checks
+ * Validates uploaded files for type, size, and security concerns
+ * 
+ * @param files - Array of FileWithBase64 objects to validate
+ * @returns Array of validated FileWithBase64 objects
+ */
+export function validateUploadedFiles(files: FileWithBase64[]): FileWithBase64[] {
+  if (!Array.isArray(files)) {
+    return [];
+  }
+
+  return files.filter((file) => {
+    // Check if file object has required properties
+    if (!file || typeof file !== 'object') {
+      return false;
+    }
+
+    if (!file.name || !file.type || !file.base64 || file.size == null) {
+      return false;
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE || file.size <= 0) {
+      return false;
+    }
+
+    // Validate file type
+    if (!ALLOWED_FILE_TYPES.includes(file.type.toLowerCase())) {
+      return false;
+    }
+
+    // Validate file name (basic security check)
+    if (file.name.length > 255 || file.name.includes('../') || file.name.includes('..\\')) {
+      return false;
+    }
+
+    // Validate base64 format (basic check)
+    if (!file.base64.startsWith('data:') || !file.base64.includes(';base64,')) {
+      return false;
+    }
+
+    return true;
+  });
+}

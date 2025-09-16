@@ -4,12 +4,20 @@ import { NextRequest } from "next/server";
 /* generic proxy helper                                                 */
 /* -------------------------------------------------------------------- */
 async function proxy(req: NextRequest, path: string[]): Promise<Response> {
-  const BASE_URL = process.env.BYTEBOT_AGENT_BASE_URL!;
+  const BASE_URL = process.env.BYTEBOT_AGENT_BASE_URL;
+  
+  if (!BASE_URL) {
+    throw new Error('BYTEBOT_AGENT_BASE_URL environment variable is not configured');
+  }
   const subPath = path.length ? path.join("/") : "";
   const url = `${BASE_URL}/${subPath}${req.nextUrl.search}`;
 
   // Extract cookies from the incoming request
   const cookies = req.headers.get("cookie");
+
+  const requestBody = req.method === "GET" || req.method === "HEAD" 
+    ? null 
+    : await req.text();
 
   const init: RequestInit = {
     method: req.method,
@@ -17,10 +25,7 @@ async function proxy(req: NextRequest, path: string[]): Promise<Response> {
       "Content-Type": "application/json",
       ...(cookies && { Cookie: cookies }),
     },
-    body:
-      req.method === "GET" || req.method === "HEAD"
-        ? undefined
-        : await req.text(),
+    body: requestBody,
   };
 
   const res = await fetch(url, init);
@@ -50,7 +55,7 @@ async function proxy(req: NextRequest, path: string[]): Promise<Response> {
 /* -------------------------------------------------------------------- */
 type PathParams = Promise<{ path?: string[] }>; // <- Promise is the key
 
-async function handler(req: NextRequest, { params }: { params: PathParams }) {
+async function handler(req: NextRequest, { params }: { params: PathParams }): Promise<Response> {
   const { path } = await params;
   return proxy(req, path ?? []);
 }

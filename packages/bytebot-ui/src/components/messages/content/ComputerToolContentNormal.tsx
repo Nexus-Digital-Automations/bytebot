@@ -288,7 +288,7 @@ export function ComputerToolContentNormal({
     return null;
   }
 
-  const icon = getIcon(block) as string;
+  const icon = getIcon(block);
 
   return (
     <div className="mb-3 max-w-4/5">

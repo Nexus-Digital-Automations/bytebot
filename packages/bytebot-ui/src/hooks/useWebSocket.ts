@@ -69,7 +69,7 @@ export function useWebSocket({
     socket.on("task_created", (task: Task) => {
       logDebug(
         "Task created",
-        { taskId: task.id, title: task.title },
+        { taskId: task.id, description: task.description },
         "useWebSocket",
       );
       onTaskCreated?.(task);
