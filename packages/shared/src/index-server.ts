@@ -320,6 +320,9 @@ export {
   ParlantServiceUnavailableError,
 } from "./interceptors/parlant-validation.interceptor";
 
+// Local Monitoring System - server-only (NestJS + Prometheus)
+export * from "./monitoring";
+
 // Note: Test utilities are available but not exported by default
 // to avoid jest dependencies in production builds.
 // Import them directly from specific paths when needed in tests:

@@ -16,7 +16,7 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantConversationContext,
-  _ValidationResult,
+  ValidationResult,
   ValidationDecision,
   ConversationState,
   ConversationPriority,
@@ -28,16 +28,16 @@ import {
   SourceLocation,
   ExecutionContext,
   ExecutionEnvironment,
-  _UserContext,
-  _RequestContext,
-  _SessionContext,
+  UserContext,
+  RequestContext,
+  SessionContext,
   ValidationParameters,
   ValidationRule,
-  _ValidationRuleType,
+  ValidationRuleType,
   PerformanceMetrics,
-  _ErrorDetails,
-  _ErrorSeverity,
-  _ParlantWrapperConfig,
+  ErrorDetails,
+  ErrorSeverity,
+  ParlantWrapperConfig,
 } from "../types/parlant.types";
 import {
   getParlantValidationMetadata,
@@ -159,8 +159,8 @@ export interface WrapperContext {
  *   originalFunction,
  *   {
  *     enabled: true,
- *     validationMode: ValidationMode.INTERACTIVE,
- *     approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
+ *     validationMode: ValidationMode._INTERACTIVE,
+ *     approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
  *     securityLevel: FunctionSecurityLevel.RESTRICTED,
  *     riskLevel: RiskLevel.HIGH,
  *     timeout: 30000,
@@ -216,7 +216,7 @@ export function createParlantWrapper<
         await parlantService.validateFunctionExecution(validationRequest);
 
       // Check validation result
-      if (validationResponse.result.decision !== ValidationDecision.APPROVED) {
+      if (validationResponse.result.decision !== ValidationDecision._APPROVED) {
         const error = new ParlantValidationRejection(
           `Function execution denied: ${validationResponse.result.reasoning}`,
           validationResponse.result.decision,
@@ -317,17 +317,17 @@ export function wrapFunctionWithMetadata<
   // Create wrapper configuration from metadata
   const wrapperConfig: FunctionWrapperConfig = {
     enabled: validationConfig.enabled ?? true,
-    validationMode: validationConfig.mode ?? ValidationMode.INTERACTIVE,
+    validationMode: validationConfig.mode ?? ValidationMode._INTERACTIVE,
     approvalLevel:
-      validationConfig.approvalLevel ?? ApprovalLevel.SINGLE_APPROVAL,
+      validationConfig.approvalLevel ?? ApprovalLevel._SINGLE_APPROVAL,
     securityLevel:
-      securityConfig?.securityLevel ?? FunctionSecurityLevel.INTERNAL,
-    riskLevel: securityConfig?.riskLevel ?? RiskLevel.MODERATE,
+      securityConfig?.securityLevel ?? FunctionSecurityLevel._INTERNAL,
+    riskLevel: securityConfig?.riskLevel ?? RiskLevel._MODERATE,
     timeout: validationConfig.timeout ?? 30000,
     cacheable: validationConfig.cacheable ?? false,
     rules: validationRules ?? [],
     conversationPriority:
-      conversationConfig?.priority ?? ConversationPriority.NORMAL,
+      conversationConfig?.priority ?? ConversationPriority._NORMAL,
     customConfig: validationConfig.customConfig,
   };
 
@@ -427,8 +427,8 @@ function createExecutionContext(): ExecutionContext {
   return {
     environment:
       process.env.NODE_ENV === "production"
-        ? ExecutionEnvironment.PRODUCTION
-        : ExecutionEnvironment.DEVELOPMENT,
+        ? ExecutionEnvironment._PRODUCTION
+        : ExecutionEnvironment._DEVELOPMENT,
     properties: {
       nodeVersion: process.version,
       platform: process.platform,
@@ -466,7 +466,7 @@ function createValidationRequest<T extends (..._args: unknown[]) => unknown>(
 
   const conversationContext: ParlantConversationContext = {
     conversationId: generateConversationId(),
-    state: ConversationState.INITIATED,
+    state: ConversationState._INITIATED,
     metadata: {
       priority: context.config.conversationPriority,
       tags: ["function-validation"],
@@ -604,9 +604,9 @@ async function logValidationRejection(
     // Create audit entry for rejection
     const auditData = {
       functionName: context.functionName,
-      decision: error.decision,
-      confidence: error.confidence,
-      reasoning: error.validationResponse.result.reasoning,
+      decision: error._decision,
+      confidence: error._confidence,
+      reasoning: error._validationResponse.result.reasoning,
       timestamp: new Date(),
     };
 
@@ -743,21 +743,21 @@ export class ParlantWrapperBuilder<T extends (..._args: unknown[]) => unknown> {
   build(): WrappedFunction<T> {
     const defaultConfig: FunctionWrapperConfig = {
       enabled: true,
-      validationMode: ValidationMode.INTERACTIVE,
-      approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
-      securityLevel: FunctionSecurityLevel.INTERNAL,
-      riskLevel: RiskLevel.MODERATE,
+      validationMode: ValidationMode._INTERACTIVE,
+      approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
+      securityLevel: FunctionSecurityLevel._INTERNAL,
+      riskLevel: RiskLevel._MODERATE,
       timeout: 30000,
       cacheable: false,
       rules: [],
-      conversationPriority: ConversationPriority.NORMAL,
+      conversationPriority: ConversationPriority._NORMAL,
     };
 
     const finalConfig = { ...defaultConfig, ...this.config };
     return createParlantWrapper(
-      this.originalFunction,
+      this._originalFunction,
       finalConfig,
-      this.parlantService,
+      this._parlantService,
     );
   }
 }
@@ -772,7 +772,7 @@ export class ParlantWrapperBuilder<T extends (..._args: unknown[]) => unknown> {
  * @example
  * ```typescript
  * const wrappedFunction = parlantWrapper(originalFunction, parlantService)
- *   .validationMode(ValidationMode.INTERACTIVE)
+ *   .validationMode(ValidationMode._INTERACTIVE)
  *   .approvalLevel(ApprovalLevel.DUAL_APPROVAL)
  *   .securityLevel(FunctionSecurityLevel.RESTRICTED)
  *   .riskLevel(RiskLevel.HIGH)

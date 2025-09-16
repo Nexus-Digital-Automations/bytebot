@@ -344,7 +344,7 @@ export enum SecurityMeasureType {
   REQUEST_VALIDATION = "request_validation",
   RESPONSE_FILTERING = "response_filtering",
   SESSION_MONITORING = "session_monitoring",
-  AUDIT_LOGGING = "audit_logging",
+  _AUDIT_LOGGING = "audit_logging",
   CIRCUIT_BREAKING = "circuit_breaking",
 }
 
@@ -488,9 +488,9 @@ export interface ComplianceViolation {
  */
 export enum ComplianceViolationType {
   DATA_RETENTION = "data_retention",
-  ACCESS_CONTROL = "access_control",
+  _ACCESS_CONTROL = "access_control",
   AUDIT_TRAIL = "audit_trail",
-  ENCRYPTION = "encryption",
+  _ENCRYPTION = "encryption",
   PRIVACY = "privacy",
   CONSENT = "consent",
   DATA_MINIMIZATION = "data_minimization",

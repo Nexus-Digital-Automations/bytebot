@@ -526,9 +526,9 @@ export interface DataSensitivityAnalysis {
 export enum DataSensitivityLevel {
   _PUBLIC = "public",
   _INTERNAL = "internal",
-  CONFIDENTIAL = "confidential",
-  RESTRICTED = "restricted",
-  SECRET = "secret",
+  _CONFIDENTIAL = "confidential",
+  _RESTRICTED = "restricted",
+  _SECRET = "secret",
 }
 
 /**
@@ -552,14 +552,14 @@ export interface SensitiveField {
  * Sensitive data types
  */
 export enum SensitiveDataType {
-  PII = "pii", // Personally Identifiable Information
-  PHI = "phi", // Protected Health Information
-  PCI = "pci", // Payment Card Information
-  FINANCIAL = "financial",
-  BIOMETRIC = "biometric",
-  LOCATION = "location",
-  BEHAVIORAL = "behavioral",
-  TECHNICAL = "technical",
+  _PII = "pii", // Personally Identifiable Information
+  _PHI = "phi", // Protected Health Information
+  _PCI = "pci", // Payment Card Information
+  _FINANCIAL = "financial",
+  _BIOMETRIC = "biometric",
+  _LOCATION = "location",
+  _BEHAVIORAL = "behavioral",
+  _TECHNICAL = "technical",
 }
 
 /**
@@ -583,12 +583,12 @@ export interface DataProtectionRequirement {
  * Data protection types
  */
 export enum DataProtectionType {
-  ENCRYPTION = "encryption",
-  MASKING = "masking",
-  TOKENIZATION = "tokenization",
-  REDACTION = "redaction",
-  ACCESS_CONTROL = "access_control",
-  AUDIT_LOGGING = "audit_logging",
+  _ENCRYPTION = "encryption",
+  _MASKING = "masking",
+  _TOKENIZATION = "tokenization",
+  _REDACTION = "redaction",
+  _ACCESS_CONTROL = "access_control",
+  _AUDIT_LOGGING = "audit_logging",
 }
 
 /**
@@ -612,11 +612,11 @@ export interface ResponseComplianceValidation {
  * Compliance status
  */
 export enum ComplianceStatus {
-  COMPLIANT = "compliant",
-  NON_COMPLIANT = "non_compliant",
-  PARTIAL_COMPLIANCE = "partial_compliance",
-  PENDING_REVIEW = "pending_review",
-  NOT_APPLICABLE = "not_applicable",
+  _COMPLIANT = "compliant",
+  _NON_COMPLIANT = "non_compliant",
+  _PARTIAL_COMPLIANCE = "partial_compliance",
+  _PENDING_REVIEW = "pending_review",
+  _NOT_APPLICABLE = "not_applicable",
 }
 
 // Additional supporting interfaces for complete type coverage
@@ -836,10 +836,10 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
   private readonly validationCache = new Map<string, CachedValidationResult>();
 
   constructor(
-    private readonly reflector: Reflector,
-    private readonly configService: ConfigService,
-    private readonly parlantWrapperUtils: ParlantWrapperUtils,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly _reflector: Reflector,
+    private readonly _configService: ConfigService,
+    private readonly _parlantWrapperUtils: ParlantWrapperUtils,
+    @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
   ) {
     this.logger.log(
       "Unified API Validation Interceptor initialized with MAXIMUM Parlant integration",
@@ -1081,8 +1081,8 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
   // This file would continue with complete implementation of all validation methods
 
   private async initializeUnifiedApiContext(
-    context: ExecutionContext,
-    operationId: string,
+    _context: ExecutionContext,
+    _operationId: string,
   ): Promise<UnifiedApiContext> {
     // Implementation for initializing unified API context
     throw new Error("Method not implemented.");

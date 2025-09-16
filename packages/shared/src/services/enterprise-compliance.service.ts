@@ -44,13 +44,13 @@ import {
   _ParlantExecutionContext,
   _ParlantValidationMetadata,
   _ParlantRiskAssessment,
-  ParlantAuditEntry,
+  _ParlantAuditEntry,
 } from "../types/parlant-integration.types";
 
 // Import Parlant decorators and utilities
 import {
   ParlantValidation,
-  ParlantDecoratorOptions,
+  _ParlantDecoratorOptions,
 } from "../decorators/parlant-validation.decorator";
 
 import { ParlantWrapperUtils } from "../utils/parlant-wrapper.utils";
@@ -62,41 +62,41 @@ import { ParlantWrapperUtils } from "../utils/parlant-wrapper.utils";
  */
 export enum ComplianceFramework {
   // Financial Regulations
-  SOX = "sox", // Sarbanes-Oxley Act
-  PCI_DSS = "pci_dss", // Payment Card Industry Data Security Standard
-  BASEL_III = "basel_iii", // Basel III Banking Regulations
-  MIFID_II = "mifid_ii", // Markets in Financial Instruments Directive II
-  DODD_FRANK = "dodd_frank", // Dodd-Frank Wall Street Reform Act
+  _SOX = "sox", // Sarbanes-Oxley Act
+  _PCI_DSS = "pci_dss", // Payment Card Industry Data Security Standard
+  _BASEL_III = "basel_iii", // Basel III Banking Regulations
+  _MIFID_II = "mifid_ii", // Markets in Financial Instruments Directive II
+  _DODD_FRANK = "dodd_frank", // Dodd-Frank Wall Street Reform Act
 
   // Data Protection Regulations
-  GDPR = "gdpr", // General Data Protection Regulation
-  CCPA = "ccpa", // California Consumer Privacy Act
-  LGPD = "lgpd", // Lei Geral de Proteção de Dados (Brazil)
-  PIPEDA = "pipeda", // Personal Information Protection and Electronic Documents Act (Canada)
-  DPA = "dpa", // Data Protection Act (UK)
+  _GDPR = "gdpr", // General Data Protection Regulation
+  _CCPA = "ccpa", // California Consumer Privacy Act
+  _LGPD = "lgpd", // Lei Geral de Proteção de Dados (Brazil)
+  _PIPEDA = "pipeda", // Personal Information Protection and Electronic Documents Act (Canada)
+  _DPA = "dpa", // Data Protection Act (UK)
 
   // Healthcare Regulations
-  HIPAA = "hipaa", // Health Insurance Portability and Accountability Act
-  HITECH = "hitech", // Health Information Technology for Economic and Clinical Health Act
-  FDA_21_CFR_PART_11 = "fda_21_cfr_part_11", // FDA 21 CFR Part 11
+  _HIPAA = "hipaa", // Health Insurance Portability and Accountability Act
+  _HITECH = "hitech", // Health Information Technology for Economic and Clinical Health Act
+  _FDA_21_CFR_PART_11 = "fda_21_cfr_part_11", // FDA 21 CFR Part 11
 
   // Security Frameworks
-  SOC_2 = "soc_2", // Service Organization Control 2
-  ISO_27001 = "iso_27001", // ISO/IEC 27001 Information Security Management
-  NIST_CSF = "nist_csf", // NIST Cybersecurity Framework
-  COBIT = "cobit", // Control Objectives for Information Technologies
+  _SOC_2 = "soc_2", // Service Organization Control 2
+  _ISO_27001 = "iso_27001", // ISO/IEC 27001 Information Security Management
+  _NIST_CSF = "nist_csf", // NIST Cybersecurity Framework
+  _COBIT = "cobit", // Control Objectives for Information Technologies
 
   // Government Regulations
-  FISMA = "fisma", // Federal Information Security Management Act
-  FEDRAMP = "fedramp", // Federal Risk and Authorization Management Program
-  ITAR = "itar", // International Traffic in Arms Regulations
-  EAR = "ear", // Export Administration Regulations
+  _FISMA = "fisma", // Federal Information Security Management Act
+  _FEDRAMP = "fedramp", // Federal Risk and Authorization Management Program
+  _ITAR = "itar", // International Traffic in Arms Regulations
+  _EAR = "ear", // Export Administration Regulations
 
   // Industry-Specific Regulations
-  FERPA = "ferpa", // Family Educational Rights and Privacy Act
-  GLBA = "glba", // Gramm-Leach-Bliley Act
-  NERC_CIP = "nerc_cip", // North American Electric Reliability Corporation Critical Infrastructure Protection
-  COSO = "coso", // Committee of Sponsoring Organizations Framework
+  _FERPA = "ferpa", // Family Educational Rights and Privacy Act
+  _GLBA = "glba", // Gramm-Leach-Bliley Act
+  _NERC_CIP = "nerc_cip", // North American Electric Reliability Corporation Critical Infrastructure Protection
+  _COSO = "coso", // Committee of Sponsoring Organizations Framework
 }
 
 /**
@@ -155,13 +155,13 @@ export interface ComplianceValidationScope {
  * Compliance scope types
  */
 export enum ComplianceScopeType {
-  FULL_ORGANIZATION = "full_organization",
-  BUSINESS_UNIT = "business_unit",
-  APPLICATION = "application",
-  DATA_PROCESSING = "data_processing",
-  TRANSACTION = "transaction",
-  USER_ACTIVITY = "user_activity",
-  SYSTEM_OPERATION = "system_operation",
+  _FULL_ORGANIZATION = "full_organization",
+  _BUSINESS_UNIT = "business_unit",
+  _APPLICATION = "application",
+  _DATA_PROCESSING = "data_processing",
+  _TRANSACTION = "transaction",
+  _USER_ACTIVITY = "user_activity",
+  _SYSTEM_OPERATION = "system_operation",
 }
 
 /**
@@ -185,23 +185,23 @@ export interface ComplianceTimePeriod {
  * Compliance period types
  */
 export enum CompliancePeriodType {
-  REAL_TIME = "real_time",
-  DAILY = "daily",
-  WEEKLY = "weekly",
-  MONTHLY = "monthly",
-  QUARTERLY = "quarterly",
-  ANNUALLY = "annually",
-  CUSTOM = "custom",
+  _REAL_TIME = "real_time",
+  _DAILY = "daily",
+  _WEEKLY = "weekly",
+  _MONTHLY = "monthly",
+  _QUARTERLY = "quarterly",
+  _ANNUALLY = "annually",
+  _CUSTOM = "custom",
 }
 
 /**
  * Compliance depth levels
  */
 export enum ComplianceDepthLevel {
-  SURFACE = "surface", // Basic compliance checks
-  STANDARD = "standard", // Standard compliance validation
-  COMPREHENSIVE = "comprehensive", // Detailed compliance analysis
-  FORENSIC = "forensic", // Deep forensic compliance investigation
+  _SURFACE = "surface", // Basic compliance checks
+  _STANDARD = "standard", // Standard compliance validation
+  _COMPREHENSIVE = "comprehensive", // Detailed compliance analysis
+  _FORENSIC = "forensic", // Deep forensic compliance investigation
 }
 
 /**
@@ -232,46 +232,46 @@ export interface ComplianceDataContext {
  */
 export enum ComplianceDataType {
   // Personal Data
-  PERSONAL_IDENTIFIABLE_INFORMATION = "pii",
-  SENSITIVE_PERSONAL_DATA = "sensitive_personal_data",
-  BIOMETRIC_DATA = "biometric_data",
-  GENETIC_DATA = "genetic_data",
-  LOCATION_DATA = "location_data",
+  _PERSONAL_IDENTIFIABLE_INFORMATION = "pii",
+  _SENSITIVE_PERSONAL_DATA = "sensitive_personal_data",
+  _BIOMETRIC_DATA = "biometric_data",
+  _GENETIC_DATA = "genetic_data",
+  _LOCATION_DATA = "location_data",
 
   // Financial Data
-  PAYMENT_CARD_DATA = "payment_card_data",
-  FINANCIAL_ACCOUNT_DATA = "financial_account_data",
-  TRANSACTION_DATA = "transaction_data",
-  CREDIT_DATA = "credit_data",
+  _PAYMENT_CARD_DATA = "payment_card_data",
+  _FINANCIAL_ACCOUNT_DATA = "financial_account_data",
+  _TRANSACTION_DATA = "transaction_data",
+  _CREDIT_DATA = "credit_data",
 
   // Healthcare Data
-  PROTECTED_HEALTH_INFORMATION = "phi",
-  MEDICAL_RECORDS = "medical_records",
-  HEALTH_INSURANCE_DATA = "health_insurance_data",
+  _PROTECTED_HEALTH_INFORMATION = "phi",
+  _MEDICAL_RECORDS = "medical_records",
+  _HEALTH_INSURANCE_DATA = "health_insurance_data",
 
   // Technical Data
-  SYSTEM_LOGS = "system_logs",
-  SECURITY_LOGS = "security_logs",
-  AUDIT_LOGS = "audit_logs",
-  CONFIGURATION_DATA = "configuration_data",
+  _SYSTEM_LOGS = "system_logs",
+  _SECURITY_LOGS = "security_logs",
+  _AUDIT_LOGS = "audit_logs",
+  _CONFIGURATION_DATA = "configuration_data",
 
   // Business Data
-  INTELLECTUAL_PROPERTY = "intellectual_property",
-  TRADE_SECRETS = "trade_secrets",
-  CONTRACT_DATA = "contract_data",
-  EMPLOYEE_DATA = "employee_data",
+  _INTELLECTUAL_PROPERTY = "intellectual_property",
+  _TRADE_SECRETS = "trade_secrets",
+  _CONTRACT_DATA = "contract_data",
+  _EMPLOYEE_DATA = "employee_data",
 }
 
 /**
  * Data sensitivity levels
  */
 export enum DataSensitivityLevel {
-  PUBLIC = "public",
-  INTERNAL = "internal",
-  CONFIDENTIAL = "confidential",
-  RESTRICTED = "restricted",
-  SECRET = "secret",
-  TOP_SECRET = "top_secret",
+  _PUBLIC = "public",
+  _INTERNAL = "internal",
+  _CONFIDENTIAL = "confidential",
+  _RESTRICTED = "restricted",
+  _SECRET = "secret",
+  _TOP_SECRET = "top_secret",
 }
 
 /**
@@ -304,26 +304,26 @@ export interface DataProcessingActivity {
  * Processing activity types
  */
 export enum ProcessingActivityType {
-  COLLECTION = "collection",
-  STORAGE = "storage",
-  PROCESSING = "processing",
-  ANALYSIS = "analysis",
-  SHARING = "sharing",
-  DELETION = "deletion",
-  ANONYMIZATION = "anonymization",
-  PSEUDONYMIZATION = "pseudonymization",
+  _COLLECTION = "collection",
+  _STORAGE = "storage",
+  _PROCESSING = "processing",
+  _ANALYSIS = "analysis",
+  _SHARING = "sharing",
+  _DELETION = "deletion",
+  _ANONYMIZATION = "anonymization",
+  _PSEUDONYMIZATION = "pseudonymization",
 }
 
 /**
  * Legal basis types
  */
 export enum LegalBasisType {
-  CONSENT = "consent",
-  CONTRACT = "contract",
-  LEGAL_OBLIGATION = "legal_obligation",
-  VITAL_INTERESTS = "vital_interests",
-  PUBLIC_TASK = "public_task",
-  LEGITIMATE_INTERESTS = "legitimate_interests",
+  _CONSENT = "consent",
+  _CONTRACT = "contract",
+  _LEGAL_OBLIGATION = "legal_obligation",
+  _VITAL_INTERESTS = "vital_interests",
+  _PUBLIC_TASK = "public_task",
+  _LEGITIMATE_INTERESTS = "legitimate_interests",
 }
 
 /**
@@ -1079,9 +1079,9 @@ export class EnterpriseComplianceService {
   };
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly parlantWrapperUtils: ParlantWrapperUtils,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly _configService: ConfigService,
+    private readonly _parlantWrapperUtils: ParlantWrapperUtils,
+    @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
   ) {
     this.logger.log(
       "Enterprise Compliance Service initialized with MAXIMUM Parlant integration",
