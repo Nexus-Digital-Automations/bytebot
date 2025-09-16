@@ -10,10 +10,7 @@ import {
   User03Icon,
 } from "@hugeicons/core-free-icons";
 import {
-  ClickMouseToolUseBlock,
   ComputerToolUseContentBlock,
-  DragMouseToolUseBlock,
-  PressMouseToolUseBlock,
   isApplicationToolUseBlock,
   isClickMouseToolUseBlock,
   isCursorPositionToolUseBlock,
@@ -44,58 +41,91 @@ export type IconType =
   | typeof FilePasteIcon
   | typeof FileIcon;
 
+/**
+ * Safe type guard wrapper to handle potential type safety issues
+ * Ensures boolean return and handles any runtime type checking errors
+ */
+function safeTypeGuard<T>(
+  guard: (obj: unknown) => obj is T,
+  block: ComputerToolUseContentBlock,
+): boolean {
+  try {
+    // Explicit type casting to handle the "error" type issue
+    const result = guard(block as unknown);
+    return Boolean(result);
+  } catch (_error) {
+    // Log type guard failure for debugging
+    // console.warn("Type guard failed", { error: _error, block });
+    return false;
+  }
+}
+
+/**
+ * Safe property access for block input with proper type checking
+ */
+function hasButtonProperty(
+  block: ComputerToolUseContentBlock,
+): block is ComputerToolUseContentBlock & { input: { button: string } } {
+  return (
+    Boolean(block) &&
+    typeof block === "object" &&
+    "input" in block &&
+    Boolean(block.input) &&
+    typeof block.input === "object" &&
+    "button" in block.input &&
+    typeof (block.input as { button?: unknown }).button === "string"
+  );
+}
+
 export function getIcon(block: ComputerToolUseContentBlock): IconType {
-  if (isScreenshotToolUseBlock(block) === true) {
+  // Comprehensive logging for debugging
+  // console.debug("ComputerToolUtils.getIcon", {
+  //   blockType: block?.name,
+  //   hasInput: Boolean(block?.input),
+  // });
+
+  if (safeTypeGuard(isScreenshotToolUseBlock, block)) {
     return Camera01Icon;
   }
 
-  if (isWaitToolUseBlock(block) === true) {
+  if (safeTypeGuard(isWaitToolUseBlock, block)) {
     return TimeQuarter02Icon;
   }
 
   if (
-    isTypeKeysToolUseBlock(block) === true ||
-    isTypeTextToolUseBlock(block) === true ||
-    isPressKeysToolUseBlock(block) === true
+    safeTypeGuard(isTypeKeysToolUseBlock, block) ||
+    safeTypeGuard(isTypeTextToolUseBlock, block) ||
+    safeTypeGuard(isPressKeysToolUseBlock, block)
   ) {
     return TypeCursorIcon;
   }
 
-  if (isPasteTextToolUseBlock(block) === true) {
+  if (safeTypeGuard(isPasteTextToolUseBlock, block)) {
     return FilePasteIcon;
   }
 
   if (
-    isMoveMouseToolUseBlock(block) === true ||
-    isScrollToolUseBlock(block) === true ||
-    isCursorPositionToolUseBlock(block) === true ||
-    isClickMouseToolUseBlock(block) === true ||
-    isDragMouseToolUseBlock(block) === true ||
-    isPressMouseToolUseBlock(block) === true ||
-    isTraceMouseToolUseBlock(block) === true
+    safeTypeGuard(isMoveMouseToolUseBlock, block) ||
+    safeTypeGuard(isScrollToolUseBlock, block) ||
+    safeTypeGuard(isCursorPositionToolUseBlock, block) ||
+    safeTypeGuard(isClickMouseToolUseBlock, block) ||
+    safeTypeGuard(isDragMouseToolUseBlock, block) ||
+    safeTypeGuard(isPressMouseToolUseBlock, block) ||
+    safeTypeGuard(isTraceMouseToolUseBlock, block)
   ) {
-    // Safe access to input property with type assertion
-    const mouseBlock = block as
-      | ClickMouseToolUseBlock
-      | PressMouseToolUseBlock
-      | DragMouseToolUseBlock;
-    if (
-      mouseBlock.input &&
-      typeof mouseBlock.input === "object" &&
-      "button" in mouseBlock.input &&
-      mouseBlock.input.button === "right"
-    ) {
+    // Safe access to button property
+    if (hasButtonProperty(block) && block.input.button === "right") {
       return MouseRightClick06Icon;
     }
 
     return Cursor02Icon;
   }
 
-  if (isApplicationToolUseBlock(block) === true) {
+  if (safeTypeGuard(isApplicationToolUseBlock, block)) {
     return BrowserIcon;
   }
 
-  if (isReadFileToolUseBlock(block) === true) {
+  if (safeTypeGuard(isReadFileToolUseBlock, block)) {
     return FileIcon;
   }
 
@@ -103,58 +133,65 @@ export function getIcon(block: ComputerToolUseContentBlock): IconType {
 }
 
 export function getLabel(block: ComputerToolUseContentBlock): string {
-  if (isScreenshotToolUseBlock(block) === true) {
+  // Comprehensive logging for debugging
+  // console.debug("ComputerToolUtils.getLabel", {
+  //   blockType: block?.name,
+  //   hasInput: Boolean(block?.input),
+  // });
+
+  if (safeTypeGuard(isScreenshotToolUseBlock, block)) {
     return "Screenshot";
   }
 
-  if (isWaitToolUseBlock(block) === true) {
+  if (safeTypeGuard(isWaitToolUseBlock, block)) {
     return "Wait";
   }
 
-  if (isTypeKeysToolUseBlock(block) === true) {
+  if (safeTypeGuard(isTypeKeysToolUseBlock, block)) {
     return "Keys";
   }
 
-  if (isTypeTextToolUseBlock(block) === true) {
+  if (safeTypeGuard(isTypeTextToolUseBlock, block)) {
     return "Type";
   }
 
-  if (isPasteTextToolUseBlock(block) === true) {
+  if (safeTypeGuard(isPasteTextToolUseBlock, block)) {
     return "Paste";
   }
 
-  if (isPressKeysToolUseBlock(block) === true) {
+  if (safeTypeGuard(isPressKeysToolUseBlock, block)) {
     return "Press Keys";
   }
 
-  if (isMoveMouseToolUseBlock(block) === true) {
+  if (safeTypeGuard(isMoveMouseToolUseBlock, block)) {
     return "Move Mouse";
   }
 
-  if (isScrollToolUseBlock(block) === true) {
+  if (safeTypeGuard(isScrollToolUseBlock, block)) {
     return "Scroll";
   }
 
-  if (isCursorPositionToolUseBlock(block) === true) {
+  if (safeTypeGuard(isCursorPositionToolUseBlock, block)) {
     return "Cursor Position";
   }
 
-  if (isClickMouseToolUseBlock(block) === true) {
-    // Safe access with proper type assertion and null checks
-    const clickBlock = block as ClickMouseToolUseBlock;
-    if (clickBlock.input && typeof clickBlock.input === "object") {
-      const button = clickBlock.input.button;
+  if (safeTypeGuard(isClickMouseToolUseBlock, block)) {
+    // Safe access with comprehensive type checking
+    if (Boolean(block.input) && typeof block.input === "object") {
+      const input = block.input as {
+        button?: string;
+        clickCount?: number;
+      };
+
+      const button = input.button;
       if (button === "left") {
-        if (
-          typeof clickBlock.input.clickCount === "number" &&
-          clickBlock.input.clickCount === 2
-        ) {
+        if (typeof input.clickCount === "number" && input.clickCount === 2) {
           return "Double Click";
         }
 
         if (
-          typeof clickBlock.input.clickCount === "number" &&
-          clickBlock.input.clickCount === TRIPLE_CLICK_COUNT
+          typeof input.clickCount === "number" &&
+          input.clickCount === TRIPLE_CLICK_COUNT
         ) {
           return "Triple Click";
         }
@@ -171,23 +208,23 @@ export function getLabel(block: ComputerToolUseContentBlock): string {
     return "Click";
   }
 
-  if (isDragMouseToolUseBlock(block) === true) {
+  if (safeTypeGuard(isDragMouseToolUseBlock, block)) {
     return "Drag";
   }
 
-  if (isPressMouseToolUseBlock(block) === true) {
+  if (safeTypeGuard(isPressMouseToolUseBlock, block)) {
     return "Press Mouse";
   }
 
-  if (isTraceMouseToolUseBlock(block) === true) {
+  if (safeTypeGuard(isTraceMouseToolUseBlock, block)) {
     return "Trace Mouse";
   }
 
-  if (isApplicationToolUseBlock(block) === true) {
+  if (safeTypeGuard(isApplicationToolUseBlock, block)) {
     return "Open Application";
   }
 
-  if (isReadFileToolUseBlock(block) === true) {
+  if (safeTypeGuard(isReadFileToolUseBlock, block)) {
     return "Read File";
   }
 

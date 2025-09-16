@@ -17,11 +17,13 @@ import {
 function isValidToolResultWithContent(
   block: MessageContentBlock,
 ): block is ToolResultContentBlock {
-  return (
-    isToolResultContentBlock(block) &&
-    Array.isArray(block.content) &&
-    block.content.length > 0
-  );
+  // First check if it's a tool result block
+  if (!isToolResultContentBlock(block)) {
+    return false;
+  }
+
+  // Now TypeScript knows block is ToolResultContentBlock, safe to access content
+  return Array.isArray(block.content) && block.content.length > 0;
 }
 
 interface UserMessageProps {
@@ -48,12 +50,11 @@ export function UserMessage({
               >
                 {/* Render hidden divs for each screenshot block */}
                 {message.content.map((block, blockIndex) => {
-                  if (isValidToolResultContent(block)) {
+                  if (isValidToolResultWithContent(block)) {
                     // Check ALL content items in the tool result, not just the first one
                     const markers: React.ReactNode[] = [];
                     // Type guard ensures block is valid ToolResultContentBlock with content
-                    const validContent = block.content;
-                    validContent.forEach(
+                    block.content.forEach(
                       (
                         contentItem: MessageContentBlock,
                         contentIndex: number,
@@ -62,7 +63,9 @@ export function UserMessage({
                           markers.push(
                             <div
                               key={`${blockIndex}-${contentIndex}`}
-                              data-message-index={messageIdToIndex[message.id]}
+                              data-message-index={
+                                messageIdToIndex[message.id] ?? 0
+                              }
                               data-block-index={blockIndex}
                               data-content-index={contentIndex}
                               style={{
@@ -110,18 +113,17 @@ export function UserMessage({
           >
             {/* Render hidden divs for each screenshot block */}
             {message.content.map((block, blockIndex) => {
-              if (isValidToolResultContent(block)) {
+              if (isValidToolResultWithContent(block)) {
                 // Check ALL content items in the tool result, not just the first one
                 const markers: React.ReactNode[] = [];
                 // Type guard ensures block is valid ToolResultContentBlock with content
-                const validContent = block.content;
-                validContent.forEach(
+                block.content.forEach(
                   (contentItem: MessageContentBlock, contentIndex: number) => {
                     if (isImageContentBlock(contentItem)) {
                       markers.push(
                         <div
                           key={`${blockIndex}-${contentIndex}`}
-                          data-message-index={messageIdToIndex[message.id]}
+                          data-message-index={messageIdToIndex[message.id] ?? 0}
                           data-block-index={blockIndex}
                           data-content-index={contentIndex}
                           style={{

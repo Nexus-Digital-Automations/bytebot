@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  TextContentBlock,
-  ToolResultContentBlock,
-  isTextContentBlock,
-} from "@bytebot/shared";
+import { ToolResultContentBlock } from "@bytebot/shared";
 import { AlertCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
@@ -12,30 +8,54 @@ interface ErrorContentProps {
 }
 
 /**
- * Safely extracts error text from a ToolResultContentBlock
+ * Safely extracts error text from a ToolResultContentBlock using defensive programming
+ * This implementation uses explicit type checking to satisfy strict TypeScript rules
  * @param block - The tool result content block to extract text from
  * @returns The error text string or default message
  */
 function getErrorText(block: ToolResultContentBlock): string {
-  // Type-safe access to block.content with proper validation
-  const content = block.content;
+  const defaultMessage = "Error running tool";
 
-  // Ensure content exists and is an array
-  if (!Array.isArray(content) || content.length === 0) {
-    return "Error running tool";
+  try {
+    // Multiple defensive checks to ensure type safety
+    if (typeof block !== "object" || block === null) {
+      return defaultMessage;
+    }
+
+    // Check if content property exists using explicit property access
+    if (!("content" in block)) {
+      return defaultMessage;
+    }
+
+    // Get content with explicit type validation
+    const blockContent = block.content;
+    if (!Array.isArray(blockContent) || blockContent.length === 0) {
+      return defaultMessage;
+    }
+
+    // Get first item with bounds checking
+    const firstItem = blockContent[0];
+    if (typeof firstItem !== "object" || firstItem === null) {
+      return defaultMessage;
+    }
+
+    // Check for text content block structure
+    const item = firstItem as Record<string, unknown>;
+    if (
+      "type" in item &&
+      item.type === "text" &&
+      "text" in item &&
+      typeof item.text === "string" &&
+      item.text.length > 0
+    ) {
+      return item.text;
+    }
+
+    return defaultMessage;
+  } catch {
+    // Catch any unexpected errors and return default message
+    return defaultMessage;
   }
-
-  // Get first content item with type safety
-  const firstContentItem = content[0];
-
-  // Type guard check with explicit type assertion
-  if (firstContentItem && isTextContentBlock(firstContentItem)) {
-    // TypeScript now knows firstContentItem is TextContentBlock
-    const textBlock = firstContentItem as TextContentBlock;
-    return textBlock.text;
-  }
-
-  return "Error running tool";
 }
 
 export function ErrorContent({ block }: ErrorContentProps): React.JSX.Element {

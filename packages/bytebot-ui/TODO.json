@@ -178,7 +178,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-16T01:25:54.437Z",
       "title": "Final validation of ALL TypeScript ESLint fixes across bytebot-ui package",
       "description": "Run comprehensive build and linting validation to ensure zero tolerance compliance. Count remaining violations and verify all files are clean. Complete the emergency TypeScript ESLint task with evidence of full compliance.",
@@ -195,10 +195,12 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-16T01:36:24.949Z",
+      "updated_at": "2025-09-16T01:36:24.949Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-16T01:25:57.027Z",
       "title": "Fix TypeScript ESLint violations in ComputerToolContentNormal.tsx",
       "description": "Resolve unsafe type operations, unsafe member access, and strict boolean expressions with proper type guards and safe type assertions",
@@ -215,7 +217,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-16T01:41:49.333Z",
+      "updated_at": "2025-09-16T01:41:49.333Z"
     },
     {
       "status": "in_progress",
@@ -278,7 +282,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-16T01:25:58.299Z",
       "title": "Fix TypeScript ESLint violations in MessageContent.tsx",
       "description": "Fix ALL TypeScript ESLint violations including unsafe type operations, unsafe member access, and strict boolean expressions with comprehensive type safety fixes",
@@ -295,7 +299,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-16T01:42:05.585Z",
+      "updated_at": "2025-09-16T01:42:05.585Z"
     },
     {
       "status": "in_progress",

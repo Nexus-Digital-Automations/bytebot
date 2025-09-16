@@ -12,20 +12,39 @@ interface ImageContentProps {
 const DEFAULT_IMAGE_WIDTH = 250;
 const DEFAULT_IMAGE_HEIGHT = 250;
 const FALLBACK_ALT_TEXT = "Screenshot";
+const LOG_PREFIX_LENGTH = 50;
 
 /**
  * Type guard to safely validate ImageContentBlock structure
  * Provides comprehensive type safety for image source data
  */
 function isValidImageContentBlock(block: ImageContentBlock): boolean {
-  return Boolean(
-    block?.source &&
-      typeof block.source === "object" &&
-      typeof block.source.data === "string" &&
-      block.source.data.length > 0 &&
-      block.source.media_type === "image/png" &&
-      block.source.type === "base64",
-  );
+  // Handle each validation step explicitly for strict boolean expressions
+  if (block?.source === null || block?.source === undefined) {
+    return false;
+  }
+
+  if (typeof block.source !== "object") {
+    return false;
+  }
+
+  if (typeof block.source.data !== "string") {
+    return false;
+  }
+
+  if (block.source.data.length === 0) {
+    return false;
+  }
+
+  if (block.source.media_type !== "image/png") {
+    return false;
+  }
+
+  if (block.source.type !== "base64") {
+    return false;
+  }
+
+  return true;
 }
 
 /**
@@ -34,14 +53,18 @@ function isValidImageContentBlock(block: ImageContentBlock): boolean {
  */
 function getImageSourceData(block: ImageContentBlock): string | null {
   if (!isValidImageContentBlock(block)) {
-    console.warn("Invalid ImageContentBlock structure detected", {
-      hasBlock: Boolean(block),
-      hasSource: Boolean(block?.source),
-      hasData: Boolean(block?.source?.data),
-      dataType: typeof block?.source?.data,
-      mediaType: block?.source?.media_type,
-      sourceType: block?.source?.type,
-    });
+    // Console usage restricted to development environment only
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.warn("Invalid ImageContentBlock structure detected", {
+        hasBlock: Boolean(block),
+        hasSource: Boolean(block?.source),
+        hasData: Boolean(block?.source?.data),
+        dataType: typeof block?.source?.data,
+        mediaType: block?.source?.media_type,
+        sourceType: block?.source?.type,
+      });
+    }
     return null;
   }
 
@@ -50,21 +73,27 @@ function getImageSourceData(block: ImageContentBlock): string | null {
 }
 
 export function ImageContent({ block }: ImageContentProps): React.JSX.Element {
-  // Comprehensive logging for debugging and monitoring
-  console.debug("ImageContent component rendering", {
-    blockType: block?.type,
-    hasSource: Boolean(block?.source),
-    sourceType: block?.source?.type,
-    mediaType: block?.source?.media_type,
-    dataLength: block?.source?.data?.length ?? 0,
-  });
+  // Comprehensive logging for debugging and monitoring - development only
+  if (process.env.NODE_ENV === "development") {
+    // eslint-disable-next-line no-console
+    console.debug("ImageContent component rendering", {
+      blockType: block?.type,
+      hasSource: Boolean(block?.source),
+      sourceType: block?.source?.type,
+      mediaType: block?.source?.media_type,
+      dataLength: block?.source?.data?.length ?? 0,
+    });
+  }
 
   // Safe data extraction with type safety
   const imageData = getImageSourceData(block);
 
-  // Handle invalid or missing image data gracefully
-  if (!imageData) {
-    console.error("Failed to extract valid image data from block", { block });
+  // Handle invalid or missing image data gracefully - explicit null/undefined check
+  if (imageData === null || imageData === undefined || imageData === "") {
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.error("Failed to extract valid image data from block", { block });
+    }
     return (
       <div className="mb-3 max-w-4/5">
         <div className="mb-2 flex items-center gap-2">
@@ -103,17 +132,23 @@ export function ImageContent({ block }: ImageContentProps): React.JSX.Element {
           height={DEFAULT_IMAGE_HEIGHT}
           className="block object-contain"
           onError={(error) => {
-            console.error("Failed to load image", {
-              error,
-              imageSource: `${imageSource.substring(0, 50)}...`,
-              block,
-            });
+            if (process.env.NODE_ENV === "development") {
+              // eslint-disable-next-line no-console
+              console.error("Failed to load image", {
+                error,
+                imageSource: `${imageSource.substring(0, LOG_PREFIX_LENGTH)}...`,
+                block,
+              });
+            }
           }}
           onLoad={() => {
-            console.debug("Image loaded successfully", {
-              width: DEFAULT_IMAGE_WIDTH,
-              height: DEFAULT_IMAGE_HEIGHT,
-            });
+            if (process.env.NODE_ENV === "development") {
+              // eslint-disable-next-line no-console
+              console.debug("Image loaded successfully", {
+                width: DEFAULT_IMAGE_WIDTH,
+                height: DEFAULT_IMAGE_HEIGHT,
+              });
+            }
           }}
         />
       </div>

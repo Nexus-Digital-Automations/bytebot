@@ -11,12 +11,15 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * Type guard to check if a ToolResultContentBlock has valid content
- * Provides type-safe access to tool result content
+ * Type guard to check if a ToolResultContentBlock has valid content and is not an error
+ * Provides type-safe access to tool result content for takeover scenarios
  */
 function isValidToolResultContent(
   block: unknown,
-): block is ToolResultContentBlock & { content: MessageContentBlock[] } {
+): block is ToolResultContentBlock & {
+  content: MessageContentBlock[];
+  is_error?: false | undefined;
+} {
   // Comprehensive type safety check
   if (block == null || typeof block !== "object") {
     return false;
@@ -27,6 +30,8 @@ function isValidToolResultContent(
   return (
     obj.type === "tool_result" &&
     typeof obj.tool_use_id === "string" &&
+    // Ensure it's not an error case
+    obj.is_error !== true &&
     Array.isArray(obj.content) &&
     (obj.content as unknown[]).length > 0 &&
     (obj.content as unknown[]).every(
@@ -37,12 +42,12 @@ function isValidToolResultContent(
 
 /**
  * Type guard to check if a ToolResultContentBlock is not an error
- * Provides type-safe access to non-error tool results
+ * Provides type-safe access to non-error tool results for normal message display
  */
 function isNonErrorToolResult(
   block: unknown,
 ): block is ToolResultContentBlock & {
-  is_error: false;
+  is_error?: false | undefined;
   content: MessageContentBlock[];
 } {
   // Comprehensive type safety check
@@ -55,6 +60,7 @@ function isNonErrorToolResult(
   return (
     obj.type === "tool_result" &&
     typeof obj.tool_use_id === "string" &&
+    // Explicitly check that it's not an error (false, undefined, or missing)
     obj.is_error !== true &&
     Array.isArray(obj.content) &&
     (obj.content as unknown[]).length > 0 &&
@@ -110,8 +116,13 @@ export function AssistantMessage({
                   if (isValidToolResultContent(block)) {
                     // Check ALL content items in the tool result, not just the first one
                     const markers: React.ReactNode[] = [];
-                    // Safe access to content after successful type guard check
-                    const validContent = block.content;
+                    // Type guard ensures we have valid content - safe to access
+                    const toolResult = block as ToolResultContentBlock & {
+                      is_error?: false | undefined;
+                      content: MessageContentBlock[];
+                    };
+                    const validContent = toolResult.content;
+                    
                     if (
                       Array.isArray(validContent) &&
                       validContent.length > 0

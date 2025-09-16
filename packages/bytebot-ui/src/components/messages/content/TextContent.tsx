@@ -6,6 +6,24 @@ interface TextContentProps {
   block: TextContentBlock;
 }
 
+/**
+ * Type guard to ensure block is properly typed as TextContentBlock
+ * @param block - The block to validate
+ * @returns The validated text content
+ */
+function getTextFromBlock(block: TextContentBlock): string {
+  // Defensive validation with proper type assertion
+  if (
+    block &&
+    typeof block === "object" &&
+    "text" in block &&
+    typeof block.text === "string"
+  ) {
+    return block.text;
+  }
+  return "";
+}
+
 export function TextContent({ block }: TextContentProps): React.JSX.Element {
   return (
     <div className="mb-3">
@@ -96,7 +114,7 @@ export function TextContent({ block }: TextContentProps): React.JSX.Element {
             ),
           }}
         >
-          {(block).text}
+          {getTextFromBlock(block)}
         </ReactMarkdown>
       </div>
     </div>

@@ -147,7 +147,7 @@ function ToolDetailsTakeOver({
       {isTypeTextToolUseBlock(block) && hasText(block.input) && (
         <p className={baseClasses}>
           {String(
-            block.input.isSensitive
+            (block.input.isSensitive ?? false)
               ? "●".repeat(block.input.text.length)
               : block.input.text,
           )}
