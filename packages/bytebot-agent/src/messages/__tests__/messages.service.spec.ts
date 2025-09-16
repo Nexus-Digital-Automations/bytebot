@@ -175,17 +175,21 @@ describe('MessagesService', () => {
       expect(result.operationId).toBeDefined();
       expect(result.contentMetrics).toBeDefined();
       expect(result.performanceMetrics).toBeDefined();
-      
+
       // Verify content metrics
       expect(result.contentMetrics.blockCount).toBe(1);
-      expect(result.contentMetrics.totalCharacters).toBe(mockTextContentBlock.text.length);
+      expect(result.contentMetrics.totalCharacters).toBe(
+        mockTextContentBlock.text.length,
+      );
       expect(result.contentMetrics.validatedBlocks).toBe(1);
-      
+
       // Verify performance metrics
       expect(result.performanceMetrics.processingTimeMs).toBeGreaterThan(0);
-      expect(result.performanceMetrics.databaseResponseTimeMs).toBeGreaterThan(0);
+      expect(result.performanceMetrics.databaseResponseTimeMs).toBeGreaterThan(
+        0,
+      );
       expect(result.performanceMetrics.validationTimeMs).toBeGreaterThan(0);
-      
+
       expect(prismaService.message.create).toHaveBeenCalledWith({
         data: {
           content: createMessageDto.content,
@@ -377,8 +381,10 @@ describe('MessagesService', () => {
         expect(result.retrievalMetrics).toBeDefined();
         expect(result.retrievalMetrics.totalCount).toBe(mockMessages.length);
         expect(result.retrievalMetrics.retrievalTimeMs).toBeGreaterThan(0);
-        expect(result.retrievalMetrics.databaseResponseTimeMs).toBeGreaterThan(0);
-        
+        expect(result.retrievalMetrics.databaseResponseTimeMs).toBeGreaterThan(
+          0,
+        );
+
         expect(prismaService.message.findMany).toHaveBeenCalledWith({
           where: { taskId: mockTaskId },
           orderBy: { createdAt: 'asc' },
@@ -396,9 +402,15 @@ describe('MessagesService', () => {
       });
 
       it('should validate task ID and throw BadRequestException for invalid input', async () => {
-        await expect(service.findEvery('')).rejects.toThrow('Invalid task ID provided');
-        await expect(service.findEvery(null as any)).rejects.toThrow('Invalid task ID provided');
-        await expect(service.findEvery('   ')).rejects.toThrow('Invalid task ID provided');
+        await expect(service.findEvery('')).rejects.toThrow(
+          'Invalid task ID provided',
+        );
+        await expect(service.findEvery(null as any)).rejects.toThrow(
+          'Invalid task ID provided',
+        );
+        await expect(service.findEvery('   ')).rejects.toThrow(
+          'Invalid task ID provided',
+        );
       });
 
       it('should handle database errors with retry logic', async () => {
@@ -424,8 +436,10 @@ describe('MessagesService', () => {
         expect(result.retrievalMetrics).toBeDefined();
         expect(result.retrievalMetrics.totalCount).toBe(mockMessages.length);
         expect(result.retrievalMetrics.retrievalTimeMs).toBeGreaterThan(0);
-        expect(result.retrievalMetrics.databaseResponseTimeMs).toBeGreaterThan(0);
-        
+        expect(result.retrievalMetrics.databaseResponseTimeMs).toBeGreaterThan(
+          0,
+        );
+
         expect(prismaService.message.findMany).toHaveBeenCalledWith({
           where: { taskId: mockTaskId },
           orderBy: { createdAt: 'asc' },
@@ -480,22 +494,22 @@ describe('MessagesService', () => {
 
       it('should validate pagination parameters', async () => {
         // Test invalid limit values
-        await expect(
-          service.findAll(mockTaskId, { limit: 0 }),
-        ).rejects.toThrow('Limit must be between 1 and 100');
+        await expect(service.findAll(mockTaskId, { limit: 0 })).rejects.toThrow(
+          'Limit must be between 1 and 100',
+        );
 
         await expect(
           service.findAll(mockTaskId, { limit: 101 }),
         ).rejects.toThrow('Limit must be between 1 and 100');
 
-        // Test invalid page values  
-        await expect(
-          service.findAll(mockTaskId, { page: 0 }),
-        ).rejects.toThrow('Page must be greater than 0');
+        // Test invalid page values
+        await expect(service.findAll(mockTaskId, { page: 0 })).rejects.toThrow(
+          'Page must be greater than 0',
+        );
 
-        await expect(
-          service.findAll(mockTaskId, { page: -1 }),
-        ).rejects.toThrow('Page must be greater than 0');
+        await expect(service.findAll(mockTaskId, { page: -1 })).rejects.toThrow(
+          'Page must be greater than 0',
+        );
       });
     });
 

@@ -359,7 +359,7 @@ export class JobStorage implements JobStorageInterface {
         error: job.error
           ? {
               ...job.error,
-              timestamp: new Date(job.error.timestamp),
+              timestamp: job.error.timestamp ? new Date(job.error.timestamp) : new Date(),
             }
           : undefined,
       };

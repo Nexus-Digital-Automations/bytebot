@@ -39,7 +39,8 @@ describe('SummariesService', () => {
   const mockSummary: Summary = {
     id: mockSummaryId,
     taskId: mockTaskId,
-    content: 'This is a comprehensive summary of the task progress. It contains detailed analysis and findings.',
+    content:
+      'This is a comprehensive summary of the task progress. It contains detailed analysis and findings.',
     parentId: null,
     metadata: { type: 'auto-generated', quality: 'high' },
     createdAt: new Date('2024-01-01T10:00:00.000Z'),
@@ -104,14 +105,18 @@ describe('SummariesService', () => {
       expect(result.performanceMetrics).toBeDefined();
 
       // Verify content metrics
-      expect(result.contentMetrics.characterCount).toBe(createSummaryDto.content.length);
+      expect(result.contentMetrics.characterCount).toBe(
+        createSummaryDto.content.length,
+      );
       expect(result.contentMetrics.wordCount).toBeGreaterThan(0);
       expect(result.contentMetrics.lineCount).toBeGreaterThan(0);
       expect(result.contentMetrics.readingTimeMinutes).toBeGreaterThan(0);
 
       // Verify performance metrics
       expect(result.performanceMetrics.processingTimeMs).toBeGreaterThan(0);
-      expect(result.performanceMetrics.databaseResponseTimeMs).toBeGreaterThan(0);
+      expect(result.performanceMetrics.databaseResponseTimeMs).toBeGreaterThan(
+        0,
+      );
 
       expect(prismaService.summary.create).toHaveBeenCalledWith({
         data: {
@@ -166,7 +171,8 @@ describe('SummariesService', () => {
           expectedReadingTime: 1,
         },
         {
-          content: 'This is a longer summary with multiple sentences. It contains more detailed information.',
+          content:
+            'This is a longer summary with multiple sentences. It contains more detailed information.',
           expectedWords: 15,
           expectedLines: 1,
           expectedReadingTime: 1,
@@ -198,18 +204,34 @@ describe('SummariesService', () => {
 
         expect(result.contentMetrics.wordCount).toBe(testCase.expectedWords);
         expect(result.contentMetrics.lineCount).toBe(testCase.expectedLines);
-        expect(result.contentMetrics.readingTimeMinutes).toBe(testCase.expectedReadingTime);
-        expect(result.contentMetrics.characterCount).toBe(testCase.content.length);
+        expect(result.contentMetrics.readingTimeMinutes).toBe(
+          testCase.expectedReadingTime,
+        );
+        expect(result.contentMetrics.characterCount).toBe(
+          testCase.content.length,
+        );
       }
     });
 
     describe('Input Validation', () => {
       it('should validate task ID requirements', async () => {
         const testCases = [
-          { taskId: '', error: 'Task ID is required and must be a non-empty string' },
-          { taskId: '   ', error: 'Task ID is required and must be a non-empty string' },
-          { taskId: null as any, error: 'Task ID is required and must be a non-empty string' },
-          { taskId: undefined as any, error: 'Task ID is required and must be a non-empty string' },
+          {
+            taskId: '',
+            error: 'Task ID is required and must be a non-empty string',
+          },
+          {
+            taskId: '   ',
+            error: 'Task ID is required and must be a non-empty string',
+          },
+          {
+            taskId: null as any,
+            error: 'Task ID is required and must be a non-empty string',
+          },
+          {
+            taskId: undefined as any,
+            error: 'Task ID is required and must be a non-empty string',
+          },
         ];
 
         for (const testCase of testCases) {
@@ -224,10 +246,22 @@ describe('SummariesService', () => {
 
       it('should validate content requirements', async () => {
         const testCases = [
-          { content: '', error: 'Summary content is required and must be a non-empty string' },
-          { content: '   ', error: 'Summary content is required and must be a non-empty string' },
-          { content: null as any, error: 'Summary content is required and must be a non-empty string' },
-          { content: undefined as any, error: 'Summary content is required and must be a non-empty string' },
+          {
+            content: '',
+            error: 'Summary content is required and must be a non-empty string',
+          },
+          {
+            content: '   ',
+            error: 'Summary content is required and must be a non-empty string',
+          },
+          {
+            content: null as any,
+            error: 'Summary content is required and must be a non-empty string',
+          },
+          {
+            content: undefined as any,
+            error: 'Summary content is required and must be a non-empty string',
+          },
         ];
 
         for (const testCase of testCases) {
@@ -253,8 +287,14 @@ describe('SummariesService', () => {
 
       it('should validate parent ID when provided', async () => {
         const testCases = [
-          { parentId: '', error: 'Parent ID must be a valid string if provided' },
-          { parentId: '   ', error: 'Parent ID must be a valid string if provided' },
+          {
+            parentId: '',
+            error: 'Parent ID must be a valid string if provided',
+          },
+          {
+            parentId: '   ',
+            error: 'Parent ID must be a valid string if provided',
+          },
         ];
 
         for (const testCase of testCases) {
@@ -286,7 +326,9 @@ describe('SummariesService', () => {
         const persistentError = new Error('Persistent database error');
         prismaService.summary.create.mockRejectedValue(persistentError);
 
-        await expect(service.create(createSummaryDto)).rejects.toThrow(persistentError);
+        await expect(service.create(createSummaryDto)).rejects.toThrow(
+          persistentError,
+        );
         expect(prismaService.summary.create).toHaveBeenCalledTimes(3); // Max retry attempts
       });
 
@@ -294,7 +336,9 @@ describe('SummariesService', () => {
         const constraintError = new Error('Unique constraint violation');
         prismaService.summary.create.mockRejectedValue(constraintError);
 
-        await expect(service.create(createSummaryDto)).rejects.toThrow(constraintError);
+        await expect(service.create(createSummaryDto)).rejects.toThrow(
+          constraintError,
+        );
       });
     });
   });
@@ -327,9 +371,9 @@ describe('SummariesService', () => {
         const testCases = ['', '   ', null, undefined];
 
         for (const invalidTaskId of testCases) {
-          await expect(service.findLatest(invalidTaskId as any)).rejects.toThrow(
-            'Invalid task ID provided',
-          );
+          await expect(
+            service.findLatest(invalidTaskId as any),
+          ).rejects.toThrow('Invalid task ID provided');
         }
       });
 
@@ -362,7 +406,9 @@ describe('SummariesService', () => {
         expect(result.totalCount).toBe(mockSummaries.length);
         expect(result.performanceMetrics).toBeDefined();
         expect(result.performanceMetrics.retrievalTimeMs).toBeGreaterThan(0);
-        expect(result.performanceMetrics.databaseResponseTimeMs).toBeGreaterThan(0);
+        expect(
+          result.performanceMetrics.databaseResponseTimeMs,
+        ).toBeGreaterThan(0);
 
         expect(prismaService.summary.findMany).toHaveBeenCalledWith({
           where: { taskId: mockTaskId },
@@ -642,7 +688,9 @@ describe('SummariesService', () => {
 
     it('should handle service degradation gracefully', async () => {
       // Simulate partial database failure
-      prismaService.summary.create.mockRejectedValue(new Error('Database unavailable'));
+      prismaService.summary.create.mockRejectedValue(
+        new Error('Database unavailable'),
+      );
       prismaService.summary.findMany.mockResolvedValue([]);
 
       await expect(

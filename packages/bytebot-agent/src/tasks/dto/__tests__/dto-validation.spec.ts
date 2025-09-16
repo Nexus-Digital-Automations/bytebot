@@ -22,7 +22,12 @@ import { CreateTaskDto, TaskFileDto } from '../create-task.dto';
 import { UpdateTaskDto } from '../update-task.dto';
 import { AddTaskMessageDto } from '../add-task-message.dto';
 import { TaskDto } from '../task.dto';
-import { TaskType, TaskPriority, TaskStatus, MessageRole } from '@prisma/client';
+import {
+  TaskType,
+  TaskPriority,
+  TaskStatus,
+  MessageRole,
+} from '@prisma/client';
 
 describe('DTO Validation Tests', () => {
   describe('CreateTaskDto', () => {
@@ -249,7 +254,9 @@ describe('DTO Validation Tests', () => {
 
         const fileError = errors[0].children![0];
         expect(fileError.constraints).toBeDefined();
-        expect(Object.keys(fileError.constraints || {})).toContain('isNotEmpty');
+        expect(Object.keys(fileError.constraints || {})).toContain(
+          'isNotEmpty',
+        );
       });
 
       it('should reject CreateTaskDto with file missing name', async () => {
@@ -266,9 +273,11 @@ describe('DTO Validation Tests', () => {
 
         const errors = await validate(dto);
         expect(errors).toHaveLength(1);
-        
+
         const fileValidation = errors[0].children![0];
-        const nameError = fileValidation.children?.find(child => child.property === 'name');
+        const nameError = fileValidation.children?.find(
+          (child) => child.property === 'name',
+        );
         expect(nameError).toBeDefined();
         expect(nameError?.constraints).toHaveProperty('isNotEmpty');
       });
@@ -287,9 +296,11 @@ describe('DTO Validation Tests', () => {
 
         const errors = await validate(dto);
         expect(errors).toHaveLength(1);
-        
+
         const fileValidation = errors[0].children![0];
-        const base64Error = fileValidation.children?.find(child => child.property === 'base64');
+        const base64Error = fileValidation.children?.find(
+          (child) => child.property === 'base64',
+        );
         expect(base64Error).toBeDefined();
         expect(base64Error?.constraints).toHaveProperty('isNotEmpty');
       });
@@ -309,9 +320,11 @@ describe('DTO Validation Tests', () => {
 
         const errors = await validate(dto);
         expect(errors).toHaveLength(1);
-        
+
         const fileValidation = errors[0].children![0];
-        const sizeError = fileValidation.children?.find(child => child.property === 'size');
+        const sizeError = fileValidation.children?.find(
+          (child) => child.property === 'size',
+        );
         expect(sizeError).toBeDefined();
         expect(sizeError?.constraints).toHaveProperty('isNumber');
       });
@@ -408,7 +421,7 @@ describe('DTO Validation Tests', () => {
 
     it('should validate status transitions', async () => {
       const validStatuses = Object.values(TaskStatus);
-      
+
       for (const status of validStatuses) {
         const dto = plainToClass(UpdateTaskDto, { status });
         const errors = await validate(dto);
@@ -458,7 +471,8 @@ describe('DTO Validation Tests', () => {
     });
 
     it('should handle messages with special characters', async () => {
-      const specialMessage = 'Message with émojis 🚀 and spécial çharaçters: @#$%^&*()';
+      const specialMessage =
+        'Message with émojis 🚀 and spécial çharaçters: @#$%^&*()';
       const dto = plainToClass(AddTaskMessageDto, {
         message: specialMessage,
       });
@@ -512,7 +526,11 @@ describe('DTO Validation Tests', () => {
         queuedAt: new Date('2024-01-01T11:59:00.000Z'),
         error: null,
         result: { success: true, output: 'Task completed successfully' },
-        model: { provider: 'anthropic', name: 'claude-3-opus', temperature: 0.8 },
+        model: {
+          provider: 'anthropic',
+          name: 'claude-3-opus',
+          temperature: 0.8,
+        },
       });
 
       const errors = await validate(dto);
@@ -555,7 +573,7 @@ describe('DTO Validation Tests', () => {
       };
 
       const dto = plainToClass(CreateTaskDto, plainObject);
-      
+
       expect(dto.description).toBe('Transform test');
       expect(dto.type).toBe('IMMEDIATE');
       expect(dto.priority).toBe('HIGH');
@@ -586,21 +604,22 @@ describe('DTO Validation Tests', () => {
 
       const parsedObject = JSON.parse(jsonString);
       const dto = plainToClass(CreateTaskDto, parsedObject);
-      
+
       const errors = await validate(dto);
       expect(errors).toHaveLength(0);
     });
 
     it('should handle concurrent validation of multiple DTOs', async () => {
-      const dtos = Array.from({ length: 100 }, (_, i) => 
+      const dtos = Array.from({ length: 100 }, (_, i) =>
         plainToClass(CreateTaskDto, {
           description: `Concurrent test task ${i}`,
           type: i % 2 === 0 ? TaskType.IMMEDIATE : TaskType.SCHEDULED,
-          priority: Object.values(TaskPriority)[i % Object.values(TaskPriority).length],
-        })
+          priority:
+            Object.values(TaskPriority)[i % Object.values(TaskPriority).length],
+        }),
       );
 
-      const validationPromises = dtos.map(dto => validate(dto));
+      const validationPromises = dtos.map((dto) => validate(dto));
       const results = await Promise.all(validationPromises);
 
       results.forEach((errors, index) => {
@@ -627,7 +646,7 @@ describe('DTO Validation Tests', () => {
       expect(errors.length).toBeGreaterThan(0);
 
       // Check that errors contain useful debugging information
-      errors.forEach(error => {
+      errors.forEach((error) => {
         expect(error.property).toBeDefined();
         expect(error.constraints).toBeDefined();
         expect(error.value).toBeDefined();
@@ -645,7 +664,7 @@ describe('DTO Validation Tests', () => {
           provider: 'anthropic',
           name: 'claude-3-opus',
           parameters: Object.fromEntries(
-            Array.from({ length: 1000 }, (_, i) => [`param${i}`, `value${i}`])
+            Array.from({ length: 1000 }, (_, i) => [`param${i}`, `value${i}`]),
           ),
         },
         files: Array.from({ length: 10 }, (_, i) => ({
@@ -681,7 +700,7 @@ describe('DTO Validation Tests', () => {
       for (const input of malformedInputs) {
         const dto = plainToClass(CreateTaskDto, input as any);
         const errors = await validate(dto);
-        
+
         // Should either pass (for valid structures) or provide meaningful errors
         if (errors.length > 0) {
           expect(errors[0]).toHaveProperty('property');

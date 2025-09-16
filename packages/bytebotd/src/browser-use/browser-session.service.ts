@@ -102,8 +102,9 @@ export class BrowserSessionService {
         }
 
         // Make first tab active
-        if (session.tabs.length > 0 && session.tabs[0]) {
-          session.activeTabId = session.tabs[0].tabId;
+        const firstTab = session.tabs.length > 0 ? session.tabs[0] : null;
+        if (firstTab) {
+          session.activeTabId = firstTab.tabId;
         }
       } else {
         // Create default blank tab
@@ -303,11 +304,13 @@ export class BrowserSessionService {
     // If closed tab was active, make another tab active
     if (
       session.activeTabId === tabId &&
-      session.tabs.length > 0 &&
-      session.tabs[0]
+      session.tabs.length > 0
     ) {
-      session.activeTabId = session.tabs[0].tabId;
-      session.tabs[0].active = true;
+      const firstTab = session.tabs[0];
+      if (firstTab) {
+        session.activeTabId = firstTab.tabId;
+        firstTab.active = true;
+      }
     } else if (session.tabs.length === 0) {
       session.activeTabId = '';
     }

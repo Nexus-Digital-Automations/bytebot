@@ -187,7 +187,9 @@ describe('Task Lifecycle Integration Tests', () => {
 
       const mockMessage: Message = {
         id: `message-${taskId}`,
-        content: [{ type: 'text', text: createDto.description }] as Prisma.JsonValue,
+        content: [
+          { type: 'text', text: createDto.description },
+        ] as Prisma.JsonValue,
         role: MessageRole.USER,
         taskId,
         summaryId: null,
@@ -221,7 +223,10 @@ describe('Task Lifecycle Integration Tests', () => {
 
       const updatedTask = await tasksService.update(taskId, runningUpdate);
       expect(updatedTask.status).toBe(TaskStatus.RUNNING);
-      expect(mockTasksGateway.emitTaskUpdate).toHaveBeenCalledWith(taskId, updatedTask);
+      expect(mockTasksGateway.emitTaskUpdate).toHaveBeenCalledWith(
+        taskId,
+        updatedTask,
+      );
 
       // 4. Add progress messages during execution
       const progressMessageDto: AddTaskMessageDto = {
@@ -252,10 +257,14 @@ describe('Task Lifecycle Integration Tests', () => {
       expect(finalTask.result).toEqual(completedUpdate.result);
 
       // Verify task.completed event was emitted
-      expect(mockTasksGateway.emitTaskUpdate).toHaveBeenCalledWith(taskId, finalTask);
+      expect(mockTasksGateway.emitTaskUpdate).toHaveBeenCalledWith(
+        taskId,
+        finalTask,
+      );
 
       // 6. Create summary after completion
-      const summaryContent = 'Task completed successfully with high quality output.';
+      const summaryContent =
+        'Task completed successfully with high quality output.';
       const mockSummary: Summary = {
         id: `summary-${taskId}`,
         taskId,
@@ -338,8 +347,8 @@ describe('Task Lifecycle Integration Tests', () => {
 
       // Setup mocks
       mockPrismaService.task.create.mockResolvedValue(mockTask);
-      mockPrismaService.file.create.mockImplementation((data) => 
-        Promise.resolve(mockFiles[0])
+      mockPrismaService.file.create.mockImplementation((data) =>
+        Promise.resolve(mockFiles[0]),
       );
       mockPrismaService.message.create.mockResolvedValue({
         id: `file-message-${taskId}`,
@@ -434,10 +443,10 @@ describe('Task Lifecycle Integration Tests', () => {
       const takeOverSpy = jest.spyOn(tasksService, 'takeOver');
       const takenOverTask = { ...mockTask, control: MessageRole.USER };
       takeOverSpy.mockResolvedValue(takenOverTask);
-      
-      mockPrismaService.task.update.mockResolvedValue({ 
-        ...mockTask, 
-        status: TaskStatus.NEEDS_HELP 
+
+      mockPrismaService.task.update.mockResolvedValue({
+        ...mockTask,
+        status: TaskStatus.NEEDS_HELP,
       });
 
       await tasksService.update(taskId, needsHelpUpdate);
@@ -608,11 +617,11 @@ describe('Task Lifecycle Integration Tests', () => {
         {
           id: `msg-3-${taskId}`,
           content: [
-            { 
+            {
               type: 'tool_result',
               tool_use_id: 'tool-123',
-              content: 'Tool execution successful'
-            }
+              content: 'Tool execution successful',
+            },
           ],
           role: MessageRole.USER,
           taskId,
@@ -630,18 +639,23 @@ describe('Task Lifecycle Integration Tests', () => {
       expect(allMessages.retrievalMetrics.totalCount).toBe(3);
 
       // 2. Process messages for UI display
-      const processedMessages = await messagesService.findProcessedMessages(taskId);
+      const processedMessages =
+        await messagesService.findProcessedMessages(taskId);
       expect(processedMessages.groupedMessages).toBeDefined();
       expect(processedMessages.processingMetrics).toBeDefined();
 
       // 3. Create summary from conversation
-      const conversationSummary = 'User requested assistance, assistant provided help, tools executed successfully.';
+      const conversationSummary =
+        'User requested assistance, assistant provided help, tools executed successfully.';
       const mockSummary: Summary = {
         id: `conv-summary-${taskId}`,
         taskId,
         content: conversationSummary,
         parentId: null,
-        metadata: { type: 'conversation-summary', messageCount: 3 } as Prisma.JsonValue,
+        metadata: {
+          type: 'conversation-summary',
+          messageCount: 3,
+        } as Prisma.JsonValue,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -655,17 +669,20 @@ describe('Task Lifecycle Integration Tests', () => {
       });
 
       expect(summary.contentMetrics.wordCount).toBeGreaterThan(0);
-      expect(summary.contentMetrics.characterCount).toBe(conversationSummary.length);
+      expect(summary.contentMetrics.characterCount).toBe(
+        conversationSummary.length,
+      );
 
       // 4. Attach summary to messages
-      const messageIds = messages.map(m => m.id);
+      const messageIds = messages.map((m) => m.id);
       mockPrismaService.message.updateMany.mockResolvedValue({ count: 3 });
 
       await messagesService.attachSummary(taskId, summary.id, messageIds);
 
       // 5. Verify unsummarized messages (should be empty after attachment)
       mockPrismaService.message.findMany.mockResolvedValue([]);
-      const unsummarizedMessages = await messagesService.findUnsummarized(taskId);
+      const unsummarizedMessages =
+        await messagesService.findUnsummarized(taskId);
       expect(unsummarizedMessages).toHaveLength(0);
     });
   });
@@ -713,7 +730,7 @@ describe('Task Lifecycle Integration Tests', () => {
           description: task.description,
           type: task.type,
           priority: task.priority,
-        })
+        }),
       );
 
       const startTime = Date.now();
@@ -805,7 +822,9 @@ describe('Task Lifecycle Integration Tests', () => {
 
       expect(results).toHaveLength(operationCount);
       expect(endTime - startTime).toBeLessThan(10000); // Should complete within 10 seconds
-      expect(mockTasksGateway.emitNewMessage).toHaveBeenCalledTimes(operationCount);
+      expect(mockTasksGateway.emitNewMessage).toHaveBeenCalledTimes(
+        operationCount,
+      );
     });
   });
 

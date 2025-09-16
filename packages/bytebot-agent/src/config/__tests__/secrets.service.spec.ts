@@ -22,25 +22,28 @@ describe('SecretsService', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    
+
     testSecretsDir = '/tmp/test-secrets';
     process.env.LOCAL_SECRETS_DIR = testSecretsDir;
-    process.env.LOCAL_SECRETS_ENCRYPTION_KEY = 'test-encryption-key-32-chars-long';
+    process.env.LOCAL_SECRETS_ENCRYPTION_KEY =
+      'test-encryption-key-32-chars-long';
 
     mockConfigService = {
       get: jest.fn(),
     } as any;
 
     // Setup default config values
-    mockConfigService.get.mockImplementation((key: string, defaultValue?: any) => {
-      const mockValues = {
-        'LOCAL_SECRETS_DIR': testSecretsDir,
-        'LOCAL_SECRETS_ENCRYPTION_KEY': 'test-key',
-        'SECRETS_ENCRYPTION_ALGORITHM': 'aes-256-gcm',
-        'SECRETS_FILE_PERMISSIONS': '600',
-      };
-      return mockValues[key] || defaultValue;
-    });
+    mockConfigService.get.mockImplementation(
+      (key: string, defaultValue?: any) => {
+        const mockValues = {
+          LOCAL_SECRETS_DIR: testSecretsDir,
+          LOCAL_SECRETS_ENCRYPTION_KEY: 'test-key',
+          SECRETS_ENCRYPTION_ALGORITHM: 'aes-256-gcm',
+          SECRETS_FILE_PERMISSIONS: '600',
+        };
+        return mockValues[key] || defaultValue;
+      },
+    );
   });
 
   afterEach(() => {
@@ -76,22 +79,25 @@ describe('SecretsService', () => {
   describe('Environment Variable Integration', () => {
     it('should fall back to environment variables when secrets not in storage', () => {
       process.env.TEST_SECRET = 'env-value';
-      
+
       // Test fallback mechanism
       expect(process.env.TEST_SECRET).toBe('env-value');
     });
 
     it('should sanitize environment variable values', () => {
       process.env.TEST_DIRTY_VAL = 'clean\x00value\x01test';
-      
-      const cleanValue = process.env.TEST_DIRTY_VAL?.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+
+      const cleanValue = process.env.TEST_DIRTY_VAL?.replace(
+        /[\u0000-\u001F\u007F-\u009F]/g,
+        '',
+      );
       expect(cleanValue).toBe('cleanvaluetest');
     });
 
     it('should limit environment variable length', () => {
       const longValue = 'x'.repeat(5000);
       process.env.LONG_SECRET = longValue;
-      
+
       const limitedValue = process.env.LONG_SECRET?.substring(0, 4096);
       expect(limitedValue?.length).toBe(4096);
     });
@@ -120,7 +126,7 @@ describe('SecretsService', () => {
 
     it('should prevent path traversal attacks', () => {
       const maliciousPath = '../../../etc/passwd';
-      
+
       // Should not allow path traversal
       expect(maliciousPath.includes('..')).toBe(true);
       // Implementation would sanitize this
@@ -160,7 +166,7 @@ describe('SecretsService', () => {
       const password = 'test-password';
       const salt = 'salt';
       const keyLength = 32;
-      
+
       const key = crypto.scryptSync(password, salt, keyLength);
       expect(key).toHaveLength(keyLength);
     });
@@ -175,7 +181,7 @@ describe('SecretsService', () => {
     it('should validate category names', () => {
       const validCategory = 'api-keys';
       const invalidCategory = '../invalid';
-      
+
       expect(validCategory.match(/^[a-z0-9-]+$/)).toBeTruthy();
       expect(invalidCategory.includes('..')).toBe(true);
     });
@@ -201,23 +207,23 @@ describe('SecretsService', () => {
 
     it('should log secret operations for audit', () => {
       const logSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       // Secret operation would log here
       console.log('Secret accessed: api-keys/test-key');
-      
+
       expect(logSpy).toHaveBeenCalled();
       logSpy.mockRestore();
     });
 
     it('should not log secret values', () => {
       const logSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       const secretValue = 'super-secret-value';
       // Should log access but not value
       console.log('Secret accessed: api-keys/test-key [REDACTED]');
-      
+
       expect(logSpy).not.toHaveBeenCalledWith(
-        expect.stringContaining(secretValue)
+        expect.stringContaining(secretValue),
       );
       logSpy.mockRestore();
     });
@@ -225,7 +231,7 @@ describe('SecretsService', () => {
     it('should track error rates for monitoring', () => {
       let errorCount = 0;
       let totalAccess = 0;
-      
+
       // Simulate operations
       totalAccess++;
       try {
@@ -233,7 +239,7 @@ describe('SecretsService', () => {
       } catch (error) {
         errorCount++;
       }
-      
+
       const errorRate = (errorCount / totalAccess) * 100;
       expect(errorRate).toBe(100); // 100% error rate in this test
     });
@@ -309,7 +315,7 @@ describe('SecretsService', () => {
   describe('Compliance and Auditing', () => {
     it('should log all secret operations', () => {
       const operations = ['create', 'read', 'update', 'delete'];
-      operations.forEach(op => {
+      operations.forEach((op) => {
         expect(op).toMatch(/^(create|read|update|delete)$/);
       });
     });
@@ -323,7 +329,7 @@ describe('SecretsService', () => {
         timestamp: new Date().toISOString(),
         success: true,
       };
-      
+
       expect(auditEntry).toHaveProperty('userId');
       expect(auditEntry).toHaveProperty('timestamp');
     });
@@ -359,14 +365,14 @@ describe('SecretsService', () => {
     it('should not expose sensitive information in errors', () => {
       const secretValue = 'super-secret-123';
       const error = new Error('Operation failed');
-      
+
       expect(error.message).not.toContain(secretValue);
     });
 
     it('should implement retry logic for transient failures', () => {
       let attempts = 0;
       const maxAttempts = 3;
-      
+
       const retryOperation = () => {
         attempts++;
         if (attempts < maxAttempts) {
@@ -374,7 +380,7 @@ describe('SecretsService', () => {
         }
         return 'success';
       };
-      
+
       let result;
       for (let i = 0; i < maxAttempts; i++) {
         try {
@@ -384,7 +390,7 @@ describe('SecretsService', () => {
           if (i === maxAttempts - 1) throw error;
         }
       }
-      
+
       expect(result).toBe('success');
       expect(attempts).toBe(maxAttempts);
     });

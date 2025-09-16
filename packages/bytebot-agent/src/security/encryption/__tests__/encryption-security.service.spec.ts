@@ -1,9 +1,9 @@
 /**
  * Encryption Security Service Test Suite - Comprehensive Cryptographic Testing
- * 
+ *
  * Tests all encryption, decryption, key management, TLS, and cryptographic operations
  * Validates security boundaries, performance, and enterprise-grade security requirements
- * 
+ *
  * @author Claude Code
  * @version 2.0.0
  * @since Security Testing Phase
@@ -54,12 +54,18 @@ Object.defineProperty(crypto, 'randomBytes', { value: mockRandomBytes });
 Object.defineProperty(crypto, 'pbkdf2Sync', { value: mockPbkdf2Sync });
 Object.defineProperty(crypto, 'hkdfSync', { value: mockHkdfSync });
 Object.defineProperty(crypto, 'createCipheriv', { value: mockCreateCipheriv });
-Object.defineProperty(crypto, 'createDecipheriv', { value: mockCreateDecipheriv });
+Object.defineProperty(crypto, 'createDecipheriv', {
+  value: mockCreateDecipheriv,
+});
 Object.defineProperty(crypto, 'createHash', { value: mockCreateHash });
 Object.defineProperty(crypto, 'createHmac', { value: mockCreateHmac });
-Object.defineProperty(crypto, 'timingSafeEqual', { value: mockTimingSafeEqual });
+Object.defineProperty(crypto, 'timingSafeEqual', {
+  value: mockTimingSafeEqual,
+});
 Object.defineProperty(crypto, 'randomUUID', { value: mockRandomUUID });
-Object.defineProperty(crypto, 'X509Certificate', { value: mockX509Certificate });
+Object.defineProperty(crypto, 'X509Certificate', {
+  value: mockX509Certificate,
+});
 
 describe('EncryptionSecurityService', () => {
   let service: EncryptionSecurityService;
@@ -100,9 +106,15 @@ describe('EncryptionSecurityService', () => {
     };
 
     // Configure crypto mocks with realistic responses
-    mockRandomBytes.mockReturnValue(Buffer.from('random-bytes-32-chars-test-data'));
-    mockPbkdf2Sync.mockReturnValue(Buffer.from('derived-key-32-chars-test-data-'));
-    mockHkdfSync.mockReturnValue(Buffer.from('hkdf-key-32-chars-test-data-here'));
+    mockRandomBytes.mockReturnValue(
+      Buffer.from('random-bytes-32-chars-test-data'),
+    );
+    mockPbkdf2Sync.mockReturnValue(
+      Buffer.from('derived-key-32-chars-test-data-'),
+    );
+    mockHkdfSync.mockReturnValue(
+      Buffer.from('hkdf-key-32-chars-test-data-here'),
+    );
     mockRandomUUID.mockReturnValue('test-uuid-1234-5678-9012-345678901234');
     mockTimingSafeEqual.mockReturnValue(true);
 
@@ -127,12 +139,16 @@ describe('EncryptionSecurityService', () => {
     // Mock hash operations
     const mockHash = {
       update: jest.fn().mockReturnThis(),
-      digest: jest.fn().mockReturnValue(Buffer.from('hash-result-32-chars-test-data')),
+      digest: jest
+        .fn()
+        .mockReturnValue(Buffer.from('hash-result-32-chars-test-data')),
     };
 
     const mockHmac = {
       update: jest.fn().mockReturnThis(),
-      digest: jest.fn().mockReturnValue(Buffer.from('hmac-result-32-chars-test-data')),
+      digest: jest
+        .fn()
+        .mockReturnValue(Buffer.from('hmac-result-32-chars-test-data')),
     };
 
     mockCreateHash.mockReturnValue(mockHash);
@@ -140,7 +156,8 @@ describe('EncryptionSecurityService', () => {
 
     // Mock X509Certificate
     const mockCertificate = {
-      subject: 'CN=test.example.com,C=US,ST=CA,L=San Francisco,O=Test Org,OU=IT',
+      subject:
+        'CN=test.example.com,C=US,ST=CA,L=San Francisco,O=Test Org,OU=IT',
       issuer: 'CN=Test CA,C=US,ST=CA,L=San Francisco,O=Test CA',
       validFrom: '2023-01-01T00:00:00.000Z',
       validTo: '2025-01-01T00:00:00.000Z',
@@ -175,7 +192,9 @@ describe('EncryptionSecurityService', () => {
       .setLogger(mockLogger as any)
       .compile();
 
-    configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
+    configService = module.get<ConfigService>(
+      ConfigService,
+    ) as jest.Mocked<ConfigService>;
     service = module.get<EncryptionSecurityService>(EncryptionSecurityService);
   });
 
@@ -188,7 +207,9 @@ describe('EncryptionSecurityService', () => {
   describe('Service Initialization', () => {
     it('should be defined and properly initialized', () => {
       expect(service).toBeDefined();
-      expect(mockLogger.log).toHaveBeenCalledWith('Encryption Security Service initializing...');
+      expect(mockLogger.log).toHaveBeenCalledWith(
+        'Encryption Security Service initializing...',
+      );
       expect(mockLogger.log).toHaveBeenCalledWith(
         'Encryption Security Service initialized successfully',
         expect.objectContaining({
@@ -196,14 +217,23 @@ describe('EncryptionSecurityService', () => {
           mutualTLSEnabled: false,
           defaultAlgorithm: EncryptionAlgorithm.AES_256_GCM,
           keyRotationEnabled: true,
-        })
+        }),
       );
     });
 
     it('should load TLS configuration from ConfigService', () => {
-      expect(configService.get).toHaveBeenCalledWith('encryption.tls.version', 'TLSv1.3');
-      expect(configService.get).toHaveBeenCalledWith('encryption.tls.enableMutualTLS', false);
-      expect(configService.get).toHaveBeenCalledWith('encryption.random.useHardwareRandom', false);
+      expect(configService.get).toHaveBeenCalledWith(
+        'encryption.tls.version',
+        'TLSv1.3',
+      );
+      expect(configService.get).toHaveBeenCalledWith(
+        'encryption.tls.enableMutualTLS',
+        false,
+      );
+      expect(configService.get).toHaveBeenCalledWith(
+        'encryption.random.useHardwareRandom',
+        false,
+      );
     });
 
     it('should initialize master key and salt', () => {
@@ -212,7 +242,7 @@ describe('EncryptionSecurityService', () => {
         expect.any(Buffer),
         100000,
         32,
-        'sha512'
+        'sha512',
       );
       expect(mockRandomBytes).toHaveBeenCalledWith(32);
     });
@@ -237,23 +267,25 @@ describe('EncryptionSecurityService', () => {
 
     it('should encrypt Buffer data with password-based key derivation', () => {
       const dataBuffer = Buffer.from(testData);
-      
+
       const result = service.encryptData(
         dataBuffer,
         testPassword,
         EncryptionAlgorithm.AES_256_GCM,
-        KeyDerivationFunction.PBKDF2
+        KeyDerivationFunction.PBKDF2,
       );
 
       expect(result).toBeDefined();
-      expect(result.keyDerivationParams?.function).toBe(KeyDerivationFunction.PBKDF2);
+      expect(result.keyDerivationParams?.function).toBe(
+        KeyDerivationFunction.PBKDF2,
+      );
       expect(result.keyDerivationParams?.iterations).toBe(100000);
       expect(mockPbkdf2Sync).toHaveBeenCalledWith(
         testPassword,
         expect.any(Buffer),
         100000,
         32,
-        'sha512'
+        'sha512',
       );
     });
 
@@ -276,10 +308,12 @@ describe('EncryptionSecurityService', () => {
         testData,
         testPassword,
         EncryptionAlgorithm.AES_256_GCM,
-        KeyDerivationFunction.SCRYPT
+        KeyDerivationFunction.SCRYPT,
       );
 
-      expect(result.keyDerivationParams?.function).toBe(KeyDerivationFunction.SCRYPT);
+      expect(result.keyDerivationParams?.function).toBe(
+        KeyDerivationFunction.SCRYPT,
+      );
     });
 
     it('should handle encryption errors gracefully', () => {
@@ -295,7 +329,7 @@ describe('EncryptionSecurityService', () => {
         expect.stringContaining('Encryption operation failed'),
         expect.objectContaining({
           error: 'Cipher creation failed',
-        })
+        }),
       );
     });
 
@@ -307,7 +341,7 @@ describe('EncryptionSecurityService', () => {
         expect.objectContaining({
           algorithm: EncryptionAlgorithm.AES_256_GCM,
           dataLength: testData.length,
-        })
+        }),
       );
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -315,7 +349,7 @@ describe('EncryptionSecurityService', () => {
         expect.objectContaining({
           encryptedSize: expect.any(Number),
           processingTimeMs: expect.any(String),
-        })
+        }),
       );
     });
   });
@@ -362,7 +396,7 @@ describe('EncryptionSecurityService', () => {
         mockDecryptionParams.salt,
         100000,
         32,
-        'sha512'
+        'sha512',
       );
     });
 
@@ -380,7 +414,7 @@ describe('EncryptionSecurityService', () => {
         expect.any(Buffer), // master key
         mockDecryptionParams.salt,
         `bytebot-encryption-${mockDecryptionParams.algorithm}`,
-        32
+        32,
       );
     });
 
@@ -414,7 +448,7 @@ describe('EncryptionSecurityService', () => {
         expect.objectContaining({
           algorithm: mockDecryptionParams.algorithm,
           encryptedSize: mockDecryptionParams.encrypted.length,
-        })
+        }),
       );
     });
   });
@@ -431,7 +465,11 @@ describe('EncryptionSecurityService', () => {
     });
 
     it('should generate secure hash with salt', () => {
-      const result = service.generateSecureHash(testData, HashAlgorithm.SHA512, testSalt);
+      const result = service.generateSecureHash(
+        testData,
+        HashAlgorithm.SHA512,
+        testSalt,
+      );
 
       expect(result).toBeInstanceOf(Buffer);
       expect(mockCreateHash).toHaveBeenCalledWith(HashAlgorithm.SHA512);
@@ -468,7 +506,7 @@ describe('EncryptionSecurityService', () => {
       expect(result).toBe(true);
       expect(mockTimingSafeEqual).toHaveBeenCalledWith(
         signature,
-        expect.any(Buffer)
+        expect.any(Buffer),
       );
     });
   });
@@ -496,7 +534,7 @@ describe('EncryptionSecurityService', () => {
         expect.objectContaining({
           error: 'Random generation failed',
           size: 32,
-        })
+        }),
       );
     });
   });
@@ -544,7 +582,7 @@ describe('EncryptionSecurityService', () => {
           issuer: 'Test CA',
           isValid: expect.any(Boolean),
           daysUntilExpiry: expect.any(Number),
-        })
+        }),
       );
     });
   });
@@ -575,11 +613,15 @@ describe('EncryptionSecurityService', () => {
     });
 
     it('should read certificate files when paths provided', () => {
-      configService.get.mockImplementation((key: string, defaultValue?: any) => {
-        if (key === 'encryption.tls.certificatePath') return '/path/to/cert.pem';
-        if (key === 'encryption.tls.privateKeyPath') return '/path/to/key.pem';
-        return defaultConfig[key] ?? defaultValue;
-      });
+      configService.get.mockImplementation(
+        (key: string, defaultValue?: any) => {
+          if (key === 'encryption.tls.certificatePath')
+            return '/path/to/cert.pem';
+          if (key === 'encryption.tls.privateKeyPath')
+            return '/path/to/key.pem';
+          return defaultConfig[key] ?? defaultValue;
+        },
+      );
 
       // Create new service instance with certificate paths
       const newService = new EncryptionSecurityService(configService);
@@ -601,7 +643,7 @@ describe('EncryptionSecurityService', () => {
           maxVersion: expect.any(String),
           mutualTLS: expect.any(Boolean),
           cipherCount: expect.any(Number),
-        })
+        }),
       );
     });
   });
@@ -609,7 +651,7 @@ describe('EncryptionSecurityService', () => {
   describe('Key Rotation', () => {
     beforeEach(() => {
       // Mock setInterval to prevent actual scheduling
-      jest.spyOn(global, 'setInterval').mockImplementation(() => ({} as any));
+      jest.spyOn(global, 'setInterval').mockImplementation(() => ({}) as any);
     });
 
     afterEach(() => {
@@ -621,7 +663,7 @@ describe('EncryptionSecurityService', () => {
 
       expect(mockLogger.log).toHaveBeenCalledWith(
         'Starting key rotation process',
-        { keyId: undefined }
+        { keyId: undefined },
       );
 
       expect(mockLogger.log).toHaveBeenCalledWith(
@@ -629,7 +671,7 @@ describe('EncryptionSecurityService', () => {
         expect.objectContaining({
           keyId: undefined,
           processingTimeMs: expect.any(String),
-        })
+        }),
       );
     });
 
@@ -648,7 +690,7 @@ describe('EncryptionSecurityService', () => {
         expect.objectContaining({
           keyId: 'test-key-id',
           error: 'Key rotation failed',
-        })
+        }),
       );
     });
   });
@@ -705,7 +747,7 @@ describe('EncryptionSecurityService', () => {
 
       // Verify sensitive data is not logged in plaintext
       expect(mockLogger.debug).not.toHaveBeenCalledWith(
-        expect.stringContaining(sensitiveData)
+        expect.stringContaining(sensitiveData),
       );
 
       // Verify encryption result doesn't expose plaintext

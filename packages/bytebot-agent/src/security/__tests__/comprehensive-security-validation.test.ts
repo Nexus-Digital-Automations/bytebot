@@ -30,6 +30,7 @@ import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cache } from 'cache-manager';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
@@ -143,6 +144,14 @@ describe('Comprehensive Security Validation', () => {
       wrap: jest.fn(),
     } as any;
 
+    // Mock EventEmitter2
+    const mockEventEmitter = {
+      emit: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+      removeAllListeners: jest.fn(),
+    };
+
     // Create testing module
     module = await Test.createTestingModule({
       providers: [
@@ -154,6 +163,7 @@ describe('Comprehensive Security Validation', () => {
         { provide: JwtService, useValue: mockJwtService },
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: CACHE_MANAGER, useValue: mockCacheManager },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 

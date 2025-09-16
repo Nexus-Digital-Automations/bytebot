@@ -734,7 +734,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
         },
       });
 
-      const sessionId = response.data.id;
+      const sessionId = response.data.id ?? `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
       
       // Store session context
       this.conversationSessions.set(context.userId, {

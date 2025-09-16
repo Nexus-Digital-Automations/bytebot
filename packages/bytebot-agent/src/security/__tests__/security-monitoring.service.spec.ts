@@ -1,9 +1,9 @@
 /**
  * Security Monitoring Service Test Suite - Comprehensive Threat Detection Testing
- * 
+ *
  * Tests security event processing, threat detection, automated responses, and monitoring capabilities
  * Validates real-time security monitoring, ML-based anomaly detection, and incident response
- * 
+ *
  * @author Claude Code
  * @version 1.0.0
  * @since Security Testing Phase
@@ -121,9 +121,15 @@ describe('SecurityMonitoringService', () => {
       .setLogger(mockLogger as any)
       .compile();
 
-    configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
-    eventEmitter = module.get<EventEmitter2>(EventEmitter2) as jest.Mocked<EventEmitter2>;
-    prismaService = module.get<PrismaService>(PrismaService) as jest.Mocked<PrismaService>;
+    configService = module.get<ConfigService>(
+      ConfigService,
+    ) as jest.Mocked<ConfigService>;
+    eventEmitter = module.get<EventEmitter2>(
+      EventEmitter2,
+    ) as jest.Mocked<EventEmitter2>;
+    prismaService = module.get<PrismaService>(
+      PrismaService,
+    ) as jest.Mocked<PrismaService>;
     service = module.get<SecurityMonitoringService>(SecurityMonitoringService);
   });
 
@@ -137,14 +143,23 @@ describe('SecurityMonitoringService', () => {
     it('should be defined and properly initialized', () => {
       expect(service).toBeDefined();
       expect(mockLogger.log).toHaveBeenCalledWith(
-        'Security Monitoring Service initialized successfully'
+        'Security Monitoring Service initialized successfully',
       );
     });
 
     it('should load configuration from ConfigService', () => {
-      expect(configService.get).toHaveBeenCalledWith('security.monitoring.enabled', true);
-      expect(configService.get).toHaveBeenCalledWith('security.monitoring.autoResponse.enabled', true);
-      expect(configService.get).toHaveBeenCalledWith('security.monitoring.riskScoreThreshold', 75);
+      expect(configService.get).toHaveBeenCalledWith(
+        'security.monitoring.enabled',
+        true,
+      );
+      expect(configService.get).toHaveBeenCalledWith(
+        'security.monitoring.autoResponse.enabled',
+        true,
+      );
+      expect(configService.get).toHaveBeenCalledWith(
+        'security.monitoring.riskScoreThreshold',
+        75,
+      );
     });
 
     it('should set up event listeners during initialization', () => {
@@ -182,7 +197,7 @@ describe('SecurityMonitoringService', () => {
           eventId: mockSecurityEvent.eventId,
           type: mockSecurityEvent.type,
           severity: mockSecurityEvent.severity,
-        })
+        }),
       );
     });
 
@@ -191,7 +206,7 @@ describe('SecurityMonitoringService', () => {
 
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'security.event.processed',
-        mockSecurityEvent
+        mockSecurityEvent,
       );
     });
 
@@ -214,18 +229,18 @@ describe('SecurityMonitoringService', () => {
 
     it('should handle database errors gracefully', async () => {
       prismaService.securityEvent.create.mockRejectedValueOnce(
-        new Error('Database connection failed')
+        new Error('Database connection failed'),
       );
 
-      await expect(service.processSecurityEvent(mockSecurityEvent)).rejects.toThrow(
-        'Database connection failed'
-      );
+      await expect(
+        service.processSecurityEvent(mockSecurityEvent),
+      ).rejects.toThrow('Database connection failed');
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to process security event',
         expect.objectContaining({
           error: 'Database connection failed',
-        })
+        }),
       );
     });
   });
@@ -246,7 +261,7 @@ describe('SecurityMonitoringService', () => {
       }
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Potential brute force attack detected')
+        expect.stringContaining('Potential brute force attack detected'),
       );
     });
 
@@ -265,7 +280,7 @@ describe('SecurityMonitoringService', () => {
       await service.processSecurityEvent(rateLimitEvent);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Rate limit violation detected')
+        expect.stringContaining('Rate limit violation detected'),
       );
     });
 
@@ -284,7 +299,7 @@ describe('SecurityMonitoringService', () => {
       await service.processSecurityEvent(injectionEvent);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Critical security event detected')
+        expect.stringContaining('Critical security event detected'),
       );
     });
 
@@ -332,7 +347,7 @@ describe('SecurityMonitoringService', () => {
         expect.objectContaining({
           eventId: criticalEvent.eventId,
           responseLevel: 'critical',
-        })
+        }),
       );
     });
 
@@ -352,7 +367,7 @@ describe('SecurityMonitoringService', () => {
         expect.objectContaining({
           sourceIp: '10.0.0.100',
           duration: expect.any(Number),
-        })
+        }),
       );
     });
 
@@ -381,7 +396,7 @@ describe('SecurityMonitoringService', () => {
         'security.response.quarantine',
         expect.objectContaining({
           userId: 'compromised-user-123',
-        })
+        }),
       );
     });
 
@@ -400,7 +415,7 @@ describe('SecurityMonitoringService', () => {
         expect.objectContaining({
           level: 'critical',
           requiresImmediate: true,
-        })
+        }),
       );
     });
   });
@@ -432,7 +447,11 @@ describe('SecurityMonitoringService', () => {
     it('should track threat trends over time', async () => {
       const trendData = [
         { date: new Date(), count: 10, avgRiskScore: 45 },
-        { date: new Date(Date.now() - 24 * 60 * 60 * 1000), count: 15, avgRiskScore: 52 },
+        {
+          date: new Date(Date.now() - 24 * 60 * 60 * 1000),
+          count: 15,
+          avgRiskScore: 52,
+        },
       ];
 
       prismaService.securityEvent.groupBy.mockResolvedValue(trendData as any);
@@ -464,7 +483,7 @@ describe('SecurityMonitoringService', () => {
       await service.processSecurityEvent(anomalousEvent);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Behavioral anomaly detected')
+        expect.stringContaining('Behavioral anomaly detected'),
       );
     });
 
@@ -562,7 +581,9 @@ describe('SecurityMonitoringService', () => {
       }));
 
       const startTime = Date.now();
-      const promises = events.map(event => service.processSecurityEvent(event));
+      const promises = events.map((event) =>
+        service.processSecurityEvent(event),
+      );
       await Promise.all(promises);
       const endTime = Date.now();
 
@@ -589,14 +610,16 @@ describe('SecurityMonitoringService', () => {
   describe('Error Handling and Resilience', () => {
     it('should handle service unavailability gracefully', async () => {
       prismaService.securityEvent.create.mockRejectedValue(
-        new Error('Service unavailable')
+        new Error('Service unavailable'),
       );
 
       // Should not throw, but log error
-      await expect(service.processSecurityEvent(mockSecurityEvent)).rejects.toThrow();
+      await expect(
+        service.processSecurityEvent(mockSecurityEvent),
+      ).rejects.toThrow();
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to process security event')
+        expect.stringContaining('Failed to process security event'),
       );
     });
 
@@ -623,38 +646,42 @@ describe('SecurityMonitoringService', () => {
       };
 
       await expect(service.processSecurityEvent(invalidEvent)).rejects.toThrow(
-        'Invalid security event data'
+        'Invalid security event data',
       );
     });
   });
 
   describe('Configuration and Customization', () => {
     it('should respect monitoring configuration settings', async () => {
-      configService.get.mockImplementation((key: string, defaultValue?: any) => {
-        if (key === 'security.monitoring.enabled') return false;
-        return defaultConfig[key] ?? defaultValue;
-      });
+      configService.get.mockImplementation(
+        (key: string, defaultValue?: any) => {
+          if (key === 'security.monitoring.enabled') return false;
+          return defaultConfig[key] ?? defaultValue;
+        },
+      );
 
       // Create new service instance with monitoring disabled
       const disabledService = new SecurityMonitoringService(
         configService,
         eventEmitter,
-        prismaService
+        prismaService,
       );
 
       await disabledService.processSecurityEvent(mockSecurityEvent);
 
       // Should not process events when monitoring is disabled
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Security monitoring is disabled, skipping event processing'
+        'Security monitoring is disabled, skipping event processing',
       );
     });
 
     it('should support custom risk score thresholds', async () => {
-      configService.get.mockImplementation((key: string, defaultValue?: any) => {
-        if (key === 'security.monitoring.riskScoreThreshold') return 50; // Lower threshold
-        return defaultConfig[key] ?? defaultValue;
-      });
+      configService.get.mockImplementation(
+        (key: string, defaultValue?: any) => {
+          if (key === 'security.monitoring.riskScoreThreshold') return 50; // Lower threshold
+          return defaultConfig[key] ?? defaultValue;
+        },
+      );
 
       const mediumRiskEvent = {
         ...mockSecurityEvent,
@@ -667,7 +694,7 @@ describe('SecurityMonitoringService', () => {
         'security.response.trigger',
         expect.objectContaining({
           responseLevel: 'high',
-        })
+        }),
       );
     });
   });
