@@ -26,11 +26,12 @@ import {
   HttpStatus,
   Res,
   Param,
+  Header,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { HealthService, HealthCheckResult } from './health.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { MetricsService } from '../metrics/metrics.service';
+import { MetricsService } from '@bytebot/shared/server';
 
 /**
  * Health monitoring controller providing system status endpoints
@@ -877,6 +878,62 @@ export class HealthController {
           message: errorMessage,
         },
       };
+    }
+  }
+
+  /**
+   * Prometheus metrics endpoint
+   * GET /health/metrics
+   */
+  @Get('metrics')
+  @Header('Content-Type', 'text/plain; version=0.0.4; charset=utf-8')
+  @ApiOperation({
+    summary: 'Prometheus metrics',
+    description: 'Exposes application metrics in Prometheus format for local monitoring',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Prometheus metrics in text format',
+    headers: {
+      'Content-Type': {
+        description: 'Prometheus exposition format',
+        schema: {
+          type: 'string',
+          example: 'text/plain; version=0.0.4; charset=utf-8',
+        },
+      },
+    },
+  })
+  @HttpCode(HttpStatus.OK)
+  async getPrometheusMetrics(@Res() response: Response): Promise<void> {
+    const operationId = this.healthService.generateCorrelationId();
+    this.logger.debug(`[${operationId}] Prometheus metrics endpoint accessed`);
+
+    try {
+      const startTime = Date.now();
+      const metricsOutput = this.metricsService.generatePrometheusMetrics();
+      const responseTime = Date.now() - startTime;
+
+      // Record metrics endpoint access
+      this.metricsService.incrementCounter('prometheus_metrics_requests_total');
+      this.metricsService.observeHistogram('prometheus_metrics_response_time_seconds', responseTime / 1000);
+
+      this.logger.debug(`[${operationId}] Prometheus metrics generated successfully`, {
+        responseTimeMs: responseTime,
+        outputSize: metricsOutput.length,
+        metricsCount: this.metricsService.getMetricsSummary(),
+      });
+
+      response.send(metricsOutput);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`[${operationId}] Failed to generate Prometheus metrics: ${errorMessage}`, {
+        error: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+
+      this.metricsService.incrementCounter('prometheus_metrics_errors_total');
+      response.status(500).send('# Error generating metrics\n');
     }
   }
 }

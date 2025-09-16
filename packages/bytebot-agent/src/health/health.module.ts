@@ -23,7 +23,7 @@ import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { SecurityMonitoringModule } from '../security/security-monitoring.module';
-import { MetricsModule } from '../metrics/metrics.module';
+import { MonitoringModule } from '@bytebot/shared/server';
 
 /**
  * Health monitoring module providing comprehensive observability
@@ -39,8 +39,8 @@ import { MetricsModule } from '../metrics/metrics.module';
     // Security monitoring module for security health checks
     SecurityMonitoringModule,
 
-    // Metrics module for performance monitoring
-    MetricsModule,
+    // Shared monitoring module for metrics and observability
+    MonitoringModule,
   ],
   controllers: [HealthController],
   providers: [HealthService],

@@ -275,9 +275,9 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
     request: ParlantOrchestrationRequest
   ): Promise<ParlantOrchestrationResult> {
     const startTime = Date.now();
-    const _executionId = uuidv4();
+    const executionId = uuidv4();
 
-    this.logger.log(`Starting orchestration execution: ${_executionId}`, {
+    this.logger.log(`Starting orchestration execution: ${executionId}`, {
       taskId: request.task.taskId,
       userId: request.userContext.userId,
       priority: request.task.priority
@@ -286,13 +286,13 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
     try {
       // Create execution context
       const executionContext = this.createExecutionContext(
-        _executionId,
+        executionId,
         request.task,
         request.userContext,
         request.conversationContext
       );
 
-      this.activeExecutions.set(_executionId, executionContext);
+      this.activeExecutions.set(executionId, executionContext);
 
       // Phase 1: Pre-execution validation
       await this.performPreExecutionValidation(executionContext, request);
@@ -316,19 +316,19 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
       );
 
       // Store in history
-      this.executionHistory.set(_executionId, orchestrationResult);
+      this.executionHistory.set(executionId, orchestrationResult);
 
       // Update performance metrics
       this.updatePerformanceMetrics(Date.now() - startTime, true);
 
       // Emit success event
       this.eventEmitter.emit('orchestration.completed', {
-        executionId: _executionId,
+        executionId,
         result: orchestrationResult,
         durationMs: Date.now() - startTime
       });
 
-      this.logger.log(`Orchestration completed successfully: ${_executionId}`, {
+      this.logger.log(`Orchestration completed successfully: ${executionId}`, {
         durationMs: Date.now() - startTime,
         stepsCompleted: executionContext.state.completedSteps.length
       });
@@ -336,14 +336,14 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
       return orchestrationResult;
 
     } catch (error) {
-      this.logger.error(`Orchestration failed: ${_executionId}`, error);
+      this.logger.error(`Orchestration failed: ${executionId}`, error);
 
       // Update performance metrics
       this.updatePerformanceMetrics(Date.now() - startTime, false);
 
       // Create error result
       const errorResult = this.createErrorResult(
-        _executionId,
+        executionId,
         request,
         error,
         startTime
@@ -351,7 +351,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
 
       // Emit error event
       this.eventEmitter.emit('orchestration.failed', {
-        executionId: _executionId,
+        executionId,
         error: errorResult,
         durationMs: Date.now() - startTime
       });
@@ -360,7 +360,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
 
     } finally {
       // Cleanup active execution
-      this.activeExecutions.delete(_executionId);
+      this.activeExecutions.delete(executionId);
     }
   }
 
@@ -637,7 +637,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   private async executeServiceCall(
     step: WorkflowStep,
     previousResults: Map<string, any>,
-    _context: OrchestrationExecutionContext
+    context: OrchestrationExecutionContext
   ): Promise<any> {
     // Resolve parameters from previous results and step parameters
     const resolvedParameters = this.resolveStepParameters(
@@ -664,7 +664,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   private async executeValidationStep(
     step: WorkflowStep,
     previousResults: Map<string, any>,
-    _context: OrchestrationExecutionContext
+    context: OrchestrationExecutionContext
   ): Promise<any> {
     // Implement validation logic
     const validationData = this.resolveStepParameters(
@@ -719,10 +719,10 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   private async executeNotificationStep(
     step: WorkflowStep,
     previousResults: Map<string, any>,
-    _context: OrchestrationExecutionContext
+    context: OrchestrationExecutionContext
   ): Promise<any> {
     // Implement notification logic
-    const _notificationData = this.resolveStepParameters(
+    const notificationData = this.resolveStepParameters(
       step.parameters,
       previousResults
     );
@@ -740,7 +740,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   private async executeDataTransformStep(
     step: WorkflowStep,
     previousResults: Map<string, any>,
-    _context: OrchestrationExecutionContext
+    context: OrchestrationExecutionContext
   ): Promise<any> {
     const inputData = this.resolveStepParameters(
       step.parameters,
@@ -760,7 +760,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   private async executeConditionStep(
     step: WorkflowStep,
     previousResults: Map<string, any>,
-    _context: OrchestrationExecutionContext
+    context: OrchestrationExecutionContext
   ): Promise<any> {
     if (!step.condition) {
       throw new Error(`Condition step ${step.stepId} missing condition configuration`);
@@ -785,10 +785,10 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   }
 
   private async executeParallelStep(
-    _step: WorkflowStep,
-    _previousResults: Map<string, any>,
-    _context: OrchestrationExecutionContext,
-    _request: ParlantOrchestrationRequest
+    step: WorkflowStep,
+    previousResults: Map<string, any>,
+    context: OrchestrationExecutionContext,
+    request: ParlantOrchestrationRequest
   ): Promise<any> {
     // Execute parallel sub-steps
     // This would recursively execute workflow steps in parallel
@@ -800,10 +800,10 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   }
 
   private async executeSequenceStep(
-    _step: WorkflowStep,
-    _previousResults: Map<string, any>,
-    _context: OrchestrationExecutionContext,
-    _request: ParlantOrchestrationRequest
+    step: WorkflowStep,
+    previousResults: Map<string, any>,
+    context: OrchestrationExecutionContext,
+    request: ParlantOrchestrationRequest
   ): Promise<any> {
     // Execute sequential sub-steps
     // This would recursively execute workflow steps in sequence
@@ -955,24 +955,24 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   }
 
   // Placeholder methods for step execution helpers
-  private validateTaskStructure(_task: OrchestrationTask): void {
+  private validateTaskStructure(task: OrchestrationTask): void {
     // Implement task structure validation
   }
 
-  private async validateServiceDependencies(_task: OrchestrationTask): Promise<void> {
+  private async validateServiceDependencies(task: OrchestrationTask): Promise<void> {
     // Implement service dependency validation
   }
 
   private async validateUserPermissions(
-    _userContext: OrchestrationUserContext,
-    _task: OrchestrationTask
+    userContext: OrchestrationUserContext,
+    task: OrchestrationTask
   ): Promise<void> {
     // Implement user permission validation
   }
 
   private async performParlantPreValidation(
-    _context: OrchestrationExecutionContext,
-    _request: ParlantOrchestrationRequest
+    context: OrchestrationExecutionContext,
+    request: ParlantOrchestrationRequest
   ): Promise<void> {
     // Implement Parlant pre-validation
   }
@@ -995,10 +995,10 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   }
 
   private async processParlantApproval(
-    _approvalRequest: ApprovalRequest,
-    _request: ParlantOrchestrationRequest,
-    _context: OrchestrationExecutionContext,
-    _previousResults?: Map<string, any>
+    approvalRequest: ApprovalRequest,
+    request: ParlantOrchestrationRequest,
+    context: OrchestrationExecutionContext,
+    previousResults?: Map<string, any>
   ): Promise<any> {
     // Implement Parlant approval processing
     return {
@@ -1014,9 +1014,9 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   }
 
   private async shouldSkipStep(
-    _step: WorkflowStep,
-    _results: Map<string, any>,
-    _context: OrchestrationExecutionContext
+    step: WorkflowStep,
+    results: Map<string, any>,
+    context: OrchestrationExecutionContext
   ): Promise<boolean> {
     // Implement conditional step execution logic
     return false;
@@ -1064,19 +1064,19 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   }
 
   private async determineRecoveryStrategy(
-    _step: WorkflowStep,
-    _error: Error,
-    _context: OrchestrationExecutionContext
+    step: WorkflowStep,
+    error: Error,
+    context: OrchestrationExecutionContext
   ): Promise<RecoveryStrategy | null> {
     // Implement recovery strategy determination
     return null;
   }
 
   private async executeRecoveryStrategy(
-    _strategy: RecoveryStrategy,
-    _step: WorkflowStep,
-    _error: Error,
-    _context: OrchestrationExecutionContext
+    strategy: RecoveryStrategy,
+    step: WorkflowStep,
+    error: Error,
+    context: OrchestrationExecutionContext
   ): Promise<any> {
     // Implement recovery strategy execution
     return null;
@@ -1092,41 +1092,41 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   }
 
   private async validateStepWithParlant(
-    _step: WorkflowStep,
-    _previousResults: Map<string, any>,
-    _context: OrchestrationExecutionContext,
-    _request: ParlantOrchestrationRequest
+    step: WorkflowStep,
+    previousResults: Map<string, any>,
+    context: OrchestrationExecutionContext,
+    request: ParlantOrchestrationRequest
   ): Promise<void> {
     // Implement step-level Parlant validation
   }
 
   private resolveStepParameters(
     parameters: Record<string, any>,
-    _previousResults: Map<string, any>
+    previousResults: Map<string, any>
   ): Record<string, any> {
     // Implement parameter resolution from previous step results
     return parameters;
   }
 
   private async executeServiceCallWithRetry(
-    _serviceId: string,
-    _endpoint: string,
-    _parameters: Record<string, any>,
-    _retryConfig: any,
-    _timeout: any
+    serviceId: string,
+    endpoint: string,
+    parameters: Record<string, any>,
+    retryConfig: any,
+    timeout: any
   ): Promise<any> {
     // Implement service call with retry logic
     return { mockResult: true };
   }
 
-  private evaluateConditionExpression(_expression: string, _variables: Record<string, any>): boolean {
+  private evaluateConditionExpression(expression: string, variables: Record<string, any>): boolean {
     // Implement condition expression evaluation
     return true;
   }
 
   private async performPostExecutionValidation(
-    _context: OrchestrationExecutionContext,
-    _result: any
+    context: OrchestrationExecutionContext,
+    result: any
   ): Promise<void> {
     // Implement post-execution validation
   }
@@ -1291,7 +1291,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
     };
   }
 
-  private generateAuditTrail(_context: OrchestrationExecutionContext): OrchestrationAuditEntry[] {
+  private generateAuditTrail(context: OrchestrationExecutionContext): OrchestrationAuditEntry[] {
     // Generate comprehensive audit trail
     return [];
   }
@@ -1333,7 +1333,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   private async shutdownActiveExecutions(): Promise<void> {
     // Gracefully shutdown any active executions
     this.logger.log(`Shutting down ${this.activeExecutions.size} active executions...`);
-    for (const [_executionId, context] of this.activeExecutions) {
+    for (const [executionId, context] of this.activeExecutions) {
       context.state.status = OrchestrationStatus.CANCELLED;
     }
   }

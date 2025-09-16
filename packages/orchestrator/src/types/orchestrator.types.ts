@@ -11,7 +11,7 @@
  */
 
 import { 
-  ParlantValidationRequest, 
+  ParlantValidationRequest as _ParlantValidationRequest, 
   ParlantValidationResponse,
   ParlantConversationContext,
   SecurityLevel

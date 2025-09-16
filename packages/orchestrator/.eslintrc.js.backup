@@ -1,0 +1,42 @@
+/**
+ * ESLint Configuration for Orchestrator Package
+ * =============================================
+ *
+ * Ultra-minimal ESLint configuration that avoids TypeScript ESLint plugin
+ * compatibility issues by using only basic ESLint rules.
+ */
+
+module.exports = {
+  env: {
+    node: true,
+    es6: true,
+    es2020: true,
+  },
+  extends: [
+    'eslint:recommended',
+  ],
+  parserOptions: {
+    ecmaVersion: 2020,
+    sourceType: 'module',
+  },
+  rules: {
+    // Basic JavaScript rules that work reliably across all setups
+    'prefer-const': 'error',
+    'no-var': 'error',
+    'no-console': 'off', // Allow console for NestJS logging
+    'eqeqeq': ['error', 'always'],
+    'no-unused-vars': 'off', // Disable to avoid conflicts with TypeScript
+    // Configure no-unused-expressions with allowShortCircuit option
+    'no-unused-expressions': ['error', { 'allowShortCircuit': true, 'allowTernary': false }],
+  },
+  ignorePatterns: [
+    'node_modules/',
+    'dist/',
+    'build/',
+    'coverage/',
+    '*.js',
+    '*.mjs',
+    '*.d.ts',
+    'jest.config.*',
+  ],
+};

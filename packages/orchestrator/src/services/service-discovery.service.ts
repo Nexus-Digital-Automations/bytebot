@@ -40,7 +40,7 @@ export class ServiceDiscoveryService {
     return null;
   }
 
-  async checkServiceHealth(serviceId: string): Promise<boolean> {
+  async checkServiceHealth(_serviceId: string): Promise<boolean> {
     // Implement health checking
     return true;
   }

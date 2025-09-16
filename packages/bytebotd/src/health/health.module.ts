@@ -25,6 +25,7 @@ import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
 import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
+import { MonitoringModule } from '@bytebot/shared/server';
 
 /**
  * Enterprise health monitoring module providing Kubernetes observability
@@ -33,6 +34,7 @@ import { HealthService } from './health.service';
   imports: [
     TerminusModule, // Provides health check indicators
     HttpModule, // For external service health checks
+    MonitoringModule, // Provides MetricsService for Prometheus metrics
   ],
   controllers: [HealthController],
   providers: [HealthService],
@@ -43,13 +45,16 @@ export class HealthModule {
 
   constructor() {
     this.logger.log(
-      'Enterprise Health Module initialized - Kubernetes monitoring enabled',
+      'Enterprise Health Module initialized - Kubernetes monitoring and Prometheus metrics enabled',
     );
     this.logger.log(
-      'Available endpoints: GET /health, GET /health/live, GET /health/ready, GET /health/startup, GET /health/status',
+      'Available endpoints: GET /health, GET /health/live, GET /health/ready, GET /health/startup, GET /health/status, GET /health/metrics',
     );
     this.logger.log(
       'Kubernetes probes: liveness (/health/live), readiness (/health/ready), startup (/health/startup)',
+    );
+    this.logger.log(
+      'Prometheus metrics: /health/metrics - exposing health and performance metrics for local monitoring',
     );
   }
 }

@@ -31,7 +31,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { v4 as uuidv4 } from 'uuid';
 import * as process from 'process';
 import { SecurityMonitoringService } from '../security/security-monitoring.service';
-import { MetricsService } from '../metrics/metrics.service';
+import { MetricsService } from '@bytebot/shared/server';
 // import { PrometheusRegistry } from 'prom-client';
 import * as os from 'os';
 import { promises as fs } from 'fs';

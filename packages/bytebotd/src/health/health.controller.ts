@@ -24,7 +24,7 @@
  * @version 3.0.0 - PARLANT MAXIMUM INTEGRATION
  */
 
-import { Controller, Get, Logger, UseGuards } from '@nestjs/common';
+import { Controller, Get, Logger, UseGuards, Res, Header, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   HealthCheckService,
   HttpHealthIndicator,
@@ -34,6 +34,7 @@ import {
   HealthCheckResult,
 } from '@nestjs/terminus';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import {
@@ -51,6 +52,7 @@ import {
   HealthOperationType,
   HealthMetricsValidationResult,
 } from '../parlant/services/parlant-health-metrics-validation.service';
+import { MetricsService } from '@bytebot/shared/server';
 
 /**
  * Health monitoring controller providing system status endpoints with Parlant validation
@@ -68,12 +70,14 @@ export class HealthController {
     private readonly memory: MemoryHealthIndicator,
     private readonly disk: DiskHealthIndicator,
     private readonly parlantValidationService: ParlantHealthMetricsValidationService,
+    private readonly metricsService: MetricsService,
   ) {
-    this.logger.log('Enterprise Health Controller initialized with Parlant validation');
+    this.logger.log('Enterprise Health Controller initialized with Parlant validation and Metrics integration');
     this.logger.log(
-      'Available endpoints: /health, /health/live, /health/ready, /health/startup, /health/status',
+      'Available endpoints: /health, /health/live, /health/ready, /health/startup, /health/status, /health/metrics',
     );
     this.logger.log('PARLANT INTEGRATION: Risk-based conversational validation active');
+    this.logger.log('METRICS INTEGRATION: Prometheus metrics collection enabled');
   }
 
   /**
@@ -132,13 +136,31 @@ export class HealthController {
       }
 
       // Execute health check with audit trail
+      const startTime = Date.now();
       const healthData = this.healthService.getBasicHealth();
+      const responseTime = Date.now() - startTime;
+      
+      // Record metrics for health check
+      try {
+        this.metricsService.recordHealthCheck('basic', true, responseTime);
+        this.metricsService.incrementCounter('health_requests_total', {
+          endpoint: '/health',
+          method: 'GET',
+          status: 'success',
+          user_id: user.id,
+        });
+      } catch (metricsError) {
+        this.logger.warn('Failed to record health check metrics', {
+          error: metricsError instanceof Error ? metricsError.message : String(metricsError),
+        });
+      }
       
       this.logger.debug(`[${operationId}] Health check completed successfully with Parlant audit`, {
         operationId,
         userId: user.id,
         healthStatus: healthData.status,
         conversationId: validation.conversationId,
+        responseTime,
         securityEvent: 'health_check_completed',
       });
 
@@ -507,6 +529,95 @@ export class HealthController {
         error: errorMessage,
         services: {},
       };
+    }
+  }
+
+  /**
+   * Prometheus metrics endpoint with Parlant validation
+   * GET /health/metrics
+   */
+  @Get('metrics')
+  @Header('Content-Type', 'text/plain; version=0.0.4; charset=utf-8')
+  @HttpCode(HttpStatus.OK)
+  async getPrometheusMetrics(
+    @CurrentUser() user: ByteBotdUser, 
+    @Res() response: Response
+  ): Promise<void> {
+    const operationId = `metrics_${Date.now()}`;
+    this.logger.debug(`[${operationId}] Prometheus metrics endpoint accessed with Parlant validation`, {
+      operationId,
+      userId: user.id,
+      securityEvent: 'metrics_endpoint_accessed',
+    });
+
+    try {
+      // PARLANT VALIDATION: Metrics endpoint (MEDIUM risk - exposes system metrics)
+      const validation = await this.parlantValidationService.validateHealthOperation(
+        HealthOperationType.METRICS_ENDPOINT,
+        {
+          endpoint: '/health/metrics',
+          method: 'GET',
+          frequency: 'periodic',
+          exposesSystemMetrics: true,
+          sensitivityLevel: 'medium',
+        },
+        { userId: user.id, userRole: user.role },
+      );
+
+      if (!validation.approved) {
+        this.logger.error(`[${operationId}] Metrics endpoint rejected by Parlant validation`, {
+          operationId,
+          reason: validation.reason,
+          conversationId: validation.conversationId,
+        });
+        
+        response.status(403).send('# Metrics access denied by Parlant validation\n');
+        return;
+      }
+
+      this.logger.debug(`[${operationId}] Parlant validation approved for metrics endpoint`, {
+        operationId,
+        conversationId: validation.conversationId,
+        riskLevel: validation.riskLevel,
+        validationDuration: validation.performanceImpact.validationDuration,
+      });
+
+      const startTime = Date.now();
+      const metricsOutput = this.metricsService.generatePrometheusMetrics();
+      const responseTime = Date.now() - startTime;
+
+      // Record metrics endpoint access
+      this.metricsService.incrementCounter('prometheus_metrics_requests_total', {
+        service: 'bytebotd',
+        user_id: user.id,
+      });
+      this.metricsService.observeHistogram('prometheus_metrics_response_time_seconds', responseTime / 1000);
+
+      this.logger.debug(`[${operationId}] Prometheus metrics generated successfully with Parlant audit`, {
+        operationId,
+        userId: user.id,
+        conversationId: validation.conversationId,
+        responseTimeMs: responseTime,
+        outputSize: metricsOutput.length,
+        metricsCount: this.metricsService.getMetricsSummary(),
+        securityEvent: 'metrics_endpoint_completed',
+      });
+
+      response.send(metricsOutput);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`[${operationId}] Failed to generate Prometheus metrics: ${errorMessage}`, {
+        operationId,
+        userId: user.id,
+        error: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+
+      this.metricsService.incrementCounter('prometheus_metrics_errors_total', {
+        service: 'bytebotd',
+        user_id: user.id,
+      });
+      response.status(500).send('# Error generating metrics\n');
     }
   }
 }

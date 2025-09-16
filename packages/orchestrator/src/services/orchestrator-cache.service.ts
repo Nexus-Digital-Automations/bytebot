@@ -11,16 +11,16 @@ import { Injectable, Logger } from '@nestjs/common';
 export class OrchestratorCacheService {
   private readonly logger = new Logger(OrchestratorCacheService.name);
 
-  async get<T>(key: string): Promise<T | null> {
+  async get<T>(_key: string): Promise<T | null> {
     // Implement cache retrieval
     return null;
   }
 
-  async set<T>(key: string, value: T, ttlMs?: number): Promise<void> {
+  async set<T>(_key: string, _value: T, _ttlMs?: number): Promise<void> {
     // Implement cache storage
   }
 
-  async delete(key: string): Promise<boolean> {
+  async delete(_key: string): Promise<boolean> {
     // Implement cache deletion
     return false;
   }

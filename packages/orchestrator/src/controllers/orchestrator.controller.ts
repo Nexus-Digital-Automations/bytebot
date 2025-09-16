@@ -13,15 +13,15 @@ import {
   Controller,
   Post,
   Get,
-  Put,
-  Delete,
+  Put as _Put,
+  Delete as _Delete,
   Body,
   Param,
   Query,
   HttpStatus,
   HttpException,
   Logger,
-  UseGuards,
+  UseGuards as _UseGuards,
   UseInterceptors,
   UsePipes,
   ValidationPipe
@@ -35,7 +35,7 @@ import {
   ApiSecurity,
   ApiBearerAuth
 } from '@nestjs/swagger';
-import { IsUUID, IsOptional, IsEnum, IsNumber, Min, Max } from 'class-validator';
+import { IsUUID as _IsUUID, IsOptional, IsEnum, IsNumber, Min, Max } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 // Core services
@@ -44,7 +44,7 @@ import { PerformanceMonitoringService } from '../services/performance-monitoring
 
 // Types and interfaces
 import {
-  ParlantOrchestrationRequest,
+  ParlantOrchestrationRequest as _ParlantOrchestrationRequest,
   ParlantOrchestrationResult,
   OrchestrationUserContext
 } from '../services/parlant-orchestrator.service';

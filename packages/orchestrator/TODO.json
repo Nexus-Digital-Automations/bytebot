@@ -1,0 +1,32 @@
+{
+  "tasks": [
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T17:51:52.696Z",
+      "title": "Fix 195 ESLint violations in orchestrator package",
+      "description": "Fix 86 ESLint errors and 109 warnings in orchestrator package including: unused variables/imports that need underscore prefixes, no-undef errors for Node.js globals (process, setInterval, clearInterval, NodeJS), and @typescript-eslint/no-explicit-any warnings requiring proper typing",
+      "category": "error",
+      "priority": "normal",
+      "id": "error_1758045112696_kkoe01n5hgs",
+      "assigned_agent": "dev_session_1758044287214_1_general_e9227ef6",
+      "started_at": "2025-09-16T17:52:18.396Z",
+      "claimed_by": "dev_session_1758044287214_1_general_e9227ef6",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758044287214_1_general_e9227ef6",
+          "role": "primary",
+          "assignedAt": "2025-09-16T17:52:18.396Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T18:01:14.733Z",
+      "updated_at": "2025-09-16T18:01:14.733Z"
+    }
+  ],
+  "completed_tasks": [],
+  "features": [],
+  "agents": [],
+  "project_success_criteria": [],
+  "task_creation_attempts": []
+}

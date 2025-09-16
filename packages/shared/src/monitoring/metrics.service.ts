@@ -103,8 +103,8 @@ export class MetricsService {
     this.startMetricsCollection();
 
     this.logger.log('Local Metrics Service initialized with Prometheus integration', {
-      metricsEnabled: this.config.get<boolean>('METRICS_ENABLED', true),
-      prometheusPort: this.config.get<number>('PROMETHEUS_PORT', 9090),
+      metricsEnabled: this._config.get<boolean>('METRICS_ENABLED', true),
+      prometheusPort: this._config.get<number>('PROMETHEUS_PORT', 9090),
       alertThresholds: Object.fromEntries(this.alertThresholds),
       histogramBuckets: this.defaultHistogramBuckets,
     });
@@ -170,7 +170,7 @@ export class MetricsService {
    */
   private startMetricsCollection(): void {
     const operationId = this.generateOperationId();
-    const collectInterval = this.config.get<number>('METRICS_COLLECT_INTERVAL', 30000);
+    const collectInterval = this._config.get<number>('METRICS_COLLECT_INTERVAL', 30000);
 
     this.logger.debug(`[${operationId}] Starting periodic metrics collection`, {
       intervalMs: collectInterval,
@@ -572,7 +572,7 @@ export class MetricsService {
    */
   private emitMonitoringEvent(event: MonitoringEvent): void {
     try {
-      this.eventEmitter.emit('monitoring.event', event);
+      this._eventEmitter.emit('monitoring.event', event);
     } catch (error) {
       this.logger.error('Failed to emit monitoring event', {
         error: error instanceof Error ? error.message : 'Unknown error',

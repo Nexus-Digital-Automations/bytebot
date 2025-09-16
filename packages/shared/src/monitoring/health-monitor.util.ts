@@ -165,7 +165,7 @@ export class HealthMonitorUtil {
   /**
    * Get comprehensive health status for the service
    */
-  async getServiceHealthStatus(): Promise<ServiceHealthStatus> {
+  async getServiceHealthStatus(): Promise<Record<string, unknown>> {
     const operationId = this.generateOperationId();
     this.logger.debug(`[${operationId}] Getting comprehensive service health status`);
 
@@ -185,7 +185,7 @@ export class HealthMonitorUtil {
       overallStatus = 'degraded';
     }
 
-    const healthStatus: ServiceHealthStatus = {
+    const healthStatus = {
       serviceName: this.serviceName,
       status: overallStatus,
       timestamp: new Date().toISOString(),
@@ -223,32 +223,17 @@ export class HealthMonitorUtil {
       const cpuUsage = await this.calculateCpuUsage();
 
       const metrics: SystemResourceMetrics = {
-        timestamp: new Date().toISOString(),
-        cpu: {
-          usage: cpuUsage,
-          loadAverage: this.getLoadAverage(),
-        },
-        memory: {
-          used: memoryUsage.rss,
-          free: memoryUsage.heapTotal - memoryUsage.heapUsed,
-          total: memoryUsage.heapTotal,
-          utilization: (memoryUsage.rss / memoryUsage.heapTotal) * 100,
-        },
-        disk: {
-          usage: await this.getDiskUsage(),
-          available: 0, // Would implement actual disk monitoring
-          total: 0,
-        },
-        network: {
-          connections: this.getActiveConnections(),
-          throughput: 0, // Would implement actual network monitoring
-        },
-        operationId,
+        cpuUsagePercent: cpuUsage,
+        memoryUsagePercent: (memoryUsage.rss / memoryUsage.heapTotal) * 100,
+        diskUsagePercent: await this.getDiskUsage(),
+        networkLatencyMs: 0, // Would implement actual network monitoring
+        gcPauseTimeMs: 0, // Would implement actual GC monitoring
+        threadPoolUtilization: 0, // Would implement actual thread monitoring
       };
 
       this.logger.debug(`[${operationId}] System resource metrics collected`, {
-        cpuUsage: metrics.cpu.usage.toFixed(2),
-        memoryUtilization: metrics.memory.utilization.toFixed(2),
+        cpuUsage: metrics.cpuUsagePercent.toFixed(2),
+        memoryUtilization: metrics.memoryUsagePercent.toFixed(2),
       });
 
       return metrics;
@@ -260,12 +245,12 @@ export class HealthMonitorUtil {
 
       // Return default metrics on error
       return {
-        timestamp: new Date().toISOString(),
-        cpu: { usage: 0, loadAverage: [] },
-        memory: { used: 0, free: 0, total: 0, utilization: 0 },
-        disk: { usage: 0, available: 0, total: 0 },
-        network: { connections: 0, throughput: 0 },
-        operationId,
+        cpuUsagePercent: 0,
+        memoryUsagePercent: 0,
+        diskUsagePercent: 0,
+        networkLatencyMs: 0,
+        gcPauseTimeMs: 0,
+        threadPoolUtilization: 0,
       };
     }
   }
@@ -292,9 +277,9 @@ export class HealthMonitorUtil {
     }
 
     const allHistory: HealthCheckExecutionResult[] = [];
-    for (const history of this.executionHistory.values()) {
+    Array.from(this.executionHistory.values()).forEach((history) => {
       allHistory.push(...history);
-    }
+    });
 
     return allHistory.sort((a, b) => 
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -393,31 +378,29 @@ export class HealthMonitorUtil {
     error?: string
   ): void {
     try {
-      // Record execution metrics
-      this.metricsService.recordHealthCheck(context.checkName, success, duration);
+      // Create a health check result for the standard method
+      const healthCheckResult: HealthCheckResult = result || {
+        isHealthy: success,
+        details: { duration, error: error || undefined },
+        timestamp: new Date().toISOString(),
+        responseTime: duration,
+      };
+
+      // Record execution metrics using the standard interface
+      this.metricsService.recordHealthCheck(context.serviceName, healthCheckResult);
       
-      // Record detailed metrics
-      this.metricsService.incrementCounter('health_check_executions_total', {
+      // Record detailed metrics with proper labels parameter
+      this.metricsService.incrementCounter('health_check_executions_total', 1, {
         service: context.serviceName,
         check_name: context.checkName,
         status: success ? 'success' : 'failure',
         user_id: context.userId || 'system',
       });
 
-      this.metricsService.observeHistogram('health_check_duration_seconds', duration / 1000, {
-        service: context.serviceName,
-        check_name: context.checkName,
-      });
-
-      if (result) {
-        this.metricsService.recordGauge('health_check_status', result.isHealthy ? 1 : 0, {
-          service: context.serviceName,
-          check_name: context.checkName,
-        });
-      }
+      this.metricsService.observeHistogram('health_check_duration_seconds', duration / 1000);
 
       if (error) {
-        this.metricsService.incrementCounter('health_check_errors_total', {
+        this.metricsService.incrementCounter('health_check_errors_total', 1, {
           service: context.serviceName,
           check_name: context.checkName,
           error_type: error.includes('timeout') ? 'timeout' : 'execution_error',
@@ -465,9 +448,9 @@ export class HealthMonitorUtil {
   private getAllExecutionHistory(): Record<string, HealthCheckExecutionResult[]> {
     const allHistory: Record<string, HealthCheckExecutionResult[]> = {};
     
-    for (const [checkName, history] of this.executionHistory.entries()) {
+    Array.from(this.executionHistory.entries()).forEach(([checkName, history]) => {
       allHistory[checkName] = [...history];
-    }
+    });
 
     return allHistory;
   }
@@ -475,15 +458,15 @@ export class HealthMonitorUtil {
   private getAllCircuitBreakerStates(): Map<string, CircuitBreakerStatus> {
     const states = new Map<string, CircuitBreakerStatus>();
     
-    for (const [checkName, breaker] of this.circuitBreakers.entries()) {
+    Array.from(this.circuitBreakers.entries()).forEach(([checkName, breaker]) => {
       states.set(checkName, {
-        state: breaker.state,
+        state: breaker.state as 'CLOSED' | 'OPEN' | 'HALF_OPEN',
         failureCount: breaker.failureCount,
         successCount: breaker.successCount,
-        lastFailureTime: breaker.lastFailureTime,
-        nextAttemptTime: breaker.nextAttemptTime,
+        lastFailureTime: breaker.lastFailureTime ? new Date(breaker.lastFailureTime) : undefined,
+        nextAttemptTime: breaker.nextAttemptTime ? new Date(breaker.nextAttemptTime) : undefined,
       });
-    }
+    });
 
     return states;
   }
@@ -492,13 +475,13 @@ export class HealthMonitorUtil {
     const cutoff = Date.now() - timeWindow;
     let failures = 0;
 
-    for (const history of this.executionHistory.values()) {
-      for (const execution of history) {
+    Array.from(this.executionHistory.values()).forEach((history) => {
+      history.forEach((execution) => {
         if (new Date(execution.timestamp).getTime() >= cutoff && !execution.success) {
           failures++;
         }
-      }
-    }
+      });
+    });
 
     return failures;
   }
@@ -507,13 +490,13 @@ export class HealthMonitorUtil {
     const cutoff = Date.now() - timeWindow;
     let total = 0;
 
-    for (const history of this.executionHistory.values()) {
-      for (const execution of history) {
+    Array.from(this.executionHistory.values()).forEach((history) => {
+      history.forEach((execution) => {
         if (new Date(execution.timestamp).getTime() >= cutoff) {
           total++;
         }
-      }
-    }
+      });
+    });
 
     return total;
   }
@@ -522,12 +505,12 @@ export class HealthMonitorUtil {
     let totalTime = 0;
     let count = 0;
 
-    for (const history of this.executionHistory.values()) {
-      for (const execution of history) {
+    Array.from(this.executionHistory.values()).forEach((history) => {
+      history.forEach((execution) => {
         totalTime += execution.duration;
         count++;
-      }
-    }
+      });
+    });
 
     return count > 0 ? totalTime / count : 0;
   }
