@@ -455,7 +455,7 @@ export const useParlantWebSocket = (
       return;
     }
     
-    if (socketRef.current?.connected) {
+    if (socketRef.current?.connected === true) {
       logDebug('Already connected to Parlant WebSocket', null, 'useParlantWebSocket');
       return;
     }
@@ -471,7 +471,7 @@ export const useParlantWebSocket = (
         reconnectionDelay: config.reconnectDelay,
         timeout: config.connectionTimeout,
         auth: {
-          token: localStorage.getItem('jwt_token') || '',
+          token: localStorage.getItem('jwt_token') ?? '',
           service: 'bytebot-ui',
           version: '1.0.0',
         },
@@ -486,7 +486,9 @@ export const useParlantWebSocket = (
         connectionStartTime.current = new Date();
         
         startHeartbeat();
-        processOfflineQueue();
+        processOfflineQueue().catch((error) => {
+          logError('Failed to process offline queue', error, 'useParlantWebSocket');
+        });
         onConnected?.();
       });
       
@@ -513,7 +515,7 @@ export const useParlantWebSocket = (
           code: 'CONNECTION_ERROR',
           message: error.message,
           timestamp: new Date(),
-          severity: 'HIGH' as any,
+          severity: 'HIGH' as const,
         });
       });
       
@@ -609,9 +611,10 @@ export const useParlantWebSocket = (
   }, []);
   
   const reconnect = useCallback(async () => {
+    const RECONNECT_DELAY_MS = 1000;
     logInfo('Manual reconnect requested', null, 'useParlantWebSocket');
     disconnect();
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, RECONNECT_DELAY_MS));
     connect();
   }, [disconnect, connect]);
   
@@ -645,8 +648,12 @@ export const useParlantWebSocket = (
       updatedAt: new Date(),
     };
     
-    return new Promise((resolve, reject) => {
-      socketRef.current!.emit('parlant:start_conversation', conversation, (response: any) => {
+    return new Promise<string>((resolve, reject) => {
+      if (!socketRef.current) {
+        reject(new Error('Socket not available'));
+        return;
+      }
+      socketRef.current.emit('parlant:start_conversation', conversation, (response: { success: boolean; error?: string }) => {
         if (response.success) {
           setCurrentConversation(conversation);
           setConversationState(ConversationState.ACTIVE);
@@ -656,8 +663,8 @@ export const useParlantWebSocket = (
           resolve(conversationId);
           logInfo('Started new conversation', { conversationId, topic }, 'useParlantWebSocket');
         } else {
-          reject(new Error(response.error || 'Failed to start conversation'));
-          logError('Failed to start conversation', response.error, 'useParlantWebSocket');
+          reject(new Error(response.error ?? 'Failed to start conversation'));
+          logError('Failed to start conversation', response.error ?? 'Unknown error', 'useParlantWebSocket');
         }
       });
     });
@@ -668,18 +675,22 @@ export const useParlantWebSocket = (
       throw new Error('Not connected to Parlant WebSocket');
     }
     
-    return new Promise((resolve, reject) => {
-      socketRef.current!.emit('parlant:join_conversation', conversationId, (response: any) => {
-        if (response.success) {
+    return new Promise<void>((resolve, reject) => {
+      if (!socketRef.current) {
+        reject(new Error('Socket not available'));
+        return;
+      }
+      socketRef.current.emit('parlant:join_conversation', conversationId, (response: { success: boolean; error?: string; conversation?: ParlantConversationContext; messages?: ConversationMessage[]; participants?: ConversationParticipant[] }) => {
+        if (response.success && response.conversation) {
           setCurrentConversation(response.conversation);
           setConversationState(response.conversation.state);
-          setMessages(response.messages || []);
-          setParticipants(response.participants || []);
+          setMessages(response.messages ?? []);
+          setParticipants(response.participants ?? []);
           resolve();
           logInfo('Joined conversation', { conversationId }, 'useParlantWebSocket');
         } else {
-          reject(new Error(response.error || 'Failed to join conversation'));
-          logError('Failed to join conversation', response.error, 'useParlantWebSocket');
+          reject(new Error(response.error ?? 'Failed to join conversation'));
+          logError('Failed to join conversation', response.error ?? 'Unknown error', 'useParlantWebSocket');
         }
       });
     });
@@ -702,8 +713,12 @@ export const useParlantWebSocket = (
       throw new Error('Not connected to Parlant WebSocket');
     }
     
-    return new Promise((resolve, reject) => {
-      socketRef.current!.emit('parlant:end_conversation', conversationId, (response: any) => {
+    return new Promise<void>((resolve, reject) => {
+      if (!socketRef.current) {
+        reject(new Error('Socket not available'));
+        return;
+      }
+      socketRef.current.emit('parlant:end_conversation', conversationId, (response: { success: boolean; error?: string }) => {
         if (response.success) {
           if (currentConversation?.conversationId === conversationId) {
             setCurrentConversation(null);
@@ -714,8 +729,8 @@ export const useParlantWebSocket = (
           resolve();
           logInfo('Ended conversation', { conversationId }, 'useParlantWebSocket');
         } else {
-          reject(new Error(response.error || 'Failed to end conversation'));
-          logError('Failed to end conversation', response.error, 'useParlantWebSocket');
+          reject(new Error(response.error ?? 'Failed to end conversation'));
+          logError('Failed to end conversation', response.error ?? 'Unknown error', 'useParlantWebSocket');
         }
       });
     });
@@ -767,12 +782,19 @@ export const useParlantWebSocket = (
       return;
     }
     
-    return new Promise((resolve, reject) => {
+    const MESSAGE_TIMEOUT = 10_000;
+    return new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject(new Error('Message send timeout'));
-      }, 10000);
+      }, MESSAGE_TIMEOUT);
       
-      socketRef.current!.emit('parlant:send_message', message, (response: any) => {
+      if (!socketRef.current) {
+        clearTimeout(timeout);
+        reject(new Error('Socket not available'));
+        return;
+      }
+      
+      socketRef.current.emit('parlant:send_message', message, (response: { success: boolean; error?: string }) => {
         clearTimeout(timeout);
         if (response.success) {
           setMessages(prev => [...prev, message]);
@@ -780,8 +802,8 @@ export const useParlantWebSocket = (
           resolve();
           logDebug('Message sent successfully', { messageId: message.id }, 'useParlantWebSocket');
         } else {
-          reject(new Error(response.error || 'Failed to send message'));
-          logError('Failed to send message', response.error, 'useParlantWebSocket');
+          reject(new Error(response.error ?? 'Failed to send message'));
+          logError('Failed to send message', response.error ?? 'Unknown error', 'useParlantWebSocket');
         }
       });
     });
@@ -794,11 +816,18 @@ export const useParlantWebSocket = (
       throw new Error('Not connected to Parlant WebSocket');
     }
     
-    return new Promise((resolve, reject) => {
+    const VALIDATION_TIMEOUT = 30_000;
+    return new Promise<ParlantValidationResponse>((resolve, reject) => {
       const timeout = setTimeout(() => {
         pendingValidations.current.delete(request.requestId);
         reject(new Error('Validation request timeout'));
-      }, 30000);
+      }, VALIDATION_TIMEOUT);
+      
+      if (!socketRef.current) {
+        clearTimeout(timeout);
+        reject(new Error('Socket not available'));
+        return;
+      }
       
       pendingValidations.current.set(request.requestId, {
         resolve: (response: ParlantValidationResponse) => {
@@ -812,7 +841,7 @@ export const useParlantWebSocket = (
         timestamp: new Date(),
       });
       
-      socketRef.current!.emit('parlant:validate_function', request);
+      socketRef.current.emit('parlant:validate_function', request);
       onValidationRequest?.(request);
       logInfo('Validation request sent', { requestId: request.requestId }, 'useParlantWebSocket');
     });
@@ -830,18 +859,22 @@ export const useParlantWebSocket = (
     const response = {
       requestId,
       decision,
-      reasoning: reasoning || '',
+      reasoning: reasoning ?? '',
       timestamp: new Date(),
     };
     
-    return new Promise((resolve, reject) => {
-      socketRef.current!.emit('parlant:validation_response', response, (result: any) => {
+    return new Promise<void>((resolve, reject) => {
+      if (!socketRef.current) {
+        reject(new Error('Socket not available'));
+        return;
+      }
+      socketRef.current.emit('parlant:validation_response', response, (result: { success: boolean; error?: string }) => {
         if (result.success) {
           resolve();
           logInfo('Validation response sent', { requestId, decision }, 'useParlantWebSocket');
         } else {
-          reject(new Error(result.error || 'Failed to send validation response'));
-          logError('Failed to send validation response', result.error, 'useParlantWebSocket');
+          reject(new Error(result.error ?? 'Failed to send validation response'));
+          logError('Failed to send validation response', result.error ?? 'Unknown error', 'useParlantWebSocket');
         }
       });
     });
@@ -858,14 +891,18 @@ export const useParlantWebSocket = (
       throw new Error('Not connected to Parlant WebSocket');
     }
     
-    return new Promise((resolve, reject) => {
-      socketRef.current!.emit('parlant:search_conversations', options, (response: any) => {
+    return new Promise<ParlantConversationContext[]>((resolve, reject) => {
+      if (!socketRef.current) {
+        reject(new Error('Socket not available'));
+        return;
+      }
+      socketRef.current.emit('parlant:search_conversations', options, (response: { success: boolean; error?: string; conversations: ParlantConversationContext[] }) => {
         if (response.success) {
           resolve(response.conversations);
           logDebug('Conversation search completed', { resultCount: response.conversations.length }, 'useParlantWebSocket');
         } else {
-          reject(new Error(response.error || 'Search failed'));
-          logError('Conversation search failed', response.error, 'useParlantWebSocket');
+          reject(new Error(response.error ?? 'Search failed'));
+          logError('Conversation search failed', response.error ?? 'Unknown error', 'useParlantWebSocket');
         }
       });
     });
@@ -873,20 +910,24 @@ export const useParlantWebSocket = (
   
   const getConversationHistory = useCallback(async (
     conversationId: string,
-    limit = 100
+    limit = 100 // Default history limit
   ): Promise<ConversationMessage[]> => {
     if (!isConnected || !socketRef.current) {
       throw new Error('Not connected to Parlant WebSocket');
     }
     
-    return new Promise((resolve, reject) => {
-      socketRef.current!.emit('parlant:get_history', { conversationId, limit }, (response: any) => {
+    return new Promise<ConversationMessage[]>((resolve, reject) => {
+      if (!socketRef.current) {
+        reject(new Error('Socket not available'));
+        return;
+      }
+      socketRef.current.emit('parlant:get_history', { conversationId, limit }, (response: { success: boolean; error?: string; messages: ConversationMessage[] }) => {
         if (response.success) {
           resolve(response.messages);
           logDebug('Conversation history retrieved', { conversationId, messageCount: response.messages.length }, 'useParlantWebSocket');
         } else {
-          reject(new Error(response.error || 'Failed to get history'));
-          logError('Failed to get conversation history', response.error, 'useParlantWebSocket');
+          reject(new Error(response.error ?? 'Failed to get history'));
+          logError('Failed to get conversation history', response.error ?? 'Unknown error', 'useParlantWebSocket');
         }
       });
     });
@@ -897,14 +938,18 @@ export const useParlantWebSocket = (
       throw new Error('Not connected to Parlant WebSocket');
     }
     
-    return new Promise((resolve, reject) => {
-      socketRef.current!.emit('parlant:export_conversation', conversationId, (response: any) => {
+    return new Promise<string>((resolve, reject) => {
+      if (!socketRef.current) {
+        reject(new Error('Socket not available'));
+        return;
+      }
+      socketRef.current.emit('parlant:export_conversation', conversationId, (response: { success: boolean; error?: string; exportData: string }) => {
         if (response.success) {
           resolve(response.exportData);
           logInfo('Conversation exported', { conversationId }, 'useParlantWebSocket');
         } else {
-          reject(new Error(response.error || 'Export failed'));
-          logError('Failed to export conversation', response.error, 'useParlantWebSocket');
+          reject(new Error(response.error ?? 'Export failed'));
+          logError('Failed to export conversation', response.error ?? 'Unknown error', 'useParlantWebSocket');
         }
       });
     });
@@ -914,32 +959,38 @@ export const useParlantWebSocket = (
   // VALIDATION WORKFLOW
   // ===========================
   
-  const getValidationWorkflow = useCallback(async (requestId: string): Promise<any> => {
+  const getValidationWorkflow = useCallback(async (requestId: string): Promise<unknown> => {
     if (!isConnected || !socketRef.current) {
       throw new Error('Not connected to Parlant WebSocket');
     }
     
-    return new Promise((resolve, reject) => {
-      socketRef.current!.emit('parlant:get_workflow', requestId, (response: any) => {
+    return new Promise<unknown>((resolve, reject) => {
+      if (!socketRef.current) {
+        reject(new Error('Socket not available'));
+        return;
+      }
+      socketRef.current.emit('parlant:get_workflow', requestId, (response: { success: boolean; error?: string; workflow: unknown }) => {
         if (response.success) {
           resolve(response.workflow);
           logDebug('Validation workflow retrieved', { requestId }, 'useParlantWebSocket');
         } else {
-          reject(new Error(response.error || 'Failed to get workflow'));
-          logError('Failed to get validation workflow', response.error, 'useParlantWebSocket');
+          reject(new Error(response.error ?? 'Failed to get workflow'));
+          logError('Failed to get validation workflow', response.error ?? 'Unknown error', 'useParlantWebSocket');
         }
       });
     });
   }, [isConnected]);
   
   const subscribeToValidationUpdates = useCallback((
-    callback: (update: any) => void
+    callback: (update: unknown) => void
   ): (() => void) => {
     if (!socketRef.current) {
-      return () => {};
+      return (): void => {
+        // No-op cleanup function when no socket is available
+      };
     }
     
-    const handleUpdate = (update: any) => {
+    const handleUpdate = (update: unknown): void => {
       callback(update);
       onValidationWorkflowUpdate?.(update);
     };
@@ -975,7 +1026,8 @@ export const useParlantWebSocket = (
       } catch (error) {
         logError('Failed to send offline message', error, 'useParlantWebSocket');
         // Re-queue message if retry limit not reached
-        if (offlineMessage.retryCount < 3) {
+        const MAX_RETRY_COUNT = 3;
+        if (offlineMessage.retryCount < MAX_RETRY_COUNT) {
           setOfflineQueue(prev => [...prev, {
             ...offlineMessage,
             retryCount: offlineMessage.retryCount + 1,
@@ -1014,7 +1066,7 @@ export const useParlantWebSocket = (
     }
     
     heartbeatTimer.current = setInterval(() => {
-      if (socketRef.current?.connected) {
+      if (socketRef.current?.connected === true) {
         socketRef.current.emit('parlant:heartbeat', { timestamp: Date.now() });
       }
     }, config.heartbeatInterval);
@@ -1036,9 +1088,10 @@ export const useParlantWebSocket = (
       clearInterval(metricsTimer.current);
     }
     
+    const METRICS_UPDATE_INTERVAL = 5000; // Update metrics every 5 seconds
     metricsTimer.current = setInterval(() => {
       updatePerformanceMetrics();
-    }, 5000); // Update metrics every 5 seconds
+    }, METRICS_UPDATE_INTERVAL);
   }, [config.enablePerformanceTracking, updatePerformanceMetrics]);
   
   const stopMetricsTracking = useCallback(() => {
@@ -1073,8 +1126,8 @@ export const useParlantWebSocket = (
       maxSize: config.maxOfflineQueue,
     },
     pendingValidations: pendingValidations.current.size,
-    currentConversation: currentConversation?.conversationId || null,
-    uptime: connectionStartTime.current ? Date.now() - connectionStartTime.current.getTime() : 0,
+    currentConversation: currentConversation?.conversationId ?? null,
+    uptime: Date.now() - connectionStartTime.current.getTime(),
   }), [isConnected, isReconnecting, connectionError, metrics, offlineQueue.length, config.offlineQueue, config.maxOfflineQueue, currentConversation]);
   
   // ===========================
@@ -1089,7 +1142,7 @@ export const useParlantWebSocket = (
     
     startMetricsTracking();
     
-    return () => {
+    return (): void => {
       disconnect();
       stopMetricsTracking();
     };
@@ -1103,9 +1156,11 @@ export const useParlantWebSocket = (
   // Process offline queue when connection is restored
   useEffect(() => {
     if (isConnected && !isOffline && offlineQueue.length > 0) {
-      processOfflineQueue();
+      processOfflineQueue().catch((error) => {
+        logError('Failed to process offline queue in effect', error, 'useParlantWebSocket');
+      });
     }
-  }, [isConnected, isOffline, processOfflineQueue]);
+  }, [isConnected, isOffline, offlineQueue.length, processOfflineQueue]);
   
   // ===========================
   // RETURN INTERFACE
