@@ -350,6 +350,22 @@ interface UseConversationContextProps {
 }
 
 // ===========================
+// CONSTANTS
+// ===========================
+
+const MAX_PREVIEW_LENGTH = 100;
+const MODERATE_COMPLEXITY_THRESHOLD = 20;
+const HIGH_COMPLEXITY_THRESHOLD = 50;
+const RECENT_MESSAGES_SLICE = -10;
+const BASE_CONFIDENCE = 0.5;
+const HIGH_MESSAGE_COUNT_THRESHOLD = 10;
+const CONFIDENCE_BOOST_MESSAGES = 0.2;
+const CONFIDENCE_BOOST_TIMING = 0.1;
+const MAX_RESPONSE_TIME_MS = 60000;
+const RECENT_ACTIVITY_WINDOW_MS = 300000;
+const MAX_CONFIDENCE = 0.95;
+
+// ===========================
 // DEFAULT CONFIGURATION
 // ===========================
 
@@ -517,7 +533,7 @@ class ConversationStorage {
               return options.sortDirection === 'desc'
                 ? b.lastActivity.getTime() - a.lastActivity.getTime()
                 : a.lastActivity.getTime() - b.lastActivity.getTime();
-            case 'priority':
+            case 'priority': {
               const priorityOrder = {
                 [ConversationPriority.EMERGENCY]: 5,
                 [ConversationPriority.CRITICAL]: 4,
@@ -528,6 +544,9 @@ class ConversationStorage {
               return options.sortDirection === 'desc'
                 ? priorityOrder[b.conversation.metadata.priority] - priorityOrder[a.conversation.metadata.priority]
                 : priorityOrder[a.conversation.metadata.priority] - priorityOrder[b.conversation.metadata.priority];
+            }
+            case 'relevance':
+            case undefined:
             default:
               return b.lastActivity.getTime() - a.lastActivity.getTime();
           }
@@ -549,12 +568,16 @@ class ConversationStorage {
     if (!this.db) {await this.initialize();}
     
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['conversations'], 'readwrite');
+      if (!this.db) { 
+        reject(new Error('Database not initialized')); 
+        return; 
+      }
+      const transaction = this.db.transaction(['conversations'], 'readwrite');
       const store = transaction.objectStore('conversations');
       const request = store.delete(conversationId);
       
-      request.onerror = () => { reject(request.error); };
-      request.onsuccess = () => { resolve(); };
+      request.onerror = (): void => { reject(request.error); };
+      request.onsuccess = (): void => { resolve(); };
     });
   }
   
@@ -562,7 +585,11 @@ class ConversationStorage {
     if (!this.db) {await this.initialize();}
     
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(
+      if (!this.db) { 
+        reject(new Error('Database not initialized')); 
+        return; 
+      }
+      const transaction = this.db.transaction(
         ['conversations', 'messages', 'branches', 'analytics'], 
         'readwrite'
       );
@@ -570,7 +597,7 @@ class ConversationStorage {
       const stores = ['conversations', 'messages', 'branches', 'analytics'];
       let completed = 0;
       
-      const checkComplete = () => {
+      const checkComplete = (): void => {
         completed++;
         if (completed === stores.length) {
           resolve();
@@ -580,7 +607,7 @@ class ConversationStorage {
       stores.forEach(storeName => {
         const store = transaction.objectStore(storeName);
         const request = store.clear();
-        request.onerror = () => { reject(request.error); };
+        request.onerror = (): void => { reject(request.error); };
         request.onsuccess = checkComplete;
       });
     });
@@ -590,8 +617,8 @@ class ConversationStorage {
     if ('storage' in navigator && 'estimate' in navigator.storage) {
       const estimate = await navigator.storage.estimate();
       return {
-        used: estimate.usage || 0,
-        available: estimate.quota || 0
+        used: estimate.usage ?? 0,
+        available: estimate.quota ?? 0
       };
     }
     
@@ -604,8 +631,8 @@ class ConversationStorage {
 // ANALYTICS ENGINE
 // ===========================
 
-class ConversationAnalyticsEngine {
-  static calculateAnalytics(
+const ConversationAnalyticsEngine = {
+  calculateAnalytics(
     messages: ConversationMessage[],
     participants: ConversationParticipant[],
     duration: number
@@ -677,14 +704,14 @@ class ConversationAnalyticsEngine {
 // CONTEXT PREDICTION ENGINE
 // ===========================
 
-class ContextPredictionEngine {
-  static generatePredictions(
+const ContextPredictionEngine = {
+  generatePredictions(
     context: ParlantConversationContext,
     messages: ConversationMessage[],
     analytics: ConversationAnalytics
   ): ContextPrediction {
-    const recentMessages = messages.slice(-10); // Look at recent messages
-    const lastMessage = recentMessages[recentMessages.length - 1];
+    const recentMessages = messages.slice(RECENT_MESSAGES_SLICE); // Look at recent messages
+    const _lastMessage = recentMessages[recentMessages.length - 1];
     
     // Predict next actions based on conversation patterns
     const suggestedActions = this.predictActions(recentMessages, context);
@@ -712,11 +739,11 @@ class ContextPredictionEngine {
       confidence,
       reasoning
     };
-  }
+  },
   
-  private static predictActions(
+  predictActions(
     recentMessages: ConversationMessage[],
-    context: ParlantConversationContext
+    _context: ParlantConversationContext
   ): string[] {
     const actions: string[] = [];
     const lastMessage = recentMessages[recentMessages.length - 1];
@@ -742,7 +769,7 @@ class ContextPredictionEngine {
       actions.push('Review and approve/deny validation request');
     }
     
-    if (context.state === ConversationState.VALIDATING) {
+    if (_context.state === ConversationState.VALIDATING) {
       actions.push('Complete validation process');
     }
     
@@ -752,9 +779,9 @@ class ContextPredictionEngine {
     }
     
     return actions;
-  }
+  },
   
-  private static predictTopics(
+  predictTopics(
     recentMessages: ConversationMessage[],
     topicDistribution: Record<string, number>
   ): string[] {
@@ -784,49 +811,56 @@ class ContextPredictionEngine {
     });
     
     return topics;
-  }
+  },
   
-  private static predictParticipants(
-    context: ParlantConversationContext,
-    analytics: ConversationAnalytics
+  predictParticipants(
+    _context: ParlantConversationContext,
+    _analytics: ConversationAnalytics
   ): ConversationParticipant[] {
     // For now, return current participants
     // In a real implementation, this would recommend additional participants
     // based on expertise, availability, and conversation topic
     return [];
-  }
+  },
   
-  private static calculatePredictionConfidence(
+  calculatePredictionConfidence(
     recentMessages: ConversationMessage[],
     analytics: ConversationAnalytics
   ): number {
-    let confidence = 0.5; // Base confidence
+    let confidence = BASE_CONFIDENCE; // Base confidence
     
     // Higher confidence with more messages
-    if (analytics.messageCount > 10) {
-      confidence += 0.2;
+    if (analytics.messageCount > HIGH_MESSAGE_COUNT_THRESHOLD) {
+      confidence += CONFIDENCE_BOOST_MESSAGES;
     }
     
     // Higher confidence with consistent patterns
-    if (analytics.avgResponseTime > 0 && analytics.avgResponseTime < 60000) {
-      confidence += 0.1;
+    if (analytics.avgResponseTime > 0 && analytics.avgResponseTime < MAX_RESPONSE_TIME_MS) {
+      confidence += CONFIDENCE_BOOST_TIMING;
     }
     
     // Higher confidence with recent activity
     const lastMessageTime = recentMessages[recentMessages.length - 1]?.timestamp;
-    if (lastMessageTime && Date.now() - lastMessageTime.getTime() < 300000) {
-      confidence += 0.1;
+    if (lastMessageTime && Date.now() - lastMessageTime.getTime() < RECENT_ACTIVITY_WINDOW_MS) {
+      confidence += CONFIDENCE_BOOST_TIMING;
     }
     
-    return Math.min(0.95, confidence);
-  }
+    return Math.min(MAX_CONFIDENCE, confidence);
+  },
   
-  private static generateReasoning(
+  generateReasoning(
     actions: string[],
     topics: string[],
     confidence: number
   ): string {
-    const confidenceLevel = confidence > 0.8 ? 'high' : confidence > 0.5 ? 'moderate' : 'low';
+    let confidenceLevel: string;
+    if (confidence > 0.8) {
+      confidenceLevel = 'high';
+    } else if (confidence > 0.5) {
+      confidenceLevel = 'moderate';
+    } else {
+      confidenceLevel = 'low';
+    }
     
     return `Based on conversation patterns and recent activity, I have ${confidenceLevel} confidence in these predictions. ` +
            `The suggested actions (${actions.length}) and likely topics (${topics.length}) are derived from ` +
@@ -849,7 +883,7 @@ export const useConversationContext = ({
   autoLoad,
   onContextChange,
   onContextSaved,
-  onSyncComplete,
+  onSyncComplete: _onSyncComplete,
   onError
 }: UseConversationContextProps = {}): UseConversationContextReturn => {
   // ===========================
@@ -874,7 +908,7 @@ export const useConversationContext = ({
   
   // Refs for timers and storage
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
-  const syncTimer = useRef<NodeJS.Timeout | null>(null);
+  const _syncTimer = useRef<NodeJS.Timeout | null>(null);
   const storage = useRef(new ConversationStorage());
   
   // ===========================
@@ -959,8 +993,8 @@ export const useConversationContext = ({
         contextSummary: summary,
         snapshotAt: new Date(),
         lastActivity: new Date(),
-        analytics: analytics || ConversationAnalyticsEngine.calculateAnalytics(messages, participants, 0),
-        syncStatus: syncStatus || {
+        analytics: analytics ?? ConversationAnalyticsEngine.calculateAnalytics(messages, participants, 0),
+        syncStatus: syncStatus ?? {
           lastSync: new Date(),
           state: 'synced',
           pendingChanges: 0,
@@ -1165,30 +1199,36 @@ export const useConversationContext = ({
   // ===========================
   
   const generateContextSummary = (
-    messages: ConversationMessage[],
-    context: ParlantConversationContext
+    hookMessages: ConversationMessage[],
+    _context: ParlantConversationContext
   ): ContextSummary => {
     // Extract topics from messages
-    const topics = extractTopicsFromMessages(messages);
+    const topics = extractTopicsFromMessages(hookMessages);
     
     // Extract decisions and actions
-    const decisions = extractDecisions(messages);
-    const pendingActions = extractPendingActions(messages);
+    const decisions = extractDecisions(hookMessages);
+    const pendingActions = extractPendingActions(hookMessages);
     
     // Get key participants
     const keyParticipants = participants
-      .filter(p => messages.some(m => m.sender.id === p.id))
+      .filter(p => hookMessages.some(m => m.sender.id === p.id))
       .map(p => p.name);
     
     // Simple sentiment analysis
-    const sentiment = analyzeSentiment(messages);
+    const sentiment = analyzeSentiment(hookMessages);
     
     // Determine complexity
-    const complexity = messages.length > 50 ? 'complex' : 
-                      messages.length > 20 ? 'moderate' : 'simple';
+    let complexity: 'simple' | 'moderate' | 'complex';
+    if (hookMessages.length > HIGH_COMPLEXITY_THRESHOLD) {
+      complexity = 'complex';
+    } else if (hookMessages.length > MODERATE_COMPLEXITY_THRESHOLD) {
+      complexity = 'moderate';
+    } else {
+      complexity = 'simple';
+    }
     
     // Generate summary text
-    const summary = generateSummaryText(messages, topics, decisions);
+    const summary = generateSummaryText(hookMessages, topics, decisions);
     
     return {
       topics,
@@ -1201,11 +1241,11 @@ export const useConversationContext = ({
     };
   };
   
-  const extractTopicsFromMessages = (messages: ConversationMessage[]): string[] => {
+  const extractTopicsFromMessages = (hookMessages: ConversationMessage[]): string[] => {
     const topics = new Set<string>();
     const commonTopics = ['task', 'project', 'help', 'error', 'validation', 'settings'];
     
-    messages.forEach(message => {
+    hookMessages.forEach(message => {
       const content = message.content.toLowerCase();
       commonTopics.forEach(topic => {
         if (content.includes(topic)) {
@@ -1217,33 +1257,33 @@ export const useConversationContext = ({
     return Array.from(topics);
   };
   
-  const extractDecisions = (messages: ConversationMessage[]): string[] => {
-    return messages
+  const extractDecisions = (hookMessages: ConversationMessage[]): string[] => {
+    return hookMessages
       .filter(msg => 
         msg.content.toLowerCase().includes('decided') ||
         msg.content.toLowerCase().includes('approved') ||
         msg.content.toLowerCase().includes('rejected')
       )
-      .map(msg => msg.content.substring(0, 100));
+      .map(msg => msg.content.substring(0, MAX_PREVIEW_LENGTH));
   };
   
-  const extractPendingActions = (messages: ConversationMessage[]): string[] => {
-    return messages
+  const extractPendingActions = (hookMessages: ConversationMessage[]): string[] => {
+    return hookMessages
       .filter(msg => 
         msg.content.toLowerCase().includes('todo') ||
         msg.content.toLowerCase().includes('action item') ||
         msg.content.toLowerCase().includes('need to')
       )
-      .map(msg => msg.content.substring(0, 100));
+      .map(msg => msg.content.substring(0, MAX_PREVIEW_LENGTH));
   };
   
-  const analyzeSentiment = (messages: ConversationMessage[]): 'positive' | 'neutral' | 'negative' => {
+  const analyzeSentiment = (hookMessages: ConversationMessage[]): 'positive' | 'neutral' | 'negative' => {
     // Simple sentiment analysis based on keywords
     let score = 0;
     const positiveWords = ['good', 'great', 'excellent', 'success', 'approved', 'working'];
     const negativeWords = ['error', 'problem', 'failed', 'issue', 'denied', 'broken'];
     
-    messages.forEach(message => {
+    hookMessages.forEach(message => {
       const content = message.content.toLowerCase();
       positiveWords.forEach(word => {
         if (content.includes(word)) {score++;}
@@ -1253,15 +1293,21 @@ export const useConversationContext = ({
       });
     });
     
-    return score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral';
+    if (score > 0) {
+      return 'positive';
+    }
+    if (score < 0) {
+      return 'negative';
+    }
+    return 'neutral';
   };
   
   const generateSummaryText = (
-    messages: ConversationMessage[],
+    hookMessages: ConversationMessage[],
     topics: string[],
     decisions: string[]
   ): string => {
-    const messageCount = messages.length;
+    const messageCount = hookMessages.length;
     const topicList = topics.length > 0 ? topics.join(', ') : 'general discussion';
     const decisionCount = decisions.length;
     
@@ -1304,12 +1350,12 @@ export const useConversationContext = ({
     if (config.enablePersistence && config.autoSaveInterval > 0) {
       autoSaveTimer.current = setInterval(() => {
         if (currentContext && !isSaving) {
-          saveContext();
+          saveContext().catch(console.error);
         }
       }, config.autoSaveInterval);
     }
     
-    return () => {
+    return (): void => {
       if (autoSaveTimer.current) {
         clearInterval(autoSaveTimer.current);
       }
@@ -1318,8 +1364,8 @@ export const useConversationContext = ({
   
   // Auto-load on mount
   useEffect(() => {
-    if (autoLoad && config.enablePersistence) {
-      loadContext(autoLoad);
+    if (autoLoad && autoLoad.length > 0 && config.enablePersistence) {
+      loadContext(autoLoad).catch(console.error);
     }
   }, [autoLoad, config.enablePersistence, loadContext]);
   
@@ -1376,18 +1422,25 @@ export const useConversationContext = ({
     getArchivedContexts,
     
     // Branching (TODO: Implement)
-    createBranch: async () => '',
-    mergeBranch: async () => {},
-    abandonBranch: async () => {},
+    createBranch: async (): Promise<string> => {
+      // TODO: Implement branching
+      return '';
+    },
+    mergeBranch: async (): Promise<void> => {
+      // TODO: Implement branch merging
+    },
+    abandonBranch: async (): Promise<void> => {
+      // TODO: Implement branch abandoning
+    },
     getBranches: async () => [],
     
     // Analytics (TODO: Enhance)
-    getAnalytics: async () => analytics || ConversationAnalyticsEngine.calculateAnalytics([], [], 0),
+    getAnalytics: async (): Promise<ConversationAnalytics> => analytics ?? ConversationAnalyticsEngine.calculateAnalytics([], [], 0),
     exportAnalytics: async () => JSON.stringify(analytics),
     
     // Predictions
     getPredictions: async () => predictions,
-    updatePredictions: async () => {
+    updatePredictions: async (): Promise<void> => {
       if (config.enablePrediction && currentContext && analytics) {
         const newPredictions = ContextPredictionEngine.generatePredictions(
           currentContext,
@@ -1400,17 +1453,22 @@ export const useConversationContext = ({
     
     // Sync
     sync,
-    enableSync: () => {},
-    getSyncStatus: () => syncStatus,
+    enableSync: (): void => {
+      // TODO: Implement sync enabling/disabling
+    },
+    getSyncStatus: (): SyncStatus | null => syncStatus,
     
     // Utilities
     clearAll,
-    exportContext: async (conversationId) => {
+    exportContext: async (conversationId: string): Promise<string> => {
       const snapshot = await storage.current.loadSnapshot(conversationId);
       return JSON.stringify(snapshot);
     },
-    importContext: async () => '',
-    getStorageUsage: () => storage.current.getStorageUsage(),
+    importContext: async (): Promise<string> => {
+      // TODO: Implement context import
+      return '';
+    },
+    getStorageUsage: (): Promise<{ used: number; available: number }> => storage.current.getStorageUsage(),
   };
 };
 

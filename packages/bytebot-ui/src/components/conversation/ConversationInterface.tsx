@@ -37,7 +37,7 @@ import {
   ValidationDecision
 } from '@bytebot/shared/types/parlant.types';
 import { useParlantWebSocket } from '@/hooks/useParlantWebSocket';
-import { logDebug, logInfo, logWarning } from '@/utils/logger';
+import { logDebug, logInfo } from '@/utils/logger';
 import {
   AlertCircleIcon,
   ArrowRight02Icon,
@@ -187,12 +187,16 @@ interface ConversationInterfaceProps {
 // CONSTANTS
 // ===========================
 
+/** Time constants in milliseconds */
 const TIME_CONSTANTS = {
   ONE_MINUTE: 60000,
   ONE_HOUR: 3600000,
   ONE_DAY: 86400000,
+  ANIMATION_DURATION: 200,
+  MAX_DISPLAY_MESSAGES: 1000,
+  SLOW_RESPONSE_THRESHOLD: 1000,
+  MAX_CONTENT_PREVIEW: 300
 } as const;
-
 
 // ===========================
 // DEFAULT CONFIGURATION
@@ -216,21 +220,6 @@ const DEFAULT_CONFIG: ConversationConfig = {
     secondaryColor: '#8b5cf6',
   },
 };
-
-// ===========================
-// CONSTANTS
-// ===========================
-
-/** Time constants in milliseconds */
-const TIME_CONSTANTS = {
-  ONE_MINUTE: 60000,
-  ONE_HOUR: 3600000,
-  ONE_DAY: 86400000,
-  ANIMATION_DURATION: 200,
-  MAX_DISPLAY_MESSAGES: 1000,
-  SLOW_RESPONSE_THRESHOLD: 1000,
-  MAX_CONTENT_PREVIEW: 300
-} as const;
 
 // ===========================
 // UTILITY FUNCTIONS
