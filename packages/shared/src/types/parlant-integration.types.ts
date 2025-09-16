@@ -37,7 +37,7 @@ export interface ParlantValidationRequest {
   /** Function description in natural language */
   description: string;
   /** Function parameters */
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   /** User context for validation */
   userContext: ParlantUserContext;
   /** Security level required */
@@ -73,12 +73,12 @@ export interface ParlantUserContext {
   /** IP address for security tracking */
   ipAddress: string;
   /** Additional context data */
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface ParlantExecutionContext {
   /** Execution constraints */
-  constraints: Record<string, any>;
+  constraints: Record<string, unknown>;
   /** Resource limits */
   resourceLimits: ParlantResourceLimits;
   /** Security restrictions */
@@ -138,10 +138,10 @@ export interface ParlantRiskAssessment {
 }
 
 export enum SecurityLevel {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  CRITICAL = "critical",
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
 }
 
 export interface ParlantCacheEntry {
@@ -154,14 +154,14 @@ export interface ParlantCacheEntry {
   /** Cache hit count */
   hitCount: number;
   /** Cache metadata */
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface ParlantWebSocketMessage {
   /** Message type */
   type: ParlantMessageType;
   /** Message payload */
-  payload: any;
+  payload: Record<string, unknown>;
   /** Message ID for correlation */
   messageId: string;
   /** Timestamp */
@@ -169,18 +169,18 @@ export interface ParlantWebSocketMessage {
 }
 
 export enum ParlantMessageType {
-  VALIDATION_REQUEST = "validation_request",
-  VALIDATION_RESPONSE = "validation_response",
-  STATUS_UPDATE = "status_update",
-  ERROR = "error",
-  HEARTBEAT = "heartbeat",
-  AUTH_CHALLENGE = "auth_challenge",
-  AUTH_RESPONSE = "auth_response",
+  _VALIDATION_REQUEST = "validation_request",
+  _VALIDATION_RESPONSE = "validation_response",
+  _STATUS_UPDATE = "status_update",
+  _ERROR = "error",
+  _HEARTBEAT = "heartbeat",
+  _AUTH_CHALLENGE = "auth_challenge",
+  _AUTH_RESPONSE = "auth_response",
 }
 
 export interface ParlantFunctionWrapper {
   /** Original function reference */
-  originalFunction: Function;
+  originalFunction: (..._args: unknown[]) => unknown;
   /** Function metadata */
   metadata: ParlantFunctionMetadata;
   /** Validation configuration */
@@ -197,9 +197,9 @@ export interface ParlantFunctionMetadata {
   /** Function description */
   description: string;
   /** Parameter schemas */
-  parameterSchemas: Record<string, any>;
+  parameterSchemas: Record<string, unknown>;
   /** Return type schema */
-  returnSchema: any;
+  returnSchema: Record<string, unknown>;
   /** Security requirements */
   securityRequirements: string[];
   /** Performance SLA */
@@ -274,13 +274,13 @@ export interface ParlantAuditEntry {
   /** Validation response */
   validationResponse: ParlantValidationResponse;
   /** Execution result */
-  executionResult?: any;
+  executionResult?: unknown;
   /** Execution error if any */
   executionError?: Error;
   /** Audit timestamp */
   timestamp: Date;
   /** Additional metadata */
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface ParlantHealthStatus {
@@ -378,7 +378,7 @@ export interface ParlantDecoratorOptions {
   /** Validation timeout override */
   timeout?: number;
   /** Custom validation logic */
-  customValidator?: (request: ParlantValidationRequest) => Promise<boolean>;
+  customValidator?: (_request: ParlantValidationRequest) => Promise<boolean>;
 }
 
 /**
@@ -387,8 +387,8 @@ export interface ParlantDecoratorOptions {
 export class ParlantIntegrationError extends Error {
   constructor(
     message: string,
-    public readonly code: string,
-    public readonly details?: any,
+    public readonly _code: string,
+    public readonly _details?: Record<string, unknown>,
   ) {
     super(message);
     this.name = "ParlantIntegrationError";
@@ -396,28 +396,28 @@ export class ParlantIntegrationError extends Error {
 }
 
 export class ParlantValidationError extends ParlantIntegrationError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, "VALIDATION_ERROR", details);
     this.name = "ParlantValidationError";
   }
 }
 
 export class ParlantConnectionError extends ParlantIntegrationError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, "CONNECTION_ERROR", details);
     this.name = "ParlantConnectionError";
   }
 }
 
 export class ParlantAuthenticationError extends ParlantIntegrationError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, "AUTHENTICATION_ERROR", details);
     this.name = "ParlantAuthenticationError";
   }
 }
 
 export class ParlantTimeoutError extends ParlantIntegrationError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, "TIMEOUT_ERROR", details);
     this.name = "ParlantTimeoutError";
   }
