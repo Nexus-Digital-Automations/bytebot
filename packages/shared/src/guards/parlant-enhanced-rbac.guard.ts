@@ -40,7 +40,11 @@ import {
 } from "./rbac-authorization.guard";
 
 // Import RBAC decorators and types
-import { Role, Permission, RBACMetadata } from "../types/rbac.types";
+import {
+  Role,
+  Permission as _Permission,
+} from "../decorators/rbac-authorization.decorators";
+import { RBACMetadata } from "../types/rbac.types";
 
 // Import Parlant types
 import {
@@ -137,14 +141,14 @@ export interface AuthorizationRiskFactor {
  * Authorization risk types
  */
 export enum AuthorizationRiskType {
-  PRIVILEGE_ESCALATION = "privilege_escalation",
-  SENSITIVE_RESOURCE = "sensitive_resource",
-  UNUSUAL_ACCESS_PATTERN = "unusual_access_pattern",
-  HIGH_VALUE_OPERATION = "high_value_operation",
-  CROSS_BOUNDARY_ACCESS = "cross_boundary_access",
-  ADMIN_OPERATION = "admin_operation",
-  BULK_OPERATION = "bulk_operation",
-  EXTERNAL_SYSTEM_ACCESS = "external_system_access",
+  _PRIVILEGE_ESCALATION = "privilege_escalation",
+  _SENSITIVE_RESOURCE = "sensitive_resource",
+  _UNUSUAL_ACCESS_PATTERN = "unusual_access_pattern",
+  _HIGH_VALUE_OPERATION = "high_value_operation",
+  _CROSS_BOUNDARY_ACCESS = "cross_boundary_access",
+  _ADMIN_OPERATION = "admin_operation",
+  _BULK_OPERATION = "bulk_operation",
+  _EXTERNAL_SYSTEM_ACCESS = "external_system_access",
 }
 
 /**
@@ -194,11 +198,11 @@ export interface SecurityPolicy {
  * Security policy types
  */
 export enum SecurityPolicyType {
-  ACCESS_CONTROL = "access_control",
-  DATA_PROTECTION = "data_protection",
-  AUDIT_LOGGING = "audit_logging",
-  COMPLIANCE = "compliance",
-  THREAT_PROTECTION = "threat_protection",
+  _ACCESS_CONTROL = "access_control",
+  _DATA_PROTECTION = "data_protection",
+  _AUDIT_LOGGING = "audit_logging",
+  _COMPLIANCE = "compliance",
+  _THREAT_PROTECTION = "threat_protection",
 }
 
 /**
@@ -222,20 +226,20 @@ export interface SecurityRule {
  * Security actions
  */
 export enum SecurityAction {
-  ALLOW = "allow",
-  DENY = "deny",
-  REQUIRE_APPROVAL = "require_approval",
-  AUDIT = "audit",
-  ESCALATE = "escalate",
+  _ALLOW = "allow",
+  _DENY = "deny",
+  _REQUIRE_APPROVAL = "require_approval",
+  _AUDIT = "audit",
+  _ESCALATE = "escalate",
 }
 
 /**
  * Enforcement levels
  */
 export enum EnforcementLevel {
-  ADVISORY = "advisory",
-  ENFORCING = "enforcing",
-  STRICT = "strict",
+  _ADVISORY = "advisory",
+  _ENFORCING = "enforcing",
+  _STRICT = "strict",
 }
 
 /**
@@ -259,10 +263,10 @@ export interface PerformanceContext {
  * Cache strategies
  */
 export enum CacheStrategy {
-  NONE = "none",
-  AGGRESSIVE = "aggressive",
-  CONSERVATIVE = "conservative",
-  INTELLIGENT = "intelligent",
+  _NONE = "none",
+  _AGGRESSIVE = "aggressive",
+  _CONSERVATIVE = "conservative",
+  _INTELLIGENT = "intelligent",
 }
 
 /**
@@ -283,10 +287,10 @@ export interface PerformanceRequirement {
  * Performance requirement types
  */
 export enum PerformanceRequirementType {
-  RESPONSE_TIME = "response_time",
-  CACHE_HIT_RATE = "cache_hit_rate",
-  CPU_USAGE = "cpu_usage",
-  MEMORY_USAGE = "memory_usage",
+  _RESPONSE_TIME = "response_time",
+  _CACHE_HIT_RATE = "cache_hit_rate",
+  _CPU_USAGE = "cpu_usage",
+  _MEMORY_USAGE = "memory_usage",
 }
 
 /**
@@ -294,7 +298,7 @@ export enum PerformanceRequirementType {
  */
 export interface ConversationalAuthorizationResult extends AuthorizationResult {
   /** Conversation context if applicable */
-  conversationContext?: any;
+  conversationContext?: Record<string, unknown>;
 
   /** Performance metrics */
   performanceMetrics: AuthorizationPerformanceMetrics;
@@ -354,15 +358,15 @@ export class ParlantEnhancedRBACGuard
   extends RBACAuthorizationGuard
   implements CanActivate
 {
-  private readonly logger = new Logger(ParlantEnhancedRBACGuard.name);
+  private readonly rbacLogger = new Logger(ParlantEnhancedRBACGuard.name);
   private readonly conversationCacheTimeout: number;
   private readonly riskThresholds: RiskThresholds;
 
   constructor(
-    reflector: Reflector,
+    private readonly reflector: Reflector,
     configService: ConfigService,
-    @Inject(CACHE_MANAGER) cacheManager: Cache,
-    private readonly parlantService: ParlantIntegrationService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly _parlantService: ParlantIntegrationService,
   ) {
     super(reflector, configService, cacheManager);
 
@@ -382,7 +386,7 @@ export class ParlantEnhancedRBACGuard
       ),
     };
 
-    this.logger.log("Parlant Enhanced RBAC Guard initialized", {
+    this.rbacLogger.log("Parlant Enhanced RBAC Guard initialized", {
       conversationCacheTimeout: this.conversationCacheTimeout,
       riskThresholds: this.riskThresholds,
     });
@@ -399,7 +403,7 @@ export class ParlantEnhancedRBACGuard
     const startTime = Date.now();
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
-    this.logger.debug(
+    this.rbacLogger.debug(
       `[${operationId}] Enhanced RBAC authorization initiated`,
       {
         operationId,
@@ -443,7 +447,7 @@ export class ParlantEnhancedRBACGuard
         await this.performConversationalAuthorization(authContext, operationId);
 
       const totalTime = Date.now() - startTime;
-      this.logger.log(
+      this.rbacLogger.log(
         `[${operationId}] Enhanced RBAC authorization completed`,
         {
           operationId,
@@ -458,13 +462,16 @@ export class ParlantEnhancedRBACGuard
     } catch (error) {
       const totalTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] Enhanced RBAC authorization failed`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        totalTime,
-        userId: request.user?.id,
-        url: request.url,
-      });
+      this.rbacLogger.error(
+        `[${operationId}] Enhanced RBAC authorization failed`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          totalTime,
+          userId: request.user?.id,
+          url: request.url,
+        },
+      );
 
       // Fallback to standard RBAC on error
       return super.canActivate(context);
@@ -499,12 +506,15 @@ export class ParlantEnhancedRBACGuard
   ): Promise<ConversationalAuthorizationResult> {
     const startTime = Date.now();
 
-    this.logger.log(`[${operationId}] Conversational authorization initiated`, {
-      operationId,
-      userId: authContext.user.id,
-      riskScore: authContext.riskAssessment.riskScore,
-      riskLevel: authContext.riskAssessment.riskLevel,
-    });
+    this.rbacLogger.log(
+      `[${operationId}] Conversational authorization initiated`,
+      {
+        operationId,
+        userId: authContext.user.id,
+        riskScore: authContext.riskAssessment.riskScore,
+        riskLevel: authContext.riskAssessment.riskLevel,
+      },
+    );
 
     try {
       // Step 1: Check cache for recent decisions
@@ -541,12 +551,15 @@ export class ParlantEnhancedRBACGuard
     } catch (error) {
       const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId}] Conversational authorization error`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        processingTime,
-        userId: authContext.user.id,
-      });
+      this.rbacLogger.error(
+        `[${operationId}] Conversational authorization error`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          processingTime,
+          userId: authContext.user.id,
+        },
+      );
 
       // Return fallback result
       return this.createFallbackAuthorizationResult(
@@ -582,7 +595,7 @@ export class ParlantEnhancedRBACGuard
     authContext: ConversationalAuthorizationContext,
     operationId: string,
   ): Promise<ConversationalAuthorizationResult> {
-    this.logger.warn(`[${operationId}] High-risk authorization initiated`, {
+    this.rbacLogger.warn(`[${operationId}] High-risk authorization initiated`, {
       operationId,
       userId: authContext.user.id,
       riskScore: authContext.riskAssessment.riskScore,
@@ -647,18 +660,18 @@ export class ParlantEnhancedRBACGuard
   private async buildAuthorizationContext(
     context: ExecutionContext,
     user: AuthenticatedRequest["user"],
-    standardResult: AuthorizationResult,
+    _standardResult: AuthorizationResult,
   ): Promise<ConversationalAuthorizationContext> {
-    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const handler = context.getHandler();
-    const controllerClass = context.getClass();
+    const _request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const _handler = context.getHandler();
+    const _controllerClass = context.getClass();
 
-    // Extract RBAC metadata
-    const rbacMetadata = this.extractRBACMetadata(
-      context,
-      handler,
-      controllerClass,
-    );
+    // Extract RBAC metadata using reflector
+    const rbacMetadata = {
+      roles: this.reflector.get<string[]>("roles", context.getHandler()) || [],
+      permissions:
+        this.reflector.get<string[]>("permissions", context.getHandler()) || [],
+    } as RBACMetadata;
 
     // Assess authorization risk
     const riskAssessment = await this.assessAuthorizationRisk(
@@ -805,7 +818,7 @@ export class ParlantEnhancedRBACGuard
     user: AuthenticatedRequest["user"],
     rbacMetadata: RBACMetadata,
   ): Promise<AuthorizationSecurityContext> {
-    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const _request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
     // Determine security classification
     const securityClassification = this.determineSecurityClassification(
@@ -1045,7 +1058,7 @@ export class ParlantEnhancedRBACGuard
   private createFallbackAuthorizationResult(
     authContext: ConversationalAuthorizationContext,
     startTime: number,
-    error: unknown,
+    _error: unknown,
   ): ConversationalAuthorizationResult {
     return {
       granted: false,
@@ -1068,7 +1081,7 @@ export class ParlantEnhancedRBACGuard
   private async handleStandardRBACDenial(
     context: ExecutionContext,
     standardResult: AuthorizationResult,
-    operationId: string,
+    _operationId: string,
   ): Promise<boolean> {
     // Check if conversational override is possible for denied requests
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
@@ -1089,12 +1102,15 @@ export class ParlantEnhancedRBACGuard
   ): boolean {
     const totalTime = Date.now() - startTime;
 
-    this.logger.debug(`[${operationId}] Standard authorization sufficient`, {
-      operationId,
-      userId: authContext.user.id,
-      riskScore: authContext.riskAssessment.riskScore,
-      totalTime,
-    });
+    this.rbacLogger.debug(
+      `[${operationId}] Standard authorization sufficient`,
+      {
+        operationId,
+        userId: authContext.user.id,
+        riskScore: authContext.riskAssessment.riskScore,
+        totalTime,
+      },
+    );
 
     return true;
   }
@@ -1118,8 +1134,8 @@ export class ParlantEnhancedRBACGuard
   }
 
   private async isUnusualAccessPattern(
-    user: AuthenticatedRequest["user"],
-    context: ExecutionContext,
+    _user: AuthenticatedRequest["user"],
+    _context: ExecutionContext,
   ): Promise<boolean> {
     // Implementation would analyze user access patterns
     return false;
@@ -1147,7 +1163,7 @@ export class ParlantEnhancedRBACGuard
   // Implement remaining helper methods...
   private determineSecurityClassification(
     rbacMetadata: RBACMetadata,
-    context: ExecutionContext,
+    _context: ExecutionContext,
   ): FunctionSecurityLevel {
     if (rbacMetadata.adminOnly) return FunctionSecurityLevel.RESTRICTED;
     if (rbacMetadata.permissions?.length) return FunctionSecurityLevel.INTERNAL;
@@ -1155,19 +1171,19 @@ export class ParlantEnhancedRBACGuard
   }
 
   private async getActiveSecurityPolicies(
-    user: AuthenticatedRequest["user"],
-    context: ExecutionContext,
+    _user: AuthenticatedRequest["user"],
+    _context: ExecutionContext,
   ): Promise<SecurityPolicy[]> {
     // Implementation would return active security policies
     return [];
   }
 
-  private getComplianceRequirements(context: ExecutionContext): string[] {
+  private getComplianceRequirements(_context: ExecutionContext): string[] {
     // Implementation would return compliance requirements
     return [];
   }
 
-  private isPrivilegedOperation(context: ExecutionContext): boolean {
+  private isPrivilegedOperation(_context: ExecutionContext): boolean {
     // Implementation would check if operation is privileged
     return false;
   }
@@ -1240,8 +1256,8 @@ export class ParlantEnhancedRBACGuard
   }
 
   private createAuthorizationConversation(
-    authContext: ConversationalAuthorizationContext,
-  ): any {
+    _authContext: ConversationalAuthorizationContext,
+  ): Record<string, unknown> {
     // Implementation would create conversation context
     return {};
   }
@@ -1279,7 +1295,7 @@ export class ParlantEnhancedRBACGuard
 
   private determineCacheTTL(
     authContext: ConversationalAuthorizationContext,
-    result: ConversationalAuthorizationResult,
+    _result: ConversationalAuthorizationResult,
   ): number {
     if (authContext.riskAssessment.riskLevel === RiskLevel.CRITICAL) {
       return 60000; // 1 minute
@@ -1298,7 +1314,7 @@ export class ParlantEnhancedRBACGuard
     result: ConversationalAuthorizationResult,
   ): Promise<void> {
     // Implementation would log authorization decision for audit
-    this.logger.log(`[${operationId}] Authorization decision logged`, {
+    this.rbacLogger.log(`[${operationId}] Authorization decision logged`, {
       operationId,
       userId: authContext.user.id,
       granted: result.granted,
@@ -1312,7 +1328,7 @@ export class ParlantEnhancedRBACGuard
     operationId: string,
   ): Promise<void> {
     // Implementation would add additional security measures
-    this.logger.log(
+    this.rbacLogger.log(
       `[${operationId}] Additional security measures implemented`,
       {
         operationId,
