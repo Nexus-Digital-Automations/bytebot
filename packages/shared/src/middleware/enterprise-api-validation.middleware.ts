@@ -52,14 +52,14 @@ import {
   _ParlantExecutionContext,
   _ParlantValidationMetadata,
   _ParlantRiskAssessment,
-  ParlantAuditEntry,
-  ParlantHealthStatus,
+  ParlantAuditEntry as _ParlantAuditEntry,
+  ParlantHealthStatus as _ParlantHealthStatus,
 } from "../types/parlant-integration.types";
 
 // Import Parlant decorators
 import {
   ParlantValidation,
-  ParlantDecoratorOptions,
+  ParlantDecoratorOptions as _ParlantDecoratorOptions,
 } from "../decorators/parlant-validation.decorator";
 
 // Import Parlant utility functions
@@ -338,14 +338,14 @@ export interface SecurityMeasure {
  * Security measure types
  */
 export enum SecurityMeasureType {
-  ENHANCED_AUTHENTICATION = "enhanced_authentication",
-  RATE_LIMITING = "rate_limiting",
-  IP_FILTERING = "ip_filtering",
-  REQUEST_VALIDATION = "request_validation",
-  RESPONSE_FILTERING = "response_filtering",
-  SESSION_MONITORING = "session_monitoring",
+  _ENHANCED_AUTHENTICATION = "enhanced_authentication",
+  _RATE_LIMITING = "rate_limiting",
+  _IP_FILTERING = "ip_filtering",
+  _REQUEST_VALIDATION = "request_validation",
+  _RESPONSE_FILTERING = "response_filtering",
+  _SESSION_MONITORING = "session_monitoring",
   _AUDIT_LOGGING = "audit_logging",
-  CIRCUIT_BREAKING = "circuit_breaking",
+  _CIRCUIT_BREAKING = "circuit_breaking",
 }
 
 /**
@@ -487,14 +487,14 @@ export interface ComplianceViolation {
  * Compliance violation types
  */
 export enum ComplianceViolationType {
-  DATA_RETENTION = "data_retention",
+  _DATA_RETENTION = "data_retention",
   _ACCESS_CONTROL = "access_control",
-  AUDIT_TRAIL = "audit_trail",
+  _AUDIT_TRAIL = "audit_trail",
   _ENCRYPTION = "encryption",
-  PRIVACY = "privacy",
-  CONSENT = "consent",
-  DATA_MINIMIZATION = "data_minimization",
-  CROSS_BORDER_TRANSFER = "cross_border_transfer",
+  _PRIVACY = "privacy",
+  _CONSENT = "consent",
+  _DATA_MINIMIZATION = "data_minimization",
+  _CROSS_BORDER_TRANSFER = "cross_border_transfer",
 }
 
 /**

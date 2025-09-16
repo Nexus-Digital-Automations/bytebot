@@ -16,6 +16,9 @@ export { MonitoringModule } from './monitoring.module';
 // Type definitions
 export * from './types';
 
+// Standardized monitoring configuration
+export * from './config/monitoring.config';
+
 // Re-export commonly used types for convenience
 export type {
   HealthStatus,

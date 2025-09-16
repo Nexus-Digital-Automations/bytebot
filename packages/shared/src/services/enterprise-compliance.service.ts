@@ -330,9 +330,9 @@ export enum LegalBasisType {
  * Processing methods
  */
 export enum ProcessingMethod {
-  AUTOMATED = "automated",
-  MANUAL = "manual",
-  HYBRID = "hybrid",
+  _AUTOMATED = "automated",
+  _MANUAL = "manual",
+  _HYBRID = "hybrid",
 }
 
 /**
@@ -359,14 +359,14 @@ export interface DataSubjectInfo {
  * Data subject categories
  */
 export enum DataSubjectCategory {
-  CUSTOMER = "customer",
-  EMPLOYEE = "employee",
-  PROSPECT = "prospect",
-  VENDOR = "vendor",
-  PATIENT = "patient",
-  STUDENT = "student",
-  VISITOR = "visitor",
-  MINOR = "minor",
+  _CUSTOMER = "customer",
+  _EMPLOYEE = "employee",
+  _PROSPECT = "prospect",
+  _VENDOR = "vendor",
+  _PATIENT = "patient",
+  _STUDENT = "student",
+  _VISITOR = "visitor",
+  _MINOR = "minor",
 }
 
 /**
@@ -393,23 +393,23 @@ export interface ConsentStatus {
  * Consent methods
  */
 export enum ConsentMethod {
-  EXPLICIT_OPT_IN = "explicit_opt_in",
-  IMPLIED_CONSENT = "implied_consent",
-  OPT_OUT = "opt_out",
-  LEGITIMATE_INTEREST = "legitimate_interest",
+  _EXPLICIT_OPT_IN = "explicit_opt_in",
+  _IMPLIED_CONSENT = "implied_consent",
+  _OPT_OUT = "opt_out",
+  _LEGITIMATE_INTEREST = "legitimate_interest",
 }
 
 /**
  * Data subject rights
  */
 export enum DataSubjectRights {
-  ACCESS = "access",
-  RECTIFICATION = "rectification",
-  ERASURE = "erasure",
-  PORTABILITY = "portability",
-  RESTRICTION = "restriction",
-  OBJECTION = "objection",
-  AUTOMATED_DECISION_MAKING = "automated_decision_making",
+  _ACCESS = "access",
+  _RECTIFICATION = "rectification",
+  _ERASURE = "erasure",
+  _PORTABILITY = "portability",
+  _RESTRICTION = "restriction",
+  _OBJECTION = "objection",
+  _AUTOMATED_DECISION_MAKING = "automated_decision_making",
 }
 
 /**
@@ -476,10 +476,10 @@ export interface DataResidencyRequirement {
  * Residency requirement types
  */
 export enum ResidencyRequirementType {
-  DATA_LOCALIZATION = "data_localization",
-  CONDITIONAL_TRANSFER = "conditional_transfer",
-  RESTRICTED_TRANSFER = "restricted_transfer",
-  PROHIBITED_TRANSFER = "prohibited_transfer",
+  _DATA_LOCALIZATION = "data_localization",
+  _CONDITIONAL_TRANSFER = "conditional_transfer",
+  _RESTRICTED_TRANSFER = "restricted_transfer",
+  _PROHIBITED_TRANSFER = "prohibited_transfer",
 }
 
 /**
@@ -512,39 +512,39 @@ export interface ComplianceOrganization {
  * Organization types
  */
 export enum OrganizationType {
-  PUBLIC_COMPANY = "public_company",
-  PRIVATE_COMPANY = "private_company",
-  GOVERNMENT_AGENCY = "government_agency",
-  NON_PROFIT = "non_profit",
-  EDUCATIONAL_INSTITUTION = "educational_institution",
-  HEALTHCARE_ORGANIZATION = "healthcare_organization",
-  FINANCIAL_INSTITUTION = "financial_institution",
+  _PUBLIC_COMPANY = "public_company",
+  _PRIVATE_COMPANY = "private_company",
+  _GOVERNMENT_AGENCY = "government_agency",
+  _NON_PROFIT = "non_profit",
+  _EDUCATIONAL_INSTITUTION = "educational_institution",
+  _HEALTHCARE_ORGANIZATION = "healthcare_organization",
+  _FINANCIAL_INSTITUTION = "financial_institution",
 }
 
 /**
  * Industry sectors
  */
 export enum IndustrySector {
-  FINANCIAL_SERVICES = "financial_services",
-  HEALTHCARE = "healthcare",
-  TECHNOLOGY = "technology",
-  RETAIL = "retail",
-  MANUFACTURING = "manufacturing",
-  ENERGY = "energy",
-  TELECOMMUNICATIONS = "telecommunications",
-  EDUCATION = "education",
-  GOVERNMENT = "government",
-  NON_PROFIT = "non_profit",
+  _FINANCIAL_SERVICES = "financial_services",
+  _HEALTHCARE = "healthcare",
+  _TECHNOLOGY = "technology",
+  _RETAIL = "retail",
+  _MANUFACTURING = "manufacturing",
+  _ENERGY = "energy",
+  _TELECOMMUNICATIONS = "telecommunications",
+  _EDUCATION = "education",
+  _GOVERNMENT = "government",
+  _NON_PROFIT = "non_profit",
 }
 
 /**
  * Organization sizes
  */
 export enum OrganizationSize {
-  SMALL = "small", // < 50 employees
-  MEDIUM = "medium", // 50-250 employees
-  LARGE = "large", // 250-5000 employees
-  ENTERPRISE = "enterprise", // > 5000 employees
+  _SMALL = "small", // < 50 employees
+  _MEDIUM = "medium", // 50-250 employees
+  _LARGE = "large", // 250-5000 employees
+  _ENTERPRISE = "enterprise", // > 5000 employees
 }
 
 /**
@@ -577,26 +577,26 @@ export interface ComplianceBusinessContext {
  * Business operation types
  */
 export enum BusinessOperationType {
-  CUSTOMER_ONBOARDING = "customer_onboarding",
-  TRANSACTION_PROCESSING = "transaction_processing",
-  DATA_ANALYSIS = "data_analysis",
-  REPORTING = "reporting",
-  AUDIT = "audit",
-  INCIDENT_RESPONSE = "incident_response",
-  SYSTEM_MAINTENANCE = "system_maintenance",
-  POLICY_ENFORCEMENT = "policy_enforcement",
+  _CUSTOMER_ONBOARDING = "customer_onboarding",
+  _TRANSACTION_PROCESSING = "transaction_processing",
+  _DATA_ANALYSIS = "data_analysis",
+  _REPORTING = "reporting",
+  _AUDIT = "audit",
+  _INCIDENT_RESPONSE = "incident_response",
+  _SYSTEM_MAINTENANCE = "system_maintenance",
+  _POLICY_ENFORCEMENT = "policy_enforcement",
 }
 
 /**
  * Compliance risk levels
  */
 export enum ComplianceRiskLevel {
-  MINIMAL = "minimal",
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  CRITICAL = "critical",
-  EXTREME = "extreme",
+  _MINIMAL = "minimal",
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
+  _EXTREME = "extreme",
 }
 
 /**
@@ -626,12 +626,12 @@ export interface ComplianceConversationContext {
  * Compliance conversation types
  */
 export enum ComplianceConversationType {
-  COMPLIANCE_VALIDATION = "compliance_validation",
-  POLICY_INTERPRETATION = "policy_interpretation",
-  VIOLATION_INVESTIGATION = "violation_investigation",
-  RISK_ASSESSMENT = "risk_assessment",
-  REMEDIATION_PLANNING = "remediation_planning",
-  AUDIT_REVIEW = "audit_review",
+  _COMPLIANCE_VALIDATION = "compliance_validation",
+  _POLICY_INTERPRETATION = "policy_interpretation",
+  _VIOLATION_INVESTIGATION = "violation_investigation",
+  _RISK_ASSESSMENT = "risk_assessment",
+  _REMEDIATION_PLANNING = "remediation_planning",
+  _AUDIT_REVIEW = "audit_review",
 }
 
 /**
@@ -664,10 +664,10 @@ export interface ComplianceValidationConfiguration {
  * Compliance validation modes
  */
 export enum ComplianceValidationMode {
-  PASSIVE = "passive", // Monitor only
-  ACTIVE = "active", // Validate and warn
-  ENFORCING = "enforcing", // Block non-compliant operations
-  ADVISORY = "advisory", // Provide guidance only
+  _PASSIVE = "passive", // Monitor only
+  _ACTIVE = "active", // Validate and warn
+  _ENFORCING = "enforcing", // Block non-compliant operations
+  _ADVISORY = "advisory", // Provide guidance only
 }
 
 /**
@@ -712,13 +712,13 @@ export interface ComplianceValidationResult {
  * Compliance status
  */
 export enum ComplianceStatus {
-  COMPLIANT = "compliant",
-  NON_COMPLIANT = "non_compliant",
-  PARTIALLY_COMPLIANT = "partially_compliant",
-  UNDER_REVIEW = "under_review",
-  PENDING_APPROVAL = "pending_approval",
-  EXEMPTED = "exempted",
-  NOT_APPLICABLE = "not_applicable",
+  _COMPLIANT = "compliant",
+  _NON_COMPLIANT = "non_compliant",
+  _PARTIALLY_COMPLIANT = "partially_compliant",
+  _UNDER_REVIEW = "under_review",
+  _PENDING_APPROVAL = "pending_approval",
+  _EXEMPTED = "exempted",
+  _NOT_APPLICABLE = "not_applicable",
 }
 
 /**
@@ -792,32 +792,32 @@ export interface ComplianceControlAssessment {
  * Compliance control results
  */
 export enum ComplianceControlResult {
-  EFFECTIVE = "effective",
-  DEFICIENT = "deficient",
-  NOT_IMPLEMENTED = "not_implemented",
-  NOT_APPLICABLE = "not_applicable",
-  COMPENSATING_CONTROL = "compensating_control",
+  _EFFECTIVE = "effective",
+  _DEFICIENT = "deficient",
+  _NOT_IMPLEMENTED = "not_implemented",
+  _NOT_APPLICABLE = "not_applicable",
+  _COMPENSATING_CONTROL = "compensating_control",
 }
 
 /**
  * Implementation status
  */
 export enum ImplementationStatus {
-  IMPLEMENTED = "implemented",
-  PARTIALLY_IMPLEMENTED = "partially_implemented",
-  PLANNED = "planned",
-  NOT_IMPLEMENTED = "not_implemented",
+  _IMPLEMENTED = "implemented",
+  _PARTIALLY_IMPLEMENTED = "partially_implemented",
+  _PLANNED = "planned",
+  _NOT_IMPLEMENTED = "not_implemented",
 }
 
 /**
  * Effectiveness ratings
  */
 export enum EffectivenessRating {
-  HIGHLY_EFFECTIVE = "highly_effective",
-  EFFECTIVE = "effective",
-  MODERATELY_EFFECTIVE = "moderately_effective",
-  MINIMALLY_EFFECTIVE = "minimally_effective",
-  INEFFECTIVE = "ineffective",
+  _HIGHLY_EFFECTIVE = "highly_effective",
+  _EFFECTIVE = "effective",
+  _MODERATELY_EFFECTIVE = "moderately_effective",
+  _MINIMALLY_EFFECTIVE = "minimally_effective",
+  _INEFFECTIVE = "ineffective",
 }
 
 // Additional supporting interfaces continue...
@@ -903,25 +903,25 @@ export interface ComplianceViolation {
 }
 
 export enum ComplianceViolationType {
-  DATA_BREACH = "data_breach",
-  UNAUTHORIZED_ACCESS = "unauthorized_access",
-  POLICY_VIOLATION = "policy_violation",
-  REGULATORY_VIOLATION = "regulatory_violation",
-  CONTROL_DEFICIENCY = "control_deficiency",
+  _DATA_BREACH = "data_breach",
+  _UNAUTHORIZED_ACCESS = "unauthorized_access",
+  _POLICY_VIOLATION = "policy_violation",
+  _REGULATORY_VIOLATION = "regulatory_violation",
+  _CONTROL_DEFICIENCY = "control_deficiency",
 }
 
 export enum ComplianceSeverity {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  CRITICAL = "critical",
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
 }
 
 export enum ViolationStatus {
-  OPEN = "open",
-  IN_PROGRESS = "in_progress",
-  RESOLVED = "resolved",
-  CLOSED = "closed",
+  _OPEN = "open",
+  _IN_PROGRESS = "in_progress",
+  _RESOLVED = "resolved",
+  _CLOSED = "closed",
 }
 
 export interface ComplianceRiskAssessment {
@@ -956,19 +956,19 @@ export interface ComplianceRecommendation {
 }
 
 export enum RecommendationType {
-  POLICY_UPDATE = "policy_update",
-  PROCESS_IMPROVEMENT = "process_improvement",
-  TECHNOLOGY_ENHANCEMENT = "technology_enhancement",
-  TRAINING = "training",
-  MONITORING = "monitoring",
+  _POLICY_UPDATE = "policy_update",
+  _PROCESS_IMPROVEMENT = "process_improvement",
+  _TECHNOLOGY_ENHANCEMENT = "technology_enhancement",
+  _TRAINING = "training",
+  _MONITORING = "monitoring",
 }
 
 export enum CompliancePriority {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  CRITICAL = "critical",
-  IMMEDIATE = "immediate",
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
+  _IMMEDIATE = "immediate",
 }
 
 export interface ComplianceRemediationAction {
@@ -981,11 +981,11 @@ export interface ComplianceRemediationAction {
 }
 
 export enum RemediationStatus {
-  PLANNED = "planned",
-  IN_PROGRESS = "in_progress",
-  COMPLETED = "completed",
-  OVERDUE = "overdue",
-  CANCELLED = "cancelled",
+  _PLANNED = "planned",
+  _IN_PROGRESS = "in_progress",
+  _COMPLETED = "completed",
+  _OVERDUE = "overdue",
+  _CANCELLED = "cancelled",
 }
 
 export interface ComplianceAuditEntry {
@@ -1196,24 +1196,24 @@ export class EnterpriseComplianceService {
       };
 
       // Phase 1: Framework-specific validation
-      await this.performFrameworkValidations(context, validationResult);
+      await this.performFrameworkValidations(_context, validationResult);
 
       // Phase 2: Cross-framework analysis
-      await this.performCrossFrameworkAnalysis(context, validationResult);
+      await this.performCrossFrameworkAnalysis(_context, validationResult);
 
       // Phase 3: Risk assessment with Parlant enhancement
-      await this.performComplianceRiskAssessment(context, validationResult);
+      await this.performComplianceRiskAssessment(_context, validationResult);
 
       // Phase 4: Conversational compliance validation (if configured)
-      if (context.conversationContext) {
+      if (_context.conversationContext) {
         await this.performConversationalComplianceValidation(
-          context,
+          _context,
           validationResult,
         );
       }
 
       // Phase 5: Generate recommendations and remediation actions
-      await this.generateComplianceRecommendations(context, validationResult);
+      await this.generateComplianceRecommendations(_context, validationResult);
 
       // Phase 6: Finalize validation results
       this.finalizeComplianceValidation(validationResult);
@@ -1293,7 +1293,7 @@ export class EnterpriseComplianceService {
     _context: ComplianceValidationContext,
   ): string {
     // Implementation for cache key generation
-    return `compliance-${context.operationId}`;
+    return `compliance-${_context.operationId}`;
   }
 
   private async getCachedComplianceResult(

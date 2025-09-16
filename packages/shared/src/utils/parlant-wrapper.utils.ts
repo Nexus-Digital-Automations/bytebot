@@ -185,7 +185,7 @@ export function createParlantWrapper<
 >(
   originalFunction: T,
   config: FunctionWrapperConfig,
-  parlantService: unknown, // ParlantIntegrationService type would be imported
+  parlantService: ParlantService,
 ): WrappedFunction<T> {
   const logger = new Logger(`ParlantWrapper:${originalFunction.name}`);
 
@@ -209,7 +209,7 @@ export function createParlantWrapper<
         logger.debug(
           `[${context.functionName}] Parlant wrapper disabled, executing directly`,
         );
-        return await originalFunction(...args);
+        return (await originalFunction(...args)) as ReturnType<T>;
       }
 
       // Create validation request
@@ -265,7 +265,7 @@ export function createParlantWrapper<
         },
       );
 
-      return result;
+      return result as ReturnType<T>;
     } catch (error) {
       const executionTime = performance.now() - context.startTime;
 
@@ -521,7 +521,7 @@ async function executeWithMonitoring<T>(
       conversationId: validationResponse.conversationContext.conversationId,
     });
 
-    return result;
+    return result as T;
   } catch (error) {
     const endTime = performance.now();
     const executionTime = endTime - startTime;
@@ -606,7 +606,7 @@ function generateConversationId(): string {
 async function logValidationRejection(
   error: ParlantValidationRejection,
   context: WrapperContext,
-  _parlantService: unknown,
+  _parlantService: ParlantService,
 ): Promise<void> {
   try {
     // Create audit entry for rejection
@@ -660,7 +660,7 @@ export class ParlantWrapperBuilder<T extends (..._args: unknown[]) => unknown> {
 
   constructor(
     private _originalFunction: T,
-    private _parlantService: unknown,
+    private _parlantService: ParlantService,
   ) {}
 
   /**

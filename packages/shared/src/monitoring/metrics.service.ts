@@ -76,8 +76,8 @@ export class MetricsService {
   private readonly defaultHistogramBuckets = [0.1, 0.5, 1, 2, 5, 10, 30, 60];
 
   constructor(
-    private readonly config: ConfigService,
-    private readonly eventEmitter: EventEmitter2,
+    private readonly _config: ConfigService,
+    private readonly _eventEmitter: EventEmitter2,
   ) {
     this.metrics = {
       counters: new Map(),

@@ -63,7 +63,7 @@ export interface ParlantIntegrationModuleOptions {
 export interface ParlantIntegrationModuleAsyncOptions {
   /** Configuration factory function */
   useFactory?: (
-    ...args: unknown[]
+    ..._args: unknown[]
   ) =>
     | ParlantIntegrationModuleOptions
     | Promise<ParlantIntegrationModuleOptions>;
@@ -535,10 +535,10 @@ export function ParlantEnabled(options?: {
   securityLevel?: string;
   cacheResponses?: boolean;
 }) {
-  return function <T extends { new (...args: unknown[]): Record<string, unknown> }>(constructor: T) {
+  return function <T extends { new (..._args: unknown[]): Record<string, unknown> }>(constructor: T) {
     return class extends constructor {
-      constructor(...args: unknown[]) {
-        super(...args);
+      constructor(..._args: unknown[]) {
+        super(..._args);
 
         // Mark as Parlant-enabled for automatic function wrapping
         Object.defineProperty(this, "__parlantEnabled", {

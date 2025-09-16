@@ -37,7 +37,7 @@ export class MonitoringController {
   private readonly logger = new Logger(MonitoringController.name);
 
   constructor(
-    private readonly metricsService: MetricsService,
+    private readonly _metricsService: MetricsService,
     private readonly config: ConfigService,
   ) {
     this.logger.log('Local Monitoring Controller initialized', {
