@@ -193,14 +193,6 @@ const TIME_CONSTANTS = {
   ONE_DAY: 86400000,
 } as const;
 
-const UI_CONSTANTS = {
-  MESSAGE_CONTENT_THRESHOLD: 300,
-  SLOW_RESPONSE_THRESHOLD: 1000,
-  ANIMATION_SCALE_MAX: 1.2,
-  ANIMATION_DELAY_MULTIPLIER: 0.2,
-  MESSAGE_CONTENT_PREVIEW: 50,
-  RECENT_MESSAGE_COUNT: 3,
-} as const;
 
 // ===========================
 // DEFAULT CONFIGURATION
@@ -465,7 +457,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               size="sm"
               variant="outline"
               onClick={() => {
-                void handleValidationResponse(ValidationDecision.APPROVED);
+                handleValidationResponse(ValidationDecision.APPROVED).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-green-600 border-green-600 hover:bg-green-50"
@@ -477,7 +469,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               size="sm"
               variant="outline"
               onClick={() => {
-                void handleValidationResponse(ValidationDecision.DENIED);
+                handleValidationResponse(ValidationDecision.DENIED).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-red-600 border-red-600 hover:bg-red-50"
@@ -489,7 +481,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               size="sm"
               variant="outline"
               onClick={() => {
-                void handleValidationResponse(ValidationDecision.REQUEST_MORE_INFO);
+                handleValidationResponse(ValidationDecision.REQUEST_MORE_INFO).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
@@ -716,9 +708,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       logInfo('Conversation started', { conversationId: conversation.conversationId }, 'ConversationInterface');
       onConversationStart?.(conversation.conversationId);
     },
-    onConversationEnd: (conversationId) => {
-      logInfo('Conversation ended', { conversationId }, 'ConversationInterface');
-      onConversationEnd?.(conversationId);
+    onConversationEnd: (endedConversationId) => {
+      logInfo('Conversation ended', { conversationId: endedConversationId }, 'ConversationInterface');
+      onConversationEnd?.(endedConversationId);
     },
     onMessageSent: (message) => {
       logDebug('Message sent', { messageId: message.id }, 'ConversationInterface');
@@ -760,7 +752,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      void handleSendMessage();
+      handleSendMessage().catch(() => undefined);
     }
   }, [handleSendMessage]);
   
@@ -791,8 +783,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   
   const handleStartConversation = useCallback(async () => {
     try {
-      const conversationId = await startConversation(initialTopic, initialPriority);
-      logInfo('New conversation started', { conversationId }, 'ConversationInterface');
+      const newConversationId = await startConversation(initialTopic, initialPriority);
+      logInfo('New conversation started', { conversationId: newConversationId }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logWarning('Failed to start conversation', { error: errorMessage }, 'ConversationInterface');
@@ -864,9 +856,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   useEffect(() => {
     if (isConnected && !currentConversation) {
       if (conversationId) {
-        void handleJoinConversation(conversationId);
+        handleJoinConversation(conversationId).catch(() => undefined);
       } else if (autoStart) {
-        void handleStartConversation();
+        handleStartConversation().catch(() => undefined);
       }
     }
   }, [isConnected, currentConversation, conversationId, autoStart, handleJoinConversation, handleStartConversation]);
@@ -907,7 +899,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           showAvatar={showAvatar}
           showTimestamp={true}
           isAnimated={isAnimated}
-          onValidationResponse={(decision, reasoning) => { void handleValidationResponse(decision, reasoning); }}
+          onValidationResponse={(decision, reasoning) => {
+            handleValidationResponse(decision, reasoning).catch(() => undefined);
+          }}
         />
       );
     });
@@ -963,8 +957,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           state={conversationState}
           metrics={metrics}
           onSearch={config.enableSearch ? (): void => { setShowSearch(!showSearch); } : undefined}
-          onExport={config.enableExport ? (): void => { 
-            void handleExportConversation(); 
+          onExport={config.enableExport ? () => {
+            handleExportConversation().catch(() => undefined);
           } : undefined}
           onRefresh={(): void => { 
             window.location.reload(); 
@@ -1016,7 +1010,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 Complex tasks become as simple as having a natural conversation.
               </p>
               <Button
-                onClick={() => { void handleStartConversation(); }}
+                onClick={() => {
+                  handleStartConversation().catch(() => undefined);
+                }}
                 disabled={!isConnected}
                 className="bg-blue-600 hover:bg-blue-700"
               >
@@ -1134,7 +1130,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
             
             {/* Send Button */}
             <Button
-              onClick={() => { void handleSendMessage(); }}
+              onClick={() => {
+                handleSendMessage().catch(() => undefined);
+              }}
               disabled={!inputValue.trim() || !isConnected || isComposing}
               size="icon"
               className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
