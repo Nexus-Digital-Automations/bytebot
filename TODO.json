@@ -1398,6 +1398,26 @@
       ],
       "completed_at": "2025-09-16T12:28:28.878Z",
       "updated_at": "2025-09-16T12:28:28.878Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-16T12:32:21.276Z",
+      "title": "PARLANT Browser-Use Integration Research Agent #4",
+      "description": "Implement function-level Parlant integration for Browser-Use package with comprehensive conversational validation including browser automation functions, session management, task execution, and real-time approval flows",
+      "category": "feature",
+      "id": "feature_1758025941276_km4k5o9lmh8",
+      "assigned_agent": "dev_session_1758025919646_1_general_db4c7cc4",
+      "started_at": "2025-09-16T12:35:02.730Z",
+      "claimed_by": "dev_session_1758025919646_1_general_db4c7cc4",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758025919646_1_general_db4c7cc4",
+          "role": "primary",
+          "assignedAt": "2025-09-16T12:35:02.730Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -3399,6 +3419,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-16T12:09:12.674Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758025919646_1_general_db4c7cc4": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T12:31:59.649Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T12:31:59.649Z",
       "sessionId": null,
       "metadata": {}
     }
