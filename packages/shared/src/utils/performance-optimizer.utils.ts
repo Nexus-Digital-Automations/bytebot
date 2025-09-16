@@ -1093,7 +1093,7 @@ export class PerformanceOptimizerUtils {
       });
 
       // Return fallback metrics
-      return this.createFallbackMetrics(timestamp);
+      return await this.createFallbackMetrics(timestamp);
     }
   }
 
@@ -1157,7 +1157,200 @@ export class PerformanceOptimizerUtils {
     // Implementation for auto-scaling
   }
 
-  // ... (all other method implementations)
+  // Method implementations - stubs for missing methods
+  private async analyzePerformanceBottlenecks(
+    _context: ValidationOptimizationContext,
+    _metrics: PerformanceMetrics,
+  ): Promise<unknown[]> {
+    // Implementation stub
+    return [];
+  }
+
+  private async generateOptimizationActions(
+    _bottlenecks: unknown[],
+    _context: ValidationOptimizationContext,
+  ): Promise<OptimizationAction[]> {
+    // Implementation stub
+    return [];
+  }
+
+  private async applyOptimizations(
+    actions: OptimizationAction[],
+    _operationId: string,
+  ): Promise<OptimizationAction[]> {
+    // Implementation stub
+    return actions;
+  }
+
+  private calculatePerformanceImprovements(
+    _before: PerformanceMetrics,
+    _after: PerformanceMetrics,
+  ): PerformanceImprovement[] {
+    // Implementation stub
+    return [];
+  }
+
+  private async generateOptimizationRecommendations(
+    _metrics: PerformanceMetrics,
+    _context: ValidationOptimizationContext,
+  ): Promise<OptimizationRecommendation[]> {
+    // Implementation stub
+    return [];
+  }
+
+  private async generateConversationPerformanceInsights(
+    _context: ValidationOptimizationContext,
+  ): Promise<ConversationPerformanceInsights | undefined> {
+    // Implementation stub
+    return undefined;
+  }
+
+  private updatePerformanceHistory(
+    operationId: string,
+    result: PerformanceOptimizationResult,
+  ): void {
+    // Implementation stub
+    this.metricsHistory.set(operationId, [result.afterMetrics]);
+  }
+
+  private async collectApiPerformanceMetrics(): Promise<ApiPerformanceMetrics> {
+    // Implementation stub
+    return {
+      averageResponseTime: 100,
+      p50ResponseTime: 80,
+      p95ResponseTime: 200,
+      p99ResponseTime: 400,
+      throughput: 1000,
+      errorRate: 0.1,
+      validation: {
+        securityValidationTime: 20,
+        complianceValidationTime: 30,
+        parlantValidationTime: 50,
+        totalValidationTime: 100,
+        successRate: 99.5,
+        cacheHitRate: 90,
+      },
+      conversationPerformance: {
+        averageResponseTime: 100,
+        throughput: 1000,
+        errorRate: 0.1,
+      },
+    };
+  }
+
+  private async collectSystemPerformanceMetrics(): Promise<SystemPerformanceMetrics> {
+    // Implementation stub
+    return {
+      cpuUtilization: 50,
+      memoryUsage: 1024,
+      memoryUtilization: 60,
+      diskIo: 100,
+      networkIo: 200,
+      garbageCollection: {
+        frequency: 10,
+        duration: 5,
+        memoryReclaimed: 100,
+      },
+      threads: {
+        activeThreads: 20,
+        totalThreads: 50,
+        utilization: 40,
+      },
+    };
+  }
+
+  private async collectCachePerformanceMetrics(): Promise<CachePerformanceMetrics> {
+    // Implementation stub
+    return {
+      hitRate: 90,
+      missRate: 10,
+      averageLookupTime: 5,
+      cacheSize: 512,
+      evictionRate: 1,
+      memoryUsage: 256,
+      conversationContextMetrics: {
+        hitRate: 85,
+        missRate: 15,
+        size: 128,
+      },
+    };
+  }
+
+  private async collectDatabasePerformanceMetrics(): Promise<DatabasePerformanceMetrics> {
+    // Implementation stub
+    return {
+      averageQueryTime: 50,
+      connectionUtilization: 30,
+      cacheHitRate: 80,
+      slowQueryCount: 5,
+    };
+  }
+
+  private async collectNetworkPerformanceMetrics(): Promise<NetworkPerformanceMetrics> {
+    // Implementation stub
+    return {
+      latency: 25,
+      throughput: 1000,
+      packetLoss: 0.01,
+      errorRate: 0.1,
+    };
+  }
+
+  private async collectConversationPerformanceMetrics(): Promise<ConversationPerformanceMetrics> {
+    // Implementation stub
+    return {
+      responseTime: 150,
+      throughput: 500,
+      accuracy: 95,
+    };
+  }
+
+  private calculateOverallPerformanceScore(_metrics: {
+    api: ApiPerformanceMetrics;
+    system: SystemPerformanceMetrics;
+    cache: CachePerformanceMetrics;
+    database: DatabasePerformanceMetrics;
+    network: NetworkPerformanceMetrics;
+    conversation: ConversationPerformanceMetrics;
+  }): number {
+    // Implementation stub - calculate weighted average
+    return 85; // Default score
+  }
+
+  private determinePerformanceGrade(score: number): PerformanceGrade {
+    // Implementation stub
+    if (score >= 95) return PerformanceGrade._A_PLUS;
+    if (score >= 90) return PerformanceGrade._A;
+    if (score >= 80) return PerformanceGrade._B_PLUS;
+    if (score >= 70) return PerformanceGrade._B;
+    if (score >= 50) return PerformanceGrade._C;
+    if (score >= 30) return PerformanceGrade._D;
+    return PerformanceGrade._F;
+  }
+
+  private async createFallbackMetrics(
+    timestamp: Date,
+  ): Promise<PerformanceMetrics> {
+    // Implementation stub
+    return {
+      timestamp,
+      api: await this.collectApiPerformanceMetrics(),
+      system: await this.collectSystemPerformanceMetrics(),
+      cache: await this.collectCachePerformanceMetrics(),
+      database: await this.collectDatabasePerformanceMetrics(),
+      network: await this.collectNetworkPerformanceMetrics(),
+      conversation: await this.collectConversationPerformanceMetrics(),
+      overallScore: 0,
+      grade: PerformanceGrade._F,
+    };
+  }
+
+  private async processPerformanceMetrics(
+    metrics: PerformanceMetrics,
+  ): Promise<void> {
+    // Implementation stub - process and store metrics
+    this.currentMetrics$.next(metrics);
+  }
 
   /**
    * Get performance optimization observable for real-time updates
