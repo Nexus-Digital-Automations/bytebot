@@ -277,7 +277,7 @@ export class GoogleService {
           candidatesTokens: response.usageMetadata.candidatesTokenCount,
           totalTokens: response.usageMetadata.totalTokenCount,
           candidatesCount: response.candidates.length,
-          finishReason: response.candidates[0]?.finishReason,
+          finishReason: response.candidates.length > 0 ? response.candidates[0].finishReason : 'FINISH_REASON_UNSPECIFIED',
           duration,
           validationId: validationResponse.conversationId,
         }
@@ -431,13 +431,14 @@ export class GoogleService {
       const duration = Date.now() - startTime;
       this.updatePerformanceMetrics(duration, response.usageMetadata);
 
-      const functionCalls = response.candidates[0]?.content.parts.filter(part => part.functionCall) || [];
+      const firstCandidate = response.candidates.length > 0 ? response.candidates[0] : null;
+      const functionCalls = firstCandidate?.content.parts.filter(part => part.functionCall) || [];
 
       this.logger.log(`[${operationId}] Gemini function calling completed successfully`, {
         operationId,
         modelVersion: response.modelVersion,
         functionCallsCount: functionCalls.length,
-        functionNames: functionCalls.map(call => call.functionCall?.name).filter(Boolean),
+        functionNames: functionCalls.map(call => call.functionCall?.name).filter((name): name is string => Boolean(name)),
         duration,
         validationId: validationResponse.conversationId,
       });
@@ -517,7 +518,7 @@ export class GoogleService {
         modelVersion: response.modelVersion,
         promptTokens: response.usageMetadata.promptTokenCount,
         candidatesTokens: response.usageMetadata.candidatesTokenCount,
-        safetyRatings: response.candidates[0]?.safetyRatings || [],
+        safetyRatings: response.candidates.length > 0 ? response.candidates[0].safetyRatings : [],
         duration,
         validationId: validationResponse.conversationId,
       });

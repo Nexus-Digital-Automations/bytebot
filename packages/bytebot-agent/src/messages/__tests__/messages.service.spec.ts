@@ -167,10 +167,25 @@ describe('MessagesService', () => {
       prismaService.message.create.mockResolvedValue(mockUserMessage);
     });
 
-    it('should create a new message successfully', async () => {
+    it('should create a new message successfully with metrics tracking', async () => {
       const result = await service.create(createMessageDto);
 
-      expect(result).toEqual(mockUserMessage);
+      expect(result).toBeDefined();
+      expect(result.message).toEqual(mockUserMessage);
+      expect(result.operationId).toBeDefined();
+      expect(result.contentMetrics).toBeDefined();
+      expect(result.performanceMetrics).toBeDefined();
+      
+      // Verify content metrics
+      expect(result.contentMetrics.blockCount).toBe(1);
+      expect(result.contentMetrics.totalCharacters).toBe(mockTextContentBlock.text.length);
+      expect(result.contentMetrics.validatedBlocks).toBe(1);
+      
+      // Verify performance metrics
+      expect(result.performanceMetrics.processingTimeMs).toBeGreaterThan(0);
+      expect(result.performanceMetrics.databaseResponseTimeMs).toBeGreaterThan(0);
+      expect(result.performanceMetrics.validationTimeMs).toBeGreaterThan(0);
+      
       expect(prismaService.message.create).toHaveBeenCalledWith({
         data: {
           content: createMessageDto.content,
@@ -274,12 +289,70 @@ describe('MessagesService', () => {
       });
     });
 
-    it('should handle database creation errors', async () => {
+    it('should validate task ID requirements', async () => {
+      const invalidDto = {
+        content: [mockTextContentBlock],
+        role: MessageRole.USER,
+        taskId: '', // Empty task ID
+      };
+
+      await expect(service.create(invalidDto)).rejects.toThrow(
+        'Task ID is required and must be a non-empty string',
+      );
+    });
+
+    it('should validate role requirements', async () => {
+      const invalidDto = {
+        content: [mockTextContentBlock],
+        role: 'INVALID_ROLE' as any,
+        taskId: mockTaskId,
+      };
+
+      await expect(service.create(invalidDto)).rejects.toThrow(
+        'Valid message role is required',
+      );
+    });
+
+    it('should include metadata when provided', async () => {
+      const dtoWithMetadata = {
+        content: [mockTextContentBlock],
+        role: MessageRole.USER,
+        taskId: mockTaskId,
+        metadata: { source: 'test', priority: 'high' },
+      };
+
+      await service.create(dtoWithMetadata);
+
+      expect(prismaService.message.create).toHaveBeenCalledWith({
+        data: {
+          content: dtoWithMetadata.content,
+          role: dtoWithMetadata.role,
+          taskId: dtoWithMetadata.taskId,
+          metadata: dtoWithMetadata.metadata,
+        },
+      });
+    });
+
+    it('should handle database creation errors with retry logic', async () => {
       const dbError = new Error('Database constraint violation');
+      prismaService.message.create
+        .mockRejectedValueOnce(new Error('Transient error'))
+        .mockRejectedValueOnce(new Error('Another transient error'))
+        .mockResolvedValueOnce(mockUserMessage);
+
+      const result = await service.create(createMessageDto);
+
+      expect(result.message).toEqual(mockUserMessage);
+      expect(prismaService.message.create).toHaveBeenCalledTimes(3);
+    });
+
+    it('should fail after maximum retry attempts', async () => {
+      const dbError = new Error('Persistent database error');
       prismaService.message.create.mockRejectedValue(dbError);
 
       await expect(service.create(createMessageDto)).rejects.toThrow(dbError);
       expect(tasksGateway.emitNewMessage).not.toHaveBeenCalled();
+      expect(prismaService.message.create).toHaveBeenCalledTimes(3); // Max retry attempts
     });
   });
 
@@ -295,30 +368,64 @@ describe('MessagesService', () => {
     });
 
     describe('findEvery()', () => {
-      it('should retrieve all messages for a task', async () => {
+      it('should retrieve all messages for a task with metrics', async () => {
         const result = await service.findEvery(mockTaskId);
 
-        expect(result).toEqual(mockMessages);
+        expect(result).toBeDefined();
+        expect(result.messages).toEqual(mockMessages);
+        expect(result.operationId).toBeDefined();
+        expect(result.retrievalMetrics).toBeDefined();
+        expect(result.retrievalMetrics.totalCount).toBe(mockMessages.length);
+        expect(result.retrievalMetrics.retrievalTimeMs).toBeGreaterThan(0);
+        expect(result.retrievalMetrics.databaseResponseTimeMs).toBeGreaterThan(0);
+        
         expect(prismaService.message.findMany).toHaveBeenCalledWith({
           where: { taskId: mockTaskId },
           orderBy: { createdAt: 'asc' },
         });
       });
 
-      it('should handle empty results', async () => {
+      it('should handle empty results with proper metrics', async () => {
         prismaService.message.findMany.mockResolvedValue([]);
 
         const result = await service.findEvery(mockTaskId);
 
-        expect(result).toEqual([]);
+        expect(result.messages).toEqual([]);
+        expect(result.retrievalMetrics.totalCount).toBe(0);
+        expect(result.retrievalMetrics.retrievalTimeMs).toBeGreaterThan(0);
+      });
+
+      it('should validate task ID and throw BadRequestException for invalid input', async () => {
+        await expect(service.findEvery('')).rejects.toThrow('Invalid task ID provided');
+        await expect(service.findEvery(null as any)).rejects.toThrow('Invalid task ID provided');
+        await expect(service.findEvery('   ')).rejects.toThrow('Invalid task ID provided');
+      });
+
+      it('should handle database errors with retry logic', async () => {
+        prismaService.message.findMany
+          .mockRejectedValueOnce(new Error('Connection timeout'))
+          .mockRejectedValueOnce(new Error('Lock timeout'))
+          .mockResolvedValueOnce(mockMessages);
+
+        const result = await service.findEvery(mockTaskId);
+
+        expect(result.messages).toEqual(mockMessages);
+        expect(prismaService.message.findMany).toHaveBeenCalledTimes(3);
       });
     });
 
     describe('findAll()', () => {
-      it('should retrieve messages with default pagination', async () => {
+      it('should retrieve messages with default pagination and metrics', async () => {
         const result = await service.findAll(mockTaskId);
 
-        expect(result).toEqual(mockMessages);
+        expect(result).toBeDefined();
+        expect(result.messages).toEqual(mockMessages);
+        expect(result.operationId).toBeDefined();
+        expect(result.retrievalMetrics).toBeDefined();
+        expect(result.retrievalMetrics.totalCount).toBe(mockMessages.length);
+        expect(result.retrievalMetrics.retrievalTimeMs).toBeGreaterThan(0);
+        expect(result.retrievalMetrics.databaseResponseTimeMs).toBeGreaterThan(0);
+        
         expect(prismaService.message.findMany).toHaveBeenCalledWith({
           where: { taskId: mockTaskId },
           orderBy: { createdAt: 'asc' },
@@ -369,6 +476,26 @@ describe('MessagesService', () => {
           take: 15,
           skip: 0,
         });
+      });
+
+      it('should validate pagination parameters', async () => {
+        // Test invalid limit values
+        await expect(
+          service.findAll(mockTaskId, { limit: 0 }),
+        ).rejects.toThrow('Limit must be between 1 and 100');
+
+        await expect(
+          service.findAll(mockTaskId, { limit: 101 }),
+        ).rejects.toThrow('Limit must be between 1 and 100');
+
+        // Test invalid page values  
+        await expect(
+          service.findAll(mockTaskId, { page: 0 }),
+        ).rejects.toThrow('Page must be greater than 0');
+
+        await expect(
+          service.findAll(mockTaskId, { page: -1 }),
+        ).rejects.toThrow('Page must be greater than 0');
       });
     });
 

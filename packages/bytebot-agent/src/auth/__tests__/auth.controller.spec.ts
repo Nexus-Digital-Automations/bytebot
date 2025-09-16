@@ -19,11 +19,11 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { 
-  HttpStatus, 
-  UnauthorizedException, 
+import {
+  HttpStatus,
+  UnauthorizedException,
   BadRequestException,
-  ConflictException 
+  ConflictException,
 } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
@@ -147,7 +147,9 @@ describe('AuthController', () => {
 
     it('should throw UnauthorizedException for invalid credentials', async () => {
       // Arrange
-      authService.login.mockRejectedValue(new UnauthorizedException('Invalid credentials'));
+      authService.login.mockRejectedValue(
+        new UnauthorizedException('Invalid credentials'),
+      );
       const request = createMockRequest();
 
       // Act & Assert
@@ -192,7 +194,9 @@ describe('AuthController', () => {
       // Arrange
       const loggerSpy = jest.spyOn(controller['logger'], 'warn');
       const errorMessage = 'Invalid credentials';
-      authService.login.mockRejectedValue(new UnauthorizedException(errorMessage));
+      authService.login.mockRejectedValue(
+        new UnauthorizedException(errorMessage),
+      );
       const request = createMockRequest();
 
       // Act & Assert
@@ -230,7 +234,7 @@ describe('AuthController', () => {
 
       for (const testCase of testCases) {
         const request = createMockRequest(testCase);
-        
+
         // Act
         await controller.login(loginDto, request);
 
@@ -330,7 +334,9 @@ describe('AuthController', () => {
       // Arrange
       const loggerSpy = jest.spyOn(controller['logger'], 'warn');
       const errorMessage = 'Email already exists';
-      authService.register.mockRejectedValue(new ConflictException(errorMessage));
+      authService.register.mockRejectedValue(
+        new ConflictException(errorMessage),
+      );
 
       // Act & Assert
       await expect(controller.register(registerDto)).rejects.toThrow();
@@ -436,7 +442,9 @@ describe('AuthController', () => {
 
       // Assert
       expect(result).toEqual({ message: 'Logout successful' });
-      expect(authService.logout).toHaveBeenCalledWith(refreshTokenDto.refreshToken);
+      expect(authService.logout).toHaveBeenCalledWith(
+        refreshTokenDto.refreshToken,
+      );
     });
 
     it('should always return success even if logout fails', async () => {
@@ -448,7 +456,9 @@ describe('AuthController', () => {
 
       // Assert
       expect(result).toEqual({ message: 'Logout successful' });
-      expect(authService.logout).toHaveBeenCalledWith(refreshTokenDto.refreshToken);
+      expect(authService.logout).toHaveBeenCalledWith(
+        refreshTokenDto.refreshToken,
+      );
     });
 
     it('should log successful logout', async () => {
@@ -503,7 +513,10 @@ describe('AuthController', () => {
       authService.changePassword.mockResolvedValue(undefined);
 
       // Act
-      const result = await controller.changePassword(changePasswordDto, mockUser);
+      const result = await controller.changePassword(
+        changePasswordDto,
+        mockUser,
+      );
 
       // Assert
       expect(result).toEqual({ message: 'Password changed successfully' });
@@ -736,10 +749,30 @@ describe('AuthController', () => {
       // Arrange
       const serviceError = new Error('Database connection failed');
       const endpoints = [
-        () => controller.login({ email: 'test@test.com', password: 'pass', rememberMe: false }, createMockRequest()),
-        () => controller.register({ email: 'test@test.com', username: 'test', firstName: 'Test', lastName: 'User', password: 'pass', confirmPassword: 'pass' }),
+        () =>
+          controller.login(
+            { email: 'test@test.com', password: 'pass', rememberMe: false },
+            createMockRequest(),
+          ),
+        () =>
+          controller.register({
+            email: 'test@test.com',
+            username: 'test',
+            firstName: 'Test',
+            lastName: 'User',
+            password: 'pass',
+            confirmPassword: 'pass',
+          }),
         () => controller.refresh({ refreshToken: 'token' }),
-        () => controller.changePassword({ currentPassword: 'old', newPassword: 'new', confirmNewPassword: 'new' }, mockUser),
+        () =>
+          controller.changePassword(
+            {
+              currentPassword: 'old',
+              newPassword: 'new',
+              confirmNewPassword: 'new',
+            },
+            mockUser,
+          ),
       ];
 
       // Setup mocks to throw errors
@@ -767,8 +800,8 @@ describe('AuthController', () => {
 
       // Assert
       const logCalls = loggerSpy.mock.calls;
-      const successLog = logCalls.find(call => 
-        call[0].includes('Login successful')
+      const successLog = logCalls.find((call) =>
+        call[0].includes('Login successful'),
       );
       expect(successLog?.[1]).toHaveProperty('loginTimeMs');
       expect(typeof successLog?.[1].loginTimeMs).toBe('number');
@@ -781,7 +814,11 @@ describe('AuthController', () => {
 
       // Act
       await controller.login(
-        { email: 'test@test.com', password: 'secretpassword123', rememberMe: false },
+        {
+          email: 'test@test.com',
+          password: 'secretpassword123',
+          rememberMe: false,
+        },
         createMockRequest(),
       );
 
@@ -841,7 +878,11 @@ describe('AuthController', () => {
 
       // Act
       const result = await controller.changePassword(
-        { currentPassword: 'old', newPassword: 'new', confirmNewPassword: 'new' },
+        {
+          currentPassword: 'old',
+          newPassword: 'new',
+          confirmNewPassword: 'new',
+        },
         mockUser,
       );
 

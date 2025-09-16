@@ -4,9 +4,9 @@ import { format } from "date-fns";
 import { capitalizeFirstChar } from "@/utils/stringUtils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  Tick02Icon,
-  CancelCircleIcon,
   AlertCircleIcon,
+  CancelCircleIcon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { Loader } from "@/components/ui/loader";
 import Link from "next/link";
@@ -70,7 +70,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
 
   const StatusIcon = ({ status }: { status: TaskStatus }) => {
     const config = STATUS_CONFIGS[status];
-    if (!config) return null;
+    if (!config) {return null;}
 
     const { icon, color, useLoader } = config;
 

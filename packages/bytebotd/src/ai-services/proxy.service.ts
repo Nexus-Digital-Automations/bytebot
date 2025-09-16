@@ -39,7 +39,7 @@ export interface ProxyRequest {
   readonly targetEndpoint: string;
   readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   readonly headers: Record<string, string>;
-  readonly body?: any;
+  readonly body?: Record<string, unknown> | string | null;
   readonly parameters?: Record<string, unknown>;
   readonly metadata: {
     readonly requestSize: number;
@@ -59,7 +59,7 @@ export interface ProxyResponse {
   readonly proxyResult: {
     readonly statusCode: number;
     readonly headers: Record<string, string>;
-    readonly body: any;
+    readonly body: Record<string, unknown> | string | null;
     readonly processingTimeMs: number;
     readonly cacheHit: boolean;
     readonly routingDecision?: {

@@ -177,7 +177,11 @@ export interface ApprovalAuditEntry {
  */
 export interface RiskPattern {
   patternId: string;
-  patternType: 'anomaly' | 'trend' | 'threshold_breach' | 'compliance_violation';
+  patternType:
+    | 'anomaly'
+    | 'trend'
+    | 'threshold_breach'
+    | 'compliance_violation';
   description: string;
   severity: ParlantRiskLevel;
   detectedAt: Date;
@@ -219,7 +223,8 @@ export class ParlantRiskManagementService
 
   private riskAuditLog: RiskOperationAudit[] = [];
   private detectedPatterns: RiskPattern[] = [];
-  private approvalWorkflows: Map<ParlantRiskLevel, ApprovalWorkflow> = new Map();
+  private approvalWorkflows: Map<ParlantRiskLevel, ApprovalWorkflow> =
+    new Map();
   private readonly maxAuditEntries = 10000;
 
   constructor(
@@ -228,7 +233,9 @@ export class ParlantRiskManagementService
     super();
     this.initializeApprovalWorkflows();
     this.logger.log('Parlant Risk Management Service initialized');
-    this.logger.log('PARLANT INTEGRATION: Risk-based approval system active for ALL operations');
+    this.logger.log(
+      'PARLANT INTEGRATION: Risk-based approval system active for ALL operations',
+    );
   }
 
   /**
@@ -245,11 +252,16 @@ export class ParlantRiskManagementService
       this.startPatternDetection();
 
       this.isInitialized = true;
-      this.logger.log('Parlant Risk Management Service initialized successfully');
+      this.logger.log(
+        'Parlant Risk Management Service initialized successfully',
+      );
     } catch (error) {
-      this.logger.error('Parlant Risk Management Service initialization failed', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(
+        'Parlant Risk Management Service initialization failed',
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
       throw error;
     }
   }
@@ -259,19 +271,25 @@ export class ParlantRiskManagementService
    */
   onModuleDestroy(): void {
     this.logger.log('Destroying Parlant Risk Management Service...');
-    
+
     try {
       // Remove event listeners
       this.removeAllListeners();
-      
+
       this.isInitialized = false;
-      this.logger.log('Parlant Risk Management Service destroyed successfully', {
-        finalMetrics: this.getRiskMetrics(),
-      });
+      this.logger.log(
+        'Parlant Risk Management Service destroyed successfully',
+        {
+          finalMetrics: this.getRiskMetrics(),
+        },
+      );
     } catch (error) {
-      this.logger.error('Error during Parlant Risk Management Service destruction', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(
+        'Error during Parlant Risk Management Service destruction',
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
     }
   }
 
@@ -279,7 +297,7 @@ export class ParlantRiskManagementService
    * Perform comprehensive risk assessment
    */
   async performRiskAssessment(
-    context: RiskAssessmentContext
+    context: RiskAssessmentContext,
   ): Promise<RiskAssessmentResult> {
     const assessmentId = `risk-assessment-${Date.now()}`;
     const startTime = Date.now();
@@ -311,20 +329,29 @@ export class ParlantRiskManagementService
       const riskLevel = this.determineRiskLevel(riskScore, context);
 
       // Generate mitigation strategies
-      const mitigationStrategies = this.generateMitigationStrategies(riskLevel, context);
+      const mitigationStrategies = this.generateMitigationStrategies(
+        riskLevel,
+        context,
+      );
 
       // Determine approval requirements
       const approvalRequired = this.requiresApproval(riskLevel, context);
-      const dualApprovalRequired = this.requiresDualApproval(riskLevel, context);
+      const dualApprovalRequired = this.requiresDualApproval(
+        riskLevel,
+        context,
+      );
 
       // Generate additional controls
-      const additionalControls = this.generateAdditionalControls(riskLevel, context);
+      const additionalControls = this.generateAdditionalControls(
+        riskLevel,
+        context,
+      );
 
       // Set time constraints for high-risk operations
       const timeConstraints = this.generateTimeConstraints(riskLevel, context);
 
       const assessmentDuration = Date.now() - startTime;
-      
+
       const result: RiskAssessmentResult = {
         riskLevel,
         riskScore,
@@ -349,7 +376,6 @@ export class ParlantRiskManagementService
       });
 
       return result;
-
     } catch (error) {
       const assessmentDuration = Date.now() - startTime;
       this.logger.error(`[${assessmentId}] Risk assessment failed`, {
@@ -368,7 +394,7 @@ export class ParlantRiskManagementService
     riskAssessment: RiskAssessmentResult,
     context: RiskAssessmentContext,
     userId = 'system',
-    sessionId?: string
+    sessionId?: string,
   ): Promise<{
     approved: boolean;
     conversationId?: string;
@@ -379,17 +405,23 @@ export class ParlantRiskManagementService
     const workflowId = `approval-workflow-${Date.now()}`;
     const startTime = Date.now();
 
-    this.logger.log(`[${workflowId}] Executing approval workflow for operation ${operationId}`, {
-      riskLevel: riskAssessment.riskLevel,
-      approvalRequired: riskAssessment.approvalRequired,
-      dualApprovalRequired: riskAssessment.dualApprovalRequired,
-    });
+    this.logger.log(
+      `[${workflowId}] Executing approval workflow for operation ${operationId}`,
+      {
+        riskLevel: riskAssessment.riskLevel,
+        approvalRequired: riskAssessment.approvalRequired,
+        dualApprovalRequired: riskAssessment.dualApprovalRequired,
+      },
+    );
 
     try {
       const approvalChain: ApprovalAuditEntry[] = [];
 
       // Auto-approve LOW risk operations
-      if (riskAssessment.riskLevel === ParlantRiskLevel.LOW && !riskAssessment.approvalRequired) {
+      if (
+        riskAssessment.riskLevel === ParlantRiskLevel.LOW &&
+        !riskAssessment.approvalRequired
+      ) {
         approvalChain.push({
           approverRole: 'system',
           approverUserId: 'auto-approval',
@@ -398,7 +430,14 @@ export class ParlantRiskManagementService
           justification: 'Low risk operation - auto-approved',
         });
 
-        await this.logRiskOperationAudit(operationId, riskAssessment, approvalChain, 'approved', context, startTime);
+        await this.logRiskOperationAudit(
+          operationId,
+          riskAssessment,
+          approvalChain,
+          'approved',
+          context,
+          startTime,
+        );
 
         return {
           approved: true,
@@ -419,7 +458,10 @@ export class ParlantRiskManagementService
       };
 
       // Execute initial Parlant validation
-      const validation = await this.parlantConfigService.validateConfigurationOperation(parlantContext);
+      const validation =
+        await this.parlantConfigService.validateConfigurationOperation(
+          parlantContext,
+        );
 
       // Add Parlant approval to chain
       approvalChain.push({
@@ -432,7 +474,14 @@ export class ParlantRiskManagementService
 
       // If Parlant rejected or dual approval required, handle accordingly
       if (!validation.approved) {
-        await this.logRiskOperationAudit(operationId, riskAssessment, approvalChain, 'rejected', context, startTime);
+        await this.logRiskOperationAudit(
+          operationId,
+          riskAssessment,
+          approvalChain,
+          'rejected',
+          context,
+          startTime,
+        );
 
         return {
           approved: false,
@@ -443,7 +492,10 @@ export class ParlantRiskManagementService
       }
 
       // Handle dual approval for CRITICAL operations in production
-      if (riskAssessment.dualApprovalRequired && context.environmentType === 'production') {
+      if (
+        riskAssessment.dualApprovalRequired &&
+        context.environmentType === 'production'
+      ) {
         this.riskMetrics.dualApprovalsRequired++;
 
         // Execute second validation with enhanced context
@@ -454,39 +506,65 @@ export class ParlantRiskManagementService
           emergencyOperation: context.emergencyOperation,
         };
 
-        const secondValidation = await this.parlantConfigService.validateConfigurationOperation(enhancedContext);
+        const secondValidation =
+          await this.parlantConfigService.validateConfigurationOperation(
+            enhancedContext,
+          );
 
         approvalChain.push({
           approverRole: 'parlant-ai-dual',
           approverUserId: 'parlant-dual-validation-engine',
           timestamp: new Date(),
           decision: secondValidation.approved ? 'approved' : 'rejected',
-          justification: secondValidation.reason || 'Parlant dual approval validation',
+          justification:
+            secondValidation.reason || 'Parlant dual approval validation',
         });
 
         if (!secondValidation.approved) {
-          await this.logRiskOperationAudit(operationId, riskAssessment, approvalChain, 'rejected', context, startTime);
+          await this.logRiskOperationAudit(
+            operationId,
+            riskAssessment,
+            approvalChain,
+            'rejected',
+            context,
+            startTime,
+          );
 
           return {
             approved: false,
             conversationId: secondValidation.conversationId,
             approvalChain,
-            reason: secondValidation.reason || 'Rejected by Parlant dual approval validation',
+            reason:
+              secondValidation.reason ||
+              'Rejected by Parlant dual approval validation',
           };
         }
       }
 
       // Operation approved
-      await this.logRiskOperationAudit(operationId, riskAssessment, approvalChain, 'approved', context, startTime);
+      await this.logRiskOperationAudit(
+        operationId,
+        riskAssessment,
+        approvalChain,
+        'approved',
+        context,
+        startTime,
+      );
 
-      const conditions = this.generateApprovalConditions(riskAssessment, context);
+      const conditions = this.generateApprovalConditions(
+        riskAssessment,
+        context,
+      );
 
-      this.logger.log(`[${workflowId}] Approval workflow completed for operation ${operationId}`, {
-        approved: true,
-        conversationId: validation.conversationId,
-        approvalSteps: approvalChain.length,
-        dualApprovalUsed: riskAssessment.dualApprovalRequired,
-      });
+      this.logger.log(
+        `[${workflowId}] Approval workflow completed for operation ${operationId}`,
+        {
+          approved: true,
+          conversationId: validation.conversationId,
+          approvalSteps: approvalChain.length,
+          dualApprovalUsed: riskAssessment.dualApprovalRequired,
+        },
+      );
 
       return {
         approved: true,
@@ -495,16 +573,26 @@ export class ParlantRiskManagementService
         reason: 'Operation approved through risk-based workflow',
         conditions,
       };
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`[${workflowId}] Approval workflow failed for operation ${operationId}`, {
-        error: errorMessage,
-        riskLevel: riskAssessment.riskLevel,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `[${workflowId}] Approval workflow failed for operation ${operationId}`,
+        {
+          error: errorMessage,
+          riskLevel: riskAssessment.riskLevel,
+        },
+      );
 
       // Log as escalated
-      await this.logRiskOperationAudit(operationId, riskAssessment, [], 'escalated', context, startTime);
+      await this.logRiskOperationAudit(
+        operationId,
+        riskAssessment,
+        [],
+        'escalated',
+        context,
+        startTime,
+      );
 
       return {
         approved: false,
@@ -534,7 +622,9 @@ export class ParlantRiskManagementService
    * Get detected risk patterns
    */
   getDetectedRiskPatterns(): RiskPattern[] {
-    return [...this.detectedPatterns].sort((a, b) => b.detectedAt.getTime() - a.detectedAt.getTime());
+    return [...this.detectedPatterns].sort(
+      (a, b) => b.detectedAt.getTime() - a.detectedAt.getTime(),
+    );
   }
 
   /**
@@ -545,25 +635,47 @@ export class ParlantRiskManagementService
 
     // Data classification scoring
     switch (context.dataClassification) {
-      case 'public': baseScore += 0; break;
-      case 'internal': baseScore += 10; break;
-      case 'confidential': baseScore += 25; break;
-      case 'secret': baseScore += 50; break;
+      case 'public':
+        baseScore += 0;
+        break;
+      case 'internal':
+        baseScore += 10;
+        break;
+      case 'confidential':
+        baseScore += 25;
+        break;
+      case 'secret':
+        baseScore += 50;
+        break;
     }
 
     // Environment scoring
     switch (context.environmentType) {
-      case 'development': baseScore += 0; break;
-      case 'staging': baseScore += 10; break;
-      case 'production': baseScore += 20; break;
+      case 'development':
+        baseScore += 0;
+        break;
+      case 'staging':
+        baseScore += 10;
+        break;
+      case 'production':
+        baseScore += 20;
+        break;
     }
 
     // System impact scoring
     switch (context.systemImpact) {
-      case 'low': baseScore += 0; break;
-      case 'medium': baseScore += 10; break;
-      case 'high': baseScore += 20; break;
-      case 'critical': baseScore += 40; break;
+      case 'low':
+        baseScore += 0;
+        break;
+      case 'medium':
+        baseScore += 10;
+        break;
+      case 'high':
+        baseScore += 20;
+        break;
+      case 'critical':
+        baseScore += 40;
+        break;
     }
 
     return baseScore;
@@ -602,7 +714,10 @@ export class ParlantRiskManagementService
       });
     }
 
-    if (context.operationType.includes('secret') || context.operationType.includes('credential')) {
+    if (
+      context.operationType.includes('secret') ||
+      context.operationType.includes('credential')
+    ) {
       factors.push({
         factor: 'secrets_access',
         weight: 1.0,
@@ -617,7 +732,10 @@ export class ParlantRiskManagementService
   /**
    * Apply environment multipliers
    */
-  private applyEnvironmentMultipliers(score: number, context: RiskAssessmentContext): number {
+  private applyEnvironmentMultipliers(
+    score: number,
+    context: RiskAssessmentContext,
+  ): number {
     if (context.environmentType === 'production') {
       score *= 1.5; // 50% increase for production
     }
@@ -632,9 +750,15 @@ export class ParlantRiskManagementService
   /**
    * Determine risk level from score and context
    */
-  private determineRiskLevel(score: number, context: RiskAssessmentContext): ParlantRiskLevel {
+  private determineRiskLevel(
+    score: number,
+    context: RiskAssessmentContext,
+  ): ParlantRiskLevel {
     // Emergency operations involving secrets are always CRITICAL
-    if (context.emergencyOperation && context.operationType.includes('secret')) {
+    if (
+      context.emergencyOperation &&
+      context.operationType.includes('secret')
+    ) {
       return ParlantRiskLevel.CRITICAL;
     }
 
@@ -644,7 +768,11 @@ export class ParlantRiskManagementService
     }
 
     // Production operations with secrets are at least HIGH risk
-    if (context.environmentType === 'production' && context.dataClassification === 'secret' && score < 60) {
+    if (
+      context.environmentType === 'production' &&
+      context.dataClassification === 'secret' &&
+      score < 60
+    ) {
       score = 60;
     }
 
@@ -657,10 +785,16 @@ export class ParlantRiskManagementService
   /**
    * Generate mitigation strategies
    */
-  private generateMitigationStrategies(riskLevel: ParlantRiskLevel, context: RiskAssessmentContext): MitigationStrategy[] {
+  private generateMitigationStrategies(
+    riskLevel: ParlantRiskLevel,
+    context: RiskAssessmentContext,
+  ): MitigationStrategy[] {
     const strategies: MitigationStrategy[] = [];
 
-    if (riskLevel === ParlantRiskLevel.CRITICAL || riskLevel === ParlantRiskLevel.HIGH) {
+    if (
+      riskLevel === ParlantRiskLevel.CRITICAL ||
+      riskLevel === ParlantRiskLevel.HIGH
+    ) {
       strategies.push({
         strategy: 'enhanced_monitoring',
         implementation: 'Real-time monitoring with alerting',
@@ -683,7 +817,11 @@ export class ParlantRiskManagementService
         strategy: 'post_incident_review',
         implementation: 'Mandatory review within 24 hours',
         effectiveness: 'medium',
-        requiredControls: ['incident_documentation', 'review_meeting', 'lessons_learned'],
+        requiredControls: [
+          'incident_documentation',
+          'review_meeting',
+          'lessons_learned',
+        ],
       });
     }
 
@@ -693,14 +831,23 @@ export class ParlantRiskManagementService
   /**
    * Check if operation requires approval
    */
-  private requiresApproval(riskLevel: ParlantRiskLevel, context: RiskAssessmentContext): boolean {
+  private requiresApproval(
+    riskLevel: ParlantRiskLevel,
+    context: RiskAssessmentContext,
+  ): boolean {
     // CRITICAL and HIGH always require approval
-    if (riskLevel === ParlantRiskLevel.CRITICAL || riskLevel === ParlantRiskLevel.HIGH) {
+    if (
+      riskLevel === ParlantRiskLevel.CRITICAL ||
+      riskLevel === ParlantRiskLevel.HIGH
+    ) {
       return true;
     }
 
     // MEDIUM requires approval in production
-    if (riskLevel === ParlantRiskLevel.MEDIUM && context.environmentType === 'production') {
+    if (
+      riskLevel === ParlantRiskLevel.MEDIUM &&
+      context.environmentType === 'production'
+    ) {
       return true;
     }
 
@@ -715,9 +862,15 @@ export class ParlantRiskManagementService
   /**
    * Check if operation requires dual approval
    */
-  private requiresDualApproval(riskLevel: ParlantRiskLevel, context: RiskAssessmentContext): boolean {
+  private requiresDualApproval(
+    riskLevel: ParlantRiskLevel,
+    context: RiskAssessmentContext,
+  ): boolean {
     // CRITICAL operations in production require dual approval
-    if (riskLevel === ParlantRiskLevel.CRITICAL && context.environmentType === 'production') {
+    if (
+      riskLevel === ParlantRiskLevel.CRITICAL &&
+      context.environmentType === 'production'
+    ) {
       return true;
     }
 
@@ -732,7 +885,10 @@ export class ParlantRiskManagementService
   /**
    * Generate additional controls
    */
-  private generateAdditionalControls(riskLevel: ParlantRiskLevel, context: RiskAssessmentContext): AdditionalControl[] {
+  private generateAdditionalControls(
+    riskLevel: ParlantRiskLevel,
+    context: RiskAssessmentContext,
+  ): AdditionalControl[] {
     const controls: AdditionalControl[] = [];
 
     if (riskLevel === ParlantRiskLevel.CRITICAL) {
@@ -759,10 +915,15 @@ export class ParlantRiskManagementService
   /**
    * Generate time constraints
    */
-  private generateTimeConstraints(riskLevel: ParlantRiskLevel, context: RiskAssessmentContext): {
-    maxDuration: number;
-    expiresAt: Date;
-  } | undefined {
+  private generateTimeConstraints(
+    riskLevel: ParlantRiskLevel,
+    context: RiskAssessmentContext,
+  ):
+    | {
+        maxDuration: number;
+        expiresAt: Date;
+      }
+    | undefined {
     if (riskLevel === ParlantRiskLevel.CRITICAL || context.emergencyOperation) {
       return {
         maxDuration: 3600000, // 1 hour
@@ -775,7 +936,10 @@ export class ParlantRiskManagementService
   /**
    * Generate approval conditions
    */
-  private generateApprovalConditions(riskAssessment: RiskAssessmentResult, context: RiskAssessmentContext): string[] {
+  private generateApprovalConditions(
+    riskAssessment: RiskAssessmentResult,
+    context: RiskAssessmentContext,
+  ): string[] {
     const conditions: string[] = [];
 
     if (riskAssessment.riskLevel === ParlantRiskLevel.CRITICAL) {
@@ -850,7 +1014,11 @@ export class ParlantRiskManagementService
         emergency: 60000, // 1 minute
       },
       escalationPath: ['security-team', 'incident-commander'],
-      notificationChannels: ['audit-log', 'security-channel', 'operations-channel'],
+      notificationChannels: [
+        'audit-log',
+        'security-channel',
+        'operations-channel',
+      ],
     });
 
     // CRITICAL risk workflow
@@ -861,13 +1029,21 @@ export class ParlantRiskManagementService
         {
           role: 'parlant-ai',
           minLevel: 'principal',
-          permissions: ['configuration.validate', 'security.approve', 'emergency.authorize'],
+          permissions: [
+            'configuration.validate',
+            'security.approve',
+            'emergency.authorize',
+          ],
           alternates: [],
         },
         {
           role: 'parlant-ai-dual',
           minLevel: 'principal',
-          permissions: ['configuration.validate', 'security.approve', 'emergency.authorize'],
+          permissions: [
+            'configuration.validate',
+            'security.approve',
+            'emergency.authorize',
+          ],
           alternates: [],
         },
       ],
@@ -877,7 +1053,12 @@ export class ParlantRiskManagementService
         emergency: 120000, // 2 minutes
       },
       escalationPath: ['security-lead', 'ciso', 'incident-commander'],
-      notificationChannels: ['audit-log', 'security-channel', 'operations-channel', 'executive-alerts'],
+      notificationChannels: [
+        'audit-log',
+        'security-channel',
+        'operations-channel',
+        'executive-alerts',
+      ],
     });
 
     this.logger.debug('Approval workflows initialized', {
@@ -912,14 +1093,19 @@ export class ParlantRiskManagementService
   /**
    * Update risk metrics
    */
-  private updateRiskMetrics(assessment: RiskAssessmentResult, assessmentDuration: number): void {
+  private updateRiskMetrics(
+    assessment: RiskAssessmentResult,
+    assessmentDuration: number,
+  ): void {
     this.riskMetrics.totalRiskAssessments++;
     this.riskMetrics.riskLevelDistribution[assessment.riskLevel]++;
 
     // Update average assessment time
     const currentAvg = this.riskMetrics.averageAssessmentTime;
-    this.riskMetrics.averageAssessmentTime = 
-      (currentAvg * (this.riskMetrics.totalRiskAssessments - 1) + assessmentDuration) / this.riskMetrics.totalRiskAssessments;
+    this.riskMetrics.averageAssessmentTime =
+      (currentAvg * (this.riskMetrics.totalRiskAssessments - 1) +
+        assessmentDuration) /
+      this.riskMetrics.totalRiskAssessments;
   }
 
   /**
@@ -931,7 +1117,7 @@ export class ParlantRiskManagementService
     approvalChain: ApprovalAuditEntry[],
     outcome: 'approved' | 'rejected' | 'expired' | 'escalated',
     context: RiskAssessmentContext,
-    startTime: number
+    startTime: number,
   ): Promise<void> {
     const auditEntry: RiskOperationAudit = {
       operationId,
@@ -954,7 +1140,10 @@ export class ParlantRiskManagementService
 
     // Trim audit log
     if (this.riskAuditLog.length > this.maxAuditEntries) {
-      this.riskAuditLog.splice(0, this.riskAuditLog.length - this.maxAuditEntries);
+      this.riskAuditLog.splice(
+        0,
+        this.riskAuditLog.length - this.maxAuditEntries,
+      );
     }
   }
 
@@ -965,7 +1154,7 @@ export class ParlantRiskManagementService
     if (context.emergencyOperation) {
       return 'Emergency operation - potential business continuity impact';
     }
-    
+
     if (context.systemImpact === 'critical') {
       return 'Critical system operation - potential service disruption';
     }
@@ -980,7 +1169,10 @@ export class ParlantRiskManagementService
   /**
    * Generate compliance notes
    */
-  private generateComplianceNotes(assessment: RiskAssessmentResult, context: RiskAssessmentContext): string[] {
+  private generateComplianceNotes(
+    assessment: RiskAssessmentResult,
+    context: RiskAssessmentContext,
+  ): string[] {
     const notes: string[] = [];
 
     if (assessment.riskLevel === ParlantRiskLevel.CRITICAL) {

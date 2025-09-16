@@ -6,7 +6,7 @@
       "title": "Fix shared package TypeScript build errors - environment-security.config.ts type mismatches",
       "description": "Resolve critical TypeScript build errors in shared package environment-security.config.ts: missing properties in rateLimiting config (enabled, strictMode, windowMs, etc.) and performance config (memoryLimit, cpuThreshold, diskSpaceThreshold) preventing successful builds",
       "category": "build-error",
-      "priority": "critical",
+      "priority": "normal",
       "status": "in_progress",
       "dependencies": [],
       "important_files": [
@@ -37,7 +37,7 @@
       "id": "error_1757736019148_labrv7rx3",
       "title": "EMERGENCY: Fix 186 TypeScript compilation errors blocking BytebotD package build",
       "description": "CRITICAL BUILD FAILURE: BytebotD package has 186 TypeScript compilation errors preventing successful build. Errors span multiple modules including JWT auth guards, browser services, test utilities, security middleware, and error handlers. This blocks the entire CI/CD pipeline and deployment. Requires immediate systematic resolution using concurrent specialized subagents for maximum parallel efficiency.",
-      "priority": "critical",
+      "priority": "normal",
       "category": "error",
       "status": "in_progress",
       "dependencies": [],
@@ -77,7 +77,7 @@
       "id": "error_1757477906659_bvxkxu3qy",
       "title": "CRITICAL: Fix TypeScript compilation errors in bytebotd test files",
       "description": "Fix critical TypeScript compilation errors in bytebotd package test files preventing build: 1) Remove C/ua integration imports and references (cua-integration.service, cua-vision.service, cua-performance.service), 2) Fix missing exported members from @bytebot/shared (OcrAction, FindTextAction, EnhancedScreenshotAction), 3) Update action interfaces for proper typing (DragMouseAction, TraceMouseAction, PressKeysAction), 4) Fix InputTrackingGateway test mocks for missing methods (broadcastActionEvent, broadcastInputEvent, getConnectedClients), 5) Resolve type conflicts and property mismatches. Focus on: computer-use.service.desktop-automation.spec.ts, computer-use.service.spec.ts, input-tracking.realtime-comprehensive.spec.ts",
-      "priority": "critical",
+      "priority": "normal",
       "category": "error",
       "status": "in_progress",
       "dependencies": [],
@@ -109,7 +109,7 @@
       "id": "error_1757323050185_996c8rhk3",
       "title": "Fix remaining TypeScript compilation errors in shared package",
       "description": "Fix critical TypeScript compilation errors in shared package preventing successful builds:\n\n**Critical Issues Found:**\n1. **rbac-authorization.guard.ts** - Property naming inconsistencies:\n   - _cacheManager vs cacheManager property references\n   - Missing Permission enum values (TASK_READ, TASK_WRITE, TASK_DELETE need _ prefixes)\n   \n2. **comprehensive-security.middleware.ts** - SecurityEventType enum usage:\n   - CORS_VIOLATION should be _CORS_VIOLATION\n   - MALFORMED_REQUEST should be _MALFORMED_REQUEST\n   - CSP_VIOLATION should be _CSP_VIOLATION\n\n**Files Affected:**\n- src/guards/rbac-authorization.guard.ts (32 errors)\n- src/middleware/comprehensive-security.middleware.ts (4 errors)\n\n**Required Actions:**\n1. Fix property name inconsistencies (_cacheManager vs cacheManager)\n2. Update Permission enum references to use correct underscore-prefixed names\n3. Update SecurityEventType enum references to use correct underscore-prefixed names\n4. Verify all enum values exist in their respective type definitions\n5. Run final compilation check to ensure no errors remain\n\n**Success Criteria:**\n- All TypeScript compilation errors resolved\n- npx tsc --noEmit passes without errors\n- No breaking changes to existing functionality",
-      "priority": "critical",
+      "priority": "normal",
       "category": "error",
       "status": "in_progress",
       "dependencies": [],
@@ -143,7 +143,7 @@
       "title": "Fix Python import and undefined name errors in orchestrator package",
       "description": "CRITICAL: Fix 151 Python F821 undefined name errors in orchestrator package that are blocking test execution: Missing asyncio import, ControlType, ControlImplementation, ThreatLevel, MonitoringEvent, ResponseAction, ThreatIntelligence imports in security test files",
       "mode": "DEVELOPMENT",
-      "priority": "critical",
+      "priority": "normal",
       "category": "error",
       "status": "in_progress",
       "dependencies": [],
@@ -176,7 +176,7 @@
       "title": "Fix remaining TypeScript errors in tasks.controller.spec.ts - property and argument issues",
       "description": "Fix multiple TypeScript compilation errors in tasks.controller.spec.ts including: missing files property on task objects (lines 451-453), missing messages property on GroupedMessages type (line 679), and incorrect argument counts in function calls (lines 718, 729, 743, 755, 765, 779)",
       "mode": "DEVELOPMENT",
-      "priority": "critical",
+      "priority": "normal",
       "category": "error",
       "status": "in_progress",
       "dependencies": [],
@@ -205,7 +205,7 @@
       "title": "Fix critical TypeScript compilation errors - interceptors and test files",
       "description": "Fix multiple critical TypeScript compilation errors preventing build: 1) sanitization.interceptor.ts line 200 - expression not callable, 2) health.controller.spec.ts - multiple expression not callable errors (lines 130, 151, 166, 180, 192, 209, 223), 3) tasks.controller.spec.ts - missing files property on task objects (lines 451-452). These are build-blocking errors.",
       "mode": "DEVELOPMENT",
-      "priority": "critical",
+      "priority": "normal",
       "category": "error",
       "status": "in_progress",
       "dependencies": [],
@@ -713,7 +713,7 @@
       "title": "CRITICAL: Fix bytebotd test coverage from 45% to 100% for production readiness",
       "description": "Immediately improve bytebotd package test coverage from current 45% to required 100% for critical modules. Multiple modules have 0% coverage including health, input-tracking, and mcp modules. This is a CRITICAL FAILURE blocking production deployment.",
       "mode": "DEVELOPMENT",
-      "priority": "critical",
+      "priority": "normal",
       "category": "test",
       "status": "in_progress",
       "dependencies": [],
@@ -747,9 +747,9 @@
       "title": "CRITICAL: Create complete test suite for bytebot-agent (0% → 100% coverage)",
       "description": "URGENT: bytebot-agent has NO TESTS WHATSOEVER (0% coverage). This is a complete failure of production readiness standards. Must implement comprehensive unit and integration tests for all 41 source files to achieve required 100% coverage.",
       "mode": "DEVELOPMENT",
-      "priority": "critical",
+      "priority": "normal",
       "category": "test",
-      "status": "pending",
+      "status": "in_progress",
       "dependencies": [],
       "important_files": [
         "bytebot/packages/bytebot-agent/src/"
@@ -759,14 +759,26 @@
       "requires_research": false,
       "subtasks": [],
       "created_at": "2025-09-07T03:30:38.386Z",
-      "auto_research_created": false
+      "auto_research_created": false,
+      "assigned_agent": "dev_session_1758007968365_1_general_73c77b7a",
+      "started_at": "2025-09-16T07:38:01.787Z",
+      "claimed_by": "dev_session_1758007968365_1_general_73c77b7a",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758007968365_1_general_73c77b7a",
+          "role": "primary",
+          "assignedAt": "2025-09-16T07:38:01.787Z",
+          "reassignReason": null,
+          "claimPriority": "critical"
+        }
+      ]
     },
     {
       "id": "error_1757184058993_wfuj1o0xb",
       "title": "Fix remaining ESLint violations in database and health modules",
       "description": "Fix 2 critical ESLint violations blocking build process:\n\n1. **database/database.service.ts:546:75**: @typescript-eslint/require-await - Async arrow function has no await expression\n2. **health/health.controller.ts:403:19**: @typescript-eslint/no-unnecessary-type-assertion - Unnecessary type assertion\n\nThese linting errors are preventing the build from passing and must be resolved.",
       "mode": "DEVELOPMENT",
-      "priority": "critical",
+      "priority": "normal",
       "status": "in_progress",
       "dependencies": [],
       "important_files": [
@@ -790,7 +802,8 @@
           "reassignReason": null,
           "claimPriority": "development_session_1757183378269_1_linting_6ef85a40"
         }
-      ]
+      ],
+      "category": "error"
     },
     {
       "id": "feature_1757217096067_mjvi1rjl6",
@@ -929,7 +942,8 @@
       "subtasks": [],
       "created_at": "2025-09-07T03:16:31.822Z",
       "auto_research_created": false,
-      "mode": "DEVELOPMENT"
+      "mode": "DEVELOPMENT",
+      "category": "test"
     },
     {
       "id": "test_1757214990760_gf2i8knmd",
@@ -947,7 +961,8 @@
       "subtasks": [],
       "created_at": "2025-09-07T03:16:30.760Z",
       "auto_research_created": false,
-      "mode": "DEVELOPMENT"
+      "mode": "DEVELOPMENT",
+      "category": "test"
     },
     {
       "id": "test_1757214989019_iprud1esf",
@@ -966,7 +981,8 @@
       "subtasks": [],
       "created_at": "2025-09-07T03:16:29.019Z",
       "auto_research_created": false,
-      "mode": "DEVELOPMENT"
+      "mode": "DEVELOPMENT",
+      "category": "test"
     },
     {
       "id": "test_1757214987948_hz9vm5mim",
@@ -985,7 +1001,8 @@
       "subtasks": [],
       "created_at": "2025-09-07T03:16:27.948Z",
       "auto_research_created": false,
-      "mode": "DEVELOPMENT"
+      "mode": "DEVELOPMENT",
+      "category": "test"
     },
     {
       "id": "test_1757214986874_zup1c5dq4",
@@ -1004,7 +1021,8 @@
       "subtasks": [],
       "created_at": "2025-09-07T03:16:26.874Z",
       "auto_research_created": false,
-      "mode": "DEVELOPMENT"
+      "mode": "DEVELOPMENT",
+      "category": "test"
     },
     {
       "id": "test_1757214985789_znvys4808",
@@ -1023,7 +1041,8 @@
       "subtasks": [],
       "created_at": "2025-09-07T03:16:25.790Z",
       "auto_research_created": false,
-      "mode": "DEVELOPMENT"
+      "mode": "DEVELOPMENT",
+      "category": "test"
     },
     {
       "id": "test_1757214984742_no13mwt6h",
@@ -1041,7 +1060,8 @@
       "subtasks": [],
       "created_at": "2025-09-07T03:16:24.743Z",
       "auto_research_created": false,
-      "mode": "DEVELOPMENT"
+      "mode": "DEVELOPMENT",
+      "category": "test"
     },
     {
       "id": "test_1757214983779_16878ib67",
@@ -1060,7 +1080,8 @@
       "subtasks": [],
       "created_at": "2025-09-07T03:16:23.779Z",
       "auto_research_created": false,
-      "mode": "DEVELOPMENT"
+      "mode": "DEVELOPMENT",
+      "category": "test"
     },
     {
       "id": "test_1757214982732_ly668tfud",
@@ -1079,7 +1100,8 @@
       "subtasks": [],
       "created_at": "2025-09-07T03:16:22.732Z",
       "auto_research_created": false,
-      "mode": "DEVELOPMENT"
+      "mode": "DEVELOPMENT",
+      "category": "test"
     },
     {
       "id": "test_1757214981634_7b54cydbv",
@@ -1099,7 +1121,8 @@
       "subtasks": [],
       "created_at": "2025-09-07T03:16:21.634Z",
       "auto_research_created": false,
-      "mode": "DEVELOPMENT"
+      "mode": "DEVELOPMENT",
+      "category": "test"
     }
   ],
   "agents": {
@@ -4390,5 +4413,7 @@
   "review_strikes": 0,
   "strikes_completed_last_run": false,
   "current_task_index": 0,
-  "current_mode": "DEVELOPMENT"
+  "current_mode": "DEVELOPMENT",
+  "completed_tasks": [],
+  "features": []
 }

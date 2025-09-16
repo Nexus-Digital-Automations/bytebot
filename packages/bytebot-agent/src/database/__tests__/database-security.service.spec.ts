@@ -1,10 +1,10 @@
 /**
  * Database Security Service Test Suite
- * 
+ *
  * Comprehensive test coverage for enterprise database security implementation
  * including SSL/TLS encryption, connection authentication, audit logging,
  * access control, and security violation detection.
- * 
+ *
  * Test Categories:
  * - Service initialization and configuration management
  * - SSL/TLS certificate validation and security configuration
@@ -55,7 +55,8 @@ describe('DatabaseSecurityService', () => {
     maxConcurrentConnections: 100,
   };
 
-  const mockDatabaseUrl = 'postgresql://user:pass@localhost:5432/db?sslmode=require';
+  const mockDatabaseUrl =
+    'postgresql://user:pass@localhost:5432/db?sslmode=require';
 
   beforeEach(async () => {
     // Reset all timers and mocks
@@ -72,16 +73,20 @@ describe('DatabaseSecurityService', () => {
           DB_SSL_CERT_PATH: mockSecurityConfig.sslCertPath,
           DB_SSL_KEY_PATH: mockSecurityConfig.sslKeyPath,
           DB_SSL_ROOT_CERT_PATH: mockSecurityConfig.sslRootCertPath,
-          DB_CONNECTION_AUTH_ENABLED: mockSecurityConfig.connectionAuthentication,
+          DB_CONNECTION_AUTH_ENABLED:
+            mockSecurityConfig.connectionAuthentication,
           DB_CREDENTIALS_ENCRYPTED: mockSecurityConfig.userCredentialsEncrypted,
-          DB_CONNECTION_STRING_OBFUSCATION: mockSecurityConfig.connectionStringObfuscation,
+          DB_CONNECTION_STRING_OBFUSCATION:
+            mockSecurityConfig.connectionStringObfuscation,
           DB_AUDIT_LOGGING_ENABLED: mockSecurityConfig.auditLoggingEnabled,
           DB_AUDIT_SENSITIVE_OPS: mockSecurityConfig.auditSensitiveOperations,
           DB_AUDIT_ALL_QUERIES: mockSecurityConfig.auditAllQueries,
           DB_AUDIT_RETENTION_DAYS: mockSecurityConfig.auditRetentionDays,
-          DB_RESTRICTED_OPERATIONS: mockSecurityConfig.restrictedOperations.join(','),
+          DB_RESTRICTED_OPERATIONS:
+            mockSecurityConfig.restrictedOperations.join(','),
           DB_ALLOWED_IP_RANGES: mockSecurityConfig.allowedIpRanges?.join(','),
-          DB_MAX_CONCURRENT_CONNECTIONS: mockSecurityConfig.maxConcurrentConnections,
+          DB_MAX_CONCURRENT_CONNECTIONS:
+            mockSecurityConfig.maxConcurrentConnections,
         };
         return configMap[key] ?? defaultValue;
       }),
@@ -133,8 +138,14 @@ describe('DatabaseSecurityService', () => {
     it('should initialize with security configuration from environment', () => {
       expect(service).toBeDefined();
       expect(configService.get).toHaveBeenCalledWith('DB_SSL_ENABLED', true);
-      expect(configService.get).toHaveBeenCalledWith('DB_AUDIT_LOGGING_ENABLED', true);
-      expect(configService.get).toHaveBeenCalledWith('DB_MAX_CONCURRENT_CONNECTIONS', 100);
+      expect(configService.get).toHaveBeenCalledWith(
+        'DB_AUDIT_LOGGING_ENABLED',
+        true,
+      );
+      expect(configService.get).toHaveBeenCalledWith(
+        'DB_MAX_CONCURRENT_CONNECTIONS',
+        100,
+      );
       expect(mockLogger.log).toHaveBeenCalledWith(
         'Database security service initialized',
         expect.objectContaining({
@@ -147,16 +158,18 @@ describe('DatabaseSecurityService', () => {
 
     it('should handle missing optional configuration values', async () => {
       // Create service with minimal configuration
-      configService.get.mockImplementation((key: string, defaultValue?: any) => {
-        const minimalConfig: Record<string, any> = {
-          DB_SSL_ENABLED: false,
-          DB_AUDIT_LOGGING_ENABLED: false,
-          DB_CONNECTION_AUTH_ENABLED: false,
-          DB_RESTRICTED_OPERATIONS: '',
-          DB_ALLOWED_IP_RANGES: '',
-        };
-        return minimalConfig[key] ?? defaultValue;
-      });
+      configService.get.mockImplementation(
+        (key: string, defaultValue?: any) => {
+          const minimalConfig: Record<string, any> = {
+            DB_SSL_ENABLED: false,
+            DB_AUDIT_LOGGING_ENABLED: false,
+            DB_CONNECTION_AUTH_ENABLED: false,
+            DB_RESTRICTED_OPERATIONS: '',
+            DB_ALLOWED_IP_RANGES: '',
+          };
+          return minimalConfig[key] ?? defaultValue;
+        },
+      );
 
       const module: TestingModule = await Test.createTestingModule({
         providers: [
@@ -168,7 +181,9 @@ describe('DatabaseSecurityService', () => {
         ],
       }).compile();
 
-      const minimalService = module.get<DatabaseSecurityService>(DatabaseSecurityService);
+      const minimalService = module.get<DatabaseSecurityService>(
+        DatabaseSecurityService,
+      );
       expect(minimalService).toBeDefined();
     });
 
@@ -206,8 +221,12 @@ describe('DatabaseSecurityService', () => {
     it('should log operational status on module init', () => {
       service.onModuleInit();
 
-      expect(mockLogger.log).toHaveBeenCalledWith('Starting database security monitoring');
-      expect(mockLogger.log).toHaveBeenCalledWith('Database security service fully operational');
+      expect(mockLogger.log).toHaveBeenCalledWith(
+        'Starting database security monitoring',
+      );
+      expect(mockLogger.log).toHaveBeenCalledWith(
+        'Database security service fully operational',
+      );
     });
   });
 
@@ -251,10 +270,15 @@ describe('DatabaseSecurityService', () => {
       ];
 
       for (const sslMode of sslModes) {
-        configService.get.mockImplementation((key: string, defaultValue?: any) => {
-          if (key === 'DB_SSL_MODE') return sslMode;
-          return mockSecurityConfig[key as keyof DatabaseSecurityConfig] ?? defaultValue;
-        });
+        configService.get.mockImplementation(
+          (key: string, defaultValue?: any) => {
+            if (key === 'DB_SSL_MODE') return sslMode;
+            return (
+              mockSecurityConfig[key as keyof DatabaseSecurityConfig] ??
+              defaultValue
+            );
+          },
+        );
 
         const module: TestingModule = await Test.createTestingModule({
           providers: [
@@ -266,7 +290,9 @@ describe('DatabaseSecurityService', () => {
           ],
         }).compile();
 
-        const testService = module.get<DatabaseSecurityService>(DatabaseSecurityService);
+        const testService = module.get<DatabaseSecurityService>(
+          DatabaseSecurityService,
+        );
         expect(testService).toBeDefined();
       }
     });
@@ -395,7 +421,8 @@ describe('DatabaseSecurityService', () => {
     });
 
     it('should truncate very long query text', () => {
-      const longQuery = 'SELECT * FROM table WHERE ' + 'column = value AND '.repeat(100);
+      const longQuery =
+        'SELECT * FROM table WHERE ' + 'column = value AND '.repeat(100);
 
       service.auditOperation('database_query', {
         queryText: longQuery,
@@ -488,7 +515,7 @@ describe('DatabaseSecurityService', () => {
 
     it('should register active connections in connection registry', () => {
       const connectionId = 'conn_123';
-      
+
       service.auditConnection(connectionId, 'connect', {
         userId: 'user123',
         ipAddress: '192.168.1.100',
@@ -502,7 +529,7 @@ describe('DatabaseSecurityService', () => {
 
     it('should unregister connections on disconnect', () => {
       const connectionId = 'conn_123';
-      
+
       // Connect
       service.auditConnection(connectionId, 'connect', {
         userId: 'user123',
@@ -578,10 +605,10 @@ describe('DatabaseSecurityService', () => {
   describe('Query Security Validation', () => {
     it('should detect SQL injection patterns', () => {
       const maliciousQueries = [
-        "SELECT * FROM users UNION SELECT password FROM admin_users",
-        "SELECT * FROM users WHERE id = 1 OR 1=1",
-        "SELECT * FROM users; DROP TABLE users;",
-        "DELETE FROM users WHERE id = 1; DROP TABLE admin;",
+        'SELECT * FROM users UNION SELECT password FROM admin_users',
+        'SELECT * FROM users WHERE id = 1 OR 1=1',
+        'SELECT * FROM users; DROP TABLE users;',
+        'DELETE FROM users WHERE id = 1; DROP TABLE admin;',
         "INSERT INTO users VALUES ('hacker'); DROP TABLE users;",
         "SELECT * FROM users WHERE name = 'test'; DROP TABLE admin;",
       ];
@@ -635,7 +662,9 @@ describe('DatabaseSecurityService', () => {
           ipAddress: '192.168.1.100',
         });
 
-        expect(result.violations.some((v) => v.type === 'suspicious_query')).toBe(true);
+        expect(
+          result.violations.some((v) => v.type === 'suspicious_query'),
+        ).toBe(true);
       });
     });
 
@@ -686,7 +715,7 @@ describe('DatabaseSecurityService', () => {
     });
 
     it('should log detected security violations', () => {
-      const maliciousQuery = "SELECT * FROM users WHERE id = 1 OR 1=1";
+      const maliciousQuery = 'SELECT * FROM users WHERE id = 1 OR 1=1';
 
       service.validateQuerySecurity(maliciousQuery, {
         userId: 'user123',
@@ -718,7 +747,7 @@ describe('DatabaseSecurityService', () => {
         error: 'Connection failed',
       });
 
-      service.validateQuerySecurity("SELECT * FROM users WHERE id = 1 OR 1=1", {
+      service.validateQuerySecurity('SELECT * FROM users WHERE id = 1 OR 1=1', {
         userId: 'user123',
         ipAddress: '192.168.1.100',
       });
@@ -757,7 +786,9 @@ describe('DatabaseSecurityService', () => {
     it('should group security violations by type and severity', () => {
       const metrics = service.getSecurityMetrics();
 
-      expect(metrics.securityViolations.byType).toHaveProperty('sql_injection_attempt');
+      expect(metrics.securityViolations.byType).toHaveProperty(
+        'sql_injection_attempt',
+      );
       expect(metrics.securityViolations.bySeverity).toHaveProperty('critical');
     });
 
@@ -792,9 +823,9 @@ describe('DatabaseSecurityService', () => {
     it('should sort violations and audit events by timestamp descending', () => {
       // Add multiple events with slight time differences
       jest.useRealTimers();
-      
+
       service.auditOperation('operation1', { duration: 100, success: true });
-      
+
       setTimeout(() => {
         service.auditOperation('operation2', { duration: 100, success: true });
       }, 10);
@@ -882,7 +913,9 @@ describe('DatabaseSecurityService', () => {
       service.onModuleDestroy(); // Stop cleanup interval
 
       expect(clearIntervalSpy).toHaveBeenCalled();
-      expect(mockLogger.log).toHaveBeenCalledWith('Database security service shutdown complete');
+      expect(mockLogger.log).toHaveBeenCalledWith(
+        'Database security service shutdown complete',
+      );
     });
 
     it('should flush pending audit events on shutdown', () => {
@@ -902,10 +935,12 @@ describe('DatabaseSecurityService', () => {
 
     it('should handle module destroy when no cleanup interval exists', () => {
       // Don't start audit cleanup
-      configService.get.mockImplementation((key: string, defaultValue?: any) => {
-        if (key === 'DB_AUDIT_LOGGING_ENABLED') return false;
-        return defaultValue;
-      });
+      configService.get.mockImplementation(
+        (key: string, defaultValue?: any) => {
+          if (key === 'DB_AUDIT_LOGGING_ENABLED') return false;
+          return defaultValue;
+        },
+      );
 
       const module: TestingModule = await Test.createTestingModule({
         providers: [
@@ -917,7 +952,9 @@ describe('DatabaseSecurityService', () => {
         ],
       }).compile();
 
-      const testService = module.get<DatabaseSecurityService>(DatabaseSecurityService);
+      const testService = module.get<DatabaseSecurityService>(
+        DatabaseSecurityService,
+      );
       (testService as any).logger = mockLogger;
 
       // Should not throw error
@@ -956,7 +993,12 @@ describe('DatabaseSecurityService', () => {
     });
 
     it('should determine blocking status based on severity', () => {
-      const severities: Array<SecurityViolation['severity']> = ['low', 'medium', 'high', 'critical'];
+      const severities: Array<SecurityViolation['severity']> = [
+        'low',
+        'medium',
+        'high',
+        'critical',
+      ];
       const expectedBlocked = [false, false, true, true];
 
       severities.forEach((severity, index) => {
@@ -983,7 +1025,9 @@ describe('DatabaseSecurityService', () => {
 
       const violations = service.getSecurityViolations();
       const authViolation = violations.find(
-        (v) => v.type === 'unauthorized_access' && v.description === 'Failed authentication attempt',
+        (v) =>
+          v.type === 'unauthorized_access' &&
+          v.description === 'Failed authentication attempt',
       );
 
       expect(authViolation).toBeDefined();
@@ -1037,10 +1081,12 @@ describe('DatabaseSecurityService', () => {
 
     it('should handle audit operations when audit logging is disabled', () => {
       // Create service with audit logging disabled
-      configService.get.mockImplementation((key: string, defaultValue?: any) => {
-        if (key === 'DB_AUDIT_LOGGING_ENABLED') return false;
-        return defaultValue;
-      });
+      configService.get.mockImplementation(
+        (key: string, defaultValue?: any) => {
+          if (key === 'DB_AUDIT_LOGGING_ENABLED') return false;
+          return defaultValue;
+        },
+      );
 
       const module: TestingModule = await Test.createTestingModule({
         providers: [
@@ -1052,7 +1098,9 @@ describe('DatabaseSecurityService', () => {
         ],
       }).compile();
 
-      const testService = module.get<DatabaseSecurityService>(DatabaseSecurityService);
+      const testService = module.get<DatabaseSecurityService>(
+        DatabaseSecurityService,
+      );
 
       // Should not create audit events when logging is disabled
       testService.auditOperation('test_operation', {
@@ -1065,10 +1113,12 @@ describe('DatabaseSecurityService', () => {
     });
 
     it('should handle configuration with empty restricted operations', () => {
-      configService.get.mockImplementation((key: string, defaultValue?: any) => {
-        if (key === 'DB_RESTRICTED_OPERATIONS') return '';
-        return defaultValue;
-      });
+      configService.get.mockImplementation(
+        (key: string, defaultValue?: any) => {
+          if (key === 'DB_RESTRICTED_OPERATIONS') return '';
+          return defaultValue;
+        },
+      );
 
       const module: TestingModule = await Test.createTestingModule({
         providers: [
@@ -1080,7 +1130,9 @@ describe('DatabaseSecurityService', () => {
         ],
       }).compile();
 
-      const testService = module.get<DatabaseSecurityService>(DatabaseSecurityService);
+      const testService = module.get<DatabaseSecurityService>(
+        DatabaseSecurityService,
+      );
 
       // Should not detect violations when no operations are restricted
       const result = testService.validateQuerySecurity('DROP TABLE users', {
@@ -1147,7 +1199,8 @@ describe('DatabaseSecurityService', () => {
     });
 
     it('should handle large queries in security validation', () => {
-      const largeQuery = 'SELECT ' + 'column_name, '.repeat(1000) + 'last_column FROM table';
+      const largeQuery =
+        'SELECT ' + 'column_name, '.repeat(1000) + 'last_column FROM table';
 
       const startTime = Date.now();
       const result = service.validateQuerySecurity(largeQuery, {

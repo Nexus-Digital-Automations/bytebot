@@ -213,7 +213,7 @@ export class EnterpriseRateLimitGuard
           method: request.method,
           rateLimitTier: rateLimitConfig.tier,
           limit: rateLimitConfig.limit,
-          userAgent: request.headers['user-agent'],
+          userAgent: request.headers['user-agent'] as string | undefined,
           rateLimited: true,
         });
 
@@ -312,10 +312,10 @@ export class EnterpriseRateLimitGuard
       request.ip ??
       request.connection.remoteAddress ??
       request.socket.remoteAddress ??
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ??
+      (request.headers['x-forwarded-for'] as string | undefined)?.split(',')[0] ??
       'unknown';
 
-    const userAgent = request.headers['user-agent'] ?? 'unknown';
+    const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unknown';
 
     // Create hash-like identifier without actually hashing (for performance)
     return `${ip}:${userAgent.substring(0, 50)}`.replace(

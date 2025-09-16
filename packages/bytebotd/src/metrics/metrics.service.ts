@@ -1,20 +1,28 @@
 /**
- * Metrics Collection Service
+ * Metrics Collection Service - PARLANT INTEGRATED
  *
  * Core service for collecting and exposing application metrics using Prometheus
- * client library. Provides comprehensive observability for the Bytebot platform
+ * client library with PARLANT CONVERSATIONAL VALIDATION for all metrics
+ * operations. Provides comprehensive observability for the Bytebot platform
  * with custom business metrics and performance tracking.
  *
  * Features:
- * - Prometheus metrics collection and export
- * - Custom application metrics (task processing, API performance)
- * - Computer-use operation metrics
- * - WebSocket connection tracking
- * - Database performance metrics
- * - System resource monitoring
+ * - Prometheus metrics collection and export with conversational validation
+ * - Custom application metrics with risk-based approval
+ * - Computer-use operation metrics with audit trails
+ * - WebSocket connection tracking with Parlant validation
+ * - Database performance metrics with conversational oversight
+ * - System resource monitoring with intelligent validation
  *
- * @author Claude Code
- * @version 1.0.0
+ * PARLANT INTEGRATION:
+ * - Metrics collection: LOW risk (optimized validation with caching)
+ * - Performance tracking: MEDIUM risk (conditional approval)
+ * - Database metrics: MEDIUM risk (data sensitivity validation)
+ * - System metrics: LOW risk (auto-approved for high-frequency operations)
+ * - Custom metrics: MEDIUM risk (business context validation)
+ *
+ * @author Claude Code - Agent 4 (Health & Metrics Parlant Integration)
+ * @version 2.0.0 - PARLANT MAXIMUM INTEGRATION
  */
 
 import { Injectable, Logger } from '@nestjs/common';
@@ -25,6 +33,11 @@ import {
   Histogram,
   Gauge,
 } from 'prom-client';
+import {
+  ParlantHealthMetricsValidationService,
+  MetricsOperationType,
+  HealthMetricsValidationResult,
+} from '../parlant/services/parlant-health-metrics-validation.service';
 
 /**
  * Metrics collection service for Prometheus integration
@@ -71,8 +84,10 @@ export class MetricsService {
   private readonly memoryUsage: Gauge<string>;
   private readonly cpuUsage: Gauge<string>;
 
-  constructor() {
-    this.logger.log('Metrics Service initializing with Prometheus client');
+  constructor(
+    private readonly parlantValidationService: ParlantHealthMetricsValidationService,
+  ) {
+    this.logger.log('Metrics Service initializing with Prometheus client and Parlant validation');
 
     // Enable default system metrics collection
     collectDefaultMetrics({
@@ -455,28 +470,69 @@ export class MetricsService {
   }
 
   /**
-   * Record database query metrics
+   * Record database query metrics with Parlant validation
    *
    * @param operation Database operation type
    * @param table Database table name
    * @param duration Query duration in milliseconds
    */
-  recordDatabaseQuery(
+  async recordDatabaseQuery(
     operation: string,
     table: string,
     duration: number,
-  ): void {
-    const durationSeconds = duration / 1000;
+  ): Promise<void> {
+    const operationId = `db_metrics_${Date.now()}`;
+    
+    try {
+      // PARLANT VALIDATION: Database metrics (MEDIUM risk - data sensitivity)
+      const validation = await this.parlantValidationService.validateMetricsOperation(
+        MetricsOperationType.DATABASE_METRICS,
+        {
+          operation: 'database_query_metrics',
+          dbOperation: operation,
+          table,
+          duration,
+          sensitivityLevel: 'MEDIUM',
+        },
+        { userId: 'system', userRole: 'metrics_service' },
+      );
 
-    this.databaseQueryDuration
-      .labels(operation, table)
-      .observe(durationSeconds);
+      if (!validation.approved) {
+        this.logger.warn(`[${operationId}] Database metrics recording rejected by Parlant validation`, {
+          operationId,
+          operation,
+          table,
+          reason: validation.reason,
+          conversationId: validation.conversationId,
+        });
+        return; // Skip metrics recording if not approved
+      }
 
-    this.logger.debug('Database query metrics recorded', {
-      operation,
-      table,
-      durationMs: duration,
-    });
+      // Record metrics with Parlant audit trail
+      const durationSeconds = duration / 1000;
+
+      this.databaseQueryDuration
+        .labels(operation, table)
+        .observe(durationSeconds);
+
+      this.logger.debug('Database query metrics recorded with Parlant validation', {
+        operationId,
+        operation,
+        table,
+        durationMs: duration,
+        conversationId: validation.conversationId,
+        parlantApproved: true,
+      });
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`[${operationId}] Database metrics recording failed: ${errorMessage}`, {
+        operationId,
+        operation,
+        table,
+        error: errorMessage,
+      });
+    }
   }
 
   /**

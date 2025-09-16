@@ -95,7 +95,7 @@ export const ParlantUtils = {
   /**
    * Validate conversation context structure
    */
-  validateConversationContext: (context: any): boolean => {
+  validateConversationContext: (context: unknown): boolean => {
     return !!(context?.userId && 
              context.sessionId && 
              Array.isArray(context.conversationHistory));
@@ -104,7 +104,7 @@ export const ParlantUtils = {
   /**
    * Sanitize sensitive data from parameters
    */
-  sanitizeSensitiveData: (params: Record<string, any>): Record<string, any> => {
+  sanitizeSensitiveData: (params: Record<string, unknown>): Record<string, unknown> => {
     const sanitized = { ...params };
     
     // Remove or mask sensitive fields
@@ -127,7 +127,7 @@ export const ParlantUtils = {
   /**
    * Format validation response for API output
    */
-  formatValidationResponse: (response: any): any => {
+  formatValidationResponse: (response: Record<string, unknown>): Record<string, unknown> => {
     return {
       approved: response.approved,
       reasoning: response.reasoning,
@@ -142,7 +142,7 @@ export const ParlantUtils = {
   /**
    * Calculate performance metrics
    */
-  calculatePerformanceMetrics: (startTime: number, validationTime?: number): any => {
+  calculatePerformanceMetrics: (startTime: number, validationTime?: number): Record<string, unknown> => {
     const totalTime = Date.now() - startTime;
     return {
       totalTimeMs: totalTime,
@@ -155,7 +155,7 @@ export const ParlantUtils = {
   /**
    * Generate audit log entry
    */
-  generateAuditEntry: (operationId: string, action: string, result: string, details: any = {}): any => {
+  generateAuditEntry: (operationId: string, action: string, result: string, details: Record<string, unknown> = {}): Record<string, unknown> => {
     return {
       operationId,
       action,

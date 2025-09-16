@@ -1,19 +1,27 @@
 /**
- * OWASP Top 10 Detection Engine Integration Service
+ * OWASP Top 10 Detection Engine Integration Service - MAXIMUM Parlant Integration
  *
- * TypeScript integration layer for the comprehensive OWASP Top 10 vulnerability detection engine.
- * Provides local-only scanning capabilities with integration to existing Bytebot security infrastructure.
+ * TypeScript integration layer for the comprehensive OWASP Top 10 vulnerability detection engine
+ * with full Parlant conversational validation for ALL OWASP security operations. Every OWASP
+ * scanning operation is wrapped with conversational validation to ensure security testing
+ * aligns with user intent and security policies.
  *
  * Features:
- * - Complete OWASP Top 10 2021/2024 vulnerability detection
- * - Multi-protocol scanning (HTTP/HTTPS/TCP/UDP)
- * - Machine learning enhanced detection
- * - Real-time threat intelligence
- * - Comprehensive reporting and remediation guidance
- * - Integration with existing security framework
+ * - Complete OWASP Top 10 2021/2024 vulnerability detection with Parlant validation
+ * - Pre-execution conversational validation for ALL OWASP scanning operations
+ * - CRITICAL-risk classification for active scanning and penetration testing
+ * - Multi-protocol scanning (HTTP/HTTPS/TCP/UDP) with conversational authentication
+ * - Machine learning enhanced detection with validated security policies
+ * - Real-time threat intelligence with Parlant-approved response actions
+ * - Comprehensive reporting and remediation guidance with audit trails
+ * - Integration with existing security framework and Parlant validation service
+ *
+ * Architecture: Parlant-validated OWASP scanning with conversation-first security approach
+ * Security: Every OWASP operation validated through conversational security authentication
+ * Performance: Sub-1000ms validation with intelligent caching for security scan operations
  *
  * @author Enterprise Security Team
- * @version 2.0.0 - OWASP Top 10 Integration Service
+ * @version 3.0.0 - MAXIMUM Parlant Integration for OWASP Operations
  */
 
 import { Injectable, Logger } from "@nestjs/common";
@@ -22,10 +30,22 @@ import { promises as fs } from "fs";
 import { join, resolve } from "path";
 import { randomBytes } from "crypto";
 import { performance } from "perf_hooks";
+import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../../../bytebotd/src/parlant/parlant-integration.service';
 
 // ===========================
 // TYPES AND INTERFACES
 // ===========================
+
+// ===== OWASP PARLANT INTEGRATION INTERFACES =====
+
+export interface OWASPScanningContext extends ParlantConversationContext {
+  readonly scanType: 'web_application' | 'api' | 'network' | 'database' | 'configuration' | 'source_code';
+  readonly targetEnvironment: 'production' | 'staging' | 'development' | 'testing';
+  readonly scanSeverity: 'passive_only' | 'active_safe' | 'active_aggressive' | 'penetration_testing';
+  readonly complianceFramework?: 'PCI_DSS' | 'SOX' | 'GDPR' | 'HIPAA' | 'ISO27001';
+  readonly businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly dataClassification?: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
+}
 
 /* eslint-disable no-unused-vars -- Enum values are used via Object.values() and type annotations throughout the codebase */
 export enum OWASPCategory {
@@ -266,8 +286,22 @@ export class OWASPTop10IntegrationService {
   private activeProcesses = new Map<string, ChildProcess>();
   private scanResults = new Map<string, ScanResult>();
 
-  constructor() {
-    this.logger.log("OWASP Top 10 Integration Service initialized");
+  // Performance and validation metrics for OWASP operations
+  private scanCount = 0;
+  private validationCount = 0;
+  private averageScanTime = 0;
+  private vulnerabilitiesDetected = 0;
+
+  constructor(private readonly parlantIntegration: ParlantIntegrationService) {
+    const operationId = `owasp_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    
+    this.logger.log(`[${operationId}] OWASP Top 10 Integration Service initialized with MAXIMUM Parlant integration`, {
+      parlantEnabled: true,
+      validationRequired: true,
+      auditTrailEnabled: true,
+      securityScanningEnabled: true,
+    });
+    
     void this.ensureReportsDirectory();
 
     // Log supported configurations to ensure enum usage is detected by ESLint
@@ -277,6 +311,9 @@ export class OWASPTop10IntegrationService {
         `${SUPPORTED_SCAN_TYPES.length} scan types, and ` +
         `${SUPPORTED_DETECTION_METHODS.length} detection methods`,
     );
+
+    // Set up performance metrics logging
+    setInterval(() => this.logPerformanceMetrics(), 60000);
   }
 
   /**
@@ -302,19 +339,55 @@ export class OWASPTop10IntegrationService {
   }
 
   /**
-   * Perform comprehensive OWASP Top 10 vulnerability scan
+   * Perform comprehensive OWASP Top 10 vulnerability scan with Parlant validation
    */
-  async scanTarget(configuration: ScanConfiguration): Promise<ScanResult> {
+  async scanTarget(configuration: ScanConfiguration, context: OWASPScanningContext): Promise<ScanResult> {
     const scanId = this.generateScanId();
     const startTime = performance.now();
+    this.scanCount++;
 
     this.logger.log(
-      `Starting OWASP Top 10 scan: ${scanId} for target: ${configuration.target}`,
+      `[${scanId}] Starting OWASP Top 10 scan with Parlant validation for target: ${configuration.target}`,
+      {
+        scanId,
+        target: configuration.target,
+        scanTypes: configuration.scan_types,
+        targetEnvironment: context.targetEnvironment,
+        scanSeverity: context.scanSeverity,
+        businessImpact: context.businessImpact,
+        activeScanningEnabled: configuration.enable_active_scanning,
+      }
     );
 
     try {
-      // Validate configuration
+      // Validate configuration first
       this.validateScanConfiguration(configuration);
+
+      // Perform Parlant validation for security scanning operation
+      const validationRequest: ParlantValidationRequest = {
+        functionName: 'OWASPTop10IntegrationService.scanTarget',
+        functionParams: {
+          target: configuration.target,
+          scanTypes: configuration.scan_types,
+          targetEnvironment: context.targetEnvironment,
+          scanSeverity: context.scanSeverity,
+          businessImpact: context.businessImpact,
+          activeScanningEnabled: configuration.enable_active_scanning,
+          penetrationTesting: context.scanSeverity === 'penetration_testing',
+          hasProductionData: context.targetEnvironment === 'production',
+        },
+        actionDescription: `Perform OWASP Top 10 ${context.scanSeverity} security scan on ${context.targetEnvironment} target ${configuration.target}`,
+        context,
+        riskLevel: this.assessOWASPScanRiskLevel(configuration, context),
+        operationId: scanId,
+      };
+
+      const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
+      this.validationCount++;
+
+      if (!validationResponse.approved) {
+        throw new Error(`OWASP security scan blocked by conversational validation: ${validationResponse.reasoning}`);
+      }
 
       // Prepare scan parameters
       const scanParams = {
@@ -323,6 +396,7 @@ export class OWASPTop10IntegrationService {
         max_depth: configuration.depth,
         scan_types: configuration.scan_types.map((type) => type.toString()),
         timeout: configuration.timeout,
+        conversation_id: validationResponse.conversationId,
       };
 
       // Execute Python scanning engine
@@ -332,15 +406,30 @@ export class OWASPTop10IntegrationService {
       this.scanResults.set(scanId, result);
 
       const duration = performance.now() - startTime;
+      this.updatePerformanceMetrics(duration, result.vulnerabilities.length);
+
       this.logger.log(
-        `Scan completed: ${scanId} - Found ${result.vulnerabilities.length} vulnerabilities in ${duration.toFixed(2)}ms`,
+        `[${scanId}] OWASP scan completed successfully with Parlant validation - Found ${result.vulnerabilities.length} vulnerabilities in ${duration.toFixed(2)}ms`,
+        {
+          scanId,
+          vulnerabilitiesFound: result.vulnerabilities.length,
+          duration: `${duration.toFixed(2)}ms`,
+          validationId: validationResponse.conversationId,
+          riskLevel: result.risk_assessment.overall_risk_level,
+          criticalIssues: result.risk_assessment.critical_issues,
+        }
       );
 
       return result;
     } catch (err) {
+      const duration = performance.now() - startTime;
       this.logger.error(
-        `Scan failed: ${scanId} - ${err instanceof Error ? err.message : String(err)}`,
-        err,
+        `[${scanId}] OWASP scan failed: ${err instanceof Error ? err.message : String(err)}`,
+        {
+          scanId,
+          error: err instanceof Error ? err.message : String(err),
+          duration: `${duration.toFixed(2)}ms`,
+        }
       );
 
       // Create error result
@@ -408,10 +497,11 @@ export class OWASPTop10IntegrationService {
   }
 
   /**
-   * Scan web application for OWASP vulnerabilities
+   * Scan web application for OWASP vulnerabilities with Parlant validation
    */
   async scanWebApplication(
     target: string,
+    context: Partial<OWASPScanningContext> = {},
     options: Partial<ScanConfiguration> = {},
   ): Promise<ScanResult> {
     const configuration: ScanConfiguration = {
@@ -421,7 +511,7 @@ export class OWASPTop10IntegrationService {
       depth: 3,
       timeout: 300,
       concurrent_requests: 10,
-      user_agent: "OWASP-Scanner/2.0.0",
+      user_agent: "OWASP-Scanner/3.0.0-Parlant",
       headers: {},
       cookies: {},
       exclude_patterns: [],
@@ -436,14 +526,27 @@ export class OWASPTop10IntegrationService {
       ...options,
     };
 
-    return this.scanTarget(configuration);
+    const scanningContext: OWASPScanningContext = {
+      sessionId: `webapp_scan_${Date.now()}`,
+      userId: 'system',
+      userRole: 'security_analyst',
+      requestSource: 'owasp_web_scanner',
+      scanType: 'web_application',
+      targetEnvironment: 'development',
+      scanSeverity: 'active_safe',
+      businessImpact: 'MEDIUM',
+      ...context,
+    };
+
+    return this.scanTarget(configuration, scanningContext);
   }
 
   /**
-   * Scan API endpoints for vulnerabilities
+   * Scan API endpoints for vulnerabilities with Parlant validation
    */
   async scanApi(
     target: string,
+    context: Partial<OWASPScanningContext> = {},
     options: Partial<ScanConfiguration> = {},
   ): Promise<ScanResult> {
     const configuration: ScanConfiguration = {
@@ -453,7 +556,7 @@ export class OWASPTop10IntegrationService {
       depth: 2,
       timeout: 180,
       concurrent_requests: 5,
-      user_agent: "OWASP-API-Scanner/2.0.0",
+      user_agent: "OWASP-API-Scanner/3.0.0-Parlant",
       headers: {},
       cookies: {},
       exclude_patterns: [],
@@ -468,14 +571,27 @@ export class OWASPTop10IntegrationService {
       ...options,
     };
 
-    return this.scanTarget(configuration);
+    const scanningContext: OWASPScanningContext = {
+      sessionId: `api_scan_${Date.now()}`,
+      userId: 'system',
+      userRole: 'security_analyst',
+      requestSource: 'owasp_api_scanner',
+      scanType: 'api',
+      targetEnvironment: 'development',
+      scanSeverity: 'passive_only', // Conservative for APIs
+      businessImpact: 'HIGH', // APIs often handle sensitive data
+      ...context,
+    };
+
+    return this.scanTarget(configuration, scanningContext);
   }
 
   /**
-   * Perform network security scan
+   * Perform network security scan with Parlant validation
    */
   async scanNetwork(
     target: string,
+    context: Partial<OWASPScanningContext> = {},
     options: Partial<ScanConfiguration> = {},
   ): Promise<ScanResult> {
     const configuration: ScanConfiguration = {
@@ -489,7 +605,7 @@ export class OWASPTop10IntegrationService {
       depth: 1,
       timeout: 120,
       concurrent_requests: 3,
-      user_agent: "OWASP-Network-Scanner/2.0.0",
+      user_agent: "OWASP-Network-Scanner/3.0.0-Parlant",
       headers: {},
       cookies: {},
       exclude_patterns: [],
@@ -504,7 +620,19 @@ export class OWASPTop10IntegrationService {
       ...options,
     };
 
-    return this.scanTarget(configuration);
+    const scanningContext: OWASPScanningContext = {
+      sessionId: `network_scan_${Date.now()}`,
+      userId: 'system',
+      userRole: 'security_analyst',
+      requestSource: 'owasp_network_scanner',
+      scanType: 'network',
+      targetEnvironment: 'development',
+      scanSeverity: 'passive_only', // Network scanning is passive by default
+      businessImpact: 'MEDIUM',
+      ...context,
+    };
+
+    return this.scanTarget(configuration, scanningContext);
   }
 
   /**
@@ -786,6 +914,98 @@ export class OWASPTop10IntegrationService {
       this.logger.error("Failed to cleanup old scans", err);
       return cleanedCount;
     }
+  }
+
+  /**
+   * Assess risk level for OWASP scanning operations with Parlant validation
+   */
+  private assessOWASPScanRiskLevel(configuration: ScanConfiguration, context: OWASPScanningContext): RiskLevel {
+    // CRITICAL risk for penetration testing or production active scanning
+    if (context.scanSeverity === 'penetration_testing' || 
+        (context.targetEnvironment === 'production' && configuration.enable_active_scanning)) {
+      return RiskLevel.CRITICAL;
+    }
+    
+    // HIGH risk for active aggressive scanning or production targets
+    if (context.scanSeverity === 'active_aggressive' || 
+        context.targetEnvironment === 'production' ||
+        context.businessImpact === 'CRITICAL') {
+      return RiskLevel.HIGH;
+    }
+    
+    // MEDIUM risk for active safe scanning or staging environments
+    if (context.scanSeverity === 'active_safe' || 
+        context.targetEnvironment === 'staging' ||
+        context.businessImpact === 'HIGH') {
+      return RiskLevel.MEDIUM;
+    }
+    
+    // LOW risk for passive scanning in development
+    return RiskLevel.LOW;
+  }
+
+  /**
+   * Update performance metrics for OWASP operations
+   */
+  private updatePerformanceMetrics(duration: number, vulnerabilitiesFound: number): void {
+    this.averageScanTime = 
+      (this.averageScanTime * (this.scanCount - 1) + duration) / this.scanCount;
+    this.vulnerabilitiesDetected += vulnerabilitiesFound;
+  }
+
+  /**
+   * Log performance metrics for OWASP operations
+   */
+  private logPerformanceMetrics(): void {
+    const validationRate = this.scanCount > 0 ? (this.validationCount / this.scanCount) * 100 : 0;
+    const averageVulnerabilitiesPerScan = this.scanCount > 0 ? this.vulnerabilitiesDetected / this.scanCount : 0;
+    
+    this.logger.log('OWASP Top 10 Integration Service Performance Metrics', {
+      scanCount: this.scanCount,
+      validationRate: `${validationRate.toFixed(2)}%`,
+      averageScanTime: `${this.averageScanTime.toFixed(2)}ms`,
+      vulnerabilitiesDetected: this.vulnerabilitiesDetected,
+      averageVulnerabilitiesPerScan: averageVulnerabilitiesPerScan.toFixed(2),
+    });
+  }
+
+  /**
+   * Get service health status for OWASP operations
+   */
+  getServiceHealth(): { status: 'HEALTHY' | 'DEGRADED' | 'FAILED'; metrics: Record<string, unknown>; } {
+    const avgScanTime = this.averageScanTime;
+    const validationRate = this.scanCount > 0 ? (this.validationCount / this.scanCount) * 100 : 100;
+
+    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
+    
+    if (avgScanTime > 30000 || validationRate < 95) { // 30 seconds is reasonable for security scans
+      status = 'DEGRADED';
+    }
+    if (avgScanTime > 60000 || validationRate < 80) { // 60 seconds is concerning
+      status = 'FAILED';
+    }
+
+    return {
+      status,
+      metrics: {
+        scanCount: this.scanCount,
+        averageScanTime: `${avgScanTime.toFixed(2)}ms`,
+        validationRate: `${validationRate.toFixed(2)}%`,
+        vulnerabilitiesDetected: this.vulnerabilitiesDetected,
+        parlantIntegrationEnabled: true,
+      },
+    };
+  }
+
+  /**
+   * Reset performance metrics
+   */
+  resetMetrics(): void {
+    this.scanCount = 0;
+    this.validationCount = 0;
+    this.averageScanTime = 0;
+    this.vulnerabilitiesDetected = 0;
+    this.logger.log('OWASP Top 10 Integration Service metrics reset');
   }
 
   // ===========================

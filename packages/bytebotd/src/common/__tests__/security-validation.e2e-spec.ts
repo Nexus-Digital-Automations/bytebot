@@ -67,7 +67,7 @@ describe('Security Validation E2E Tests', () => {
         .expect(200); // Note: CORS is enforced by browser, not server blocking
 
       // Check if CORS headers are present
-      expect(response.headers['access-control-allow-origin']).toBeUndefined();
+      expect(response.headers['access-control-allow-origin'] as string | undefined).toBeUndefined();
     });
 
     it('should allow requests from authorized origins', async () => {
@@ -76,7 +76,7 @@ describe('Security Validation E2E Tests', () => {
         .set('Origin', 'http://localhost:3000')
         .send({ action: 'screenshot' });
 
-      expect(response.headers['access-control-allow-origin']).toBeDefined();
+      expect(response.headers['access-control-allow-origin'] as string | undefined).toBeDefined();
     });
 
     it('should include security headers in response', async () => {
@@ -321,7 +321,7 @@ describe('Security Validation E2E Tests', () => {
         .expect(400);
 
       expect(
-        (response.body as ApiResponse).requestId ?? response.headers['x-request-id'],
+        (response.body as ApiResponse).requestId ?? (response.headers['x-request-id'] as string | undefined),
       ).toBeDefined();
     });
 
@@ -471,8 +471,8 @@ describe('Security Validation E2E Tests', () => {
         .send({ action: 'screenshot' });
 
       expect(
-        response.headers['x-request-id'] ??
-          response.headers['x-correlation-id'] ??
+        (response.headers['x-request-id'] as string | undefined) ??
+          (response.headers['x-correlation-id'] as string | undefined) ??
           (response.body as ApiResponse).operationId,
       ).toBeDefined();
     });
