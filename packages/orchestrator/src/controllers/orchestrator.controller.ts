@@ -52,8 +52,39 @@ import {
   OrchestrationTask,
   OrchestrationPriority,
   OrchestrationStatus,
-  OrchestrationState
+  OrchestrationState,
+  OrchestrationExecutionContext,
+  OrchestrationMetrics
 } from '../types/orchestrator.types';
+import {
+  ParlantConversationContext
+} from '@bytebot/shared/types/parlant-integration.types';
+
+// Additional response types
+interface PerformanceMetricsResponse {
+  summary: OrchestrationMetrics;
+  detailed: Record<string, unknown> | null;
+  timestamp: string;
+  query: PerformanceMetricsDto;
+}
+
+interface HealthComponent {
+  status: 'up' | 'down' | 'degraded';
+  [key: string]: unknown;
+}
+
+interface OrchestratorConfigurationResponse {
+  performance: {
+    maxConcurrentExecutions: number;
+    defaultTimeoutMs: number;
+  };
+  features: {
+    parlantIntegration: boolean;
+    caching: boolean;
+    monitoring: boolean;
+  };
+  [key: string]: unknown;
+}
 
 // DTOs for request/response validation
 class ExecuteOrchestrationDto {
@@ -64,7 +95,7 @@ class ExecuteOrchestrationDto {
   userContext: OrchestrationUserContext;
 
   @ApiOperation({ summary: 'Parlant conversation context' })
-  conversationContext?: any;
+  conversationContext?: ParlantConversationContext;
 
   @ApiOperation({ summary: 'Execution options' })
   options?: {
@@ -408,7 +439,7 @@ export class OrchestratorController {
   async listOrchestrations(
     @Query() query: OrchestrationQueryDto
   ): Promise<{
-    orchestrations: any[];
+    orchestrations: OrchestrationExecutionContext[];
     pagination: {
       total: number;
       limit: number;
@@ -461,7 +492,7 @@ export class OrchestratorController {
   })
   async getPerformanceMetrics(
     @Query() query: PerformanceMetricsDto
-  ): Promise<any> {
+  ): Promise<PerformanceMetricsResponse> {
     this.logger.debug('Getting performance metrics', query);
 
     try {
@@ -512,7 +543,7 @@ export class OrchestratorController {
     status: 'healthy' | 'degraded' | 'unhealthy';
     timestamp: string;
     version: string;
-    components: Record<string, any>;
+    components: Record<string, HealthComponent>;
   }> {
     this.logger.debug('Health check requested');
 
@@ -637,7 +668,7 @@ export class OrchestratorController {
     status: 200, 
     description: 'Configuration retrieved successfully' 
   })
-  async getConfiguration(): Promise<any> {
+  async getConfiguration(): Promise<OrchestratorConfigurationResponse> {
     this.logger.debug('Getting orchestrator configuration');
 
     try {

@@ -48,7 +48,6 @@ import {
   ExportIcon,
   HugeiconsIcon,
   MicrophoneIcon,
-  MoreVerticalIcon,
   RefreshIcon,
   SearchIcon,
   SendIcon,
@@ -115,7 +114,7 @@ interface MessageDisplayProps {
   showAvatar: boolean;
   showTimestamp: boolean;
   isAnimated: boolean;
-  onValidationResponse?: (decision: ValidationDecision, reasoning?: string) => void;
+  onValidationResponse?: (_decision: ValidationDecision, _reasoning?: string) => void;
 }
 
 /**
@@ -130,10 +129,18 @@ interface TypingIndicatorProps {
  * Conversation header props
  */
 interface ConversationHeaderProps {
-  conversation: any;
+  conversation: {
+    conversationId: string;
+    metadata?: {
+      topic?: string;
+    };
+  } | null;
   participants: ConversationParticipant[];
   state: ConversationState;
-  metrics: any;
+  metrics: {
+    totalMessages: number;
+    averageResponseTime: number;
+  } | null;
   onSearch?: () => void;
   onSettings?: () => void;
   onExport?: () => void;
@@ -163,18 +170,37 @@ interface ConversationInterfaceProps {
   initialPriority?: ConversationPriority;
   
   /** Event handlers */
-  onConversationStart?: (conversationId: string) => void;
-  onConversationEnd?: (conversationId: string) => void;
-  onMessageSent?: (message: ConversationMessage) => void;
-  onValidationRequest?: (request: ParlantValidationRequest) => void;
-  onError?: (error: any) => void;
+  onConversationStart?: (_conversationId: string) => void;
+  onConversationEnd?: (_conversationId: string) => void;
+  onMessageSent?: (_message: ConversationMessage) => void;
+  onValidationRequest?: (_request: ParlantValidationRequest) => void;
+  onError?: (_error: Error | unknown) => void;
   
   /** Custom message renderer */
-  customMessageRenderer?: (message: ConversationMessage) => React.ReactNode;
+  customMessageRenderer?: (_message: ConversationMessage) => React.ReactNode;
   
   /** Custom action buttons */
   customActions?: React.ReactNode;
 }
+
+// ===========================
+// CONSTANTS
+// ===========================
+
+const TIME_CONSTANTS = {
+  ONE_MINUTE: 60000,
+  ONE_HOUR: 3600000,
+  ONE_DAY: 86400000,
+} as const;
+
+const UI_CONSTANTS = {
+  MESSAGE_CONTENT_THRESHOLD: 300,
+  SLOW_RESPONSE_THRESHOLD: 1000,
+  ANIMATION_SCALE_MAX: 1.2,
+  ANIMATION_DELAY_MULTIPLIER: 0.2,
+  MESSAGE_CONTENT_PREVIEW: 50,
+  RECENT_MESSAGE_COUNT: 3,
+} as const;
 
 // ===========================
 // DEFAULT CONFIGURATION
@@ -188,8 +214,8 @@ const DEFAULT_CONFIG: ConversationConfig = {
   showParticipants: true,
   enableSearch: true,
   enableExport: true,
-  maxDisplayMessages: 1000,
-  animationDuration: 200,
+  maxDisplayMessages: TIME_CONSTANTS.MAX_DISPLAY_MESSAGES,
+  animationDuration: TIME_CONSTANTS.ANIMATION_DURATION,
   enableA11y: true,
   theme: 'auto',
   branding: {
@@ -198,6 +224,21 @@ const DEFAULT_CONFIG: ConversationConfig = {
     secondaryColor: '#8b5cf6',
   },
 };
+
+// ===========================
+// CONSTANTS
+// ===========================
+
+/** Time constants in milliseconds */
+const TIME_CONSTANTS = {
+  ONE_MINUTE: 60000,
+  ONE_HOUR: 3600000,
+  ONE_DAY: 86400000,
+  ANIMATION_DURATION: 200,
+  MAX_DISPLAY_MESSAGES: 1000,
+  SLOW_RESPONSE_THRESHOLD: 1000,
+  MAX_CONTENT_PREVIEW: 300
+} as const;
 
 // ===========================
 // UTILITY FUNCTIONS
@@ -210,12 +251,12 @@ const formatTimestamp = (date: Date): string => {
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   
-  if (diff < 60000) { // Less than 1 minute
+  if (diff < TIME_CONSTANTS.ONE_MINUTE) {
     return 'now';
-  } else if (diff < 3600000) { // Less than 1 hour
-    return `${Math.floor(diff / 60000)}m ago`;
-  } else if (diff < 86400000) { // Less than 1 day
-    return `${Math.floor(diff / 3600000)}h ago`;
+  } else if (diff < TIME_CONSTANTS.ONE_HOUR) {
+    return `${Math.floor(diff / TIME_CONSTANTS.ONE_MINUTE)}m ago`;
+  } else if (diff < TIME_CONSTANTS.ONE_DAY) {
+    return `${Math.floor(diff / TIME_CONSTANTS.ONE_HOUR)}h ago`;
   } 
     return date.toLocaleDateString();
   
@@ -224,17 +265,19 @@ const formatTimestamp = (date: Date): string => {
 /**
  * Get message type icon
  */
-const getMessageTypeIcon = (type: MessageType) => {
+const getMessageTypeIcon = (type: MessageType): typeof AlertCircleIcon => {
   switch (type) {
-    case MessageType.VALIDATION_REQUEST:
+    case MessageType._TEXT:
+      return UserIcon;
+    case MessageType._VALIDATION_REQUEST:
       return AlertCircleIcon;
-    case MessageType.VALIDATION_RESPONSE:
+    case MessageType._VALIDATION_RESPONSE:
       return CheckmarkCircle02Icon;
-    case MessageType.SYSTEM_NOTIFICATION:
+    case MessageType._SYSTEM_NOTIFICATION:
       return BotIcon;
-    case MessageType.ERROR:
+    case MessageType._ERROR:
       return AlertCircleIcon;
-    case MessageType.COMMAND:
+    case MessageType._COMMAND:
       return ArrowRight02Icon;
     default:
       return UserIcon;
@@ -246,21 +289,41 @@ const getMessageTypeIcon = (type: MessageType) => {
  */
 const getStateColor = (state: ConversationState): string => {
   switch (state) {
-    case ConversationState.ACTIVE:
+    case ConversationState._INITIATED:
+      return 'text-gray-500';
+    case ConversationState._ACTIVE:
       return 'text-green-600';
-    case ConversationState.VALIDATING:
+    case ConversationState._VALIDATING:
       return 'text-yellow-600';
-    case ConversationState.APPROVED:
+    case ConversationState._APPROVED:
       return 'text-blue-600';
-    case ConversationState.DENIED:
+    case ConversationState._DENIED:
       return 'text-red-600';
-    case ConversationState.ERROR:
-      return 'text-red-600';
-    case ConversationState.SUSPENDED:
+    case ConversationState._COMPLETED:
+      return 'text-green-700';
+    case ConversationState._SUSPENDED:
       return 'text-gray-600';
+    case ConversationState._ERROR:
+      return 'text-red-600';
     default:
       return 'text-gray-500';
   }
+};
+
+/**
+ * Get message type CSS class name
+ */
+const getMessageTypeClassName = (type: MessageType): string => {
+  if (type === MessageType._VALIDATION_REQUEST) {
+    return 'bg-yellow-100 text-yellow-800';
+  }
+  if (type === MessageType._VALIDATION_RESPONSE) {
+    return 'bg-green-100 text-green-800';
+  }
+  if (type === MessageType._ERROR) {
+    return 'bg-red-100 text-red-800';
+  }
+  return 'bg-blue-100 text-blue-800';
 };
 
 // ===========================
@@ -283,15 +346,18 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
   
   const MessageIcon = getMessageTypeIcon(message.type);
   
-  const handleValidationResponse = useCallback(async (decision: ValidationDecision, reasoning?: string) => {
-    if (!onValidationResponse) {return;}
+  const handleValidationResponse = useCallback(async (decision: ValidationDecision, reasoning?: string): Promise<void> => {
+    if (!onValidationResponse) {
+      return;
+    }
     
     setIsValidationPending(true);
     try {
       await onValidationResponse(decision, reasoning);
       logInfo('Validation response submitted', { messageId: message.id, decision }, 'ConversationInterface');
     } catch (error) {
-      logWarning('Failed to submit validation response', error, 'ConversationInterface');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logWarning('Failed to submit validation response', { error: errorMessage }, 'ConversationInterface');
     } finally {
       setIsValidationPending(false);
     }
@@ -309,7 +375,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
       initial={isAnimated ? 'hidden' : 'visible'}
       animate="visible"
       exit="exit"
-      transition={{ duration: 0.2 }}
+      transition={{ duration: TIME_CONSTANTS.ANIMATION_DURATION / 1000 }}
       className={cn(
         'flex w-full gap-3 px-4 py-3 hover:bg-gray-50/50 transition-colors',
         isOwn ? 'flex-row-reverse' : 'flex-row'
@@ -350,13 +416,10 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               {formatTimestamp(message.timestamp)}
             </time>
           )}
-          {message.type !== MessageType.TEXT && (
+          {message.type !== MessageType._TEXT && (
             <span className={cn(
               'px-2 py-1 rounded-full text-xs font-medium',
-              message.type === MessageType.VALIDATION_REQUEST ? 'bg-yellow-100 text-yellow-800' :
-              message.type === MessageType.VALIDATION_RESPONSE ? 'bg-green-100 text-green-800' :
-              message.type === MessageType.ERROR ? 'bg-red-100 text-red-800' :
-              'bg-blue-100 text-blue-800'
+              getMessageTypeClassName(message.type)
             )}>
               {message.type.replace('_', ' ').toLowerCase()}
             </span>
@@ -376,12 +439,12 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
           )}>
             <div className={cn(
               'whitespace-pre-wrap break-words',
-              !isExpanded && message.content.length > 300 ? 'line-clamp-3' : ''
+              !isExpanded && message.content.length > TIME_CONSTANTS.MAX_CONTENT_PREVIEW ? 'line-clamp-3' : ''
             )}>
               {message.content}
             </div>
             
-            {message.content.length > 300 && (
+            {message.content.length > TIME_CONSTANTS.MAX_CONTENT_PREVIEW && (
               <button
                 onClick={() => { setIsExpanded(!isExpanded); }}
                 className={cn(
@@ -396,12 +459,14 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
         </div>
         
         {/* Validation Actions */}
-        {message.type === MessageType.VALIDATION_REQUEST && onValidationResponse && (
+        {message.type === MessageType._VALIDATION_REQUEST && onValidationResponse && (
           <div className="flex gap-2 mt-3">
             <Button
               size="sm"
               variant="outline"
-              onClick={() => handleValidationResponse(ValidationDecision.APPROVED)}
+              onClick={() => {
+                void handleValidationResponse(ValidationDecision.APPROVED);
+              }}
               disabled={isValidationPending}
               className="text-green-600 border-green-600 hover:bg-green-50"
             >
@@ -411,7 +476,9 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => handleValidationResponse(ValidationDecision.DENIED)}
+              onClick={() => {
+                void handleValidationResponse(ValidationDecision.DENIED);
+              }}
               disabled={isValidationPending}
               className="text-red-600 border-red-600 hover:bg-red-50"
             >
@@ -421,7 +488,9 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => handleValidationResponse(ValidationDecision.REQUEST_MORE_INFO)}
+              onClick={() => {
+                void handleValidationResponse(ValidationDecision.REQUEST_MORE_INFO);
+              }}
               disabled={isValidationPending}
               className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
             >
@@ -441,7 +510,9 @@ MessageDisplay.displayName = 'MessageDisplay';
  * Typing Indicator Component
  */
 const TypingIndicator: React.FC<TypingIndicatorProps> = React.memo(({ participants, isVisible }) => {
-  if (!isVisible || participants.length === 0) {return null;}
+  if (!isVisible || participants.length === 0) {
+    return null;
+  }
   
   return (
     <motion.div
@@ -628,12 +699,12 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     startConversation,
     joinConversation,
     sendMessage,
-    sendValidationRequest,
+    sendValidationRequest: _sendValidationRequest,
     respondToValidation,
     exportConversation,
-    connect,
-    disconnect,
-    getHealthStatus
+    connect: _connect,
+    disconnect: _disconnect,
+    getHealthStatus: _getHealthStatus
   } = useParlantWebSocket({
     config: {
       enablePerformanceTracking: true,
@@ -667,17 +738,20 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   // EVENT HANDLERS
   // ===========================
   
-  const handleSendMessage = useCallback(async () => {
-    if (!inputValue.trim() || isComposing) {return;}
+  const handleSendMessage = useCallback(async (): Promise<void> => {
+    if (!inputValue.trim() || isComposing) {
+      return;
+    }
     
     const messageContent = inputValue.trim();
     setInputValue('');
     
     try {
-      await sendMessage(messageContent, MessageType.TEXT);
+      await sendMessage(messageContent, MessageType._TEXT);
       logDebug('Message sent successfully', { content: messageContent.substring(0, 50) }, 'ConversationInterface');
     } catch (error) {
-      logWarning('Failed to send message', error, 'ConversationInterface');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logWarning('Failed to send message', { error: errorMessage }, 'ConversationInterface');
       // Re-populate input on failure
       setInputValue(messageContent);
     }
@@ -686,7 +760,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      void handleSendMessage();
     }
   }, [handleSendMessage]);
   
@@ -697,7 +771,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     try {
       // Find the validation request message
       const validationMessage = messages.find(msg => 
-        msg.type === MessageType.VALIDATION_REQUEST &&
+        msg.type === MessageType._VALIDATION_REQUEST &&
         msg.metadata?.requestId
       );
       
@@ -710,7 +784,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
         logInfo('Validation response sent', { decision, requestId: validationMessage.metadata.requestId }, 'ConversationInterface');
       }
     } catch (error) {
-      logWarning('Failed to send validation response', error, 'ConversationInterface');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logWarning('Failed to send validation response', { error: errorMessage }, 'ConversationInterface');
     }
   }, [messages, respondToValidation]);
   
@@ -719,7 +794,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       const conversationId = await startConversation(initialTopic, initialPriority);
       logInfo('New conversation started', { conversationId }, 'ConversationInterface');
     } catch (error) {
-      logWarning('Failed to start conversation', error, 'ConversationInterface');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logWarning('Failed to start conversation', { error: errorMessage }, 'ConversationInterface');
     }
   }, [startConversation, initialTopic, initialPriority]);
   
@@ -728,12 +804,15 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       await joinConversation(id);
       logInfo('Joined conversation', { conversationId: id }, 'ConversationInterface');
     } catch (error) {
-      logWarning('Failed to join conversation', error, 'ConversationInterface');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logWarning('Failed to join conversation', { error: errorMessage }, 'ConversationInterface');
     }
   }, [joinConversation]);
   
-  const handleExportConversation = useCallback(async () => {
-    if (!currentConversation) {return;}
+  const handleExportConversation = useCallback(async (): Promise<void> => {
+    if (!currentConversation) {
+      return;
+    }
     
     try {
       const exportData = await exportConversation(currentConversation.conversationId);
@@ -751,7 +830,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       
       logInfo('Conversation exported', { conversationId: currentConversation.conversationId }, 'ConversationInterface');
     } catch (error) {
-      logWarning('Failed to export conversation', error, 'ConversationInterface');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logWarning('Failed to export conversation', { error: errorMessage }, 'ConversationInterface');
     }
   }, [currentConversation, exportConversation]);
   
@@ -784,9 +864,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   useEffect(() => {
     if (isConnected && !currentConversation) {
       if (conversationId) {
-        handleJoinConversation(conversationId);
+        void handleJoinConversation(conversationId);
       } else if (autoStart) {
-        handleStartConversation();
+        void handleStartConversation();
       }
     }
   }, [isConnected, currentConversation, conversationId, autoStart, handleJoinConversation, handleStartConversation]);
@@ -827,7 +907,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           showAvatar={showAvatar}
           showTimestamp={true}
           isAnimated={isAnimated}
-          onValidationResponse={handleValidationResponse}
+          onValidationResponse={(decision, reasoning) => { void handleValidationResponse(decision, reasoning); }}
         />
       );
     });
@@ -844,7 +924,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       );
     }
     
-    if (responseTime > 1000) {
+    if (responseTime > TIME_CONSTANTS.SLOW_RESPONSE_THRESHOLD) {
       return (
         <div className="flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
           <div className="w-2 h-2 bg-yellow-500 rounded-full" />
@@ -882,10 +962,16 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           participants={participants}
           state={conversationState}
           metrics={metrics}
-          onSearch={config.enableSearch ? () => { setShowSearch(!showSearch); } : undefined}
-          onExport={config.enableExport ? handleExportConversation : undefined}
-          onRefresh={() => { window.location.reload(); }}
-          onSettings={() => { logDebug('Settings clicked', null, 'ConversationInterface'); }}
+          onSearch={config.enableSearch ? (): void => { setShowSearch(!showSearch); } : undefined}
+          onExport={config.enableExport ? (): void => { 
+            void handleExportConversation(); 
+          } : undefined}
+          onRefresh={(): void => { 
+            window.location.reload(); 
+          }}
+          onSettings={(): void => { 
+            logDebug('Settings clicked', null, 'ConversationInterface'); 
+          }}
         />
       )}
       
@@ -895,7 +981,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           <Input
             placeholder="Search messages..."
             value={searchQuery}
-            onChange={(e) => { setSearchQuery(e.target.value); }}
+            onChange={(e): void => { setSearchQuery(e.target.value); }}
             className="w-full"
             aria-label="Search messages"
           />
@@ -930,7 +1016,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 Complex tasks become as simple as having a natural conversation.
               </p>
               <Button
-                onClick={handleStartConversation}
+                onClick={() => { void handleStartConversation(); }}
                 disabled={!isConnected}
                 className="bg-blue-600 hover:bg-blue-700"
               >
@@ -982,7 +1068,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => { setSelectedFile(null); }}
+                onClick={(): void => { setSelectedFile(null); }}
                 aria-label="Remove file"
               >
                 ×
@@ -1027,10 +1113,10 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               <Input
                 ref={inputRef}
                 value={inputValue}
-                onChange={(e) => { setInputValue(e.target.value); }}
+                onChange={(e): void => { setInputValue(e.target.value); }}
                 onKeyDown={handleKeyDown}
-                onCompositionStart={() => { setIsComposing(true); }}
-                onCompositionEnd={() => { setIsComposing(false); }}
+                onCompositionStart={(): void => { setIsComposing(true); }}
+                onCompositionEnd={(): void => { setIsComposing(false); }}
                 placeholder={
                   isVoiceRecording
                     ? 'Listening...'
@@ -1048,7 +1134,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
             
             {/* Send Button */}
             <Button
-              onClick={handleSendMessage}
+              onClick={() => { void handleSendMessage(); }}
               disabled={!inputValue.trim() || !isConnected || isComposing}
               size="icon"
               className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"

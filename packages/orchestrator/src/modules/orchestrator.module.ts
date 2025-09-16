@@ -9,7 +9,7 @@
  * @author AIgent Orchestrator Team
  */
 
-import { Module, Global, DynamicModule } from '@nestjs/common';
+import { Module, Global, DynamicModule, Provider } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
@@ -28,7 +28,13 @@ import { ComplianceAuditService } from '../services/compliance-audit.service';
 import { PerformanceMonitoringService } from '../services/performance-monitoring.service';
 
 // Configuration interfaces
-import { OrchestratorConfiguration } from '../types/orchestrator.types';
+import { OrchestratorConfiguration, LogLevel } from '../types/orchestrator.types';
+
+// Define additional types
+type CacheProvider = 'memory' | 'redis' | 'file';
+type DiscoveryType = 'static' | 'dynamic' | 'consul';
+type EvictionPolicy = 'lru' | 'fifo' | 'random';
+type AuthProvider = 'jwt' | 'oauth' | 'saml';
 
 export interface OrchestratorModuleOptions {
   /** Global configuration */
@@ -36,7 +42,7 @@ export interface OrchestratorModuleOptions {
   /** Enable global module registration */
   isGlobal?: boolean;
   /** Custom service implementations */
-  customServices?: any[];
+  customServices?: Provider[];
 }
 
 @Global()
@@ -74,7 +80,7 @@ export class OrchestratorModule {
               }
             },
             serviceRegistry: {
-              discoveryType: 'static' as any,
+              discoveryType: 'static' as DiscoveryType,
               healthCheckIntervalMs: 30000,
               serviceTimeoutMs: 5000
             },
@@ -95,19 +101,19 @@ export class OrchestratorModule {
             },
             caching: {
               enabled: true,
-              provider: configService.get('ORCHESTRATOR_CACHE_PROVIDER', 'memory') as any,
+              provider: configService.get('ORCHESTRATOR_CACHE_PROVIDER', 'memory') as CacheProvider,
               defaultTtlMs: 300000,
               sizeLimits: {
                 maxEntries: 10000,
                 maxMemoryMb: 256,
-                evictionPolicy: 'lru' as any
+                evictionPolicy: 'lru' as EvictionPolicy
               }
             },
             monitoring: {
               enabled: true,
               metricsIntervalMs: 60000,
               traceSamplingRate: 0.1,
-              logLevel: configService.get('LOG_LEVEL', 'info') as any,
+              logLevel: configService.get('LOG_LEVEL', 'info') as LogLevel,
               exportConfig: {
                 customHandlers: []
               }
@@ -120,7 +126,7 @@ export class OrchestratorModule {
                 encryptInTransit: true
               },
               authentication: {
-                provider: 'jwt' as any,
+                provider: 'jwt' as AuthProvider,
                 tokenExpirationMs: 3600000,
                 refreshTokenEnabled: true,
                 mfaEnabled: false
