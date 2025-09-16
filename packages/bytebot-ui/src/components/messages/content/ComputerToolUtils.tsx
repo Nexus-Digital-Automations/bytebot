@@ -42,87 +42,212 @@ export type IconType =
   | typeof FileIcon;
 
 /**
- * Safe type assertion to ensure we can work with the block safely
+ * Type definition for validated block input with required properties
+ */
+interface ValidatedBlockInput {
+  readonly button?: string;
+  readonly clickCount?: number;
+  readonly [key: string]: unknown;
+}
+
+/**
+ * Type guard to validate block input structure
+ * @param input - Input object to validate
+ * @returns Type predicate for ValidatedBlockInput
+ */
+function isValidatedBlockInput(input: unknown): input is ValidatedBlockInput {
+  return (
+    input !== null &&
+    input !== undefined &&
+    typeof input === "object" &&
+    !Array.isArray(input)
+  );
+}
+
+/**
+ * Comprehensive type guard to validate ComputerToolUseContentBlock structure
+ * @param block - Unknown value to validate
+ * @returns Type assertion that block is ComputerToolUseContentBlock
+ * @throws Error if block structure is invalid
  */
 function assertValidBlock(
   block: unknown,
 ): asserts block is ComputerToolUseContentBlock {
+  // Validate block is a non-null object
   if (block === null || block === undefined || typeof block !== "object") {
     throw new Error("Invalid block: not an object");
   }
+
+  // Type-safe check for required properties
+  const blockObj = block as Record<string, unknown>;
+
+  // Validate 'name' property exists and is string
   if (
-    !("name" in block) ||
-    typeof (block as { name?: unknown }).name !== "string"
+    !("name" in blockObj) ||
+    typeof blockObj.name !== "string" ||
+    blockObj.name.length === 0
   ) {
     throw new Error("Invalid block: missing or invalid name property");
+  }
+
+  // Additional validation for expected block structure
+  if (
+    "input" in blockObj &&
+    blockObj.input !== null &&
+    blockObj.input !== undefined
+  ) {
+    if (typeof blockObj.input !== "object") {
+      throw new Error(
+        "Invalid block: input property must be an object when present",
+      );
+    }
   }
 }
 
 /**
- * Safe type guard wrapper that handles type assertion issues
+ * Safe type guard wrapper with comprehensive error handling and logging
+ * @param guard - Type guard function to execute
+ * @param block - Block to validate
+ * @returns Boolean indicating if guard passed
  */
 function safeTypeGuard<T>(
   guard: (obj: unknown) => obj is T,
   block: unknown,
 ): boolean {
   try {
+    // First validate basic block structure
     assertValidBlock(block);
+
+    // Execute the specific type guard
     const result = guard(block);
+
+    // Ensure result is explicitly boolean
     return Boolean(result);
-  } catch {
+  } catch (error: unknown) {
+    // Type-safe error handling with detailed logging
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    console.debug("ComputerToolUtils.safeTypeGuard failed:", {
+      errorMessage,
+      blockType: typeof block,
+      blockName:
+        block !== null && typeof block === "object" && "name" in block
+          ? (block as { name: unknown }).name
+          : "unknown",
+    });
     return false;
   }
 }
 
 /**
- * Safe property access for block input with comprehensive type checking
+ * Type-safe validation for block input property with comprehensive checking
+ * @param block - Block to validate for input property
+ * @returns Boolean indicating if block has valid input object
  */
-function hasValidInput(block: unknown): boolean {
+function hasValidInput(
+  block: unknown,
+): block is ComputerToolUseContentBlock & { input: Record<string, unknown> } {
   try {
+    // Validate basic block structure first
     assertValidBlock(block);
+
+    // Type-safe access to input property
     const typedBlock = block;
 
+    // Comprehensive input validation
     return (
       "input" in typedBlock &&
       typedBlock.input !== null &&
       typedBlock.input !== undefined &&
-      typeof typedBlock.input === "object"
+      typeof typedBlock.input === "object" &&
+      !Array.isArray(typedBlock.input) // Ensure input is object, not array
     );
-  } catch {
+  } catch (error: unknown) {
+    // Type-safe error logging
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    console.debug("ComputerToolUtils.hasValidInput failed:", {
+      errorMessage,
+      blockType: typeof block,
+    });
     return false;
   }
 }
 
 /**
- * Get button value safely
+ * Safely extract button value from block input with comprehensive type checking
+ * @param block - Block to extract button value from
+ * @returns Button value as string or undefined if not found/invalid
  */
 function getButtonValue(block: unknown): string | undefined {
   try {
+    // Validate block structure
     assertValidBlock(block);
+
+    // Use type-safe input validation
+    if (!hasValidInput(block)) {
+      return undefined;
+    }
+
     const typedBlock = block;
 
-    if (
-      "input" in typedBlock &&
-      typedBlock.input !== null &&
-      typedBlock.input !== undefined &&
-      typeof typedBlock.input === "object" &&
-      "button" in typedBlock.input
-    ) {
-      const button = (typedBlock.input as { button?: unknown }).button;
-      return typeof button === "string" ? button : undefined;
+    // Validate input using type guard
+    if (!isValidatedBlockInput(typedBlock.input)) {
+      return undefined;
     }
+
+    const input: ValidatedBlockInput = typedBlock.input;
+
+    // Type-safe button property access with validation
+    if (
+      input.button !== undefined &&
+      typeof input.button === "string" &&
+      input.button.length > 0
+    ) {
+      return input.button;
+    }
+
     return undefined;
-  } catch {
+  } catch (error: unknown) {
+    // Type-safe error logging
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    console.debug("ComputerToolUtils.getButtonValue failed:", {
+      errorMessage,
+      blockType: typeof block,
+    });
     return undefined;
   }
 }
 
+/**
+ * Get appropriate icon for a computer tool use block with comprehensive type safety
+ * @param block - Validated ComputerToolUseContentBlock
+ * @returns Corresponding icon component
+ */
 export function getIcon(block: ComputerToolUseContentBlock): IconType {
-  // Comprehensive logging for debugging
+  // Type-safe property access with optional chaining
+  const blockName = block?.name;
+
+  // Comprehensive logging for debugging (commented for production)
   // console.debug("ComputerToolUtils.getIcon", {
-  //   blockType: block?.name,
+  //   blockType: blockName,
   //   hasInput: Boolean(block?.input),
+  //   blockValid: blockName !== undefined && blockName.length > 0
   // });
+
+  // Validate input parameter with explicit null check
+  if (
+    block === null ||
+    block === undefined ||
+    !blockName ||
+    blockName.length === 0
+  ) {
+    console.warn("ComputerToolUtils.getIcon: Invalid block provided", {
+      block,
+    });
+    return User03Icon;
+  }
 
   if (safeTypeGuard(isScreenshotToolUseBlock, block)) {
     return Camera01Icon;
@@ -173,12 +298,34 @@ export function getIcon(block: ComputerToolUseContentBlock): IconType {
   return User03Icon;
 }
 
+/**
+ * Get human-readable label for a computer tool use block with comprehensive type safety
+ * @param block - Validated ComputerToolUseContentBlock
+ * @returns Human-readable label string
+ */
 export function getLabel(block: ComputerToolUseContentBlock): string {
-  // Comprehensive logging for debugging
+  // Type-safe property access with optional chaining
+  const blockName = block?.name;
+
+  // Comprehensive logging for debugging (commented for production)
   // console.debug("ComputerToolUtils.getLabel", {
-  //   blockType: block?.name,
+  //   blockType: blockName,
   //   hasInput: Boolean(block?.input),
+  //   blockValid: blockName !== undefined && blockName.length > 0
   // });
+
+  // Validate input parameter with explicit null check
+  if (
+    block === null ||
+    block === undefined ||
+    !blockName ||
+    blockName.length === 0
+  ) {
+    console.warn("ComputerToolUtils.getLabel: Invalid block provided", {
+      block,
+    });
+    return "Unknown";
+  }
 
   if (safeTypeGuard(isScreenshotToolUseBlock, block)) {
     return "Screenshot";
@@ -217,39 +364,53 @@ export function getLabel(block: ComputerToolUseContentBlock): string {
   }
 
   if (safeTypeGuard(isClickMouseToolUseBlock, block)) {
-    // Safe access with comprehensive type checking
+    // Type-safe access with comprehensive validation
     if (hasValidInput(block)) {
       try {
-        assertValidBlock(block);
         const typedBlock = block;
-        const input = typedBlock.input as {
-          button?: string;
-          clickCount?: number;
-        };
 
-        const button = input.button;
-        if (button === "left") {
-          if (typeof input.clickCount === "number" && input.clickCount === 2) {
-            return "Double Click";
-          }
-
-          if (
-            typeof input.clickCount === "number" &&
-            input.clickCount === TRIPLE_CLICK_COUNT
-          ) {
-            return "Triple Click";
-          }
-
+        // Validate input using type guard
+        if (!isValidatedBlockInput(typedBlock.input)) {
           return "Click";
         }
 
-        if (typeof button === "string" && button.length > 0) {
+        const input: ValidatedBlockInput = typedBlock.input;
+
+        // Type-safe property extraction with explicit validation
+        const button =
+          input.button !== undefined && typeof input.button === "string"
+            ? input.button
+            : undefined;
+        const clickCount =
+          input.clickCount !== undefined && typeof input.clickCount === "number"
+            ? input.clickCount
+            : undefined;
+
+        // Handle left button clicks with click count
+        if (button === "left") {
+          if (clickCount === 2) {
+            return "Double Click";
+          }
+          if (clickCount === TRIPLE_CLICK_COUNT) {
+            return "Triple Click";
+          }
+          return "Click";
+        }
+
+        // Handle other button types with explicit string validation
+        if (button !== undefined && button.length > 0) {
           const capitalizedButton =
             button.charAt(0).toUpperCase() + button.slice(1);
           return `${capitalizedButton} Click`;
         }
-      } catch {
-        // Fall through to default
+      } catch (error: unknown) {
+        // Type-safe error handling
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        console.debug("ComputerToolUtils.getLabel click processing failed:", {
+          errorMessage,
+          blockName: block?.name,
+        });
       }
     }
     return "Click";
