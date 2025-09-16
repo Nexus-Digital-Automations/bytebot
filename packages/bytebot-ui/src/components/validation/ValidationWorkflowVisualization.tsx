@@ -23,7 +23,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,32 +37,23 @@ import {
   ConversationParticipant,
   FunctionSecurityLevel,
   ParlantValidationRequest,
-  ParlantValidationResponse,
-  ParticipantCapability,
   ParticipantRole,
-  RiskLevel,
-  ValidationDecision,
-  ValidationMode,
-  ValidationRuleResult
+  ValidationDecision
 } from '@bytebot/shared/types/parlant.types';
 import { useParlantWebSocket } from '@/hooks/useParlantWebSocket';
-import { logDebug, logInfo, logWarning } from '@/utils/logger';
+import { logDebug, logInfo } from '@/utils/logger';
 import {
   ActivityIcon,
   AlertTriangleIcon,
-  BranchIcon,
   CheckmarkCircle02Icon,
   ClockIcon,
   ExportIcon,
-  EyeIcon,
   FastForwardIcon,
   FlowIcon,
   HugeiconsIcon,
   PauseIcon,
   PlayIcon,
   RefreshIcon,
-  SettingsIcon,
-  ShieldIcon,
   TimeIcon,
   TrendUpIcon,
   UserIcon,
@@ -466,11 +457,15 @@ const generateWorkflowSteps = (request: ParlantValidationRequest): WorkflowStep[
     requiredParticipants: [],
     currentParticipants: [],
     metadata: {},
-    dependencies: request.validationParams.approvalLevel !== ApprovalLevel.AUTOMATIC 
-      ? ['human-approval'] 
-      : request.functionContext.securityLevel !== FunctionSecurityLevel.PUBLIC
-        ? ['security-analysis']
-        : ['initial-validation']
+    dependencies: (() => {
+      if (request.validationParams.approvalLevel !== ApprovalLevel.AUTOMATIC) {
+        return ['human-approval'];
+      }
+      if (request.functionContext.securityLevel !== FunctionSecurityLevel.PUBLIC) {
+        return ['security-analysis'];
+      }
+      return ['initial-validation'];
+    })()
   });
   
   return steps;
@@ -632,7 +627,7 @@ const WorkflowStepComponent: React.FC<{
               </p>
               
               {/* Duration */}
-              {step.duration && (
+              {(step.duration !== null && step.duration !== undefined) && (
                 <div className="flex items-center gap-1 mt-1">
                   <HugeiconsIcon icon={TimeIcon} className="w-3 h-3 text-gray-400" />
                   <span className="text-xs text-gray-500">
@@ -682,7 +677,7 @@ const WorkflowStepComponent: React.FC<{
                   <span>{step.startTime.toLocaleTimeString()}</span>
                 </div>
               )}
-              {step.duration && (
+              {(step.duration !== null && step.duration !== undefined) && (
                 <div className="flex justify-between text-xs">
                   <span>Duration:</span>
                   <span>{formatDuration(step.duration)}</span>
@@ -1449,7 +1444,7 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
                       <span className="font-medium">{selectedStep.type}</span>
                     </div>
                     
-                    {selectedStep.duration && (
+                    {(selectedStep.duration !== null && selectedStep.duration !== undefined) && (
                       <div className="flex justify-between">
                         <span>Duration:</span>
                         <span className="font-medium">

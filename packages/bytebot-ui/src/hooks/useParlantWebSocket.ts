@@ -31,7 +31,6 @@ import {
   ParlantError,
   ParlantValidationRequest,
   ParlantValidationResponse,
-  ParlantWebSocketEvents,
   ValidationDecision
 } from '@bytebot/shared/types/parlant.types';
 import { logDebug, logError, logInfo, logWarning } from '@/utils/logger';
@@ -201,8 +200,8 @@ interface UseParlantWebSocketReturn {
   readonly exportConversation: (conversationId: string) => Promise<string>;
   
   // Real-time status
-  readonly getValidationWorkflow: (requestId: string) => Promise<any>;
-  readonly subscribeToValidationUpdates: (callback: (update: any) => void) => () => void;
+  readonly getValidationWorkflow: (requestId: string) => Promise<unknown>;
+  readonly subscribeToValidationUpdates: (callback: (update: unknown) => void) => () => void;
   
   // Connection management
   readonly connect: () => void;
@@ -214,7 +213,20 @@ interface UseParlantWebSocketReturn {
   readonly getConfig: () => ParlantWebSocketConfig;
   
   // Health and diagnostics
-  readonly getHealthStatus: () => any;
+  readonly getHealthStatus: () => {
+    connected: boolean;
+    reconnecting: boolean;
+    error: string | null;
+    metrics: ConversationMetrics;
+    offlineQueue: {
+      size: number;
+      enabled: boolean;
+      maxSize: number;
+    };
+    pendingValidations: number;
+    currentConversation: string | null;
+    uptime: number;
+  };
   readonly clearOfflineQueue: () => void;
   readonly retryFailedMessages: () => Promise<void>;
 }
@@ -242,7 +254,7 @@ interface UseParlantWebSocketProps {
   /** Validation event handlers */
   onValidationRequest?: (request: ParlantValidationRequest) => void;
   onValidationResponse?: (response: ParlantValidationResponse) => void;
-  onValidationWorkflowUpdate?: (update: any) => void;
+  onValidationWorkflowUpdate?: (update: unknown) => void;
   
   /** Participant event handlers */
   onParticipantJoined?: (participant: ConversationParticipant) => void;
@@ -279,18 +291,23 @@ const DEFAULT_CONFIG: ParlantWebSocketConfig = {
 // UTILITY FUNCTIONS
 // ===========================
 
+// Constants for ID generation
+const ID_BASE = 36;
+const ID_SUBSTRING_START = 2;
+const ID_SUBSTRING_LENGTH = 9;
+
 /**
  * Generate unique conversation ID
  */
 const generateConversationId = (): string => {
-  return `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `conv_${Date.now()}_${Math.random().toString(ID_BASE).substr(ID_SUBSTRING_START, ID_SUBSTRING_LENGTH)}`;
 };
 
 /**
  * Generate unique message ID
  */
 const generateMessageId = (): string => {
-  return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `msg_${Date.now()}_${Math.random().toString(ID_BASE).substr(ID_SUBSTRING_START, ID_SUBSTRING_LENGTH)}`;
 };
 
 /**
@@ -301,6 +318,10 @@ const calculateMetrics = (
   startTime: Date,
   errors: number
 ): ConversationMetrics => {
+  const RESPONSE_TIME_MAX_MS = 30_000;
+  const MILLISECONDS_PER_MINUTE = 60_000;
+  const PERCENTAGE_MULTIPLIER = 100;
+  
   const now = new Date();
   const uptimeMs = now.getTime() - startTime.getTime();
   const totalMessages = messages.length;
@@ -311,26 +332,26 @@ const calculateMetrics = (
     .map((msg, index) => 
       msg.timestamp.getTime() - messages[index].timestamp.getTime()
     )
-    .filter(time => time > 0 && time < 30000); // Filter unrealistic response times
+    .filter(time => time > 0 && time < RESPONSE_TIME_MAX_MS); // Filter unrealistic response times
   
   const averageResponseTime = responseTimes.length > 0
     ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
     : 0;
   
   const messagesPerMinute = uptimeMs > 0
-    ? (totalMessages / (uptimeMs / 60000))
+    ? (totalMessages / (uptimeMs / MILLISECONDS_PER_MINUTE))
     : 0;
   
   const errorRate = totalMessages > 0
-    ? (errors / totalMessages) * 100
+    ? (errors / totalMessages) * PERCENTAGE_MULTIPLIER
     : 0;
   
   return {
     averageResponseTime: Math.round(averageResponseTime),
     totalMessages,
-    messagesPerMinute: Math.round(messagesPerMinute * 100) / 100,
+    messagesPerMinute: Math.round(messagesPerMinute * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER,
     connectionUptime: uptimeMs,
-    errorRate: Math.round(errorRate * 100) / 100,
+    errorRate: Math.round(errorRate * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER,
     validationSuccessRate: 0, // TODO: Calculate from validation responses
     lastUpdate: now,
   };
@@ -416,7 +437,6 @@ export const useParlantWebSocket = (
   // Timers and cleanup
   const heartbeatTimer = useRef<NodeJS.Timeout | null>(null);
   const metricsTimer = useRef<NodeJS.Timeout | null>(null);
-  const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
   
   // Validation tracking
   const pendingValidations = useRef<Map<string, {

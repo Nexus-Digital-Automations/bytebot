@@ -32,7 +32,7 @@ import {
   MessageType,
   ParlantConversationContext
 } from '@bytebot/shared/types/parlant.types';
-import { logDebug, logError, logInfo, logWarning } from '@/utils/logger';
+import { logDebug, logError, logInfo } from '@/utils/logger';
 
 // ===========================
 // TYPE DEFINITIONS
@@ -382,14 +382,14 @@ class ConversationStorage {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version);
       
-      request.onerror = () => { reject(request.error); };
+      request.onerror = (): void => { reject(request.error); };
       
-      request.onsuccess = () => {
+      request.onsuccess = (): void => {
         this.db = request.result;
         resolve();
       };
       
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = (event): void => {
         const db = (event.target as IDBOpenDBRequest).result;
         
         // Conversations store
@@ -434,12 +434,16 @@ class ConversationStorage {
     if (!this.db) {await this.initialize();}
     
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['conversations'], 'readwrite');
+      if (!this.db) { 
+        reject(new Error('Database not initialized')); 
+        return; 
+      }
+      const transaction = this.db.transaction(['conversations'], 'readwrite');
       const store = transaction.objectStore('conversations');
       const request = store.put(snapshot);
       
-      request.onerror = () => { reject(request.error); };
-      request.onsuccess = () => { resolve(); };
+      request.onerror = (): void => { reject(request.error); };
+      request.onsuccess = (): void => { resolve(); };
     });
   }
   
@@ -447,12 +451,16 @@ class ConversationStorage {
     if (!this.db) {await this.initialize();}
     
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['conversations'], 'readonly');
+      if (!this.db) { 
+        reject(new Error('Database not initialized')); 
+        return; 
+      }
+      const transaction = this.db.transaction(['conversations'], 'readonly');
       const store = transaction.objectStore('conversations');
       const request = store.get(conversationId);
       
-      request.onerror = () => { reject(request.error); };
-      request.onsuccess = () => { resolve(request.result || null); };
+      request.onerror = (): void => { reject(request.error); };
+      request.onsuccess = (): void => { resolve(request.result ?? null); };
     });
   }
   
@@ -460,33 +468,37 @@ class ConversationStorage {
     if (!this.db) {await this.initialize();}
     
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['conversations'], 'readonly');
+      if (!this.db) { 
+        reject(new Error('Database not initialized')); 
+        return; 
+      }
+      const transaction = this.db.transaction(['conversations'], 'readonly');
       const store = transaction.objectStore('conversations');
       const request = store.getAll();
       
-      request.onerror = () => { reject(request.error); };
-      request.onsuccess = () => {
-        let results = request.result || [];
+      request.onerror = (): void => { reject(request.error); };
+      request.onsuccess = (): void => {
+        let results = request.result ?? [];
         
         // Apply filters
-        if (options.states) {
-          results = results.filter(s => options.states!.includes(s.conversation.state));
+        if (options.states && options.states.length > 0) {
+          results = results.filter(s => options.states?.includes(s.conversation.state) ?? false);
         }
         
-        if (options.priorities) {
+        if (options.priorities && options.priorities.length > 0) {
           results = results.filter(s => 
-            options.priorities!.includes(s.conversation.metadata.priority)
+            options.priorities?.includes(s.conversation.metadata.priority) ?? false
           );
         }
         
         if (options.dateRange) {
           results = results.filter(s => 
-            s.lastActivity >= options.dateRange!.start &&
-            s.lastActivity <= options.dateRange!.end
+            s.lastActivity >= options.dateRange.start &&
+            s.lastActivity <= options.dateRange.end
           );
         }
         
-        if (options.query) {
+        if (options.query && options.query.length > 0) {
           const query = options.query.toLowerCase();
           results = results.filter(s =>
             s.contextSummary.summary.toLowerCase().includes(query) ||

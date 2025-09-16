@@ -95,7 +95,7 @@ interface CommandResult {
   entity?: NavigationEntity;
   
   /** Extracted parameters */
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   
   /** Confidence score (0-1) */
   confidence: number;
@@ -253,7 +253,7 @@ interface ChatFirstNavigationProps {
   
   /** Event handlers */
   onCommandExecuted?: (command: string, result: CommandResult) => void;
-  onNavigate?: (path: string, params?: Record<string, any>) => void;
+  onNavigate?: (path: string, params?: Record<string, unknown>) => void;
   onError?: (error: string) => void;
   
   /** Styling */
@@ -333,7 +333,7 @@ const DEFAULT_ACTIONS: NavigationAction[] = [
     id: 'create-task',
     label: 'Create New Task',
     description: 'Create a new task',
-    handler: async () => {
+    handler: async (): Promise<void> => {
       // TODO: Implement task creation
       logInfo('Create task command executed', null, 'ChatFirstNavigation');
     },
@@ -346,7 +346,7 @@ const DEFAULT_ACTIONS: NavigationAction[] = [
     id: 'search-global',
     label: 'Global Search',
     description: 'Search across all content',
-    handler: async () => {
+    handler: async (): Promise<void> => {
       // TODO: Implement global search
       logInfo('Global search command executed', null, 'ChatFirstNavigation');
     },
@@ -499,8 +499,8 @@ class NavigationNLU {
   /**
    * Extract parameters from command based on intent
    */
-  private extractParameters(command: string, intent: NavigationIntent): Record<string, any> {
-    const parameters: Record<string, any> = {};
+  private extractParameters(command: string, intent: NavigationIntent): Record<string, unknown> {
+    const parameters: Record<string, unknown> = {};
     
     // Extract common parameters
     const idMatch = command.match(/(?:id|number|#)\s*(\w+)/);
@@ -508,35 +508,51 @@ class NavigationNLU {
       parameters.id = idMatch[1];
     }
     
-    const nameMatch = command.match(/(?:named|called)\s+[\"']([^\"']+)[\"']/);
+    const nameMatch = command.match(/(?:named|called)\s+["']([^"']+)["']/);
     if (nameMatch) {
       parameters.name = nameMatch[1];
     }
     
     // Intent-specific parameter extraction
     switch (intent) {
-      case NavigationIntent.SEARCH:
-        const searchMatch = command.match(/(?:search|find|look for)\s+[\"']([^\"']+)[\"']/) ||
+      case NavigationIntent.SEARCH: {
+        const searchMatch = command.match(/(?:search|find|look for)\s+["']([^"']+)["']/) ||
                            command.match(/(?:search|find|look for)\s+(\w+)/);
         if (searchMatch) {
           parameters.query = searchMatch[1];
         }
         break;
+      }
         
-      case NavigationIntent.FILTER:
-        const filterMatch = command.match(/(?:by|where)\s+(\w+)\s*(?:is|equals)\s*([^\\s]+)/);
+      case NavigationIntent.FILTER: {
+        const filterMatch = command.match(/(?:by|where)\s+(\w+)\s*(?:is|equals)\s*([^\s]+)/);
         if (filterMatch) {
           parameters.filterField = filterMatch[1];
           parameters.filterValue = filterMatch[2];
         }
         break;
+      }
         
-      case NavigationIntent.SORT:
+      case NavigationIntent.SORT: {
         const sortMatch = command.match(/(?:sort|order)\s+by\s+(\w+)(?:\s+(asc|desc|ascending|descending))?/);
         if (sortMatch) {
           parameters.sortField = sortMatch[1];
           parameters.sortDirection = sortMatch[2] || 'asc';
         }
+        break;
+      }
+      
+      case NavigationIntent.NAVIGATE:
+      case NavigationIntent.CREATE:
+      case NavigationIntent.UPDATE:
+      case NavigationIntent.DELETE:
+      case NavigationIntent.EXPORT:
+      case NavigationIntent.HELP:
+      case NavigationIntent.SETTINGS:
+      case NavigationIntent.LOGOUT:
+      case NavigationIntent.UNKNOWN:
+      default:
+        // No specific parameter extraction for these intents
         break;
     }
     

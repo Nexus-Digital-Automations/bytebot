@@ -679,6 +679,54 @@
       ],
       "completed_at": "2025-09-16T11:04:11.545Z",
       "updated_at": "2025-09-16T11:04:11.545Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-16T19:13:33.728Z",
+      "title": "CRITICAL: Fix remaining 111 ESLint errors across bytebot-ui package",
+      "description": "Complete ESLint error resolution across entire bytebot-ui package. After fixing ConversationInterface.tsx (21 errors → 0), there are still 111 errors in other files blocking the build pipeline. Deploy concurrent agents to systematically resolve all errors across components, pages, hooks, and utils. Priority: resolve actual errors (not warnings) to restore build functionality.",
+      "category": "error",
+      "id": "error_1758050013728_ern26c8q38m",
+      "assigned_agent": "dev_session_1758046142346_1_general_58dfbad3",
+      "started_at": "2025-09-16T19:13:59.323Z",
+      "claimed_by": "dev_session_1758046142346_1_general_58dfbad3",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758046142346_1_general_58dfbad3",
+          "role": "primary",
+          "assignedAt": "2025-09-16T19:13:59.323Z",
+          "reassignReason": null,
+          "claimPriority": "critical"
+        }
+      ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-16T19:18:04.048Z",
+      "title": "Fix ValidationWorkflowVisualization ESLint errors",
+      "description": "Fix 20 ESLint errors in ValidationWorkflowVisualization.tsx component while preserving validation workflow visualization functionality",
+      "category": "error",
+      "id": "error_1758050284048_2wg0jjd69ui"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-16T19:18:14.109Z",
+      "title": "Fix 37 ESLint errors in useConversationContext.ts hook",
+      "description": "Critical ESLint error fixing in React hook file - analyze and fix hook-specific violations, dependency arrays, state management, effect cleanup, types, unused variables, promise handling",
+      "category": "error",
+      "id": "error_1758050294109_k5h9hq8vwvo",
+      "assigned_agent": "dev_session_1758050224353_1_general_b9fdb6e6",
+      "started_at": "2025-09-16T19:22:32.773Z",
+      "claimed_by": "dev_session_1758050224353_1_general_b9fdb6e6",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758050224353_1_general_b9fdb6e6",
+          "role": "primary",
+          "assignedAt": "2025-09-16T19:22:32.773Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -1960,6 +2008,48 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-16T03:12:35.072Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758050224309_1_general_210ddc8d": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T19:17:04.309Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T19:17:04.309Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758050224353_1_general_b9fdb6e6": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T19:17:04.354Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T19:17:04.354Z",
       "sessionId": null,
       "metadata": {}
     }
