@@ -30,7 +30,37 @@ import { promises as fs } from "fs";
 import { join, resolve } from "path";
 import { randomBytes } from "crypto";
 import { performance } from "perf_hooks";
-import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../../../bytebotd/src/parlant/parlant-integration.service';
+// Local interface definitions for OWASP integration
+export enum RiskLevel {
+  MINIMAL = 'MINIMAL',
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL'
+}
+
+export interface ParlantConversationContext {
+  readonly userId: string;
+  readonly sessionId: string;
+  readonly agentRole?: string;
+  readonly userRole?: string;
+  readonly requestSource?: string;
+  readonly securityLevel?: string;
+  readonly conversationHistory?: Array<{ role: string; content: string; timestamp: Date }>;
+}
+
+export interface ParlantValidationRequest {
+  readonly functionName: string;
+  readonly functionParams: Record<string, unknown>;
+  readonly actionDescription: string;
+  readonly context: ParlantConversationContext;
+  readonly riskLevel: RiskLevel;
+  readonly operationId: string;
+}
+
+export interface ParlantIntegrationService {
+  validateFunctionExecution(request: ParlantValidationRequest): Promise<{ approved: boolean; reasoning: string; conversationId: string }>;
+}
 
 // ===========================
 // TYPES AND INTERFACES
@@ -45,6 +75,11 @@ export interface OWASPScanningContext extends ParlantConversationContext {
   readonly complianceFramework?: 'PCI_DSS' | 'SOX' | 'GDPR' | 'HIPAA' | 'ISO27001';
   readonly businessImpact: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   readonly dataClassification?: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
+  readonly depth?: number;
+  readonly headers?: Record<string, string>;
+  readonly verify_ssl?: boolean;
+  readonly rate_limit?: number;
+  readonly enable_active_scanning?: boolean;
 }
 
 /* eslint-disable no-unused-vars -- Enum values are used via Object.values() and type annotations throughout the codebase */
@@ -1330,7 +1365,17 @@ export class OWASPScannerFactory {
           report_format: "comprehensive",
         };
 
-        return this._owaspService.scanTarget(configuration);
+        const defaultContext: OWASPScanningContext = {
+          sessionId: `comprehensive_scan_${Date.now()}`,
+          userId: 'system',
+          userRole: 'security_analyst',
+          requestSource: 'comprehensive_scanner',
+          scanType: 'web_application',
+          targetEnvironment: 'development',
+          scanSeverity: 'active_safe',
+          businessImpact: 'MEDIUM',
+        };
+        return this._owaspService.scanTarget(configuration, defaultContext);
       },
     };
   }
