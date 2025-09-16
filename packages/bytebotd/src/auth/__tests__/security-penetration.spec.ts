@@ -30,6 +30,52 @@ import { UserRole, Permission } from '@bytebot/shared';
 import * as _crypto from 'crypto';
 import * as _jwt from 'jsonwebtoken';
 
+// Type definitions for security testing
+interface JwtHeaderOptions {
+  algorithm?: string;
+  headerInjection?: Record<string, unknown>;
+  customSignature?: string;
+}
+
+interface SecurityTestPayload {
+  [key: string]: unknown;
+  sub?: string;
+  role?: string;
+  exp?: number;
+  iat?: number;
+}
+
+interface PentestHeaders {
+  [key: string]: string | string[] | undefined;
+  'user-agent'?: string;
+  'x-forwarded-for'?: string;
+  'x-real-ip'?: string;
+  'x-attack-vector'?: string;
+}
+
+interface PentestMetadata {
+  ip?: string;
+  url?: string;
+  method?: string;
+  attackVector?: string;
+}
+
+// Interface for security testing user objects
+interface SecurityTestUser extends Partial<ByteBotdUser> {
+  [key: string]: unknown;
+  __proto__?: unknown;
+  constructor?: unknown;
+}
+
+// Interface for audit events
+interface AuditEvent {
+  level: string;
+  message: string;
+  timestamp: number;
+}
+
+
+
 /**
  * Security Penetration Testing Suite
  * Simulates real-world attack scenarios against the authentication system
@@ -57,7 +103,7 @@ describe('Security Penetration Testing Suite', () => {
   // Advanced JWT manipulation toolkit
   const JWTManipulator = {
     // Create JWT with specific vulnerabilities
-    createVulnerableJWT: (_payload: any, options: any = {}) => {
+    createVulnerableJWT: (_payload: SecurityTestPayload, options: JwtHeaderOptions = {}) => {
       const header = {
         alg: options.algorithm ?? 'HS256',
         typ: 'JWT',
@@ -80,7 +126,7 @@ describe('Security Penetration Testing Suite', () => {
     },
 
     // Algorithm confusion attack vectors
-    createAlgorithmConfusionTokens: (_payload: any) => {
+    createAlgorithmConfusionTokens: (_payload: SecurityTestPayload) => {
       return {
         noneAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
           algorithm: 'none',
@@ -98,7 +144,7 @@ describe('Security Penetration Testing Suite', () => {
     },
 
     // Payload injection attack vectors
-    createPayloadInjectionTokens: (basePayload: any) => {
+    createPayloadInjectionTokens: (basePayload: SecurityTestPayload) => {
       return {
         prototypeInjection: JWTManipulator.createVulnerableJWT({
           ...basePayload,
@@ -281,8 +327,8 @@ describe('Security Penetration Testing Suite', () => {
   // Mock execution context for penetration testing
   const createPentestExecutionContext = (
     user?: ByteBotdUser,
-    headers: any = {},
-    metadata: any = {},
+    headers: PentestHeaders = {},
+    metadata: PentestMetadata = {},
   ): ExecutionContext => {
     const mockRequest = {
       user,
@@ -624,7 +670,7 @@ describe('Security Penetration Testing Suite', () => {
             role: UserRole._VIEWER,
             isActive: true,
             __proto__: { role: UserRole._ADMIN, isAdmin: true },
-          } as any,
+          } as SecurityTestUser,
         },
         {
           name: 'constructor-manipulation',
@@ -640,7 +686,7 @@ describe('Security Penetration Testing Suite', () => {
                 permissions: [Permission._SYSTEM_ADMIN],
               },
             },
-          } as any,
+          } as SecurityTestUser,
         },
         {
           name: 'role-confusion',
@@ -810,7 +856,7 @@ describe('Security Penetration Testing Suite', () => {
           requiredRole: UserRole._ADMIN,
           shouldPass: false,
         },
-        { role: null as any, requiredRole: UserRole._ADMIN, shouldPass: false },
+        { role: null as unknown as UserRole, requiredRole: UserRole._ADMIN, shouldPass: false },
       ];
 
       const authzTimingResults = [];
@@ -1357,7 +1403,7 @@ describe('Security Penetration Testing Suite', () => {
       );
 
       // Mock security audit logger
-      const auditEvents: any[] = [];
+      const auditEvents: AuditEvent[] = [];
       const originalConsole = { ...console };
 
       console.warn = (...args) => {
@@ -1456,7 +1502,7 @@ describe('Security Penetration Testing Suite', () => {
       console.error = originalConsole.error;
 
       // Validate audit trail
-      const securityAuditEvents = auditEvents.filter((event) => {
+      const securityAuditEvents = auditEvents.filter((event: AuditEvent) => {
         const message = event.message ?? '';
         const securityTerms = ['security', 'auth', 'attack', 'unauthorized'];
         return securityTerms.some((term) => message.includes(term));
@@ -1465,7 +1511,7 @@ describe('Security Penetration Testing Suite', () => {
       expect(securityAuditEvents.length).toBeGreaterThan(0);
 
       // Verify audit events contain critical information
-      const hasIPTracking = auditEvents.some((event) => {
+      const hasIPTracking = auditEvents.some((event: AuditEvent) => {
         const message = event.message ?? '';
         const ipAddresses = ['192.168.100.100', '10.0.100.100'];
         return ipAddresses.some((ip) => message.includes(ip));

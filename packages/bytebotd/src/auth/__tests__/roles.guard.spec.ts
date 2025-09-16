@@ -31,6 +31,18 @@ interface AuthenticatedUser {
   permissions: Permission[];
 }
 
+// Type definitions for request and context
+interface AuthenticatedRequest {
+  user?: AuthenticatedUser;
+}
+
+interface MockExecutionContext extends ExecutionContext {
+  switchToHttp(): {
+    getRequest(): AuthenticatedRequest;
+    getResponse(): Record<string, unknown>;
+  };
+}
+
 // Mock RBAC Roles Guard implementation for Phase 1 requirements
 class MockRolesGuard {
   constructor(private reflector: Reflector) {}
@@ -51,8 +63,8 @@ class MockRolesGuard {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user as AuthenticatedUser;
+    const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
+    const user = request.user;
 
     if (!user) {
       throw new ForbiddenException('User authentication required');
@@ -181,8 +193,8 @@ describe('RolesGuard', () => {
   // Mock execution context factory
   const createMockExecutionContext = (
     user?: AuthenticatedUser,
-  ): ExecutionContext => {
-    const mockRequest = { user };
+  ): MockExecutionContext => {
+    const mockRequest: AuthenticatedRequest = { user };
 
     return {
       switchToHttp: jest.fn().mockReturnValue({
@@ -191,7 +203,7 @@ describe('RolesGuard', () => {
       }),
       getHandler: jest.fn(),
       getClass: jest.fn(),
-    } as any;
+    } as MockExecutionContext;
   };
 
   // Mock user factory
@@ -645,7 +657,7 @@ describe('RolesGuard', () => {
       console.log(`[${testId}] Testing null role handling`);
 
       const user = createMockUser(UserRole._VIEWER, [], {
-        role: null as any,
+        role: null as unknown as UserRole,
       });
       const context = createMockExecutionContext(user);
 
