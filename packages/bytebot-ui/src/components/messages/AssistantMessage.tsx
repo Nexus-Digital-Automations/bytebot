@@ -2,11 +2,7 @@ import React from "react";
 import { GroupedMessages, TaskStatus } from "@/types";
 import { MessageAvatar } from "./MessageAvatar";
 import { MessageContent } from "./content/MessageContent";
-import {
-  MessageContentBlock,
-  ToolResultContentBlock,
-  isImageContentBlock,
-} from "@bytebot/shared";
+import { MessageContentBlock, ToolResultContentBlock } from "@bytebot/shared";
 
 /**
  * Safe wrapper for isImageContentBlock to handle strict boolean expressions

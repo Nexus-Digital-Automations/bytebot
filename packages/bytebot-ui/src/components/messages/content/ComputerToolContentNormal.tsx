@@ -188,7 +188,7 @@ function ToolDetailsNormal({
       {Boolean(block) && hasCoordinates(block.input) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!block?.input || !hasCoordinates(block.input)) {
+            if (!hasCoordinates(block.input)) {
               return "Invalid coordinates";
             }
             const coords = block.input.coordinates;
@@ -201,7 +201,7 @@ function ToolDetailsNormal({
       {Boolean(block) && hasPathCoordinates(block.input) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!block?.input || !hasPathCoordinates(block.input)) {
+            if (!hasPathCoordinates(block.input)) {
               return "Invalid path coordinates";
             }
             const input = block.input;
@@ -265,7 +265,7 @@ export function ComputerToolContentNormal({
   block,
 }: ComputerToolContentNormalProps): React.JSX.Element | null {
   // Don't render screenshot tool use blocks here - they're handled separately
-  if (!block || typeof block !== "object") {
+  if (typeof block !== "object" || block === null) {
     return null;
   }
 
