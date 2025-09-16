@@ -2,12 +2,7 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import { GroupedMessages } from "@/types";
 import { MessageAvatar } from "./MessageAvatar";
-import {
-  MessageContentBlock,
-  ToolResultContentBlock,
-  isImageContentBlock,
-  isTextContentBlock,
-} from "@bytebot/shared";
+import { MessageContentBlock, ToolResultContentBlock } from "@bytebot/shared";
 
 /**
  * Enhanced type guard to check if a ToolResultContentBlock has valid content
@@ -55,8 +50,109 @@ function getValidToolResultContent(
     return null;
   }
 
-  // After type guard validation, we can safely access the content
-  return block.content;
+  // Use type narrowing with proper property access
+  if (typeof block === "object" && block !== null && "content" in block) {
+    const blockWithContent = block as { content: unknown };
+    if (Array.isArray(blockWithContent.content)) {
+      // Safely cast and validate the content array
+      const rawArray = blockWithContent.content;
+
+      if (Array.isArray(rawArray) && rawArray.length > 0) {
+        const validatedArray: MessageContentBlock[] = [];
+
+        for (const item of rawArray) {
+          if (item != null && typeof item === "object") {
+            validatedArray.push(item as MessageContentBlock);
+          }
+        }
+
+        return validatedArray.length > 0 ? validatedArray : null;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Safe wrapper for isImageContentBlock that handles error types
+ * Provides explicit type checking and error handling
+ */
+function safeIsImageContentBlock(contentItem: MessageContentBlock): boolean {
+  if (contentItem == null || typeof contentItem !== "object") {
+    return false;
+  }
+
+  try {
+    // Manual type checking to avoid unsafe function calls
+    // Check for image content block properties directly
+    if (
+      typeof contentItem === "object" &&
+      "type" in contentItem &&
+      (contentItem as { type: unknown }).type === "image" &&
+      "source" in contentItem
+    ) {
+      const imageBlock = contentItem as { source: unknown };
+      return (
+        typeof imageBlock.source === "object" &&
+        imageBlock.source !== null &&
+        "data" in imageBlock.source &&
+        "media_type" in imageBlock.source
+      );
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Safe wrapper for isTextContentBlock that handles error types
+ * Provides explicit type checking and error handling
+ */
+function safeIsTextContentBlock(block: MessageContentBlock): boolean {
+  if (block == null || typeof block !== "object") {
+    return false;
+  }
+
+  try {
+    // Manual type checking to avoid unsafe function calls
+    // Check for text content block properties directly
+    if (
+      typeof block === "object" &&
+      "type" in block &&
+      (block as { type: unknown }).type === "text" &&
+      "text" in block &&
+      typeof (block as { text: unknown }).text === "string"
+    ) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Safe text extraction from TextContentBlock with proper type guards
+ * Returns empty string if block is invalid or not a text block
+ */
+function safeGetTextContent(block: MessageContentBlock): string {
+  if (!safeIsTextContentBlock(block)) {
+    return "";
+  }
+
+  // Use type narrowing with explicit property checking
+  if (
+    typeof block === "object" &&
+    block !== null &&
+    "text" in block &&
+    typeof (block as { text: unknown }).text === "string"
+  ) {
+    return (block as { text: string }).text;
+  }
+
+  return "";
 }
 
 interface UserMessageProps {
@@ -95,7 +191,7 @@ export function UserMessage({
                         contentItem: MessageContentBlock,
                         contentIndex: number,
                       ) => {
-                        if (isImageContentBlock(contentItem)) {
+                        if (safeIsImageContentBlock(contentItem)) {
                           markers.push(
                             <div
                               key={`${blockIndex}-${contentIndex}`}
@@ -125,8 +221,10 @@ export function UserMessage({
                       key={index}
                       className="text-bytebot-bronze-light-12 text-sm"
                     >
-                      {isTextContentBlock(block) && (
-                        <ReactMarkdown>{block.text}</ReactMarkdown>
+                      {safeIsTextContentBlock(block) && (
+                        <ReactMarkdown>
+                          {safeGetTextContent(block)}
+                        </ReactMarkdown>
                       )}
                     </div>
                   ))}
@@ -158,7 +256,7 @@ export function UserMessage({
 
                 validContent.forEach(
                   (contentItem: MessageContentBlock, contentIndex: number) => {
-                    if (isImageContentBlock(contentItem)) {
+                    if (safeIsImageContentBlock(contentItem)) {
                       markers.push(
                         <div
                           key={`${blockIndex}-${contentIndex}`}
@@ -183,8 +281,8 @@ export function UserMessage({
             <div className="space-y-2 rounded-md text-fuchsia-600">
               {message.content.map((block, index) => (
                 <div key={index} className="prose prose-sm max-w-none text-sm">
-                  {isTextContentBlock(block) && (
-                    <ReactMarkdown>{block.text}</ReactMarkdown>
+                  {safeIsTextContentBlock(block) && (
+                    <ReactMarkdown>{safeGetTextContent(block)}</ReactMarkdown>
                   )}
                 </div>
               ))}
