@@ -2,7 +2,8 @@ import { TasksService } from '../tasks/tasks.service';
 import { MessagesService } from '../messages/messages.service';
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  MessageRole,
+  Message,
+  Role,
   Task,
   TaskPriority,
   TaskStatus,
@@ -165,11 +166,10 @@ export class AgentProcessor {
                 updatedAt: new Date(),
                 taskId,
                 summaryId: null,
-                userId: null,
-                role: MessageRole.USER,
+                role: Role.USER,
                 content: [
                   {
-                    type: MessageContentType._Text,
+                    type: MessageContentType.Text,
                     text: latestSummary.content,
                   },
                 ],
@@ -183,9 +183,9 @@ export class AgentProcessor {
       );
 
       const model = task.model as unknown as BytebotAgentModel;
-      const service = this.services[model.provider];
+      let agentResponse: BytebotAgentResponse;
 
-      // Service declaration moved above to fix variable declaration order
+      const service = this.services[model.provider];
       if (!service) {
         this.logger.warn(
           `No service found for model provider: ${model.provider}`,
@@ -198,7 +198,7 @@ export class AgentProcessor {
         return;
       }
 
-      const agentResponse: BytebotAgentResponse = await service.generateMessage(
+      agentResponse = await service.generateMessage(
         AGENT_SYSTEM_PROMPT,
         messages,
         model.name,
@@ -226,7 +226,7 @@ export class AgentProcessor {
 
       await this.messagesService.create({
         content: messageContentBlocks,
-        role: MessageRole.ASSISTANT,
+        role: Role.ASSISTANT,
         taskId,
       });
 
@@ -249,11 +249,10 @@ export class AgentProcessor {
                 updatedAt: new Date(),
                 taskId,
                 summaryId: null,
-                userId: null,
-                role: MessageRole.USER,
+                role: Role.USER,
                 content: [
                   {
-                    type: MessageContentType._Text,
+                    type: MessageContentType.Text,
                     text: 'Respond with a summary of the messages above. Do not include any additional information.',
                   },
                 ],
@@ -272,11 +271,9 @@ export class AgentProcessor {
           const summaryContent = summaryContentBlocks
             .filter(
               (block: MessageContentBlock) =>
-                block.type === MessageContentType._Text,
+                block.type === MessageContentType.Text,
             )
-            .map(
-              (block: MessageContentBlock) => (block as TextContentBlock).text,
-            )
+            .map((block: TextContentBlock) => block.text)
             .join('\n');
 
           const summary = await this.summariesService.create({
@@ -293,21 +290,10 @@ export class AgentProcessor {
           this.logger.log(
             `Generated summary for task ${taskId} due to token usage (${agentResponse.tokenUsage.totalTokens}/${contextWindow})`,
           );
-        } catch (error: unknown) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : (() => {
-                  try {
-                    return JSON.stringify(error);
-                  } catch {
-                    return '[Unserializable Error Object]';
-                  }
-                })();
-          const errorStack = error instanceof Error ? error.stack : undefined;
+        } catch (error: any) {
           this.logger.error(
-            `Error summarizing messages for task ID: ${taskId}: ${errorMessage}`,
-            errorStack,
+            `Error summarizing messages for task ID: ${taskId}`,
+            error.stack,
           );
         }
       }
@@ -333,7 +319,7 @@ export class AgentProcessor {
           await this.tasksService.create({
             description: block.input.description,
             type,
-            createdBy: MessageRole.ASSISTANT,
+            createdBy: Role.ASSISTANT,
             ...(block.input.scheduledFor && {
               scheduledFor: new Date(block.input.scheduledFor),
             }),
@@ -342,11 +328,11 @@ export class AgentProcessor {
           });
 
           generatedToolResults.push({
-            type: MessageContentType._ToolResult,
+            type: MessageContentType.ToolResult,
             tool_use_id: block.id,
             content: [
               {
-                type: MessageContentType._Text,
+                type: MessageContentType.Text,
                 text: 'The task has been created',
               },
             ],
@@ -357,12 +343,12 @@ export class AgentProcessor {
           setTaskStatusToolUseBlock = block;
 
           generatedToolResults.push({
-            type: MessageContentType._ToolResult,
+            type: MessageContentType.ToolResult,
             tool_use_id: block.id,
             is_error: block.input.status === 'failed',
             content: [
               {
-                type: MessageContentType._Text,
+                type: MessageContentType.Text,
                 text: block.input.description,
               },
             ],
@@ -373,7 +359,7 @@ export class AgentProcessor {
       if (generatedToolResults.length > 0) {
         await this.messagesService.create({
           content: generatedToolResults,
-          role: MessageRole.USER,
+          role: Role.USER,
           taskId,
         });
       }
@@ -397,28 +383,15 @@ export class AgentProcessor {
 
       // Schedule the next iteration without blocking
       if (this.isProcessing) {
-        setImmediate(() => {
-          void this.runIteration(taskId);
-        });
+        setImmediate(() => this.runIteration(taskId));
       }
-    } catch (error: unknown) {
-      if (error instanceof Error && error.name === 'BytebotAgentInterrupt') {
+    } catch (error: any) {
+      if (error?.name === 'BytebotAgentInterrupt') {
         this.logger.warn(`Processing aborted for task ID: ${taskId}`);
       } else {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : (() => {
-                try {
-                  return JSON.stringify(error);
-                } catch {
-                  return '[Unserializable Error Object]';
-                }
-              })();
-        const errorStack = error instanceof Error ? error.stack : undefined;
         this.logger.error(
-          `Error during task processing iteration for task ID: ${taskId} - ${errorMessage}`,
-          errorStack,
+          `Error during task processing iteration for task ID: ${taskId} - ${error.message}`,
+          error.stack,
         );
         await this.tasksService.update(taskId, {
           status: TaskStatus.FAILED,
@@ -434,14 +407,12 @@ export class AgentProcessor {
       return;
     }
 
-    await Promise.resolve(); // Satisfy async requirement
-
     this.logger.log(`Stopping execution of task ${this.currentTaskId}`);
 
     // Signal any in-flight async operations to abort
     this.abortController?.abort();
 
-    this.inputCaptureService.stop();
+    await this.inputCaptureService.stop();
 
     this.isProcessing = false;
     this.currentTaskId = null;

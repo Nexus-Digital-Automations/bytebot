@@ -1,8 +1,4 @@
 import { MessageContentBlock } from "@bytebot/shared";
-import {
-  BYTES_PER_MB,
-  MAX_TYPE_VALIDATION_FILE_SIZE_MB,
-} from "../constants/ui";
 
 export enum Role {
   USER = "USER",
@@ -55,84 +51,11 @@ export enum TaskType {
   SCHEDULED = "SCHEDULED",
 }
 
-export interface User {
-  id: string;
-  name?: string;
-  email: string;
-}
-
-/**
- * Maximum file size in bytes (100MB)
- */
-const MAX_FILE_SIZE_BYTES = MAX_TYPE_VALIDATION_FILE_SIZE_MB * BYTES_PER_MB;
-
-/**
- * Enhanced file upload interface with comprehensive type safety and validation
- * Used for secure file uploads with base64 encoding
- */
 export interface FileWithBase64 {
-  /** Original filename with extension */
   name: string;
-  /** Base64 encoded file content (must include data: prefix) */
-  base64: `data:${string};base64,${string}`;
-  /** MIME type for file validation and security */
-  type: `${string}/${string}`;
-  /** File size in bytes (must be positive) */
+  base64: string;
+  type: string;
   size: number;
-  /** Optional file validation metadata */
-  metadata?: {
-    /** Whether file content has been validated */
-    isValidated?: boolean;
-    /** File upload timestamp */
-    uploadedAt?: Date;
-    /** Maximum allowed file size */
-    maxSize?: number;
-    /** Allowed MIME types for validation */
-    allowedTypes?: readonly string[];
-  };
-}
-
-/**
- * Type guard to validate FileWithBase64 structure and content
- * @param obj - Object to validate
- * @returns Type-safe FileWithBase64 object
- */
-export function isValidFileWithBase64(obj: unknown): obj is FileWithBase64 {
-  if (typeof obj !== "object" || obj === null) {
-    return false;
-  }
-
-  const file = obj as Record<string, unknown>;
-
-  return (
-    typeof file.name === "string" &&
-    file.name.length > 0 &&
-    typeof file.base64 === "string" &&
-    file.base64.startsWith("data:") &&
-    file.base64.includes(";base64,") &&
-    typeof file.type === "string" &&
-    file.type.includes("/") &&
-    typeof file.size === "number" &&
-    file.size > 0 &&
-    file.size < MAX_FILE_SIZE_BYTES // 100MB max
-  );
-}
-
-/**
- * Validates and sanitizes uploaded files for security
- * @param files - Array of file objects to validate
- * @returns Validated FileWithBase64 array
- */
-export function validateUploadedFiles(files: unknown[]): FileWithBase64[] {
-  return files.filter(isValidFileWithBase64).map((file) => ({
-    ...file,
-    name: file.name.replace(/[^a-zA-Z0-9.-]/g, "_"), // Sanitize filename
-    metadata: {
-      ...file.metadata,
-      isValidated: true,
-      uploadedAt: new Date(),
-    },
-  }));
 }
 
 export interface File {
@@ -148,7 +71,6 @@ export interface File {
 
 export interface Task {
   id: string;
-  title: string;
   description: string;
   type: TaskType;
   status: TaskStatus;
@@ -164,7 +86,5 @@ export interface Task {
   error?: string;
   result?: unknown;
   model: Model;
-  userId?: string;
-  user?: User;
   files?: File[];
 }
