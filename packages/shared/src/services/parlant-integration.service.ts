@@ -235,7 +235,7 @@ export class ParlantIntegrationService
       this.logger.log(
         "✅ HTTP client initialized and connected to Parlant API",
       );
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn(
         "⚠️ Could not connect to Parlant API, running in offline mode",
       );
@@ -324,7 +324,7 @@ export class ParlantIntegrationService
       try {
         // Redis initialization would go here
         this.logger.log("📦 Redis cache initialized");
-      } catch (error) {
+      } catch (_error) {
         this.logger.warn("⚠️ Redis not available, using memory cache only");
         this.config.cache.type = "memory";
       }
@@ -459,7 +459,7 @@ export class ParlantIntegrationService
    * Validate function execution for RBAC purposes
    */
   async validateFunctionExecution(
-    request: ParlantValidationRequest,
+    _request: ParlantValidationRequest,
   ): Promise<ParlantValidationResponse> {
     // Stub implementation for RBAC validation
     return {
@@ -546,7 +546,7 @@ export class ParlantIntegrationService
    */
   private transformParlantResponse(
     data: Record<string, unknown>,
-    request: ParlantValidationRequest,
+    _request: ParlantValidationRequest,
   ): ParlantValidationResponse {
     return {
       approved: data.approved || false,
@@ -899,7 +899,7 @@ export class ParlantIntegrationService
     try {
       await this.httpClient.get("/health");
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

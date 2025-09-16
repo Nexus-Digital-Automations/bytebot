@@ -618,7 +618,7 @@ function extractParameterSchemas(
 /**
  * Extract return schema for validation
  */
-function extractReturnSchema(_method: GenericFunction): unknown {
+function extractReturnSchema(_method: GenericFunction): Record<string, unknown> {
   // This would typically use reflection metadata
   return { type: "unknown" };
 }

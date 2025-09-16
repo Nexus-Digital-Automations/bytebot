@@ -1182,7 +1182,7 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
 
   private createAuthenticationConversation(
     req: ParlantAuthenticatedRequest,
-  ): any {
+  ): Record<string, unknown> {
     // Implementation would create conversation context
     return {
       conversationId: `auth-conv-${Date.now()}`,
@@ -1200,7 +1200,7 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
 
   private async performStandardAuthentication(
     req: ParlantAuthenticatedRequest,
-    operationId: string,
+    _operationId: string,
   ): Promise<void> {
     // Implementation would perform standard JWT authentication
     // For now, mock the authentication
@@ -1209,20 +1209,20 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     req.authenticationState!.authMethod = AuthMethod.JWT_TOKEN;
   }
 
-  private extractUserFromToken(req: Request): AuthenticatedUser | undefined {
+  private extractUserFromToken(_req: Request): AuthenticatedUser | undefined {
     // Implementation would extract user from JWT token
     return undefined;
   }
 
   private mapRecommendationsToMeasures(
-    recommendations: any[],
+    _recommendations: Array<Record<string, unknown>>,
   ): SecurityMeasure[] {
     // Implementation would map Parlant recommendations to security measures
     return [];
   }
 
   private async getCachedAuthenticationDecision(
-    req: ParlantAuthenticatedRequest,
+    _req: ParlantAuthenticatedRequest,
   ): Promise<ConversationalAuthResult | null> {
     // Implementation would check cache for recent authentication decisions
     return null;

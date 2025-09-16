@@ -41,30 +41,30 @@ import { Reflector } from "@nestjs/core";
 import { ConfigService } from "@nestjs/config";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Cache } from "cache-manager";
-import { Observable, throwError, of } from "rxjs";
+import { Observable, _throwError, _of } from "rxjs";
 import { catchError, map, tap, timeout } from "rxjs/operators";
-import { Request, Response } from "express";
-import { GqlExecutionContext } from "@nestjs/graphql";
+import { _Request, _Response } from "express";
+import { _GqlExecutionContext } from "@nestjs/graphql";
 
 // Import Parlant integration types and services
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
-  ParlantIntegrationError,
-  ParlantValidationError,
+  _ParlantIntegrationError,
+  _ParlantValidationError,
   ParlantTimeoutError,
   SecurityLevel,
-  ParlantUserContext,
-  ParlantExecutionContext,
-  ParlantValidationMetadata,
-  ParlantRiskAssessment,
-  ParlantAuditEntry,
+  _ParlantUserContext,
+  _ParlantExecutionContext,
+  _ParlantValidationMetadata,
+  _ParlantRiskAssessment,
+  _ParlantAuditEntry,
 } from "../types/parlant-integration.types";
 
 // Import Parlant decorators and utilities
 import {
   ParlantValidation,
-  ParlantDecoratorOptions,
+  _ParlantDecoratorOptions,
 } from "../decorators/parlant-validation.decorator";
 
 import { ParlantWrapperUtils } from "../utils/parlant-wrapper.utils";

@@ -589,7 +589,7 @@ function generateConversationId(): string {
 async function logValidationRejection(
   error: ParlantValidationRejection,
   context: WrapperContext,
-  parlantService: any,
+  parlantService: unknown,
 ): Promise<void> {
   try {
     // Create audit entry for rejection
@@ -638,12 +638,12 @@ export class ParlantValidationRejection extends Error {
 /**
  * Function wrapper builder for fluent configuration
  */
-export class ParlantWrapperBuilder<T extends (...args: any[]) => any> {
+export class ParlantWrapperBuilder<T extends (...args: unknown[]) => unknown> {
   private config: Partial<FunctionWrapperConfig> = {};
 
   constructor(
     private originalFunction: T,
-    private parlantService: any,
+    private parlantService: unknown,
   ) {}
 
   /**
@@ -772,9 +772,9 @@ export class ParlantWrapperBuilder<T extends (...args: any[]) => any> {
  *   .build();
  * ```
  */
-export function parlantWrapper<T extends (...args: any[]) => any>(
+export function parlantWrapper<T extends (...args: unknown[]) => unknown>(
   originalFunction: T,
-  parlantService: any,
+  parlantService: unknown,
 ): ParlantWrapperBuilder<T> {
   return new ParlantWrapperBuilder(originalFunction, parlantService);
 }
@@ -802,7 +802,7 @@ export class ParlantWrapperRegistry {
   /**
    * Register a wrapped function
    */
-  register<T extends (...args: any[]) => any>(
+  register<T extends (...args: unknown[]) => unknown>(
     functionId: string,
     wrappedFunction: WrappedFunction<T>,
     config: FunctionWrapperConfig,
@@ -820,7 +820,7 @@ export class ParlantWrapperRegistry {
   /**
    * Get a wrapped function
    */
-  get<T extends (...args: any[]) => any>(
+  get<T extends (...args: unknown[]) => unknown>(
     functionId: string,
   ): WrappedFunction<T> | undefined {
     return this.wrappedFunctions.get(functionId);

@@ -897,7 +897,7 @@ export class EnterpriseSecurityGuard implements CanActivate {
   @ParlantValidated({
     description:
       "Initialize comprehensive security context for enterprise request validation",
-    securityLevel: SecurityLevel.MEDIUM,
+    securityLevel: SecurityLevel._MEDIUM,
     cacheable: false,
   })
   private async initializeSecurityContext(
@@ -923,7 +923,7 @@ export class EnterpriseSecurityGuard implements CanActivate {
       request.securityContext = {
         validationId: operationId,
         requiredSecurityLevel,
-        achievedSecurityLevel: SecurityLevel.LOW, // Will be updated during validation
+        achievedSecurityLevel: SecurityLevel._LOW, // Will be updated during validation
         appliedPolicies: [],
         threatMitigations: [],
         complianceRequirements: [],
@@ -1011,7 +1011,7 @@ export class EnterpriseSecurityGuard implements CanActivate {
         method: "none",
         reason: "No authentication method successful",
         user: undefined,
-        securityLevel: SecurityLevel.LOW,
+        securityLevel: SecurityLevel._LOW,
         requiresMfa: false,
         conversationId: undefined,
       };
@@ -1059,7 +1059,7 @@ export class EnterpriseSecurityGuard implements CanActivate {
             method: authenticationResult.method,
             reason: `MFA required: ${mfaResult.reason}`,
             user: undefined,
-            securityLevel: SecurityLevel.LOW,
+            securityLevel: SecurityLevel._LOW,
             requiresMfa: true,
             conversationId: mfaResult.conversationId,
           };
@@ -1105,7 +1105,7 @@ export class EnterpriseSecurityGuard implements CanActivate {
         method: "error",
         reason: `Authentication error: ${error instanceof Error ? error.message : String(error)}`,
         user: undefined,
-        securityLevel: SecurityLevel.LOW,
+        securityLevel: SecurityLevel._LOW,
         requiresMfa: false,
         conversationId: undefined,
       };

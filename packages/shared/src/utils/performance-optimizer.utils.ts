@@ -160,6 +160,7 @@ export enum CacheType {
   _MEMORY = "memory",
   _REDIS = "redis",
   _MEMCACHED = "memcached",
+  // eslint-disable-next-line no-unused-vars
   HYBRID = "hybrid", // Memory + Redis
   _DISTRIBUTED = "distributed",
 }
@@ -172,6 +173,7 @@ export enum CacheEvictionPolicy {
   _LFU = "lfu", // Least Frequently Used
   _FIFO = "fifo", // First In First Out
   _TTL = "ttl", // Time To Live
+  // eslint-disable-next-line no-unused-vars
   ADAPTIVE = "adaptive", // AI-powered adaptive eviction
 }
 
@@ -180,9 +182,11 @@ export enum CacheEvictionPolicy {
  */
 export enum CacheWarmingStrategy {
   _PRELOAD = "preload", // Preload common data
+  // eslint-disable-next-line no-unused-vars
   PREDICTIVE = "predictive", // AI-predicted cache warming
   _SCHEDULED = "scheduled", // Scheduled cache warming
   _REACTIVE = "reactive", // React to cache misses
+  // eslint-disable-next-line no-unused-vars
   CONVERSATION_BASED = "conversation_based", // Based on conversation patterns
 }
 
