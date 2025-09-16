@@ -308,7 +308,7 @@
       "updated_at": "2025-09-16T01:42:05.585Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-16T01:25:58.307Z",
       "title": "Fix TypeScript ESLint violations in ErrorContent.tsx",
       "description": "Fix ALL TypeScript ESLint violations including unsafe type operations, unsafe member access, and strict boolean expressions. Apply comprehensive type safety fixes using proper type guards and safe type assertions.",
@@ -325,10 +325,12 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-16T01:47:00.751Z",
+      "updated_at": "2025-09-16T01:47:00.751Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-16T01:25:58.572Z",
       "title": "Fix TypeScript ESLint violations in TextContent.tsx",
       "description": "Fix ALL TypeScript ESLint violations in TextContent.tsx file including unsafe type operations, unsafe member access, and strict boolean expressions using proper type guards and safe type assertions",
@@ -345,7 +347,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-16T01:49:57.407Z",
+      "updated_at": "2025-09-16T01:49:57.407Z"
     },
     {
       "status": "completed",

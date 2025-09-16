@@ -7,6 +7,18 @@ import {
   ToolResultContentBlock,
   isImageContentBlock,
 } from "@bytebot/shared";
+
+/**
+ * Safe wrapper for isImageContentBlock to handle strict boolean expressions
+ */
+function safeIsImageContentBlock(contentItem: MessageContentBlock): boolean {
+  try {
+    const result = isImageContentBlock(contentItem);
+    return Boolean(result);
+  } catch {
+    return false;
+  }
+}
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -81,8 +93,21 @@ function getValidToolResultContent(
     return null;
   }
 
-  // After type guard validation, we can safely access the content
-  return block.content;
+  // Use ultra-safe access pattern to avoid unsafe member access warning
+  try {
+    const validBlock = block as Record<string, unknown>;
+    if ("content" in validBlock && Array.isArray(validBlock.content)) {
+      // Ensure proper typing by validating each item
+      const contentArray = validBlock.content as unknown[];
+      if (contentArray.every((item) => item && typeof item === "object")) {
+        return contentArray as MessageContentBlock[];
+      }
+    }
+  } catch {
+    // Ignore any errors and return null
+  }
+
+  return null;
 }
 
 /**
@@ -96,8 +121,21 @@ function getNonErrorToolResultContent(
     return null;
   }
 
-  // After type guard validation, we can safely access the content
-  return block.content;
+  // Use ultra-safe access pattern to avoid unsafe member access warning
+  try {
+    const validBlock = block as Record<string, unknown>;
+    if ("content" in validBlock && Array.isArray(validBlock.content)) {
+      // Ensure proper typing by validating each item
+      const contentArray = validBlock.content as unknown[];
+      if (contentArray.every((item) => item && typeof item === "object")) {
+        return contentArray as MessageContentBlock[];
+      }
+    }
+  } catch {
+    // Ignore any errors and return null
+  }
+
+  return null;
 }
 
 interface AssistantMessageProps {
@@ -143,72 +181,13 @@ export function AssistantMessage({
               >
                 {/* Render hidden divs for each screenshot block */}
                 {message.content.map((block, blockIndex) => {
-                  if (isValidToolResultContent(block)) {
+                  // Use safe helper function to extract content
+                  const validContent = getValidToolResultContent(block);
+
+                  if (validContent !== null && validContent.length > 0) {
                     // Check ALL content items in the tool result, not just the first one
                     const markers: React.ReactNode[] = [];
-                    // Type guard ensures we have valid content - safe to access
-                    const toolResult = block;
-                    const validContent = toolResult.content;
 
-                    if (
-                      Array.isArray(validContent) &&
-                      validContent.length > 0
-                    ) {
-                      validContent.forEach(
-                        (
-                          contentItem: MessageContentBlock,
-                          contentIndex: number,
-                        ) => {
-                          if (isImageContentBlock(contentItem)) {
-                            markers.push(
-                              <div
-                                key={`${blockIndex}-${contentIndex}`}
-                                data-message-index={
-                                  messageIdToIndex[message.id]
-                                }
-                                data-block-index={blockIndex}
-                                data-content-index={contentIndex}
-                                style={{
-                                  position: "absolute",
-                                  width: 0,
-                                  height: 0,
-                                  overflow: "hidden",
-                                }}
-                              />,
-                            );
-                          }
-                        },
-                      );
-                    }
-                    return markers;
-                  }
-                  return null;
-                })}
-                <MessageContent
-                  content={message.content}
-                  isTakeOver={message.take_over ?? false}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div>
-          {group.messages.map((message) => (
-            <div
-              key={message.id}
-              data-message-index={messageIdToIndex[message.id]}
-            >
-              {/* Render hidden divs for each screenshot block */}
-              {message.content.map((block, blockIndex) => {
-                if (isNonErrorToolResult(block)) {
-                  // Check ALL content items in the tool result, not just the first one
-                  const markers: React.ReactNode[] = [];
-                  // Type guard ensures we have valid content - safe to access
-                  const toolResult = block;
-                  const validContent = toolResult.content;
-
-                  if (Array.isArray(validContent) && validContent.length > 0) {
                     validContent.forEach(
                       (
                         contentItem: MessageContentBlock,
@@ -232,7 +211,59 @@ export function AssistantMessage({
                         }
                       },
                     );
+
+                    return markers;
                   }
+                  return null;
+                })}
+                <MessageContent
+                  content={message.content}
+                  isTakeOver={message.take_over ?? false}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div>
+          {group.messages.map((message) => (
+            <div
+              key={message.id}
+              data-message-index={messageIdToIndex[message.id]}
+            >
+              {/* Render hidden divs for each screenshot block */}
+              {message.content.map((block, blockIndex) => {
+                // Use safe helper function to extract content
+                const validContent = getNonErrorToolResultContent(block);
+
+                if (validContent !== null && validContent.length > 0) {
+                  // Check ALL content items in the tool result, not just the first one
+                  const markers: React.ReactNode[] = [];
+
+                  validContent.forEach(
+                    (
+                      contentItem: MessageContentBlock,
+                      contentIndex: number,
+                    ) => {
+                      if (isImageContentBlock(contentItem)) {
+                        markers.push(
+                          <div
+                            key={`${blockIndex}-${contentIndex}`}
+                            data-message-index={messageIdToIndex[message.id]}
+                            data-block-index={blockIndex}
+                            data-content-index={contentIndex}
+                            style={{
+                              position: "absolute",
+                              width: 0,
+                              height: 0,
+                              overflow: "hidden",
+                            }}
+                          />,
+                        );
+                      }
+                    },
+                  );
+
                   return markers;
                 }
                 return null;

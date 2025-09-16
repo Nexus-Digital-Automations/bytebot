@@ -21,26 +21,42 @@ function isValidToolResultWithContent(
     return false;
   }
 
-  // Check if it has the correct type property
-  const hasCorrectType = "type" in block && block.type === "tool_result";
+  // Check if it has the correct type property with safe casting
+  const blockObj = block as Record<string, unknown>;
+  const hasCorrectType = "type" in blockObj && blockObj.type === "tool_result";
   if (!hasCorrectType) {
     return false;
   }
 
   // Check for required tool_use_id property
   const hasToolUseId =
-    "tool_use_id" in block && typeof block.tool_use_id === "string";
+    "tool_use_id" in blockObj && typeof blockObj.tool_use_id === "string";
   if (!hasToolUseId) {
     return false;
   }
 
   // Check for content array with at least one item
   const hasValidContent =
-    "content" in block &&
-    Array.isArray(block.content) &&
-    block.content.length > 0;
+    "content" in blockObj &&
+    Array.isArray(blockObj.content) &&
+    (blockObj.content as unknown[]).length > 0;
 
   return hasValidContent;
+}
+
+/**
+ * Safely extracts content from a valid ToolResultContentBlock
+ * Returns null if the block is invalid or has no content
+ */
+function getValidToolResultContent(
+  block: MessageContentBlock,
+): MessageContentBlock[] | null {
+  if (!isValidToolResultWithContent(block)) {
+    return null;
+  }
+
+  // After type guard validation, we can safely access the content
+  return block.content;
 }
 
 interface UserMessageProps {
@@ -67,11 +83,14 @@ export function UserMessage({
               >
                 {/* Render hidden divs for each screenshot block */}
                 {message.content.map((block, blockIndex) => {
-                  if (isValidToolResultWithContent(block)) {
+                  // Use safe helper function to extract content
+                  const validContent = getValidToolResultContent(block);
+
+                  if (validContent !== null && validContent.length > 0) {
                     // Check ALL content items in the tool result, not just the first one
                     const markers: React.ReactNode[] = [];
-                    // Type guard ensures block is valid ToolResultContentBlock with content
-                    block.content.forEach(
+
+                    validContent.forEach(
                       (
                         contentItem: MessageContentBlock,
                         contentIndex: number,
@@ -130,11 +149,14 @@ export function UserMessage({
           >
             {/* Render hidden divs for each screenshot block */}
             {message.content.map((block, blockIndex) => {
-              if (isValidToolResultWithContent(block)) {
+              // Use safe helper function to extract content
+              const validContent = getValidToolResultContent(block);
+
+              if (validContent !== null && validContent.length > 0) {
                 // Check ALL content items in the tool result, not just the first one
                 const markers: React.ReactNode[] = [];
-                // Type guard ensures block is valid ToolResultContentBlock with content
-                block.content.forEach(
+
+                validContent.forEach(
                   (contentItem: MessageContentBlock, contentIndex: number) => {
                     if (isImageContentBlock(contentItem)) {
                       markers.push(
