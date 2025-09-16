@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"],
+      "@services/*": ["services/*"],
+      "@controllers/*": ["controllers/*"],
+      "@types/*": ["types/*"],
+      "@utils/*": ["utils/*"],
+      "@interfaces/*": ["interfaces/*"],
+      "@shared/*": ["../shared/src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
+}
