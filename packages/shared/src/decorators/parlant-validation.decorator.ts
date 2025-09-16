@@ -11,8 +11,11 @@
  * @author AIgent Integration Team
  */
 
-import { Injectable, Inject } from "@nestjs/common";
+// Note: Injectable and Inject not currently used but available for future DI needs
 import { v4 as uuidv4 } from "uuid";
+
+// Type for generic function to replace Function type
+type GenericFunction = (..._args: unknown[]) => unknown;
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
@@ -39,7 +42,7 @@ import { ParlantIntegrationService } from "../services/parlant-integration.servi
  */
 export function ParlantValidated(options: ParlantDecoratorOptions) {
   return function (
-    target: any,
+    target: object,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
@@ -80,10 +83,10 @@ export function ParlantValidated(options: ParlantDecoratorOptions) {
     };
 
     // Replace the original method with validation wrapper
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const startTime = Date.now();
       const operationId = uuidv4();
-      const context = this as any;
+      const context = this as unknown;
 
       // Get Parlant Integration Service instance
       const parlantService = getParlantService(context);
@@ -233,10 +236,12 @@ export function ParlantValidatedClass(classOptions: {
   defaultSecurityLevel?: SecurityLevel;
   enableValidation?: boolean;
 }) {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+  return function <T extends { new (..._args: unknown[]): object }>(
+    constructor: T,
+  ) {
     return class extends constructor {
-      constructor(...args: any[]) {
-        super(...args);
+      constructor(..._args: unknown[]) {
+        super(..._args);
 
         if (classOptions.enableValidation !== false) {
           // Auto-wrap all methods with Parlant validation
@@ -263,8 +268,8 @@ export function ParlantValidatedClass(classOptions: {
 
       private wrapMethodWithParlant(
         methodName: string,
-        originalMethod: Function,
-        options: any,
+        originalMethod: GenericFunction,
+        options: unknown,
       ) {
         const decoratorOptions: ParlantDecoratorOptions = {
           description: `Auto-generated validation for ${methodName}`,
@@ -302,6 +307,7 @@ async function performValidationWithRetry(
   parlantService: ParlantIntegrationService,
   request: ParlantValidationRequest,
   config: ParlantValidationConfig,
+  // eslint-disable-next-line no-unused-vars
   customValidator?: (request: ParlantValidationRequest) => Promise<boolean>,
 ): Promise<ParlantValidationResponse> {
   const { maxAttempts, baseDelay, backoffMultiplier, maxDelay } =
@@ -376,12 +382,12 @@ async function performValidationWithRetry(
  * Execute function with monitoring and resource constraints
  */
 async function executeWithMonitoring(
-  originalMethod: Function,
-  context: any,
-  args: any[],
+  originalMethod: GenericFunction,
+  context: unknown,
+  args: unknown[],
   validationResponse: ParlantValidationResponse,
   operationId: string,
-): Promise<any> {
+): Promise<unknown> {
   const executionContext = validationResponse.executionContext;
 
   if (!executionContext) {
@@ -450,20 +456,24 @@ async function executeWithMonitoring(
  * Apply execution context constraints
  */
 async function applyExecutionContext(
-  executionContext: any,
-  context: any,
+  executionContext: unknown,
+  _context: unknown,
 ): Promise<void> {
   // Apply constraints based on execution context
-  if (executionContext.constraints) {
+  const contextWithConstraints = executionContext as { constraints?: unknown };
+  if (contextWithConstraints.constraints) {
     // Implementation would depend on specific constraint types
     console.debug(
       "Applying execution constraints",
-      executionContext.constraints,
+      contextWithConstraints.constraints,
     );
   }
 
   // Set up resource monitoring
-  if (executionContext.monitoring.realTimeMonitoring) {
+  const contextWithMonitoring = executionContext as {
+    monitoring?: { realTimeMonitoring?: boolean };
+  };
+  if (contextWithMonitoring.monitoring?.realTimeMonitoring) {
     // Set up monitoring hooks
     console.debug("Real-time monitoring enabled for function execution");
   }
@@ -472,19 +482,26 @@ async function applyExecutionContext(
 /**
  * Get Parlant service instance from context
  */
-function getParlantService(context: any): ParlantIntegrationService | null {
+function getParlantService(context: unknown): ParlantIntegrationService | null {
+  const typedContext = context as {
+    parlantService?: ParlantIntegrationService;
+    constructor?: { parlantService?: ParlantIntegrationService };
+  };
+
   // Try to get service from NestJS context
-  if (context.parlantService) {
-    return context.parlantService;
+  if (typedContext.parlantService) {
+    return typedContext.parlantService;
   }
 
   // Try to get from constructor
-  if (context.constructor.parlantService) {
-    return context.constructor.parlantService;
+  if (typedContext.constructor?.parlantService) {
+    return typedContext.constructor.parlantService;
   }
 
   // Try to get from global registry (fallback)
-  const globalService = (global as any).__parlantService__;
+  const globalService = (
+    global as unknown as { __parlantService__?: ParlantIntegrationService }
+  ).__parlantService__;
   if (globalService) {
     return globalService;
   }
@@ -496,21 +513,30 @@ function getParlantService(context: any): ParlantIntegrationService | null {
  * Extract user context from function context and arguments
  */
 async function getUserContext(
-  context: any,
-  args: any[],
+  context: unknown,
+  args: unknown[],
 ): Promise<ParlantUserContext> {
   // Try to extract from request context (NestJS)
-  const request = context.request || args.find((arg: any) => arg && arg.user);
+  const request =
+    (context as { request?: unknown }).request ||
+    args.find((arg: unknown) => arg && (arg as { user?: unknown }).user);
 
-  if (request && request.user) {
+  const typedRequest = request as {
+    user?: { id?: string; roles?: string[] };
+    sessionID?: string;
+    ip?: string;
+    headers?: { [key: string]: string };
+  };
+
+  if (typedRequest && typedRequest.user) {
     return {
-      userId: request.user.id || "anonymous",
-      roles: request.user.roles || ["user"],
-      sessionId: request.sessionID || "no-session",
-      ipAddress: request.ip || "127.0.0.1",
+      userId: typedRequest.user.id || "anonymous",
+      roles: typedRequest.user.roles || ["user"],
+      sessionId: typedRequest.sessionID || "no-session",
+      ipAddress: typedRequest.ip || "127.0.0.1",
       metadata: {
         timestamp: Date.now(),
-        userAgent: request.headers?.["user-agent"] || "unknown",
+        userAgent: typedRequest.headers?.["user-agent"] || "unknown",
       },
     };
   }
@@ -531,9 +557,12 @@ async function getUserContext(
 /**
  * Extract function parameters from arguments
  */
-function extractParameters(method: Function, args: any[]): Record<string, any> {
+function extractParameters(
+  method: GenericFunction,
+  args: unknown[],
+): Record<string, unknown> {
   const paramNames = getParameterNames(method);
-  const parameters: Record<string, any> = {};
+  const parameters: Record<string, unknown> = {};
 
   for (let i = 0; i < Math.min(paramNames.length, args.length); i++) {
     parameters[paramNames[i]] = sanitizeForLogging(args[i]);
@@ -545,7 +574,7 @@ function extractParameters(method: Function, args: any[]): Record<string, any> {
 /**
  * Get parameter names from function
  */
-function getParameterNames(func: Function): string[] {
+function getParameterNames(func: GenericFunction): string[] {
   const funcStr = func.toString();
   const match = funcStr.match(/\(([^)]*)\)/);
 
@@ -560,14 +589,16 @@ function getParameterNames(func: Function): string[] {
 /**
  * Extract parameter schemas for validation
  */
-function extractParameterSchemas(method: Function): Record<string, any> {
+function extractParameterSchemas(
+  method: GenericFunction,
+): Record<string, unknown> {
   // This would typically use reflection metadata or TypeScript decorators
   // For now, return basic schema
   const paramNames = getParameterNames(method);
-  const schemas: Record<string, any> = {};
+  const schemas: Record<string, unknown> = {};
 
   for (const paramName of paramNames) {
-    schemas[paramName] = { type: "any", required: true };
+    schemas[paramName] = { type: "unknown", required: true };
   }
 
   return schemas;
@@ -576,9 +607,9 @@ function extractParameterSchemas(method: Function): Record<string, any> {
 /**
  * Extract return schema for validation
  */
-function extractReturnSchema(method: Function): any {
+function extractReturnSchema(_method: GenericFunction): unknown {
   // This would typically use reflection metadata
-  return { type: "any" };
+  return { type: "unknown" };
 }
 
 /**
@@ -612,7 +643,7 @@ function getPackageName(): string {
   // Try to detect package name from call stack or module info
   const stack = new Error().stack;
   if (stack) {
-    const match = stack.match(/\/packages\/([^\/]+)\//);
+    const match = stack.match(/\/packages\/([^/]+)\//);
     if (match) {
       return match[1];
     }
@@ -636,7 +667,9 @@ function updateFunctionMetrics(
     error?: string;
   },
 ): void {
-  const wrapper = (parlantService as any).functionRegistry?.get(functionName);
+  const wrapper = (
+    parlantService as unknown as { functionRegistry?: Map<string, unknown> }
+  ).functionRegistry?.get(functionName);
   if (!wrapper) return;
 
   const metrics = wrapper.metrics;
@@ -687,7 +720,7 @@ function logFunctionExecution(
   details: {
     success: boolean;
     executionTime: number;
-    result?: any;
+    result?: unknown;
     error?: string;
     stack?: string;
     validationResponse?: ParlantValidationResponse;
@@ -720,7 +753,7 @@ function logFunctionExecution(
 /**
  * Sanitize data for logging (remove sensitive information)
  */
-function sanitizeForLogging(data: any): any {
+function sanitizeForLogging(data: unknown): unknown {
   if (data === null || data === undefined) return data;
 
   if (typeof data === "string") {
@@ -737,7 +770,7 @@ function sanitizeForLogging(data: any): any {
         : data.map((item) => sanitizeForLogging(item));
     }
 
-    const sanitized: any = {};
+    const sanitized: Record<string, unknown> = {};
     const sensitiveKeys = [
       "password",
       "token",

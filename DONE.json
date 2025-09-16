@@ -2361,10 +2361,64 @@
       "updated_at": "2025-09-16T11:43:34.952Z",
       "archived_at": "2025-09-16T11:43:34.958Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T12:08:30.410Z",
+      "title": "Fix linter errors in Parlant authentication implementation",
+      "description": "Fix ESLint violations including unused imports, no-explicit-any warnings, and prefer-nullish-coalescing issues in parlant-validation decorator and other files",
+      "category": "error",
+      "priority": "high",
+      "important_files": [
+        "packages/shared/src/decorators/parlant-validation.decorator.ts",
+        "packages/shared/src/modules/parlant-auth.module.ts",
+        "packages/bytebotd/src/enterprise-api/"
+      ],
+      "id": "error_1758024510410_y5e0anjynni",
+      "assigned_agent": "dev_session_1758024552673_1_general_0c1633b8",
+      "started_at": "2025-09-16T12:09:40.035Z",
+      "claimed_by": "dev_session_1758024552673_1_general_0c1633b8",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758024552673_1_general_0c1633b8",
+          "role": "primary",
+          "assignedAt": "2025-09-16T12:09:40.035Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T12:28:28.878Z",
+      "updated_at": "2025-09-16T12:28:28.878Z",
+      "archived_at": "2025-09-16T12:28:28.882Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T11:45:55.630Z",
+      "title": "Implement Parlant Authentication & Authorization Integration",
+      "description": "Research and implement comprehensive Parlant integration for authentication and authorization systems including conversational login flows, real-time permission validation, token management, RBAC with conversational approval, and security audit trails",
+      "category": "feature",
+      "id": "feature_1758023155630_f23bqxi13q",
+      "assigned_agent": "dev_session_1758023137421_1_general_0c5749be",
+      "started_at": "2025-09-16T11:47:33.654Z",
+      "claimed_by": "dev_session_1758023137421_1_general_0c5749be",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758023137421_1_general_0c5749be",
+          "role": "primary",
+          "assignedAt": "2025-09-16T11:47:33.654Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T12:29:44.918Z",
+      "updated_at": "2025-09-16T12:29:44.918Z",
+      "archived_at": "2025-09-16T12:29:44.925Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 60,
+  "total_completed": 62,
   "last_completion": "2025-09-13T05:08:39.544Z",
   "created_at": "2025-09-11T09:00:29.533Z",
-  "last_archived": "2025-09-16T11:43:34.958Z"
+  "last_archived": "2025-09-16T12:29:44.925Z"
 }

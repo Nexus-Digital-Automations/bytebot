@@ -99,10 +99,81 @@ export {
   RateLimitSecurityLevel,
 } from "./guards/rate-limit.standardized";
 
+// Permission-Based Guards - server-only (NestJS)
+export {
+  PermissionGuard,
+  ResourceGuard,
+  OwnershipGuard,
+  CompositeGuard,
+  IPWhitelistGuard,
+  TimeBasedAccessGuard,
+  PermissionConfig,
+  ResourceConfig,
+  OwnershipConfig,
+  CompositeGuardConfig,
+  IPWhitelistConfig,
+  TimeBasedAccessConfig,
+  RequirePermissions,
+  RequireOwnership,
+  PERMISSION_GUARD_KEY,
+  RESOURCE_GUARD_KEY,
+  OWNERSHIP_GUARD_KEY,
+  COMPOSITE_GUARD_KEY,
+  IP_WHITELIST_KEY,
+  TIME_BASED_ACCESS_KEY,
+} from "./guards/permission-based-guards";
+
 // Security Interceptors - server-only (NestJS + requires @nestjs/microservices)
 export * from "./interceptors/critical-area-sanitization.interceptor";
 export * from "./interceptors/response.interceptor";
 export * from "./interceptors/security-logging.interceptor";
+
+// Parlant Authentication & Authorization Services - server-only (NestJS)
+export {
+  ParlantEnhancedAuthService,
+  ConversationalAuthContext,
+  AuthenticationMethod,
+  RiskAssessment,
+  ConversationalAuthResult,
+  RequiredActionType,
+} from "./services/parlant-enhanced-auth.service";
+
+export {
+  ParlantMFAService,
+  MFAMethod,
+  MFAChallenge,
+  MFAValidationRequest,
+  MFAValidationResult,
+  MFASetupRequest,
+  MFASetupResult,
+} from "./services/parlant-mfa.service";
+
+// Parlant Enhanced Guards - server-only (NestJS)
+export {
+  ParlantEnhancedRBACGuard,
+  ConversationalAuthorizationContext,
+  AuthorizationRiskAssessment,
+  ConversationalAuthorizationResult,
+} from "./guards/parlant-enhanced-rbac.guard";
+
+// Parlant Enhanced Middleware - server-only (NestJS)
+export {
+  ParlantEnhancedAuthMiddleware,
+  ParlantAuthenticatedRequest,
+  EnhancedAuthenticationState,
+  AuthMethod,
+  SecurityContext,
+  RequestRiskAssessment,
+} from "./middleware/parlant-enhanced-auth.middleware";
+
+// Parlant Authentication Module - server-only (NestJS)
+export {
+  ParlantAuthModule,
+  ParlantAuthModuleOptions,
+  ParlantAuthModuleAsyncOptions,
+  createEnvironmentConfig,
+  validateParlantAuthConfig,
+} from "./modules/parlant-auth.module";
 
 // Enterprise Validation Services - server-only (NestJS) - explicit exports to avoid ValidationResult conflict
 export {

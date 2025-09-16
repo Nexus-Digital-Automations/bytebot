@@ -95,7 +95,7 @@ export interface ParlantValidationConfig {
  */
 export function ParlantValidation(config: ParlantValidationConfig = {}) {
   return function (
-    target: any,
+    target: object,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
@@ -186,7 +186,7 @@ export interface ConversationContextConfig {
  */
 export function ConversationContext(config: ConversationContextConfig = {}) {
   return function (
-    target: any,
+    target: object,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
@@ -251,7 +251,7 @@ export interface SecurityClassificationConfig {
  */
 export function SecurityClassification(config: SecurityClassificationConfig) {
   return function (
-    target: any,
+    target: object,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
@@ -308,11 +308,11 @@ export interface EscalationRule {
  * Escalation conditions
  */
 export enum EscalationCondition {
-  TIMEOUT = "timeout",
-  MULTIPLE_DENIALS = "multiple_denials",
-  HIGH_RISK_DETECTED = "high_risk_detected",
-  SECURITY_VIOLATION = "security_violation",
-  CUSTOM_CONDITION = "custom_condition",
+  _TIMEOUT = "timeout",
+  _MULTIPLE_DENIALS = "multiple_denials",
+  _HIGH_RISK_DETECTED = "high_risk_detected",
+  _SECURITY_VIOLATION = "security_violation",
+  _CUSTOM_CONDITION = "custom_condition",
 }
 
 /**
@@ -330,7 +330,7 @@ export enum EscalationCondition {
  *   allowSelfApproval: false,
  *   escalationRules: [{
  *     id: 'timeout_escalation',
- *     condition: EscalationCondition.TIMEOUT,
+ *     condition: EscalationCondition._TIMEOUT,
  *     targetRole: ParticipantRole.MODERATOR,
  *     delay: 30000,
  *     priority: 1
@@ -343,7 +343,7 @@ export enum EscalationCondition {
  */
 export function ApprovalWorkflow(config: ApprovalWorkflowConfig) {
   return function (
-    target: any,
+    target: object,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
@@ -373,7 +373,7 @@ export function ApprovalWorkflow(config: ApprovalWorkflowConfig) {
  * ```
  */
 export function ParlantWrapper(config: Partial<ParlantWrapperConfig>) {
-  return function (target: any) {
+  return function (target: object) {
     SetMetadata(PARLANT_WRAPPER_CONFIG_KEY, config)(target);
   };
 }
@@ -403,7 +403,7 @@ export function ParlantWrapper(config: Partial<ParlantWrapperConfig>) {
  */
 export function ValidationRules(rules: ValidationRule[]) {
   return function (
-    target: any,
+    target: object,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
@@ -525,7 +525,7 @@ export interface CompleteParlantConfig {
  */
 export function ParlantIntegrated(config: CompleteParlantConfig) {
   return function (
-    target: any,
+    target: object,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
@@ -555,7 +555,7 @@ export function ParlantIntegrated(config: CompleteParlantConfig) {
  * @returns Parlant validation configuration or undefined
  */
 export function getParlantValidationMetadata(
-  target: any,
+  target: object,
   propertyKey: string,
 ): ParlantValidationConfig | undefined {
   return Reflect.getMetadata(PARLANT_VALIDATION_KEY, target, propertyKey);
@@ -569,7 +569,7 @@ export function getParlantValidationMetadata(
  * @returns Conversation context configuration or undefined
  */
 export function getConversationContextMetadata(
-  target: any,
+  target: object,
   propertyKey: string,
 ): ConversationContextConfig | undefined {
   return Reflect.getMetadata(PARLANT_CONVERSATION_KEY, target, propertyKey);
@@ -583,7 +583,7 @@ export function getConversationContextMetadata(
  * @returns Security classification configuration or undefined
  */
 export function getSecurityClassificationMetadata(
-  target: any,
+  target: object,
   propertyKey: string,
 ): SecurityClassificationConfig | undefined {
   return Reflect.getMetadata(PARLANT_SECURITY_KEY, target, propertyKey);
@@ -597,7 +597,7 @@ export function getSecurityClassificationMetadata(
  * @returns Approval workflow configuration or undefined
  */
 export function getApprovalWorkflowMetadata(
-  target: any,
+  target: object,
   propertyKey: string,
 ): ApprovalWorkflowConfig | undefined {
   return Reflect.getMetadata(PARLANT_APPROVAL_KEY, target, propertyKey);
@@ -611,7 +611,7 @@ export function getApprovalWorkflowMetadata(
  * @returns Validation rules array or undefined
  */
 export function getValidationRulesMetadata(
-  target: any,
+  target: object,
   propertyKey: string,
 ): ValidationRule[] | undefined {
   return Reflect.getMetadata(PARLANT_RULES_KEY, target, propertyKey);
@@ -625,7 +625,7 @@ export function getValidationRulesMetadata(
  * @returns True if Parlant validation is enabled
  */
 export function hasParlantValidation(
-  target: any,
+  target: object,
   propertyKey: string,
 ): boolean {
   const config = getParlantValidationMetadata(target, propertyKey);
@@ -639,7 +639,7 @@ export function hasParlantValidation(
  * @param propertyKey - Method name
  * @returns Complete Parlant metadata object
  */
-export function getAllParlantMetadata(target: any, propertyKey: string) {
+export function getAllParlantMetadata(target: object, propertyKey: string) {
   return {
     validation: getParlantValidationMetadata(target, propertyKey),
     conversation: getConversationContextMetadata(target, propertyKey),
