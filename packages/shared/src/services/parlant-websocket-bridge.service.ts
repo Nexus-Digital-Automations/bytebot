@@ -25,11 +25,11 @@ import {
   ParlantMessageType,
   ParlantValidationRequest,
   ParlantValidationResponse,
-  ParlantUserContext,
+  _ParlantUserContext,
   ParlantHealthStatus,
   ParlantWebSocketConfig,
   ParlantConnectionError,
-  ParlantAuthenticationError,
+  _ParlantAuthenticationError,
   ParlantIntegrationError,
 } from "../types/parlant-integration.types";
 
@@ -42,8 +42,8 @@ interface QueuedMessage {
   timestamp: Date;
   retryCount: number;
   maxRetries: number;
-  resolve: (value: unknown) => void;
-  reject: (error: Error | unknown) => void;
+  resolve: (_value: unknown) => void;
+  reject: (_error: Error | unknown) => void;
   timeout: NodeJS.Timeout;
 }
 
@@ -85,7 +85,7 @@ export class ParlantWebSocketBridgeService
 
   // Message handling
   private messageQueue = new Map<string, QueuedMessage>();
-  private pendingValidations = new Map<string, any>();
+  private pendingValidations = new Map<string, QueuedMessage>();
 
   // Configuration
   private config: ParlantWebSocketConfig = {
@@ -266,9 +266,12 @@ export class ParlantWebSocketBridgeService
       },
     });
 
-    this.serverWs.on("connection", (ws: WebSocket, request: Record<string, unknown>) => {
-      this.handleClientConnection(ws, request);
-    });
+    this.serverWs.on(
+      "connection",
+      (ws: WebSocket, request: Record<string, unknown>) => {
+        this.handleClientConnection(ws, request);
+      },
+    );
 
     this.serverWs.on("error", (error: Error) => {
       this.logger.error("❌ WebSocket server error", error);
@@ -281,7 +284,10 @@ export class ParlantWebSocketBridgeService
   /**
    * Handle new client connections to the bridge server
    */
-  private handleClientConnection(ws: WebSocket, request: Record<string, unknown>): void {
+  private handleClientConnection(
+    ws: WebSocket,
+    _request: Record<string, unknown>,
+  ): void {
     const clientId = this.generateClientId();
     this.logger.log(`🤝 New client connected: ${clientId}`);
 
@@ -677,7 +683,7 @@ export class ParlantWebSocketBridgeService
    */
   private handleClientHeartbeat(
     ws: WebSocket,
-    message: ParlantWebSocketMessage,
+    _message: ParlantWebSocketMessage,
   ): void {
     this.sendToClient(ws, {
       type: ParlantMessageType.HEARTBEAT,
@@ -693,7 +699,7 @@ export class ParlantWebSocketBridgeService
   /**
    * Handle Parlant heartbeat
    */
-  private handleParlantHeartbeat(message: ParlantWebSocketMessage): void {
+  private handleParlantHeartbeat(_message: ParlantWebSocketMessage): void {
     // Respond to Parlant heartbeat
     const response: ParlantWebSocketMessage = {
       type: ParlantMessageType.HEARTBEAT,

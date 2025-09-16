@@ -31,7 +31,7 @@
     "@nestjs/core": "^10.0.0",
     "@nestjs/config": "^3.0.0",
     "@nestjs/event-emitter": "^2.0.0",
-    "@aiagent/shared": "workspace:*",
+    "@bytebot/shared": "workspace:*",
     "rxjs": "^7.8.0",
     "reflect-metadata": "^0.1.13",
     "class-transformer": "^0.5.1",

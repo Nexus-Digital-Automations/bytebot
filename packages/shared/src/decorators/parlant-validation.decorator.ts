@@ -245,7 +245,7 @@ export function ParlantValidatedClass(classOptions: {
     constructor: T,
   ) {
     return class extends constructor {
-      constructor(..._args: ConstructorParameters<T>) {
+      constructor(..._args: unknown[]) {
         super(..._args);
 
         if (classOptions.enableValidation !== false) {
