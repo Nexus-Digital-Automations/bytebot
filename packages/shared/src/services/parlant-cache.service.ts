@@ -35,9 +35,9 @@ import {
  * Cache layer types
  */
 enum CacheLayer {
-  MEMORY = "memory",
-  REDIS = "redis",
-  PERSISTENT = "persistent",
+  _MEMORY = "memory",
+  _REDIS = "redis",
+  _PERSISTENT = "persistent",
 }
 
 /**
@@ -427,7 +427,7 @@ export class ParlantCacheService
 
     try {
       // Invalidate from memory cache
-      for (const [key, entry] of this.memoryCache.entries()) {
+      for (const [key, _entry] of this.memoryCache.entries()) {
         if (key.includes(pattern)) {
           this.memoryCache.delete(key);
           this.keyMetadata.delete(key);
@@ -500,10 +500,13 @@ export class ParlantCacheService
   private async loadConfiguration(): Promise<void> {
     this.config = {
       enabled: process.env.PARLANT_CACHE_ENABLED !== "false",
-      type: (process.env.PARLANT_CACHE_TYPE as any) || "hybrid",
+      type:
+        (process.env.PARLANT_CACHE_TYPE as "memory" | "redis" | "hybrid") ||
+        "hybrid",
       defaultTtl: parseInt(process.env.PARLANT_CACHE_TTL || "3600000"),
       maxSize: parseInt(process.env.PARLANT_CACHE_MAX_SIZE || "10000"),
-      evictionPolicy: (process.env.PARLANT_CACHE_EVICTION as any) || "lru",
+      evictionPolicy:
+        (process.env.PARLANT_CACHE_EVICTION as "lru" | "lfu" | "fifo") || "lru",
     };
 
     this.persistentCachePath =
@@ -700,7 +703,7 @@ export class ParlantCacheService
   private async setInMemory(
     key: string,
     entry: ParlantCacheEntry,
-    ttl: number,
+    _ttl: number,
   ): Promise<void> {
     // Check memory limits and evict if necessary
     if (this.memoryCache.size >= this.config.maxSize) {
@@ -746,7 +749,7 @@ export class ParlantCacheService
     try {
       const exists = await this.redisClient.exists(key);
       return exists === 1;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -830,7 +833,7 @@ export class ParlantCacheService
     return crypto.createHash("sha256").update(keyString).digest("hex");
   }
 
-  private hashParameters(params: Record<string, any>): string {
+  private hashParameters(params: Record<string, unknown>): string {
     const sanitized = this.sanitizeParameters(params);
     return crypto
       .createHash("md5")
@@ -935,8 +938,8 @@ export class ParlantCacheService
 
   private updateStats(
     startTime: number,
-    hit: boolean,
-    layer?: CacheLayer,
+    _hit: boolean,
+    _layer?: CacheLayer,
   ): void {
     const responseTime = Date.now() - startTime;
 
@@ -1080,7 +1083,7 @@ export class ParlantCacheService
       this.logger.log(
         `📋 Loaded cache metadata for ${this.keyMetadata.size} entries`,
       );
-    } catch (error) {
+    } catch (_error) {
       // Metadata file doesn't exist yet, which is fine
       this.logger.debug("📋 No existing cache metadata found");
     }
