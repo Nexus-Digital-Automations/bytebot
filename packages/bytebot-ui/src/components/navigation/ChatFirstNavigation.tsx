@@ -27,27 +27,20 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+// Removed unused UI components: ScrollArea, Popover, PopoverContent, PopoverTrigger
 import { Badge } from '@/components/ui/badge';
 import { 
   AnalyticsIcon,
-  ArrowRightIcon,
-  CheckIcon,
-  CommandIcon,
   HelpIcon,
   HomeIcon,
   HugeiconsIcon,
   KeyboardIcon,
-  LightbulbIcon,
-  LogoutIcon,
   MicrophoneIcon,
   NavigationIcon,
   SearchIcon,
   SettingsIcon,
   TaskIcon,
-  UserIcon,
-  XIcon
+  UserIcon
 } from '@hugeicons/core-free-icons';
 import { logDebug, logInfo, logWarning } from '@/utils/logger';
 
@@ -639,7 +632,7 @@ class NavigationNLU {
   /**
    * Generate alternative command interpretations
    */
-  private generateAlternatives(command: string, primaryIntent: NavigationIntent): CommandResult[] {
+  private generateAlternatives(_command: string, _primaryIntent: NavigationIntent): CommandResult[] {
     // For now, return empty array - could be enhanced with fuzzy matching
     return [];
   }
@@ -707,7 +700,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   onCommandExecuted,
   onNavigate,
   onError,
-  theme = 'auto',
+  _theme = 'auto',
   position = 'top'
 }) => {
   // ===========================
