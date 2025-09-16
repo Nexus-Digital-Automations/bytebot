@@ -18,7 +18,7 @@ import React from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { ChatContainer } from "../ChatContainer";
 import { GroupedMessages, Role, TaskStatus } from "@/types";
-import { MessageContentBlock, MessageContentType } from "@bytebot/shared";
+import { MessageContentBlock } from "@bytebot/shared";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 
 // Test constants
@@ -110,9 +110,7 @@ const createMockGroupedMessages = (): GroupedMessages[] => [
     messages: [
       {
         id: "msg-1",
-        content: [
-          { type: MessageContentType._Text, text: "Hello" },
-        ] as MessageContentBlock[],
+        content: [{ type: "text", text: "Hello" }] as MessageContentBlock[],
         role: Role.USER,
         createdAt: new Date().toISOString(),
       },
@@ -124,7 +122,7 @@ const createMockGroupedMessages = (): GroupedMessages[] => [
       {
         id: "msg-2",
         content: [
-          { type: MessageContentType._Text, text: "Hello! How can I help?" },
+          { type: "text", text: "Hello! How can I help?" },
         ] as MessageContentBlock[],
         role: Role.ASSISTANT,
         createdAt: new Date().toISOString(),
@@ -554,9 +552,7 @@ describe("ChatContainer Component", () => {
           messages: [
             {
               id: `msg-${i}`,
-              content: [
-                { type: MessageContentType._Text, text: `Message ${i}` },
-              ],
+              content: [{ type: "text", text: `Message ${i}` }],
               role: i % 2 === 0 ? Role.USER : Role.ASSISTANT,
               createdAt: new Date().toISOString(),
             },
@@ -717,7 +713,7 @@ describe("ChatContainer Component", () => {
             {
               id: "new-msg",
               content: [
-                { type: MessageContentType._Text, text: "New message" },
+                { type: "text", text: "New message" },
               ] as MessageContentBlock[],
               role: Role.ASSISTANT,
               createdAt: new Date().toISOString(),

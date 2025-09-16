@@ -11,12 +11,12 @@ import {
 } from "@bytebot/shared";
 
 /**
- * Type guard to check if a ToolResultContentBlock has valid content
- * Provides type-safe access to tool result content
+ * Enhanced type guard to check if a ToolResultContentBlock has valid content
+ * Uses the shared type guard plus additional validation for content array
  */
-function isValidToolResultContent(
+function isValidToolResultWithContent(
   block: MessageContentBlock,
-): block is ToolResultContentBlock & { content: MessageContentBlock[] } {
+): block is ToolResultContentBlock {
   return (
     isToolResultContentBlock(block) &&
     Array.isArray(block.content) &&
@@ -51,7 +51,9 @@ export function UserMessage({
                   if (isValidToolResultContent(block)) {
                     // Check ALL content items in the tool result, not just the first one
                     const markers: React.ReactNode[] = [];
-                    block.content.forEach(
+                    // Type guard ensures block is valid ToolResultContentBlock with content
+                    const validContent = block.content;
+                    validContent.forEach(
                       (
                         contentItem: MessageContentBlock,
                         contentIndex: number,
@@ -111,7 +113,9 @@ export function UserMessage({
               if (isValidToolResultContent(block)) {
                 // Check ALL content items in the tool result, not just the first one
                 const markers: React.ReactNode[] = [];
-                block.content.forEach(
+                // Type guard ensures block is valid ToolResultContentBlock with content
+                const validContent = block.content;
+                validContent.forEach(
                   (contentItem: MessageContentBlock, contentIndex: number) => {
                     if (isImageContentBlock(contentItem)) {
                       markers.push(

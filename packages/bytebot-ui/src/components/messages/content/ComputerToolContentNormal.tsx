@@ -15,6 +15,55 @@ import {
 } from "@bytebot/shared";
 import { getIcon, getLabel } from "./ComputerToolUtils";
 
+/**
+ * Type guard to safely check if a value has coordinates property
+ */
+function hasCoordinates(input: unknown): input is { coordinates: Coordinates } {
+  return (
+    typeof input === "object" &&
+    input !== null &&
+    "coordinates" in input &&
+    typeof (input as { coordinates: unknown }).coordinates === "object" &&
+    (input as { coordinates: unknown }).coordinates !== null &&
+    "x" in (input as { coordinates: Coordinates }).coordinates &&
+    "y" in (input as { coordinates: Coordinates }).coordinates &&
+    typeof (input as { coordinates: Coordinates }).coordinates.x === "number" &&
+    typeof (input as { coordinates: Coordinates }).coordinates.y === "number"
+  );
+}
+
+/**
+ * Type guard to safely check if a value has a path property with coordinates array
+ */
+function hasPathCoordinates(input: unknown): input is { path: Coordinates[] } {
+  return (
+    typeof input === "object" &&
+    input !== null &&
+    "path" in input &&
+    Array.isArray((input as { path: unknown }).path) &&
+    (input as { path: unknown[] }).path.length > 0 &&
+    (input as { path: unknown[] }).path.every(
+      (point: unknown): point is Coordinates =>
+        typeof point === "object" &&
+        point !== null &&
+        "x" in point &&
+        "y" in point &&
+        typeof (point as Coordinates).x === "number" &&
+        typeof (point as Coordinates).y === "number",
+    )
+  );
+}
+
+/**
+ * Type guard to safely check if a value is a valid Application type
+ */
+function isValidApplication(value: unknown): value is Application {
+  return (
+    typeof value === "string" &&
+    Object.prototype.hasOwnProperty.call(applicationMap, value)
+  );
+}
+
 interface ComputerToolContentNormalProps {
   block: ComputerToolUseContentBlock;
 }
@@ -41,67 +90,95 @@ function ToolDetailsNormal({
     <>
       {isApplicationToolUseBlock(block) && (
         <p className={baseClasses}>
-          {applicationMap[block.input.application as Application]}
+          {isValidApplication(block.input.application)
+            ? applicationMap[block.input.application]
+            : "Unknown Application"}
         </p>
       )}
 
       {/* Text for type and key actions */}
       {(isTypeKeysToolUseBlock(block) || isPressKeysToolUseBlock(block)) && (
-        <p className={baseClasses}>{String(block.input.keys.join(" + "))}</p>
+        <p className={baseClasses}>
+          {Array.isArray(block.input.keys)
+            ? String(block.input.keys.join(" + "))
+            : "Invalid keys"}
+        </p>
       )}
 
       {(isTypeTextToolUseBlock(block) || isPasteTextToolUseBlock(block)) && (
         <p className={baseClasses}>
-          {String(
-            (block.input.isSensitive ?? false)
-              ? "●".repeat(block.input.text.length)
-              : block.input.text,
-          )}
+          {((): string => {
+            const text = block.input.text;
+            const isSensitive = Boolean(block.input.isSensitive);
+
+            if (typeof text !== "string") {
+              return "Invalid text";
+            }
+
+            return String(isSensitive ? "●".repeat(text.length) : text);
+          })()}
         </p>
       )}
 
       {/* Duration for wait actions */}
       {isWaitToolUseBlock(block) && (
-        <p className={baseClasses}>{`${block.input.duration}ms`}</p>
+        <p className={baseClasses}>
+          {typeof block.input.duration === "number"
+            ? `${block.input.duration}ms`
+            : "Invalid duration"}
+        </p>
       )}
 
       {/* Coordinates for click/mouse actions */}
-      {block.input.coordinates != null && (
+      {hasCoordinates(block.input) && (
         <p className={baseClasses}>
-          {(block.input.coordinates as Coordinates).x},{" "}
-          {(block.input.coordinates as Coordinates).y}
+          {block.input.coordinates.x}, {block.input.coordinates.y}
         </p>
       )}
 
       {/* Start and end coordinates for path actions */}
-      {"path" in block.input &&
-        Array.isArray(block.input.path) &&
-        block.input.path.every(
-          (point: unknown): point is Coordinates =>
-            typeof point === "object" &&
-            point !== null &&
-            "x" in point &&
-            "y" in point &&
-            typeof (point as Coordinates).x === "number" &&
-            typeof (point as Coordinates).y === "number",
-        ) && (
-          <p className={baseClasses}>
-            From: {block.input.path[0]?.x}, {block.input.path[0]?.y} → To:{" "}
-            {block.input.path[block.input.path.length - 1]?.x},{" "}
-            {block.input.path[block.input.path.length - 1]?.y}
-          </p>
-        )}
+      {hasPathCoordinates(block.input) && (
+        <p className={baseClasses}>
+          {((): string => {
+            const path = block.input.path;
+            const firstPoint = path[0];
+            const lastPoint = path[path.length - 1];
+
+            if (!firstPoint || !lastPoint) {
+              return "Invalid path coordinates";
+            }
+
+            return `From: ${firstPoint.x}, ${firstPoint.y} → To: ${lastPoint.x}, ${lastPoint.y}`;
+          })()}
+        </p>
+      )}
 
       {/* Scroll information */}
       {isScrollToolUseBlock(block) && (
         <p className={baseClasses}>
-          {String(block.input.direction)} {Number(block.input.scrollCount)}
+          {((): string => {
+            const direction = block.input.direction;
+            const scrollCount = block.input.scrollCount;
+
+            const validDirection =
+              typeof direction === "string" ? direction : "unknown";
+            const validScrollCount =
+              typeof scrollCount === "number" && !isNaN(scrollCount)
+                ? scrollCount
+                : 0;
+
+            return `${validDirection} ${validScrollCount}`;
+          })()}
         </p>
       )}
 
       {/* File information */}
       {isReadFileToolUseBlock(block) && (
-        <p className={baseClasses}>{block.input.path}</p>
+        <p className={baseClasses}>
+          {typeof block.input.path === "string"
+            ? block.input.path
+            : "Invalid file path"}
+        </p>
       )}
     </>
   );

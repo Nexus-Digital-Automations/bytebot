@@ -6,7 +6,6 @@ import {
   MessageContentBlock,
   ToolResultContentBlock,
   isImageContentBlock,
-  isToolResultContentBlock,
 } from "@bytebot/shared";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -16,12 +15,23 @@ import { cn } from "@/lib/utils";
  * Provides type-safe access to tool result content
  */
 function isValidToolResultContent(
-  block: MessageContentBlock,
+  block: unknown,
 ): block is ToolResultContentBlock & { content: MessageContentBlock[] } {
+  // Comprehensive type safety check
+  if (block == null || typeof block !== "object") {
+    return false;
+  }
+
+  const obj = block as Record<string, unknown>;
+
   return (
-    isToolResultContentBlock(block) &&
-    Array.isArray(block.content) &&
-    block.content.length > 0
+    obj.type === "tool_result" &&
+    typeof obj.tool_use_id === "string" &&
+    Array.isArray(obj.content) &&
+    (obj.content as unknown[]).length > 0 &&
+    (obj.content as unknown[]).every(
+      (item) => item != null && typeof item === "object",
+    )
   );
 }
 
@@ -30,16 +40,27 @@ function isValidToolResultContent(
  * Provides type-safe access to non-error tool results
  */
 function isNonErrorToolResult(
-  block: MessageContentBlock,
+  block: unknown,
 ): block is ToolResultContentBlock & {
   is_error: false;
   content: MessageContentBlock[];
 } {
+  // Comprehensive type safety check
+  if (block == null || typeof block !== "object") {
+    return false;
+  }
+
+  const obj = block as Record<string, unknown>;
+
   return (
-    isToolResultContentBlock(block) &&
-    !(block.is_error === true) &&
-    Array.isArray(block.content) &&
-    block.content.length > 0
+    obj.type === "tool_result" &&
+    typeof obj.tool_use_id === "string" &&
+    obj.is_error !== true &&
+    Array.isArray(obj.content) &&
+    (obj.content as unknown[]).length > 0 &&
+    (obj.content as unknown[]).every(
+      (item) => item != null && typeof item === "object",
+    )
   );
 }
 
@@ -89,29 +110,38 @@ export function AssistantMessage({
                   if (isValidToolResultContent(block)) {
                     // Check ALL content items in the tool result, not just the first one
                     const markers: React.ReactNode[] = [];
-                    block.content.forEach(
-                      (
-                        contentItem: MessageContentBlock,
-                        contentIndex: number,
-                      ) => {
-                        if (isImageContentBlock(contentItem)) {
-                          markers.push(
-                            <div
-                              key={`${blockIndex}-${contentIndex}`}
-                              data-message-index={messageIdToIndex[message.id]}
-                              data-block-index={blockIndex}
-                              data-content-index={contentIndex}
-                              style={{
-                                position: "absolute",
-                                width: 0,
-                                height: 0,
-                                overflow: "hidden",
-                              }}
-                            />,
-                          );
-                        }
-                      },
-                    );
+                    // Safe access to content after successful type guard check
+                    const validContent = block.content;
+                    if (
+                      Array.isArray(validContent) &&
+                      validContent.length > 0
+                    ) {
+                      validContent.forEach(
+                        (
+                          contentItem: MessageContentBlock,
+                          contentIndex: number,
+                        ) => {
+                          if (isImageContentBlock(contentItem)) {
+                            markers.push(
+                              <div
+                                key={`${blockIndex}-${contentIndex}`}
+                                data-message-index={
+                                  messageIdToIndex[message.id]
+                                }
+                                data-block-index={blockIndex}
+                                data-content-index={contentIndex}
+                                style={{
+                                  position: "absolute",
+                                  width: 0,
+                                  height: 0,
+                                  overflow: "hidden",
+                                }}
+                              />,
+                            );
+                          }
+                        },
+                      );
+                    }
                     return markers;
                   }
                   return null;
@@ -136,29 +166,33 @@ export function AssistantMessage({
                 if (isNonErrorToolResult(block)) {
                   // Check ALL content items in the tool result, not just the first one
                   const markers: React.ReactNode[] = [];
-                  block.content.forEach(
-                    (
-                      contentItem: MessageContentBlock,
-                      contentIndex: number,
-                    ) => {
-                      if (isImageContentBlock(contentItem)) {
-                        markers.push(
-                          <div
-                            key={`${blockIndex}-${contentIndex}`}
-                            data-message-index={messageIdToIndex[message.id]}
-                            data-block-index={blockIndex}
-                            data-content-index={contentIndex}
-                            style={{
-                              position: "absolute",
-                              width: 0,
-                              height: 0,
-                              overflow: "hidden",
-                            }}
-                          />,
-                        );
-                      }
-                    },
-                  );
+                  // Safe access to content after successful type guard check
+                  const validContent = block.content;
+                  if (Array.isArray(validContent) && validContent.length > 0) {
+                    validContent.forEach(
+                      (
+                        contentItem: MessageContentBlock,
+                        contentIndex: number,
+                      ) => {
+                        if (isImageContentBlock(contentItem)) {
+                          markers.push(
+                            <div
+                              key={`${blockIndex}-${contentIndex}`}
+                              data-message-index={messageIdToIndex[message.id]}
+                              data-block-index={blockIndex}
+                              data-content-index={contentIndex}
+                              style={{
+                                position: "absolute",
+                                width: 0,
+                                height: 0,
+                                overflow: "hidden",
+                              }}
+                            />,
+                          );
+                        }
+                      },
+                    );
+                  }
                   return markers;
                 }
                 return null;

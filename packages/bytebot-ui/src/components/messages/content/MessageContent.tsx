@@ -2,6 +2,7 @@ import React from "react";
 import {
   MessageContentBlock,
   MessageContentType,
+  ToolResultContentBlock,
   isComputerToolUseContentBlock,
   isImageContentBlock,
   isTextContentBlock,
@@ -17,23 +18,52 @@ interface MessageContentProps {
   isTakeOver?: boolean;
 }
 
+/**
+ * Type guard to safely check if a ToolResultContentBlock contains valid content
+ * @param block The block to validate
+ * @returns Type predicate indicating block has valid content array
+ */
+function isValidToolResultContent(
+  block: MessageContentBlock,
+): block is ToolResultContentBlock & { content: MessageContentBlock[] } {
+  return (
+    isToolResultContentBlock(block) &&
+    Array.isArray(block.content) &&
+    block.content.length > 0
+  );
+}
+
+/**
+ * Type guard to check if a ToolResultContentBlock is not an error
+ * @param block The block to validate
+ * @returns Type predicate indicating block is not an error
+ */
+function isNonErrorToolResult(
+  block: MessageContentBlock,
+): block is ToolResultContentBlock & { is_error: false } {
+  return isToolResultContentBlock(block) && block.is_error === false;
+}
+
 export function MessageContent({
   content,
   isTakeOver = false,
 }: MessageContentProps): React.JSX.Element | null {
   // Filter content blocks and check if any visible content remains
-  const visibleBlocks = content.filter((block) => {
-    // Filter logic from the original code
-    if (
-      isToolResultContentBlock(block) &&
-      block.content?.some((contentBlock: MessageContentBlock) =>
-        isImageContentBlock(contentBlock),
-      )
-    ) {
-      return true;
+  const visibleBlocks = content.filter((block): block is MessageContentBlock => {
+    // Filter logic with type-safe operations
+    if (isValidToolResultContent(block)) {
+      // Safe access to content after successful type guard check
+      const hasImageContent = block.content.some((contentBlock: MessageContentBlock) =>
+        isImageContentBlock(contentBlock)
+      );
+      if (hasImageContent) {
+        return true;
+      }
     }
+    
     if (
       isToolResultContentBlock(block) &&
+      typeof block.tool_use_id === 'string' &&
       block.tool_use_id !== "set_task_status" &&
       block.is_error === false
     ) {
@@ -43,7 +73,7 @@ export function MessageContent({
   });
 
   // Skip rendering if no visible content
-  if (visibleBlocks.length === 0) {
+  if (!Array.isArray(visibleBlocks) || visibleBlocks.length === 0) {
     return null;
   }
 
@@ -53,8 +83,8 @@ export function MessageContent({
         <div key={index}>
           {isTextContentBlock(block) && <TextContent block={block} />}
 
-          {isToolResultContentBlock(block) &&
-            block.is_error === false &&
+          {isNonErrorToolResult(block) &&
+            isValidToolResultContent(block) &&
             block.content.map(
               (
                 contentBlock: MessageContentBlock,
@@ -76,14 +106,18 @@ export function MessageContent({
             <ComputerToolContent block={block} isTakeOver={isTakeOver} />
           )}
 
-          {isToolResultContentBlock(block) && block.is_error === true && (
+          {isToolResultContentBlock(block) && 
+            typeof block.is_error === 'boolean' && 
+            block.is_error === true && (
             <ErrorContent block={block} />
           )}
 
-          {isToolResultContentBlock(block) &&
-            block.is_error === false &&
+          {isNonErrorToolResult(block) &&
+            isValidToolResultContent(block) &&
+            typeof block.tool_use_id === 'string' &&
             block.tool_use_id === "set_task_status" &&
-            block.content?.[0]?.type === MessageContentType._Text && (
+            block.content.length > 0 &&
+            isTextContentBlock(block.content[0]) && (
               <TextContent block={block.content[0]} />
             )}
         </div>

@@ -96,7 +96,7 @@ export function TextContent({ block }: TextContentProps): React.JSX.Element {
             ),
           }}
         >
-          {block.text}
+          {(block).text}
         </ReactMarkdown>
       </div>
     </div>

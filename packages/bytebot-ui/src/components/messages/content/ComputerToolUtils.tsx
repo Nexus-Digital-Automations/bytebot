@@ -10,7 +10,10 @@ import {
   User03Icon,
 } from "@hugeicons/core-free-icons";
 import {
+  ClickMouseToolUseBlock,
   ComputerToolUseContentBlock,
+  DragMouseToolUseBlock,
+  PressMouseToolUseBlock,
   isApplicationToolUseBlock,
   isClickMouseToolUseBlock,
   isCursorPositionToolUseBlock,
@@ -42,47 +45,57 @@ export type IconType =
   | typeof FileIcon;
 
 export function getIcon(block: ComputerToolUseContentBlock): IconType {
-  if (isScreenshotToolUseBlock(block)) {
+  if (isScreenshotToolUseBlock(block) === true) {
     return Camera01Icon;
   }
 
-  if (isWaitToolUseBlock(block)) {
+  if (isWaitToolUseBlock(block) === true) {
     return TimeQuarter02Icon;
   }
 
   if (
-    isTypeKeysToolUseBlock(block) ||
-    isTypeTextToolUseBlock(block) ||
-    isPressKeysToolUseBlock(block)
+    isTypeKeysToolUseBlock(block) === true ||
+    isTypeTextToolUseBlock(block) === true ||
+    isPressKeysToolUseBlock(block) === true
   ) {
     return TypeCursorIcon;
   }
 
-  if (isPasteTextToolUseBlock(block)) {
+  if (isPasteTextToolUseBlock(block) === true) {
     return FilePasteIcon;
   }
 
   if (
-    isMoveMouseToolUseBlock(block) ||
-    isScrollToolUseBlock(block) ||
-    isCursorPositionToolUseBlock(block) ||
-    isClickMouseToolUseBlock(block) ||
-    isDragMouseToolUseBlock(block) ||
-    isPressMouseToolUseBlock(block) ||
-    isTraceMouseToolUseBlock(block)
+    isMoveMouseToolUseBlock(block) === true ||
+    isScrollToolUseBlock(block) === true ||
+    isCursorPositionToolUseBlock(block) === true ||
+    isClickMouseToolUseBlock(block) === true ||
+    isDragMouseToolUseBlock(block) === true ||
+    isPressMouseToolUseBlock(block) === true ||
+    isTraceMouseToolUseBlock(block) === true
   ) {
-    if (block.input.button === "right") {
+    // Safe access to input property with type assertion
+    const mouseBlock = block as
+      | ClickMouseToolUseBlock
+      | PressMouseToolUseBlock
+      | DragMouseToolUseBlock;
+    if (
+      mouseBlock.input &&
+      typeof mouseBlock.input === "object" &&
+      "button" in mouseBlock.input &&
+      mouseBlock.input.button === "right"
+    ) {
       return MouseRightClick06Icon;
     }
 
     return Cursor02Icon;
   }
 
-  if (isApplicationToolUseBlock(block)) {
+  if (isApplicationToolUseBlock(block) === true) {
     return BrowserIcon;
   }
 
-  if (isReadFileToolUseBlock(block)) {
+  if (isReadFileToolUseBlock(block) === true) {
     return FileIcon;
   }
 
@@ -90,76 +103,91 @@ export function getIcon(block: ComputerToolUseContentBlock): IconType {
 }
 
 export function getLabel(block: ComputerToolUseContentBlock): string {
-  if (isScreenshotToolUseBlock(block)) {
+  if (isScreenshotToolUseBlock(block) === true) {
     return "Screenshot";
   }
 
-  if (isWaitToolUseBlock(block)) {
+  if (isWaitToolUseBlock(block) === true) {
     return "Wait";
   }
 
-  if (isTypeKeysToolUseBlock(block)) {
+  if (isTypeKeysToolUseBlock(block) === true) {
     return "Keys";
   }
 
-  if (isTypeTextToolUseBlock(block)) {
+  if (isTypeTextToolUseBlock(block) === true) {
     return "Type";
   }
 
-  if (isPasteTextToolUseBlock(block)) {
+  if (isPasteTextToolUseBlock(block) === true) {
     return "Paste";
   }
 
-  if (isPressKeysToolUseBlock(block)) {
+  if (isPressKeysToolUseBlock(block) === true) {
     return "Press Keys";
   }
 
-  if (isMoveMouseToolUseBlock(block)) {
+  if (isMoveMouseToolUseBlock(block) === true) {
     return "Move Mouse";
   }
 
-  if (isScrollToolUseBlock(block)) {
+  if (isScrollToolUseBlock(block) === true) {
     return "Scroll";
   }
 
-  if (isCursorPositionToolUseBlock(block)) {
+  if (isCursorPositionToolUseBlock(block) === true) {
     return "Cursor Position";
   }
 
-  if (isClickMouseToolUseBlock(block)) {
-    const button = block.input.button;
-    if (button === "left") {
-      if (block.input.clickCount === 2) {
-        return "Double Click";
+  if (isClickMouseToolUseBlock(block) === true) {
+    // Safe access with proper type assertion and null checks
+    const clickBlock = block as ClickMouseToolUseBlock;
+    if (clickBlock.input && typeof clickBlock.input === "object") {
+      const button = clickBlock.input.button;
+      if (button === "left") {
+        if (
+          typeof clickBlock.input.clickCount === "number" &&
+          clickBlock.input.clickCount === 2
+        ) {
+          return "Double Click";
+        }
+
+        if (
+          typeof clickBlock.input.clickCount === "number" &&
+          clickBlock.input.clickCount === TRIPLE_CLICK_COUNT
+        ) {
+          return "Triple Click";
+        }
+
+        return "Click";
       }
 
-      if (block.input.clickCount === TRIPLE_CLICK_COUNT) {
-        return "Triple Click";
+      if (typeof button === "string" && button.length > 0) {
+        const capitalizedButton =
+          button.charAt(0).toUpperCase() + button.slice(1);
+        return `${capitalizedButton} Click`;
       }
-
-      return "Click";
     }
-
-    return `${block.input.button?.charAt(0).toUpperCase() + block.input.button?.slice(1)} Click`;
+    return "Click";
   }
 
-  if (isDragMouseToolUseBlock(block)) {
+  if (isDragMouseToolUseBlock(block) === true) {
     return "Drag";
   }
 
-  if (isPressMouseToolUseBlock(block)) {
+  if (isPressMouseToolUseBlock(block) === true) {
     return "Press Mouse";
   }
 
-  if (isTraceMouseToolUseBlock(block)) {
+  if (isTraceMouseToolUseBlock(block) === true) {
     return "Trace Mouse";
   }
 
-  if (isApplicationToolUseBlock(block)) {
+  if (isApplicationToolUseBlock(block) === true) {
     return "Open Application";
   }
 
-  if (isReadFileToolUseBlock(block)) {
+  if (isReadFileToolUseBlock(block) === true) {
     return "Read File";
   }
 
