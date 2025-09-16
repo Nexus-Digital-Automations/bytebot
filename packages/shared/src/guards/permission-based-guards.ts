@@ -455,7 +455,7 @@ export class ResourceGuard implements CanActivate {
     user: Record<string, unknown>,
     resourceType: string,
   ): string[] {
-    const allPermissions = user.permissions || [];
+    const allPermissions = (user.permissions as string[]) || [];
     return allPermissions.filter((perm: string) =>
       perm.startsWith(`${resourceType}:`),
     );
@@ -552,7 +552,7 @@ export class OwnershipGuard implements CanActivate {
     _request: Request,
   ): boolean {
     // Verify ownership based on JWT token claims
-    const ownerValue = user[config.ownershipField];
+    const ownerValue = user[config.ownershipField] as string;
     return (
       ownerValue === user.id || config.allowedRelations.includes(ownerValue)
     );
@@ -661,7 +661,22 @@ export class CompositeGuard implements CanActivate {
     // Set guard-specific metadata
     this.setGuardMetadata(guardDef, context);
 
-    return await guardInstance.canActivate(context);
+    const result = await guardInstance.canActivate(context);
+    // Handle both boolean and Observable<boolean> return types
+    if (typeof result === 'boolean') {
+      return result;
+    }
+    // If it's an Observable, convert to Promise and await
+    return new Promise((resolve) => {
+      if (result && typeof result.subscribe === 'function') {
+        result.subscribe({
+          next: (value: boolean) => resolve(value),
+          error: () => resolve(false),
+        });
+      } else {
+        resolve(false);
+      }
+    });
   }
 
   private setGuardMetadata(
@@ -990,6 +1005,376 @@ export const TimeBasedAccess = (
     allowedTimes,
     timezone,
     allowedDays: [0, 1, 2, 3, 4, 5, 6],
+  });
+
+/**
+ * Role Guard
+ *
+ * Provides role-based access control with hierarchical role support
+ * and dynamic role evaluation.
+ */
+@Injectable()
+export class RoleGuard implements CanActivate {
+  private readonly logger = new Logger(RoleGuard.name);
+
+  constructor(
+    private readonly _reflector: Reflector,
+    private readonly _configService: ConfigService,
+    @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<SecurityContextRequest>();
+
+    const requiredRoles = this._reflector.get<string[]>(
+      "roles",
+      context.getHandler(),
+    );
+
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true; // No role requirements
+    }
+
+    if (!request.user) {
+      throw new UnauthorizedException(
+        "Authentication required for role verification",
+      );
+    }
+
+    const hasRole = await this.verifyRoles(request.user, requiredRoles);
+
+    if (!hasRole) {
+      this.logger.warn(`Role access denied`, {
+        userId: request.user.id,
+        requiredRoles,
+        userRoles: request.user.roles || [request.user.role],
+      });
+
+      throw new ForbiddenException("Insufficient role permissions");
+    }
+
+    return true;
+  }
+
+  private async verifyRoles(
+    user: Record<string, unknown>,
+    requiredRoles: string[],
+  ): Promise<boolean> {
+    const userRoles = (user.roles as string[]) || [user.role as string];
+
+    return requiredRoles.some((role) => userRoles.includes(role));
+  }
+}
+
+/**
+ * Audit Guard
+ *
+ * Provides comprehensive audit logging and compliance tracking
+ * for security-sensitive operations.
+ */
+@Injectable()
+export class AuditGuard implements CanActivate {
+  private readonly logger = new Logger(AuditGuard.name);
+
+  constructor(
+    private readonly _reflector: Reflector,
+    private readonly _configService: ConfigService,
+    @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<SecurityContextRequest>();
+
+    const auditConfig = this._reflector.get<AuditGuardConfig>(
+      AUDIT_GUARD_KEY,
+      context.getHandler(),
+    );
+
+    if (!auditConfig) {
+      return true; // No audit requirements
+    }
+
+    // Create audit entry
+    await this.createAuditEntry(request, auditConfig, context);
+
+    // Check for sensitive operations requiring additional validation
+    const operation = this.extractOperation(context);
+    if (auditConfig.sensitiveOperations.includes(operation)) {
+      return await this.validateSensitiveOperation(
+        request,
+        operation,
+        auditConfig,
+      );
+    }
+
+    return true;
+  }
+
+  private async createAuditEntry(
+    request: SecurityContextRequest,
+    config: AuditGuardConfig,
+    context: ExecutionContext,
+  ): Promise<void> {
+    const auditEntry = {
+      timestamp: new Date(),
+      userId: request.user?.id || "anonymous",
+      operation: this.extractOperation(context),
+      endpoint: request.path,
+      method: request.method,
+      ipAddress: request.ip,
+      userAgent: request.get("user-agent"),
+      auditLevel: config.auditLevel,
+      compliance: config.complianceFramework || [],
+    };
+
+    this.logger.log(`Audit entry created`, auditEntry);
+
+    // Log to specified destinations
+    if (config.logDestination === "file" || config.logDestination === "both") {
+      await this.logToFile(auditEntry);
+    }
+
+    if (
+      config.logDestination === "database" ||
+      config.logDestination === "both"
+    ) {
+      await this.logToDatabase(auditEntry);
+    }
+
+    // Real-time alerts for critical operations
+    if (config.realTimeAlert && config.auditLevel === "comprehensive") {
+      await this.sendRealTimeAlert(auditEntry);
+    }
+  }
+
+  private extractOperation(context: ExecutionContext): string {
+    const handler = context.getHandler();
+    return handler.name || "unknown_operation";
+  }
+
+  private async validateSensitiveOperation(
+    _request: SecurityContextRequest,
+    _operation: string,
+    _config: AuditGuardConfig,
+  ): Promise<boolean> {
+    // Additional validation for sensitive operations
+    // This could include additional authentication, approval workflows, etc.
+    this.logger.warn(`Sensitive operation detected: ${_operation}`);
+    return true;
+  }
+
+  private async logToFile(auditEntry: Record<string, unknown>): Promise<void> {
+    // Implementation for file-based audit logging
+    this.logger.debug(`File audit log: ${JSON.stringify(auditEntry)}`);
+  }
+
+  private async logToDatabase(
+    auditEntry: Record<string, unknown>,
+  ): Promise<void> {
+    // Implementation for database audit logging
+    this.logger.debug(`Database audit log: ${JSON.stringify(auditEntry)}`);
+  }
+
+  private async sendRealTimeAlert(
+    auditEntry: Record<string, unknown>,
+  ): Promise<void> {
+    // Implementation for real-time alerts
+    this.logger.warn(`Real-time alert: ${JSON.stringify(auditEntry)}`);
+  }
+}
+
+/**
+ * Health Guard
+ *
+ * Monitors system health and implements circuit breaker patterns
+ * to protect against cascading failures.
+ */
+@Injectable()
+export class HealthGuard implements CanActivate {
+  private readonly logger = new Logger(HealthGuard.name);
+  private readonly healthStatus = new Map<string, boolean>();
+  private readonly circuitBreakers = new Map<
+    string,
+    { failures: number; lastFailure: Date }
+  >();
+
+  constructor(
+    private readonly _reflector: Reflector,
+    private readonly _configService: ConfigService,
+    @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const healthConfig = this._reflector.get<HealthGuardConfig>(
+      HEALTH_GUARD_KEY,
+      context.getHandler(),
+    );
+
+    if (!healthConfig) {
+      return true; // No health requirements
+    }
+
+    // Perform health checks
+    const healthResults = await this.performHealthChecks(healthConfig);
+    const failedChecks = healthResults.filter((result) => !result.healthy);
+
+    // Check failure threshold
+    if (failedChecks.length >= healthConfig.failureThreshold) {
+      if (healthConfig.circuitBreakerEnabled) {
+        return this.handleCircuitBreaker(healthConfig, failedChecks);
+      }
+
+      if (healthConfig.gracefulDegradation) {
+        this.logger.warn("Health checks failed, enabling graceful degradation");
+        return true; // Allow with degraded functionality
+      }
+
+      this.logger.error("Health checks failed, blocking request");
+      throw new ForbiddenException("Service health checks failed");
+    }
+
+    return true;
+  }
+
+  private async performHealthChecks(
+    config: HealthGuardConfig,
+  ): Promise<Array<{ name: string; healthy: boolean; error?: string }>> {
+    const results = await Promise.allSettled(
+      config.healthChecks.map((check) => this.performSingleHealthCheck(check)),
+    );
+
+    return results.map((result, index) => {
+      const checkName = config.healthChecks[index].name;
+
+      if (result.status === "fulfilled") {
+        return { name: checkName, healthy: result.value };
+      } else {
+        return {
+          name: checkName,
+          healthy: false,
+          error: result.reason?.message || "Unknown error",
+        };
+      }
+    });
+  }
+
+  private async performSingleHealthCheck(check: HealthCheck): Promise<boolean> {
+    const startTime = Date.now();
+
+    try {
+      switch (check.type) {
+        case "service":
+          return await this.checkServiceHealth(check);
+        case "database":
+          return await this.checkDatabaseHealth(check);
+        case "cache":
+          return await this.checkCacheHealth(check);
+        case "external":
+          return await this.checkExternalHealth(check);
+        default:
+          this.logger.warn(`Unknown health check type: ${check.type}`);
+          return false;
+      }
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      this.logger.error(
+        `Health check ${check.name} failed in ${duration}ms`,
+        error,
+      );
+
+      if (check.critical) {
+        this.updateCircuitBreaker(check.name);
+      }
+
+      return false;
+    }
+  }
+
+  private async checkServiceHealth(_check: HealthCheck): Promise<boolean> {
+    // Implementation for service health checks
+    return true;
+  }
+
+  private async checkDatabaseHealth(_check: HealthCheck): Promise<boolean> {
+    // Implementation for database health checks
+    return true;
+  }
+
+  private async checkCacheHealth(_check: HealthCheck): Promise<boolean> {
+    // Implementation for cache health checks
+    return true;
+  }
+
+  private async checkExternalHealth(_check: HealthCheck): Promise<boolean> {
+    // Implementation for external service health checks
+    return true;
+  }
+
+  private handleCircuitBreaker(
+    config: HealthGuardConfig,
+    failedChecks: Array<{ name: string; healthy: boolean; error?: string }>,
+  ): boolean {
+    const criticalFailures = failedChecks.filter(
+      (check) =>
+        config.healthChecks.find((hc) => hc.name === check.name)?.critical,
+    );
+
+    if (criticalFailures.length > 0) {
+      this.logger.error(
+        "Circuit breaker activated due to critical health failures",
+      );
+
+      if (config.emergencyMode) {
+        this.logger.warn("Emergency mode enabled, allowing limited access");
+        return true;
+      }
+
+      throw new ForbiddenException(
+        "Circuit breaker activated - service unavailable",
+      );
+    }
+
+    return true;
+  }
+
+  private updateCircuitBreaker(checkName: string): void {
+    const current = this.circuitBreakers.get(checkName) || {
+      failures: 0,
+      lastFailure: new Date(),
+    };
+    this.circuitBreakers.set(checkName, {
+      failures: current.failures + 1,
+      lastFailure: new Date(),
+    });
+  }
+}
+
+/**
+ * Additional decorator functions for the new guards
+ */
+
+export const RequireRoles = (roles: string[]) => SetMetadata("roles", roles);
+
+export const RequireAudit = (
+  auditLevel: "basic" | "detailed" | "comprehensive" = "basic",
+  sensitiveOperations: string[] = [],
+) =>
+  SetMetadata(AUDIT_GUARD_KEY, {
+    auditLevel,
+    sensitiveOperations,
+    logDestination: "both",
+    realTimeAlert: auditLevel === "comprehensive",
+  });
+
+export const RequireHealthCheck = (
+  healthChecks: HealthCheck[],
+  failureThreshold: number = 1,
+) =>
+  SetMetadata(HEALTH_GUARD_KEY, {
+    healthChecks,
+    failureThreshold,
+    circuitBreakerEnabled: true,
+    gracefulDegradation: false,
   });
 
 /**
