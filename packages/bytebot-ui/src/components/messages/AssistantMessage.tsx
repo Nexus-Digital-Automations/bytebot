@@ -15,9 +15,15 @@ function safeIsImageContentBlock(contentItem: MessageContentBlock): boolean {
   try {
     // Safe call with explicit type checking
     if (contentItem !== null && typeof contentItem === "object") {
-      // Type-safe call with explicit boolean conversion
-      const checkResult: unknown = isImageContentBlock(contentItem);
-      return Boolean(checkResult);
+      // Type-safe call with explicit boolean conversion and error handling
+      try {
+        const checkResult = isImageContentBlock(contentItem);
+        // Type guard: ensure result is boolean
+        return typeof checkResult === "boolean" ? checkResult : false;
+      } catch (_callError) {
+        // Handle function call errors safely
+        return false;
+      }
     }
     return false;
   } catch {
@@ -114,6 +120,7 @@ function getValidToolResultContent(
             typedArray.push(item as MessageContentBlock);
           }
         });
+        // Explicit type return to avoid unsafe return warning
         return typedArray;
       }
     }
@@ -151,6 +158,7 @@ function getNonErrorToolResultContent(
             typedArray.push(item as MessageContentBlock);
           }
         });
+        // Explicit type return to avoid unsafe return warning
         return typedArray;
       }
     }
@@ -268,7 +276,7 @@ export function AssistantMessage({
                       contentItem: MessageContentBlock,
                       contentIndex: number,
                     ) => {
-                      if (isImageContentBlock(contentItem)) {
+                      if (safeIsImageContentBlock(contentItem)) {
                         markers.push(
                           <div
                             key={`${blockIndex}-${contentIndex}`}
