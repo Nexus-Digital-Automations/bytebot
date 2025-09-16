@@ -524,8 +524,8 @@ export interface DataSensitivityAnalysis {
  * Data sensitivity levels
  */
 export enum DataSensitivityLevel {
-  PUBLIC = "public",
-  INTERNAL = "internal",
+  _PUBLIC = "public",
+  _INTERNAL = "internal",
   CONFIDENTIAL = "confidential",
   RESTRICTED = "restricted",
   SECRET = "secret",
