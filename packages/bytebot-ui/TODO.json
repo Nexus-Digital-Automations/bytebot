@@ -222,7 +222,7 @@
       "updated_at": "2025-09-16T01:41:49.333Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-16T01:25:57.979Z",
       "title": "Fix ALL TypeScript ESLint violations in ComputerToolUtils.tsx",
       "description": "Fix 30+ TypeScript ESLint violations in ComputerToolUtils.tsx including unsafe type operations, unsafe member access, and strict boolean expressions. Apply comprehensive type safety fixes using proper type guards and safe type assertions.",
@@ -239,7 +239,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-16T01:44:52.945Z",
+      "updated_at": "2025-09-16T01:44:52.945Z"
     },
     {
       "status": "in_progress",
@@ -262,7 +264,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-16T01:25:58.080Z",
       "title": "Fix TypeScript ESLint violations in ComputerToolContentTakeOver.tsx",
       "description": "Fix all TypeScript ESLint violations focusing on unsafe type operations, unsafe member access, and strict boolean expressions. Apply comprehensive type safety fixes using proper type guards and safe type assertions.",
@@ -279,7 +281,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-16T01:44:17.787Z",
+      "updated_at": "2025-09-16T01:44:17.787Z"
     },
     {
       "status": "completed",
@@ -344,7 +348,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-16T01:25:58.771Z",
       "title": "Fix TypeScript ESLint violations in ImageContent.tsx",
       "description": "Fix ALL TypeScript ESLint violations in ImageContent.tsx file focusing on unsafe type operations, unsafe member access, and strict boolean expressions. Apply comprehensive type safety fixes using proper type guards and safe type assertions.",
@@ -361,7 +365,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-16T01:45:36.037Z",
+      "updated_at": "2025-09-16T01:45:36.037Z"
     },
     {
       "status": "in_progress",

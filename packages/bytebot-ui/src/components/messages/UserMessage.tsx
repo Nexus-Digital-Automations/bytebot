@@ -7,7 +7,6 @@ import {
   ToolResultContentBlock,
   isImageContentBlock,
   isTextContentBlock,
-  isToolResultContentBlock,
 } from "@bytebot/shared";
 
 /**
@@ -17,13 +16,31 @@ import {
 function isValidToolResultWithContent(
   block: MessageContentBlock,
 ): block is ToolResultContentBlock {
-  // First check if it's a tool result block
-  if (!isToolResultContentBlock(block)) {
+  // Comprehensive null/undefined check
+  if (block == null || typeof block !== "object") {
     return false;
   }
 
-  // Now TypeScript knows block is ToolResultContentBlock, safe to access content
-  return Array.isArray(block.content) && block.content.length > 0;
+  // Check if it has the correct type property
+  const hasCorrectType = "type" in block && block.type === "tool_result";
+  if (!hasCorrectType) {
+    return false;
+  }
+
+  // Check for required tool_use_id property
+  const hasToolUseId =
+    "tool_use_id" in block && typeof block.tool_use_id === "string";
+  if (!hasToolUseId) {
+    return false;
+  }
+
+  // Check for content array with at least one item
+  const hasValidContent =
+    "content" in block &&
+    Array.isArray(block.content) &&
+    block.content.length > 0;
+
+  return hasValidContent;
 }
 
 interface UserMessageProps {

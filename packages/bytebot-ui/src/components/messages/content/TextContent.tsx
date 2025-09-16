@@ -7,18 +7,27 @@ interface TextContentProps {
 }
 
 /**
- * Type guard to ensure block is properly typed as TextContentBlock
+ * Type guard to check if a block is a valid TextContentBlock
  * @param block - The block to validate
- * @returns The validated text content
+ * @returns True if block is a valid TextContentBlock
+ */
+function isTextContentBlock(block: unknown): block is TextContentBlock {
+  return (
+    typeof block === "object" &&
+    block !== null &&
+    "text" in block &&
+    typeof (block as { text: unknown }).text === "string"
+  );
+}
+
+/**
+ * Safely extracts text from a TextContentBlock
+ * @param block - The block to extract text from
+ * @returns The text content or empty string if invalid
  */
 function getTextFromBlock(block: TextContentBlock): string {
-  // Defensive validation with proper type assertion
-  if (
-    block &&
-    typeof block === "object" &&
-    "text" in block &&
-    typeof block.text === "string"
-  ) {
+  // Use type guard for comprehensive safety
+  if (isTextContentBlock(block)) {
     return block.text;
   }
   return "";

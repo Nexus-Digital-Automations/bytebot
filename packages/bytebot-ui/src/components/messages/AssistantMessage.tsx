@@ -70,6 +70,36 @@ function isNonErrorToolResult(
   );
 }
 
+/**
+ * Safely extracts content from a validated ToolResultContentBlock
+ * Returns null if the block is invalid or in error state
+ */
+function getValidToolResultContent(
+  block: unknown,
+): MessageContentBlock[] | null {
+  if (!isValidToolResultContent(block)) {
+    return null;
+  }
+
+  // After type guard validation, we can safely access the content
+  return block.content;
+}
+
+/**
+ * Safely extracts content from a non-error ToolResultContentBlock
+ * Returns null if the block is invalid or in error state
+ */
+function getNonErrorToolResultContent(
+  block: unknown,
+): MessageContentBlock[] | null {
+  if (!isNonErrorToolResult(block)) {
+    return null;
+  }
+
+  // After type guard validation, we can safely access the content
+  return block.content;
+}
+
 interface AssistantMessageProps {
   group: GroupedMessages;
   taskStatus: TaskStatus;

@@ -1196,10 +1196,82 @@
       "updated_at": "2025-09-16T01:42:05.585Z",
       "archived_at": "2025-09-16T01:42:05.588Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T01:25:58.080Z",
+      "title": "Fix TypeScript ESLint violations in ComputerToolContentTakeOver.tsx",
+      "description": "Fix all TypeScript ESLint violations focusing on unsafe type operations, unsafe member access, and strict boolean expressions. Apply comprehensive type safety fixes using proper type guards and safe type assertions.",
+      "category": "error",
+      "id": "error_1757985958080_kpn24uexx5",
+      "assigned_agent": "dev_session_1757985939997_1_general_e0b9c93e",
+      "started_at": "2025-09-16T01:26:29.612Z",
+      "claimed_by": "dev_session_1757985939997_1_general_e0b9c93e",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757985939997_1_general_e0b9c93e",
+          "role": "primary",
+          "assignedAt": "2025-09-16T01:26:29.612Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T01:44:17.787Z",
+      "updated_at": "2025-09-16T01:44:17.787Z",
+      "archived_at": "2025-09-16T01:44:17.792Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T01:25:57.979Z",
+      "title": "Fix ALL TypeScript ESLint violations in ComputerToolUtils.tsx",
+      "description": "Fix 30+ TypeScript ESLint violations in ComputerToolUtils.tsx including unsafe type operations, unsafe member access, and strict boolean expressions. Apply comprehensive type safety fixes using proper type guards and safe type assertions.",
+      "category": "error",
+      "id": "error_1757985957979_qqybp2w1bvs",
+      "assigned_agent": "dev_session_1757985937505_1_general_96bdc933",
+      "started_at": "2025-09-16T01:26:34.362Z",
+      "claimed_by": "dev_session_1757985937505_1_general_96bdc933",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757985937505_1_general_96bdc933",
+          "role": "primary",
+          "assignedAt": "2025-09-16T01:26:34.362Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T01:44:52.945Z",
+      "updated_at": "2025-09-16T01:44:52.945Z",
+      "archived_at": "2025-09-16T01:44:52.950Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T01:25:58.771Z",
+      "title": "Fix TypeScript ESLint violations in ImageContent.tsx",
+      "description": "Fix ALL TypeScript ESLint violations in ImageContent.tsx file focusing on unsafe type operations, unsafe member access, and strict boolean expressions. Apply comprehensive type safety fixes using proper type guards and safe type assertions.",
+      "category": "error",
+      "id": "error_1757985958771_wuwgzib093",
+      "assigned_agent": "dev_session_1757985937131_1_general_a572d969",
+      "started_at": "2025-09-16T01:26:26.405Z",
+      "claimed_by": "dev_session_1757985937131_1_general_a572d969",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757985937131_1_general_a572d969",
+          "role": "primary",
+          "assignedAt": "2025-09-16T01:26:26.405Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T01:45:36.037Z",
+      "updated_at": "2025-09-16T01:45:36.037Z",
+      "archived_at": "2025-09-16T01:45:36.041Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 25,
+  "total_completed": 28,
   "last_completion": "2025-09-11T08:31:32.558Z",
   "created_at": "2025-09-11T06:47:03.082Z",
-  "last_archived": "2025-09-16T01:42:05.588Z"
+  "last_archived": "2025-09-16T01:45:36.041Z"
 }
