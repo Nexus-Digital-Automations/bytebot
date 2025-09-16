@@ -365,9 +365,9 @@ export function wrapClassMethods(
 ): unknown {
   const logger = new Logger(`ParlantWrapper:${target.constructor.name}`);
 
-  const methodNames = Object.getOwnPropertyNames(target.prototype).filter(
+  const methodNames = Object.getOwnPropertyNames((target as any).prototype).filter(
     (name) =>
-      name !== "constructor" && typeof target.prototype[name] === "function",
+      name !== "constructor" && typeof (target as any).prototype[name] === "function",
   );
 
   logger.log(
@@ -885,7 +885,7 @@ export class ParlantWrapperRegistry {
       byValidationMode: {} as Record<string, number>,
     };
 
-    for (const config of this.wrapperMetadata.values()) {
+    for (const config of Array.from(this.wrapperMetadata.values())) {
       // Count by security level
       const secLevel = config.securityLevel;
       stats.bySecurityLevel[secLevel] =
