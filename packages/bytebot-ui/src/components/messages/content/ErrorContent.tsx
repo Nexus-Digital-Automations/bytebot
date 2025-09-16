@@ -27,14 +27,15 @@ function getErrorText(block: ToolResultContentBlock): string {
       return defaultMessage;
     }
 
-    // Get content with explicit type validation
-    const blockContent = block.content;
+    // Get content with explicit type validation using safer approach
+    const blockAsRecord = block as Record<string, unknown>;
+    const blockContent = blockAsRecord.content;
     if (!Array.isArray(blockContent) || blockContent.length === 0) {
       return defaultMessage;
     }
 
-    // Get first item with bounds checking
-    const firstItem = blockContent[0];
+    // Get first item with bounds checking using explicit array access
+    const firstItem = blockContent[0] as unknown;
     if (typeof firstItem !== "object" || firstItem === null) {
       return defaultMessage;
     }

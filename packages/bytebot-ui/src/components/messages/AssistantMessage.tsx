@@ -117,12 +117,9 @@ export function AssistantMessage({
                     // Check ALL content items in the tool result, not just the first one
                     const markers: React.ReactNode[] = [];
                     // Type guard ensures we have valid content - safe to access
-                    const toolResult = block as ToolResultContentBlock & {
-                      is_error?: false | undefined;
-                      content: MessageContentBlock[];
-                    };
+                    const toolResult = block;
                     const validContent = toolResult.content;
-                    
+
                     if (
                       Array.isArray(validContent) &&
                       validContent.length > 0
@@ -177,8 +174,10 @@ export function AssistantMessage({
                 if (isNonErrorToolResult(block)) {
                   // Check ALL content items in the tool result, not just the first one
                   const markers: React.ReactNode[] = [];
-                  // Safe access to content after successful type guard check
-                  const validContent = block.content;
+                  // Type guard ensures we have valid content - safe to access
+                  const toolResult = block;
+                  const validContent = toolResult.content;
+
                   if (Array.isArray(validContent) && validContent.length > 0) {
                     validContent.forEach(
                       (
