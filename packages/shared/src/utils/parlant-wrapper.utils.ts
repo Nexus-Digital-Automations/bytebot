@@ -410,7 +410,7 @@ function createWrapperContext(
  * Extract source location from function
  */
 function extractSourceLocation(
-  _func: (...__args: unknown[]) => unknown,
+  _func: (..._args: unknown[]) => unknown,
 ): SourceLocation {
   // In a real implementation, this would use stack traces or source maps
   return {

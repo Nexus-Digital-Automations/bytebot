@@ -245,9 +245,9 @@ export enum PayloadType {
   _FORM_DATA = "form_data",
   _MULTIPART = "multipart",
   _BINARY = "binary",
-  TEXT = "text",
-  GRAPHQL_QUERY = "graphql_query",
-  PROTOBUF = "protobuf",
+  _TEXT = "text",
+  _GRAPHQL_QUERY = "graphql_query",
+  _PROTOBUF = "protobuf",
 }
 
 /**
