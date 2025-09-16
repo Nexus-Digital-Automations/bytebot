@@ -36,6 +36,19 @@ import { HealthModule } from '../health.module';
 import { HealthController } from '../health.controller';
 import { HealthService } from '../health.service';
 
+// Type definitions for health service method returns
+interface HealthCheckResponse {
+  status: string;
+  timestamp?: string;
+  [key: string]: unknown;
+}
+
+interface DetailedStatusResponse {
+  status: string;
+  details?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 describe('HealthModule', () => {
   let module: TestingModule;
   let healthModule: HealthModule;
@@ -568,10 +581,12 @@ describe('HealthModule', () => {
       // Mock HealthService constructor to simulate initialization failure
       const mockHealthService = {
         getBasicHealth: (
-          jest.fn() as jest.MockedFunction<() => Promise<any>>
+          jest.fn() as jest.MockedFunction<() => Promise<HealthCheckResponse>>
         ).mockRejectedValue(new Error('Service initialization failed')),
         getDetailedStatus: (
-          jest.fn() as jest.MockedFunction<() => Promise<any>>
+          jest.fn() as jest.MockedFunction<
+            () => Promise<DetailedStatusResponse>
+          >
         ).mockRejectedValue(new Error('Service initialization failed')),
         isServiceStable: jest.fn().mockReturnValue(false),
         getInitializationTime: jest.fn().mockReturnValue(Date.now()),
