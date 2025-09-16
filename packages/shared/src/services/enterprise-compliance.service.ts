@@ -1118,19 +1118,19 @@ export class EnterpriseComplianceService {
     cacheTtl: 600000, // 10 minutes
   })
   async validateCompliance(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): Promise<ComplianceValidationResult> {
-    const operationId = context.operationId;
+    const operationId = _context.operationId;
     const startTime = Date.now();
 
     this.logger.log(
       `[${operationId}] Enterprise compliance validation initiated`,
       {
         operationId,
-        frameworks: context.targetFrameworks.length,
-        scope: context.validationScope.type,
-        dataTypes: context.dataContext.dataTypes.length,
-        validationMode: context.validationConfiguration.mode,
+        frameworks: _context.targetFrameworks.length,
+        scope: _context.validationScope.type,
+        dataTypes: _context.dataContext.dataTypes.length,
+        validationMode: _context.validationConfiguration.mode,
       },
     );
 
@@ -1144,7 +1144,7 @@ export class EnterpriseComplianceService {
       }
 
       // Check compliance cache
-      const cacheKey = this.generateComplianceCacheKey(context);
+      const cacheKey = this.generateComplianceCacheKey(_context);
       const cachedResult = await this.getCachedComplianceResult(cacheKey);
 
       if (cachedResult && this.complianceConfig.enableRealTimeValidation) {
@@ -1290,7 +1290,7 @@ export class EnterpriseComplianceService {
   }
 
   private generateComplianceCacheKey(
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ): string {
     // Implementation for cache key generation
     return `compliance-${context.operationId}`;
@@ -1326,7 +1326,7 @@ interface FrameworkValidationEngine {
   framework: ComplianceFramework;
   version: string;
   validate: (
-    context: ComplianceValidationContext,
+    _context: ComplianceValidationContext,
   ) => Promise<ComplianceFrameworkResult>;
 }
 

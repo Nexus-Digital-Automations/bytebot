@@ -304,14 +304,14 @@ export interface SecurityThreat {
  * Security threat types
  */
 export enum SecurityThreatType {
-  UNAUTHORIZED_ACCESS = "unauthorized_access",
-  DATA_EXFILTRATION = "data_exfiltration",
-  PRIVILEGE_ESCALATION = "privilege_escalation",
-  INJECTION_ATTACK = "injection_attack",
-  DENIAL_OF_SERVICE = "denial_of_service",
-  MALICIOUS_PAYLOAD = "malicious_payload",
-  SUSPICIOUS_PATTERN = "suspicious_pattern",
-  ANOMALOUS_BEHAVIOR = "anomalous_behavior",
+  _UNAUTHORIZED_ACCESS = "unauthorized_access",
+  _DATA_EXFILTRATION = "data_exfiltration",
+  _PRIVILEGE_ESCALATION = "privilege_escalation",
+  _INJECTION_ATTACK = "injection_attack",
+  _DENIAL_OF_SERVICE = "denial_of_service",
+  _MALICIOUS_PAYLOAD = "malicious_payload",
+  _SUSPICIOUS_PATTERN = "suspicious_pattern",
+  _ANOMALOUS_BEHAVIOR = "anomalous_behavior",
 }
 
 /**
@@ -639,9 +639,9 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
   };
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly parlantWrapperUtils: ParlantWrapperUtils,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly _configService: ConfigService,
+    private readonly _parlantWrapperUtils: ParlantWrapperUtils,
+    @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
   ) {
     this.logger.log(
       "Enterprise API Validation Middleware initialized with MAXIMUM Parlant integration",
@@ -1279,15 +1279,15 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
   // validation logic, caching, circuit breaker management, etc.
 
   private async initializeConversationHistory(
-    req: EnterpriseValidatedRequest,
-    operationId: string,
+    _req: EnterpriseValidatedRequest,
+    _operationId: string,
   ): Promise<void> {
     // Implementation for initializing conversation history
   }
 
   private async performBasicSecurityChecks(
-    req: EnterpriseValidatedRequest,
-    operationId: string,
+    _req: EnterpriseValidatedRequest,
+    _operationId: string,
   ): Promise<void> {
     // Implementation for basic security checks
   }

@@ -141,6 +141,14 @@ export interface WrapperContext {
   startTime: number;
 }
 
+/**
+ * Parlant service interface for function validation
+ */
+export interface ParlantService {
+  /** Validate function execution */
+  validateFunctionExecution(request: ParlantValidationRequest): Promise<ParlantValidationResponse>;
+}
+
 // ===========================
 // CORE WRAPPER FUNCTIONS
 // ===========================
