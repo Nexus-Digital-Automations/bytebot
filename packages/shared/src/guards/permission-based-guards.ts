@@ -398,7 +398,7 @@ export class ResourceGuard implements CanActivate {
   }
 
   private async verifyResourceAccess(
-    user: any,
+    user: Record<string, unknown>,
     config: ResourceConfig,
     request: Request,
   ): Promise<boolean> {
@@ -452,7 +452,7 @@ export class ResourceGuard implements CanActivate {
   }
 
   private getUserResourcePermissions(
-    user: any,
+    user: Record<string, unknown>,
     resourceType: string,
   ): string[] {
     const allPermissions = user.permissions || [];
@@ -462,9 +462,9 @@ export class ResourceGuard implements CanActivate {
   }
 
   private async verifyResourceOwnership(
-    user: any,
-    config: ResourceConfig,
-    resourceId: string,
+    _user: Record<string, unknown>,
+    _config: ResourceConfig,
+    _resourceId: string,
   ): Promise<boolean> {
     // This would typically query the database to verify ownership
     // For now, return true as implementation would depend on specific data layer
@@ -525,7 +525,7 @@ export class OwnershipGuard implements CanActivate {
   }
 
   private async verifyOwnership(
-    user: any,
+    user: Record<string, unknown>,
     config: OwnershipConfig,
     request: Request,
   ): Promise<boolean> {
@@ -547,9 +547,9 @@ export class OwnershipGuard implements CanActivate {
   }
 
   private verifyJwtOwnership(
-    user: any,
+    user: Record<string, unknown>,
     config: OwnershipConfig,
-    request: Request,
+    _request: Request,
   ): boolean {
     // Verify ownership based on JWT token claims
     const ownerValue = user[config.ownershipField];
@@ -559,9 +559,9 @@ export class OwnershipGuard implements CanActivate {
   }
 
   private async verifyDatabaseOwnership(
-    user: any,
-    config: OwnershipConfig,
-    request: Request,
+    _user: Record<string, unknown>,
+    _config: OwnershipConfig,
+    _request: Request,
   ): Promise<boolean> {
     // This would typically query the database to verify ownership
     // Implementation would depend on specific data access layer
@@ -578,7 +578,7 @@ export class OwnershipGuard implements CanActivate {
 @Injectable()
 export class CompositeGuard implements CanActivate {
   private readonly logger = new Logger(CompositeGuard.name);
-  private readonly guardInstances = new Map<string, any>();
+  private readonly guardInstances = new Map<string, CanActivate>();
 
   constructor(
     private readonly _reflector: Reflector,
