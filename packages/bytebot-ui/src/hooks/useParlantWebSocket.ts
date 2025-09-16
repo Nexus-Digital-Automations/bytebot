@@ -20,18 +20,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Socket, io } from 'socket.io-client';
 import {
-  ParlantConversationContext,
-  ParlantValidationRequest,
-  ParlantValidationResponse,
-  ConversationState,
   ConversationMessage,
-  MessageType,
-  ParlantWebSocketEvents,
-  ConversationStatusUpdate,
-  IntentAnalysis,
-  ParlantError,
   ConversationParticipant,
   ConversationPriority,
+  ConversationState,
+  ConversationStatusUpdate,
+  IntentAnalysis,
+  MessageType,
+  ParlantConversationContext,
+  ParlantError,
+  ParlantValidationRequest,
+  ParlantValidationResponse,
+  ParlantWebSocketEvents,
   ValidationDecision
 } from '@bytebot/shared/types/parlant.types';
 import { logDebug, logError, logInfo, logWarning } from '@/utils/logger';
@@ -853,7 +853,7 @@ export const useParlantWebSocket = (
   
   const getConversationHistory = useCallback(async (
     conversationId: string,
-    limit: number = 100
+    limit = 100
   ): Promise<ConversationMessage[]> => {
     if (!isConnected || !socketRef.current) {
       throw new Error('Not connected to Parlant WebSocket');

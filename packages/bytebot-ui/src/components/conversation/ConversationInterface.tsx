@@ -28,32 +28,32 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { 
-  ConversationState, 
   ConversationMessage, 
-  MessageType,
-  ConversationParticipant,
+  ConversationParticipant, 
   ConversationPriority,
-  ValidationDecision,
-  ParlantValidationRequest
+  ConversationState,
+  MessageType,
+  ParlantValidationRequest,
+  ValidationDecision
 } from '@bytebot/shared/types/parlant.types';
 import { useParlantWebSocket } from '@/hooks/useParlantWebSocket';
 import { logDebug, logInfo, logWarning } from '@/utils/logger';
 import {
-  HugeiconsIcon,
+  AlertCircleIcon,
   ArrowRight02Icon,
-  MicrophoneIcon,
   AttachmentIcon,
-  MoreVerticalIcon,
-  SendIcon,
-  UserIcon,
   BotIcon,
   CheckmarkCircle02Icon,
-  AlertCircleIcon,
   ClockIcon,
-  SearchIcon,
-  SettingsIcon,
   ExportIcon,
-  RefreshIcon
+  HugeiconsIcon,
+  MicrophoneIcon,
+  MoreVerticalIcon,
+  RefreshIcon,
+  SearchIcon,
+  SendIcon,
+  SettingsIcon,
+  UserIcon
 } from '@hugeicons/core-free-icons';
 
 // ===========================
@@ -216,9 +216,9 @@ const formatTimestamp = (date: Date): string => {
     return `${Math.floor(diff / 60000)}m ago`;
   } else if (diff < 86400000) { // Less than 1 day
     return `${Math.floor(diff / 3600000)}h ago`;
-  } else {
+  } 
     return date.toLocaleDateString();
-  }
+  
 };
 
 /**
@@ -284,7 +284,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
   const MessageIcon = getMessageTypeIcon(message.type);
   
   const handleValidationResponse = useCallback(async (decision: ValidationDecision, reasoning?: string) => {
-    if (!onValidationResponse) return;
+    if (!onValidationResponse) {return;}
     
     setIsValidationPending(true);
     try {
@@ -383,7 +383,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
             
             {message.content.length > 300 && (
               <button
-                onClick={() => setIsExpanded(!isExpanded)}
+                onClick={() => { setIsExpanded(!isExpanded); }}
                 className={cn(
                   'mt-2 text-xs underline',
                   isOwn ? 'text-blue-100 hover:text-white' : 'text-blue-600 hover:text-blue-800'
@@ -441,7 +441,7 @@ MessageDisplay.displayName = 'MessageDisplay';
  * Typing Indicator Component
  */
 const TypingIndicator: React.FC<TypingIndicatorProps> = React.memo(({ participants, isVisible }) => {
-  if (!isVisible || participants.length === 0) return null;
+  if (!isVisible || participants.length === 0) {return null;}
   
   return (
     <motion.div
@@ -668,7 +668,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   // ===========================
   
   const handleSendMessage = useCallback(async () => {
-    if (!inputValue.trim() || isComposing) return;
+    if (!inputValue.trim() || isComposing) {return;}
     
     const messageContent = inputValue.trim();
     setInputValue('');
@@ -733,7 +733,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   }, [joinConversation]);
   
   const handleExportConversation = useCallback(async () => {
-    if (!currentConversation) return;
+    if (!currentConversation) {return;}
     
     try {
       const exportData = await exportConversation(currentConversation.conversationId);
@@ -882,10 +882,10 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           participants={participants}
           state={conversationState}
           metrics={metrics}
-          onSearch={config.enableSearch ? () => setShowSearch(!showSearch) : undefined}
+          onSearch={config.enableSearch ? () => { setShowSearch(!showSearch); } : undefined}
           onExport={config.enableExport ? handleExportConversation : undefined}
-          onRefresh={() => window.location.reload()}
-          onSettings={() => logDebug('Settings clicked', null, 'ConversationInterface')}
+          onRefresh={() => { window.location.reload(); }}
+          onSettings={() => { logDebug('Settings clicked', null, 'ConversationInterface'); }}
         />
       )}
       
@@ -895,7 +895,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           <Input
             placeholder="Search messages..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); }}
             className="w-full"
             aria-label="Search messages"
           />
@@ -982,7 +982,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setSelectedFile(null)}
+                onClick={() => { setSelectedFile(null); }}
                 aria-label="Remove file"
               >
                 ×
@@ -1027,10 +1027,10 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               <Input
                 ref={inputRef}
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(e) => { setInputValue(e.target.value); }}
                 onKeyDown={handleKeyDown}
-                onCompositionStart={() => setIsComposing(true)}
-                onCompositionEnd={() => setIsComposing(false)}
+                onCompositionStart={() => { setIsComposing(true); }}
+                onCompositionEnd={() => { setIsComposing(false); }}
                 placeholder={
                   isVoiceRecording
                     ? 'Listening...'
