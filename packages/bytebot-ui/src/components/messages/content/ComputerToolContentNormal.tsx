@@ -19,16 +19,25 @@ import { getIcon, getLabel } from "./ComputerToolUtils";
  * Type guard to safely check if a value has coordinates property
  */
 function hasCoordinates(input: unknown): input is { coordinates: Coordinates } {
+  if (typeof input !== "object" || input === null) {
+    return false;
+  }
+
+  const obj = input as Record<string, unknown>;
+  if (
+    !("coordinates" in obj) ||
+    typeof obj.coordinates !== "object" ||
+    obj.coordinates === null
+  ) {
+    return false;
+  }
+
+  const coords = obj.coordinates as Record<string, unknown>;
   return (
-    typeof input === "object" &&
-    input !== null &&
-    "coordinates" in input &&
-    typeof (input as { coordinates: unknown }).coordinates === "object" &&
-    (input as { coordinates: unknown }).coordinates !== null &&
-    "x" in (input as { coordinates: Coordinates }).coordinates &&
-    "y" in (input as { coordinates: Coordinates }).coordinates &&
-    typeof (input as { coordinates: Coordinates }).coordinates.x === "number" &&
-    typeof (input as { coordinates: Coordinates }).coordinates.y === "number"
+    "x" in coords &&
+    "y" in coords &&
+    typeof coords.x === "number" &&
+    typeof coords.y === "number"
   );
 }
 
@@ -36,22 +45,27 @@ function hasCoordinates(input: unknown): input is { coordinates: Coordinates } {
  * Type guard to safely check if a value has a path property with coordinates array
  */
 function hasPathCoordinates(input: unknown): input is { path: Coordinates[] } {
-  return (
-    typeof input === "object" &&
-    input !== null &&
-    "path" in input &&
-    Array.isArray((input as { path: unknown }).path) &&
-    (input as { path: unknown[] }).path.length > 0 &&
-    (input as { path: unknown[] }).path.every(
-      (point: unknown): point is Coordinates =>
-        typeof point === "object" &&
-        point !== null &&
-        "x" in point &&
-        "y" in point &&
-        typeof (point as Coordinates).x === "number" &&
-        typeof (point as Coordinates).y === "number",
-    )
-  );
+  if (typeof input !== "object" || input === null) {
+    return false;
+  }
+
+  const obj = input as Record<string, unknown>;
+  if (!("path" in obj) || !Array.isArray(obj.path) || obj.path.length === 0) {
+    return false;
+  }
+
+  return obj.path.every((point: unknown): point is Coordinates => {
+    if (typeof point !== "object" || point === null) {
+      return false;
+    }
+    const coords = point as Record<string, unknown>;
+    return (
+      "x" in coords &&
+      "y" in coords &&
+      typeof coords.x === "number" &&
+      typeof coords.y === "number"
+    );
+  });
 }
 
 /**
@@ -90,26 +104,33 @@ function ToolDetailsNormal({
     <>
       {isApplicationToolUseBlock(block) && (
         <p className={baseClasses}>
-          {isValidApplication(block.input.application)
-            ? applicationMap[block.input.application]
-            : "Unknown Application"}
+          {((): string => {
+            const app = block.input.application;
+            return isValidApplication(app)
+              ? applicationMap[app]
+              : "Unknown Application";
+          })()}
         </p>
       )}
 
       {/* Text for type and key actions */}
       {(isTypeKeysToolUseBlock(block) || isPressKeysToolUseBlock(block)) && (
         <p className={baseClasses}>
-          {Array.isArray(block.input.keys)
-            ? String(block.input.keys.join(" + "))
-            : "Invalid keys"}
+          {((): string => {
+            const keys = block.input.keys;
+            return Array.isArray(keys)
+              ? String(keys.join(" + "))
+              : "Invalid keys";
+          })()}
         </p>
       )}
 
       {(isTypeTextToolUseBlock(block) || isPasteTextToolUseBlock(block)) && (
         <p className={baseClasses}>
           {((): string => {
-            const text = block.input.text;
-            const isSensitive = Boolean(block.input.isSensitive);
+            const input = block.input;
+            const text = input.text;
+            const isSensitive = Boolean(input.isSensitive);
 
             if (typeof text !== "string") {
               return "Invalid text";
@@ -123,9 +144,12 @@ function ToolDetailsNormal({
       {/* Duration for wait actions */}
       {isWaitToolUseBlock(block) && (
         <p className={baseClasses}>
-          {typeof block.input.duration === "number"
-            ? `${block.input.duration}ms`
-            : "Invalid duration"}
+          {((): string => {
+            const duration = block.input.duration;
+            return typeof duration === "number"
+              ? `${duration}ms`
+              : "Invalid duration";
+          })()}
         </p>
       )}
 
@@ -157,8 +181,9 @@ function ToolDetailsNormal({
       {isScrollToolUseBlock(block) && (
         <p className={baseClasses}>
           {((): string => {
-            const direction = block.input.direction;
-            const scrollCount = block.input.scrollCount;
+            const input = block.input;
+            const direction = input.direction;
+            const scrollCount = input.scrollCount;
 
             const validDirection =
               typeof direction === "string" ? direction : "unknown";
@@ -175,9 +200,10 @@ function ToolDetailsNormal({
       {/* File information */}
       {isReadFileToolUseBlock(block) && (
         <p className={baseClasses}>
-          {typeof block.input.path === "string"
-            ? block.input.path
-            : "Invalid file path"}
+          {((): string => {
+            const path = block.input.path;
+            return typeof path === "string" ? path : "Invalid file path";
+          })()}
         </p>
       )}
     </>
@@ -188,20 +214,21 @@ export function ComputerToolContentNormal({
   block,
 }: ComputerToolContentNormalProps): React.JSX.Element | null {
   // Don't render screenshot tool use blocks here - they're handled separately
-  if (getLabel(block) === "Screenshot") {
+  const label = getLabel(block);
+  if (label === "Screenshot") {
     return null;
   }
+
+  const icon = getIcon(block);
 
   return (
     <div className="mb-3 max-w-4/5">
       <div className="flex items-center gap-2">
         <HugeiconsIcon
-          icon={getIcon(block)}
+          icon={icon}
           className="text-bytebot-bronze-dark-9 h-4 w-4"
         />
-        <p className="text-bytebot-bronze-light-11 text-xs">
-          {getLabel(block)}
-        </p>
+        <p className="text-bytebot-bronze-light-11 text-xs">{label}</p>
         <ToolDetailsNormal block={block} />
       </div>
     </div>
