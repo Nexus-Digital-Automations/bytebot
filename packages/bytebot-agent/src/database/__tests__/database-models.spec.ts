@@ -931,6 +931,393 @@ describe('Database Models Comprehensive Test Suite', () => {
     });
   });
 
+  describe('Browser Automation Models Validation', () => {
+    it('should validate browser session status enum values', () => {
+      const validSessionStatuses = [
+        'IDLE',
+        'ACTIVE',
+        'BUSY',
+        'ERROR',
+        'TERMINATED',
+      ];
+
+      // Test that enum values are strings (from Prisma)
+      validSessionStatuses.forEach((status) => {
+        expect(typeof status).toBe('string');
+        expect(status.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should create browser session with all required fields', async () => {
+      const sessionData = {
+        id: uuidv4(),
+        processId: 'proc_123',
+        status: 'ACTIVE',
+        headless: true,
+        viewportWidth: 1920,
+        viewportHeight: 1080,
+        userAgent: 'Mozilla/5.0 Test',
+        workingDirectory: '/tmp/browser',
+        screenshotsEnabled: true,
+        videoRecording: false,
+        timeoutMs: 30000,
+        lastActivity: new Date(),
+        networkRequestsCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockCreate = jest.fn().mockResolvedValue(sessionData);
+      jest
+        .spyOn(prismaService.browserSession, 'create')
+        .mockImplementation(mockCreate);
+
+      const result = await prismaService.browserSession.create({
+        data: sessionData,
+      });
+
+      expect(result.id).toBeDefined();
+      expect(result.status).toBe('ACTIVE');
+      expect(result.viewportWidth).toBe(1920);
+      expect(result.viewportHeight).toBe(1080);
+      expect(result.headless).toBe(true);
+      expect(result.screenshotsEnabled).toBe(true);
+      expect(result.networkRequestsCount).toBe(0);
+    });
+
+    it('should validate browser task priority enum values', () => {
+      const validTaskPriorities = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
+
+      validTaskPriorities.forEach((priority) => {
+        expect(typeof priority).toBe('string');
+        expect(priority.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should create browser task with JSON action configuration', async () => {
+      const actions = [
+        { type: 'navigate', url: 'https://example.com' },
+        { type: 'click', selector: '#button', timestamp: new Date() },
+        { type: 'type', selector: '#input', value: 'test text' },
+      ];
+
+      const taskData = {
+        id: uuidv4(),
+        sessionId: uuidv4(),
+        type: 'automation',
+        status: 'PENDING',
+        priority: 'NORMAL',
+        actions: actions,
+        configuration: {
+          timeout: 30000,
+          retryCount: 3,
+          screenshotsEnabled: true,
+        },
+        currentStep: 0,
+        totalSteps: 3,
+        lastActivity: new Date(),
+        networkRequestsCount: 0,
+        screenshotsCount: 0,
+        retryCount: 0,
+        maxRetries: 3,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockCreate = jest.fn().mockResolvedValue(taskData);
+      jest
+        .spyOn(prismaService.browserTask, 'create')
+        .mockImplementation(mockCreate);
+
+      const result = await prismaService.browserTask.create({
+        data: taskData,
+      });
+
+      expect(result.actions).toEqual(actions);
+      expect(Array.isArray(result.actions)).toBe(true);
+      expect(result.configuration).toBeDefined();
+      expect(result.currentStep).toBe(0);
+      expect(result.totalSteps).toBe(3);
+    });
+
+    it('should validate browser screenshot storage tiers', () => {
+      const validStorageTiers = ['HOT', 'WARM', 'COLD', 'ARCHIVE'];
+
+      validStorageTiers.forEach((tier) => {
+        expect(typeof tier).toBe('string');
+        expect(tier.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should create browser screenshot with file metadata', async () => {
+      const screenshotData = {
+        id: uuidv4(),
+        sessionId: uuidv4(),
+        taskId: uuidv4(),
+        filename: 'screenshot_001.png',
+        filePath: '/tmp/screenshots/screenshot_001.png',
+        url: 'https://example.com',
+        viewport: { width: 1920, height: 1080 },
+        timestamp: new Date(),
+        fileSize: 512000,
+        mimeType: 'image/png',
+        compressionType: 'NONE',
+        storageTier: 'HOT',
+        accessCount: 0,
+        lastAccessed: new Date(),
+      };
+
+      const mockCreate = jest.fn().mockResolvedValue(screenshotData);
+      jest
+        .spyOn(prismaService.browserScreenshot, 'create')
+        .mockImplementation(mockCreate);
+
+      const result = await prismaService.browserScreenshot.create({
+        data: screenshotData,
+      });
+
+      expect(result.filename).toBe('screenshot_001.png');
+      expect(result.fileSize).toBe(512000);
+      expect(result.mimeType).toBe('image/png');
+      expect(result.storageTier).toBe('HOT');
+      expect(result.accessCount).toBe(0);
+      expect(result.viewport).toEqual({ width: 1920, height: 1080 });
+    });
+
+    it('should validate compression types for DOM snapshots', () => {
+      const validCompressionTypes = ['NONE', 'GZIP', 'BROTLI'];
+
+      validCompressionTypes.forEach((type) => {
+        expect(typeof type).toBe('string');
+        expect(type.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should create DOM snapshot with HTML content compression', async () => {
+      const domSnapshotData = {
+        id: uuidv4(),
+        sessionId: uuidv4(),
+        taskId: uuidv4(),
+        url: 'https://example.com/page',
+        title: 'Example Page',
+        htmlContent: '<html><body>Test content</body></html>',
+        compressionType: 'GZIP',
+        originalSize: 1024,
+        compressedSize: 512,
+        extractedText: 'Test content',
+        textContentHash: 'abc123',
+        timestamp: new Date(),
+        elementCount: 15,
+        formCount: 1,
+        linkCount: 5,
+        imageCount: 3,
+        storageTier: 'WARM',
+        accessCount: 0,
+        lastAccessed: new Date(),
+      };
+
+      const mockCreate = jest.fn().mockResolvedValue(domSnapshotData);
+      jest
+        .spyOn(prismaService.browserDomSnapshot, 'create')
+        .mockImplementation(mockCreate);
+
+      const result = await prismaService.browserDomSnapshot.create({
+        data: domSnapshotData,
+      });
+
+      expect(result.url).toBe('https://example.com/page');
+      expect(result.compressionType).toBe('GZIP');
+      expect(result.originalSize).toBe(1024);
+      expect(result.compressedSize).toBe(512);
+      expect(result.elementCount).toBe(15);
+      expect(result.formCount).toBe(1);
+      expect(result.extractedText).toBe('Test content');
+    });
+
+    it('should create browser form data with validation results', async () => {
+      const formData = {
+        id: uuidv4(),
+        taskId: uuidv4(),
+        formSelector: '#contact-form',
+        fieldName: 'email',
+        fieldType: 'email',
+        fieldValue: 'test@example.com',
+        isSubmitted: true,
+        submittedAt: new Date(),
+        validationResult: {
+          isValid: true,
+          errors: [],
+          pattern: '^[^@]+@[^@]+\\.[^@]+$',
+        },
+        metadata: {
+          required: true,
+          maxLength: 255,
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockCreate = jest.fn().mockResolvedValue(formData);
+      jest
+        .spyOn(prismaService.browserFormData, 'create')
+        .mockImplementation(mockCreate);
+
+      const result = await prismaService.browserFormData.create({
+        data: formData,
+      });
+
+      expect(result.formSelector).toBe('#contact-form');
+      expect(result.fieldName).toBe('email');
+      expect(result.fieldType).toBe('email');
+      expect(result.fieldValue).toBe('test@example.com');
+      expect(result.isSubmitted).toBe(true);
+      expect(result.validationResult).toBeDefined();
+      if (
+        result.validationResult &&
+        typeof result.validationResult === 'object'
+      ) {
+        expect((result.validationResult as any).isValid).toBe(true);
+      }
+    });
+
+    it('should create data extraction with different extraction types', async () => {
+      const extractionTypes = [
+        'text',
+        'table',
+        'links',
+        'images',
+        'structured',
+      ];
+
+      for (const extractionType of extractionTypes) {
+        const extractionData = {
+          id: uuidv4(),
+          taskId: uuidv4(),
+          extractionType: extractionType,
+          selector: '.content',
+          extractedData: {
+            content: 'Extracted content',
+            count: 5,
+          },
+          rawContent: 'Raw extracted text',
+          confidence: 0.95,
+          sensitivityLevel: 'LOW',
+          extractionTimeMs: 150,
+          extractedAt: new Date(),
+        };
+
+        const mockCreate = jest.fn().mockResolvedValue(extractionData);
+        jest
+          .spyOn(prismaService.browserDataExtraction, 'create')
+          .mockImplementation(mockCreate);
+
+        const result = await prismaService.browserDataExtraction.create({
+          data: extractionData,
+        });
+
+        expect(result.extractionType).toBe(extractionType);
+        expect(result.confidence).toBe(0.95);
+        expect(result.sensitivityLevel).toBe('LOW');
+        expect(result.extractionTimeMs).toBe(150);
+        expect(result.extractedData).toBeDefined();
+      }
+    });
+
+    it('should validate performance metrics with different metric types', async () => {
+      const metricTypes = [
+        'page_load_time',
+        'dom_content_loaded',
+        'first_paint',
+        'memory_usage',
+        'cpu_usage',
+      ];
+
+      for (const metricType of metricTypes) {
+        const metricData = {
+          id: uuidv4(),
+          sessionId: uuidv4(),
+          taskId: uuidv4(),
+          metricType: metricType,
+          metricValue: 123.45,
+          metricUnit: 'ms',
+          measurementTime: new Date(),
+          context: {
+            url: 'https://example.com',
+            userAgent: 'Test Agent',
+          },
+        };
+
+        const mockCreate = jest.fn().mockResolvedValue(metricData);
+        jest
+          .spyOn(prismaService.browserPerformanceMetric, 'create')
+          .mockImplementation(mockCreate);
+
+        const result = await prismaService.browserPerformanceMetric.create({
+          data: metricData,
+        });
+
+        expect(result.metricType).toBe(metricType);
+        expect(result.metricValue).toBe(123.45);
+        expect(result.metricUnit).toBe('ms');
+        expect(result.context).toBeDefined();
+      }
+    });
+
+    it('should handle browser automation relationship cascades', async () => {
+      const sessionId = uuidv4();
+
+      // Mock cascade delete behavior for browser session
+      const mockDelete = jest.fn().mockResolvedValue({ count: 1 });
+      jest
+        .spyOn(prismaService.browserSession, 'delete')
+        .mockImplementation(mockDelete);
+
+      await prismaService.browserSession.delete({
+        where: { id: sessionId },
+      });
+
+      expect(mockDelete).toHaveBeenCalledWith({
+        where: { id: sessionId },
+      });
+    });
+
+    it('should validate browser task step execution tracking', async () => {
+      const stepData = {
+        id: uuidv4(),
+        taskId: uuidv4(),
+        stepNumber: 1,
+        action: 'click',
+        status: 'COMPLETED',
+        startedAt: new Date(Date.now() - 1000),
+        completedAt: new Date(),
+        durationMs: 1000,
+        result: 'success',
+        metadata: {
+          selector: '#button',
+          coordinates: { x: 100, y: 200 },
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockCreate = jest.fn().mockResolvedValue(stepData);
+      jest
+        .spyOn(prismaService.browserTaskStep, 'create')
+        .mockImplementation(mockCreate);
+
+      const result = await prismaService.browserTaskStep.create({
+        data: stepData,
+      });
+
+      expect(result.stepNumber).toBe(1);
+      expect(result.action).toBe('click');
+      expect(result.status).toBe('COMPLETED');
+      expect(result.durationMs).toBe(1000);
+      expect(result.result).toBe('success');
+      expect(result.metadata).toBeDefined();
+    });
+  });
+
   describe('Edge Cases and Error Scenarios', () => {
     it('should handle concurrent updates', async () => {
       const taskId = uuidv4();

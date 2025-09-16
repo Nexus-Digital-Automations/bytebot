@@ -768,6 +768,344 @@ describe('DatabaseService Comprehensive Test Suite', () => {
     });
   });
 
+  describe('Enhanced Reliability Patterns', () => {
+    beforeEach(async () => {
+      mockPrismaClient.$connect.mockResolvedValue();
+      await service.onModuleInit();
+    });
+
+    it('should execute raw query with full reliability patterns', async () => {
+      const mockResult = [{ data: 'test' }];
+      mockPrismaClient.$queryRawUnsafe.mockResolvedValue(mockResult);
+
+      circuitBreakerService.execute = jest
+        .fn()
+        .mockImplementation((name, operation) => operation());
+      retryService.executeWithRetry = jest
+        .fn()
+        .mockImplementation((operation) => operation());
+
+      const result = await service.executeRawQueryWithReliability(
+        'SELECT * FROM test_table WHERE id = ?',
+        ['test-id'],
+      );
+
+      expect(result).toEqual(mockResult);
+      expect(circuitBreakerService.execute).toHaveBeenCalledWith(
+        'database_raw_query',
+        expect.any(Function),
+      );
+      expect(retryService.executeWithRetry).toHaveBeenCalled();
+    });
+
+    it('should handle reliability pattern failures gracefully', async () => {
+      const dbError = new Error('Database connection lost');
+      mockPrismaClient.$queryRawUnsafe.mockRejectedValue(dbError);
+
+      circuitBreakerService.execute = jest
+        .fn()
+        .mockRejectedValue(new Error('Circuit breaker open'));
+
+      await expect(
+        service.executeRawQueryWithReliability('SELECT 1'),
+      ).rejects.toThrow('Circuit breaker open');
+
+      expect(circuitBreakerService.execute).toHaveBeenCalled();
+    });
+
+    it('should perform enhanced health check with reliability patterns', async () => {
+      mockPrismaClient.$queryRaw.mockResolvedValue([{ health_check: 1 }]);
+
+      circuitBreakerService.execute = jest
+        .fn()
+        .mockImplementation((name, operation) => operation());
+
+      await (service as any).performHealthCheckWithReliability();
+
+      expect(circuitBreakerService.execute).toHaveBeenCalledWith(
+        'database_health_check',
+        expect.any(Function),
+      );
+      expect((service as any).isHealthy).toBe(true);
+    });
+
+    it('should record metrics for reliability pattern operations', async () => {
+      mockPrismaClient.$queryRawUnsafe.mockResolvedValue([]);
+      const recordMetricsSpy = jest.spyOn(service as any, 'recordQueryMetrics');
+
+      circuitBreakerService.execute = jest
+        .fn()
+        .mockImplementation((name, operation) => operation());
+      retryService.executeWithRetry = jest
+        .fn()
+        .mockImplementation((operation) => operation());
+
+      await service.executeRawQueryWithReliability('SELECT 1');
+
+      expect(recordMetricsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: 'reliable_raw_query',
+          success: true,
+          duration: expect.any(Number),
+          timestamp: expect.any(Date),
+        }),
+      );
+    });
+
+    it('should track errors in reliability pattern operations', async () => {
+      const dbError = new Error('Connection timeout');
+      mockPrismaClient.$queryRawUnsafe.mockRejectedValue(dbError);
+      const recordMetricsSpy = jest.spyOn(service as any, 'recordQueryMetrics');
+
+      circuitBreakerService.execute = jest
+        .fn()
+        .mockImplementation((name, operation) => operation());
+      retryService.executeWithRetry = jest
+        .fn()
+        .mockImplementation((operation) => operation());
+
+      await expect(
+        service.executeRawQueryWithReliability('INVALID SQL'),
+      ).rejects.toThrow('Connection timeout');
+
+      expect(recordMetricsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: 'reliable_raw_query',
+          success: false,
+          error: 'Connection timeout',
+          duration: expect.any(Number),
+          timestamp: expect.any(Date),
+        }),
+      );
+    });
+  });
+
+  describe('Advanced Performance Monitoring', () => {
+    beforeEach(async () => {
+      mockPrismaClient.$connect.mockResolvedValue();
+      await service.onModuleInit();
+    });
+
+    it('should maintain query metrics circular buffer', () => {
+      // Add more than 1000 queries to test buffer limit
+      for (let i = 0; i < 1050; i++) {
+        (service as any).recordQueryMetrics({
+          query: `query_${i}`,
+          duration: 100,
+          timestamp: new Date(),
+          success: true,
+        });
+      }
+
+      expect((service as any).queryMetrics.length).toBe(1000);
+      expect((service as any).totalQueries).toBe(1050);
+    });
+
+    it('should categorize queries as slow based on threshold', () => {
+      const slowThreshold = mockConnectionPoolOptions.slowQueryThreshold;
+
+      // Add fast query
+      (service as any).recordQueryMetrics({
+        query: 'fast_query',
+        duration: slowThreshold - 100,
+        timestamp: new Date(),
+        success: true,
+      });
+
+      // Add slow query
+      (service as any).recordQueryMetrics({
+        query: 'slow_query',
+        duration: slowThreshold + 100,
+        timestamp: new Date(),
+        success: true,
+      });
+
+      expect((service as any).slowQueries).toBe(1);
+      expect((service as any).totalQueries).toBe(2);
+    });
+
+    it('should calculate accurate performance metrics', () => {
+      // Clear existing metrics
+      (service as any).totalQueries = 0;
+      (service as any).totalQueryTime = 0;
+      (service as any).slowQueries = 0;
+      (service as any).errorCount = 0;
+
+      // Add test queries
+      const queries = [
+        { duration: 100, success: true },
+        { duration: 200, success: true },
+        { duration: 1500, success: false }, // slow and failed
+        { duration: 300, success: true },
+      ];
+
+      queries.forEach((query, index) => {
+        (service as any).recordQueryMetrics({
+          query: `test_query_${index}`,
+          duration: query.duration,
+          timestamp: new Date(),
+          success: query.success,
+        });
+      });
+
+      const metrics = service.getMetrics();
+
+      expect(metrics.performance.totalQueries).toBe(4);
+      expect(metrics.performance.averageQueryTime).toBe(525); // (100+200+1500+300)/4
+      expect(metrics.performance.slowQueries).toBe(1); // Only the 1500ms query
+      expect(metrics.health.errorRate).toBe(0.25); // 1 failure out of 4
+    });
+
+    it('should track memory and CPU metrics in connection pool', () => {
+      const connectionMetrics = (service as any).getConnectionPoolMetrics();
+
+      expect(connectionMetrics).toHaveProperty('active');
+      expect(connectionMetrics).toHaveProperty('idle');
+      expect(connectionMetrics).toHaveProperty('waiting');
+      expect(connectionMetrics).toHaveProperty('total');
+      expect(typeof connectionMetrics.active).toBe('number');
+      expect(typeof connectionMetrics.idle).toBe('number');
+      expect(connectionMetrics.active).toBeGreaterThanOrEqual(0);
+      expect(connectionMetrics.idle).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should generate comprehensive reliability metrics', () => {
+      const mockCircuitMetrics = [
+        {
+          circuitName: 'database_default',
+          state: 'CLOSED',
+          failureCount: 0,
+          successCount: 100,
+        },
+        {
+          circuitName: 'database_health_check',
+          state: 'HALF_OPEN',
+          failureCount: 2,
+          successCount: 98,
+        },
+        {
+          circuitName: 'other_service',
+          state: 'OPEN',
+          failureCount: 10,
+          successCount: 0,
+        },
+      ];
+
+      circuitBreakerService.getAllCircuitMetrics = jest
+        .fn()
+        .mockReturnValue(mockCircuitMetrics);
+
+      const reliabilityMetrics = service.getReliabilityMetrics();
+
+      expect(reliabilityMetrics.circuitBreakers).toHaveLength(2); // Only database circuits
+      expect(reliabilityMetrics.circuitBreakers[0].circuitName).toBe(
+        'database_default',
+      );
+      expect(reliabilityMetrics.circuitBreakers[1].circuitName).toBe(
+        'database_health_check',
+      );
+      expect(reliabilityMetrics.connectionPool).toBeDefined();
+      expect(reliabilityMetrics.performance).toBeDefined();
+    });
+  });
+
+  describe('Operation ID Generation and Tracking', () => {
+    it('should generate unique operation IDs', () => {
+      const operationIds = new Set();
+
+      for (let i = 0; i < 100; i++) {
+        const operationId = (service as any).generateOperationId();
+        expect(operationId).toMatch(/^db_op_\d+_[a-z0-9]{7}$/);
+        expect(operationIds.has(operationId)).toBe(false);
+        operationIds.add(operationId);
+      }
+
+      expect(operationIds.size).toBe(100);
+    });
+
+    it('should include operation ID in log messages', async () => {
+      const loggerDebugSpy = jest
+        .spyOn(Logger.prototype, 'debug')
+        .mockImplementation();
+
+      mockPrismaClient.$queryRawUnsafe.mockResolvedValue([]);
+
+      await service.executeRawQuery('SELECT 1');
+
+      expect(loggerDebugSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Executing raw query'),
+        expect.objectContaining({
+          operationId: expect.stringMatching(/^db_op_\d+_[a-z0-9]{7}$/),
+        }),
+      );
+
+      loggerDebugSpy.mockRestore();
+    });
+  });
+
+  describe('Stress Testing and Load Scenarios', () => {
+    beforeEach(async () => {
+      mockPrismaClient.$connect.mockResolvedValue();
+      await service.onModuleInit();
+    });
+
+    it('should handle concurrent database operations', async () => {
+      mockPrismaClient.$queryRawUnsafe.mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve([{ result: 'success' }]), 10),
+          ) as any,
+      );
+
+      const concurrentOperations = Array.from({ length: 50 }, (_, i) =>
+        service.executeRawQuery(`SELECT ${i}`),
+      );
+
+      const results = await Promise.all(concurrentOperations);
+
+      expect(results).toHaveLength(50);
+      results.forEach((result) => {
+        expect(result).toEqual([{ result: 'success' }]);
+      });
+      expect((service as any).totalQueries).toBe(50);
+    });
+
+    it('should handle rapid health check requests', async () => {
+      mockPrismaClient.$queryRaw.mockResolvedValue([{ health_check: 1 }]);
+
+      const healthCheckPromises = Array.from({ length: 20 }, () =>
+        (service as any).performHealthCheck(),
+      );
+
+      await Promise.allSettled(healthCheckPromises);
+
+      expect((service as any).isHealthy).toBe(true);
+      expect(mockPrismaClient.$queryRaw).toHaveBeenCalledTimes(20);
+    });
+
+    it('should maintain performance under high query load', async () => {
+      mockPrismaClient.$queryRawUnsafe.mockResolvedValue([]);
+
+      const startTime = Date.now();
+
+      // Execute 100 queries rapidly
+      const queryPromises = Array.from({ length: 100 }, (_, i) =>
+        service.executeRawQuery(`SELECT ${i}`),
+      );
+
+      await Promise.all(queryPromises);
+
+      const endTime = Date.now();
+      const totalTime = endTime - startTime;
+
+      expect(totalTime).toBeLessThan(5000); // Should complete within 5 seconds
+      expect((service as any).totalQueries).toBe(100);
+
+      const metrics = service.getMetrics();
+      expect(metrics.performance.queriesPerSecond).toBeGreaterThan(0);
+    });
+  });
+
   describe('Configuration Integration', () => {
     it('should respect configuration values', () => {
       expect(configService.get).toHaveBeenCalledWith('NODE_ENV');
@@ -812,6 +1150,18 @@ describe('DatabaseService Comprehensive Test Suite', () => {
         const logConfig = (service as any).getLogConfiguration();
         // Should return default configuration
       }).not.toThrow();
+    });
+
+    it('should apply log configuration based on logQueries setting', () => {
+      // Test with logQueries enabled
+      (service as any).connectionPoolOptions.logQueries = true;
+      const logConfigWithQueries = (service as any).getLogConfiguration();
+      expect(logConfigWithQueries).toContain('query');
+
+      // Test with logQueries disabled
+      (service as any).connectionPoolOptions.logQueries = false;
+      const logConfigWithoutQueries = (service as any).getLogConfiguration();
+      expect(logConfigWithoutQueries).not.toContain('query');
     });
   });
 });

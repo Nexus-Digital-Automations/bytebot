@@ -1,0 +1,1492 @@
+/**
+ * Authentication-Specific Parlant Validation Types and Interfaces - COMPREHENSIVE INTEGRATION
+ *
+ * Comprehensive type definitions for ALL authentication and authorization Parlant integrations
+ * implementing function-level conversational validation with enterprise-grade type safety.
+ *
+ * Features:
+ * - Complete type coverage for all authentication operations
+ * - Hierarchical interface inheritance for code reusability
+ * - Enterprise-grade validation context definitions
+ * - Comprehensive audit trail type definitions
+ * - Performance metrics and monitoring type definitions
+ * - Security event and threat modeling type definitions
+ *
+ * Architecture: Centralized type definitions for consistent Parlant authentication integration
+ * Security: Type-safe validation with comprehensive security context modeling
+ * Maintainability: Hierarchical type organization for scalable authentication systems
+ *
+ * @fileoverview Comprehensive authentication Parlant integration type definitions
+ * @version 1.0.0
+ * @author Agent 2 - Authentication & Authorization Parlant Integration Specialist
+ */
+
+import { UserRole } from '@prisma/client';
+import {
+  ParlantConversationContext,
+  ParlantValidationRequest,
+  RiskLevel,
+} from '../../parlant/parlant-integration.service';
+import {
+  PermissionAction,
+  ResourceType,
+  Permission,
+} from '../services/rbac-authorization.service';
+import {
+  SecurityEventType,
+  SecurityEventSeverity,
+  GeolocationData,
+} from '../services/security-monitoring.service';
+
+// ===== BASE AUTHENTICATION CONTEXT TYPES =====
+
+/**
+ * Base authentication context for all Parlant validation operations
+ */
+export interface BaseAuthContext extends ParlantConversationContext {
+  readonly operationCategory:
+    | 'authentication'
+    | 'authorization'
+    | 'security_monitoring'
+    | 'api_gateway';
+  readonly sensitivityLevel:
+    | 'PUBLIC'
+    | 'INTERNAL'
+    | 'SENSITIVE'
+    | 'CONFIDENTIAL'
+    | 'RESTRICTED';
+  readonly complianceFrameworks: ComplianceFramework[];
+  readonly auditRequired: boolean;
+  readonly notificationRequired: boolean;
+  readonly escalationRequired: boolean;
+}
+
+/**
+ * Compliance frameworks for regulatory requirements
+ */
+export enum ComplianceFramework {
+  GDPR = 'GDPR',
+  HIPAA = 'HIPAA',
+  SOX = 'SOX',
+  PCI_DSS = 'PCI_DSS',
+  ISO_27001 = 'ISO_27001',
+  NIST = 'NIST',
+  SOC2 = 'SOC2',
+  CUSTOM = 'CUSTOM',
+}
+
+/**
+ * Authentication operation types for comprehensive categorization
+ */
+export enum AuthenticationOperationType {
+  // User management operations
+  USER_LOGIN = 'USER_LOGIN',
+  USER_LOGOUT = 'USER_LOGOUT',
+  USER_REGISTER = 'USER_REGISTER',
+  USER_PROFILE_ACCESS = 'USER_PROFILE_ACCESS',
+  PASSWORD_CHANGE = 'PASSWORD_CHANGE',
+  PASSWORD_RESET = 'PASSWORD_RESET',
+
+  // Token management operations
+  TOKEN_GENERATE = 'TOKEN_GENERATE',
+  TOKEN_REFRESH = 'TOKEN_REFRESH',
+  TOKEN_VALIDATE = 'TOKEN_VALIDATE',
+  TOKEN_REVOKE = 'TOKEN_REVOKE',
+
+  // Session management operations
+  SESSION_CREATE = 'SESSION_CREATE',
+  SESSION_VALIDATE = 'SESSION_VALIDATE',
+  SESSION_TERMINATE = 'SESSION_TERMINATE',
+  SESSION_EXTEND = 'SESSION_EXTEND',
+
+  // Authorization operations
+  PERMISSION_CHECK = 'PERMISSION_CHECK',
+  PERMISSION_GRANT = 'PERMISSION_GRANT',
+  PERMISSION_REVOKE = 'PERMISSION_REVOKE',
+  ROLE_ASSIGNMENT = 'ROLE_ASSIGNMENT',
+
+  // Security monitoring operations
+  THREAT_DETECTION = 'THREAT_DETECTION',
+  INCIDENT_RESPONSE = 'INCIDENT_RESPONSE',
+  SECURITY_ALERT = 'SECURITY_ALERT',
+  AUDIT_LOG_ACCESS = 'AUDIT_LOG_ACCESS',
+
+  // API gateway operations
+  API_AUTHENTICATION = 'API_AUTHENTICATION',
+  API_AUTHORIZATION = 'API_AUTHORIZATION',
+  API_RATE_LIMITING = 'API_RATE_LIMITING',
+  API_SECURITY_VALIDATION = 'API_SECURITY_VALIDATION',
+}
+
+// ===== AUTHENTICATION-SPECIFIC CONTEXT TYPES =====
+
+/**
+ * Authentication-specific Parlant validation context
+ */
+export interface AuthenticationParlantContext extends BaseAuthContext {
+  readonly operationCategory: 'authentication';
+  readonly authOperation: AuthenticationOperationType;
+  readonly credentialData: CredentialContext;
+  readonly deviceContext: DeviceContext;
+  readonly locationContext: LocationContext;
+  readonly behaviorContext: BehaviorContext;
+}
+
+/**
+ * Credential context for authentication operations
+ */
+export interface CredentialContext {
+  readonly credentialType:
+    | 'password'
+    | 'token'
+    | 'biometric'
+    | 'mfa'
+    | 'api_key'
+    | 'certificate';
+  readonly credentialStrength: 'weak' | 'medium' | 'strong' | 'very_strong';
+  readonly isExpired: boolean;
+  readonly lastUsed?: Date;
+  readonly failedAttempts: number;
+  readonly requiresMFA: boolean;
+  readonly mfaMethod?:
+    | 'totp'
+    | 'sms'
+    | 'email'
+    | 'hardware_token'
+    | 'biometric';
+}
+
+/**
+ * Device context for authentication operations
+ */
+export interface DeviceContext {
+  readonly deviceId?: string;
+  readonly deviceType:
+    | 'mobile'
+    | 'desktop'
+    | 'tablet'
+    | 'server'
+    | 'iot'
+    | 'unknown';
+  readonly platform:
+    | 'windows'
+    | 'macos'
+    | 'linux'
+    | 'ios'
+    | 'android'
+    | 'unknown';
+  readonly browser?: string;
+  readonly browserVersion?: string;
+  readonly userAgent: string;
+  readonly isKnownDevice: boolean;
+  readonly isTrustedDevice: boolean;
+  readonly deviceFingerprint: string;
+  readonly screenResolution?: string;
+  readonly timezone?: string;
+  readonly language?: string;
+}
+
+/**
+ * Location context for authentication operations
+ */
+export interface LocationContext {
+  readonly ipAddress: string;
+  readonly geolocation?: GeolocationData;
+  readonly isVPN: boolean;
+  readonly isProxy: boolean;
+  readonly isTor: boolean;
+  readonly isKnownLocation: boolean;
+  readonly locationRisk: 'low' | 'medium' | 'high' | 'critical';
+  readonly distanceFromLastLocation?: number;
+  readonly velocityBetweenLocations?: number; // km/h
+}
+
+/**
+ * Behavior context for authentication operations
+ */
+export interface BehaviorContext {
+  readonly typingPattern?: string;
+  readonly mouseMovement?: string;
+  readonly sessionDuration?: number;
+  readonly activityLevel: 'low' | 'normal' | 'high' | 'suspicious';
+  readonly anomalyScore: number; // 0-1
+  readonly behaviorProfile?: string;
+  readonly deviationFromBaseline: number; // 0-1
+}
+
+// ===== AUTHORIZATION-SPECIFIC CONTEXT TYPES =====
+
+/**
+ * Authorization-specific Parlant validation context
+ */
+export interface AuthorizationParlantContext extends BaseAuthContext {
+  readonly operationCategory: 'authorization';
+  readonly authzOperation: AuthenticationOperationType;
+  readonly resourceContext: ResourceContext;
+  readonly permissionContext: PermissionContext;
+  readonly policyContext: PolicyContext;
+  readonly inheritanceContext: InheritanceContext;
+}
+
+/**
+ * Resource context for authorization operations
+ */
+export interface ResourceContext {
+  readonly resourceType: ResourceType;
+  readonly resourceId?: string;
+  readonly resourceOwner?: string;
+  readonly resourceTags: string[];
+  readonly resourceClassification:
+    | 'public'
+    | 'internal'
+    | 'confidential'
+    | 'restricted'
+    | 'top_secret';
+  readonly dataTypes: DataType[];
+  readonly businessValue: 'low' | 'medium' | 'high' | 'critical';
+  readonly complianceRequired: boolean;
+  readonly encryptionRequired: boolean;
+}
+
+/**
+ * Data types for resource classification
+ */
+export enum DataType {
+  PERSONAL_DATA = 'PERSONAL_DATA',
+  FINANCIAL_DATA = 'FINANCIAL_DATA',
+  HEALTH_DATA = 'HEALTH_DATA',
+  INTELLECTUAL_PROPERTY = 'INTELLECTUAL_PROPERTY',
+  SYSTEM_CONFIGURATION = 'SYSTEM_CONFIGURATION',
+  SECURITY_DATA = 'SECURITY_DATA',
+  AUDIT_DATA = 'AUDIT_DATA',
+  OPERATIONAL_DATA = 'OPERATIONAL_DATA',
+}
+
+/**
+ * Permission context for authorization operations
+ */
+export interface PermissionContext {
+  readonly requestedAction: PermissionAction;
+  readonly currentPermissions: Permission[];
+  readonly requiredPermissions: Permission[];
+  readonly effectiveRole: UserRole;
+  readonly delegatedPermissions: Permission[];
+  readonly temporaryPermissions: Permission[];
+  readonly contextualPermissions: Permission[];
+}
+
+/**
+ * Policy context for authorization operations
+ */
+export interface PolicyContext {
+  readonly applicablePolicies: PolicyDefinition[];
+  readonly policyViolations: PolicyViolation[];
+  readonly policyExceptions: PolicyException[];
+  readonly dynamicPolicies: DynamicPolicy[];
+}
+
+/**
+ * Policy definition for rule-based authorization
+ */
+export interface PolicyDefinition {
+  readonly policyId: string;
+  readonly policyName: string;
+  readonly policyType:
+    | 'access'
+    | 'data'
+    | 'compliance'
+    | 'security'
+    | 'business';
+  readonly conditions: PolicyCondition[];
+  readonly actions: PolicyAction[];
+  readonly priority: number;
+  readonly isActive: boolean;
+  readonly effectiveDate: Date;
+  readonly expirationDate?: Date;
+}
+
+/**
+ * Policy condition for rule evaluation
+ */
+export interface PolicyCondition {
+  readonly conditionType:
+    | 'time'
+    | 'location'
+    | 'device'
+    | 'user'
+    | 'resource'
+    | 'context';
+  readonly operator:
+    | 'equals'
+    | 'not_equals'
+    | 'in'
+    | 'not_in'
+    | 'greater_than'
+    | 'less_than'
+    | 'contains'
+    | 'matches';
+  readonly value: unknown;
+  readonly metadata?: Record<string, unknown>;
+}
+
+/**
+ * Policy action for rule enforcement
+ */
+export interface PolicyAction {
+  readonly actionType:
+    | 'allow'
+    | 'deny'
+    | 'require_approval'
+    | 'require_mfa'
+    | 'log'
+    | 'notify'
+    | 'escalate';
+  readonly parameters?: Record<string, unknown>;
+  readonly priority: number;
+}
+
+/**
+ * Policy violation tracking
+ */
+export interface PolicyViolation {
+  readonly violationId: string;
+  readonly policyId: string;
+  readonly violationType:
+    | 'access_denied'
+    | 'data_exposure'
+    | 'compliance_breach'
+    | 'security_violation';
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly timestamp: Date;
+  readonly details: Record<string, unknown>;
+}
+
+/**
+ * Policy exception handling
+ */
+export interface PolicyException {
+  readonly exceptionId: string;
+  readonly policyId: string;
+  readonly exceptionType: 'temporary' | 'permanent' | 'conditional';
+  readonly justification: string;
+  readonly approvedBy: string;
+  readonly effectiveDate: Date;
+  readonly expirationDate?: Date;
+}
+
+/**
+ * Dynamic policy for context-aware authorization
+ */
+export interface DynamicPolicy {
+  readonly policyId: string;
+  readonly contextTriggers: string[];
+  readonly evaluationLogic: string;
+  readonly adaptiveRules: Record<string, unknown>;
+  readonly learningEnabled: boolean;
+}
+
+/**
+ * Inheritance context for role-based authorization
+ */
+export interface InheritanceContext {
+  readonly parentRoles: UserRole[];
+  readonly inheritedPermissions: Permission[];
+  readonly overriddenPermissions: Permission[];
+  readonly roleHierarchy: RoleHierarchy;
+  readonly inheritanceRules: InheritanceRule[];
+}
+
+/**
+ * Role hierarchy definition
+ */
+export interface RoleHierarchy {
+  readonly roleId: UserRole;
+  readonly parentRoles: UserRole[];
+  readonly childRoles: UserRole[];
+  readonly depth: number;
+  readonly weight: number;
+}
+
+/**
+ * Inheritance rule for permission propagation
+ */
+export interface InheritanceRule {
+  readonly ruleId: string;
+  readonly sourceRole: UserRole;
+  readonly targetRole: UserRole;
+  readonly inheritanceType: 'full' | 'partial' | 'conditional' | 'excluded';
+  readonly conditions: PolicyCondition[];
+  readonly transformations: PermissionTransformation[];
+}
+
+/**
+ * Permission transformation for inheritance
+ */
+export interface PermissionTransformation {
+  readonly transformationType: 'grant' | 'revoke' | 'modify' | 'restrict';
+  readonly sourcePermission: Permission;
+  readonly targetPermission: Permission;
+  readonly conditions: PolicyCondition[];
+}
+
+// ===== SECURITY MONITORING CONTEXT TYPES =====
+
+/**
+ * Security monitoring-specific Parlant validation context
+ */
+export interface SecurityMonitoringParlantContext extends BaseAuthContext {
+  readonly operationCategory: 'security_monitoring';
+  readonly securityOperation: AuthenticationOperationType;
+  readonly threatContext: ThreatContext;
+  readonly incidentContext: IncidentContext;
+  readonly responseContext: ResponseContext;
+  readonly intelligenceContext: IntelligenceContext;
+}
+
+/**
+ * Threat context for security monitoring operations
+ */
+export interface ThreatContext {
+  readonly threatType: ThreatType;
+  readonly threatLevel:
+    | 'minimal'
+    | 'low'
+    | 'medium'
+    | 'high'
+    | 'critical'
+    | 'extreme';
+  readonly threatSources: ThreatSource[];
+  readonly attackVectors: AttackVector[];
+  readonly threatIndicators: ThreatIndicator[];
+  readonly mitreTactics: string[];
+  readonly mitreClassification: string[];
+}
+
+/**
+ * Threat type enumeration
+ */
+export enum ThreatType {
+  BRUTE_FORCE_ATTACK = 'BRUTE_FORCE_ATTACK',
+  CREDENTIAL_STUFFING = 'CREDENTIAL_STUFFING',
+  SESSION_HIJACKING = 'SESSION_HIJACKING',
+  PRIVILEGE_ESCALATION = 'PRIVILEGE_ESCALATION',
+  DATA_EXFILTRATION = 'DATA_EXFILTRATION',
+  MALWARE_INFECTION = 'MALWARE_INFECTION',
+  SOCIAL_ENGINEERING = 'SOCIAL_ENGINEERING',
+  INSIDER_THREAT = 'INSIDER_THREAT',
+  ZERO_DAY_EXPLOIT = 'ZERO_DAY_EXPLOIT',
+  DENIAL_OF_SERVICE = 'DENIAL_OF_SERVICE',
+  MAN_IN_THE_MIDDLE = 'MAN_IN_THE_MIDDLE',
+  SQL_INJECTION = 'SQL_INJECTION',
+  CROSS_SITE_SCRIPTING = 'CROSS_SITE_SCRIPTING',
+  API_ABUSE = 'API_ABUSE',
+  CONFIGURATION_WEAKNESS = 'CONFIGURATION_WEAKNESS',
+}
+
+/**
+ * Threat source classification
+ */
+export enum ThreatSource {
+  EXTERNAL_ATTACKER = 'EXTERNAL_ATTACKER',
+  INSIDER_MALICIOUS = 'INSIDER_MALICIOUS',
+  INSIDER_NEGLIGENT = 'INSIDER_NEGLIGENT',
+  STATE_ACTOR = 'STATE_ACTOR',
+  ORGANIZED_CRIME = 'ORGANIZED_CRIME',
+  HACKTIVIST = 'HACKTIVIST',
+  COMPETITOR = 'COMPETITOR',
+  AUTOMATED_TOOL = 'AUTOMATED_TOOL',
+  UNKNOWN = 'UNKNOWN',
+}
+
+/**
+ * Attack vector classification
+ */
+export enum AttackVector {
+  NETWORK = 'NETWORK',
+  WEB_APPLICATION = 'WEB_APPLICATION',
+  EMAIL = 'EMAIL',
+  SOCIAL_MEDIA = 'SOCIAL_MEDIA',
+  PHYSICAL = 'PHYSICAL',
+  SUPPLY_CHAIN = 'SUPPLY_CHAIN',
+  CLOUD_SERVICE = 'CLOUD_SERVICE',
+  MOBILE_DEVICE = 'MOBILE_DEVICE',
+  IOT_DEVICE = 'IOT_DEVICE',
+  THIRD_PARTY = 'THIRD_PARTY',
+}
+
+/**
+ * Threat indicator for detection
+ */
+export interface ThreatIndicator {
+  readonly indicatorType:
+    | 'ip'
+    | 'domain'
+    | 'url'
+    | 'hash'
+    | 'email'
+    | 'pattern'
+    | 'behavior';
+  readonly indicatorValue: string;
+  readonly confidence: number; // 0-1
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly source: string;
+  readonly lastSeen: Date;
+  readonly context: Record<string, unknown>;
+}
+
+/**
+ * Incident context for security operations
+ */
+export interface IncidentContext {
+  readonly incidentId?: string;
+  readonly incidentType: IncidentType;
+  readonly incidentStatus: IncidentStatus;
+  readonly severity: SecurityEventSeverity;
+  readonly priority: 'low' | 'medium' | 'high' | 'critical' | 'emergency';
+  readonly affectedSystems: string[];
+  readonly affectedUsers: string[];
+  readonly businessImpact: BusinessImpact;
+  readonly estimatedDamage: DamageAssessment;
+}
+
+/**
+ * Incident type classification
+ */
+export enum IncidentType {
+  SECURITY_BREACH = 'SECURITY_BREACH',
+  DATA_LEAK = 'DATA_LEAK',
+  SYSTEM_COMPROMISE = 'SYSTEM_COMPROMISE',
+  SERVICE_DISRUPTION = 'SERVICE_DISRUPTION',
+  COMPLIANCE_VIOLATION = 'COMPLIANCE_VIOLATION',
+  POLICY_VIOLATION = 'POLICY_VIOLATION',
+  FRAUD_ATTEMPT = 'FRAUD_ATTEMPT',
+  UNAUTHORIZED_ACCESS = 'UNAUTHORIZED_ACCESS',
+  MALWARE_DETECTION = 'MALWARE_DETECTION',
+  VULNERABILITY_EXPLOITATION = 'VULNERABILITY_EXPLOITATION',
+}
+
+/**
+ * Incident status tracking
+ */
+export enum IncidentStatus {
+  DETECTED = 'DETECTED',
+  INVESTIGATING = 'INVESTIGATING',
+  CONFIRMED = 'CONFIRMED',
+  CONTAINING = 'CONTAINING',
+  ERADICATING = 'ERADICATING',
+  RECOVERING = 'RECOVERING',
+  RESOLVED = 'RESOLVED',
+  CLOSED = 'CLOSED',
+  FALSE_POSITIVE = 'FALSE_POSITIVE',
+}
+
+/**
+ * Business impact assessment
+ */
+export interface BusinessImpact {
+  readonly impactLevel: 'none' | 'low' | 'medium' | 'high' | 'critical';
+  readonly affectedServices: string[];
+  readonly serviceDowntime?: number; // minutes
+  readonly revenueImpact?: number; // dollars
+  readonly reputationalImpact: 'none' | 'low' | 'medium' | 'high' | 'critical';
+  readonly complianceImpact: 'none' | 'low' | 'medium' | 'high' | 'critical';
+  readonly customerImpact: number; // number of customers affected
+}
+
+/**
+ * Damage assessment for incidents
+ */
+export interface DamageAssessment {
+  readonly dataCompromised: boolean;
+  readonly dataTypes: DataType[];
+  readonly recordsAffected?: number;
+  readonly systemsCompromised: string[];
+  readonly confidentialityImpact: 'none' | 'low' | 'medium' | 'high';
+  readonly integrityImpact: 'none' | 'low' | 'medium' | 'high';
+  readonly availabilityImpact: 'none' | 'low' | 'medium' | 'high';
+  readonly recoveryTimeEstimate?: number; // hours
+  readonly forensicEvidence: ForensicEvidence[];
+}
+
+/**
+ * Forensic evidence for incident investigation
+ */
+export interface ForensicEvidence {
+  readonly evidenceId: string;
+  readonly evidenceType:
+    | 'log'
+    | 'memory_dump'
+    | 'network_capture'
+    | 'disk_image'
+    | 'file'
+    | 'metadata';
+  readonly evidenceSource: string;
+  readonly collectionTime: Date;
+  readonly chainOfCustody: string[];
+  readonly hash: string;
+  readonly size: number;
+  readonly location: string;
+  readonly analysis: Record<string, unknown>;
+}
+
+/**
+ * Response context for security operations
+ */
+export interface ResponseContext {
+  readonly responseType: ResponseType;
+  readonly automatedActions: AutomatedAction[];
+  readonly manualActions: ManualAction[];
+  readonly escalationTriggers: EscalationTrigger[];
+  readonly notificationTargets: NotificationTarget[];
+  readonly recoveryProcedures: RecoveryProcedure[];
+}
+
+/**
+ * Response type classification
+ */
+export enum ResponseType {
+  IMMEDIATE = 'IMMEDIATE',
+  DELAYED = 'DELAYED',
+  MANUAL = 'MANUAL',
+  AUTOMATED = 'AUTOMATED',
+  HYBRID = 'HYBRID',
+  NONE = 'NONE',
+}
+
+/**
+ * Automated action for incident response
+ */
+export interface AutomatedAction {
+  readonly actionId: string;
+  readonly actionType:
+    | 'block_ip'
+    | 'disable_user'
+    | 'isolate_system'
+    | 'backup_data'
+    | 'notify'
+    | 'escalate';
+  readonly triggerConditions: string[];
+  readonly executionTime: Date;
+  readonly status:
+    | 'pending'
+    | 'executing'
+    | 'completed'
+    | 'failed'
+    | 'cancelled';
+  readonly result?: string;
+  readonly error?: string;
+}
+
+/**
+ * Manual action for incident response
+ */
+export interface ManualAction {
+  readonly actionId: string;
+  readonly actionType: string;
+  readonly assignedTo: string;
+  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly dueDate: Date;
+  readonly status: 'assigned' | 'in_progress' | 'completed' | 'cancelled';
+  readonly instructions: string;
+  readonly completionNotes?: string;
+}
+
+/**
+ * Escalation trigger for incident management
+ */
+export interface EscalationTrigger {
+  readonly triggerId: string;
+  readonly triggerType:
+    | 'time_based'
+    | 'severity_based'
+    | 'impact_based'
+    | 'manual';
+  readonly conditions: Record<string, unknown>;
+  readonly escalationLevel: number;
+  readonly targetRole: string;
+  readonly notificationMethod: 'email' | 'sms' | 'call' | 'slack' | 'pager';
+}
+
+/**
+ * Notification target for alerts
+ */
+export interface NotificationTarget {
+  readonly targetId: string;
+  readonly targetType: 'user' | 'group' | 'system' | 'external';
+  readonly contactMethod: 'email' | 'sms' | 'call' | 'slack' | 'webhook';
+  readonly urgency: 'low' | 'medium' | 'high' | 'critical';
+  readonly deliveryStatus: 'pending' | 'sent' | 'delivered' | 'failed';
+}
+
+/**
+ * Recovery procedure for incident resolution
+ */
+export interface RecoveryProcedure {
+  readonly procedureId: string;
+  readonly procedureName: string;
+  readonly steps: RecoveryStep[];
+  readonly estimatedDuration: number; // minutes
+  readonly prerequisites: string[];
+  readonly rollbackPlan: RollbackPlan;
+}
+
+/**
+ * Recovery step for incident resolution
+ */
+export interface RecoveryStep {
+  readonly stepId: string;
+  readonly stepName: string;
+  readonly description: string;
+  readonly estimatedDuration: number; // minutes
+  readonly dependencies: string[];
+  readonly validation: string;
+  readonly rollbackInstructions?: string;
+}
+
+/**
+ * Rollback plan for recovery procedures
+ */
+export interface RollbackPlan {
+  readonly planId: string;
+  readonly triggerConditions: string[];
+  readonly rollbackSteps: RecoveryStep[];
+  readonly rollbackTimeout: number; // minutes
+  readonly fallbackOptions: string[];
+}
+
+/**
+ * Intelligence context for threat analysis
+ */
+export interface IntelligenceContext {
+  readonly threatIntelSources: ThreatIntelSource[];
+  readonly iocs: IndicatorOfCompromise[];
+  readonly ttps: TacticTechniqueeProcedure[];
+  readonly attribution: Attribution;
+  readonly confidence: ConfidenceLevel;
+}
+
+/**
+ * Threat intelligence source
+ */
+export interface ThreatIntelSource {
+  readonly sourceId: string;
+  readonly sourceName: string;
+  readonly sourceType:
+    | 'commercial'
+    | 'open_source'
+    | 'government'
+    | 'internal'
+    | 'community';
+  readonly reliability: 'verified' | 'credible' | 'unconfirmed' | 'unreliable';
+  readonly lastUpdate: Date;
+  readonly dataTypes: string[];
+}
+
+/**
+ * Indicator of compromise
+ */
+export interface IndicatorOfCompromise {
+  readonly iocId: string;
+  readonly iocType: 'ip' | 'domain' | 'url' | 'hash' | 'email' | 'pattern';
+  readonly iocValue: string;
+  readonly malwareFamily?: string;
+  readonly campaignId?: string;
+  readonly firstSeen: Date;
+  readonly lastSeen: Date;
+  readonly confidence: number; // 0-1
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+}
+
+/**
+ * Tactic, technique, and procedure
+ */
+export interface TacticTechniqueeProcedure {
+  readonly ttpId: string;
+  readonly tactic: string;
+  readonly technique: string;
+  readonly procedure: string;
+  readonly mitreId?: string;
+  readonly description: string;
+  readonly detectionMethods: string[];
+  readonly mitigations: string[];
+}
+
+/**
+ * Attribution information
+ */
+export interface Attribution {
+  readonly actorId?: string;
+  readonly actorName?: string;
+  readonly actorType:
+    | 'apt'
+    | 'cybercriminal'
+    | 'hacktivist'
+    | 'insider'
+    | 'unknown';
+  readonly motivation:
+    | 'financial'
+    | 'espionage'
+    | 'disruption'
+    | 'ideology'
+    | 'unknown';
+  readonly sophistication: 'low' | 'medium' | 'high' | 'advanced';
+  readonly geography?: string;
+  readonly confidence: number; // 0-1
+}
+
+/**
+ * Confidence level assessment
+ */
+export interface ConfidenceLevel {
+  readonly overall: number; // 0-1
+  readonly sources: number; // 0-1
+  readonly corroboration: number; // 0-1
+  readonly analytical: number; // 0-1
+  readonly temporal: number; // 0-1
+}
+
+// ===== API GATEWAY CONTEXT TYPES =====
+
+/**
+ * API gateway-specific Parlant validation context
+ */
+export interface ApiGatewayParlantContext extends BaseAuthContext {
+  readonly operationCategory: 'api_gateway';
+  readonly apiOperation: AuthenticationOperationType;
+  readonly requestContext: ApiRequestContext;
+  readonly routingContext: RoutingContext;
+  readonly rateLimitContext: RateLimitContext;
+  readonly transformationContext: TransformationContext;
+}
+
+/**
+ * API request context for gateway operations
+ */
+export interface ApiRequestContext {
+  readonly requestId: string;
+  readonly httpMethod:
+    | 'GET'
+    | 'POST'
+    | 'PUT'
+    | 'DELETE'
+    | 'PATCH'
+    | 'HEAD'
+    | 'OPTIONS';
+  readonly path: string;
+  readonly query: Record<string, string>;
+  readonly headers: Record<string, string>;
+  readonly body?: unknown;
+  readonly contentType?: string;
+  readonly contentLength?: number;
+  readonly userAgent: string;
+  readonly acceptLanguage?: string;
+  readonly authorization?: string;
+  readonly apiKey?: string;
+  readonly clientCertificate?: string;
+}
+
+/**
+ * Routing context for API gateway
+ */
+export interface RoutingContext {
+  readonly targetService: string;
+  readonly targetEndpoint: string;
+  readonly routingRules: RoutingRule[];
+  readonly loadBalancing: LoadBalancingStrategy;
+  readonly circuitBreaker: CircuitBreakerState;
+  readonly retryPolicy: RetryPolicy;
+}
+
+/**
+ * Routing rule for API gateway
+ */
+export interface RoutingRule {
+  readonly ruleId: string;
+  readonly priority: number;
+  readonly conditions: RoutingCondition[];
+  readonly actions: RoutingAction[];
+  readonly isActive: boolean;
+}
+
+/**
+ * Routing condition for rule evaluation
+ */
+export interface RoutingCondition {
+  readonly conditionType:
+    | 'path'
+    | 'header'
+    | 'query'
+    | 'method'
+    | 'ip'
+    | 'user'
+    | 'time';
+  readonly operator:
+    | 'equals'
+    | 'contains'
+    | 'starts_with'
+    | 'ends_with'
+    | 'matches'
+    | 'in'
+    | 'not_in';
+  readonly value: string | string[];
+  readonly caseSensitive: boolean;
+}
+
+/**
+ * Routing action for request handling
+ */
+export interface RoutingAction {
+  readonly actionType:
+    | 'route'
+    | 'redirect'
+    | 'rewrite'
+    | 'block'
+    | 'transform'
+    | 'cache';
+  readonly parameters: Record<string, unknown>;
+}
+
+/**
+ * Load balancing strategy
+ */
+export interface LoadBalancingStrategy {
+  readonly strategy:
+    | 'round_robin'
+    | 'least_connections'
+    | 'weighted'
+    | 'ip_hash'
+    | 'random';
+  readonly targets: LoadBalancingTarget[];
+  readonly healthCheck: HealthCheckConfig;
+}
+
+/**
+ * Load balancing target
+ */
+export interface LoadBalancingTarget {
+  readonly targetId: string;
+  readonly endpoint: string;
+  readonly weight: number;
+  readonly isHealthy: boolean;
+  readonly lastHealthCheck: Date;
+  readonly responseTime: number; // ms
+}
+
+/**
+ * Health check configuration
+ */
+export interface HealthCheckConfig {
+  readonly interval: number; // seconds
+  readonly timeout: number; // seconds
+  readonly healthyThreshold: number;
+  readonly unhealthyThreshold: number;
+  readonly path: string;
+  readonly expectedStatus: number[];
+  readonly expectedResponse?: string;
+}
+
+/**
+ * Circuit breaker state
+ */
+export interface CircuitBreakerState {
+  readonly state: 'closed' | 'open' | 'half_open';
+  readonly failureCount: number;
+  readonly failureThreshold: number;
+  readonly recoveryTimeout: number; // seconds
+  readonly lastFailure?: Date;
+  readonly nextRetryTime?: Date;
+}
+
+/**
+ * Retry policy configuration
+ */
+export interface RetryPolicy {
+  readonly maxRetries: number;
+  readonly retryDelay: number; // milliseconds
+  readonly backoffStrategy: 'fixed' | 'exponential' | 'linear';
+  readonly retryableErrors: string[];
+  readonly timeout: number; // milliseconds
+}
+
+/**
+ * Rate limiting context for API gateway
+ */
+export interface RateLimitContext {
+  readonly limitType:
+    | 'requests_per_second'
+    | 'requests_per_minute'
+    | 'requests_per_hour'
+    | 'requests_per_day';
+  readonly limit: number;
+  readonly current: number;
+  readonly remaining: number;
+  readonly resetTime: Date;
+  readonly identifier: string; // IP, user ID, API key, etc.
+  readonly strategy: RateLimitStrategy;
+}
+
+/**
+ * Rate limiting strategy
+ */
+export interface RateLimitStrategy {
+  readonly algorithm:
+    | 'token_bucket'
+    | 'leaky_bucket'
+    | 'fixed_window'
+    | 'sliding_window';
+  readonly scope: 'global' | 'per_user' | 'per_ip' | 'per_api_key';
+  readonly burst: boolean;
+  readonly burstCapacity?: number;
+}
+
+/**
+ * Transformation context for API gateway
+ */
+export interface TransformationContext {
+  readonly requestTransformations: Transformation[];
+  readonly responseTransformations: Transformation[];
+  readonly dataValidation: ValidationRule[];
+  readonly dataEnrichment: EnrichmentRule[];
+}
+
+/**
+ * Transformation rule for request/response modification
+ */
+export interface Transformation {
+  readonly transformationType:
+    | 'add'
+    | 'remove'
+    | 'modify'
+    | 'rename'
+    | 'convert';
+  readonly target: 'header' | 'query' | 'body' | 'path';
+  readonly field: string;
+  readonly value?: string;
+  readonly expression?: string;
+  readonly conditions: TransformationCondition[];
+}
+
+/**
+ * Transformation condition
+ */
+export interface TransformationCondition {
+  readonly field: string;
+  readonly operator: 'equals' | 'contains' | 'exists' | 'not_exists';
+  readonly value?: string;
+}
+
+/**
+ * Validation rule for API gateway
+ */
+export interface ValidationRule {
+  readonly field: string;
+  readonly type:
+    | 'string'
+    | 'number'
+    | 'boolean'
+    | 'array'
+    | 'object'
+    | 'email'
+    | 'url'
+    | 'date';
+  readonly required: boolean;
+  readonly minLength?: number;
+  readonly maxLength?: number;
+  readonly pattern?: string;
+  readonly enum?: string[];
+}
+
+/**
+ * Enrichment rule for API gateway
+ */
+export interface EnrichmentRule {
+  readonly field: string;
+  readonly source: 'database' | 'cache' | 'api' | 'static' | 'computed';
+  readonly sourceConfig: Record<string, unknown>;
+  readonly conditions: EnrichmentCondition[];
+}
+
+/**
+ * Enrichment condition
+ */
+export interface EnrichmentCondition {
+  readonly field: string;
+  readonly operator: 'equals' | 'contains' | 'in' | 'not_in';
+  readonly value: unknown;
+}
+
+// ===== COMPREHENSIVE AUDIT TRAIL TYPES =====
+
+/**
+ * Comprehensive audit trail entry with full context
+ */
+export interface ComprehensiveAuditEntry {
+  readonly auditId: string;
+  readonly parlantConversationId: string;
+  readonly operationCategory:
+    | 'authentication'
+    | 'authorization'
+    | 'security_monitoring'
+    | 'api_gateway';
+  readonly operationType: AuthenticationOperationType;
+  readonly timestamp: Date;
+  readonly duration: number; // milliseconds
+  readonly userId?: string;
+  readonly sessionId?: string;
+  readonly requestId?: string;
+  readonly ipAddress?: string;
+  readonly userAgent?: string;
+  readonly validationResult: 'approved' | 'denied' | 'error' | 'timeout';
+  readonly executionResult:
+    | 'success'
+    | 'failure'
+    | 'timeout'
+    | 'cancelled'
+    | 'partial';
+  readonly riskAssessment: RiskLevel;
+  readonly complianceStatus: ComplianceStatus;
+  readonly securityFlags: SecurityFlag[];
+  readonly parlantMetadata: ParlantAuditMetadata;
+  readonly contextData: Record<string, unknown>;
+  readonly businessMetadata: BusinessMetadata;
+}
+
+/**
+ * Compliance status for audit entries
+ */
+export interface ComplianceStatus {
+  readonly status:
+    | 'compliant'
+    | 'non_compliant'
+    | 'requires_review'
+    | 'pending_verification';
+  readonly frameworks: ComplianceFramework[];
+  readonly violations: ComplianceViolation[];
+  readonly attestations: ComplianceAttestation[];
+  readonly evidence: ComplianceEvidence[];
+}
+
+/**
+ * Compliance violation tracking
+ */
+export interface ComplianceViolation {
+  readonly violationId: string;
+  readonly framework: ComplianceFramework;
+  readonly requirement: string;
+  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly description: string;
+  readonly evidence: string[];
+  readonly remediationRequired: boolean;
+  readonly remediationDeadline?: Date;
+}
+
+/**
+ * Compliance attestation
+ */
+export interface ComplianceAttestation {
+  readonly attestationId: string;
+  readonly framework: ComplianceFramework;
+  readonly requirement: string;
+  readonly attestedBy: string;
+  readonly attestationDate: Date;
+  readonly evidence: string[];
+  readonly validity: number; // days
+}
+
+/**
+ * Compliance evidence
+ */
+export interface ComplianceEvidence {
+  readonly evidenceId: string;
+  readonly evidenceType:
+    | 'log'
+    | 'screenshot'
+    | 'certificate'
+    | 'report'
+    | 'attestation';
+  readonly description: string;
+  readonly location: string;
+  readonly hash: string;
+  readonly timestamp: Date;
+}
+
+/**
+ * Security flag enumeration
+ */
+export enum SecurityFlag {
+  PARLANT_VALIDATED = 'PARLANT_VALIDATED',
+  VALIDATION_DENIED = 'VALIDATION_DENIED',
+  EXECUTION_ERROR = 'EXECUTION_ERROR',
+  AUTHENTICATION_SUCCESS = 'AUTHENTICATION_SUCCESS',
+  AUTHENTICATION_FAILURE = 'AUTHENTICATION_FAILURE',
+  AUTHORIZATION_GRANTED = 'AUTHORIZATION_GRANTED',
+  AUTHORIZATION_DENIED = 'AUTHORIZATION_DENIED',
+  SECURITY_INCIDENT = 'SECURITY_INCIDENT',
+  COMPLIANCE_VIOLATION = 'COMPLIANCE_VIOLATION',
+  API_VALIDATION_SUCCESS = 'API_VALIDATION_SUCCESS',
+  API_VALIDATION_FAILURE = 'API_VALIDATION_FAILURE',
+  ELEVATED_PRIVILEGES = 'ELEVATED_PRIVILEGES',
+  SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',
+  ANOMALY_DETECTED = 'ANOMALY_DETECTED',
+  THREAT_DETECTED = 'THREAT_DETECTED',
+  INCIDENT_RESPONSE = 'INCIDENT_RESPONSE',
+  MANUAL_OVERRIDE = 'MANUAL_OVERRIDE',
+  EMERGENCY_ACCESS = 'EMERGENCY_ACCESS',
+  PRIVILEGED_OPERATION = 'PRIVILEGED_OPERATION',
+  DATA_ACCESS = 'DATA_ACCESS',
+  CONFIGURATION_CHANGE = 'CONFIGURATION_CHANGE',
+}
+
+/**
+ * Parlant-specific audit metadata
+ */
+export interface ParlantAuditMetadata {
+  readonly conversationId: string;
+  readonly validationConfidence: number; // 0-1
+  readonly reasoning: string;
+  readonly suggestedAlternatives: string[];
+  readonly conversationDuration: number; // milliseconds
+  readonly conversationTurns: number;
+  readonly modelUsed: string;
+  readonly promptTokens: number;
+  readonly completionTokens: number;
+  readonly totalTokens: number;
+  readonly responseQuality: ResponseQuality;
+}
+
+/**
+ * Response quality metrics
+ */
+export interface ResponseQuality {
+  readonly coherence: number; // 0-1
+  readonly relevance: number; // 0-1
+  readonly completeness: number; // 0-1
+  readonly accuracy: number; // 0-1
+  readonly helpfulness: number; // 0-1
+  readonly safetyScore: number; // 0-1
+}
+
+/**
+ * Business metadata for audit entries
+ */
+export interface BusinessMetadata {
+  readonly businessUnit: string;
+  readonly costCenter: string;
+  readonly project: string;
+  readonly application: string;
+  readonly environment: 'development' | 'testing' | 'staging' | 'production';
+  readonly criticality: 'low' | 'medium' | 'high' | 'critical';
+  readonly dataClassification:
+    | 'public'
+    | 'internal'
+    | 'confidential'
+    | 'restricted';
+  readonly businessProcess: string;
+  readonly stakeholders: string[];
+}
+
+// ===== PERFORMANCE METRICS AND MONITORING TYPES =====
+
+/**
+ * Comprehensive performance metrics for Parlant integration
+ */
+export interface ParlantPerformanceMetrics {
+  readonly overall: OverallMetrics;
+  readonly authentication: AuthenticationMetrics;
+  readonly authorization: AuthorizationMetrics;
+  readonly security: SecurityMetrics;
+  readonly api: ApiMetrics;
+  readonly compliance: ComplianceMetrics;
+}
+
+/**
+ * Overall performance metrics
+ */
+export interface OverallMetrics {
+  readonly totalValidations: number;
+  readonly successfulValidations: number;
+  readonly failedValidations: number;
+  readonly averageResponseTime: number; // milliseconds
+  readonly p95ResponseTime: number; // milliseconds
+  readonly p99ResponseTime: number; // milliseconds
+  readonly cacheHitRate: number; // percentage
+  readonly errorRate: number; // percentage
+  readonly throughput: number; // requests per second
+  readonly availability: number; // percentage
+}
+
+/**
+ * Authentication-specific metrics
+ */
+export interface AuthenticationMetrics {
+  readonly loginAttempts: number;
+  readonly successfulLogins: number;
+  readonly failedLogins: number;
+  readonly passwordChanges: number;
+  readonly tokenGenerations: number;
+  readonly tokenRefreshes: number;
+  readonly sessionCreations: number;
+  readonly averageSessionDuration: number; // minutes
+  readonly mfaUsage: number;
+  readonly suspiciousActivities: number;
+}
+
+/**
+ * Authorization-specific metrics
+ */
+export interface AuthorizationMetrics {
+  readonly permissionChecks: number;
+  readonly permissionsGranted: number;
+  readonly permissionsDenied: number;
+  readonly roleAssignments: number;
+  readonly policyEvaluations: number;
+  readonly policyViolations: number;
+  readonly escalations: number;
+  readonly privilegedOperations: number;
+}
+
+/**
+ * Security-specific metrics
+ */
+export interface SecurityMetrics {
+  readonly securityEvents: number;
+  readonly threatsDetected: number;
+  readonly incidentsCreated: number;
+  readonly incidentsResolved: number;
+  readonly falsePositives: number;
+  readonly averageIncidentResponseTime: number; // minutes
+  readonly automatedResponses: number;
+  readonly manualInterventions: number;
+}
+
+/**
+ * API-specific metrics
+ */
+export interface ApiMetrics {
+  readonly apiRequests: number;
+  readonly successfulRequests: number;
+  readonly failedRequests: number;
+  readonly rateLimitHits: number;
+  readonly transformations: number;
+  readonly routingDecisions: number;
+  readonly circuitBreakerActivations: number;
+  readonly averageRequestSize: number; // bytes
+  readonly averageResponseSize: number; // bytes
+}
+
+/**
+ * Compliance-specific metrics
+ */
+export interface ComplianceMetrics {
+  readonly complianceChecks: number;
+  readonly compliantOperations: number;
+  readonly violations: number;
+  readonly attestations: number;
+  readonly auditRequests: number;
+  readonly evidenceCollected: number;
+  readonly reportGenerated: number;
+  readonly certificationsMaintained: number;
+}
+
+// ===== EXPORT ALL TYPES =====
+
+export {
+  // Base types
+  BaseAuthContext,
+  ComplianceFramework,
+  AuthenticationOperationType,
+
+  // Authentication types
+  AuthenticationParlantContext,
+  CredentialContext,
+  DeviceContext,
+  LocationContext,
+  BehaviorContext,
+
+  // Authorization types
+  AuthorizationParlantContext,
+  ResourceContext,
+  PermissionContext,
+  PolicyContext,
+  InheritanceContext,
+  DataType,
+  PolicyDefinition,
+  PolicyCondition,
+  PolicyAction,
+  PolicyViolation,
+  PolicyException,
+  DynamicPolicy,
+  RoleHierarchy,
+  InheritanceRule,
+  PermissionTransformation,
+
+  // Security monitoring types
+  SecurityMonitoringParlantContext,
+  ThreatContext,
+  IncidentContext,
+  ResponseContext,
+  IntelligenceContext,
+  ThreatType,
+  ThreatSource,
+  AttackVector,
+  ThreatIndicator,
+  IncidentType,
+  IncidentStatus,
+  BusinessImpact,
+  DamageAssessment,
+  ForensicEvidence,
+  ResponseType,
+  AutomatedAction,
+  ManualAction,
+  EscalationTrigger,
+  NotificationTarget,
+  RecoveryProcedure,
+  RecoveryStep,
+  RollbackPlan,
+  ThreatIntelSource,
+  IndicatorOfCompromise,
+  TacticTechniqueeProcedure,
+  Attribution,
+  ConfidenceLevel,
+
+  // API gateway types
+  ApiGatewayParlantContext,
+  ApiRequestContext,
+  RoutingContext,
+  RateLimitContext,
+  TransformationContext,
+  RoutingRule,
+  RoutingCondition,
+  RoutingAction,
+  LoadBalancingStrategy,
+  LoadBalancingTarget,
+  HealthCheckConfig,
+  CircuitBreakerState,
+  RetryPolicy,
+  RateLimitStrategy,
+  Transformation,
+  TransformationCondition,
+  ValidationRule,
+  EnrichmentRule,
+  EnrichmentCondition,
+
+  // Audit trail types
+  ComprehensiveAuditEntry,
+  ComplianceStatus,
+  ComplianceViolation,
+  ComplianceAttestation,
+  ComplianceEvidence,
+  SecurityFlag,
+  ParlantAuditMetadata,
+  ResponseQuality,
+  BusinessMetadata,
+
+  // Performance metrics types
+  ParlantPerformanceMetrics,
+  OverallMetrics,
+  AuthenticationMetrics,
+  AuthorizationMetrics,
+  SecurityMetrics,
+  ApiMetrics,
+  ComplianceMetrics,
+};
