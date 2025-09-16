@@ -747,7 +747,8 @@ export class EncryptionSecurityService {
       keyId = `ephemeral_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     }
 
-    const cipher = crypto.createCipher(this.mapAlgorithmToCrypto(request.algorithm), key);
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv(this.mapAlgorithmToCrypto(request.algorithm), key, iv);
     cipher.setAuthTag ? cipher.update(request.data) : null;
     
     let encrypted = cipher.update(request.data);
@@ -776,7 +777,7 @@ export class EncryptionSecurityService {
     const key = crypto.randomBytes(32); // Mock key
     const iv = request.options?.iv || crypto.randomBytes(16);
 
-    const decipher = crypto.createDecipher(this.mapAlgorithmToCrypto(request.algorithm), key);
+    const decipher = crypto.createDecipheriv(this.mapAlgorithmToCrypto(request.algorithm), key, iv);
     if (request.options?.iv && decipher.setAuthTag) {
       decipher.setAuthTag(Buffer.from('mock-tag')); // Mock auth tag
     }

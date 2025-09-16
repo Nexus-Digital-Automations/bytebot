@@ -14,6 +14,84 @@
 
 import { expect } from '@jest/globals';
 
+// Type interfaces for test result validation
+interface ScreenshotResult {
+  image: string;
+  metadata: {
+    captureTime: Date;
+    operationId: string;
+    format?: string;
+    width?: number;
+    height?: number;
+  };
+}
+
+interface FileOperationResult {
+  success: boolean;
+  operationId: string;
+  timestamp: Date;
+  message?: string;
+  data?: string;
+  name?: string;
+  path?: string;
+  size?: number;
+}
+
+interface OcrResult {
+  text: string;
+  confidence: number;
+  processingTimeMs: number;
+  method: string;
+  operationId: string;
+  boundingBoxes?: Array<{
+    text: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    confidence: number;
+  }>;
+}
+
+// Type guard functions for safe property access
+const isScreenshotResult = (obj: unknown): obj is ScreenshotResult => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'image' in obj &&
+    'metadata' in obj &&
+    typeof (obj as { image: unknown }).image === 'string' &&
+    typeof (obj as { metadata: unknown }).metadata === 'object'
+  );
+};
+
+const isFileOperationResult = (obj: unknown): obj is FileOperationResult => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'success' in obj &&
+    'operationId' in obj &&
+    'timestamp' in obj &&
+    typeof (obj as { success: unknown }).success === 'boolean' &&
+    typeof (obj as { operationId: unknown }).operationId === 'string'
+  );
+};
+
+const isOcrResult = (obj: unknown): obj is OcrResult => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'text' in obj &&
+    'confidence' in obj &&
+    'processingTimeMs' in obj &&
+    'method' in obj &&
+    'operationId' in obj &&
+    typeof (obj as { text: unknown }).text === 'string' &&
+    typeof (obj as { confidence: unknown }).confidence === 'number' &&
+    typeof (obj as { processingTimeMs: unknown }).processingTimeMs === 'number'
+  );
+};
+
 // Custom Jest matchers for BytebotD testing
 expect.extend({
   /**
@@ -123,14 +201,19 @@ expect.extend({
       };
     }
 
-    const _result = received as any;
-    const hasImage = typeof _result.image === 'string';
-    const hasMetadata =
-      _result.metadata && typeof _result.metadata === 'object';
+    if (!isScreenshotResult(received)) {
+      return {
+        message: () => `Expected ${received} to have required screenshot result properties`,
+        pass: false,
+      };
+    }
+
+    const hasImage = typeof received.image === 'string';
+    const hasMetadata = received.metadata && typeof received.metadata === 'object';
     const hasValidTimestamp =
-      hasMetadata && _result.metadata.captureTime instanceof Date;
+      hasMetadata && received.metadata.captureTime instanceof Date;
     const hasOperationId =
-      hasMetadata && typeof _result.metadata.operationId === 'string';
+      hasMetadata && typeof received.metadata.operationId === 'string';
 
     const pass = hasImage && hasMetadata && hasValidTimestamp && hasOperationId;
 
@@ -169,24 +252,30 @@ expect.extend({
       };
     }
 
-    const _result = received as any;
-    const hasSuccess = typeof _result.success === 'boolean';
-    const hasOperationId = typeof _result.operationId === 'string';
-    const hasTimestamp = _result.timestamp instanceof Date;
-    const hasMessage = typeof _result.message === 'string';
+    if (!isFileOperationResult(received)) {
+      return {
+        message: () => `Expected ${received} to have required file operation result properties`,
+        pass: false,
+      };
+    }
+
+    const hasSuccess = typeof received.success === 'boolean';
+    const hasOperationId = typeof received.operationId === 'string';
+    const hasTimestamp = received.timestamp instanceof Date;
+    const hasMessage = typeof received.message === 'string';
 
     let operationSpecificChecks = true;
     const issues: string[] = [];
 
     if (operation === 'read') {
-      const hasValidReadData = _result.success
-        ? typeof _result.data === 'string' && typeof _result.name === 'string'
+      const hasValidReadData = received.success
+        ? typeof received.data === 'string' && typeof received.name === 'string'
         : true;
       operationSpecificChecks = hasValidReadData;
       if (!hasValidReadData) issues.push('missing read-specific data');
     } else if (operation === 'write') {
-      const hasValidWriteData = _result.success
-        ? typeof _result.path === 'string' && typeof _result.size === 'number'
+      const hasValidWriteData = received.success
+        ? typeof received.path === 'string' && typeof received.size === 'number'
         : true;
       operationSpecificChecks = hasValidWriteData;
       if (!hasValidWriteData) issues.push('missing write-specific data');
@@ -196,7 +285,7 @@ expect.extend({
       hasSuccess &&
       hasOperationId &&
       hasTimestamp &&
-      (_result.success === true || hasMessage) &&
+      (received.success === true || hasMessage) &&
       operationSpecificChecks;
 
     if (pass) {
@@ -209,7 +298,7 @@ expect.extend({
       if (!hasSuccess) issues.push('missing or invalid success');
       if (!hasOperationId) issues.push('missing or invalid operationId');
       if (!hasTimestamp) issues.push('missing or invalid timestamp');
-      if (!_result.success && !hasMessage) issues.push('missing error message');
+      if (!received.success && !hasMessage) issues.push('missing error message');
 
       return {
         message: () =>
@@ -230,19 +319,25 @@ expect.extend({
       };
     }
 
-    const _result = received as any;
-    const hasText = typeof _result.text === 'string';
+    if (!isOcrResult(received)) {
+      return {
+        message: () => `Expected ${received} to have required OCR result properties`,
+        pass: false,
+      };
+    }
+
+    const hasText = typeof received.text === 'string';
     const hasConfidence =
-      typeof _result.confidence === 'number' &&
-      _result.confidence >= 0 &&
-      _result.confidence <= 1;
+      typeof received.confidence === 'number' &&
+      received.confidence >= 0 &&
+      received.confidence <= 1;
     const hasProcessingTime =
-      typeof _result.processingTimeMs === 'number' &&
-      _result.processingTimeMs > 0;
-    const hasMethod = typeof _result.method === 'string';
-    const hasOperationId = typeof _result.operationId === 'string';
+      typeof received.processingTimeMs === 'number' &&
+      received.processingTimeMs > 0;
+    const hasMethod = typeof received.method === 'string';
+    const hasOperationId = typeof received.operationId === 'string';
     const hasBoundingBoxes =
-      !_result.boundingBoxes || Array.isArray(_result.boundingBoxes);
+      !received.boundingBoxes || Array.isArray(received.boundingBoxes);
 
     const pass =
       hasText &&

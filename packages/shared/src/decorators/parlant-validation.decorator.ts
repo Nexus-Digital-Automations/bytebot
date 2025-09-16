@@ -1,0 +1,787 @@
+/**
+ * Parlant Function Validation Decorator
+ *
+ * Revolutionary function-level validation decorator that enables conversational AI
+ * control over ALL 1,520+ functions across the AIgent ecosystem. Provides
+ * real-time validation, security checks, audit trails, and performance monitoring
+ * through Parlant's conversational AI engine.
+ *
+ * @module ParlantValidationDecorator
+ * @version 1.0.0
+ * @author AIgent Integration Team
+ */
+
+import { Injectable, Inject } from "@nestjs/common";
+import { v4 as uuidv4 } from "uuid";
+import {
+  ParlantValidationRequest,
+  ParlantValidationResponse,
+  ParlantUserContext,
+  ParlantFunctionMetadata,
+  ParlantValidationConfig,
+  ParlantDecoratorOptions,
+  SecurityLevel,
+  ParlantValidationError,
+  ParlantTimeoutError,
+  ParlantAuthenticationError,
+} from "../types/parlant-integration.types";
+import { ParlantIntegrationService } from "../services/parlant-integration.service";
+
+/**
+ * Parlant Validation Decorator
+ *
+ * Wraps any function to enable conversational AI validation through Parlant.
+ * This decorator transforms traditional function calls into AI-validated operations
+ * with enterprise-grade security, monitoring, and audit capabilities.
+ *
+ * @param options Configuration options for the validation
+ * @returns Method decorator function
+ */
+export function ParlantValidated(options: ParlantDecoratorOptions) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
+    const originalMethod = descriptor.value;
+    const className = target.constructor.name;
+    const functionName = `${className}.${propertyKey}`;
+
+    // Create function metadata
+    const metadata: ParlantFunctionMetadata = {
+      name: functionName,
+      packageName: getPackageName(),
+      description: options.description,
+      parameterSchemas: extractParameterSchemas(originalMethod),
+      returnSchema: extractReturnSchema(originalMethod),
+      securityRequirements: getSecurityRequirements(
+        options.securityLevel || SecurityLevel.MEDIUM,
+      ),
+      performanceSla: {
+        maxResponseTime: options.timeout || 5000,
+        requiredUptime: 99.9,
+        maxErrorRate: 1.0,
+      },
+    };
+
+    // Create validation configuration
+    const validationConfig: ParlantValidationConfig = {
+      enabled: true,
+      securityLevel: options.securityLevel || SecurityLevel.MEDIUM,
+      cacheable: options.cacheable !== false,
+      cacheTtl: options.cacheTtl || 3600000, // 1 hour default
+      timeout: options.timeout || 5000,
+      retryConfig: {
+        maxAttempts: 3,
+        baseDelay: 1000,
+        backoffMultiplier: 2,
+        maxDelay: 10000,
+      },
+    };
+
+    // Replace the original method with validation wrapper
+    descriptor.value = async function (...args: any[]) {
+      const startTime = Date.now();
+      const operationId = uuidv4();
+      const context = this as any;
+
+      // Get Parlant Integration Service instance
+      const parlantService = getParlantService(context);
+      if (!parlantService) {
+        throw new ParlantValidationError(
+          "Parlant Integration Service not available",
+          { functionName, operationId },
+        );
+      }
+
+      // Register function if not already registered
+      if (!parlantService.functionRegistry?.has(functionName)) {
+        parlantService.registerFunction(
+          functionName,
+          metadata,
+          validationConfig,
+        );
+      }
+
+      // Get user context
+      const userContext = await getUserContext(context, args);
+
+      // Create validation request
+      const validationRequest: ParlantValidationRequest = {
+        operationId,
+        functionName,
+        packageName: metadata.packageName,
+        description: metadata.description,
+        parameters: extractParameters(originalMethod, args),
+        userContext,
+        securityLevel: validationConfig.securityLevel,
+        timeout: validationConfig.timeout,
+      };
+
+      try {
+        // Perform Parlant validation
+        const validationResponse = await performValidationWithRetry(
+          parlantService,
+          validationRequest,
+          validationConfig,
+          options.customValidator,
+        );
+
+        // Check if operation is approved
+        if (!validationResponse.approved) {
+          const error = new ParlantValidationError(
+            `Operation blocked by Parlant validation: ${validationResponse.reason}`,
+            {
+              functionName,
+              operationId,
+              conversationId: validationResponse.conversationId,
+              reason: validationResponse.reason,
+              confidence: validationResponse.confidence,
+            },
+          );
+
+          // Update function metrics
+          updateFunctionMetrics(parlantService, functionName, {
+            failed: true,
+            validationTime: Date.now() - startTime,
+          });
+
+          throw error;
+        }
+
+        // Apply execution context if provided
+        if (validationResponse.executionContext) {
+          await applyExecutionContext(
+            validationResponse.executionContext,
+            context,
+          );
+        }
+
+        // Execute the original function with monitoring
+        const result = await executeWithMonitoring(
+          originalMethod,
+          context,
+          args,
+          validationResponse,
+          operationId,
+        );
+
+        // Update function metrics
+        const executionTime = Date.now() - startTime;
+        updateFunctionMetrics(parlantService, functionName, {
+          success: true,
+          validationTime: validationResponse.metadata.processingTime,
+          executionTime,
+          cacheHit: validationResponse.metadata.cacheStatus === "hit",
+        });
+
+        // Log successful execution
+        logFunctionExecution(functionName, operationId, {
+          success: true,
+          executionTime,
+          result: sanitizeForLogging(result),
+          validationResponse,
+        });
+
+        return result;
+      } catch (error) {
+        const executionTime = Date.now() - startTime;
+
+        // Update function metrics
+        updateFunctionMetrics(parlantService, functionName, {
+          failed: true,
+          validationTime: 0,
+          executionTime,
+          error: error.message,
+        });
+
+        // Log failed execution
+        logFunctionExecution(functionName, operationId, {
+          success: false,
+          executionTime,
+          error: error.message,
+          stack: error.stack,
+        });
+
+        throw error;
+      }
+    };
+
+    // Preserve metadata
+    Object.defineProperty(descriptor.value, "name", {
+      value: originalMethod.name,
+    });
+    Object.defineProperty(descriptor.value, "_parlantMetadata", {
+      value: metadata,
+    });
+    Object.defineProperty(descriptor.value, "_parlantConfig", {
+      value: validationConfig,
+    });
+    Object.defineProperty(descriptor.value, "_originalMethod", {
+      value: originalMethod,
+    });
+
+    return descriptor;
+  };
+}
+
+/**
+ * Class decorator for automatic Parlant validation of all methods
+ */
+export function ParlantValidatedClass(classOptions: {
+  packageName?: string;
+  defaultSecurityLevel?: SecurityLevel;
+  enableValidation?: boolean;
+}) {
+  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+    return class extends constructor {
+      constructor(...args: any[]) {
+        super(...args);
+
+        if (classOptions.enableValidation !== false) {
+          // Auto-wrap all methods with Parlant validation
+          const prototype = Object.getPrototypeOf(this);
+          const methodNames = Object.getOwnPropertyNames(prototype).filter(
+            (name) =>
+              name !== "constructor" &&
+              typeof prototype[name] === "function" &&
+              !name.startsWith("_"), // Skip private methods
+          );
+
+          for (const methodName of methodNames) {
+            const originalMethod = prototype[methodName];
+            if (originalMethod && !originalMethod._parlantWrapped) {
+              this.wrapMethodWithParlant(
+                methodName,
+                originalMethod,
+                classOptions,
+              );
+            }
+          }
+        }
+      }
+
+      private wrapMethodWithParlant(
+        methodName: string,
+        originalMethod: Function,
+        options: any,
+      ) {
+        const decoratorOptions: ParlantDecoratorOptions = {
+          description: `Auto-generated validation for ${methodName}`,
+          securityLevel: options.defaultSecurityLevel || SecurityLevel.MEDIUM,
+          cacheable: true,
+        };
+
+        // Apply the decorator programmatically
+        const descriptor = {
+          value: originalMethod,
+          writable: true,
+          enumerable: false,
+          configurable: true,
+        };
+
+        ParlantValidated(decoratorOptions)(this, methodName, descriptor);
+
+        // Replace the method
+        Object.defineProperty(this, methodName, {
+          ...descriptor,
+          value: descriptor.value,
+        });
+
+        // Mark as wrapped
+        descriptor.value._parlantWrapped = true;
+      }
+    };
+  };
+}
+
+/**
+ * Perform validation with retry logic
+ */
+async function performValidationWithRetry(
+  parlantService: ParlantIntegrationService,
+  request: ParlantValidationRequest,
+  config: ParlantValidationConfig,
+  customValidator?: (request: ParlantValidationRequest) => Promise<boolean>,
+): Promise<ParlantValidationResponse> {
+  const { maxAttempts, baseDelay, backoffMultiplier, maxDelay } =
+    config.retryConfig;
+
+  let lastError: Error;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      // Run custom validator if provided
+      if (customValidator) {
+        const customResult = await customValidator(request);
+        if (!customResult) {
+          return {
+            approved: false,
+            conversationId: "",
+            reason: "Custom validation failed",
+            confidence: 1.0,
+            metadata: {
+              startTime: new Date(),
+              endTime: new Date(),
+              processingTime: 0,
+              cacheStatus: "miss",
+              source: "custom",
+              riskAssessment: {
+                level: SecurityLevel.HIGH,
+                factors: ["Custom validation failure"],
+                score: 90,
+                mitigations: ["Review function parameters and context"],
+              },
+            },
+          };
+        }
+      }
+
+      // Perform Parlant validation
+      return await parlantService.validateFunction(request);
+    } catch (error) {
+      lastError = error;
+
+      // Don't retry on authentication errors
+      if (error instanceof ParlantAuthenticationError) {
+        throw error;
+      }
+
+      // Don't retry if this is the last attempt
+      if (attempt === maxAttempts) {
+        break;
+      }
+
+      // Calculate delay with exponential backoff
+      const delay = Math.min(
+        baseDelay * Math.pow(backoffMultiplier, attempt - 1),
+        maxDelay,
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
+
+      console.warn(
+        `Parlant validation retry ${attempt}/${maxAttempts} for ${request.functionName}`,
+        {
+          error: error.message,
+          nextDelay: delay,
+        },
+      );
+    }
+  }
+
+  throw lastError;
+}
+
+/**
+ * Execute function with monitoring and resource constraints
+ */
+async function executeWithMonitoring(
+  originalMethod: Function,
+  context: any,
+  args: any[],
+  validationResponse: ParlantValidationResponse,
+  operationId: string,
+): Promise<any> {
+  const executionContext = validationResponse.executionContext;
+
+  if (!executionContext) {
+    return originalMethod.apply(context, args);
+  }
+
+  // Set up monitoring
+  const startTime = Date.now();
+  let memoryUsageBefore = 0;
+
+  if (executionContext.monitoring.realTimeMonitoring) {
+    memoryUsageBefore = process.memoryUsage().heapUsed;
+  }
+
+  // Execute with timeout
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(
+        new ParlantTimeoutError(
+          `Function execution timeout: ${executionContext.resourceLimits.maxExecutionTime}ms`,
+        ),
+      );
+    }, executionContext.resourceLimits.maxExecutionTime);
+  });
+
+  try {
+    const result = await Promise.race([
+      originalMethod.apply(context, args),
+      timeoutPromise,
+    ]);
+
+    // Monitor resource usage
+    if (executionContext.monitoring.realTimeMonitoring) {
+      const executionTime = Date.now() - startTime;
+      const memoryUsed = process.memoryUsage().heapUsed - memoryUsageBefore;
+      const memoryUsageMB = memoryUsed / 1024 / 1024;
+
+      if (memoryUsageMB > executionContext.resourceLimits.maxMemoryUsage) {
+        console.warn(`Memory limit exceeded for ${operationId}`, {
+          used: memoryUsageMB,
+          limit: executionContext.resourceLimits.maxMemoryUsage,
+        });
+      }
+
+      // Log performance metrics
+      console.log(`Function execution metrics for ${operationId}`, {
+        executionTime,
+        memoryUsage: memoryUsageMB,
+        resourceLimits: executionContext.resourceLimits,
+      });
+    }
+
+    return result;
+  } catch (error) {
+    if (executionContext.monitoring.alertOnViolations) {
+      console.error(`Function execution failed for ${operationId}`, {
+        error: error.message,
+        stack: error.stack,
+      });
+    }
+    throw error;
+  }
+}
+
+/**
+ * Apply execution context constraints
+ */
+async function applyExecutionContext(
+  executionContext: any,
+  context: any,
+): Promise<void> {
+  // Apply constraints based on execution context
+  if (executionContext.constraints) {
+    // Implementation would depend on specific constraint types
+    console.debug(
+      "Applying execution constraints",
+      executionContext.constraints,
+    );
+  }
+
+  // Set up resource monitoring
+  if (executionContext.monitoring.realTimeMonitoring) {
+    // Set up monitoring hooks
+    console.debug("Real-time monitoring enabled for function execution");
+  }
+}
+
+/**
+ * Get Parlant service instance from context
+ */
+function getParlantService(context: any): ParlantIntegrationService | null {
+  // Try to get service from NestJS context
+  if (context.parlantService) {
+    return context.parlantService;
+  }
+
+  // Try to get from constructor
+  if (context.constructor.parlantService) {
+    return context.constructor.parlantService;
+  }
+
+  // Try to get from global registry (fallback)
+  const globalService = (global as any).__parlantService__;
+  if (globalService) {
+    return globalService;
+  }
+
+  return null;
+}
+
+/**
+ * Extract user context from function context and arguments
+ */
+async function getUserContext(
+  context: any,
+  args: any[],
+): Promise<ParlantUserContext> {
+  // Try to extract from request context (NestJS)
+  const request = context.request || args.find((arg: any) => arg && arg.user);
+
+  if (request && request.user) {
+    return {
+      userId: request.user.id || "anonymous",
+      roles: request.user.roles || ["user"],
+      sessionId: request.sessionID || "no-session",
+      ipAddress: request.ip || "127.0.0.1",
+      metadata: {
+        timestamp: Date.now(),
+        userAgent: request.headers?.["user-agent"] || "unknown",
+      },
+    };
+  }
+
+  // Default anonymous context
+  return {
+    userId: "anonymous",
+    roles: ["anonymous"],
+    sessionId: "anonymous-session",
+    ipAddress: "127.0.0.1",
+    metadata: {
+      timestamp: Date.now(),
+      source: "system",
+    },
+  };
+}
+
+/**
+ * Extract function parameters from arguments
+ */
+function extractParameters(method: Function, args: any[]): Record<string, any> {
+  const paramNames = getParameterNames(method);
+  const parameters: Record<string, any> = {};
+
+  for (let i = 0; i < Math.min(paramNames.length, args.length); i++) {
+    parameters[paramNames[i]] = sanitizeForLogging(args[i]);
+  }
+
+  return parameters;
+}
+
+/**
+ * Get parameter names from function
+ */
+function getParameterNames(func: Function): string[] {
+  const funcStr = func.toString();
+  const match = funcStr.match(/\(([^)]*)\)/);
+
+  if (!match) return [];
+
+  return match[1]
+    .split(",")
+    .map((param) => param.trim().split("=")[0].trim())
+    .filter((param) => param && !param.startsWith("..."));
+}
+
+/**
+ * Extract parameter schemas for validation
+ */
+function extractParameterSchemas(method: Function): Record<string, any> {
+  // This would typically use reflection metadata or TypeScript decorators
+  // For now, return basic schema
+  const paramNames = getParameterNames(method);
+  const schemas: Record<string, any> = {};
+
+  for (const paramName of paramNames) {
+    schemas[paramName] = { type: "any", required: true };
+  }
+
+  return schemas;
+}
+
+/**
+ * Extract return schema for validation
+ */
+function extractReturnSchema(method: Function): any {
+  // This would typically use reflection metadata
+  return { type: "any" };
+}
+
+/**
+ * Get security requirements based on level
+ */
+function getSecurityRequirements(level: SecurityLevel): string[] {
+  switch (level) {
+    case SecurityLevel.LOW:
+      return ["basic-auth"];
+    case SecurityLevel.MEDIUM:
+      return ["basic-auth", "input-validation"];
+    case SecurityLevel.HIGH:
+      return ["basic-auth", "input-validation", "audit-logging"];
+    case SecurityLevel.CRITICAL:
+      return [
+        "basic-auth",
+        "input-validation",
+        "audit-logging",
+        "two-factor-auth",
+        "real-time-monitoring",
+      ];
+    default:
+      return ["basic-auth"];
+  }
+}
+
+/**
+ * Get package name from context
+ */
+function getPackageName(): string {
+  // Try to detect package name from call stack or module info
+  const stack = new Error().stack;
+  if (stack) {
+    const match = stack.match(/\/packages\/([^\/]+)\//);
+    if (match) {
+      return match[1];
+    }
+  }
+
+  return "unknown-package";
+}
+
+/**
+ * Update function metrics
+ */
+function updateFunctionMetrics(
+  parlantService: ParlantIntegrationService,
+  functionName: string,
+  update: {
+    success?: boolean;
+    failed?: boolean;
+    validationTime?: number;
+    executionTime?: number;
+    cacheHit?: boolean;
+    error?: string;
+  },
+): void {
+  const wrapper = (parlantService as any).functionRegistry?.get(functionName);
+  if (!wrapper) return;
+
+  const metrics = wrapper.metrics;
+  metrics.totalInvocations++;
+
+  if (update.success) {
+    metrics.successfulValidations++;
+  }
+
+  if (update.failed) {
+    metrics.failedValidations++;
+  }
+
+  if (update.validationTime !== undefined) {
+    // Update average validation time with exponential moving average
+    const alpha = 0.1;
+    metrics.averageValidationTime =
+      metrics.averageValidationTime * (1 - alpha) +
+      update.validationTime * alpha;
+  }
+
+  if (update.cacheHit !== undefined) {
+    // Update cache hit rate
+    const totalValidations =
+      metrics.successfulValidations + metrics.failedValidations;
+    if (totalValidations > 0) {
+      metrics.cacheHitRate = update.cacheHit
+        ? (metrics.cacheHitRate * (totalValidations - 1) + 100) /
+          totalValidations
+        : (metrics.cacheHitRate * (totalValidations - 1)) / totalValidations;
+    }
+  }
+
+  metrics.errorRate =
+    totalValidations > 0
+      ? (metrics.failedValidations / totalValidations) * 100
+      : 0;
+
+  metrics.lastUpdated = new Date();
+}
+
+/**
+ * Log function execution
+ */
+function logFunctionExecution(
+  functionName: string,
+  operationId: string,
+  details: {
+    success: boolean;
+    executionTime: number;
+    result?: any;
+    error?: string;
+    stack?: string;
+    validationResponse?: ParlantValidationResponse;
+  },
+): void {
+  const logData = {
+    functionName,
+    operationId,
+    success: details.success,
+    executionTime: details.executionTime,
+    timestamp: new Date().toISOString(),
+  };
+
+  if (details.success) {
+    console.log(
+      `✅ Parlant-validated function executed: ${functionName}`,
+      logData,
+    );
+  } else {
+    console.error(`❌ Parlant-validated function failed: ${functionName}`, {
+      ...logData,
+      error: details.error,
+      stack: details.stack,
+    });
+  }
+
+  // Additional audit logging could be implemented here
+}
+
+/**
+ * Sanitize data for logging (remove sensitive information)
+ */
+function sanitizeForLogging(data: any): any {
+  if (data === null || data === undefined) return data;
+
+  if (typeof data === "string") {
+    // Truncate long strings
+    return data.length > 1000
+      ? data.substring(0, 1000) + "...[truncated]"
+      : data;
+  }
+
+  if (typeof data === "object") {
+    if (Array.isArray(data)) {
+      return data.length > 10
+        ? [...data.slice(0, 10), `...[${data.length - 10} more items]`]
+        : data.map((item) => sanitizeForLogging(item));
+    }
+
+    const sanitized: any = {};
+    const sensitiveKeys = [
+      "password",
+      "token",
+      "secret",
+      "key",
+      "auth",
+      "credential",
+    ];
+
+    for (const [key, value] of Object.entries(data)) {
+      if (
+        sensitiveKeys.some((sensitive) => key.toLowerCase().includes(sensitive))
+      ) {
+        sanitized[key] = "[REDACTED]";
+      } else {
+        sanitized[key] = sanitizeForLogging(value);
+      }
+    }
+
+    return sanitized;
+  }
+
+  return data;
+}
+
+/**
+ * Utility function to create Parlant validation decorator with common settings
+ */
+export const ParlantSecure = (
+  description: string,
+  securityLevel: SecurityLevel = SecurityLevel.HIGH,
+) => ParlantValidated({ description, securityLevel, cacheable: true });
+
+export const ParlantCritical = (description: string) =>
+  ParlantValidated({
+    description,
+    securityLevel: SecurityLevel.CRITICAL,
+    cacheable: false,
+  });
+
+export const ParlantCached = (
+  description: string,
+  cacheTtl: number = 3600000,
+) => ParlantValidated({ description, cacheable: true, cacheTtl });
+
+export const ParlantFast = (description: string, timeout: number = 1000) =>
+  ParlantValidated({ description, timeout, cacheable: true });

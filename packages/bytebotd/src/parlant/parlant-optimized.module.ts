@@ -21,6 +21,106 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
+/**
+ * Type definitions for Parlant optimization status objects
+ */
+interface CircuitBreakerStatus {
+  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+  successCount: number;
+  totalRequests: number;
+}
+
+interface PerformanceStats {
+  averageLatency: number;
+  p95Latency: number;
+  throughputRpm: number;
+  cacheHitRate: number;
+  errorRate: number;
+  performanceScore: number;
+}
+
+interface PerformanceStatus {
+  currentStats: PerformanceStats;
+  recommendations?: string[];
+  alerts?: string[];
+}
+
+interface CacheStatus {
+  hitRate: number;
+  totalEntries: number;
+  memoryUsage: number;
+}
+
+interface AuditStatus {
+  totalEntries: number;
+  complianceDistribution: Record<string, number>;
+}
+
+interface OptimizationStatusConfig {
+  performanceTargets: {
+    averageLatency: number;
+    p95Latency: number;
+    throughput: number;
+    cacheHitRate: number;
+    availability: number;
+  };
+}
+
+interface OptimizationStatus {
+  targetsMet: boolean;
+  uptime: number;
+  circuitBreaker?: CircuitBreakerStatus;
+  performance?: PerformanceStatus;
+  cache?: CacheStatus;
+  audit?: AuditStatus;
+  config: OptimizationStatusConfig;
+}
+
+/**
+ * Type guard functions for safe property access
+ */
+function isCircuitBreakerStatus(obj: unknown): obj is CircuitBreakerStatus {
+  if (!obj || typeof obj !== 'object') return false;
+  const record = obj as Record<string, unknown>;
+  return (
+    'state' in record && typeof record.state === 'string' && 
+    'successCount' in record && typeof record.successCount === 'number' && 
+    'totalRequests' in record && typeof record.totalRequests === 'number'
+  );
+}
+
+function isPerformanceStatus(obj: unknown): obj is PerformanceStatus {
+  if (!obj || typeof obj !== 'object') return false;
+  const record = obj as Record<string, unknown>;
+  if (!('currentStats' in record) || !record.currentStats || typeof record.currentStats !== 'object') return false;
+  
+  const stats = record.currentStats as Record<string, unknown>;
+  return (
+    'averageLatency' in stats && typeof stats.averageLatency === 'number' &&
+    'throughputRpm' in stats && typeof stats.throughputRpm === 'number'
+  );
+}
+
+function isCacheStatus(obj: unknown): obj is CacheStatus {
+  if (!obj || typeof obj !== 'object') return false;
+  const record = obj as Record<string, unknown>;
+  return (
+    'hitRate' in record && typeof record.hitRate === 'number' && 
+    'totalEntries' in record && typeof record.totalEntries === 'number' && 
+    'memoryUsage' in record && typeof record.memoryUsage === 'number'
+  );
+}
+
+function isAuditStatus(obj: unknown): obj is AuditStatus {
+  if (!obj || typeof obj !== 'object') return false;
+  const record = obj as Record<string, unknown>;
+  return (
+    'totalEntries' in record && typeof record.totalEntries === 'number' && 
+    'complianceDistribution' in record && record.complianceDistribution &&
+    typeof record.complianceDistribution === 'object'
+  );
+}
+
 // Core optimized integration service
 import { ParlantIntegrationOptimizedService } from './parlant-integration-optimized.service';
 
@@ -196,17 +296,17 @@ export const parlantOptimizationConfig = () => ({
       provide: 'PARLANT_HEALTH_CHECK',
       useFactory: (optimizedService: ParlantIntegrationOptimizedService) => {
         return () => {
-          const status = optimizedService.getOptimizationStatus();
+          const status = optimizedService.getOptimizationStatus() as OptimizationStatus;
           return {
             status: status.targetsMet ? 'healthy' : 'degraded',
             uptime: status.uptime,
             services: {
               cache: status.cache ? 'healthy' : 'disabled',
-              circuitBreaker: status.circuitBreaker ? 
+              circuitBreaker: status.circuitBreaker && isCircuitBreakerStatus(status.circuitBreaker) ? 
                 (status.circuitBreaker.state === 'CLOSED' ? 'healthy' : 'degraded') : 'disabled',
               audit: status.audit ? 'healthy' : 'disabled',
             },
-            performance: status.performance ? {
+            performance: status.performance && isPerformanceStatus(status.performance) ? {
               averageLatency: `${status.performance.currentStats.averageLatency.toFixed(2)}ms`,
               throughput: `${status.performance.currentStats.throughputRpm.toFixed(1)} req/min`,
               cacheHitRate: `${status.performance.currentStats.cacheHitRate.toFixed(1)}%`,
@@ -279,7 +379,7 @@ export class ParlantHealthController {
    * Returns comprehensive health and performance status
    */
   async getHealth() {
-    const status = this.optimizedService.getOptimizationStatus();
+    const status = this.optimizedService.getOptimizationStatus() as OptimizationStatus;
     
     return {
       status: status.targetsMet ? 'healthy' : 'degraded',
@@ -288,7 +388,7 @@ export class ParlantHealthController {
       timestamp: new Date().toISOString(),
       
       // Performance metrics
-      performance: status.performance ? {
+      performance: status.performance && isPerformanceStatus(status.performance) ? {
         averageLatency: `${status.performance.currentStats.averageLatency.toFixed(2)}ms`,
         p95Latency: `${status.performance.currentStats.p95Latency.toFixed(2)}ms`,
         throughput: `${status.performance.currentStats.throughputRpm.toFixed(1)} req/min`,
@@ -299,20 +399,20 @@ export class ParlantHealthController {
       
       // Service status
       services: {
-        intelligentCache: status.cache ? {
+        intelligentCache: status.cache && isCacheStatus(status.cache) ? {
           status: 'healthy',
           hitRate: `${status.cache.hitRate.toFixed(1)}%`,
           totalEntries: status.cache.totalEntries,
           memoryUsage: `${Math.round(status.cache.memoryUsage / 1024 / 1024)}MB`,
         } : { status: 'disabled' },
         
-        circuitBreaker: status.circuitBreaker ? {
+        circuitBreaker: status.circuitBreaker && isCircuitBreakerStatus(status.circuitBreaker) ? {
           status: status.circuitBreaker.state === 'CLOSED' ? 'healthy' : 'degraded',
           state: status.circuitBreaker.state,
           successRate: `${((status.circuitBreaker.successCount / Math.max(status.circuitBreaker.totalRequests, 1)) * 100).toFixed(1)}%`,
         } : { status: 'disabled' },
         
-        enterpriseAudit: status.audit ? {
+        enterpriseAudit: status.audit && isAuditStatus(status.audit) ? {
           status: 'healthy',
           totalEntries: status.audit.totalEntries,
           complianceDistribution: status.audit.complianceDistribution,
@@ -330,8 +430,8 @@ export class ParlantHealthController {
       },
       
       // Recommendations (if any performance issues)
-      recommendations: status.performance?.recommendations || [],
-      alerts: status.performance?.alerts || [],
+      recommendations: status.performance && isPerformanceStatus(status.performance) ? (status.performance.recommendations ?? []) : [],
+      alerts: status.performance && isPerformanceStatus(status.performance) ? (status.performance.alerts ?? []) : [],
     };
   }
 
@@ -340,8 +440,10 @@ export class ParlantHealthController {
    * Returns detailed performance metrics
    */
   async getPerformanceMetrics() {
-    const status = this.optimizedService.getOptimizationStatus();
-    return status.performance || { error: 'Performance monitoring disabled' };
+    const status = this.optimizedService.getOptimizationStatus() as OptimizationStatus;
+    return status.performance && isPerformanceStatus(status.performance) 
+      ? status.performance 
+      : { error: 'Performance monitoring disabled' };
   }
 
   /**
@@ -349,8 +451,10 @@ export class ParlantHealthController {
    * Returns cache performance statistics
    */
   async getCacheMetrics() {
-    const status = this.optimizedService.getOptimizationStatus();
-    return status.cache || { error: 'Intelligent caching disabled' };
+    const status = this.optimizedService.getOptimizationStatus() as OptimizationStatus;
+    return status.cache && isCacheStatus(status.cache) 
+      ? status.cache 
+      : { error: 'Intelligent caching disabled' };
   }
 
   /**
@@ -358,7 +462,9 @@ export class ParlantHealthController {
    * Returns audit and compliance statistics
    */
   async getAuditMetrics() {
-    const status = this.optimizedService.getOptimizationStatus();
-    return status.audit || { error: 'Enterprise audit disabled' };
+    const status = this.optimizedService.getOptimizationStatus() as OptimizationStatus;
+    return status.audit && isAuditStatus(status.audit) 
+      ? status.audit 
+      : { error: 'Enterprise audit disabled' };
   }
 }

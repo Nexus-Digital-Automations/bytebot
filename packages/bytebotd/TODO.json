@@ -1123,6 +1123,27 @@
       "auto_research_created": false,
       "mode": "DEVELOPMENT",
       "category": "test"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-16T10:56:28.267Z",
+      "title": "Continue TypeScript error cleanup in bytebotd - 132 errors remaining",
+      "description": "Complete the TypeScript error cleanup work in bytebotd package. Previous work reduced errors from 1000+ to 132 (87% improvement). Remaining issues: browser-use services (missing properties, undefined types, switch fallthrough), parlant modules (read-only property assignments), security services (deprecated crypto methods, missing properties). Focus on highest-impact fixes: undefined type handling, missing enum values, read-only property workarounds, crypto API updates.",
+      "category": "error",
+      "priority": "high",
+      "id": "error_1758020188267_rk2ru1wvryg",
+      "assigned_agent": "dev_session_1758019683161_1_general_9b833f57",
+      "started_at": "2025-09-16T10:56:45.740Z",
+      "claimed_by": "dev_session_1758019683161_1_general_9b833f57",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758019683161_1_general_9b833f57",
+          "role": "primary",
+          "assignedAt": "2025-09-16T10:56:45.740Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {

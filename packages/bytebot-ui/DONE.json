@@ -1568,10 +1568,68 @@
       "updated_at": "2025-09-16T03:26:21.445Z",
       "archived_at": "2025-09-16T03:26:21.456Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "id": "error_1757578107749_6rkezkyce",
+      "title": "Fix bytebot-ui ESLint configuration - exclude Next.js build files",
+      "description": "Fix ESLint parsing errors in bytebot-ui package by adding proper ignore patterns for Next.js build directories and files. The current configuration is trying to parse .next build files which causes parser errors. Add ignore patterns for .next/, build/, dist/, and other generated files.",
+      "priority": "high",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebot-ui/eslint.config.js"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-11T08:08:27.749Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757577848219_1_general_9cce2d4b",
+      "started_at": "2025-09-11T08:08:44.654Z",
+      "claimed_by": "development_session_1757577848219_1_general_9cce2d4b",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757577848219_1_general_9cce2d4b",
+          "role": "primary",
+          "assignedAt": "2025-09-11T08:08:44.654Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T10:46:26.710Z",
+      "updated_at": "2025-09-16T10:46:26.710Z",
+      "archived_at": "2025-09-16T10:46:26.716Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T10:54:08.396Z",
+      "title": "CRITICAL: Fix TypeScript ESLint violations in bytebot-ui React components",
+      "description": "Fix critical @typescript-eslint/no-unsafe-* violations across multiple React components: 1) AssistantMessage.tsx: Unsafe return of any[] values (lines 125, 163), 2) ComputerToolContent.tsx: Unsafe assignment of error typed values (lines 35, 38), 3) ComputerToolContentNormal.tsx: Multiple unsafe assignments, member access, and argument type errors on error-typed values (lines 138-147). These violations prevent enterprise-grade TypeScript compliance and must be resolved with proper type definitions and type guards.",
+      "category": "linter-error",
+      "id": "linter-error_1758020048396_vjr4zk1qenl",
+      "assigned_agent": "dev_session_1758018116858_1_general_c515cfe1",
+      "started_at": "2025-09-16T10:54:27.902Z",
+      "claimed_by": "dev_session_1758018116858_1_general_c515cfe1",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758018116858_1_general_c515cfe1",
+          "role": "primary",
+          "assignedAt": "2025-09-16T10:54:27.902Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T11:04:11.545Z",
+      "updated_at": "2025-09-16T11:04:11.545Z",
+      "archived_at": "2025-09-16T11:04:11.549Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 41,
+  "total_completed": 43,
   "last_completion": "2025-09-11T08:31:32.558Z",
   "created_at": "2025-09-11T06:47:03.082Z",
-  "last_archived": "2025-09-16T03:26:21.456Z"
+  "last_archived": "2025-09-16T11:04:11.549Z"
 }

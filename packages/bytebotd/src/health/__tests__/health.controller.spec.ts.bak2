@@ -423,13 +423,13 @@ describe('HealthController', () => {
         timestamp: expect.stringMatching(
           /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
         ),
-        uptime: expect.toEqual(expect.any(Number)),
+        uptime: expect.any(Number),
         memory: expect.objectContaining({
-          used: expect.toEqual(expect.any(Number)),
-          free: expect.toEqual(expect.any(Number)),
-          total: expect.toEqual(expect.any(Number)),
-          heapUsed: expect.toEqual(expect.any(Number)),
-          heapTotal: expect.toEqual(expect.any(Number)),
+          used: expect.any(Number),
+          free: expect.any(Number),
+          total: expect.any(Number),
+          heapUsed: expect.any(Number),
+          heapTotal: expect.any(Number),
         }),
         services: expect.objectContaining({
           database: expect.stringMatching(/^(connected|disconnected|unknown)$/),
@@ -437,8 +437,8 @@ describe('HealthController', () => {
           external: expect.stringMatching(/^(reachable|unreachable|unknown)$/),
         }),
         performance: expect.objectContaining({
-          requestsPerSecond: expect.toEqual(expect.any(Number)),
-          averageResponseTime: expect.toEqual(expect.any(Number)),
+          requestsPerSecond: expect.any(Number),
+          averageResponseTime: expect.any(Number),
         }),
       });
 

@@ -559,7 +559,7 @@ export class OpenAIService {
       },
     };
 
-    mockResponse.usage.totalTokens = mockResponse.usage.promptTokens + mockResponse.usage.completionTokens;
+    (mockResponse.usage as any).totalTokens = mockResponse.usage.promptTokens + mockResponse.usage.completionTokens;
 
     // Simulate API latency
     await new Promise(resolve => setTimeout(resolve, 150 + Math.random() * 250));
@@ -646,7 +646,7 @@ export class OpenAIService {
       },
     };
 
-    mockResponse.usage.totalTokens = mockResponse.usage.promptTokens + mockResponse.usage.completionTokens;
+    (mockResponse.usage as any).totalTokens = mockResponse.usage.promptTokens + mockResponse.usage.completionTokens;
 
     await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 200));
     return mockResponse;

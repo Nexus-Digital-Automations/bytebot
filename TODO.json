@@ -795,7 +795,7 @@
       "updated_at": "2025-09-14T20:42:28.697Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-14T20:29:48.940Z",
       "title": "Comprehensive build pipeline testing after workspace coordination fixes",
       "description": "Test individual package builds, workspace build coordination, Prisma integration, TypeScript compilation, and production builds across the entire workspace with performance monitoring",
@@ -812,7 +812,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-16T09:41:31.587Z",
+      "updated_at": "2025-09-16T09:41:31.588Z"
     },
     {
       "status": "pending",
@@ -1240,6 +1242,112 @@
       ],
       "completed_at": "2025-09-15T23:08:32.079Z",
       "updated_at": "2025-09-15T23:08:32.079Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T10:29:33.556Z",
+      "title": "CRITICAL: Fix remaining 1050 ESLint violations in bytebotd",
+      "description": "Comprehensive cleanup of remaining ESLint violations blocking clean builds: prefer-nullish-coalescing (975+ violations), no-explicit-any (422+ violations), restrict-template-expressions (113+ violations), and other TypeScript safety issues. Focus on highest-impact files: test-utils/setupAfterEnv.ts, computer-use/ files, and auth/ modules. Implement proper TypeScript patterns, replace unsafe any types, fix template expressions, and ensure zero ESLint violations for production readiness.",
+      "category": "error",
+      "priority": "high",
+      "id": "error_1758018573555_4en1aa72o6f",
+      "assigned_agent": "dev_session_1758018497502_1_general_b06e0de8",
+      "started_at": "2025-09-16T10:29:51.220Z",
+      "claimed_by": "dev_session_1758018497502_1_general_b06e0de8",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758018497502_1_general_b06e0de8",
+          "role": "primary",
+          "assignedAt": "2025-09-16T10:29:51.220Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T10:46:51.365Z",
+      "updated_at": "2025-09-16T10:46:51.365Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-16T10:52:49.497Z",
+      "title": "CRITICAL: Fix bytebotd build failure - directory cleanup error",
+      "description": "NestJS CLI build failing with ENOTEMPTY error when trying to rmdir dist/src/computer-use directory. This prevents clean builds of the bytebotd package. Issue: directory not empty, rmdir dist/src/computer-use. Need to investigate and fix directory cleanup process or clean build artifacts manually.",
+      "category": "error",
+      "priority": "high",
+      "id": "error_1758019969497_r4wft4vyy9i",
+      "assigned_agent": "dev_session_1758019683161_1_general_9b833f57",
+      "started_at": "2025-09-16T10:53:31.414Z",
+      "claimed_by": "dev_session_1758019683161_1_general_9b833f57",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758019683161_1_general_9b833f57",
+          "role": "primary",
+          "assignedAt": "2025-09-16T10:53:31.414Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-16T11:08:42.444Z",
+      "title": "Continue TypeScript error cleanup in bytebotd - 122 errors remaining",
+      "description": "Continue systematic TypeScript error cleanup work in bytebotd package. Previous work achieved 88% improvement from 1000+ errors to 122. Remaining issues include: parlant modules (read-only property assignments, undefined type handling), browser-use services (missing property definitions, async return types), security services (interface mismatches), and complex type definitions. Focus on highest-impact fixes to further reduce error count while maintaining type safety.",
+      "category": "error",
+      "priority": "high",
+      "id": "error_1758020922444_k70nu6cfib",
+      "assigned_agent": "dev_session_1758020824342_1_general_c7d4fbcb",
+      "started_at": "2025-09-16T11:09:05.253Z",
+      "claimed_by": "dev_session_1758020824342_1_general_c7d4fbcb",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758020824342_1_general_c7d4fbcb",
+          "role": "primary",
+          "assignedAt": "2025-09-16T11:09:05.253Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-16T11:12:08.781Z",
+      "title": "FOUNDATION: Create Parlant Integration Essentials and Deploy Research Subagents",
+      "description": "PRIORITY DIRECTIVE: Create comprehensive Parlant integration foundation as Phase 1 of systematic integration. Deploy up to 10 concurrent research subagents for parallel analysis of: WebSocket architecture, AIgent integration points mapping, shared library integration patterns, authentication layer integration, and real-time validation systems. Establish foundation for function-level Parlant wrapping across all packages. Create research reports in development/reports/ for each integration area.",
+      "category": "feature",
+      "priority": "normal",
+      "id": "feature_1758021128780_jv1ak4764p",
+      "assigned_agent": "dev_session_1758020824342_1_general_c7d4fbcb",
+      "started_at": "2025-09-16T11:13:16.098Z",
+      "claimed_by": "dev_session_1758020824342_1_general_c7d4fbcb",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758020824342_1_general_c7d4fbcb",
+          "role": "primary",
+          "assignedAt": "2025-09-16T11:13:16.098Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T11:15:41.237Z",
+      "title": "Analyze WebSocket Architecture for Parlant Integration",
+      "description": "Research existing WebSocket implementations in AIgent codebase, identify integration points for Parlant real-time validation, analyze performance requirements, map event handlers, and create architecture recommendations",
+      "category": "research",
+      "id": "research_1758021341236_figq4cy9k1m",
+      "completed_at": "2025-09-16T11:20:04.243Z",
+      "updated_at": "2025-09-16T11:20:04.243Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T11:21:08.122Z",
+      "title": "Analyze Parlant integration foundation in shared libraries",
+      "description": "Examine /packages/shared/ directory structure, identify integration points, analyze utility functions for Parlant wrapping, design wrapper interfaces, implement core types, and create function-level wrapping patterns",
+      "category": "feature",
+      "id": "feature_1758021668121_1oje7tybbe2",
+      "completed_at": "2025-09-16T11:43:34.952Z",
+      "updated_at": "2025-09-16T11:43:34.952Z"
     }
   ],
   "agents": {
@@ -3052,6 +3160,153 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-16T09:23:18.421Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758015786316_1_general_10e754fc": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T09:43:06.320Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T09:43:06.320Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758016460595_1_general_95602592": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T09:54:20.598Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T09:54:20.599Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758017389559_1_general_54428f34": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T10:09:49.560Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T10:09:49.560Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758018497502_1_general_b06e0de8": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T10:28:17.503Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T10:28:17.503Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758019683161_1_general_9b833f57": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T10:48:03.162Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T10:48:03.162Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758021304552_1_general_f65c1840": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T11:15:04.553Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T11:15:04.553Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758021649961_1_general_dd82ff03": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T11:20:49.961Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T11:20:49.961Z",
       "sessionId": null,
       "metadata": {}
     }

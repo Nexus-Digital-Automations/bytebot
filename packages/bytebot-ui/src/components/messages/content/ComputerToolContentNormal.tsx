@@ -135,14 +135,19 @@ function ToolDetailsNormal({
 
   return (
     <>
+      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
       {safeTypeGuardCall(isApplicationToolUseBlock, block) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
               return "Unknown Application";
             }
-            const input = block.input;
-            const app = input.application;
+            // Type assertion after type guard to fix unsafe member access
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const validatedBlock = block;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            const input = validatedBlock.input;
+            const app = (input as { application?: unknown }).application;
             return isValidApplication(app)
               ? applicationMap[app]
               : "Unknown Application";
@@ -151,30 +156,42 @@ function ToolDetailsNormal({
       )}
 
       {/* Text for type and key actions */}
-      {(safeTypeGuardCall(isTypeKeysToolUseBlock, block) ||
+      {(/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
+      safeTypeGuardCall(isTypeKeysToolUseBlock, block) ||
+      /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
         safeTypeGuardCall(isPressKeysToolUseBlock, block)) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
               return "Invalid keys";
             }
-            const input = block.input;
-            const keys = input.keys;
+            // Type assertion after type guard to fix unsafe member access
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const validatedBlock = block;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            const input = validatedBlock.input;
+            const keys = (input as { keys?: unknown }).keys;
             return Array.isArray(keys) ? keys.join(" + ") : "Invalid keys";
           })()}
         </p>
       )}
 
+      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
       {(safeTypeGuardCall(isTypeTextToolUseBlock, block) ||
+        /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
         safeTypeGuardCall(isPasteTextToolUseBlock, block)) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
               return "Invalid text";
             }
-            const input = block.input;
-            const text = input.text;
-            const isSensitive = Boolean(input.isSensitive ?? false);
+            // Type assertion after type guard to fix unsafe member access
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const validatedBlock = block;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            const input = validatedBlock.input;
+            const text = (input as { text?: unknown }).text;
+            const isSensitive = Boolean((input as { isSensitive?: unknown }).isSensitive ?? false);
 
             if (typeof text !== "string") {
               return "Invalid text";

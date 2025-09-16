@@ -168,6 +168,85 @@ export * from "./audit/integrations/audit.module";
 // Security Framework - server-only security services and ML algorithms
 export * from "./security";
 
+// Parlant Integration - Shared Library Foundation
+// Core types, services, decorators, and utilities for conversational AI validation
+export * from "./types/parlant.types";
+export * from "./services/parlant-integration.service";
+export * from "./decorators/parlant-validation.decorators";
+export * from "./interceptors/parlant-validation.interceptor";
+export * from "./utils/parlant-wrapper.utils";
+
+// Parlant Core Types - explicit exports to avoid conflicts
+export {
+  ParlantValidationRequest,
+  ParlantValidationResponse,
+  ParlantConversationContext,
+  ValidationResult,
+  ValidationDecision,
+  ConversationState,
+  ConversationPriority,
+  FunctionSecurityLevel,
+  RiskLevel,
+  ValidationMode,
+  ApprovalLevel,
+  ParticipantRole,
+  ParticipantType,
+  ParticipantCapability
+} from "./types/parlant.types";
+
+// Parlant Decorators - core validation decorators
+export {
+  ParlantValidation,
+  ConversationContext,
+  SecurityClassification,
+  ApprovalWorkflow,
+  ValidationRules,
+  ParlantIntegrated,
+  ConversationParam,
+  ValidationRequestParam,
+  UserContextParam,
+  getParlantValidationMetadata,
+  getConversationContextMetadata,
+  getSecurityClassificationMetadata,
+  getApprovalWorkflowMetadata,
+  getValidationRulesMetadata,
+  hasParlantValidation,
+  getAllParlantMetadata
+} from "./decorators/parlant-validation.decorators";
+
+// Parlant Services - integration service and interfaces
+export {
+  ParlantIntegrationService,
+  ParlantIntegrationConfig,
+  ConversationManager,
+  ValidationEngine,
+  AuditService,
+  ServiceHealthStatus,
+  ParlantValidationError
+} from "./services/parlant-integration.service";
+
+// Parlant Wrapper Utilities - function wrapping and registry
+export {
+  createParlantWrapper,
+  wrapFunctionWithMetadata,
+  wrapClassMethods,
+  parlantWrapper,
+  ParlantWrapperBuilder,
+  ParlantWrapperRegistry,
+  ParlantValidationRejection,
+  FunctionWrapperConfig,
+  ParlantExecutionResult,
+  WrappedFunction
+} from "./utils/parlant-wrapper.utils";
+
+// Parlant Interceptor - NestJS automatic validation
+export {
+  ParlantValidationInterceptor,
+  ParlantValidationInterceptorConfig,
+  ParlantValidationDenialError,
+  ParlantServiceUnavailableError
+} from "./interceptors/parlant-validation.interceptor";
+
 // Note: Test utilities are available but not exported by default
 // to avoid jest dependencies in production builds.
 // Import them directly from specific paths when needed in tests:

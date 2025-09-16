@@ -435,7 +435,7 @@ export class ParlantValidatedBrowserSessionService {
       }
 
       // Step 3: Execute session deletion
-      await this.originalBrowserSessionService.deleteSession(sessionId);
+      await this.originalBrowserSessionService.closeSession(sessionId);
 
       // Step 4: Create audit entry
       await this.createSessionAuditEntry({
@@ -527,7 +527,7 @@ export class ParlantValidatedBrowserSessionService {
       }
 
       // Step 3: Execute tab creation
-      const tabInfo = await this.originalBrowserSessionService.createTab(sessionId, url);
+      const tabInfo = await this.originalBrowserSessionService.createTab(sessionId, { url });
 
       // Step 4: Create audit entry
       await this.createSessionAuditEntry({

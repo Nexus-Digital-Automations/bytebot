@@ -1,7 +1,5 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * Health Controller Test Suite
@@ -92,28 +90,28 @@ describe('HealthController', () => {
       warn: jest.fn(),
       verbose: jest.fn(),
       fatal: jest.fn(),
-      localInstance: {} as any,
-      options: {} as any,
+      localInstance: {},
+      options: {},
       registerLocalInstanceRef: jest.fn(),
-    } as any;
+    } as jest.Mocked<Logger>;
 
     // Create mocked Terminus dependencies
     healthCheckService = {
       check: jest.fn(),
-    } as any;
+    } as jest.Mocked<HealthCheckService>;
 
     httpHealthIndicator = {
       pingCheck: jest.fn(),
-    } as any;
+    } as jest.Mocked<HttpHealthIndicator>;
 
     memoryHealthIndicator = {
       checkHeap: jest.fn(),
       checkRSS: jest.fn(),
-    } as any;
+    } as jest.Mocked<MemoryHealthIndicator>;
 
     diskHealthIndicator = {
       checkStorage: jest.fn(),
-    } as any;
+    } as jest.Mocked<DiskHealthIndicator>;
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [HealthController],
@@ -156,13 +154,13 @@ describe('HealthController', () => {
 
     // Mock the logger
     (
-      jest.spyOn(Logger.prototype, 'log') as jest.MockedFunction<any>
+      jest.spyOn(Logger.prototype, 'log')
     ).mockImplementation(mockLogger.log);
     (
-      jest.spyOn(Logger.prototype, 'debug') as jest.MockedFunction<any>
+      jest.spyOn(Logger.prototype, 'debug')
     ).mockImplementation(mockLogger.debug);
     (
-      jest.spyOn(Logger.prototype, 'error') as jest.MockedFunction<any>
+      jest.spyOn(Logger.prototype, 'error')
     ).mockImplementation(mockLogger.error);
 
     console.log(`[${operationId}] HealthController test setup completed`);
@@ -179,7 +177,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing basic health check with healthy status`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
       const result = await controller.getHealth();
@@ -200,7 +198,7 @@ describe('HealthController', () => {
 
       const serviceError = new Error('Database connection failed');
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockImplementation(() => {
         throw serviceError;
       });
@@ -209,7 +207,7 @@ describe('HealthController', () => {
 
       expect(result).toEqual({
         status: 'unhealthy',
-        timestamp: expect.any(String),
+        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/),
         error: 'Database connection failed',
       });
 
@@ -227,7 +225,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing basic health check with unknown error`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockImplementation(() => {
         throw 'Unknown error type';
       });
@@ -236,7 +234,7 @@ describe('HealthController', () => {
 
       expect(result).toEqual({
         status: 'unhealthy',
-        timestamp: expect.any(String),
+        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/),
         error: 'Unknown _error',
       });
 
@@ -252,7 +250,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing basic health check response format`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
       const result = await controller.getHealth();
@@ -262,14 +260,14 @@ describe('HealthController', () => {
         status: expect.stringMatching(/^(healthy|unhealthy)$/),
         timestamp: expect.stringMatching(
           /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
-        ),
-        uptime: expect.any(Number),
-        memory: expect.objectContaining({
-          used: expect.any(Number),
-          free: expect.any(Number),
-          total: expect.any(Number),
-        }),
+        )
       });
+      
+      // Validate numeric values separately to avoid unsafe assignment
+      expect(typeof result.uptime).toBe('number');
+      expect(typeof result.memory.used).toBe('number');
+      expect(typeof result.memory.free).toBe('number');
+      expect(typeof result.memory.total).toBe('number');
 
       console.log(`[${testId}] Response format validation test completed`);
     });
@@ -279,7 +277,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing basic health check performance`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
       const startTime = Date.now();
@@ -303,7 +301,7 @@ describe('HealthController', () => {
       );
 
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
       const result = await controller.getDetailedStatus();
@@ -337,7 +335,7 @@ describe('HealthController', () => {
       };
 
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockReturnValue(degradedResponse);
 
       const result = await controller.getDetailedStatus();
@@ -370,7 +368,7 @@ describe('HealthController', () => {
       };
 
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockReturnValue(unhealthyResponse);
 
       const result = await controller.getDetailedStatus();
@@ -389,7 +387,7 @@ describe('HealthController', () => {
 
       const serviceError = new Error('Service monitoring failure');
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockImplementation(() => {
         throw serviceError;
       });
@@ -415,7 +413,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing detailed status response structure`);
 
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
       const result = await controller.getDetailedStatus();
@@ -452,7 +450,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing detailed status performance`);
 
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
       const startTime = Date.now();
@@ -474,7 +472,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing health check request logging`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
       await controller.getHealth();
@@ -492,7 +490,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing detailed status request logging`);
 
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
       await controller.getDetailedStatus();
@@ -515,7 +513,7 @@ describe('HealthController', () => {
         'Connection timeout to monitoring service',
       );
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockImplementation(() => {
         throw contextualError;
       });
@@ -534,7 +532,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing concurrent request logging`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
       // Simulate concurrent requests
@@ -565,7 +563,7 @@ describe('HealthController', () => {
 
       for (const _error of testErrors) {
         (
-          healthService.getBasicHealth as jest.MockedFunction<any>
+          healthService.getBasicHealth
         ).mockImplementation(() => {
           throw _error;
         });
@@ -613,7 +611,7 @@ describe('HealthController', () => {
       timeoutError.name = 'TimeoutError';
 
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockImplementation(() => {
         throw timeoutError;
       });
@@ -668,7 +666,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing high-frequency health checks`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
       const startTime = Date.now();
@@ -692,10 +690,10 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing mixed endpoint load handling`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
       const startTime = Date.now();
@@ -725,7 +723,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing response consistency under load`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
       // Execute multiple concurrent requests
@@ -750,7 +748,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing memory leak prevention`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
       const initialMemory = process.memoryUsage();
@@ -780,7 +778,7 @@ describe('HealthController', () => {
       );
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
       const result = await controller.getHealth();
@@ -811,7 +809,7 @@ describe('HealthController', () => {
 
       for (const variation of variations) {
         (
-          healthService.getBasicHealth as jest.MockedFunction<any>
+          healthService.getBasicHealth
         ).mockReturnValue(variation);
 
         const result = await controller.getHealth();
@@ -831,10 +829,10 @@ describe('HealthController', () => {
 
       // Test service interaction
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
       const basicResult = await controller.getHealth();
@@ -851,7 +849,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing service method parameter validation`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
       // Both endpoints should work without parameters
@@ -868,7 +866,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing sensitive information protection`);
 
       (
-        healthService.getDetailedStatus as jest.MockedFunction<any>
+        healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
       const result = await controller.getDetailedStatus();
@@ -887,7 +885,7 @@ describe('HealthController', () => {
       console.log(`[${testId}] Testing response data type validation`);
 
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
       const result = await controller.getHealth();
@@ -913,7 +911,7 @@ describe('HealthController', () => {
         'Database error: <script>alert("XSS")</script>',
       );
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockImplementation(() => {
         throw maliciousError;
       });
@@ -934,7 +932,7 @@ describe('HealthController', () => {
 
       const longError = new Error('A'.repeat(1000)); // Very long error message
       (
-        healthService.getBasicHealth as jest.MockedFunction<any>
+        healthService.getBasicHealth
       ).mockImplementation(() => {
         throw longError;
       });
@@ -964,7 +962,7 @@ describe('HealthController', () => {
 
         // Mock successful health checks
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockResolvedValue({
           memory_heap: {
             status: 'up' as HealthIndicatorStatus,
@@ -974,11 +972,11 @@ describe('HealthController', () => {
         });
 
         (
-          healthService.checkProcessHealth as jest.MockedFunction<any>
+          healthService.checkProcessHealth
         ).mockReturnValue(mockHealthIndicatorResult);
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue({
           status: 'ok',
           info: { memory_heap: { status: 'up' }, process: { status: 'up' } },
@@ -1005,11 +1003,11 @@ describe('HealthController', () => {
         // Mock failed health checks
         const healthError = new Error('Memory limit exceeded');
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockRejectedValue(healthError);
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockRejectedValue(healthError);
 
         try {
@@ -1028,7 +1026,7 @@ describe('HealthController', () => {
         console.log(`[${testId}] Testing liveness probe logging`);
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue({
           status: 'ok',
           info: {},
@@ -1050,17 +1048,17 @@ describe('HealthController', () => {
         console.log(`[${testId}] Testing liveness memory limit validation`);
 
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockResolvedValue({
           memory_heap: { status: 'up', limit: '150MB', used: '120MB' },
         });
 
         (
-          healthService.checkProcessHealth as jest.MockedFunction<any>
+          healthService.checkProcessHealth
         ).mockReturnValue(mockHealthIndicatorResult);
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue({
           status: 'ok',
           info: { memory_heap: { status: 'up' } },
@@ -1086,31 +1084,31 @@ describe('HealthController', () => {
 
         // Mock all readiness dependencies
         (
-          healthService.checkDatabaseHealth as jest.MockedFunction<any>
+          healthService.checkDatabaseHealth
         ).mockResolvedValue({
           database: { status: 'up', responseTime: '25ms' },
         });
 
         (
-          healthService.checkExternalServices as jest.MockedFunction<any>
+          healthService.checkExternalServices
         ).mockResolvedValue({
           external_services: { status: 'up', serviceCount: 2 },
         });
 
         (
-          diskHealthIndicator.checkStorage as jest.MockedFunction<any>
+          diskHealthIndicator.checkStorage
         ).mockResolvedValue({
           storage: { status: 'up', usage: '65%' },
         });
 
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockResolvedValue({
           memory_heap: { status: 'up', used: '80MB' },
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue({
           status: 'ok',
           info: {
@@ -1145,11 +1143,11 @@ describe('HealthController', () => {
           jest.spyOn(
             healthService,
             'checkDatabaseHealth',
-          ) as jest.MockedFunction<any>
+          )
         ).mockRejectedValue(new Error('Database connection timeout'));
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockRejectedValue(new Error('Readiness check failed'));
 
         try {
@@ -1167,31 +1165,31 @@ describe('HealthController', () => {
         console.log(`[${testId}] Testing readiness threshold validation`);
 
         (
-          healthService.checkDatabaseHealth as jest.MockedFunction<any>
+          healthService.checkDatabaseHealth
         ).mockResolvedValue({
           database: { status: 'up' },
         });
 
         (
-          healthService.checkExternalServices as jest.MockedFunction<any>
+          healthService.checkExternalServices
         ).mockResolvedValue({
           external_services: { status: 'up' },
         });
 
         (
-          diskHealthIndicator.checkStorage as jest.MockedFunction<any>
+          diskHealthIndicator.checkStorage
         ).mockResolvedValue({
           storage: { status: 'up' },
         });
 
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockResolvedValue({
           memory_heap: { status: 'up' },
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue({
           status: 'ok',
           info: {},
@@ -1220,29 +1218,29 @@ describe('HealthController', () => {
 
         // Mock external services failure but database success
         (
-          healthService.checkDatabaseHealth as jest.MockedFunction<any>
+          healthService.checkDatabaseHealth
         ).mockResolvedValue({
           database: { status: 'up' },
         });
 
         (
-          healthService.checkExternalServices as jest.MockedFunction<any>
+          healthService.checkExternalServices
         ).mockRejectedValue(new Error('External service unavailable'));
 
         (
-          diskHealthIndicator.checkStorage as jest.MockedFunction<any>
+          diskHealthIndicator.checkStorage
         ).mockResolvedValue({
           storage: { status: 'up' },
         });
 
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockResolvedValue({
           memory_heap: { status: 'up' },
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockRejectedValue(new Error('Some services are down'));
 
         try {
@@ -1260,31 +1258,31 @@ describe('HealthController', () => {
 
         // Mock successful checks
         (
-          healthService.checkDatabaseHealth as jest.MockedFunction<any>
+          healthService.checkDatabaseHealth
         ).mockResolvedValue({
           database: { status: 'up' },
         });
 
         (
-          healthService.checkExternalServices as jest.MockedFunction<any>
+          healthService.checkExternalServices
         ).mockResolvedValue({
           external_services: { status: 'up' },
         });
 
         (
-          diskHealthIndicator.checkStorage as jest.MockedFunction<any>
+          diskHealthIndicator.checkStorage
         ).mockResolvedValue({
           storage: { status: 'up' },
         });
 
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockResolvedValue({
           memory_heap: { status: 'up' },
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue({
           status: 'ok',
           info: {},
@@ -1309,25 +1307,25 @@ describe('HealthController', () => {
 
         // Mock startup dependencies
         (
-          healthService.checkStartupComplete as jest.MockedFunction<any>
+          healthService.checkStartupComplete
         ).mockReturnValue({
           startup: { status: 'up', uptime: '45s' },
         });
 
         (
-          healthService.checkModuleInitialization as jest.MockedFunction<any>
+          healthService.checkModuleInitialization
         ).mockReturnValue({
           modules: { status: 'up', modules: { health: true } },
         });
 
         (
-          healthService.checkDatabaseHealth as jest.MockedFunction<any>
+          healthService.checkDatabaseHealth
         ).mockResolvedValue({
           database: { status: 'up', responseTime: '15ms' },
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue({
           status: 'ok',
           info: {
@@ -1357,13 +1355,13 @@ describe('HealthController', () => {
 
         // Mock startup not complete
         (
-          healthService.checkStartupComplete as jest.MockedFunction<any>
+          healthService.checkStartupComplete
         ).mockReturnValue({
           startup: { status: 'down', message: 'Service is still starting up' },
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockRejectedValue(new Error('Startup not complete'));
 
         try {
@@ -1380,13 +1378,13 @@ describe('HealthController', () => {
         console.log(`[${testId}] Testing module initialization validation`);
 
         (
-          healthService.checkStartupComplete as jest.MockedFunction<any>
+          healthService.checkStartupComplete
         ).mockReturnValue({
           startup: { status: 'up' },
         });
 
         (
-          healthService.checkModuleInitialization as jest.MockedFunction<any>
+          healthService.checkModuleInitialization
         ).mockReturnValue({
           modules: {
             status: 'up',
@@ -1400,13 +1398,13 @@ describe('HealthController', () => {
         });
 
         (
-          healthService.checkDatabaseHealth as jest.MockedFunction<any>
+          healthService.checkDatabaseHealth
         ).mockResolvedValue({
           database: { status: 'up' },
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue({
           status: 'ok',
           info: {},
@@ -1426,7 +1424,7 @@ describe('HealthController', () => {
 
         // Mock service that hasn't been running long enough
         (
-          healthService.checkStartupComplete as jest.MockedFunction<any>
+          healthService.checkStartupComplete
         ).mockReturnValue({
           startup: {
             status: 'down',
@@ -1436,19 +1434,19 @@ describe('HealthController', () => {
         });
 
         (
-          healthService.checkModuleInitialization as jest.MockedFunction<any>
+          healthService.checkModuleInitialization
         ).mockReturnValue({
           modules: { status: 'up', modules: {} },
         });
 
         (
-          healthService.checkDatabaseHealth as jest.MockedFunction<any>
+          healthService.checkDatabaseHealth
         ).mockResolvedValue({
           database: { status: 'up' },
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockRejectedValue(
           new Error('Startup probe failed - still initializing'),
         );
@@ -1468,25 +1466,25 @@ describe('HealthController', () => {
         console.log(`[${testId}] Testing startup probe timing logging`);
 
         (
-          healthService.checkStartupComplete as jest.MockedFunction<any>
+          healthService.checkStartupComplete
         ).mockReturnValue({
           startup: { status: 'up', uptime: '120s' },
         });
 
         (
-          healthService.checkModuleInitialization as jest.MockedFunction<any>
+          healthService.checkModuleInitialization
         ).mockReturnValue({
           modules: { status: 'up' },
         });
 
         (
-          healthService.checkDatabaseHealth as jest.MockedFunction<any>
+          healthService.checkDatabaseHealth
         ).mockResolvedValue({
           database: { status: 'up' },
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue({
           status: 'ok',
           info: {},
@@ -1511,42 +1509,42 @@ describe('HealthController', () => {
 
         // Mock all health checks to succeed
         (
-          healthService.checkProcessHealth as jest.MockedFunction<any>
+          healthService.checkProcessHealth
         ).mockReturnValue(mockHealthIndicatorResult);
         (
-          healthService.checkDatabaseHealth as jest.MockedFunction<any>
+          healthService.checkDatabaseHealth
         ).mockResolvedValue({
           database: { status: 'up' },
         });
         (
-          healthService.checkExternalServices as jest.MockedFunction<any>
+          healthService.checkExternalServices
         ).mockResolvedValue({
           external_services: { status: 'up' },
         });
         (
-          healthService.checkStartupComplete as jest.MockedFunction<any>
+          healthService.checkStartupComplete
         ).mockReturnValue({
           startup: { status: 'up' },
         });
         (
-          healthService.checkModuleInitialization as jest.MockedFunction<any>
+          healthService.checkModuleInitialization
         ).mockReturnValue({
           modules: { status: 'up' },
         });
 
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockResolvedValue({
           memory_heap: { status: 'up' },
         });
         (
-          diskHealthIndicator.checkStorage as jest.MockedFunction<any>
+          diskHealthIndicator.checkStorage
         ).mockResolvedValue({
           storage: { status: 'up' },
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue({
           status: 'ok',
           info: {},
@@ -1577,16 +1575,16 @@ describe('HealthController', () => {
 
         // Mock fast responses
         (
-          healthService.checkProcessHealth as jest.MockedFunction<any>
+          healthService.checkProcessHealth
         ).mockReturnValue(mockHealthIndicatorResult);
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockResolvedValue({
           memory_heap: { status: 'up' },
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue({
           status: 'ok',
           info: {},
@@ -1611,10 +1609,10 @@ describe('HealthController', () => {
         console.log(`[${testId}] Testing health probe response consistency`);
 
         (
-          healthService.checkProcessHealth as jest.MockedFunction<any>
+          healthService.checkProcessHealth
         ).mockReturnValue(mockHealthIndicatorResult);
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockResolvedValue({
           memory_heap: { status: 'up' },
         });
@@ -1633,7 +1631,7 @@ describe('HealthController', () => {
         };
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue(consistentResponse);
 
         // Execute multiple identical requests
@@ -1663,10 +1661,10 @@ describe('HealthController', () => {
         timeoutError.name = 'TimeoutError';
 
         (
-          healthService.checkDatabaseHealth as jest.MockedFunction<any>
+          healthService.checkDatabaseHealth
         ).mockRejectedValue(timeoutError);
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockRejectedValue(timeoutError);
 
         try {
@@ -1686,10 +1684,10 @@ describe('HealthController', () => {
         );
 
         (
-          healthService.checkProcessHealth as jest.MockedFunction<any>
+          healthService.checkProcessHealth
         ).mockReturnValue(mockHealthIndicatorResult);
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockResolvedValue({
           memory_heap: { status: 'up' },
         });
@@ -1724,7 +1722,7 @@ describe('HealthController', () => {
         };
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockResolvedValue(kubernetesResponse);
 
         const result = await controller.checkLiveness();
@@ -1751,13 +1749,13 @@ describe('HealthController', () => {
 
         const unavailableError = new Error('Health service unavailable');
         (
-          healthService.checkProcessHealth as jest.MockedFunction<any>
+          healthService.checkProcessHealth
         ).mockImplementation(() => {
           throw unavailableError;
         });
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockRejectedValue(unavailableError);
 
         try {
@@ -1815,11 +1813,11 @@ describe('HealthController', () => {
 
         const memoryError = new Error('Memory threshold exceeded');
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockRejectedValue(memoryError);
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockRejectedValue(memoryError);
 
         try {
@@ -1838,11 +1836,11 @@ describe('HealthController', () => {
 
         const diskError = new Error('Insufficient disk space');
         (
-          diskHealthIndicator.checkStorage as jest.MockedFunction<any>
+          diskHealthIndicator.checkStorage
         ).mockRejectedValue(diskError);
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockRejectedValue(diskError);
 
         try {
@@ -1864,11 +1862,11 @@ describe('HealthController', () => {
           jest.spyOn(
             healthService,
             'checkProcessHealth',
-          ) as jest.MockedFunction<any>
+          )
         ).mockReturnValue(mockHealthIndicatorResult);
 
         (
-          memoryHealthIndicator.checkHeap as jest.MockedFunction<any>
+          memoryHealthIndicator.checkHeap
         ).mockImplementation(
           () =>
             new Promise((resolve) =>
@@ -1877,7 +1875,7 @@ describe('HealthController', () => {
         );
 
         (
-          healthCheckService.check as jest.MockedFunction<any>
+          healthCheckService.check
         ).mockImplementation(
           () =>
             new Promise((resolve) =>

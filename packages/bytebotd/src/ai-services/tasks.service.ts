@@ -503,7 +503,7 @@ export class TasksService {
             action: `Execute ${task.name}`,
             estimatedDuration: 300 + (index * 200),
             dependencies: task.dependencies,
-            riskLevel: ['low', 'medium', 'high'][index % 3],
+            riskLevel: ['low', 'medium', 'high'][index % 3] || 'low',
           })),
           totalEstimatedDuration: request.tasks.length * 500,
           parallelizationOpportunities: ['independent_tasks', 'resource_pooling'],

@@ -510,7 +510,7 @@ export class MessagesService {
     const mockAnalysis: MessageAnalysisResult[] = request.messages.map((message, index) => ({
       messageId: message.id,
       sentiment: ['positive', 'negative', 'neutral', 'mixed'][index % 4] as any,
-      topics: ['technology', 'business', 'communication', 'support'][index % 4] ? [['technology', 'business', 'communication', 'support'][index % 4]] : ['general'],
+      topics: [['technology', 'business', 'communication', 'support'][index % 4] || 'general'],
       intent: {
         primary: 'information_request',
         confidence: 0.85 + Math.random() * 0.1,

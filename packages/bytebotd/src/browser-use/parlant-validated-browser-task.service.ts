@@ -354,7 +354,7 @@ export class ParlantValidatedBrowserTaskService {
           {
             operationId,
             taskId: task.taskId,
-            taskName: task.name,
+            taskName: task.taskId,
             status: task.status,
             executionTime: Date.now() - executionStartTime,
             validationTime: executionStartTime - startTime,
@@ -502,7 +502,12 @@ export class ParlantValidatedBrowserTaskService {
       }
 
       // Step 3: Execute task update
-      const updatedTask = await this.originalBrowserTaskService.updateTask(taskId, updateData);
+      this.originalBrowserTaskService.updateTaskStatus(taskId, updateData);
+      const updatedTask = this.originalBrowserTaskService.getTask(taskId);
+      
+      if (!updatedTask) {
+        throw new Error(`Task ${taskId} not found after update`);
+      }
 
       // Step 4: Create audit entry
       await this.createTaskAuditEntry({
@@ -753,7 +758,7 @@ export class ParlantValidatedBrowserTaskService {
     }
 
     // Assess based on task priority
-    if (taskData.priority === BrowserTaskPriority.HIGH || taskData.priority === BrowserTaskPriority.URGENT) {
+    if (taskData.priority === BrowserTaskPriority.HIGH || taskData.priority === BrowserTaskPriority.CRITICAL) {
       riskLevel = this.escalateRiskLevel(riskLevel);
       riskFactors.push('high_priority_task');
     }
@@ -985,13 +990,13 @@ export class ParlantValidatedBrowserTaskService {
     switch (riskLevel) {
       case RiskLevel.CRITICAL:
         requirements.push('real_time_monitoring', 'security_team_notification');
-        // fall through
+        // @ts-expect-error: intentional fallthrough
       case RiskLevel.HIGH:
         requirements.push('detailed_action_logging', 'resource_monitoring');
-        // fall through
+        // @ts-expect-error: intentional fallthrough
       case RiskLevel.MEDIUM:
         requirements.push('progress_tracking', 'error_monitoring');
-        // fall through
+        // @ts-expect-error: intentional fallthrough
       case RiskLevel.LOW:
         requirements.push('basic_logging');
         break;
@@ -1055,10 +1060,10 @@ export class ParlantValidatedBrowserTaskService {
    */
   private extractTaskMetadata(taskData: TaskCreationData): TaskExecutionMetadata {
     return {
-      priority: taskData.priority,
+      priority: taskData.priority || BrowserTaskPriority.NORMAL,
       sessionConfig: taskData.sessionConfig,
-      enableLogging: taskData.enableLogging,
-      continueOnError: taskData.continueOnError,
+      enableLogging: taskData.enableLogging || false,
+      continueOnError: taskData.continueOnError || false,
       timeout: taskData.maxExecutionTimeMs,
     };
   }
@@ -1128,7 +1133,7 @@ export class ParlantValidatedBrowserTaskService {
       flags.push('HIGH_COMPLEXITY_TASK');
     }
 
-    if (taskData.priority === BrowserTaskPriority.URGENT) {
+    if (taskData.priority === BrowserTaskPriority.CRITICAL) {
       flags.push('URGENT_PRIORITY_TASK');
     }
 

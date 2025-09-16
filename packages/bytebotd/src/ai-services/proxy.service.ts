@@ -28,7 +28,7 @@ export interface ProxyProcessingContext extends ParlantConversationContext {
   readonly proxyType: 'ai_model_routing' | 'load_balancing' | 'request_filtering' | 'response_processing';
   readonly targetService: 'anthropic' | 'openai' | 'google' | 'internal' | 'external';
   readonly operationMode: 'passthrough' | 'transform' | 'aggregate' | 'filter';
-  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'MAXIMUM';
+  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   readonly cachingEnabled: boolean;
   readonly requestSizeLimit?: number;
 }
@@ -264,17 +264,17 @@ export class ProxyService {
     const weights = this.calculateServiceWeights(request);
     
     // Simple weighted random selection for demo
-    let totalWeight = weights.reduce((sum, w) => sum + w, 0);
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
     let random = Math.random() * totalWeight;
     
     for (let i = 0; i < services.length; i++) {
-      random -= weights[i];
+      random -= weights[i] || 0;
       if (random <= 0) {
-        return services[i];
+        return services[i] || 'anthropic';
       }
     }
     
-    return services[0]; // fallback
+    return services[0] || 'anthropic'; // fallback
   }
 
   private calculateServiceWeights(request: ProxyRequest): number[] {
@@ -287,7 +287,7 @@ export class ProxyService {
     if (request.context.proxyType === 'ai_model_routing' && request.context.operationMode === 'transform') {
       return RiskLevel.CRITICAL; // AI routing with transformation is high risk
     }
-    if (request.context.securityLevel === 'MAXIMUM') {
+    if (request.context.securityLevel === 'CRITICAL') {
       return RiskLevel.HIGH;
     }
     if (request.metadata.requestSize > (request.context.requestSizeLimit || 1000000)) {

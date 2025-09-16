@@ -571,18 +571,18 @@ export class ParlantValidatedInputCaptureService {
   }
 
   private assessActionRiskLevel(action: ComputerAction): RiskLevel {
-    if (action.action === 'type' && 'text' in action) {
+    if ((action.action === 'type_text' || action.action === 'type_keys') && 'text' in action) {
       // Check if the text contains sensitive patterns
-      const text = action.text as string;
+      const text = (action as any).text as string;
       if (this.containsSensitiveData(text)) {
         return RiskLevel.CRITICAL;
       }
       return RiskLevel.MEDIUM;
     }
-    if (action.action === 'click' || action.action === 'drag') {
+    if (action.action === 'click_mouse' || action.action === 'drag_mouse') {
       return RiskLevel.MEDIUM; // Mouse actions can trigger important operations
     }
-    if (action.action === 'scroll' || action.action === 'move') {
+    if (action.action === 'scroll' || action.action === 'move_mouse') {
       return RiskLevel.LOW; // Navigation actions are generally safe
     }
     return RiskLevel.MINIMAL;
@@ -618,8 +618,8 @@ export class ParlantValidatedInputCaptureService {
 
   private detectActionAnomaly(action: ComputerAction): boolean {
     // Simple anomaly detection based on action type
-    if (action.action === 'type' && 'text' in action) {
-      const text = action.text as string;
+    if ((action.action === 'type_text' || action.action === 'type_keys') && 'text' in action) {
+      const text = (action as any).text as string;
       return text.length > 1000; // Very long text input might be anomalous
     }
     return Math.random() < 0.03; // 3% chance of anomaly detection

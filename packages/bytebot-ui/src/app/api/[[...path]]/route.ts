@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 async function proxy(req: NextRequest, path: string[]): Promise<Response> {
   const BASE_URL = process.env.BYTEBOT_AGENT_BASE_URL;
   
-  if (!BASE_URL) {
+  if (typeof BASE_URL !== 'string' || BASE_URL.length === 0) {
     throw new Error('BYTEBOT_AGENT_BASE_URL environment variable is not configured');
   }
   const subPath = path.length ? path.join("/") : "";
@@ -23,7 +23,7 @@ async function proxy(req: NextRequest, path: string[]): Promise<Response> {
     method: req.method,
     headers: {
       "Content-Type": "application/json",
-      ...(cookies && { Cookie: cookies }),
+      ...(typeof cookies === 'string' && cookies.length > 0 && { Cookie: cookies }),
     },
     body: requestBody,
   };
@@ -32,7 +32,7 @@ async function proxy(req: NextRequest, path: string[]): Promise<Response> {
   const body = await res.text();
 
   // Extract Set-Cookie headers from the backend response
-  const setCookieHeaders = res.headers.getSetCookie?.() || [];
+  const setCookieHeaders = typeof res.headers.getSetCookie === 'function' ? res.headers.getSetCookie() : [];
 
   // Create response headers
   const responseHeaders = new Headers({

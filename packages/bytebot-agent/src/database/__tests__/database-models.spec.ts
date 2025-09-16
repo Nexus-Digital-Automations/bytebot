@@ -1248,7 +1248,7 @@ describe('Database Models Comprehensive Test Suite', () => {
         };
 
         const mockCreate = jest.fn().mockResolvedValue(metricData);
-        
+
         // Ensure the browserPerformanceMetric property exists on the mock
         if (!prismaService.browserPerformanceMetric) {
           (prismaService as any).browserPerformanceMetric = {
@@ -1259,7 +1259,7 @@ describe('Database Models Comprehensive Test Suite', () => {
             delete: jest.fn(),
           };
         }
-        
+
         jest
           .spyOn(prismaService.browserPerformanceMetric, 'create')
           .mockImplementation(mockCreate);

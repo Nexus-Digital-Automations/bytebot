@@ -2288,10 +2288,83 @@
       "updated_at": "2025-09-15T23:36:14.998Z",
       "archived_at": "2025-09-15T23:36:15.002Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-14T20:29:48.940Z",
+      "title": "Comprehensive build pipeline testing after workspace coordination fixes",
+      "description": "Test individual package builds, workspace build coordination, Prisma integration, TypeScript compilation, and production builds across the entire workspace with performance monitoring",
+      "category": "test",
+      "id": "test_1757881788940_5jjn8wyrq0a",
+      "assigned_agent": "dev_session_1758014598420_1_general_53da819c",
+      "started_at": "2025-09-16T09:26:57.671Z",
+      "claimed_by": "dev_session_1758014598420_1_general_53da819c",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758014598420_1_general_53da819c",
+          "role": "primary",
+          "assignedAt": "2025-09-16T09:26:57.671Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T09:41:31.587Z",
+      "updated_at": "2025-09-16T09:41:31.588Z",
+      "archived_at": "2025-09-16T09:41:31.595Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T10:29:33.556Z",
+      "title": "CRITICAL: Fix remaining 1050 ESLint violations in bytebotd",
+      "description": "Comprehensive cleanup of remaining ESLint violations blocking clean builds: prefer-nullish-coalescing (975+ violations), no-explicit-any (422+ violations), restrict-template-expressions (113+ violations), and other TypeScript safety issues. Focus on highest-impact files: test-utils/setupAfterEnv.ts, computer-use/ files, and auth/ modules. Implement proper TypeScript patterns, replace unsafe any types, fix template expressions, and ensure zero ESLint violations for production readiness.",
+      "category": "error",
+      "priority": "high",
+      "id": "error_1758018573555_4en1aa72o6f",
+      "assigned_agent": "dev_session_1758018497502_1_general_b06e0de8",
+      "started_at": "2025-09-16T10:29:51.220Z",
+      "claimed_by": "dev_session_1758018497502_1_general_b06e0de8",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758018497502_1_general_b06e0de8",
+          "role": "primary",
+          "assignedAt": "2025-09-16T10:29:51.220Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T10:46:51.365Z",
+      "updated_at": "2025-09-16T10:46:51.365Z",
+      "archived_at": "2025-09-16T10:46:51.375Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T11:15:41.237Z",
+      "title": "Analyze WebSocket Architecture for Parlant Integration",
+      "description": "Research existing WebSocket implementations in AIgent codebase, identify integration points for Parlant real-time validation, analyze performance requirements, map event handlers, and create architecture recommendations",
+      "category": "research",
+      "id": "research_1758021341236_figq4cy9k1m",
+      "completed_at": "2025-09-16T11:20:04.243Z",
+      "updated_at": "2025-09-16T11:20:04.243Z",
+      "archived_at": "2025-09-16T11:20:04.250Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T11:21:08.122Z",
+      "title": "Analyze Parlant integration foundation in shared libraries",
+      "description": "Examine /packages/shared/ directory structure, identify integration points, analyze utility functions for Parlant wrapping, design wrapper interfaces, implement core types, and create function-level wrapping patterns",
+      "category": "feature",
+      "id": "feature_1758021668121_1oje7tybbe2",
+      "completed_at": "2025-09-16T11:43:34.952Z",
+      "updated_at": "2025-09-16T11:43:34.952Z",
+      "archived_at": "2025-09-16T11:43:34.958Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 56,
+  "total_completed": 60,
   "last_completion": "2025-09-13T05:08:39.544Z",
   "created_at": "2025-09-11T09:00:29.533Z",
-  "last_archived": "2025-09-15T23:36:15.002Z"
+  "last_archived": "2025-09-16T11:43:34.958Z"
 }

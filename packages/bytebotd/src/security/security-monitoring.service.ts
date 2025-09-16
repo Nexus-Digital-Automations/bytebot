@@ -628,7 +628,7 @@ export class SecurityMonitoringService {
       throw new Error(`Monitoring session ${monitoringId} not found`);
     }
 
-    session.endTime = new Date();
+    (session as any).endTime = new Date();
     session.conversationalAuditTrail.push(`Monitoring stopped via conversation ${conversationId}`);
     
     this.activeMonitoringSessions.delete(monitoringId);

@@ -569,7 +569,7 @@ export class SecurityAlertsService {
   private async distributeAlert(alert: SecurityAlert): Promise<AlertDistributionResult> {
     const sentToChannels: AlertChannel[] = [];
     const failedChannels: AlertChannel[] = [];
-    const deliveryConfirmations: Record<AlertChannel, boolean> = {};
+    const deliveryConfirmations: Record<AlertChannel, boolean> = {} as Record<AlertChannel, boolean>;
     let totalRecipients = 0;
 
     for (const channel of alert.channels) {

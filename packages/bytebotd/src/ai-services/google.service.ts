@@ -277,7 +277,7 @@ export class GoogleService {
           candidatesTokens: response.usageMetadata.candidatesTokenCount,
           totalTokens: response.usageMetadata.totalTokenCount,
           candidatesCount: response.candidates.length,
-          finishReason: response.candidates.length > 0 ? response.candidates[0].finishReason : 'FINISH_REASON_UNSPECIFIED',
+          finishReason: response.candidates.length > 0 ? response.candidates[0]?.finishReason || 'FINISH_REASON_UNSPECIFIED' : 'FINISH_REASON_UNSPECIFIED',
           duration,
           validationId: validationResponse.conversationId,
         }
@@ -495,7 +495,7 @@ export class GoogleService {
           imageCount: request.imageCount || 0,
           totalImageSize: request.totalImageSize || 0,
         },
-        actionDescription: `Execute Gemini multimodal processing with ${request.contentCount || request.contents.length} content parts including ${request.imageCount || 0} images`,
+        actionDescription: `Execute Gemini multimodal processing with ${request.contents.length} content parts including ${(request as any).imageCount || 0} images`,
         context: request.context,
         riskLevel: RiskLevel.HIGH, // Multimodal processing is HIGH risk
         operationId,
@@ -518,7 +518,7 @@ export class GoogleService {
         modelVersion: response.modelVersion,
         promptTokens: response.usageMetadata.promptTokenCount,
         candidatesTokens: response.usageMetadata.candidatesTokenCount,
-        safetyRatings: response.candidates.length > 0 ? response.candidates[0].safetyRatings : [],
+        safetyRatings: response.candidates.length > 0 ? response.candidates[0]?.safetyRatings || [] : [],
         duration,
         validationId: validationResponse.conversationId,
       });
@@ -581,7 +581,7 @@ export class GoogleService {
       modelVersion: request.config.model,
     };
 
-    mockResponse.usageMetadata.totalTokenCount = 
+    (mockResponse.usageMetadata as any).totalTokenCount = 
       mockResponse.usageMetadata.promptTokenCount + mockResponse.usageMetadata.candidatesTokenCount;
 
     // Simulate API latency
@@ -682,7 +682,7 @@ export class GoogleService {
       modelVersion: request.config.model,
     };
 
-    mockResponse.usageMetadata.totalTokenCount = 
+    (mockResponse.usageMetadata as any).totalTokenCount = 
       mockResponse.usageMetadata.promptTokenCount + mockResponse.usageMetadata.candidatesTokenCount;
 
     await new Promise(resolve => setTimeout(resolve, 250 + Math.random() * 250));
@@ -700,7 +700,7 @@ export class GoogleService {
         content: {
           role: 'model',
           parts: [{
-            text: `Mock Gemini multimodal analysis with ${request.imageCount || 0} images processed`
+            text: `Mock Gemini multimodal analysis with ${(request as any).imageCount || 0} images processed`
           }]
         },
         finishReason: 'STOP',
@@ -716,14 +716,14 @@ export class GoogleService {
         ]
       }],
       usageMetadata: {
-        promptTokenCount: this.estimatePromptTokens(request) + (request.imageCount || 0) * 200, // Images add tokens
+        promptTokenCount: this.estimatePromptTokens(request) + ((request as any).imageCount || 0) * 200, // Images add tokens
         candidatesTokenCount: 150,
         totalTokenCount: 0,
       },
       modelVersion: request.config.model,
     };
 
-    mockResponse.usageMetadata.totalTokenCount = 
+    (mockResponse.usageMetadata as any).totalTokenCount = 
       mockResponse.usageMetadata.promptTokenCount + mockResponse.usageMetadata.candidatesTokenCount;
 
     await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 300)); // Multimodal takes longer

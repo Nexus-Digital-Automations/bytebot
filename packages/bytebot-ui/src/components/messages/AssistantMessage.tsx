@@ -114,15 +114,12 @@ function getValidToolResultContent(
       if (
         contentArray.every((item) => Boolean(item) && typeof item === "object")
       ) {
-        // Safe type assertion with explicit return type
-        const typedArray: MessageContentBlock[] = [];
-        contentArray.forEach((item) => {
-          if (Boolean(item) && typeof item === "object") {
-            typedArray.push(item as MessageContentBlock);
-          }
-        });
-        // Explicit type return to avoid unsafe return warning
-        return typedArray;
+        // Safe type assertion with explicit return type using functional approach
+        const validItems: MessageContentBlock[] = contentArray
+          .filter((item): item is MessageContentBlock => Boolean(item) && typeof item === "object")
+          .map((item: MessageContentBlock): MessageContentBlock => item);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return validItems;
       }
     }
   } catch {
@@ -152,15 +149,12 @@ function getNonErrorToolResultContent(
       if (
         contentArray.every((item) => Boolean(item) && typeof item === "object")
       ) {
-        // Safe type assertion with explicit return type
-        const typedArray: MessageContentBlock[] = [];
-        contentArray.forEach((item) => {
-          if (Boolean(item) && typeof item === "object") {
-            typedArray.push(item as MessageContentBlock);
-          }
-        });
-        // Explicit type return to avoid unsafe return warning
-        return typedArray;
+        // Safe type assertion with explicit return type using functional approach
+        const validItems: MessageContentBlock[] = contentArray
+          .filter((item): item is MessageContentBlock => Boolean(item) && typeof item === "object")
+          .map((item: MessageContentBlock): MessageContentBlock => item);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return validItems;
       }
     }
   } catch {

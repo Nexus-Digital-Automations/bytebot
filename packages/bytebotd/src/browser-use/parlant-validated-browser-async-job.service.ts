@@ -48,7 +48,7 @@ export interface AsyncJobValidationContext extends ParlantConversationContext {
   readonly estimatedDurationMs?: number;
   readonly maxRetries?: number;
   readonly resourceRequirements: AsyncJobResourceRequirements;
-  readonly securityLevel: 'SAFE' | 'MODERATE' | 'ELEVATED' | 'CRITICAL';
+  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   readonly queueState: AsyncJobQueueInfo;
 }
 
@@ -269,7 +269,7 @@ export class ParlantValidatedBrowserAsyncJobService {
           executionResult = await Promise.race([
             this.originalAsyncJobService.createAsyncJob(dto),
             this.createTimeoutPromise(executionContext.timeoutMs)
-          ]);
+          ]) as AsyncJobResultDto;
         } else {
           executionResult = this.originalAsyncJobService.createAsyncJob(dto);
         }
@@ -917,7 +917,7 @@ export class ParlantValidatedBrowserAsyncJobService {
     let riskLevel = RiskLevel.LOW;
 
     // Check if user has appropriate access level
-    if (context.securityLevel === 'ELEVATED' || context.securityLevel === 'CRITICAL') {
+    if (context.securityLevel === 'HIGH' || context.securityLevel === 'CRITICAL') {
       riskFactors.push('Access to sensitive job information');
       riskLevel = RiskLevel.MEDIUM;
     }
