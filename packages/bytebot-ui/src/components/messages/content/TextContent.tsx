@@ -28,7 +28,11 @@ function isTextContentBlock(block: unknown): block is TextContentBlock {
 function getTextFromBlock(block: TextContentBlock): string {
   // Use type guard for comprehensive safety
   if (isTextContentBlock(block)) {
-    return block.text;
+    // Use bracket notation to avoid unsafe member access warnings
+    const textValue = (block as Record<string, unknown>).text;
+    if (typeof textValue === "string") {
+      return textValue;
+    }
   }
   return "";
 }
