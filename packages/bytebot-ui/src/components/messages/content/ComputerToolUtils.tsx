@@ -42,39 +42,79 @@ export type IconType =
   | typeof FileIcon;
 
 /**
- * Safe type guard wrapper to handle potential type safety issues
- * Ensures boolean return and handles any runtime type checking errors
+ * Safe type assertion to ensure we can work with the block safely
+ */
+function assertValidBlock(
+  block: unknown,
+): asserts block is ComputerToolUseContentBlock {
+  if (block === null || block === undefined || typeof block !== "object") {
+    throw new Error("Invalid block: not an object");
+  }
+  if (
+    !("name" in block) ||
+    typeof (block as { name?: unknown }).name !== "string"
+  ) {
+    throw new Error("Invalid block: missing or invalid name property");
+  }
+}
+
+/**
+ * Safe type guard wrapper that handles type assertion issues
  */
 function safeTypeGuard<T>(
   guard: (obj: unknown) => obj is T,
-  block: ComputerToolUseContentBlock,
+  block: unknown,
 ): boolean {
   try {
-    // Explicit type casting to handle the "error" type issue
-    const result = guard(block as unknown);
+    assertValidBlock(block);
+    const result = guard(block);
     return Boolean(result);
-  } catch (_error) {
-    // Log type guard failure for debugging
-    // console.warn("Type guard failed", { error: _error, block });
+  } catch {
     return false;
   }
 }
 
 /**
- * Safe property access for block input with proper type checking
+ * Safe property access for block input with comprehensive type checking
  */
-function hasButtonProperty(
-  block: ComputerToolUseContentBlock,
-): block is ComputerToolUseContentBlock & { input: { button: string } } {
-  return (
-    Boolean(block) &&
-    typeof block === "object" &&
-    "input" in block &&
-    Boolean(block.input) &&
-    typeof block.input === "object" &&
-    "button" in block.input &&
-    typeof (block.input as { button?: unknown }).button === "string"
-  );
+function hasValidInput(block: unknown): boolean {
+  try {
+    assertValidBlock(block);
+    const typedBlock = block;
+
+    return (
+      "input" in typedBlock &&
+      typedBlock.input !== null &&
+      typedBlock.input !== undefined &&
+      typeof typedBlock.input === "object"
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get button value safely
+ */
+function getButtonValue(block: unknown): string | undefined {
+  try {
+    assertValidBlock(block);
+    const typedBlock = block;
+
+    if (
+      "input" in typedBlock &&
+      typedBlock.input !== null &&
+      typedBlock.input !== undefined &&
+      typeof typedBlock.input === "object" &&
+      "button" in typedBlock.input
+    ) {
+      const button = (typedBlock.input as { button?: unknown }).button;
+      return typeof button === "string" ? button : undefined;
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function getIcon(block: ComputerToolUseContentBlock): IconType {
@@ -114,7 +154,8 @@ export function getIcon(block: ComputerToolUseContentBlock): IconType {
     safeTypeGuard(isTraceMouseToolUseBlock, block)
   ) {
     // Safe access to button property
-    if (hasButtonProperty(block) && block.input.button === "right") {
+    const buttonValue = getButtonValue(block);
+    if (buttonValue === "right") {
       return MouseRightClick06Icon;
     }
 
@@ -177,32 +218,38 @@ export function getLabel(block: ComputerToolUseContentBlock): string {
 
   if (safeTypeGuard(isClickMouseToolUseBlock, block)) {
     // Safe access with comprehensive type checking
-    if (Boolean(block.input) && typeof block.input === "object") {
-      const input = block.input as {
-        button?: string;
-        clickCount?: number;
-      };
+    if (hasValidInput(block)) {
+      try {
+        assertValidBlock(block);
+        const typedBlock = block;
+        const input = typedBlock.input as {
+          button?: string;
+          clickCount?: number;
+        };
 
-      const button = input.button;
-      if (button === "left") {
-        if (typeof input.clickCount === "number" && input.clickCount === 2) {
-          return "Double Click";
+        const button = input.button;
+        if (button === "left") {
+          if (typeof input.clickCount === "number" && input.clickCount === 2) {
+            return "Double Click";
+          }
+
+          if (
+            typeof input.clickCount === "number" &&
+            input.clickCount === TRIPLE_CLICK_COUNT
+          ) {
+            return "Triple Click";
+          }
+
+          return "Click";
         }
 
-        if (
-          typeof input.clickCount === "number" &&
-          input.clickCount === TRIPLE_CLICK_COUNT
-        ) {
-          return "Triple Click";
+        if (typeof button === "string" && button.length > 0) {
+          const capitalizedButton =
+            button.charAt(0).toUpperCase() + button.slice(1);
+          return `${capitalizedButton} Click`;
         }
-
-        return "Click";
-      }
-
-      if (typeof button === "string" && button.length > 0) {
-        const capitalizedButton =
-          button.charAt(0).toUpperCase() + button.slice(1);
-        return `${capitalizedButton} Click`;
+      } catch {
+        // Fall through to default
       }
     }
     return "Click";

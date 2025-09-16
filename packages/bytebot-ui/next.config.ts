@@ -127,6 +127,12 @@ const nextConfig: NextConfig = {
     // Enable webpack build worker for faster builds
     webpackBuildWorker: true,
   },
+
+  /**
+   * Disable static optimization to avoid webpack runtime errors
+   */
+  output: "standalone",
+  trailingSlash: false,
 };
 
 export default nextConfig;

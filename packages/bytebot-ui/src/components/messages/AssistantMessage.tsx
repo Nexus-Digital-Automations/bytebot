@@ -17,10 +17,15 @@ function safeIsImageContentBlock(contentItem: MessageContentBlock): boolean {
     if (contentItem !== null && typeof contentItem === "object") {
       // Type-safe call with explicit boolean conversion and error handling
       try {
-        const checkResult = isImageContentBlock(contentItem);
-        // Type guard: ensure result is boolean
-        return typeof checkResult === "boolean" ? checkResult : false;
-      } catch (_callError) {
+        // Direct property check to avoid unsafe function calls
+        if (
+          "type" in contentItem &&
+          (contentItem as { type: unknown }).type === "image"
+        ) {
+          return true;
+        }
+        return false;
+      } catch {
         // Handle function call errors safely
         return false;
       }

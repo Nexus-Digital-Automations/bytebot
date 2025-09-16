@@ -78,6 +78,19 @@ function isValidApplication(value: unknown): value is Application {
   );
 }
 
+/**
+ * Helper function to safely check if block has valid input
+ */
+function hasValidBlockInput(block: unknown): boolean {
+  return Boolean(
+    block !== null &&
+      typeof block === "object" &&
+      "input" in block &&
+      block.input !== null &&
+      typeof block.input === "object",
+  );
+}
+
 interface ComputerToolContentNormalProps {
   block: ComputerToolUseContentBlock;
 }
@@ -102,10 +115,14 @@ function ToolDetailsNormal({
 
   return (
     <>
-      {isApplicationToolUseBlock(block) && (
+      {Boolean(isApplicationToolUseBlock(block)) && (
         <p className={baseClasses}>
           {((): string => {
-            const app = block.input.application;
+            if (!hasValidBlockInput(block)) {
+              return "Unknown Application";
+            }
+            const input = block.input as { application?: unknown };
+            const app = input.application;
             return isValidApplication(app)
               ? applicationMap[app]
               : "Unknown Application";
@@ -114,38 +131,52 @@ function ToolDetailsNormal({
       )}
 
       {/* Text for type and key actions */}
-      {(isTypeKeysToolUseBlock(block) || isPressKeysToolUseBlock(block)) && (
+      {(Boolean(isTypeKeysToolUseBlock(block)) ||
+        Boolean(isPressKeysToolUseBlock(block))) && (
         <p className={baseClasses}>
           {((): string => {
-            const keys = block.input.keys;
-            return Array.isArray(keys)
-              ? String(keys.join(" + "))
-              : "Invalid keys";
+            if (!hasValidBlockInput(block)) {
+              return "Invalid keys";
+            }
+            const input = block.input as { keys?: unknown };
+            const keys = input.keys;
+            return Array.isArray(keys) ? keys.join(" + ") : "Invalid keys";
           })()}
         </p>
       )}
 
-      {(isTypeTextToolUseBlock(block) || isPasteTextToolUseBlock(block)) && (
+      {(Boolean(isTypeTextToolUseBlock(block)) ||
+        Boolean(isPasteTextToolUseBlock(block))) && (
         <p className={baseClasses}>
           {((): string => {
-            const input = block.input;
+            if (!hasValidBlockInput(block)) {
+              return "Invalid text";
+            }
+            const input = block.input as {
+              text?: unknown;
+              isSensitive?: unknown;
+            };
             const text = input.text;
-            const isSensitive = Boolean(input.isSensitive);
+            const isSensitive = Boolean(input.isSensitive ?? false);
 
             if (typeof text !== "string") {
               return "Invalid text";
             }
 
-            return String(isSensitive ? "●".repeat(text.length) : text);
+            return isSensitive ? "●".repeat(text.length) : text;
           })()}
         </p>
       )}
 
       {/* Duration for wait actions */}
-      {isWaitToolUseBlock(block) && (
+      {Boolean(isWaitToolUseBlock(block)) && (
         <p className={baseClasses}>
           {((): string => {
-            const duration = block.input.duration;
+            if (!hasValidBlockInput(block)) {
+              return "Invalid duration";
+            }
+            const input = block.input as { duration?: unknown };
+            const duration = input.duration;
             return typeof duration === "number"
               ? `${duration}ms`
               : "Invalid duration";
@@ -154,17 +185,27 @@ function ToolDetailsNormal({
       )}
 
       {/* Coordinates for click/mouse actions */}
-      {hasCoordinates(block.input) && (
+      {Boolean(block) && hasCoordinates(block.input) && (
         <p className={baseClasses}>
-          {block.input.coordinates.x}, {block.input.coordinates.y}
+          {((): string => {
+            if (!block?.input || !hasCoordinates(block.input)) {
+              return "Invalid coordinates";
+            }
+            const coords = block.input.coordinates;
+            return `${coords.x}, ${coords.y}`;
+          })()}
         </p>
       )}
 
       {/* Start and end coordinates for path actions */}
-      {hasPathCoordinates(block.input) && (
+      {Boolean(block) && hasPathCoordinates(block.input) && (
         <p className={baseClasses}>
           {((): string => {
-            const path = block.input.path;
+            if (!block?.input || !hasPathCoordinates(block.input)) {
+              return "Invalid path coordinates";
+            }
+            const input = block.input;
+            const path = input.path;
             const firstPoint = path[0];
             const lastPoint = path[path.length - 1];
 
@@ -178,17 +219,23 @@ function ToolDetailsNormal({
       )}
 
       {/* Scroll information */}
-      {isScrollToolUseBlock(block) && (
+      {Boolean(isScrollToolUseBlock(block)) && (
         <p className={baseClasses}>
           {((): string => {
-            const input = block.input;
+            if (!hasValidBlockInput(block)) {
+              return "unknown 0";
+            }
+            const input = block.input as {
+              direction?: unknown;
+              scrollCount?: unknown;
+            };
             const direction = input.direction;
             const scrollCount = input.scrollCount;
 
             const validDirection =
               typeof direction === "string" ? direction : "unknown";
             const validScrollCount =
-              typeof scrollCount === "number" && !isNaN(scrollCount)
+              typeof scrollCount === "number" && !Number.isNaN(scrollCount)
                 ? scrollCount
                 : 0;
 
@@ -198,10 +245,14 @@ function ToolDetailsNormal({
       )}
 
       {/* File information */}
-      {isReadFileToolUseBlock(block) && (
+      {Boolean(isReadFileToolUseBlock(block)) && (
         <p className={baseClasses}>
           {((): string => {
-            const path = block.input.path;
+            if (!hasValidBlockInput(block)) {
+              return "Invalid file path";
+            }
+            const input = block.input as { path?: unknown };
+            const path = input.path;
             return typeof path === "string" ? path : "Invalid file path";
           })()}
         </p>
@@ -214,6 +265,10 @@ export function ComputerToolContentNormal({
   block,
 }: ComputerToolContentNormalProps): React.JSX.Element | null {
   // Don't render screenshot tool use blocks here - they're handled separately
+  if (!block || typeof block !== "object") {
+    return null;
+  }
+
   const label = getLabel(block);
   if (label === "Screenshot") {
     return null;
