@@ -13,6 +13,13 @@ export { MetricsService } from './metrics.service';
 export { MonitoringController } from './monitoring.controller';
 export { MonitoringModule } from './monitoring.module';
 
+// Unified health monitoring utility
+export { HealthMonitorUtil } from './health-monitor.util';
+export type { 
+  HealthCheckContext, 
+  HealthCheckExecutionResult 
+} from './health-monitor.util';
+
 // Type definitions
 export * from './types';
 

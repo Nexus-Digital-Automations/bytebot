@@ -306,14 +306,14 @@ export function wrapFunctionWithMetadata<
   );
 
   // Extract metadata from decorators
-  const validationConfig = getParlantValidationMetadata(target, propertyKey);
+  const validationConfig = getParlantValidationMetadata(target as object, propertyKey);
   const conversationConfig = getConversationContextMetadata(
-    target,
+    target as object,
     propertyKey,
   );
-  const securityConfig = getSecurityClassificationMetadata(target, propertyKey);
-  const _approvalConfig = getApprovalWorkflowMetadata(target, propertyKey);
-  const validationRules = getValidationRulesMetadata(target, propertyKey);
+  const securityConfig = getSecurityClassificationMetadata(target as object, propertyKey);
+  const _approvalConfig = getApprovalWorkflowMetadata(target as object, propertyKey);
+  const validationRules = getValidationRulesMetadata(target as object, propertyKey);
 
   if (!validationConfig?.enabled) {
     logger.debug(
@@ -349,7 +349,7 @@ export function wrapFunctionWithMetadata<
     },
   );
 
-  return createParlantWrapper(originalFunction, wrapperConfig, parlantService);
+  return createParlantWrapper(originalFunction, wrapperConfig, parlantService as ParlantService);
 }
 
 /**
@@ -378,15 +378,15 @@ export function wrapClassMethods(
   );
 
   for (const methodName of methodNames) {
-    const originalMethod = target.prototype[methodName];
+    const originalMethod = (target as any).prototype[methodName];
     const wrappedMethod = wrapFunctionWithMetadata(
       originalMethod,
-      target.prototype,
+      (target as any).prototype,
       methodName,
       parlantService,
     );
 
-    target.prototype[methodName] = wrappedMethod;
+    (target as any).prototype[methodName] = wrappedMethod;
   }
 
   return target;
@@ -793,7 +793,7 @@ export function parlantWrapper<T extends (..._args: unknown[]) => unknown>(
   originalFunction: T,
   parlantService: unknown,
 ): ParlantWrapperBuilder<T> {
-  return new ParlantWrapperBuilder(originalFunction, parlantService);
+  return new ParlantWrapperBuilder(originalFunction, parlantService as ParlantService);
 }
 
 // ===========================
