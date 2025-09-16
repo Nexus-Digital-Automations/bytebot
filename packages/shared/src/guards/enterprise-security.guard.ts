@@ -35,12 +35,12 @@ import {
   ForbiddenException,
   Logger,
   Inject,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { Request, Response } from 'express';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { ConfigService } from "@nestjs/config";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
+import { Request, Response } from "express";
 
 // Import Parlant integration types and services
 import {
@@ -56,15 +56,15 @@ import {
   ParlantValidationMetadata,
   ParlantRiskAssessment,
   ParlantAuditEntry,
-} from '../types/parlant-integration.types';
+} from "../types/parlant-integration.types";
 
 // Import Parlant decorators and utilities
 import {
   ParlantValidation,
   ParlantDecoratorOptions,
-} from '../decorators/parlant-validation.decorator';
+} from "../decorators/parlant-validation.decorator";
 
-import { ParlantWrapperUtils } from '../utils/parlant-wrapper.utils';
+import { ParlantWrapperUtils } from "../utils/parlant-wrapper.utils";
 
 // ===== ENTERPRISE SECURITY TYPES =====
 
@@ -74,19 +74,19 @@ import { ParlantWrapperUtils } from '../utils/parlant-wrapper.utils';
 export interface SecureRequest extends Request {
   /** Authenticated user information */
   user?: AuthenticatedUser;
-  
+
   /** Security context for the request */
   securityContext?: SecurityContext;
-  
+
   /** Authorization results */
   authorizationResult?: AuthorizationResult;
-  
+
   /** Threat assessment results */
   threatAssessment?: ThreatAssessment;
-  
+
   /** Session security information */
   sessionSecurity?: SessionSecurityInfo;
-  
+
   /** Audit context */
   auditContext?: AuditContext;
 }
@@ -97,28 +97,28 @@ export interface SecureRequest extends Request {
 export interface AuthenticatedUser {
   /** User ID */
   id: string;
-  
+
   /** Username */
   username: string;
-  
+
   /** Email address */
   email: string;
-  
+
   /** User roles with hierarchy */
   roles: UserRole[];
-  
+
   /** Specific permissions */
   permissions: UserPermission[];
-  
+
   /** Security clearance level */
   securityClearance: SecurityClearanceLevel;
-  
+
   /** Multi-factor authentication status */
   mfaStatus: MfaStatus;
-  
+
   /** Account security status */
   accountStatus: AccountSecurityStatus;
-  
+
   /** User metadata */
   metadata: Record<string, unknown>;
 }
@@ -129,19 +129,19 @@ export interface AuthenticatedUser {
 export interface UserRole {
   /** Role name */
   name: string;
-  
+
   /** Role level in hierarchy */
   level: number;
-  
+
   /** Role permissions */
   permissions: string[];
-  
+
   /** Role restrictions */
   restrictions: string[];
-  
+
   /** Role expiration date */
   expiresAt?: Date;
-  
+
   /** Role metadata */
   metadata?: Record<string, unknown>;
 }
@@ -152,19 +152,19 @@ export interface UserRole {
 export interface UserPermission {
   /** Permission name */
   name: string;
-  
+
   /** Permission scope */
   scope: PermissionScope;
-  
+
   /** Resource constraints */
   resourceConstraints: ResourceConstraint[];
-  
+
   /** Time-based constraints */
   timeConstraints?: TimeConstraint[];
-  
+
   /** Conditional constraints */
   conditionalConstraints?: ConditionalConstraint[];
-  
+
   /** Permission expiration */
   expiresAt?: Date;
 }
@@ -173,12 +173,12 @@ export interface UserPermission {
  * Security clearance levels
  */
 export enum SecurityClearanceLevel {
-  PUBLIC = 'public',
-  INTERNAL = 'internal',
-  CONFIDENTIAL = 'confidential',
-  RESTRICTED = 'restricted',
-  SECRET = 'secret',
-  TOP_SECRET = 'top_secret',
+  PUBLIC = "public",
+  INTERNAL = "internal",
+  CONFIDENTIAL = "confidential",
+  RESTRICTED = "restricted",
+  SECRET = "secret",
+  TOP_SECRET = "top_secret",
 }
 
 /**
@@ -187,16 +187,16 @@ export enum SecurityClearanceLevel {
 export interface MfaStatus {
   /** Whether MFA is enabled */
   enabled: boolean;
-  
+
   /** MFA methods configured */
   methods: MfaMethod[];
-  
+
   /** Last MFA verification */
   lastVerification?: Date;
-  
+
   /** MFA verification status */
-  verificationStatus: 'VERIFIED' | 'PENDING' | 'EXPIRED' | 'FAILED';
-  
+  verificationStatus: "VERIFIED" | "PENDING" | "EXPIRED" | "FAILED";
+
   /** MFA challenges active */
   activeChallenges: MfaChallenge[];
 }
@@ -207,16 +207,16 @@ export interface MfaStatus {
 export interface MfaMethod {
   /** Method type */
   type: MfaMethodType;
-  
+
   /** Method configuration */
   configuration: Record<string, unknown>;
-  
+
   /** Method status */
-  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
-  
+  status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
+
   /** Last used timestamp */
   lastUsed?: Date;
-  
+
   /** Method metadata */
   metadata?: Record<string, unknown>;
 }
@@ -225,12 +225,12 @@ export interface MfaMethod {
  * MFA method types
  */
 export enum MfaMethodType {
-  SMS = 'sms',
-  EMAIL = 'email',
-  TOTP = 'totp',
-  HARDWARE_TOKEN = 'hardware_token',
-  BIOMETRIC = 'biometric',
-  CONVERSATIONAL = 'conversational',
+  SMS = "sms",
+  EMAIL = "email",
+  TOTP = "totp",
+  HARDWARE_TOKEN = "hardware_token",
+  BIOMETRIC = "biometric",
+  CONVERSATIONAL = "conversational",
 }
 
 /**
@@ -239,22 +239,22 @@ export enum MfaMethodType {
 export interface MfaChallenge {
   /** Challenge ID */
   id: string;
-  
+
   /** Challenge type */
   type: MfaMethodType;
-  
+
   /** Challenge question or prompt */
   prompt: string;
-  
+
   /** Challenge expiration */
   expiresAt: Date;
-  
+
   /** Attempt count */
   attemptCount: number;
-  
+
   /** Maximum attempts allowed */
   maxAttempts: number;
-  
+
   /** Challenge metadata */
   metadata?: Record<string, unknown>;
 }
@@ -265,22 +265,22 @@ export interface MfaChallenge {
 export interface AccountSecurityStatus {
   /** Whether account is locked */
   locked: boolean;
-  
+
   /** Lock reason if applicable */
   lockReason?: string;
-  
+
   /** Lock expiration */
   lockExpiresAt?: Date;
-  
+
   /** Failed login attempts */
   failedLoginAttempts: number;
-  
+
   /** Last failed login */
   lastFailedLogin?: Date;
-  
+
   /** Security alerts active */
   activeSecurityAlerts: SecurityAlert[];
-  
+
   /** Suspicious activity indicators */
   suspiciousActivityIndicators: SuspiciousActivityIndicator[];
 }
@@ -291,22 +291,22 @@ export interface AccountSecurityStatus {
 export interface SecurityAlert {
   /** Alert ID */
   id: string;
-  
+
   /** Alert type */
   type: SecurityAlertType;
-  
+
   /** Alert severity */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
   /** Alert message */
   message: string;
-  
+
   /** Alert timestamp */
   timestamp: Date;
-  
+
   /** Alert status */
-  status: 'ACTIVE' | 'ACKNOWLEDGED' | 'RESOLVED';
-  
+  status: "ACTIVE" | "ACKNOWLEDGED" | "RESOLVED";
+
   /** Alert metadata */
   metadata?: Record<string, unknown>;
 }
@@ -315,12 +315,12 @@ export interface SecurityAlert {
  * Security alert types
  */
 export enum SecurityAlertType {
-  SUSPICIOUS_LOGIN = 'suspicious_login',
-  PRIVILEGE_ESCALATION_ATTEMPT = 'privilege_escalation_attempt',
-  UNUSUAL_ACTIVITY_PATTERN = 'unusual_activity_pattern',
-  MULTIPLE_FAILED_LOGINS = 'multiple_failed_logins',
-  ACCOUNT_COMPROMISE_SUSPECTED = 'account_compromise_suspected',
-  UNAUTHORIZED_ACCESS_ATTEMPT = 'unauthorized_access_attempt',
+  SUSPICIOUS_LOGIN = "suspicious_login",
+  PRIVILEGE_ESCALATION_ATTEMPT = "privilege_escalation_attempt",
+  UNUSUAL_ACTIVITY_PATTERN = "unusual_activity_pattern",
+  MULTIPLE_FAILED_LOGINS = "multiple_failed_logins",
+  ACCOUNT_COMPROMISE_SUSPECTED = "account_compromise_suspected",
+  UNAUTHORIZED_ACCESS_ATTEMPT = "unauthorized_access_attempt",
 }
 
 /**
@@ -329,16 +329,16 @@ export enum SecurityAlertType {
 export interface SuspiciousActivityIndicator {
   /** Indicator type */
   type: string;
-  
+
   /** Indicator description */
   description: string;
-  
+
   /** Risk score contribution */
   riskScore: number;
-  
+
   /** Detection timestamp */
   detectedAt: Date;
-  
+
   /** Indicator metadata */
   metadata?: Record<string, unknown>;
 }
@@ -349,25 +349,25 @@ export interface SuspiciousActivityIndicator {
 export interface SecurityContext {
   /** Security validation ID */
   validationId: string;
-  
+
   /** Security level required */
   requiredSecurityLevel: SecurityLevel;
-  
+
   /** Actual security level achieved */
   achievedSecurityLevel: SecurityLevel;
-  
+
   /** Security policies applied */
   appliedPolicies: SecurityPolicy[];
-  
+
   /** Threat mitigation measures */
   threatMitigations: ThreatMitigation[];
-  
+
   /** Compliance requirements */
   complianceRequirements: ComplianceRequirement[];
-  
+
   /** Security metrics */
   securityMetrics: SecurityMetrics;
-  
+
   /** Validation timestamp */
   validatedAt: Date;
 }
@@ -378,19 +378,19 @@ export interface SecurityContext {
 export interface SecurityPolicy {
   /** Policy ID */
   id: string;
-  
+
   /** Policy name */
   name: string;
-  
+
   /** Policy type */
   type: SecurityPolicyType;
-  
+
   /** Policy rules */
   rules: SecurityPolicyRule[];
-  
+
   /** Policy enforcement level */
-  enforcementLevel: 'ADVISORY' | 'ENFORCED' | 'STRICT';
-  
+  enforcementLevel: "ADVISORY" | "ENFORCED" | "STRICT";
+
   /** Policy metadata */
   metadata?: Record<string, unknown>;
 }
@@ -399,14 +399,14 @@ export interface SecurityPolicy {
  * Security policy types
  */
 export enum SecurityPolicyType {
-  ACCESS_CONTROL = 'access_control',
-  DATA_PROTECTION = 'data_protection',
-  AUTHENTICATION = 'authentication',
-  AUTHORIZATION = 'authorization',
-  AUDIT_LOGGING = 'audit_logging',
-  ENCRYPTION = 'encryption',
-  NETWORK_SECURITY = 'network_security',
-  CONVERSATION_VALIDATION = 'conversation_validation',
+  ACCESS_CONTROL = "access_control",
+  DATA_PROTECTION = "data_protection",
+  AUTHENTICATION = "authentication",
+  AUTHORIZATION = "authorization",
+  AUDIT_LOGGING = "audit_logging",
+  ENCRYPTION = "encryption",
+  NETWORK_SECURITY = "network_security",
+  CONVERSATION_VALIDATION = "conversation_validation",
 }
 
 /**
@@ -415,16 +415,16 @@ export enum SecurityPolicyType {
 export interface SecurityPolicyRule {
   /** Rule ID */
   id: string;
-  
+
   /** Rule condition */
   condition: PolicyCondition;
-  
+
   /** Rule action */
   action: PolicyAction;
-  
+
   /** Rule priority */
   priority: number;
-  
+
   /** Rule metadata */
   metadata?: Record<string, unknown>;
 }
@@ -435,25 +435,25 @@ export interface SecurityPolicyRule {
 export interface AuthorizationResult {
   /** Whether authorization is granted */
   granted: boolean;
-  
+
   /** Authorization decision */
   decision: AuthorizationDecision;
-  
+
   /** Decision reasoning */
   reasoning: string;
-  
+
   /** Required permissions */
   requiredPermissions: string[];
-  
+
   /** User permissions */
   userPermissions: string[];
-  
+
   /** Permission gaps */
   permissionGaps: string[];
-  
+
   /** Conditional approvals */
   conditionalApprovals: ConditionalApproval[];
-  
+
   /** Authorization timestamp */
   authorizedAt: Date;
 }
@@ -462,10 +462,10 @@ export interface AuthorizationResult {
  * Authorization decision types
  */
 export enum AuthorizationDecision {
-  ALLOW = 'allow',
-  DENY = 'deny',
-  CONDITIONAL = 'conditional',
-  ESCALATE = 'escalate',
+  ALLOW = "allow",
+  DENY = "deny",
+  CONDITIONAL = "conditional",
+  ESCALATE = "escalate",
 }
 
 /**
@@ -474,25 +474,25 @@ export enum AuthorizationDecision {
 export interface ThreatAssessment {
   /** Overall threat score (0-100) */
   overallThreatScore: number;
-  
+
   /** Threat level */
   threatLevel: ThreatLevel;
-  
+
   /** Identified threats */
   identifiedThreats: IdentifiedThreat[];
-  
+
   /** Threat indicators */
   threatIndicators: ThreatIndicator[];
-  
+
   /** Risk factors */
   riskFactors: RiskFactor[];
-  
+
   /** Mitigation recommendations */
   mitigationRecommendations: MitigationRecommendation[];
-  
+
   /** Assessment confidence */
   assessmentConfidence: number;
-  
+
   /** Assessment timestamp */
   assessedAt: Date;
 }
@@ -501,12 +501,12 @@ export interface ThreatAssessment {
  * Threat levels
  */
 export enum ThreatLevel {
-  NONE = 'none',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  IMMINENT = 'imminent',
+  NONE = "none",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
+  IMMINENT = "imminent",
 }
 
 /**
@@ -515,28 +515,28 @@ export enum ThreatLevel {
 export interface IdentifiedThreat {
   /** Threat ID */
   id: string;
-  
+
   /** Threat type */
   type: ThreatType;
-  
+
   /** Threat severity */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
   /** Threat description */
   description: string;
-  
+
   /** Attack vectors */
   attackVectors: string[];
-  
+
   /** Potential impact */
   potentialImpact: string[];
-  
+
   /** Likelihood score */
   likelihoodScore: number;
-  
+
   /** Impact score */
   impactScore: number;
-  
+
   /** Threat metadata */
   metadata?: Record<string, unknown>;
 }
@@ -545,19 +545,19 @@ export interface IdentifiedThreat {
  * Threat types
  */
 export enum ThreatType {
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  DATA_BREACH = 'data_breach',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  MALICIOUS_CODE_INJECTION = 'malicious_code_injection',
-  DENIAL_OF_SERVICE = 'denial_of_service',
-  SOCIAL_ENGINEERING = 'social_engineering',
-  INSIDER_THREAT = 'insider_threat',
-  ADVANCED_PERSISTENT_THREAT = 'advanced_persistent_threat',
+  UNAUTHORIZED_ACCESS = "unauthorized_access",
+  DATA_BREACH = "data_breach",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  MALICIOUS_CODE_INJECTION = "malicious_code_injection",
+  DENIAL_OF_SERVICE = "denial_of_service",
+  SOCIAL_ENGINEERING = "social_engineering",
+  INSIDER_THREAT = "insider_threat",
+  ADVANCED_PERSISTENT_THREAT = "advanced_persistent_threat",
 }
 
 // Additional supporting interfaces...
 export interface PermissionScope {
-  type: 'GLOBAL' | 'RESOURCE' | 'ATTRIBUTE';
+  type: "GLOBAL" | "RESOURCE" | "ATTRIBUTE";
   value: string;
 }
 
@@ -612,7 +612,7 @@ export interface ThreatMitigation {
 export interface ComplianceRequirement {
   framework: string;
   requirement: string;
-  status: 'MET' | 'NOT_MET' | 'PARTIAL' | 'N/A';
+  status: "MET" | "NOT_MET" | "PARTIAL" | "N/A";
 }
 
 export interface SecurityMetrics {
@@ -645,7 +645,7 @@ export interface RiskFactor {
 
 export interface MitigationRecommendation {
   recommendation: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   implementation: string;
   effectiveness: number;
 }
@@ -672,7 +672,7 @@ export interface PolicyAction {
 @Injectable()
 export class EnterpriseSecurityGuard implements CanActivate {
   private readonly logger = new Logger(EnterpriseSecurityGuard.name);
-  
+
   /** Performance targets for security operations */
   private readonly performanceTargets = {
     maxAuthenticationTime: 50, // ms
@@ -680,7 +680,7 @@ export class EnterpriseSecurityGuard implements CanActivate {
     maxThreatAssessmentTime: 40, // ms
     maxTotalSecurityTime: 100, // ms
   };
-  
+
   /** Security configuration */
   private readonly securityConfig = {
     enableZeroTrust: true,
@@ -691,7 +691,7 @@ export class EnterpriseSecurityGuard implements CanActivate {
     criticalThreatThreshold: 90,
     defaultSecurityLevel: SecurityLevel.MEDIUM,
   };
-  
+
   /** Circuit breaker for security services */
   private circuitBreakerState = {
     isOpen: false,
@@ -701,7 +701,7 @@ export class EnterpriseSecurityGuard implements CanActivate {
     failureThreshold: 5,
     recoveryTimeout: 60000, // 1 minute
   };
-  
+
   /** Security cache for performance optimization */
   private readonly securityCache = new Map<string, CachedSecurityResult>();
 
@@ -711,19 +711,23 @@ export class EnterpriseSecurityGuard implements CanActivate {
     private readonly parlantWrapperUtils: ParlantWrapperUtils,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
-    this.logger.log('Enterprise Security Guard initialized with MAXIMUM Parlant integration', {
-      performanceTargets: this.performanceTargets,
-      securityConfig: this.securityConfig,
-      zeroTrustEnabled: this.securityConfig.enableZeroTrust,
-      conversationalValidationEnabled: this.securityConfig.requireConversationalValidation,
-    });
+    this.logger.log(
+      "Enterprise Security Guard initialized with MAXIMUM Parlant integration",
+      {
+        performanceTargets: this.performanceTargets,
+        securityConfig: this.securityConfig,
+        zeroTrustEnabled: this.securityConfig.enableZeroTrust,
+        conversationalValidationEnabled:
+          this.securityConfig.requireConversationalValidation,
+      },
+    );
 
     // Initialize security monitoring
     this.initializeSecurityMonitoring();
-    
+
     // Initialize circuit breaker monitoring
     this.initializeCircuitBreakerMonitoring();
-    
+
     // Start security cache cleanup
     this.startSecurityCacheCleanup();
   }
@@ -732,53 +736,89 @@ export class EnterpriseSecurityGuard implements CanActivate {
    * Main security guard activation with comprehensive enterprise validation
    */
   @ParlantValidation({
-    description: 'Comprehensive enterprise security guard validation with zero-trust model',
+    description:
+      "Comprehensive enterprise security guard validation with zero-trust model",
     securityLevel: SecurityLevel.HIGH,
     cacheable: false, // Security decisions should not be cached between different requests
   })
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<SecureRequest>();
     const response = context.switchToHttp().getResponse<Response>();
-    
+
     const operationId = `enterprise-security-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
-    this.logger.debug(`[${operationId}] Enterprise security validation initiated`, {
-      operationId,
-      method: request.method,
-      url: request.url,
-      clientIp: this.getClientIp(request),
-      userAgent: request.get('User-Agent'),
-    });
+    this.logger.debug(
+      `[${operationId}] Enterprise security validation initiated`,
+      {
+        operationId,
+        method: request.method,
+        url: request.url,
+        clientIp: this.getClientIp(request),
+        userAgent: request.get("User-Agent"),
+      },
+    );
 
     try {
       // Phase 1: Initialize security context (Target: <10ms)
       await this.initializeSecurityContext(request, context, operationId);
 
       // Phase 2: Perform authentication validation (Target: <50ms)
-      const authenticationResult = await this.performEnterpriseAuthentication(request, context, operationId);
-      
+      const authenticationResult = await this.performEnterpriseAuthentication(
+        request,
+        context,
+        operationId,
+      );
+
       if (!authenticationResult.success) {
-        this.logSecurityEvent('AUTHENTICATION_FAILED', request, operationId, authenticationResult.reason);
+        this.logSecurityEvent(
+          "AUTHENTICATION_FAILED",
+          request,
+          operationId,
+          authenticationResult.reason,
+        );
         throw new UnauthorizedException(authenticationResult.reason);
       }
 
       // Phase 3: Perform authorization validation (Target: <30ms)
-      const authorizationResult = await this.performEnterpriseAuthorization(request, context, operationId);
+      const authorizationResult = await this.performEnterpriseAuthorization(
+        request,
+        context,
+        operationId,
+      );
       request.authorizationResult = authorizationResult;
-      
+
       if (!authorizationResult.granted) {
-        this.logSecurityEvent('AUTHORIZATION_FAILED', request, operationId, authorizationResult.reasoning);
+        this.logSecurityEvent(
+          "AUTHORIZATION_FAILED",
+          request,
+          operationId,
+          authorizationResult.reasoning,
+        );
         throw new ForbiddenException(authorizationResult.reasoning);
       }
 
       // Phase 4: Perform threat assessment (Target: <40ms)
-      const threatAssessment = await this.performThreatAssessment(request, context, operationId);
+      const threatAssessment = await this.performThreatAssessment(
+        request,
+        context,
+        operationId,
+      );
       request.threatAssessment = threatAssessment;
-      
-      if (threatAssessment.threatLevel === ThreatLevel.CRITICAL || threatAssessment.threatLevel === ThreatLevel.IMMINENT) {
-        this.logSecurityEvent('CRITICAL_THREAT_DETECTED', request, operationId, `Threat level: ${threatAssessment.threatLevel}`);
-        throw new ForbiddenException('Access denied due to critical security threat');
+
+      if (
+        threatAssessment.threatLevel === ThreatLevel.CRITICAL ||
+        threatAssessment.threatLevel === ThreatLevel.IMMINENT
+      ) {
+        this.logSecurityEvent(
+          "CRITICAL_THREAT_DETECTED",
+          request,
+          operationId,
+          `Threat level: ${threatAssessment.threatLevel}`,
+        );
+        throw new ForbiddenException(
+          "Access denied due to critical security threat",
+        );
       }
 
       // Phase 5: Apply security measures and audit logging
@@ -787,51 +827,64 @@ export class EnterpriseSecurityGuard implements CanActivate {
 
       // Calculate total security validation time
       const totalTime = Date.now() - startTime;
-      
+
       // Update security metrics
       this.updateSecurityMetrics(request, totalTime);
-      
+
       // Set security headers
       this.setSecurityHeaders(request, response);
 
       // Update circuit breaker on success
       this.updateCircuitBreakerOnSuccess();
 
-      this.logger.log(`[${operationId}] Enterprise security validation successful`, {
-        operationId,
-        totalTime,
-        authenticationMethod: authenticationResult.method,
-        authorizationDecision: authorizationResult.decision,
-        threatLevel: threatAssessment.threatLevel,
-        securityLevel: request.securityContext?.achievedSecurityLevel,
-        performanceMet: totalTime <= this.performanceTargets.maxTotalSecurityTime,
-      });
+      this.logger.log(
+        `[${operationId}] Enterprise security validation successful`,
+        {
+          operationId,
+          totalTime,
+          authenticationMethod: authenticationResult.method,
+          authorizationDecision: authorizationResult.decision,
+          threatLevel: threatAssessment.threatLevel,
+          securityLevel: request.securityContext?.achievedSecurityLevel,
+          performanceMet:
+            totalTime <= this.performanceTargets.maxTotalSecurityTime,
+        },
+      );
 
       return true;
-
     } catch (error) {
       const totalTime = Date.now() - startTime;
-      
+
       // Update circuit breaker on failure
       this.updateCircuitBreakerOnFailure();
-      
+
       // Log security failure with full context
-      this.logger.error(`[${operationId}] Enterprise security validation failed`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        errorType: error?.constructor?.name,
-        totalTime,
-        url: request.url,
-        method: request.method,
-        clientIp: this.getClientIp(request),
-      });
+      this.logger.error(
+        `[${operationId}] Enterprise security validation failed`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          errorType: error?.constructor?.name,
+          totalTime,
+          url: request.url,
+          method: request.method,
+          clientIp: this.getClientIp(request),
+        },
+      );
 
       // Log security event
-      this.logSecurityEvent('SECURITY_VALIDATION_FAILED', request, operationId, error instanceof Error ? error.message : String(error));
+      this.logSecurityEvent(
+        "SECURITY_VALIDATION_FAILED",
+        request,
+        operationId,
+        error instanceof Error ? error.message : String(error),
+      );
 
       // Determine if we should fail open based on circuit breaker state
       if (this.shouldFailOpen(error)) {
-        this.logger.warn(`[${operationId}] Failing open due to circuit breaker or error type`);
+        this.logger.warn(
+          `[${operationId}] Failing open due to circuit breaker or error type`,
+        );
         return true;
       }
 
@@ -844,7 +897,8 @@ export class EnterpriseSecurityGuard implements CanActivate {
    * Initialize security context for the request
    */
   @ParlantValidation({
-    description: 'Initialize comprehensive security context for enterprise request validation',
+    description:
+      "Initialize comprehensive security context for enterprise request validation",
     securityLevel: SecurityLevel.MEDIUM,
     cacheable: false,
   })
@@ -857,9 +911,15 @@ export class EnterpriseSecurityGuard implements CanActivate {
 
     try {
       // Extract security requirements from decorators and metadata
-      const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler()) || [];
-      const requiredPermissions = this.reflector.get<string[]>('permissions', context.getHandler()) || [];
-      const requiredSecurityLevel = this.reflector.get<SecurityLevel>('securityLevel', context.getHandler()) || this.securityConfig.defaultSecurityLevel;
+      const requiredRoles =
+        this.reflector.get<string[]>("roles", context.getHandler()) || [];
+      const requiredPermissions =
+        this.reflector.get<string[]>("permissions", context.getHandler()) || [];
+      const requiredSecurityLevel =
+        this.reflector.get<SecurityLevel>(
+          "securityLevel",
+          context.getHandler(),
+        ) || this.securityConfig.defaultSecurityLevel;
 
       // Initialize security context
       request.securityContext = {
@@ -884,11 +944,13 @@ export class EnterpriseSecurityGuard implements CanActivate {
         auditId: `audit-${operationId}`,
         auditTrail: [],
         complianceFrameworks: this.getRequiredComplianceFrameworks(context),
-        retentionPolicy: this.determineAuditRetentionPolicy(requiredSecurityLevel),
+        retentionPolicy: this.determineAuditRetentionPolicy(
+          requiredSecurityLevel,
+        ),
       };
 
       const initTime = Date.now() - startTime;
-      
+
       this.logger.debug(`[${operationId}] Security context initialized`, {
         operationId,
         requiredSecurityLevel,
@@ -897,16 +959,18 @@ export class EnterpriseSecurityGuard implements CanActivate {
         complianceFrameworks: request.auditContext.complianceFrameworks.length,
         initTime,
       });
-
     } catch (error) {
       const initTime = Date.now() - startTime;
-      
-      this.logger.error(`[${operationId}] Failed to initialize security context`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        initTime,
-      });
-      
+
+      this.logger.error(
+        `[${operationId}] Failed to initialize security context`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          initTime,
+        },
+      );
+
       throw error;
     }
   }
@@ -915,7 +979,8 @@ export class EnterpriseSecurityGuard implements CanActivate {
    * Perform comprehensive enterprise authentication
    */
   @ParlantValidation({
-    description: 'Perform comprehensive enterprise authentication with conversational validation',
+    description:
+      "Perform comprehensive enterprise authentication with conversational validation",
     securityLevel: SecurityLevel.HIGH,
     cacheable: true,
     cacheTtl: 300000, // 5 minutes for authentication cache
@@ -930,7 +995,9 @@ export class EnterpriseSecurityGuard implements CanActivate {
     try {
       // Check circuit breaker
       if (this.circuitBreakerState.isOpen) {
-        throw new ParlantAuthenticationError('Authentication service unavailable - circuit breaker open');
+        throw new ParlantAuthenticationError(
+          "Authentication service unavailable - circuit breaker open",
+        );
       }
 
       // Extract authentication information
@@ -940,11 +1007,11 @@ export class EnterpriseSecurityGuard implements CanActivate {
 
       // Determine authentication methods to use
       const authMethods = this.determineAuthMethods(request, context);
-      
+
       let authenticationResult: AuthenticationResult = {
         success: false,
-        method: 'none',
-        reason: 'No authentication method successful',
+        method: "none",
+        reason: "No authentication method successful",
         user: undefined,
         securityLevel: SecurityLevel.LOW,
         requiresMfa: false,
@@ -958,26 +1025,36 @@ export class EnterpriseSecurityGuard implements CanActivate {
             method,
             request,
             { authToken, clientCertificate, biometricData },
-            operationId
+            operationId,
           );
-          
+
           if (methodResult.success) {
             authenticationResult = methodResult;
             break;
           }
         } catch (methodError) {
-          this.logger.warn(`[${operationId}] Authentication method ${method} failed`, {
-            operationId,
-            method,
-            error: methodError instanceof Error ? methodError.message : String(methodError),
-          });
+          this.logger.warn(
+            `[${operationId}] Authentication method ${method} failed`,
+            {
+              operationId,
+              method,
+              error:
+                methodError instanceof Error
+                  ? methodError.message
+                  : String(methodError),
+            },
+          );
         }
       }
 
       // If primary authentication successful, check if MFA is required
       if (authenticationResult.success && authenticationResult.requiresMfa) {
-        const mfaResult = await this.performMfaValidation(request, authenticationResult.user!, operationId);
-        
+        const mfaResult = await this.performMfaValidation(
+          request,
+          authenticationResult.user!,
+          operationId,
+        );
+
         if (!mfaResult.success) {
           authenticationResult = {
             success: false,
@@ -994,37 +1071,40 @@ export class EnterpriseSecurityGuard implements CanActivate {
       // Set authenticated user in request
       if (authenticationResult.success && authenticationResult.user) {
         request.user = authenticationResult.user;
-        request.securityContext!.achievedSecurityLevel = authenticationResult.securityLevel;
+        request.securityContext!.achievedSecurityLevel =
+          authenticationResult.securityLevel;
       }
 
       const authTime = Date.now() - startTime;
       request.securityContext!.securityMetrics.validationTime = authTime;
 
-      this.logger.debug(`[${operationId}] Enterprise authentication completed`, {
-        operationId,
-        success: authenticationResult.success,
-        method: authenticationResult.method,
-        securityLevel: authenticationResult.securityLevel,
-        requiresMfa: authenticationResult.requiresMfa,
-        authTime,
-        userId: authenticationResult.user?.id,
-      });
+      this.logger.debug(
+        `[${operationId}] Enterprise authentication completed`,
+        {
+          operationId,
+          success: authenticationResult.success,
+          method: authenticationResult.method,
+          securityLevel: authenticationResult.securityLevel,
+          requiresMfa: authenticationResult.requiresMfa,
+          authTime,
+          userId: authenticationResult.user?.id,
+        },
+      );
 
       return authenticationResult;
-
     } catch (error) {
       const authTime = Date.now() - startTime;
       request.securityContext!.securityMetrics.validationTime = authTime;
-      
+
       this.logger.error(`[${operationId}] Enterprise authentication failed`, {
         operationId,
         error: error instanceof Error ? error.message : String(error),
         authTime,
       });
-      
+
       return {
         success: false,
-        method: 'error',
+        method: "error",
         reason: `Authentication error: ${error instanceof Error ? error.message : String(error)}`,
         user: undefined,
         securityLevel: SecurityLevel.LOW,
@@ -1038,15 +1118,19 @@ export class EnterpriseSecurityGuard implements CanActivate {
   // This file would continue with the complete implementation of all methods
 
   private initializeSecurityMonitoring(): void {
-    this.logger.log('Security monitoring initialized for enterprise security guard');
+    this.logger.log(
+      "Security monitoring initialized for enterprise security guard",
+    );
   }
 
   private initializeCircuitBreakerMonitoring(): void {
-    this.logger.log('Circuit breaker monitoring initialized for security services');
+    this.logger.log(
+      "Circuit breaker monitoring initialized for security services",
+    );
   }
 
   private startSecurityCacheCleanup(): void {
-    this.logger.log('Security cache cleanup initialized');
+    this.logger.log("Security cache cleanup initialized");
   }
 
   // ... (all other method implementations would continue)
