@@ -1,10 +1,5 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// TypeScript safety note: Test file with flexible typing for complex mock integrations
+// TypeScript safety note: Test file with proper type safety for complex mock integrations
 
 /**
  * Health Service Test Suite
@@ -58,8 +53,18 @@ interface _ServiceHealthMockReturn {
 }
 
 // Type for Health Service with access to private methods (for testing)
-interface _TestableHealthService extends HealthService {
-  // Additional test-specific methods can be added here
+interface TestableHealthService extends HealthService {
+  checkServiceHealth(): _ServiceHealthMockReturn;
+  performDatabasePing(): Promise<boolean>;
+  checkExternalService(
+    name: string,
+    url: string,
+  ): Promise<{ status: string; responseTime: string }>;
+  getPerformanceMetrics(): {
+    requestsPerSecond: number;
+    averageResponseTime: number;
+  };
+  startTime: number;
 }
 
 interface _PerformanceMetrics {
@@ -69,7 +74,7 @@ interface _PerformanceMetrics {
   cpuUsage?: NodeJS.CpuUsage;
 }
 describe('HealthService', () => {
-  let service: HealthService;
+  let service: TestableHealthService;
   let mockLogger: MockLogger;
   const operationId = `health_service_test_${Date.now()}`;
   beforeEach(async () => {
@@ -85,7 +90,9 @@ describe('HealthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [HealthService],
     }).compile();
-    service = module.get<HealthService>(HealthService);
+    service = module.get<TestableHealthService>(
+      HealthService,
+    ) as TestableHealthService;
     // Mock the logger
     jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);
     jest.spyOn(Logger.prototype, 'debug').mockImplementation(mockLogger.debug);
@@ -121,7 +128,7 @@ describe('HealthService', () => {
     });
   });
   describe('Basic Health Monitoring', () => {
-    it('should return healthy status with valid memory and uptime data', () => {
+    it('should return healthy status with valid memory and uptime data', async () => {
       const testId = `${operationId}_basic_health`;
       console.log(`[${testId}] Testing basic health monitoring`);
       // Mock process.memoryUsage and process.uptime
@@ -134,7 +141,7 @@ describe('HealthService', () => {
       };
       jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300); // 5 minutes
-      const result = service.getBasicHealth() as BasicHealthResponse;
+      const result = (await service.getBasicHealth()) as BasicHealthResponse;
       expect(result).toMatchObject({
         status: 'healthy',
         timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
@@ -155,7 +162,7 @@ describe('HealthService', () => {
         `[${testId}] Basic health monitoring test completed successfully`,
       );
     });
-    it('should handle memory usage edge cases', () => {
+    it('should handle memory usage edge cases', async () => {
       const testId = `${operationId}_memory_edge_cases`;
       console.log(`[${testId}] Testing memory usage edge cases`);
       const edgeCases = [
@@ -187,18 +194,16 @@ describe('HealthService', () => {
       for (const mockMemory of edgeCases) {
         jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemory);
         jest.spyOn(process, 'uptime').mockReturnValue(100);
-        const result = service.getBasicHealth() as BasicHealthResponse;
+        const result = (await service.getBasicHealth()) as BasicHealthResponse;
         expect(result.status).toBe('healthy');
         expect(result.memory.used).toBeGreaterThanOrEqual(0);
         expect(result.memory.total).toBeGreaterThanOrEqual(0);
         // free can be negative in edge cases
-        expect(typeof (result as BasicHealthResponse).memory.free).toBe(
-          'number',
-        );
+        expect(typeof result.memory.free).toBe('number');
       }
       console.log(`[${testId}] Memory edge cases test completed`);
     });
-    it('should handle process.uptime variations', () => {
+    it('should handle process.uptime variations', async () => {
       const testId = `${operationId}_uptime_variations`;
       console.log(`[${testId}] Testing process uptime variations`);
       const uptimeValues = [0, 1, 60, 3600, 86400, 604800]; // 0s, 1s, 1m, 1h, 1d, 1w
@@ -211,7 +216,7 @@ describe('HealthService', () => {
       });
       for (const uptime of uptimeValues) {
         jest.spyOn(process, 'uptime').mockReturnValue(uptime);
-        const result = service.getBasicHealth() as BasicHealthResponse;
+        const result = (await service.getBasicHealth()) as BasicHealthResponse;
         expect(result.uptime).toBe(Math.round(uptime));
         expect(result.status).toBe('healthy');
       }
@@ -309,9 +314,9 @@ describe('HealthService', () => {
       });
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       // Mock the private service health check method
-      const _originalCheckServiceHealth = service['checkServiceHealth'];
+      const _originalCheckServiceHealth = service.checkServiceHealth;
       // Test healthy status
-      jest.spyOn(service as any, 'checkServiceHealth').mockReturnValue({
+      jest.spyOn(service, 'checkServiceHealth').mockReturnValue({
         database: 'connected',
         cache: 'available',
         external: 'reachable',
@@ -319,7 +324,7 @@ describe('HealthService', () => {
       const result = await service.getDetailedStatus();
       expect(result.status).toBe('healthy');
       // Test degraded status (unknown services)
-      jest.spyOn(service as any, 'checkServiceHealth').mockReturnValue({
+      jest.spyOn(service, 'checkServiceHealth').mockReturnValue({
         database: 'unknown',
         cache: 'unknown',
         external: 'unknown',
@@ -327,7 +332,7 @@ describe('HealthService', () => {
       const result2 = await service.getDetailedStatus();
       expect(result2.status).toBe('degraded');
       // Test unhealthy status (failed services)
-      jest.spyOn(service as any, 'checkServiceHealth').mockReturnValue({
+      jest.spyOn(service, 'checkServiceHealth').mockReturnValue({
         database: 'disconnected',
         cache: 'unavailable',
         external: 'unreachable',

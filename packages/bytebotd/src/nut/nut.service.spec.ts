@@ -33,6 +33,35 @@ import { NutService } from './nut.service';
 import { spawn, type ChildProcessWithoutNullStreams } from 'child_process';
 import * as fs from 'fs';
 
+// Type-safe interfaces for NUT service operations
+interface ServiceResponse {
+  success: boolean;
+  message?: string;
+}
+
+interface Coordinates {
+  x: number;
+  y: number;
+}
+
+interface ServiceStatus {
+  healthy: boolean;
+  screenshotDir: string;
+  mouseConfig: { autoDelayMs: number };
+  keyboardConfig: { autoDelayMs: number };
+}
+
+interface KeyInfo {
+  key: string;
+  modifiers?: string[];
+}
+
+// Type-safe interface for accessing private methods in tests
+interface NutServiceWithPrivateMethods extends NutService {
+  validateServiceReady(): void;
+  screenshotDir: string | null;
+}
+
 // Type definitions for testing private methods - now imported from test-interfaces
 
 // Type definitions for nut-js mocks
@@ -227,7 +256,7 @@ jest.mock('fs', () => ({
 }));
 
 describe('NutService', () => {
-  let service: any;
+  let service: NutService;
   let loggerSpy: jest.SpyInstance;
 
   const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
@@ -276,7 +305,12 @@ describe('NutService', () => {
     it('should create screenshot directory during initialization', () => {
       // Since constructor runs during service creation, verify mkdir was called
       // Note: This is tested indirectly through the service health check
-      const status = service.getServiceStatus() as any;
+      const status: {
+        healthy: boolean;
+        screenshotDir: string;
+        mouseConfig: { autoDelayMs: number };
+        keyboardConfig: { autoDelayMs: number };
+      } = service.getServiceStatus();
       expect(status).toBeDefined();
       expect(status.screenshotDir).toContain('bytebot-screenshots');
     });

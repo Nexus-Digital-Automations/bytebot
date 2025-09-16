@@ -49,14 +49,17 @@ describe('HealthModule', () => {
     console.log(`[${operationId}] Setting up HealthModule test environment`);
 
     // Create mock logger
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Creating mock logger for testing
+
     mockLogger = {
       log: jest.fn(),
       debug: jest.fn(),
       error: jest.fn(),
       warn: jest.fn(),
       verbose: jest.fn(),
-    } as any;
+      fatal: jest.fn(),
+      setContext: jest.fn(),
+      localInstance: undefined,
+    } as jest.Mocked<Logger>;
 
     // Mock Logger constructor to return our mock
     jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);
@@ -145,7 +148,14 @@ describe('HealthModule', () => {
         ],
       }).compile();
 
-      const testService = testModule.get('TestServiceUsingHealth');
+      // Type-safe service retrieval with proper interface definition
+      interface TestServiceWithHealth {
+        getHealthService: () => HealthService;
+      }
+
+      const testService = testModule.get<TestServiceWithHealth>(
+        'TestServiceUsingHealth',
+      );
       const exportedHealthService = testService.getHealthService();
 
       expect(exportedHealthService).toBeDefined();
@@ -492,7 +502,9 @@ describe('HealthModule', () => {
         ],
       }).compile();
 
-      const customHealthIndicator = extendedModule.get('CustomHealthIndicator');
+      const customHealthIndicator = extendedModule.get(
+        'CustomHealthIndicator',
+      ) as { checkCustomHealth: () => Promise<{ status: string }> };
       expect(customHealthIndicator).toBeDefined();
 
       const customHealth = await customHealthIndicator.checkCustomHealth();
@@ -556,10 +568,10 @@ describe('HealthModule', () => {
       // Mock HealthService constructor to simulate initialization failure
       const mockHealthService = {
         getBasicHealth: (
-          jest.fn() as jest.MockedFunction<any>
+          jest.fn() as jest.MockedFunction<() => Promise<any>>
         ).mockRejectedValue(new Error('Service initialization failed')),
         getDetailedStatus: (
-          jest.fn() as jest.MockedFunction<any>
+          jest.fn() as jest.MockedFunction<() => Promise<any>>
         ).mockRejectedValue(new Error('Service initialization failed')),
         isServiceStable: jest.fn().mockReturnValue(false),
         getInitializationTime: jest.fn().mockReturnValue(Date.now()),
@@ -790,7 +802,8 @@ describe('HealthModule', () => {
       const startTime = Date.now();
 
       // Fire requests as fast as possible
-      const rapidPromises: Promise<any>[] = [];
+      const rapidPromises: Promise<{ status: string; timestamp: string }>[] =
+        [];
       for (let i = 0; i < requestCount; i++) {
         rapidPromises.push(Promise.resolve(healthController.getHealth()));
       }

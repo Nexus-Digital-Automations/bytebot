@@ -1,6 +1,4 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Comprehensive Application Management Unit Tests for ComputerUseService
  *

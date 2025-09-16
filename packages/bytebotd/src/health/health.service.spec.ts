@@ -16,8 +16,20 @@ import { HealthService } from './health.service';
 
 // Type definitions for test mocking - simplified for ESLint compliance
 
+// Type-safe interface for accessing private methods in tests
+interface HealthServiceWithPrivateMethods extends HealthService {
+  performDatabasePing(): Promise<boolean>;
+  checkExternalService(
+    serviceName: string,
+    healthUrl: string,
+  ): Promise<{ status: string; responseTime?: string; error?: string }>;
+  checkServiceHealth(): { database: string; cache: string; external: string };
+  startTime: number;
+}
+
 describe('HealthService', () => {
   let service: HealthService;
+  let serviceWithPrivates: HealthServiceWithPrivateMethods;
   let _logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
@@ -26,6 +38,7 @@ describe('HealthService', () => {
     }).compile();
 
     service = module.get<HealthService>(HealthService);
+    serviceWithPrivates = service as HealthServiceWithPrivateMethods;
     _logger = module.get<Logger>(Logger) as jest.Mocked<Logger>;
   });
 
@@ -86,7 +99,7 @@ describe('HealthService', () => {
 
         process.memoryUsage = jest.fn(() => {
           throw new Error('Memory error');
-        }) as any;
+        }) as jest.MockedFunction<typeof process.memoryUsage>;
 
         const result = await service.checkProcessHealth();
 
@@ -112,7 +125,7 @@ describe('HealthService', () => {
         // Mock performDatabasePing to return false
 
         jest
-          .spyOn(service as any, 'performDatabasePing')
+          .spyOn(serviceWithPrivates, 'performDatabasePing')
           .mockResolvedValueOnce(false);
 
         const result = await service.checkDatabaseHealth();
@@ -134,7 +147,7 @@ describe('HealthService', () => {
         // Mock checkExternalService to throw error
 
         jest
-          .spyOn(service as any, 'checkExternalService')
+          .spyOn(serviceWithPrivates, 'checkExternalService')
           .mockRejectedValue(new Error('Service error'));
 
         const result = await service.checkExternalServices();
@@ -160,8 +173,7 @@ describe('HealthService', () => {
 
       it('should pass startup check after sufficient uptime', async () => {
         // Mock the start time to be old enough
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing private property
-        (service as any).startTime = Date.now() - 15000; // 15 seconds ago
+        serviceWithPrivates.startTime = Date.now() - 15000; // 15 seconds ago
 
         const result = await service.checkStartupComplete();
 
@@ -190,8 +202,7 @@ describe('HealthService', () => {
   describe('Service Stability', () => {
     it('should check service stability with default threshold', () => {
       // Mock start time to be 35 seconds ago
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing private property
-      (service as any).startTime = Date.now() - 35000;
+      serviceWithPrivates.startTime = Date.now() - 35000;
 
       const isStable = service.isServiceStable();
       expect(isStable).toBe(true);
@@ -199,8 +210,7 @@ describe('HealthService', () => {
 
     it('should check service stability with custom threshold', () => {
       // Mock start time to be 25 seconds ago
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing private property
-      (service as any).startTime = Date.now() - 25000;
+      serviceWithPrivates.startTime = Date.now() - 25000;
 
       const isStable = service.isServiceStable(60); // 60 second threshold
       expect(isStable).toBe(false);
@@ -216,16 +226,14 @@ describe('HealthService', () => {
   describe('Private Methods', () => {
     describe('Database Ping', () => {
       it('should simulate database ping successfully', async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing private method
-        const result = await (service as any).performDatabasePing();
+        const result = await serviceWithPrivates.performDatabasePing();
         expect(result).toBe(true);
       });
     });
 
     describe('External Service Check', () => {
       it('should check individual external service', async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing private method
-        const result = await (service as any).checkExternalService(
+        const result = await serviceWithPrivates.checkExternalService(
           'test-service',
           'http://test.com/health',
         );
@@ -239,8 +247,7 @@ describe('HealthService', () => {
 
     describe('Legacy Service Health Check', () => {
       it('should return legacy service health status', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing private method
-        const services = (service as any).checkServiceHealth();
+        const services = serviceWithPrivates.checkServiceHealth();
 
         expect(services).toHaveProperty('database', 'unknown');
         expect(services).toHaveProperty('cache', 'unknown');

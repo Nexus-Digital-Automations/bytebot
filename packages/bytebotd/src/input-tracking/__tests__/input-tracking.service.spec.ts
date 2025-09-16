@@ -1,6 +1,5 @@
 /* eslint-env jest */
  
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Input Tracking Service Test Suite
  *

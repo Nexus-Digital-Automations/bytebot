@@ -10,10 +10,7 @@
  * @author Input Validation & API Security Specialist
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TypeScript safety note: This file uses flexible typing for NestJS integration
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import {
   ExceptionFilter,

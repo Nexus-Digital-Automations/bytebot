@@ -15,13 +15,7 @@
  * @coverage-target 95%+
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TypeScript safety note: This test file uses flexible typing for security testing
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 
 import { Test as Test, TestingModule as TestingModule } from '@nestjs/testing';
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';

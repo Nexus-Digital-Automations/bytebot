@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
  
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-env jest */
 /**
  * Computer Use Service - Advanced Desktop Automation Test Suite
@@ -48,7 +45,6 @@ jest.mock('fs/promises', () => ({
   mkdir: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('util', () => ({
   ...jest.requireActual('util'),
   promisify: jest.fn(
@@ -61,7 +57,6 @@ jest.mock('util', () => ({
   ),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('path', () => ({
   ...jest.requireActual('path'),
   resolve: jest.fn((...paths: string[]) => paths.join('/')),

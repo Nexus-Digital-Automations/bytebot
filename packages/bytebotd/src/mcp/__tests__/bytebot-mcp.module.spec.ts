@@ -1,7 +1,5 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TypeScript safety note: This test file uses flexible typing for testing complex integrations
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * BytebotMcpModule Test Suite

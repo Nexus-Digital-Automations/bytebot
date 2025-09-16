@@ -1,6 +1,5 @@
 /* eslint-env jest */
 
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 /**
  * MCP Index Module Test Suite
@@ -52,11 +51,9 @@ class IndexTestUtils {
    * Validate that an export exists and has correct type
    */
   static validateExport(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     exportObj: any,
     name: string,
     expectedType: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expectedConstructor?: any,
   ): void {
     expect(exportObj).toBeDefined();

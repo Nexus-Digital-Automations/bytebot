@@ -17,10 +17,7 @@
  * @version 1.0.0
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // TypeScript safety note: This file uses flexible typing for NestJS integration
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import {
   Injectable,
@@ -31,6 +28,22 @@ import {
 } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
+
+// Type definitions for explicit any type replacement
+interface HttpErrorWithStatus {
+  status?: number;
+  statusCode?: number;
+  message?: string;
+  name?: string;
+  stack?: string;
+}
+
+interface RequestWithPath {
+  path?: string;
+  url?: string;
+  method?: string;
+  [key: string]: unknown;
+}
 import { Request, Response } from 'express';
 import { v4 as _uuidv4 } from 'uuid';
 import { MetricsService } from '../../metrics/metrics.service';
@@ -151,8 +164,10 @@ export class LoggingInterceptor implements NestInterceptor {
         // Record metrics for failed requests
         if (this.metricsService) {
           const statusCode: number =
-            Number((_error as any)?.status ?? (_error as any)?.statusCode) ||
-            500;
+            Number(
+              (_error as HttpErrorWithStatus)?.status ??
+                (_error as HttpErrorWithStatus)?.statusCode,
+            ) || 500;
           this.metricsService.recordApiRequestDuration(
             request.method,
             route,

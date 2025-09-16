@@ -18,8 +18,6 @@
  * @version 1.0.0
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 import {
   CallHandler,
   ExecutionContext,

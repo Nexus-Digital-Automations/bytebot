@@ -1,5 +1,4 @@
 /* eslint-env jest */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /**
  * Comprehensive Unit Tests for ComputerUseService File Operations
  *
