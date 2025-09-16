@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { MetricsService } from './metrics/metrics.service';
 import { ParlantModule } from './parlant/parlant.module';
+import { EnterpriseApiModule } from './enterprise-api/enterprise-api.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ParlantModule } from './parlant/parlant.module';
     HealthModule, // Enterprise health monitoring with Kubernetes support
     MetricsModule, // Prometheus metrics collection
     ParlantModule, // MAXIMUM IMPLEMENTATION - Parlant conversational AI validation for ALL functions
+    EnterpriseApiModule, // MAXIMUM IMPLEMENTATION - Enterprise API Gateway with universal Parlant validation
   ],
   controllers: [AppController],
   providers: [

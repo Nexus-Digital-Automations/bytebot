@@ -3,7 +3,7 @@ import { MessagesService } from '../messages/messages.service';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   Message,
-  Role,
+  MessageRole,
   Task,
   TaskPriority,
   TaskStatus,
@@ -166,10 +166,10 @@ export class AgentProcessor {
                 updatedAt: new Date(),
                 taskId,
                 summaryId: null,
-                role: Role.USER,
+                role: MessageRole.USER,
                 content: [
                   {
-                    type: MessageContentType.Text,
+                    type: MessageContentType._Text,
                     text: latestSummary.content,
                   },
                 ],
@@ -226,7 +226,7 @@ export class AgentProcessor {
 
       await this.messagesService.create({
         content: messageContentBlocks,
-        role: Role.ASSISTANT,
+        role: MessageRole.ASSISTANT,
         taskId,
       });
 
@@ -249,10 +249,10 @@ export class AgentProcessor {
                 updatedAt: new Date(),
                 taskId,
                 summaryId: null,
-                role: Role.USER,
+                role: MessageRole.USER,
                 content: [
                   {
-                    type: MessageContentType.Text,
+                    type: MessageContentType._Text,
                     text: 'Respond with a summary of the messages above. Do not include any additional information.',
                   },
                 ],
@@ -271,9 +271,9 @@ export class AgentProcessor {
           const summaryContent = summaryContentBlocks
             .filter(
               (block: MessageContentBlock) =>
-                block.type === MessageContentType.Text,
+                block.type === MessageContentType._Text,
             )
-            .map((block: TextContentBlock) => block.text)
+            .map((block) => (block as TextContentBlock).text)
             .join('\n');
 
           const summary = await this.summariesService.create({
@@ -319,7 +319,7 @@ export class AgentProcessor {
           await this.tasksService.create({
             description: block.input.description,
             type,
-            createdBy: Role.ASSISTANT,
+            createdBy: MessageRole.ASSISTANT,
             ...(block.input.scheduledFor && {
               scheduledFor: new Date(block.input.scheduledFor),
             }),
@@ -328,11 +328,11 @@ export class AgentProcessor {
           });
 
           generatedToolResults.push({
-            type: MessageContentType.ToolResult,
+            type: MessageContentType._ToolResult,
             tool_use_id: block.id,
             content: [
               {
-                type: MessageContentType.Text,
+                type: MessageContentType._Text,
                 text: 'The task has been created',
               },
             ],
@@ -343,12 +343,12 @@ export class AgentProcessor {
           setTaskStatusToolUseBlock = block;
 
           generatedToolResults.push({
-            type: MessageContentType.ToolResult,
+            type: MessageContentType._ToolResult,
             tool_use_id: block.id,
             is_error: block.input.status === 'failed',
             content: [
               {
-                type: MessageContentType.Text,
+                type: MessageContentType._Text,
                 text: block.input.description,
               },
             ],
@@ -359,7 +359,7 @@ export class AgentProcessor {
       if (generatedToolResults.length > 0) {
         await this.messagesService.create({
           content: generatedToolResults,
-          role: Role.USER,
+          role: MessageRole.USER,
           taskId,
         });
       }

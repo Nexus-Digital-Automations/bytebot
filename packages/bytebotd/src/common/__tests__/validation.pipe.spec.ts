@@ -17,7 +17,7 @@
 
 // TypeScript safety note: This test file uses flexible typing for security testing
 
-import { Test as Test, TestingModule as TestingModule } from '@nestjs/testing';
+// Test imports removed - not used in this mock implementation
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
 import {
   IsString,
@@ -53,7 +53,7 @@ class MockValidationPipe {
     }
   }
 
-  async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
+  async transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown> {
     const operationId = `validation_${Date.now()}`;
     console.log(`[${operationId}] Validating input`, {
       type: metadata.type,
@@ -70,7 +70,7 @@ class MockValidationPipe {
       // Validate and transform complex objects
       const validatedValue = await this.validateAndTransform(
         value,
-        metadata.metatype,
+        metadata.metatype as new () => object,
       );
 
       console.log(`[${operationId}] Validation completed successfully`);
@@ -89,7 +89,7 @@ class MockValidationPipe {
     return types.includes(metatype as typeof String);
   }
 
-  private sanitizeBasicValue(value: any): any {
+  private sanitizeBasicValue(value: unknown): unknown {
     if (typeof value === 'string') {
       // Basic XSS prevention
       return value
@@ -101,10 +101,12 @@ class MockValidationPipe {
     return value;
   }
 
-  private validateAndTransform(value: any, metatype: any): any {
+  private validateAndTransform(value: unknown, metatype: new () => object): unknown {
     // Mock validation logic - in real implementation would use class-validator
     const instance = new metatype();
-    Object.assign(instance, value);
+    if (value && typeof value === 'object') {
+      Object.assign(instance, value);
+    }
 
     // Simulate validation errors for testing
     const errors = this.mockValidate(instance, metatype);
@@ -120,18 +122,18 @@ class MockValidationPipe {
     return this.sanitizeObject(instance);
   }
 
-  private mockValidate(instance: any, metatype: any): ValidationError[] {
+  private mockValidate(instance: Record<string, unknown>, metatype: new () => object): ValidationError[] {
     const errors: ValidationError[] = [];
 
     // Mock validation rules based on common patterns
     if (metatype.name === 'CreateUserDto') {
-      if (!instance.email?.includes('@')) {
+      if (typeof instance.email !== 'string' || !instance.email.includes('@')) {
         errors.push({
           property: 'email',
           constraints: { isEmail: 'email must be a valid email address' },
         });
       }
-      if (!instance.password || instance.password.length < 6) {
+      if (typeof instance.password !== 'string' || instance.password.length < 6) {
         errors.push({
           property: 'password',
           constraints: {
@@ -142,7 +144,7 @@ class MockValidationPipe {
     }
 
     if (metatype.name === 'UpdateTaskDto') {
-      if (instance.title && instance.title.length > 100) {
+      if (typeof instance.title === 'string' && instance.title.length > 100) {
         errors.push({
           property: 'title',
           constraints: {
@@ -151,8 +153,8 @@ class MockValidationPipe {
         });
       }
       if (
-        instance.priority &&
-        !['low', 'medium', 'high'].includes(instance.priority as string)
+        typeof instance.priority === 'string' &&
+        !['low', 'medium', 'high'].includes(instance.priority)
       ) {
         errors.push({
           property: 'priority',
@@ -164,7 +166,7 @@ class MockValidationPipe {
     return errors;
   }
 
-  private sanitizeObject(obj: any): any {
+  private sanitizeObject(obj: unknown): unknown {
     if (obj === null || obj === undefined) {
       return obj;
     }
@@ -178,7 +180,7 @@ class MockValidationPipe {
     }
 
     if (typeof obj === 'object') {
-      const sanitized: any = {};
+      const sanitized: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(
         obj as Record<string, unknown>,
       )) {
@@ -248,7 +250,7 @@ class UpdateTaskDto {
 class SearchDto {
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => value?.trim())
+  @Transform(({ value }): string | undefined => typeof value === 'string' ? value.trim() : undefined)
   query?: string;
 
   @IsOptional()
@@ -697,8 +699,8 @@ describe('ValidationPipe', () => {
       console.log(`[${testId}] Testing transformation error handling`);
 
       // Test with circular reference object
-      const circularObj: any = { name: 'test' };
-      circularObj.self = circularObj;
+      const circularObj: Record<string, unknown> = { name: 'test' };
+      (circularObj as Record<string, unknown>).self = circularObj;
 
       const metadata: ArgumentMetadata = {
         type: 'body',
@@ -786,11 +788,11 @@ describe('ValidationPipe', () => {
       console.log(`[${testId}] Testing deeply nested object handling`);
 
       // Create deeply nested object
-      const deepObject: any = { level: 0 };
+      const deepObject: Record<string, unknown> = { level: 0 };
       let current = deepObject;
       for (let i = 1; i < 100; i++) {
-        current.nested = { level: i };
-        current = current.nested;
+        (current as Record<string, unknown>).nested = { level: i };
+        current = (current as Record<string, unknown>).nested as Record<string, unknown>;
       }
 
       const metadata: ArgumentMetadata = {

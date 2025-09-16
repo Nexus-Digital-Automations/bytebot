@@ -28,20 +28,14 @@ import {
   UsePipes,
   UseInterceptors,
   Get,
-  Param,
-  Delete,
   Headers,
-  Query,
 } from '@nestjs/common';
 import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiTags,
-  ApiParam,
-  ApiQuery,
   ApiBody,
-  ApiHeader,
 } from '@nestjs/swagger';
 import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
 import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
@@ -63,10 +57,11 @@ import {
 } from './parlant-validated-computer-use.service';
 import { 
   ParlantIntegrationService,
-  ConversationalValidationError 
+  ConversationalValidationError,
+  RiskLevel 
 } from './parlant-integration.service';
 import { ComputerActionValidationPipe } from '../computer-use/dto/computer-action-validation.pipe';
-import { ComputerActionDto } from '../computer-use/dto/computer-action.dto';
+import { ComputerAction } from '@bytebot/shared';
 
 // ===== PARLANT-ENHANCED INTERFACES =====
 
@@ -78,7 +73,7 @@ export class ParlantComputerActionDto {
   action!: string;
   
   /** Action-specific properties - will vary based on action type */
-  [key: string]: any;
+  [key: string]: unknown;
 
   /** Conversation context for validation */
   conversationContext?: {
@@ -140,7 +135,7 @@ export class ParlantValidationResponseDto {
  */
 export class ParlantComputerActionResultDto {
   /** Action execution result */
-  result!: any;
+  result!: unknown;
 
   /** Validation details */
   validation!: ParlantValidationResponseDto;
@@ -289,14 +284,14 @@ export class ParlantComputerUseController {
       // Build comprehensive validation context
       const validationContext: ComputerActionValidationContext = {
         userId: user.id,
-        sessionId: conversationId || params.conversationContext?.sessionId || `session_${Date.now()}`,
+        sessionId: conversationId ?? params.conversationContext?.sessionId ?? `session_${Date.now()}`,
         agentRole: user.role,
         securityLevel: this.mapUserRoleToSecurityLevel(user.role),
         conversationHistory: params.conversationContext?.conversationHistory?.map(entry => ({
           timestamp: new Date(entry.timestamp),
           speaker: entry.speaker,
           message: entry.message,
-        })) || [],
+        })) ?? [],
         metadata: {
           operationId,
           userAgent: sessionContext,
@@ -310,7 +305,7 @@ export class ParlantComputerUseController {
       const validationStartTime = Date.now();
 
       // Execute with Parlant validation
-      const result = await this.parlantComputerUseService.action(params as any, validationContext);
+      const result: unknown = await this.parlantComputerUseService.action(params as ComputerAction, validationContext);
 
       const executionTime = Date.now() - validationStartTime;
       const totalTime = Date.now() - startTime;
@@ -461,14 +456,14 @@ export class ParlantComputerUseController {
       // Build validation context
       const validationContext: ComputerActionValidationContext = {
         userId: user.id,
-        sessionId: conversationId || `prevalidate_session_${Date.now()}`,
+        sessionId: conversationId ?? `prevalidate_session_${Date.now()}`,
         agentRole: user.role,
         securityLevel: this.mapUserRoleToSecurityLevel(user.role),
         conversationHistory: params.conversationContext?.conversationHistory?.map(entry => ({
           timestamp: new Date(entry.timestamp),
           speaker: entry.speaker,
           message: entry.message,
-        })) || [],
+        })) ?? [],
         metadata: {
           operationId,
           preValidationOnly: true,
@@ -601,18 +596,18 @@ export class ParlantComputerUseController {
     };
   }
 
-  private generateActionDescription(params: any): string {
+  private generateActionDescription(params: ParlantComputerActionDto): string {
     // TODO: Implement comprehensive action description generation
-    return `Execute computer action: ${params.action}`;
+    return `Execute computer action: ${String(params.action)}`;
   }
 
-  private sanitizeParamsForValidation(params: any): Record<string, unknown> {
+  private sanitizeParamsForValidation(params: ParlantComputerActionDto): Record<string, unknown> {
     // TODO: Implement parameter sanitization for validation
-    return { action: params.action };
+    return { action: String(params.action) };
   }
 
-  private async assessActionRiskLevel(params: any, context: any) {
+  private async assessActionRiskLevel(_params: ParlantComputerActionDto, _context: ComputerActionValidationContext): Promise<RiskLevel> {
     // TODO: Implement risk level assessment
-    return 'MEDIUM' as any;
+    return RiskLevel.MEDIUM;
   }
 }
