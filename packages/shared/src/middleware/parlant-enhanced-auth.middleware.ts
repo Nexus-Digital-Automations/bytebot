@@ -112,7 +112,7 @@ export interface EnhancedAuthenticationState {
 /**
  * Authentication methods - Exported for external module use
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/* eslint-disable no-unused-vars */
 export enum AuthMethod {
   JWT_TOKEN = "jwt_token",
   API_KEY = "api_key",
@@ -120,6 +120,7 @@ export enum AuthMethod {
   SSO = "sso",
   CONVERSATIONAL = "conversational",
 }
+/* eslint-enable no-unused-vars */
 // AuthMethod enum values exported for external consumption
 
 /**
@@ -188,7 +189,7 @@ export interface SecurityContext {
 /**
  * Threat levels - Exported for external module use
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/* eslint-disable no-unused-vars */
 export enum ThreatLevel {
   NONE = "none",
   LOW = "low",
@@ -196,6 +197,7 @@ export enum ThreatLevel {
   HIGH = "high",
   CRITICAL = "critical",
 }
+/* eslint-enable no-unused-vars */
 // ThreatLevel enum values exported for external consumption
 
 /**
@@ -218,7 +220,7 @@ export interface SecurityMeasure {
 /**
  * Security measure types - Exported for external module use
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/* eslint-disable no-unused-vars */
 export enum SecurityMeasureType {
   RATE_LIMITING = "rate_limiting",
   IP_FILTERING = "ip_filtering",
@@ -227,6 +229,7 @@ export enum SecurityMeasureType {
   MFA_REQUIRED = "mfa_required",
   CONVERSATION_REQUIRED = "conversation_required",
 }
+/* eslint-enable no-unused-vars */
 // SecurityMeasureType enum values exported for external consumption
 
 /**
@@ -269,7 +272,7 @@ export interface RequestRiskFactor {
 /**
  * Request risk types - Exported for external module use
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/* eslint-disable no-unused-vars */
 export enum RequestRiskType {
   UNUSUAL_IP = "unusual_ip",
   SUSPICIOUS_USER_AGENT = "suspicious_user_agent",
@@ -280,6 +283,7 @@ export enum RequestRiskType {
   GEOGRAPHIC_ANOMALY = "geographic_anomaly",
   TIME_ANOMALY = "time_anomaly",
 }
+/* eslint-enable no-unused-vars */
 // RequestRiskType enum values exported for external consumption
 
 /**
@@ -1072,7 +1076,7 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     };
   }
 
-  private assessTimeRisk(req: Request): RequestRiskFactor {
+  private assessTimeRisk(_req: Request): RequestRiskFactor {
     const hour = new Date().getHours();
     const isUnusualTime = hour >= 23 || hour <= 6;
 
@@ -1084,7 +1088,9 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     };
   }
 
-  private async assessGeographicRisk(req: Request): Promise<RequestRiskFactor> {
+  private async assessGeographicRisk(
+    _req: Request,
+  ): Promise<RequestRiskFactor> {
     // Implementation would check geographic location against user history
     return {
       type: RequestRiskType.GEOGRAPHIC_ANOMALY,
@@ -1268,15 +1274,15 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   private async applyModerateSecurityMeasures(
     _req: ParlantAuthenticatedRequest,
     _res: Response,
-    operationId: string,
+    _operationId: string,
   ): Promise<void> {
     // Implementation would apply moderate security measures
   }
 
   private async applyLowSecurityMeasures(
-    req: ParlantAuthenticatedRequest,
-    res: Response,
-    operationId: string,
+    _req: ParlantAuthenticatedRequest,
+    _res: Response,
+    _operationId: string,
   ): Promise<void> {
     // Implementation would apply low security measures
   }

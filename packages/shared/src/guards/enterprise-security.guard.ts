@@ -910,11 +910,12 @@ export class EnterpriseSecurityGuard implements CanActivate {
     try {
       // Extract security requirements from decorators and metadata
       const requiredRoles =
-        this.reflector.get<string[]>("roles", context.getHandler()) || [];
+        this._reflector.get<string[]>("roles", context.getHandler()) || [];
       const requiredPermissions =
-        this.reflector.get<string[]>("permissions", context.getHandler()) || [];
+        this._reflector.get<string[]>("permissions", context.getHandler()) ||
+        [];
       const requiredSecurityLevel =
-        this.reflector.get<SecurityLevel>(
+        this._reflector.get<SecurityLevel>(
           "securityLevel",
           context.getHandler(),
         ) || this.securityConfig.defaultSecurityLevel;

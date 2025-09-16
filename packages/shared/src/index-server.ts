@@ -264,7 +264,7 @@ export {
   ApprovalLevel,
   ParticipantRole,
   ParticipantType,
-  ParticipantCapability
+  ParticipantCapability,
 } from "./types/parlant.types";
 
 // Parlant Decorators - core validation decorators
@@ -284,7 +284,7 @@ export {
   getApprovalWorkflowMetadata,
   getValidationRulesMetadata,
   hasParlantValidation,
-  getAllParlantMetadata
+  getAllParlantMetadata,
 } from "./decorators/parlant-validation.decorators";
 
 // Parlant Services - integration service and interfaces
@@ -295,7 +295,7 @@ export {
   ValidationEngine,
   AuditService,
   ServiceHealthStatus,
-  ParlantValidationError
+  ParlantValidationError,
 } from "./services/parlant-integration.service";
 
 // Parlant Wrapper Utilities - function wrapping and registry
@@ -309,7 +309,7 @@ export {
   ParlantValidationRejection,
   FunctionWrapperConfig,
   ParlantExecutionResult,
-  WrappedFunction
+  WrappedFunction,
 } from "./utils/parlant-wrapper.utils";
 
 // Parlant Interceptor - NestJS automatic validation
@@ -317,7 +317,7 @@ export {
   ParlantValidationInterceptor,
   ParlantValidationInterceptorConfig,
   ParlantValidationDenialError,
-  ParlantServiceUnavailableError
+  ParlantServiceUnavailableError,
 } from "./interceptors/parlant-validation.interceptor";
 
 // Note: Test utilities are available but not exported by default

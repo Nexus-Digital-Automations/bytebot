@@ -663,12 +663,12 @@ export class CompositeGuard implements CanActivate {
 
     const result = await guardInstance.canActivate(context);
     // Handle both boolean and Observable<boolean> return types
-    if (typeof result === 'boolean') {
+    if (typeof result === "boolean") {
       return result;
     }
     // If it's an Observable, convert to Promise and await
     return new Promise((resolve) => {
-      if (result && typeof result.subscribe === 'function') {
+      if (result && typeof result.subscribe === "function") {
         result.subscribe({
           next: (value: boolean) => resolve(value),
           error: () => resolve(false),

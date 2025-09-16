@@ -419,7 +419,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
    */
   private createSourceLocation(
     target: unknown,
-    handler: (...args: unknown[]) => unknown,
+    handler: (..._args: unknown[]) => unknown,
   ): SourceLocation {
     return {
       filePath: target.name + ".ts", // Simplified

@@ -35,15 +35,15 @@ import { Cache } from "cache-manager";
 
 // Import Parlant integration types and services
 import {
-  ParlantValidationRequest,
-  ParlantValidationResponse,
+  _ParlantValidationRequest,
+  _ParlantValidationResponse,
   ParlantIntegrationError,
-  ParlantValidationError,
+  _ParlantValidationError,
   SecurityLevel,
-  ParlantUserContext,
-  ParlantExecutionContext,
-  ParlantValidationMetadata,
-  ParlantRiskAssessment,
+  _ParlantUserContext,
+  _ParlantExecutionContext,
+  _ParlantValidationMetadata,
+  _ParlantRiskAssessment,
   ParlantAuditEntry,
 } from "../types/parlant-integration.types";
 

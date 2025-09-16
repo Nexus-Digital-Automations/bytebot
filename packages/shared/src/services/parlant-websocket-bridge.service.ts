@@ -42,8 +42,8 @@ interface QueuedMessage {
   timestamp: Date;
   retryCount: number;
   maxRetries: number;
-  resolve: (value: any) => void;
-  reject: (error: any) => void;
+  resolve: (value: unknown) => void;
+  reject: (error: Error | unknown) => void;
   timeout: NodeJS.Timeout;
 }
 
@@ -266,7 +266,7 @@ export class ParlantWebSocketBridgeService
       },
     });
 
-    this.serverWs.on("connection", (ws: WebSocket, request: any) => {
+    this.serverWs.on("connection", (ws: WebSocket, request: Record<string, unknown>) => {
       this.handleClientConnection(ws, request);
     });
 
@@ -281,7 +281,7 @@ export class ParlantWebSocketBridgeService
   /**
    * Handle new client connections to the bridge server
    */
-  private handleClientConnection(ws: WebSocket, request: any): void {
+  private handleClientConnection(ws: WebSocket, request: Record<string, unknown>): void {
     const clientId = this.generateClientId();
     this.logger.log(`🤝 New client connected: ${clientId}`);
 
@@ -864,7 +864,7 @@ export class ParlantWebSocketBridgeService
   /**
    * Get basic statistics
    */
-  private getBasicStats(): any {
+  private getBasicStats(): Record<string, unknown> {
     return {
       connected: this.isConnected,
       uptime: this.stats.uptime,

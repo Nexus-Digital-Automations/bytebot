@@ -54,7 +54,7 @@ import {
 /**
  * Wrapped function signature
  */
-export type WrappedFunction<T extends (...args: unknown[]) => unknown> = (
+export type WrappedFunction<T extends (..._args: unknown[]) => unknown> = (
   ..._args: Parameters<T>
 ) => Promise<ReturnType<T>>;
 
@@ -172,7 +172,9 @@ export interface WrapperContext {
  * );
  * ```
  */
-export function createParlantWrapper<T extends (..._args: unknown[]) => unknown>(
+export function createParlantWrapper<
+  T extends (..._args: unknown[]) => unknown,
+>(
   originalFunction: T,
   config: FunctionWrapperConfig,
   parlantService: unknown, // ParlantIntegrationService type would be imported
@@ -283,7 +285,9 @@ export function createParlantWrapper<T extends (..._args: unknown[]) => unknown>
  * @param parlantService - Parlant integration service
  * @returns Wrapped function with decorator-based configuration
  */
-export function wrapFunctionWithMetadata<T extends (..._args: unknown[]) => unknown>(
+export function wrapFunctionWithMetadata<
+  T extends (..._args: unknown[]) => unknown,
+>(
   originalFunction: T,
   target: unknown,
   propertyKey: string,
@@ -300,7 +304,7 @@ export function wrapFunctionWithMetadata<T extends (..._args: unknown[]) => unkn
     propertyKey,
   );
   const securityConfig = getSecurityClassificationMetadata(target, propertyKey);
-  const approvalConfig = getApprovalWorkflowMetadata(target, propertyKey);
+  const _approvalConfig = getApprovalWorkflowMetadata(target, propertyKey);
   const validationRules = getValidationRulesMetadata(target, propertyKey);
 
   if (!validationConfig?.enabled) {
@@ -347,7 +351,10 @@ export function wrapFunctionWithMetadata<T extends (..._args: unknown[]) => unkn
  * @param parlantService - Parlant integration service
  * @returns Class with wrapped methods
  */
-export function wrapClassMethods(target: unknown, parlantService: unknown): unknown {
+export function wrapClassMethods(
+  target: unknown,
+  parlantService: unknown,
+): unknown {
   const logger = new Logger(`ParlantWrapper:${target.constructor.name}`);
 
   const methodNames = Object.getOwnPropertyNames(target.prototype).filter(
@@ -385,7 +392,7 @@ export function wrapClassMethods(target: unknown, parlantService: unknown): unkn
  * Create wrapper context for function execution
  */
 function createWrapperContext(
-  originalFunction: Function,
+  originalFunction: (..._args: unknown[]) => unknown,
   config: FunctionWrapperConfig,
   logger: Logger,
 ): WrapperContext {
@@ -402,11 +409,13 @@ function createWrapperContext(
 /**
  * Extract source location from function
  */
-function extractSourceLocation(func: Function): SourceLocation {
+function extractSourceLocation(
+  _func: (...__args: unknown[]) => unknown,
+): SourceLocation {
   // In a real implementation, this would use stack traces or source maps
   return {
     filePath: "unknown",
-    methodName: func.name || "anonymous",
+    methodName: _func.name || "anonymous",
     moduleName: "shared",
   };
 }
@@ -483,7 +492,7 @@ function createValidationRequest<T extends (..._args: unknown[]) => unknown>(
  * Execute function with monitoring and validation context
  */
 async function executeWithMonitoring<T>(
-  originalFunction: Function,
+  originalFunction: (..._args: unknown[]) => unknown,
   args: unknown[],
   context: WrapperContext,
   validationResponse: ParlantValidationResponse,
@@ -638,7 +647,7 @@ export class ParlantValidationRejection extends Error {
 /**
  * Function wrapper builder for fluent configuration
  */
-export class ParlantWrapperBuilder<T extends (...args: unknown[]) => unknown> {
+export class ParlantWrapperBuilder<T extends (..._args: unknown[]) => unknown> {
   private config: Partial<FunctionWrapperConfig> = {};
 
   constructor(
@@ -772,7 +781,7 @@ export class ParlantWrapperBuilder<T extends (...args: unknown[]) => unknown> {
  *   .build();
  * ```
  */
-export function parlantWrapper<T extends (...args: unknown[]) => unknown>(
+export function parlantWrapper<T extends (..._args: unknown[]) => unknown>(
   originalFunction: T,
   parlantService: unknown,
 ): ParlantWrapperBuilder<T> {
@@ -788,7 +797,10 @@ export function parlantWrapper<T extends (...args: unknown[]) => unknown>(
  */
 export class ParlantWrapperRegistry {
   private static instance: ParlantWrapperRegistry;
-  private wrappedFunctions = new Map<string, any>();
+  private wrappedFunctions = new Map<
+    string,
+    WrappedFunction<(..._args: unknown[]) => unknown>
+  >();
   private wrapperMetadata = new Map<string, FunctionWrapperConfig>();
   private logger = new Logger("ParlantWrapperRegistry");
 
@@ -802,7 +814,7 @@ export class ParlantWrapperRegistry {
   /**
    * Register a wrapped function
    */
-  register<T extends (...args: unknown[]) => unknown>(
+  register<T extends (..._args: unknown[]) => unknown>(
     functionId: string,
     wrappedFunction: WrappedFunction<T>,
     config: FunctionWrapperConfig,
@@ -820,7 +832,7 @@ export class ParlantWrapperRegistry {
   /**
    * Get a wrapped function
    */
-  get<T extends (...args: unknown[]) => unknown>(
+  get<T extends (..._args: unknown[]) => unknown>(
     functionId: string,
   ): WrappedFunction<T> | undefined {
     return this.wrappedFunctions.get(functionId);

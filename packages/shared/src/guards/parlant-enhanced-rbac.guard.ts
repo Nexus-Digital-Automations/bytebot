@@ -486,13 +486,13 @@ export class ParlantEnhancedRBACGuard
    * @returns Promise<ConversationalAuthorizationResult> - Authorization result
    */
   @ParlantValidation({
-    mode: ValidationMode.INTERACTIVE,
-    approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
+    mode: ValidationMode._INTERACTIVE,
+    approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
     timeout: 45000,
     cacheable: true,
   })
   @SecurityClassification({
-    securityLevel: FunctionSecurityLevel.RESTRICTED,
+    securityLevel: FunctionSecurityLevel._RESTRICTED,
     riskLevel: RiskLevel.HIGH,
   })
   @ConversationContext({
@@ -578,7 +578,7 @@ export class ParlantEnhancedRBACGuard
    * @returns Promise<ConversationalAuthorizationResult> - Authorization result
    */
   @ParlantValidation({
-    mode: ValidationMode.INTERACTIVE,
+    mode: ValidationMode._INTERACTIVE,
     approvalLevel: ApprovalLevel.DUAL_APPROVAL,
     timeout: 120000,
   })
@@ -879,7 +879,7 @@ export class ParlantEnhancedRBACGuard
     };
 
     const validationParams: ValidationParameters = {
-      mode: ValidationMode.INTERACTIVE,
+      mode: ValidationMode._INTERACTIVE,
       approvalLevel: this.determineApprovalLevel(authContext),
       timeout: this.determineTimeout(authContext),
       cacheable: this.shouldCacheResult(authContext),
@@ -1165,7 +1165,7 @@ export class ParlantEnhancedRBACGuard
     rbacMetadata: RBACMetadata,
     _context: ExecutionContext,
   ): FunctionSecurityLevel {
-    if (rbacMetadata.adminOnly) return FunctionSecurityLevel.RESTRICTED;
+    if (rbacMetadata.adminOnly) return FunctionSecurityLevel._RESTRICTED;
     if (rbacMetadata.permissions?.length) return FunctionSecurityLevel.INTERNAL;
     return FunctionSecurityLevel.PUBLIC;
   }
@@ -1232,7 +1232,7 @@ export class ParlantEnhancedRBACGuard
     }
 
     if (authContext.securityContext.isPrivilegedOperation) {
-      return ApprovalLevel.SINGLE_APPROVAL;
+      return ApprovalLevel._SINGLE_APPROVAL;
     }
 
     return ApprovalLevel.AUTOMATIC;

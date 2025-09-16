@@ -149,22 +149,22 @@ export enum OperationType {
   _HTTP_GET = "http_get",
   _HTTP_POST = "http_post",
   _HTTP_PUT = "http_put",
-  HTTP_DELETE = "http_delete",
-  HTTP_PATCH = "http_patch",
-  HTTP_OPTIONS = "http_options",
-  HTTP_HEAD = "http_head",
-  WEBSOCKET_MESSAGE = "websocket_message",
-  GRPC_UNARY = "grpc_unary",
-  GRPC_STREAM = "grpc_stream",
+  _HTTP_DELETE = "http_delete",
+  _HTTP_PATCH = "http_patch",
+  _HTTP_OPTIONS = "http_options",
+  _HTTP_HEAD = "http_head",
+  _WEBSOCKET_MESSAGE = "websocket_message",
+  _GRPC_UNARY = "grpc_unary",
+  _GRPC_STREAM = "grpc_stream",
 }
 
 /**
  * GraphQL operation types
  */
 export enum GraphQLOperationType {
-  QUERY = "query",
-  MUTATION = "mutation",
-  SUBSCRIPTION = "subscription",
+  _QUERY = "query",
+  _MUTATION = "mutation",
+  _SUBSCRIPTION = "subscription",
 }
 
 /**
@@ -240,11 +240,11 @@ export interface RequestPayload {
  * Payload types
  */
 export enum PayloadType {
-  JSON = "json",
-  XML = "xml",
-  FORM_DATA = "form_data",
-  MULTIPART = "multipart",
-  BINARY = "binary",
+  _JSON = "json",
+  _XML = "xml",
+  _FORM_DATA = "form_data",
+  _MULTIPART = "multipart",
+  _BINARY = "binary",
   TEXT = "text",
   GRAPHQL_QUERY = "graphql_query",
   PROTOBUF = "protobuf",
