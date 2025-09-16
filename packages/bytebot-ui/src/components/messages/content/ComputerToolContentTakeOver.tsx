@@ -15,16 +15,24 @@ import { getIcon, getLabel } from "./ComputerToolUtils";
  * Type guard to safely check if a value has coordinates property
  */
 function hasCoordinates(obj: unknown): obj is { coordinates: Coordinates } {
+  if (typeof obj !== "object" || obj === null || !("coordinates" in obj)) {
+    return false;
+  }
+
+  const objWithCoords = obj as { coordinates: unknown };
+  const coords = objWithCoords.coordinates;
+
+  if (typeof coords !== "object" || coords === null) {
+    return false;
+  }
+
+  const coordsObj = coords as Record<string, unknown>;
+
   return (
-    typeof obj === "object" &&
-    obj !== null &&
-    "coordinates" in obj &&
-    typeof (obj as { coordinates: unknown }).coordinates === "object" &&
-    (obj as { coordinates: unknown }).coordinates !== null &&
-    "x" in (obj as { coordinates: Coordinates }).coordinates &&
-    "y" in (obj as { coordinates: Coordinates }).coordinates &&
-    typeof (obj as { coordinates: Coordinates }).coordinates.x === "number" &&
-    typeof (obj as { coordinates: Coordinates }).coordinates.y === "number"
+    "x" in coordsObj &&
+    "y" in coordsObj &&
+    typeof coordsObj.x === "number" &&
+    typeof coordsObj.y === "number"
   );
 }
 
@@ -32,21 +40,31 @@ function hasCoordinates(obj: unknown): obj is { coordinates: Coordinates } {
  * Type guard to safely check if a value has path property with Coordinates array
  */
 function hasPath(obj: unknown): obj is { path: Coordinates[] } {
-  return (
-    typeof obj === "object" &&
-    obj !== null &&
-    "path" in obj &&
-    Array.isArray((obj as { path: unknown }).path) &&
-    (obj as { path: unknown[] }).path.every(
-      (point: unknown): point is Coordinates =>
-        typeof point === "object" &&
-        point !== null &&
-        "x" in point &&
-        "y" in point &&
-        typeof (point as Coordinates).x === "number" &&
-        typeof (point as Coordinates).y === "number",
-    )
-  );
+  if (typeof obj !== "object" || obj === null || !("path" in obj)) {
+    return false;
+  }
+
+  const objWithPath = obj as { path: unknown };
+  const path = objWithPath.path;
+
+  if (!Array.isArray(path)) {
+    return false;
+  }
+
+  return path.every((point: unknown): point is Coordinates => {
+    if (typeof point !== "object" || point === null) {
+      return false;
+    }
+
+    const pointObj = point as Record<string, unknown>;
+
+    return (
+      "x" in pointObj &&
+      "y" in pointObj &&
+      typeof pointObj.x === "number" &&
+      typeof pointObj.y === "number"
+    );
+  });
 }
 
 /**
@@ -110,12 +128,16 @@ function hasScrollProperties(
 function isValidComputerToolBlock(
   block: unknown,
 ): block is ComputerToolUseContentBlock & { input: Record<string, unknown> } {
+  if (typeof block !== "object" || block === null) {
+    return false;
+  }
+
+  const blockObj = block as Record<string, unknown>;
+
   return (
-    typeof block === "object" &&
-    block !== null &&
-    "input" in block &&
-    typeof (block as { input: unknown }).input === "object" &&
-    (block as { input: unknown }).input !== null
+    "input" in blockObj &&
+    typeof blockObj.input === "object" &&
+    blockObj.input !== null
   );
 }
 
@@ -136,53 +158,95 @@ function ToolDetailsTakeOver({
     return <></>;
   }
 
+  // Type-safe access to input property with explicit validation
+  const blockWithInput = block;
+  const input: Record<string, unknown> = blockWithInput.input;
+
   return (
     <>
       {/* Text for type and key actions */}
-      {(isTypeKeysToolUseBlock(block) || isPressKeysToolUseBlock(block)) &&
-        hasKeys(block.input) && (
-          <p className={baseClasses}>{String(block.input.keys.join("+"))}</p>
+      {(Boolean(
+        typeof isTypeKeysToolUseBlock === "function"
+          ? isTypeKeysToolUseBlock(blockWithInput)
+          : false,
+      ) ||
+        Boolean(
+          typeof isPressKeysToolUseBlock === "function"
+            ? isPressKeysToolUseBlock(blockWithInput)
+            : false,
+        )) &&
+        hasKeys(input) && (
+          <p className={baseClasses}>
+            {String((input as { keys: string[] }).keys.join("+"))}
+          </p>
         )}
 
-      {isTypeTextToolUseBlock(block) && hasText(block.input) && (
-        <p className={baseClasses}>
-          {String(
-            (block.input.isSensitive ?? false)
-              ? "●".repeat(block.input.text.length)
-              : block.input.text,
-          )}
-        </p>
-      )}
+      {Boolean(
+        typeof isTypeTextToolUseBlock === "function"
+          ? isTypeTextToolUseBlock(blockWithInput)
+          : false,
+      ) &&
+        hasText(input) && (
+          <p className={baseClasses}>
+            {String(
+              ((input as { isSensitive?: boolean }).isSensitive ?? false)
+                ? "●".repeat(Number((input as { text: string }).text.length))
+                : (input as { text: string }).text,
+            )}
+          </p>
+        )}
 
       {/* Duration for wait actions */}
-      {isWaitToolUseBlock(block) && hasDuration(block.input) && (
-        <p className={baseClasses}>{`${String(block.input.duration)}ms`}</p>
-      )}
+      {Boolean(
+        typeof isWaitToolUseBlock === "function"
+          ? isWaitToolUseBlock(blockWithInput)
+          : false,
+      ) &&
+        hasDuration(input) && (
+          <p
+            className={baseClasses}
+          >{`${String((input as { duration: number }).duration)}ms`}</p>
+        )}
 
       {/* Coordinates for click/mouse actions */}
-      {hasCoordinates(block.input) && (
+      {hasCoordinates(input) && (
         <p className={baseClasses}>
-          {String(block.input.coordinates.x)},{" "}
-          {String(block.input.coordinates.y)}
+          {String((input as { coordinates: Coordinates }).coordinates.x)},{" "}
+          {String((input as { coordinates: Coordinates }).coordinates.y)}
         </p>
       )}
 
       {/* Start and end coordinates for path actions */}
-      {hasPath(block.input) && block.input.path.length > 0 && (
+      {hasPath(input) && (input as { path: Coordinates[] }).path.length > 0 && (
         <p className={baseClasses}>
-          From: {String(block.input.path[0]?.x ?? "0")},{" "}
-          {String(block.input.path[0]?.y ?? "0")} → To:{" "}
-          {String(block.input.path[block.input.path.length - 1]?.x ?? "0")},{" "}
-          {String(block.input.path[block.input.path.length - 1]?.y ?? "0")}
+          From: {String((input as { path: Coordinates[] }).path[0]?.x ?? 0)},{" "}
+          {String((input as { path: Coordinates[] }).path[0]?.y ?? 0)} → To:{" "}
+          {String(
+            (input as { path: Coordinates[] }).path[
+              (input as { path: Coordinates[] }).path.length - 1
+            ]?.x ?? 0,
+          )}
+          ,{" "}
+          {String(
+            (input as { path: Coordinates[] }).path[
+              (input as { path: Coordinates[] }).path.length - 1
+            ]?.y ?? 0,
+          )}
         </p>
       )}
 
       {/* Scroll information */}
-      {isScrollToolUseBlock(block) && hasScrollProperties(block.input) && (
-        <p className={baseClasses}>
-          {String(block.input.direction)} {String(block.input.scrollCount)}
-        </p>
-      )}
+      {Boolean(
+        typeof isScrollToolUseBlock === "function"
+          ? isScrollToolUseBlock(blockWithInput)
+          : false,
+      ) &&
+        hasScrollProperties(input) && (
+          <p className={baseClasses}>
+            {String((input as { direction: string }).direction)}{" "}
+            {String((input as { scrollCount: number }).scrollCount)}
+          </p>
+        )}
     </>
   );
 }
