@@ -732,7 +732,7 @@ export function useChatSession({ initialTaskId }: UseChatSessionProps = {}): {
         id: `error_${Date.now()}_exception`,
         content: [
           {
-            type: MessageContentType._Text,
+            type: MessageContentType._Text as const,
             text: "An unexpected error occurred. Please try again.",
           },
         ],

@@ -506,6 +506,155 @@
       ],
       "completed_at": "2025-09-16T02:55:10.636Z",
       "updated_at": "2025-09-16T02:55:10.636Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-16T03:07:56.563Z",
+      "title": "EMERGENCY: Fix 162+ critical TypeScript ESLint violations across bytebot-ui package",
+      "description": "Fix all TypeScript ESLint violations immediately: unsafe assignments, unsafe member access, unsafe calls, strict boolean expressions. Critical files: MessageContent.tsx (43 violations), ComputerToolUtils.tsx (40 violations), ComputerToolContentNormal.tsx (39 violations), ImageContent.tsx (26 violations), plus test files. Implement comprehensive type guards and safe type assertions.",
+      "category": "error",
+      "priority": "high",
+      "id": "error_1757992076563_loxste7gxlc",
+      "assigned_agent": "dev_session_1757991973533_1_general_1ee9e96c",
+      "started_at": "2025-09-16T03:08:13.503Z",
+      "claimed_by": "dev_session_1757991973533_1_general_1ee9e96c",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757991973533_1_general_1ee9e96c",
+          "role": "primary",
+          "assignedAt": "2025-09-16T03:08:13.503Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-16T03:12:53.838Z",
+      "title": "Fix TypeScript ESLint violations in ComputerToolContentNormal.tsx",
+      "description": "Fix ~36 TypeScript ESLint violations including unsafe calls, unsafe member access, unsafe assignments, and strict boolean expressions. Implement proper type guards and safe type assertions.",
+      "category": "error",
+      "id": "error_1757992373838_r9xcoyb1at",
+      "assigned_agent": "dev_session_1757992353606_1_general_8fcb9bd6",
+      "started_at": "2025-09-16T03:13:31.003Z",
+      "claimed_by": "dev_session_1757992353606_1_general_8fcb9bd6",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757992353606_1_general_8fcb9bd6",
+          "role": "primary",
+          "assignedAt": "2025-09-16T03:13:31.003Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T03:12:53.879Z",
+      "title": "Fix TypeScript ESLint violations in ImageContent.tsx",
+      "description": "Fix all TypeScript ESLint violations in ImageContent.tsx (~26 violations). Focus on unsafe member access .source on error typed values, unsafe assignments, unsafe returns. Implement proper type guards and safe type assertions.",
+      "category": "error",
+      "id": "error_1757992373879_6oljlqniik",
+      "assigned_agent": "dev_session_1757992353622_1_general_9a676900",
+      "started_at": "2025-09-16T03:14:18.015Z",
+      "claimed_by": "dev_session_1757992353622_1_general_9a676900",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757992353622_1_general_9a676900",
+          "role": "primary",
+          "assignedAt": "2025-09-16T03:14:18.015Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T03:21:35.106Z",
+      "updated_at": "2025-09-16T03:21:35.106Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T03:12:54.089Z",
+      "title": "Fix TypeScript ESLint violations in ComputerToolContentTakeOver.tsx",
+      "description": "Fix all TypeScript ESLint violations (~15 violations) focusing on unsafe assignments, unsafe member access, unsafe calls. Implement proper type guards and safe type assertions.",
+      "category": "error",
+      "id": "error_1757992374089_s6t8950dtja",
+      "assigned_agent": "dev_session_1757992353400_1_general_9a33cad7",
+      "started_at": "2025-09-16T03:13:18.133Z",
+      "claimed_by": "dev_session_1757992353400_1_general_9a33cad7",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757992353400_1_general_9a33cad7",
+          "role": "primary",
+          "assignedAt": "2025-09-16T03:13:18.133Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T03:16:50.130Z",
+      "updated_at": "2025-09-16T03:16:50.130Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T03:12:54.120Z",
+      "title": "Fix TypeScript ESLint violations in ComputerToolUtils.tsx",
+      "description": "Fix ~40 TypeScript ESLint violations including unsafe arguments, unsafe assignments, unsafe member access. Implement proper type guards and safe type assertions in ComputerToolUtils.tsx",
+      "category": "error",
+      "id": "error_1757992374120_6tb91s45lct",
+      "assigned_agent": "dev_session_1757992353299_1_general_1560a5f2",
+      "started_at": "2025-09-16T03:13:19.084Z",
+      "claimed_by": "dev_session_1757992353299_1_general_1560a5f2",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757992353299_1_general_1560a5f2",
+          "role": "primary",
+          "assignedAt": "2025-09-16T03:13:19.084Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T03:26:21.445Z",
+      "updated_at": "2025-09-16T03:26:21.445Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T03:12:54.729Z",
+      "title": "Fix TypeScript ESLint violations in MessageContent.tsx",
+      "description": "Fix all ~43 TypeScript ESLint violations in MessageContent.tsx focusing on unsafe returns, unsafe calls, unsafe member access, strict boolean expressions. Implement proper type guards and safe type assertions.",
+      "category": "error",
+      "id": "error_1757992374729_muilgkpdrn",
+      "assigned_agent": "dev_session_1757992353967_1_general_ba812fa5",
+      "started_at": "2025-09-16T03:13:19.076Z",
+      "claimed_by": "dev_session_1757992353967_1_general_ba812fa5",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757992353967_1_general_ba812fa5",
+          "role": "primary",
+          "assignedAt": "2025-09-16T03:13:19.076Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-16T03:15:28.380Z",
+      "updated_at": "2025-09-16T03:15:28.381Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-16T03:12:55.119Z",
+      "title": "Fix TypeScript ESLint violations in test files",
+      "description": "Fix all TypeScript ESLint violations in useChatSession.test.ts, useChatSession.ts, taskUtils.test.ts (~20+ violations). Focus on unsafe assignments and unsafe member access ._Text on error typed values. Implement proper type guards and safe type assertions.",
+      "category": "error",
+      "id": "error_1757992375119_8nc92o5p9dw",
+      "assigned_agent": "dev_session_1757992355071_1_general_b6460d92",
+      "started_at": "2025-09-16T03:13:31.013Z",
+      "claimed_by": "dev_session_1757992355071_1_general_b6460d92",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757992355071_1_general_b6460d92",
+          "role": "primary",
+          "assignedAt": "2025-09-16T03:13:31.013Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -1619,6 +1768,174 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-16T02:29:04.193Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757991812398_1_general_54560092": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T03:03:32.399Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T03:03:32.399Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757991973533_1_general_1ee9e96c": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T03:06:13.534Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T03:06:13.534Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757992353299_1_general_1560a5f2": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T03:12:33.299Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T03:12:33.299Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757992353400_1_general_9a33cad7": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T03:12:33.401Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T03:12:33.401Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757992353606_1_general_8fcb9bd6": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T03:12:33.606Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T03:12:33.606Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757992353622_1_general_9a676900": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T03:12:33.627Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T03:12:33.627Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757992353967_1_general_ba812fa5": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T03:12:33.967Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T03:12:33.967Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757992355071_1_general_b6460d92": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-16T03:12:35.072Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-16T03:12:35.072Z",
       "sessionId": null,
       "metadata": {}
     }

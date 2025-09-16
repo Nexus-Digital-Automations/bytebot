@@ -756,7 +756,7 @@ describe("TaskUtils", () => {
         }),
       );
 
-      results.forEach((result) => {
+      results.forEach((result: Task | null) => {
         expect(result).toBeNull();
       });
       expect(mockFetch).not.toHaveBeenCalled();

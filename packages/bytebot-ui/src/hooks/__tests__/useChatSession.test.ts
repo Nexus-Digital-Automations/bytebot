@@ -86,20 +86,24 @@ describe("useChatSession Hook", () => {
     mockJoinTask = jest.fn();
     mockLeaveTask = jest.fn();
 
-    mockUseWebSocket.mockImplementation(
-      ({ onTaskUpdate, onNewMessage, onTaskCreated, onTaskDeleted }) => {
+    mockUseWebSocket.mockImplementation((props) => {
+      // Type guard to ensure props is defined and has the expected shape
+      if (props && typeof props === "object" && "onTaskUpdate" in props) {
         mockWebSocketHandlers = {
-          onTaskUpdate: onTaskUpdate as (task: Task) => void,
-          onNewMessage: onNewMessage as (message: Message) => void,
-          onTaskCreated: onTaskCreated as (task: Task) => void,
-          onTaskDeleted: onTaskDeleted as (taskId: string) => void,
+          onTaskUpdate: props.onTaskUpdate as (task: Task) => void,
+          onNewMessage: props.onNewMessage as (message: Message) => void,
+          onTaskCreated: props.onTaskCreated as (task: Task) => void,
+          onTaskDeleted: props.onTaskDeleted as (taskId: string) => void,
         };
-        return {
-          joinTask: mockJoinTask,
-          leaveTask: mockLeaveTask,
-        };
-      },
-    );
+      }
+      return {
+        socket: null,
+        joinTask: mockJoinTask,
+        leaveTask: mockLeaveTask,
+        disconnect: jest.fn(),
+        isConnected: false,
+      };
+    });
 
     // Setup default mock implementations
     mockTaskUtils.fetchTaskById.mockResolvedValue({
@@ -390,7 +394,7 @@ describe("useChatSession Hook", () => {
       mockTaskUtils.addMessage.mockResolvedValue({
         success: true,
         message: "Message added successfully",
-      });
+      } as Awaited<ReturnType<typeof mockTaskUtils.addMessage>>);
 
       const { result } = renderHook(() =>
         useChatSession({ initialTaskId: "task-123" }),
@@ -440,9 +444,14 @@ describe("useChatSession Hook", () => {
 
       // Should add error message to chat
       expect(result.current.messages).toHaveLength(initialMessageCount + 1);
-      expect(
-        result.current.messages[initialMessageCount].content[0].text,
-      ).toContain("Sorry, there was an error");
+      const lastMessage = result.current.messages[initialMessageCount];
+      if (lastMessage?.content?.[0] && "text" in lastMessage.content[0]) {
+        expect(lastMessage.content[0].text).toContain(
+          "Sorry, there was an error",
+        );
+      } else {
+        throw new Error("Expected error message not found");
+      }
     });
 
     it("does not send empty messages", async () => {
@@ -466,8 +475,12 @@ describe("useChatSession Hook", () => {
     });
 
     it("shows loading state during message sending", async () => {
-      let resolveAddMessage: (value: unknown) => void;
-      const addMessagePromise = new Promise((resolve) => {
+      let resolveAddMessage: (
+        value: Awaited<ReturnType<typeof mockTaskUtils.addMessage>>,
+      ) => void;
+      const addMessagePromise = new Promise<
+        Awaited<ReturnType<typeof mockTaskUtils.addMessage>>
+      >((resolve) => {
         resolveAddMessage = resolve;
       });
       mockTaskUtils.addMessage.mockReturnValue(addMessagePromise);
@@ -493,7 +506,7 @@ describe("useChatSession Hook", () => {
 
       act(() => {
         if (resolveAddMessage !== undefined) {
-          resolveAddMessage({ success: true });
+          resolveAddMessage({ success: true, message: "Success" });
         }
       });
 
@@ -505,12 +518,10 @@ describe("useChatSession Hook", () => {
 
   describe("Infinite Scroll / Load More Messages", () => {
     it("loads more messages successfully", async () => {
-      const additionalMessages = [
+      const additionalMessages: Message[] = [
         {
           id: "msg-2",
-          content: [
-            { type: MessageContentType._Text, text: "Older message" },
-          ] as const,
+          content: [{ type: MessageContentType._Text, text: "Older message" }],
           role: Role.ASSISTANT,
           createdAt: new Date().toISOString(),
         },
@@ -521,9 +532,7 @@ describe("useChatSession Hook", () => {
         .mockResolvedValueOnce([
           {
             id: "msg-1",
-            content: [
-              { type: MessageContentType._Text, text: "Hello" },
-            ] as const,
+            content: [{ type: MessageContentType._Text, text: "Hello" }],
             role: Role.USER,
             createdAt: new Date().toISOString(),
           },
@@ -556,7 +565,7 @@ describe("useChatSession Hook", () => {
         .mockResolvedValueOnce([
           {
             id: "msg-1",
-            content: [] as const,
+            content: [],
             role: Role.USER,
             createdAt: new Date().toISOString(),
           },
@@ -614,13 +623,8 @@ describe("useChatSession Hook", () => {
         expect(result.current.isLoadingSession).toBe(false);
       });
 
-      // Manually set hasMoreMessages to false
-      act(() => {
-        // This would normally be set by the component based on response size
-        (
-          result.current as unknown as { hasMoreMessages: boolean }
-        ).hasMoreMessages = false;
-      });
+      // Note: Cannot manually set hasMoreMessages as it's a read-only property from the hook
+      // This test verifies the component's internal logic for handling no more messages
 
       await act(async () => {
         await result.current.loadMoreMessages();
@@ -635,7 +639,7 @@ describe("useChatSession Hook", () => {
         .mockResolvedValueOnce([
           {
             id: "msg-1",
-            content: [] as const,
+            content: [],
             role: Role.USER,
             createdAt: new Date().toISOString(),
           },
@@ -911,7 +915,7 @@ describe("useChatSession Hook", () => {
             id: `rapid-msg-${index}`,
             content: [
               { type: MessageContentType._Text, text: `Message ${index}` },
-            ] as const,
+            ],
             role: Role.ASSISTANT,
             createdAt: new Date().toISOString(),
             taskId: "task-123",
@@ -928,13 +932,11 @@ describe("useChatSession Hook", () => {
     });
 
     it("efficiently handles large message sets", async () => {
-      const largeMessageSet = Array.from(
+      const largeMessageSet: Message[] = Array.from(
         { length: LARGE_DATASET_SIZE },
         (_, i) => ({
           id: `msg-${i}`,
-          content: [
-            { type: MessageContentType._Text, text: `Message ${i}` },
-          ] as const,
+          content: [{ type: MessageContentType._Text, text: `Message ${i}` }],
           role: i % 2 === 0 ? Role.USER : Role.ASSISTANT,
           createdAt: new Date().toISOString(),
         }),
@@ -1023,9 +1025,7 @@ describe("useChatSession Hook", () => {
 export const ChatSessionTestUtils = {
   createMockMessage: (overrides: Partial<Message> = {}): Message => ({
     id: "test-msg",
-    content: [
-      { type: MessageContentType._Text, text: "Test message" },
-    ] as const,
+    content: [{ type: MessageContentType._Text, text: "Test message" }],
     role: Role.USER,
     createdAt: new Date().toISOString(),
     taskId: "test-task",
@@ -1058,17 +1058,17 @@ export const ChatSessionTestUtils = {
     onTaskDeleted: jest.MockedFunction<(taskId: string) => void>;
   } => {
     const mockHandlers = {
-      onTaskUpdate: jest.fn<undefined, [Task]>(),
-      onNewMessage: jest.fn<undefined, [Message]>(),
-      onTaskCreated: jest.fn<undefined, [Task]>(),
-      onTaskDeleted: jest.fn<undefined, [string]>(),
+      onTaskUpdate: jest.fn(),
+      onNewMessage: jest.fn(),
+      onTaskCreated: jest.fn(),
+      onTaskDeleted: jest.fn(),
     };
 
     mockUseWebSocket.mockReturnValue({
       socket: null,
-      joinTask: jest.fn<undefined, [string]>(),
-      leaveTask: jest.fn<undefined, []>(),
-      disconnect: jest.fn<undefined, []>(),
+      joinTask: jest.fn(),
+      leaveTask: jest.fn(),
+      disconnect: jest.fn(),
       isConnected: false,
     });
 

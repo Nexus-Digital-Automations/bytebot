@@ -23,6 +23,7 @@
 
 import { Module } from '@nestjs/common';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { ConfigurationModule } from '../config/config.module';
 import { AuthModule } from '../auth/auth.module';
 import { DatabaseModule } from '../database/database.module';
@@ -45,6 +46,7 @@ import { BrowserResultsService } from './services/browser-results.service';
     AuthModule,
     DatabaseModule,
     SecurityMonitoringModule,
+    ThrottlerModule, // Import for AdvancedThrottleGuard access to global throttler providers
     CacheModule.register(),
   ],
   controllers: [BrowserUseController],
@@ -61,33 +63,6 @@ import { BrowserResultsService } from './services/browser-results.service';
     {
       provide: 'REDIS_CLIENT',
       useValue: null, // Mock Redis client for development
-    },
-    {
-      provide: 'THROTTLER:MODULE_OPTIONS',
-      useValue: {
-        throttlers: [
-          {
-            name: 'default',
-            ttl: 60000,
-            limit: 10,
-          },
-        ],
-        skipIf: () => false,
-        ignoreUserAgents: [],
-        storage: undefined,
-        generateKey: undefined,
-        errorMessage: 'Too Many Requests',
-        getTracker: undefined,
-        skipSuccessfulRequests: false,
-        skipFailedRequests: false,
-      }, // Mock throttler options for development
-    },
-    {
-      provide: 'THROTTLER_STORAGE',
-      useValue: {
-        getRecord: async () => ({ totalHits: 0, timeToExpire: 0 }),
-        addRecord: async () => ({ totalHits: 1, timeToExpire: 60000 }),
-      }, // Mock throttler storage for development
     },
   ],
   exports: [

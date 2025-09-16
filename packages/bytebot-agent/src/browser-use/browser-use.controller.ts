@@ -79,9 +79,9 @@ import { CircuitBreakerAuthGuard } from '../auth/guards/circuit-breaker-auth.gua
 
 // Security and Performance Guards
 import { RateLimitGuard } from '../common/guards/rate-limit.guard';
-import { ThrottleGuard } from '../common/guards/throttle.guard';
 import { CircuitBreakerGuard } from '../common/guards/circuit-breaker.guard';
 import { DatabaseHealthGuard } from '../common/guards/database-health.guard';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 // Decorators and Pipes
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -164,7 +164,7 @@ import {
   CircuitBreakerAuthGuard,
   RolesGuard,
   RateLimitGuard,
-  ThrottleGuard,
+  ThrottlerGuard,
   CircuitBreakerGuard,
   DatabaseHealthGuard,
 )

@@ -79,16 +79,36 @@ function isValidApplication(value: unknown): value is Application {
 }
 
 /**
- * Helper function to safely check if block has valid input
+ * Safe wrapper for type guard calls that handles error types
  */
-function hasValidBlockInput(block: unknown): boolean {
-  return Boolean(
-    block !== null &&
-      typeof block === "object" &&
-      "input" in block &&
-      block.input !== null &&
-      typeof block.input === "object",
-  );
+function safeTypeGuardCall<T>(
+  typeGuard: (block: unknown) => boolean,
+  block: T,
+): boolean {
+  try {
+    return Boolean(typeGuard(block as unknown));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Type guard to check if a block is a valid ComputerToolUseContentBlock with input
+ */
+function isBlockWithInput(
+  block: unknown,
+): block is ComputerToolUseContentBlock & { input: Record<string, unknown> } {
+  try {
+    return Boolean(
+      block !== null &&
+        typeof block === "object" &&
+        "input" in block &&
+        block.input !== null &&
+        typeof block.input === "object",
+    );
+  } catch {
+    return false;
+  }
 }
 
 interface ComputerToolContentNormalProps {
@@ -115,13 +135,13 @@ function ToolDetailsNormal({
 
   return (
     <>
-      {Boolean(isApplicationToolUseBlock(block)) && (
+      {safeTypeGuardCall(isApplicationToolUseBlock, block) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!hasValidBlockInput(block)) {
+            if (!isBlockWithInput(block)) {
               return "Unknown Application";
             }
-            const input = block.input as { application?: unknown };
+            const input = block.input;
             const app = input.application;
             return isValidApplication(app)
               ? applicationMap[app]
@@ -131,31 +151,28 @@ function ToolDetailsNormal({
       )}
 
       {/* Text for type and key actions */}
-      {(Boolean(isTypeKeysToolUseBlock(block)) ||
-        Boolean(isPressKeysToolUseBlock(block))) && (
+      {(safeTypeGuardCall(isTypeKeysToolUseBlock, block) ||
+        safeTypeGuardCall(isPressKeysToolUseBlock, block)) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!hasValidBlockInput(block)) {
+            if (!isBlockWithInput(block)) {
               return "Invalid keys";
             }
-            const input = block.input as { keys?: unknown };
+            const input = block.input;
             const keys = input.keys;
             return Array.isArray(keys) ? keys.join(" + ") : "Invalid keys";
           })()}
         </p>
       )}
 
-      {(Boolean(isTypeTextToolUseBlock(block)) ||
-        Boolean(isPasteTextToolUseBlock(block))) && (
+      {(safeTypeGuardCall(isTypeTextToolUseBlock, block) ||
+        safeTypeGuardCall(isPasteTextToolUseBlock, block)) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!hasValidBlockInput(block)) {
+            if (!isBlockWithInput(block)) {
               return "Invalid text";
             }
-            const input = block.input as {
-              text?: unknown;
-              isSensitive?: unknown;
-            };
+            const input = block.input;
             const text = input.text;
             const isSensitive = Boolean(input.isSensitive ?? false);
 
@@ -169,13 +186,13 @@ function ToolDetailsNormal({
       )}
 
       {/* Duration for wait actions */}
-      {Boolean(isWaitToolUseBlock(block)) && (
+      {safeTypeGuardCall(isWaitToolUseBlock, block) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!hasValidBlockInput(block)) {
+            if (!isBlockWithInput(block)) {
               return "Invalid duration";
             }
-            const input = block.input as { duration?: unknown };
+            const input = block.input;
             const duration = input.duration;
             return typeof duration === "number"
               ? `${duration}ms`
@@ -185,7 +202,7 @@ function ToolDetailsNormal({
       )}
 
       {/* Coordinates for click/mouse actions */}
-      {Boolean(block) && hasCoordinates(block.input) && (
+      {block !== null && hasCoordinates(block.input) && (
         <p className={baseClasses}>
           {((): string => {
             if (!hasCoordinates(block.input)) {
@@ -198,7 +215,7 @@ function ToolDetailsNormal({
       )}
 
       {/* Start and end coordinates for path actions */}
-      {Boolean(block) && hasPathCoordinates(block.input) && (
+      {block !== null && hasPathCoordinates(block.input) && (
         <p className={baseClasses}>
           {((): string => {
             if (!hasPathCoordinates(block.input)) {
@@ -209,7 +226,7 @@ function ToolDetailsNormal({
             const firstPoint = path[0];
             const lastPoint = path[path.length - 1];
 
-            if (!firstPoint || !lastPoint) {
+            if (firstPoint === undefined || lastPoint === undefined) {
               return "Invalid path coordinates";
             }
 
@@ -219,16 +236,13 @@ function ToolDetailsNormal({
       )}
 
       {/* Scroll information */}
-      {Boolean(isScrollToolUseBlock(block)) && (
+      {safeTypeGuardCall(isScrollToolUseBlock, block) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!hasValidBlockInput(block)) {
+            if (!isBlockWithInput(block)) {
               return "unknown 0";
             }
-            const input = block.input as {
-              direction?: unknown;
-              scrollCount?: unknown;
-            };
+            const input = block.input;
             const direction = input.direction;
             const scrollCount = input.scrollCount;
 
@@ -245,13 +259,13 @@ function ToolDetailsNormal({
       )}
 
       {/* File information */}
-      {Boolean(isReadFileToolUseBlock(block)) && (
+      {safeTypeGuardCall(isReadFileToolUseBlock, block) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!hasValidBlockInput(block)) {
+            if (!isBlockWithInput(block)) {
               return "Invalid file path";
             }
-            const input = block.input as { path?: unknown };
+            const input = block.input;
             const path = input.path;
             return typeof path === "string" ? path : "Invalid file path";
           })()}
@@ -274,7 +288,7 @@ export function ComputerToolContentNormal({
     return null;
   }
 
-  const icon = getIcon(block);
+  const icon = getIcon(block) as string;
 
   return (
     <div className="mb-3 max-w-4/5">

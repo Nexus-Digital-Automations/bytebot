@@ -665,12 +665,24 @@
       ]
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-14T20:12:51.548Z",
       "title": "Analyze and optimize workspace performance after coordination fixes",
       "description": "Performance Optimization Agent: Analyze workspace build performance, optimize pnpm configuration, monitor TypeScript compilation, test parallel execution, benchmark operations, and create optimization recommendations",
       "category": "feature",
-      "id": "feature_1757880771548_tre9csl3fio"
+      "id": "feature_1757880771548_tre9csl3fio",
+      "assigned_agent": "dev_session_1757979470990_1_general_93f2f793",
+      "started_at": "2025-09-15T23:39:51.010Z",
+      "claimed_by": "dev_session_1757979470990_1_general_93f2f793",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1757979470990_1_general_93f2f793",
+          "role": "primary",
+          "assignedAt": "2025-09-15T23:39:51.010Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "completed",
@@ -1064,7 +1076,7 @@
       "updated_at": "2025-09-15T23:12:08.106Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-15T22:58:48.870Z",
       "title": "Cross-Package Integration Validation",
       "description": "Validate and fix integration issues across all packages in the workspace after individual fixes. Test builds, dependencies, shared packages, and runtime functionality.",
@@ -1081,7 +1093,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-15T23:18:46.111Z",
+      "updated_at": "2025-09-15T23:18:46.111Z"
     },
     {
       "status": "completed",
@@ -1128,7 +1142,7 @@
       "updated_at": "2025-09-15T23:16:46.602Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-15T22:58:49.148Z",
       "title": "Fix TypeScript warnings in bytebot-ui package",
       "description": "Fix 25 TypeScript lint violations in bytebot-ui package focusing on test files, security configuration, magic numbers, missing return types, and frontend type safety",
@@ -1145,7 +1159,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-15T23:36:14.998Z",
+      "updated_at": "2025-09-15T23:36:14.998Z"
     },
     {
       "status": "completed",
@@ -1170,7 +1186,7 @@
       "updated_at": "2025-09-15T23:15:39.548Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-15T22:58:49.251Z",
       "title": "Fix massive TypeScript safety violations in bytebotd package",
       "description": "Address hundreds of TypeScript lint violations across bytebotd package: 653 no-unsafe-member-access, 563 no-unsafe-assignment, 427 explicit-any, 239 prefer-nullish-coalescing violations. Strategic approach: Start with explicit-any violations (highest impact), move to unsafe assignments and member access, finish with nullish coalescing improvements. Focus on critical service files first. Implement proper interfaces/types, type guards, safe property access patterns, nullish coalescing operators.",
@@ -1187,7 +1203,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-15T23:26:00.214Z",
+      "updated_at": "2025-09-15T23:26:00.214Z"
     },
     {
       "status": "completed",
@@ -2980,6 +2998,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-15T22:58:23.824Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1757979470990_1_general_93f2f793": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-15T23:37:50.990Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-15T23:37:50.990Z",
       "sessionId": null,
       "metadata": {}
     }

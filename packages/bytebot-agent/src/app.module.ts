@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AgentModule } from './agent/agent.module';
@@ -29,6 +30,25 @@ import { ReliabilityModule } from './common/reliability/reliability.module';
     // Core NestJS modules
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot(),
+
+    // Rate limiting and throttling (must be imported early for global availability)
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60000, // 1 minute
+        limit: 100, // 100 requests per minute default
+      },
+      {
+        name: 'auth',
+        ttl: 60000, // 1 minute
+        limit: 30, // 30 requests per minute for auth endpoints
+      },
+      {
+        name: 'computer-use',
+        ttl: 60000, // 1 minute
+        limit: 120, // 120 requests per minute for computer operations
+      },
+    ]),
 
     // Configuration management (must be first for other modules to use)
     ConfigurationModule,
