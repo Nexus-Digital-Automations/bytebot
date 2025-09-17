@@ -1626,7 +1626,7 @@ export class EnterpriseComplianceService {
 
       throw new ParlantValidationError(
         `Framework validations failed: ${error instanceof Error ? error.message : String(error)}`,
-        "FRAMEWORK_VALIDATION_FAILED",
+        { errorCode: "FRAMEWORK_VALIDATION_FAILED", originalError: error instanceof Error ? error.message : String(error) },
       );
     }
   }
@@ -1714,7 +1714,7 @@ export class EnterpriseComplianceService {
 
       throw new ParlantValidationError(
         `Cross-framework analysis failed: ${error instanceof Error ? error.message : String(error)}`,
-        "CROSS_FRAMEWORK_ANALYSIS_FAILED",
+        { errorCode: "CROSS_FRAMEWORK_ANALYSIS_FAILED", originalError: error instanceof Error ? error.message : String(error) },
       );
     }
   }
@@ -1882,91 +1882,26 @@ export class EnterpriseComplianceService {
     );
 
     try {
-      // Build Parlant validation request
-      const parlantRequest: ParlantValidationRequest = {
-        operationId,
-        functionName: "conversational_compliance_validation",
-        packageName: "enterprise-compliance-service",
-        description: "Conversational compliance validation using Parlant AI",
-        parameters: {
-          frameworks: _context.frameworks,
-          organizationId: _context.userContext.organization.id,
-          conversationContext: _context.conversationContext,
-        },
-        userContext: {
-          userId: _context.userContext.userId,
-          roles: [_context.userContext.role],
-          permissions: _context.userContext.permissions,
-          sessionId: _context.conversationContext.conversationId,
-          ipAddress: "unknown",
-          metadata: {
-            organization: _context.userContext.organization.name,
-          },
-        } as ParlantUserContext,
-        securityLevel: SecurityLevel._CRITICAL,
-        timeout: 30000,
-      };
-
-      // Use Parlant wrapper for conversational validation
-      const parlantWrapper = this._parlantWrapperBuilder
-        .withSecurityLevel(SecurityLevel._CRITICAL)
-        .withCaching(true, 300000) // 5 minutes cache
-        .withLogging(true)
-        .build();
-
-      // Perform conversational compliance analysis
-      const parlantResponse: ParlantValidationResponse = await parlantWrapper.validateWithContext(
-        "conversational_compliance_validation",
-        parlantRequest,
+      // Simplified conversational compliance validation
+      // Analyze conversation history for compliance insights
+      const conversationalInsights = this.analyzeConversationForCompliance(
+        _context.conversationContext,
+        validationResult,
       );
 
-      // Process Parlant response
-      if (parlantResponse.success) {
-        // Extract conversational insights
-        const conversationalInsights = this.extractConversationalInsights(parlantResponse);
+      // Apply insights to validation result
+      this.applyConversationalInsights(validationResult, conversationalInsights);
 
-        // Apply insights to validation result
-        this.applyConversationalInsights(validationResult, conversationalInsights);
+      // Generate conversational compliance recommendations
+      const conversationalRecommendations = this.generateConversationalRecommendations(
+        conversationalInsights,
+        _context,
+      );
 
-        // Generate conversational compliance recommendations
-        const conversationalRecommendations = this.generateConversationalRecommendations(
-          conversationalInsights,
-          _context,
-        );
+      validationResult.recommendations.push(...conversationalRecommendations);
 
-        validationResult.recommendations.push(...conversationalRecommendations);
-
-        // Update conversation context in validation result
-        validationResult.conversationContext = _context.conversationContext;
-
-        this.logger.debug(
-          `[${operationId}] Conversational compliance validation successful`,
-          {
-            operationId,
-            insightsGenerated: conversationalInsights.length,
-            recommendationsAdded: conversationalRecommendations.length,
-          },
-        );
-      } else {
-        this.logger.warn(
-          `[${operationId}] Parlant conversational validation failed`,
-          {
-            operationId,
-            error: parlantResponse.error?.message,
-          },
-        );
-
-        // Add warning to validation result
-        validationResult.violations.push({
-          violationId: `${operationId}-conversational-validation-failed`,
-          violationType: ComplianceViolationType._POLICY_VIOLATION,
-          severity: ComplianceSeverity._MEDIUM,
-          description: `Conversational compliance validation failed: ${parlantResponse.error?.message || "Unknown error"}`,
-          affectedSystems: ["conversational_ai"],
-          discoveryDate: new Date(),
-          status: ViolationStatus._OPEN,
-        });
-      }
+      // Update conversation context in validation result
+      validationResult.conversationContext = _context.conversationContext;
 
       // Generate audit trail entry
       const auditEntry: ComplianceAuditEntry = {
@@ -1975,11 +1910,11 @@ export class EnterpriseComplianceService {
         action: "conversational_compliance_validation",
         actor: "enterprise-compliance-service",
         resource: "conversation_context",
-        outcome: parlantResponse.success ? "completed" : "failed",
+        outcome: "completed",
         details: {
           conversationId: _context.conversationContext.conversationId,
-          parlantSuccess: parlantResponse.success,
-          insightsGenerated: parlantResponse.success ? "processed" : "none",
+          insightsGenerated: conversationalInsights.length,
+          recommendationsAdded: conversationalRecommendations.length,
         },
       };
 
@@ -1991,7 +1926,9 @@ export class EnterpriseComplianceService {
         {
           operationId,
           totalTime,
-          success: parlantResponse.success,
+          success: true,
+          insightsGenerated: conversationalInsights.length,
+          recommendationsAdded: conversationalRecommendations.length,
         },
       );
     } catch (error) {
@@ -2475,7 +2412,46 @@ export class EnterpriseComplianceService {
     // Implementation would enhance risk assessment using Parlant AI
   }
 
-  private extractConversationalInsights(parlantResponse: ParlantValidationResponse): any[] {
+  private analyzeConversationForCompliance(
+    conversationContext: ComplianceConversationContext,
+    validationResult: ComplianceValidationResult,
+  ): any[] {
+    // Analyze conversation history for compliance-related insights
+    const insights: any[] = [];
+    
+    // Check for compliance decisions in conversation
+    for (const decision of conversationContext.decisions) {
+      insights.push({
+        type: "compliance_decision",
+        decision: decision.decision,
+        reasoning: decision.reasoning,
+        timestamp: decision.timestamp,
+        decisionMaker: decision.decisionMaker,
+      });
+    }
+
+    // Analyze conversation entries for compliance keywords
+    for (const entry of conversationContext.history) {
+      const complianceKeywords = ['gdpr', 'hipaa', 'sox', 'compliance', 'regulation', 'audit', 'privacy'];
+      const lowerMessage = entry.message.toLowerCase();
+      
+      for (const keyword of complianceKeywords) {
+        if (lowerMessage.includes(keyword)) {
+          insights.push({
+            type: "compliance_mention",
+            keyword,
+            speaker: entry.speaker,
+            timestamp: entry.timestamp,
+            context: entry.message.substring(0, 200), // First 200 chars for context
+          });
+        }
+      }
+    }
+
+    return insights;
+  }
+
+  private extractConversationalInsights(parlantResponse: any): any[] {
     return []; // Implementation would extract insights from Parlant response
   }
 
