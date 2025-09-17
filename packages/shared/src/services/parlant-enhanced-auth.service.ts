@@ -449,9 +449,9 @@ export class ParlantEnhancedAuthService {
         {
           operationId,
           success: authResult.success,
-          decision: validationResponse.result.decision,
+          decision: validationResponse.approved ? "approved" : "denied",
           processingTime,
-          conversationId: validationResponse.conversationContext.conversationId,
+          conversationId: validationResponse.conversationId,
         },
       );
 
@@ -534,7 +534,7 @@ export class ParlantEnhancedAuthService {
       await this.parlantService.validateFunctionExecution(validationRequest);
 
     // Additional security measures for high-risk authentication
-    if (validationResponse.result.decision === ValidationDecision._APPROVED) {
+    if (validationResponse.approved) {
       await this.implementAdditionalSecurityMeasures(authContext);
     }
 
@@ -616,7 +616,7 @@ export class ParlantEnhancedAuthService {
     const response =
       await this.parlantService.validateFunctionExecution(validationRequest);
 
-    return response.result.decision === ValidationDecision._APPROVED;
+    return response.approved;
   }
 
   /**
@@ -935,8 +935,7 @@ export class ParlantEnhancedAuthService {
     );
 
     // Enhanced parameters for high-risk scenarios
-    baseRequest.validationParams = {
-      ...baseRequest.validationParams,
+    (baseRequest as any).validationParams = {
       mode: ValidationMode._INTERACTIVE,
       approvalLevel: ApprovalLevel._DUAL_APPROVAL,
       timeout: 120000, // 2 minutes for high-risk scenarios
@@ -944,14 +943,16 @@ export class ParlantEnhancedAuthService {
     };
 
     // Update conversation context for high-risk
-    baseRequest.conversationContext.metadata.priority =
-      ConversationPriority._CRITICAL;
-    baseRequest.conversationContext.metadata.properties = {
-      ...baseRequest.conversationContext.metadata.properties,
-      highRisk: true,
-      criticalRiskFactors: authContext.riskAssessment.riskFactors.filter(
-        (f) => f.critical,
-      ),
+    (baseRequest as any).conversationContext = {
+      metadata: {
+        priority: ConversationPriority._CRITICAL,
+        properties: {
+          highRisk: true,
+          criticalRiskFactors: authContext.riskAssessment.riskFactors.filter(
+            (f) => f.critical,
+          ),
+        },
+      },
     };
 
     return baseRequest;
@@ -994,12 +995,13 @@ export class ParlantEnhancedAuthService {
       requiredActions: [],
       metadata: {
         processingTime: response.processingTime,
-        confidence: response.result.confidence,
-        decision: response.result.decision,
+        confidence: response.confidence,
+        decision: response.approved ? ValidationDecision._APPROVED : ValidationDecision._DENIED,
       },
     };
 
-    switch (response.result.decision) {
+    const decision = response.approved ? ValidationDecision._APPROVED : ValidationDecision._DENIED;
+    switch (decision) {
       case ValidationDecision._APPROVED:
         // Authentication approved - perform actual authentication
         result.success = true;
@@ -1007,12 +1009,12 @@ export class ParlantEnhancedAuthService {
         break;
 
       case ValidationDecision._DENIED:
-        result.error = response.result.reasoning;
+        result.error = response.reason;
         break;
 
       case ValidationDecision._CONDITIONAL_APPROVAL:
         result.requiredActions = this.mapRecommendationsToActions(
-          response.result.recommendations,
+          response.reason,
         );
         break;
 
@@ -1021,7 +1023,7 @@ export class ParlantEnhancedAuthService {
           {
             type: RequiredActionType.SECURITY_QUESTION,
             description: "Additional information required for authentication",
-            parameters: { questions: response.result.reasoning },
+            parameters: { questions: response.reason },
             mandatory: true,
           },
         ];
@@ -1033,7 +1035,7 @@ export class ParlantEnhancedAuthService {
           {
             type: RequiredActionType.SECURITY_ACKNOWLEDGMENT,
             description: "Manual security review initiated",
-            parameters: { escalationReason: response.result.reasoning },
+            parameters: { escalationReason: response.reason },
             mandatory: false,
           },
         ];

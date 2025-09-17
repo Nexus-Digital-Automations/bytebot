@@ -211,19 +211,19 @@ export class ParlantIntegrationService
 
     // Add request interceptor for metrics
     this.httpClient.interceptors.request.use((config) => {
-      config.metadata = { startTime: Date.now() };
+      (config as any).metadata = { startTime: Date.now() };
       return config;
     });
 
     // Add response interceptor for metrics and error handling
     this.httpClient.interceptors.response.use(
       (response) => {
-        const duration = Date.now() - response.config.metadata.startTime;
+        const duration = Date.now() - (response.config as any).metadata.startTime;
         this.updateMetrics({ responseTime: duration, success: true });
         return response;
       },
       (error) => {
-        const duration = Date.now() - error.config?.metadata?.startTime || 0;
+        const duration = Date.now() - (error.config as any)?.metadata?.startTime || 0;
         this.updateMetrics({ responseTime: duration, success: false });
         return Promise.reject(error);
       },
@@ -296,7 +296,9 @@ export class ParlantIntegrationService
         clearTimeout(timeout);
         this.logger.error("❌ WebSocket error", error);
         reject(
-          new ParlantConnectionError("WebSocket connection failed", error),
+          new ParlantConnectionError("WebSocket connection failed", {
+            error: error instanceof Error ? error.message : String(error)
+          }),
         );
       });
     });
@@ -473,6 +475,12 @@ export class ParlantIntegrationService
         processingTime: 10,
         cacheStatus: "miss",
         source: "fallback",
+        riskAssessment: {
+          level: SecurityLevel._MEDIUM,
+          factors: [],
+          score: 50,
+          mitigations: [],
+        },
       },
     };
   }
@@ -569,19 +577,19 @@ export class ParlantIntegrationService
       confidence: typeof data.confidence === "number" ? data.confidence : 0,
       executionContext: data.execution_context
         ? {
-            constraints: data.execution_context.constraints || {},
+            constraints: (data.execution_context as any).constraints || {},
             resourceLimits: {
               maxExecutionTime:
-                data.execution_context.max_execution_time || 30000,
-              maxMemoryUsage: data.execution_context.max_memory_usage || 512,
-              maxCpuUsage: data.execution_context.max_cpu_usage || 80,
+                (data.execution_context as any).max_execution_time || 30000,
+              maxMemoryUsage: (data.execution_context as any).max_memory_usage || 512,
+              maxCpuUsage: (data.execution_context as any).max_cpu_usage || 80,
               fileSystemAccess:
-                data.execution_context.filesystem_access || "read",
+                (data.execution_context as any).filesystem_access || "read",
               networkAccess:
-                data.execution_context.network_access || "internal",
+                (data.execution_context as any).network_access || "internal",
             },
             securityRestrictions:
-              data.execution_context.security_restrictions || [],
+              (data.execution_context as any).security_restrictions || [],
             monitoring: {
               realTimeMonitoring: true,
               logAllOperations: true,
@@ -653,7 +661,7 @@ export class ParlantIntegrationService
     }
 
     const cacheKey = this.generateCacheKey(request);
-    const ttl = this.config.wrapper.cacheTtl;
+    const ttl = this.config.wrapper.cacheTtl || this.config.connection.cacheTtl;
 
     const cacheEntry: ParlantCacheEntry = {
       response,

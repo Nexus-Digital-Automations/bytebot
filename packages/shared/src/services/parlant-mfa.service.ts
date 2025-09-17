@@ -32,6 +32,7 @@ import { Cache } from "cache-manager";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
+  ParlantUserContext,
 } from "../types/parlant-integration.types";
 
 import {
@@ -1165,24 +1166,28 @@ export class ParlantMFAService {
       rules: [],
     };
 
+    // Create user context from challenge data
+    const userContext: ParlantUserContext = {
+      userId: challenge.userId,
+      roles: functionContext.executionContext.user?.roles || [],
+      sessionId: `mfa-session-${challenge.challengeId}`,
+      ipAddress: challenge.metadata.clientIp || "unknown",
+      metadata: {
+        challengeId: challenge.challengeId,
+        method: challenge.method,
+        riskScore: challenge.riskAssessment.riskScore,
+      },
+    };
+
     return {
-      requestId: operationId,
-      functionContext,
-      validationParams,
-      conversationContext: challenge.conversationId
-        ? ({
-            conversationId: challenge.conversationId,
-            metadata: {
-              topic: "MFA Validation",
-              priority: ConversationPriority._HIGH,
-              properties: {
-                challengeId: challenge.challengeId,
-                method: challenge.method,
-              },
-            },
-          } as any)
-        : undefined,
-      timestamp: new Date(),
+      operationId: operationId,
+      functionName: functionContext.functionName,
+      packageName: "parlant-mfa-service",
+      description: "Validate MFA response with conversational verification",
+      parameters: functionContext.arguments,
+      userContext: userContext,
+      securityLevel: functionContext.securityLevel as any,
+      timeout: validationParams.timeout,
     };
   }
 
