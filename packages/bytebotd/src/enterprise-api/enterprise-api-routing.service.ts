@@ -620,12 +620,13 @@ export class EnterpriseApiRoutingService {
         return this.selectWeightedEndpoint(healthyEndpoints);
       case 'LEAST_CONNECTIONS':
         return this.selectLeastConnectionsEndpoint(healthyEndpoints);
-      default:
+      default: {
         const endpoint = healthyEndpoints[0];
         if (!endpoint) {
           throw new Error('No healthy endpoints available');
         }
         return endpoint;
+      }
     }
   }
 
@@ -817,7 +818,7 @@ export class EnterpriseApiRoutingService {
    */
   private startHealthChecks(): void {
     setInterval(async () => {
-      for (const [operation, endpoints] of this.serviceEndpoints) {
+      for (const [_operation, endpoints] of this.serviceEndpoints) {
         for (const endpoint of endpoints) {
           await this.performHealthCheck(endpoint);
         }
@@ -864,21 +865,21 @@ export class EnterpriseApiRoutingService {
   }
 
   private shouldValidateHealthUpdate(serviceId: string, health: 'HEALTHY' | 'DEGRADED' | 'FAILED'): boolean {
-    return health === 'FAILED' ?? this.isCriticalService(serviceId);
+    return health === 'FAILED' || this.isCriticalService(serviceId);
   }
 
   private async performHealthUpdate(
     serviceId: string,
     health: 'HEALTHY' | 'DEGRADED' | 'FAILED',
-    healthData: any,
+    healthData: { responseTime?: number; [key: string]: unknown },
     operationId: string
   ): Promise<void> {
     // Find and update the service endpoint
-    for (const [operation, endpoints] of this.serviceEndpoints) {
+    for (const [_operation, endpoints] of this.serviceEndpoints) {
       const endpoint = endpoints.find(e => e.id === serviceId);
       if (endpoint) {
         endpoint.health = health;
-        endpoint.metrics.lastResponseTime = healthData.responseTime;
+        endpoint.metrics.lastResponseTime = healthData.responseTime ?? 0;
         endpoint.metrics.lastHealthCheck = new Date();
         
         this.logger.debug(`[${operationId}] Service health updated`, {
@@ -914,7 +915,7 @@ export class EnterpriseApiRoutingService {
     return 85; // Mock value
   }
 
-  private calculateEndpointScore(endpoint: ServiceEndpoint, request: RoutingRequest): number {
+  private calculateEndpointScore(endpoint: ServiceEndpoint, _request: RoutingRequest): number {
     let score = 0;
     
     // Health score
@@ -999,7 +1000,7 @@ export class EnterpriseApiRoutingService {
   }
 
   private isCriticalService(serviceId: string): boolean {
-    return serviceId.includes('primary') ?? serviceId.includes('auth');
+    return serviceId.includes('primary') || serviceId.includes('auth');
   }
 
   private sanitizeOperationForFunction(operation: string): string {

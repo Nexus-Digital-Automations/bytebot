@@ -1006,7 +1006,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
           autoRemediation: {
             enabled: validationResult.approved && severity !== 'EMERGENCY',
             approvedActions: validationResult.approved ? actions : [],
-            requiresUserApproval: severity === 'CRITICAL' ?? severity === 'EMERGENCY',
+            requiresUserApproval: severity === 'CRITICAL' || severity === 'EMERGENCY',
           },
         },
       };
@@ -1175,7 +1175,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
           alertCreation: true,
           severity,
           component,
-          businessContinuity: severity === 'CRITICAL' ?? severity === 'EMERGENCY',
+          businessContinuity: severity === 'CRITICAL' || severity === 'EMERGENCY',
         },
       },
       riskLevel: riskLevel as RiskLevel,
