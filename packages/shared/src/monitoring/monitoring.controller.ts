@@ -334,7 +334,10 @@ export class MonitoringController {
             "HEALTH_PROBES_ENABLED",
             true,
           ),
-          intervalSeconds: this._config.get<number>("HEALTH_CHECK_INTERVAL", 30),
+          intervalSeconds: this._config.get<number>(
+            "HEALTH_CHECK_INTERVAL",
+            30,
+          ),
           timeoutSeconds: this._config.get<number>("HEALTH_CHECK_TIMEOUT", 5),
           failureThreshold: this._config.get<number>(
             "HEALTH_FAILURE_THRESHOLD",

@@ -18,7 +18,7 @@ import {
 } from "@nestjs/common";
 import { EventEmitter } from "events";
 import * as jwt from "jsonwebtoken";
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 import WebSocket from "ws";
 import {
   ParlantServiceConfig,
@@ -40,6 +40,30 @@ import {
   ParlantAuthenticationError,
   ParlantTimeoutError,
 } from "../types/parlant-integration.types";
+
+/**
+ * API Error Response interface
+ */
+interface ApiErrorResponse {
+  status: number;
+  data?: {
+    message?: string;
+    error?: string;
+  };
+}
+
+/**
+ * Raw execution context data from API
+ */
+interface RawExecutionContextData {
+  constraints?: Record<string, unknown>;
+  max_execution_time?: number;
+  max_memory_usage?: number;
+  max_cpu_usage?: number;
+  filesystem_access?: string;
+  network_access?: string;
+  security_restrictions?: string[];
+}
 
 /**
  * Maximum Parlant Integration Service
@@ -210,20 +234,22 @@ export class ParlantIntegrationService
     });
 
     // Add request interceptor for metrics
-    this.httpClient.interceptors.request.use((config) => {
-      (config as any).metadata = { startTime: Date.now() };
+    this.httpClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+      (config as InternalAxiosRequestConfig & { metadata?: { startTime: number } }).metadata = { startTime: Date.now() };
       return config;
     });
 
     // Add response interceptor for metrics and error handling
     this.httpClient.interceptors.response.use(
-      (response) => {
-        const duration = Date.now() - (response.config as any).metadata.startTime;
+      (response: AxiosResponse) => {
+        const config = response.config as InternalAxiosRequestConfig & { metadata?: { startTime: number } };
+        const duration = Date.now() - (config.metadata?.startTime ?? Date.now());
         this.updateMetrics({ responseTime: duration, success: true });
         return response;
       },
-      (error) => {
-        const duration = Date.now() - (error.config as any)?.metadata?.startTime || 0;
+      (error: AxiosError) => {
+        const config = error.config as InternalAxiosRequestConfig & { metadata?: { startTime: number } } | undefined;
+        const duration = Date.now() - (config?.metadata?.startTime ?? Date.now());
         this.updateMetrics({ responseTime: duration, success: false });
         return Promise.reject(error);
       },
@@ -543,7 +569,7 @@ export class ParlantIntegrationService
 
       // Handle different error types
       if (error && typeof error === "object" && "response" in error) {
-        const errorResponse = error.response as any;
+        const errorResponse = error.response as ApiErrorResponse;
         if (errorResponse?.status === 401) {
           throw new ParlantAuthenticationError(
             "Invalid Parlant API credentials",
@@ -577,19 +603,19 @@ export class ParlantIntegrationService
       confidence: typeof data.confidence === "number" ? data.confidence : 0,
       executionContext: data.execution_context
         ? {
-            constraints: (data.execution_context as any).constraints || {},
+            constraints: (data.execution_context as RawExecutionContextData).constraints ?? {},
             resourceLimits: {
               maxExecutionTime:
-                (data.execution_context as any).max_execution_time || 30000,
-              maxMemoryUsage: (data.execution_context as any).max_memory_usage || 512,
-              maxCpuUsage: (data.execution_context as any).max_cpu_usage || 80,
+                (data.execution_context as RawExecutionContextData).max_execution_time ?? 30000,
+              maxMemoryUsage: (data.execution_context as RawExecutionContextData).max_memory_usage ?? 512,
+              maxCpuUsage: (data.execution_context as RawExecutionContextData).max_cpu_usage ?? 80,
               fileSystemAccess:
-                (data.execution_context as any).filesystem_access || "read",
+                ((data.execution_context as RawExecutionContextData).filesystem_access ?? "read") as "read" | "write" | "none" | "full",
               networkAccess:
-                (data.execution_context as any).network_access || "internal",
+                ((data.execution_context as RawExecutionContextData).network_access ?? "internal") as "none" | "internal" | "external" | "full",
             },
             securityRestrictions:
-              (data.execution_context as any).security_restrictions || [],
+              (data.execution_context as RawExecutionContextData).security_restrictions ?? [],
             monitoring: {
               realTimeMonitoring: true,
               logAllOperations: true,

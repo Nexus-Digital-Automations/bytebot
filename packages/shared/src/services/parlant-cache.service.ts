@@ -21,6 +21,19 @@ import { EventEmitter } from "events";
 import * as crypto from "crypto";
 import * as fs from "fs/promises";
 import * as path from "path";
+
+/**
+ * Redis client interface for type safety
+ */
+interface RedisClient {
+  get(key: string): Promise<string | null>;
+  set(key: string, value: string): Promise<void>;
+  setex(key: string, seconds: number, value: string): Promise<void>;
+  del(key: string | string[]): Promise<number>;
+  keys(pattern: string): Promise<string[]>;
+  exists(key: string): Promise<number>;
+  quit(): Promise<void>;
+}
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
@@ -110,7 +123,7 @@ export class ParlantCacheService
 
   // Multi-level cache storage
   private memoryCache = new Map<string, ParlantCacheEntry>();
-  private redisClient: any = null; // Redis client will be injected
+  private redisClient: RedisClient | null = null; // Redis client will be injected
   private persistentCachePath: string = "";
 
   // Cache metadata and monitoring
@@ -452,9 +465,9 @@ export class ParlantCacheService
 
       // Invalidate from Redis
       if (this.redisClient) {
-        const keys = await (this.redisClient as any).keys(`*${pattern}*`);
+        const keys = await this.redisClient.keys(`*${pattern}*`);
         if (keys.length > 0) {
-          await (this.redisClient as any).del(keys);
+          await this.redisClient.del(keys);
           invalidatedCount += keys.length;
         }
       }
@@ -629,7 +642,7 @@ export class ParlantCacheService
 
     try {
       const startTime = Date.now();
-      const data = await (this.redisClient as any).get(key);
+      const data = await this.redisClient.get(key);
       const responseTime = Date.now() - startTime;
 
       if (!data) {
@@ -644,7 +657,7 @@ export class ParlantCacheService
       const entry: ParlantCacheEntry = JSON.parse(data);
 
       if (this.isExpired(entry)) {
-        await (this.redisClient as any).del(key);
+        await this.redisClient.del(key);
         return {
           found: false,
           data: null,
@@ -737,7 +750,7 @@ export class ParlantCacheService
 
     try {
       const ttlSeconds = Math.floor(ttl / 1000);
-      await (this.redisClient as any).setex(key, ttlSeconds, JSON.stringify(entry));
+      await this.redisClient.setex(key, ttlSeconds, JSON.stringify(entry));
     } catch (error) {
       this.logger.error("❌ Redis set operation failed", error);
     }
@@ -762,7 +775,7 @@ export class ParlantCacheService
     if (!this.redisClient) return false;
 
     try {
-      const exists = await (this.redisClient as any).exists(key);
+      const exists = await this.redisClient.exists(key);
       return exists === 1;
     } catch (_error) {
       return false;
@@ -1121,7 +1134,7 @@ export class ParlantCacheService
   private async shutdownRedisCache(): Promise<void> {
     if (this.redisClient) {
       try {
-        await (this.redisClient as any).quit();
+        await this.redisClient.quit();
         this.logger.log("🔄 Redis connection closed");
       } catch (error) {
         this.logger.error("❌ Failed to close Redis connection", error);

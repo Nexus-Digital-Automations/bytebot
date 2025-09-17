@@ -1186,7 +1186,7 @@ export class ParlantMFAService {
       description: "Validate MFA response with conversational verification",
       parameters: functionContext.arguments,
       userContext: userContext,
-      securityLevel: functionContext.securityLevel as any,
+      securityLevel: functionContext.securityLevel as SecurityLevel,
       timeout: validationParams.timeout,
     };
   }
