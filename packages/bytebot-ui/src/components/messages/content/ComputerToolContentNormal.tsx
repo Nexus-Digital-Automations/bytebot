@@ -137,7 +137,6 @@ function ToolDetailsNormal({
 
   return (
     <>
-      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
       {safeTypeGuardCall(isApplicationToolUseBlock, safeBlock) && (
         <p className={baseClasses}>
           {((): string => {
@@ -145,9 +144,7 @@ function ToolDetailsNormal({
               return "Unknown Application";
             }
             // Type assertion after type guard to fix unsafe member access
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const validatedBlock = safeBlock;
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             const input = validatedBlock.input;
             const app = (input as { application?: unknown }).application;
             if (isValidApplication(app)) {
@@ -160,9 +157,7 @@ function ToolDetailsNormal({
       )}
 
       {/* Text for type and key actions */}
-      {(/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
-      safeTypeGuardCall(isTypeKeysToolUseBlock, safeBlock) ||
-      /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
+      {(safeTypeGuardCall(isTypeKeysToolUseBlock, safeBlock) ||
         safeTypeGuardCall(isPressKeysToolUseBlock, safeBlock)) && (
         <p className={baseClasses}>
           {((): string => {
@@ -170,9 +165,7 @@ function ToolDetailsNormal({
               return "Invalid keys";
             }
             // Type assertion after type guard to fix unsafe member access
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const validatedBlock = safeBlock;
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             const input = validatedBlock.input;
             const keys = (input as { keys?: unknown }).keys;
             return Array.isArray(keys) ? keys.join(" + ") : "Invalid keys";
@@ -180,9 +173,7 @@ function ToolDetailsNormal({
         </p>
       )}
 
-      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
       {(safeTypeGuardCall(isTypeTextToolUseBlock, safeBlock) ||
-        /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
         safeTypeGuardCall(isPasteTextToolUseBlock, safeBlock)) && (
         <p className={baseClasses}>
           {((): string => {
@@ -190,9 +181,7 @@ function ToolDetailsNormal({
               return "Invalid text";
             }
             // Type assertion after type guard to fix unsafe member access
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const validatedBlock = safeBlock;
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             const input = validatedBlock.input;
             const text = (input as { text?: unknown }).text;
             const isSensitive = Boolean((input as { isSensitive?: unknown }).isSensitive ?? false);
@@ -224,7 +213,7 @@ function ToolDetailsNormal({
       )}
 
       {/* Coordinates for click/mouse actions */}
-      {safeBlock !== null && safeBlock.input !== null && hasCoordinates(safeBlock.input) && (
+      {Boolean(safeBlock?.input) && hasCoordinates(safeBlock.input) && (
         <p className={baseClasses}>
           {((): string => {
             // hasCoordinates type guard already confirmed structure
@@ -235,7 +224,7 @@ function ToolDetailsNormal({
       )}
 
       {/* Start and end coordinates for path actions */}
-      {safeBlock !== null && safeBlock.input !== null && hasPathCoordinates(safeBlock.input) && (
+      {Boolean(safeBlock?.input) && hasPathCoordinates(safeBlock.input) && (
         <p className={baseClasses}>
           {((): string => {
             // hasPathCoordinates type guard already confirmed structure  

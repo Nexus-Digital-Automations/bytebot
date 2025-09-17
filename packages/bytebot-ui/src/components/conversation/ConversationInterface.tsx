@@ -728,7 +728,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Parlant WebSocket integration
+  // Parlant WebSocket integration with proper typing
   const hookResult = useParlantWebSocket({
     config: {
       enablePerformanceTracking: true,
@@ -740,7 +740,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       logInfo('Conversation started', { conversationId: safeConversation.conversationId }, 'ConversationInterface');
       onConversationStart?.(safeConversation.conversationId);
     },
-    onConversationEnd: (endedConversationId) => {
+    onConversationEnd: (endedConversationId: string) => {
       logInfo('Conversation ended', { conversationId: endedConversationId }, 'ConversationInterface');
       onConversationEnd?.(endedConversationId);
     },
@@ -754,13 +754,13 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       logInfo('Validation request received', { requestId: safeRequest.requestId }, 'ConversationInterface');
       onValidationRequest?.(safeRequest);
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       logWarn('Conversation error', error, 'ConversationInterface');
       onError?.(error);
     }
   });
 
-  // Safe destructuring to avoid error-typed values
+  // Safe destructuring with type assertion to resolve ESLint warnings
   const {
     currentConversation,
     conversationState,

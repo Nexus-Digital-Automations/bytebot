@@ -15,7 +15,7 @@ import {
   ParlantValidationResponse,
   ParlantConversationContext,
   SecurityLevel
-} from '@bytebot/shared/types/parlant-integration.types';
+} from '../../../shared/src/types/parlant-integration.types';
 
 // ===== ORCHESTRATION CORE INTERFACES =====
 

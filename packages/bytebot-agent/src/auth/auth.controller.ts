@@ -36,12 +36,12 @@ import {
 } from '@nestjs/swagger';
 import { RateLimitGuard, RateLimit } from '../common/guards/rate-limit.guard';
 import { RateLimitPreset } from '@bytebot/shared';
-import {
-  ParlantCritical,
-  ParlantSecure,
-  ParlantValidated,
-  SecurityLevel,
-} from '@bytebot/shared/server';
+// import {
+//   ParlantCritical,
+//   ParlantSecure,
+//   ParlantValidated,
+//   SecurityLevel,
+// } from '@bytebot/shared/server';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from './guards/jwt-auth.guard';
@@ -79,9 +79,9 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @RateLimit(RateLimitPreset._AUTH) // Strict rate limiting for authentication
-  @ParlantCritical(
-    'User login authentication with credential validation and JWT token generation',
-  )
+  // @ParlantCritical(
+  //   'User login authentication with credential validation and JWT token generation',
+  // )
   @ApiOperation({
     summary: 'User login',
     description: 'Authenticate user credentials and return JWT tokens',
@@ -170,9 +170,9 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @RateLimit(RateLimitPreset._AUTH) // Strict rate limiting for registration
-  @ParlantCritical(
-    'User account registration with secure password hashing and user creation',
-  )
+  // @ParlantCritical(
+  //   'User account registration with secure password hashing and user creation',
+  // )
   @ApiOperation({
     summary: 'User registration',
     description: 'Create new user account with secure password hashing',
@@ -264,9 +264,9 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @RateLimit(RateLimitPreset._AUTH) // Rate limiting for token refresh
-  @ParlantSecure(
-    'JWT token refresh operation with refresh token validation and new token generation',
-  )
+  // @ParlantSecure(
+  //   'JWT token refresh operation with refresh token validation and new token generation',
+  // )
   @ApiOperation({
     summary: 'Refresh JWT tokens',
     description: 'Generate new access token using valid refresh token',
@@ -334,12 +334,12 @@ export class AuthController {
   @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  @ParlantValidated({
-    description:
-      'User logout operation with refresh token invalidation and session cleanup',
-    securityLevel: SecurityLevel._MEDIUM,
-    cacheable: false,
-  })
+  // @ParlantValidated({
+  //   description:
+  //     'User logout operation with refresh token invalidation and session cleanup',
+  //   securityLevel: SecurityLevel._MEDIUM,
+  //   cacheable: false,
+  // })
   @ApiOperation({
     summary: 'User logout',
     description: 'Invalidate refresh token and log out user',
@@ -402,9 +402,9 @@ export class AuthController {
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ParlantCritical(
-    'Password change operation with current password verification and secure password update',
-  )
+  // @ParlantCritical(
+  //   'Password change operation with current password verification and secure password update',
+  // )
   @ApiOperation({
     summary: 'Change user password',
     description: 'Update user password with current password verification',
@@ -476,13 +476,13 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiBearerAuth()
-  @ParlantValidated({
-    description:
-      'Retrieve authenticated user profile information and account details',
-    securityLevel: SecurityLevel._MEDIUM,
-    cacheable: true,
-    cacheTtl: 300000,
-  })
+  // @ParlantValidated({
+  //   description:
+  //     'Retrieve authenticated user profile information and account details',
+  //   securityLevel: SecurityLevel._MEDIUM,
+  //   cacheable: true,
+  //   cacheTtl: 300000,
+  // })
   @ApiOperation({
     summary: 'Get current user profile',
     description: 'Returns authenticated user profile information',

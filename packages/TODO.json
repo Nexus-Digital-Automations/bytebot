@@ -1,0 +1,134 @@
+{
+  "project": "unknown",
+  "tasks": [
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T14:49:57.462Z",
+      "title": "Fix TypeScript ESLint warnings in bytebotd package",
+      "description": "Resolve all ESLint TypeScript strict mode violations in bytebotd NestJS service including any type violations, unsafe member access, and strict boolean expressions",
+      "category": "error",
+      "id": "error_1758120597461_5p0z6u8928",
+      "assigned_agent": "dev_session_1758120559426_1_general_9ea0acab",
+      "started_at": "2025-09-17T14:54:58.513Z",
+      "claimed_by": "dev_session_1758120559426_1_general_9ea0acab",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758120559426_1_general_9ea0acab",
+          "role": "primary",
+          "assignedAt": "2025-09-17T14:54:58.513Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T14:49:58.479Z",
+      "title": "Fix ESLint TypeScript warnings in bytebot-ui package",
+      "description": "Resolve 100+ unsafe member access ESLint warnings, TypeScript any violations, and strict boolean expressions in React/Next.js components",
+      "category": "error",
+      "id": "error_1758120598479_u5apn8hqu78",
+      "assigned_agent": "dev_session_1758120558420_1_general_4da642f2",
+      "started_at": "2025-09-17T14:51:15.353Z",
+      "claimed_by": "dev_session_1758120558420_1_general_4da642f2",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758120558420_1_general_4da642f2",
+          "role": "primary",
+          "assignedAt": "2025-09-17T14:51:15.353Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T14:51:07.944Z",
+      "title": "Fix TypeScript ESLint warnings in shared package",
+      "description": "Resolve all ESLint TypeScript strict mode violations in shared package including any type violations, unsafe member access, and strict boolean expressions",
+      "category": "error",
+      "id": "error_1758120667944_pw7q1xij61r",
+      "assigned_agent": "dev_session_1758120558415_1_general_1f4398a6",
+      "started_at": "2025-09-17T14:56:07.928Z",
+      "claimed_by": "dev_session_1758120558415_1_general_1f4398a6",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758120558415_1_general_1f4398a6",
+          "role": "primary",
+          "assignedAt": "2025-09-17T14:56:07.928Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-17T15:55:50.488Z",
+      "updated_at": "2025-09-17T15:55:50.488Z"
+    }
+  ],
+  "agents": {
+    "dev_session_1758120558415_1_general_1f4398a6": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T14:49:18.416Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T14:49:18.416Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758120558420_1_general_4da642f2": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T14:49:18.421Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T14:49:18.421Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758120559426_1_general_9ea0acab": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T14:49:19.427Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T14:49:19.427Z",
+      "sessionId": null,
+      "metadata": {}
+    }
+  },
+  "completed_tasks": [],
+  "features": []
+}

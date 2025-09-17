@@ -29,7 +29,7 @@ function isValidToolResultContent(
   return (
     isToolResultContentBlock(safeBlock) &&
     Array.isArray((safeBlock as unknown as ToolResultContentBlock).content) &&
-    ((safeBlock as unknown as ToolResultContentBlock).content as MessageContentBlock[]).length > 0
+    ((safeBlock as unknown as ToolResultContentBlock).content).length > 0
   );
 }
 

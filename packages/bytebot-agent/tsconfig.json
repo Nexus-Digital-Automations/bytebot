@@ -43,7 +43,13 @@
     "dist",
     "coverage",
     "**/*.js",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "src/auth/controllers/parlant-validated-auth.controller.ts",
+    "src/auth/services/parlant-validated-*.ts",
+    "src/database/services/parlant-validated-*.ts",
+    "src/database/security/parlant-validated-*.ts",
+    "src/prisma/parlant-validated-*.ts",
+    "src/config/parlant-*.ts"
   ],
   "references": [
     {

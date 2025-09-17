@@ -57,8 +57,8 @@ import {
   OrchestrationMetrics
 } from '../types/orchestrator.types';
 import {
-  ParlantConversationContext
-} from '@bytebot/shared/types/parlant-integration.types';
+  ParlantUserContext
+} from '../../../shared/src/types/parlant-integration.types';
 
 // Additional response types
 interface PerformanceMetricsResponse {

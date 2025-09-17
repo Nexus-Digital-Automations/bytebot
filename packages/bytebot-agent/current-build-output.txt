@@ -1,0 +1,1908 @@
+
+> bytebot-agent@0.0.1 build /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebot-agent
+> npm run build --prefix ../shared && npx prisma generate && nest build
+
+
+> @bytebot/shared@0.0.1 build
+> npx tsc -p tsconfig.build.json
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.16.1) to ./../../../node_modules/@prisma/client in 211ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+[96msrc/agent/agent.processor.ts[0m:[93m113[0m:[93m4[0m - [91merror[0m[90m TS2304: [0mCannot find name 'ParlantCritical'.
+
+[7m113[0m   @ParlantCritical(
+[7m   [0m [91m   ~~~~~~~~~~~~~~~[0m
+[96msrc/agent/agent.processor.ts[0m:[93m136[0m:[93m4[0m - [91merror[0m[90m TS2304: [0mCannot find name 'ParlantCritical'.
+
+[7m136[0m   @ParlantCritical(
+[7m   [0m [91m   ~~~~~~~~~~~~~~~[0m
+[96msrc/app.module.ts[0m:[93m30[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '@bytebot/shared/modules/global-parlant-integration.module' or its corresponding type declarations.
+
+[7m30[0m } from '@bytebot/shared/modules/global-parlant-integration.module';
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/app.module.ts[0m:[93m31[0m:[93m46[0m - [91merror[0m[90m TS2307: [0mCannot find module '@bytebot/shared/interceptors/parlant-validation.interceptor' or its corresponding type declarations.
+
+[7m31[0m import { ParlantValidationInterceptor } from '@bytebot/shared/interceptors/parlant-validation.interceptor';
+[7m  [0m [91m                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/auth.controller.ts[0m:[93m40[0m:[93m3[0m - [91merror[0m[90m TS2305: [0mModule '"@bytebot/shared/server"' has no exported member 'ParlantCritical'.
+
+[7m40[0m   ParlantCritical,
+[7m  [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/auth.controller.ts[0m:[93m41[0m:[93m3[0m - [91merror[0m[90m TS2724: [0m'"@bytebot/shared/server"' has no exported member named 'ParlantSecure'. Did you mean 'ParlantService'?
+
+[7m41[0m   ParlantSecure,
+[7m  [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/auth.controller.ts[0m:[93m42[0m:[93m3[0m - [91merror[0m[90m TS2724: [0m'"@bytebot/shared/server"' has no exported member named 'ParlantValidated'. Did you mean 'ParlantValidation'?
+
+[7m42[0m   ParlantValidated,
+[7m  [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/auth.controller.ts[0m:[93m340[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty '_MEDIUM' does not exist on type 'typeof SecurityLevel'.
+
+[7m340[0m     securityLevel: SecurityLevel._MEDIUM,
+[7m   [0m [91m                                 ~~~~~~~[0m
+[96msrc/auth/auth.controller.ts[0m:[93m482[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty '_MEDIUM' does not exist on type 'typeof SecurityLevel'.
+
+[7m482[0m     securityLevel: SecurityLevel._MEDIUM,
+[7m   [0m [91m                                 ~~~~~~~[0m
+[96msrc/auth/controllers/parlant-validated-auth.controller.ts[0m:[93m65[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../parlant/parlant-integration.service' or its corresponding type declarations.
+
+[7m65[0m } from '../../parlant/parlant-integration.service';
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/controllers/parlant-validated-auth.controller.ts[0m:[93m266[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'ApiParlantContext'.
+
+[7m266[0m         userId: 'pending',
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/auth/controllers/parlant-validated-auth.controller.ts[0m:[93m297[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'ApiValidationRequest'.
+
+[7m297[0m         functionName: 'ParlantAuthController.login',
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+[96msrc/auth/controllers/parlant-validated-auth.controller.ts[0m:[93m338[0m:[93m48[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ApiValidationRequest'.
+
+[7m338[0m           riskAssessment: apiValidationRequest.riskLevel,
+[7m   [0m [91m                                               ~~~~~~~~~[0m
+[96msrc/auth/controllers/parlant-validated-auth.controller.ts[0m:[93m396[0m:[93m46[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ApiValidationRequest'.
+
+[7m396[0m         riskAssessment: apiValidationRequest.riskLevel,
+[7m   [0m [91m                                             ~~~~~~~~~[0m
+[96msrc/auth/controllers/parlant-validated-auth.controller.ts[0m:[93m578[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'ApiParlantContext'.
+
+[7m578[0m       userId: 'new_user',
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/auth/controllers/parlant-validated-auth.controller.ts[0m:[93m596[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'ApiValidationRequest'.
+
+[7m596[0m       functionName: 'ParlantAuthController.register',
+[7m   [0m [91m      ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m28[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../parlant/parlant-integration.service' or its corresponding type declarations.
+
+[7m28[0m } from '../../parlant/parlant-integration.service';
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1393[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1393[0m   BaseAuthContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1393[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'BaseAuthContext'.
+
+[7m1393[0m   BaseAuthContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1394[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ComplianceFramework'.
+
+[7m1394[0m   ComplianceFramework,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1395[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'AuthenticationOperationType'.
+
+[7m1395[0m   AuthenticationOperationType,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1398[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1398[0m   AuthenticationParlantContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1398[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'AuthenticationParlantContext'.
+
+[7m1398[0m   AuthenticationParlantContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1399[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1399[0m   CredentialContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1399[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'CredentialContext'.
+
+[7m1399[0m   CredentialContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1400[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1400[0m   DeviceContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1400[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'DeviceContext'.
+
+[7m1400[0m   DeviceContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1401[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1401[0m   LocationContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1401[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'LocationContext'.
+
+[7m1401[0m   LocationContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1402[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1402[0m   BehaviorContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1402[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'BehaviorContext'.
+
+[7m1402[0m   BehaviorContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1405[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1405[0m   AuthorizationParlantContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1405[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'AuthorizationParlantContext'.
+
+[7m1405[0m   AuthorizationParlantContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1406[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1406[0m   ResourceContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1406[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ResourceContext'.
+
+[7m1406[0m   ResourceContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1407[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1407[0m   PermissionContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1407[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'PermissionContext'.
+
+[7m1407[0m   PermissionContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1408[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1408[0m   PolicyContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1408[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'PolicyContext'.
+
+[7m1408[0m   PolicyContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1409[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1409[0m   InheritanceContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1409[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'InheritanceContext'.
+
+[7m1409[0m   InheritanceContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1410[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'DataType'.
+
+[7m1410[0m   DataType,
+[7m    [0m [91m  ~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1411[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1411[0m   PolicyDefinition,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1411[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'PolicyDefinition'.
+
+[7m1411[0m   PolicyDefinition,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1412[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1412[0m   PolicyCondition,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1412[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'PolicyCondition'.
+
+[7m1412[0m   PolicyCondition,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1413[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1413[0m   PolicyAction,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1413[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'PolicyAction'.
+
+[7m1413[0m   PolicyAction,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1414[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1414[0m   PolicyViolation,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1414[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'PolicyViolation'.
+
+[7m1414[0m   PolicyViolation,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1415[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1415[0m   PolicyException,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1415[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'PolicyException'.
+
+[7m1415[0m   PolicyException,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1416[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1416[0m   DynamicPolicy,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1416[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'DynamicPolicy'.
+
+[7m1416[0m   DynamicPolicy,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1417[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1417[0m   RoleHierarchy,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1417[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'RoleHierarchy'.
+
+[7m1417[0m   RoleHierarchy,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1418[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1418[0m   InheritanceRule,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1418[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'InheritanceRule'.
+
+[7m1418[0m   InheritanceRule,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1419[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1419[0m   PermissionTransformation,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1419[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'PermissionTransformation'.
+
+[7m1419[0m   PermissionTransformation,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1422[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1422[0m   SecurityMonitoringParlantContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1422[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'SecurityMonitoringParlantContext'.
+
+[7m1422[0m   SecurityMonitoringParlantContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1423[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1423[0m   ThreatContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1423[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ThreatContext'.
+
+[7m1423[0m   ThreatContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1424[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1424[0m   IncidentContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1424[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'IncidentContext'.
+
+[7m1424[0m   IncidentContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1425[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1425[0m   ResponseContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1425[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ResponseContext'.
+
+[7m1425[0m   ResponseContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1426[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1426[0m   IntelligenceContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1426[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'IntelligenceContext'.
+
+[7m1426[0m   IntelligenceContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1427[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ThreatType'.
+
+[7m1427[0m   ThreatType,
+[7m    [0m [91m  ~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1428[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ThreatSource'.
+
+[7m1428[0m   ThreatSource,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1429[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'AttackVector'.
+
+[7m1429[0m   AttackVector,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1430[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1430[0m   ThreatIndicator,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1430[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ThreatIndicator'.
+
+[7m1430[0m   ThreatIndicator,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1431[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'IncidentType'.
+
+[7m1431[0m   IncidentType,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1432[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'IncidentStatus'.
+
+[7m1432[0m   IncidentStatus,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1433[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1433[0m   BusinessImpact,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1433[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'BusinessImpact'.
+
+[7m1433[0m   BusinessImpact,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1434[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1434[0m   DamageAssessment,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1434[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'DamageAssessment'.
+
+[7m1434[0m   DamageAssessment,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1435[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1435[0m   ForensicEvidence,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1435[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ForensicEvidence'.
+
+[7m1435[0m   ForensicEvidence,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1436[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ResponseType'.
+
+[7m1436[0m   ResponseType,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1437[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1437[0m   AutomatedAction,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1437[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'AutomatedAction'.
+
+[7m1437[0m   AutomatedAction,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1438[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1438[0m   ManualAction,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1438[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ManualAction'.
+
+[7m1438[0m   ManualAction,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1439[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1439[0m   EscalationTrigger,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1439[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'EscalationTrigger'.
+
+[7m1439[0m   EscalationTrigger,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1440[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1440[0m   NotificationTarget,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1440[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'NotificationTarget'.
+
+[7m1440[0m   NotificationTarget,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1441[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1441[0m   RecoveryProcedure,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1441[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'RecoveryProcedure'.
+
+[7m1441[0m   RecoveryProcedure,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1442[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1442[0m   RecoveryStep,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1442[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'RecoveryStep'.
+
+[7m1442[0m   RecoveryStep,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1443[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1443[0m   RollbackPlan,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1443[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'RollbackPlan'.
+
+[7m1443[0m   RollbackPlan,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1444[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1444[0m   ThreatIntelSource,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1444[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ThreatIntelSource'.
+
+[7m1444[0m   ThreatIntelSource,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1445[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1445[0m   IndicatorOfCompromise,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1445[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'IndicatorOfCompromise'.
+
+[7m1445[0m   IndicatorOfCompromise,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1446[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1446[0m   TacticTechniqueeProcedure,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1446[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'TacticTechniqueeProcedure'.
+
+[7m1446[0m   TacticTechniqueeProcedure,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1447[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1447[0m   Attribution,
+[7m    [0m [91m  ~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1447[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'Attribution'.
+
+[7m1447[0m   Attribution,
+[7m    [0m [91m  ~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1448[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1448[0m   ConfidenceLevel,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1448[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ConfidenceLevel'.
+
+[7m1448[0m   ConfidenceLevel,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1451[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1451[0m   ApiGatewayParlantContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1451[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ApiGatewayParlantContext'.
+
+[7m1451[0m   ApiGatewayParlantContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1452[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1452[0m   ApiRequestContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1452[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ApiRequestContext'.
+
+[7m1452[0m   ApiRequestContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1453[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1453[0m   RoutingContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1453[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'RoutingContext'.
+
+[7m1453[0m   RoutingContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1454[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1454[0m   RateLimitContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1454[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'RateLimitContext'.
+
+[7m1454[0m   RateLimitContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1455[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1455[0m   TransformationContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1455[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'TransformationContext'.
+
+[7m1455[0m   TransformationContext,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1456[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1456[0m   RoutingRule,
+[7m    [0m [91m  ~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1456[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'RoutingRule'.
+
+[7m1456[0m   RoutingRule,
+[7m    [0m [91m  ~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1457[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1457[0m   RoutingCondition,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1457[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'RoutingCondition'.
+
+[7m1457[0m   RoutingCondition,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1458[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1458[0m   RoutingAction,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1458[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'RoutingAction'.
+
+[7m1458[0m   RoutingAction,
+[7m    [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1459[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1459[0m   LoadBalancingStrategy,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1459[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'LoadBalancingStrategy'.
+
+[7m1459[0m   LoadBalancingStrategy,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1460[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1460[0m   LoadBalancingTarget,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1460[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'LoadBalancingTarget'.
+
+[7m1460[0m   LoadBalancingTarget,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1461[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1461[0m   HealthCheckConfig,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1461[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'HealthCheckConfig'.
+
+[7m1461[0m   HealthCheckConfig,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1462[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1462[0m   CircuitBreakerState,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1462[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'CircuitBreakerState'.
+
+[7m1462[0m   CircuitBreakerState,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1463[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1463[0m   RetryPolicy,
+[7m    [0m [91m  ~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1463[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'RetryPolicy'.
+
+[7m1463[0m   RetryPolicy,
+[7m    [0m [91m  ~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1464[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1464[0m   RateLimitStrategy,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1464[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'RateLimitStrategy'.
+
+[7m1464[0m   RateLimitStrategy,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1465[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1465[0m   Transformation,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1465[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'Transformation'.
+
+[7m1465[0m   Transformation,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1466[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1466[0m   TransformationCondition,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1466[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'TransformationCondition'.
+
+[7m1466[0m   TransformationCondition,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1467[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1467[0m   ValidationRule,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1467[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ValidationRule'.
+
+[7m1467[0m   ValidationRule,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1468[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1468[0m   EnrichmentRule,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1468[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'EnrichmentRule'.
+
+[7m1468[0m   EnrichmentRule,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1469[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1469[0m   EnrichmentCondition,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1469[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'EnrichmentCondition'.
+
+[7m1469[0m   EnrichmentCondition,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1472[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1472[0m   ComprehensiveAuditEntry,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1472[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ComprehensiveAuditEntry'.
+
+[7m1472[0m   ComprehensiveAuditEntry,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1473[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1473[0m   ComplianceStatus,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1473[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ComplianceStatus'.
+
+[7m1473[0m   ComplianceStatus,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1474[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1474[0m   ComplianceViolation,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1474[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ComplianceViolation'.
+
+[7m1474[0m   ComplianceViolation,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1475[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1475[0m   ComplianceAttestation,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1475[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ComplianceAttestation'.
+
+[7m1475[0m   ComplianceAttestation,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1476[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1476[0m   ComplianceEvidence,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1476[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ComplianceEvidence'.
+
+[7m1476[0m   ComplianceEvidence,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1477[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'SecurityFlag'.
+
+[7m1477[0m   SecurityFlag,
+[7m    [0m [91m  ~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1478[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1478[0m   ParlantAuditMetadata,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1478[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ParlantAuditMetadata'.
+
+[7m1478[0m   ParlantAuditMetadata,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1479[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1479[0m   ResponseQuality,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1479[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ResponseQuality'.
+
+[7m1479[0m   ResponseQuality,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1480[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1480[0m   BusinessMetadata,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1480[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'BusinessMetadata'.
+
+[7m1480[0m   BusinessMetadata,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1483[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1483[0m   ParlantPerformanceMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1483[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ParlantPerformanceMetrics'.
+
+[7m1483[0m   ParlantPerformanceMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1484[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1484[0m   OverallMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1484[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'OverallMetrics'.
+
+[7m1484[0m   OverallMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1485[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1485[0m   AuthenticationMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1485[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'AuthenticationMetrics'.
+
+[7m1485[0m   AuthenticationMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1486[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1486[0m   AuthorizationMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1486[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'AuthorizationMetrics'.
+
+[7m1486[0m   AuthorizationMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1487[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1487[0m   SecurityMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1487[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'SecurityMetrics'.
+
+[7m1487[0m   SecurityMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1488[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1488[0m   ApiMetrics,
+[7m    [0m [91m  ~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1488[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ApiMetrics'.
+
+[7m1488[0m   ApiMetrics,
+[7m    [0m [91m  ~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1489[0m:[93m3[0m - [91merror[0m[90m TS1205: [0mRe-exporting a type when 'isolatedModules' is enabled requires using 'export type'.
+
+[7m1489[0m   ComplianceMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/interfaces/parlant-auth-types.ts[0m:[93m1489[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ComplianceMetrics'.
+
+[7m1489[0m   ComplianceMetrics,
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m33[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../parlant/parlant-integration.service' or its corresponding type declarations.
+
+[7m33[0m } from '../../parlant/parlant-integration.service';
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m152[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'AuthParlantContext'.
+
+[7m152[0m         userId: 'pending', // Will be resolved after validation
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m176[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'AuthValidationRequest'.
+
+[7m176[0m         functionName: 'AuthService.login',
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m209[0m:[93m45[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'AuthValidationRequest'.
+
+[7m209[0m           riskAssessment: validationRequest.riskLevel,
+[7m   [0m [91m                                            ~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m258[0m:[93m43[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'AuthValidationRequest'.
+
+[7m258[0m         riskAssessment: validationRequest.riskLevel,
+[7m   [0m [91m                                          ~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m343[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'AuthParlantContext'.
+
+[7m343[0m         userId: 'new_user',
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m359[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'AuthValidationRequest'.
+
+[7m359[0m         functionName: 'AuthService.register',
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m486[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'AuthParlantContext'.
+
+[7m486[0m       userId: 'token_refresh',
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m499[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'AuthValidationRequest'.
+
+[7m499[0m       functionName: 'AuthService.refreshTokens',
+[7m   [0m [91m      ~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m538[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'AuthParlantContext'.
+
+[7m538[0m       userId: 'logout_user',
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m551[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'AuthValidationRequest'.
+
+[7m551[0m       functionName: 'AuthService.logout',
+[7m   [0m [91m      ~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m590[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'AuthParlantContext'.
+
+[7m590[0m       userId,
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/auth/services/parlant-validated-auth.service.ts[0m:[93m603[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'AuthValidationRequest'.
+
+[7m603[0m       functionName: 'AuthService.changePassword',
+[7m   [0m [91m      ~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-rbac.service.ts[0m:[93m41[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../parlant/parlant-integration.service' or its corresponding type declarations.
+
+[7m41[0m } from '../../parlant/parlant-integration.service';
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-rbac.service.ts[0m:[93m161[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'AuthorizationParlantContext'.
+
+[7m161[0m         userId: context.userId,
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/auth/services/parlant-validated-rbac.service.ts[0m:[93m190[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'AuthorizationValidationRequest'.
+
+[7m190[0m         functionName: 'RBACAuthorizationService.isAuthorized',
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-rbac.service.ts[0m:[93m222[0m:[93m45[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'AuthorizationValidationRequest'.
+
+[7m222[0m           riskAssessment: validationRequest.riskLevel,
+[7m   [0m [91m                                            ~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-rbac.service.ts[0m:[93m273[0m:[93m43[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'AuthorizationValidationRequest'.
+
+[7m273[0m         riskAssessment: validationRequest.riskLevel,
+[7m   [0m [91m                                          ~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-rbac.service.ts[0m:[93m301[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'parlantValidation' does not exist in type 'AuthorizationAuditEntry'.
+
+[7m301[0m           parlantValidation: {
+[7m   [0m [91m          ~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/auth/services/rbac-authorization.service.ts[0m:[93m142[0m:[93m3[0m
+    [7m142[0m   auditTrail: AuthorizationAuditEntry;
+    [7m   [0m [96m  ~~~~~~~~~~[0m
+    The expected type comes from property 'auditTrail' which is declared here on type 'AuthorizationResult'
+[96msrc/auth/services/parlant-validated-rbac.service.ts[0m:[93m413[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'AuthorizationParlantContext'.
+
+[7m413[0m       userId: grantedBy,
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/auth/services/parlant-validated-rbac.service.ts[0m:[93m439[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'AuthorizationValidationRequest'.
+
+[7m439[0m       functionName: 'RBACAuthorizationService.grantPermission',
+[7m   [0m [91m      ~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-rbac.service.ts[0m:[93m507[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'AuthorizationParlantContext'.
+
+[7m507[0m       userId: revokedBy,
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/auth/services/parlant-validated-rbac.service.ts[0m:[93m532[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'AuthorizationValidationRequest'.
+
+[7m532[0m       functionName: 'RBACAuthorizationService.revokePermission',
+[7m   [0m [91m      ~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-security-monitoring.service.ts[0m:[93m40[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../parlant/parlant-integration.service' or its corresponding type declarations.
+
+[7m40[0m } from '../../parlant/parlant-integration.service';
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-security-monitoring.service.ts[0m:[93m196[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'SecurityParlantContext'.
+
+[7m196[0m         userId: userId || 'unknown',
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/auth/services/parlant-validated-security-monitoring.service.ts[0m:[93m238[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'SecurityValidationRequest'.
+
+[7m238[0m         functionName: 'SecurityMonitoringService.recordLoginAttempt',
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-security-monitoring.service.ts[0m:[93m274[0m:[93m45[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'SecurityValidationRequest'.
+
+[7m274[0m           riskAssessment: validationRequest.riskLevel,
+[7m   [0m [91m                                            ~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-security-monitoring.service.ts[0m:[93m342[0m:[93m43[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'SecurityValidationRequest'.
+
+[7m342[0m         riskAssessment: validationRequest.riskLevel,
+[7m   [0m [91m                                          ~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-security-monitoring.service.ts[0m:[93m441[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'SecurityParlantContext'.
+
+[7m441[0m       userId: 'system',
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/auth/services/parlant-validated-security-monitoring.service.ts[0m:[93m467[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'SecurityValidationRequest'.
+
+[7m467[0m       functionName: 'SecurityMonitoringService.isIpBlocked',
+[7m   [0m [91m      ~~~~~~~~~~~~[0m
+[96msrc/auth/services/parlant-validated-security-monitoring.service.ts[0m:[93m501[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'userId' does not exist in type 'SecurityParlantContext'.
+
+[7m501[0m       userId: 'system',
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/auth/services/parlant-validated-security-monitoring.service.ts[0m:[93m527[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'SecurityValidationRequest'.
+
+[7m527[0m       functionName: 'SecurityMonitoringService.getSecurityMetrics',
+[7m   [0m [91m      ~~~~~~~~~~~~[0m
+[96msrc/browser-use/browser-use.controller.ts[0m:[93m76[0m:[93m3[0m - [91merror[0m[90m TS2305: [0mModule '"@bytebot/shared/server"' has no exported member 'ParlantCritical'.
+
+[7m76[0m   ParlantCritical,
+[7m  [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/browser-use/browser-use.controller.ts[0m:[93m77[0m:[93m3[0m - [91merror[0m[90m TS2724: [0m'"@bytebot/shared/server"' has no exported member named 'ParlantSecure'. Did you mean 'ParlantService'?
+
+[7m77[0m   ParlantSecure,
+[7m  [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/browser-use/browser-use.controller.ts[0m:[93m78[0m:[93m3[0m - [91merror[0m[90m TS2724: [0m'"@bytebot/shared/server"' has no exported member named 'ParlantValidated'. Did you mean 'ParlantValidation'?
+
+[7m78[0m   ParlantValidated,
+[7m  [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/browser-use/browser-use.controller.ts[0m:[93m664[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty '_MEDIUM' does not exist on type 'typeof SecurityLevel'.
+
+[7m664[0m     securityLevel: SecurityLevel._MEDIUM,
+[7m   [0m [91m                                 ~~~~~~~[0m
+[96msrc/config/configuration.ts[0m:[93m23[0m:[93m22[0m - [91merror[0m[90m TS2307: [0mCannot find module 'joi' or its corresponding type declarations.
+
+[7m23[0m import * as Joi from 'joi';
+[7m  [0m [91m                     ~~~~~[0m
+[96msrc/config/configuration.ts[0m:[93m274[0m:[93m29[0m - [91merror[0m[90m TS7006: [0mParameter 'detail' implicitly has an 'any' type.
+
+[7m274[0m         error?.details.map((detail) => ({
+[7m   [0m [91m                            ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m264[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m264[0m         configurationScope: 'system-wide-security',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m284[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m284[0m             reason: validation.reason,
+[7m   [0m [91m                               ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m289[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'ParlantSecurityOperationResult<undefined>' is not assignable to type 'ParlantSecurityOperationResult<ParlantSecurityStatus>'.
+  Type 'undefined' is not assignable to type 'ParlantSecurityStatus'.
+
+[7m289[0m         return this.createSecurityOperationResult(
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m314[0m:[93m42[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m314[0m           validationDuration: validation.performanceImpact.validationDuration,
+[7m   [0m [91m                                         ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m316[0m:[93m38[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m316[0m           riskAssessment: validation.riskLevel,
+[7m   [0m [91m                                     ~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m373[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'reason' does not exist in type 'ParlantValidationResponse'.
+
+[7m373[0m         reason: 'Security audit operation failed with error',
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m382[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'ParlantSecurityOperationResult<undefined>' is not assignable to type 'ParlantSecurityOperationResult<ParlantSecurityStatus>'.
+  Type 'undefined' is not assignable to type 'ParlantSecurityStatus'.
+
+[7m382[0m       return this.createSecurityOperationResult(
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m429[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m429[0m         configurationScope: 'field-security-validation',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m443[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m443[0m             reason: validation.reason,
+[7m   [0m [91m                               ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m449[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'ParlantSecurityOperationResult<undefined>' is not assignable to type 'ParlantSecurityOperationResult<{ secure: boolean; violations: ParlantSecurityViolation[]; recommendations: string[]; }>'.
+  Type 'undefined' is not assignable to type '{ secure: boolean; violations: ParlantSecurityViolation[]; recommendations: string[]; }'.
+
+[7m449[0m         return this.createSecurityOperationResult(
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m513[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'reason' does not exist in type 'ParlantValidationResponse'.
+
+[7m513[0m         reason: 'Security validation operation failed with error',
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m522[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'ParlantSecurityOperationResult<undefined>' is not assignable to type 'ParlantSecurityOperationResult<{ secure: boolean; violations: ParlantSecurityViolation[]; recommendations: string[]; }>'.
+  Type 'undefined' is not assignable to type '{ secure: boolean; violations: ParlantSecurityViolation[]; recommendations: string[]; }'.
+
+[7m522[0m       return this.createSecurityOperationResult(
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m563[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m563[0m         configurationScope: 'system-integrity-verification',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m577[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m577[0m             reason: validation.reason,
+[7m   [0m [91m                               ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m582[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'ParlantSecurityOperationResult<undefined>' is not assignable to type 'ParlantSecurityOperationResult<boolean>'.
+  Type 'undefined' is not assignable to type 'boolean'.
+
+[7m582[0m         return this.createSecurityOperationResult(
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m636[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'reason' does not exist in type 'ParlantValidationResponse'.
+
+[7m636[0m         reason: 'Integrity verification operation failed with error',
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m645[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'ParlantSecurityOperationResult<undefined>' is not assignable to type 'ParlantSecurityOperationResult<boolean>'.
+  Type 'undefined' is not assignable to type 'boolean'.
+
+[7m645[0m       return this.createSecurityOperationResult(
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m689[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m689[0m         configurationScope: 'security-status-monitoring',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m703[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m703[0m             reason: validation.reason,
+[7m   [0m [91m                               ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m708[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'ParlantSecurityOperationResult<undefined>' is not assignable to type 'ParlantSecurityOperationResult<{ score: number; lastAudit?: Date | undefined; requiresAudit: boolean; }>'.
+  Type 'undefined' is not assignable to type '{ score: number; lastAudit?: Date | undefined; requiresAudit: boolean; }'.
+
+[7m708[0m         return this.createSecurityOperationResult(
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m760[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'reason' does not exist in type 'ParlantValidationResponse'.
+
+[7m760[0m         reason: 'Security status check operation failed with error',
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m769[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'ParlantSecurityOperationResult<undefined>' is not assignable to type 'ParlantSecurityOperationResult<{ score: number; lastAudit?: Date | undefined; requiresAudit: boolean; }>'.
+  Type 'undefined' is not assignable to type '{ score: number; lastAudit?: Date | undefined; requiresAudit: boolean; }'.
+
+[7m769[0m       return this.createSecurityOperationResult(
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m840[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m840[0m         configurationScope: 'critical-security-incident',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m937[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m937[0m     const newTime = validation.performanceImpact.validationDuration;
+[7m   [0m [91m                               ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m944[0m:[93m20[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m944[0m     if (validation.performanceImpact.cacheHit) {
+[7m   [0m [91m                   ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m990[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m990[0m         riskLevel: validation?.riskLevel || ParlantRiskLevel.MEDIUM,
+[7m   [0m [91m                               ~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m992[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m992[0m         reason: validation?.reason,
+[7m   [0m [91m                            ~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m994[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m994[0m           validation?.performanceImpact.validationDuration || 0,
+[7m   [0m [91m                      ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m995[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m995[0m         cacheHit: validation?.performanceImpact.cacheHit || false,
+[7m   [0m [91m                              ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m997[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m997[0m           validation?.riskLevel === ParlantRiskLevel.CRITICAL,
+[7m   [0m [91m                      ~~~~~~~~~[0m
+[96msrc/config/parlant-configuration-security.service.ts[0m:[93m1017[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m1017[0m             validation?.performanceImpact.validationDuration || 0,
+[7m    [0m [91m                        ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-configuration.service.ts[0m:[93m714[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'approvalRate' does not exist in type '{ totalValidations: number; approvedOperations: number; rejectedOperations: number; averageApprovalTime: number; criticalRiskOperations: number; productionSafeguardActivations: number; }'.
+
+[7m714[0m       approvalRate:
+[7m   [0m [91m      ~~~~~~~~~~~~[0m
+[96msrc/config/parlant-enterprise-secrets.service.ts[0m:[93m23[0m:[93m3[0m - [91merror[0m[90m TS2459: [0mModule '"./enterprise-secrets.service"' declares 'SecretResult' locally, but it is not exported.
+
+[7m23[0m   SecretResult,
+[7m  [0m [91m  ~~~~~~~~~~~~[0m
+
+  [96msrc/config/enterprise-secrets.service.ts[0m:[93m113[0m:[93m11[0m
+    [7m113[0m interface SecretResult {
+    [7m   [0m [96m          ~~~~~~~~~~~~[0m
+    'SecretResult' is declared here.
+[96msrc/config/parlant-enterprise-secrets.service.ts[0m:[93m24[0m:[93m3[0m - [91merror[0m[90m TS2459: [0mModule '"./enterprise-secrets.service"' declares 'EnterpriseHealthResult' locally, but it is not exported.
+
+[7m24[0m   EnterpriseHealthResult,
+[7m  [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/config/enterprise-secrets.service.ts[0m:[93m124[0m:[93m11[0m
+    [7m124[0m interface EnterpriseHealthResult {
+    [7m   [0m [96m          ~~~~~~~~~~~~~~~~~~~~~~[0m
+    'EnterpriseHealthResult' is declared here.
+[96msrc/config/parlant-enterprise-secrets.service.ts[0m:[93m724[0m:[93m40[0m - [91merror[0m[90m TS2339: [0mProperty 'includes' does not exist on type '{}'.
+
+[7m724[0m         context.parameters.secretName?.includes('personal')
+[7m   [0m [91m                                       ~~~~~~~~[0m
+[96msrc/config/parlant-enterprise-secrets.service.ts[0m:[93m796[0m:[93m14[0m - [91merror[0m[90m TS2683: [0m'this' implicitly has type 'any' because it does not have a type annotation.
+
+[7m796[0m       typeof this.parlantService.getPerformanceMetrics
+[7m   [0m [91m             ~~~~[0m
+
+  [96msrc/config/parlant-enterprise-secrets.service.ts[0m:[93m795[0m:[93m5[0m
+    [7m795[0m     parlantValidation: ReturnType<
+    [7m   [0m [96m    ~~~~~~~~~~~~~~~~~[0m
+    An outer value of 'this' is shadowed by this container.
+[96msrc/config/parlant-enterprise-secrets.service.ts[0m:[93m801[0m:[93m36[0m - [91merror[0m[90m TS2683: [0m'this' implicitly has type 'any' because it does not have a type annotation.
+
+[7m801[0m       auditingRequirements: typeof this.complianceConfig.auditingRequirements;
+[7m   [0m [91m                                   ~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m287[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m287[0m         configurationScope: 'external-secrets-access',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m307[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m307[0m             reason: validation.reason,
+[7m   [0m [91m                               ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m342[0m:[93m39[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m342[0m                 riskLevel: validation.riskLevel,
+[7m   [0m [91m                                      ~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m351[0m:[93m28[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m351[0m                 validation.performanceImpact.validationDuration,
+[7m   [0m [91m                           ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m353[0m:[93m42[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m353[0m               riskAssessment: validation.riskLevel,
+[7m   [0m [91m                                         ~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m399[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'reason' does not exist in type 'ParlantValidationResponse'.
+
+[7m399[0m         reason: 'External secret access operation failed with error',
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m455[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m455[0m         configurationScope: 'external-secrets-enumeration',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m475[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m475[0m             reason: validation.reason,
+[7m   [0m [91m                               ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m503[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m503[0m             riskLevel: validation.riskLevel,
+[7m   [0m [91m                                  ~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m549[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'reason' does not exist in type 'ParlantValidationResponse'.
+
+[7m549[0m         reason: 'External secrets listing operation failed with error',
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m598[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m598[0m         configurationScope: 'external-provider-health-monitoring',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m612[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m612[0m             reason: validation.reason,
+[7m   [0m [91m                               ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m617[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'ParlantExternalSecretsOperationResult<undefined>' is not assignable to type 'ParlantExternalSecretsOperationResult<ParlantProviderHealthStatus>'.
+  Type 'undefined' is not assignable to type 'ParlantProviderHealthStatus'.
+
+[7m617[0m         return this.createExternalSecretsOperationResult(
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m649[0m:[93m42[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m649[0m           validationDuration: validation.performanceImpact.validationDuration,
+[7m   [0m [91m                                         ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m651[0m:[93m38[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m651[0m           riskAssessment: validation.riskLevel,
+[7m   [0m [91m                                     ~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m696[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'reason' does not exist in type 'ParlantValidationResponse'.
+
+[7m696[0m         reason: 'External providers health check operation failed with error',
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m705[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'ParlantExternalSecretsOperationResult<undefined>' is not assignable to type 'ParlantExternalSecretsOperationResult<ParlantProviderHealthStatus>'.
+  Type 'undefined' is not assignable to type 'ParlantProviderHealthStatus'.
+
+[7m705[0m       return this.createExternalSecretsOperationResult(
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m750[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m750[0m         configurationScope: 'external-secrets-service-monitoring',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m764[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m764[0m             reason: validation.reason,
+[7m   [0m [91m                               ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m769[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'ParlantExternalSecretsOperationResult<undefined>' is not assignable to type 'ParlantExternalSecretsOperationResult<{ providersCount: number; hasPrimaryProvider: boolean; fallbackProvidersCount: number; isHealthy: boolean; }>'.
+  Type 'undefined' is not assignable to type '{ providersCount: number; hasPrimaryProvider: boolean; fallbackProvidersCount: number; isHealthy: boolean; }'.
+
+[7m769[0m         return this.createExternalSecretsOperationResult(
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m822[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'reason' does not exist in type 'ParlantValidationResponse'.
+
+[7m822[0m         reason:
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m832[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'ParlantExternalSecretsOperationResult<undefined>' is not assignable to type 'ParlantExternalSecretsOperationResult<{ providersCount: number; hasPrimaryProvider: boolean; fallbackProvidersCount: number; isHealthy: boolean; }>'.
+  Type 'undefined' is not assignable to type '{ providersCount: number; hasPrimaryProvider: boolean; fallbackProvidersCount: number; isHealthy: boolean; }'.
+
+[7m832[0m       return this.createExternalSecretsOperationResult(
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m903[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m903[0m         configurationScope: 'external-provider-health-incident',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m967[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m967[0m     const newTime = validation.performanceImpact.validationDuration;
+[7m   [0m [91m                               ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m974[0m:[93m20[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m974[0m     if (validation.performanceImpact.cacheHit) {
+[7m   [0m [91m                   ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m1020[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m1020[0m         riskLevel: validation?.riskLevel || ParlantRiskLevel.MEDIUM,
+[7m    [0m [91m                               ~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m1022[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m1022[0m         reason: validation?.reason,
+[7m    [0m [91m                            ~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m1024[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m1024[0m           validation?.performanceImpact.validationDuration || 0,
+[7m    [0m [91m                      ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m1025[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m1025[0m         cacheHit: validation?.performanceImpact.cacheHit || false,
+[7m    [0m [91m                              ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m1027[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m1027[0m           validation?.riskLevel === ParlantRiskLevel.CRITICAL,
+[7m    [0m [91m                      ~~~~~~~~~[0m
+[96msrc/config/parlant-external-secrets.service.ts[0m:[93m1049[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m1049[0m             validation?.performanceImpact.validationDuration || 0,
+[7m    [0m [91m                        ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m274[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m274[0m         configurationScope: this.determineConfigurationScope(event.source),
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m293[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m293[0m             riskLevel: validation.riskLevel,
+[7m   [0m [91m                                  ~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m295[0m:[93m42[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m295[0m             approvalDuration: validation.performanceImpact.validationDuration,
+[7m   [0m [91m                                         ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m307[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m307[0m             riskLevel: validation.riskLevel,
+[7m   [0m [91m                                  ~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m317[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m317[0m               reason: validation.reason,
+[7m   [0m [91m                                 ~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m318[0m:[93m37[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m318[0m               riskLevel: validation.riskLevel,
+[7m   [0m [91m                                    ~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m358[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m358[0m         configurationScope: 'system-wide',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m373[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m373[0m           riskLevel: validation.riskLevel,
+[7m   [0m [91m                                ~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m425[0m:[93m11[0m - [91merror[0m[90m TS2367: [0mThis comparison appears to be unintentional because the types 'ParlantRiskLevel.MEDIUM | ParlantRiskLevel.CRITICAL' and 'ParlantRiskLevel.HIGH' have no overlap.
+
+[7m425[0m           riskLevel === ParlantRiskLevel.HIGH ||
+[7m   [0m [91m          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m429[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m429[0m         configurationScope: filePath ? 'file-specific' : 'system-wide',
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m449[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m449[0m             reason: validation.reason,
+[7m   [0m [91m                               ~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m454[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'ParlantHotReloadResult<undefined>' is not assignable to type 'ParlantHotReloadResult<boolean>'.
+  Type 'undefined' is not assignable to type 'boolean'.
+
+[7m454[0m         return this.createHotReloadResult(
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m507[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'reason' does not exist in type 'ParlantValidationResponse'.
+
+[7m507[0m         reason: 'Operation failed with error',
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m516[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'ParlantHotReloadResult<undefined>' is not assignable to type 'ParlantHotReloadResult<boolean>'.
+  Type 'undefined' is not assignable to type 'boolean'.
+
+[7m516[0m       return this.createHotReloadResult(
+[7m   [0m [91m      ~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m521[0m:[93m9[0m - [91merror[0m[90m TS2304: [0mCannot find name 'operationType'.
+
+[7m521[0m         operationType,
+[7m   [0m [91m        ~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m534[0m:[93m36[0m - [91merror[0m[90m TS2683: [0m'this' implicitly has type 'any' because it does not have a type annotation.
+
+[7m534[0m     parlantValidationStats: typeof this.validationMetrics;
+[7m   [0m [91m                                   ~~~~[0m
+
+  [96msrc/config/parlant-hot-reload.service.ts[0m:[93m534[0m:[93m5[0m
+    [7m534[0m     parlantValidationStats: typeof this.validationMetrics;
+    [7m   [0m [96m    ~~~~~~~~~~~~~~~~~~~~~~[0m
+    An outer value of 'this' is shadowed by this container.
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m646[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m646[0m     const newTime = validation.performanceImpact.validationDuration;
+[7m   [0m [91m                               ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m652[0m:[93m20[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m652[0m     if (validation.performanceImpact.cacheHit) {
+[7m   [0m [91m                   ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m698[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m698[0m         riskLevel: validation?.riskLevel || ParlantRiskLevel.MEDIUM,
+[7m   [0m [91m                               ~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m700[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m700[0m         reason: validation?.reason,
+[7m   [0m [91m                            ~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m702[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m702[0m           validation?.performanceImpact.validationDuration || 0,
+[7m   [0m [91m                      ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m703[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m703[0m         cacheHit: validation?.performanceImpact.cacheHit || false,
+[7m   [0m [91m                              ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m705[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantValidationResponse'.
+
+[7m705[0m           validation?.riskLevel === ParlantRiskLevel.CRITICAL,
+[7m   [0m [91m                      ~~~~~~~~~[0m
+[96msrc/config/parlant-hot-reload.service.ts[0m:[93m726[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'performanceImpact' does not exist on type 'ParlantValidationResponse'.
+
+[7m726[0m             validation?.performanceImpact.validationDuration || 0,
+[7m   [0m [91m                        ~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-risk-management.service.ts[0m:[93m454[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'configurationScope' does not exist in type 'ConfigurationOperationContext'.
+
+[7m454[0m         configurationScope: context.operationScope,
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-risk-management.service.ts[0m:[93m471[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m471[0m         justification: validation.reason || 'Parlant conversational validation',
+[7m   [0m [91m                                  ~~~~~~[0m
+[96msrc/config/parlant-risk-management.service.ts[0m:[93m489[0m:[93m30[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m489[0m           reason: validation.reason || 'Rejected by Parlant validation',
+[7m   [0m [91m                             ~~~~~~[0m
+[96msrc/config/parlant-risk-management.service.ts[0m:[93m505[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'emergencyOperation' does not exist in type 'ConfigurationOperationContext'.
+
+[7m505[0m           emergencyOperation: context.emergencyOperation,
+[7m   [0m [91m          ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-risk-management.service.ts[0m:[93m519[0m:[93m30[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m519[0m             secondValidation.reason || 'Parlant dual approval validation',
+[7m   [0m [91m                             ~~~~~~[0m
+[96msrc/config/parlant-risk-management.service.ts[0m:[93m537[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'reason' does not exist on type 'ParlantValidationResponse'.
+
+[7m537[0m               secondValidation.reason ||
+[7m   [0m [91m                               ~~~~~~[0m
+[96msrc/config/parlant-secrets-health.controller.ts[0m:[93m329[0m:[93m57[0m - [91merror[0m[90m TS2339: [0mProperty 'approvalRate' does not exist on type '{ totalValidations: number; approvedOperations: number; rejectedOperations: number; averageApprovalTime: number; criticalRiskOperations: number; productionSafeguardActivations: number; }'.
+
+[7m329[0m       } else if (summary.expiring > 0 || parlantMetrics.approvalRate < 95) {
+[7m   [0m [91m                                                        ~~~~~~~~~~~~[0m
+[96msrc/config/parlant-secrets-health.controller.ts[0m:[93m346[0m:[93m41[0m - [91merror[0m[90m TS2339: [0mProperty 'totalRequests' does not exist on type '{ totalValidations: number; approvedOperations: number; rejectedOperations: number; averageApprovalTime: number; criticalRiskOperations: number; productionSafeguardActivations: number; }'.
+
+[7m346[0m           totalRequests: parlantMetrics.totalRequests,
+[7m   [0m [91m                                        ~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-secrets-health.controller.ts[0m:[93m347[0m:[93m39[0m - [91merror[0m[90m TS2339: [0mProperty 'approvalRate' does not exist on type '{ totalValidations: number; approvedOperations: number; rejectedOperations: number; averageApprovalTime: number; criticalRiskOperations: number; productionSafeguardActivations: number; }'.
+
+[7m347[0m           successRate: parlantMetrics.approvalRate,
+[7m   [0m [91m                                      ~~~~~~~~~~~~[0m
+[96msrc/config/parlant-secrets-health.controller.ts[0m:[93m348[0m:[93m47[0m - [91merror[0m[90m TS2339: [0mProperty 'averageResponseTime' does not exist on type '{ totalValidations: number; approvedOperations: number; rejectedOperations: number; averageApprovalTime: number; criticalRiskOperations: number; productionSafeguardActivations: number; }'.
+
+[7m348[0m           averageResponseTime: parlantMetrics.averageResponseTime,
+[7m   [0m [91m                                              ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-secrets-health.controller.ts[0m:[93m358[0m:[93m39[0m - [91merror[0m[90m TS2339: [0mProperty 'approvalRate' does not exist on type '{ totalValidations: number; approvedOperations: number; rejectedOperations: number; averageApprovalTime: number; criticalRiskOperations: number; productionSafeguardActivations: number; }'.
+
+[7m358[0m           successRate: parlantMetrics.approvalRate,
+[7m   [0m [91m                                      ~~~~~~~~~~~~[0m
+[96msrc/config/parlant-secrets-health.controller.ts[0m:[93m529[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType '{ error: string; conversationId: string; rejectionReason: string | undefined; timestamp: string; }' is not assignable to type 'string | ParlantMetricsData'.
+  Type '{ error: string; conversationId: string; rejectionReason: string | undefined; timestamp: string; }' is missing the following properties from type 'ParlantMetricsData': secrets, performance, parlantMetrics, sources, and 2 more.
+
+[7m529[0m         return {
+[7m   [0m [91m        ~~~~~~[0m
+[96msrc/config/parlant-secrets-health.controller.ts[0m:[93m553[0m:[93m41[0m - [91merror[0m[90m TS2339: [0mProperty 'totalRequests' does not exist on type '{ totalValidations: number; approvedOperations: number; rejectedOperations: number; averageApprovalTime: number; criticalRiskOperations: number; productionSafeguardActivations: number; }'.
+
+[7m553[0m           totalRequests: parlantMetrics.totalRequests,
+[7m   [0m [91m                                        ~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-secrets-health.controller.ts[0m:[93m554[0m:[93m39[0m - [91merror[0m[90m TS2339: [0mProperty 'approvalRate' does not exist on type '{ totalValidations: number; approvedOperations: number; rejectedOperations: number; averageApprovalTime: number; criticalRiskOperations: number; productionSafeguardActivations: number; }'.
+
+[7m554[0m           successRate: parlantMetrics.approvalRate,
+[7m   [0m [91m                                      ~~~~~~~~~~~~[0m
+[96msrc/config/parlant-secrets-health.controller.ts[0m:[93m560[0m:[93m47[0m - [91merror[0m[90m TS2339: [0mProperty 'averageResponseTime' does not exist on type '{ totalValidations: number; approvedOperations: number; rejectedOperations: number; averageApprovalTime: number; criticalRiskOperations: number; productionSafeguardActivations: number; }'.
+
+[7m560[0m           averageResponseTime: parlantMetrics.averageResponseTime,
+[7m   [0m [91m                                              ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-secrets-health.controller.ts[0m:[93m564[0m:[93m40[0m - [91merror[0m[90m TS2339: [0mProperty 'approvalRate' does not exist on type '{ totalValidations: number; approvedOperations: number; rejectedOperations: number; averageApprovalTime: number; criticalRiskOperations: number; productionSafeguardActivations: number; }'.
+
+[7m564[0m           approvalRate: parlantMetrics.approvalRate,
+[7m   [0m [91m                                       ~~~~~~~~~~~~[0m
+[96msrc/config/parlant-secrets-health.controller.ts[0m:[93m565[0m:[93m47[0m - [91merror[0m[90m TS2339: [0mProperty 'averageResponseTime' does not exist on type '{ totalValidations: number; approvedOperations: number; rejectedOperations: number; averageApprovalTime: number; criticalRiskOperations: number; productionSafeguardActivations: number; }'.
+
+[7m565[0m           averageApprovalTime: parlantMetrics.averageResponseTime,
+[7m   [0m [91m                                              ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/config/parlant-secrets.service.ts[0m:[93m20[0m:[93m26[0m - [91merror[0m[90m TS2459: [0mModule '"./secrets.service"' declares 'LocalSecretMetadata' locally, but it is not exported.
+
+[7m20[0m import { SecretsService, LocalSecretMetadata } from './secrets.service';
+[7m  [0m [91m                         ~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/config/secrets.service.ts[0m:[93m38[0m:[93m11[0m
+    [7m38[0m interface LocalSecretMetadata {
+    [7m  [0m [96m          ~~~~~~~~~~~~~~~~~~~[0m
+    'LocalSecretMetadata' is declared here.
+[96msrc/config/parlant-secrets.service.ts[0m:[93m744[0m:[93m14[0m - [91merror[0m[90m TS2683: [0m'this' implicitly has type 'any' because it does not have a type annotation.
+
+[7m744[0m       typeof this.secretsService.getLocalSecretsHealth
+[7m   [0m [91m             ~~~~[0m
+
+  [96msrc/config/parlant-secrets.service.ts[0m:[93m743[0m:[93m5[0m
+    [7m743[0m     secretsService: ReturnType<
+    [7m   [0m [96m    ~~~~~~~~~~~~~~[0m
+    An outer value of 'this' is shadowed by this container.
+[96msrc/config/parlant-secrets.service.ts[0m:[93m747[0m:[93m14[0m - [91merror[0m[90m TS2683: [0m'this' implicitly has type 'any' because it does not have a type annotation.
+
+[7m747[0m       typeof this.parlantService.getPerformanceMetrics
+[7m   [0m [91m             ~~~~[0m
+
+  [96msrc/config/parlant-secrets.service.ts[0m:[93m746[0m:[93m5[0m
+    [7m746[0m     parlantValidation: ReturnType<
+    [7m   [0m [96m    ~~~~~~~~~~~~~~~~~[0m
+    An outer value of 'this' is shadowed by this container.
+[96msrc/config/validation.schema.ts[0m:[93m19[0m:[93m22[0m - [91merror[0m[90m TS2307: [0mCannot find module 'joi' or its corresponding type declarations.
+
+[7m19[0m import * as Joi from 'joi';
+[7m  [0m [91m                     ~~~~~[0m
+[96msrc/database/parlant-database.module.ts[0m:[93m47[0m:[93m43[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../bytebotd/src/parlant/parlant-integration.service' or its corresponding type declarations.
+
+[7m47[0m import { ParlantIntegrationService } from '../../bytebotd/src/parlant/parlant-integration.service';
+[7m  [0m [91m                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/parlant-database.module.ts[0m:[93m123[0m:[93m5[0m - [91merror[0m[90m TS2449: [0mClass 'ParlantDatabaseOrchestrationService' used before its declaration.
+
+[7m123[0m     ParlantDatabaseOrchestrationService,
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/database/parlant-database.module.ts[0m:[93m158[0m:[93m14[0m
+    [7m158[0m export class ParlantDatabaseOrchestrationService {
+    [7m   [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'ParlantDatabaseOrchestrationService' is declared here.
+[96msrc/database/parlant-database.module.ts[0m:[93m133[0m:[93m5[0m - [91merror[0m[90m TS2449: [0mClass 'ParlantDatabaseOrchestrationService' used before its declaration.
+
+[7m133[0m     ParlantDatabaseOrchestrationService,
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/database/parlant-database.module.ts[0m:[93m158[0m:[93m14[0m
+    [7m158[0m export class ParlantDatabaseOrchestrationService {
+    [7m   [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'ParlantDatabaseOrchestrationService' is declared here.
+[96msrc/database/parlant-database.module.ts[0m:[93m155[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../bytebotd/src/parlant/parlant-integration.service' or its corresponding type declarations.
+
+[7m155[0m } from '../../bytebotd/src/parlant/parlant-integration.service';
+[7m   [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/parlant-database.module.ts[0m:[93m504[0m:[93m47[0m - [91merror[0m[90m TS2339: [0mProperty 'getCacheStatistics' does not exist on type 'ParlantValidatedDatabaseMigrationService'.
+
+[7m504[0m       migration: this.parlantMigrationService.getCacheStatistics?.() || {
+[7m   [0m [91m                                              ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/parlant-database.module.ts[0m:[93m507[0m:[93m45[0m - [91merror[0m[90m TS2339: [0mProperty 'getCacheStatistics' does not exist on type 'ParlantValidatedDatabaseSecurityService'.
+
+[7m507[0m       security: this.parlantSecurityService.getCacheStatistics?.() || {
+[7m   [0m [91m                                            ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m37[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../bytebotd/src/parlant/parlant-integration.service' or its corresponding type declarations.
+
+[7m37[0m } from '../../bytebotd/src/parlant/parlant-integration.service';
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m145[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'ParlantDatabaseValidationRequest'.
+
+[7m145[0m         functionName: operationName,
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m218[0m:[93m11[0m - [91merror[0m[90m TS2352: [0mConversion of type '{ functionName: string; databaseOperation: DatabaseOperationMetadata; }' to type 'ParlantDatabaseValidationRequest' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'estimatedImpact' is missing in type '{ functionName: string; databaseOperation: DatabaseOperationMetadata; }' but required in type 'ParlantDatabaseValidationRequest'.
+
+[7m218[0m           {
+[7m   [0m [91m          ~[0m
+[7m219[0m             functionName: operationName,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m220[0m             databaseOperation: metadata,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m221[0m           } as ParlantDatabaseValidationRequest,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/database/parlant-validated-database.service.ts[0m:[93m68[0m:[93m12[0m
+    [7m68[0m   readonly estimatedImpact: 'MINIMAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    [7m  [0m [96m           ~~~~~~~~~~~~~~~[0m
+    'estimatedImpact' is declared here.
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m579[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'ParlantDatabaseValidationRequest'.
+
+[7m579[0m         functionName: request.functionName,
+[7m   [0m [91m                              ~~~~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m580[0m:[93m28[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantDatabaseValidationRequest'.
+
+[7m580[0m         riskLevel: request.riskLevel,
+[7m   [0m [91m                           ~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m641[0m:[93m22[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantDatabaseValidationRequest'.
+
+[7m641[0m       return request.riskLevel !== RiskLevel.CRITICAL;
+[7m   [0m [91m                     ~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m679[0m:[93m17[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantDatabaseValidationRequest'.
+
+[7m679[0m     if (request.riskLevel === RiskLevel.CRITICAL) {
+[7m   [0m [91m                ~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m701[0m:[93m15[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantDatabaseValidationRequest'.
+
+[7m701[0m       request.riskLevel === RiskLevel.HIGH ||
+[7m   [0m [91m              ~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m702[0m:[93m15[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantDatabaseValidationRequest'.
+
+[7m702[0m       request.riskLevel === RiskLevel.CRITICAL
+[7m   [0m [91m              ~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m797[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'Partial<ParlantDatabaseValidationRequest>'.
+
+[7m797[0m       query: validationRequest.functionName || 'unknown',
+[7m   [0m [91m                               ~~~~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m805[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'operationId' does not exist in type 'DatabaseParlantAuditEntry'.
+
+[7m805[0m       operationId,
+[7m   [0m [91m      ~~~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m808[0m:[93m39[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'Partial<ParlantDatabaseValidationRequest>'.
+
+[7m808[0m       functionName: validationRequest.functionName || 'unknown',
+[7m   [0m [91m                                      ~~~~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m810[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'actionDescription' does not exist on type 'Partial<ParlantDatabaseValidationRequest>'.
+
+[7m810[0m         validationRequest.actionDescription || 'Database operation',
+[7m   [0m [91m                          ~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m815[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'context' does not exist on type 'Partial<ParlantDatabaseValidationRequest>'.
+
+[7m815[0m       userId: validationRequest.context?.userId || 'system',
+[7m   [0m [91m                                ~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m816[0m:[93m36[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'Partial<ParlantDatabaseValidationRequest>'.
+
+[7m816[0m       riskLevel: validationRequest.riskLevel || RiskLevel.MEDIUM,
+[7m   [0m [91m                                   ~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m851[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'ParlantDatabaseValidationRequest'.
+
+[7m851[0m       functionName: request.functionName,
+[7m   [0m [91m                            ~~~~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m854[0m:[93m26[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantDatabaseValidationRequest'.
+
+[7m854[0m       riskLevel: request.riskLevel,
+[7m   [0m [91m                         ~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m855[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'context' does not exist on type 'ParlantDatabaseValidationRequest'.
+
+[7m855[0m       userId: request.context.userId,
+[7m   [0m [91m                      ~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m962[0m:[93m28[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'DatabaseParlantAuditEntry'.
+
+[7m962[0m         const risk = entry.riskLevel;
+[7m   [0m [91m                           ~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m985[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'executionResult' does not exist on type 'DatabaseParlantAuditEntry'.
+
+[7m985[0m       (entry) => entry.executionResult === 'SUCCESS',
+[7m   [0m [91m                       ~~~~~~~~~~~~~~~[0m
+[96msrc/database/parlant-validated-database.service.ts[0m:[93m998[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'duration' does not exist on type 'DatabaseParlantAuditEntry'.
+
+[7m998[0m       (sum, entry) => sum + entry.duration,
+[7m   [0m [91m                                  ~~~~~~~~[0m
+[96msrc/database/security/database-security.service.ts[0m:[93m15[0m:[93m3[0m - [91merror[0m[90m TS2305: [0mModule '"@bytebot/shared/server"' has no exported member 'ParlantCritical'.
+
+[7m15[0m   ParlantCritical,
+[7m  [0m [91m  ~~~~~~~~~~~~~~~[0m
+[96msrc/database/security/database-security.service.ts[0m:[93m16[0m:[93m3[0m - [91merror[0m[90m TS2724: [0m'"@bytebot/shared/server"' has no exported member named 'ParlantSecure'. Did you mean 'ParlantService'?
+
+[7m16[0m   ParlantSecure,
+[7m  [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m36[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../../bytebotd/src/parlant/parlant-integration.service' or its corresponding type declarations.
+
+[7m36[0m } from '../../../bytebotd/src/parlant/parlant-integration.service';
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m279[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'ParlantSecurityValidationRequest'.
+
+[7m279[0m         functionName: operationName,
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m364[0m:[93m11[0m - [91merror[0m[90m TS2352: [0mConversion of type '{ functionName: string; securityOperation: SecurityOperationMetadata; }' to type 'ParlantSecurityValidationRequest' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ functionName: string; securityOperation: SecurityOperationMetadata; }' is missing the following properties from type 'ParlantSecurityValidationRequest': securityImpactAssessment, complianceCheckSummary, threatMitigationPlan, securityControlsAffected, and 2 more.
+
+[7m364[0m           {
+[7m   [0m [91m          ~[0m
+[7m365[0m             functionName: operationName,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m366[0m             securityOperation: metadata,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m367[0m           } as ParlantSecurityValidationRequest,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m443[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty 'initializeSecurityConfiguration' does not exist on type 'DatabaseSecurityService'.
+
+[7m443[0m       () => this.securityService.initializeSecurityConfiguration(config),
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m491[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty 'recordAuditEvent' does not exist on type 'DatabaseSecurityService'.
+
+[7m491[0m       () => this.securityService.recordAuditEvent(event),
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m549[0m:[93m34[0m - [91merror[0m[90m TS2551: [0mProperty 'handleSecurityViolation' does not exist on type 'DatabaseSecurityService'. Did you mean 'getSecurityViolations'?
+
+[7m549[0m       () => this.securityService.handleSecurityViolation(violation),
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/database/security/database-security.service.ts[0m:[93m437[0m:[93m3[0m
+    [7m437[0m   getSecurityViolations(limit = 50): SecurityViolation[] {
+    [7m   [0m [96m  ~~~~~~~~~~~~~~~~~~~~~[0m
+    'getSecurityViolations' is declared here.
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m596[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty 'getSecurityConfiguration' does not exist on type 'DatabaseSecurityService'.
+
+[7m596[0m       () => this.securityService.getSecurityConfiguration(),
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m647[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty 'getAuditEvents' does not exist on type 'DatabaseSecurityService'.
+
+[7m647[0m       () => this.securityService.getAuditEvents(startDate, endDate, eventType),
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m657[0m:[93m9[0m - [91merror[0m[90m TS2393: [0mDuplicate function implementation.
+
+[7m657[0m   async getSecurityViolations(
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m703[0m:[93m13[0m - [91merror[0m[90m TS2739: [0mType 'SecurityViolation[]' is missing the following properties from type 'Promise<SecurityViolation[]>': then, catch, finally, [Symbol.toStringTag]
+
+[7m703[0m       () => this.securityService.getSecurityViolations(severity),
+[7m   [0m [91m            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m256[0m:[93m16[0m
+    [7m256[0m     operation: () => Promise<T>,
+    [7m   [0m [96m               ~~~~~~~~~~~~~~~~[0m
+    The expected type comes from the return type of this signature.
+  [96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m703[0m:[93m7[0m
+    [7m703[0m       () => this.securityService.getSecurityViolations(severity),
+    [7m   [0m [96m      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    Did you mean to mark this function as 'async'?
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m703[0m:[93m56[0m - [91merror[0m[90m TS2345: [0mArgument of type '"low" | "medium" | "high" | "critical" | undefined' is not assignable to parameter of type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+
+[7m703[0m       () => this.securityService.getSecurityViolations(severity),
+[7m   [0m [91m                                                       ~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m760[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty 'validateSSLConfiguration' does not exist on type 'DatabaseSecurityService'.
+
+[7m760[0m       () => this.securityService.validateSSLConfiguration(),
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m820[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty 'clearAuditLogs' does not exist on type 'DatabaseSecurityService'.
+
+[7m820[0m       () => this.securityService.clearAuditLogs(retentionDays),
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1319[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'ParlantSecurityValidationRequest'.
+
+[7m1319[0m         functionName: request.functionName,
+[7m    [0m [91m                              ~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1322[0m:[93m28[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantSecurityValidationRequest'.
+
+[7m1322[0m         riskLevel: request.riskLevel,
+[7m    [0m [91m                           ~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1643[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'Partial<ParlantSecurityValidationRequest>'.
+
+[7m1643[0m       query: validationRequest.functionName || 'unknown',
+[7m    [0m [91m                               ~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1661[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'operationId' does not exist in type 'SecurityParlantAuditEntry'.
+
+[7m1661[0m       operationId,
+[7m    [0m [91m      ~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1664[0m:[93m39[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'Partial<ParlantSecurityValidationRequest>'.
+
+[7m1664[0m       functionName: validationRequest.functionName || 'unknown',
+[7m    [0m [91m                                      ~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1666[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'actionDescription' does not exist on type 'Partial<ParlantSecurityValidationRequest>'.
+
+[7m1666[0m         validationRequest.actionDescription || 'Security operation',
+[7m    [0m [91m                          ~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1671[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'context' does not exist on type 'Partial<ParlantSecurityValidationRequest>'.
+
+[7m1671[0m       userId: validationRequest.context?.userId || 'system',
+[7m    [0m [91m                                ~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1672[0m:[93m36[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'Partial<ParlantSecurityValidationRequest>'.
+
+[7m1672[0m       riskLevel: validationRequest.riskLevel || RiskLevel.CRITICAL,
+[7m    [0m [91m                                   ~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1807[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'ParlantSecurityValidationRequest'.
+
+[7m1807[0m       functionName: request.functionName,
+[7m    [0m [91m                            ~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1812[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'context' does not exist on type 'ParlantSecurityValidationRequest'.
+
+[7m1812[0m       userId: request.context.userId,
+[7m    [0m [91m                      ~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1885[0m:[93m3[0m - [91merror[0m[90m TS2393: [0mDuplicate function implementation.
+
+[7m1885[0m   getSecurityViolations(): SecurityViolation[] {
+[7m    [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1941[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'executionResult' does not exist on type 'SecurityParlantAuditEntry'.
+
+[7m1941[0m       (entry) => entry.executionResult === 'SUCCESS',
+[7m    [0m [91m                       ~~~~~~~~~~~~~~~[0m
+[96msrc/database/security/parlant-validated-database-security.service.ts[0m:[93m1954[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'duration' does not exist on type 'SecurityParlantAuditEntry'.
+
+[7m1954[0m       (sum, entry) => sum + entry.duration,
+[7m    [0m [91m                                  ~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m37[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../../bytebotd/src/parlant/parlant-integration.service' or its corresponding type declarations.
+
+[7m37[0m } from '../../../bytebotd/src/parlant/parlant-integration.service';
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m178[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'ParlantMigrationValidationRequest'.
+
+[7m178[0m         functionName: operationName,
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m258[0m:[93m11[0m - [91merror[0m[90m TS2352: [0mConversion of type '{ functionName: string; migrationOperation: MigrationOperationMetadata; }' to type 'ParlantMigrationValidationRequest' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ functionName: string; migrationOperation: MigrationOperationMetadata; }' is missing the following properties from type 'ParlantMigrationValidationRequest': schemaChangeSummary, dataImpactAssessment, rollbackPlan, databaseOperation, estimatedImpact
+
+[7m258[0m           {
+[7m   [0m [91m          ~[0m
+[7m259[0m             functionName: operationName,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m260[0m             migrationOperation: metadata,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m261[0m           } as ParlantMigrationValidationRequest,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m302[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType 'void' is not assignable to type 'MigrationResult'.
+
+[7m302[0m     return this.validateAndExecuteMigration(
+[7m   [0m [91m    ~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m304[0m:[93m35[0m - [91merror[0m[90m TS2341: [0mProperty 'executeMigration' is private and only accessible within class 'DatabaseMigrationService'.
+
+[7m304[0m       () => this.migrationService.executeMigration(targetVersion),
+[7m   [0m [91m                                  ~~~~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m304[0m:[93m52[0m - [91merror[0m[90m TS2345: [0mArgument of type 'string' is not assignable to parameter of type 'MigrationDefinition'.
+
+[7m304[0m       () => this.migrationService.executeMigration(targetVersion),
+[7m   [0m [91m                                                   ~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m341[0m:[93m35[0m - [91merror[0m[90m TS2551: [0mProperty 'rollbackMigration' does not exist on type 'DatabaseMigrationService'. Did you mean 'rollbackMigrations'?
+
+[7m341[0m       () => this.migrationService.rollbackMigration(targetVersion),
+[7m   [0m [91m                                  ~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/database/services/database-migration.service.ts[0m:[93m363[0m:[93m9[0m
+    [7m363[0m   async rollbackMigrations(versionsToRollback: string[]): Promise<void> {
+    [7m   [0m [96m        ~~~~~~~~~~~~~~~~~~[0m
+    'rollbackMigrations' is declared here.
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m375[0m:[93m35[0m - [91merror[0m[90m TS2551: [0mProperty 'executeBatchMigration' does not exist on type 'DatabaseMigrationService'. Did you mean 'executeMigrations'?
+
+[7m375[0m       () => this.migrationService.executeBatchMigration(fromVersion, toVersion),
+[7m   [0m [91m                                  ~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/database/services/database-migration.service.ts[0m:[93m193[0m:[93m9[0m
+    [7m193[0m   async executeMigrations(): Promise<MigrationResult> {
+    [7m   [0m [96m        ~~~~~~~~~~~~~~~~~[0m
+    'executeMigrations' is declared here.
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m408[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'validateMigration' does not exist on type 'DatabaseMigrationService'.
+
+[7m408[0m       () => this.migrationService.validateMigration(migrationDefinition),
+[7m   [0m [91m                                  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m474[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'createPreMigrationBackup' does not exist on type 'DatabaseMigrationService'.
+
+[7m474[0m       () => this.migrationService.createPreMigrationBackup(migrationVersion),
+[7m   [0m [91m                                  ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m516[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'restoreFromBackup' does not exist on type 'DatabaseMigrationService'.
+
+[7m516[0m       () => this.migrationService.restoreFromBackup(backupId),
+[7m   [0m [91m                                  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m565[0m:[93m39[0m - [91merror[0m[90m TS2339: [0mProperty 'isMigrationExecuted' does not exist on type 'DatabaseMigrationService'.
+
+[7m565[0m           await this.migrationService.isMigrationExecuted(dependency);
+[7m   [0m [91m                                      ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m877[0m:[93m7[0m - [91merror[0m[90m TS2367: [0mThis comparison appears to be unintentional because the types '"low" | "medium" | undefined' and '"critical"' have no overlap.
+
+[7m877[0m       migrationDef.riskLevel === 'critical' ||
+[7m   [0m [91m      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m889[0m:[93m42[0m - [91merror[0m[90m TS2339: [0mProperty 'getMigrationDefinition' does not exist on type 'DatabaseMigrationService'.
+
+[7m889[0m       return await this.migrationService.getMigrationDefinition(version);
+[7m   [0m [91m                                         ~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m911[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'ParlantMigrationValidationRequest'.
+
+[7m911[0m         functionName: request.functionName,
+[7m   [0m [91m                              ~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m913[0m:[93m28[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantMigrationValidationRequest'.
+
+[7m913[0m         riskLevel: request.riskLevel,
+[7m   [0m [91m                           ~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1155[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'Partial<ParlantMigrationValidationRequest>'.
+
+[7m1155[0m       query: validationRequest.functionName || 'unknown',
+[7m    [0m [91m                               ~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1163[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'operationId' does not exist in type 'MigrationParlantAuditEntry'.
+
+[7m1163[0m       operationId,
+[7m    [0m [91m      ~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1166[0m:[93m39[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'Partial<ParlantMigrationValidationRequest>'.
+
+[7m1166[0m       functionName: validationRequest.functionName || 'unknown',
+[7m    [0m [91m                                      ~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1168[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'actionDescription' does not exist on type 'Partial<ParlantMigrationValidationRequest>'.
+
+[7m1168[0m         validationRequest.actionDescription || 'Migration operation',
+[7m    [0m [91m                          ~~~~~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1173[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'context' does not exist on type 'Partial<ParlantMigrationValidationRequest>'.
+
+[7m1173[0m       userId: validationRequest.context?.userId || 'system',
+[7m    [0m [91m                                ~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1174[0m:[93m36[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'Partial<ParlantMigrationValidationRequest>'.
+
+[7m1174[0m       riskLevel: validationRequest.riskLevel || RiskLevel.HIGH,
+[7m    [0m [91m                                   ~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1204[0m:[93m43[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'Partial<ParlantMigrationValidationRequest>'.
+
+[7m1204[0m       rollbackExecuted: validationRequest.functionName === 'rollbackMigration',
+[7m    [0m [91m                                          ~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1219[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'ParlantMigrationValidationRequest'.
+
+[7m1219[0m       functionName: request.functionName,
+[7m    [0m [91m                            ~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1221[0m:[93m26[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantMigrationValidationRequest'.
+
+[7m1221[0m       riskLevel: request.riskLevel,
+[7m    [0m [91m                         ~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1224[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'context' does not exist on type 'ParlantMigrationValidationRequest'.
+
+[7m1224[0m       userId: request.context.userId,
+[7m    [0m [91m                      ~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1304[0m:[93m28[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'MigrationParlantAuditEntry'.
+
+[7m1304[0m         const type = entry.functionName;
+[7m    [0m [91m                           ~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1329[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'executionResult' does not exist on type 'MigrationParlantAuditEntry'.
+
+[7m1329[0m       (entry) => entry.executionResult === 'SUCCESS',
+[7m    [0m [91m                       ~~~~~~~~~~~~~~~[0m
+[96msrc/database/services/parlant-validated-database-migration.service.ts[0m:[93m1342[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'duration' does not exist on type 'MigrationParlantAuditEntry'.
+
+[7m1342[0m       (sum, entry) => sum + entry.duration,
+[7m    [0m [91m                                  ~~~~~~~~[0m
+[96msrc/health/health.controller.ts[0m:[93m503[0m:[93m64[0m - [91merror[0m[90m TS2554: [0mExpected 2 arguments, but got 3.
+
+[7m503[0m         this.metricsService.recordHealthCheck('summary', true, Date.now());
+[7m   [0m [91m                                                               ~~~~~~~~~~[0m
+[96msrc/health/health.controller.ts[0m:[93m528[0m:[93m65[0m - [91merror[0m[90m TS2554: [0mExpected 2 arguments, but got 3.
+
+[7m528[0m         this.metricsService.recordHealthCheck('summary', false, Date.now());
+[7m   [0m [91m                                                                ~~~~~~~~~~[0m
+[96msrc/health/health.controller.ts[0m:[93m632[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'recordDashboardAccess' does not exist on type 'MetricsService'.
+
+[7m632[0m         this.metricsService.recordDashboardAccess(operationId);
+[7m   [0m [91m                            ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/health/health.controller.ts[0m:[93m819[0m:[93m11[0m - [91merror[0m[90m TS2554: [0mExpected 2 arguments, but got 3.
+
+[7m819[0m           Date.now(),
+[7m   [0m [91m          ~~~~~~~~~~[0m
+[96msrc/health/health.controller.ts[0m:[93m852[0m:[93m63[0m - [91merror[0m[90m TS2554: [0mExpected 2 arguments, but got 3.
+
+[7m852[0m         this.metricsService.recordHealthCheck(service, false, Date.now());
+[7m   [0m [91m                                                              ~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m31[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../bytebotd/src/parlant/parlant-integration.service' or its corresponding type declarations.
+
+[7m31[0m } from '../../bytebotd/src/parlant/parlant-integration.service';
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m263[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'functionName' does not exist in type 'ParlantPrismaValidationRequest'.
+
+[7m263[0m         functionName: operationName,
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m341[0m:[93m11[0m - [91merror[0m[90m TS2352: [0mConversion of type '{ functionName: string; prismaOperation: PrismaOperationMetadata; }' to type 'ParlantPrismaValidationRequest' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ functionName: string; prismaOperation: PrismaOperationMetadata; }' is missing the following properties from type 'ParlantPrismaValidationRequest': sensitiveDataAccess, databaseOperation, estimatedImpact
+
+[7m341[0m           {
+[7m   [0m [91m          ~[0m
+[7m342[0m             functionName: operationName,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m343[0m             prismaOperation: metadata,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m344[0m           } as ParlantPrismaValidationRequest,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m953[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'ParlantPrismaValidationRequest'.
+
+[7m953[0m         functionName: request.functionName,
+[7m   [0m [91m                              ~~~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m956[0m:[93m28[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantPrismaValidationRequest'.
+
+[7m956[0m         riskLevel: request.riskLevel,
+[7m   [0m [91m                           ~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1012[0m:[93m22[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantPrismaValidationRequest'.
+
+[7m1012[0m       return request.riskLevel !== RiskLevel.CRITICAL;
+[7m    [0m [91m                     ~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1018[0m:[93m15[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantPrismaValidationRequest'.
+
+[7m1018[0m       request.riskLevel !== RiskLevel.CRITICAL
+[7m    [0m [91m              ~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1091[0m:[93m44[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantPrismaValidationRequest'.
+
+[7m1091[0m     if (operation.isDestructive || request.riskLevel === RiskLevel.HIGH) {
+[7m    [0m [91m                                           ~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1188[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'Partial<ParlantPrismaValidationRequest>'.
+
+[7m1188[0m       query: validationRequest.functionName || 'unknown',
+[7m    [0m [91m                               ~~~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1196[0m:[93m7[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'operationId' does not exist in type 'DatabaseParlantAuditEntry'.
+
+[7m1196[0m       operationId,
+[7m    [0m [91m      ~~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1199[0m:[93m39[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'Partial<ParlantPrismaValidationRequest>'.
+
+[7m1199[0m       functionName: validationRequest.functionName || 'unknown',
+[7m    [0m [91m                                      ~~~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1201[0m:[93m27[0m - [91merror[0m[90m TS2339: [0mProperty 'actionDescription' does not exist on type 'Partial<ParlantPrismaValidationRequest>'.
+
+[7m1201[0m         validationRequest.actionDescription || 'Prisma operation',
+[7m    [0m [91m                          ~~~~~~~~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1206[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'context' does not exist on type 'Partial<ParlantPrismaValidationRequest>'.
+
+[7m1206[0m       userId: validationRequest.context?.userId || 'system',
+[7m    [0m [91m                                ~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1207[0m:[93m36[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'Partial<ParlantPrismaValidationRequest>'.
+
+[7m1207[0m       riskLevel: validationRequest.riskLevel || RiskLevel.MEDIUM,
+[7m    [0m [91m                                   ~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1227[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'ParlantPrismaValidationRequest'.
+
+[7m1227[0m       functionName: request.functionName,
+[7m    [0m [91m                            ~~~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1233[0m:[93m26[0m - [91merror[0m[90m TS2339: [0mProperty 'riskLevel' does not exist on type 'ParlantPrismaValidationRequest'.
+
+[7m1233[0m       riskLevel: request.riskLevel,
+[7m    [0m [91m                         ~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1234[0m:[93m23[0m - [91merror[0m[90m TS2339: [0mProperty 'context' does not exist on type 'ParlantPrismaValidationRequest'.
+
+[7m1234[0m       userId: request.context.userId,
+[7m    [0m [91m                      ~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1351[0m:[93m30[0m - [91merror[0m[90m TS2339: [0mProperty 'functionName' does not exist on type 'DatabaseParlantAuditEntry'.
+
+[7m1351[0m         const method = entry.functionName;
+[7m    [0m [91m                             ~~~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1375[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'executionResult' does not exist on type 'DatabaseParlantAuditEntry'.
+
+[7m1375[0m       (entry) => entry.executionResult === 'SUCCESS',
+[7m    [0m [91m                       ~~~~~~~~~~~~~~~[0m
+[96msrc/prisma/parlant-validated-prisma.service.ts[0m:[93m1388[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'duration' does not exist on type 'DatabaseParlantAuditEntry'.
+
+[7m1388[0m       (sum, entry) => sum + entry.duration,
+[7m    [0m [91m                                  ~~~~~~~~[0m
+[96msrc/tasks/tasks.controller.ts[0m:[93m38[0m:[93m3[0m - [91merror[0m[90m TS2724: [0m'"@bytebot/shared/server"' has no exported member named 'ParlantSecure'. Did you mean 'ParlantService'?
+
+[7m38[0m   ParlantSecure,
+[7m  [0m [91m  ~~~~~~~~~~~~~[0m
+[96msrc/tasks/tasks.controller.ts[0m:[93m39[0m:[93m3[0m - [91merror[0m[90m TS2724: [0m'"@bytebot/shared/server"' has no exported member named 'ParlantValidated'. Did you mean 'ParlantValidation'?
+
+[7m39[0m   ParlantValidated,
+[7m  [0m [91m  ~~~~~~~~~~~~~~~~[0m
+[96msrc/tasks/tasks.controller.ts[0m:[93m223[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty '_MEDIUM' does not exist on type 'typeof SecurityLevel'.
+
+[7m223[0m     securityLevel: SecurityLevel._MEDIUM,
+[7m   [0m [91m                                 ~~~~~~~[0m
+[96msrc/tasks/tasks.controller.ts[0m:[93m594[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty '_MEDIUM' does not exist on type 'typeof SecurityLevel'.
+
+[7m594[0m     securityLevel: SecurityLevel._MEDIUM,
+[7m   [0m [91m                                 ~~~~~~~[0m
+
+Found 441 error(s).
+
+ ELIFECYCLE  Command failed with exit code 1.

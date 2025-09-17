@@ -34,10 +34,8 @@ export function ComputerToolContent({
   // After type guard validation, the block is safe to use
 
   if (isTakeOver) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     return <ComputerToolContentTakeOver block={block} />;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   return <ComputerToolContentNormal block={block} />;
 }

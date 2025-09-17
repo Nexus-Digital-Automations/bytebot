@@ -24,11 +24,11 @@ import { BrowserUseModule } from './browser-use/browser-use.module';
 import { ConfigurationModule } from './config/config.module';
 import { EnterpriseConfigModule } from './config/enterprise-config.module';
 import { ReliabilityModule } from './common/reliability/reliability.module';
-import {
-  GlobalParlantIntegrationModule,
-  ParlantIntegrationUtils,
-} from '@bytebot/shared/modules/global-parlant-integration.module';
-import { ParlantValidationInterceptor } from '@bytebot/shared/interceptors/parlant-validation.interceptor';
+// import {
+//   GlobalParlantIntegrationModule,
+//   ParlantIntegrationUtils,
+// } from '@bytebot/shared/modules/global-parlant-integration.module';
+// import { ParlantValidationInterceptor } from '@bytebot/shared/interceptors/parlant-validation.interceptor';
 
 @Module({
   imports: [
@@ -74,11 +74,11 @@ import { ParlantValidationInterceptor } from '@bytebot/shared/interceptors/parla
     AuthModule,
 
     // Parlant conversational AI validation (must be imported after auth for proper security context)
-    GlobalParlantIntegrationModule.forRoot(
-      process.env.NODE_ENV === 'production'
-        ? ParlantIntegrationUtils.forHighThroughput()
-        : ParlantIntegrationUtils.forDevelopment(),
-    ),
+    // GlobalParlantIntegrationModule.forRoot(
+    //   process.env.NODE_ENV === 'production'
+    //     ? ParlantIntegrationUtils.forHighThroughput()
+    //     : ParlantIntegrationUtils.forDevelopment(),
+    // ),
 
     // Reliability and resilience patterns (must be imported early)
     ReliabilityModule,
@@ -107,10 +107,10 @@ import { ParlantValidationInterceptor } from '@bytebot/shared/interceptors/parla
       provide: APP_INTERCEPTOR,
       useClass: MetricsInterceptor,
     },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: ParlantValidationInterceptor,
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: ParlantValidationInterceptor,
+    // },
   ],
 })
 export class AppModule {
