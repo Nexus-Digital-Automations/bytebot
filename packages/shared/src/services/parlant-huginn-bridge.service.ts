@@ -519,21 +519,21 @@ export class ParlantHuginnBridgeService
     try {
       this.websocket = new (WebSocket as any)(this.config.huginnWebSocketUrl);
 
-      this.websocket.on("open", () => {
+      this.websocket?.on("open", () => {
         this.isConnected = true;
         this.logger.log("✅ WebSocket connection established with Huginn");
       });
 
-      this.websocket.on("message", (data) => {
+      this.websocket?.on("message", (data: any) => {
         this.handleHuginnWebSocketMessage(JSON.parse(data.toString()));
       });
 
-      this.websocket.on("close", () => {
+      this.websocket?.on("close", () => {
         this.isConnected = false;
         this.logger.warn("⚠️ WebSocket connection to Huginn closed");
       });
 
-      this.websocket.on("error", (error) => {
+      this.websocket?.on("error", (error: Error) => {
         this.logger.error("❌ WebSocket error with Huginn", error);
       });
     } catch (error) {

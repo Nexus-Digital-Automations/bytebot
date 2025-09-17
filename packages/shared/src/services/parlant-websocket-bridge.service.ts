@@ -276,7 +276,7 @@ export class ParlantWebSocketBridgeService
 
     this.serverWs = new WebSocket.Server({
       port,
-      verifyClient: (info) => {
+      verifyClient: (info: { req: any; origin?: string; secure?: boolean }) => {
         // Verify JWT token from AIgent components
         const token = info.req.headers.authorization?.replace("Bearer ", "");
         if (!token) return false;

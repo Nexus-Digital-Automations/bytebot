@@ -292,7 +292,7 @@ export class ParlantIntegrationService
         this.attemptReconnection();
       });
 
-      ws.on("error", (error) => {
+      ws.on("error", (error: Error) => {
         clearTimeout(timeout);
         this.logger.error("❌ WebSocket error", error);
         reject(
