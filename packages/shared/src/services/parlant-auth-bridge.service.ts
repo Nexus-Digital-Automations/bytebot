@@ -677,7 +677,7 @@ export class ParlantAuthBridgeService
       userId: sessionMapping.aigentUserId,
       roles: sessionMapping.roles,
       sessionId: sessionMapping.aigentSessionId,
-      ipAddress: requestMetadata?.ipAddress || "127.0.0.1",
+      ipAddress: (typeof requestMetadata?.ipAddress === 'string' ? requestMetadata.ipAddress : "127.0.0.1"),
       metadata: {
         parlantSessionId: sessionMapping.parlantSessionId,
         parlantUserId: sessionMapping.parlantUserId,
@@ -770,10 +770,10 @@ export class ParlantAuthBridgeService
 
     const profile: SynchronizedUserProfile = {
       userId,
-      username: basicInfo.username,
-      email: basicInfo.email,
-      roles: basicInfo.roles,
-      permissions: basicInfo.permissions,
+      username: (typeof basicInfo.username === 'string' ? basicInfo.username : 'unknown'),
+      email: (typeof basicInfo.email === 'string' ? basicInfo.email : 'unknown@unknown.com'),
+      roles: (Array.isArray(basicInfo.roles) ? basicInfo.roles as string[] : []),
+      permissions: (Array.isArray(basicInfo.permissions) ? basicInfo.permissions as string[] : []),
       preferences: existingProfile?.preferences || {},
       securitySettings: existingProfile?.securitySettings || {
         twoFactorEnabled: false,
@@ -783,7 +783,7 @@ export class ParlantAuthBridgeService
         locked: false,
       },
       parlantProfile: existingProfile?.parlantProfile,
-      lastSync: basicInfo.lastSync,
+      lastSync: (basicInfo.lastSync instanceof Date ? basicInfo.lastSync : new Date()),
     };
 
     this.userProfiles.set(userId, profile);
