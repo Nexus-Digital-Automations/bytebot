@@ -43,7 +43,7 @@ export class ApprovalWorkflowService {
     return true;
   }
 
-  getApprovalStats(): any {
+  getApprovalStats(): { totalRequests: number; pending: number; approved: number; rejected: number } {
     const requests = Array.from(this.approvalRequests.values());
     return {
       totalRequests: requests.length,

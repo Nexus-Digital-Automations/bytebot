@@ -135,7 +135,7 @@ export class RiskAssessmentService {
     return [...new Set(strategies)]; // Remove duplicates
   }
 
-  async getHistoricalRiskTrends(): Promise<any> {
+  async getHistoricalRiskTrends(): Promise<{ averageRiskScore: number; riskTrend: string; commonRiskFactors: string[]; lastAnalyzed: Date }> {
     // Implementation would analyze historical risk assessments
     return {
       averageRiskScore: 0.4,

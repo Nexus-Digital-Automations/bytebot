@@ -29,7 +29,7 @@ export class OrchestratorCacheService {
     // Implement cache clearing
   }
 
-  getStats(): any {
+  getStats(): { hits: number; misses: number; entries: number; memoryUsage: number } {
     return {
       hits: 0,
       misses: 0,

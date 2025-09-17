@@ -13,7 +13,7 @@ export interface ServiceEndpoint {
   url: string;
   health: 'healthy' | 'degraded' | 'unhealthy';
   lastCheck: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 @Injectable()
@@ -45,7 +45,7 @@ export class ServiceDiscoveryService {
     return true;
   }
 
-  getServiceStats(): any {
+  getServiceStats(): { totalServices: number; healthyServices: number; lastUpdate: Date } {
     return {
       totalServices: this.services.size,
       healthyServices: Array.from(this.services.values()).filter(s => s.health === 'healthy').length,

@@ -127,7 +127,7 @@ export class ComplianceAuditService {
     return {
       id: `finding-${Date.now()}-${Math.random()}`,
       requirement: control,
-      status: status as any,
+      status: status as 'met' | 'not_met' | 'partial',
       evidence,
       riskLevel: status === 'met' ? 'low' : 'medium',
       remediation: status === 'not_met' ? this.generateRemediation(control) : undefined
@@ -227,7 +227,7 @@ export class ComplianceAuditService {
     return filteredEntries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
-  getComplianceStats(): any {
+  getComplianceStats(): { totalAuditEntries: number; recentEntries: number; complianceFrameworks: string[]; lastReport: Date; averageComplianceScore: number } {
     const totalEntries = this.auditEntries.length;
     const recentEntries = this.auditEntries.filter(entry => 
       entry.timestamp > new Date(Date.now() - 24 * 60 * 60 * 1000)

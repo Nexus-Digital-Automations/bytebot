@@ -28,13 +28,20 @@ import { ComplianceAuditService } from '../services/compliance-audit.service';
 import { PerformanceMonitoringService } from '../services/performance-monitoring.service';
 
 // Configuration interfaces
-import { OrchestratorConfiguration, LogLevel } from '../types/orchestrator.types';
+import { 
+  OrchestratorConfiguration, 
+  LogLevel, 
+  ServiceDiscoveryType,
+  CacheProvider,
+  EvictionPolicy,
+  AuthProvider,
+  AuthorizationModel,
+  PolicyEngine,
+  AuditEventType,
+  AuditStorageType
+} from '../types/orchestrator.types';
 
-// Define additional types
-type CacheProvider = 'memory' | 'redis' | 'file';
-type DiscoveryType = 'static' | 'dynamic' | 'consul';
-type EvictionPolicy = 'lru' | 'fifo' | 'random';
-type AuthProvider = 'jwt' | 'oauth' | 'saml';
+// Additional local types (none needed - using imported enums)
 
 export interface OrchestratorModuleOptions {
   /** Global configuration */
@@ -80,7 +87,7 @@ export class OrchestratorModule {
               }
             },
             serviceRegistry: {
-              discoveryType: 'static' as DiscoveryType,
+              discoveryType: ServiceDiscoveryType.STATIC,
               healthCheckIntervalMs: 30000,
               serviceTimeoutMs: 5000
             },
@@ -101,19 +108,23 @@ export class OrchestratorModule {
             },
             caching: {
               enabled: true,
-              provider: configService.get('ORCHESTRATOR_CACHE_PROVIDER', 'memory') as CacheProvider,
+              provider: (configService.get('ORCHESTRATOR_CACHE_PROVIDER', 'memory') as string) === 'memory' ? CacheProvider.MEMORY : 
+                       (configService.get('ORCHESTRATOR_CACHE_PROVIDER', 'memory') as string) === 'redis' ? CacheProvider.REDIS : CacheProvider.MEMORY,
               defaultTtlMs: 300000,
               sizeLimits: {
                 maxEntries: 10000,
                 maxMemoryMb: 256,
-                evictionPolicy: 'lru' as EvictionPolicy
+                evictionPolicy: EvictionPolicy.LRU
               }
             },
             monitoring: {
               enabled: true,
               metricsIntervalMs: 60000,
               traceSamplingRate: 0.1,
-              logLevel: configService.get('LOG_LEVEL', 'info') as LogLevel,
+              logLevel: (configService.get('LOG_LEVEL', 'info') as string) === 'info' ? LogLevel.INFO : 
+                       (configService.get('LOG_LEVEL', 'info') as string) === 'debug' ? LogLevel.DEBUG : 
+                       (configService.get('LOG_LEVEL', 'info') as string) === 'warn' ? LogLevel.WARN : 
+                       (configService.get('LOG_LEVEL', 'info') as string) === 'error' ? LogLevel.ERROR : LogLevel.INFO,
               exportConfig: {
                 customHandlers: []
               }
@@ -126,23 +137,23 @@ export class OrchestratorModule {
                 encryptInTransit: true
               },
               authentication: {
-                provider: 'jwt' as AuthProvider,
+                provider: AuthProvider.JWT,
                 tokenExpirationMs: 3600000,
                 refreshTokenEnabled: true,
                 mfaEnabled: false
               },
               authorization: {
-                model: 'rbac' as any,
+                model: AuthorizationModel.RBAC,
                 rbacEnabled: true,
                 abacEnabled: false,
-                policyEngine: 'custom' as any
+                policyEngine: PolicyEngine.CUSTOM
               },
               audit: {
                 enabled: true,
                 retentionDays: 90,
-                eventTypes: ['execution_start' as any, 'execution_end' as any],
+                eventTypes: [AuditEventType.EXECUTION_START, AuditEventType.EXECUTION_END],
                 storage: {
-                  type: 'database' as any,
+                  type: AuditStorageType.DATABASE,
                   encrypted: true,
                   compressed: true
                 }
@@ -195,9 +206,9 @@ export class OrchestratorModule {
    * Register async orchestrator module with factory
    */
   static registerAsync(options: {
-    imports?: any[];
-    useFactory?: (...args: any[]) => Promise<OrchestratorModuleOptions> | OrchestratorModuleOptions;
-    inject?: any[];
+    imports?: unknown[];
+    useFactory?: (...args: unknown[]) => Promise<OrchestratorModuleOptions> | OrchestratorModuleOptions;
+    inject?: unknown[];
     isGlobal?: boolean;
   }): DynamicModule {
     return {
@@ -218,7 +229,7 @@ export class OrchestratorModule {
         // Async configuration provider
         {
           provide: 'ORCHESTRATOR_CONFIG',
-          useFactory: async (...args: any[]) => {
+          useFactory: async (...args: unknown[]) => {
             if (options.useFactory) {
               const moduleOptions = await options.useFactory(...args);
               return this.buildConfiguration(moduleOptions);
@@ -266,7 +277,7 @@ export class OrchestratorModule {
         }
       },
       serviceRegistry: {
-        discoveryType: 'static' as any,
+        discoveryType: ServiceDiscoveryType.STATIC,
         healthCheckIntervalMs: 30000,
         serviceTimeoutMs: 5000
       },
@@ -287,19 +298,21 @@ export class OrchestratorModule {
       },
       caching: {
         enabled: true,
-        provider: (process.env.ORCHESTRATOR_CACHE_PROVIDER as any) || 'memory',
+        provider: process.env.ORCHESTRATOR_CACHE_PROVIDER === 'redis' ? CacheProvider.REDIS : CacheProvider.MEMORY,
         defaultTtlMs: 300000,
         sizeLimits: {
           maxEntries: 10000,
           maxMemoryMb: 256,
-          evictionPolicy: 'lru' as any
+          evictionPolicy: EvictionPolicy.LRU
         }
       },
       monitoring: {
         enabled: true,
         metricsIntervalMs: 60000,
         traceSamplingRate: 0.1,
-        logLevel: (process.env.LOG_LEVEL as any) || 'info',
+        logLevel: process.env.LOG_LEVEL === 'debug' ? LogLevel.DEBUG : 
+                 process.env.LOG_LEVEL === 'warn' ? LogLevel.WARN : 
+                 process.env.LOG_LEVEL === 'error' ? LogLevel.ERROR : LogLevel.INFO,
         exportConfig: {
           customHandlers: []
         }
@@ -312,23 +325,23 @@ export class OrchestratorModule {
           encryptInTransit: true
         },
         authentication: {
-          provider: 'jwt' as any,
+          provider: AuthProvider.JWT,
           tokenExpirationMs: 3600000,
           refreshTokenEnabled: true,
           mfaEnabled: false
         },
         authorization: {
-          model: 'rbac' as any,
+          model: AuthorizationModel.RBAC,
           rbacEnabled: true,
           abacEnabled: false,
-          policyEngine: 'custom' as any
+          policyEngine: PolicyEngine.CUSTOM
         },
         audit: {
           enabled: true,
           retentionDays: 90,
-          eventTypes: ['execution_start' as any, 'execution_end' as any],
+          eventTypes: [AuditEventType.EXECUTION_START, AuditEventType.EXECUTION_END],
           storage: {
-            type: 'database' as any,
+            type: AuditStorageType.DATABASE,
             encrypted: true,
             compressed: true
           }

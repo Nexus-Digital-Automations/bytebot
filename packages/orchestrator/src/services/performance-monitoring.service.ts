@@ -87,7 +87,7 @@ export class PerformanceMonitoringService {
     hours: number = 1,
     granularity: 'minute' | 'hour' | 'day' = 'minute',
     includeBreakdown: boolean = false
-  ): Promise<any> {
+  ): Promise<{ period: { start: Date; end: Date }; granularity: string; dataPoints: number; summary: unknown; timeSeries: unknown[]; targets: unknown; alerts: PerformanceAlert[]; breakdown?: unknown }> {
     const endTime = new Date();
     const startTime = new Date(endTime.getTime() - (hours * 60 * 60 * 1000));
 
@@ -114,7 +114,7 @@ export class PerformanceMonitoringService {
     };
 
     if (includeBreakdown) {
-      response['breakdown'] = this.generateMetricsBreakdown(relevantMetrics);
+      (response as typeof response & { breakdown: unknown }).breakdown = this.generateMetricsBreakdown(relevantMetrics);
     }
 
     return response;
@@ -277,7 +277,7 @@ export class PerformanceMonitoringService {
   private aggregateMetrics(
     metrics: PerformanceMetrics[],
     granularity: 'minute' | 'hour' | 'day'
-  ): any[] {
+  ): Array<{ timestamp: string; responseTime: { avg: number; p95: number; p99: number }; throughput: { avg: number; successRate: number }; errorRate: number; cacheHitRate: number }> {
     // Group metrics by time buckets based on granularity
     const buckets = new Map<string, PerformanceMetrics[]>();
     
@@ -324,7 +324,7 @@ export class PerformanceMonitoringService {
     }
   }
 
-  private calculateSummaryStats(metrics: PerformanceMetrics[]): any {
+  private calculateSummaryStats(metrics: PerformanceMetrics[]): { responseTime: { min: number; max: number; avg: number }; throughput: { min: number; max: number; avg: number }; errorRate: { min: number; max: number; avg: number }; totalDataPoints: number } | null {
     if (metrics.length === 0) return null;
 
     const responseTimes = metrics.map(m => m.metrics.responseTime.avg);
@@ -351,7 +351,7 @@ export class PerformanceMonitoringService {
     };
   }
 
-  private evaluateTargetCompliance(metrics: PerformanceMetrics[]): any {
+  private evaluateTargetCompliance(metrics: PerformanceMetrics[]): { p95ResponseTime: { complianceRate: number; target: number; status: string }; throughput: { complianceRate: number; target: number; status: string }; errorRate: { complianceRate: number; target: number; status: string }; availability: { complianceRate: number; target: number; status: string } } | null {
     if (metrics.length === 0) return null;
 
     const p95Compliance = metrics.filter(m => m.targets.p95ResponseTime.met).length / metrics.length;
@@ -383,7 +383,7 @@ export class PerformanceMonitoringService {
     };
   }
 
-  private generateMetricsBreakdown(metrics: PerformanceMetrics[]): any {
+  private generateMetricsBreakdown(metrics: PerformanceMetrics[]): { byHour: unknown[]; errorBreakdown: Record<string, number>; resourceTrends: unknown; cachePerformance: unknown } {
     // Generate detailed breakdown by different dimensions
     return {
       byHour: this.aggregateMetrics(metrics, 'hour'),
@@ -393,7 +393,7 @@ export class PerformanceMonitoringService {
     };
   }
 
-  private aggregateErrorsByType(metrics: PerformanceMetrics[]): any {
+  private aggregateErrorsByType(metrics: PerformanceMetrics[]): Record<string, number> {
     const errorTypes = new Map<string, number>();
     
     for (const metric of metrics) {
@@ -405,7 +405,7 @@ export class PerformanceMonitoringService {
     return Object.fromEntries(errorTypes);
   }
 
-  private aggregateResourceUsage(metrics: PerformanceMetrics[]): any {
+  private aggregateResourceUsage(metrics: PerformanceMetrics[]): { cpu: { min: number; max: number; avg: number }; memory: { min: number; max: number; avg: number } } {
     return {
       cpu: {
         min: Math.min(...metrics.map(m => m.metrics.resources.cpuUsage)),
@@ -420,7 +420,7 @@ export class PerformanceMonitoringService {
     };
   }
 
-  private aggregateCacheMetrics(metrics: PerformanceMetrics[]): any {
+  private aggregateCacheMetrics(metrics: PerformanceMetrics[]): { avgHitRate: number; avgMissRate: number; avgResponseTime: number } {
     return {
       avgHitRate: this.average(metrics.map(m => m.metrics.cache.hitRate)),
       avgMissRate: this.average(metrics.map(m => m.metrics.cache.missRate)),
@@ -428,7 +428,7 @@ export class PerformanceMonitoringService {
     };
   }
 
-  private getEmptyMetricsResponse(startTime: Date, endTime: Date, granularity: string): any {
+  private getEmptyMetricsResponse(startTime: Date, endTime: Date, granularity: string): { period: { start: Date; end: Date }; granularity: string; dataPoints: number; summary: null; timeSeries: unknown[]; targets: null; alerts: PerformanceAlert[]; message: string } {
     return {
       period: { start: startTime, end: endTime },
       granularity,
@@ -487,7 +487,7 @@ export class PerformanceMonitoringService {
       this.metricsHistory[this.metricsHistory.length - 1] : null;
   }
 
-  getMetricsStats(): any {
+  getMetricsStats(): { totalDataPoints: number; activeAlerts: number; timeRange: { oldest: Date; newest: Date } | null; collectionStatus: string } {
     return {
       totalDataPoints: this.metricsHistory.length,
       activeAlerts: this.getActiveAlerts().length,

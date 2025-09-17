@@ -110,7 +110,7 @@ export interface WorkflowStep {
   /** Function or endpoint to call */
   readonly endpoint: string;
   /** Input parameters */
-  readonly parameters: Record<string, any>;
+  readonly parameters: Record<string, unknown>;
   /** Dependencies on previous steps */
   readonly dependencies: string[];
   /** Conditional execution logic */
@@ -138,7 +138,7 @@ export interface WorkflowCondition {
   /** Condition expression */
   readonly expression: string;
   /** Variables available in condition */
-  readonly variables: Record<string, any>;
+  readonly variables: Record<string, unknown>;
   /** Action if condition true */
   readonly onTrue: string;
   /** Action if condition false */
@@ -280,7 +280,7 @@ export interface OrchestrationMetadata {
   /** Tags for categorization */
   readonly tags: string[];
   /** Custom metadata */
-  readonly custom: Record<string, any>;
+  readonly custom: Record<string, unknown>;
 }
 
 // ===== ORCHESTRATION EXECUTION =====
@@ -341,7 +341,7 @@ export interface StepExecutionResult {
   /** Execution status */
   readonly status: StepExecutionStatus;
   /** Result data */
-  readonly result?: any;
+  readonly result?: unknown;
   /** Error if failed */
   readonly error?: Error;
   /** Execution start time */
@@ -498,7 +498,7 @@ export interface OrchestrationError {
   /** Error message */
   readonly message: string;
   /** Error details */
-  readonly details: any;
+  readonly details: unknown;
   /** Step where error occurred */
   readonly stepId?: string;
   /** Service where error occurred */
