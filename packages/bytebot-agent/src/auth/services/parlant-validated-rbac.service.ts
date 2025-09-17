@@ -383,11 +383,11 @@ export class ParlantValidatedRBACService {
         action: context.action,
         auditId: result.auditTrail.auditId,
         parlantValidation: {
-          // @ts-ignore - We know this exists from our enhanced result
+          // @ts-expect-error - Parlant validation properties are added dynamically to auditTrail
           conversationId: result.auditTrail.parlantValidation?.conversationId,
-          // @ts-ignore
+          // @ts-expect-error - Parlant validation confidence added during conversation analysis
           confidence: result.auditTrail.parlantValidation?.confidence,
-          // @ts-ignore
+          // @ts-expect-error - Parlant validation reasoning populated by conversation processor
           reasoning: result.auditTrail.parlantValidation?.reasoning,
         },
       });
