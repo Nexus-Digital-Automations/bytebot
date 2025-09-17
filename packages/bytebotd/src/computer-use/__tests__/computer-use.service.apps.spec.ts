@@ -85,7 +85,7 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
 // Mock external dependencies
 jest.mock('child_process');
 jest.mock('util', () => {
-  const originalUtil = jest.requireActual('util') as typeof import('util');
+  const originalUtil = jest.requireActual('util');
   return {
     ...originalUtil,
     promisify: Object.assign(jest.fn(), {
@@ -241,7 +241,7 @@ describe('ComputerUseService - Application Management', () => {
 
     // Setup spawn mock to return mock process
     (mockSpawn).mockReturnValue(
-      mockProcess as unknown as ReturnType<typeof spawn>,
+      mockProcess as ReturnType<typeof spawn>,
     );
 
     // Create testing module with mocked dependencies
@@ -297,7 +297,7 @@ describe('ComputerUseService - Application Management', () => {
           }),
           stdio: 'ignore',
           detached: true,
-        }) as SpawnOptions,
+        }),
       );
 
       // Verify process was unreferenced for proper cleanup
@@ -339,7 +339,7 @@ describe('ComputerUseService - Application Management', () => {
           }),
           stdio: 'ignore',
           detached: true,
-        }) as SpawnOptions,
+        }),
       );
 
       expect(mockProcess.unref).toHaveBeenCalled();
@@ -384,7 +384,7 @@ describe('ComputerUseService - Application Management', () => {
           'sudo',
           ['-u', 'user', 'nohup', command],
           expect.objectContaining({
-            env: expect.objectContaining({ DISPLAY: ':0.0' }) as any,
+            env: expect.objectContaining({ DISPLAY: ':0.0' }) as SpawnOptions['env'],
             stdio: 'ignore',
             detached: true,
           }),
@@ -426,7 +426,7 @@ describe('ComputerUseService - Application Management', () => {
           'sudo',
           ['-u', 'user', 'wmctrl', '-x', '-a', processName],
           expect.objectContaining({
-            env: expect.objectContaining({ DISPLAY: ':0.0' }) as any,
+            env: expect.objectContaining({ DISPLAY: ':0.0' }) as SpawnOptions['env'],
             stdio: 'ignore',
             detached: true,
           }),
@@ -447,7 +447,7 @@ describe('ComputerUseService - Application Management', () => {
             'add,maximized_vert,maximized_horz',
           ],
           expect.objectContaining({
-            env: expect.objectContaining({ DISPLAY: ':0.0' }) as any,
+            env: expect.objectContaining({ DISPLAY: ':0.0' }) as SpawnOptions['env'],
             stdio: 'ignore',
             detached: true,
           }),
@@ -497,7 +497,7 @@ describe('ComputerUseService - Application Management', () => {
         'sudo',
         ['-u', 'user', 'nohup', 'firefox-esr'],
         expect.objectContaining({
-          env: expect.objectContaining({ DISPLAY: ':0.0' }) as any,
+          env: expect.objectContaining({ DISPLAY: ':0.0' }),
         }),
       );
     });
@@ -590,8 +590,8 @@ describe('ComputerUseService - Application Management', () => {
         expect.objectContaining({
           env: expect.objectContaining({
             DISPLAY: ':0.0',
-          }) as SpawnOptions,
-        }) as SpawnOptions,
+          }),
+        }),
       );
     });
   });

@@ -1,4 +1,5 @@
 /* eslint-env jest */
+ 
 /**
  * Comprehensive Unit Tests for ComputerUseService File Operations
  *
@@ -205,9 +206,7 @@ describe('ComputerUseService - File Operations', () => {
     } as unknown as jest.Mocked<Logger>;
 
     // Setup promisify mock to return our mock exec function
-    (mockPromisify as jest.MockedFunction<typeof promisify>).mockReturnValue(
-      mockExecAsync,
-    );
+    mockPromisify.mockReturnValue(mockExecAsync);
 
     // Setup default successful mock responses
     (

@@ -1,4 +1,5 @@
 /* eslint-env jest */
+ 
 
 /**
  * Computer Use Service - Main Action Router and Error Handling Unit Tests
@@ -28,7 +29,7 @@ jest.mock('child_process', () => {
   };
 
   return {
-    exec: jest.fn().mockImplementation((cmd: string, opts: any, cb?: any) => {
+    exec: jest.fn().mockImplementation((cmd: string, opts: unknown, cb?: unknown) => {
       const callback = typeof opts === 'function' ? opts : cb;
       if (callback) {
         setTimeout(() => (callback as MockExecCallback)(null, '', ''), 10);
@@ -63,7 +64,7 @@ jest.mock(
               Promise.resolve(fn(...args)),
         ),
         { custom: Symbol.for('nodejs.util.promisify.custom') },
-      ) as any,
+      ) as jest.MockedFunction<typeof import('util').promisify>,
     }) as jest.Mocked<typeof import('util')>,
 );
 
@@ -162,11 +163,8 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
       stderr: { on: jest.fn() },
     };
 
-    (
-      childProcess.exec as jest.MockedFunction<
-        typeof import('child_process').exec
-      >
-    ).mockImplementation((command: string, options: any, callback?: any) => {
+    const mockedExec = childProcess.exec;
+    mockedExec.mockImplementation((command: string, options: unknown, callback?: unknown) => {
       const cb = typeof options === 'function' ? options : callback;
       // Simulate quick exec resolution
       setTimeout(() => {
@@ -454,7 +452,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const action = createTestAction<CursorPositionAction>({
           action: 'cursor_position',
         });
-        (mockNutService.getCursorPosition as jest.Mock).mockResolvedValue({
+        (mockNutService.getCursorPosition).mockResolvedValue({
           x: 150,
           y: 250,
         });
@@ -549,7 +547,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const invalidAction = {
           action: 'invalid_action',
           someParam: 'value',
-        } as any as ComputerAction;
+        } as ComputerAction;
 
         // Act & Assert
         await expect(service.action(invalidAction)).rejects.toThrow(
@@ -561,7 +559,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         // Arrange - Create action with unknown type
         const unknownAction = {
           action: 'completely_unknown',
-        } as any as ComputerAction;
+        } as ComputerAction;
 
         // Act & Assert
         await expect(service.action(unknownAction)).rejects.toThrow();
@@ -578,7 +576,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
           coordinates: { x: 100, y: 200 },
         });
         const originalError = new Error('NutService connection failed');
-        (mockNutService.mouseMoveEvent as jest.Mock).mockRejectedValue(
+        (mockNutService.mouseMoveEvent).mockRejectedValue(
           originalError,
         );
 
@@ -594,7 +592,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
           action: 'screenshot',
         });
         const mockBuffer = Buffer.from('screenshot-data');
-        (mockNutService.screendump as jest.Mock).mockResolvedValue(mockBuffer);
+        (mockNutService.screendump).mockResolvedValue(mockBuffer);
 
         // Act
         const result = await service.action(action);
@@ -612,7 +610,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
           button: 'left',
           clickCount: 1,
         });
-        (mockNutService.mouseClickEvent as jest.Mock).mockRejectedValue(
+        (mockNutService.mouseClickEvent).mockRejectedValue(
           new Error('Mouse hardware error'),
         );
 
@@ -637,7 +635,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
           action: 'type_text',
           text: 'test',
         });
-        (mockNutService.typeText as jest.Mock).mockRejectedValue(
+        (mockNutService.typeText).mockRejectedValue(
           new Error('Keyboard error'),
         );
 
@@ -685,7 +683,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
           action: 'screenshot',
         });
         const mockBuffer = Buffer.from('test-data');
-        (mockNutService.screendump as jest.Mock).mockResolvedValue(mockBuffer);
+        (mockNutService.screendump).mockResolvedValue(mockBuffer);
 
         // Act
         await service.action(action);
@@ -709,7 +707,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
           action: 'screenshot',
         });
         const mockBuffer = Buffer.from('test-data');
-        (mockNutService.screendump as jest.Mock).mockResolvedValue(mockBuffer);
+        (mockNutService.screendump).mockResolvedValue(mockBuffer);
 
         // Act
         const result = await service.action(action);

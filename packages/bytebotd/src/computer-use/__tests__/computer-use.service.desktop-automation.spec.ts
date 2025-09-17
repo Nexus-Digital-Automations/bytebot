@@ -1,5 +1,6 @@
  
 /* eslint-env jest */
+ 
 /**
  * Computer Use Service - Advanced Desktop Automation Test Suite
  *
@@ -49,9 +50,9 @@ jest.mock('util', () => ({
   ...jest.requireActual('util'),
   promisify: jest.fn(
      
-    (fn: any) =>
+    (fn: (...args: unknown[]) => unknown) =>
        
-      (...args: any[]) =>
+      (...args: unknown[]) =>
          
         Promise.resolve(fn(...args)),
   ),
