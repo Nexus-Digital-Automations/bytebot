@@ -24,7 +24,11 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import { ParlantSecure, ParlantValidated, SecurityLevel } from '@bytebot/shared/server';
+import {
+  ParlantSecure,
+  ParlantValidated,
+  SecurityLevel,
+} from '@bytebot/shared/server';
 import { MetricsService } from './metrics.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 

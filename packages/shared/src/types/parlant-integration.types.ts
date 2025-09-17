@@ -372,6 +372,8 @@ export interface ParlantAuthConfig {
 export interface ParlantDecoratorOptions {
   /** Human-readable description of the function */
   description: string;
+  /** Intent or purpose of the function for AI validation */
+  intent?: string;
   /** Required security level */
   securityLevel?: SecurityLevel;
   /** Enable caching for this function */
