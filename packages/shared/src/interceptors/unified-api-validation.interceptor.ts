@@ -836,7 +836,7 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
   constructor(
     private readonly _reflector: Reflector,
     private readonly _configService: ConfigService,
-    @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
+    private readonly _cacheManager: Cache,
   ) {
     this.logger.log(
       "Unified API Validation Interceptor initialized with MAXIMUM Parlant integration",
@@ -856,10 +856,6 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
   /**
    * Main interceptor method providing unified validation across API types
    */
-  @ParlantValidation({
-    cacheable: true,
-    timeout: 300000, // 5 minutes
-  })
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     if (!this.validationConfig.enableUnifiedValidation) {
       return next.handle();
@@ -949,9 +945,6 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
   /**
    * Perform comprehensive unified validation across all API types
    */
-  @ParlantValidation({
-    cacheable: true,
-  })
   private async performUnifiedValidation(
     context: ExecutionContext,
     operationId: string,
@@ -1079,11 +1072,81 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
   // This file would continue with complete implementation of all validation methods
 
   private async initializeUnifiedApiContext(
-    _context: ExecutionContext,
-    _operationId: string,
+    context: ExecutionContext,
+    operationId: string,
   ): Promise<UnifiedApiContext> {
-    // Implementation for initializing unified API context
-    throw new Error("Method not implemented.");
+    const startTime = Date.now();
+
+    // Detect API type based on context
+    const apiType = this.detectApiType(context);
+    
+    // Extract request information
+    const requestContext = await this.extractRequestContext(context, operationId);
+    
+    // Determine operation information
+    const operation = this.extractOperationInfo(context, apiType);
+    
+    // Initialize performance metrics
+    const performanceMetrics: PerformanceMetrics = {
+      startTime: new Date(startTime),
+      cachingMetrics: {
+        cacheHit: false,
+      },
+      resourceUsage: {
+        cpuUsage: 0,
+        memoryUsage: 0,
+        networkUsage: 0,
+      },
+    };
+
+    // Initialize validation context
+    const validationContext: ValidationContext = {
+      validationId: operationId,
+      startTime: new Date(startTime),
+      validationRules: [],
+      validationResults: [],
+    };
+
+    // Initialize security context
+    const securityContext: SecurityContext = {
+      securityLevel: SecurityLevel._MEDIUM,
+      threatLevel: "low",
+      appliedMeasures: [],
+      securityScore: 0.5,
+    };
+
+    // Initialize compliance context
+    const complianceContext: ComplianceContext = {
+      requiredFrameworks: ["SOX", "GDPR"],
+      applicableRegulations: [],
+      complianceScore: 0.5,
+      auditRequirements: [],
+    };
+
+    // Initialize audit context
+    const auditContext: AuditContext = {
+      auditId: `audit-${operationId}`,
+      auditTrail: [{
+        timestamp: new Date(),
+        action: "validation_started",
+        resource: operation.name,
+        actor: "unified-api-interceptor",
+        outcome: "initiated",
+        details: { operationId, apiType },
+      }],
+      retentionPolicy: "30-days",
+    };
+
+    return {
+      apiType,
+      operation,
+      requestContext,
+      validationContext,
+      performanceMetrics,
+      securityContext,
+      complianceContext,
+      auditContext,
+    };
   }
 
   private generateValidationCacheKey(apiContext: UnifiedApiContext): string {
@@ -1163,7 +1226,7 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     // Preserve original error if available
     if (error instanceof Error) {
       enhancedError.stack = error.stack;
-      enhancedError.cause = error;
+      (enhancedError as any).cause = error;
     }
     
     return enhancedError;
@@ -1327,6 +1390,226 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     return (
       this.circuitBreakerState.isOpen || error instanceof ParlantTimeoutError
     );
+  }
+
+  /**
+   * Detect API type based on execution context
+   */
+  private detectApiType(context: ExecutionContext): ApiType {
+    const contextType = context.getType();
+    
+    if (contextType === 'http') {
+      const request = context.switchToHttp().getRequest<Request>();
+      const contentType = request.headers['content-type'] || '';
+      const path = request.path || request.url;
+      
+      // Check for GraphQL
+      if (path?.includes('/graphql') || contentType.includes('application/graphql')) {
+        return ApiType._GRAPHQL;
+      }
+      
+      // Default to REST for HTTP
+      return ApiType._REST;
+    }
+    
+    if (contextType === 'ws') {
+      return ApiType._WEBSOCKET;
+    }
+    
+    if (contextType === 'rpc') {
+      return ApiType._GRPC;
+    }
+    
+    // Default to REST
+    return ApiType._REST;
+  }
+
+  /**
+   * Extract request context from execution context
+   */
+  private async extractRequestContext(
+    context: ExecutionContext,
+    operationId: string,
+  ): Promise<UnifiedRequestContext> {
+    const contextType = context.getType();
+    
+    if (contextType === 'http') {
+      const request = context.switchToHttp().getRequest<Request>();
+      
+      // Extract client information
+      const clientInfo: ClientInformation = {
+        ipAddress: request.ip || request.socket.remoteAddress || 'unknown',
+        userAgent: request.headers['user-agent'],
+        sessionId: (request as any).sessionID || undefined,
+      };
+
+      // Extract payload information
+      const payload: RequestPayload = {
+        size: JSON.stringify(request.body || {}).length,
+        type: this.determinePayloadType(request.headers['content-type'] || ''),
+        structure: {
+          schemaValidation: {
+            valid: true,
+            errors: [],
+            warnings: [],
+            metadata: {},
+          },
+          fieldAnalysis: [],
+          complexityMetrics: {
+            overallComplexity: 1,
+            fieldCount: Object.keys(request.body || {}).length,
+            nestingDepth: 1,
+            arrayComplexity: 0,
+            objectComplexity: 1,
+          },
+          securityAnalysis: {
+            threatsDetected: [],
+            riskScore: 0.1,
+            recommendedMeasures: [],
+            encryptionRequirements: [],
+          },
+        },
+        sensitiveDataIndicators: [],
+        validationResults: [],
+      };
+
+      return {
+        requestId: operationId,
+        timestamp: new Date(),
+        client: clientInfo,
+        payload,
+        headers: request.headers as Record<string, string>,
+        parameters: { ...request.params, ...request.query },
+        metadata: {
+          method: request.method,
+          path: request.path || request.url,
+          protocol: request.protocol,
+        },
+      };
+    }
+    
+    // Default context for non-HTTP requests
+    return {
+      requestId: operationId,
+      timestamp: new Date(),
+      client: {
+        ipAddress: 'unknown',
+      },
+      payload: {
+        size: 0,
+        type: PayloadType._JSON,
+        structure: {
+          schemaValidation: { valid: true, errors: [], warnings: [], metadata: {} },
+          fieldAnalysis: [],
+          complexityMetrics: {
+            overallComplexity: 0,
+            fieldCount: 0,
+            nestingDepth: 0,
+            arrayComplexity: 0,
+            objectComplexity: 0,
+          },
+          securityAnalysis: {
+            threatsDetected: [],
+            riskScore: 0,
+            recommendedMeasures: [],
+            encryptionRequirements: [],
+          },
+        },
+        sensitiveDataIndicators: [],
+        validationResults: [],
+      },
+      headers: {},
+      parameters: {},
+      metadata: {},
+    };
+  }
+
+  /**
+   * Extract operation information from execution context
+   */
+  private extractOperationInfo(context: ExecutionContext, apiType: ApiType): ApiOperation {
+    const handler = context.getHandler();
+    const controllerClass = context.getClass();
+    
+    // Get method and controller names
+    const methodName = handler.name || 'unknown';
+    const controllerName = controllerClass.name || 'UnknownController';
+    
+    // Determine operation type based on API type and context
+    let operationType: OperationType;
+    let httpMethod: string | undefined;
+    
+    if (apiType === ApiType._REST && context.getType() === 'http') {
+      const request = context.switchToHttp().getRequest<Request>();
+      httpMethod = request.method;
+      
+      switch (httpMethod?.toUpperCase()) {
+        case 'GET':
+          operationType = OperationType._HTTP_GET;
+          break;
+        case 'POST':
+          operationType = OperationType._HTTP_POST;
+          break;
+        case 'PUT':
+          operationType = OperationType._HTTP_PUT;
+          break;
+        case 'DELETE':
+          operationType = OperationType._HTTP_DELETE;
+          break;
+        case 'PATCH':
+          operationType = OperationType._HTTP_PATCH;
+          break;
+        default:
+          operationType = OperationType._HTTP_GET;
+      }
+    } else if (apiType === ApiType._GRAPHQL) {
+      operationType = OperationType._QUERY; // Default, could be refined
+    } else {
+      operationType = OperationType._QUERY;
+    }
+
+    return {
+      name: `${controllerName}.${methodName}`,
+      type: operationType,
+      httpMethod,
+      description: `${apiType} operation ${methodName} on ${controllerName}`,
+      tags: [apiType, controllerName, methodName],
+      metadata: {
+        controllerName,
+        methodName,
+        apiType,
+      },
+    };
+  }
+
+  /**
+   * Determine payload type from content type header
+   */
+  private determinePayloadType(contentType: string): PayloadType {
+    if (contentType.includes('application/json')) {
+      return PayloadType._JSON;
+    }
+    if (contentType.includes('application/xml') || contentType.includes('text/xml')) {
+      return PayloadType._XML;
+    }
+    if (contentType.includes('application/x-www-form-urlencoded')) {
+      return PayloadType._FORM_DATA;
+    }
+    if (contentType.includes('multipart/form-data')) {
+      return PayloadType._MULTIPART;
+    }
+    if (contentType.includes('application/graphql')) {
+      return PayloadType._GRAPHQL_QUERY;
+    }
+    if (contentType.includes('application/octet-stream')) {
+      return PayloadType._BINARY;
+    }
+    if (contentType.includes('text/')) {
+      return PayloadType._TEXT;
+    }
+    
+    // Default to JSON
+    return PayloadType._JSON;
   }
 }
 

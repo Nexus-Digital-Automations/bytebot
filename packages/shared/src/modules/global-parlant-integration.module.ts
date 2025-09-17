@@ -24,12 +24,14 @@ import {
   MiddlewareConsumer,
   NestModule,
 } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
 import { ParlantIntegrationModule } from "./parlant-integration.module";
 import { UniversalParlantValidationMiddleware } from "../middleware/universal-parlant-validation.middleware";
 import { ParlantIntegrationService } from "../services/parlant-integration.service";
 import { ParlantValidationInterceptor } from "../interceptors/parlant-validation.interceptor";
 import { PerformanceModule } from "../performance/performance.module";
 import { MonitoringModule } from "../monitoring/monitoring.module";
+import { SecurityLevel } from "../types/parlant-integration.types";
 
 /**
  * Configuration for global Parlant integration deployment
@@ -77,7 +79,7 @@ export interface GlobalParlantIntegrationConfig {
   /** Security and compliance settings */
   security: {
     /** Default security level for endpoints without explicit validation */
-    defaultSecurityLevel: string;
+    defaultSecurityLevel: SecurityLevel;
 
     /** Enable risk-based security level assignment */
     enableRiskBasedAssignment: boolean;
@@ -107,7 +109,7 @@ const DEFAULT_CONFIG: GlobalParlantIntegrationConfig = {
     metricsInterval: 60000, // 1 minute
   },
   security: {
-    defaultSecurityLevel: "MEDIUM",
+    defaultSecurityLevel: SecurityLevel._MEDIUM,
     enableRiskBasedAssignment: true,
     enableComplianceReporting: true,
   },
@@ -175,12 +177,6 @@ export class GlobalParlantIntegrationModule implements NestModule {
             refreshTokenEnabled: true,
             sessionDuration: 3600000,
           },
-          monitoring: {
-            realTimeMonitoring: finalConfig.monitoring.enableMetrics,
-            logAllOperations: finalConfig.monitoring.enableAuditLogging,
-            alertOnViolations: finalConfig.monitoring.enableAlerting,
-            auditTrail: true,
-          },
           globalDecorators: {
             enabled: true,
             defaultSecurityLevel: finalConfig.security.defaultSecurityLevel,
@@ -201,8 +197,7 @@ export class GlobalParlantIntegrationModule implements NestModule {
           useFactory: (parlantService: ParlantIntegrationService) => {
             return new UniversalParlantValidationMiddleware(parlantService, {
               enabled: finalConfig.enableUniversalMiddleware,
-              defaultSecurityLevel: finalConfig.security
-                .defaultSecurityLevel as "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+              defaultSecurityLevel: finalConfig.security.defaultSecurityLevel,
               bypassDecoratedEndpoints: true,
               enableCaching: finalConfig.performance.enableCaching,
               cacheTtl: finalConfig.performance.cacheTtl,
@@ -238,10 +233,10 @@ export class GlobalParlantIntegrationModule implements NestModule {
           ? [
               {
                 provide: ParlantValidationInterceptor,
-                useFactory: (parlantService: ParlantIntegrationService) => {
-                  return new ParlantValidationInterceptor(parlantService);
+                useFactory: (reflector: Reflector, parlantService: ParlantIntegrationService) => {
+                  return new ParlantValidationInterceptor(reflector, parlantService);
                 },
-                inject: [ParlantIntegrationService],
+                inject: [Reflector, ParlantIntegrationService],
               },
             ]
           : []),
@@ -389,7 +384,7 @@ export class ParlantIntegrationUtils {
         metricsInterval: 30000,
       },
       security: {
-        defaultSecurityLevel: "LOW",
+        defaultSecurityLevel: SecurityLevel._LOW,
         enableRiskBasedAssignment: true,
         enableComplianceReporting: false,
       },
@@ -402,7 +397,7 @@ export class ParlantIntegrationUtils {
   static forMaximumSecurity(): Partial<GlobalParlantIntegrationConfig> {
     return {
       security: {
-        defaultSecurityLevel: "HIGH",
+        defaultSecurityLevel: SecurityLevel._HIGH,
         enableRiskBasedAssignment: true,
         enableComplianceReporting: true,
       },
@@ -439,7 +434,7 @@ export class ParlantIntegrationUtils {
         metricsInterval: 30000, // Very frequent monitoring
       },
       security: {
-        defaultSecurityLevel: "MEDIUM", // Balanced security for performance
+        defaultSecurityLevel: SecurityLevel._MEDIUM, // Balanced security for performance
         enableRiskBasedAssignment: true,
         enableComplianceReporting: false, // Disable for performance
       },

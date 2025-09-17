@@ -127,6 +127,9 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
   /** Active validation tracking for concurrency control */
   private readonly activeValidations = new Set<string>();
   
+  /** Merged configuration */
+  private readonly config: UniversalParlantConfig;
+  
   /** Default configuration */
   private readonly defaultConfig: UniversalParlantConfig = {
     enabled: true,
@@ -228,7 +231,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
   
   constructor(
     private readonly parlantService: ParlantIntegrationService,
-    private readonly config: UniversalParlantConfig = {},
+    config: Partial<UniversalParlantConfig> = {},
   ) {
     // Merge provided config with defaults
     this.config = { ...this.defaultConfig, ...config };
@@ -420,7 +423,6 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
         conversationId: `concurrent_limit_${metadata.operationId}`,
         reason: 'Concurrency limit reached',
         confidence: 0.5,
-        validationTimestamp: new Date(),
         metadata: {
           startTime: new Date(),
           endTime: new Date(),
@@ -455,7 +457,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
         userContext: {
           userId: metadata.userId || 'anonymous',
           roles: ['api_user'],
-          sessionId: req.sessionID || `universal_session_${Date.now()}`,
+          sessionId: (req as any).sessionID || `universal_session_${Date.now()}`,
           ipAddress: metadata.ipAddress,
           metadata: {
             timestamp: Date.now(),

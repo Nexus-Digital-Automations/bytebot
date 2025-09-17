@@ -778,7 +778,7 @@ export class ParlantIntegrationService
       this.config.authentication.jwtSecret,
       {
         expiresIn: this.config.authentication.tokenExpiration,
-      },
+      } as jwt.SignOptions,
     );
 
     const response: ParlantWebSocketMessage = {

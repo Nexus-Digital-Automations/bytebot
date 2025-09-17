@@ -656,7 +656,7 @@ export function getAllParlantMetadata(target: object, propertyKey: string) {
 
 /**
  * Alias for ParlantValidation decorator for backwards compatibility
- * 
+ *
  * @param config - Validation configuration
  * @returns Method decorator
  */
@@ -666,10 +666,10 @@ export function ParlantValidated(config: ParlantValidationConfig = {}) {
 
 /**
  * Security-focused Parlant validation decorator
- * 
+ *
  * @param securityLevel - Security level requirement
  * @returns Method decorator
- * 
+ *
  * @example
  * ```typescript
  * @ParlantSecure(SecurityLevel._HIGH)
@@ -678,7 +678,9 @@ export function ParlantValidated(config: ParlantValidationConfig = {}) {
  * }
  * ```
  */
-export function ParlantSecure(securityLevel: SecurityLevel = SecurityLevel._MEDIUM) {
+export function ParlantSecure(
+  securityLevel: SecurityLevel = SecurityLevel._MEDIUM,
+) {
   return ParlantValidation({
     enabled: true,
     mode: ValidationMode._INTERACTIVE,

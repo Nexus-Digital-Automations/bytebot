@@ -57,6 +57,15 @@ interface PendingValidation {
 }
 
 /**
+ * Pending Direct Validation Entry for API requests
+ */
+interface PendingDirectValidation {
+  resolve: (response: ParlantValidationResponse) => void;
+  reject: (error: Error) => void;
+  timestamp: Date;
+}
+
+/**
  * Connection Statistics
  */
 interface ConnectionStats {
@@ -95,6 +104,7 @@ export class ParlantWebSocketBridgeService
   // Message handling
   private messageQueue = new Map<string, QueuedMessage>();
   private pendingValidations = new Map<string, PendingValidation>();
+  private pendingDirectValidations = new Map<string, PendingDirectValidation>();
 
   // Configuration
   private config: ParlantWebSocketConfig = {
@@ -241,7 +251,11 @@ export class ParlantWebSocketBridgeService
         reject(
           new ParlantConnectionError(
             "Client WebSocket connection failed",
-            error,
+            {
+              message: error.message,
+              name: error.name,
+              stack: error.stack,
+            },
           ),
         );
       });
@@ -475,27 +489,47 @@ export class ParlantWebSocketBridgeService
   private handleValidationResponse(message: ParlantWebSocketMessage): void {
     const originalMessageId = message.payload.originalMessageId;
     const pending = this.pendingValidations.get(originalMessageId);
+    const pendingDirect = this.pendingDirectValidations.get(originalMessageId);
 
-    if (!pending) {
+    if (!pending && !pendingDirect) {
       this.logger.warn(
         `⚠️ No pending validation found for message: ${originalMessageId}`,
       );
       return;
     }
 
-    // Calculate latency
-    const latency = Date.now() - pending.timestamp.getTime();
-    this.updateAverageLatency(latency);
+    if (pending) {
+      // Handle bridge validation (client WebSocket)
+      const latency = Date.now() - pending.timestamp.getTime();
+      this.updateAverageLatency(latency);
 
-    // Forward response to client
-    this.sendToClient(pending.clientWs, message);
+      // Forward response to client
+      this.sendToClient(pending.clientWs, message);
 
-    // Clean up pending validation
-    this.pendingValidations.delete(originalMessageId);
+      // Clean up pending validation
+      this.pendingValidations.delete(originalMessageId);
 
-    this.logger.debug(
-      `✅ Validation response forwarded (${latency}ms): ${originalMessageId}`,
-    );
+      this.logger.debug(
+        `✅ Validation response forwarded (${latency}ms): ${originalMessageId}`,
+      );
+    }
+
+    if (pendingDirect) {
+      // Handle direct validation (Promise resolution)
+      const latency = Date.now() - pendingDirect.timestamp.getTime();
+      this.updateAverageLatency(latency);
+
+      // Resolve the promise with the response
+      const response = message.payload as ParlantValidationResponse;
+      pendingDirect.resolve(response);
+
+      // Clean up pending validation
+      this.pendingDirectValidations.delete(originalMessageId);
+
+      this.logger.debug(
+        `✅ Direct validation resolved (${latency}ms): ${originalMessageId}`,
+      );
+    }
   }
 
   /**
@@ -941,18 +975,18 @@ export class ParlantWebSocketBridgeService
   ): Promise<ParlantValidationResponse> {
     const message: ParlantWebSocketMessage = {
       type: ParlantMessageType._VALIDATION_REQUEST,
-      payload: request,
+      payload: request as Record<string, unknown>,
       messageId: `validation_${request.operationId}`,
       timestamp: new Date(),
     };
 
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        this.pendingValidations.delete(message.messageId);
+        this.pendingDirectValidations.delete(message.messageId);
         reject(new Error("Validation request timeout"));
       }, 30000);
 
-      this.pendingValidations.set(message.messageId, {
+      this.pendingDirectValidations.set(message.messageId, {
         resolve: (response: ParlantValidationResponse) => {
           clearTimeout(timeout);
           resolve(response);

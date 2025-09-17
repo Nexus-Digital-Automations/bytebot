@@ -995,7 +995,8 @@ export class ParlantEnhancedRBACGuard
     authContext: ConversationalAuthorizationContext,
   ): Promise<ConversationalAuthorizationResult | null> {
     const cacheKey = this.buildAuthorizationCacheKey(authContext);
-    const result = await this.cacheManager.get<ConversationalAuthorizationResult>(cacheKey);
+    const result =
+      await this.cacheManager.get<ConversationalAuthorizationResult>(cacheKey);
     return result || null;
   }
 

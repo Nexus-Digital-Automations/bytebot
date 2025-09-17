@@ -135,12 +135,8 @@ export class ParlantValidationInterceptor implements NestInterceptor {
 
   constructor(
     private readonly _reflector: Reflector,
-    @Optional()
-    @Inject("PARLANT_INTEGRATION_SERVICE")
-    private readonly _parlantService?: ParlantIntegrationService,
-    @Optional()
-    @Inject("PARLANT_INTERCEPTOR_CONFIG")
-    config?: Partial<ParlantValidationInterceptorConfig>,
+    @Optional() @Inject("PARLANT_INTEGRATION_SERVICE") private readonly _parlantService?: ParlantIntegrationService,
+    @Optional() @Inject("PARLANT_INTERCEPTOR_CONFIG") config?: Partial<ParlantValidationInterceptorConfig>,
   ) {
     this.config = { ...DEFAULT_CONFIG, ...config };
 
@@ -465,7 +461,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
         ipAddress: (request as any).requestContext?.clientIp || "unknown",
         metadata: (request as any).userContext?.metadata || {},
       },
-      securityLevel: "MEDIUM" as any,
+      securityLevel: SecurityLevel._MEDIUM,
       timeout: 30000,
     };
   }

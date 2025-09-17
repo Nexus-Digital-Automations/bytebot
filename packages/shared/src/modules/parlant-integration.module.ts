@@ -10,8 +10,9 @@
  * @author AIgent Integration Team
  */
 
-import { Module, DynamicModule, Provider } from "@nestjs/common";
+import { Module, DynamicModule, Provider, Type, ForwardReference } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ModuleMetadata } from "@nestjs/common/interfaces";
 import { ParlantIntegrationService } from "../services/parlant-integration.service";
 import { ParlantWebSocketBridgeService } from "../services/parlant-websocket-bridge.service";
 import { ParlantAuthBridgeService } from "../services/parlant-auth-bridge.service";

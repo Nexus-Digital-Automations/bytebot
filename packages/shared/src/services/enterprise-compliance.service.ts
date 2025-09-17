@@ -1331,7 +1331,7 @@ export class EnterpriseComplianceService {
       // Initialize validation result
       const validationResult: ComplianceValidationResult = {
         validationId: operationId,
-        overallStatus: ComplianceStatus.UNDER_REVIEW,
+        overallStatus: ComplianceStatus._UNDER_REVIEW,
         overallScore: 0,
         frameworkResults: [],
         violations: [],
@@ -1391,8 +1391,8 @@ export class EnterpriseComplianceService {
       this.finalizeComplianceValidation(validationResult);
 
       // Cache successful results
-      if (validationResult.overallStatus === ComplianceStatus.COMPLIANT) {
-        await this.cacheComplianceResult(cacheKey, validationResult);
+      if (validationResult.overallStatus === ComplianceStatus._COMPLIANT) {
+        await this.getCachedComplianceResult(cacheKey, validationResult);
       }
 
       const totalTime = Date.now() - startTime;

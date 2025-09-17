@@ -16,10 +16,11 @@
  * @author Parlant Integration Research Agent #3
  */
 
-import { Module, DynamicModule } from "@nestjs/common";
+import { Module, DynamicModule, Type, ForwardReference, Provider } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { CacheModule } from "@nestjs/cache-manager";
+import { ModuleMetadata } from "@nestjs/common/interfaces";
 
 // Import Parlant core services
 import { ParlantIntegrationService } from "../services/parlant-integration.service";
@@ -123,20 +124,20 @@ export interface ParlantAuthModuleOptions {
 /**
  * Async configuration options for Parlant Authentication Module
  */
-export interface ParlantAuthModuleAsyncOptions {
+export interface ParlantAuthModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
   /** Imports for dependency injection */
-  imports?: unknown[];
+  imports?: Array<Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference>;
 
   /** Providers for dependency injection */
-  providers?: unknown[];
+  providers?: Provider[];
 
   /** Factory function to create options */
   useFactory?: (
-    ..._args: unknown[]
+    ...args: any[]
   ) => Promise<ParlantAuthModuleOptions> | ParlantAuthModuleOptions;
 
   /** Providers to inject into factory function */
-  inject?: unknown[];
+  inject?: any[];
 }
 
 /**
@@ -318,9 +319,9 @@ export class ParlantAuthModule {
         // JWT module with async configuration
         JwtModule.registerAsync({
           imports: options.imports,
-          useFactory: async (..._args: unknown[]) => {
+          useFactory: async (...args: any[]) => {
             const parlantOptions = options.useFactory
-              ? await options.useFactory(..._args)
+              ? await options.useFactory(...args)
               : {};
             const mergedOptions = { ...DEFAULT_OPTIONS, ...parlantOptions };
 
@@ -340,9 +341,9 @@ export class ParlantAuthModule {
         // Cache module with async configuration
         CacheModule.registerAsync({
           imports: options.imports,
-          useFactory: async (..._args: unknown[]) => {
+          useFactory: async (...args: any[]) => {
             const parlantOptions = options.useFactory
-              ? await options.useFactory(..._args)
+              ? await options.useFactory(...args)
               : {};
             const mergedOptions = { ...DEFAULT_OPTIONS, ...parlantOptions };
 
@@ -356,12 +357,12 @@ export class ParlantAuthModule {
       ],
       providers: [
         // Async configuration providers
-        ...(options.providers || []),
+        ...(options.providers || [] as Provider[]),
 
         // Options provider
         {
           provide: "PARLANT_AUTH_OPTIONS",
-          useFactory: options.useFactory,
+          useFactory: options.useFactory || (() => ({})),
           inject: options.inject || [],
         },
 
@@ -377,9 +378,9 @@ export class ParlantAuthModule {
         // Dynamic configuration providers
         {
           provide: "PARLANT_RISK_THRESHOLDS",
-          useFactory: async (..._args: unknown[]) => {
+          useFactory: async (...args: any[]) => {
             const parlantOptions = options.useFactory
-              ? await options.useFactory(..._args)
+              ? await options.useFactory(...args)
               : {};
             const mergedOptions = { ...DEFAULT_OPTIONS, ...parlantOptions };
             return mergedOptions.riskAssessment?.thresholds;
@@ -389,9 +390,9 @@ export class ParlantAuthModule {
 
         {
           provide: "PARLANT_MFA_CONFIG",
-          useFactory: async (..._args: unknown[]) => {
+          useFactory: async (...args: any[]) => {
             const parlantOptions = options.useFactory
-              ? await options.useFactory(..._args)
+              ? await options.useFactory(...args)
               : {};
             const mergedOptions = { ...DEFAULT_OPTIONS, ...parlantOptions };
             return mergedOptions.mfa;
@@ -401,9 +402,9 @@ export class ParlantAuthModule {
 
         {
           provide: "PARLANT_CONVERSATION_CONFIG",
-          useFactory: async (..._args: unknown[]) => {
+          useFactory: async (...args: any[]) => {
             const parlantOptions = options.useFactory
-              ? await options.useFactory(..._args)
+              ? await options.useFactory(...args)
               : {};
             const mergedOptions = { ...DEFAULT_OPTIONS, ...parlantOptions };
             return mergedOptions.conversation;
@@ -466,8 +467,8 @@ export class ParlantAuthModule {
 
     return {
       module: ParlantAuthModule,
-      providers,
-      exports,
+      providers: providers as Provider[],
+      exports: exports as Array<string | symbol | Type<any> | DynamicModule | Provider>,
     };
   }
 }

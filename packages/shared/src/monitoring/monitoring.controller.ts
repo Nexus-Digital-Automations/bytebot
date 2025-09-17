@@ -59,17 +59,17 @@ export class MonitoringController {
 
     try {
       const startTime = Date.now();
-      const metricsOutput = this.metricsService.generatePrometheusMetrics();
+      const metricsOutput = this._metricsService.generatePrometheusMetrics();
       const responseTime = Date.now() - startTime;
 
       // Record metrics endpoint access
-      this.metricsService.incrementCounter('prometheus_metrics_requests_total');
-      this.metricsService.observeHistogram('prometheus_metrics_response_time_seconds', responseTime / 1000);
+      this._metricsService.incrementCounter('prometheus_metrics_requests_total');
+      this._metricsService.observeHistogram('prometheus_metrics_response_time_seconds', responseTime / 1000);
 
       this.logger.debug(`[${operationId}] Prometheus metrics generated successfully`, {
         responseTimeMs: responseTime,
         outputSize: metricsOutput.length,
-        metricsCount: this.metricsService.getMetricsSummary(),
+        metricsCount: this._metricsService.getMetricsSummary(),
       });
 
       response.send(metricsOutput);
@@ -80,7 +80,7 @@ export class MonitoringController {
         stack: error instanceof Error ? error.stack : undefined,
       });
 
-      this.metricsService.incrementCounter('prometheus_metrics_errors_total');
+      this._metricsService.incrementCounter('prometheus_metrics_errors_total');
       response.status(500).send('# Error generating metrics\n');
     }
   }
@@ -90,7 +90,7 @@ export class MonitoringController {
    */
   @Get('metrics/summary')
   async getMetricsSummary(): Promise<{
-    summary: ReturnType<typeof this.metricsService.getMetricsSummary>;
+    summary: ReturnType<typeof this._metricsService.getMetricsSummary>;
     timestamp: string;
     operationId: string;
   }> {
@@ -98,7 +98,7 @@ export class MonitoringController {
     this.logger.debug(`[${operationId}] Metrics summary endpoint accessed`);
 
     try {
-      const summary = this.metricsService.getMetricsSummary();
+      const summary = this._metricsService.getMetricsSummary();
 
       this.logger.debug(`[${operationId}] Metrics summary generated`, { summary });
 
@@ -136,7 +136,7 @@ export class MonitoringController {
     });
 
     try {
-      let history = this.metricsService.getHealthCheckHistory(serviceName);
+      let history = this._metricsService.getHealthCheckHistory(serviceName);
       
       // Apply limit if specified
       const limitNum = limit ? parseInt(limit, 10) : undefined;

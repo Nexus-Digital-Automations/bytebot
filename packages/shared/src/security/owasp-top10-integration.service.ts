@@ -453,7 +453,7 @@ export class OWASPTop10IntegrationService {
       };
 
       const validationResponse =
-        await this.parlantIntegration.validateFunctionExecution(
+        await this._parlantIntegration.validateFunctionExecution(
           validationRequest,
         );
       this.validationCount++;
