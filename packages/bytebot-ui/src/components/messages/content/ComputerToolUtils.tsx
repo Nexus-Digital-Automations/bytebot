@@ -125,10 +125,8 @@ function safeTypeGuard<T>(
     return Boolean(result);
   } catch (error: unknown) {
     // Type-safe error handling with detailed logging
-    const _errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
     // Debug logging removed for ESLint compliance
-    // Error details: _errorMessage, blockType: typeof block
+    // Error details: error instanceof Error ? error.message : "Unknown error", blockType: typeof block
     return false;
   }
 }
@@ -158,10 +156,8 @@ function hasValidInput(
     );
   } catch (error: unknown) {
     // Type-safe error logging
-    const _errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
     // Debug logging removed for ESLint compliance
-    // Error details: _errorMessage, blockType: typeof block
+    // Error details: error instanceof Error ? error.message : "Unknown error", blockType: typeof block
     return false;
   }
 }
@@ -202,10 +198,8 @@ function getButtonValue(block: unknown): string | undefined {
     return undefined;
   } catch (error: unknown) {
     // Type-safe error logging
-    const _errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
     // Debug logging removed for ESLint compliance
-    // Error details: _errorMessage, blockType: typeof block
+    // Error details: error instanceof Error ? error.message : "Unknown error", blockType: typeof block
     return undefined;
   }
 }
@@ -395,10 +389,8 @@ export function getLabel(block: ComputerToolUseContentBlock | unknown): string {
         }
       } catch (error: unknown) {
         // Type-safe error handling
-        const _errorMessage =
-          error instanceof Error ? error.message : "Unknown error";
         // Debug logging removed for ESLint compliance
-        // Click processing failed: errorMessage, blockName
+        // Click processing failed: error instanceof Error ? error.message : "Unknown error", blockName
       }
     }
     return "Click";

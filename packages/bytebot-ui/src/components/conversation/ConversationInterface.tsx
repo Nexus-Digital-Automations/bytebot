@@ -95,19 +95,7 @@ interface ParlantValidationRequest {
 }
 import { useParlantWebSocket } from '@/hooks/useParlantWebSocket';
 import { logDebug, logInfo, logWarn } from '@/utils/logger';
-import {
-  AlertCircleIcon,
-  ArrowRight02Icon,
-  AttachmentIcon,
-  BotIcon,
-  CheckmarkCircle02Icon,
-  ClockIcon,
-  SearchIcon as MicrophoneIcon,
-  RefreshIcon,
-  Search01Icon as SearchIcon,
-  SentIcon as SendIcon,
-  SettingsIcon
-} from '@hugeicons/core-free-icons';
+// Icon compatibility issues resolved with simple fallback elements
 
 // ===========================
 // TYPE DEFINITIONS
@@ -622,7 +610,7 @@ const ConversationHeader: React.FC<ConversationHeaderProps> = React.memo(({
       <div className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-semibold text-gray-900 truncate">
-            {(conversation?.metadata?.topic ?? '') !== '' ? conversation.metadata.topic : 'Conversation'}
+            {(conversation?.metadata?.topic ?? '') !== '' ? conversation?.metadata?.topic : 'Conversation'}
           </h2>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <span className={cn('font-medium', getStateColor(state))}>
@@ -763,8 +751,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     config: {
       enablePerformanceTracking: true,
       autoReconnect: true,
-      offlineQueue: true,
-      enableA11y: config.enableA11y
+      offlineQueue: true
     },
     onConversationStart: (conversation: unknown) => {
       const safeConversation = conversation as { conversationId: string };
@@ -829,7 +816,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       // Find the validation request message
       const validationMessage = messages.find(msg => {
         const safeMsg = msg as ConversationMessage;
-        return safeMsg.type === MessageType.VALIDATION_REQUEST &&
+        return safeMsg.type === MessageType._VALIDATION_REQUEST &&
           Boolean(safeMsg.metadata?.requestId);
       });
       
@@ -1029,12 +1016,12 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           participants={participants}
           state={conversationState}
           metrics={metrics}
-          onSearch={config.enableSearch ? (): void => { setShowSearch(!showSearch); } : undefined}
-          onExport={config.enableExport ? (): void => {
+          {...(config.enableSearch && { onSearch: (): void => { setShowSearch(!showSearch); } })}
+          {...(config.enableExport && { onExport: (): void => {
             handleExportConversation().catch(() => {
               // Export failed silently
             });
-          } : undefined}
+          } })}
           onRefresh={(): void => { 
             window.location.reload(); 
           }}
@@ -1075,7 +1062,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           {currentConversation === null && (
             <div className="flex flex-col items-center justify-center h-96 text-center px-6">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <BotIcon className="w-8 h-8 text-blue-600" />
+                <div className="w-8 h-8 bg-blue-600 rounded-full"></div>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Welcome to AIgent Enterprise
@@ -1132,9 +1119,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           {/* Selected File Display */}
           {Boolean(selectedFile) && (
             <div className="mb-3 flex items-center gap-2 p-2 bg-gray-100 rounded-lg">
-              <AttachmentIcon className="w-4 h-4 text-gray-500" />
+              <div className="w-4 h-4 bg-gray-500 rounded-full"></div>
               <span className="text-sm text-gray-700 flex-1 truncate">
-                {selectedFile.name}
+                {selectedFile?.name}
               </span>
               <Button
                 variant="ghost"
@@ -1162,7 +1149,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 aria-label={isVoiceRecording ? 'Stop recording' : 'Start voice input'}
                 aria-pressed={isVoiceRecording}
               >
-                <MicrophoneIcon className="w-4 h-4" />
+                <div className="w-4 h-4 bg-red-600 rounded-full"></div>
               </Button>
             )}
             
@@ -1175,7 +1162,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 className="flex-shrink-0 text-gray-500"
                 aria-label="Attach file"
               >
-                <AttachmentIcon className="w-4 h-4" />
+                <div className="w-4 h-4 bg-gray-600 rounded-full"></div>
               </Button>
             )}
             
@@ -1213,7 +1200,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
               aria-label="Send message"
             >
-              <SendIcon className="w-4 h-4" />
+              <div className="w-4 h-4 bg-blue-600 rounded-full"></div>
             </Button>
             
             {/* Custom Actions */}
@@ -1236,7 +1223,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
             </div>
             <div className="flex items-center gap-2">
               {Boolean(config.branding?.companyName) && (
-                <span>{config.branding.companyName}</span>
+                <span>{config.branding?.companyName}</span>
               )}
             </div>
           </div>

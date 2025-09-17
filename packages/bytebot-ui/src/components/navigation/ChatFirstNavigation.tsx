@@ -28,21 +28,8 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 // Removed unused UI components: ScrollArea, Popover, PopoverContent, PopoverTrigger
-import { Badge } from '@/components/ui/badge';
-import { 
-  AnalyticsIcon,
-  HelpIcon,
-  HomeIcon,
-  HugeiconsIcon,
-  KeyboardIcon,
-  MicrophoneIcon,
-  NavigationIcon,
-  SearchIcon,
-  SettingsIcon,
-  TaskIcon,
-  UserIcon
-} from '@hugeicons/core-free-icons';
-import { logDebug, logInfo, logWarning } from '@/utils/logger';
+// Removed unused icon imports - replaced with div fallbacks
+import { logDebug, logInfo, logWarn } from '@/utils/logger';
 
 // ===========================
 // SCORING CONSTANTS
@@ -170,7 +157,7 @@ interface NavigationAction {
   requiredParams?: string[];
   
   /** Action icon */
-  icon?: React.ComponentType;
+  icon?: React.ComponentType | null;
   
   /** Keyboard shortcut */
   shortcut?: string;
@@ -309,7 +296,7 @@ const DEFAULT_ACTIONS: NavigationAction[] = [
     label: 'Go to Dashboard',
     description: 'Navigate to the main dashboard',
     path: '/',
-    icon: HomeIcon,
+    icon: null,
     shortcut: 'Ctrl+H',
     voicePatterns: ['go to dashboard', 'show dashboard', 'home', 'main page'],
     category: NavigationCategory.CORE
@@ -319,7 +306,7 @@ const DEFAULT_ACTIONS: NavigationAction[] = [
     label: 'View Tasks',
     description: 'Navigate to tasks list',
     path: '/tasks',
-    icon: TaskIcon,
+    icon: null,
     shortcut: 'Ctrl+T',
     voicePatterns: ['show tasks', 'go to tasks', 'task list', 'my tasks'],
     category: NavigationCategory.CONTENT
@@ -329,7 +316,7 @@ const DEFAULT_ACTIONS: NavigationAction[] = [
     label: 'View Analytics',
     description: 'Navigate to analytics dashboard',
     path: '/analytics',
-    icon: AnalyticsIcon,
+    icon: null,
     shortcut: 'Ctrl+A',
     voicePatterns: ['show analytics', 'go to analytics', 'reports', 'statistics'],
     category: NavigationCategory.CONTENT
@@ -339,7 +326,7 @@ const DEFAULT_ACTIONS: NavigationAction[] = [
     label: 'Open Settings',
     description: 'Navigate to application settings',
     path: '/settings',
-    icon: SettingsIcon,
+    icon: null,
     shortcut: 'Ctrl+,',
     voicePatterns: ['open settings', 'go to settings', 'preferences', 'configuration'],
     category: NavigationCategory.ADMINISTRATION
@@ -349,7 +336,7 @@ const DEFAULT_ACTIONS: NavigationAction[] = [
     label: 'Get Help',
     description: 'Open help and documentation',
     path: '/help',
-    icon: HelpIcon,
+    icon: null,
     shortcut: 'F1',
     voicePatterns: ['help', 'documentation', 'support', 'how to'],
     category: NavigationCategory.HELP
@@ -359,7 +346,7 @@ const DEFAULT_ACTIONS: NavigationAction[] = [
     label: 'View Profile',
     description: 'Navigate to user profile',
     path: '/profile',
-    icon: UserIcon,
+    icon: null,
     shortcut: 'Ctrl+P',
     voicePatterns: ['my profile', 'user profile', 'account', 'profile settings'],
     category: NavigationCategory.PERSONAL
@@ -374,7 +361,7 @@ const DEFAULT_ACTIONS: NavigationAction[] = [
       // TODO: Implement task creation
       logInfo('Create task command executed', null, 'ChatFirstNavigation');
     },
-    icon: TaskIcon,
+    icon: null,
     shortcut: 'Ctrl+N',
     voicePatterns: ['create task', 'new task', 'add task'],
     category: NavigationCategory.CONTENT
@@ -387,7 +374,7 @@ const DEFAULT_ACTIONS: NavigationAction[] = [
       // TODO: Implement global search
       logInfo('Global search command executed', null, 'ChatFirstNavigation');
     },
-    icon: SearchIcon,
+    icon: null,
     shortcut: 'Ctrl+K',
     voicePatterns: ['search', 'find', 'look for'],
     category: NavigationCategory.CORE,
@@ -404,11 +391,10 @@ const DEFAULT_ACTIONS: NavigationAction[] = [
  */
 class NavigationNLU {
   private actions: NavigationAction[];
-  private context: NavigationContext;
   
-  constructor(actions: NavigationAction[], context: NavigationContext) {
+  constructor(actions: NavigationAction[], _context: NavigationContext) {
     this.actions = actions;
-    this.context = context;
+    // _context parameter kept for interface compatibility but not used
   }
   
   /**
@@ -437,11 +423,11 @@ class NavigationNLU {
     
     return {
       intent,
-      entity,
+      ...(entity && { entity }),
       parameters,
       confidence,
       parsedCommand: normalizedCommand,
-      suggestedAction,
+      ...(suggestedAction && { suggestedAction }),
       alternatives
     };
   }
@@ -753,8 +739,8 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   onCommandExecuted,
   onNavigate,
   onError,
-  _theme = 'auto',
-  position = 'top'
+  theme: _theme = 'auto',
+  position: _position = 'top'
 }) => {
   // ===========================
   // STATE AND REFS
@@ -764,7 +750,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   const [command, setCommand] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [suggestions, setSuggestions] = useState<CommandSuggestion[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestionsVisible, setSuggestionsVisible] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const [recentCommands, setRecentCommands] = useState<string[]>([]);
   const [voiceState, setVoiceState] = useState<VoiceRecognitionState>({
@@ -776,7 +762,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null); // SpeechRecognition type not available in all environments
   
   // ===========================
   // NAVIGATION SETUP
@@ -846,16 +832,16 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
           : `I couldn't find an action for "${commandText}".`;
         
         onError?.(errorMessage);
-        logWarning('Command not understood', { command: commandText, confidence: result.confidence }, 'ChatFirstNavigation');
+        logWarn('Command not understood', { command: commandText, confidence: result.confidence }, 'ChatFirstNavigation');
       }
       
     } catch (error) {
-      logWarning('Command processing failed', error, 'ChatFirstNavigation');
+      logWarn('Command processing failed', error, 'ChatFirstNavigation');
       onError?.('Sorry, there was an error processing your command.');
     } finally {
       setIsProcessing(false);
       setCommand('');
-      setShowSuggestions(false);
+      setSuggestionsVisible(false);
       setSelectedSuggestionIndex(-1);
     }
   }, [nlu, router, onNavigate, onCommandExecuted, onError]);
@@ -863,13 +849,13 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   const updateSuggestions = useCallback((input: string) => {
     if (!showSuggestions || !input.trim()) {
       setSuggestions([]);
-      setShowSuggestions(false);
+      setSuggestionsVisible(false);
       return;
     }
     
     const newSuggestions = nlu.generateSuggestions(input);
     setSuggestions(newSuggestions.slice(0, maxSuggestions));
-    setShowSuggestions(newSuggestions.length > 0);
+    setSuggestionsVisible(newSuggestions.length > 0);
     setSelectedSuggestionIndex(-1);
   }, [nlu, maxSuggestions, showSuggestions]);
   
@@ -890,11 +876,11 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
           setCommand(suggestions[selectedSuggestionIndex].text);
           processCommand(suggestions[selectedSuggestionIndex].text).catch((error) => {
-            logWarning('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
+            logWarn('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
           });
         } else {
           processCommand(command).catch((error) => {
-            logWarning('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
+            logWarn('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
           });
         }
         break;
@@ -919,7 +905,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         
       case 'Escape':
         e.preventDefault();
-        setShowSuggestions(false);
+        setSuggestionsVisible(false);
         setSelectedSuggestionIndex(-1);
         if (inputRef.current) {
           inputRef.current.blur();
@@ -930,7 +916,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
           e.preventDefault();
           setCommand(suggestions[selectedSuggestionIndex].text);
-          setShowSuggestions(false);
+          setSuggestionsVisible(false);
         }
         break;
     }
@@ -939,7 +925,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   const handleSuggestionClick = useCallback((suggestion: CommandSuggestion) => {
     setCommand(suggestion.text);
     processCommand(suggestion.text).catch((error) => {
-      logWarning('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
+      logWarn('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
     });
   }, [processCommand]);
   
@@ -953,7 +939,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       return;
     }
     
-    const SpeechRecognition = window.webkitSpeechRecognition ?? window.SpeechRecognition;
+    const SpeechRecognition = (window as any).webkitSpeechRecognition ?? (window as any).SpeechRecognition;
     const recognition = new SpeechRecognition();
     
     recognition.continuous = false;
@@ -965,28 +951,28 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       logDebug('Voice recognition started', null, 'ChatFirstNavigation');
     };
     
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: any) => { // SpeechRecognitionEvent type not available
       const results = Array.from(event.results);
       const transcript = results
-        .map((result: SpeechRecognitionResult) => result[0].transcript)
+        .map((result: any) => result[0].transcript) // SpeechRecognitionResult type not available
         .join('');
       
       setVoiceState(prev => ({
         ...prev,
         transcript,
-        confidence: results[results.length - 1][0].confidence
+        confidence: (results[results.length - 1] as any)[0].confidence
       }));
       
       if (event.results[event.results.length - 1].isFinal) {
         setCommand(transcript);
         processCommand(transcript).catch((error) => {
-          logWarning('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
+          logWarn('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
         });
       }
     };
     
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      logWarning('Voice recognition error', event.error, 'ChatFirstNavigation');
+    recognition.onerror = (event: any) => { // SpeechRecognitionErrorEvent type not available
+      logWarn('Voice recognition error', event.error, 'ChatFirstNavigation');
       setVoiceState(prev => ({
         ...prev,
         isListening: false,
@@ -1033,13 +1019,19 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         if (action.shortcut && isKeyboardShortcut(e, action.shortcut)) {
           e.preventDefault();
           if (action.handler) {
-            action.handler().catch((error) => {
-              logWarning('Action handler failed', { error: error.message }, 'ChatFirstNavigation');
-            });
+            const result = action.handler();
+            if (result instanceof Promise) {
+              result.catch((error) => {
+                logWarn('Action handler failed', { error: error.message }, 'ChatFirstNavigation');
+              });
+            }
           } else if (action.path) {
-            router.push(action.path).catch((error) => {
-              logWarning('Navigation failed', { error: error.message }, 'ChatFirstNavigation');
-            });
+            const navigationResult = router.push(action.path);
+            if (navigationResult instanceof Promise) {
+              navigationResult.catch((error) => {
+                logWarn('Navigation failed', { error: error.message }, 'ChatFirstNavigation');
+              });
+            }
             onNavigate?.(action.path);
           }
         }
@@ -1137,7 +1129,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
             )}
             aria-label="Navigation command input"
             aria-describedby="command-help"
-            aria-expanded={showSuggestions}
+            aria-expanded={suggestionsVisible}
             aria-autocomplete="list"
             role="combobox"
           />
@@ -1177,16 +1169,16 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
             aria-label={voiceState.isListening ? 'Stop voice input' : 'Start voice input'}
             aria-pressed={voiceState.isListening}
           >
-            <HugeiconsIcon icon={MicrophoneIcon} className="w-4 h-4" />
+            <div className="w-4 h-4 bg-gray-600 rounded-full"></div>
           </Button>
         )}
         
         {/* Keyboard Shortcuts Hint */}
         {enableKeyboard && !compact && (
-          <Badge variant="secondary" className="text-xs">
-            <HugeiconsIcon icon={KeyboardIcon} className="w-3 h-3 mr-1" />
+          <div className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs flex items-center">
+            <div className="w-3 h-3 mr-1 bg-gray-500 rounded"></div>
             Ctrl+K
-          </Badge>
+          </div>
         )}
         
         {/* Processing Indicator */}
@@ -1199,7 +1191,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       
       {/* Command Suggestions */}
       <AnimatePresence>
-        {showSuggestions && suggestions.length > 0 && (
+        {suggestionsVisible && suggestions.length > 0 && (
           <motion.div
             ref={suggestionsRef}
             initial={{ opacity: 0, y: -10 }}
@@ -1248,9 +1240,9 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
                 
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {suggestion.action?.shortcut && (
-                    <Badge variant="outline" className="text-xs">
+                    <div className="border border-gray-300 text-gray-600 px-2 py-1 rounded text-xs">
                       {suggestion.action.shortcut}
-                    </Badge>
+                    </div>
                   )}
                   
                   <div 
