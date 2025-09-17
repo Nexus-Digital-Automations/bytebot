@@ -61,25 +61,25 @@ export interface ParlantIntegrationModuleOptions {
 /**
  * Async configuration options
  */
-export interface ParlantIntegrationModuleAsyncOptions {
+export interface ParlantIntegrationModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
   /** Configuration factory function */
   useFactory?: (
-    ..._args: unknown[]
+    ...args: any[]
   ) =>
     | ParlantIntegrationModuleOptions
     | Promise<ParlantIntegrationModuleOptions>;
 
   /** Dependencies to inject into useFactory */
-  inject?: unknown[];
+  inject?: any[];
 
   /** Imports for configuration dependencies */
-  imports?: unknown[];
+  imports?: Array<Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference>;
 
   /** Use existing provider */
-  useExisting?: unknown;
+  useExisting?: Type<any>;
 
   /** Use class for configuration */
-  useClass?: unknown;
+  useClass?: Type<any>;
 }
 
 /**
@@ -115,7 +115,7 @@ export class ParlantIntegrationModule {
 
     return {
       module: ParlantIntegrationModule,
-      imports: options.imports || [],
+      imports: options.imports || [] as Array<Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference>,
       providers,
       exports: [
         ParlantIntegrationService,
@@ -234,7 +234,7 @@ export class ParlantIntegrationModule {
     if (options.useFactory) {
       return {
         provide: "PARLANT_CONFIG",
-        useFactory: async (...args: unknown[]) => {
+        useFactory: async (...args: any[]) => {
           const moduleOptions = await options.useFactory!(...args);
           return this.createConfiguration(moduleOptions);
         },
@@ -245,7 +245,7 @@ export class ParlantIntegrationModule {
     if (options.useClass) {
       return {
         provide: "PARLANT_CONFIG",
-        useFactory: async (configService: unknown) => {
+        useFactory: async (configService: any) => {
           const moduleOptions = await configService.createParlantConfig();
           return this.createConfiguration(moduleOptions);
         },
@@ -256,7 +256,7 @@ export class ParlantIntegrationModule {
     if (options.useExisting) {
       return {
         provide: "PARLANT_CONFIG",
-        useFactory: async (configService: unknown) => {
+        useFactory: async (configService: any) => {
           const moduleOptions = await configService.createParlantConfig();
           return this.createConfiguration(moduleOptions);
         },
@@ -536,10 +536,10 @@ export function ParlantEnabled(options?: {
   securityLevel?: string;
   cacheResponses?: boolean;
 }) {
-  return function <T extends { new (..._args: unknown[]): Record<string, unknown> }>(constructor: T) {
+  return function <T extends { new (...args: any[]): Record<string, any> }>(constructor: T) {
     return class extends constructor {
-      constructor(..._args: unknown[]) {
-        super(..._args);
+      constructor(...args: any[]) {
+        super(...args);
 
         // Mark as Parlant-enabled for automatic function wrapping
         Object.defineProperty(this, "__parlantEnabled", {

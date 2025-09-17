@@ -158,9 +158,7 @@ export class ParlantMonitoringController {
    */
   @Post('query')
   @HttpCode(HttpStatus.OK)
-  @ParlantSecure(
-    'Natural language monitoring query processing with intelligent analytics and insights generation'
-  )
+  @ParlantSecure(SecurityLevelEnum._MEDIUM)
   @ApiOperation({
     summary: 'Process natural language monitoring query',
     description: 'Submit a natural language query to get intelligent monitoring insights, performance analytics, and recommendations',
