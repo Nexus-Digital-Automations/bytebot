@@ -282,7 +282,6 @@ export class ParlantMonitoringController {
   @Post('query/follow-up')
   @HttpCode(HttpStatus.OK)
   @ParlantValidated({
-    securityLevel: SecurityLevel._MEDIUM,
     cacheable: false,
   })
   @ApiOperation({
@@ -342,7 +341,6 @@ export class ParlantMonitoringController {
    */
   @Get('dashboard')
   @ParlantValidated({
-    securityLevel: SecurityLevel._MEDIUM,
     cacheable: true,
   })
   @ApiOperation({
@@ -435,7 +433,6 @@ export class ParlantMonitoringController {
    */
   @Get('insights/:period')
   @ParlantValidated({
-    securityLevel: SecurityLevel._MEDIUM,
     cacheable: true,
   })
   @ApiOperation({

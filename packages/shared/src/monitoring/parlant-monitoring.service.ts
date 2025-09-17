@@ -441,10 +441,15 @@ export class ParlantMonitoringService {
         functionName: 'analyzeMonitoringQuery',
         packageName: '@bytebot/monitoring',
         description: `Analyze monitoring query intent: "${query}"`,
-        context: { query, type: 'intent_analysis' },
+        parameters: { query, type: 'intent_analysis' },
+        userContext: { 
+          userId: 'monitoring-service',
+          roles: ['monitoring', 'system'],
+          sessionId: `monitoring-${Date.now()}`,
+          ipAddress: '127.0.0.1',
+          metadata: { query, type: 'intent_analysis' }
+        },
         securityLevel: SecurityLevel._LOW,
-        cacheable: true,
-        cacheTtl: 300000,
       });
       
       // Extract intent from response (simplified)
