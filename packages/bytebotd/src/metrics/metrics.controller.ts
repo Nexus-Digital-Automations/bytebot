@@ -37,7 +37,6 @@ import { MetricsService } from './metrics.service';
 import {
   ParlantHealthMetricsValidationService,
   MetricsOperationType,
-  HealthMetricsValidationResult,
 } from '../parlant/services/parlant-health-metrics-validation.service';
 
 /**
@@ -116,7 +115,7 @@ export class MetricsController {
         // Return validation rejection in Prometheus format
         return `# HELP bytebot_metrics_validation_rejected Metrics validation rejections
 # TYPE bytebot_metrics_validation_rejected counter
-bytebot_metrics_validation_rejected{reason="${validation.reason || 'unknown'}"} 1
+bytebot_metrics_validation_rejected{reason="${validation.reason ?? 'unknown'}"} 1
 # HELP bytebot_metrics_conversation_id Conversation ID for validation
 # TYPE bytebot_metrics_conversation_id info
 bytebot_metrics_conversation_id{conversation_id="${validation.conversationId}"} 1

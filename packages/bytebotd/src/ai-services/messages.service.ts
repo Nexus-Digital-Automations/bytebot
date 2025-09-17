@@ -509,7 +509,7 @@ export class MessagesService {
     
     const mockAnalysis: MessageAnalysisResult[] = request.messages.map((message, index) => ({
       messageId: message.id,
-      sentiment: (['positive', 'negative', 'neutral', 'mixed'] as const)[index % 4],
+      sentiment: (['positive', 'negative', 'neutral', 'mixed'] as const)[index % 4] as 'positive' | 'negative' | 'neutral' | 'mixed',
       topics: [['technology', 'business', 'communication', 'support'][index % 4] ?? 'general'],
       intent: {
         primary: 'information_request',
@@ -731,10 +731,10 @@ export class MessagesService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgProcessingTime > 800 ?? validationRate < 95)) {
+    if (avgProcessingTime > 800 || validationRate < 95) {
       status = 'DEGRADED';
     }
-    if (avgProcessingTime > 2000 ?? validationRate < 80)) {
+    if (avgProcessingTime > 2000 || validationRate < 80) {
       status = 'FAILED';
     }
 

@@ -720,10 +720,10 @@ export class OpenAIService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgResponseTime > 1500 ?? validationRate < 95)) {
+    if (avgResponseTime > 1500 || validationRate < 95) {
       status = 'DEGRADED';
     }
-    if (avgResponseTime > 4000 ?? validationRate < 80 ?? !this.apiKey) {
+    if (avgResponseTime > 4000 || validationRate < 80 || !this.apiKey) {
       status = 'FAILED';
     }
 

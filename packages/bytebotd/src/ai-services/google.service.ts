@@ -777,10 +777,10 @@ export class GoogleService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgResponseTime > 2500 ?? validationRate < 95)) {
+    if (avgResponseTime > 2500 || validationRate < 95) {
       status = 'DEGRADED';
     }
-    if (avgResponseTime > 6000 ?? validationRate < 80 ?? !this.apiKey) {
+    if (avgResponseTime > 6000 || validationRate < 80 || !this.apiKey) {
       status = 'FAILED';
     }
 

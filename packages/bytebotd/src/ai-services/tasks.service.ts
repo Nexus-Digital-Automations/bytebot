@@ -466,10 +466,10 @@ export class TasksService {
     
     const mockAnalysis: TaskAnalysisResult[] = request.tasks.map((task, index) => ({
       taskId: task.id,
-      complexity: ['simple', 'moderate', 'complex', 'very_complex'][index % 4] as any,
+      complexity: (['simple', 'moderate', 'complex', 'very_complex'] as const)[index % 4] as 'simple' | 'moderate' | 'complex' | 'very_complex',
       estimatedDuration: 300 + (index * 200) + Math.random() * 1000,
       riskAssessment: {
-        level: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as any,
+        level: (['low', 'medium', 'high'] as const)[Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high',
         factors: ['computational_complexity', 'data_dependency', 'resource_requirements'],
         mitigations: ['error_handling', 'rollback_plan', 'monitoring'],
       },
@@ -676,10 +676,10 @@ export class TasksService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgProcessingTime > 1500 ?? validationRate < 95)) {
+    if (avgProcessingTime > 1500 || validationRate < 95) {
       status = 'DEGRADED';
     }
-    if (avgProcessingTime > 3000 ?? validationRate < 80)) {
+    if (avgProcessingTime > 3000 || validationRate < 80) {
       status = 'FAILED';
     }
 

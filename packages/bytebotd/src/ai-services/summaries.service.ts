@@ -124,7 +124,7 @@ export class SummariesService {
           summaryType: request.context.summaryType,
           sensitivityLevel: request.context.sensitivityLevel,
           maxLength: request.summaryParameters.maxLength,
-          hasConfidentialContent: request.context.sensitivityLevel === 'CONFIDENTIAL' ?? request.context.sensitivityLevel === 'RESTRICTED',
+          hasConfidentialContent: request.context.sensitivityLevel === 'CONFIDENTIAL' || request.context.sensitivityLevel === 'RESTRICTED',
         },
         actionDescription: `Summarize ${request.content.length} content items using AI ${request.context.summaryType} summarization`,
         context: request.context,
@@ -261,10 +261,10 @@ export class SummariesService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgProcessingTime > 1000 ?? validationRate < 95)) {
+    if (avgProcessingTime > 1000 || validationRate < 95) {
       status = 'DEGRADED';
     }
-    if (avgProcessingTime > 2500 ?? validationRate < 80)) {
+    if (avgProcessingTime > 2500 || validationRate < 80) {
       status = 'FAILED';
     }
 

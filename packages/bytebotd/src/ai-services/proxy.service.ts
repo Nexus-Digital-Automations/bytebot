@@ -277,7 +277,7 @@ export class ProxyService {
     return services[0] ?? 'anthropic'; // fallback
   }
 
-  private calculateServiceWeights(request: ProxyRequest): number[] {
+  private calculateServiceWeights(_request: ProxyRequest): number[] {
     // TODO: Implement actual weight calculation based on service performance, load, etc.
     // For now, return mock weights
     return [0.4, 0.35, 0.25]; // Slightly favor anthropic, then openai, then google
@@ -338,10 +338,10 @@ export class ProxyService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgProcessingTime > 500 ?? validationRate < 95 ?? cacheHitRate < 20)) {
+    if (avgProcessingTime > 500 || validationRate < 95 || cacheHitRate < 20) {
       status = 'DEGRADED';
     }
-    if (avgProcessingTime > 1500 ?? validationRate < 80 ?? cacheHitRate < 10)) {
+    if (avgProcessingTime > 1500 || validationRate < 80 || cacheHitRate < 10) {
       status = 'FAILED';
     }
 

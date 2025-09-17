@@ -36,7 +36,6 @@ import {
 import {
   ParlantHealthMetricsValidationService,
   MetricsOperationType,
-  HealthMetricsValidationResult,
 } from '../parlant/services/parlant-health-metrics-validation.service';
 
 /**
