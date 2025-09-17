@@ -519,20 +519,27 @@ export class ParlantIntegrationService
       ]);
 
       // Transform Parlant response to our format
-      if (typeof response === 'object' && response && 'data' in response) {
-        return this.transformParlantResponse(response.data as Record<string, unknown>, request);
+      if (typeof response === "object" && response && "data" in response) {
+        return this.transformParlantResponse(
+          response.data as Record<string, unknown>,
+          request,
+        );
       }
-      throw new ParlantValidationError("Invalid response format from Parlant service");
+      throw new ParlantValidationError(
+        "Invalid response format from Parlant service",
+      );
     } catch (error) {
       if (error instanceof ParlantTimeoutError) {
         throw error;
       }
 
       // Handle different error types
-      if (error && typeof error === 'object' && 'response' in error) {
+      if (error && typeof error === "object" && "response" in error) {
         const errorResponse = error.response as any;
         if (errorResponse?.status === 401) {
-          throw new ParlantAuthenticationError("Invalid Parlant API credentials");
+          throw new ParlantAuthenticationError(
+            "Invalid Parlant API credentials",
+          );
         }
 
         if (errorResponse?.status >= 500) {
@@ -555,10 +562,11 @@ export class ParlantIntegrationService
     _request: ParlantValidationRequest,
   ): ParlantValidationResponse {
     return {
-      approved: typeof data.approved === 'boolean' ? data.approved : false,
-      conversationId: typeof data.conversation_id === 'string' ? data.conversation_id : "",
-      reason: typeof data.reason === 'string' ? data.reason : "",
-      confidence: typeof data.confidence === 'number' ? data.confidence : 0,
+      approved: typeof data.approved === "boolean" ? data.approved : false,
+      conversationId:
+        typeof data.conversation_id === "string" ? data.conversation_id : "",
+      reason: typeof data.reason === "string" ? data.reason : "",
+      confidence: typeof data.confidence === "number" ? data.confidence : 0,
       executionContext: data.execution_context
         ? {
             constraints: data.execution_context.constraints || {},
@@ -589,10 +597,18 @@ export class ParlantIntegrationService
         cacheStatus: "miss",
         source: "parlant",
         riskAssessment: {
-          level: (Object.values(SecurityLevel).includes(data.risk_level as SecurityLevel) ? data.risk_level as SecurityLevel : SecurityLevel._MEDIUM),
-          factors: (Array.isArray(data.risk_factors) ? data.risk_factors as string[] : []),
-          score: (typeof data.risk_score === 'number' ? data.risk_score : 50),
-          mitigations: (Array.isArray(data.mitigations) ? data.mitigations as string[] : []),
+          level: Object.values(SecurityLevel).includes(
+            data.risk_level as SecurityLevel,
+          )
+            ? (data.risk_level as SecurityLevel)
+            : SecurityLevel._MEDIUM,
+          factors: Array.isArray(data.risk_factors)
+            ? (data.risk_factors as string[])
+            : [],
+          score: typeof data.risk_score === "number" ? data.risk_score : 50,
+          mitigations: Array.isArray(data.mitigations)
+            ? (data.mitigations as string[])
+            : [],
         },
       },
     };
@@ -999,12 +1015,12 @@ export class ParlantIntegrationService
    */
   async createConversation(topic: string, priority?: string): Promise<string> {
     const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-    
+
     // Log conversation creation
     this.logger.log(`Creating conversation: ${conversationId}`, {
       topic,
-      priority: priority || 'normal',
-      timestamp: new Date().toISOString()
+      priority: priority || "normal",
+      timestamp: new Date().toISOString(),
     });
 
     // In a real implementation, this would create a conversation via API
@@ -1031,7 +1047,9 @@ export interface ConversationManager {
 }
 
 export interface ValidationEngine {
-  validateFunction(request: ParlantValidationRequest): Promise<ParlantValidationResponse>;
+  validateFunction(
+    request: ParlantValidationRequest,
+  ): Promise<ParlantValidationResponse>;
   createValidationContext(context: any): any;
   processValidationResult(result: any): any;
 }
@@ -1043,11 +1061,11 @@ export interface AuditService {
 }
 
 export enum ServiceHealthStatus {
-  HEALTHY = 'healthy',
-  DEGRADED = 'degraded',
-  UNHEALTHY = 'unhealthy',
-  UNKNOWN = 'unknown',
+  HEALTHY = "healthy",
+  DEGRADED = "degraded",
+  UNHEALTHY = "unhealthy",
+  UNKNOWN = "unknown",
 }
 
 // Re-export types that are imported from other modules
-export { ParlantValidationError } from '../types/parlant-integration.types';
+export { ParlantValidationError } from "../types/parlant-integration.types";

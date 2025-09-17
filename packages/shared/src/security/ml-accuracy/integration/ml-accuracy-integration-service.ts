@@ -1266,7 +1266,9 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
         await this.handleFalsePositiveEvent(event);
         break;
       case "performance_degraded":
-        await this.handlePerformanceDegradation(event as unknown as Record<string, unknown>);
+        await this.handlePerformanceDegradation(
+          event as unknown as Record<string, unknown>,
+        );
         break;
       default:
         this.logger.debug(

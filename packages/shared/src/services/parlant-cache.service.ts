@@ -110,7 +110,7 @@ export class ParlantCacheService
 
   // Multi-level cache storage
   private memoryCache = new Map<string, ParlantCacheEntry>();
-  private redisClient: unknown = null; // Redis client will be injected
+  private redisClient: any = null; // Redis client will be injected
   private persistentCachePath: string = "";
 
   // Cache metadata and monitoring
@@ -297,7 +297,13 @@ export class ParlantCacheService
           this.logger.debug(
             `💿 Persistent cache hit: ${this.getFunctionName(request)} (${Date.now() - startTime}ms)`,
           );
-          return persistentResult;
+          return {
+            found: true,
+            data: persistentResult.data?.response || null,
+            layer: persistentResult.layer,
+            responseTime: persistentResult.responseTime,
+            metadata: persistentResult.metadata
+          };
         }
       }
 

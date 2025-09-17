@@ -579,7 +579,8 @@ export class ParlantAuthBridgeService
   async getUserProfile(
     userId: string,
   ): Promise<SynchronizedUserProfile | null> {
-    let profile: SynchronizedUserProfile | null = this.userProfiles.get(userId) || null;
+    let profile: SynchronizedUserProfile | null =
+      this.userProfiles.get(userId) || null;
 
     if (!profile || this.isProfileStale(profile)) {
       profile = await this.syncUserProfileFromParlant(userId);
@@ -677,7 +678,10 @@ export class ParlantAuthBridgeService
       userId: sessionMapping.aigentUserId,
       roles: sessionMapping.roles,
       sessionId: sessionMapping.aigentSessionId,
-      ipAddress: (typeof requestMetadata?.ipAddress === 'string' ? requestMetadata.ipAddress : "127.0.0.1"),
+      ipAddress:
+        typeof requestMetadata?.ipAddress === "string"
+          ? requestMetadata.ipAddress
+          : "127.0.0.1",
       metadata: {
         parlantSessionId: sessionMapping.parlantSessionId,
         parlantUserId: sessionMapping.parlantUserId,
@@ -765,15 +769,26 @@ export class ParlantAuthBridgeService
     }
   }
 
-  private async syncUserProfile(userId: string, basicInfo: Record<string, unknown>): Promise<void> {
+  private async syncUserProfile(
+    userId: string,
+    basicInfo: Record<string, unknown>,
+  ): Promise<void> {
     const existingProfile = this.userProfiles.get(userId);
 
     const profile: SynchronizedUserProfile = {
       userId,
-      username: (typeof basicInfo.username === 'string' ? basicInfo.username : 'unknown'),
-      email: (typeof basicInfo.email === 'string' ? basicInfo.email : 'unknown@unknown.com'),
-      roles: (Array.isArray(basicInfo.roles) ? basicInfo.roles as string[] : []),
-      permissions: (Array.isArray(basicInfo.permissions) ? basicInfo.permissions as string[] : []),
+      username:
+        typeof basicInfo.username === "string" ? basicInfo.username : "unknown",
+      email:
+        typeof basicInfo.email === "string"
+          ? basicInfo.email
+          : "unknown@unknown.com",
+      roles: Array.isArray(basicInfo.roles)
+        ? (basicInfo.roles as string[])
+        : [],
+      permissions: Array.isArray(basicInfo.permissions)
+        ? (basicInfo.permissions as string[])
+        : [],
       preferences: existingProfile?.preferences || {},
       securitySettings: existingProfile?.securitySettings || {
         twoFactorEnabled: false,
@@ -783,7 +798,8 @@ export class ParlantAuthBridgeService
         locked: false,
       },
       parlantProfile: existingProfile?.parlantProfile,
-      lastSync: (basicInfo.lastSync instanceof Date ? basicInfo.lastSync : new Date()),
+      lastSync:
+        basicInfo.lastSync instanceof Date ? basicInfo.lastSync : new Date(),
     };
 
     this.userProfiles.set(userId, profile);
