@@ -1266,7 +1266,7 @@ export class ParlantMFAService {
 
     const finalResult =
       methodValidation &&
-      validationResponse.result.decision === ValidationDecision._APPROVED;
+      validationResponse.approved;
 
     return {
       valid: finalResult,
@@ -1280,8 +1280,8 @@ export class ParlantMFAService {
         riskScore: challenge.riskAssessment.riskScore,
         conversationalValidation: true,
         properties: {
-          parlantDecision: validationResponse.result.decision,
-          confidence: validationResponse.result.confidence,
+          parlantDecision: validationResponse.approved ? 'APPROVED' : 'DENIED',
+          confidence: validationResponse.confidence,
         },
       },
       requiredActions: [],

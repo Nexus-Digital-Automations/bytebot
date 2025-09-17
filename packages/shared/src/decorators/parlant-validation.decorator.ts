@@ -325,7 +325,12 @@ async function performValidationWithRetry(
   customValidator?: (request: ParlantValidationRequest) => Promise<boolean>,
 ): Promise<ParlantValidationResponse> {
   const { maxAttempts, baseDelay, backoffMultiplier, maxDelay } =
-    config.retryConfig;
+    config.retryConfig || {
+      maxAttempts: 3,
+      baseDelay: 1000,
+      backoffMultiplier: 2,
+      maxDelay: 10000,
+    };
 
   let lastError: Error = new Error(
     "Validation failed after all retry attempts",
