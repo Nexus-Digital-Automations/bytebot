@@ -1,0 +1,4 @@
+
+> bytebot-agent@0.0.1 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --fix
+
