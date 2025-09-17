@@ -22,10 +22,7 @@
  */
 
 import { UserRole } from '@prisma/client';
-import {
-  ParlantConversationContext,
-  RiskLevel,
-} from '../../parlant/parlant-integration.service';
+import { ParlantConversationContext, RiskLevel } from '@bytebot/shared';
 import {
   PermissionAction,
   ResourceType,
@@ -1388,10 +1385,11 @@ export interface ComplianceMetrics {
 
 // ===== EXPORT ALL TYPES =====
 
-export {
+export { ComplianceFramework };
+
+export type {
   // Base types
   BaseAuthContext,
-  ComplianceFramework,
   AuthenticationOperationType,
 
   // Authentication types

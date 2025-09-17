@@ -57,12 +57,26 @@ import { TokenPair } from '../types/jwt-payload.interface';
 import { Public, CurrentUser } from '../decorators/roles.decorator';
 import type { User } from '@prisma/client';
 import {
-  ParlantIntegrationService,
   ParlantValidationRequest,
   RiskLevel,
   ParlantConversationContext,
-  ConversationalValidationError,
-} from '../../parlant/parlant-integration.service';
+} from '@bytebot/shared';
+
+// TODO: Implement ParlantIntegrationService and ConversationalValidationError
+// These are currently missing from the shared package
+interface ParlantIntegrationService {
+  validateApiRequest: (request: any) => Promise<any>;
+}
+
+class ConversationalValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly validationCode?: string,
+  ) {
+    super(message);
+    this.name = 'ConversationalValidationError';
+  }
+}
 import { ConfigService } from '@nestjs/config';
 
 /**
