@@ -130,23 +130,23 @@ function ToolDetailsNormal({
 }: {
   block: ComputerToolUseContentBlock;
 }): React.JSX.Element {
-  // Explicit type annotation to avoid error typing
-  const safeBlock: ComputerToolUseContentBlock = block;
+  // Block is already properly typed from props
+  const safeBlock = block;
   const baseClasses =
     "px-1 py-0.5 text-[12px] text-bytebot-bronze-light-11 bg-bytebot-red-light-1 border border-bytebot-bronze-light-7 rounded-md";
 
   return (
     <>
-      {safeTypeGuardCall(isApplicationToolUseBlock, safeBlock) && (
+      {safeTypeGuardCall(isApplicationToolUseBlock, safeBlock as unknown) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(safeBlock)) {
               return "Unknown Application";
             }
             // Type assertion after type guard to fix unsafe member access
-            const validatedBlock = safeBlock;
-            const input = validatedBlock.input;
-            const app = (input as { application?: unknown }).application;
+            const validatedBlock = safeBlock as ComputerToolUseContentBlock;
+            const input = validatedBlock.input as { application?: unknown };
+            const app = input.application;
             if (isValidApplication(app)) {
               // TypeScript should know app is Application here, but explicit cast for safety
               return applicationMap[app];
@@ -157,34 +157,34 @@ function ToolDetailsNormal({
       )}
 
       {/* Text for type and key actions */}
-      {(safeTypeGuardCall(isTypeKeysToolUseBlock, safeBlock) ||
-        safeTypeGuardCall(isPressKeysToolUseBlock, safeBlock)) && (
+      {(safeTypeGuardCall(isTypeKeysToolUseBlock, safeBlock as unknown) ||
+        safeTypeGuardCall(isPressKeysToolUseBlock, safeBlock as unknown)) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(safeBlock)) {
               return "Invalid keys";
             }
             // Type assertion after type guard to fix unsafe member access
-            const validatedBlock = safeBlock;
-            const input = validatedBlock.input;
-            const keys = (input as { keys?: unknown }).keys;
+            const validatedBlock = safeBlock as ComputerToolUseContentBlock;
+            const input = validatedBlock.input as { keys?: unknown };
+            const keys = input.keys;
             return Array.isArray(keys) ? keys.join(" + ") : "Invalid keys";
           })()}
         </p>
       )}
 
-      {(safeTypeGuardCall(isTypeTextToolUseBlock, safeBlock) ||
-        safeTypeGuardCall(isPasteTextToolUseBlock, safeBlock)) && (
+      {(safeTypeGuardCall(isTypeTextToolUseBlock, safeBlock as unknown) ||
+        safeTypeGuardCall(isPasteTextToolUseBlock, safeBlock as unknown)) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(safeBlock)) {
               return "Invalid text";
             }
             // Type assertion after type guard to fix unsafe member access
-            const validatedBlock = safeBlock;
-            const input = validatedBlock.input;
-            const text = (input as { text?: unknown }).text;
-            const isSensitive = Boolean((input as { isSensitive?: unknown }).isSensitive ?? false);
+            const validatedBlock = safeBlock as ComputerToolUseContentBlock;
+            const input = validatedBlock.input as { text?: unknown; isSensitive?: unknown };
+            const text = input.text;
+            const isSensitive = Boolean(input.isSensitive ?? false);
 
             if (typeof text !== "string") {
               return "Invalid text";
@@ -203,7 +203,7 @@ function ToolDetailsNormal({
               return "Invalid duration";
             }
             // After type guard, we know block has input property
-            const input = safeBlock.input;
+            const input = (safeBlock as ComputerToolUseContentBlock).input as { duration?: unknown };
             const duration = input.duration;
             return typeof duration === "number"
               ? `${duration}ms`

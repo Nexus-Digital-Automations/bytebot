@@ -1047,7 +1047,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
     const modifiers = parts.slice(0, -1);
     
     // Safety check for key
-    if (!key) return false;
+    if (!key) {return false;}
     
     const hasCtrl = modifiers.includes('ctrl') && e.ctrlKey;
     const hasAlt = modifiers.includes('alt') && e.altKey;
@@ -1089,9 +1089,9 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       className={cn(
         'chat-first-navigation',
         'relative z-50',
-        position === 'floating' && 'fixed top-4 left-1/2 transform -translate-x-1/2',
-        position === 'top' && 'sticky top-0',
-        position === 'bottom' && 'sticky bottom-0',
+        _position === 'floating' && 'fixed top-4 left-1/2 transform -translate-x-1/2',
+        _position === 'top' && 'sticky top-0',
+        _position === 'bottom' && 'sticky bottom-0',
         className
       )}
       role="navigation"

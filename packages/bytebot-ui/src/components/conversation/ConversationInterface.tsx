@@ -760,7 +760,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     }
   });
 
-  // Safe destructuring with type assertion to resolve ESLint warnings
+  // Safe destructuring with explicit type annotation to resolve ESLint warnings
   const {
     currentConversation,
     conversationState,
@@ -779,7 +779,25 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     connect: _connect,
     disconnect: _disconnect,
     getHealthStatus: _getHealthStatus
-  } = hookResult;
+  } = hookResult as {
+    currentConversation: unknown;
+    conversationState: unknown;
+    participants: unknown;
+    messages: ConversationMessage[];
+    metrics: unknown;
+    isConnected: boolean;
+    isOffline: boolean;
+    responseTime: number;
+    startConversation: (...args: unknown[]) => unknown;
+    joinConversation: (...args: unknown[]) => unknown;
+    sendMessage: (...args: unknown[]) => unknown;
+    sendValidationRequest: (...args: unknown[]) => unknown;
+    respondToValidation: (...args: unknown[]) => unknown;
+    exportConversation: (...args: unknown[]) => unknown;
+    connect: (...args: unknown[]) => unknown;
+    disconnect: (...args: unknown[]) => unknown;
+    getHealthStatus: (...args: unknown[]) => unknown;
+  };
   
   // ===========================
   // EVENT HANDLERS
@@ -816,15 +834,15 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     reasoning?: string
   ) => {
     try {
-      // Find the validation request message
-      const validationMessage = messages.find((msg: ConversationMessage) => {
+      // Find the validation request message with proper type assertion
+      const validationMessage = (messages).find((msg: ConversationMessage) => {
         return msg.type === MessageType._VALIDATION_REQUEST &&
           msg.metadata?.requestId !== undefined &&
           msg.metadata.requestId !== null;
       });
       
       if (validationMessage !== undefined) {
-        const safeValidationMessage = validationMessage as ConversationMessage;
+        const safeValidationMessage = validationMessage;
         if (safeValidationMessage.metadata?.requestId !== undefined) {
           await respondToValidation(
             safeValidationMessage.metadata.requestId as string,
@@ -870,7 +888,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       const exportData = await exportConversation(safeCurrentConversation.conversationId);
       
       // Create download link
-      const blob = new Blob([exportData], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(exportData)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -940,7 +958,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     
     return displayMessages.map((message, index) => {
       // Use message with type assertion for proper typing
-      const safeMessage = message as ConversationMessage;
+      const safeMessage = message;
       const isOwn = safeMessage.sender.id === 'current-user'; // TODO: Get from auth context
       const prevMessage = index === 0 ? null : (displayMessages[index - 1] as ConversationMessage);
       const showAvatar = index === 0 || (prevMessage?.sender.id !== safeMessage.sender.id);
@@ -1015,7 +1033,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       {/* Header */}
       {currentConversation !== null && currentConversation !== undefined && (
         <ConversationHeader
-          conversation={currentConversation}
+          conversation={currentConversation as unknown}
           participants={participants}
           state={conversationState}
           metrics={metrics}
