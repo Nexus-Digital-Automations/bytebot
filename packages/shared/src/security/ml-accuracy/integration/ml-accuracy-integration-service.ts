@@ -39,6 +39,11 @@ import {
   EventSubscriber,
   RemediationAction,
   PerformanceBenchmark,
+  ServiceDependency,
+  ServiceMetrics,
+  OptimizationObjective as _OptimizationObjective,
+  ObjectiveConstraint as _ObjectiveConstraint,
+  RetentionPolicy as _RetentionPolicy,
 } from "../types/integration.types";
 import {
   AccuracyMetric,
@@ -70,8 +75,20 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
   ];
   public healthScore: number = 100;
   public lastHealthCheck: Date = new Date();
-  public readonly dependencies: Record<string, unknown>[] = [];
-  public readonly metrics: Record<string, unknown> = {};
+  public readonly dependencies: ServiceDependency[] = [];
+  public readonly metrics: ServiceMetrics = {
+    uptime: 0,
+    requestCount: 0,
+    errorRate: 0,
+    averageResponseTime: 0,
+    throughput: 0,
+    resourceUsage: {
+      cpu: 0,
+      memory: 0,
+      disk: 0,
+      network: 0,
+    },
+  };
 
   private readonly logger = new Logger(MLAccuracyIntegrationService.name);
   private readonly eventEmitter = new EventEmitter();
@@ -273,7 +290,7 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
       dataExchange: [],
       synchronization: {
         type: "event_driven",
-        conflictResolution: "consensus",
+        conflictResolution: "manual",
       },
       conflictResolution: {
         algorithm: "consensus",
@@ -489,7 +506,10 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
       );
 
       // Trigger adaptive learning if pattern detected
-      if (patterns.confidence > 0.8) {
+      if (
+        typeof patterns.confidence === "number" &&
+        patterns.confidence > 0.8
+      ) {
         await this.triggerAdaptiveLearning(componentId, patterns);
       }
 
@@ -577,11 +597,10 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
           target,
           weight: 1.0,
           constraint: {
-            constraintId: `${metric}-constraint`,
-            parameter: metric,
-            minValue: target * 0.9,
-            maxValue: target * 1.1,
-          },
+            type: "soft" as const,
+            penalty: 0.1,
+            tolerance: target * 0.1,
+          } as ObjectiveConstraint,
         })),
         constraints: [
           {
@@ -876,9 +895,13 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
   private async analyzeFalsePositivePatterns(
     _componentId: string,
     metrics: FalsePositiveMetric[],
-  ): Promise<Record<string, unknown>> {
+  ): Promise<{
+    confidence: number;
+    pattern: string;
+    frequency: number;
+  }> {
     if (metrics.length < 3) {
-      return { confidence: 0, pattern: "insufficient_data" };
+      return { confidence: 0, pattern: "insufficient_data", frequency: 0 };
     }
 
     const recent = metrics.slice(-10);
@@ -897,15 +920,21 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
     decisionType: DecisionType,
     context: Record<string, unknown>,
   ): Promise<void> {
-    const round = ++this.consensusEngine.currentRound;
+    // Create new consensus engine with incremented round (immutable update)
+    const newRound = this.consensusEngine.currentRound + 1;
+    this.consensusEngine = {
+      ...this.consensusEngine,
+      currentRound: newRound,
+    };
+
     this.logger.log(
-      `[${this.serviceId}] Triggering consensus decision - Round ${round}, Type: ${decisionType}`,
+      `[${this.serviceId}] Triggering consensus decision - Round ${newRound}, Type: ${decisionType}`,
     );
 
     // Implementation would trigger actual consensus process
     // For now, we'll simulate consensus reached
     const decision: ConsensusDecision = {
-      decisionId: `decision-${round}`,
+      decisionId: `decision-${newRound}`,
       type: decisionType,
       outcome: `Consensus reached for ${decisionType}`,
       confidence: 0.85,
@@ -935,9 +964,9 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
       },
     };
 
-    this.consensusRounds.set(round, decision);
+    this.consensusRounds.set(newRound, decision);
     this.eventEmitter.emit("consensus-decision", {
-      round,
+      round: newRound,
       decision,
       componentId,
     });
@@ -963,12 +992,27 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
     ).find((s) => s.targetComponents.includes(componentId));
 
     if (existingStrategy) {
-      // Update objectives based on new metric
-      existingStrategy.objectives.forEach((obj) => {
+      // Update objectives based on new metric (immutable update)
+      const updatedObjectives = existingStrategy.objectives.map((obj) => {
         if (obj.metric === "accuracy" && metric.accuracy < obj.target) {
-          obj.target = Math.max(obj.target, metric.accuracy + 0.1);
+          return {
+            ...obj,
+            target: Math.max(obj.target, metric.accuracy + 0.1),
+          };
         }
+        return obj;
       });
+
+      // Update the strategy in the map with new objectives
+      const updatedStrategy = {
+        ...existingStrategy,
+        objectives: updatedObjectives,
+      };
+
+      this.optimizationStrategies.set(
+        existingStrategy.strategyId,
+        updatedStrategy,
+      );
     }
   }
 
@@ -1022,6 +1066,7 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
             destination: "disk",
             compression: true,
           },
+          compression: true,
         },
         partitioning: {
           type: "time",
@@ -1059,13 +1104,26 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
     setTimeout(() => {
       const session = this.activeTuningSessions.get(operationId);
       if (session) {
-        session.currentState.iteration++;
-        session.currentState.currentScore = Math.random() * 100;
-        session.currentState.improvementRate = Math.random() * 0.1;
+        // Create new state with immutable updates
+        const updatedState = {
+          ...session.currentState,
+          iteration: session.currentState.iteration + 1,
+          currentScore: Math.random() * 100,
+          improvementRate: Math.random() * 0.1,
+        };
+
+        // Create new session with updated state
+        const updatedSession = {
+          ...session,
+          currentState: updatedState,
+        };
+
+        // Update the session in the map
+        this.activeTuningSessions.set(operationId, updatedSession);
 
         this.eventEmitter.emit("optimization-complete", {
           operationId,
-          session,
+          session: updatedSession,
         });
       }
     }, 5000);
@@ -1082,9 +1140,11 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
     return sum / (values.length - 1);
   }
 
-  private findPatterns(
-    categories: SecurityThreatCategory[],
-  ): Record<string, unknown> {
+  private findPatterns(categories: SecurityThreatCategory[]): {
+    confidence: number;
+    pattern: string;
+    frequency: number;
+  } {
     const frequency = new Map<SecurityThreatCategory, number>();
 
     categories.forEach((cat) => {
