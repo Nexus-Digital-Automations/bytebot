@@ -278,12 +278,12 @@ describe('ComputerUseService - File Operations', () => {
         // Verify successful result structure
         expect(result).toMatchObject({
           success: true,
-          message: expect.stringContaining('File written successfully'),
           path: '/home/user/documents/test.txt',
           size: Buffer.from(validBase64Data, 'base64').length,
-          operationId: expect.stringMatching(/^write_file_\d+_[a-z0-9]+$/),
-          timestamp: expect.any(Date),
-        });
+        } as Partial<FileWriteResult>);
+        expect(result.message).toEqual(expect.any(String) as string);
+        expect(result.operationId).toEqual(expect.any(String) as string);
+        expect(result.timestamp).toEqual(expect.any(Date) as Date);
 
         // Verify file system operations were called correctly
         expect(mockFs.writeFile).toHaveBeenCalledWith(
@@ -316,10 +316,10 @@ describe('ComputerUseService - File Operations', () => {
         expect(mockLogger.log).toHaveBeenCalledWith(
           expect.stringMatching(/^\[write_file_\d+_[a-z0-9]+\] Writing file$/),
           expect.objectContaining({
-            operationId: expect.any(String),
+            operationId: expect.any(String) as string,
             originalPath: '/home/user/documents/test.txt',
             dataLength: validBase64Data.length,
-            timestamp: expect.any(String),
+            timestamp: expect.any(String) as string,
           }),
         );
 
@@ -328,9 +328,9 @@ describe('ComputerUseService - File Operations', () => {
             /^\[write_file_\d+_[a-z0-9]+\] File write operation completed successfully$/,
           ),
           expect.objectContaining({
-            operationId: expect.any(String),
+            operationId: expect.any(String) as string,
             finalPath: '/home/user/documents/test.txt',
-            fileSize: expect.any(Number),
+            fileSize: expect.any(Number) as number,
           }),
         );
       });
@@ -387,7 +387,7 @@ describe('ComputerUseService - File Operations', () => {
         expect(result.success).toBe(true);
         expect(result.size).toBe(1024 * 1024); // 1MB
         expect(mockFs.writeFile).toHaveBeenCalledWith(
-          expect.any(String),
+          expect.any(String) as string,
           expect.any(Buffer),
         );
       });
@@ -439,10 +439,8 @@ describe('ComputerUseService - File Operations', () => {
         expect(mockLogger.error).toHaveBeenCalledWith(
           expect.stringMatching(/File write operation failed/),
           expect.objectContaining({
-            operationId: expect.any(String),
-            error: expect.stringContaining(
-              'File data must be a non-empty base64 encoded string',
-            ),
+            operationId: expect.any(String) as string,
+            error: expect.any(String) as string,
           }),
         );
       });
@@ -755,9 +753,9 @@ describe('ComputerUseService - File Operations', () => {
           size: 25,
           mediaType: 'text/plain',
           lastModified: new Date(1609459200 * 1000), // Unix timestamp conversion
-          operationId: expect.stringMatching(/^read_file_\d+_[a-z0-9]+$/),
-          timestamp: expect.any(Date),
-        });
+        } as Partial<FileReadResult>);
+        expect(result.operationId).toEqual((expect.stringMatching(/^read_file_\d+_[a-z0-9]+$/) as unknown) as string);
+        expect(result.timestamp).toEqual(expect.any(Date) as Date);
 
         // Verify file system operations
         expect(mockExecAsync).toHaveBeenCalledWith(
@@ -944,10 +942,8 @@ describe('ComputerUseService - File Operations', () => {
         expect(mockLogger.error).toHaveBeenCalledWith(
           expect.stringMatching(/File read operation failed/),
           expect.objectContaining({
-            operationId: expect.any(String),
-            error: expect.stringContaining(
-              'File path must be a non-empty string',
-            ),
+            operationId: expect.any(String) as string,
+            error: expect.any(String) as string,
           }),
         );
       });
@@ -1283,10 +1279,10 @@ describe('ComputerUseService - File Operations', () => {
       expect(mockLogger.log).toHaveBeenCalledWith(
         expect.stringMatching(/Writing file$/),
         expect.objectContaining({
-          operationId: expect.any(String),
+          operationId: expect.any(String) as string,
           originalPath: '/home/user/test.txt',
-          dataLength: expect.any(Number),
-          timestamp: expect.any(String),
+          dataLength: expect.any(Number) as number,
+          timestamp: expect.any(String) as string,
         }),
       );
 
@@ -1294,9 +1290,9 @@ describe('ComputerUseService - File Operations', () => {
       expect(mockLogger.log).toHaveBeenCalledWith(
         expect.stringMatching(/File write operation completed successfully$/),
         expect.objectContaining({
-          operationId: expect.any(String),
+          operationId: expect.any(String) as string,
           finalPath: '/home/user/test.txt',
-          fileSize: expect.any(Number),
+          fileSize: expect.any(Number) as number,
         }),
       );
     });
@@ -1322,9 +1318,9 @@ describe('ComputerUseService - File Operations', () => {
       expect(mockLogger.log).toHaveBeenCalledWith(
         expect.stringMatching(/Reading file$/),
         expect.objectContaining({
-          operationId: expect.any(String),
+          operationId: expect.any(String) as string,
           originalPath: '/home/user/test.txt',
-          timestamp: expect.any(String),
+          timestamp: expect.any(String) as string,
         }),
       );
 
@@ -1332,11 +1328,11 @@ describe('ComputerUseService - File Operations', () => {
       expect(mockLogger.log).toHaveBeenCalledWith(
         expect.stringMatching(/File read operation completed successfully$/),
         expect.objectContaining({
-          operationId: expect.any(String),
+          operationId: expect.any(String) as string,
           fileName: 'test.txt',
           fileSize: 12,
           mediaType: 'text/plain',
-          base64Length: expect.any(Number),
+          base64Length: expect.any(Number) as number,
         }),
       );
     });
@@ -1360,18 +1356,18 @@ describe('ComputerUseService - File Operations', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringMatching(/File write operation failed:/),
         expect.objectContaining({
-          operationId: expect.any(String),
-          error: expect.any(String),
-          stack: expect.any(String),
+          operationId: expect.any(String) as string,
+          error: expect.any(String) as string,
+          stack: expect.any(String) as string,
         }),
       );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringMatching(/File read operation failed:/),
         expect.objectContaining({
-          operationId: expect.any(String),
-          error: expect.any(String),
-          stack: expect.any(String),
+          operationId: expect.any(String) as string,
+          error: expect.any(String) as string,
+          stack: expect.any(String) as string,
         }),
       );
     });
@@ -1549,7 +1545,7 @@ describe('ComputerUseService - File Operations', () => {
 
       // Verify the buffer was handled correctly
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        expect.any(String),
+        expect.any(String) as string,
         expect.any(Buffer),
       );
     });

@@ -47,7 +47,7 @@ jest.mock('fs/promises', () => ({
 }));
 
 jest.mock('util', () => ({
-  ...jest.requireActual('util'),
+  ...jest.requireActual('util') as typeof import('util'),
   promisify: jest.fn(
      
     (fn: (...args: unknown[]) => unknown) =>
@@ -59,7 +59,7 @@ jest.mock('util', () => ({
 }));
 
 jest.mock('path', () => ({
-  ...jest.requireActual('path'),
+  ...jest.requireActual('path') as typeof import('path'),
   resolve: jest.fn((...paths: string[]) => paths.join('/')),
   join: jest.fn((...paths: string[]) => paths.join('/')),
 }));
@@ -87,7 +87,7 @@ jest.mock('@nut-tree-fork/nut-js', () => ({
     colorAt: jest.fn(),
   },
    
-  Point: jest.fn().mockImplementation((x, y) => ({ x, y })),
+  Point: jest.fn().mockImplementation((x: number, y: number) => ({ x, y })),
   Region: jest.fn(),
   Key: {
     LeftCmd: 'LeftCmd',
