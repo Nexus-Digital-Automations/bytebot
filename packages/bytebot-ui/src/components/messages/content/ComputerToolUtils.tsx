@@ -211,7 +211,7 @@ function getButtonValue(block: unknown): string | undefined {
  */
 export function getIcon(block: ComputerToolUseContentBlock | unknown): IconType {
   // Type-safe property access with explicit type checking
-  const blockObj = block as Record<string, unknown>;
+  const blockObj: Record<string, unknown> = block as Record<string, unknown>;
   const blockName = blockObj?.name;
 
   // Comprehensive logging for debugging (commented for production)
@@ -233,34 +233,36 @@ export function getIcon(block: ComputerToolUseContentBlock | unknown): IconType 
     return User03Icon;
   }
 
-  if (safeTypeGuard(isScreenshotToolUseBlock, block as unknown)) {
+  const safeBlock: unknown = block;
+  
+  if (safeTypeGuard(isScreenshotToolUseBlock, safeBlock)) {
     return Camera01Icon;
   }
 
-  if (safeTypeGuard(isWaitToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isWaitToolUseBlock, safeBlock)) {
     return TimeQuarter02Icon;
   }
 
   if (
-    safeTypeGuard(isTypeKeysToolUseBlock, block as unknown) ||
-    safeTypeGuard(isTypeTextToolUseBlock, block as unknown) ||
-    safeTypeGuard(isPressKeysToolUseBlock, block as unknown)
+    safeTypeGuard(isTypeKeysToolUseBlock, safeBlock) ||
+    safeTypeGuard(isTypeTextToolUseBlock, safeBlock) ||
+    safeTypeGuard(isPressKeysToolUseBlock, safeBlock)
   ) {
     return TypeCursorIcon;
   }
 
-  if (safeTypeGuard(isPasteTextToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isPasteTextToolUseBlock, safeBlock)) {
     return FilePasteIcon;
   }
 
   if (
-    safeTypeGuard(isMoveMouseToolUseBlock, block as unknown) ||
-    safeTypeGuard(isScrollToolUseBlock, block as unknown) ||
-    safeTypeGuard(isCursorPositionToolUseBlock, block as unknown) ||
-    safeTypeGuard(isClickMouseToolUseBlock, block as unknown) ||
-    safeTypeGuard(isDragMouseToolUseBlock, block as unknown) ||
-    safeTypeGuard(isPressMouseToolUseBlock, block as unknown) ||
-    safeTypeGuard(isTraceMouseToolUseBlock, block as unknown)
+    safeTypeGuard(isMoveMouseToolUseBlock, safeBlock) ||
+    safeTypeGuard(isScrollToolUseBlock, safeBlock) ||
+    safeTypeGuard(isCursorPositionToolUseBlock, safeBlock) ||
+    safeTypeGuard(isClickMouseToolUseBlock, safeBlock) ||
+    safeTypeGuard(isDragMouseToolUseBlock, safeBlock) ||
+    safeTypeGuard(isPressMouseToolUseBlock, safeBlock) ||
+    safeTypeGuard(isTraceMouseToolUseBlock, safeBlock)
   ) {
     // Safe access to button property
     const buttonValue = getButtonValue(block);
@@ -271,11 +273,11 @@ export function getIcon(block: ComputerToolUseContentBlock | unknown): IconType 
     return Cursor02Icon;
   }
 
-  if (safeTypeGuard(isApplicationToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isApplicationToolUseBlock, safeBlock)) {
     return BrowserIcon;
   }
 
-  if (safeTypeGuard(isReadFileToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isReadFileToolUseBlock, safeBlock)) {
     return FileIcon;
   }
 
@@ -311,43 +313,43 @@ export function getLabel(block: ComputerToolUseContentBlock | unknown): string {
     return "Unknown";
   }
 
-  if (safeTypeGuard(isScreenshotToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isScreenshotToolUseBlock, safeBlock)) {
     return "Screenshot";
   }
 
-  if (safeTypeGuard(isWaitToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isWaitToolUseBlock, safeBlock)) {
     return "Wait";
   }
 
-  if (safeTypeGuard(isTypeKeysToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isTypeKeysToolUseBlock, safeBlock)) {
     return "Keys";
   }
 
-  if (safeTypeGuard(isTypeTextToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isTypeTextToolUseBlock, safeBlock)) {
     return "Type";
   }
 
-  if (safeTypeGuard(isPasteTextToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isPasteTextToolUseBlock, safeBlock)) {
     return "Paste";
   }
 
-  if (safeTypeGuard(isPressKeysToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isPressKeysToolUseBlock, safeBlock)) {
     return "Press Keys";
   }
 
-  if (safeTypeGuard(isMoveMouseToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isMoveMouseToolUseBlock, safeBlock)) {
     return "Move Mouse";
   }
 
-  if (safeTypeGuard(isScrollToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isScrollToolUseBlock, safeBlock)) {
     return "Scroll";
   }
 
-  if (safeTypeGuard(isCursorPositionToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isCursorPositionToolUseBlock, safeBlock)) {
     return "Cursor Position";
   }
 
-  if (safeTypeGuard(isClickMouseToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isClickMouseToolUseBlock, safeBlock)) {
     // Type-safe access with comprehensive validation
     if (hasValidInput(block)) {
       try {
@@ -396,23 +398,23 @@ export function getLabel(block: ComputerToolUseContentBlock | unknown): string {
     return "Click";
   }
 
-  if (safeTypeGuard(isDragMouseToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isDragMouseToolUseBlock, safeBlock)) {
     return "Drag";
   }
 
-  if (safeTypeGuard(isPressMouseToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isPressMouseToolUseBlock, safeBlock)) {
     return "Press Mouse";
   }
 
-  if (safeTypeGuard(isTraceMouseToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isTraceMouseToolUseBlock, safeBlock)) {
     return "Trace Mouse";
   }
 
-  if (safeTypeGuard(isApplicationToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isApplicationToolUseBlock, safeBlock)) {
     return "Open Application";
   }
 
-  if (safeTypeGuard(isReadFileToolUseBlock, block as unknown)) {
+  if (safeTypeGuard(isReadFileToolUseBlock, safeBlock)) {
     return "Read File";
   }
 

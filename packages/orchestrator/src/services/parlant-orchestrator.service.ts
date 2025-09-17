@@ -39,7 +39,7 @@ import {
   ParlantIntegrationError as _ParlantIntegrationError,
   ParlantValidationError,
   ParlantTimeoutError as _ParlantTimeoutError
-} from '@aiagent/shared/types/parlant-integration.types';
+} from '@bytebot/shared/types/parlant-integration.types';
 
 // Import orchestrator types
 import {

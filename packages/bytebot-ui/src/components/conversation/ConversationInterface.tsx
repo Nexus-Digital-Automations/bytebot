@@ -729,25 +729,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Parlant WebSocket integration
-  const {
-    currentConversation,
-    conversationState,
-    participants,
-    messages,
-    metrics,
-    isConnected,
-    isOffline,
-    responseTime,
-    startConversation,
-    joinConversation,
-    sendMessage,
-    sendValidationRequest: _sendValidationRequest,
-    respondToValidation,
-    exportConversation,
-    connect: _connect,
-    disconnect: _disconnect,
-    getHealthStatus: _getHealthStatus
-  } = useParlantWebSocket({
+  const hookResult = useParlantWebSocket({
     config: {
       enablePerformanceTracking: true,
       autoReconnect: true,
@@ -777,6 +759,27 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       onError?.(error);
     }
   });
+
+  // Safe destructuring to avoid error-typed values
+  const {
+    currentConversation,
+    conversationState,
+    participants,
+    messages,
+    metrics,
+    isConnected,
+    isOffline,
+    responseTime,
+    startConversation,
+    joinConversation,
+    sendMessage,
+    sendValidationRequest: _sendValidationRequest,
+    respondToValidation,
+    exportConversation,
+    connect: _connect,
+    disconnect: _disconnect,
+    getHealthStatus: _getHealthStatus
+  } = hookResult;
   
   // ===========================
   // EVENT HANDLERS
@@ -814,13 +817,13 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   ) => {
     try {
       // Find the validation request message
-      const validationMessage = messages.find(msg => {
-        const safeMsg = msg as ConversationMessage;
-        return safeMsg.type === MessageType._VALIDATION_REQUEST &&
-          Boolean(safeMsg.metadata?.requestId);
+      const validationMessage = messages.find((msg: ConversationMessage) => {
+        return msg.type === MessageType._VALIDATION_REQUEST &&
+          msg.metadata?.requestId !== undefined &&
+          msg.metadata.requestId !== null;
       });
       
-      if (validationMessage) {
+      if (validationMessage !== undefined) {
         const safeValidationMessage = validationMessage as ConversationMessage;
         if (safeValidationMessage.metadata?.requestId !== undefined) {
           await respondToValidation(
@@ -1010,7 +1013,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       aria-label="Enterprise Conversational Interface"
     >
       {/* Header */}
-      {Boolean(currentConversation) && (
+      {currentConversation !== null && currentConversation !== undefined && (
         <ConversationHeader
           conversation={currentConversation}
           participants={participants}

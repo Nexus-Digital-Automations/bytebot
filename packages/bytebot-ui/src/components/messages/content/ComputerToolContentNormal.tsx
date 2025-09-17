@@ -81,12 +81,12 @@ function isValidApplication(value: unknown): value is Application {
 /**
  * Safe wrapper for type guard calls that handles error types
  */
-function safeTypeGuardCall<T>(
+function safeTypeGuardCall(
   typeGuard: (block: unknown) => boolean,
-  block: T,
+  block: ComputerToolUseContentBlock,
 ): boolean {
   try {
-    return Boolean(typeGuard(block as unknown));
+    return Boolean(typeGuard(block));
   } catch {
     return false;
   }
@@ -130,44 +130,48 @@ function ToolDetailsNormal({
 }: {
   block: ComputerToolUseContentBlock;
 }): React.JSX.Element {
+  // Explicit type annotation to avoid error typing
+  const safeBlock: ComputerToolUseContentBlock = block;
   const baseClasses =
     "px-1 py-0.5 text-[12px] text-bytebot-bronze-light-11 bg-bytebot-red-light-1 border border-bytebot-bronze-light-7 rounded-md";
 
   return (
     <>
       {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
-      {safeTypeGuardCall(isApplicationToolUseBlock, block) && (
+      {safeTypeGuardCall(isApplicationToolUseBlock, safeBlock) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(block)) {
+            if (!isBlockWithInput(safeBlock)) {
               return "Unknown Application";
             }
             // Type assertion after type guard to fix unsafe member access
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const validatedBlock = block;
+            const validatedBlock = safeBlock;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             const input = validatedBlock.input;
             const app = (input as { application?: unknown }).application;
-            return isValidApplication(app)
-              ? applicationMap[app]
-              : "Unknown Application";
+            if (isValidApplication(app)) {
+              // TypeScript should know app is Application here, but explicit cast for safety
+              return applicationMap[app];
+            }
+            return "Unknown Application";
           })()}
         </p>
       )}
 
       {/* Text for type and key actions */}
       {(/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
-      safeTypeGuardCall(isTypeKeysToolUseBlock, block) ||
+      safeTypeGuardCall(isTypeKeysToolUseBlock, safeBlock) ||
       /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
-        safeTypeGuardCall(isPressKeysToolUseBlock, block)) && (
+        safeTypeGuardCall(isPressKeysToolUseBlock, safeBlock)) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(block)) {
+            if (!isBlockWithInput(safeBlock)) {
               return "Invalid keys";
             }
             // Type assertion after type guard to fix unsafe member access
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const validatedBlock = block;
+            const validatedBlock = safeBlock;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             const input = validatedBlock.input;
             const keys = (input as { keys?: unknown }).keys;
@@ -177,17 +181,17 @@ function ToolDetailsNormal({
       )}
 
       {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
-      {(safeTypeGuardCall(isTypeTextToolUseBlock, block) ||
+      {(safeTypeGuardCall(isTypeTextToolUseBlock, safeBlock) ||
         /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
-        safeTypeGuardCall(isPasteTextToolUseBlock, block)) && (
+        safeTypeGuardCall(isPasteTextToolUseBlock, safeBlock)) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(block)) {
+            if (!isBlockWithInput(safeBlock)) {
               return "Invalid text";
             }
             // Type assertion after type guard to fix unsafe member access
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const validatedBlock = block;
+            const validatedBlock = safeBlock;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             const input = validatedBlock.input;
             const text = (input as { text?: unknown }).text;
@@ -203,15 +207,14 @@ function ToolDetailsNormal({
       )}
 
       {/* Duration for wait actions */}
-      {safeTypeGuardCall(isWaitToolUseBlock, block) && (
+      {safeTypeGuardCall(isWaitToolUseBlock, safeBlock) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(block)) {
+            if (!isBlockWithInput(safeBlock)) {
               return "Invalid duration";
             }
-            // Type assertion to help TypeScript understand the block type
-            const typedBlock = block as ComputerToolUseContentBlock;
-            const input = typedBlock.input as Record<string, unknown>;
+            // After type guard, we know block has input property
+            const input = safeBlock.input;
             const duration = input.duration;
             return typeof duration === "number"
               ? `${duration}ms`
@@ -221,29 +224,22 @@ function ToolDetailsNormal({
       )}
 
       {/* Coordinates for click/mouse actions */}
-      {block !== null && hasCoordinates(block.input) && (
+      {safeBlock !== null && safeBlock.input !== null && hasCoordinates(safeBlock.input) && (
         <p className={baseClasses}>
           {((): string => {
-            const typedBlock = block;
-            if (!hasCoordinates(typedBlock.input)) {
-              return "Invalid coordinates";
-            }
-            const coords = (typedBlock.input as { coordinates: Coordinates }).coordinates;
+            // hasCoordinates type guard already confirmed structure
+            const coords = safeBlock.input.coordinates;
             return `${coords.x}, ${coords.y}`;
           })()}
         </p>
       )}
 
       {/* Start and end coordinates for path actions */}
-      {block !== null && hasPathCoordinates(block.input) && (
+      {safeBlock !== null && safeBlock.input !== null && hasPathCoordinates(safeBlock.input) && (
         <p className={baseClasses}>
           {((): string => {
-            const typedBlock = block;
-            if (!hasPathCoordinates(typedBlock.input)) {
-              return "Invalid path coordinates";
-            }
-            const input = typedBlock.input as { path: Coordinates[] };
-            const path = input.path;
+            // hasPathCoordinates type guard already confirmed structure  
+            const path = safeBlock.input.path;
             const firstPoint = path[0];
             const lastPoint = path[path.length - 1];
 
@@ -257,15 +253,14 @@ function ToolDetailsNormal({
       )}
 
       {/* Scroll information */}
-      {safeTypeGuardCall(isScrollToolUseBlock, block) && (
+      {safeTypeGuardCall(isScrollToolUseBlock, safeBlock) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(block)) {
+            if (!isBlockWithInput(safeBlock)) {
               return "unknown 0";
             }
-            // Type assertion to help TypeScript understand the block type
-            const typedBlock = block as ComputerToolUseContentBlock;
-            const input = typedBlock.input as Record<string, unknown>;
+            // After type guard, we know block has input property
+            const input = safeBlock.input;
             const direction = input.direction;
             const scrollCount = input.scrollCount;
 
@@ -282,15 +277,14 @@ function ToolDetailsNormal({
       )}
 
       {/* File information */}
-      {safeTypeGuardCall(isReadFileToolUseBlock, block) && (
+      {safeTypeGuardCall(isReadFileToolUseBlock, safeBlock) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(block)) {
+            if (!isBlockWithInput(safeBlock)) {
               return "Invalid file path";
             }
-            // Type assertion to help TypeScript understand the block type
-            const typedBlock = block as ComputerToolUseContentBlock;
-            const input = typedBlock.input as Record<string, unknown>;
+            // After type guard, we know block has input property
+            const input = safeBlock.input;
             const path = input.path;
             return typeof path === "string" ? path : "Invalid file path";
           })()}

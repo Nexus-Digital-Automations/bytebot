@@ -159,8 +159,8 @@ function ToolDetailsTakeOver({
   }
 
   // Type-safe access to input property with explicit validation
-  const blockWithInput = block as ComputerToolUseContentBlock;
-  const input: Record<string, unknown> = blockWithInput.input as Record<string, unknown>;
+  const blockWithInput: ComputerToolUseContentBlock = block;
+  const input: Record<string, unknown> = blockWithInput.input;
 
   return (
     <>
@@ -211,29 +211,27 @@ function ToolDetailsTakeOver({
       {/* Coordinates for click/mouse actions */}
       {hasCoordinates(input) && (
         <p className={baseClasses}>
-          {String((input as { coordinates: Coordinates }).coordinates.x)},{" "}
-          {String((input as { coordinates: Coordinates }).coordinates.y)}
+          {((): string => {
+            const coordsInput = input as { coordinates: Coordinates };
+            return `${coordsInput.coordinates.x}, ${coordsInput.coordinates.y}`;
+          })()}
         </p>
       )}
 
       {/* Start and end coordinates for path actions */}
-      {hasPath(input) && (input as { path: Coordinates[] }).path.length > 0 && (
-        <p className={baseClasses}>
-          From: {String((input as { path: Coordinates[] }).path[0]?.x ?? 0)},{" "}
-          {String((input as { path: Coordinates[] }).path[0]?.y ?? 0)} → To:{" "}
-          {String(
-            (input as { path: Coordinates[] }).path[
-              (input as { path: Coordinates[] }).path.length - 1
-            ]?.x ?? 0,
-          )}
-          ,{" "}
-          {String(
-            (input as { path: Coordinates[] }).path[
-              (input as { path: Coordinates[] }).path.length - 1
-            ]?.y ?? 0,
-          )}
-        </p>
-      )}
+      {hasPath(input) && ((): React.JSX.Element | false => {
+        const pathInput = input as { path: Coordinates[] };
+        return pathInput.path.length > 0 && (
+          <p className={baseClasses}>
+            {((): string => {
+              const path = pathInput.path;
+              const firstPoint = path[0];
+              const lastPoint = path[path.length - 1];
+              return `From: ${firstPoint?.x ?? 0}, ${firstPoint?.y ?? 0} → To: ${lastPoint?.x ?? 0}, ${lastPoint?.y ?? 0}`;
+            })()}
+          </p>
+        );
+      })()}
 
       {/* Scroll information */}
       {Boolean(

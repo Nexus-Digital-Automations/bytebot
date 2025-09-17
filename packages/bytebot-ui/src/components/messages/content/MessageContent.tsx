@@ -25,10 +25,11 @@ interface MessageContentProps {
 function isValidToolResultContent(
   block: MessageContentBlock,
 ): block is ToolResultContentBlock & { content: MessageContentBlock[] } {
+  const safeBlock: MessageContentBlock = block;
   return (
-    isToolResultContentBlock(block) &&
-    Array.isArray(block.content) &&
-    block.content.length > 0
+    isToolResultContentBlock(safeBlock) &&
+    Array.isArray((safeBlock as unknown as ToolResultContentBlock).content) &&
+    ((safeBlock as unknown as ToolResultContentBlock).content as MessageContentBlock[]).length > 0
   );
 }
 

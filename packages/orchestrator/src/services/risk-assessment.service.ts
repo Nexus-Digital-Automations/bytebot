@@ -6,7 +6,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { SecurityLevel } from '@aiagent/shared/types/parlant-integration.types';
+import { SecurityLevel } from '@bytebot/shared/types/parlant-integration.types';
 import { OrchestrationTask } from '../types/orchestrator.types';
 
 export interface RiskAssessment {

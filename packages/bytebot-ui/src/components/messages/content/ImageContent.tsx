@@ -17,7 +17,7 @@ function isImageContentBlock(value: unknown): value is ImageContentBlock {
     return false;
   }
 
-  const candidate = value as Partial<ImageContentBlock>;
+  const candidate: Partial<ImageContentBlock> = value as Partial<ImageContentBlock>;
 
   if (candidate.type !== "image") {
     return false;
@@ -27,7 +27,7 @@ function isImageContentBlock(value: unknown): value is ImageContentBlock {
     return false;
   }
 
-  const source = candidate.source as Record<string, unknown>;
+  const source: Record<string, unknown> = candidate.source as Record<string, unknown>;
 
   return (
     typeof source.data === "string" &&
