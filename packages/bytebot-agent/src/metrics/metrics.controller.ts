@@ -24,6 +24,7 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import { ParlantSecure, ParlantValidated } from '@bytebot/shared/server';
 import { MetricsService } from './metrics.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
@@ -47,6 +48,13 @@ export class MetricsController {
    * Standard Prometheus metrics endpoint for scraping
    */
   @Get()
+  @ParlantSecure({
+    intent:
+      'Expose comprehensive Prometheus metrics for monitoring systems and observability platforms',
+    securityLevel: 'HIGH',
+    description:
+      'Critical endpoint providing system metrics, performance data, and business intelligence for monitoring',
+  })
   @ApiOperation({
     summary: 'Prometheus metrics endpoint',
     description:
@@ -109,6 +117,12 @@ export class MetricsController {
    * GET /metrics/health
    */
   @Get('health')
+  @ParlantValidated({
+    intent: 'Check metrics collection system health and registry status',
+    securityLevel: 'MEDIUM',
+    description:
+      'Standard endpoint for monitoring the health and status of the metrics collection system',
+  })
   @ApiOperation({
     summary: 'Metrics system health',
     description: 'Returns health status of the metrics collection system',
@@ -178,6 +192,13 @@ export class MetricsController {
    * GET /metrics/info
    */
   @Get('info')
+  @ParlantValidated({
+    intent:
+      'Retrieve metrics system documentation and available metrics information',
+    securityLevel: 'MEDIUM',
+    description:
+      'Standard endpoint providing metadata about available metrics categories and system configuration',
+  })
   @ApiOperation({
     summary: 'Metrics information',
     description:

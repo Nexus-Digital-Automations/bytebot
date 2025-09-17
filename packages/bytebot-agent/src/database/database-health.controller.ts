@@ -14,6 +14,7 @@ import {
   Logger,
   Header,
 } from '@nestjs/common';
+import { ParlantSecure } from '@bytebot/shared/server';
 import { DatabaseService } from './database.service';
 import { DatabaseHealthService } from './health/database-health.service';
 import {
@@ -42,6 +43,13 @@ export class DatabaseHealthController {
    * Used by Kubernetes liveness/readiness probes and monitoring systems
    */
   @Get('health')
+  @ParlantSecure({
+    intent:
+      'Retrieve comprehensive database health status including connection state and circuit breaker metrics',
+    securityLevel: 'HIGH',
+    description:
+      'Critical endpoint exposing database health, performance metrics, and operational status for monitoring systems',
+  })
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
   async getHealthStatus() {
@@ -102,6 +110,13 @@ export class DatabaseHealthController {
    * Get detailed database metrics for monitoring dashboards
    */
   @Get('metrics')
+  @ParlantSecure({
+    intent:
+      'Retrieve detailed database performance metrics including connection pool utilization and query statistics',
+    securityLevel: 'HIGH',
+    description:
+      'Secure endpoint providing comprehensive database metrics for monitoring dashboards and operational analysis',
+  })
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-cache, max-age=30')
   getDatabaseMetrics(): {
