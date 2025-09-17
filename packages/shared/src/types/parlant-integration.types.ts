@@ -208,17 +208,19 @@ export interface ParlantFunctionMetadata {
 
 export interface ParlantValidationConfig {
   /** Enable validation for this function */
-  enabled: boolean;
+  enabled?: boolean;
   /** Required security level */
-  securityLevel: SecurityLevel;
+  securityLevel?: SecurityLevel;
   /** Cache validation results */
-  cacheable: boolean;
+  cacheable?: boolean;
   /** Cache TTL in milliseconds */
-  cacheTtl: number;
+  cacheTtl?: number;
   /** Validation timeout */
-  timeout: number;
+  timeout?: number;
   /** Retry configuration */
-  retryConfig: ParlantRetryConfig;
+  retryConfig?: ParlantRetryConfig;
+  /** Operation description */
+  description?: string;
 }
 
 export interface ParlantRetryConfig {

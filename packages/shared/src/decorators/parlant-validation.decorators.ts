@@ -26,6 +26,7 @@ import {
   ConversationPriority,
   ParticipantRole,
 } from "../types/parlant.types";
+import { SecurityLevel } from "../types/parlant-integration.types";
 
 // ===========================
 // METADATA KEYS FOR PARLANT DECORATORS
@@ -648,3 +649,48 @@ export function getAllParlantMetadata(target: object, propertyKey: string) {
     rules: getValidationRulesMetadata(target, propertyKey),
   };
 }
+
+// ===========================
+// COMPATIBILITY DECORATORS
+// ===========================
+
+/**
+ * Alias for ParlantValidation decorator for backwards compatibility
+ * 
+ * @param config - Validation configuration
+ * @returns Method decorator
+ */
+export function ParlantValidated(config: ParlantValidationConfig = {}) {
+  return ParlantValidation(config);
+}
+
+/**
+ * Security-focused Parlant validation decorator
+ * 
+ * @param securityLevel - Security level requirement
+ * @returns Method decorator
+ * 
+ * @example
+ * ```typescript
+ * @ParlantSecure(SecurityLevel._HIGH)
+ * async sensitiveOperation(): Promise<void> {
+ *   // Implementation
+ * }
+ * ```
+ */
+export function ParlantSecure(securityLevel: SecurityLevel = SecurityLevel._MEDIUM) {
+  return ParlantValidation({
+    enabled: true,
+    mode: ValidationMode._INTERACTIVE,
+    approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
+    priority: ConversationPriority._HIGH,
+    requiredRoles: [ParticipantRole._APPROVER, ParticipantRole._VALIDATOR],
+    customConfig: {
+      securityLevel,
+      requiresSecureApproval: true,
+    },
+  });
+}
+
+// Re-export SecurityLevel for convenience
+export { SecurityLevel };

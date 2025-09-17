@@ -52,7 +52,20 @@ import {
 } from "../types/parlant.types";
 
 // Import existing auth types
-import { JwtPayload, TokenPair, RefreshTokenPayload } from "../types/jwt.types";
+import { JwtPayload } from "../types/security.types";
+
+// Define token types used in this service
+export interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface RefreshTokenPayload {
+  userId: string;
+  sessionId: string;
+  iat: number;
+  exp: number;
+}
 
 // Import decorators
 import {

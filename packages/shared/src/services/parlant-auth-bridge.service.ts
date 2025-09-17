@@ -777,7 +777,7 @@ export class ParlantAuthBridgeService
       preferences: existingProfile?.preferences || {},
       securitySettings: existingProfile?.securitySettings || {
         twoFactorEnabled: false,
-        securityLevel: SecurityLevel.MEDIUM,
+        securityLevel: SecurityLevel._MEDIUM,
         lastPasswordChange: new Date(),
         failedAttempts: 0,
         locked: false,
@@ -805,7 +805,7 @@ export class ParlantAuthBridgeService
         preferences: data.preferences || {},
         securitySettings: data.security_settings || {
           twoFactorEnabled: false,
-          securityLevel: SecurityLevel.MEDIUM,
+          securityLevel: SecurityLevel._MEDIUM,
           lastPasswordChange: new Date(),
           failedAttempts: 0,
           locked: false,
@@ -835,7 +835,7 @@ export class ParlantAuthBridgeService
       preferences: {},
       securitySettings: {
         twoFactorEnabled: false,
-        securityLevel: SecurityLevel.MEDIUM,
+        securityLevel: SecurityLevel._MEDIUM,
         lastPasswordChange: new Date(),
         failedAttempts: 0,
         locked: false,

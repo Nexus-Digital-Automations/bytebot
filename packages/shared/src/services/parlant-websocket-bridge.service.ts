@@ -48,6 +48,15 @@ interface QueuedMessage {
 }
 
 /**
+ * Pending Validation Entry for response routing
+ */
+interface PendingValidation {
+  clientWs: WebSocket.WebSocket;
+  timestamp: Date;
+  request: ParlantWebSocketMessage;
+}
+
+/**
  * Connection Statistics
  */
 interface ConnectionStats {
@@ -85,7 +94,7 @@ export class ParlantWebSocketBridgeService
 
   // Message handling
   private messageQueue = new Map<string, QueuedMessage>();
-  private pendingValidations = new Map<string, QueuedMessage>();
+  private pendingValidations = new Map<string, PendingValidation>();
 
   // Configuration
   private config: ParlantWebSocketConfig = {
@@ -550,8 +559,8 @@ export class ParlantWebSocketBridgeService
   private broadcastToClients(message: ParlantWebSocketMessage): void {
     if (!this.serverWs) return;
 
-    this.serverWs.clients.forEach((client: WebSocket) => {
-      if (client.readyState === WebSocket.OPEN) {
+    this.serverWs.clients.forEach((client: WebSocket.WebSocket) => {
+      if (client.readyState === WebSocket.WebSocket.OPEN) {
         this.sendToClient(client, message);
       }
     });

@@ -301,8 +301,9 @@ export function wrapFunctionWithMetadata<
   propertyKey: string,
   parlantService: unknown,
 ): WrappedFunction<T> {
+  const targetObj = target as any;
   const logger = new Logger(
-    `ParlantWrapper:${target.constructor.name}.${propertyKey}`,
+    `ParlantWrapper:${targetObj.constructor?.name || 'Unknown'}.${propertyKey}`,
   );
 
   // Extract metadata from decorators
@@ -317,7 +318,7 @@ export function wrapFunctionWithMetadata<
 
   if (!validationConfig?.enabled) {
     logger.debug(
-      `Parlant validation not enabled for ${target.constructor.name}.${propertyKey}`,
+      `Parlant validation not enabled for ${targetObj.constructor?.name || 'Unknown'}.${propertyKey}`,
     );
     return originalFunction as WrappedFunction<T>;
   }
@@ -340,7 +341,7 @@ export function wrapFunctionWithMetadata<
   };
 
   logger.log(
-    `Creating Parlant wrapper for ${target.constructor.name}.${propertyKey}`,
+    `Creating Parlant wrapper for ${targetObj.constructor?.name || 'Unknown'}.${propertyKey}`,
     {
       validationMode: wrapperConfig.validationMode,
       approvalLevel: wrapperConfig.approvalLevel,
@@ -363,15 +364,16 @@ export function wrapClassMethods(
   target: unknown,
   parlantService: unknown,
 ): unknown {
-  const logger = new Logger(`ParlantWrapper:${target.constructor.name}`);
+  const targetObj = target as any;
+  const logger = new Logger(`ParlantWrapper:${targetObj.constructor?.name || 'Unknown'}`);
 
-  const methodNames = Object.getOwnPropertyNames((target as any).prototype).filter(
+  const methodNames = Object.getOwnPropertyNames(targetObj.prototype).filter(
     (name) =>
-      name !== "constructor" && typeof (target as any).prototype[name] === "function",
+      name !== "constructor" && typeof targetObj.prototype[name] === "function",
   );
 
   logger.log(
-    `Wrapping ${methodNames.length} methods for class ${target.constructor.name}`,
+    `Wrapping ${methodNames.length} methods for class ${targetObj.constructor?.name || 'Unknown'}`,
     {
       methods: methodNames,
     },
@@ -545,7 +547,7 @@ function sanitizeArguments(args: unknown[]): unknown[] {
   return args.map((arg) => {
     if (typeof arg === "object" && arg !== null) {
       // Remove sensitive data from objects
-      const sanitized = { ...arg };
+      const sanitized = { ...(arg as Record<string, unknown>) };
 
       // Common sensitive field names
       const sensitiveFields = [
@@ -562,7 +564,7 @@ function sanitizeArguments(args: unknown[]): unknown[] {
 
       for (const field of sensitiveFields) {
         if (field in sanitized) {
-          sanitized[field] = "[REDACTED]";
+          (sanitized as Record<string, unknown>)[field] = "[REDACTED]";
         }
       }
 

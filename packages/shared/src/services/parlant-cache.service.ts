@@ -111,7 +111,7 @@ export class ParlantCacheService
   // Multi-level cache storage
   private memoryCache = new Map<string, ParlantCacheEntry>();
   private redisClient: unknown = null; // Redis client will be injected
-  private persistentCachePath: string;
+  private persistentCachePath: string = "";
 
   // Cache metadata and monitoring
   private keyMetadata = new Map<string, CacheKeyMetadata>();
@@ -190,7 +190,7 @@ export class ParlantCacheService
       throw new ParlantIntegrationError(
         "Multi-Level Cache initialization failed",
         "CACHE_INIT_ERROR",
-        { error: error.message },
+        { error: error instanceof Error ? error.message : String(error) },
       );
     }
   }
@@ -225,13 +225,19 @@ export class ParlantCacheService
       const memoryResult = await this.getFromMemory(cacheKey);
       if (memoryResult.found) {
         this.stats.memoryHits++;
-        this.updateStats(startTime, true, CacheLayer.MEMORY);
-        this.updateMetadata(cacheKey, CacheLayer.MEMORY);
+        this.updateStats(startTime, true, CacheLayer._MEMORY);
+        this.updateMetadata(cacheKey, CacheLayer._MEMORY);
 
         this.logger.debug(
           `💾 Memory cache hit: ${this.getFunctionName(request)} (${Date.now() - startTime}ms)`,
         );
-        return memoryResult;
+        return {
+          found: true,
+          data: memoryResult.data?.response || null,
+          layer: memoryResult.layer,
+          responseTime: memoryResult.responseTime,
+          metadata: memoryResult.metadata
+        };
       }
 
       // Level 2: Redis Cache (fast)
@@ -239,8 +245,8 @@ export class ParlantCacheService
         const redisResult = await this.getFromRedis(cacheKey);
         if (redisResult.found) {
           this.stats.redisHits++;
-          this.updateStats(startTime, true, CacheLayer.REDIS);
-          this.updateMetadata(cacheKey, CacheLayer.REDIS);
+          this.updateStats(startTime, true, CacheLayer._REDIS);
+          this.updateMetadata(cacheKey, CacheLayer._REDIS);
 
           // Promote to memory cache
           if (redisResult.data) {
@@ -254,7 +260,13 @@ export class ParlantCacheService
           this.logger.debug(
             `🔄 Redis cache hit: ${this.getFunctionName(request)} (${Date.now() - startTime}ms)`,
           );
-          return redisResult;
+          return {
+            found: true,
+            data: redisResult.data?.response || null,
+            layer: redisResult.layer,
+            responseTime: redisResult.responseTime,
+            metadata: redisResult.metadata
+          };
         }
       }
 
@@ -263,8 +275,8 @@ export class ParlantCacheService
         const persistentResult = await this.getFromPersistent(cacheKey);
         if (persistentResult.found) {
           this.stats.persistentHits++;
-          this.updateStats(startTime, true, CacheLayer.PERSISTENT);
-          this.updateMetadata(cacheKey, CacheLayer.PERSISTENT);
+          this.updateStats(startTime, true, CacheLayer._PERSISTENT);
+          this.updateMetadata(cacheKey, CacheLayer._PERSISTENT);
 
           // Promote to higher cache levels
           if (persistentResult.data) {
@@ -674,7 +686,7 @@ export class ParlantCacheService
         return {
           found: false,
           data: null,
-          layer: CacheLayer.PERSISTENT,
+          layer: CacheLayer._PERSISTENT,
           responseTime,
         };
       }
@@ -684,7 +696,7 @@ export class ParlantCacheService
       return {
         found: true,
         data: entry,
-        layer: CacheLayer.PERSISTENT,
+        layer: CacheLayer._PERSISTENT,
         responseTime,
       };
     } catch (error) {
@@ -694,7 +706,7 @@ export class ParlantCacheService
       return {
         found: false,
         data: null,
-        layer: CacheLayer.PERSISTENT,
+        layer: CacheLayer._PERSISTENT,
         responseTime: 0,
       };
     }
@@ -868,13 +880,13 @@ export class ParlantCacheService
 
     // Increase priority based on security level
     switch (request.securityLevel) {
-      case SecurityLevel.CRITICAL:
+      case SecurityLevel._CRITICAL:
         priority += 3;
         break;
-      case SecurityLevel.HIGH:
+      case SecurityLevel._HIGH:
         priority += 2;
         break;
-      case SecurityLevel.MEDIUM:
+      case SecurityLevel._MEDIUM:
         priority += 1;
         break;
     }

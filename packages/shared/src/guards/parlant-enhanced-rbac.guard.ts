@@ -975,7 +975,9 @@ export class ParlantEnhancedRBACGuard
       },
       securityEnhancements: this.determineSecurityEnhancements(
         authContext,
-        response.approved ? ValidationDecision._APPROVED : ValidationDecision._DENIED,
+        response.approved
+          ? ValidationDecision._APPROVED
+          : ValidationDecision._DENIED,
       ),
     };
 
@@ -993,7 +995,8 @@ export class ParlantEnhancedRBACGuard
     authContext: ConversationalAuthorizationContext,
   ): Promise<ConversationalAuthorizationResult | null> {
     const cacheKey = this.buildAuthorizationCacheKey(authContext);
-    return this.cacheManager.get<ConversationalAuthorizationResult>(cacheKey);
+    const result = await this.cacheManager.get<ConversationalAuthorizationResult>(cacheKey);
+    return result || null;
   }
 
   private async cacheAuthorizationDecision(
@@ -1107,7 +1110,7 @@ export class ParlantEnhancedRBACGuard
     rbacMetadata: RBACMetadata,
   ): boolean {
     // Implementation would check if the operation requires higher privileges
-    return rbacMetadata.adminOnly && !this.isAdmin(user);
+    return Boolean(rbacMetadata.adminOnly) && !this.isParlantAdmin(user);
   }
 
   private involvesSensitiveResource(
@@ -1126,14 +1129,14 @@ export class ParlantEnhancedRBACGuard
     return false;
   }
 
-  private isAdmin(user: AuthenticatedRequest["user"]): boolean {
-    const userRoles = this.getUserRoles(user);
+  private isParlantAdmin(user: AuthenticatedRequest["user"]): boolean {
+    const userRoles = this.getParlantUserRoles(user);
     return (
       userRoles.includes(Role._ADMIN) || userRoles.includes(Role._SUPER_ADMIN)
     );
   }
 
-  private getUserRoles(user: AuthenticatedRequest["user"]): Role[] {
+  private getParlantUserRoles(user: AuthenticatedRequest["user"]): Role[] {
     if (user.roles && Array.isArray(user.roles)) {
       return user.roles;
     }

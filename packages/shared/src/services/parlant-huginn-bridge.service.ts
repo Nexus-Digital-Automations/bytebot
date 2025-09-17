@@ -686,7 +686,7 @@ export class ParlantHuginnBridgeService
         cacheStatus: "miss",
         source: "parlant",
         riskAssessment: {
-          level: SecurityLevel.MEDIUM,
+          level: SecurityLevel._MEDIUM,
           factors: [],
           score: 30,
           mitigations: [],

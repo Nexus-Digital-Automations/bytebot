@@ -1246,3 +1246,90 @@ export interface EventBusMetrics {
   readonly topicCount: number;
   readonly subscriberCount: number;
 }
+
+// ===========================
+// MISSING TYPE DEFINITIONS
+// ===========================
+
+/**
+ * Performance prediction interface for ML optimization
+ */
+export interface PerformancePrediction {
+  readonly predictionId: string;
+  readonly targetMetric: string;
+  readonly predictedValue: number;
+  readonly confidence: number; // 0-1
+  readonly timeHorizon: number; // ms
+  readonly basedOnMetrics: string[];
+  readonly updatedAt: Date;
+}
+
+/**
+ * Adaptive configuration for ML components
+ */
+export interface AdaptiveConfiguration {
+  readonly configId: string;
+  readonly componentId: string;
+  readonly parameterName: string;
+  readonly currentValue: unknown;
+  readonly targetValue: unknown;
+  readonly adaptationRate: number; // 0-1
+  readonly adaptationConditions: AdaptationCondition[];
+  readonly lastAdaptation: Date;
+}
+
+/**
+ * Conditions for adaptive configuration changes
+ */
+export interface AdaptationCondition {
+  readonly conditionId: string;
+  readonly metricThreshold: number;
+  readonly comparisonType: 'greater_than' | 'less_than' | 'equals';
+  readonly enabled: boolean;
+}
+
+/**
+ * Event publisher for ML integration system
+ */
+export interface EventPublisher {
+  readonly publisherId: string;
+  readonly name: string;
+  readonly publishedTopics: string[];
+  readonly publishingRate: number; // events per second
+  readonly enabled: boolean;
+  readonly lastPublished: Date;
+}
+
+/**
+ * Event routing configuration
+ */
+export interface EventRouting {
+  readonly routeId: string;
+  readonly sourcePattern: string;
+  readonly targetTopics: string[];
+  readonly routingRules: RoutingRule[];
+  readonly enabled: boolean;
+}
+
+/**
+ * Routing rule for event routing
+ */
+export interface RoutingRule {
+  readonly ruleId: string;
+  readonly condition: string; // expression
+  readonly action: 'forward' | 'filter' | 'transform';
+  readonly targetTopic?: string;
+  readonly transformation?: string;
+}
+
+/**
+ * Event middleware for processing events
+ */
+export interface EventMiddleware {
+  readonly middlewareId: string;
+  readonly name: string;
+  readonly processingOrder: number;
+  readonly enabled: boolean;
+  readonly processingFunction: string; // function reference
+  readonly configuration: Record<string, unknown>;
+}

@@ -44,8 +44,22 @@ export {
 // Re-export Permission enum from RBAC decorators as RBACPermission to avoid conflicts
 export { Permission as RBACPermission } from "./decorators/rbac-authorization.decorators";
 
-// RBAC Types and Utilities
-export * from "./types/rbac.types";
+// RBAC Types and Utilities - specific exports to avoid conflicts with parlant.types
+export {
+  UserContext as RBACUserContext,
+  RequestContext as RBACRequestContext,
+  SecurityContext as RBACSecurityContext,
+  PermissionMatrix,
+  AccessControlEntry,
+  AuthorizationResult as RBACAuthorizationResult,
+  BatchAuthorizationResult,
+  RBACMetadata,
+  RBACGuardConfig,
+  AuthorizationCacheEntry,
+  AuthorizationEvent,
+  IRBACService,
+  IPermissionService,
+} from "./types/rbac.types";
 export {
   analyzeSecurityRequirements,
   getCacheStats,
@@ -242,42 +256,35 @@ export * from "./audit/integrations/audit.module";
 // export * from "./security";
 
 // Parlant Integration - Shared Library Foundation
-// Core types, services, decorators, and utilities for conversational AI validation
-export * from "./types/parlant.types";
+// Core services, decorators, and utilities for conversational AI validation
+// (types are already exported from index-client to avoid conflicts)
 export * from "./services/parlant-integration.service";
-export * from "./decorators/parlant-validation.decorators";
-export * from "./interceptors/parlant-validation.interceptor";
-export * from "./utils/parlant-wrapper.utils";
-
-// Parlant Core Types - explicit exports to avoid conflicts
+// Parlant Decorators - specific exports to avoid ParlantValidationConfig conflict
 export {
-  ParlantValidationRequest,
-  ParlantValidationResponse,
-  ParlantConversationContext,
-  ValidationResult,
-  ValidationDecision,
-  ConversationState,
-  ConversationPriority,
-  FunctionSecurityLevel,
-  RiskLevel,
-  ValidationMode,
-  ApprovalLevel,
-  ParticipantRole,
-  ParticipantType,
-  ParticipantCapability,
-} from "./types/parlant.types";
-
-// Parlant Decorators - core validation decorators
-export {
+  PARLANT_VALIDATION_KEY,
+  PARLANT_CONVERSATION_KEY,
+  PARLANT_SECURITY_KEY,
+  PARLANT_APPROVAL_KEY,
+  PARLANT_WRAPPER_CONFIG_KEY,
+  PARLANT_RULES_KEY,
+  PARLANT_CONTEXT_KEY,
+  ParlantValidationConfig as ParlantDecoratorValidationConfig,
   ParlantValidation,
+  ConversationContextConfig,
   ConversationContext,
+  SecurityClassificationConfig,
   SecurityClassification,
+  ApprovalWorkflowConfig,
+  EscalationRule,
+  EscalationCondition,
   ApprovalWorkflow,
+  ParlantWrapper,
   ValidationRules,
-  ParlantIntegrated,
   ConversationParam,
   ValidationRequestParam,
   UserContextParam,
+  CompleteParlantConfig,
+  ParlantIntegrated,
   getParlantValidationMetadata,
   getConversationContextMetadata,
   getSecurityClassificationMetadata,
@@ -286,6 +293,11 @@ export {
   hasParlantValidation,
   getAllParlantMetadata,
 } from "./decorators/parlant-validation.decorators";
+export * from "./interceptors/parlant-validation.interceptor";
+export * from "./utils/parlant-wrapper.utils";
+
+// Note: Parlant types are already exported from index-client.ts
+// Avoiding duplicate exports to prevent conflicts
 
 // Parlant Services - integration service and interfaces
 export {

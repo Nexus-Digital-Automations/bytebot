@@ -1348,3 +1348,10 @@ export interface ParlantError {
   /** Error context */
   context?: Record<string, unknown>;
 }
+
+// ===========================
+// RE-EXPORTS FROM PARLANT-INTEGRATION.TYPES
+// ===========================
+
+// Re-export SecurityLevel from parlant-integration.types for convenience
+export { SecurityLevel } from "./parlant-integration.types";

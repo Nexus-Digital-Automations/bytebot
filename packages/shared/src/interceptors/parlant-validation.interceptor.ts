@@ -23,6 +23,23 @@ import { Reflector } from "@nestjs/core";
 import { Observable, from, throwError } from "rxjs";
 import { switchMap, catchError, tap } from "rxjs/operators";
 import { Request } from "express";
+
+// Extended request interface to include user and other properties
+interface ExtendedRequest extends Request {
+  user?: {
+    id?: string;
+    roles?: string[];
+    permissions?: string[];
+  };
+  parlantValidationResult?: any;
+  parlantConversationContext?: any;
+  parlantOperationId?: string;
+  sessionID?: string;
+}
+import {
+  ParlantUserContext,
+  SecurityLevel,
+} from "../types/parlant-integration.types";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
@@ -33,15 +50,12 @@ import {
   RiskLevel,
   ValidationMode,
   ApprovalLevel,
-  FunctionContext,
   SourceLocation,
   ExecutionContext as ParlantExecutionContext,
   ExecutionEnvironment,
   UserContext,
   RequestContext,
   SessionContext,
-  ValidationParameters,
-  ParlantConversationContext,
   ParlantAuditEntry,
   AuditEntryType,
   ActorType,
@@ -227,9 +241,10 @@ export class ParlantValidationInterceptor implements NestInterceptor {
         );
 
         // Store validation context in request for potential use by method
-        const request = context.switchToHttp().getRequest();
+        const request = context.switchToHttp().getRequest<ExtendedRequest>();
         request.parlantValidationResult = validationResult;
-        request.parlantConversation = validationResult.conversationContext;
+        request.parlantConversationContext =
+          validationResult.conversationContext;
         request.parlantOperationId = operationId;
 
         return next.handle();
@@ -299,14 +314,15 @@ export class ParlantValidationInterceptor implements NestInterceptor {
         return this.handleFallback(validationRequest, "Service not available");
       }
 
-      const validationResponse =
-        await this._parlantService.validateFunctionExecution(validationRequest);
+      const adaptedRequest = this.adaptValidationRequest(validationRequest);
+      const rawValidationResponse =
+        await this._parlantService.validateFunctionExecution(adaptedRequest);
+      const validationResponse = this.adaptValidationResponse(
+        rawValidationResponse,
+      );
 
       // Cache the result if approved and caching is enabled
-      if (
-        this.config.cacheEnabled &&
-        validationResponse.result.decision === ValidationDecision.APPROVED
-      ) {
+      if (this.config.cacheEnabled && rawValidationResponse.approved) {
         await this.cacheValidation(validationRequest, validationResponse);
       }
 
@@ -320,7 +336,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
       }
 
       // Check validation decision
-      if (validationResponse.result.decision !== ValidationDecision.APPROVED) {
+      if (validationResponse.result.decision !== ValidationDecision._APPROVED) {
         throw new ParlantValidationDenialError(
           validationResponse.result.reasoning,
           validationResponse.result.decision,
@@ -330,8 +346,10 @@ export class ParlantValidationInterceptor implements NestInterceptor {
 
       return validationResponse;
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.error(`[${operationId}] Validation failed`, {
-        error: error.message,
+        error: errorMessage,
       });
 
       // Handle validation errors based on configuration
@@ -340,9 +358,11 @@ export class ParlantValidationInterceptor implements NestInterceptor {
       }
 
       // Service error - apply fallback behavior
+      const fallbackErrorMessage =
+        error instanceof Error ? error.message : String(error);
       return this.handleFallback(
         await this.createValidationRequest(context, operationId, metadata),
-        error.message,
+        fallbackErrorMessage,
       );
     }
   }
@@ -357,61 +377,159 @@ export class ParlantValidationInterceptor implements NestInterceptor {
   ): ParlantValidationRequest {
     const handler = context.getHandler();
     const target = context.getClass();
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<ExtendedRequest>();
     const args = context.getArgs();
 
-    // Extract function context
-    const functionContext: FunctionContext = {
-      functionName: handler.name,
-      arguments: this.extractMethodArguments(args),
-      source: this.createSourceLocation(target, handler),
-      securityLevel:
-        metadata.security?.securityLevel || FunctionSecurityLevel.INTERNAL,
-      riskLevel: metadata.security?.riskLevel || RiskLevel._MODERATE,
-      executionContext: this.createExecutionContext(request),
-    };
-
-    // Create validation parameters
-    const validationParams: ValidationParameters = {
-      mode: metadata.validation?.mode || ValidationMode.INTERACTIVE,
-      approvalLevel:
-        metadata.validation?.approvalLevel || ApprovalLevel._SINGLE_APPROVAL,
-      timeout: metadata.validation?.timeout || this.config.globalTimeout,
-      cacheable: this.config.cacheEnabled,
-      rules: metadata.rules || [],
-    };
-
-    // Create conversation context
-    const conversationContext: ParlantConversationContext = {
-      conversationId: this.generateConversationId(operationId),
-      state: ConversationState.INITIATED,
+    // Extract user context from request
+    const userContext: ParlantUserContext = {
+      userId: request.user?.id || "anonymous",
+      roles: request.user?.roles || ["user"],
+      sessionId: (request as ExtendedRequest).sessionID || `session_${Date.now()}`,
+      ipAddress: request.ip || request.socket?.remoteAddress || "unknown",
       metadata: {
-        topic:
-          metadata.conversation?.topic ||
-          `${target.name}.${handler.name} validation`,
-        priority:
-          metadata.conversation?.priority || ConversationPriority._NORMAL,
-        tags: ["interceptor", "nestjs", target.name.toLowerCase()],
-        properties: {
-          className: target.name,
-          methodName: handler.name,
-          operationId,
-        },
-        history: [],
+        userAgent: request.get("User-Agent") || "unknown",
+        timestamp: Date.now(),
       },
-      participants: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    };
+
+    // Determine security level with type guard
+    const securityMetadata = metadata.security as {
+      securityLevel?: FunctionSecurityLevel;
     };
 
     return {
-      requestId: this.generateRequestId(operationId),
-      functionContext,
-      validationParams,
-      conversationContext,
+      requestId: operationId,
+      functionContext: {
+        functionName: handler.name,
+        arguments: this.extractMethodArguments(args),
+        returnType: "unknown",
+        source: this.createSourceLocation(
+          target,
+          handler as (..._args: unknown[]) => unknown,
+        ),
+        securityLevel:
+          securityMetadata?.securityLevel || FunctionSecurityLevel._INTERNAL,
+        riskLevel: RiskLevel._MODERATE,
+        executionContext: this.createExecutionContext(request),
+      },
+      validationParams: {
+        mode: ValidationMode._SYNCHRONOUS,
+        approvalLevel: ApprovalLevel._AUTOMATIC,
+        timeout:
+          (metadata.validation as { timeout?: number })?.timeout ||
+          this.config.globalTimeout,
+        cacheable: true,
+        rules: [],
+      },
+      conversationContext: {
+        conversationId: `conv_${operationId}`,
+        userId: userContext?.userId,
+        sessionId: `session_${operationId}`,
+        state: ConversationState._ACTIVE,
+        metadata: {
+          topic: `Validation for ${handler.name}`,
+          priority: ConversationPriority._NORMAL,
+          tags: ["validation", "interceptor"],
+          properties: {},
+          history: [],
+        },
+        participants: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
       timestamp: new Date(),
-      timeout: validationParams.timeout,
+      timeout:
+        (metadata.validation as { timeout?: number })?.timeout ||
+        this.config.globalTimeout,
+      metadata: metadata as Record<string, unknown>,
     };
+  }
+
+  /**
+   * Convert parlant.types request to parlant-integration.types request
+   */
+  private adaptValidationRequest(
+    request: import("../types/parlant.types").ParlantValidationRequest,
+  ): import("../types/parlant-integration.types").ParlantValidationRequest {
+    return {
+      operationId: `op_${Date.now()}`,
+      functionName:
+        (request as any).conversationContext?.functionName || "unknown",
+      packageName: "shared",
+      description: `Validation for ${(request as any).conversationContext?.functionName || "unknown"}`,
+      parameters: (request as any).requestContext?.parameters || {},
+      userContext: {
+        userId: (request as any).userContext?.userId || "anonymous",
+        roles: (request as any).userContext?.roles || [],
+        sessionId: (request as any).sessionContext?.sessionId || "no-session",
+        ipAddress: (request as any).requestContext?.clientIp || "unknown",
+        metadata: (request as any).userContext?.metadata || {},
+      },
+      securityLevel: "MEDIUM" as any,
+      timeout: 30000,
+    };
+  }
+
+  /**
+   * Convert parlant-integration.types response to parlant.types response
+   */
+  private adaptValidationResponse(
+    response: import("../types/parlant-integration.types").ParlantValidationResponse,
+  ): import("../types/parlant.types").ParlantValidationResponse {
+    return {
+      requestId: `req_${Date.now()}`,
+      result: {
+        decision: response.approved ? ("APPROVED" as any) : ("DENIED" as any),
+        confidence: response.confidence,
+        reasoning: response.reason,
+        ruleResults: [],
+        recommendations: [],
+        evidence: {
+          artifacts: [],
+          sources: [],
+          confidenceScore: response.confidence,
+          complete: true,
+          collectedAt: new Date(),
+        },
+      },
+      timestamp: new Date(),
+      processingTime: 100,
+      conversationContext: {
+        conversationId: response.conversationId,
+        userId: "system",
+        sessionId: `session_${Date.now()}`,
+        state: ConversationState._ACTIVE,
+        metadata: {
+          topic: "Validation Response",
+          priority: ConversationPriority._NORMAL,
+          tags: ["validation", "response"],
+          properties: {},
+          history: [],
+        },
+        participants: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      metadata: (response.metadata || {}) as unknown as Record<string, unknown>,
+    };
+  }
+
+  /**
+   * Map FunctionSecurityLevel to SecurityLevel
+   */
+  private mapToSecurityLevel(
+    functionSecurityLevel: FunctionSecurityLevel,
+  ): SecurityLevel {
+    switch (functionSecurityLevel) {
+      case FunctionSecurityLevel._PUBLIC:
+        return SecurityLevel._LOW;
+      case FunctionSecurityLevel._INTERNAL:
+        return SecurityLevel._MEDIUM;
+      case FunctionSecurityLevel._RESTRICTED:
+        return SecurityLevel._HIGH;
+      default:
+        return SecurityLevel._MEDIUM;
+    }
   }
 
   /**
@@ -421,10 +539,11 @@ export class ParlantValidationInterceptor implements NestInterceptor {
     target: unknown,
     handler: (..._args: unknown[]) => unknown,
   ): SourceLocation {
+    const targetWithName = target as { name?: string };
     return {
-      filePath: target.name + ".ts", // Simplified
+      filePath: (targetWithName.name || "unknown") + ".ts", // Simplified
       methodName: handler.name,
-      className: target.name,
+      className: targetWithName.name || "unknown",
       moduleName: "shared",
     };
   }
@@ -432,11 +551,16 @@ export class ParlantValidationInterceptor implements NestInterceptor {
   /**
    * Create execution context from request
    */
-  private createExecutionContext(request: Request): ParlantExecutionContext {
+  private createExecutionContext(
+    request: ExtendedRequest,
+  ): ParlantExecutionContext {
+    const user = (request as any).user as
+      | { id?: string; roles?: string[]; permissions?: string[] }
+      | undefined;
     const userContext: UserContext = {
-      userId: request.user?.id || "anonymous",
-      roles: request.user?.roles || [],
-      permissions: request.user?.permissions || [],
+      userId: user?.id || "anonymous",
+      roles: user?.roles || [],
+      permissions: user?.permissions || [],
     };
 
     const requestContext: RequestContext = {
@@ -449,17 +573,20 @@ export class ParlantValidationInterceptor implements NestInterceptor {
       userAgent: request.get("user-agent"),
     };
 
+    const sessionRequest = request as {
+      session?: { id?: string; startTime?: number };
+    };
     const sessionContext: SessionContext = {
-      sessionId: request.session?.id || "no-session",
-      startTime: new Date(request.session?.startTime || Date.now()),
+      sessionId: sessionRequest.session?.id || "no-session",
+      startTime: new Date(sessionRequest.session?.startTime || Date.now()),
       lastActivity: new Date(),
     };
 
     return {
       environment:
         process.env.NODE_ENV === "production"
-          ? ExecutionEnvironment.PRODUCTION
-          : ExecutionEnvironment.DEVELOPMENT,
+          ? ExecutionEnvironment._PRODUCTION
+          : ExecutionEnvironment._DEVELOPMENT,
       user: userContext,
       request: requestContext,
       session: sessionContext,
@@ -508,9 +635,9 @@ export class ParlantValidationInterceptor implements NestInterceptor {
       "authorization",
     ];
 
-    const sanitized = Array.isArray(arg) ? [...arg] : { ...arg };
+    const sanitized: any = Array.isArray(arg) ? [...arg] : { ...arg };
 
-    if (typeof sanitized === "object") {
+    if (typeof sanitized === "object" && sanitized !== null) {
       for (const field of sensitiveFields) {
         if (field in sanitized) {
           sanitized[field] = "[REDACTED]";
@@ -561,7 +688,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
       case "deny":
         throw new ParlantValidationDenialError(
           `Validation denied due to service unavailability: ${reason}`,
-          ValidationDecision.DENIED,
+          ValidationDecision._DENIED,
           0,
         );
 
@@ -581,7 +708,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
     return {
       requestId: request.requestId,
       result: {
-        decision: ValidationDecision.APPROVED,
+        decision: ValidationDecision._APPROVED,
         confidence: 0.5, // Low confidence for fallback
         reasoning: `Fallback approval due to: ${reason}`,
         ruleResults: [],
@@ -632,17 +759,17 @@ export class ParlantValidationInterceptor implements NestInterceptor {
   ): Promise<void> {
     const auditEntry: ParlantAuditEntry = {
       id: this.generateAuditId(),
-      type: AuditEntryType.VALIDATION_RESPONSE,
+      type: AuditEntryType._VALIDATION_RESPONSE,
       timestamp: new Date(),
       conversationId: request.conversationContext.conversationId,
       requestId: request.requestId,
       actor: {
         id: "parlant-interceptor",
-        type: ActorType.SERVICE,
+        type: ActorType._SERVICE,
         name: "Parlant Validation Interceptor",
         roles: ["validator", "interceptor"],
       },
-      action: AuditAction.PROVIDE_VALIDATION,
+      action: AuditAction._PROVIDE_VALIDATION,
       details: {
         functionContext: request.functionContext,
         validationResult: response.result,
@@ -652,8 +779,8 @@ export class ParlantValidationInterceptor implements NestInterceptor {
           duration: response.processingTime,
           customMetrics: {
             interceptor: "nestjs",
-            operationId,
-          },
+            operationId: operationId,
+          } as any,
         },
       },
       metadata: {

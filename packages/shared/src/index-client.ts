@@ -11,20 +11,106 @@
 export * from "./types/messageContent.types";
 export * from "./types/computerAction.types";
 export * from "./types/agent.types";
-export * from "./types/security.types";
-export * from "./types/parlant.types";
-export * from "./types/parlant-integration.types";
+
+// Security types (avoiding ValidationResult conflict)
+export {
+  SecurityEventType,
+  UserRole,
+  Permission,
+  RateLimitPreset,
+  RateLimitServiceType,
+  SecurityErrorCode,
+  VersioningStrategy,
+  DEFAULT_SANITIZATION_OPTIONS,
+  createSecurityEvent,
+  SanitizationOptions,
+  FilePathValidationResult,
+  CoordinatesValidationResult,
+  SecurityHeadersConfig,
+  CorsConfig,
+  SecurityEvent,
+  XSSDetectionResult,
+  SQLInjectionDetectionResult,
+  CommandInjectionDetectionResult,
+  JwtPayload,
+  AuthCredentialsDto,
+  RegisterUserDto,
+  AuthTokenResponse,
+  ValidationError,
+  RateLimitConfig,
+  JwtConfig,
+  PasswordPolicy,
+  SecurityConfig,
+  ApiVersion,
+  RoleMetadata,
+  PermissionMetadata,
+  ThrottleMetadata,
+  SecurityError,
+} from "./types/security.types";
+
+// RBAC types (aliased to avoid conflicts with Parlant types)
+export {
+  UserContext as RBACUserContext,
+  RequestContext as RBACRequestContext,
+} from "./types/rbac.types";
+
+// Core Parlant types (using aliases to avoid conflicts with integration types)
+export {
+  ValidationDecision,
+  ConversationState,
+  ConversationPriority,
+  MessageType,
+  FunctionSecurityLevel,
+  RiskLevel,
+  ValidationMode,
+  ApprovalLevel,
+  ParticipantRole,
+  ParticipantType,
+  ParticipantCapability,
+  ExecutionEnvironment,
+  FunctionContext,
+  SourceLocation,
+  UserContext as ParlantCoreUserContext,
+  RequestContext as ParlantCoreRequestContext,
+  SessionContext,
+  ValidationParameters,
+  ParlantConversationContext,
+  ActorType,
+  AuditAction,
+  AuditEntryType,
+  // Aliased exports to avoid conflicts
+  ValidationResult as ParlantCoreValidationResult,
+  ParlantValidationRequest as ParlantCoreValidationRequest,
+  ParlantValidationResponse as ParlantCoreValidationResponse,
+  ParlantAuditEntry as ParlantCoreAuditEntry,
+} from "./types/parlant.types";
+
+// Parlant integration types (primary versions for integration)
+export {
+  ParlantValidationRequest,
+  ParlantValidationResponse, 
+  ParlantAuditEntry,
+  ParlantUserContext,
+  SecurityLevel,
+  ParlantServiceConfig,
+  ParlantCacheEntry,
+  ParlantHealthStatus,
+  ParlantHealthMetrics,
+  ParlantWebSocketMessage,
+  ParlantMessageType,
+  ParlantFunctionWrapper,
+  ParlantFunctionMetadata,
+  ParlantValidationConfig as ParlantIntegrationValidationConfig,
+  ParlantIntegrationError,
+  ParlantValidationError,
+  ParlantConnectionError,
+  ParlantAuthenticationError,
+  ParlantTimeoutError,
+} from "./types/parlant-integration.types";
 
 // Export enums directly (these have runtime exports)
 export { MessageContentType, Role } from "./types/messageContent.types";
-export { 
-  ConversationState, 
-  ConversationPriority, 
-  MessageType, 
-  ValidationDecision, 
-  ParticipantType,
-  ParticipantRole 
-} from "./types/parlant.types";
+// Note: ConversationState and other parlant types already exported above to prevent duplicates
 
 // Type-only exports are handled by `export * from` above
 // Individual type exports are commented out to prevent Next.js warnings
@@ -69,18 +155,7 @@ export {
   isReadFileToolUseBlock,
 } from "./utils/messageContent.utils";
 
-// Export security enums and constants directly (these have runtime exports)
-export {
-  SecurityEventType,
-  UserRole,
-  Permission,
-  RateLimitPreset,
-  RateLimitServiceType,
-  SecurityErrorCode,
-  VersioningStrategy,
-  DEFAULT_SANITIZATION_OPTIONS,
-  createSecurityEvent,
-} from "./types/security.types";
+// Note: Security enums and constants already exported above to prevent duplicates
 
 // Type-only exports are handled by `export * from` above
 

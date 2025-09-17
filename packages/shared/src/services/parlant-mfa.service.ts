@@ -678,7 +678,7 @@ export class ParlantMFAService {
    */
   @ParlantValidation({
     mode: ValidationMode._INTERACTIVE,
-    approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
+    approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
     timeout: 120000,
   })
   @SecurityClassification({
@@ -688,7 +688,7 @@ export class ParlantMFAService {
   @ConversationContext({
     topic: "High-Risk Multi-Factor Authentication",
     priority: ConversationPriority._CRITICAL,
-    requiredParticipants: [ParticipantRole.VALIDATOR, ParticipantRole.APPROVER],
+    requiredParticipants: [ParticipantRole._VALIDATOR, ParticipantRole._APPROVER],
   })
   async initiateHighRiskMFA(
     userId: string,
@@ -838,13 +838,13 @@ export class ParlantMFAService {
    */
   @ParlantValidation({
     mode: ValidationMode._INTERACTIVE,
-    approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
+    approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
     timeout: 300000, // 5 minutes for setup
   })
   @ConversationContext({
     topic: "Multi-Factor Authentication Setup",
     priority: ConversationPriority._NORMAL,
-    requiredParticipants: [ParticipantRole.VALIDATOR],
+    requiredParticipants: [ParticipantRole._VALIDATOR],
   })
   async setupConversationalMFA(
     setupRequest: MFASetupRequest,
@@ -911,7 +911,7 @@ export class ParlantMFAService {
    */
   @ParlantValidation({
     mode: ValidationMode._INTERACTIVE,
-    approvalLevel: ApprovalLevel.DUAL_APPROVAL,
+    approvalLevel: ApprovalLevel._DUAL_APPROVAL,
     timeout: 600000, // 10 minutes for recovery
   })
   @SecurityClassification({
@@ -922,9 +922,9 @@ export class ParlantMFAService {
     topic: "MFA Account Recovery",
     priority: ConversationPriority._HIGH,
     requiredParticipants: [
-      ParticipantRole.APPROVER,
-      ParticipantRole.VALIDATOR,
-      ParticipantRole.MODERATOR,
+      ParticipantRole._APPROVER,
+      ParticipantRole._VALIDATOR,
+      ParticipantRole._MODERATOR,
     ],
   })
   async initiateConversationalMFARecovery(
@@ -1177,7 +1177,8 @@ export class ParlantMFAService {
     challengeId: string,
   ): Promise<MFAChallenge | null> {
     const cacheKey = `mfa-challenge:${challengeId}`;
-    return this.cacheManager.get<MFAChallenge>(cacheKey);
+    const result = await this.cacheManager.get<MFAChallenge>(cacheKey);
+    return result || null;
   }
 
   private async updateChallengeState(

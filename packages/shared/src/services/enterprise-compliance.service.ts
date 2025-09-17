@@ -35,25 +35,25 @@ import { Cache } from "cache-manager";
 
 // Import Parlant integration types and services
 import {
-  _ParlantValidationRequest,
-  _ParlantValidationResponse,
+  ParlantValidationRequest,
+  ParlantValidationResponse,
   ParlantIntegrationError,
-  _ParlantValidationError,
+  ParlantValidationError,
   SecurityLevel,
-  _ParlantUserContext,
-  _ParlantExecutionContext,
-  _ParlantValidationMetadata,
-  _ParlantRiskAssessment,
-  _ParlantAuditEntry,
+  ParlantUserContext,
+  ParlantExecutionContext,
+  ParlantValidationMetadata,
+  ParlantRiskAssessment,
+  ParlantAuditEntry,
 } from "../types/parlant-integration.types";
 
 // Import Parlant decorators and utilities
 import {
   ParlantValidation,
-  _ParlantDecoratorOptions,
-} from "../decorators/parlant-validation.decorator";
+  ParlantValidationConfig,
+} from "../decorators/parlant-validation.decorators";
 
-import { ParlantWrapperUtils } from "../utils/parlant-wrapper.utils";
+import { parlantWrapper, ParlantWrapperBuilder } from "../utils/parlant-wrapper.utils";
 
 // ===== ENTERPRISE COMPLIANCE TYPES =====
 
@@ -336,6 +336,76 @@ export enum ProcessingMethod {
 }
 
 /**
+ * Data storage information
+ */
+export interface DataStorageInfo {
+  /** Storage location */
+  location: string;
+  /** Storage type */
+  type: 'local' | 'cloud' | 'hybrid';
+  /** Encryption status */
+  encrypted: boolean;
+  /** Retention period */
+  retentionPeriod: number; // days
+  /** Access controls */
+  accessControls: string[];
+}
+
+/**
+ * Data transfer information
+ */
+export interface DataTransferInfo {
+  /** Transfer destination */
+  destination: string;
+  /** Transfer mechanism */
+  mechanism: string;
+  /** Legal basis */
+  legalBasis: string;
+  /** Safeguards in place */
+  safeguards: string[];
+}
+
+/**
+ * Third party information
+ */
+export interface ThirdPartyInfo {
+  /** Third party name */
+  name: string;
+  /** Purpose of data sharing */
+  purpose: string;
+  /** Legal basis */
+  legalBasis: string;
+  /** Data categories shared */
+  dataCategories: string[];
+}
+
+/**
+ * Data subject preferences
+ */
+export interface DataSubjectPreferences {
+  /** Communication preferences */
+  communication: Record<string, boolean>;
+  /** Processing preferences */
+  processing: Record<string, boolean>;
+  /** Marketing preferences */
+  marketing: Record<string, boolean>;
+}
+
+/**
+ * Consent withdrawal information
+ */
+export interface ConsentWithdrawal {
+  /** Withdrawal timestamp */
+  timestamp: Date;
+  /** Reason for withdrawal */
+  reason?: string;
+  /** Processing stopped */
+  processingStopped: boolean;
+  /** Data deleted */
+  dataDeleted: boolean;
+}
+
+/**
  * Data subject information
  */
 export interface DataSubjectInfo {
@@ -433,6 +503,108 @@ export interface ComplianceUserContext {
 
   /** User compliance training status */
   trainingStatus: ComplianceTrainingStatus;
+}
+
+/**
+ * Compliance training status
+ */
+export interface ComplianceTrainingStatus {
+  /** Training completed */
+  completed: boolean;
+  /** Completion date */
+  completionDate?: Date;
+  /** Training modules */
+  modules: string[];
+  /** Certification valid until */
+  validUntil?: Date;
+}
+
+/**
+ * Regulatory license information
+ */
+export interface RegulatoryLicense {
+  /** License identifier */
+  licenseId: string;
+  /** License type */
+  type: string;
+  /** Issuing authority */
+  authority: string;
+  /** Issue date */
+  issueDate: Date;
+  /** Expiry date */
+  expiryDate: Date;
+  /** License status */
+  status: 'active' | 'expired' | 'suspended';
+}
+
+/**
+ * Compliance certification
+ */
+export interface ComplianceCertification {
+  /** Certification identifier */
+  certificationId: string;
+  /** Certification name */
+  name: string;
+  /** Certifying body */
+  certifyingBody: string;
+  /** Certification date */
+  certificationDate: Date;
+  /** Valid until */
+  validUntil: Date;
+  /** Scope of certification */
+  scope: string[];
+}
+
+/**
+ * Compliance evidence
+ */
+export interface ComplianceEvidence {
+  /** Evidence identifier */
+  evidenceId: string;
+  /** Evidence type */
+  type: string;
+  /** Description */
+  description: string;
+  /** Source */
+  source: string;
+  /** Collection date */
+  collectionDate: Date;
+  /** Evidence data */
+  data: Record<string, unknown>;
+}
+
+/**
+ * Compliance deficiency
+ */
+export interface ComplianceDeficiency {
+  /** Deficiency identifier */
+  deficiencyId: string;
+  /** Deficiency type */
+  type: string;
+  /** Severity level */
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  /** Description */
+  description: string;
+  /** Remediation required */
+  remediationRequired: boolean;
+  /** Due date */
+  dueDate?: Date;
+}
+
+/**
+ * Testing procedure for compliance
+ */
+export interface TestingProcedure {
+  /** Procedure identifier */
+  procedureId: string;
+  /** Procedure name */
+  name: string;
+  /** Test steps */
+  steps: string[];
+  /** Expected outcome */
+  expectedOutcome: string;
+  /** Test frequency */
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annually';
 }
 
 /**
@@ -1057,7 +1229,7 @@ export class EnterpriseComplianceService {
     enableConversationalCompliance: true,
     zeroToleranceViolations: true,
     supportedFrameworks: Object.values(ComplianceFramework),
-    defaultValidationMode: ComplianceValidationMode.ENFORCING,
+    defaultValidationMode: ComplianceValidationMode._ENFORCING,
     maxConcurrentValidations: 100,
   };
 
@@ -1080,7 +1252,7 @@ export class EnterpriseComplianceService {
 
   constructor(
     private readonly _configService: ConfigService,
-    private readonly _parlantWrapperUtils: ParlantWrapperUtils,
+    private readonly _parlantWrapperBuilder: ParlantWrapperBuilder<any>,
     @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
   ) {
     this.logger.log(
@@ -1113,7 +1285,7 @@ export class EnterpriseComplianceService {
   @ParlantValidation({
     description:
       "Comprehensive enterprise compliance validation across multiple regulatory frameworks with conversational AI enhancement",
-    securityLevel: SecurityLevel.CRITICAL,
+    securityLevel: SecurityLevel._CRITICAL,
     cacheable: true,
     cacheTtl: 600000, // 10 minutes
   })
@@ -1164,7 +1336,7 @@ export class EnterpriseComplianceService {
         frameworkResults: [],
         violations: [],
         riskAssessment: {
-          overallRisk: ComplianceRiskLevel.MEDIUM,
+          overallRisk: ComplianceRiskLevel._MEDIUM,
           riskFactors: [],
           mitigationStrategies: [],
           riskScore: 0,

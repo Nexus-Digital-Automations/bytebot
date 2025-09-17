@@ -260,7 +260,8 @@ export class PermissionGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      this.updateMetrics("permission-guard", startTime, false, error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.updateMetrics("permission-guard", startTime, false, errorMessage);
       throw error;
     }
   }
@@ -620,9 +621,10 @@ export class CompositeGuard implements CanActivate {
             break; // Fail fast
           }
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
           results.push({
             success: false,
-            error: error.message,
+            error: errorMessage,
             guard: guardDef.type,
           });
           if (guardDef.required !== false) {
@@ -637,7 +639,8 @@ export class CompositeGuard implements CanActivate {
           const result = await this.executeGuard(guardDef, context);
           return { success: result, guard: guardDef.type };
         } catch (error) {
-          return { success: false, error: error.message, guard: guardDef.type };
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          return { success: false, error: errorMessage, guard: guardDef.type };
         }
       });
 

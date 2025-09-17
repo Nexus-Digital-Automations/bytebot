@@ -1004,7 +1004,7 @@ export class OWASPTop10IntegrationService {
       (context.targetEnvironment === "production" &&
         configuration.enable_active_scanning)
     ) {
-      return RiskLevel.CRITICAL;
+      return RiskLevel._CRITICAL;
     }
 
     // HIGH risk for active aggressive scanning or production targets
@@ -1013,7 +1013,7 @@ export class OWASPTop10IntegrationService {
       context.targetEnvironment === "production" ||
       context.businessImpact === "CRITICAL"
     ) {
-      return RiskLevel.HIGH;
+      return RiskLevel._HIGH;
     }
 
     // MEDIUM risk for active safe scanning or staging environments
@@ -1022,11 +1022,11 @@ export class OWASPTop10IntegrationService {
       context.targetEnvironment === "staging" ||
       context.businessImpact === "HIGH"
     ) {
-      return RiskLevel.MEDIUM;
+      return RiskLevel._MEDIUM;
     }
 
     // LOW risk for passive scanning in development
-    return RiskLevel.LOW;
+    return RiskLevel._LOW;
   }
 
   /**

@@ -9,9 +9,8 @@
 // Export client-safe components by default
 export * from "./index-client";
 
-// Export parlant types directly for easier access
-export * from "./types/parlant.types";
-export * from "./types/parlant-integration.types";
+// Note: Parlant types are already exported via index-client to prevent conflicts
+// Direct exports removed to avoid duplicate export errors
 
 // Note: For server-specific components (NestJS interceptors, services, etc.)
 // use the server entry point:

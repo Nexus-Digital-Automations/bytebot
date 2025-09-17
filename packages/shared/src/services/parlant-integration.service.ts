@@ -987,4 +987,61 @@ export class ParlantIntegrationService
       this.metrics.requestRate = Math.max(this.metrics.requestRate - 1, 0);
     }, 60000); // Decay after 1 minute
   }
+
+  /**
+   * Create a new Parlant conversation
+   */
+  async createConversation(topic: string, priority?: string): Promise<string> {
+    const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+    
+    // Log conversation creation
+    this.logger.log(`Creating conversation: ${conversationId}`, {
+      topic,
+      priority: priority || 'normal',
+      timestamp: new Date().toISOString()
+    });
+
+    // In a real implementation, this would create a conversation via API
+    // For now, return the generated ID
+    return conversationId;
+  }
 }
+
+// Export additional interfaces and types for index files
+export interface ParlantIntegrationConfig {
+  serviceUrl: string;
+  apiKey: string;
+  timeout?: number;
+  retryAttempts?: number;
+  enableWebSocket?: boolean;
+  enableCaching?: boolean;
+}
+
+export interface ConversationManager {
+  createConversation(context: any): Promise<string>;
+  getConversation(id: string): Promise<any>;
+  updateConversation(id: string, update: any): Promise<void>;
+  closeConversation(id: string): Promise<void>;
+}
+
+export interface ValidationEngine {
+  validateFunction(request: ParlantValidationRequest): Promise<ParlantValidationResponse>;
+  createValidationContext(context: any): any;
+  processValidationResult(result: any): any;
+}
+
+export interface AuditService {
+  logValidationEvent(event: ParlantAuditEntry): Promise<void>;
+  getValidationHistory(context: any): Promise<ParlantAuditEntry[]>;
+  exportAuditLog(options: any): Promise<string>;
+}
+
+export enum ServiceHealthStatus {
+  HEALTHY = 'healthy',
+  DEGRADED = 'degraded',
+  UNHEALTHY = 'unhealthy',
+  UNKNOWN = 'unknown',
+}
+
+// Re-export types that are imported from other modules
+export { ParlantValidationError } from '../types/parlant-integration.types';
