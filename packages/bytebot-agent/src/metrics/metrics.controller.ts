@@ -24,7 +24,7 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import { ParlantSecure, ParlantValidated } from '@bytebot/shared/server';
+import { ParlantSecure, ParlantValidated, SecurityLevel } from '@bytebot/shared/server';
 import { MetricsService } from './metrics.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
@@ -115,7 +115,7 @@ export class MetricsController {
   @Get('health')
   @ParlantValidated({
     intent: 'Check metrics collection system health and registry status',
-    securityLevel: 'MEDIUM',
+    securityLevel: SecurityLevel._MEDIUM,
     description:
       'Standard endpoint for monitoring the health and status of the metrics collection system',
   })
@@ -191,7 +191,7 @@ export class MetricsController {
   @ParlantValidated({
     intent:
       'Retrieve metrics system documentation and available metrics information',
-    securityLevel: 'MEDIUM',
+    securityLevel: SecurityLevel._MEDIUM,
     description:
       'Standard endpoint providing metadata about available metrics categories and system configuration',
   })

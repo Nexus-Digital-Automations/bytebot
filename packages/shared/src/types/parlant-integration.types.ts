@@ -138,6 +138,7 @@ export interface ParlantRiskAssessment {
 }
 
 export enum SecurityLevel {
+  _MINIMAL = "minimal",
   _LOW = "low",
   _MEDIUM = "medium",
   _HIGH = "high",

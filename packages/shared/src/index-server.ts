@@ -9,6 +9,9 @@
 // Re-export everything from the client-safe index
 export * from "./index-client";
 
+// Explicitly re-export the correct SecurityLevel from parlant-integration.types to resolve ambiguity
+export { SecurityLevel } from "./types/parlant-integration.types";
+
 // Server-only Security Utilities (requiring Node.js dependencies)
 // Temporarily disabled due to TypeScript compilation errors
 // export {
@@ -84,7 +87,7 @@ export * from "./services/critical-area-sanitization.service";
 // Security Configuration - server environment
 export * from "./config/cors-security.config";
 export {
-  SecurityLevel,
+  SecurityLevel as EnvironmentSecurityLevel,
   EnvironmentSecurityConfig,
   EnvironmentSecurityConfigManager,
   getSecurityLevelForEnvironment,

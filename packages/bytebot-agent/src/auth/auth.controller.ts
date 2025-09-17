@@ -337,7 +337,7 @@ export class AuthController {
   @ParlantValidated({
     intent:
       'User logout operation with refresh token invalidation and session cleanup',
-    securityLevel: 'MEDIUM',
+    securityLevel: SecurityLevel._MEDIUM,
     description:
       'Logout endpoint requiring moderate security validation for session cleanup',
   })
@@ -480,7 +480,7 @@ export class AuthController {
   @ParlantValidated({
     intent:
       'Retrieve authenticated user profile information and account details',
-    securityLevel: 'MEDIUM',
+    securityLevel: SecurityLevel._MEDIUM,
     description:
       'Standard profile retrieval endpoint requiring user authentication',
   })

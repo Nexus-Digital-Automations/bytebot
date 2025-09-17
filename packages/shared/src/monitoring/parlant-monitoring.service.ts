@@ -525,6 +525,7 @@ export class ParlantMonitoringService {
         approvalRate: 0.95,
         averageValidationTime: 120,
         bySecurityLevel: {
+          [SecurityLevel._MINIMAL]: { count: 100, approvalRate: 0.99, averageTime: 50 },
           [SecurityLevel._LOW]: { count: 300, approvalRate: 0.98, averageTime: 80 },
           [SecurityLevel._MEDIUM]: { count: 500, approvalRate: 0.95, averageTime: 120 },
           [SecurityLevel._HIGH]: { count: 150, approvalRate: 0.90, averageTime: 200 },

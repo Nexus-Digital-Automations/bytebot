@@ -9,6 +9,7 @@ import {
   HttpCode,
   Query,
 } from '@nestjs/common';
+import { ParlantValidated, ParlantSecure } from '@bytebot/shared/server';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { Message, Task } from '@prisma/client';
@@ -23,12 +24,26 @@ export class TasksController {
   ) {}
 
   @Post()
+  @ParlantValidated({
+    intent:
+      'Create new task for creative coding agent with specified parameters and configuration',
+    securityLevel: 'MEDIUM',
+    description:
+      'Standard endpoint for creating new creative coding tasks with validation and processing',
+  })
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
     return await this.tasksService.create(createTaskDto);
   }
 
   @Get()
+  @ParlantValidated({
+    intent:
+      'Retrieve paginated list of creative coding tasks with optional filtering by status',
+    securityLevel: 'MEDIUM',
+    description:
+      'Standard endpoint for querying tasks with pagination and status filtering capabilities',
+  })
   async findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -119,6 +134,13 @@ export class TasksController {
   }
 
   @Delete(':id')
+  @ParlantSecure({
+    intent:
+      'Delete specified creative coding task and associated data permanently',
+    securityLevel: 'HIGH',
+    description:
+      'Critical endpoint for permanent task deletion requiring elevated security validation',
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id') id: string): Promise<void> {
     await this.tasksService.delete(id);
