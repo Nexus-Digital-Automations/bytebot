@@ -642,8 +642,8 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
       id,
       level,
       metric: id,
-      threshold: data.target || 0,
-      currentValue: data.current || 0,
+      threshold: data.target ?? 0,
+      currentValue: data.current ?? 0,
       message,
       timestamp: new Date(),
       resolved: false
@@ -682,8 +682,8 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     const p95Index = Math.floor(sortedResponseTimes.length * 0.95);
     const p99Index = Math.floor(sortedResponseTimes.length * 0.99);
     
-    const p95ResponseTime = sortedResponseTimes[p95Index] || 0;
-    const p99ResponseTime = sortedResponseTimes[p99Index] || 0;
+    const p95ResponseTime = sortedResponseTimes[p95Index] ?? 0;
+    const p99ResponseTime = sortedResponseTimes[p99Index] ?? 0;
     
     const avgResponseTime = this.performanceMetrics.totalRequests > 0 ?
       this.performanceMetrics.totalLatency / this.performanceMetrics.totalRequests : 0;

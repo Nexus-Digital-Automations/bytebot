@@ -337,7 +337,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
           conversationId: validationResult.conversationId,
         });
       }
-    } catch (_error) {
+    } catch (error) {
       this.logger.error('Scheduled health check failed', {
         operationId,
         error: error instanceof Error ? error.message : String(error),
@@ -364,7 +364,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
       if (validationResult.approved) {
         await this.updatePerformanceMetrics();
       }
-    } catch (_error) {
+    } catch (error) {
       this.logger.error('Performance metrics collection failed', {
         operationId,
         error: error instanceof Error ? error.message : String(error),
@@ -379,7 +379,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
   async checkSlaCompliance(): Promise<void> {
     try {
       await this.updateSlaMetrics();
-    } catch (_error) {
+    } catch (error) {
       this.logger.error('SLA compliance check failed', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -475,7 +475,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         checkTime,
       });
       
-    } catch (_error) {
+    } catch (error) {
       this.logger.error('Comprehensive health check failed', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -533,7 +533,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         trends: this.updateTrend('api', score),
       };
       
-    } catch (_error) {
+    } catch (error) {
       this.logger.error('API health check failed', { error: error instanceof Error ? error.message : String(error) });
       return this.createFailedHealth('API health check failed');
     }
@@ -568,7 +568,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         trends: this.updateTrend('database', score),
       };
       
-    } catch (_error) {
+    } catch (error) {
       this.logger.error('Database health check failed', { error: error instanceof Error ? error.message : String(error) });
       return this.createFailedHealth('Database health check failed');
     }
@@ -603,7 +603,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         trends: this.updateTrend('parlant', score),
       };
       
-    } catch (_error) {
+    } catch (error) {
       this.logger.error('Parlant health check failed', { error: error instanceof Error ? error.message : String(error) });
       return this.createFailedHealth('Parlant health check failed');
     }
@@ -1006,7 +1006,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
           autoRemediation: {
             enabled: validationResult.approved && severity !== 'EMERGENCY',
             approvedActions: validationResult.approved ? actions : [],
-            requiresUserApproval: severity === 'CRITICAL' || severity === 'EMERGENCY',
+            requiresUserApproval: severity === 'CRITICAL' ?? severity === 'EMERGENCY',
           },
         },
       };
@@ -1021,7 +1021,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         parlantApproved: validationResult.approved,
         conversationId: validationResult.conversationId,
       });
-    } catch (_error) {
+    } catch (error) {
       // Fallback: Create alert without Parlant validation if validation fails
       const alert: HealthAlert = {
         id: alertId,
@@ -1094,7 +1094,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
           reasoning: validationResult.reasoning,
         });
       }
-    } catch (_error) {
+    } catch (error) {
       this.logger.error(`[${operationId}] SLA metrics update validation failed`, {
         operationId,
         error: error instanceof Error ? error.message : String(error),
@@ -1175,7 +1175,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
           alertCreation: true,
           severity,
           component,
-          businessContinuity: severity === 'CRITICAL' || severity === 'EMERGENCY',
+          businessContinuity: severity === 'CRITICAL' ?? severity === 'EMERGENCY',
         },
       },
       riskLevel: riskLevel as RiskLevel,
@@ -1304,7 +1304,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         reason: result.reasoning,
         approvedConfig: result.approved ? newConfig : undefined,
       };
-    } catch (_error) {
+    } catch (error) {
       return {
         approved: false,
         reason: `Configuration validation failed: ${error instanceof Error ? error.message : String(error)}`,

@@ -27,11 +27,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantIntegrationService,
-  ConversationalValidationError,
+  ConversationalValidationError as _ConversationalValidationError,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
-  ParlantConversationContext,
+  ParlantConversationContext as _ParlantConversationContext,
 } from '../parlant/parlant-integration.service';
 
 // ===== RATE LIMITING TYPES =====
@@ -342,14 +342,14 @@ export class EnterpriseApiRateLimitService {
         actionDescription: `Rate limit override request: ${request.overrideRequest.reason}`,
         context: {
           userId: request.userId,
-          sessionId: request.conversationalContext?.sessionId || `override_${Date.now()}`,
+          sessionId: request.conversationalContext?.sessionId ?? `override_${Date.now()}`,
           agentRole: 'RATE_LIMIT_MANAGER',
           securityLevel: this.mapUrgencyToSecurityLevel(request.overrideRequest.urgencyLevel),
           conversationHistory: request.conversationalContext?.conversationHistory?.map(h => ({
             timestamp: new Date(h.timestamp),
             speaker: h.speaker,
             message: h.message,
-          })) || [],
+          })) ?? [],
           metadata: {
             operationId,
             rateLimitOverride: true,
@@ -455,14 +455,14 @@ export class EnterpriseApiRateLimitService {
         : `Rate limit check for ${request.endpoint} - validate normal request`,
       context: {
         userId: request.userId,
-        sessionId: request.conversationalContext?.sessionId || `rate_${Date.now()}`,
+        sessionId: request.conversationalContext?.sessionId ?? `rate_${Date.now()}`,
         agentRole: 'RATE_LIMITER',
         securityLevel: this.mapRiskLevelToSecurityLevel(config.riskLevel),
         conversationHistory: request.conversationalContext?.conversationHistory?.map(h => ({
           timestamp: new Date(h.timestamp),
           speaker: h.speaker,
           message: h.message,
-        })) || [],
+        })) ?? [],
         metadata: {
           operationId,
           rateLimitDecision: true,
@@ -500,7 +500,7 @@ export class EnterpriseApiRateLimitService {
       overrideApplied = {
         type: request.conversationalContext?.requestedOverride ? 'BUSINESS_JUSTIFICATION' : 'USER_INTENT',
         reason: validationResult.reasoning,
-        duration: request.conversationalContext?.requestedOverride?.expectedDuration || 3600000, // 1 hour default
+        duration: request.conversationalContext?.requestedOverride?.expectedDuration ?? 3600000, // 1 hour default
         approvalLevel: 'PARLANT_AI_VALIDATION',
       };
     } else if (wouldExceedLimit && !validationResult.approved) {
@@ -568,14 +568,14 @@ export class EnterpriseApiRateLimitService {
     const existing = this.rateLimitTracking.get(trackingKey);
     const now = new Date();
     
-    if (!existing || now >= existing.resetTime) {
+    if (|| now >= existing.resetTime) {
       // Create new tracking window
       const resetTime = new Date(now.getTime() + config.windowMs);
       this.rateLimitTracking.set(trackingKey, {
         count: 0,
         resetTime,
         firstRequest: now,
-        violations: existing?.violations || 0,
+        violations: existing?.violations ?? 0,
       });
       return { count: 0, resetTime };
     }

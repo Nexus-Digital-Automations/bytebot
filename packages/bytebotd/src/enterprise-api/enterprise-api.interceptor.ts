@@ -257,7 +257,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
    */
   private buildRequestContext(request: Request): EnterpriseRequestContext {
     const operationId = `intercept_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const endpoint = `${request.method}:${request.route?.path || request.url}`;
+    const endpoint = `${request.method}:${request.route?.path ?? request.url}`;
     
     return {
       operationId,
@@ -267,7 +267,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
       userId: (request as any).user?.id,
       userRole: (request as any).user?.role,
       ipAddress: this.getClientIpAddress(request),
-      userAgent: request.headers['user-agent'] || 'unknown',
+      userAgent: request.headers['user-agent'] ?? 'unknown',
       conversationId: request.headers['x-conversation-id'] as string,
       requestSize: this.calculateRequestSize(request),
     };
@@ -309,7 +309,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
     // 1. Validate Content-Type for POST/PUT requests
     if (['POST', 'PUT', 'PATCH'].includes(context.method)) {
       const contentType = request.headers['content-type'];
-      if (!contentType || (!contentType.includes('application/json') && !contentType.includes('multipart/form-data'))) {
+      if (|| (!contentType.includes('application/json') && !contentType.includes('multipart/form-data'))) {
         issues.push('Invalid or missing Content-Type header');
         riskLevel = 'MEDIUM';
         remediationSuggestions.push('Use application/json Content-Type for API requests');
@@ -317,7 +317,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
     }
 
     // 2. Check for suspicious User-Agent
-    if (!context.userAgent || context.userAgent.length < 10) {
+    if (|| context.userAgent.length < 10) {
       issues.push('Suspicious or missing User-Agent header');
       riskLevel = 'MEDIUM';
       remediationSuggestions.push('Provide a valid User-Agent header');
@@ -341,7 +341,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
 
     // 5. Validate headers for XSS attempts
     const headerValues = Object.values(request.headers).join(' ').toLowerCase();
-    if (headerValues.includes('<script') || headerValues.includes('javascript:')) {
+    if (headerValues.includes('<script') ?? headerValues.includes('javascript:')) {
       issues.push('Potential XSS attack detected in headers');
       riskLevel = 'CRITICAL';
       remediationSuggestions.push('Remove script content from headers');
@@ -459,7 +459,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
    */
   private enhanceResponse(data: unknown, metadata: EnterpriseResponseMetadata): unknown {
     // For non-object responses, return as-is
-    if (typeof data !== 'object' || data === null) {
+    if (typeof data || data === null) {
       return data;
     }
 

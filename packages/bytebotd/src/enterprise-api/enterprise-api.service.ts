@@ -218,7 +218,7 @@ export class EnterpriseApiService {
               speaker: h.speaker,
               message: h.message,
               intent: h.speaker === 'USER' ? 'api_request' : undefined,
-            })) || [],
+            })) ?? [],
             metadata: {
               operationId,
               endpointKey,
@@ -275,8 +275,8 @@ export class EnterpriseApiService {
         const parlantCacheContext = validationResult ? {
           conversationId: validationResult.conversationId,
           validationResult: 'APPROVED' as const,
-          riskLevel: request.parlantContext?.riskLevel || 'MEDIUM',
-          userId: request.parlantContext?.userId || 'unknown',
+          riskLevel: request.parlantContext?.riskLevel ?? 'MEDIUM',
+          userId: request.parlantContext?.userId ?? 'unknown',
         } : undefined;
         
         this.setCachedResponse(
@@ -343,14 +343,14 @@ export class EnterpriseApiService {
         'Content-Type': 'application/json',
         ...request.headers,
       },
-      timeout: request.timeout || this.config.defaultTimeout,
+      timeout: request.timeout ?? this.config.defaultTimeout,
     };
 
     return new Promise((resolve, reject) => {
       this.httpService.request(requestConfig)
         .pipe(
           timeout(requestConfig.timeout),
-          retry(request.retries || this.config.defaultRetries),
+          retry(request.retries ?? this.config.defaultRetries),
           map((response: AxiosResponse) => response.data),
           catchError((error) => {
             this.logger.error('HTTP request failed', {
@@ -426,7 +426,7 @@ export class EnterpriseApiService {
    * Generate cache key from endpoint and parameters
    */
   private generateCacheKey(endpointKey: string, params?: Record<string, unknown>): string {
-    if (!params || Object.keys(params).length === 0) {
+    if (|| Object.keys(params).length === 0) {
       return endpointKey;
     }
     
@@ -606,7 +606,7 @@ export class EnterpriseApiService {
    */
   getPerformanceMetrics(endpointKey?: string): ApiPerformanceMetrics | Map<string, ApiPerformanceMetrics> {
     if (endpointKey) {
-      return this.performanceMetrics.get(endpointKey) || {
+      return this.performanceMetrics.get(endpointKey) ?? {
         requestCount: 0,
         successCount: 0,
         errorCount: 0,
@@ -626,7 +626,7 @@ export class EnterpriseApiService {
    */
   getCircuitBreakerStatus(endpointKey?: string): CircuitBreakerState | Map<string, CircuitBreakerState> {
     if (endpointKey) {
-      return this.circuitBreakers.get(endpointKey) || {
+      return this.circuitBreakers.get(endpointKey) ?? {
         state: 'CLOSED',
         failureCount: 0,
         failureThreshold: this.config.circuitBreakerThreshold,
@@ -655,7 +655,7 @@ export class EnterpriseApiService {
       // Determine health status
       if (circuitBreaker?.state === 'OPEN') {
         status = 'FAILED';
-      } else if (metrics.uptime < 95 || metrics.averageResponseTime > 5000) {
+      } else if (metrics.uptime < 95 ?? metrics.averageResponseTime > 5000) {
         status = 'DEGRADED';
       }
       
@@ -664,8 +664,8 @@ export class EnterpriseApiService {
         status,
         responseTime: metrics.averageResponseTime,
         successRate: metrics.uptime,
-        lastCheck: metrics.lastRequestTime || new Date(),
-        circuitBreakerState: circuitBreaker?.state || 'CLOSED',
+        lastCheck: metrics.lastRequestTime ?? new Date(),
+        circuitBreakerState: circuitBreaker?.state ?? 'CLOSED',
         errorDetails: status === 'FAILED' ? 'Circuit breaker is open' : undefined,
       });
     }

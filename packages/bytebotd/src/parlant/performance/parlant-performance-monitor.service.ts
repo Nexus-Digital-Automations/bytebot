@@ -243,7 +243,7 @@ export class ParlantPerformanceMonitorService {
     // Calculate latency statistics
     const latencies = recentMetrics.map(m => m.duration).sort((a, b) => a - b);
     const averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
-    const medianLatency = latencies[Math.floor(latencies.length / 2)] || 0;
+    const medianLatency = latencies[Math.floor(latencies.length / 2)] ?? 0;
     const p95Index = Math.floor(latencies.length * 0.95);
     const p99Index = Math.floor(latencies.length * 0.99);
 
@@ -259,7 +259,7 @@ export class ParlantPerformanceMonitorService {
     // Performance score (0-100)
     const performanceScore = this.calculatePerformanceScore({
       averageLatency,
-      p95Latency: latencies[p95Index] || 0,
+      p95Latency: latencies[p95Index] ?? 0,
       throughputRpm,
       cacheHitRate,
       errorRate,
@@ -268,7 +268,7 @@ export class ParlantPerformanceMonitorService {
     // Check if targets are met
     const targetsMet = {
       avgUnder500ms: averageLatency < this.performanceAlerts.thresholds.maxAverageLatency,
-      p95Under1000ms: (latencies[p95Index] || 0) < this.performanceAlerts.thresholds.maxP95Latency,
+      p95Under1000ms: (latencies[p95Index] ?? 0) < this.performanceAlerts.thresholds.maxP95Latency,
       throughputOver25: throughputRpm > this.performanceAlerts.thresholds.minThroughputRpm,
       cacheHitOver95: cacheHitRate > this.performanceAlerts.thresholds.minCacheHitRate,
     };
@@ -278,8 +278,8 @@ export class ParlantPerformanceMonitorService {
       totalOperations: recentMetrics.length,
       averageLatency,
       medianLatency,
-      p95Latency: latencies[p95Index] || 0,
-      p99Latency: latencies[p99Index] || 0,
+      p95Latency: latencies[p95Index] ?? 0,
+      p99Latency: latencies[p99Index] ?? 0,
       maxLatency: Math.max(...latencies),
       minLatency: Math.min(...latencies),
       throughputRpm,

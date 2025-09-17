@@ -255,7 +255,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
             endpointUsed = failoverResult.successfulEndpoint;
             degradedMode = failoverResult.degradedMode;
           } else {
-            throw failoverResult.error || new Error('Validation failed after all retry attempts');
+            throw failoverResult.error ?? new Error('Validation failed after all retry attempts');
           }
           
         } else if (this.optimizedConfig.enableCircuitBreaker) {
@@ -270,7 +270,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
           if (circuitResult.success) {
             validationResponse = circuitResult.data!;
           } else {
-            throw circuitResult.error || new Error('Circuit breaker blocked validation');
+            throw circuitResult.error ?? new Error('Circuit breaker blocked validation');
           }
           
         } else {
@@ -404,8 +404,8 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
     this.logger.log(`[${operationId}] Starting bulk validation`, {
       totalRequests: bulkRequest.requests.length,
       priority: bulkRequest.priority,
-      batchSize: bulkRequest.batchSize || 10,
-      maxConcurrency: bulkRequest.maxConcurrency || 5,
+      batchSize: bulkRequest.batchSize ?? 10,
+      maxConcurrency: bulkRequest.maxConcurrency ?? 5,
     });
 
     try {
@@ -439,12 +439,12 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
               approved: false,
               conversationId: `bulk_error_${Date.now()}`,
               validationTimestamp: new Date(),
-              reasoning: `Bulk validation failed: ${result?.error?.message || 'Unknown error'}`,
+              reasoning: `Bulk validation failed: ${result?.error?.message ?? 'Unknown error'}`,
               confidence: 0,
               performanceMetrics: {
-                totalTime: result?.totalTime || 0,
+                totalTime: result?.totalTime ?? 0,
                 cacheHit: false,
-                retryAttempts: result?.totalAttempts || 0,
+                retryAttempts: result?.totalAttempts ?? 0,
                 circuitBreakerState: 'UNKNOWN',
                 degradedMode: true,
               },

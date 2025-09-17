@@ -27,11 +27,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ParlantIntegrationService,
-  ConversationalValidationError,
+  ConversationalValidationError as _ConversationalValidationError,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
-  ParlantConversationContext,
+  ParlantConversationContext as _ParlantConversationContext,
 } from '../parlant/parlant-integration.service';
 
 // ===== ROUTING TYPES =====
@@ -420,7 +420,7 @@ export class EnterpriseApiRoutingService {
    */
   getServiceEndpoints(operation?: string): ServiceEndpoint[] {
     if (operation) {
-      return this.serviceEndpoints.get(operation) || [];
+      return this.serviceEndpoints.get(operation) ?? [];
     }
     
     const allEndpoints: ServiceEndpoint[] = [];
@@ -533,7 +533,7 @@ export class EnterpriseApiRoutingService {
         confidence: parlantValidation.confidence,
         businessAnalysis: `Business analysis for ${request.operation} routing`,
         riskAssessment: `Risk assessment: ${this.assessRoutingRisk(request, availableEndpoints)}`,
-        routingOptimizations: parlantValidation.suggestedAlternatives || [],
+        routingOptimizations: parlantValidation.suggestedAlternatives ?? [],
       },
       metadata: {
         operationId,
@@ -545,8 +545,8 @@ export class EnterpriseApiRoutingService {
           businessPriority: selectedEndpoint.capabilities.businessPriority,
         },
         fallbackPlan: {
-          primaryFailover: alternativeEndpoints[0]?.id || 'none',
-          secondaryFailover: alternativeEndpoints[1]?.id || 'none',
+          primaryFailover: alternativeEndpoints[0]?.id ?? 'none',
+          secondaryFailover: alternativeEndpoints[1]?.id ?? 'none',
           emergencyFallback: 'circuit_breaker',
         },
       },
@@ -584,7 +584,7 @@ export class EnterpriseApiRoutingService {
     });
     
     scores.sort((a, b) => b.score - a.score);
-    const selectedEndpoint = scores[0]?.endpoint || availableEndpoints[0];
+    const selectedEndpoint = scores[0]?.endpoint ?? availableEndpoints[0];
     
     if (!selectedEndpoint) {
       throw new Error('No available endpoints for routing');
@@ -673,7 +673,7 @@ export class EnterpriseApiRoutingService {
    * Get available endpoints for operation
    */
   private getAvailableEndpoints(operation: string): ServiceEndpoint[] {
-    return this.serviceEndpoints.get(operation) || [];
+    return this.serviceEndpoints.get(operation) ?? [];
   }
 
   /**
@@ -864,7 +864,7 @@ export class EnterpriseApiRoutingService {
   }
 
   private shouldValidateHealthUpdate(serviceId: string, health: 'HEALTHY' | 'DEGRADED' | 'FAILED'): boolean {
-    return health === 'FAILED' || this.isCriticalService(serviceId);
+    return health === 'FAILED' ?? this.isCriticalService(serviceId);
   }
 
   private async performHealthUpdate(
@@ -943,7 +943,7 @@ export class EnterpriseApiRoutingService {
   }
 
   private selectRoundRobinEndpoint(operation: string, endpoints: ServiceEndpoint[]): ServiceEndpoint {
-    const counter = this.roundRobinCounters.get(operation) || 0;
+    const counter = this.roundRobinCounters.get(operation) ?? 0;
     const selectedIndex = counter % endpoints.length;
     this.roundRobinCounters.set(operation, counter + 1);
     const endpoint = endpoints[selectedIndex];
@@ -999,7 +999,7 @@ export class EnterpriseApiRoutingService {
   }
 
   private isCriticalService(serviceId: string): boolean {
-    return serviceId.includes('primary') || serviceId.includes('auth');
+    return serviceId.includes('primary') ?? serviceId.includes('auth');
   }
 
   private sanitizeOperationForFunction(operation: string): string {

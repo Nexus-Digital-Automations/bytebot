@@ -326,7 +326,7 @@ export class ParlantComputerUseController {
         result,
         validation: {
           approved: true,
-          conversationId: validationContext.sessionId || `session-${Date.now()}`,
+          conversationId: validationContext.sessionId ?? `session-${Date.now()}`,
           validationTimestamp: new Date(),
           reasoning: 'Action approved through conversational validation',
           confidence: 0.95, // High confidence for successful execution

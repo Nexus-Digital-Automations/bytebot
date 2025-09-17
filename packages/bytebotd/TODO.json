@@ -1227,7 +1227,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T21:24:39.927Z",
       "title": "Fix ESLint violations in encryption and security service files",
       "description": "Fix all ESLint violations in encryption-service.ts and similar security files, focusing on unsafe any assignments, unsafe calls, unsafe member access, explicit any types, and nullish coalescing. Target zero violations in encryption services.",
@@ -1244,7 +1244,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-17T21:36:20.143Z",
+      "updated_at": "2025-09-17T21:36:20.143Z"
     },
     {
       "status": "in_progress",
@@ -1267,7 +1269,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T21:24:46.267Z",
       "title": "Fix all ESLint violations in browser-use service files",
       "description": "Comprehensive ESLint violation fix in browser-use directory: unsafe any assignments, explicit any types, nullish coalescing, unused variables/parameters, forbidden non-null assertions. Target zero violations.",
@@ -1284,7 +1286,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-17T21:36:01.073Z",
+      "updated_at": "2025-09-17T21:36:01.073Z"
     }
   ],
   "agents": {

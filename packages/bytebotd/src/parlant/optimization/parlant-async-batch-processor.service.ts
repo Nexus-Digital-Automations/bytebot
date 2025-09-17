@@ -22,6 +22,7 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
+import { Worker } from 'worker_threads';
 import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
 
 // ===== ASYNC BATCH PROCESSING INTERFACES =====
@@ -329,7 +330,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     const criticalQueue = this.priorityQueues.get(ValidationPriority.CRITICAL) ?? [];
     const highQueue = this.priorityQueues.get(ValidationPriority.HIGH) ?? [];
     
-    return criticalQueue.length > 0 || highQueue.length >= this.batchConfig.priorityThreshold;
+    return criticalQueue.length > 0 ?? highQueue.length >= this.batchConfig.priorityThreshold;
   }
 
   private hasTimeCriticalRequests(): boolean {
@@ -355,7 +356,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
         const batchSize = this.getBatchSizeForPriority(priority);
         const batch = queue.splice(0, Math.min(batchSize, queue.length));
         
-        if (batch.length >= this.batchConfig.minBatchSize || this.shouldProcessSmallBatch(batch)) {
+        if (batch.length >= this.batchConfig.minBatchSize ?? this.shouldProcessSmallBatch(batch)) {
           await this.executeBatch(batch, priority);
         } else {
           // Put items back if batch too small
@@ -379,7 +380,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     const maxAge = this.batchConfig.maxWaitTimeMs;
     
     return batch.some(item => 
-      item.priority <= ValidationPriority.HIGH || 
+      item.priority <= ValidationPriority.HIGH ?? 
       now - item.timestamp > maxAge
     );
   }
@@ -456,7 +457,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     const validationTask: ValidationTask = {
       batchId,
       requests: batch,
-      priority: batch[0]?.priority || ValidationPriority.MEDIUM,
+      priority: batch[0]?.priority ?? ValidationPriority.MEDIUM,
       timeoutMs: this.workerPoolConfig.taskTimeoutMs
     };
     

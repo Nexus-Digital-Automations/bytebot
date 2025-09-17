@@ -29,39 +29,39 @@ export const parlantConfigFactory = () => ({
     enabled: process.env.PARLANT_ENABLED !== 'false',
     cacheEnabled: process.env.PARLANT_CACHE_ENABLED !== 'false',
     auditEnabled: process.env.PARLANT_AUDIT_ENABLED !== 'false',
-    cacheMaxAgeMs: parseInt(process.env.PARLANT_CACHE_MAX_AGE_MS || '300000', 10), // 5 minutes
-    validationTimeoutMs: parseInt(process.env.PARLANT_VALIDATION_TIMEOUT_MS || '5000', 10), // 5 seconds
-    maxConversationHistory: parseInt(process.env.PARLANT_MAX_CONVERSATION_HISTORY || '100', 10),
-    performanceMetricsInterval: parseInt(process.env.PARLANT_METRICS_INTERVAL_MS || '60000', 10), // 1 minute
-    auditRetentionDays: parseInt(process.env.PARLANT_AUDIT_RETENTION_DAYS || '90', 10),
+    cacheMaxAgeMs: parseInt(process.env.PARLANT_CACHE_MAX_AGE_MS ?? '300000', 10), // 5 minutes
+    validationTimeoutMs: parseInt(process.env.PARLANT_VALIDATION_TIMEOUT_MS ?? '5000', 10), // 5 seconds
+    maxConversationHistory: parseInt(process.env.PARLANT_MAX_CONVERSATION_HISTORY ?? '100', 10),
+    performanceMetricsInterval: parseInt(process.env.PARLANT_METRICS_INTERVAL_MS ?? '60000', 10), // 1 minute
+    auditRetentionDays: parseInt(process.env.PARLANT_AUDIT_RETENTION_DAYS ?? '90', 10),
     
     // Security configuration
     security: {
       requireApprovalForHighRisk: process.env.PARLANT_REQUIRE_HIGH_RISK_APPROVAL !== 'false',
       enableThreatDetection: process.env.PARLANT_ENABLE_THREAT_DETECTION !== 'false',
-      maxFailedValidations: parseInt(process.env.PARLANT_MAX_FAILED_VALIDATIONS || '5', 10),
-      suspiciousActivityThreshold: parseInt(process.env.PARLANT_SUSPICIOUS_THRESHOLD || '3', 10),
+      maxFailedValidations: parseInt(process.env.PARLANT_MAX_FAILED_VALIDATIONS ?? '5', 10),
+      suspiciousActivityThreshold: parseInt(process.env.PARLANT_SUSPICIOUS_THRESHOLD ?? '3', 10),
     },
     
     // Performance configuration
     performance: {
-      cacheSize: parseInt(process.env.PARLANT_CACHE_SIZE || '1000', 10),
-      batchValidationSize: parseInt(process.env.PARLANT_BATCH_SIZE || '10', 10),
-      concurrentValidations: parseInt(process.env.PARLANT_CONCURRENT_VALIDATIONS || '5', 10),
-      validationTimeoutMs: parseInt(process.env.PARLANT_VALIDATION_TIMEOUT_MS || '1000', 10),
+      cacheSize: parseInt(process.env.PARLANT_CACHE_SIZE ?? '1000', 10),
+      batchValidationSize: parseInt(process.env.PARLANT_BATCH_SIZE ?? '10', 10),
+      concurrentValidations: parseInt(process.env.PARLANT_CONCURRENT_VALIDATIONS ?? '5', 10),
+      validationTimeoutMs: parseInt(process.env.PARLANT_VALIDATION_TIMEOUT_MS ?? '1000', 10),
     },
     
     // API configuration (for future Parlant API integration)
     api: {
-      baseUrl: process.env.PARLANT_API_BASE_URL || 'http://localhost:8000',
-      apiKey: process.env.PARLANT_API_KEY || '',
-      timeout: parseInt(process.env.PARLANT_API_TIMEOUT_MS || '10000', 10),
-      retries: parseInt(process.env.PARLANT_API_RETRIES || '3', 10),
+      baseUrl: process.env.PARLANT_API_BASE_URL ?? 'http://localhost:8000',
+      apiKey: process.env.PARLANT_API_KEY ?? '',
+      timeout: parseInt(process.env.PARLANT_API_TIMEOUT_MS ?? '10000', 10),
+      retries: parseInt(process.env.PARLANT_API_RETRIES ?? '3', 10),
     },
     
     // Logging configuration
     logging: {
-      level: process.env.PARLANT_LOG_LEVEL || 'info',
+      level: process.env.PARLANT_LOG_LEVEL ?? 'info',
       enableAuditLogging: process.env.PARLANT_ENABLE_AUDIT_LOGGING !== 'false',
       enablePerformanceLogging: process.env.PARLANT_ENABLE_PERFORMANCE_LOGGING !== 'false',
       logValidationDetails: process.env.PARLANT_LOG_VALIDATION_DETAILS === 'true',

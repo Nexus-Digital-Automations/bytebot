@@ -3014,9 +3014,58 @@
       "needs_linter_feedback": true,
       "linter_feedback_generated": false,
       "archived_from_todo": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/TODO.json"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T21:24:46.267Z",
+      "title": "Fix all ESLint violations in browser-use service files",
+      "description": "Comprehensive ESLint violation fix in browser-use directory: unsafe any assignments, explicit any types, nullish coalescing, unused variables/parameters, forbidden non-null assertions. Target zero violations.",
+      "category": "error",
+      "id": "error_1758144286267_awktvw4xjm",
+      "assigned_agent": "dev_session_1758144259141_1_general_ceab2bad",
+      "started_at": "2025-09-17T21:25:21.559Z",
+      "claimed_by": "dev_session_1758144259141_1_general_ceab2bad",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758144259141_1_general_ceab2bad",
+          "role": "primary",
+          "assignedAt": "2025-09-17T21:25:21.559Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-17T21:36:01.073Z",
+      "updated_at": "2025-09-17T21:36:01.073Z",
+      "archived_at": "2025-09-17T21:36:01.078Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T21:24:39.927Z",
+      "title": "Fix ESLint violations in encryption and security service files",
+      "description": "Fix all ESLint violations in encryption-service.ts and similar security files, focusing on unsafe any assignments, unsafe calls, unsafe member access, explicit any types, and nullish coalescing. Target zero violations in encryption services.",
+      "category": "error",
+      "id": "error_1758144279927_kurwbp0z6x8",
+      "assigned_agent": "dev_session_1758144260776_1_general_9c7201c4",
+      "started_at": "2025-09-17T21:25:37.066Z",
+      "claimed_by": "dev_session_1758144260776_1_general_9c7201c4",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758144260776_1_general_9c7201c4",
+          "role": "primary",
+          "assignedAt": "2025-09-17T21:25:37.066Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-17T21:36:20.143Z",
+      "updated_at": "2025-09-17T21:36:20.143Z",
+      "archived_at": "2025-09-17T21:36:20.148Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 59,
+  "total_completed": 61,
   "last_completion": "2025-09-13T17:42:38.813Z",
-  "created_at": "2025-09-06T03:52:57.066Z"
+  "created_at": "2025-09-06T03:52:57.066Z",
+  "last_archived": "2025-09-17T21:36:20.148Z"
 }

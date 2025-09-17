@@ -595,6 +595,6 @@ class PerformanceBenchmark {
   static calculatePercentile(values: number[], percentile: number): number {
     const sorted = [...values].sort((a, b) => a - b);
     const index = Math.floor(sorted.length * (percentile / 100));
-    return sorted[index] || 0;
+    return sorted[index] ?? 0;
   }
 }

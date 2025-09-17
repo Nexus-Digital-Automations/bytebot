@@ -462,7 +462,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
     
     return {
       success: false,
-      error: lastError || new Error('All retry attempts exhausted'),
+      error: lastError ?? new Error('All retry attempts exhausted'),
       totalAttempts: currentAttempt,
       totalTime,
       failedEndpoints,
@@ -647,13 +647,13 @@ export class ParlantRetryFailoverService extends EventEmitter {
   // ===== PRIVATE HELPER METHODS =====
 
   private getRetryConfig(riskLevel: RiskLevel): RetryConfig {
-    return this.retryConfigs.get(riskLevel) || this.retryConfigs.get(RiskLevel.MEDIUM)!;
+    return this.retryConfigs.get(riskLevel) ?? this.retryConfigs.get(RiskLevel.MEDIUM)!;
   }
 
   private getHealthyEndpoints(): FailoverEndpoint[] {
     return this.failoverEndpoints.filter(endpoint => {
       const health = this.endpointHealth.get(endpoint.url);
-      return endpoint.enabled && (!health || health.healthy);
+      return endpoint.enabled && (!health ?? health.healthy);
     });
   }
 
@@ -690,16 +690,16 @@ export class ParlantRetryFailoverService extends EventEmitter {
   private categorizeError(error: Error): string {
     const message = error.message.toLowerCase();
     
-    if (message.includes('timeout') || message.includes('timed out')) {
+    if (message.includes('timeout') ?? message.includes('timed out')) {
       return 'TIMEOUT';
     }
-    if (message.includes('connection') || message.includes('network')) {
+    if (message.includes('connection') ?? message.includes('network')) {
       return 'CONNECTION_ERROR';
     }
-    if (message.includes('rate limit') || message.includes('too many requests')) {
+    if (message.includes('rate limit') ?? message.includes('too many requests')) {
       return 'RATE_LIMITED';
     }
-    if (message.includes('server error') || message.includes('internal error')) {
+    if (message.includes('server error') ?? message.includes('internal error')) {
       return 'SERVER_ERROR';
     }
     
@@ -751,7 +751,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
       (this.retryAnalytics.averageRetryCount * (totalOperations - 1) + (attempts - 1)) / totalOperations;
     
     // Update endpoint success rate
-    const currentRate = this.retryAnalytics.endpointSuccessRates.get(endpoint) || 0;
+    const currentRate = this.retryAnalytics.endpointSuccessRates.get(endpoint) ?? 0;
     this.retryAnalytics.endpointSuccessRates.set(endpoint, currentRate + 1);
     
     // Update time distribution
@@ -806,12 +806,12 @@ export class ParlantRetryFailoverService extends EventEmitter {
     const circuitStats = this.circuitBreakerService.getCircuitBreakerStats();
     
     if (circuitStats.state === CircuitBreakerState.OPEN) {
-      return this.degradationStrategies.get('circuit_open') || null;
+      return this.degradationStrategies.get('circuit_open') ?? null;
     }
     
     const healthyEndpoints = this.getHealthyEndpoints();
     if (healthyEndpoints.length === 0) {
-      return this.degradationStrategies.get('all_endpoints_down') || null;
+      return this.degradationStrategies.get('all_endpoints_down') ?? null;
     }
     
     return null;
@@ -849,7 +849,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
     data?: any;
   }> {
     // Try cache-only response for low-risk operations
-    if (request.riskLevel === RiskLevel.MINIMAL || request.riskLevel === RiskLevel.LOW) {
+    if (request.riskLevel === RiskLevel.MINIMAL ?? request.riskLevel === RiskLevel.LOW) {
       return {
         degradedMode: true,
         fallbackUsed: true,

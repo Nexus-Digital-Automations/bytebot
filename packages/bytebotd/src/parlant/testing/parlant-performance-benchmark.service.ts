@@ -20,7 +20,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { performance } from 'perf_hooks';
-import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
+import { ParlantValidationRequest, ParlantValidationResponse as _ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
 import { ParlantPerformanceMonitorService } from '../performance/parlant-performance-monitor.service';
 
 // ===== BENCHMARKING INTERFACES =====
@@ -547,7 +547,7 @@ export class ParlantPerformanceBenchmarkService {
    * @returns Historical benchmark results
    */
   getBenchmarkHistory(benchmarkName: string, days: number = 30): BenchmarkResult[] {
-    const history = this.testHistory.get(benchmarkName) || [];
+    const history = this.testHistory.get(benchmarkName) ?? [];
     const cutoffDate = new Date(Date.now() - (days * 24 * 60 * 60 * 1000));
     
     return history.filter(result => result.startTime >= cutoffDate);
@@ -670,11 +670,12 @@ export class ParlantPerformanceBenchmarkService {
           return Math.floor((elapsed / rampDuration) * scenario.peakLoad);
         case 'exponential':
           return Math.floor(scenario.peakLoad * Math.pow(elapsed / rampDuration, 2));
-        case 'step':
+        case 'step': {
           const steps = 5;
           const stepSize = scenario.peakLoad / steps;
           const stepDuration = rampDuration / steps;
           return Math.floor((Math.floor(elapsed / stepDuration) + 1) * stepSize);
+        }
         default:
           return Math.floor((elapsed / rampDuration) * scenario.peakLoad);
       }
@@ -693,7 +694,7 @@ export class ParlantPerformanceBenchmarkService {
       }
     }
     
-    return journeys[journeys.length - 1] || journeys[0]; // Fallback
+    return journeys[journeys.length - 1] ?? journeys[0]; // Fallback
   }
 
   private async simulateUserJourney(
@@ -730,7 +731,7 @@ export class ParlantPerformanceBenchmarkService {
     results: Array<{ latency: number; success: boolean; timestamp: number }>,
     request?: ParlantValidationRequest
   ): Promise<void> {
-    const testRequest = request || this.createTestRequest();
+    const testRequest = request ?? this.createTestRequest();
     const startTime = performance.now();
     
     try {
@@ -803,7 +804,7 @@ export class ParlantPerformanceBenchmarkService {
     // Calculate latency statistics
     const latencies = successfulResults.map(r => r.latency).sort((a, b) => a - b);
     const averageLatency = latencies.length > 0 ? latencies.reduce((sum, l) => sum + l, 0) / latencies.length : 0;
-    const medianLatency = latencies.length > 0 ? (latencies[Math.floor(latencies.length / 2)] || 0) : 0;
+    const medianLatency = latencies.length > 0 ? (latencies[Math.floor(latencies.length / 2)] ?? 0) : 0;
     const p95Index = Math.floor(latencies.length * 0.95);
     const p99Index = Math.floor(latencies.length * 0.99);
     
@@ -834,8 +835,8 @@ export class ParlantPerformanceBenchmarkService {
       failedRequests: failedResults.length,
       averageLatency,
       medianLatency,
-      p95Latency: latencies[p95Index] || 0,
-      p99Latency: latencies[p99Index] || 0,
+      p95Latency: latencies[p95Index] ?? 0,
+      p99Latency: latencies[p99Index] ?? 0,
       maxLatency: latencies.length > 0 ? Math.max(...latencies) : 0,
       minLatency: latencies.length > 0 ? Math.min(...latencies) : 0,
       throughput,
@@ -897,7 +898,7 @@ export class ParlantPerformanceBenchmarkService {
       if (typeof baselineValue === 'number' && typeof currentValue === 'number') {
         const change = (currentValue - baselineValue) / baselineValue;
         
-        if (metric === 'averageLatency' || metric === 'p95Latency' || metric === 'errorRate') {
+        if (metric === 'averageLatency' ?? metric === 'p95Latency' ?? metric === 'errorRate') {
           // Lower is better for these metrics
           if (change > tolerance) {
             const issue = `${metric} degraded: ${baselineValue.toFixed(2)} -> ${currentValue.toFixed(2)} (${(change * 100).toFixed(1)}% increase)`;
@@ -978,7 +979,7 @@ export class ParlantPerformanceBenchmarkService {
   }
 
   private storeBenchmarkResult(benchmarkName: string, result: BenchmarkResult): void {
-    const history = this.testHistory.get(benchmarkName) || [];
+    const history = this.testHistory.get(benchmarkName) ?? [];
     history.push(result);
     
     // Keep only recent history (e.g., last 100 results)

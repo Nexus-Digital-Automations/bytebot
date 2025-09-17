@@ -80,7 +80,7 @@ interface OptimizationStatus {
  * Type guard functions for safe property access
  */
 function isCircuitBreakerStatus(obj: unknown): obj is CircuitBreakerStatus {
-  if (!obj || typeof obj !== 'object') return false;
+  if (!obj ?? typeof obj !== 'object') return false;
   const record = obj as Record<string, unknown>;
   return (
     'state' in record && typeof record.state === 'string' && 
@@ -90,9 +90,9 @@ function isCircuitBreakerStatus(obj: unknown): obj is CircuitBreakerStatus {
 }
 
 function isPerformanceStatus(obj: unknown): obj is PerformanceStatus {
-  if (!obj || typeof obj !== 'object') return false;
+  if (!obj ?? typeof obj !== 'object') return false;
   const record = obj as Record<string, unknown>;
-  if (!('currentStats' in record) || !record.currentStats || typeof record.currentStats !== 'object') return false;
+  if (!('currentStats' in record) ?? !record.currentStats ?? typeof record.currentStats !== 'object') return false;
   
   const stats = record.currentStats as Record<string, unknown>;
   return (
@@ -102,7 +102,7 @@ function isPerformanceStatus(obj: unknown): obj is PerformanceStatus {
 }
 
 function isCacheStatus(obj: unknown): obj is CacheStatus {
-  if (!obj || typeof obj !== 'object') return false;
+  if (!obj ?? typeof obj !== 'object') return false;
   const record = obj as Record<string, unknown>;
   return (
     'hitRate' in record && typeof record.hitRate === 'number' && 
@@ -112,7 +112,7 @@ function isCacheStatus(obj: unknown): obj is CacheStatus {
 }
 
 function isAuditStatus(obj: unknown): obj is AuditStatus {
-  if (!obj || typeof obj !== 'object') return false;
+  if (!obj ?? typeof obj !== 'object') return false;
   const record = obj as Record<string, unknown>;
   return (
     'totalEntries' in record && typeof record.totalEntries === 'number' && 
@@ -157,56 +157,56 @@ export const parlantOptimizationConfig = () => ({
 
     // Performance targets
     performanceTargets: {
-      averageLatency: parseInt(process.env.PARLANT_TARGET_AVG_LATENCY_MS || '500', 10),
-      p95Latency: parseInt(process.env.PARLANT_TARGET_P95_LATENCY_MS || '1000', 10),
-      throughput: parseInt(process.env.PARLANT_TARGET_THROUGHPUT_RPS || '25', 10),
-      cacheHitRate: parseInt(process.env.PARLANT_TARGET_CACHE_HIT_RATE || '95', 10),
-      availability: parseFloat(process.env.PARLANT_TARGET_AVAILABILITY || '99.9'),
+      averageLatency: parseInt(process.env.PARLANT_TARGET_AVG_LATENCY_MS ?? '500', 10),
+      p95Latency: parseInt(process.env.PARLANT_TARGET_P95_LATENCY_MS ?? '1000', 10),
+      throughput: parseInt(process.env.PARLANT_TARGET_THROUGHPUT_RPS ?? '25', 10),
+      cacheHitRate: parseInt(process.env.PARLANT_TARGET_CACHE_HIT_RATE ?? '95', 10),
+      availability: parseFloat(process.env.PARLANT_TARGET_AVAILABILITY ?? '99.9'),
     },
 
     // Cache configuration
     cache: {
       warmingEnabled: process.env.PARLANT_CACHE_WARMING_ENABLED === 'true',
-      warmingInterval: parseInt(process.env.PARLANT_CACHE_WARMING_INTERVAL || '15', 10),
+      warmingInterval: parseInt(process.env.PARLANT_CACHE_WARMING_INTERVAL ?? '15', 10),
       redisEnabled: process.env.PARLANT_REDIS_ENABLED === 'true',
-      redisHost: process.env.PARLANT_REDIS_HOST || 'localhost',
-      redisPort: parseInt(process.env.PARLANT_REDIS_PORT || '6379', 10),
+      redisHost: process.env.PARLANT_REDIS_HOST ?? 'localhost',
+      redisPort: parseInt(process.env.PARLANT_REDIS_PORT ?? '6379', 10),
       redisPassword: process.env.PARLANT_REDIS_PASSWORD,
     },
 
     // Circuit breaker configuration
     circuitBreaker: {
-      failureThreshold: parseInt(process.env.PARLANT_CIRCUIT_FAILURE_THRESHOLD || '5', 10),
-      recoveryTimeout: parseInt(process.env.PARLANT_CIRCUIT_RECOVERY_TIMEOUT_MS || '60000', 10),
-      successThreshold: parseInt(process.env.PARLANT_CIRCUIT_SUCCESS_THRESHOLD || '3', 10),
-      timeWindow: parseInt(process.env.PARLANT_CIRCUIT_TIME_WINDOW_MS || '60000', 10),
-      minimumRequests: parseInt(process.env.PARLANT_CIRCUIT_MIN_REQUESTS || '10', 10),
+      failureThreshold: parseInt(process.env.PARLANT_CIRCUIT_FAILURE_THRESHOLD ?? '5', 10),
+      recoveryTimeout: parseInt(process.env.PARLANT_CIRCUIT_RECOVERY_TIMEOUT_MS ?? '60000', 10),
+      successThreshold: parseInt(process.env.PARLANT_CIRCUIT_SUCCESS_THRESHOLD ?? '3', 10),
+      timeWindow: parseInt(process.env.PARLANT_CIRCUIT_TIME_WINDOW_MS ?? '60000', 10),
+      minimumRequests: parseInt(process.env.PARLANT_CIRCUIT_MIN_REQUESTS ?? '10', 10),
     },
 
     // Connection pool configuration
     connectionPool: {
-      maxConnections: parseInt(process.env.PARLANT_POOL_MAX_CONNECTIONS || '20', 10),
-      minConnections: parseInt(process.env.PARLANT_POOL_MIN_CONNECTIONS || '5', 10),
-      acquireTimeout: parseInt(process.env.PARLANT_POOL_ACQUIRE_TIMEOUT_MS || '5000', 10),
-      idleTimeout: parseInt(process.env.PARLANT_POOL_IDLE_TIMEOUT_MS || '300000', 10),
-      healthCheckInterval: parseInt(process.env.PARLANT_POOL_HEALTH_CHECK_MS || '30000', 10),
+      maxConnections: parseInt(process.env.PARLANT_POOL_MAX_CONNECTIONS ?? '20', 10),
+      minConnections: parseInt(process.env.PARLANT_POOL_MIN_CONNECTIONS ?? '5', 10),
+      acquireTimeout: parseInt(process.env.PARLANT_POOL_ACQUIRE_TIMEOUT_MS ?? '5000', 10),
+      idleTimeout: parseInt(process.env.PARLANT_POOL_IDLE_TIMEOUT_MS ?? '300000', 10),
+      healthCheckInterval: parseInt(process.env.PARLANT_POOL_HEALTH_CHECK_MS ?? '30000', 10),
     },
 
     // Retry and failover configuration
     retry: {
       maxAttempts: {
-        minimal: parseInt(process.env.PARLANT_RETRY_MAX_ATTEMPTS_MINIMAL || '5', 10),
-        low: parseInt(process.env.PARLANT_RETRY_MAX_ATTEMPTS_LOW || '4', 10),
-        medium: parseInt(process.env.PARLANT_RETRY_MAX_ATTEMPTS_MEDIUM || '3', 10),
-        high: parseInt(process.env.PARLANT_RETRY_MAX_ATTEMPTS_HIGH || '2', 10),
-        critical: parseInt(process.env.PARLANT_RETRY_MAX_ATTEMPTS_CRITICAL || '1', 10),
+        minimal: parseInt(process.env.PARLANT_RETRY_MAX_ATTEMPTS_MINIMAL ?? '5', 10),
+        low: parseInt(process.env.PARLANT_RETRY_MAX_ATTEMPTS_LOW ?? '4', 10),
+        medium: parseInt(process.env.PARLANT_RETRY_MAX_ATTEMPTS_MEDIUM ?? '3', 10),
+        high: parseInt(process.env.PARLANT_RETRY_MAX_ATTEMPTS_HIGH ?? '2', 10),
+        critical: parseInt(process.env.PARLANT_RETRY_MAX_ATTEMPTS_CRITICAL ?? '1', 10),
       },
       baseDelay: {
-        minimal: parseInt(process.env.PARLANT_RETRY_BASE_DELAY_MINIMAL || '100', 10),
-        low: parseInt(process.env.PARLANT_RETRY_BASE_DELAY_LOW || '200', 10),
-        medium: parseInt(process.env.PARLANT_RETRY_BASE_DELAY_MEDIUM || '500', 10),
-        high: parseInt(process.env.PARLANT_RETRY_BASE_DELAY_HIGH || '1000', 10),
-        critical: parseInt(process.env.PARLANT_RETRY_BASE_DELAY_CRITICAL || '0', 10),
+        minimal: parseInt(process.env.PARLANT_RETRY_BASE_DELAY_MINIMAL ?? '100', 10),
+        low: parseInt(process.env.PARLANT_RETRY_BASE_DELAY_LOW ?? '200', 10),
+        medium: parseInt(process.env.PARLANT_RETRY_BASE_DELAY_MEDIUM ?? '500', 10),
+        high: parseInt(process.env.PARLANT_RETRY_BASE_DELAY_HIGH ?? '1000', 10),
+        critical: parseInt(process.env.PARLANT_RETRY_BASE_DELAY_CRITICAL ?? '0', 10),
       },
     },
 
@@ -214,7 +214,7 @@ export const parlantOptimizationConfig = () => ({
     audit: {
       encryptionEnabled: process.env.PARLANT_AUDIT_ENCRYPTION_ENABLED === 'true',
       digitalSigningEnabled: process.env.PARLANT_AUDIT_DIGITAL_SIGNING_ENABLED === 'true',
-      retentionDays: parseInt(process.env.PARLANT_AUDIT_RETENTION_DAYS || '2555', 10), // 7 years
+      retentionDays: parseInt(process.env.PARLANT_AUDIT_RETENTION_DAYS ?? '2555', 10), // 7 years
       encryptionKey: process.env.PARLANT_AUDIT_ENCRYPTION_KEY,
       signingKey: process.env.PARLANT_AUDIT_SIGNING_KEY,
       realTimeMonitoring: process.env.PARLANT_AUDIT_REAL_TIME_MONITORING === 'true',
@@ -232,28 +232,28 @@ export const parlantOptimizationConfig = () => ({
     alerts: {
       enabled: process.env.PARLANT_PERFORMANCE_ALERTS_ENABLED === 'true',
       thresholds: {
-        maxAverageLatency: parseInt(process.env.PARLANT_ALERT_MAX_AVG_LATENCY_MS || '500', 10),
-        maxP95Latency: parseInt(process.env.PARLANT_ALERT_MAX_P95_LATENCY_MS || '1000', 10),
-        minThroughput: parseInt(process.env.PARLANT_ALERT_MIN_THROUGHPUT_RPM || '25', 10),
-        minCacheHitRate: parseInt(process.env.PARLANT_ALERT_MIN_CACHE_HIT_RATE || '95', 10),
-        maxErrorRate: parseInt(process.env.PARLANT_ALERT_MAX_ERROR_RATE || '5', 10),
+        maxAverageLatency: parseInt(process.env.PARLANT_ALERT_MAX_AVG_LATENCY_MS ?? '500', 10),
+        maxP95Latency: parseInt(process.env.PARLANT_ALERT_MAX_P95_LATENCY_MS ?? '1000', 10),
+        minThroughput: parseInt(process.env.PARLANT_ALERT_MIN_THROUGHPUT_RPM ?? '25', 10),
+        minCacheHitRate: parseInt(process.env.PARLANT_ALERT_MIN_CACHE_HIT_RATE ?? '95', 10),
+        maxErrorRate: parseInt(process.env.PARLANT_ALERT_MAX_ERROR_RATE ?? '5', 10),
       },
-      actions: (process.env.PARLANT_ALERT_ACTIONS || 'log,webhook').split(','),
+      actions: (process.env.PARLANT_ALERT_ACTIONS ?? 'log,webhook').split(','),
     },
 
     // Benchmarking configuration
     benchmarking: {
       enabled: process.env.PARLANT_BENCHMARKING_ENABLED === 'true',
       regressionTesting: process.env.PARLANT_REGRESSION_TESTING_ENABLED === 'true',
-      tolerancePercent: parseInt(process.env.PARLANT_REGRESSION_TOLERANCE_PERCENT || '10', 10),
+      tolerancePercent: parseInt(process.env.PARLANT_REGRESSION_TOLERANCE_PERCENT ?? '10', 10),
       autoRebaseline: process.env.PARLANT_REGRESSION_AUTO_REBASELINE === 'true',
     },
 
     // API endpoints configuration
-    endpoints: (process.env.PARLANT_API_ENDPOINTS || 'http://localhost:8000').split(','),
+    endpoints: (process.env.PARLANT_API_ENDPOINTS ?? 'http://localhost:8000').split(','),
 
     // Degradation strategy
-    degradationStrategy: process.env.PARLANT_DEGRADATION_STRATEGY || 'GRACEFUL_DEGRADATION',
+    degradationStrategy: process.env.PARLANT_DEGRADATION_STRATEGY ?? 'GRACEFUL_DEGRADATION',
   },
 });
 

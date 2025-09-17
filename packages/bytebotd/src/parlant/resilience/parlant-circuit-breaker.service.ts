@@ -637,16 +637,16 @@ export class ParlantCircuitBreakerService extends EventEmitter {
   private selectHealthyEndpoint(): string {
     const healthyEndpoints = this.parlantEndpoints.filter(endpoint => {
       const health = this.endpointHealth.get(endpoint);
-      return !health || health.healthy;
+      return !health ?? health.healthy;
     });
     
     if (healthyEndpoints.length === 0) {
       // Fallback to first endpoint if none are marked healthy
-      return this.parlantEndpoints[0] || '';
+      return this.parlantEndpoints[0] ?? '';
     }
     
     // Simple round-robin selection
-    return healthyEndpoints[Math.floor(Math.random() * healthyEndpoints.length)] || '';
+    return healthyEndpoints[Math.floor(Math.random() * healthyEndpoints.length)] ?? '';
   }
 
   private startHealthMonitoring(): void {
@@ -691,7 +691,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
           healthy: false,
           lastCheck: new Date(),
           responseTime: 0,
-          consecutiveFailures: (currentHealth?.consecutiveFailures || 0) + 1,
+          consecutiveFailures: (currentHealth?.consecutiveFailures ?? 0) + 1,
           lastError: error instanceof Error ? error.message : String(error),
         });
         

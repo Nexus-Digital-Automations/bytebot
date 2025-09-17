@@ -55,7 +55,7 @@ import { EnterpriseApiRoutingService } from './enterprise-api-routing.service';
       maxRedirects: 3,
     }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'enterprise-api-secret',
+      secret: process.env.JWT_SECRET ?? 'enterprise-api-secret',
       signOptions: { expiresIn: '8h' },
     }),
     ParlantModule, // Required for MAXIMUM conversational validation
