@@ -35,9 +35,9 @@ import {
   MessageType,
   ParlantValidationRequest,
   ValidationDecision
-} from '@bytebot/shared/types/parlant.types';
+} from '@bytebot/shared';
 import { useParlantWebSocket } from '@/hooks/useParlantWebSocket';
-import { logDebug, logInfo } from '@/utils/logger';
+import { logDebug, logInfo, logWarning } from '@/utils/logger';
 import {
   AlertCircleIcon,
   ArrowRight02Icon,
@@ -198,6 +198,37 @@ const TIME_CONSTANTS = {
   MAX_CONTENT_PREVIEW: 300
 } as const;
 
+/** Message type constants for safe enum access */
+const MESSAGE_TYPE_CONSTANTS = {
+  TEXT: 'text' as const,
+  VALIDATION_REQUEST: 'validation_request' as const,
+  VALIDATION_RESPONSE: 'validation_response' as const,
+  SYSTEM_NOTIFICATION: 'system_notification' as const,
+  ERROR: 'error' as const,
+  COMMAND: 'command' as const
+} as const;
+
+/** Conversation state constants for safe enum access */
+const CONVERSATION_STATE_CONSTANTS = {
+  INITIATED: 'initiated' as const,
+  ACTIVE: 'active' as const,
+  VALIDATING: 'validating' as const,
+  APPROVED: 'approved' as const,
+  DENIED: 'denied' as const,
+  COMPLETED: 'completed' as const,
+  SUSPENDED: 'suspended' as const,
+  ERROR: 'error' as const
+} as const;
+
+/** UI constants */
+const UI_CONSTANTS = {
+  SCALE_FACTOR: 1.2,
+  OPACITY_FADE: 0.2,
+  MAX_PARTICIPANT_DISPLAY: 3,
+  MAGIC_OFFSET: 50,
+  MILLISECOND_CONVERSION: 1000
+} as const;
+
 // ===========================
 // DEFAULT CONFIGURATION
 // ===========================
@@ -246,19 +277,21 @@ const formatTimestamp = (date: Date): string => {
 /**
  * Get message type icon
  */
-const getMessageTypeIcon = (type: MessageType): typeof AlertCircleIcon => {
-  switch (type) {
-    case MessageType._TEXT:
+const getMessageTypeIcon = (type: MessageType | string): typeof AlertCircleIcon => {
+  const typeStr = String(type);
+  
+  switch (typeStr) {
+    case MESSAGE_TYPE_CONSTANTS.TEXT:
       return UserIcon;
-    case MessageType._VALIDATION_REQUEST:
+    case MESSAGE_TYPE_CONSTANTS.VALIDATION_REQUEST:
       return AlertCircleIcon;
-    case MessageType._VALIDATION_RESPONSE:
+    case MESSAGE_TYPE_CONSTANTS.VALIDATION_RESPONSE:
       return CheckmarkCircle02Icon;
-    case MessageType._SYSTEM_NOTIFICATION:
+    case MESSAGE_TYPE_CONSTANTS.SYSTEM_NOTIFICATION:
       return BotIcon;
-    case MessageType._ERROR:
+    case MESSAGE_TYPE_CONSTANTS.ERROR:
       return AlertCircleIcon;
-    case MessageType._COMMAND:
+    case MESSAGE_TYPE_CONSTANTS.COMMAND:
       return ArrowRight02Icon;
     default:
       return UserIcon;
@@ -268,23 +301,25 @@ const getMessageTypeIcon = (type: MessageType): typeof AlertCircleIcon => {
 /**
  * Get conversation state color
  */
-const getStateColor = (state: ConversationState): string => {
-  switch (state) {
-    case ConversationState._INITIATED:
+const getStateColor = (state: ConversationState | string): string => {
+  const stateStr = String(state);
+  
+  switch (stateStr) {
+    case CONVERSATION_STATE_CONSTANTS.INITIATED:
       return 'text-gray-500';
-    case ConversationState._ACTIVE:
+    case CONVERSATION_STATE_CONSTANTS.ACTIVE:
       return 'text-green-600';
-    case ConversationState._VALIDATING:
+    case CONVERSATION_STATE_CONSTANTS.VALIDATING:
       return 'text-yellow-600';
-    case ConversationState._APPROVED:
+    case CONVERSATION_STATE_CONSTANTS.APPROVED:
       return 'text-blue-600';
-    case ConversationState._DENIED:
+    case CONVERSATION_STATE_CONSTANTS.DENIED:
       return 'text-red-600';
-    case ConversationState._COMPLETED:
+    case CONVERSATION_STATE_CONSTANTS.COMPLETED:
       return 'text-green-700';
-    case ConversationState._SUSPENDED:
+    case CONVERSATION_STATE_CONSTANTS.SUSPENDED:
       return 'text-gray-600';
-    case ConversationState._ERROR:
+    case CONVERSATION_STATE_CONSTANTS.ERROR:
       return 'text-red-600';
     default:
       return 'text-gray-500';
@@ -294,14 +329,16 @@ const getStateColor = (state: ConversationState): string => {
 /**
  * Get message type CSS class name
  */
-const getMessageTypeClassName = (type: MessageType): string => {
-  if (type === MessageType._VALIDATION_REQUEST) {
+const getMessageTypeClassName = (type: MessageType | string): string => {
+  const typeStr = String(type);
+  
+  if (typeStr === MESSAGE_TYPE_CONSTANTS.VALIDATION_REQUEST) {
     return 'bg-yellow-100 text-yellow-800';
   }
-  if (type === MessageType._VALIDATION_RESPONSE) {
+  if (typeStr === MESSAGE_TYPE_CONSTANTS.VALIDATION_RESPONSE) {
     return 'bg-green-100 text-green-800';
   }
-  if (type === MessageType._ERROR) {
+  if (typeStr === MESSAGE_TYPE_CONSTANTS.ERROR) {
     return 'bg-red-100 text-red-800';
   }
   return 'bg-blue-100 text-blue-800';
@@ -325,6 +362,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isValidationPending, setIsValidationPending] = useState(false);
   
+  // Use the message parameter directly with proper typing
   const MessageIcon = getMessageTypeIcon(message.type);
   
   const handleValidationResponse = useCallback(async (decision: ValidationDecision, reasoning?: string): Promise<void> => {
@@ -356,13 +394,13 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
       initial={isAnimated ? 'hidden' : 'visible'}
       animate="visible"
       exit="exit"
-      transition={{ duration: TIME_CONSTANTS.ANIMATION_DURATION / 1000 }}
+      transition={{ duration: TIME_CONSTANTS.ANIMATION_DURATION / UI_CONSTANTS.MILLISECOND_CONVERSION }}
       className={cn(
         'flex w-full gap-3 px-4 py-3 hover:bg-gray-50/50 transition-colors',
         isOwn ? 'flex-row-reverse' : 'flex-row'
       )}
       role="article"
-      aria-labelledby={`message-${message.id}`}
+      aria-labelledby={`message-${typedMessage.id}`}
       tabIndex={0}
     >
       {/* Avatar */}
@@ -397,12 +435,12 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               {formatTimestamp(message.timestamp)}
             </time>
           )}
-          {message.type !== MessageType._TEXT && (
+          {message.type !== MESSAGE_TYPE_CONSTANTS.TEXT && (
             <span className={cn(
               'px-2 py-1 rounded-full text-xs font-medium',
               getMessageTypeClassName(message.type)
             )}>
-              {message.type.replace('_', ' ').toLowerCase()}
+              {String(message.type).replace('_', ' ').toLowerCase()}
             </span>
           )}
         </div>
@@ -440,7 +478,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
         </div>
         
         {/* Validation Actions */}
-        {message.type === MessageType._VALIDATION_REQUEST && onValidationResponse && (
+        {message.type === MESSAGE_TYPE_CONSTANTS.VALIDATION_REQUEST && onValidationResponse && (
           <div className="flex gap-2 mt-3">
             <Button
               size="sm"
@@ -509,11 +547,11 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = React.memo(({ participan
           <motion.div
             key={i}
             className="w-2 h-2 bg-gray-400 rounded-full"
-            animate={{ scale: [1, 1.2, 1] }}
+            animate={{ scale: [1, UI_CONSTANTS.SCALE_FACTOR, 1] }}
             transition={{
               duration: 1,
               repeat: Infinity,
-              delay: i * 0.2,
+              delay: i * UI_CONSTANTS.OPACITY_FADE,
             }}
           />
         ))}
@@ -549,11 +587,11 @@ const ConversationHeader: React.FC<ConversationHeaderProps> = React.memo(({
       <div className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-semibold text-gray-900 truncate">
-            {conversation?.metadata?.topic || 'Conversation'}
+            {(conversation?.metadata?.topic ?? '') !== '' ? conversation.metadata.topic : 'Conversation'}
           </h2>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <span className={cn('font-medium', getStateColor(state))}>
-              {state.replace('_', ' ').toLowerCase()}
+              {String(state).replace('_', ' ').toLowerCase()}
             </span>
             <Separator orientation="vertical" className="h-4" />
             <span>{participants.length} participants</span>
@@ -728,8 +766,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     setInputValue('');
     
     try {
-      await sendMessage(messageContent, MessageType._TEXT);
-      logDebug('Message sent successfully', { content: messageContent.substring(0, 50) }, 'ConversationInterface');
+      await sendMessage(messageContent, MessageType.TEXT);
+      logDebug('Message sent successfully', { content: messageContent.substring(0, UI_CONSTANTS.MAGIC_OFFSET) }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logWarning('Failed to send message', { error: errorMessage }, 'ConversationInterface');
@@ -753,10 +791,10 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       // Find the validation request message
       const validationMessage = messages.find(msg => 
         msg.type === MessageType._VALIDATION_REQUEST &&
-        msg.metadata?.requestId
+        Boolean(msg.metadata?.requestId)
       );
       
-      if (validationMessage?.metadata?.requestId) {
+      if (validationMessage?.metadata?.requestId !== undefined) {
         await respondToValidation(
           validationMessage.metadata.requestId as string,
           decision,
@@ -791,25 +829,26 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   }, [joinConversation]);
   
   const handleExportConversation = useCallback(async (): Promise<void> => {
-    if (!currentConversation) {
+    if (currentConversation === null) {
       return;
     }
     
     try {
-      const exportData = await exportConversation(currentConversation.conversationId);
+      const typedConversation = currentConversation as any;
+      const exportData = await exportConversation(typedConversation.conversationId);
       
       // Create download link
       const blob = new Blob([exportData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `conversation-${currentConversation.conversationId}-${Date.now()}.json`;
+      link.download = `conversation-${typedConversation.conversationId}-${Date.now()}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      logInfo('Conversation exported', { conversationId: currentConversation.conversationId }, 'ConversationInterface');
+      logInfo('Conversation exported', { conversationId: typedConversation.conversationId }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logWarning('Failed to export conversation', { error: errorMessage }, 'ConversationInterface');
@@ -843,8 +882,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   
   // Auto-start or join conversation
   useEffect(() => {
-    if (isConnected && !currentConversation) {
-      if (conversationId) {
+    if (Boolean(isConnected) && currentConversation === null) {
+      if (typeof conversationId === 'string' && conversationId.length > 0) {
         handleJoinConversation(conversationId).catch(() => undefined);
       } else if (autoStart) {
         handleStartConversation().catch(() => undefined);
@@ -868,9 +907,10 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     const displayMessages = messages.slice(-config.maxDisplayMessages);
     
     return displayMessages.map((message, index) => {
+      // Use message directly without unnecessary type assertion
       const isOwn = message.sender.id === 'current-user'; // TODO: Get from auth context
-      const showAvatar = index === 0 || displayMessages[index - 1].sender.id !== message.sender.id;
-      const isAnimated = index >= displayMessages.length - 3; // Animate only recent messages
+      const showAvatar = index === 0 || (displayMessages[index - 1] as ConversationMessage).sender.id !== message.sender.id;
+      const isAnimated = index >= displayMessages.length - UI_CONSTANTS.MAX_PARTICIPANT_DISPLAY; // Animate only recent messages
       
       if (customMessageRenderer) {
         return (
@@ -939,14 +979,14 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       aria-label="Enterprise Conversational Interface"
     >
       {/* Header */}
-      {currentConversation && (
+      {Boolean(currentConversation) && (
         <ConversationHeader
           conversation={currentConversation}
           participants={participants}
           state={conversationState}
           metrics={metrics}
           onSearch={config.enableSearch ? (): void => { setShowSearch(!showSearch); } : undefined}
-          onExport={config.enableExport ? () => {
+          onExport={config.enableExport ? (): void => {
             handleExportConversation().catch(() => undefined);
           } : undefined}
           onRefresh={(): void => { 
@@ -986,7 +1026,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           </div>
           
           {/* Welcome Message */}
-          {!currentConversation && (
+          {currentConversation === null && (
             <div className="flex flex-col items-center justify-center h-96 text-center px-6">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                 <HugeiconsIcon icon={BotIcon} className="w-8 h-8 text-blue-600" />
@@ -1002,7 +1042,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 onClick={() => {
                   handleStartConversation().catch(() => undefined);
                 }}
-                disabled={!isConnected}
+                disabled={isConnected === false}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 Start Conversation
@@ -1011,7 +1051,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           )}
           
           {/* Message List */}
-          {currentConversation && (
+          {Boolean(currentConversation) && (
             <div className="pb-4">
               <AnimatePresence initial={false}>
                 {messageList}
@@ -1031,7 +1071,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       </ScrollArea>
       
       {/* Input Area */}
-      {currentConversation && (
+      {Boolean(currentConversation) && (
         <div className="border-t border-gray-200 bg-white p-4">
           {/* File Upload */}
           <input
@@ -1044,7 +1084,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           />
           
           {/* Selected File Display */}
-          {selectedFile && (
+          {Boolean(selectedFile) && (
             <div className="mb-3 flex items-center gap-2 p-2 bg-gray-100 rounded-lg">
               <HugeiconsIcon icon={AttachmentIcon} className="w-4 h-4 text-gray-500" />
               <span className="text-sm text-gray-700 flex-1 truncate">
@@ -1142,14 +1182,14 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                   Offline - Messages will be sent when connection is restored
                 </span>
               )}
-              {metrics && (
+              {Boolean(metrics) && (
                 <span>
                   {metrics.totalMessages} messages • {metrics.averageResponseTime}ms avg response
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2">
-              {config.branding?.companyName && (
+              {Boolean(config.branding?.companyName) && (
                 <span>{config.branding.companyName}</span>
               )}
             </div>
