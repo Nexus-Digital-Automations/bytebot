@@ -16,7 +16,11 @@
 // Global type declarations
 declare global {
   var testUtils: {
-    performanceMetrics: any;
+    performanceMetrics: {
+      testStartTime: number;
+      slowTests: Map<string, number>;
+      memoryUsage: Map<string, NodeJS.MemoryUsage>;
+    };
     createTestBuffer: (content: string) => Buffer;
     createMockDate: (offset?: number) => Date;
     waitFor: (condition: () => boolean, timeout?: number) => Promise<void>;
@@ -72,8 +76,8 @@ jest.mock('fs/promises', () => ({
 
 // Mock util promisify for exec operations
 jest.mock('util', () => ({
-  ...jest.requireActual('util'),
-  promisify: jest.fn(() =>
+  ...(jest.requireActual('util') as Record<string, unknown>),
+  promisify: jest.fn((): jest.MockedFunction<() => Promise<{ stdout: string; stderr: string }>> =>
     jest.fn().mockResolvedValue({
       stdout: 'mocked command output',
       stderr: '',
@@ -229,15 +233,13 @@ global.testUtils = {
 // Extend Jest matchers with custom assertions
 
 declare global {
-  namespace jest {
-    interface Matchers<R> {
-      toBeValidOperationId(): R;
-      toBeValidBase64(): R;
-      toHaveReasonableExecutionTime(_maxMs: number): R;
-      toBeValidScreenshotResult(): R;
-      toBeValidFileResult(_operation: 'read' | 'write'): R;
-      toBeValidOcrResult(): R;
-    }
+  interface CustomMatchers<R = unknown> {
+    toBeValidOperationId(): R;
+    toBeValidBase64(): R;
+    toHaveReasonableExecutionTime(_maxMs: number): R;
+    toBeValidScreenshotResult(): R;
+    toBeValidFileResult(_operation: 'read' | 'write'): R;
+    toBeValidOcrResult(): R;
   }
 }
 
