@@ -30,10 +30,8 @@ import {
 // Import Parlant types from the existing integration service
 import {
   ParlantConversationContext,
-  ParlantValidationRequest,
   ParlantValidationResponse,
   ConversationalValidationError,
-  ParlantAuditEntry,
   RiskLevel,
   ExecutionContext,
 } from '../../../bytebotd/src/parlant/parlant-integration.service';
@@ -550,7 +548,7 @@ export class ParlantValidatedDatabaseMigrationService {
    */
   private async validateMigrationPrerequisites(
     metadata: MigrationOperationMetadata,
-    context: ParlantConversationContext,
+    _context: ParlantConversationContext,
   ): Promise<void> {
     const operationId = this.generateOperationId();
 

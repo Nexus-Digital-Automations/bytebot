@@ -43,7 +43,6 @@ import {
   ParlantConfigurationService,
   ConfigurationOperationContext,
   ParlantRiskLevel,
-  ParlantValidationResponse,
 } from './parlant-configuration.service';
 
 /**
@@ -393,8 +392,8 @@ export class ParlantRiskManagementService
     operationId: string,
     riskAssessment: RiskAssessmentResult,
     context: RiskAssessmentContext,
-    userId = 'system',
-    sessionId?: string,
+    _userId = 'system',
+    _sessionId?: string,
   ): Promise<{
     approved: boolean;
     conversationId?: string;

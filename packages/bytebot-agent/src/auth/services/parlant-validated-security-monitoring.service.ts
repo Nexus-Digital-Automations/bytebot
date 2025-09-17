@@ -747,13 +747,13 @@ export class ParlantValidatedSecurityMonitoringService {
     return suspiciousPatterns.some((pattern) => pattern.test(userAgent));
   }
 
-  private isSuspiciousPattern(ipAddress: string): boolean {
+  private isSuspiciousPattern(_ipAddress: string): boolean {
     // Check for patterns like rapid successive requests from same IP
     return false; // Placeholder implementation
   }
 
   private async getGeolocationContext(
-    ipAddress: string,
+    _ipAddress: string,
   ): Promise<GeolocationData | null> {
     // This would integrate with geolocation services in production
     return {

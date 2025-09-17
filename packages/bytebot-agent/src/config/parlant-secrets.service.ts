@@ -144,7 +144,7 @@ export class ParlantSecretsService {
     key?: string,
     encrypted = false,
     user = 'system',
-    sessionId?: string,
+    _sessionId?: string,
   ): Promise<ParlantSecretsOperationResult<string | null>> {
     const startTime = Date.now();
     const operationId = `get-secret-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
@@ -264,7 +264,7 @@ export class ParlantSecretsService {
     key?: string,
     encrypted = true,
     user = 'system',
-    sessionId?: string,
+    _sessionId?: string,
   ): Promise<ParlantSecretsOperationResult<boolean>> {
     const startTime = Date.now();
     const operationId = `set-secret-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
@@ -427,7 +427,7 @@ export class ParlantSecretsService {
     secretName: string,
     key?: string,
     user = 'system',
-    sessionId?: string,
+    _sessionId?: string,
   ): Promise<ParlantSecretsOperationResult<void>> {
     const startTime = Date.now();
     const operationId = `rotate-secret-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
@@ -548,7 +548,7 @@ export class ParlantSecretsService {
    */
   async getSecretsHealth(
     user = 'system',
-    sessionId?: string,
+    _sessionId?: string,
   ): Promise<
     ParlantSecretsOperationResult<
       ReturnType<typeof this.secretsService.getSecretsHealth>

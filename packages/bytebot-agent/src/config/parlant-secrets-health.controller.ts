@@ -22,7 +22,6 @@ import {
   ParlantConfigurationService,
   ParlantRiskLevel,
   ConfigurationOperationContext,
-  ParlantValidationResponse,
 } from './parlant-configuration.service';
 import {
   ParlantSecretsService,

@@ -44,6 +44,7 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import { EventEmitter } from 'events';
+import * as crypto from 'crypto';
 import {
   ParlantConfigurationService,
   ParlantRiskLevel,
@@ -604,7 +605,7 @@ export class ParlantComprehensiveAuditTrailsService
           case 'timestamp':
             comparison = a.timestamp.getTime() - b.timestamp.getTime();
             break;
-          case 'severity':
+          case 'severity': {
             const severityOrder = {
               info: 0,
               warning: 1,
@@ -613,12 +614,14 @@ export class ParlantComprehensiveAuditTrailsService
             };
             comparison = severityOrder[a.severity] - severityOrder[b.severity];
             break;
-          case 'riskLevel':
+          }
+          case 'riskLevel': {
             const riskOrder = { low: 0, medium: 1, high: 2, critical: 3 };
             comparison =
               riskOrder[a.parlantContext.riskLevel] -
               riskOrder[b.parlantContext.riskLevel];
             break;
+          }
         }
         return sortOrder === 'desc' ? -comparison : comparison;
       });
@@ -1116,7 +1119,6 @@ export class ParlantComprehensiveAuditTrailsService
     operationDetails: any,
     operationResults: any,
   ): string {
-    const crypto = require('crypto');
     const data = JSON.stringify({
       eventId,
       operationDetails,
@@ -1129,7 +1131,6 @@ export class ParlantComprehensiveAuditTrailsService
    * Calculate export checksum
    */
   private calculateExportChecksum(events: ComprehensiveAuditEvent[]): string {
-    const crypto = require('crypto');
     const data = JSON.stringify(events.map((e) => e.eventId).sort());
     return crypto.createHash('sha256').update(data).digest('hex');
   }
@@ -1142,7 +1143,6 @@ export class ParlantComprehensiveAuditTrailsService
     events: ComprehensiveAuditEvent[],
     violations: ComplianceViolation[],
   ): string {
-    const crypto = require('crypto');
     const data = JSON.stringify({
       reportId,
       eventIds: events.map((e) => e.eventId).sort(),

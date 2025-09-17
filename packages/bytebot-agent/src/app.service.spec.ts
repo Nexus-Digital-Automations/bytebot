@@ -17,6 +17,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
+import * as crypto from 'crypto';
 import {
   AppService,
   AppHealthResponse,
@@ -46,9 +47,8 @@ describe('AppService', () => {
     mockPerformanceNow.mockReturnValue(1000); // Default mock time
 
     // Reset crypto mock
-    const crypto = require('crypto');
-    crypto.randomUUID.mockClear();
-    crypto.randomUUID.mockReturnValue('test-uuid-12345');
+    (crypto.randomUUID as jest.Mock).mockClear();
+    (crypto.randomUUID as jest.Mock).mockReturnValue('test-uuid-12345');
 
     module = await Test.createTestingModule({
       providers: [AppService],
@@ -517,10 +517,11 @@ describe('AppService', () => {
   describe('Integration and Cross-Method Testing', () => {
     it('should maintain independent operation IDs across methods', () => {
       // Arrange
-      const crypto = require('crypto');
       const mockUUIDs = ['uuid-1', 'uuid-2', 'uuid-3'];
       let callCount = 0;
-      crypto.randomUUID.mockImplementation(() => mockUUIDs[callCount++]);
+      (crypto.randomUUID as jest.Mock).mockImplementation(
+        () => mockUUIDs[callCount++],
+      );
 
       // Act
       service.getHello();

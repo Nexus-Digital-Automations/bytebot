@@ -11,6 +11,11 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import {
+  ParlantCritical,
+  ParlantSecure,
+  SecurityLevel,
+} from '@bytebot/shared/server';
 import * as fs from 'fs';
 
 export interface DatabaseSecurityConfig {
@@ -143,6 +148,10 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
   /**
    * Audit database operation
    */
+  @ParlantSecure(
+    'Audits database operations for security compliance and monitoring',
+    SecurityLevel._HIGH,
+  )
   auditOperation(
     operation: string,
     context: {
@@ -282,6 +291,9 @@ export class DatabaseSecurityService implements OnModuleInit, OnModuleDestroy {
   /**
    * Check query for security violations
    */
+  @ParlantCritical(
+    'Validates database queries for SQL injection and security violations',
+  )
   validateQuerySecurity(
     queryText: string,
     context: {

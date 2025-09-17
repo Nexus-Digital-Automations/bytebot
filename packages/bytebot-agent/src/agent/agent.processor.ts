@@ -2,7 +2,6 @@ import { TasksService } from '../tasks/tasks.service';
 import { MessagesService } from '../messages/messages.service';
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  Message,
   MessageRole,
   Task,
   TaskPriority,
@@ -15,7 +14,10 @@ import {
   isSetTaskStatusToolUseBlock,
   isCreateTaskToolUseBlock,
   SetTaskStatusToolUseBlock,
-} from '@bytebot/shared';
+  ParlantCritical,
+  ParlantSecure,
+  SecurityLevel,
+} from '@bytebot/shared/server';
 
 import {
   MessageContentBlock,
@@ -111,6 +113,9 @@ export class AgentProcessor {
     await this.stopProcessing();
   }
 
+  @ParlantCritical(
+    'Initiates AI agent task processing - requires validation before executing automated tasks',
+  )
   processTask(taskId: string) {
     this.logger.log(`Starting processing for task ID: ${taskId}`);
 
@@ -131,6 +136,9 @@ export class AgentProcessor {
    * Runs a single iteration of task processing and schedules the next
    * iteration via setImmediate while the task remains RUNNING.
    */
+  @ParlantCritical(
+    'Executes single agent iteration with AI model communication and computer actions',
+  )
   private async runIteration(taskId: string): Promise<void> {
     if (!this.isProcessing) {
       return;
@@ -183,8 +191,6 @@ export class AgentProcessor {
       );
 
       const model = task.model as unknown as BytebotAgentModel;
-      let agentResponse: BytebotAgentResponse;
-
       const service = this.services[model.provider];
       if (!service) {
         this.logger.warn(
@@ -198,7 +204,7 @@ export class AgentProcessor {
         return;
       }
 
-      agentResponse = await service.generateMessage(
+      const agentResponse: BytebotAgentResponse = await service.generateMessage(
         AGENT_SYSTEM_PROMPT,
         messages,
         model.name,

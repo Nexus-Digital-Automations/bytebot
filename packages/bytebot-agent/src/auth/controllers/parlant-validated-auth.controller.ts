@@ -31,7 +31,6 @@ import {
   Request,
   Logger,
   Get,
-  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,

@@ -260,8 +260,7 @@ export class ParlantConfigurationHotReloadService
         },
       );
 
-      // Determine operation type and risk level
-      const operationType = this.mapEventTypeToOperation(event.type);
+      // Determine risk level
       const riskLevel = this.calculateRiskLevel(event.type, event.changes);
 
       // Create validation context
@@ -570,7 +569,7 @@ export class ParlantConfigurationHotReloadService
    */
   private calculateRiskLevel(
     eventType: string,
-    changes: any[],
+    _changes: any[],
   ): ParlantRiskLevel {
     // Secrets changes are always CRITICAL
     if (eventType === 'secrets-file') {

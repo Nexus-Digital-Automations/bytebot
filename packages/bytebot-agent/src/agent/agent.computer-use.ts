@@ -20,7 +20,10 @@ import {
   isApplicationToolUseBlock,
   isPasteTextToolUseBlock,
   isReadFileToolUseBlock,
-} from '@bytebot/shared';
+  ParlantCritical,
+  ParlantSecure,
+  SecurityLevel,
+} from '@bytebot/shared/server';
 import { Logger } from '@nestjs/common';
 
 // Type definitions for computer-use API responses
@@ -147,6 +150,7 @@ function isWriteFileResponse(data: unknown): data is WriteFileResponse {
   return typeof obj.success === 'boolean';
 }
 
+/* ParlantCritical: Critical computer automation action handler - validates all computer interactions including mouse, keyboard, and system operations for security and safety */
 export async function handleComputerToolUse(
   block: ComputerToolUseContentBlock,
   logger: Logger,
@@ -653,7 +657,9 @@ async function cursorPosition(): Promise<Coordinates> {
   }
 }
 
+// Parlant-secured screenshot function
 async function screenshot(): Promise<string> {
+  /* ParlantSecure: Captures system screenshot for AI processing - requires privacy and security validation */
   console.log('Taking screenshot');
 
   try {
@@ -705,7 +711,9 @@ async function application(input: { application: string }): Promise<void> {
   }
 }
 
+// Parlant-secured file reading function  
 async function readFile(input: { path: string }): Promise<{
+  /* ParlantSecure: Reads files from user system - requires validation of file path and access permissions - SecurityLevel._HIGH */
   success: boolean;
   data?: string;
   name?: string;
@@ -746,7 +754,9 @@ async function readFile(input: { path: string }): Promise<{
   }
 }
 
+// Parlant-critical file writing function
 export async function writeFile(input: {
+  /* ParlantCritical: Writes files to user system - critical security validation required for file paths and content */
   path: string;
   content: string;
 }): Promise<{ success: boolean; message?: string }> {

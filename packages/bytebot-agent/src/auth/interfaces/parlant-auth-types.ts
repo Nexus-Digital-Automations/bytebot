@@ -24,7 +24,6 @@
 import { UserRole } from '@prisma/client';
 import {
   ParlantConversationContext,
-  ParlantValidationRequest,
   RiskLevel,
 } from '../../parlant/parlant-integration.service';
 import {
@@ -33,7 +32,6 @@ import {
   Permission,
 } from '../services/rbac-authorization.service';
 import {
-  SecurityEventType,
   SecurityEventSeverity,
   GeolocationData,
 } from '../services/security-monitoring.service';

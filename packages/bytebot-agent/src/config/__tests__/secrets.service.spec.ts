@@ -88,6 +88,7 @@ describe('SecretsService', () => {
       process.env.TEST_DIRTY_VAL = 'clean\x00value\x01test';
 
       const cleanValue = process.env.TEST_DIRTY_VAL?.replace(
+        // eslint-disable-next-line no-control-regex
         /[\u0000-\u001F\u007F-\u009F]/g,
         '',
       );

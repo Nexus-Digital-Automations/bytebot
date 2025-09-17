@@ -211,8 +211,6 @@ export class ParlantEnterpriseSecretsService {
 
     try {
       // Determine risk level based on provider and operation context
-      const providerRiskProfile =
-        this.providerRiskProfiles.get(provider) || this.getDefaultRiskProfile();
       const riskLevel = this.calculateEnterpriseRiskLevel(
         provider,
         options?.emergencyAccess || false,

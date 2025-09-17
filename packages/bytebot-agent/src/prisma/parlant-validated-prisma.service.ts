@@ -24,10 +24,8 @@ import { PrismaClient } from '@prisma/client';
 // Import Parlant types from the existing integration service
 import {
   ParlantConversationContext,
-  ParlantValidationRequest,
   ParlantValidationResponse,
   ConversationalValidationError,
-  ParlantAuditEntry,
   RiskLevel,
   ExecutionContext,
 } from '../../bytebotd/src/parlant/parlant-integration.service';
@@ -749,7 +747,7 @@ export class ParlantValidatedPrismaService {
    */
   private validateModelAccess(
     metadata: PrismaOperationMetadata,
-    context: ParlantConversationContext,
+    _context: ParlantConversationContext,
   ): void {
     const modelConfig = this.modelConfigurations.get(metadata.modelName || '');
 
