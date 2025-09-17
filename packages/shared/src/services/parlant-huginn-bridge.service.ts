@@ -20,7 +20,7 @@
 
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { EventEmitter } from "events";
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 import WebSocket from "ws";
 import {
   ParlantValidationRequest,
@@ -489,23 +489,23 @@ export class ParlantHuginnBridgeService
     });
 
     // Add request interceptor for performance monitoring
-    this.httpClient.interceptors.request.use((config) => {
-      (config as any).metadata = { startTime: Date.now() };
+    this.httpClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+      // Extend config with metadata for performance tracking
+      (config as InternalAxiosRequestConfig & { metadata?: { startTime: number } }).metadata = { startTime: Date.now() };
       return config;
     });
 
     // Add response interceptor for metrics collection
     this.httpClient.interceptors.response.use(
-      (response) => {
-        const duration =
-          Date.now() - (response.config as any).metadata.startTime;
+      (response: AxiosResponse) => {
+        const config = response.config as InternalAxiosRequestConfig & { metadata?: { startTime: number } };
+        const duration = Date.now() - (config.metadata?.startTime ?? Date.now());
         this.updateRequestMetrics(duration, true);
         return response;
       },
-      (error) => {
-        const duration =
-          Date.now() -
-          ((error.config as any)?.metadata?.startTime || Date.now());
+      (error: AxiosError) => {
+        const config = error.config as InternalAxiosRequestConfig & { metadata?: { startTime: number } } | undefined;
+        const duration = Date.now() - (config?.metadata?.startTime ?? Date.now());
         this.updateRequestMetrics(duration, false);
         return Promise.reject(error);
       },
@@ -517,7 +517,7 @@ export class ParlantHuginnBridgeService
   private async initializeWebSocketConnection(): Promise<void> {
     // WebSocket implementation for real-time communication with Huginn
     try {
-      this.websocket = new (WebSocket as any)(this.config.huginnWebSocketUrl);
+      this.websocket = new WebSocket(this.config.huginnWebSocketUrl);
 
       this.websocket?.on("open", () => {
         this.isConnected = true;

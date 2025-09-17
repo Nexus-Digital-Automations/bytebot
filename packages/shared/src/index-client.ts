@@ -12,7 +12,7 @@ export * from "./types/messageContent.types";
 export * from "./types/computerAction.types";
 export * from "./types/agent.types";
 
-// Security types (avoiding ValidationResult conflict)
+// Security types - Runtime exports (enums, classes, functions)
 export {
   SecurityEventType,
   UserRole,
@@ -23,6 +23,12 @@ export {
   VersioningStrategy,
   DEFAULT_SANITIZATION_OPTIONS,
   createSecurityEvent,
+  AuthCredentialsDto,
+  RegisterUserDto,
+} from "./types/security.types";
+
+// Security types - Type-only exports (interfaces)
+export type {
   SanitizationOptions,
   FilePathValidationResult,
   CoordinatesValidationResult,
@@ -33,8 +39,6 @@ export {
   SQLInjectionDetectionResult,
   CommandInjectionDetectionResult,
   JwtPayload,
-  AuthCredentialsDto,
-  RegisterUserDto,
   AuthTokenResponse,
   ValidationError,
   RateLimitConfig,
@@ -48,13 +52,13 @@ export {
   SecurityError,
 } from "./types/security.types";
 
-// RBAC types (aliased to avoid conflicts with Parlant types)
-export {
+// RBAC types - Type-only exports (interfaces, aliased to avoid conflicts with Parlant types)
+export type {
   UserContext as RBACUserContext,
   RequestContext as RBACRequestContext,
 } from "./types/rbac.types";
 
-// Core Parlant types (using aliases to avoid conflicts with integration types)
+// Core Parlant types - Runtime exports (enums)
 export {
   ValidationDecision,
   ConversationState,
@@ -68,6 +72,13 @@ export {
   ParticipantType,
   ParticipantCapability,
   ExecutionEnvironment,
+  ActorType,
+  AuditAction,
+  AuditEntryType,
+} from "./types/parlant.types";
+
+// Core Parlant types - Type-only exports (interfaces, using aliases to avoid conflicts with integration types)
+export type {
   FunctionContext,
   SourceLocation,
   UserContext as ParlantCoreUserContext,
@@ -75,9 +86,6 @@ export {
   SessionContext,
   ValidationParameters,
   ParlantConversationContext,
-  ActorType,
-  AuditAction,
-  AuditEntryType,
   // Aliased exports to avoid conflicts
   ValidationResult as ParlantCoreValidationResult,
   ParlantValidationRequest as ParlantCoreValidationRequest,
@@ -85,27 +93,31 @@ export {
   ParlantAuditEntry as ParlantCoreAuditEntry,
 } from "./types/parlant.types";
 
-// Parlant integration types (primary versions for integration)
+// Parlant integration types - Runtime exports (enums, classes)
 export {
-  ParlantValidationRequest,
-  ParlantValidationResponse,
-  ParlantAuditEntry,
-  ParlantUserContext,
   SecurityLevel,
-  ParlantServiceConfig,
-  ParlantCacheEntry,
-  ParlantHealthStatus,
-  ParlantHealthMetrics,
-  ParlantWebSocketMessage,
   ParlantMessageType,
-  ParlantFunctionWrapper,
-  ParlantFunctionMetadata,
-  ParlantValidationConfig as ParlantIntegrationValidationConfig,
   ParlantIntegrationError,
   ParlantValidationError,
   ParlantConnectionError,
   ParlantAuthenticationError,
   ParlantTimeoutError,
+} from "./types/parlant-integration.types";
+
+// Parlant integration types - Type-only exports (interfaces)
+export type {
+  ParlantValidationRequest,
+  ParlantValidationResponse,
+  ParlantAuditEntry,
+  ParlantUserContext,
+  ParlantServiceConfig,
+  ParlantCacheEntry,
+  ParlantHealthStatus,
+  ParlantHealthMetrics,
+  ParlantWebSocketMessage,
+  ParlantFunctionWrapper,
+  ParlantFunctionMetadata,
+  ParlantValidationConfig as ParlantIntegrationValidationConfig,
 } from "./types/parlant-integration.types";
 
 // Export enums directly (these have runtime exports)

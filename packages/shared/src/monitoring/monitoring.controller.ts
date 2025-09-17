@@ -1,10 +1,10 @@
 /**
  * Local Monitoring Controller with Prometheus Endpoints
- * 
+ *
  * HTTP controller for exposing local monitoring endpoints including
  * Prometheus metrics, health dashboards, and system information.
  * Optimized for local-only deployment architecture.
- * 
+ *
  * Features:
  * - Prometheus metrics endpoint (/metrics)
  * - Health dashboard endpoint (/health/dashboard)
@@ -12,38 +12,32 @@
  * - Metrics summary endpoint (/metrics/summary)
  * - Alert status endpoint (/alerts/status)
  * - Performance monitoring endpoints
- * 
+ *
  * @author Claude Code - Local Health Checks & Monitoring Integration Specialist
  * @version 1.0.0 - Local-Only Architecture Compliant
  */
 
-import { Controller, Get, Header, Logger, Res, Query } from '@nestjs/common';
-import { Response } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { MetricsService } from './metrics.service';
-import {
-  HealthDashboardData,
-  HealthCheckResult,
-  PerformanceMetrics,
-  SystemResourceMetrics,
-  MonitoringEvent,
-} from './types';
+import { Controller, Get, Header, Logger, Res, Query } from "@nestjs/common";
+import { Response } from "express";
+import { ConfigService } from "@nestjs/config";
+import { MetricsService } from "./metrics.service";
+import { HealthCheckResult } from "./types";
 
 /**
  * Monitoring controller for local metrics and health endpoints
  */
-@Controller('monitoring')
+@Controller("monitoring")
 export class MonitoringController {
   private readonly logger = new Logger(MonitoringController.name);
 
   constructor(
     private readonly _metricsService: MetricsService,
-    private readonly config: ConfigService,
+    private readonly _config: ConfigService,
   ) {
-    this.logger.log('Local Monitoring Controller initialized', {
-      prometheusEnabled: this.config.get<boolean>('PROMETHEUS_ENABLED', true),
-      metricsPath: '/metrics',
-      dashboardPath: '/health/dashboard',
+    this.logger.log("Local Monitoring Controller initialized", {
+      prometheusEnabled: this._config.get<boolean>("PROMETHEUS_ENABLED", true),
+      metricsPath: "/metrics",
+      dashboardPath: "/health/dashboard",
     });
   }
 
@@ -51,8 +45,8 @@ export class MonitoringController {
    * Prometheus metrics endpoint
    * Returns metrics in Prometheus exposition format
    */
-  @Get('metrics')
-  @Header('Content-Type', 'text/plain; version=0.0.4; charset=utf-8')
+  @Get("metrics")
+  @Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
   async getPrometheusMetrics(@Res() response: Response): Promise<void> {
     const operationId = this.generateOperationId();
     this.logger.debug(`[${operationId}] Prometheus metrics endpoint accessed`);
@@ -63,34 +57,46 @@ export class MonitoringController {
       const responseTime = Date.now() - startTime;
 
       // Record metrics endpoint access
-      this._metricsService.incrementCounter('prometheus_metrics_requests_total');
-      this._metricsService.observeHistogram('prometheus_metrics_response_time_seconds', responseTime / 1000);
+      this._metricsService.incrementCounter(
+        "prometheus_metrics_requests_total",
+      );
+      this._metricsService.observeHistogram(
+        "prometheus_metrics_response_time_seconds",
+        responseTime / 1000,
+      );
 
-      this.logger.debug(`[${operationId}] Prometheus metrics generated successfully`, {
-        responseTimeMs: responseTime,
-        outputSize: metricsOutput.length,
-        metricsCount: this._metricsService.getMetricsSummary(),
-      });
+      this.logger.debug(
+        `[${operationId}] Prometheus metrics generated successfully`,
+        {
+          responseTimeMs: responseTime,
+          outputSize: metricsOutput.length,
+          metricsCount: this._metricsService.getMetricsSummary(),
+        },
+      );
 
       response.send(metricsOutput);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to generate Prometheus metrics: ${errorMessage}`, {
-        error: errorMessage,
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to generate Prometheus metrics: ${errorMessage}`,
+        {
+          error: errorMessage,
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+      );
 
-      this._metricsService.incrementCounter('prometheus_metrics_errors_total');
-      response.status(500).send('# Error generating metrics\n');
+      this._metricsService.incrementCounter("prometheus_metrics_errors_total");
+      response.status(500).send("# Error generating metrics\n");
     }
   }
 
   /**
    * Metrics summary endpoint for debugging
    */
-  @Get('metrics/summary')
+  @Get("metrics/summary")
   async getMetricsSummary(): Promise<{
-    summary: any;
+    summary: Record<string, unknown>;
     timestamp: string;
     operationId: string;
   }> {
@@ -100,7 +106,9 @@ export class MonitoringController {
     try {
       const summary = this._metricsService.getMetricsSummary();
 
-      this.logger.debug(`[${operationId}] Metrics summary generated`, { summary });
+      this.logger.debug(`[${operationId}] Metrics summary generated`, {
+        summary,
+      });
 
       return {
         summary,
@@ -108,10 +116,14 @@ export class MonitoringController {
         operationId,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to get metrics summary: ${errorMessage}`, {
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to get metrics summary: ${errorMessage}`,
+        {
+          error: errorMessage,
+        },
+      );
       throw error;
     }
   }
@@ -119,25 +131,32 @@ export class MonitoringController {
   /**
    * Health check history endpoint
    */
-  @Get('health/history')
+  @Get("health/history")
   async getHealthCheckHistory(
-    @Query('service') serviceName?: string,
-    @Query('limit') limit?: string,
+    @Query("service") serviceName?: string,
+    @Query("limit") limit?: string,
   ): Promise<{
-    history: Array<{ timestamp: Date; result: HealthCheckResult; service: string }>;
+    history: Array<{
+      timestamp: Date;
+      result: HealthCheckResult;
+      service: string;
+    }>;
     total: number;
     serviceName?: string;
     operationId: string;
   }> {
     const operationId = this.generateOperationId();
-    this.logger.debug(`[${operationId}] Health check history endpoint accessed`, {
-      serviceName,
-      limit,
-    });
+    this.logger.debug(
+      `[${operationId}] Health check history endpoint accessed`,
+      {
+        serviceName,
+        limit,
+      },
+    );
 
     try {
       let history = this._metricsService.getHealthCheckHistory(serviceName);
-      
+
       // Apply limit if specified
       const limitNum = limit ? parseInt(limit, 10) : undefined;
       if (limitNum && limitNum > 0) {
@@ -157,11 +176,15 @@ export class MonitoringController {
         operationId,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to get health check history: ${errorMessage}`, {
-        error: errorMessage,
-        serviceName,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to get health check history: ${errorMessage}`,
+        {
+          error: errorMessage,
+          serviceName,
+        },
+      );
       throw error;
     }
   }
@@ -169,7 +192,7 @@ export class MonitoringController {
   /**
    * System information endpoint
    */
-  @Get('system/info')
+  @Get("system/info")
   async getSystemInfo(): Promise<{
     system: {
       platform: string;
@@ -218,10 +241,16 @@ export class MonitoringController {
           env: this.sanitizeEnvironment(process.env),
         },
         config: {
-          metricsEnabled: this.config.get<boolean>('METRICS_ENABLED', true),
-          prometheusEndpoint: this.config.get<string>('PROMETHEUS_ENDPOINT', '/metrics'),
-          healthChecksEnabled: this.config.get<boolean>('HEALTH_CHECKS_ENABLED', true),
-          localDeployment: this.config.get<boolean>('LOCAL_DEPLOYMENT', true),
+          metricsEnabled: this._config.get<boolean>("METRICS_ENABLED", true),
+          prometheusEndpoint: this._config.get<string>(
+            "PROMETHEUS_ENDPOINT",
+            "/metrics",
+          ),
+          healthChecksEnabled: this._config.get<boolean>(
+            "HEALTH_CHECKS_ENABLED",
+            true,
+          ),
+          localDeployment: this._config.get<boolean>("LOCAL_DEPLOYMENT", true),
         },
         timestamp: new Date().toISOString(),
         operationId,
@@ -236,10 +265,14 @@ export class MonitoringController {
 
       return systemInfo;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to get system info: ${errorMessage}`, {
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to get system info: ${errorMessage}`,
+        {
+          error: errorMessage,
+        },
+      );
       throw error;
     }
   }
@@ -247,7 +280,7 @@ export class MonitoringController {
   /**
    * Configuration endpoint (sanitized)
    */
-  @Get('config')
+  @Get("config")
   async getConfiguration(): Promise<{
     monitoring: {
       metricsEnabled: boolean;
@@ -279,25 +312,52 @@ export class MonitoringController {
     try {
       const configuration = {
         monitoring: {
-          metricsEnabled: this.config.get<boolean>('METRICS_ENABLED', true),
-          prometheusPort: this.config.get<number>('PROMETHEUS_PORT', 9090),
-          grafanaPort: this.config.get<number>('GRAFANA_PORT', 3000),
-          scrapeInterval: this.config.get<number>('METRICS_SCRAPE_INTERVAL', 15),
-          localDataDirectory: this.config.get<string>('LOCAL_DATA_DIRECTORY', './data'),
-          alertingEnabled: this.config.get<boolean>('ALERTING_ENABLED', true),
+          metricsEnabled: this._config.get<boolean>("METRICS_ENABLED", true),
+          prometheusPort: this._config.get<number>("PROMETHEUS_PORT", 9090),
+          grafanaPort: this._config.get<number>("GRAFANA_PORT", 3000),
+          scrapeInterval: this._config.get<number>(
+            "METRICS_SCRAPE_INTERVAL",
+            15,
+          ),
+          localDataDirectory: this._config.get<string>(
+            "LOCAL_DATA_DIRECTORY",
+            "./data",
+          ),
+          alertingEnabled: this._config.get<boolean>("ALERTING_ENABLED", true),
         },
         health: {
-          checksEnabled: this.config.get<boolean>('HEALTH_CHECKS_ENABLED', true),
-          probesEnabled: this.config.get<boolean>('HEALTH_PROBES_ENABLED', true),
-          intervalSeconds: this.config.get<number>('HEALTH_CHECK_INTERVAL', 30),
-          timeoutSeconds: this.config.get<number>('HEALTH_CHECK_TIMEOUT', 5),
-          failureThreshold: this.config.get<number>('HEALTH_FAILURE_THRESHOLD', 3),
+          checksEnabled: this._config.get<boolean>(
+            "HEALTH_CHECKS_ENABLED",
+            true,
+          ),
+          probesEnabled: this._config.get<boolean>(
+            "HEALTH_PROBES_ENABLED",
+            true,
+          ),
+          intervalSeconds: this._config.get<number>("HEALTH_CHECK_INTERVAL", 30),
+          timeoutSeconds: this._config.get<number>("HEALTH_CHECK_TIMEOUT", 5),
+          failureThreshold: this._config.get<number>(
+            "HEALTH_FAILURE_THRESHOLD",
+            3,
+          ),
         },
         security: {
-          authenticationEnabled: this.config.get<boolean>('ENABLE_AUTHENTICATION', true),
-          rateLimitingEnabled: this.config.get<boolean>('ENABLE_RATE_LIMITING', true),
-          metricsCollectionEnabled: this.config.get<boolean>('ENABLE_METRICS_COLLECTION', true),
-          auditLoggingEnabled: this.config.get<boolean>('ENABLE_AUDIT_LOGGING', true),
+          authenticationEnabled: this._config.get<boolean>(
+            "ENABLE_AUTHENTICATION",
+            true,
+          ),
+          rateLimitingEnabled: this._config.get<boolean>(
+            "ENABLE_RATE_LIMITING",
+            true,
+          ),
+          metricsCollectionEnabled: this._config.get<boolean>(
+            "ENABLE_METRICS_COLLECTION",
+            true,
+          ),
+          auditLoggingEnabled: this._config.get<boolean>(
+            "ENABLE_AUDIT_LOGGING",
+            true,
+          ),
         },
         timestamp: new Date().toISOString(),
         operationId,
@@ -311,10 +371,14 @@ export class MonitoringController {
 
       return configuration;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to get configuration: ${errorMessage}`, {
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to get configuration: ${errorMessage}`,
+        {
+          error: errorMessage,
+        },
+      );
       throw error;
     }
   }
@@ -322,7 +386,7 @@ export class MonitoringController {
   /**
    * Performance metrics endpoint
    */
-  @Get('performance')
+  @Get("performance")
   async getPerformanceMetrics(): Promise<{
     performance: {
       requestsPerSecond: number;
@@ -340,7 +404,7 @@ export class MonitoringController {
 
     try {
       const startTime = Date.now();
-      
+
       // Get current performance data
       const memoryUsage = process.memoryUsage();
       const cpuUsage = process.cpuUsage();
@@ -363,18 +427,25 @@ export class MonitoringController {
       };
 
       const responseTime = Date.now() - startTime;
-      this.logger.debug(`[${operationId}] Performance metrics retrieved in ${responseTime}ms`, {
-        memoryUsedMB: Math.round(memoryUsage.rss / 1024 / 1024),
-        eventLoopLag,
-        uptime: performanceMetrics.performance.uptime,
-      });
+      this.logger.debug(
+        `[${operationId}] Performance metrics retrieved in ${responseTime}ms`,
+        {
+          memoryUsedMB: Math.round(memoryUsage.rss / 1024 / 1024),
+          eventLoopLag,
+          uptime: performanceMetrics.performance.uptime,
+        },
+      );
 
       return performanceMetrics;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to get performance metrics: ${errorMessage}`, {
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to get performance metrics: ${errorMessage}`,
+        {
+          error: errorMessage,
+        },
+      );
       throw error;
     }
   }
@@ -397,22 +468,22 @@ export class MonitoringController {
    */
   private sanitizeEnvironment(env: NodeJS.ProcessEnv): Record<string, string> {
     const sensitiveKeys = [
-      'JWT_SECRET',
-      'ENCRYPTION_KEY', 
-      'DATABASE_URL',
-      'ANTHROPIC_API_KEY',
-      'OPENAI_API_KEY',
-      'GEMINI_API_KEY',
-      'REDIS_PASSWORD',
-      'GRAFANA_PASSWORD',
+      "JWT_SECRET",
+      "ENCRYPTION_KEY",
+      "DATABASE_URL",
+      "ANTHROPIC_API_KEY",
+      "OPENAI_API_KEY",
+      "GEMINI_API_KEY",
+      "REDIS_PASSWORD",
+      "GRAFANA_PASSWORD",
     ];
 
     const sanitized: Record<string, string> = {};
-    
+
     Object.entries(env).forEach(([key, value]) => {
       if (value) {
-        if (sensitiveKeys.some(sensitiveKey => key.includes(sensitiveKey))) {
-          sanitized[key] = '[REDACTED]';
+        if (sensitiveKeys.some((sensitiveKey) => key.includes(sensitiveKey))) {
+          sanitized[key] = "[REDACTED]";
         } else {
           sanitized[key] = value;
         }

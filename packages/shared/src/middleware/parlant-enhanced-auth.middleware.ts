@@ -45,10 +45,7 @@ import {
   RiskLevel,
   ConversationPriority,
   ConversationState,
-  ValidationDecision,
   ParticipantRole,
-  FunctionContext,
-  ValidationParameters,
   ExecutionEnvironment,
   // UserContext, // Exported type - used by other modules
   RequestContext,
@@ -597,7 +594,10 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   @ConversationContext({
     topic: "High-Risk Authentication Validation",
     priority: ConversationPriority._CRITICAL,
-    requiredParticipants: [ParticipantRole._APPROVER, ParticipantRole._VALIDATOR],
+    requiredParticipants: [
+      ParticipantRole._APPROVER,
+      ParticipantRole._VALIDATOR,
+    ],
   })
   async performHighRiskAuthentication(
     req: ParlantAuthenticatedRequest,
@@ -805,7 +805,8 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
       operationId,
       functionName: "authenticateRequest",
       packageName: "@bytebot/shared/middleware",
-      description: "Enhanced conversational authentication middleware validation",
+      description:
+        "Enhanced conversational authentication middleware validation",
       parameters: this.sanitizeRequestArguments(req),
       userContext: {
         userId: req.user?.userId || req.user?.id || "anonymous",
@@ -815,9 +816,9 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
         metadata: {
           riskScore: req.riskAssessment?.overallRisk || 0,
           riskFactors: req.riskAssessment?.riskFactors?.length || 0,
-          criticalFactors: req.riskAssessment?.riskFactors?.filter(
-            (f) => f.critical,
-          ).length || 0,
+          criticalFactors:
+            req.riskAssessment?.riskFactors?.filter((f) => f.critical).length ||
+            0,
         },
       },
       securityLevel: this.mapToSecurityLevel(this.determineSecurityLevel(req)),
@@ -844,7 +845,8 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     // Enhanced parameters for high-risk scenarios - update the description and metadata
     return {
       ...baseRequest,
-      description: "HIGH-RISK Enhanced conversational authentication middleware validation",
+      description:
+        "HIGH-RISK Enhanced conversational authentication middleware validation",
       securityLevel: SecurityLevel._CRITICAL,
       timeout: 60000, // 1 minute for high-risk
       userContext: {
@@ -852,9 +854,9 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
         metadata: {
           ...baseRequest.userContext.metadata,
           highRisk: true,
-          criticalFactors: req.riskAssessment?.riskFactors?.filter(
-            (f) => f.critical,
-          ).length || 0,
+          criticalFactors:
+            req.riskAssessment?.riskFactors?.filter((f) => f.critical).length ||
+            0,
           priority: "critical",
         },
       },
@@ -877,7 +879,9 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
       conversationId: response.conversationId,
       userId: req.user?.userId || req.user?.id,
       sessionId: req.sessionId,
-      state: response.approved ? ConversationState._APPROVED : ConversationState._DENIED,
+      state: response.approved
+        ? ConversationState._APPROVED
+        : ConversationState._DENIED,
       metadata: {
         priority: ConversationPriority._NORMAL,
         tags: ["authentication", "middleware"],
@@ -930,42 +934,52 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     // Add measures based on resource limits
     if (executionContext.resourceLimits) {
       if (executionContext.resourceLimits.maxExecutionTime < 30000) {
-        measures.push(this.createSecurityMeasure(
-          SecurityMeasureType.SESSION_MONITORING,
-          { timeLimit: 30000, type: "time_limit_30s" },
-          now
-        ));
+        measures.push(
+          this.createSecurityMeasure(
+            SecurityMeasureType.SESSION_MONITORING,
+            { timeLimit: 30000, type: "time_limit_30s" },
+            now,
+          ),
+        );
       }
       if (executionContext.resourceLimits.fileSystemAccess === "none") {
-        measures.push(this.createSecurityMeasure(
-          SecurityMeasureType.ENHANCED_LOGGING,
-          { restriction: "no_file_access", level: "strict" },
-          now
-        ));
+        measures.push(
+          this.createSecurityMeasure(
+            SecurityMeasureType.ENHANCED_LOGGING,
+            { restriction: "no_file_access", level: "strict" },
+            now,
+          ),
+        );
       }
       if (executionContext.resourceLimits.networkAccess === "none") {
-        measures.push(this.createSecurityMeasure(
-          SecurityMeasureType.ENHANCED_LOGGING,
-          { restriction: "no_network_access", level: "strict" },
-          now
-        ));
+        measures.push(
+          this.createSecurityMeasure(
+            SecurityMeasureType.ENHANCED_LOGGING,
+            { restriction: "no_network_access", level: "strict" },
+            now,
+          ),
+        );
       }
     }
 
     // Add monitoring measures
     if (executionContext.monitoring?.realTimeMonitoring) {
-      measures.push(this.createSecurityMeasure(
-        SecurityMeasureType.SESSION_MONITORING,
-        { realTimeMonitoring: true },
-        now
-      ));
+      measures.push(
+        this.createSecurityMeasure(
+          SecurityMeasureType.SESSION_MONITORING,
+          { realTimeMonitoring: true },
+          now,
+        ),
+      );
     }
     if (executionContext.monitoring?.auditTrail) {
-      measures.push(this.createSecurityMeasure(
-        SecurityMeasureType.ENHANCED_LOGGING,
-        { auditTrail: true, level: "comprehensive" },
-        now
-      ));
+      measures.push(
+        this.createSecurityMeasure(
+          SecurityMeasureType.ENHANCED_LOGGING,
+          { auditTrail: true, level: "comprehensive" },
+          now,
+        ),
+      );
     }
 
     return measures;
@@ -978,13 +992,13 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     type: SecurityMeasureType,
     parameters: Record<string, unknown>,
     appliedAt: Date,
-    expiresAt?: Date
+    expiresAt?: Date,
   ): SecurityMeasure {
     return {
       type,
       parameters,
       appliedAt,
-      expiresAt
+      expiresAt,
     };
   }
 
@@ -1209,7 +1223,9 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   /**
    * Map FunctionSecurityLevel to SecurityLevel for parlant-integration compatibility
    */
-  private mapToSecurityLevel(securityLevel: FunctionSecurityLevel): SecurityLevel {
+  private mapToSecurityLevel(
+    securityLevel: FunctionSecurityLevel,
+  ): SecurityLevel {
     switch (securityLevel) {
       case FunctionSecurityLevel._SECRET:
       case FunctionSecurityLevel._CONFIDENTIAL:

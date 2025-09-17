@@ -21,15 +21,33 @@ import { EventEmitter } from "events";
 import * as jwt from "jsonwebtoken";
 import * as crypto from "crypto";
 import axios, { AxiosInstance } from "axios";
+import { JwtPayload as BaseJwtPayload } from "jsonwebtoken";
 import {
   ParlantUserContext,
   ParlantAuthConfig,
   ParlantHealthStatus,
   ParlantIntegrationError,
   ParlantAuthenticationError,
-  ParlantConnectionError,
   SecurityLevel,
 } from "../types/parlant-integration.types";
+
+/**
+ * Extended JWT payload for Parlant authentication bridge
+ */
+interface ParlantJwtPayload extends BaseJwtPayload {
+  /** Subject - User ID */
+  sub?: string;
+  /** Alternative user ID */
+  userId?: string;
+  /** Session ID */
+  sessionId?: string;
+  /** User roles array */
+  roles?: string[];
+  /** User permissions array */
+  permissions?: string[];
+  /** Token type */
+  type?: "access" | "refresh" | "id";
+}
 
 /**
  * Session mapping between AIgent JWT and Parlant session
@@ -44,7 +62,7 @@ interface SessionMapping {
   expiresAt: Date;
   roles: string[];
   permissions: string[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 /**
@@ -59,7 +77,7 @@ interface TokenInfo {
   permissions: string[];
   issuedAt: Date;
   expiresAt: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 /**
@@ -85,7 +103,7 @@ interface SynchronizedUserProfile {
   email: string;
   roles: string[];
   permissions: string[];
-  preferences: Record<string, any>;
+  preferences: Record<string, unknown>;
   securitySettings: {
     twoFactorEnabled: boolean;
     securityLevel: SecurityLevel;
@@ -95,8 +113,8 @@ interface SynchronizedUserProfile {
     lockoutUntil?: Date;
   };
   parlantProfile?: {
-    conversationPreferences: Record<string, any>;
-    validationSettings: Record<string, any>;
+    conversationPreferences: Record<string, unknown>;
+    validationSettings: Record<string, unknown>;
     customInstructions: string[];
   };
   lastSync: Date;
@@ -246,7 +264,7 @@ export class ParlantAuthBridgeService
     try {
       await this.parlantClient.get("/auth/health");
       this.logger.log("✅ Parlant authentication API connected");
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn(
         "⚠️ Could not connect to Parlant auth API, using offline mode",
       );
@@ -265,7 +283,10 @@ export class ParlantAuthBridgeService
 
     try {
       // Verify and decode JWT token
-      const decoded = jwt.verify(jwtToken, this.config.jwtSecret) as any;
+      const decoded = jwt.verify(
+        jwtToken,
+        this.config.jwtSecret,
+      ) as ParlantJwtPayload;
 
       this.logger.debug(
         `🔐 Authenticating user: ${decoded.sub || decoded.userId}`,
@@ -531,7 +552,10 @@ export class ParlantAuthBridgeService
     }
 
     try {
-      const decoded = jwt.verify(refreshToken, this.config.jwtSecret) as any;
+      const decoded = jwt.verify(
+        refreshToken,
+        this.config.jwtSecret,
+      ) as ParlantJwtPayload;
       const userId = String(decoded.sub || decoded.userId);
 
       // Generate new access token

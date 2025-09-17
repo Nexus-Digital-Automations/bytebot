@@ -33,6 +33,7 @@ import { Cache } from "cache-manager";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
+  SecurityLevel,
 } from "../types/parlant-integration.types";
 
 import {
@@ -597,7 +598,7 @@ export class ParlantEnhancedAuthService {
         ipAddress: "127.0.0.1", // Default, should be passed from request
         metadata: {},
       },
-      securityLevel: "restricted" as any,
+      securityLevel: SecurityLevel._HIGH,
       timeout: 45000,
     };
 
@@ -907,7 +908,7 @@ export class ParlantEnhancedAuthService {
         ipAddress: "127.0.0.1",
         metadata: {},
       },
-      securityLevel: functionContext.securityLevel as any,
+      securityLevel: functionContext.securityLevel as unknown as SecurityLevel,
       timeout: validationParams.timeout,
     };
   }
@@ -931,25 +932,33 @@ export class ParlantEnhancedAuthService {
       authContext,
     );
 
-    // Enhanced parameters for high-risk scenarios
-    (baseRequest as any).validationParams = {
-      mode: ValidationMode._INTERACTIVE,
-      approvalLevel: ApprovalLevel._DUAL_APPROVAL,
-      timeout: 120000, // 2 minutes for high-risk scenarios
-      cacheable: false, // Don't cache high-risk validations
-    };
-
-    // Update conversation context for high-risk
-    (baseRequest as any).conversationContext = {
-      metadata: {
-        priority: ConversationPriority._CRITICAL,
-        properties: {
-          highRisk: true,
-          criticalRiskFactors: authContext.riskAssessment.riskFactors.filter(
-            (f) => f.critical,
-          ),
+    // Enhanced parameters for high-risk scenarios - these would be part of an extended interface
+    // in a real implementation, extending ParlantValidationRequest to include validationParams
+    // and conversationContext properties. For now, keeping the structure as separate metadata.
+    const enhancedMetadata = {
+      validationParams: {
+        mode: ValidationMode._INTERACTIVE,
+        approvalLevel: ApprovalLevel._DUAL_APPROVAL,
+        timeout: 120000, // 2 minutes for high-risk scenarios
+        cacheable: false, // Don't cache high-risk validations
+      },
+      conversationContext: {
+        metadata: {
+          priority: ConversationPriority._CRITICAL,
+          properties: {
+            highRisk: true,
+            criticalRiskFactors: authContext.riskAssessment.riskFactors.filter(
+              (f) => f.critical,
+            ),
+          },
         },
       },
+    };
+    
+    // Add enhanced metadata to user context for processing
+    baseRequest.userContext.metadata = {
+      ...baseRequest.userContext.metadata,
+      ...enhancedMetadata,
     };
 
     return baseRequest;
