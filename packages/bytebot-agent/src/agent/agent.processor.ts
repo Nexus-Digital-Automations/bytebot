@@ -14,9 +14,6 @@ import {
   isSetTaskStatusToolUseBlock,
   isCreateTaskToolUseBlock,
   SetTaskStatusToolUseBlock,
-  ParlantCritical,
-  ParlantSecure,
-  SecurityLevel,
 } from '@bytebot/shared/server';
 
 import {

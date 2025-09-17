@@ -282,7 +282,6 @@ export class ParlantMonitoringController {
   @Post('query/follow-up')
   @HttpCode(HttpStatus.OK)
   @ParlantValidated({
-    description: 'Follow-up monitoring query using conversation context for continuous dialogue',
     securityLevel: SecurityLevel._MEDIUM,
     cacheable: false,
   })
@@ -343,10 +342,8 @@ export class ParlantMonitoringController {
    */
   @Get('dashboard')
   @ParlantValidated({
-    description: 'Real-time conversational monitoring dashboard with intelligent status summaries',
     securityLevel: SecurityLevel._MEDIUM,
     cacheable: true,
-    cacheTtl: 30000, // 30 seconds cache
   })
   @ApiOperation({
     summary: 'Get conversational monitoring dashboard',
@@ -438,10 +435,8 @@ export class ParlantMonitoringController {
    */
   @Get('insights/:period')
   @ParlantValidated({
-    description: 'Monitoring insights and trend analysis for specified time period',
     securityLevel: SecurityLevel._MEDIUM,
     cacheable: true,
-    cacheTtl: 300000, // 5 minutes cache
   })
   @ApiOperation({
     summary: 'Get monitoring insights for time period',

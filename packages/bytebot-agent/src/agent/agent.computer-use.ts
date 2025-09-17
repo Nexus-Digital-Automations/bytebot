@@ -20,9 +20,6 @@ import {
   isApplicationToolUseBlock,
   isPasteTextToolUseBlock,
   isReadFileToolUseBlock,
-  ParlantCritical,
-  ParlantSecure,
-  SecurityLevel,
 } from '@bytebot/shared/server';
 import { Logger } from '@nestjs/common';
 
@@ -711,7 +708,7 @@ async function application(input: { application: string }): Promise<void> {
   }
 }
 
-// Parlant-secured file reading function  
+// Parlant-secured file reading function
 async function readFile(input: { path: string }): Promise<{
   /* ParlantSecure: Reads files from user system - requires validation of file path and access permissions - SecurityLevel._HIGH */
   success: boolean;

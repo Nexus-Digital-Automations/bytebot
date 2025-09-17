@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 // Removed unused UI components: ScrollArea, Popover, PopoverContent, PopoverTrigger
-// Removed unused icon imports - replaced with div fallbacks
+import { HugeiconsIcon } from "@hugeicons/react";
 import { logDebug, logInfo, logWarn } from '@/utils/logger';
 
 // ===========================

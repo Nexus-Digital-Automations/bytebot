@@ -436,8 +436,10 @@ export class ParlantMonitoringService {
     }
     
     try {
-      const response = await this.parlantService.validateOperation({
+      const response = await this.parlantService.validateFunction({
         operationId,
+        functionName: 'analyzeMonitoringQuery',
+        packageName: '@bytebot/monitoring',
         description: `Analyze monitoring query intent: "${query}"`,
         context: { query, type: 'intent_analysis' },
         securityLevel: SecurityLevel._LOW,

@@ -123,7 +123,7 @@ function safeTypeGuard<T>(
 
     // Ensure result is explicitly boolean
     return Boolean(result);
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     // Type-safe error handling with detailed logging
     // Debug logging removed for ESLint compliance
     // Error details: error instanceof Error ? error.message : "Unknown error", blockType: typeof block
@@ -154,7 +154,7 @@ function hasValidInput(
       typeof blockObj.input === "object" &&
       !Array.isArray(blockObj.input) // Ensure input is object, not array
     );
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     // Type-safe error logging
     // Debug logging removed for ESLint compliance
     // Error details: error instanceof Error ? error.message : "Unknown error", blockType: typeof block
@@ -196,7 +196,7 @@ function getButtonValue(block: unknown): string | undefined {
     }
 
     return undefined;
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     // Type-safe error logging
     // Debug logging removed for ESLint compliance
     // Error details: error instanceof Error ? error.message : "Unknown error", blockType: typeof block
@@ -387,7 +387,7 @@ export function getLabel(block: ComputerToolUseContentBlock | unknown): string {
             button.charAt(0).toUpperCase() + button.slice(1);
           return `${capitalizedButton} Click`;
         }
-      } catch (error: unknown) {
+      } catch (_error: unknown) {
         // Type-safe error handling
         // Debug logging removed for ESLint compliance
         // Click processing failed: error instanceof Error ? error.message : "Unknown error", blockName
