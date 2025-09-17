@@ -45,6 +45,43 @@ import {
 import { logDebug, logInfo, logWarning } from '@/utils/logger';
 
 // ===========================
+// SCORING CONSTANTS
+// ===========================
+
+/**
+ * Confidence and scoring constants for navigation command processing
+ */
+const SCORING_CONSTANTS = {
+  // Intent matching scores
+  NAVIGATE_INTENT_SCORE: 0.5,
+  CREATE_INTENT_SCORE: 0.7,
+  SEARCH_INTENT_SCORE: 0.7,
+  
+  // Entity matching scores
+  ENTITY_MATCH_BONUS: 0.4,
+  REQUIRED_PARAMS_BONUS: 0.3,
+  MISSING_PARAMS_PENALTY: 0.2,
+  
+  // Confidence thresholds
+  MIN_ACTION_CONFIDENCE: 0.3,
+  HIGH_CONFIDENCE_THRESHOLD: 0.8,
+  MEDIUM_CONFIDENCE_THRESHOLD: 0.4,
+  LOW_CONFIDENCE_THRESHOLD: 0.2,
+  VERY_LOW_CONFIDENCE_THRESHOLD: 0.1,
+  
+  // Animation and UI constants
+  OPACITY_LIGHT: 0.05,
+  OPACITY_DISABLED: 0.1,
+  OPACITY_MEDIUM: 0.3,
+  OPACITY_SEMI: 0.5,
+  
+  // Navigation constants
+  COMMAND_HISTORY_LIMIT: 10,
+  SUGGESTION_LIMIT: 5,
+  MAX_VOICE_RESULT_INDEX: 9
+} as const;
+
+// ===========================
 // TYPE DEFINITIONS
 // ===========================
 
@@ -516,7 +553,7 @@ class NavigationNLU {
     // Intent-specific parameter extraction
     switch (intent) {
       case NavigationIntent.SEARCH: {
-        const searchMatch = command.match(/(?:search|find|look for)\s+["']([^"']+)["']/) ||
+        const searchMatch = command.match(/(?:search|find|look for)\s+["']([^"']+)["']/) ??
                            command.match(/(?:search|find|look for)\s+(\w+)/);
         if (searchMatch) {
           parameters.query = searchMatch[1];
@@ -537,7 +574,7 @@ class NavigationNLU {
         const sortMatch = command.match(/(?:sort|order)\s+by\s+(\w+)(?:\s+(asc|desc|ascending|descending))?/);
         if (sortMatch) {
           parameters.sortField = sortMatch[1];
-          parameters.sortDirection = sortMatch[2] || 'asc';
+          parameters.sortDirection = sortMatch[2] ?? 'asc';
         }
         break;
       }
@@ -575,11 +612,11 @@ class NavigationNLU {
       
       // Score based on intent match
       if (intent === NavigationIntent.NAVIGATE && action.path) {
-        score += 0.5;
+        score += SCORING_CONSTANTS.NAVIGATE_INTENT_SCORE;
       } else if (intent === NavigationIntent.CREATE && action.id.includes('create')) {
-        score += 0.7;
+        score += SCORING_CONSTANTS.CREATE_INTENT_SCORE;
       } else if (intent === NavigationIntent.SEARCH && action.id.includes('search')) {
-        score += 0.7;
+        score += SCORING_CONSTANTS.SEARCH_INTENT_SCORE;
       }
       
       // Score based on entity match
@@ -587,7 +624,7 @@ class NavigationNLU {
         const entityInPath = action.path?.includes(entity.toLowerCase());
         const entityInId = action.id.includes(entity.toLowerCase());
         if (entityInPath || entityInId) {
-          score += 0.4;
+          score += SCORING_CONSTANTS.ENTITY_MATCH_BONUS;
         }
       }
       
@@ -597,9 +634,9 @@ class NavigationNLU {
           Object.prototype.hasOwnProperty.call(parameters, param)
         );
         if (hasAllParams) {
-          score += 0.3;
+          score += SCORING_CONSTANTS.REQUIRED_PARAMS_BONUS;
         } else {
-          score -= 0.2; // Penalize missing required params
+          score -= SCORING_CONSTANTS.MISSING_PARAMS_PENALTY; // Penalize missing required params
         }
       }
       
@@ -609,7 +646,7 @@ class NavigationNLU {
       }
     }
     
-    return bestScore > 0.3 ? bestAction : undefined;
+    return bestScore > SCORING_CONSTANTS.MIN_ACTION_CONFIDENCE ? bestAction : undefined;
   }
   
   /**
@@ -640,7 +677,7 @@ class NavigationNLU {
     
     // Confidence from command completeness (longer, more specific commands)
     const wordCount = command.split(' ').length;
-    confidence += Math.min(0.2, wordCount * 0.05);
+    confidence += Math.min(SCORING_CONSTANTS.MISSING_PARAMS_PENALTY, wordCount * SCORING_CONSTANTS.OPACITY_LIGHT);
     
     return Math.min(1, confidence);
   }
@@ -669,7 +706,7 @@ class NavigationNLU {
               text: pattern,
               completion: pattern.substring(normalizedInput.length),
               type: 'command',
-              confidence: 0.8,
+              confidence: SCORING_CONSTANTS.HIGH_CONFIDENCE_THRESHOLD,
               action,
               frequency: this.getCommandFrequency(pattern)
             });
@@ -681,7 +718,7 @@ class NavigationNLU {
     // Sort by confidence and frequency
     return suggestions
       .sort((a, b) => (b.confidence + b.frequency) - (a.confidence + a.frequency))
-      .slice(0, 10);
+      .slice(0, SCORING_CONSTANTS.COMMAND_HISTORY_LIMIT);
   }
   
   /**
@@ -690,7 +727,7 @@ class NavigationNLU {
   private getCommandFrequency(command: string): number {
     // In a real implementation, this would query usage analytics
     const commonCommands = ['go to dashboard', 'show tasks', 'help'];
-    return commonCommands.includes(command) ? 0.8 : 0.3;
+    return commonCommands.includes(command) ? SCORING_CONSTANTS.HIGH_CONFIDENCE_THRESHOLD : SCORING_CONSTANTS.OPACITY_MEDIUM;
   }
 }
 
@@ -790,7 +827,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       }, 'ChatFirstNavigation');
       
       // Execute the suggested action
-      if (result.suggestedAction && result.confidence > 0.5) {
+      if (result.suggestedAction && result.confidence > SCORING_CONSTANTS.OPACITY_SEMI) {
         if (result.suggestedAction.handler) {
           await result.suggestedAction.handler();
         } else if (result.suggestedAction.path) {
@@ -799,12 +836,12 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         }
         
         // Update recent commands
-        setRecentCommands(prev => [commandText, ...prev.slice(0, 9)]);
+        setRecentCommands(prev => [commandText, ...prev.slice(0, SCORING_CONSTANTS.MAX_VOICE_RESULT_INDEX)]);
         
         onCommandExecuted?.(commandText, result);
       } else {
         // Handle low confidence or no action found
-        const errorMessage = result.confidence < 0.5 
+        const errorMessage = result.confidence < SCORING_CONSTANTS.OPACITY_SEMI 
           ? `I'm not sure what you mean by "${commandText}". Could you try rephrasing?`
           : `I couldn't find an action for "${commandText}".`;
         
@@ -853,11 +890,11 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
           setCommand(suggestions[selectedSuggestionIndex].text);
           processCommand(suggestions[selectedSuggestionIndex].text).catch((error) => {
-            console.error('Command processing failed:', error);
+            logWarning('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
           });
         } else {
           processCommand(command).catch((error) => {
-            console.error('Command processing failed:', error);
+            logWarning('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
           });
         }
         break;
@@ -902,7 +939,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   const handleSuggestionClick = useCallback((suggestion: CommandSuggestion) => {
     setCommand(suggestion.text);
     processCommand(suggestion.text).catch((error) => {
-      console.error('Command processing failed:', error);
+      logWarning('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
     });
   }, [processCommand]);
   
@@ -916,7 +953,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       return;
     }
     
-    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    const SpeechRecognition = window.webkitSpeechRecognition ?? window.SpeechRecognition;
     const recognition = new SpeechRecognition();
     
     recognition.continuous = false;
@@ -943,7 +980,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       if (event.results[event.results.length - 1].isFinal) {
         setCommand(transcript);
         processCommand(transcript).catch((error) => {
-          console.error('Command processing failed:', error);
+          logWarning('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
         });
       }
     };
@@ -997,11 +1034,11 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
           e.preventDefault();
           if (action.handler) {
             action.handler().catch((error) => {
-              console.error('Action handler failed:', error);
+              logWarning('Action handler failed', { error: error.message }, 'ChatFirstNavigation');
             });
           } else if (action.path) {
             router.push(action.path).catch((error) => {
-              console.error('Navigation failed:', error);
+              logWarning('Navigation failed', { error: error.message }, 'ChatFirstNavigation');
             });
             onNavigate?.(action.path);
           }
@@ -1115,9 +1152,9 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
                     className="w-1 h-4 bg-blue-500 rounded-full"
                     animate={{ scaleY: [1, 2, 1] }}
                     transition={{
-                      duration: 0.5,
+                      duration: SCORING_CONSTANTS.OPACITY_SEMI,
                       repeat: Infinity,
-                      delay: i * 0.1,
+                      delay: i * SCORING_CONSTANTS.VERY_LOW_CONFIDENCE_THRESHOLD,
                     }}
                   />
                 ))}
@@ -1220,8 +1257,8 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
                     className="w-2 h-2 rounded-full bg-gray-300" 
                     style={{
                       backgroundColor: (() => {
-                        if (suggestion.confidence > 0.7) {return '#10b981';}
-                        if (suggestion.confidence > 0.4) {return '#f59e0b';}
+                        if (suggestion.confidence > SCORING_CONSTANTS.CREATE_INTENT_SCORE) {return '#10b981';}
+                        if (suggestion.confidence > SCORING_CONSTANTS.MEDIUM_CONFIDENCE_THRESHOLD) {return '#f59e0b';}
                         return '#ef4444';
                       })()
                     }} 
