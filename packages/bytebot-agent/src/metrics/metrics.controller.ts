@@ -48,13 +48,9 @@ export class MetricsController {
    * Standard Prometheus metrics endpoint for scraping
    */
   @Get()
-  @ParlantSecure({
-    intent:
-      'Expose comprehensive Prometheus metrics for monitoring systems and observability platforms',
-    securityLevel: 'HIGH',
-    description:
-      'Critical endpoint providing system metrics, performance data, and business intelligence for monitoring',
-  })
+  @ParlantSecure(
+    'Expose comprehensive Prometheus metrics for monitoring systems and observability platforms',
+  )
   @ApiOperation({
     summary: 'Prometheus metrics endpoint',
     description:

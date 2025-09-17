@@ -40,6 +40,7 @@ import {
   ParlantCritical,
   ParlantSecure,
   ParlantValidated,
+  SecurityLevel,
 } from '@bytebot/shared/server';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -78,13 +79,9 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @RateLimit(RateLimitPreset._AUTH) // Strict rate limiting for authentication
-  @ParlantCritical({
-    intent:
-      'User login authentication with credential validation and JWT token generation',
-    securityLevel: 'CRITICAL',
-    description:
-      'Critical authentication endpoint requiring maximum security validation',
-  })
+  @ParlantCritical(
+    'User login authentication with credential validation and JWT token generation',
+  )
   @ApiOperation({
     summary: 'User login',
     description: 'Authenticate user credentials and return JWT tokens',
@@ -173,13 +170,9 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @RateLimit(RateLimitPreset._AUTH) // Strict rate limiting for registration
-  @ParlantCritical({
-    intent:
-      'User account registration with secure password hashing and user creation',
-    securityLevel: 'CRITICAL',
-    description:
-      'Critical user registration endpoint requiring comprehensive validation',
-  })
+  @ParlantCritical(
+    'User account registration with secure password hashing and user creation',
+  )
   @ApiOperation({
     summary: 'User registration',
     description: 'Create new user account with secure password hashing',
@@ -271,13 +264,9 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @RateLimit(RateLimitPreset._AUTH) // Rate limiting for token refresh
-  @ParlantSecure({
-    intent:
-      'JWT token refresh operation with refresh token validation and new token generation',
-    securityLevel: 'HIGH',
-    description:
-      'Secure token refresh endpoint requiring validation of existing refresh token',
-  })
+  @ParlantSecure(
+    'JWT token refresh operation with refresh token validation and new token generation',
+  )
   @ApiOperation({
     summary: 'Refresh JWT tokens',
     description: 'Generate new access token using valid refresh token',
@@ -414,13 +403,9 @@ export class AuthController {
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ParlantCritical({
-    intent:
-      'Password change operation with current password verification and secure password update',
-    securityLevel: 'CRITICAL',
-    description:
-      'Critical password change endpoint requiring comprehensive security validation',
-  })
+  @ParlantCritical(
+    'Password change operation with current password verification and secure password update',
+  )
   @ApiOperation({
     summary: 'Change user password',
     description: 'Update user password with current password verification',

@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ParlantValidated } from '@bytebot/shared/server';
+import { ParlantValidated, SecurityLevel } from '@bytebot/shared/server';
 import { AppService } from './app.service';
 
 @ApiTags('Application')
@@ -21,7 +21,7 @@ export class AppController {
   })
   @ParlantValidated({
     intent: 'Get application status',
-    securityLevel: 'MINIMAL',
+    securityLevel: SecurityLevel._MINIMAL,
     description: 'Basic application health check endpoint',
   })
   getHello(): string {

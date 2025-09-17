@@ -112,13 +112,9 @@ export class SecretsHealthController {
    * external provider status, and audit information
    */
   @Get('health')
-  @ParlantSecure({
-    intent:
-      'Retrieve comprehensive secrets management health status and performance metrics',
-    securityLevel: 'HIGH',
-    description:
-      'Critical endpoint exposing secrets health, audit information, and external provider status',
-  })
+  @ParlantSecure(
+    'Retrieve comprehensive secrets management health status and performance metrics',
+  )
   async getSecretsHealth(): Promise<SecretsHealthResponse> {
     const operationId = `health-check-${Date.now()}`;
     const timestamp = new Date().toISOString();
@@ -241,13 +237,9 @@ export class SecretsHealthController {
    * Returns metrics in various formats suitable for Prometheus, Grafana, etc.
    */
   @Get('metrics')
-  @ParlantSecure({
-    intent:
-      'Retrieve secrets management metrics and performance data for monitoring systems',
-    securityLevel: 'HIGH',
-    description:
-      'Secure endpoint providing comprehensive metrics for Prometheus, Grafana, and monitoring systems',
-  })
+  @ParlantSecure(
+    'Retrieve secrets management metrics and performance data for monitoring systems',
+  )
   async getSecretsMetrics(): Promise<Record<string, unknown>> {
     const operationId = `metrics-${Date.now()}`;
     const finalFormat = 'json';
@@ -331,13 +323,9 @@ export class SecretsHealthController {
    * Returns metrics in Prometheus exposition format
    */
   @Get('metrics/prometheus')
-  @ParlantSecure({
-    intent:
-      'Retrieve secrets management metrics in Prometheus exposition format for monitoring infrastructure',
-    securityLevel: 'HIGH',
-    description:
-      'Secure endpoint providing Prometheus-compatible metrics for secrets management monitoring',
-  })
+  @ParlantSecure(
+    'Retrieve secrets management metrics in Prometheus exposition format for monitoring infrastructure',
+  )
   async getPrometheusMetrics(): Promise<any> {
     const operationId = `prometheus-${Date.now()}`;
 
