@@ -21,6 +21,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import { URL } from 'url';
 import { BrowserSessionService } from './browser-session.service';
 import { 
   ParlantIntegrationService, 
@@ -32,7 +33,6 @@ import {
 import {
   CreateBrowserSessionDto,
   BrowserSessionDto,
-  BrowserSessionStatus,
   BrowserTabInfoDto,
 } from './dto/browser-session.dto';
 
@@ -263,7 +263,7 @@ export class ParlantValidatedBrowserSessionService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -430,7 +430,7 @@ export class ParlantValidatedBrowserSessionService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -522,7 +522,7 @@ export class ParlantValidatedBrowserSessionService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -648,7 +648,7 @@ export class ParlantValidatedBrowserSessionService {
    */
   private assessSessionDeletionRisk(
     sessionId: string,
-    context: BrowserSessionValidationContext
+    _context: BrowserSessionValidationContext
   ): SessionOperationRiskAssessment {
     const riskFactors: string[] = [];
     let riskLevel: RiskLevel = RiskLevel.LOW;
@@ -825,7 +825,7 @@ export class ParlantValidatedBrowserSessionService {
       viewport: `${sessionDto.viewportWidth}x${sessionDto.viewportHeight}`,
       devtools: sessionDto.devtools,
       hasProxy: !!sessionDto.proxy,
-      initialUrlsCount: sessionDto.initialUrls?.length || 0,
+      initialUrlsCount: sessionDto.initialUrls?.length ?? 0,
     };
   }
 
@@ -878,7 +878,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Check if session has active tasks (mock implementation)
    */
-  private hasActiveTasksInSession(sessionId: string): boolean {
+  private hasActiveTasksInSession(_sessionId: string): boolean {
     // Mock implementation - in production would check actual task status
     return Math.random() > 0.8; // 20% chance of having active tasks
   }
@@ -886,7 +886,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Check if session has unsaved data (mock implementation)
    */
-  private hasUnsavedDataInSession(sessionId: string): boolean {
+  private hasUnsavedDataInSession(_sessionId: string): boolean {
     // Mock implementation - in production would check actual session state
     return Math.random() > 0.9; // 10% chance of having unsaved data
   }
@@ -902,7 +902,7 @@ export class ParlantValidatedBrowserSessionService {
     return {
       estimatedMemoryMB: Math.round((baseMemory * memoryMultiplier) + devtoolsOverhead),
       estimatedCpuPercent: sessionDto.headless ? 5 : 15,
-      estimatedNetworkConnections: sessionDto.initialUrls?.length || 1,
+      estimatedNetworkConnections: sessionDto.initialUrls?.length ?? 1,
       expectedLifetimeMinutes: 60, // Default 1 hour
     };
   }
@@ -1058,7 +1058,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Get security profile for validation context
    */
-  async getSecurityProfile(userId: string): Promise<SessionSecurityProfile> {
+  async getSecurityProfile(_userId: string): Promise<SessionSecurityProfile> {
     // Mock implementation - in production would check actual security data
     return {
       userTrustLevel: 'MEDIUM',

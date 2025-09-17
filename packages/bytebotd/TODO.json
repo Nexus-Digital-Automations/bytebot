@@ -1144,6 +1144,75 @@
           "claimPriority": "normal"
         }
       ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T16:43:11.958Z",
+      "title": "Fix TypeScript compilation errors in shared package",
+      "description": "Resolve all TypeScript compilation errors in the shared package including missing ParlantConversationContext type, property errors on ParlantValidationRequest interface, and index signature issues. This is critical as the shared package is a root dependency for all other packages.",
+      "category": "error",
+      "id": "error_1758127391958_52p0l5w6nar",
+      "assigned_agent": "dev_session_1758127357997_1_general_e2fc0f95",
+      "started_at": "2025-09-17T16:44:19.361Z",
+      "claimed_by": "dev_session_1758127357997_1_general_e2fc0f95",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758127357997_1_general_e2fc0f95",
+          "role": "primary",
+          "assignedAt": "2025-09-17T16:44:19.361Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T16:43:12.359Z",
+      "title": "Fix TypeScript compilation errors in bytebot-ui package",
+      "description": "Resolve React/Next.js TypeScript issues including null safety, undefined types, and test compilation errors after shared package build completion",
+      "category": "error",
+      "id": "error_1758127392359_uiluwz6p6dh",
+      "assigned_agent": "dev_session_1758127357918_1_general_6e53a5b9",
+      "started_at": "2025-09-17T16:45:03.062Z",
+      "claimed_by": "dev_session_1758127357918_1_general_6e53a5b9",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758127357918_1_general_6e53a5b9",
+          "role": "primary",
+          "assignedAt": "2025-09-17T16:45:03.062Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-17T16:43:13.383Z",
+      "title": "Fix TypeScript compilation errors in bytebot-agent",
+      "description": "Resolve Node.js/NestJS TypeScript compilation errors including module resolution, export conflicts, duplicate declarations, and isolatedModules compatibility issues",
+      "category": "error",
+      "id": "error_1758127393382_nrm5bjcdj3r"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T17:12:55.658Z",
+      "title": "CRITICAL: Fix ESLint timeout/failure in bytebotd package",
+      "description": "Critical build-blocking issue: ESLint command failing with SIGTERM in bytebotd package during workspace linting. This is preventing successful completion of pnpm run lint:all and blocking builds. Need to investigate ESLint configuration issues, memory problems, or circular dependency issues causing the timeout/failure.",
+      "category": "error",
+      "priority": "high",
+      "id": "error_1758129175658_jcpbni8gx9h",
+      "assigned_agent": "dev_session_1758129028666_1_general_284d8e08",
+      "started_at": "2025-09-17T17:13:22.443Z",
+      "claimed_by": "dev_session_1758129028666_1_general_284d8e08",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758129028666_1_general_284d8e08",
+          "role": "primary",
+          "assignedAt": "2025-09-17T17:13:22.443Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -4439,6 +4508,90 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-17T12:56:33.444Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758127357692_1_general_24fd2820": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T16:42:37.694Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T16:42:37.694Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758127357918_1_general_6e53a5b9": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T16:42:37.919Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T16:42:37.919Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758127357959_1_general_42fc6f59": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T16:42:37.960Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T16:42:37.960Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758127357997_1_general_e2fc0f95": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T16:42:37.998Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T16:42:37.998Z",
       "sessionId": null,
       "metadata": {}
     }

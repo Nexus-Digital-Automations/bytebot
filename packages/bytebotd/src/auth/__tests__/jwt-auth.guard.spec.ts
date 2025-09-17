@@ -138,9 +138,24 @@ describe('JwtAuthGuard', () => {
       switchToHttp: jest.fn().mockReturnValue({
         getRequest: jest.fn().mockReturnValue(mockRequest),
         getResponse: jest.fn().mockReturnValue({}),
+        getNext: jest.fn().mockReturnValue(jest.fn()),
       }),
       getHandler: jest.fn(),
       getClass: jest.fn(),
+      getArgs: jest.fn().mockReturnValue([mockRequest, {}, jest.fn()]),
+      getArgByIndex: jest.fn((index: number) => {
+        const args = [mockRequest, {}, jest.fn()];
+        return args[index];
+      }),
+      switchToRpc: jest.fn().mockReturnValue({
+        getContext: jest.fn(),
+        getData: jest.fn(),
+      }),
+      switchToWs: jest.fn().mockReturnValue({
+        getClient: jest.fn(),
+        getData: jest.fn(),
+      }),
+      getType: jest.fn().mockReturnValue('http'),
     } as ExecutionContext;
   };
 

@@ -16,7 +16,7 @@
  * @since Phase 1: Bytebot API Hardening - Local Deployment
  */
 
-import * as Joi from 'joi';
+// import * as Joi from 'joi'; // Temporarily commented - joi not installed
 
 /**
  * Environment validation schema

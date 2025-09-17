@@ -40,6 +40,7 @@ interface MockExecutionContext extends ExecutionContext {
   switchToHttp(): {
     getRequest(): AuthenticatedRequest;
     getResponse(): Record<string, unknown>;
+    getNext(): Function;
   };
 }
 

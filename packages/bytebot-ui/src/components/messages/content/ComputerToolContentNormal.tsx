@@ -131,20 +131,19 @@ function ToolDetailsNormal({
   block: ComputerToolUseContentBlock;
 }): React.JSX.Element {
   // Block is already properly typed from props
-  const safeBlock = block;
   const baseClasses =
     "px-1 py-0.5 text-[12px] text-bytebot-bronze-light-11 bg-bytebot-red-light-1 border border-bytebot-bronze-light-7 rounded-md";
 
   return (
     <>
-      {safeTypeGuardCall(isApplicationToolUseBlock, safeBlock as unknown) && (
+      {safeTypeGuardCall(isApplicationToolUseBlock, block as unknown) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(safeBlock)) {
+            if (!isBlockWithInput(block)) {
               return "Unknown Application";
             }
             // Type assertion after type guard to fix unsafe member access
-            const validatedBlock = safeBlock as ComputerToolUseContentBlock;
+            const validatedBlock = block as ComputerToolUseContentBlock;
             const input = validatedBlock.input as { application?: unknown };
             const app = input.application;
             if (isValidApplication(app)) {
@@ -157,15 +156,15 @@ function ToolDetailsNormal({
       )}
 
       {/* Text for type and key actions */}
-      {(safeTypeGuardCall(isTypeKeysToolUseBlock, safeBlock as unknown) ||
-        safeTypeGuardCall(isPressKeysToolUseBlock, safeBlock as unknown)) && (
+      {(safeTypeGuardCall(isTypeKeysToolUseBlock, block as unknown) ||
+        safeTypeGuardCall(isPressKeysToolUseBlock, block as unknown)) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(safeBlock)) {
+            if (!isBlockWithInput(block)) {
               return "Invalid keys";
             }
             // Type assertion after type guard to fix unsafe member access
-            const validatedBlock = safeBlock as ComputerToolUseContentBlock;
+            const validatedBlock = block as ComputerToolUseContentBlock;
             const input = validatedBlock.input as { keys?: unknown };
             const keys = input.keys;
             return Array.isArray(keys) ? keys.join(" + ") : "Invalid keys";
@@ -173,15 +172,15 @@ function ToolDetailsNormal({
         </p>
       )}
 
-      {(safeTypeGuardCall(isTypeTextToolUseBlock, safeBlock as unknown) ||
-        safeTypeGuardCall(isPasteTextToolUseBlock, safeBlock as unknown)) && (
+      {(safeTypeGuardCall(isTypeTextToolUseBlock, block as unknown) ||
+        safeTypeGuardCall(isPasteTextToolUseBlock, block as unknown)) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(safeBlock)) {
+            if (!isBlockWithInput(block)) {
               return "Invalid text";
             }
             // Type assertion after type guard to fix unsafe member access
-            const validatedBlock = safeBlock as ComputerToolUseContentBlock;
+            const validatedBlock = block as ComputerToolUseContentBlock;
             const input = validatedBlock.input as { text?: unknown; isSensitive?: unknown };
             const text = input.text;
             const isSensitive = Boolean(input.isSensitive ?? false);
@@ -196,14 +195,14 @@ function ToolDetailsNormal({
       )}
 
       {/* Duration for wait actions */}
-      {safeTypeGuardCall(isWaitToolUseBlock, safeBlock) && (
+      {safeTypeGuardCall(isWaitToolUseBlock, block) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(safeBlock)) {
+            if (!isBlockWithInput(block)) {
               return "Invalid duration";
             }
             // After type guard, we know block has input property
-            const input = (safeBlock as ComputerToolUseContentBlock).input as { duration?: unknown };
+            const input = (block as ComputerToolUseContentBlock).input as { duration?: unknown };
             const duration = input.duration;
             return typeof duration === "number"
               ? `${duration}ms`
@@ -213,22 +212,22 @@ function ToolDetailsNormal({
       )}
 
       {/* Coordinates for click/mouse actions */}
-      {Boolean(safeBlock?.input) && hasCoordinates(safeBlock.input) && (
+      {Boolean(block?.input) && hasCoordinates(block.input) && (
         <p className={baseClasses}>
           {((): string => {
             // hasCoordinates type guard already confirmed structure
-            const coords = safeBlock.input.coordinates;
+            const coords = block.input.coordinates;
             return `${coords.x}, ${coords.y}`;
           })()}
         </p>
       )}
 
       {/* Start and end coordinates for path actions */}
-      {Boolean(safeBlock?.input) && hasPathCoordinates(safeBlock.input) && (
+      {Boolean(block?.input) && hasPathCoordinates(block.input) && (
         <p className={baseClasses}>
           {((): string => {
             // hasPathCoordinates type guard already confirmed structure  
-            const path = safeBlock.input.path;
+            const path = block.input.path;
             const firstPoint = path[0];
             const lastPoint = path[path.length - 1];
 
@@ -242,14 +241,14 @@ function ToolDetailsNormal({
       )}
 
       {/* Scroll information */}
-      {safeTypeGuardCall(isScrollToolUseBlock, safeBlock) && (
+      {safeTypeGuardCall(isScrollToolUseBlock, block) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(safeBlock)) {
+            if (!isBlockWithInput(block)) {
               return "unknown 0";
             }
             // After type guard, we know block has input property
-            const input = safeBlock.input;
+            const input = block.input;
             const direction = input.direction;
             const scrollCount = input.scrollCount;
 
@@ -266,14 +265,14 @@ function ToolDetailsNormal({
       )}
 
       {/* File information */}
-      {safeTypeGuardCall(isReadFileToolUseBlock, safeBlock) && (
+      {safeTypeGuardCall(isReadFileToolUseBlock, block) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!isBlockWithInput(safeBlock)) {
+            if (!isBlockWithInput(block)) {
               return "Invalid file path";
             }
             // After type guard, we know block has input property
-            const input = safeBlock.input;
+            const input = block.input;
             const path = input.path;
             return typeof path === "string" ? path : "Invalid file path";
           })()}

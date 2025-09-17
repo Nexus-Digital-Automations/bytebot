@@ -1033,8 +1033,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       {/* Header */}
       {currentConversation !== null && currentConversation !== undefined && (
         <ConversationHeader
-          conversation={currentConversation as unknown}
-          participants={participants}
+          conversation={currentConversation as { conversationId: string; metadata?: { topic?: string; }; } | null}
+          participants={participants as unknown[]}
           state={conversationState}
           metrics={metrics}
           {...(config.enableSearch && { onSearch: (): void => { setShowSearch(!showSearch); } })}

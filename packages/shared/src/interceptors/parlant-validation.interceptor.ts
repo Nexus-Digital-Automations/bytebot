@@ -43,6 +43,7 @@ import {
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
+  ParlantConversationContext,
   ValidationDecision,
   ConversationState,
   ConversationPriority,
@@ -454,19 +455,20 @@ export class ParlantValidationInterceptor implements NestInterceptor {
   ): import("../types/parlant-integration.types").ParlantValidationRequest {
     return {
       operationId: `op_${Date.now()}`,
-      functionName: request.functionName || "unknown",
+      functionName: request.functionContext.functionName || "unknown",
       packageName: "shared",
-      description: `Validation for ${request.functionName || "unknown"}`,
-      parameters: request.parameters || {},
-      userContext: request.userContext || {
-        userId: "anonymous",
+      description: `Validation for ${request.functionContext.functionName || "unknown"}`,
+      parameters: request.functionContext.arguments || {},
+      userContext: {
+        userId: request.conversationContext.userId || "anonymous",
         roles: [],
         permissions: [],
-        sessionId: "no-session",
+        sessionId: request.conversationContext.sessionId || "no-session",
+        ipAddress: "unknown",
         metadata: {},
       },
       securityLevel: SecurityLevel._MEDIUM,
-      timeout: 30000,
+      timeout: request.timeout || 30000,
     };
   }
 

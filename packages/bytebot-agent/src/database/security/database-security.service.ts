@@ -14,8 +14,8 @@ import { ConfigService } from '@nestjs/config';
 import {
   ParlantCritical,
   ParlantSecure,
-  SecurityLevel,
 } from '@bytebot/shared/server';
+import { SecurityLevel } from '@bytebot/shared';
 import * as fs from 'fs';
 
 export interface DatabaseSecurityConfig {

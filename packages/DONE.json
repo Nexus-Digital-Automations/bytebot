@@ -23,6 +23,54 @@
       "updated_at": "2025-09-17T15:55:50.488Z",
       "archived_at": "2025-09-17T15:55:50.491Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T14:49:57.462Z",
+      "title": "Fix TypeScript ESLint warnings in bytebotd package",
+      "description": "Resolve all ESLint TypeScript strict mode violations in bytebotd NestJS service including any type violations, unsafe member access, and strict boolean expressions",
+      "category": "error",
+      "id": "error_1758120597461_5p0z6u8928",
+      "assigned_agent": "dev_session_1758120559426_1_general_9ea0acab",
+      "started_at": "2025-09-17T14:54:58.513Z",
+      "claimed_by": "dev_session_1758120559426_1_general_9ea0acab",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758120559426_1_general_9ea0acab",
+          "role": "primary",
+          "assignedAt": "2025-09-17T14:54:58.513Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-17T15:58:22.612Z",
+      "updated_at": "2025-09-17T15:58:22.612Z",
+      "archived_at": "2025-09-17T15:58:22.615Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T14:49:58.479Z",
+      "title": "Fix ESLint TypeScript warnings in bytebot-ui package",
+      "description": "Resolve 100+ unsafe member access ESLint warnings, TypeScript any violations, and strict boolean expressions in React/Next.js components",
+      "category": "error",
+      "id": "error_1758120598479_u5apn8hqu78",
+      "assigned_agent": "dev_session_1758120558420_1_general_4da642f2",
+      "started_at": "2025-09-17T14:51:15.353Z",
+      "claimed_by": "dev_session_1758120558420_1_general_4da642f2",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758120558420_1_general_4da642f2",
+          "role": "primary",
+          "assignedAt": "2025-09-17T14:51:15.353Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-17T16:16:08.397Z",
+      "updated_at": "2025-09-17T16:16:08.397Z",
+      "archived_at": "2025-09-17T16:16:08.399Z",
+      "archive_version": "2.0.0"
     }
   ],
   "project_info": {
@@ -33,6 +81,6 @@
     "total_completed": 0,
     "last_archived": null
   },
-  "last_archived": "2025-09-17T15:55:50.491Z",
-  "total_completed": 1
+  "last_archived": "2025-09-17T16:16:08.399Z",
+  "total_completed": 3
 }

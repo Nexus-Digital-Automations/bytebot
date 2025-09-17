@@ -2,7 +2,7 @@
   "project": "unknown",
   "tasks": [
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T14:49:57.462Z",
       "title": "Fix TypeScript ESLint warnings in bytebotd package",
       "description": "Resolve all ESLint TypeScript strict mode violations in bytebotd NestJS service including any type violations, unsafe member access, and strict boolean expressions",
@@ -19,10 +19,12 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-17T15:58:22.612Z",
+      "updated_at": "2025-09-17T15:58:22.612Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T14:49:58.479Z",
       "title": "Fix ESLint TypeScript warnings in bytebot-ui package",
       "description": "Resolve 100+ unsafe member access ESLint warnings, TypeScript any violations, and strict boolean expressions in React/Next.js components",
@@ -39,7 +41,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-17T16:16:08.397Z",
+      "updated_at": "2025-09-17T16:16:08.397Z"
     },
     {
       "status": "completed",

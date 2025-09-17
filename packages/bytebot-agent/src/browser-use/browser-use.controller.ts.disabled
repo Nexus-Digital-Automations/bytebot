@@ -661,7 +661,7 @@ export class BrowserUseController {
   @ParlantValidated({
     description:
       'Capture screenshot of browser session with privacy and data protection validation',
-    securityLevel: SecurityLevel._MEDIUM,
+    securityLevel: SecurityLevel._HIGH,
     cacheable: false,
     timeout: 10000,
   })

@@ -480,7 +480,7 @@ export class OrchestratorController {
     try {
       // This would integrate with a database or storage system
       // For now, return mock data structure
-      const orchestrations = [];
+      const orchestrations: OrchestrationExecutionContext[] = [];
       const total = 0;
 
       return {
@@ -524,7 +524,32 @@ export class OrchestratorController {
     this.logger.debug('Getting performance metrics', query);
 
     try {
-      const metrics = this.orchestratorService.getPerformanceMetrics();
+      const serviceMetrics = this.orchestratorService.getPerformanceMetrics();
+      
+      // Convert service metrics to OrchestrationMetrics format
+      const metrics: OrchestrationMetrics = {
+        totalExecutionTimeMs: serviceMetrics.averageExecutionTime || 0,
+        validationTimeMs: 0, // Not available from service, using default
+        serviceCallTimes: new Map<string, number>(), // Not available from service, using empty map
+        peakMemoryMb: 0, // Not available from service, using default
+        cpuUsageStats: {
+          average: 0,
+          peak: 0,
+          timeline: []
+        }, // Not available from service, using defaults
+        networkStats: {
+          bytesSent: 0,
+          bytesReceived: 0,
+          requestCount: serviceMetrics.totalExecutions || 0,
+          avgRequestTimeMs: serviceMetrics.averageExecutionTime || 0
+        }, // Partial data from service
+        cacheStats: {
+          hits: 0,
+          misses: 0,
+          hitRate: 0,
+          avgResponseTimeMs: 0
+        } // Not available from service, using defaults
+      };
       
       // Add additional metrics from performance service if available
       const detailedMetrics = await this.performanceService?.getDetailedMetrics?.(

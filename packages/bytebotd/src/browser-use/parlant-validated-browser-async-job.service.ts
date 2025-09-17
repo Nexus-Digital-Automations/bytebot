@@ -249,7 +249,7 @@ export class ParlantValidatedBrowserAsyncJobService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -401,7 +401,7 @@ export class ParlantValidatedBrowserAsyncJobService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -412,7 +412,7 @@ export class ParlantValidatedBrowserAsyncJobService {
       await this.createAsyncJobAuditEntry({
         timestamp: new Date(),
         jobId,
-        jobType: result?.jobType || AsyncJobType.CUSTOM_WORKFLOW,
+        jobType: result?.jobType ?? AsyncJobType.CUSTOM_WORKFLOW,
         operation: 'RETRIEVE',
         description: `Retrieved async job: ${jobId}`,
         riskLevel: riskAssessment.riskLevel,
@@ -472,7 +472,7 @@ export class ParlantValidatedBrowserAsyncJobService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -556,7 +556,7 @@ export class ParlantValidatedBrowserAsyncJobService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -658,7 +658,7 @@ export class ParlantValidatedBrowserAsyncJobService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -765,7 +765,7 @@ export class ParlantValidatedBrowserAsyncJobService {
         timestamp: new Date(),
         jobId: 'CLEANUP_OPERATION',
         jobType: AsyncJobType.CUSTOM_WORKFLOW,
-        operation: 'CLEANUP' as any,
+        operation: 'CLEANUP' as const,
         description: `Cleaned up ${cleanedCount} old async jobs`,
         riskLevel: riskAssessment.riskLevel,
         validationResult: 'APPROVED',
@@ -893,8 +893,8 @@ export class ParlantValidatedBrowserAsyncJobService {
    * Assess risk for job retrieval operations
    */
   private assessJobRetrievalRisk(
-    jobId: string,
-    context: AsyncJobValidationContext
+    _jobId: string,
+    _context: AsyncJobValidationContext
   ): AsyncJobRiskAssessment {
     return {
       riskLevel: RiskLevel.MINIMAL,
@@ -938,7 +938,7 @@ export class ParlantValidatedBrowserAsyncJobService {
    */
   private assessJobCancellationRisk(
     jobDetails: AsyncJobResultDto,
-    context: AsyncJobValidationContext
+    _context: AsyncJobValidationContext
   ): AsyncJobRiskAssessment {
     const riskFactors: string[] = [];
     let riskLevel = RiskLevel.MEDIUM; // Default medium for operational changes

@@ -104,13 +104,13 @@ expect.extend({
 
     if (pass) {
       return {
-        message: () => `Expected ${received} not to be a valid operation ID`,
+        message: () => `Expected ${String(received)} not to be a valid operation ID`,
         pass: true,
       };
     } else {
       return {
         message: () =>
-          `Expected ${received} to be a valid operation ID (format: action_timestamp_randomString)`,
+          `Expected ${String(received)} to be a valid operation ID (format: action_timestamp_randomString)`,
         pass: false,
       };
     }
@@ -122,7 +122,7 @@ expect.extend({
   toBeValidBase64(received: unknown): jest.CustomMatcherResult {
     if (typeof received !== 'string') {
       return {
-        message: () => `Expected ${received} to be a string`,
+        message: () => `Expected ${String(received)} to be a string`,
         pass: false,
       };
     }

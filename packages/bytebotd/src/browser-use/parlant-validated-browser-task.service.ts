@@ -21,7 +21,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { BrowserTaskService, TaskCreationData, TaskUpdateData, TaskLogEntry, BrowserSessionConfig } from './browser-task.service';
+import { BrowserTaskService, TaskCreationData, TaskUpdateData, BrowserSessionConfig } from './browser-task.service';
 import { 
   ParlantIntegrationService, 
   ParlantValidationRequest,
@@ -33,7 +33,6 @@ import {
   BrowserTaskResultDto,
   BrowserTaskStatus,
   BrowserTaskPriority,
-  BrowserActionType,
 } from './dto/browser-task.dto';
 
 // ===== PARLANT TASK VALIDATION INTERFACES =====
@@ -324,7 +323,7 @@ export class ParlantValidatedBrowserTaskService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -497,7 +496,7 @@ export class ParlantValidatedBrowserTaskService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -514,7 +513,7 @@ export class ParlantValidatedBrowserTaskService {
         timestamp: new Date(),
         operation: 'UPDATE_TASK',
         taskId,
-        description: `Update task with status: ${updateData.status || 'unchanged'}`,
+        description: `Update task with status: ${updateData.status ?? 'unchanged'}`,
         riskLevel: riskAssessment.riskLevel,
         validationResult: 'APPROVED',
         executionResult: 'SUCCESS',
@@ -595,7 +594,7 @@ export class ParlantValidatedBrowserTaskService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -688,7 +687,7 @@ export class ParlantValidatedBrowserTaskService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -827,7 +826,7 @@ export class ParlantValidatedBrowserTaskService {
   private assessTaskUpdateRisk(
     taskId: string,
     updateData: TaskUpdateData,
-    context: BrowserTaskValidationContext
+    _context: BrowserTaskValidationContext
   ): TaskOperationRiskAssessment {
     const riskFactors: string[] = [];
     let riskLevel: RiskLevel = RiskLevel.LOW;
@@ -891,7 +890,7 @@ export class ParlantValidatedBrowserTaskService {
    */
   private assessTaskDeletionRisk(
     taskId: string,
-    context: BrowserTaskValidationContext
+    _context: BrowserTaskValidationContext
   ): TaskOperationRiskAssessment {
     const riskFactors: string[] = [];
     let riskLevel: RiskLevel = RiskLevel.MEDIUM;
@@ -1060,10 +1059,10 @@ export class ParlantValidatedBrowserTaskService {
    */
   private extractTaskMetadata(taskData: TaskCreationData): TaskExecutionMetadata {
     return {
-      priority: taskData.priority || BrowserTaskPriority.NORMAL,
+      priority: taskData.priority ?? BrowserTaskPriority.NORMAL,
       sessionConfig: taskData.sessionConfig,
-      enableLogging: taskData.enableLogging || false,
-      continueOnError: taskData.continueOnError || false,
+      enableLogging: taskData.enableLogging ?? false,
+      continueOnError: taskData.continueOnError ?? false,
       timeout: taskData.maxExecutionTimeMs,
     };
   }
@@ -1144,11 +1143,11 @@ export class ParlantValidatedBrowserTaskService {
    * Generate execution constraints from validation response
    */
   private generateExecutionConstraints(
-    validationResponse: any,
+    validationResponse: unknown,
     riskAssessment: TaskOperationRiskAssessment
   ): TaskExecutionConstraints {
     return {
-      timeoutMs: validationResponse.executionContext?.timeoutMs,
+      timeoutMs: (validationResponse as { executionContext?: { timeoutMs?: number } })?.executionContext?.timeoutMs,
       memoryLimitMB: 1024, // Default 1GB limit
       networkConnectionLimit: 10,
       monitoringLevel: this.getMonitoringLevel(riskAssessment.riskLevel),
@@ -1173,7 +1172,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Check if task is currently running (mock implementation)
    */
-  private isTaskCurrentlyRunning(taskId: string): boolean {
+  private isTaskCurrentlyRunning(_taskId: string): boolean {
     // Mock implementation - in production would check actual task status
     return Math.random() > 0.8; // 20% chance of being running
   }
@@ -1273,7 +1272,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Get task security profile for validation context
    */
-  async getTaskSecurityProfile(userId: string): Promise<TaskSecurityProfile> {
+  async getTaskSecurityProfile(_userId: string): Promise<TaskSecurityProfile> {
     // Mock implementation - in production would check actual security data
     return {
       userTrustLevel: 'MEDIUM',
