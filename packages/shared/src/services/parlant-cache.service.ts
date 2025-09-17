@@ -312,7 +312,7 @@ export class ParlantCacheService
       return {
         found: false,
         data: null,
-        layer: CacheLayer.MEMORY,
+        layer: CacheLayer._MEMORY,
         responseTime: Date.now() - startTime,
       };
     } catch (error) {
@@ -322,7 +322,7 @@ export class ParlantCacheService
       return {
         found: false,
         data: null,
-        layer: CacheLayer.MEMORY,
+        layer: CacheLayer._MEMORY,
         responseTime: Date.now() - startTime,
       };
     }
@@ -375,7 +375,7 @@ export class ParlantCacheService
       // Update metadata
       this.setMetadata(cacheKey, {
         key: cacheKey,
-        layer: CacheLayer.MEMORY,
+        layer: CacheLayer._MEMORY,
         size: (typeof cacheEntry.metadata.size === 'number' ? cacheEntry.metadata.size : 0),
         frequency: 1,
         lastAccess: new Date(),
@@ -587,7 +587,7 @@ export class ParlantCacheService
       return {
         found: false,
         data: null,
-        layer: CacheLayer.MEMORY,
+        layer: CacheLayer._MEMORY,
         responseTime: 0,
       };
     }
@@ -598,7 +598,7 @@ export class ParlantCacheService
       return {
         found: false,
         data: null,
-        layer: CacheLayer.MEMORY,
+        layer: CacheLayer._MEMORY,
         responseTime: 0,
       };
     }
@@ -607,7 +607,7 @@ export class ParlantCacheService
     return {
       found: true,
       data: entry,
-      layer: CacheLayer.MEMORY,
+      layer: CacheLayer._MEMORY,
       responseTime: 1,
     };
   }
@@ -619,7 +619,7 @@ export class ParlantCacheService
       return {
         found: false,
         data: null,
-        layer: CacheLayer.REDIS,
+        layer: CacheLayer._REDIS,
         responseTime: 0,
       };
     }
@@ -633,7 +633,7 @@ export class ParlantCacheService
         return {
           found: false,
           data: null,
-          layer: CacheLayer.REDIS,
+          layer: CacheLayer._REDIS,
           responseTime,
         };
       }
@@ -645,7 +645,7 @@ export class ParlantCacheService
         return {
           found: false,
           data: null,
-          layer: CacheLayer.REDIS,
+          layer: CacheLayer._REDIS,
           responseTime,
         };
       }
@@ -655,7 +655,7 @@ export class ParlantCacheService
       return {
         found: true,
         data: entry,
-        layer: CacheLayer.REDIS,
+        layer: CacheLayer._REDIS,
         responseTime,
       };
     } catch (error) {
@@ -663,7 +663,7 @@ export class ParlantCacheService
       return {
         found: false,
         data: null,
-        layer: CacheLayer.REDIS,
+        layer: CacheLayer._REDIS,
         responseTime: 0,
       };
     }
