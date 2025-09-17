@@ -31,9 +31,9 @@ import {
   ApiOperation,
   ApiResponse,
   ApiParam,
-  ApiQuery,
   ApiSecurity,
-  ApiBearerAuth
+  ApiBearerAuth,
+  ApiProperty
 } from '@nestjs/swagger';
 import { IsUUID as _IsUUID, IsOptional, IsEnum, IsNumber, Min, Max } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
@@ -58,7 +58,7 @@ import {
 } from '../types/orchestrator.types';
 import {
   ParlantUserContext
-} from '../../../shared/src/types/parlant-integration.types';
+} from '../types/parlant-shared.types';
 
 // Additional response types
 interface PerformanceMetricsResponse {
@@ -88,16 +88,16 @@ interface OrchestratorConfigurationResponse {
 
 // DTOs for request/response validation
 class ExecuteOrchestrationDto {
-  @ApiOperation({ summary: 'Orchestration task configuration' })
-  task: OrchestrationTask;
+  @ApiProperty({ description: 'Orchestration task configuration' })
+  task!: OrchestrationTask;
 
-  @ApiOperation({ summary: 'User context for authorization' })
-  userContext: OrchestrationUserContext;
+  @ApiProperty({ description: 'User context for authorization' })
+  userContext!: OrchestrationUserContext;
 
-  @ApiOperation({ summary: 'Parlant conversation context' })
-  conversationContext?: ParlantConversationContext;
+  @ApiProperty({ description: 'Parlant user context', required: false })
+  conversationContext?: ParlantUserContext;
 
-  @ApiOperation({ summary: 'Execution options' })
+  @ApiProperty({ description: 'Execution options', required: false })
   options?: {
     dryRun?: boolean;
     skipValidation?: boolean;
@@ -108,10 +108,10 @@ class ExecuteOrchestrationDto {
 }
 
 class BulkExecuteOrchestrationDto {
-  @ApiOperation({ summary: 'Array of orchestration requests' })
-  requests: ExecuteOrchestrationDto[];
+  @ApiProperty({ description: 'Array of orchestration requests' })
+  requests!: ExecuteOrchestrationDto[];
 
-  @ApiOperation({ summary: 'Coordination options for bulk execution' })
+  @ApiProperty({ description: 'Coordination options for bulk execution', required: false })
   coordinationOptions?: {
     maxConcurrency?: number;
     failureStrategy?: 'fail_fast' | 'continue_on_error';
@@ -122,12 +122,12 @@ class BulkExecuteOrchestrationDto {
 class OrchestrationQueryDto {
   @IsOptional()
   @IsEnum(OrchestrationStatus)
-  @ApiQuery({ description: 'Filter by orchestration status', required: false })
+  @ApiProperty({ description: 'Filter by orchestration status', required: false })
   status?: OrchestrationStatus;
 
   @IsOptional()
   @IsEnum(OrchestrationPriority)
-  @ApiQuery({ description: 'Filter by orchestration priority', required: false })
+  @ApiProperty({ description: 'Filter by orchestration priority', required: false })
   priority?: OrchestrationPriority;
 
   @IsOptional()
@@ -135,32 +135,32 @@ class OrchestrationQueryDto {
   @Min(1)
   @Max(1000)
   @Type(() => Number)
-  @ApiQuery({ description: 'Number of results to return', required: false })
+  @ApiProperty({ description: 'Number of results to return', required: false })
   limit?: number = 50;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)
-  @ApiQuery({ description: 'Number of results to skip', required: false })
+  @ApiProperty({ description: 'Number of results to skip', required: false })
   offset?: number = 0;
 
   @IsOptional()
-  @ApiQuery({ description: 'Start date for filtering', required: false })
+  @ApiProperty({ description: 'Start date for filtering', required: false })
   @Transform(({ value }) => new Date(value))
   startDate?: Date;
 
   @IsOptional()
-  @ApiQuery({ description: 'End date for filtering', required: false })
+  @ApiProperty({ description: 'End date for filtering', required: false })
   @Transform(({ value }) => new Date(value))
   endDate?: Date;
 
   @IsOptional()
-  @ApiQuery({ description: 'User ID filter', required: false })
+  @ApiProperty({ description: 'User ID filter', required: false })
   userId?: string;
 
   @IsOptional()
-  @ApiQuery({ description: 'Task ID filter', required: false })
+  @ApiProperty({ description: 'Task ID filter', required: false })
   taskId?: string;
 }
 
@@ -170,11 +170,11 @@ class PerformanceMetricsDto {
   @Min(1)
   @Max(24)
   @Type(() => Number)
-  @ApiQuery({ description: 'Hours of metrics to retrieve', required: false })
+  @ApiProperty({ description: 'Hours of metrics to retrieve', required: false })
   hours?: number = 1;
 
   @IsOptional()
-  @ApiQuery({ 
+  @ApiProperty({ 
     description: 'Granularity of metrics',
     enum: ['minute', 'hour', 'day'],
     required: false 
@@ -182,7 +182,7 @@ class PerformanceMetricsDto {
   granularity?: 'minute' | 'hour' | 'day' = 'minute';
 
   @IsOptional()
-  @ApiQuery({ description: 'Include detailed breakdown', required: false })
+  @ApiProperty({ description: 'Include detailed breakdown', required: false })
   includeBreakdown?: boolean = false;
 }
 
@@ -242,7 +242,21 @@ export class OrchestratorController {
     });
 
     try {
-      const result = await this.orchestratorService.executeOrchestration(request);
+      // Convert DTO to proper request format with default conversation context if missing
+      const orchestrationRequest: _ParlantOrchestrationRequest = {
+        task: request.task,
+        userContext: request.userContext,
+        conversationContext: request.conversationContext || {
+          userId: request.userContext.userId,
+          sessionId: `session_${Date.now()}`,
+          roles: ['user'],
+          ipAddress: 'unknown',
+          metadata: {}
+        },
+        options: request.options
+      };
+      
+      const result = await this.orchestratorService.executeOrchestration(orchestrationRequest);
       
       this.logger.log('Orchestration completed', {
         executionId: result.executionContext.executionId,
@@ -258,7 +272,7 @@ export class OrchestratorController {
       throw new HttpException(
         {
           message: 'Orchestration execution failed',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           timestamp: new Date().toISOString()
         },
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -282,8 +296,22 @@ export class OrchestratorController {
     this.logger.log(`Executing bulk orchestration - ${request.requests.length} tasks`);
 
     try {
+      // Convert DTOs to proper request format with default conversation context if missing
+      const orchestrationRequests: _ParlantOrchestrationRequest[] = request.requests.map(req => ({
+        task: req.task,
+        userContext: req.userContext,
+        conversationContext: req.conversationContext || {
+          userId: req.userContext.userId,
+          sessionId: `session_${Date.now()}`,
+          roles: ['user'],
+          ipAddress: 'unknown',
+          metadata: {}
+        },
+        options: req.options
+      }));
+      
       const results = await this.orchestratorService.executeParallelOrchestrations(
-        request.requests
+        orchestrationRequests
       );
       
       const successful = results.filter(r => !r.error).length;
@@ -303,7 +331,7 @@ export class OrchestratorController {
       throw new HttpException(
         {
           message: 'Bulk orchestration execution failed',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           timestamp: new Date().toISOString()
         },
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -355,7 +383,7 @@ export class OrchestratorController {
       throw new HttpException(
         {
           message: 'Failed to cancel orchestration',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           timestamp: new Date().toISOString()
         },
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -471,7 +499,7 @@ export class OrchestratorController {
       throw new HttpException(
         {
           message: 'Failed to list orchestrations',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           timestamp: new Date().toISOString()
         },
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -518,7 +546,7 @@ export class OrchestratorController {
       throw new HttpException(
         {
           message: 'Failed to get performance metrics',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           timestamp: new Date().toISOString()
         },
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -583,7 +611,7 @@ export class OrchestratorController {
         components: {
           orchestrator: {
             status: 'down',
-            error: error.message
+            error: error instanceof Error ? error.message : String(error)
           }
         }
       };
@@ -649,7 +677,7 @@ export class OrchestratorController {
       throw new HttpException(
         {
           message: 'Failed to get real-time metrics',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           timestamp: new Date().toISOString()
         },
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -693,7 +721,7 @@ export class OrchestratorController {
       throw new HttpException(
         {
           message: 'Failed to get configuration',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           timestamp: new Date().toISOString()
         },
         HttpStatus.INTERNAL_SERVER_ERROR

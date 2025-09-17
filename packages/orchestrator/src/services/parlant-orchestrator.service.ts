@@ -34,12 +34,12 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   ParlantValidationRequest as _ParlantValidationRequest,
   ParlantValidationResponse as _ParlantValidationResponse,
-  ParlantConversationContext,
+  ParlantUserContext,
   SecurityLevel,
   ParlantIntegrationError as _ParlantIntegrationError,
   ParlantValidationError,
   ParlantTimeoutError as _ParlantTimeoutError
-} from '../../../shared/src/types/parlant-integration.types';
+} from '../types/parlant-shared.types';
 
 // Import orchestrator types
 import {
@@ -87,7 +87,7 @@ export interface ParlantOrchestrationRequest {
   /** Base orchestration task */
   readonly task: OrchestrationTask;
   /** Parlant conversation context */
-  readonly conversationContext: ParlantConversationContext;
+  readonly conversationContext: ParlantUserContext;
   /** User context for authorization */
   readonly userContext: OrchestrationUserContext;
   /** Execution options */
@@ -921,7 +921,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
     executionId: string,
     task: OrchestrationTask,
     userContext: OrchestrationUserContext,
-    conversationContext: ParlantConversationContext
+    conversationContext: ParlantUserContext
   ): OrchestrationExecutionContext {
     return {
       executionId,

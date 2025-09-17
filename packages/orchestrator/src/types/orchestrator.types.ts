@@ -15,7 +15,7 @@ import {
   ParlantValidationResponse,
   ParlantConversationContext,
   SecurityLevel
-} from '../../../shared/src/types/parlant-integration.types';
+} from './parlant-shared.types';
 
 // ===== ORCHESTRATION CORE INTERFACES =====
 
