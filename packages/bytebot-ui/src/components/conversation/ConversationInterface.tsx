@@ -37,7 +37,7 @@ import {
   ValidationDecision
 } from '@bytebot/shared';
 import { useParlantWebSocket } from '@/hooks/useParlantWebSocket';
-import { logDebug, logInfo, logWarning } from '@/utils/logger';
+import { logDebug, logInfo, logWarn } from '@/utils/logger';
 import {
   AlertCircleIcon,
   ArrowRight02Icon,
@@ -45,11 +45,10 @@ import {
   BotIcon,
   CheckmarkCircle02Icon,
   ClockIcon,
-  ExportIcon,
   HugeiconsIcon,
-  MicrophoneIcon,
+  SearchIcon as MicrophoneIcon,
   RefreshIcon,
-  SearchIcon,
+  Search01Icon as SearchIcon,
   SendIcon,
   SettingsIcon,
   UserIcon
@@ -376,7 +375,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
       logInfo('Validation response submitted', { messageId: message.id, decision }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logWarning('Failed to submit validation response', { error: errorMessage }, 'ConversationInterface');
+      logWarn('Failed to submit validation response', { error: errorMessage }, 'ConversationInterface');
     } finally {
       setIsValidationPending(false);
     }
@@ -400,7 +399,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
         isOwn ? 'flex-row-reverse' : 'flex-row'
       )}
       role="article"
-      aria-labelledby={`message-${typedMessage.id}`}
+      aria-labelledby={`message-${message.id}`}
       tabIndex={0}
     >
       {/* Avatar */}
@@ -484,7 +483,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               size="sm"
               variant="outline"
               onClick={() => {
-                handleValidationResponse(ValidationDecision.APPROVED).catch(() => undefined);
+                handleValidationResponse(ValidationDecision._APPROVED).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-green-600 border-green-600 hover:bg-green-50"
@@ -496,7 +495,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               size="sm"
               variant="outline"
               onClick={() => {
-                handleValidationResponse(ValidationDecision.DENIED).catch(() => undefined);
+                handleValidationResponse(ValidationDecision._DENIED).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-red-600 border-red-600 hover:bg-red-50"
@@ -508,7 +507,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               size="sm"
               variant="outline"
               onClick={() => {
-                handleValidationResponse(ValidationDecision.REQUEST_MORE_INFO).catch(() => undefined);
+                handleValidationResponse(ValidationDecision._REQUEST_MORE_INFO).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
@@ -625,7 +624,7 @@ const ConversationHeader: React.FC<ConversationHeaderProps> = React.memo(({
             onClick={onExport}
             aria-label="Export conversation"
           >
-            <HugeiconsIcon icon={ExportIcon} className="w-4 h-4" />
+            <HugeiconsIcon icon={ArrowRight02Icon} className="w-4 h-4" />
           </Button>
         )}
         
@@ -674,7 +673,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   conversationId,
   autoStart = false,
   initialTopic,
-  initialPriority = ConversationPriority.NORMAL,
+  initialPriority = ConversationPriority._NORMAL,
   onConversationStart,
   onConversationEnd,
   onMessageSent,
@@ -748,7 +747,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       onValidationRequest?.(request);
     },
     onError: (error) => {
-      logWarning('Conversation error', error, 'ConversationInterface');
+      logWarn('Conversation error', error, 'ConversationInterface');
       onError?.(error);
     }
   });
@@ -766,11 +765,11 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     setInputValue('');
     
     try {
-      await sendMessage(messageContent, MessageType.TEXT);
+      await sendMessage(messageContent, MessageType._TEXT);
       logDebug('Message sent successfully', { content: messageContent.substring(0, UI_CONSTANTS.MAGIC_OFFSET) }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logWarning('Failed to send message', { error: errorMessage }, 'ConversationInterface');
+      logWarn('Failed to send message', { error: errorMessage }, 'ConversationInterface');
       // Re-populate input on failure
       setInputValue(messageContent);
     }
@@ -790,7 +789,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     try {
       // Find the validation request message
       const validationMessage = messages.find(msg => 
-        msg.type === MessageType._VALIDATION_REQUEST &&
+        msg.type === MessageType.VALIDATION_REQUEST &&
         Boolean(msg.metadata?.requestId)
       );
       
@@ -804,7 +803,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logWarning('Failed to send validation response', { error: errorMessage }, 'ConversationInterface');
+      logWarn('Failed to send validation response', { error: errorMessage }, 'ConversationInterface');
     }
   }, [messages, respondToValidation]);
   
@@ -814,7 +813,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       logInfo('New conversation started', { conversationId: newConversationId }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logWarning('Failed to start conversation', { error: errorMessage }, 'ConversationInterface');
+      logWarn('Failed to start conversation', { error: errorMessage }, 'ConversationInterface');
     }
   }, [startConversation, initialTopic, initialPriority]);
   
@@ -824,7 +823,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       logInfo('Joined conversation', { conversationId: id }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logWarning('Failed to join conversation', { error: errorMessage }, 'ConversationInterface');
+      logWarn('Failed to join conversation', { error: errorMessage }, 'ConversationInterface');
     }
   }, [joinConversation]);
   
@@ -834,24 +833,23 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     }
     
     try {
-      const typedConversation = currentConversation as any;
-      const exportData = await exportConversation(typedConversation.conversationId);
+      const exportData = await exportConversation(currentConversation.conversationId);
       
       // Create download link
       const blob = new Blob([exportData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `conversation-${typedConversation.conversationId}-${Date.now()}.json`;
+      link.download = `conversation-${currentConversation.conversationId}-${Date.now()}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      logInfo('Conversation exported', { conversationId: typedConversation.conversationId }, 'ConversationInterface');
+      logInfo('Conversation exported', { conversationId: currentConversation.conversationId }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logWarning('Failed to export conversation', { error: errorMessage }, 'ConversationInterface');
+      logWarn('Failed to export conversation', { error: errorMessage }, 'ConversationInterface');
     }
   }, [currentConversation, exportConversation]);
   
@@ -1042,7 +1040,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 onClick={() => {
                   handleStartConversation().catch(() => undefined);
                 }}
-                disabled={isConnected === false}
+                disabled={!isConnected}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 Start Conversation
