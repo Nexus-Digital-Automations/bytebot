@@ -293,7 +293,17 @@ export {
   hasParlantValidation,
   getAllParlantMetadata,
 } from "./decorators/parlant-validation.decorators";
-export * from "./interceptors/parlant-validation.interceptor";
+
+// Parlant Simple Decorators - from alternative decorator file
+export {
+  ParlantValidated,
+  ParlantSecure,
+  ParlantCritical,
+  ParlantCached,
+  ParlantFast,
+} from "./decorators/parlant-validation.decorator";
+
+// export * from "./interceptors/parlant-validation.interceptor";
 export * from "./utils/parlant-wrapper.utils";
 
 // Note: Parlant types are already exported from index-client.ts
@@ -325,12 +335,12 @@ export {
 } from "./utils/parlant-wrapper.utils";
 
 // Parlant Interceptor - NestJS automatic validation
-export {
-  ParlantValidationInterceptor,
-  ParlantValidationInterceptorConfig,
-  ParlantValidationDenialError,
-  ParlantServiceUnavailableError,
-} from "./interceptors/parlant-validation.interceptor";
+// export {
+//   ParlantValidationInterceptor,
+//   ParlantValidationInterceptorConfig,
+//   ParlantValidationDenialError,
+//   ParlantServiceUnavailableError,
+// } from "./interceptors/parlant-validation.interceptor";
 
 // Local Monitoring System - server-only (NestJS + Prometheus)
 export * from "./monitoring";

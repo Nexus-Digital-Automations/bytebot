@@ -27,9 +27,9 @@ import { ConfigModule } from "@nestjs/config";
 
 // Temporary stub for BullModule
 interface BullModuleOptions {
-  imports?: any[];
-  useFactory?: () => any;
-  inject?: any[];
+  imports?: unknown[];
+  useFactory?: () => unknown;
+  inject?: unknown[];
 }
 
 interface BullQueueOptions {
@@ -286,7 +286,7 @@ export class AuditModule {
 
     // TODO: Controllers - temporarily commented
     // const controllers = [AuditController, ComplianceController];
-    const controllers: Array<new (...args: any[]) => any> = [];
+    const controllers: Array<new (..._args: unknown[]) => unknown> = [];
 
     // TODO: Add interceptors if enabled - temporarily commented
     // if (autoInterceptors) {

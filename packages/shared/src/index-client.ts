@@ -88,7 +88,7 @@ export {
 // Parlant integration types (primary versions for integration)
 export {
   ParlantValidationRequest,
-  ParlantValidationResponse, 
+  ParlantValidationResponse,
   ParlantAuditEntry,
   ParlantUserContext,
   SecurityLevel,

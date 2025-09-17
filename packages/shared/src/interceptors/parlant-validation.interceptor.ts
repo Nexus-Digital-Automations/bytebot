@@ -31,8 +31,8 @@ interface ExtendedRequest extends Request {
     roles?: string[];
     permissions?: string[];
   };
-  parlantValidationResult?: any;
-  parlantConversationContext?: any;
+  parlantValidationResult?: ParlantValidationResponse;
+  parlantConversationContext?: ParlantConversationContext;
   parlantOperationId?: string;
   sessionID?: string;
 }
@@ -135,8 +135,12 @@ export class ParlantValidationInterceptor implements NestInterceptor {
 
   constructor(
     private readonly _reflector: Reflector,
-    @Optional() @Inject("PARLANT_INTEGRATION_SERVICE") private readonly _parlantService?: ParlantIntegrationService,
-    @Optional() @Inject("PARLANT_INTERCEPTOR_CONFIG") config?: Partial<ParlantValidationInterceptorConfig>,
+    @Optional()
+    @Inject("PARLANT_INTEGRATION_SERVICE")
+    private readonly _parlantService?: ParlantIntegrationService,
+    @Optional()
+    @Inject("PARLANT_INTERCEPTOR_CONFIG")
+    config?: Partial<ParlantValidationInterceptorConfig>,
   ) {
     this.config = { ...DEFAULT_CONFIG, ...config };
 
@@ -380,7 +384,8 @@ export class ParlantValidationInterceptor implements NestInterceptor {
     const userContext: ParlantUserContext = {
       userId: request.user?.id || "anonymous",
       roles: request.user?.roles || ["user"],
-      sessionId: (request as ExtendedRequest).sessionID || `session_${Date.now()}`,
+      sessionId:
+        (request as ExtendedRequest).sessionID || `session_${Date.now()}`,
       ipAddress: request.ip || request.socket?.remoteAddress || "unknown",
       metadata: {
         userAgent: request.get("User-Agent") || "unknown",
@@ -449,17 +454,16 @@ export class ParlantValidationInterceptor implements NestInterceptor {
   ): import("../types/parlant-integration.types").ParlantValidationRequest {
     return {
       operationId: `op_${Date.now()}`,
-      functionName:
-        (request as any).conversationContext?.functionName || "unknown",
+      functionName: request.functionName || "unknown",
       packageName: "shared",
-      description: `Validation for ${(request as any).conversationContext?.functionName || "unknown"}`,
-      parameters: (request as any).requestContext?.parameters || {},
-      userContext: {
-        userId: (request as any).userContext?.userId || "anonymous",
-        roles: (request as any).userContext?.roles || [],
-        sessionId: (request as any).sessionContext?.sessionId || "no-session",
-        ipAddress: (request as any).requestContext?.clientIp || "unknown",
-        metadata: (request as any).userContext?.metadata || {},
+      description: `Validation for ${request.functionName || "unknown"}`,
+      parameters: request.parameters || {},
+      userContext: request.userContext || {
+        userId: "anonymous",
+        roles: [],
+        permissions: [],
+        sessionId: "no-session",
+        metadata: {},
       },
       securityLevel: SecurityLevel._MEDIUM,
       timeout: 30000,
@@ -475,7 +479,9 @@ export class ParlantValidationInterceptor implements NestInterceptor {
     return {
       requestId: `req_${Date.now()}`,
       result: {
-        decision: response.approved ? ("APPROVED" as any) : ("DENIED" as any),
+        decision: response.approved
+          ? ValidationDecision._APPROVED
+          : ValidationDecision._DENIED,
         confidence: response.confidence,
         reasoning: response.reason,
         ruleResults: [],
@@ -550,9 +556,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
   private createExecutionContext(
     request: ExtendedRequest,
   ): ParlantExecutionContext {
-    const user = (request as any).user as
-      | { id?: string; roles?: string[]; permissions?: string[] }
-      | undefined;
+    const user = request.user;
     const userContext: UserContext = {
       userId: user?.id || "anonymous",
       roles: user?.roles || [],
@@ -631,7 +635,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
       "authorization",
     ];
 
-    const sanitized: any = Array.isArray(arg) ? [...arg] : { ...arg };
+    const sanitized: unknown = Array.isArray(arg) ? [...arg] : { ...arg };
 
     if (typeof sanitized === "object" && sanitized !== null) {
       for (const field of sensitiveFields) {
@@ -774,9 +778,9 @@ export class ParlantValidationInterceptor implements NestInterceptor {
           endTime: response.timestamp,
           duration: response.processingTime,
           customMetrics: {
-            interceptor: "nestjs",
-            operationId: operationId,
-          } as any,
+            processingTime: 1,
+            operationCount: 1,
+          } as Record<string, number>,
         },
       },
       metadata: {

@@ -32,6 +32,8 @@
     "**/test-utils/**",
     "src/post-tool-linter-hook.log",
     "src/**/post-tool-linter-hook.log",
+    "src/interceptors/parlant-validation.interceptor.ts",
+    "src/modules/global-parlant-integration.module.ts",
     "node_modules"
   ]
 }

@@ -35,37 +35,24 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-  Inject,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { ConfigService } from "@nestjs/config";
-import { CACHE_MANAGER } from "@nestjs/cache-manager";
-import { Cache } from "cache-manager";
-import { Observable, throwError, of } from "rxjs";
+// Cache imports removed as not used
+import { Observable, throwError } from "rxjs";
 import { catchError, map, tap, timeout } from "rxjs/operators";
-import { Request, Response } from "express";
+import { Request } from "express";
 // GraphQL imports removed to avoid dependency conflicts
 
 // Import Parlant integration types and services
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
-  ParlantIntegrationError,
-  ParlantValidationError,
   ParlantTimeoutError,
   SecurityLevel,
-  ParlantUserContext,
-  ParlantExecutionContext,
-  ParlantValidationMetadata,
-  ParlantAuditEntry,
 } from "../types/parlant-integration.types";
 
-// Import Parlant decorators and utilities
-import {
-  ParlantValidation,
-} from "../decorators/parlant-validation.decorators";
-
-import { parlantWrapper } from "../utils/parlant-wrapper.utils";
+// Parlant decorators and utilities imports removed as not used
 
 // ===== UNIFIED API VALIDATION TYPES =====
 
@@ -895,12 +882,12 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
 
               // Handle errors
               catchError((error) =>
-                throwError(
-                  () => this.handleUnifiedError(
+                throwError(() =>
+                  this.handleUnifiedError(
                     error,
                     validationResult.apiContext!,
                     operationId,
-                  )
+                  ),
                 ),
               ),
 
@@ -1009,13 +996,13 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
         await this.performSchemaValidation(apiContext, operationId),
         await this.performSecurityValidation(apiContext, operationId),
         await this.performComplianceValidation(apiContext, operationId),
-        await this.performParlantValidation(apiContext, operationId)
+        await this.performParlantValidation(apiContext, operationId),
       ];
 
       // Cache successful validation results
       if (
         this.validationConfig.enableCaching &&
-        validationResults.every((r) => r.result === 'PASS')
+        validationResults.every((r) => r.result === "PASS")
       ) {
         await this.setCachedValidationResult(cacheKey, validationResults);
       }
@@ -1079,13 +1066,16 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
 
     // Detect API type based on context
     const apiType = this.detectApiType(context);
-    
+
     // Extract request information
-    const requestContext = await this.extractRequestContext(context, operationId);
-    
+    const requestContext = await this.extractRequestContext(
+      context,
+      operationId,
+    );
+
     // Determine operation information
     const operation = this.extractOperationInfo(context, apiType);
-    
+
     // Initialize performance metrics
     const performanceMetrics: PerformanceMetrics = {
       startTime: new Date(startTime),
@@ -1126,14 +1116,16 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     // Initialize audit context
     const auditContext: AuditContext = {
       auditId: `audit-${operationId}`,
-      auditTrail: [{
-        timestamp: new Date(),
-        action: "validation_started",
-        resource: operation.name,
-        actor: "unified-api-interceptor",
-        outcome: "initiated",
-        details: { operationId, apiType },
-      }],
+      auditTrail: [
+        {
+          timestamp: new Date(),
+          action: "validation_started",
+          resource: operation.name,
+          actor: "unified-api-interceptor",
+          outcome: "initiated",
+          details: { operationId, apiType },
+        },
+      ],
       retentionPolicy: "30-days",
     };
 
@@ -1170,7 +1162,7 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
       timestamp: new Date(),
       expiresAt: new Date(Date.now() + 300000), // 5 minutes
     };
-    
+
     this.validationCache.set(cacheKey, cacheEntry);
   }
 
@@ -1188,17 +1180,17 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
       apiType: apiContext.apiType,
       operation: apiContext.operation.name,
     });
-    
+
     // Add validation headers and context
-    if (typeof response === 'object' && response !== null) {
-      (response as any).__validationContext = {
+    if (typeof response === "object" && response !== null) {
+      (response as Record<string, unknown>).__validationContext = {
         operationId,
         apiType: apiContext.apiType,
         validated: true,
         timestamp: new Date().toISOString(),
       };
     }
-    
+
     return response;
   }
 
@@ -1211,24 +1203,24 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     operationId: string,
   ): Error {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
+
     this.logger.error(`[${operationId}] Unified API validation error`, {
       error: errorMessage,
       apiType: apiContext.apiType,
       operation: apiContext.operation.name,
     });
-    
+
     // Create enhanced error with context
     const enhancedError = new Error(
-      `Validation failed for ${apiContext.apiType} operation ${apiContext.operation.name}: ${errorMessage}`
+      `Validation failed for ${apiContext.apiType} operation ${apiContext.operation.name}: ${errorMessage}`,
     );
-    
+
     // Preserve original error if available
     if (error instanceof Error) {
       enhancedError.stack = error.stack;
-      (enhancedError as any).cause = error;
+      (enhancedError as Error & { cause?: Error }).cause = error;
     }
-    
+
     return enhancedError;
   }
 
@@ -1244,7 +1236,7 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
       apiType: apiContext.apiType,
       operation: apiContext.operation.name,
     });
-    
+
     // Clean up any temporary validation state
     // Update performance metrics
     // Log completion
@@ -1258,34 +1250,34 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     operationId: string,
   ): Promise<ValidationResult> {
     this.logger.debug(`[${operationId}] Performing schema validation`);
-    
+
     return {
-      ruleId: 'schema-validation',
-      result: 'PASS' as const,
-      message: 'Schema validation passed',
+      ruleId: "schema-validation",
+      result: "PASS" as const,
+      message: "Schema validation passed",
       details: {
         confidence: 0.9,
-        validator: 'schema-validator'
+        validator: "schema-validator",
       },
     };
   }
 
   /**
-   * Perform security validation for API context  
+   * Perform security validation for API context
    */
   private async performSecurityValidation(
     apiContext: UnifiedApiContext,
     operationId: string,
   ): Promise<ValidationResult> {
     this.logger.debug(`[${operationId}] Performing security validation`);
-    
+
     return {
-      ruleId: 'security-validation',
-      result: 'PASS' as const,
-      message: 'Security validation passed',
+      ruleId: "security-validation",
+      result: "PASS" as const,
+      message: "Security validation passed",
       details: {
         confidence: 0.85,
-        validator: 'security-validator'
+        validator: "security-validator",
       },
     };
   }
@@ -1298,14 +1290,14 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     operationId: string,
   ): Promise<ValidationResult> {
     this.logger.debug(`[${operationId}] Performing compliance validation`);
-    
+
     return {
-      ruleId: 'compliance-validation',
-      result: 'PASS' as const,
-      message: 'Compliance validation passed',
+      ruleId: "compliance-validation",
+      result: "PASS" as const,
+      message: "Compliance validation passed",
       details: {
         confidence: 0.8,
-        validator: 'compliance-validator'
+        validator: "compliance-validator",
       },
     };
   }
@@ -1318,20 +1310,20 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     operationId: string,
   ): Promise<ValidationResult> {
     this.logger.debug(`[${operationId}] Performing Parlant validation`);
-    
+
     try {
       // Create basic validation request
       const validationRequest: ParlantValidationRequest = {
         operationId,
         functionName: apiContext.operation.name,
-        packageName: 'unified-api',
+        packageName: "unified-api",
         description: `Validation for ${apiContext.apiType} operation`,
         parameters: apiContext.requestContext.parameters,
         userContext: {
-          userId: 'anonymous',
+          userId: "anonymous",
           roles: [],
           sessionId: apiContext.requestContext.requestId,
-          ipAddress: apiContext.requestContext.client?.ipAddress || 'unknown',
+          ipAddress: apiContext.requestContext.client?.ipAddress || "unknown",
           metadata: apiContext.requestContext.metadata,
         },
         securityLevel: SecurityLevel._MEDIUM,
@@ -1341,29 +1333,32 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
       // For now, return a mock successful validation
       // In full implementation, this would call the actual Parlant service
       return {
-        ruleId: 'parlant-validation',
-        result: 'PASS' as const,
-        message: 'Parlant conversational validation passed',
+        ruleId: "parlant-validation",
+        result: "PASS" as const,
+        message: "Parlant conversational validation passed",
         details: {
           confidence: 0.95,
-          validator: 'parlant-validator',
-          validationRequest
+          validator: "parlant-validator",
+          validationRequest,
         },
       };
     } catch (error) {
       this.logger.error(`[${operationId}] Parlant validation failed`, {
         error: error instanceof Error ? error.message : String(error),
       });
-      
+
       return {
-        ruleId: 'parlant-validation',
-        result: 'FAIL' as const,
+        ruleId: "parlant-validation",
+        result: "FAIL" as const,
         message: `Parlant validation failed: ${error instanceof Error ? error.message : String(error)}`,
         details: {
           confidence: 0,
-          validator: 'parlant-validator',
+          validator: "parlant-validator",
           error: error instanceof Error ? error.message : String(error),
-          recommendations: ['Review validation configuration', 'Check Parlant service availability']
+          recommendations: [
+            "Review validation configuration",
+            "Check Parlant service availability",
+          ],
         },
       };
     }
@@ -1397,29 +1392,32 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
    */
   private detectApiType(context: ExecutionContext): ApiType {
     const contextType = context.getType();
-    
-    if (contextType === 'http') {
+
+    if (contextType === "http") {
       const request = context.switchToHttp().getRequest<Request>();
-      const contentType = request.headers['content-type'] || '';
+      const contentType = request.headers["content-type"] || "";
       const path = request.path || request.url;
-      
+
       // Check for GraphQL
-      if (path?.includes('/graphql') || contentType.includes('application/graphql')) {
+      if (
+        path?.includes("/graphql") ||
+        contentType.includes("application/graphql")
+      ) {
         return ApiType._GRAPHQL;
       }
-      
+
       // Default to REST for HTTP
       return ApiType._REST;
     }
-    
-    if (contextType === 'ws') {
+
+    if (contextType === "ws") {
       return ApiType._WEBSOCKET;
     }
-    
-    if (contextType === 'rpc') {
+
+    if (contextType === "rpc") {
       return ApiType._GRPC;
     }
-    
+
     // Default to REST
     return ApiType._REST;
   }
@@ -1432,21 +1430,22 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
     operationId: string,
   ): Promise<UnifiedRequestContext> {
     const contextType = context.getType();
-    
-    if (contextType === 'http') {
+
+    if (contextType === "http") {
       const request = context.switchToHttp().getRequest<Request>();
-      
+
       // Extract client information
       const clientInfo: ClientInformation = {
-        ipAddress: request.ip || request.socket.remoteAddress || 'unknown',
-        userAgent: request.headers['user-agent'],
-        sessionId: (request as any).sessionID || undefined,
+        ipAddress: request.ip || request.socket.remoteAddress || "unknown",
+        userAgent: request.headers["user-agent"],
+        sessionId:
+          (request as Request & { sessionID?: string }).sessionID || undefined,
       };
 
       // Extract payload information
       const payload: RequestPayload = {
         size: JSON.stringify(request.body || {}).length,
-        type: this.determinePayloadType(request.headers['content-type'] || ''),
+        type: this.determinePayloadType(request.headers["content-type"] || ""),
         structure: {
           schemaValidation: {
             valid: true,
@@ -1487,19 +1486,24 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
         },
       };
     }
-    
+
     // Default context for non-HTTP requests
     return {
       requestId: operationId,
       timestamp: new Date(),
       client: {
-        ipAddress: 'unknown',
+        ipAddress: "unknown",
       },
       payload: {
         size: 0,
         type: PayloadType._JSON,
         structure: {
-          schemaValidation: { valid: true, errors: [], warnings: [], metadata: {} },
+          schemaValidation: {
+            valid: true,
+            errors: [],
+            warnings: [],
+            metadata: {},
+          },
           fieldAnalysis: [],
           complexityMetrics: {
             overallComplexity: 0,
@@ -1527,36 +1531,39 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
   /**
    * Extract operation information from execution context
    */
-  private extractOperationInfo(context: ExecutionContext, apiType: ApiType): ApiOperation {
+  private extractOperationInfo(
+    context: ExecutionContext,
+    apiType: ApiType,
+  ): ApiOperation {
     const handler = context.getHandler();
     const controllerClass = context.getClass();
-    
+
     // Get method and controller names
-    const methodName = handler.name || 'unknown';
-    const controllerName = controllerClass.name || 'UnknownController';
-    
+    const methodName = handler.name || "unknown";
+    const controllerName = controllerClass.name || "UnknownController";
+
     // Determine operation type based on API type and context
     let operationType: OperationType;
     let httpMethod: string | undefined;
-    
-    if (apiType === ApiType._REST && context.getType() === 'http') {
+
+    if (apiType === ApiType._REST && context.getType() === "http") {
       const request = context.switchToHttp().getRequest<Request>();
       httpMethod = request.method;
-      
+
       switch (httpMethod?.toUpperCase()) {
-        case 'GET':
+        case "GET":
           operationType = OperationType._HTTP_GET;
           break;
-        case 'POST':
+        case "POST":
           operationType = OperationType._HTTP_POST;
           break;
-        case 'PUT':
+        case "PUT":
           operationType = OperationType._HTTP_PUT;
           break;
-        case 'DELETE':
+        case "DELETE":
           operationType = OperationType._HTTP_DELETE;
           break;
-        case 'PATCH':
+        case "PATCH":
           operationType = OperationType._HTTP_PATCH;
           break;
         default:
@@ -1586,28 +1593,31 @@ export class UnifiedApiValidationInterceptor implements NestInterceptor {
    * Determine payload type from content type header
    */
   private determinePayloadType(contentType: string): PayloadType {
-    if (contentType.includes('application/json')) {
+    if (contentType.includes("application/json")) {
       return PayloadType._JSON;
     }
-    if (contentType.includes('application/xml') || contentType.includes('text/xml')) {
+    if (
+      contentType.includes("application/xml") ||
+      contentType.includes("text/xml")
+    ) {
       return PayloadType._XML;
     }
-    if (contentType.includes('application/x-www-form-urlencoded')) {
+    if (contentType.includes("application/x-www-form-urlencoded")) {
       return PayloadType._FORM_DATA;
     }
-    if (contentType.includes('multipart/form-data')) {
+    if (contentType.includes("multipart/form-data")) {
       return PayloadType._MULTIPART;
     }
-    if (contentType.includes('application/graphql')) {
+    if (contentType.includes("application/graphql")) {
       return PayloadType._GRAPHQL_QUERY;
     }
-    if (contentType.includes('application/octet-stream')) {
+    if (contentType.includes("application/octet-stream")) {
       return PayloadType._BINARY;
     }
-    if (contentType.includes('text/')) {
+    if (contentType.includes("text/")) {
       return PayloadType._TEXT;
     }
-    
+
     // Default to JSON
     return PayloadType._JSON;
   }
