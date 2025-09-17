@@ -152,7 +152,7 @@ export class ParlantIntegrationService
       },
       wrapper: {
         enabled: true,
-        securityLevel: SecurityLevel.MEDIUM,
+        securityLevel: SecurityLevel._MEDIUM,
         cacheable: true,
         cacheTtl: 3600000, // 1 hour
         timeout: 5000, // 5 seconds
@@ -583,7 +583,7 @@ export class ParlantIntegrationService
         cacheStatus: "miss",
         source: "parlant",
         riskAssessment: {
-          level: data.risk_level || SecurityLevel.MEDIUM,
+          level: data.risk_level || SecurityLevel._MEDIUM,
           factors: data.risk_factors || [],
           score: data.risk_score || 50,
           mitigations: data.mitigations || [],
@@ -735,19 +735,19 @@ export class ParlantIntegrationService
     this.logger.debug(`📡 Received WebSocket message: ${message.type}`);
 
     switch (message.type) {
-      case ParlantMessageType.STATUS_UPDATE:
+      case ParlantMessageType._STATUS_UPDATE:
         this.handleStatusUpdate(message.payload);
         break;
 
-      case ParlantMessageType.AUTH_CHALLENGE:
+      case ParlantMessageType._AUTH_CHALLENGE:
         this.handleAuthChallenge(message);
         break;
 
-      case ParlantMessageType.ERROR:
+      case ParlantMessageType._ERROR:
         this.handleError(message.payload);
         break;
 
-      case ParlantMessageType.HEARTBEAT:
+      case ParlantMessageType._HEARTBEAT:
         this.handleHeartbeat();
         break;
 
@@ -782,7 +782,7 @@ export class ParlantIntegrationService
     );
 
     const response: ParlantWebSocketMessage = {
-      type: ParlantMessageType.AUTH_RESPONSE,
+      type: ParlantMessageType._AUTH_RESPONSE,
       payload: { token },
       messageId: message.messageId,
       timestamp: new Date(),
@@ -805,7 +805,7 @@ export class ParlantIntegrationService
   private handleHeartbeat(): void {
     // Respond to heartbeat to keep connection alive
     const heartbeatResponse: ParlantWebSocketMessage = {
-      type: ParlantMessageType.HEARTBEAT,
+      type: ParlantMessageType._HEARTBEAT,
       payload: { timestamp: Date.now() },
       messageId: `heartbeat_${Date.now()}`,
       timestamp: new Date(),
@@ -821,7 +821,7 @@ export class ParlantIntegrationService
     setInterval(() => {
       if (this.isConnected && this.websocket) {
         const heartbeat: ParlantWebSocketMessage = {
-          type: ParlantMessageType.HEARTBEAT,
+          type: ParlantMessageType._HEARTBEAT,
           payload: { timestamp: Date.now() },
           messageId: `heartbeat_${Date.now()}`,
           timestamp: new Date(),

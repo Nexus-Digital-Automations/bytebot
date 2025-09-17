@@ -25,11 +25,11 @@ import {
   ParlantMessageType,
   ParlantValidationRequest,
   ParlantValidationResponse,
-  _ParlantUserContext,
+  ParlantUserContext,
   ParlantHealthStatus,
   ParlantWebSocketConfig,
   ParlantConnectionError,
-  _ParlantAuthenticationError,
+  ParlantAuthenticationError,
   ParlantIntegrationError,
 } from "../types/parlant-integration.types";
 
@@ -75,7 +75,7 @@ export class ParlantWebSocketBridgeService
   private readonly logger = new Logger(ParlantWebSocketBridgeService.name);
 
   // WebSocket connections
-  private clientWs: WebSocket | null = null;
+  private clientWs: WebSocket.WebSocket | null = null;
   private serverWs: WebSocket.Server | null = null;
 
   // Connection state
@@ -135,11 +135,12 @@ export class ParlantWebSocketBridgeService
       this.logger.log("✅ Parlant WebSocket Bridge initialized successfully");
       this.emit("bridge:initialized");
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error("❌ Failed to initialize WebSocket Bridge", error);
       throw new ParlantIntegrationError(
         "WebSocket Bridge initialization failed",
         "WEBSOCKET_INIT_ERROR",
-        { error: error.message },
+        { error: errorMessage },
       );
     }
   }
@@ -187,7 +188,7 @@ export class ParlantWebSocketBridgeService
     this.logger.log(`📡 Connecting to Parlant WebSocket: ${parlantWsUrl}`);
 
     return new Promise<void>((resolve, reject) => {
-      const ws = new WebSocket(parlantWsUrl, {
+      const ws = new WebSocket.WebSocket(parlantWsUrl, {
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "X-Service": "aigent",
@@ -307,7 +308,7 @@ export class ParlantWebSocketBridgeService
 
     // Send welcome message
     this.sendToClient(ws, {
-      type: ParlantMessageType.STATUS_UPDATE,
+      type: ParlantMessageType._STATUS_UPDATE,
       payload: {
         status: "connected",
         clientId,
@@ -338,15 +339,15 @@ export class ParlantWebSocketBridgeService
 
       // Forward to Parlant based on message type
       switch (message.type) {
-        case ParlantMessageType.VALIDATION_REQUEST:
+        case ParlantMessageType._VALIDATION_REQUEST:
           this.forwardValidationRequest(message, ws);
           break;
 
-        case ParlantMessageType.STATUS_UPDATE:
+        case ParlantMessageType._STATUS_UPDATE:
           this.forwardStatusUpdate(message);
           break;
 
-        case ParlantMessageType.HEARTBEAT:
+        case ParlantMessageType._HEARTBEAT:
           this.handleClientHeartbeat(ws, message);
           break;
 
@@ -378,23 +379,23 @@ export class ParlantWebSocketBridgeService
 
       // Handle message based on type
       switch (message.type) {
-        case ParlantMessageType.VALIDATION_RESPONSE:
+        case ParlantMessageType._VALIDATION_RESPONSE:
           this.handleValidationResponse(message);
           break;
 
-        case ParlantMessageType.STATUS_UPDATE:
+        case ParlantMessageType._STATUS_UPDATE:
           this.handleParlantStatusUpdate(message);
           break;
 
-        case ParlantMessageType.AUTH_CHALLENGE:
+        case ParlantMessageType._AUTH_CHALLENGE:
           this.handleAuthChallenge(message);
           break;
 
-        case ParlantMessageType.ERROR:
+        case ParlantMessageType._ERROR:
           this.handleParlantError(message);
           break;
 
-        case ParlantMessageType.HEARTBEAT:
+        case ParlantMessageType._HEARTBEAT:
           this.handleParlantHeartbeat(message);
           break;
 
@@ -417,11 +418,11 @@ export class ParlantWebSocketBridgeService
    */
   private async forwardValidationRequest(
     message: ParlantWebSocketMessage,
-    clientWs: WebSocket,
+    clientWs: WebSocket.WebSocket,
   ): Promise<void> {
     if (!this.isConnected || !this.clientWs) {
       this.sendToClient(clientWs, {
-        type: ParlantMessageType.ERROR,
+        type: ParlantMessageType._ERROR,
         payload: {
           error: "Parlant connection not available",
           originalMessageId: message.messageId,
@@ -447,7 +448,7 @@ export class ParlantWebSocketBridgeService
       if (this.pendingValidations.has(message.messageId)) {
         this.pendingValidations.delete(message.messageId);
         this.sendToClient(clientWs, {
-          type: ParlantMessageType.ERROR,
+          type: ParlantMessageType._ERROR,
           payload: {
             error: "Validation timeout",
             originalMessageId: message.messageId,
@@ -527,8 +528,8 @@ export class ParlantWebSocketBridgeService
   /**
    * Send message to client
    */
-  private sendToClient(ws: WebSocket, message: ParlantWebSocketMessage): void {
-    if (ws.readyState !== WebSocket.OPEN) {
+  private sendToClient(ws: WebSocket.WebSocket, message: ParlantWebSocketMessage): void {
+    if (ws.readyState !== WebSocket.WebSocket.OPEN) {
       this.logger.warn("⚠️ Cannot send message to closed client connection");
       return;
     }
@@ -566,7 +567,7 @@ export class ParlantWebSocketBridgeService
 
     // Notify all clients of disconnection
     this.broadcastToClients({
-      type: ParlantMessageType.STATUS_UPDATE,
+      type: ParlantMessageType._STATUS_UPDATE,
       payload: {
         status: "parlant_disconnected",
         timestamp: Date.now(),
@@ -604,7 +605,7 @@ export class ParlantWebSocketBridgeService
 
         // Notify clients of reconnection
         this.broadcastToClients({
-          type: ParlantMessageType.STATUS_UPDATE,
+          type: ParlantMessageType._STATUS_UPDATE,
           payload: {
             status: "parlant_reconnected",
             timestamp: Date.now(),
@@ -645,7 +646,7 @@ export class ParlantWebSocketBridgeService
 
         // Send heartbeat message
         const heartbeat: ParlantWebSocketMessage = {
-          type: ParlantMessageType.HEARTBEAT,
+          type: ParlantMessageType._HEARTBEAT,
           payload: {
             timestamp: Date.now(),
             stats: this.getBasicStats(),
@@ -686,7 +687,7 @@ export class ParlantWebSocketBridgeService
     _message: ParlantWebSocketMessage,
   ): void {
     this.sendToClient(ws, {
-      type: ParlantMessageType.HEARTBEAT,
+      type: ParlantMessageType._HEARTBEAT,
       payload: {
         timestamp: Date.now(),
         bridgeStats: this.getBasicStats(),
@@ -702,7 +703,7 @@ export class ParlantWebSocketBridgeService
   private handleParlantHeartbeat(_message: ParlantWebSocketMessage): void {
     // Respond to Parlant heartbeat
     const response: ParlantWebSocketMessage = {
-      type: ParlantMessageType.HEARTBEAT,
+      type: ParlantMessageType._HEARTBEAT,
       payload: {
         timestamp: Date.now(),
         stats: this.getBasicStats(),
@@ -733,7 +734,7 @@ export class ParlantWebSocketBridgeService
     );
 
     const response: ParlantWebSocketMessage = {
-      type: ParlantMessageType.AUTH_RESPONSE,
+      type: ParlantMessageType._AUTH_RESPONSE,
       payload: { token },
       messageId: message.messageId,
       timestamp: new Date(),
@@ -930,7 +931,7 @@ export class ParlantWebSocketBridgeService
     request: ParlantValidationRequest,
   ): Promise<ParlantValidationResponse> {
     const message: ParlantWebSocketMessage = {
-      type: ParlantMessageType.VALIDATION_REQUEST,
+      type: ParlantMessageType._VALIDATION_REQUEST,
       payload: request,
       messageId: `validation_${request.operationId}`,
       timestamp: new Date(),

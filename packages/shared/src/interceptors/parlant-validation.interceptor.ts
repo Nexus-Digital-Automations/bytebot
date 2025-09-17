@@ -367,7 +367,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
       source: this.createSourceLocation(target, handler),
       securityLevel:
         metadata.security?.securityLevel || FunctionSecurityLevel.INTERNAL,
-      riskLevel: metadata.security?.riskLevel || RiskLevel.MODERATE,
+      riskLevel: metadata.security?.riskLevel || RiskLevel._MODERATE,
       executionContext: this.createExecutionContext(request),
     };
 
@@ -375,7 +375,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
     const validationParams: ValidationParameters = {
       mode: metadata.validation?.mode || ValidationMode.INTERACTIVE,
       approvalLevel:
-        metadata.validation?.approvalLevel || ApprovalLevel.SINGLE_APPROVAL,
+        metadata.validation?.approvalLevel || ApprovalLevel._SINGLE_APPROVAL,
       timeout: metadata.validation?.timeout || this.config.globalTimeout,
       cacheable: this.config.cacheEnabled,
       rules: metadata.rules || [],
@@ -390,7 +390,7 @@ export class ParlantValidationInterceptor implements NestInterceptor {
           metadata.conversation?.topic ||
           `${target.name}.${handler.name} validation`,
         priority:
-          metadata.conversation?.priority || ConversationPriority.NORMAL,
+          metadata.conversation?.priority || ConversationPriority._NORMAL,
         tags: ["interceptor", "nestjs", target.name.toLowerCase()],
         properties: {
           className: target.name,

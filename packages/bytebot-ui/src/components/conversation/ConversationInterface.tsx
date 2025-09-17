@@ -107,8 +107,7 @@ import {
   RefreshIcon,
   Search01Icon as SearchIcon,
   SentIcon as SendIcon,
-  SettingsIcon,
-  UserIcon
+  SettingsIcon
 } from '@hugeicons/core-free-icons';
 
 // ===========================
@@ -398,8 +397,8 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isValidationPending, setIsValidationPending] = useState(false);
   
-  // Use the message parameter with type assertion for proper typing
-  const safeMessage = message as ConversationMessage;
+  // Message parameter is already properly typed as ConversationMessage
+  const safeMessage = message;
   
   const handleValidationResponse = useCallback(async (decision: ValidationDecision, reasoning?: string): Promise<void> => {
     if (!onValidationResponse) {
@@ -768,8 +767,8 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       offlineQueue: true,
       enableA11y: config.enableA11y
     },
-    onConversationStart: (conversation) => {
-      const safeConversation = (conversation as any);
+    onConversationStart: (conversation: unknown) => {
+      const safeConversation = conversation as { conversationId: string };
       logInfo('Conversation started', { conversationId: safeConversation.conversationId }, 'ConversationInterface');
       onConversationStart?.(safeConversation.conversationId);
     },
@@ -777,13 +776,13 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       logInfo('Conversation ended', { conversationId: endedConversationId }, 'ConversationInterface');
       onConversationEnd?.(endedConversationId);
     },
-    onMessageSent: (message) => {
+    onMessageSent: (message: unknown) => {
       const safeMessage = message as ConversationMessage;
       logDebug('Message sent', { messageId: safeMessage.id }, 'ConversationInterface');
       onMessageSent?.(safeMessage);
     },
-    onValidationRequest: (request) => {
-      const safeRequest = (request as any);
+    onValidationRequest: (request: unknown) => {
+      const safeRequest = request as ParlantValidationRequest;
       logInfo('Validation request received', { requestId: safeRequest.requestId }, 'ConversationInterface');
       onValidationRequest?.(safeRequest);
     },
@@ -878,7 +877,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     }
     
     try {
-      const safeCurrentConversation = (currentConversation as any);
+      const safeCurrentConversation = currentConversation as { conversationId: string };
       const exportData = await exportConversation(safeCurrentConversation.conversationId);
       
       // Create download link
@@ -1032,8 +1031,12 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           state={conversationState}
           metrics={metrics}
           onSearch={config.enableSearch ? (): void => { setShowSearch(!showSearch); } : undefined}
-          onExport={config.enableExport ? (): void => {
-            handleExportConversation().catch(() => undefined);
+          onExport={config.enableExport ? async (): Promise<void> => {
+            try {
+              await handleExportConversation();
+            } catch {
+              // Export failed silently
+            }
           } : undefined}
           onRefresh={(): void => { 
             window.location.reload(); 

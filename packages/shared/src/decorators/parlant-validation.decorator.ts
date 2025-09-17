@@ -194,21 +194,24 @@ export function ParlantValidated(options: ParlantDecoratorOptions) {
         return result;
       } catch (error) {
         const executionTime = Date.now() - startTime;
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
 
         // Update function metrics
         updateFunctionMetrics(parlantService, functionName, {
           failed: true,
           validationTime: 0,
           executionTime,
-          error: error.message,
+          error: errorMessage,
         });
 
         // Log failed execution
         logFunctionExecution(functionName, operationId, {
           success: false,
           executionTime,
-          error: error.message,
-          stack: error.stack,
+          error: errorMessage,
+          stack: errorStack,
         });
 
         throw error;
@@ -324,7 +327,9 @@ async function performValidationWithRetry(
   const { maxAttempts, baseDelay, backoffMultiplier, maxDelay } =
     config.retryConfig;
 
-  let lastError: Error;
+  let lastError: Error = new Error(
+    "Validation failed after all retry attempts",
+  );
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -357,7 +362,7 @@ async function performValidationWithRetry(
       // Perform Parlant validation
       return await parlantService.validateFunction(request);
     } catch (error) {
-      lastError = error;
+      lastError = error instanceof Error ? error : new Error(String(error));
 
       // Don't retry on authentication errors
       if (error instanceof ParlantAuthenticationError) {
@@ -379,7 +384,7 @@ async function performValidationWithRetry(
       console.warn(
         `Parlant validation retry ${attempt}/${maxAttempts} for ${request.functionName}`,
         {
-          error: error.message,
+          error: lastError.message,
           nextDelay: delay,
         },
       );
@@ -454,9 +459,12 @@ async function executeWithMonitoring(
     return result;
   } catch (error) {
     if (executionContext.monitoring.alertOnViolations) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
       console.error(`Function execution failed for ${operationId}`, {
-        error: error.message,
-        stack: error.stack,
+        error: errorMessage,
+        stack: errorStack,
       });
     }
     throw error;

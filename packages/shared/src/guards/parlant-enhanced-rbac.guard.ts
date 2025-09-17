@@ -46,10 +46,16 @@ import {
 } from "../decorators/rbac-authorization.decorators";
 import { RBACMetadata } from "../types/rbac.types";
 
-// Import Parlant types
+// Import Parlant integration types (for service compatibility)
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
+  ParlantUserContext,
+  SecurityLevel,
+} from "../types/parlant-integration.types";
+
+// Import other Parlant types
+import {
   ValidationMode,
   ApprovalLevel,
   FunctionSecurityLevel,
@@ -590,7 +596,7 @@ export class ParlantEnhancedRBACGuard
     topic: "High-Risk Authorization Validation",
     priority: ConversationPriority._CRITICAL,
     requiredParticipants: [
-      ParticipantRole.APPROVER,
+      ParticipantRole._APPROVER,
       ParticipantRole._VALIDATOR,
     ],
   })
@@ -617,7 +623,7 @@ export class ParlantEnhancedRBACGuard
       await this._parlantService.validateFunctionExecution(validationRequest);
 
     // Additional security measures for high-risk authorization
-    if (validationResponse.result.decision === ValidationDecision._APPROVED) {
+    if (validationResponse.approved) {
       await this.implementAdditionalSecurityMeasures(authContext, operationId);
     }
 
@@ -890,11 +896,16 @@ export class ParlantEnhancedRBACGuard
     };
 
     return {
-      requestId: operationId,
-      functionContext,
-      validationParams,
-      conversationContext: this.createAuthorizationConversation(authContext),
-      timestamp: new Date(),
+      operationId: operationId,
+      functionName: functionContext.functionName,
+      packageName: ParlantEnhancedRBACGuard.name,
+      description: `RBAC authorization validation for ${functionContext.functionName}`,
+      parameters: functionContext.arguments,
+      userContext: this.convertToUserContext(
+        functionContext.executionContext.user,
+      ),
+      securityLevel: this.convertToSecurityLevel(functionContext.securityLevel),
+      timeout: validationParams.timeout,
     };
   }
 
@@ -915,22 +926,17 @@ export class ParlantEnhancedRBACGuard
     );
 
     // Enhanced parameters for high-risk scenarios
-    baseRequest.validationParams = {
-      ...baseRequest.validationParams,
-      approvalLevel: ApprovalLevel._DUAL_APPROVAL,
-      timeout: 120000, // 2 minutes for high-risk
-      cacheable: false, // Don't cache high-risk decisions
-    };
+    baseRequest.timeout = 120000; // 2 minutes for high-risk
+    baseRequest.description = `HIGH-RISK: ${baseRequest.description} - Critical approval required`;
 
-    // Update conversation context for high-risk
-    baseRequest.conversationContext.metadata.priority =
-      ConversationPriority._CRITICAL;
-    baseRequest.conversationContext.metadata.properties = {
-      ...baseRequest.conversationContext.metadata.properties,
+    // Add high-risk indicators to parameters
+    baseRequest.parameters = {
+      ...baseRequest.parameters,
       highRisk: true,
       criticalRiskFactors: authContext.riskAssessment.riskFactors.filter(
         (f) => f.critical,
       ),
+      approvalLevel: "DUAL_APPROVAL",
     };
 
     return baseRequest;
@@ -952,13 +958,13 @@ export class ParlantEnhancedRBACGuard
     const totalTime = Date.now() - startTime;
 
     const result: ConversationalAuthorizationResult = {
-      granted: response.result.decision === ValidationDecision._APPROVED,
-      reason: response.result.reasoning,
+      granted: response.approved,
+      reason: response.reason,
       evaluatedConditions: ["conversational-validation"],
-      conversationContext: response.conversationContext,
+      conversationContext: { conversationId: response.conversationId },
       performanceMetrics: {
         totalTime,
-        conversationTime: response.processingTime,
+        conversationTime: response.metadata?.processingTime || 0,
         cacheLookupTime: 0, // Will be set by cache operations
         policyEvaluationTime: 0, // Included in total time
         riskAssessmentTime: 0, // Included in total time
@@ -969,37 +975,13 @@ export class ParlantEnhancedRBACGuard
       },
       securityEnhancements: this.determineSecurityEnhancements(
         authContext,
-        response.result.decision,
+        response.approved ? ValidationDecision._APPROVED : ValidationDecision._DENIED,
       ),
     };
 
-    // Handle different validation decisions
-    switch (response.result.decision) {
-      case ValidationDecision._APPROVED:
-        result.granted = true;
-        break;
-
-      case ValidationDecision.DENIED:
-        result.granted = false;
-        result.reason = response.result.reasoning;
-        break;
-
-      case ValidationDecision.CONDITIONAL_APPROVAL:
-        result.granted = true;
-        result.reason =
-          "Approved with conditions: " + response.result.reasoning;
-        result.securityEnhancements.push("conditional_approval");
-        break;
-
-      case ValidationDecision.ESCALATE:
-        result.granted = false;
-        result.reason = "Authorization escalated for manual review";
-        break;
-
-      default:
-        result.granted = false;
-        result.reason = "Unexpected validation decision";
-        break;
+    // Add security enhancements based on response confidence
+    if (response.approved && response.confidence < 0.8) {
+      result.securityEnhancements.push("low_confidence_approval");
     }
 
     return result;
@@ -1169,7 +1151,8 @@ export class ParlantEnhancedRBACGuard
     _context: ExecutionContext,
   ): FunctionSecurityLevel {
     if (rbacMetadata.adminOnly) return FunctionSecurityLevel._RESTRICTED;
-    if (rbacMetadata.permissions?.length) return FunctionSecurityLevel.INTERNAL;
+    if (rbacMetadata.permissions?.length)
+      return FunctionSecurityLevel._INTERNAL;
     return FunctionSecurityLevel._PUBLIC;
   }
 
@@ -1207,7 +1190,7 @@ export class ParlantEnhancedRBACGuard
 
   private getExecutionEnvironment(): ExecutionEnvironment {
     // Implementation would return current execution environment
-    return ExecutionEnvironment.DEVELOPMENT;
+    return ExecutionEnvironment._DEVELOPMENT;
   }
 
   private mapToUserContext(user: AuthenticatedRequest["user"]): UserContext {
@@ -1238,7 +1221,7 @@ export class ParlantEnhancedRBACGuard
       return ApprovalLevel._SINGLE_APPROVAL;
     }
 
-    return ApprovalLevel.AUTOMATIC;
+    return ApprovalLevel._AUTOMATIC;
   }
 
   private determineTimeout(
@@ -1286,14 +1269,14 @@ export class ParlantEnhancedRBACGuard
     riskAssessment: AuthorizationRiskAssessment,
   ): CacheStrategy {
     if (riskAssessment.riskLevel === RiskLevel._CRITICAL) {
-      return CacheStrategy.NONE;
+      return CacheStrategy._NONE;
     }
 
     if (riskAssessment.riskLevel === RiskLevel._HIGH) {
-      return CacheStrategy.CONSERVATIVE;
+      return CacheStrategy._CONSERVATIVE;
     }
 
-    return CacheStrategy.INTELLIGENT;
+    return CacheStrategy._INTELLIGENT;
   }
 
   private determineCacheTTL(
@@ -1339,6 +1322,46 @@ export class ParlantEnhancedRBACGuard
         measures: ["enhanced_monitoring", "audit_trail"],
       },
     );
+  }
+
+  /**
+   * Convert UserContext to ParlantUserContext for interface compatibility
+   */
+  private convertToUserContext(user?: UserContext): ParlantUserContext {
+    if (!user) {
+      return {
+        userId: "unknown",
+        roles: ["guest"],
+        sessionId: "unknown",
+        ipAddress: "unknown",
+        metadata: {},
+      };
+    }
+
+    return {
+      userId: user.userId || "unknown",
+      roles: user.roles || ["guest"],
+      sessionId: "unknown", // Not available in UserContext
+      ipAddress: "unknown", // Not available in UserContext
+      metadata: user.metadata || {},
+    };
+  }
+
+  /**
+   * Convert FunctionSecurityLevel to SecurityLevel for interface compatibility
+   */
+  private convertToSecurityLevel(level: FunctionSecurityLevel): SecurityLevel {
+    // Map FunctionSecurityLevel to SecurityLevel enum values
+    switch (level) {
+      case FunctionSecurityLevel._PUBLIC:
+        return SecurityLevel._LOW;
+      case FunctionSecurityLevel._INTERNAL:
+        return SecurityLevel._MEDIUM;
+      case FunctionSecurityLevel._RESTRICTED:
+        return SecurityLevel._HIGH;
+      default:
+        return SecurityLevel._MEDIUM;
+    }
   }
 }
 
