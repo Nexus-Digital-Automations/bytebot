@@ -545,7 +545,7 @@ export class ParlantAuthBridgeService
           type: "access",
         },
         this.config.jwtSecret,
-        { expiresIn: this.config.tokenExpiration },
+        { expiresIn: this.config.tokenExpiration } as jwt.SignOptions,
       );
 
       // Generate new refresh token if needed
@@ -557,7 +557,7 @@ export class ParlantAuthBridgeService
           type: "refresh",
         },
         this.config.jwtSecret,
-        { expiresIn: "7d" },
+        { expiresIn: "7d" } as jwt.SignOptions,
       );
 
       this.logger.log(`🔄 Token refreshed for user: ${userId}`);

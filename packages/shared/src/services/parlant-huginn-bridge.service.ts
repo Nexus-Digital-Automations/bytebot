@@ -769,15 +769,15 @@ export class ParlantHuginnBridgeService
       `❌ Huginn service call failed: ${callConfig.service}.${callConfig.method}`,
       {
         callId,
-        error: error.message,
-        stack: error.stack,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
       },
     );
 
     return {
       callId,
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
       executionTimeMs:
         Date.now() - (this.activeCalls.get(callId)?.startTime || Date.now()),
       bridgeMetadata: {
@@ -785,7 +785,7 @@ export class ParlantHuginnBridgeService
         targetLanguage: "ruby",
         service: callConfig.service,
         method: callConfig.method,
-        errorType: error.constructor.name,
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
       },
     };
   }

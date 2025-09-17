@@ -114,7 +114,7 @@ export class ParlantIntegrationService
       throw new ParlantIntegrationError(
         "Service initialization failed",
         "INIT_ERROR",
-        { error: error.message },
+        { error: error instanceof Error ? error.message : String(error) },
       );
     }
   }
@@ -420,7 +420,7 @@ export class ParlantIntegrationService
     );
 
     const wrapper: ParlantFunctionWrapper = {
-      originalFunction: null, // Will be set by the decorator
+      originalFunction: () => {}, // Will be set by the decorator
       metadata,
       validationConfig: config,
       metrics: {
@@ -519,7 +519,10 @@ export class ParlantIntegrationService
       ]);
 
       // Transform Parlant response to our format
-      return this.transformParlantResponse(response.data, request);
+      if (typeof response === 'object' && response && 'data' in response) {
+        return this.transformParlantResponse(response.data, request);
+      }
+      throw new ParlantValidationError("Invalid response format from Parlant service");
     } catch (error) {
       if (error instanceof ParlantTimeoutError) {
         throw error;

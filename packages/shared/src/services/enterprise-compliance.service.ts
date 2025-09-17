@@ -1844,7 +1844,7 @@ export class EnterpriseComplianceService {
 
       throw new ParlantValidationError(
         `Compliance risk assessment failed: ${error instanceof Error ? error.message : String(error)}`,
-        "RISK_ASSESSMENT_FAILED",
+        { errorCode: "RISK_ASSESSMENT_FAILED", originalError: error instanceof Error ? error.message : String(error) },
       );
     }
   }
@@ -2061,7 +2061,7 @@ export class EnterpriseComplianceService {
 
       throw new ParlantValidationError(
         `Compliance recommendations generation failed: ${error instanceof Error ? error.message : String(error)}`,
-        "RECOMMENDATIONS_GENERATION_FAILED",
+        { errorCode: "RECOMMENDATIONS_GENERATION_FAILED", originalError: error instanceof Error ? error.message : String(error) },
       );
     }
   }
