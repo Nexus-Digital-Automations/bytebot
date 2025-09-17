@@ -27,14 +27,16 @@ interface DynamicObject {
 /**
  * Interface for class constructors with prototypes
  */
-interface ClassConstructor extends Function {
+interface ClassConstructor {
   prototype: Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  new (..._args: any[]): any;
 }
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantConversationContext,
-  ValidationResult,
+  ValidationResult as _ValidationResult,
   ValidationDecision,
   ConversationState,
   ConversationPriority,
@@ -46,16 +48,16 @@ import {
   SourceLocation,
   ExecutionContext,
   ExecutionEnvironment,
-  UserContext,
-  RequestContext,
-  SessionContext,
+  UserContext as _UserContext,
+  RequestContext as _RequestContext,
+  SessionContext as _SessionContext,
   ValidationParameters,
   ValidationRule,
-  ValidationRuleType,
+  ValidationRuleType as _ValidationRuleType,
   PerformanceMetrics,
-  ErrorDetails,
-  ErrorSeverity,
-  ParlantWrapperConfig,
+  ErrorDetails as _ErrorDetails,
+  ErrorSeverity as _ErrorSeverity,
+  ParlantWrapperConfig as _ParlantWrapperConfig,
 } from "../types/parlant.types";
 import {
   getParlantValidationMetadata,
@@ -164,7 +166,9 @@ export interface WrapperContext {
  */
 export interface ParlantService {
   /** Validate function execution */
-  validateFunctionExecution(request: ParlantValidationRequest): Promise<ParlantValidationResponse>;
+  validateFunctionExecution(
+    _request: ParlantValidationRequest,
+  ): Promise<ParlantValidationResponse>;
 }
 
 // ===========================
@@ -321,22 +325,34 @@ export function wrapFunctionWithMetadata<
 ): WrappedFunction<T> {
   const targetObj = target as DynamicObject;
   const logger = new Logger(
-    `ParlantWrapper:${targetObj.constructor?.name || 'Unknown'}.${propertyKey}`,
+    `ParlantWrapper:${targetObj.constructor?.name || "Unknown"}.${propertyKey}`,
   );
 
   // Extract metadata from decorators
-  const validationConfig = getParlantValidationMetadata(target as object, propertyKey);
+  const validationConfig = getParlantValidationMetadata(
+    target as object,
+    propertyKey,
+  );
   const conversationConfig = getConversationContextMetadata(
     target as object,
     propertyKey,
   );
-  const securityConfig = getSecurityClassificationMetadata(target as object, propertyKey);
-  const _approvalConfig = getApprovalWorkflowMetadata(target as object, propertyKey);
-  const validationRules = getValidationRulesMetadata(target as object, propertyKey);
+  const securityConfig = getSecurityClassificationMetadata(
+    target as object,
+    propertyKey,
+  );
+  const _approvalConfig = getApprovalWorkflowMetadata(
+    target as object,
+    propertyKey,
+  );
+  const validationRules = getValidationRulesMetadata(
+    target as object,
+    propertyKey,
+  );
 
   if (!validationConfig?.enabled) {
     logger.debug(
-      `Parlant validation not enabled for ${targetObj.constructor?.name || 'Unknown'}.${propertyKey}`,
+      `Parlant validation not enabled for ${targetObj.constructor?.name || "Unknown"}.${propertyKey}`,
     );
     return originalFunction as WrappedFunction<T>;
   }
@@ -359,7 +375,7 @@ export function wrapFunctionWithMetadata<
   };
 
   logger.log(
-    `Creating Parlant wrapper for ${targetObj.constructor?.name || 'Unknown'}.${propertyKey}`,
+    `Creating Parlant wrapper for ${targetObj.constructor?.name || "Unknown"}.${propertyKey}`,
     {
       validationMode: wrapperConfig.validationMode,
       approvalLevel: wrapperConfig.approvalLevel,
@@ -368,7 +384,11 @@ export function wrapFunctionWithMetadata<
     },
   );
 
-  return createParlantWrapper(originalFunction, wrapperConfig, parlantService as ParlantService);
+  return createParlantWrapper(
+    originalFunction,
+    wrapperConfig,
+    parlantService as ParlantService,
+  );
 }
 
 /**
@@ -383,17 +403,21 @@ export function wrapClassMethods(
   parlantService: unknown,
 ): unknown {
   const targetObj = target as DynamicObject;
-  const logger = new Logger(`ParlantWrapper:${targetObj.constructor?.name || 'Unknown'}`);
+  const logger = new Logger(
+    `ParlantWrapper:${targetObj.constructor?.name || "Unknown"}`,
+  );
 
-  const methodNames = targetObj.prototype 
+  const methodNames = targetObj.prototype
     ? Object.getOwnPropertyNames(targetObj.prototype).filter(
         (name) =>
-          name !== "constructor" && targetObj.prototype && typeof targetObj.prototype[name] === "function",
+          name !== "constructor" &&
+          targetObj.prototype &&
+          typeof targetObj.prototype[name] === "function",
       )
     : [];
 
   logger.log(
-    `Wrapping ${methodNames.length} methods for class ${targetObj.constructor?.name || 'Unknown'}`,
+    `Wrapping ${methodNames.length} methods for class ${targetObj.constructor?.name || "Unknown"}`,
     {
       methods: methodNames,
     },
@@ -402,12 +426,12 @@ export function wrapClassMethods(
   for (const methodName of methodNames) {
     const classTarget = target as ClassConstructor;
     const originalMethod = classTarget.prototype[methodName];
-    
+
     // Type guard to ensure originalMethod is a function
-    if (typeof originalMethod !== 'function') {
+    if (typeof originalMethod !== "function") {
       continue; // Skip non-function properties
     }
-    
+
     const wrappedMethod = wrapFunctionWithMetadata(
       originalMethod as (..._args: unknown[]) => unknown,
       classTarget.prototype,
@@ -822,7 +846,10 @@ export function parlantWrapper<T extends (..._args: unknown[]) => unknown>(
   originalFunction: T,
   parlantService: unknown,
 ): ParlantWrapperBuilder<T> {
-  return new ParlantWrapperBuilder(originalFunction, parlantService as ParlantService);
+  return new ParlantWrapperBuilder(
+    originalFunction,
+    parlantService as ParlantService,
+  );
 }
 
 // ===========================

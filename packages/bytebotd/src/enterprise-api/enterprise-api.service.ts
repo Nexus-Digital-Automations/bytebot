@@ -27,7 +27,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { AxiosResponse } from 'axios';
-import { Observable, throwError } from 'rxjs';
+import { Observable as _Observable, throwError } from 'rxjs';
 import { catchError, map, timeout, retry } from 'rxjs/operators';
 import {
   ParlantIntegrationService,
@@ -35,7 +35,7 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
-  ParlantConversationContext,
+  ParlantConversationContext as _ParlantConversationContext,
 } from '../parlant/parlant-integration.service';
 
 // ===== ENTERPRISE API TYPES =====
@@ -272,7 +272,7 @@ export class EnterpriseApiService {
 
       // Cache successful GET responses with Parlant context
       if (request.method === 'GET' && response) {
-        const parlantCacheContext = validationResult ? {
+        const _parlantCacheContext = validationResult ? {
           conversationId: validationResult.conversationId,
           validationResult: 'APPROVED' as const,
           riskLevel: request.parlantContext?.riskLevel ?? 'MEDIUM',
@@ -351,8 +351,8 @@ export class EnterpriseApiService {
         .pipe(
           timeout(requestConfig.timeout),
           retry(request.retries ?? this.config.defaultRetries),
-          map((response: AxiosResponse) => response.data),
-          catchError((error) => {
+          map((response: AxiosResponse) => response.data as unknown),
+          catchError((error: Error) => {
             this.logger.error('HTTP request failed', {
               error: error.message,
               url: request.url,
@@ -426,7 +426,7 @@ export class EnterpriseApiService {
    * Generate cache key from endpoint and parameters
    */
   private generateCacheKey(endpointKey: string, params?: Record<string, unknown>): string {
-    if (|| Object.keys(params).length === 0) {
+    if (!params || Object.keys(params).length === 0) {
       return endpointKey;
     }
     
@@ -655,7 +655,7 @@ export class EnterpriseApiService {
       // Determine health status
       if (circuitBreaker?.state === 'OPEN') {
         status = 'FAILED';
-      } else if (metrics.uptime < 95 ?? metrics.averageResponseTime > 5000) {
+      } else if (metrics.uptime < 95 || metrics.averageResponseTime > 5000) {
         status = 'DEGRADED';
       }
       

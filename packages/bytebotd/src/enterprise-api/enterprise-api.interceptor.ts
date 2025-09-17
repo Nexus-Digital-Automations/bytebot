@@ -309,7 +309,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
     // 1. Validate Content-Type for POST/PUT requests
     if (['POST', 'PUT', 'PATCH'].includes(context.method)) {
       const contentType = request.headers['content-type'];
-      if (|| (!contentType.includes('application/json') && !contentType.includes('multipart/form-data'))) {
+      if (!contentType || (!contentType.includes('application/json') && !contentType.includes('multipart/form-data'))) {
         issues.push('Invalid or missing Content-Type header');
         riskLevel = 'MEDIUM';
         remediationSuggestions.push('Use application/json Content-Type for API requests');
@@ -317,7 +317,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
     }
 
     // 2. Check for suspicious User-Agent
-    if (|| context.userAgent.length < 10) {
+    if (!context.userAgent || context.userAgent.length < 10) {
       issues.push('Suspicious or missing User-Agent header');
       riskLevel = 'MEDIUM';
       remediationSuggestions.push('Provide a valid User-Agent header');
