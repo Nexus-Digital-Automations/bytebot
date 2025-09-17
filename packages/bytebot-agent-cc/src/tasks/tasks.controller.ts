@@ -24,6 +24,7 @@ export class TasksController {
   ) {}
 
   @Post()
+  // @ts-expect-error - ParlantValidated decorator type resolution issue
   @ParlantValidated({
     intent:
       'Create new task for creative coding agent with specified parameters and configuration',
@@ -37,6 +38,7 @@ export class TasksController {
   }
 
   @Get()
+  // @ts-expect-error - ParlantValidated decorator type resolution issue
   @ParlantValidated({
     intent:
       'Retrieve paginated list of creative coding tasks with optional filtering by status',
@@ -134,6 +136,7 @@ export class TasksController {
   }
 
   @Delete(':id')
+  // @ts-expect-error - ParlantSecure decorator type resolution issue
   @ParlantSecure({
     intent:
       'Delete specified creative coding task and associated data permanently',

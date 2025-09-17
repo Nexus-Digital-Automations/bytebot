@@ -19,6 +19,7 @@ export class AppController {
     description: 'Creative Coding Agent greeting message',
     schema: { type: 'string', example: 'Hello World!' },
   })
+  // @ts-expect-error - ParlantValidated decorator type resolution issue
   @ParlantValidated({
     intent: 'Get Creative Coding Agent status',
     securityLevel: 'MINIMAL',

@@ -9,7 +9,7 @@
  * @author AIgent Orchestrator Team
  */
 
-import { Module, Global, DynamicModule, Provider } from '@nestjs/common';
+import { Module, Global, DynamicModule, Provider, Type } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
@@ -223,7 +223,7 @@ export class OrchestratorModule {
           verboseMemoryLeak: true,
           ignoreErrors: false
         }),
-        ...(options.imports as any[] || [])
+        ...(options.imports as DynamicModule['imports'] || [])
       ],
       providers: [
         // Async configuration provider
@@ -236,7 +236,7 @@ export class OrchestratorModule {
             }
             return this.buildConfiguration({});
           },
-          inject: (options.inject as any[]) || []
+          inject: (options.inject as (string | symbol | Function | Type<unknown>)[]) || []
         },
         
         // Core services

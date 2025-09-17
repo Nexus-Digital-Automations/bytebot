@@ -42,6 +42,19 @@ import {
 } from '@bytebot/shared/types/parlant.types';
 import { useParlantWebSocket } from '@/hooks/useParlantWebSocket';
 import { logDebug, logInfo } from '@/utils/logger';
+
+// ===========================
+// WORKFLOW UPDATE TYPES
+// ===========================
+
+interface WorkflowUpdate {
+  type: 'step_completed' | 'step_started' | 'workflow_completed' | 'workflow_failed';
+  stepId?: string;
+  workflowId?: string;
+  duration?: number;
+  timestamp?: Date;
+  metadata?: Record<string, unknown>;
+}
 import {
   ActivityIcon,
   AlertTriangleIcon,
@@ -987,7 +1000,7 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
     logInfo('Workflow initialized', { workflowId: newWorkflow.workflowId }, 'ValidationWorkflowVisualization');
   }, []);
   
-  const updateWorkflowFromUpdate = useCallback((update: any) => {
+  const updateWorkflowFromUpdate = useCallback((update: WorkflowUpdate) => {
     if (!workflowRef.current) {return;}
     
     const updatedWorkflow = { ...workflowRef.current };

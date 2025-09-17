@@ -716,7 +716,7 @@ export class ParlantHealthMetricsValidationService {
     riskLevel: HealthMetricsRiskLevel,
   ): string {
     const paramHash = JSON.stringify(parameters);
-    return `${operationType}_${riskLevel}_${btoa(paramHash).substring(0, 16)}`;
+    return `${operationType}_${riskLevel}_${Buffer.from(paramHash).toString('base64').substring(0, 16)}`;
   }
 
   /**

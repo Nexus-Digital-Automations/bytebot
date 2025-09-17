@@ -462,7 +462,6 @@ export class ParlantValidationInterceptor implements NestInterceptor {
       userContext: {
         userId: request.conversationContext.userId || "anonymous",
         roles: [],
-        permissions: [],
         sessionId: request.conversationContext.sessionId || "no-session",
         ipAddress: "unknown",
         metadata: {},
@@ -640,9 +639,10 @@ export class ParlantValidationInterceptor implements NestInterceptor {
     const sanitized: unknown = Array.isArray(arg) ? [...arg] : { ...arg };
 
     if (typeof sanitized === "object" && sanitized !== null) {
+      const sanitizedObj = sanitized as Record<string, unknown>;
       for (const field of sensitiveFields) {
-        if (field in sanitized) {
-          sanitized[field] = "[REDACTED]";
+        if (field in sanitizedObj) {
+          sanitizedObj[field] = "[REDACTED]";
         }
       }
     }

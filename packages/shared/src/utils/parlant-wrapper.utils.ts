@@ -12,6 +12,24 @@
  */
 
 import { Logger } from "@nestjs/common";
+
+/**
+ * Interface for objects with dynamic property access
+ */
+interface DynamicObject {
+  constructor?: {
+    name?: string;
+  };
+  prototype?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+/**
+ * Interface for class constructors with prototypes
+ */
+interface ClassConstructor extends Function {
+  prototype: Record<string, unknown>;
+}
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
@@ -301,7 +319,7 @@ export function wrapFunctionWithMetadata<
   propertyKey: string,
   parlantService: unknown,
 ): WrappedFunction<T> {
-  const targetObj = target as any;
+  const targetObj = target as DynamicObject;
   const logger = new Logger(
     `ParlantWrapper:${targetObj.constructor?.name || 'Unknown'}.${propertyKey}`,
   );
@@ -364,13 +382,15 @@ export function wrapClassMethods(
   target: unknown,
   parlantService: unknown,
 ): unknown {
-  const targetObj = target as any;
+  const targetObj = target as DynamicObject;
   const logger = new Logger(`ParlantWrapper:${targetObj.constructor?.name || 'Unknown'}`);
 
-  const methodNames = Object.getOwnPropertyNames(targetObj.prototype).filter(
-    (name) =>
-      name !== "constructor" && typeof targetObj.prototype[name] === "function",
-  );
+  const methodNames = targetObj.prototype 
+    ? Object.getOwnPropertyNames(targetObj.prototype).filter(
+        (name) =>
+          name !== "constructor" && targetObj.prototype && typeof targetObj.prototype[name] === "function",
+      )
+    : [];
 
   logger.log(
     `Wrapping ${methodNames.length} methods for class ${targetObj.constructor?.name || 'Unknown'}`,
@@ -380,15 +400,22 @@ export function wrapClassMethods(
   );
 
   for (const methodName of methodNames) {
-    const originalMethod = (target as any).prototype[methodName];
+    const classTarget = target as ClassConstructor;
+    const originalMethod = classTarget.prototype[methodName];
+    
+    // Type guard to ensure originalMethod is a function
+    if (typeof originalMethod !== 'function') {
+      continue; // Skip non-function properties
+    }
+    
     const wrappedMethod = wrapFunctionWithMetadata(
-      originalMethod,
-      (target as any).prototype,
+      originalMethod as (..._args: unknown[]) => unknown,
+      classTarget.prototype,
       methodName,
       parlantService,
     );
 
-    (target as any).prototype[methodName] = wrappedMethod;
+    classTarget.prototype[methodName] = wrappedMethod;
   }
 
   return target;

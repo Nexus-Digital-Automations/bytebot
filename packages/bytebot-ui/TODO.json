@@ -976,6 +976,35 @@
           "claimPriority": "normal"
         }
       ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T20:37:04.581Z",
+      "title": "RECOVERY: Complete critical infrastructure verification after successful export resolution",
+      "description": "Continue systematic infrastructure verification after previous agent successfully resolved 40+ TypeScript interface export issues in bytebot-ui. Verify all packages meet task-requirements.md standards: PNPM-only builds, zero ESLint violations, TypeScript strict compliance, and successful runtime startup. Priority focus: 1) Validate export fixes are working across all packages, 2) Complete workspace-wide lint/build/test verification, 3) Ensure all services start successfully, 4) Document infrastructure status for deployment readiness.",
+      "category": "error",
+      "priority": "high",
+      "important_files": [
+        "development/essentials/task-requirements.md",
+        "development/essentials/pnpm-configuration.md",
+        "bytebot/packages/shared",
+        "bytebot/packages/bytebot-ui",
+        "bytebot/packages/bytebot-agent",
+        "bytebot/packages/bytebotd"
+      ],
+      "id": "error_1758141424581_7euklzri6rr",
+      "assigned_agent": "dev_session_1758141298416_1_general_b1bb0c47",
+      "started_at": "2025-09-17T20:37:24.903Z",
+      "claimed_by": "dev_session_1758141298416_1_general_b1bb0c47",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758141298416_1_general_b1bb0c47",
+          "role": "primary",
+          "assignedAt": "2025-09-17T20:37:24.903Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -2677,6 +2706,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-17T17:10:28.668Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758141298416_1_general_b1bb0c47": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T20:34:58.417Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T20:34:58.417Z",
       "sessionId": null,
       "metadata": {}
     }

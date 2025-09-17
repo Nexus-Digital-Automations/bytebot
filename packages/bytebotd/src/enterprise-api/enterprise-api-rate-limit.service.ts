@@ -568,7 +568,7 @@ export class EnterpriseApiRateLimitService {
     const existing = this.rateLimitTracking.get(trackingKey);
     const now = new Date();
     
-    if (|| now >= existing.resetTime) {
+    if (!existing || now >= existing.resetTime) {
       // Create new tracking window
       const resetTime = new Date(now.getTime() + config.windowMs);
       this.rateLimitTracking.set(trackingKey, {

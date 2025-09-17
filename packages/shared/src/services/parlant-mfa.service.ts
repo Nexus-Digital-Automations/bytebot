@@ -33,6 +33,7 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantUserContext,
+  SecurityLevel,
 } from "../types/parlant-integration.types";
 
 import {
@@ -1186,7 +1187,7 @@ export class ParlantMFAService {
       description: "Validate MFA response with conversational verification",
       parameters: functionContext.arguments,
       userContext: userContext,
-      securityLevel: functionContext.securityLevel as SecurityLevel,
+      securityLevel: this.mapFunctionSecurityLevelToSecurityLevel(functionContext.securityLevel),
       timeout: validationParams.timeout,
     };
   }
@@ -1635,6 +1636,26 @@ export class ParlantMFAService {
       riskAssessment,
       conversationId,
     );
+  }
+
+  /**
+   * Map FunctionSecurityLevel to SecurityLevel
+   */
+  private mapFunctionSecurityLevelToSecurityLevel(functionSecurityLevel: FunctionSecurityLevel): SecurityLevel {
+    switch (functionSecurityLevel) {
+      case FunctionSecurityLevel._PUBLIC:
+        return SecurityLevel._MINIMAL;
+      case FunctionSecurityLevel._INTERNAL:
+        return SecurityLevel._LOW;
+      case FunctionSecurityLevel._RESTRICTED:
+        return SecurityLevel._MEDIUM;
+      case FunctionSecurityLevel._CONFIDENTIAL:
+        return SecurityLevel._HIGH;
+      case FunctionSecurityLevel._SECRET:
+        return SecurityLevel._CRITICAL;
+      default:
+        return SecurityLevel._MEDIUM; // Default fallback
+    }
   }
 }
 

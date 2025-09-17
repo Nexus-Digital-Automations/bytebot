@@ -666,7 +666,7 @@ export class ParlantMonitoringService {
           totalValidations: 0,
           approvalRate: 0,
           averageValidationTime: 0,
-          bySecurityLevel: {} as any,
+          bySecurityLevel: {} as Record<SecurityLevel, { count: number; approvalRate: number; averageTime: number }>,
           topEndpoints: [],
           errorPatterns: [],
         },

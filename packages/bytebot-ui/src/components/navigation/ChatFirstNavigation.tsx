@@ -32,6 +32,60 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { logDebug, logInfo, logWarn } from '@/utils/logger';
 
 // ===========================
+// SPEECH RECOGNITION TYPE DEFINITIONS
+// ===========================
+
+/**
+ * Speech Recognition API type definitions for cross-browser compatibility
+ */
+interface SpeechRecognitionEvent {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionErrorEvent {
+  error: string;
+  message?: string;
+}
+
+interface SpeechRecognitionResult {
+  [index: number]: SpeechRecognitionAlternative;
+  readonly length: number;
+  readonly isFinal: boolean;
+}
+
+interface SpeechRecognitionAlternative {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+
+interface SpeechRecognitionResultList {
+  [index: number]: SpeechRecognitionResult;
+  readonly length: number;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: ((event: Event) => void) | null;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+}
+
+type SpeechRecognitionStatic = new() => SpeechRecognition;
+
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionStatic;
+    webkitSpeechRecognition?: SpeechRecognitionStatic;
+  }
+}
+
+// ===========================
 // SCORING CONSTANTS
 // ===========================
 
@@ -762,7 +816,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null); // SpeechRecognition type not available in all environments
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   
   // ===========================
   // NAVIGATION SETUP
@@ -939,7 +993,10 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       return;
     }
     
-    const SpeechRecognition = (window as any).webkitSpeechRecognition ?? (window as any).SpeechRecognition;
+    const SpeechRecognition = window.webkitSpeechRecognition ?? window.SpeechRecognition;
+    if (!SpeechRecognition) {
+      throw new Error('Speech Recognition API is not supported in this browser');
+    }
     const recognition = new SpeechRecognition();
     
     recognition.continuous = false;
@@ -951,16 +1008,16 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       logDebug('Voice recognition started', null, 'ChatFirstNavigation');
     };
     
-    recognition.onresult = (event: any) => { // SpeechRecognitionEvent type not available
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const results = Array.from(event.results);
       const transcript = results
-        .map((result: any) => result[0].transcript) // SpeechRecognitionResult type not available
+        .map((result: SpeechRecognitionResult) => result[0].transcript)
         .join('');
       
       setVoiceState(prev => ({
         ...prev,
         transcript,
-        confidence: (results[results.length - 1] as any)[0].confidence
+        confidence: results[results.length - 1][0].confidence
       }));
       
       if (event.results[event.results.length - 1].isFinal) {
@@ -971,7 +1028,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       }
     };
     
-    recognition.onerror = (event: any) => { // SpeechRecognitionErrorEvent type not available
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       logWarn('Voice recognition error', event.error, 'ChatFirstNavigation');
       setVoiceState(prev => ({
         ...prev,

@@ -69,7 +69,7 @@ expect.extend({
     received: HTMLElement,
     className: string,
   ): jest.CustomMatcherResult {
-    if (received?.classList == null) {
+    if (received?.classList === null || received?.classList === undefined) {
       return {
         message: () => `Expected element to have classList property`,
         pass: false,
@@ -98,7 +98,7 @@ expect.extend({
   toBeValidSocketEvent(received: unknown): jest.CustomMatcherResult {
     if (typeof received !== "object" || received === null) {
       return {
-        message: () => `Expected ${received} to be an object`,
+        message: () => `Expected ${JSON.stringify(received)} to be an object`,
         pass: false,
       };
     }
@@ -129,7 +129,7 @@ expect.extend({
   toBeValidTaskUI(received: unknown): jest.CustomMatcherResult {
     if (typeof received !== "object" || received === null) {
       return {
-        message: () => `Expected ${received} to be an object`,
+        message: () => `Expected ${JSON.stringify(received)} to be an object`,
         pass: false,
       };
     }
@@ -156,7 +156,7 @@ expect.extend({
    * Validates that an element is accessible
    */
   toBeAccessible(received: HTMLElement): jest.CustomMatcherResult {
-    if (received == null) {
+    if (received === null || received === undefined) {
       return {
         message: () => `Expected element to exist`,
         pass: false,
@@ -216,7 +216,7 @@ expect.extend({
     } catch (error) {
       return {
         message: () =>
-          `Expected component to render successfully, but threw error: ${error}`,
+          `Expected component to render successfully, but threw error: ${error instanceof Error ? error.message : String(error)}`,
         pass: false,
       };
     }

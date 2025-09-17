@@ -446,7 +446,7 @@ export class EnterpriseApiAuthService {
   }> {
     const session = this.activeSessions.get(sessionToken);
     
-    if (|| new Date() > session.expiresAt) {
+    if (!session || new Date() > session.expiresAt) {
       return { valid: false };
     }
 
@@ -498,7 +498,7 @@ export class EnterpriseApiAuthService {
     // This would typically involve checking against user database
     
     // For now, perform basic validation
-    if (|| !request.credentials.password) {
+    if (!request.username || !request.credentials.password) {
       return { valid: false, userId: '' };
     }
 
@@ -929,7 +929,7 @@ export class EnterpriseApiAuthService {
     parlantValidation: ParlantValidationResponse,
     request: AuthenticationRequest
   ): boolean {
-    return parlantValidation.confidence < 0.9 ?? 
+    return parlantValidation.confidence < 0.9 ||
            request.conversationalContext?.urgencyLevel === 'CRITICAL';
   }
 

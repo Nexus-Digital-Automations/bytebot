@@ -62,7 +62,6 @@ import {
   ComplianceRequirements as _ComplianceRequirements,
   OrchestratorConfiguration,
   ConversationSummary,
-  ApprovalOutcome,
   RecoveryStrategy,
   RecoveryStrategyType as _RecoveryStrategyType,
   ConversationTracking as _ConversationTracking,
@@ -896,8 +895,8 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   private createExecutionContext(
     executionId: string,
     task: OrchestrationTask,
-    userContext: OrchestrationUserContext,
-    conversationContext: ParlantUserContext
+    _userContext: OrchestrationUserContext,
+    _conversationContext: ParlantUserContext
   ): OrchestrationExecutionContext {
     return {
       executionId,

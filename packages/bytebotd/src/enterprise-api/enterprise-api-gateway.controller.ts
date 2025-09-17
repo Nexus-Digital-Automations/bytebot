@@ -668,7 +668,7 @@ export class EnterpriseApiGatewayController {
       // Check circuit breaker
       
       if (circuitBreaker?.state === 'OPEN') {
-        if (|| new Date() < circuitBreaker.nextRetryTime) {
+        if (!circuitBreaker.nextRetryTime || new Date() < circuitBreaker.nextRetryTime) {
           throw new HttpException(
             `Service ${service} is currently unavailable (circuit breaker open)`,
             HttpStatus.SERVICE_UNAVAILABLE,
