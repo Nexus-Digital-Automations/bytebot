@@ -38,12 +38,14 @@ interface HttpErrorWithStatus {
   stack?: string;
 }
 
-interface RequestWithPath {
+interface RouteInfo {
   path?: string;
-  url?: string;
-  method?: string;
-  [key: string]: unknown;
 }
+
+interface RequestWithRoute {
+  route?: RouteInfo;
+}
+
 import { Request, Response } from 'express';
 import { v4 as _uuidv4 } from 'uuid';
 import { MetricsService } from '../../metrics/metrics.service';
@@ -270,16 +272,32 @@ export class LoggingInterceptor implements NestInterceptor {
    * @returns Route pattern string
    */
   private extractRoute(request: Request): string {
-    // Try to get route pattern from NestJS route info
-    const routePattern = (request as Request & { route?: { path: string } })
-      .route?.path;
-    if (routePattern && typeof routePattern === 'string') {
-      return routePattern;
+    // Try to get route pattern from NestJS route info with safe type checking
+    const requestWithRoute = request as Request & RequestWithRoute;
+    const route: unknown = requestWithRoute.route;
+    
+    if (this.isValidRoute(route)) {
+      const routePattern = route.path;
+      if (routePattern && typeof routePattern === 'string') {
+        return routePattern;
+      }
     }
 
     // Fallback to URL path with parameter normalization
     const url = request.originalUrl ?? request.url;
     return this.normalizeUrlForMetrics(url);
+  }
+
+  /**
+   * Type guard to check if route object is valid
+   */
+  private isValidRoute(route: unknown): route is RouteInfo {
+    return (
+      typeof route === 'object' &&
+      route !== null &&
+      'path' in route &&
+      typeof (route as RouteInfo).path === 'string'
+    );
   }
 
   /**

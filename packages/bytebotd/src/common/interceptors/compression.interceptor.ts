@@ -27,7 +27,7 @@ import {
 } from '@nestjs/common';
 import { Observable, mergeMap, from } from 'rxjs';
 import { Request, Response } from 'express';
-import { gzip, brotliCompress, deflate } from 'zlib';
+import { gzip, brotliCompress, deflate, constants as zlibConstants } from 'zlib';
 import { promisify } from 'util';
 import { MetricsService } from '../../metrics/metrics.service';
 
@@ -324,7 +324,7 @@ export class CompressionInterceptor implements NestInterceptor {
       case 'brotli':
         return await brotliCompressAsync(data, {
           params: {
-            [require('zlib').constants.BROTLI_PARAM_QUALITY]: this.config.level,
+            [zlibConstants.BROTLI_PARAM_QUALITY]: this.config.level,
           },
         });
 
