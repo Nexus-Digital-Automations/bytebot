@@ -520,7 +520,7 @@ export class ParlantIntegrationService
 
       // Transform Parlant response to our format
       if (typeof response === 'object' && response && 'data' in response) {
-        return this.transformParlantResponse(response.data, request);
+        return this.transformParlantResponse(response.data as Record<string, unknown>, request);
       }
       throw new ParlantValidationError("Invalid response format from Parlant service");
     } catch (error) {
@@ -529,16 +529,19 @@ export class ParlantIntegrationService
       }
 
       // Handle different error types
-      if (error.response?.status === 401) {
-        throw new ParlantAuthenticationError("Invalid Parlant API credentials");
-      }
+      if (error && typeof error === 'object' && 'response' in error) {
+        const errorResponse = error.response as any;
+        if (errorResponse?.status === 401) {
+          throw new ParlantAuthenticationError("Invalid Parlant API credentials");
+        }
 
-      if (error.response?.status >= 500) {
-        throw new ParlantConnectionError("Parlant service unavailable");
+        if (errorResponse?.status >= 500) {
+          throw new ParlantConnectionError("Parlant service unavailable");
+        }
       }
 
       throw new ParlantValidationError("Validation request failed", {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         request,
       });
     }

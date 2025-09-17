@@ -122,7 +122,7 @@ export function ParlantValidated(options: ParlantDecoratorOptions) {
         description: metadata.description,
         parameters: extractParameters(originalMethod, args),
         userContext,
-        securityLevel: validationConfig.securityLevel ?? 'low',
+        securityLevel: validationConfig.securityLevel ?? SecurityLevel._LOW,
         timeout: validationConfig.timeout,
       };
 
