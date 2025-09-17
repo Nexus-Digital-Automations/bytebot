@@ -49,6 +49,7 @@ import {
   ValidationParameters,
   SourceLocation,
   ExecutionContext,
+  ValidationRecommendation,
 } from "../types/parlant.types";
 
 // Import existing auth types
@@ -1193,7 +1194,7 @@ export class ParlantEnhancedAuthService {
   }
 
   private mapRecommendationsToActions(
-    recommendations: Array<Record<string, unknown>>,
+    recommendations: ValidationRecommendation[],
   ): RequiredAction[] {
     // Implementation would map Parlant recommendations to required actions
     return [];

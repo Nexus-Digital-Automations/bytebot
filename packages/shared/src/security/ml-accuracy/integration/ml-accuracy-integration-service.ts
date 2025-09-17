@@ -600,7 +600,7 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
             type: "soft" as const,
             penalty: 0.1,
             tolerance: target * 0.1,
-          } as ObjectiveConstraint,
+          } as _ObjectiveConstraint,
         })),
         constraints: [
           {
@@ -1275,7 +1275,7 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
     }
   }
 
-  private async cleanupConsensusHistory(): void {
+  private async cleanupConsensusHistory(): Promise<void> {
     const _cutoff = new Date(Date.now() - 86400000); // 24 hours ago
 
     for (const [_round, decision] of this.consensusRounds) {

@@ -520,7 +520,7 @@ export class ParlantWebSocketBridgeService
       this.updateAverageLatency(latency);
 
       // Resolve the promise with the response
-      const response = message.payload as ParlantValidationResponse;
+      const response = message.payload as unknown as ParlantValidationResponse;
       pendingDirect.resolve(response);
 
       // Clean up pending validation
@@ -975,7 +975,7 @@ export class ParlantWebSocketBridgeService
   ): Promise<ParlantValidationResponse> {
     const message: ParlantWebSocketMessage = {
       type: ParlantMessageType._VALIDATION_REQUEST,
-      payload: request as Record<string, unknown>,
+      payload: request as unknown as Record<string, unknown>,
       messageId: `validation_${request.operationId}`,
       timestamp: new Date(),
     };

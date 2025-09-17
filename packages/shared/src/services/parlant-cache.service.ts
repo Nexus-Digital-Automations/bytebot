@@ -863,7 +863,7 @@ export class ParlantCacheService
       ) {
         sanitized[key] = "[REDACTED]";
       } else if (typeof value === "object" && value !== null) {
-        sanitized[key] = this.sanitizeParameters(value);
+        sanitized[key] = this.sanitizeParameters(value as Record<string, unknown>);
       } else {
         sanitized[key] = value;
       }
