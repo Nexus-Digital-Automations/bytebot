@@ -27,15 +27,72 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { 
-  ConversationMessage, 
-  ConversationParticipant, 
-  ConversationPriority,
-  ConversationState,
-  MessageType,
-  ParlantValidationRequest,
-  ValidationDecision
-} from '@bytebot/shared';
+// Local type definitions to avoid shared package build issues
+interface ConversationParticipant {
+  id: string;
+  type: string;
+  name: string;
+  role: string;
+  capabilities: string[];
+  joinedAt: Date;
+}
+
+interface ConversationMessage {
+  id: string;
+  conversationId: string;
+  sender: ConversationParticipant;
+  content: string;
+  type: MessageType;
+  timestamp: Date;
+  metadata?: Record<string, unknown>;
+}
+
+enum ConversationPriority {
+  _LOW = "low",
+  _NORMAL = "normal",
+  _HIGH = "high",
+  _CRITICAL = "critical",
+  _EMERGENCY = "emergency"
+}
+
+enum ConversationState {
+  _INITIATED = "initiated",
+  _ACTIVE = "active",
+  _VALIDATING = "validating",
+  _APPROVED = "approved",
+  _DENIED = "denied",
+  _COMPLETED = "completed",
+  _SUSPENDED = "suspended",
+  _ERROR = "error"
+}
+
+enum MessageType {
+  _TEXT = "text",
+  _VALIDATION_REQUEST = "validation_request",
+  _VALIDATION_RESPONSE = "validation_response",
+  _SYSTEM_NOTIFICATION = "system_notification",
+  _ERROR = "error",
+  _COMMAND = "command"
+}
+
+enum ValidationDecision {
+  _APPROVED = "approved",
+  _DENIED = "denied",
+  _CONDITIONAL_APPROVAL = "conditional_approval",
+  _REQUEST_MORE_INFO = "request_more_info",
+  _ESCALATE = "escalate",
+  _DEFER = "defer"
+}
+
+interface ParlantValidationRequest {
+  requestId: string;
+  functionContext: Record<string, unknown>;
+  validationParams: Record<string, unknown>;
+  conversationContext: Record<string, unknown>;
+  timestamp: Date;
+  timeout?: number;
+  metadata?: Record<string, unknown>;
+}
 import { useParlantWebSocket } from '@/hooks/useParlantWebSocket';
 import { logDebug, logInfo, logWarn } from '@/utils/logger';
 import {
@@ -49,7 +106,7 @@ import {
   SearchIcon as MicrophoneIcon,
   RefreshIcon,
   Search01Icon as SearchIcon,
-  SendIcon,
+  SentIcon as SendIcon,
   SettingsIcon,
   UserIcon
 } from '@hugeicons/core-free-icons';
@@ -255,16 +312,7 @@ const DEFAULT_CONFIG: ConversationConfig = {
 // UTILITY FUNCTIONS
 // ===========================
 
-/**
- * Type assertion utilities to handle shared package type export issues
- */
-const asConversationMessage = (msg: unknown): ConversationMessage => msg as ConversationMessage;
-const asConversationState = (state: unknown): ConversationState => state as ConversationState;
-const asConversationPriority = (priority: unknown): ConversationPriority => priority as ConversationPriority;
-const asMessageType = (type: unknown): MessageType => type as MessageType;
-const asValidationDecision = (decision: unknown): ValidationDecision => decision as ValidationDecision;
-const asConversationParticipant = (participant: unknown): ConversationParticipant => participant as ConversationParticipant;
-const asAnyObject = (obj: unknown): any => obj as any;
+// Type assertion utilities are no longer needed with local type definitions
 
 /**
  * Format timestamp for display
@@ -284,29 +332,7 @@ const formatTimestamp = (date: Date): string => {
   
 };
 
-/**
- * Get message type icon
- */
-const getMessageTypeIcon = (type: MessageType | string): typeof AlertCircleIcon => {
-  const typeStr = String(type);
-  
-  switch (typeStr) {
-    case MESSAGE_TYPE_CONSTANTS.TEXT:
-      return UserIcon;
-    case MESSAGE_TYPE_CONSTANTS.VALIDATION_REQUEST:
-      return AlertCircleIcon;
-    case MESSAGE_TYPE_CONSTANTS.VALIDATION_RESPONSE:
-      return CheckmarkCircle02Icon;
-    case MESSAGE_TYPE_CONSTANTS.SYSTEM_NOTIFICATION:
-      return BotIcon;
-    case MESSAGE_TYPE_CONSTANTS.ERROR:
-      return AlertCircleIcon;
-    case MESSAGE_TYPE_CONSTANTS.COMMAND:
-      return ArrowRight02Icon;
-    default:
-      return UserIcon;
-  }
-};
+// Message type icon logic simplified to avoid hugeicons compatibility issues
 
 /**
  * Get conversation state color
@@ -373,8 +399,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
   const [isValidationPending, setIsValidationPending] = useState(false);
   
   // Use the message parameter with type assertion for proper typing
-  const safeMessage = asConversationMessage(message);
-  const MessageIcon = getMessageTypeIcon(safeMessage.type);
+  const safeMessage = message as ConversationMessage;
   
   const handleValidationResponse = useCallback(async (decision: ValidationDecision, reasoning?: string): Promise<void> => {
     if (!onValidationResponse) {
@@ -384,6 +409,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
     setIsValidationPending(true);
     try {
       await onValidationResponse(decision, reasoning);
+      // Validation response submitted successfully
       logInfo('Validation response submitted', { messageId: safeMessage.id, decision }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -420,7 +446,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
           'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
           isOwn ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
         )}>
-          <HugeiconsIcon icon={MessageIcon} className="w-4 h-4" />
+          <div className="w-4 h-4 bg-gray-400 rounded-full"></div>
         </div>
       )}
       
@@ -495,7 +521,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               size="sm"
               variant="outline"
               onClick={() => {
-                handleValidationResponse(asValidationDecision(ValidationDecision._APPROVED)).catch(() => undefined);
+                handleValidationResponse(ValidationDecision._APPROVED).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-green-600 border-green-600 hover:bg-green-50"
@@ -507,7 +533,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               size="sm"
               variant="outline"
               onClick={() => {
-                handleValidationResponse(asValidationDecision(ValidationDecision._DENIED)).catch(() => undefined);
+                handleValidationResponse(ValidationDecision._DENIED).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-red-600 border-red-600 hover:bg-red-50"
@@ -519,7 +545,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               size="sm"
               variant="outline"
               onClick={() => {
-                handleValidationResponse(asValidationDecision(ValidationDecision._REQUEST_MORE_INFO)).catch(() => undefined);
+                handleValidationResponse(ValidationDecision._REQUEST_MORE_INFO).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
@@ -569,7 +595,7 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = React.memo(({ participan
       </div>
       <span>
         {participants.length === 1 
-          ? `${asConversationParticipant(participants[0]).name} is typing...`
+          ? `${(participants[0] as ConversationParticipant).name} is typing...`
           : `${participants.length} people are typing...`
         }
       </span>
@@ -685,7 +711,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   conversationId,
   autoStart = false,
   initialTopic,
-  initialPriority = asConversationPriority(ConversationPriority._NORMAL),
+  initialPriority = ConversationPriority._NORMAL,
   onConversationStart,
   onConversationEnd,
   onMessageSent,
@@ -743,21 +769,21 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       enableA11y: config.enableA11y
     },
     onConversationStart: (conversation) => {
-      const safeConversation = asAnyObject(conversation);
+      const safeConversation = (conversation as any);
       logInfo('Conversation started', { conversationId: safeConversation.conversationId }, 'ConversationInterface');
       onConversationStart?.(safeConversation.conversationId);
     },
     onConversationEnd: (endedConversationId) => {
       logInfo('Conversation ended', { conversationId: endedConversationId }, 'ConversationInterface');
-      onConversationEnd?.(endedConversationId as string);
+      onConversationEnd?.(endedConversationId);
     },
     onMessageSent: (message) => {
-      const safeMessage = asConversationMessage(message);
+      const safeMessage = message as ConversationMessage;
       logDebug('Message sent', { messageId: safeMessage.id }, 'ConversationInterface');
       onMessageSent?.(safeMessage);
     },
     onValidationRequest: (request) => {
-      const safeRequest = asAnyObject(request);
+      const safeRequest = (request as any);
       logInfo('Validation request received', { requestId: safeRequest.requestId }, 'ConversationInterface');
       onValidationRequest?.(safeRequest);
     },
@@ -780,7 +806,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     setInputValue('');
     
     try {
-      await sendMessage(messageContent, asMessageType(MessageType._TEXT));
+      await sendMessage(messageContent, MessageType._TEXT);
       logDebug('Message sent successfully', { content: messageContent.substring(0, UI_CONSTANTS.MAGIC_OFFSET) }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -804,18 +830,21 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     try {
       // Find the validation request message
       const validationMessage = messages.find(msg => {
-        const safeMsg = asConversationMessage(msg);
-        return safeMsg.type === asMessageType(MessageType.VALIDATION_REQUEST) &&
+        const safeMsg = msg as ConversationMessage;
+        return safeMsg.type === MessageType.VALIDATION_REQUEST &&
           Boolean(safeMsg.metadata?.requestId);
       });
       
-      if (validationMessage?.metadata?.requestId !== undefined) {
-        await respondToValidation(
-          validationMessage.metadata.requestId as string,
-          decision,
-          reasoning
-        );
-        logInfo('Validation response sent', { decision, requestId: validationMessage.metadata.requestId }, 'ConversationInterface');
+      if (validationMessage) {
+        const safeValidationMessage = validationMessage as ConversationMessage;
+        if (safeValidationMessage.metadata?.requestId !== undefined) {
+          await respondToValidation(
+            safeValidationMessage.metadata.requestId as string,
+            decision,
+            reasoning
+          );
+          logInfo('Validation response sent', { decision, requestId: safeValidationMessage.metadata.requestId }, 'ConversationInterface');
+        }
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -849,20 +878,21 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     }
     
     try {
-      const exportData = await exportConversation(currentConversation.conversationId);
+      const safeCurrentConversation = (currentConversation as any);
+      const exportData = await exportConversation(safeCurrentConversation.conversationId);
       
       // Create download link
       const blob = new Blob([exportData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `conversation-${currentConversation.conversationId}-${Date.now()}.json`;
+      link.download = `conversation-${safeCurrentConversation.conversationId}-${Date.now()}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      logInfo('Conversation exported', { conversationId: currentConversation.conversationId }, 'ConversationInterface');
+      logInfo('Conversation exported', { conversationId: safeCurrentConversation.conversationId }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logWarn('Failed to export conversation', { error: errorMessage }, 'ConversationInterface');
@@ -921,23 +951,25 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     const displayMessages = messages.slice(-config.maxDisplayMessages);
     
     return displayMessages.map((message, index) => {
-      // Use message directly without unnecessary type assertion
-      const isOwn = message.sender.id === 'current-user'; // TODO: Get from auth context
-      const showAvatar = index === 0 || (displayMessages[index - 1] as ConversationMessage).sender.id !== message.sender.id;
+      // Use message with type assertion for proper typing
+      const safeMessage = message as ConversationMessage;
+      const isOwn = safeMessage.sender.id === 'current-user'; // TODO: Get from auth context
+      const prevMessage = index === 0 ? null : (displayMessages[index - 1] as ConversationMessage);
+      const showAvatar = index === 0 || (prevMessage?.sender.id !== safeMessage.sender.id);
       const isAnimated = index >= displayMessages.length - UI_CONSTANTS.MAX_PARTICIPANT_DISPLAY; // Animate only recent messages
       
       if (customMessageRenderer) {
         return (
-          <div key={message.id}>
-            {customMessageRenderer(message)}
+          <div key={safeMessage.id}>
+            {customMessageRenderer(safeMessage)}
           </div>
         );
       }
       
       return (
         <MessageDisplay
-          key={message.id}
-          message={message}
+          key={safeMessage.id}
+          message={safeMessage}
           isOwn={isOwn}
           showAvatar={showAvatar}
           showTimestamp={true}
