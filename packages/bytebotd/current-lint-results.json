@@ -1,0 +1,4 @@
+
+> bytebotd@0.0.1 lint
+> npx eslint "{src,test}/**/*.ts" --fix --format=json
+

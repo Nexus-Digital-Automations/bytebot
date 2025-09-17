@@ -439,7 +439,7 @@ export class ParlantHealthMetricsValidationService {
     const factors: string[] = [];
     
     // Analyze parameters for risk factors
-    if (parameters.severity === 'EMERGENCY' ?? parameters.severity === 'CRITICAL') {
+    if (parameters.severity === 'EMERGENCY' || parameters.severity === 'CRITICAL') {
       factors.push('Critical severity level');
       return {
         level: HealthMetricsRiskLevel.CRITICAL,
@@ -450,7 +450,7 @@ export class ParlantHealthMetricsValidationService {
       };
     }
 
-    if (parameters.component === 'database' ?? parameters.component === 'authentication') {
+    if (parameters.component === 'database' || parameters.component === 'authentication') {
       factors.push('Critical system component');
     }
 
@@ -759,7 +759,7 @@ export class ParlantHealthMetricsValidationService {
     riskLevel: HealthMetricsRiskLevel,
   ): boolean {
     // Cache low-risk, high-frequency operations
-    return riskLevel === HealthMetricsRiskLevel.LOW ?? 
+    return riskLevel === HealthMetricsRiskLevel.LOW ||
            this.determineOperationFrequency(operationType) === 'high-frequency';
   }
 
@@ -849,7 +849,7 @@ export class ParlantHealthMetricsValidationService {
   ): string[] {
     const recommendations: string[] = [];
 
-    if (riskAssessment.level === HealthMetricsRiskLevel.HIGH ?? riskAssessment.level === HealthMetricsRiskLevel.CRITICAL) {
+    if (riskAssessment.level === HealthMetricsRiskLevel.HIGH || riskAssessment.level === HealthMetricsRiskLevel.CRITICAL) {
       recommendations.push('Monitor operation closely for unexpected behavior');
       recommendations.push('Review system impact after operation completion');
     }

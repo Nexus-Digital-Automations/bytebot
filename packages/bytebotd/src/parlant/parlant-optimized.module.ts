@@ -80,7 +80,7 @@ interface OptimizationStatus {
  * Type guard functions for safe property access
  */
 function isCircuitBreakerStatus(obj: unknown): obj is CircuitBreakerStatus {
-  if (!obj ?? typeof obj !== 'object') return false;
+  if (!obj || typeof obj !== 'object') return false;
   const record = obj as Record<string, unknown>;
   return (
     'state' in record && typeof record.state === 'string' && 
@@ -90,9 +90,9 @@ function isCircuitBreakerStatus(obj: unknown): obj is CircuitBreakerStatus {
 }
 
 function isPerformanceStatus(obj: unknown): obj is PerformanceStatus {
-  if (!obj ?? typeof obj !== 'object') return false;
+  if (!obj || typeof obj !== 'object') return false;
   const record = obj as Record<string, unknown>;
-  if (!('currentStats' in record) ?? !record.currentStats ?? typeof record.currentStats !== 'object') return false;
+  if (!('currentStats' in record) || !record.currentStats || typeof record.currentStats !== 'object') return false;
   
   const stats = record.currentStats as Record<string, unknown>;
   return (
@@ -102,7 +102,7 @@ function isPerformanceStatus(obj: unknown): obj is PerformanceStatus {
 }
 
 function isCacheStatus(obj: unknown): obj is CacheStatus {
-  if (!obj ?? typeof obj !== 'object') return false;
+  if (!obj || typeof obj !== 'object') return false;
   const record = obj as Record<string, unknown>;
   return (
     'hitRate' in record && typeof record.hitRate === 'number' && 
@@ -112,7 +112,7 @@ function isCacheStatus(obj: unknown): obj is CacheStatus {
 }
 
 function isAuditStatus(obj: unknown): obj is AuditStatus {
-  if (!obj ?? typeof obj !== 'object') return false;
+  if (!obj || typeof obj !== 'object') return false;
   const record = obj as Record<string, unknown>;
   return (
     'totalEntries' in record && typeof record.totalEntries === 'number' && 

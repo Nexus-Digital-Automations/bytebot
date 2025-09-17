@@ -245,7 +245,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
         response.setHeader('X-Processing-Time', processingTime.toString());
         response.setHeader('X-Error-Timestamp', new Date().toISOString());
         
-        return throwError(() => error);
+        return throwError(() => error as Error);
       }),
     );
   }
@@ -257,15 +257,15 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
    */
   private buildRequestContext(request: Request): EnterpriseRequestContext {
     const operationId = `intercept_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const endpoint = `${request.method}:${request.route?.path ?? request.url}`;
+    const endpoint = `${request.method}:${(request as Request & { route?: { path?: string } }).route?.path ?? request.url}`;
     
     return {
       operationId,
       startTime: Date.now(),
       endpoint,
       method: request.method,
-      userId: (request as any).user?.id,
-      userRole: (request as any).user?.role,
+      userId: (request as Request & { user?: { id?: string; role?: string } }).user?.id,
+      userRole: (request as Request & { user?: { id?: string; role?: string } }).user?.role,
       ipAddress: this.getClientIpAddress(request),
       userAgent: request.headers['user-agent'] ?? 'unknown',
       conversationId: request.headers['x-conversation-id'] as string,
@@ -459,7 +459,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
    */
   private enhanceResponse(data: unknown, metadata: EnterpriseResponseMetadata): unknown {
     // For non-object responses, return as-is
-    if (typeof data || data === null) {
+    if (typeof data !== 'object' || data === null) {
       return data;
     }
 
@@ -486,9 +486,9 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
    */
   private getClientIpAddress(request: Request): string {
     return (
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      (request.headers['x-real-ip'] as string) ||
-      request.socket?.remoteAddress ||
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??
+      (request.headers['x-real-ip'] as string) ??
+      request.socket?.remoteAddress ??
       'unknown'
     );
   }

@@ -188,6 +188,41 @@ export class ParlantIntelligentCacheService {
   }
 
   /**
+   * Helper methods to update cache stats (readonly properties)
+   */
+  private updateCacheStats(updates: Partial<CacheStats>): void {
+    this.cacheStats = { ...this.cacheStats, ...updates };
+  }
+
+  private incrementTotalRequests(): void {
+    this.updateCacheStats({ totalRequests: this.cacheStats.totalRequests + 1 });
+  }
+
+  private incrementCacheHits(): void {
+    this.updateCacheStats({ cacheHits: this.cacheStats.cacheHits + 1 });
+  }
+
+  private incrementCacheMisses(): void {
+    this.updateCacheStats({ cacheMisses: this.cacheStats.cacheMisses + 1 });
+  }
+
+  private incrementEvictedEntries(): void {
+    this.updateCacheStats({ evictedEntries: this.cacheStats.evictedEntries + 1 });
+  }
+
+  private updateAverageLookupTimeStats(lookupTime: number): void {
+    const newAverageTime = 
+      (this.cacheStats.averageLookupTime * (this.cacheStats.totalRequests - 1) + lookupTime) / 
+      this.cacheStats.totalRequests;
+    this.updateCacheStats({ averageLookupTime: newAverageTime });
+  }
+
+  private updateCacheHitRateStats(): void {
+    const newHitRate = (this.cacheStats.cacheHits / this.cacheStats.totalRequests) * 100;
+    this.updateCacheStats({ hitRate: newHitRate });
+  }
+
+  /**
    * Get cached validation response if available
    * 
    * @param request - Validation request to cache lookup
@@ -195,7 +230,7 @@ export class ParlantIntelligentCacheService {
    */
   async getCachedValidation(request: ParlantValidationRequest): Promise<ParlantValidationResponse | null> {
     const startTime = Date.now();
-    this.cacheStats.totalRequests++;
+    this.incrementTotalRequests();
 
     try {
       const cacheKey = this.generateIntelligentCacheKey(request);
@@ -205,7 +240,7 @@ export class ParlantIntelligentCacheService {
       const memoryCacheEntry = this.getFromMemoryCache(cacheKey);
       if (memoryCacheEntry && this.isCacheEntryValid(memoryCacheEntry, config)) {
         await this.updateCacheAccessMetrics(memoryCacheEntry);
-        this.cacheStats.cacheHits++;
+        this.incrementCacheHits();
         this.updateAverageLookupTime(Date.now() - startTime);
         
         this.logger.debug(`[${request.operationId}] Cache HIT (memory): ${cacheKey}`);
@@ -219,7 +254,7 @@ export class ParlantIntelligentCacheService {
           // Promote to memory cache for faster future access
           await this.setMemoryCache(cacheKey, redisCacheEntry.value, config);
           await this.updateCacheAccessMetrics(redisCacheEntry);
-          this.cacheStats.cacheHits++;
+          this.incrementCacheHits();
           this.updateAverageLookupTime(Date.now() - startTime);
           
           this.logger.debug(`[${request.operationId}] Cache HIT (Redis): ${cacheKey}`);
@@ -228,7 +263,7 @@ export class ParlantIntelligentCacheService {
       }
 
       // Cache miss
-      this.cacheStats.cacheMisses++;
+      this.incrementCacheMisses();
       this.updateAverageLookupTime(Date.now() - startTime);
       this.updateCacheHitRate();
 
@@ -242,7 +277,7 @@ export class ParlantIntelligentCacheService {
         stack: error instanceof Error ? error.stack : undefined,
       });
       
-      this.cacheStats.cacheMisses++;
+      this.incrementCacheMisses();
       return null;
     }
   }
@@ -542,19 +577,22 @@ export class ParlantIntelligentCacheService {
   }
 
   private async updateCacheAccessMetrics(entry: CacheEntry<ParlantValidationResponse>): Promise<void> {
-    // Update access patterns for intelligent optimization
-    entry.accessCount++;
-    entry.lastAccessed = new Date();
+    // Update access patterns for intelligent optimization by creating new entry
+    const updatedEntry: CacheEntry<ParlantValidationResponse> = {
+      ...entry,
+      accessCount: entry.accessCount + 1,
+      lastAccessed: new Date(),
+    };
+    // Update the cache with the new entry
+    this.memoryCache.set(entry.key, updatedEntry);
   }
 
   private updateAverageLookupTime(lookupTime: number): void {
-    this.cacheStats.averageLookupTime = 
-      (this.cacheStats.averageLookupTime * (this.cacheStats.totalRequests - 1) + lookupTime) / 
-      this.cacheStats.totalRequests;
+    this.updateAverageLookupTimeStats(lookupTime);
   }
 
   private updateCacheHitRate(): void {
-    this.cacheStats.hitRate = (this.cacheStats.cacheHits / this.cacheStats.totalRequests) * 100;
+    this.updateCacheHitRateStats();
   }
 
   private calculateMemoryUsage(): number {
@@ -587,8 +625,11 @@ export class ParlantIntelligentCacheService {
     entries.sort(([, a], [, b]) => a.lastAccessed.getTime() - b.lastAccessed.getTime());
     
     for (let i = 0; i < count && i < entries.length; i++) {
-      this.memoryCache.delete(entries[i][0]);
-      this.cacheStats.evictedEntries++;
+      const entry = entries[i];
+      if (entry?.[0]) {
+        this.memoryCache.delete(entry[0]);
+        this.incrementEvictedEntries();
+      }
     }
   }
 

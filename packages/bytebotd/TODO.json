@@ -1291,6 +1291,242 @@
       ],
       "completed_at": "2025-09-17T21:36:01.073Z",
       "updated_at": "2025-09-17T21:36:01.073Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T21:50:48.055Z",
+      "title": "Fix explicit any type violations in bytebotd package",
+      "description": "Search for @typescript-eslint/no-explicit-any violations and replace any types with proper TypeScript types: unknown for general values, specific interfaces for structured data, Record<string, unknown> for objects, proper function signatures for callbacks. Focus on files with highest violation counts first.",
+      "category": "error",
+      "id": "error_1758145848054_8y7xpcno5vv",
+      "assigned_agent": "dev_session_1758145817398_1_general_8009b7c0",
+      "started_at": "2025-09-17T21:52:31.927Z",
+      "claimed_by": "dev_session_1758145817398_1_general_8009b7c0",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758145817398_1_general_8009b7c0",
+          "role": "primary",
+          "assignedAt": "2025-09-17T21:52:31.927Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-17T21:50:49.312Z",
+      "title": "Fix constant nullishness violations in bytebotd",
+      "description": "Search for no-constant-binary-expression errors where ?? operator has constant left-hand side. Replace patterns like constantValue ?? fallback with direct assignment or proper conditional logic. Target zero constant binary expression violations.",
+      "category": "error",
+      "id": "error_1758145849312_zkfvmpi8ej"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T21:50:49.688Z",
+      "title": "Comprehensive ESLint validation to achieve zero tolerance compliance",
+      "description": "Run comprehensive ESLint validation on TypeScript files in src and test directories and fix any remaining violations to achieve exactly 0 ESLint violations",
+      "category": "error",
+      "id": "error_1758145849687_7nfg9apidai",
+      "assigned_agent": "dev_session_1758145816022_1_general_87d690ef",
+      "started_at": "2025-09-17T21:52:10.122Z",
+      "claimed_by": "dev_session_1758145816022_1_general_87d690ef",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758145816022_1_general_87d690ef",
+          "role": "primary",
+          "assignedAt": "2025-09-17T21:52:10.122Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-17T23:14:04.120Z",
+      "title": "EMERGENCY: Complete zero ESLint violations - 433 remaining",
+      "description": "Continue emergency ESLint zero tolerance compliance work. Fix remaining 433 violations in bytebotd package: explicit any types, constant nullishness, unused variables, unsafe assignments. Deploy maximum concurrent subagents for systematic fixes. Must achieve exactly 0 violations per professional developer protocol.",
+      "category": "error",
+      "id": "error_1758150844120_u3xxywn34bq"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T23:16:21.416Z",
+      "title": "Fix ESLint violations in test files",
+      "description": "Fix all remaining ESLint violations in test files across bytebotd package. Focus on jest mock type assertions, unsafe any usage in tests, proper test typing patterns. Add type assertions like `as jest.MockedFunction`, create proper mock interfaces, fix unsafe assignments in test expectations. Target zero violations in all test files.",
+      "category": "error",
+      "id": "error_1758150981416_2e7f7mwapyl",
+      "assigned_agent": "dev_session_1758150950878_1_general_3a7a0575",
+      "started_at": "2025-09-17T23:18:16.999Z",
+      "claimed_by": "dev_session_1758150950878_1_general_3a7a0575",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150950878_1_general_3a7a0575",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:18:16.999Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T23:16:21.449Z",
+      "title": "Fix unused variable violations in bytebotd package",
+      "description": "Search for @typescript-eslint/no-unused-vars errors and prefix unused variables with underscore. Focus on catch blocks, function parameters, destructured assignments. Target files like parlant performance benchmark lines 746, 757.",
+      "category": "error",
+      "id": "error_1758150981449_ag227izm7dd",
+      "assigned_agent": "dev_session_1758150950876_1_general_f91689c5",
+      "started_at": "2025-09-17T23:17:28.547Z",
+      "claimed_by": "dev_session_1758150950876_1_general_f91689c5",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150950876_1_general_f91689c5",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:17:28.547Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T23:16:21.648Z",
+      "title": "Fix all remaining ESLint violations in service files",
+      "description": "Focus on proper typing, safe property access, correct nullish coalescing usage in enterprise API services, parlant services, security services. Target zero violations in all service files (non-test).",
+      "category": "error",
+      "id": "error_1758150981647_q45ns7gt4sl",
+      "assigned_agent": "dev_session_1758150950872_1_general_be80ed03",
+      "started_at": "2025-09-17T23:20:40.949Z",
+      "claimed_by": "dev_session_1758150950872_1_general_be80ed03",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150950872_1_general_be80ed03",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:20:40.949Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T23:16:21.693Z",
+      "title": "Fix unsafe assignment violations in bytebotd package",
+      "description": "Search for @typescript-eslint/no-unsafe-assignment errors and fix them by adding proper type assertions for test mocks, creating interfaces for complex objects, using type guards. Focus on parlant performance benchmark lines 895, 896 and similar unsafe any assignments. Target zero unsafe assignment violations.",
+      "category": "error",
+      "id": "error_1758150981693_yzg7f6mozyj",
+      "assigned_agent": "dev_session_1758150950941_1_general_9b245d91",
+      "started_at": "2025-09-17T23:23:22.817Z",
+      "claimed_by": "dev_session_1758150950941_1_general_9b245d91",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150950941_1_general_9b245d91",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:23:22.817Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T23:16:21.915Z",
+      "title": "Fix constant nullishness violations in bytebotd package",
+      "description": "Search for and fix no-constant-binary-expression errors where ?? has constant left-hand side. Review parlant performance benchmark service lines 762, 852, 901 and similar. Replace patterns like constantValue ?? fallback with direct assignment or proper conditional logic.",
+      "category": "error",
+      "id": "error_1758150981915_2jkf8fqcofo",
+      "assigned_agent": "dev_session_1758150948096_1_general_f340de28",
+      "started_at": "2025-09-17T23:17:26.376Z",
+      "claimed_by": "dev_session_1758150948096_1_general_f340de28",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150948096_1_general_f340de28",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:17:26.376Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T23:16:21.990Z",
+      "title": "Fix unsafe member access violations in bytebotd package",
+      "description": "Search for @typescript-eslint/no-unsafe-member-access errors. Add type guards, create proper interfaces, use safe property access patterns. Focus on parlant performance benchmark lines 895, 896 with [metric] access on any values. Target zero unsafe member access violations.",
+      "category": "error",
+      "id": "error_1758150981990_w104n64uco",
+      "assigned_agent": "dev_session_1758150947980_1_general_8e5c9231",
+      "started_at": "2025-09-17T23:23:35.105Z",
+      "claimed_by": "dev_session_1758150947980_1_general_8e5c9231",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150947980_1_general_8e5c9231",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:23:35.105Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T23:16:22.359Z",
+      "title": "Coordinate comprehensive ESLint violation sweep across bytebotd package",
+      "description": "Monitor and coordinate with other subagents to identify missed ESLint violations, apply systematic fixes for edge cases, ensure zero conflicts between agents, and achieve exactly 0 ESLint violations across entire bytebotd package with documented evidence",
+      "category": "error",
+      "id": "error_1758150982358_2mfdy003a0g",
+      "assigned_agent": "dev_session_1758150947542_1_general_d8b1ecbc",
+      "started_at": "2025-09-17T23:17:28.560Z",
+      "claimed_by": "dev_session_1758150947542_1_general_d8b1ecbc",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150947542_1_general_d8b1ecbc",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:17:28.560Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T23:16:22.389Z",
+      "title": "Fix explicit any type violations in bytebotd package",
+      "description": "Run ESLint to find all no-explicit-any violations in bytebotd package and replace any types with proper TypeScript types: unknown, Record<string, unknown>, specific interfaces, or function signatures. Focus on parlant performance benchmark and other high-violation files. Target zero explicit any violations.",
+      "category": "error",
+      "id": "error_1758150982389_45qxuy314ed",
+      "assigned_agent": "dev_session_1758150950927_1_general_06163e85",
+      "started_at": "2025-09-17T23:18:25.933Z",
+      "claimed_by": "dev_session_1758150950927_1_general_06163e85",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150950927_1_general_06163e85",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:18:25.933Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T23:16:22.418Z",
+      "title": "Zero tolerance ESLint validation - achieve 0 violations",
+      "description": "Run comprehensive ESLint check on bytebotd package and systematically fix all remaining violations to achieve exactly 0 problems",
+      "category": "error",
+      "id": "error_1758150982417_8pl6whc32as",
+      "assigned_agent": "dev_session_1758150950922_1_general_5b313793",
+      "started_at": "2025-09-17T23:17:08.031Z",
+      "claimed_by": "dev_session_1758150950922_1_general_5b313793",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150950922_1_general_5b313793",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:17:08.031Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -4817,6 +5053,300 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-17T21:24:20.777Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758145816022_1_general_87d690ef": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:50:16.023Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:50:16.023Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758145816466_1_general_065f8abd": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:50:16.467Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:50:16.467Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758145816892_1_general_3a1becec": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:50:16.893Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:50:16.893Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758145817398_1_general_8009b7c0": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:50:17.399Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:50:17.399Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758145817505_1_general_a9a314cc": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:50:17.506Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:50:17.506Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758150823805_1_general_85963c1e": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T23:13:43.806Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T23:13:43.806Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758150947542_1_general_d8b1ecbc": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T23:15:47.543Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T23:15:47.543Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758150947980_1_general_8e5c9231": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T23:15:47.981Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T23:15:47.981Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758150948096_1_general_f340de28": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T23:15:48.097Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T23:15:48.097Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758150950872_1_general_be80ed03": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T23:15:50.873Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T23:15:50.873Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758150950878_1_general_3a7a0575": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T23:15:50.879Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T23:15:50.879Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758150950922_1_general_5b313793": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T23:15:50.922Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T23:15:50.923Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758150950927_1_general_06163e85": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T23:15:50.928Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T23:15:50.928Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758150950941_1_general_9b245d91": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T23:15:50.942Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T23:15:50.942Z",
       "sessionId": null,
       "metadata": {}
     }

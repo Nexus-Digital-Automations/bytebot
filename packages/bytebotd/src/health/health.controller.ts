@@ -53,7 +53,7 @@ import {
   MetricsOperationType,
   HealthMetricsValidationResult,
 } from '../parlant/services/parlant-health-metrics-validation.service';
-import { MetricsService } from '@bytebot/shared';
+import { MetricsService } from '@bytebot/shared/dist/index-server';
 
 /**
  * Health monitoring controller providing system status endpoints with Parlant validation
@@ -143,8 +143,8 @@ export class HealthController {
       
       // Record metrics for health check
       try {
-        this.metricsService.recordHealthCheck('basic', true, responseTime);
-        this.metricsService.incrementCounter('health_requests_total', {
+        this.metricsService.recordHealthCheck('basic', { status: 'healthy', responseTime });
+        this.metricsService.incrementCounter('health_requests_total', 1, {
           endpoint: '/health',
           method: 'GET',
           status: 'success',
@@ -588,7 +588,7 @@ export class HealthController {
       const responseTime = Date.now() - startTime;
 
       // Record metrics endpoint access
-      this.metricsService.incrementCounter('prometheus_metrics_requests_total', {
+      this.metricsService.incrementCounter('prometheus_metrics_requests_total', 1, {
         service: 'bytebotd',
         user_id: user.id,
       });
@@ -614,7 +614,7 @@ export class HealthController {
         stack: error instanceof Error ? error.stack : undefined,
       });
 
-      this.metricsService.incrementCounter('prometheus_metrics_errors_total', {
+      this.metricsService.incrementCounter('prometheus_metrics_errors_total', 1, {
         service: 'bytebotd',
         user_id: user.id,
       });

@@ -153,7 +153,7 @@ export interface UserJourney {
 export interface ValidationStep {
   readonly functionName: string;
   readonly riskLevel: RiskLevel;
-  readonly parameters: Record<string, any>;
+  readonly parameters: Record<string, unknown>;
   readonly expectedResult: 'APPROVED' | 'DENIED' | 'ANY';
 }
 
@@ -743,7 +743,7 @@ export class ParlantPerformanceBenchmarkService {
         success: true,
         timestamp: Date.now(),
       });
-    } catch (error) {
+    } catch {
       const latency = performance.now() - startTime;
       
       results.push({
@@ -754,7 +754,7 @@ export class ParlantPerformanceBenchmarkService {
     }
   }
 
-  private async executeValidationRequest(request: ParlantValidationRequest): Promise<void> {
+  private async executeValidationRequest(_request: ParlantValidationRequest): Promise<void> {
     // Mock validation execution for benchmarking
     const delay = 50 + Math.random() * 100; // 50-150ms simulated processing
     await this.delay(delay);
@@ -768,7 +768,7 @@ export class ParlantPerformanceBenchmarkService {
   private createTestRequest(
     functionName: string = 'test_function',
     riskLevel: RiskLevel = RiskLevel.LOW,
-    parameters: Record<string, any> = {}
+    parameters: Record<string, unknown> = {}
   ): ParlantValidationRequest {
     return {
       functionName,
@@ -892,13 +892,13 @@ export class ParlantPerformanceBenchmarkService {
     
     // Check each critical metric
     for (const metric of this.regressionConfig.criticalMetrics) {
-      const baselineValue = (baseline as any)[metric];
-      const currentValue = (current as any)[metric];
+      const baselineValue = (baseline as Record<string, unknown>)[metric];
+      const currentValue = (current as Record<string, unknown>)[metric];
       
       if (typeof baselineValue === 'number' && typeof currentValue === 'number') {
         const change = (currentValue - baselineValue) / baselineValue;
         
-        if (metric === 'averageLatency' ?? metric === 'p95Latency' ?? metric === 'errorRate') {
+        if (metric === 'averageLatency' || metric === 'p95Latency' || metric === 'errorRate') {
           // Lower is better for these metrics
           if (change > tolerance) {
             const issue = `${metric} degraded: ${baselineValue.toFixed(2)} -> ${currentValue.toFixed(2)} (${(change * 100).toFixed(1)}% increase)`;

@@ -33,6 +33,7 @@ import {
   BasicHealthResponse,
   DetailedStatusResponse,
 } from '../health.service';
+import { MemoryInfo, ServiceStatusMap } from '../interfaces/health.interfaces';
 
 describe('HealthController', () => {
   let controller: HealthController;
@@ -207,7 +208,7 @@ describe('HealthController', () => {
 
       expect(result).toEqual({
         status: 'unhealthy',
-        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/),
+        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/) as unknown as string,
         error: 'Database connection failed',
       });
 
@@ -234,7 +235,7 @@ describe('HealthController', () => {
 
       expect(result).toEqual({
         status: 'unhealthy',
-        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/),
+        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/) as unknown as string,
         error: 'Unknown _error',
       });
 
@@ -255,19 +256,20 @@ describe('HealthController', () => {
 
       const result = await controller.getHealth();
 
-      // Validate response structure
-      expect(result).toMatchObject({
-        status: expect.stringMatching(/^(healthy|unhealthy)$/),
+      // Validate response structure with proper typing
+      const typedResult = result as BasicHealthResponse;
+      expect(typedResult).toMatchObject({
+        status: expect.stringMatching(/^(healthy|unhealthy)$/) as unknown as string,
         timestamp: expect.stringMatching(
           /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
-        )
+        ) as unknown as string
       });
       
-      // Validate numeric values separately to avoid unsafe assignment
-      expect(typeof result.uptime).toBe('number');
-      expect(typeof result.memory.used).toBe('number');
-      expect(typeof result.memory.free).toBe('number');
-      expect(typeof result.memory.total).toBe('number');
+      // Validate numeric values with proper typing
+      expect(typeof typedResult.uptime).toBe('number');
+      expect(typeof typedResult.memory.used).toBe('number');
+      expect(typeof typedResult.memory.free).toBe('number');
+      expect(typeof typedResult.memory.total).toBe('number');
 
       console.log(`[${testId}] Response format validation test completed`);
     });
@@ -396,7 +398,7 @@ describe('HealthController', () => {
 
       expect(result).toEqual({
         status: 'error',
-        timestamp: expect.stringMatching(/.*/),
+        timestamp: expect.stringMatching(/.*/) as string,
         error: 'Service monitoring failure',
         services: {},
       });
@@ -419,17 +421,17 @@ describe('HealthController', () => {
       const result = await controller.getDetailedStatus();
 
       expect(result).toMatchObject({
-        status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/),
+        status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/) as string,
         timestamp: expect.stringMatching(
           /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
-        ),
-        uptime: expect.toEqual(expect.any(Number)),
+        ) as string,
+        uptime: expect.any(Number) as number,
         memory: expect.objectContaining({
-          used: expect.toEqual(expect.any(Number)),
-          free: expect.toEqual(expect.any(Number)),
-          total: expect.toEqual(expect.any(Number)),
-          heapUsed: expect.toEqual(expect.any(Number)),
-          heapTotal: expect.toEqual(expect.any(Number)),
+          used: expect.any(Number) as number,
+          free: expect.any(Number) as number,
+          total: expect.any(Number) as number,
+          heapUsed: expect.any(Number) as number,
+          heapTotal: expect.any(Number) as number,
         }),
         services: expect.objectContaining({
           database: expect.stringMatching(/^(connected|disconnected|unknown)$/),
@@ -572,7 +574,7 @@ describe('HealthController', () => {
 
         expect(result).toMatchObject({
           status: 'unhealthy',
-          timestamp: expect.stringMatching(/.*/),
+          timestamp: expect.stringMatching(/.*/) as unknown as string,
           error: expect.stringMatching(/.*/),
         });
       }

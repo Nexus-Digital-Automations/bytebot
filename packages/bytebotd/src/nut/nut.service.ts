@@ -22,6 +22,18 @@ import {
   Button,
   FileType,
 } from '@nut-tree-fork/nut-js';
+
+// Define interfaces for nut-js configuration
+interface NutConfigurable {
+  config: {
+    autoDelayMs: number;
+    [key: string]: unknown;
+  };
+}
+
+// Type assertions for nut-js objects
+const typedMouse = mouse as unknown as NutConfigurable;
+const typedKeyboard = keyboard as unknown as NutConfigurable;
 import { spawn } from 'child_process';
 import * as path from 'path';
 
