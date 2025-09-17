@@ -383,7 +383,7 @@ export class ParlantEnhancedAuthService {
    */
   @ParlantValidation({
     mode: ValidationMode._INTERACTIVE,
-    approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
+    approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
     timeout: 30000,
     cacheable: true,
   })
@@ -394,7 +394,7 @@ export class ParlantEnhancedAuthService {
   @ConversationContext({
     topic: "User Authentication Validation",
     priority: ConversationPriority._HIGH,
-    requiredParticipants: [ParticipantRole.VALIDATOR],
+    requiredParticipants: [ParticipantRole._VALIDATOR],
   })
   async validateConversationalAuthentication(
     credentials: Record<string, unknown>,
@@ -495,7 +495,7 @@ export class ParlantEnhancedAuthService {
    */
   @ParlantValidation({
     mode: ValidationMode._INTERACTIVE,
-    approvalLevel: ApprovalLevel.DUAL_APPROVAL,
+    approvalLevel: ApprovalLevel._DUAL_APPROVAL,
     timeout: 120000,
   })
   @SecurityClassification({
@@ -505,7 +505,7 @@ export class ParlantEnhancedAuthService {
   @ConversationContext({
     topic: "High-Risk Authentication Validation",
     priority: ConversationPriority._CRITICAL,
-    requiredParticipants: [ParticipantRole.APPROVER, ParticipantRole.VALIDATOR],
+    requiredParticipants: [ParticipantRole._APPROVER, ParticipantRole._VALIDATOR],
   })
   async validateHighRiskAuthentication(
     credentials: Record<string, unknown>,
@@ -554,7 +554,7 @@ export class ParlantEnhancedAuthService {
    */
   @ParlantValidation({
     mode: ValidationMode._INTERACTIVE,
-    approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
+    approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
     timeout: 45000,
   })
   @SecurityClassification({
@@ -601,7 +601,7 @@ export class ParlantEnhancedAuthService {
       },
       validationParams: {
         mode: ValidationMode._INTERACTIVE,
-        approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
+        approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
         timeout: 45000,
         cacheable: false,
         rules: [],
@@ -938,7 +938,7 @@ export class ParlantEnhancedAuthService {
     baseRequest.validationParams = {
       ...baseRequest.validationParams,
       mode: ValidationMode._INTERACTIVE,
-      approvalLevel: ApprovalLevel.DUAL_APPROVAL,
+      approvalLevel: ApprovalLevel._DUAL_APPROVAL,
       timeout: 120000, // 2 minutes for high-risk scenarios
       cacheable: false, // Don't cache high-risk validations
     };
@@ -1010,13 +1010,13 @@ export class ParlantEnhancedAuthService {
         result.error = response.result.reasoning;
         break;
 
-      case ValidationDecision.CONDITIONAL_APPROVAL:
+      case ValidationDecision._CONDITIONAL_APPROVAL:
         result.requiredActions = this.mapRecommendationsToActions(
           response.result.recommendations,
         );
         break;
 
-      case ValidationDecision.REQUEST_MORE_INFO:
+      case ValidationDecision._REQUEST_MORE_INFO:
         result.requiredActions = [
           {
             type: RequiredActionType.SECURITY_QUESTION,
@@ -1100,11 +1100,11 @@ export class ParlantEnhancedAuthService {
     authContext: ConversationalAuthContext,
   ): ApprovalLevel {
     if (authContext.riskAssessment.riskLevel === RiskLevel._CRITICAL) {
-      return ApprovalLevel.DUAL_APPROVAL;
+      return ApprovalLevel._DUAL_APPROVAL;
     }
 
     if (authContext.securityContext.isPrivilegedAccount) {
-      return ApprovalLevel.SINGLE_APPROVAL;
+      return ApprovalLevel._SINGLE_APPROVAL;
     }
 
     return ApprovalLevel._AUTOMATIC;
