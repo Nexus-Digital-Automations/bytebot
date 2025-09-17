@@ -209,7 +209,9 @@ function ToolDetailsNormal({
             if (!isBlockWithInput(block)) {
               return "Invalid duration";
             }
-            const input = block.input;
+            // Type assertion to help TypeScript understand the block type
+            const typedBlock = block as ComputerToolUseContentBlock;
+            const input = typedBlock.input as Record<string, unknown>;
             const duration = input.duration;
             return typeof duration === "number"
               ? `${duration}ms`
@@ -222,10 +224,11 @@ function ToolDetailsNormal({
       {block !== null && hasCoordinates(block.input) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!hasCoordinates(block.input)) {
+            const typedBlock = block;
+            if (!hasCoordinates(typedBlock.input)) {
               return "Invalid coordinates";
             }
-            const coords = block.input.coordinates;
+            const coords = (typedBlock.input as { coordinates: Coordinates }).coordinates;
             return `${coords.x}, ${coords.y}`;
           })()}
         </p>
@@ -235,10 +238,11 @@ function ToolDetailsNormal({
       {block !== null && hasPathCoordinates(block.input) && (
         <p className={baseClasses}>
           {((): string => {
-            if (!hasPathCoordinates(block.input)) {
+            const typedBlock = block;
+            if (!hasPathCoordinates(typedBlock.input)) {
               return "Invalid path coordinates";
             }
-            const input = block.input;
+            const input = typedBlock.input as { path: Coordinates[] };
             const path = input.path;
             const firstPoint = path[0];
             const lastPoint = path[path.length - 1];
@@ -259,7 +263,9 @@ function ToolDetailsNormal({
             if (!isBlockWithInput(block)) {
               return "unknown 0";
             }
-            const input = block.input;
+            // Type assertion to help TypeScript understand the block type
+            const typedBlock = block as ComputerToolUseContentBlock;
+            const input = typedBlock.input as Record<string, unknown>;
             const direction = input.direction;
             const scrollCount = input.scrollCount;
 
@@ -282,7 +288,9 @@ function ToolDetailsNormal({
             if (!isBlockWithInput(block)) {
               return "Invalid file path";
             }
-            const input = block.input;
+            // Type assertion to help TypeScript understand the block type
+            const typedBlock = block as ComputerToolUseContentBlock;
+            const input = typedBlock.input as Record<string, unknown>;
             const path = input.path;
             return typeof path === "string" ? path : "Invalid file path";
           })()}

@@ -71,6 +71,14 @@ import {
 } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 
+// Parlant Integration for Conversational AI Validation
+import {
+  ParlantCritical,
+  ParlantSecure,
+  ParlantValidated,
+  SecurityLevel,
+} from '@bytebot/shared/server';
+
 // Authentication and Authorization Guards
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -286,6 +294,9 @@ export class BrowserUseController {
   @Post('tasks')
   @HttpCode(HttpStatus.CREATED)
   @Roles(UserRole.ADMIN, UserRole.OPERATOR)
+  @ParlantCritical(
+    'Create and execute browser automation task with specified parameters and security constraints',
+  )
   @ApiOperation({
     summary: 'Create and execute browser automation task',
     description:
@@ -434,6 +445,9 @@ export class BrowserUseController {
   @Post('tasks/:taskId/start')
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.ADMIN, UserRole.OPERATOR)
+  @ParlantCritical(
+    'Start execution of browser automation task with security validation and resource monitoring',
+  )
   @ApiOperation({
     summary: 'Start browser task execution',
     description:
@@ -517,6 +531,9 @@ export class BrowserUseController {
   @Post('sessions')
   @HttpCode(HttpStatus.CREATED)
   @Roles(UserRole.ADMIN, UserRole.OPERATOR)
+  @ParlantSecure(
+    'Create browser session with configuration and security profile settings',
+  )
   @ApiOperation({
     summary: 'Create browser session',
     description:
@@ -641,6 +658,13 @@ export class BrowserUseController {
   @Post('sessions/:sessionId/screenshot')
   @HttpCode(HttpStatus.CREATED)
   @Roles(UserRole.ADMIN, UserRole.OPERATOR)
+  @ParlantValidated({
+    description:
+      'Capture screenshot of browser session with privacy and data protection validation',
+    securityLevel: SecurityLevel._MEDIUM,
+    cacheable: false,
+    timeout: 10000,
+  })
   @ApiOperation({
     summary: 'Capture screenshot',
     description:
@@ -704,6 +728,9 @@ export class BrowserUseController {
   @Post('sessions/:sessionId/navigate')
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.ADMIN, UserRole.OPERATOR)
+  @ParlantCritical(
+    'Navigate browser session to specified URL with security validation and domain restrictions',
+  )
   @ApiOperation({
     summary: 'Navigate to URL',
     description: 'Navigate the browser session to a specific URL.',
@@ -729,6 +756,9 @@ export class BrowserUseController {
   @Post('sessions/:sessionId/click')
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.ADMIN, UserRole.OPERATOR)
+  @ParlantCritical(
+    'Click DOM element with security validation to prevent malicious interactions and unauthorized actions',
+  )
   @ApiOperation({
     summary: 'Click element',
     description:
@@ -757,6 +787,9 @@ export class BrowserUseController {
   @Post('sessions/:sessionId/type')
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.ADMIN, UserRole.OPERATOR)
+  @ParlantCritical(
+    'Type text into input elements with security validation to prevent data injection and credential harvesting',
+  )
   @ApiOperation({
     summary: 'Type text',
     description: 'Type text into an input element identified by selector.',
@@ -840,6 +873,9 @@ export class BrowserUseController {
   @Post('sessions/:sessionId/forms/fill')
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.ADMIN, UserRole.OPERATOR)
+  @ParlantCritical(
+    'Fill form fields with provided data including security validation for sensitive information',
+  )
   @ApiOperation({
     summary: 'Fill form',
     description: 'Automatically fill a form with provided field data.',
@@ -865,6 +901,9 @@ export class BrowserUseController {
   @Post('sessions/:sessionId/forms/submit')
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.ADMIN, UserRole.OPERATOR)
+  @ParlantCritical(
+    'Submit form with validation and confirmation to prevent unauthorized data submission and transactions',
+  )
   @ApiOperation({
     summary: 'Submit form',
     description: 'Submit a form after validation and optional filling.',
@@ -901,6 +940,9 @@ export class BrowserUseController {
   @Post('sessions/:sessionId/extract')
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER)
+  @ParlantSecure(
+    'Extract structured data from browser session with privacy and security validation',
+  )
   @ApiOperation({
     summary: 'Extract structured data',
     description:

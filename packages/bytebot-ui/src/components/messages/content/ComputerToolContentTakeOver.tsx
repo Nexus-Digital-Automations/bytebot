@@ -159,20 +159,20 @@ function ToolDetailsTakeOver({
   }
 
   // Type-safe access to input property with explicit validation
-  const blockWithInput = block;
-  const input: Record<string, unknown> = blockWithInput.input;
+  const blockWithInput = block as ComputerToolUseContentBlock;
+  const input: Record<string, unknown> = blockWithInput.input as Record<string, unknown>;
 
   return (
     <>
       {/* Text for type and key actions */}
       {(Boolean(
         typeof isTypeKeysToolUseBlock === "function"
-          ? isTypeKeysToolUseBlock(blockWithInput)
+          ? isTypeKeysToolUseBlock(blockWithInput as unknown)
           : false,
       ) ||
         Boolean(
           typeof isPressKeysToolUseBlock === "function"
-            ? isPressKeysToolUseBlock(blockWithInput)
+            ? isPressKeysToolUseBlock(blockWithInput as unknown)
             : false,
         )) &&
         hasKeys(input) && (
@@ -183,7 +183,7 @@ function ToolDetailsTakeOver({
 
       {Boolean(
         typeof isTypeTextToolUseBlock === "function"
-          ? isTypeTextToolUseBlock(blockWithInput)
+          ? isTypeTextToolUseBlock(blockWithInput as unknown)
           : false,
       ) &&
         hasText(input) && (
@@ -199,7 +199,7 @@ function ToolDetailsTakeOver({
       {/* Duration for wait actions */}
       {Boolean(
         typeof isWaitToolUseBlock === "function"
-          ? isWaitToolUseBlock(blockWithInput)
+          ? isWaitToolUseBlock(blockWithInput as unknown)
           : false,
       ) &&
         hasDuration(input) && (

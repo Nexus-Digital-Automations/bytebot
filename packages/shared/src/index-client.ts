@@ -12,9 +12,19 @@ export * from "./types/messageContent.types";
 export * from "./types/computerAction.types";
 export * from "./types/agent.types";
 export * from "./types/security.types";
+export * from "./types/parlant.types";
+export * from "./types/parlant-integration.types";
 
 // Export enums directly (these have runtime exports)
 export { MessageContentType, Role } from "./types/messageContent.types";
+export { 
+  ConversationState, 
+  ConversationPriority, 
+  MessageType, 
+  ValidationDecision, 
+  ParticipantType,
+  ParticipantRole 
+} from "./types/parlant.types";
 
 // Type-only exports are handled by `export * from` above
 // Individual type exports are commented out to prevent Next.js warnings

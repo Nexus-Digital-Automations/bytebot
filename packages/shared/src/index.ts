@@ -9,6 +9,10 @@
 // Export client-safe components by default
 export * from "./index-client";
 
+// Export parlant types directly for easier access
+export * from "./types/parlant.types";
+export * from "./types/parlant-integration.types";
+
 // Note: For server-specific components (NestJS interceptors, services, etc.)
 // use the server entry point:
 // import { CriticalAreaSanitizationInterceptor } from "@bytebot/shared/server"

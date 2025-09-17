@@ -543,7 +543,7 @@ export const useParlantWebSocket = (
       socket.on('parlant:conversation_status', (status: ConversationStatusUpdate) => {
         logDebug('Conversation status update', { conversationId: status.conversationId, state: status.state }, 'useParlantWebSocket');
         setConversationState(status.state);
-        if (currentConversation && currentConversation.conversationId === status.conversationId) {
+        if (typeof currentConversation?.conversationId === 'string' && currentConversation.conversationId === status.conversationId) {
           const updatedConversation = {
             ...currentConversation,
             state: status.state,
@@ -585,7 +585,7 @@ export const useParlantWebSocket = (
       setConnectionError('Failed to initialize connection');
       errorCount.current++;
     }
-  }, [config, onConnected, onDisconnected, onReconnecting, onError, onMessageReceived, onValidationResponse, onConversationUpdate, onParticipantJoined, onParticipantLeft, onMessageError, currentConversation]);
+  }, [config, onConnected, onDisconnected, onReconnecting, onError, onMessageReceived, onValidationResponse, onConversationUpdate, onParticipantJoined, onParticipantLeft, onMessageError, currentConversation, processOfflineQueue, startHeartbeat, stopHeartbeat, updatePerformanceMetrics]);
   
   const disconnect = useCallback(() => {
     logInfo('Disconnecting from Parlant WebSocket', null, 'useParlantWebSocket');
@@ -608,7 +608,7 @@ export const useParlantWebSocket = (
     });
     pendingValidations.current.clear();
     
-  }, []);
+  }, [stopHeartbeat, stopMetricsTracking]);
   
   const reconnect = useCallback(async () => {
     const RECONNECT_DELAY_MS = 1000;
@@ -681,7 +681,7 @@ export const useParlantWebSocket = (
         return;
       }
       socketRef.current.emit('parlant:join_conversation', conversationId, (response: { success: boolean; error?: string; conversation?: ParlantConversationContext; messages?: ConversationMessage[]; participants?: ConversationParticipant[] }) => {
-        if (response.success && response.conversation) {
+        if (Boolean(response.success) && Boolean(response.conversation)) {
           setCurrentConversation(response.conversation);
           setConversationState(response.conversation.state);
           setMessages(response.messages ?? []);
@@ -697,7 +697,7 @@ export const useParlantWebSocket = (
   }, [isConnected]);
   
   const leaveConversation = useCallback(() => {
-    if (!currentConversation || !socketRef.current) {
+    if (currentConversation === null || socketRef.current === null) {
       return;
     }
     
@@ -744,7 +744,7 @@ export const useParlantWebSocket = (
     content: string,
     type: MessageType = MessageType.TEXT
   ): Promise<void> => {
-    if (!currentConversation) {
+    if (currentConversation === null) {
       throw new Error('No active conversation');
     }
     
@@ -753,9 +753,9 @@ export const useParlantWebSocket = (
       conversationId: currentConversation.conversationId,
       sender: {
         id: 'current-user', // TODO: Get from auth context
-        type: 'HUMAN' as any,
+        type: 'HUMAN',
         name: 'User', // TODO: Get from auth context
-        role: 'REQUESTOR' as any,
+        role: 'REQUESTOR',
         capabilities: [],
         joinedAt: new Date(),
       },
@@ -908,9 +908,12 @@ export const useParlantWebSocket = (
     });
   }, [isConnected]);
   
+  // Define default limits for conversation history
+  const DEFAULT_HISTORY_LIMIT = 100; // Default history limit for conversation messages
+  
   const getConversationHistory = useCallback(async (
     conversationId: string,
-    limit = 100 // Default history limit
+    limit = DEFAULT_HISTORY_LIMIT
   ): Promise<ConversationMessage[]> => {
     if (!isConnected || !socketRef.current) {
       throw new Error('Not connected to Parlant WebSocket');
@@ -1019,9 +1022,11 @@ export const useParlantWebSocket = (
     const messagesToProcess = [...offlineQueue];
     setOfflineQueue([]);
     
+    // Process messages sequentially to avoid overwhelming the server
     for (const offlineMessage of messagesToProcess) {
       try {
-        await sendMessage(offlineMessage.message.content, offlineMessage.message.type);
+        // Using await in loop is intentional for sequential processing
+        await sendMessage(offlineMessage.message.content, offlineMessage.message.type); // eslint-disable-line no-await-in-loop
         logDebug('Offline message sent successfully', { messageId: offlineMessage.id }, 'useParlantWebSocket');
       } catch (error) {
         logError('Failed to send offline message', error, 'useParlantWebSocket');

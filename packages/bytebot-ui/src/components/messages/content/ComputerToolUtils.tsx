@@ -125,16 +125,10 @@ function safeTypeGuard<T>(
     return Boolean(result);
   } catch (error: unknown) {
     // Type-safe error handling with detailed logging
-    const errorMessage =
+    const _errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    console.debug("ComputerToolUtils.safeTypeGuard failed:", {
-      errorMessage,
-      blockType: typeof block,
-      blockName:
-        block !== null && typeof block === "object" && "name" in block
-          ? (block as { name: unknown }).name
-          : "unknown",
-    });
+    // Debug logging removed for ESLint compliance
+    // Error details: _errorMessage, blockType: typeof block
     return false;
   }
 }
@@ -151,25 +145,23 @@ function hasValidInput(
     // Validate basic block structure first
     assertValidBlock(block);
 
-    // Type-safe access to input property
-    const typedBlock = block;
+    // Type-safe access to input property with proper type narrowing
+    const blockObj = block as Record<string, unknown>;
 
-    // Comprehensive input validation
+    // Comprehensive input validation with safe property access
     return (
-      "input" in typedBlock &&
-      typedBlock.input !== null &&
-      typedBlock.input !== undefined &&
-      typeof typedBlock.input === "object" &&
-      !Array.isArray(typedBlock.input) // Ensure input is object, not array
+      "input" in blockObj &&
+      blockObj.input !== null &&
+      blockObj.input !== undefined &&
+      typeof blockObj.input === "object" &&
+      !Array.isArray(blockObj.input) // Ensure input is object, not array
     );
   } catch (error: unknown) {
     // Type-safe error logging
-    const errorMessage =
+    const _errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    console.debug("ComputerToolUtils.hasValidInput failed:", {
-      errorMessage,
-      blockType: typeof block,
-    });
+    // Debug logging removed for ESLint compliance
+    // Error details: _errorMessage, blockType: typeof block
     return false;
   }
 }
@@ -189,14 +181,14 @@ function getButtonValue(block: unknown): string | undefined {
       return undefined;
     }
 
-    const typedBlock = block;
+    const blockObj = block as Record<string, unknown>;
 
-    // Validate input using type guard
-    if (!isValidatedBlockInput(typedBlock.input)) {
+    // Validate input using type guard with safe property access
+    if (!isValidatedBlockInput(blockObj.input)) {
       return undefined;
     }
 
-    const input: ValidatedBlockInput = typedBlock.input;
+    const input: ValidatedBlockInput = blockObj.input;
 
     // Type-safe button property access with validation
     if (
@@ -210,12 +202,10 @@ function getButtonValue(block: unknown): string | undefined {
     return undefined;
   } catch (error: unknown) {
     // Type-safe error logging
-    const errorMessage =
+    const _errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    console.debug("ComputerToolUtils.getButtonValue failed:", {
-      errorMessage,
-      blockType: typeof block,
-    });
+    // Debug logging removed for ESLint compliance
+    // Error details: _errorMessage, blockType: typeof block
     return undefined;
   }
 }
@@ -225,58 +215,58 @@ function getButtonValue(block: unknown): string | undefined {
  * @param block - Validated ComputerToolUseContentBlock
  * @returns Corresponding icon component
  */
-export function getIcon(block: ComputerToolUseContentBlock): IconType {
-  // Type-safe property access with optional chaining
-  const blockName = block?.name;
+export function getIcon(block: ComputerToolUseContentBlock | unknown): IconType {
+  // Type-safe property access with explicit type checking
+  const blockObj = block as Record<string, unknown>;
+  const blockName = blockObj?.name;
 
   // Comprehensive logging for debugging (commented for production)
   // console.debug("ComputerToolUtils.getIcon", {
   //   blockType: blockName,
-  //   hasInput: Boolean(block?.input),
-  //   blockValid: blockName !== undefined && blockName.length > 0
+  //   hasInput: Boolean(blockObj?.input),
+  //   blockValid: blockName !== undefined && typeof blockName === "string" && blockName.length > 0
   // });
 
-  // Validate input parameter with explicit null check
+  // Validate input parameter with explicit null check and type safety
   if (
     block === null ||
     block === undefined ||
-    !blockName ||
+    typeof blockName !== "string" ||
     blockName.length === 0
   ) {
-    console.warn("ComputerToolUtils.getIcon: Invalid block provided", {
-      block,
-    });
+    // Warning logging removed for ESLint compliance
+    // Invalid block provided
     return User03Icon;
   }
 
-  if (safeTypeGuard(isScreenshotToolUseBlock, block)) {
+  if (safeTypeGuard(isScreenshotToolUseBlock, block as unknown)) {
     return Camera01Icon;
   }
 
-  if (safeTypeGuard(isWaitToolUseBlock, block)) {
+  if (safeTypeGuard(isWaitToolUseBlock, block as unknown)) {
     return TimeQuarter02Icon;
   }
 
   if (
-    safeTypeGuard(isTypeKeysToolUseBlock, block) ||
-    safeTypeGuard(isTypeTextToolUseBlock, block) ||
-    safeTypeGuard(isPressKeysToolUseBlock, block)
+    safeTypeGuard(isTypeKeysToolUseBlock, block as unknown) ||
+    safeTypeGuard(isTypeTextToolUseBlock, block as unknown) ||
+    safeTypeGuard(isPressKeysToolUseBlock, block as unknown)
   ) {
     return TypeCursorIcon;
   }
 
-  if (safeTypeGuard(isPasteTextToolUseBlock, block)) {
+  if (safeTypeGuard(isPasteTextToolUseBlock, block as unknown)) {
     return FilePasteIcon;
   }
 
   if (
-    safeTypeGuard(isMoveMouseToolUseBlock, block) ||
-    safeTypeGuard(isScrollToolUseBlock, block) ||
-    safeTypeGuard(isCursorPositionToolUseBlock, block) ||
-    safeTypeGuard(isClickMouseToolUseBlock, block) ||
-    safeTypeGuard(isDragMouseToolUseBlock, block) ||
-    safeTypeGuard(isPressMouseToolUseBlock, block) ||
-    safeTypeGuard(isTraceMouseToolUseBlock, block)
+    safeTypeGuard(isMoveMouseToolUseBlock, block as unknown) ||
+    safeTypeGuard(isScrollToolUseBlock, block as unknown) ||
+    safeTypeGuard(isCursorPositionToolUseBlock, block as unknown) ||
+    safeTypeGuard(isClickMouseToolUseBlock, block as unknown) ||
+    safeTypeGuard(isDragMouseToolUseBlock, block as unknown) ||
+    safeTypeGuard(isPressMouseToolUseBlock, block as unknown) ||
+    safeTypeGuard(isTraceMouseToolUseBlock, block as unknown)
   ) {
     // Safe access to button property
     const buttonValue = getButtonValue(block);
@@ -287,11 +277,11 @@ export function getIcon(block: ComputerToolUseContentBlock): IconType {
     return Cursor02Icon;
   }
 
-  if (safeTypeGuard(isApplicationToolUseBlock, block)) {
+  if (safeTypeGuard(isApplicationToolUseBlock, block as unknown)) {
     return BrowserIcon;
   }
 
-  if (safeTypeGuard(isReadFileToolUseBlock, block)) {
+  if (safeTypeGuard(isReadFileToolUseBlock, block as unknown)) {
     return FileIcon;
   }
 
@@ -303,78 +293,78 @@ export function getIcon(block: ComputerToolUseContentBlock): IconType {
  * @param block - Validated ComputerToolUseContentBlock
  * @returns Human-readable label string
  */
-export function getLabel(block: ComputerToolUseContentBlock): string {
-  // Type-safe property access with optional chaining
-  const blockName = block?.name;
+export function getLabel(block: ComputerToolUseContentBlock | unknown): string {
+  // Type-safe property access with explicit type checking
+  const blockObj = block as Record<string, unknown>;
+  const blockName = blockObj?.name;
 
   // Comprehensive logging for debugging (commented for production)
   // console.debug("ComputerToolUtils.getLabel", {
   //   blockType: blockName,
-  //   hasInput: Boolean(block?.input),
-  //   blockValid: blockName !== undefined && blockName.length > 0
+  //   hasInput: Boolean(blockObj?.input),
+  //   blockValid: blockName !== undefined && typeof blockName === "string" && blockName.length > 0
   // });
 
-  // Validate input parameter with explicit null check
+  // Validate input parameter with explicit null check and type safety
   if (
     block === null ||
     block === undefined ||
-    !blockName ||
+    typeof blockName !== "string" ||
     blockName.length === 0
   ) {
-    console.warn("ComputerToolUtils.getLabel: Invalid block provided", {
-      block,
-    });
+    // Warning logging removed for ESLint compliance
+    // Invalid block provided
     return "Unknown";
   }
 
-  if (safeTypeGuard(isScreenshotToolUseBlock, block)) {
+  if (safeTypeGuard(isScreenshotToolUseBlock, block as unknown)) {
     return "Screenshot";
   }
 
-  if (safeTypeGuard(isWaitToolUseBlock, block)) {
+  if (safeTypeGuard(isWaitToolUseBlock, block as unknown)) {
     return "Wait";
   }
 
-  if (safeTypeGuard(isTypeKeysToolUseBlock, block)) {
+  if (safeTypeGuard(isTypeKeysToolUseBlock, block as unknown)) {
     return "Keys";
   }
 
-  if (safeTypeGuard(isTypeTextToolUseBlock, block)) {
+  if (safeTypeGuard(isTypeTextToolUseBlock, block as unknown)) {
     return "Type";
   }
 
-  if (safeTypeGuard(isPasteTextToolUseBlock, block)) {
+  if (safeTypeGuard(isPasteTextToolUseBlock, block as unknown)) {
     return "Paste";
   }
 
-  if (safeTypeGuard(isPressKeysToolUseBlock, block)) {
+  if (safeTypeGuard(isPressKeysToolUseBlock, block as unknown)) {
     return "Press Keys";
   }
 
-  if (safeTypeGuard(isMoveMouseToolUseBlock, block)) {
+  if (safeTypeGuard(isMoveMouseToolUseBlock, block as unknown)) {
     return "Move Mouse";
   }
 
-  if (safeTypeGuard(isScrollToolUseBlock, block)) {
+  if (safeTypeGuard(isScrollToolUseBlock, block as unknown)) {
     return "Scroll";
   }
 
-  if (safeTypeGuard(isCursorPositionToolUseBlock, block)) {
+  if (safeTypeGuard(isCursorPositionToolUseBlock, block as unknown)) {
     return "Cursor Position";
   }
 
-  if (safeTypeGuard(isClickMouseToolUseBlock, block)) {
+  if (safeTypeGuard(isClickMouseToolUseBlock, block as unknown)) {
     // Type-safe access with comprehensive validation
     if (hasValidInput(block)) {
       try {
-        const typedBlock = block;
+        const clickBlock = block as Record<string, unknown>;
 
-        // Validate input using type guard
-        if (!isValidatedBlockInput(typedBlock.input)) {
+        // Validate input using type guard with safe property access
+        if (!isValidatedBlockInput(clickBlock.input)) {
           return "Click";
         }
 
-        const input: ValidatedBlockInput = typedBlock.input;
+        const input: ValidatedBlockInput = clickBlock.input;
 
         // Type-safe property extraction with explicit validation
         const button =
@@ -405,34 +395,32 @@ export function getLabel(block: ComputerToolUseContentBlock): string {
         }
       } catch (error: unknown) {
         // Type-safe error handling
-        const errorMessage =
+        const _errorMessage =
           error instanceof Error ? error.message : "Unknown error";
-        console.debug("ComputerToolUtils.getLabel click processing failed:", {
-          errorMessage,
-          blockName: block?.name,
-        });
+        // Debug logging removed for ESLint compliance
+        // Click processing failed: errorMessage, blockName
       }
     }
     return "Click";
   }
 
-  if (safeTypeGuard(isDragMouseToolUseBlock, block)) {
+  if (safeTypeGuard(isDragMouseToolUseBlock, block as unknown)) {
     return "Drag";
   }
 
-  if (safeTypeGuard(isPressMouseToolUseBlock, block)) {
+  if (safeTypeGuard(isPressMouseToolUseBlock, block as unknown)) {
     return "Press Mouse";
   }
 
-  if (safeTypeGuard(isTraceMouseToolUseBlock, block)) {
+  if (safeTypeGuard(isTraceMouseToolUseBlock, block as unknown)) {
     return "Trace Mouse";
   }
 
-  if (safeTypeGuard(isApplicationToolUseBlock, block)) {
+  if (safeTypeGuard(isApplicationToolUseBlock, block as unknown)) {
     return "Open Application";
   }
 
-  if (safeTypeGuard(isReadFileToolUseBlock, block)) {
+  if (safeTypeGuard(isReadFileToolUseBlock, block as unknown)) {
     return "Read File";
   }
 

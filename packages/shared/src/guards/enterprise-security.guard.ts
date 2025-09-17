@@ -1147,7 +1147,7 @@ export class EnterpriseSecurityGuard implements CanActivate {
       decision: AuthorizationDecision._ALLOW,
       reasoning: "Authorization granted",
       requiredPermissions: [],
-      userPermissions: request.user?.permissions?.map((p) => p.name) || [],
+      userPermissions: _request.user?.permissions?.map((p) => p.name) || [],
       permissionGaps: [],
       conditionalApprovals: [],
       authorizedAt: new Date(),

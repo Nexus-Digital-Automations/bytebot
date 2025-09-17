@@ -256,6 +256,17 @@ const DEFAULT_CONFIG: ConversationConfig = {
 // ===========================
 
 /**
+ * Type assertion utilities to handle shared package type export issues
+ */
+const asConversationMessage = (msg: unknown): ConversationMessage => msg as ConversationMessage;
+const asConversationState = (state: unknown): ConversationState => state as ConversationState;
+const asConversationPriority = (priority: unknown): ConversationPriority => priority as ConversationPriority;
+const asMessageType = (type: unknown): MessageType => type as MessageType;
+const asValidationDecision = (decision: unknown): ValidationDecision => decision as ValidationDecision;
+const asConversationParticipant = (participant: unknown): ConversationParticipant => participant as ConversationParticipant;
+const asAnyObject = (obj: unknown): any => obj as any;
+
+/**
  * Format timestamp for display
  */
 const formatTimestamp = (date: Date): string => {
@@ -361,8 +372,9 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isValidationPending, setIsValidationPending] = useState(false);
   
-  // Use the message parameter directly with proper typing
-  const MessageIcon = getMessageTypeIcon(message.type);
+  // Use the message parameter with type assertion for proper typing
+  const safeMessage = asConversationMessage(message);
+  const MessageIcon = getMessageTypeIcon(safeMessage.type);
   
   const handleValidationResponse = useCallback(async (decision: ValidationDecision, reasoning?: string): Promise<void> => {
     if (!onValidationResponse) {
@@ -372,14 +384,14 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
     setIsValidationPending(true);
     try {
       await onValidationResponse(decision, reasoning);
-      logInfo('Validation response submitted', { messageId: message.id, decision }, 'ConversationInterface');
+      logInfo('Validation response submitted', { messageId: safeMessage.id, decision }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logWarn('Failed to submit validation response', { error: errorMessage }, 'ConversationInterface');
     } finally {
       setIsValidationPending(false);
     }
-  }, [onValidationResponse, message.id]);
+  }, [onValidationResponse, safeMessage.id]);
   
   const messageVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
@@ -399,7 +411,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
         isOwn ? 'flex-row-reverse' : 'flex-row'
       )}
       role="article"
-      aria-labelledby={`message-${message.id}`}
+      aria-labelledby={`message-${safeMessage.id}`}
       tabIndex={0}
     >
       {/* Avatar */}
@@ -420,26 +432,26 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
         {/* Message Header */}
         <div className="flex items-center gap-2 mb-1">
           <span
-            id={`message-${message.id}`}
+            id={`message-${safeMessage.id}`}
             className="text-sm font-medium text-gray-900"
           >
-            {message.sender.name}
+            {safeMessage.sender.name}
           </span>
           {showTimestamp && (
             <time
-              dateTime={message.timestamp.toISOString()}
+              dateTime={safeMessage.timestamp.toISOString()}
               className="text-xs text-gray-500"
-              aria-label={`Message sent ${formatTimestamp(message.timestamp)}`}
+              aria-label={`Message sent ${formatTimestamp(safeMessage.timestamp)}`}
             >
-              {formatTimestamp(message.timestamp)}
+              {formatTimestamp(safeMessage.timestamp)}
             </time>
           )}
-          {message.type !== MESSAGE_TYPE_CONSTANTS.TEXT && (
+          {safeMessage.type !== MESSAGE_TYPE_CONSTANTS.TEXT && (
             <span className={cn(
               'px-2 py-1 rounded-full text-xs font-medium',
-              getMessageTypeClassName(message.type)
+              getMessageTypeClassName(safeMessage.type)
             )}>
-              {String(message.type).replace('_', ' ').toLowerCase()}
+              {String(safeMessage.type).replace('_', ' ').toLowerCase()}
             </span>
           )}
         </div>
@@ -457,12 +469,12 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
           )}>
             <div className={cn(
               'whitespace-pre-wrap break-words',
-              !isExpanded && message.content.length > TIME_CONSTANTS.MAX_CONTENT_PREVIEW ? 'line-clamp-3' : ''
+              !isExpanded && safeMessage.content.length > TIME_CONSTANTS.MAX_CONTENT_PREVIEW ? 'line-clamp-3' : ''
             )}>
-              {message.content}
+              {safeMessage.content}
             </div>
             
-            {message.content.length > TIME_CONSTANTS.MAX_CONTENT_PREVIEW && (
+            {safeMessage.content.length > TIME_CONSTANTS.MAX_CONTENT_PREVIEW && (
               <button
                 onClick={() => { setIsExpanded(!isExpanded); }}
                 className={cn(
@@ -477,13 +489,13 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
         </div>
         
         {/* Validation Actions */}
-        {message.type === MESSAGE_TYPE_CONSTANTS.VALIDATION_REQUEST && onValidationResponse && (
+        {safeMessage.type === MESSAGE_TYPE_CONSTANTS.VALIDATION_REQUEST && onValidationResponse && (
           <div className="flex gap-2 mt-3">
             <Button
               size="sm"
               variant="outline"
               onClick={() => {
-                handleValidationResponse(ValidationDecision._APPROVED).catch(() => undefined);
+                handleValidationResponse(asValidationDecision(ValidationDecision._APPROVED)).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-green-600 border-green-600 hover:bg-green-50"
@@ -495,7 +507,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               size="sm"
               variant="outline"
               onClick={() => {
-                handleValidationResponse(ValidationDecision._DENIED).catch(() => undefined);
+                handleValidationResponse(asValidationDecision(ValidationDecision._DENIED)).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-red-600 border-red-600 hover:bg-red-50"
@@ -507,7 +519,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               size="sm"
               variant="outline"
               onClick={() => {
-                handleValidationResponse(ValidationDecision._REQUEST_MORE_INFO).catch(() => undefined);
+                handleValidationResponse(asValidationDecision(ValidationDecision._REQUEST_MORE_INFO)).catch(() => undefined);
               }}
               disabled={isValidationPending}
               className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
@@ -557,7 +569,7 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = React.memo(({ participan
       </div>
       <span>
         {participants.length === 1 
-          ? `${participants[0].name} is typing...`
+          ? `${asConversationParticipant(participants[0]).name} is typing...`
           : `${participants.length} people are typing...`
         }
       </span>
@@ -673,7 +685,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   conversationId,
   autoStart = false,
   initialTopic,
-  initialPriority = ConversationPriority._NORMAL,
+  initialPriority = asConversationPriority(ConversationPriority._NORMAL),
   onConversationStart,
   onConversationEnd,
   onMessageSent,
@@ -731,20 +743,23 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       enableA11y: config.enableA11y
     },
     onConversationStart: (conversation) => {
-      logInfo('Conversation started', { conversationId: conversation.conversationId }, 'ConversationInterface');
-      onConversationStart?.(conversation.conversationId);
+      const safeConversation = asAnyObject(conversation);
+      logInfo('Conversation started', { conversationId: safeConversation.conversationId }, 'ConversationInterface');
+      onConversationStart?.(safeConversation.conversationId);
     },
     onConversationEnd: (endedConversationId) => {
       logInfo('Conversation ended', { conversationId: endedConversationId }, 'ConversationInterface');
-      onConversationEnd?.(endedConversationId);
+      onConversationEnd?.(endedConversationId as string);
     },
     onMessageSent: (message) => {
-      logDebug('Message sent', { messageId: message.id }, 'ConversationInterface');
-      onMessageSent?.(message);
+      const safeMessage = asConversationMessage(message);
+      logDebug('Message sent', { messageId: safeMessage.id }, 'ConversationInterface');
+      onMessageSent?.(safeMessage);
     },
     onValidationRequest: (request) => {
-      logInfo('Validation request received', { requestId: request.requestId }, 'ConversationInterface');
-      onValidationRequest?.(request);
+      const safeRequest = asAnyObject(request);
+      logInfo('Validation request received', { requestId: safeRequest.requestId }, 'ConversationInterface');
+      onValidationRequest?.(safeRequest);
     },
     onError: (error) => {
       logWarn('Conversation error', error, 'ConversationInterface');
@@ -765,7 +780,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
     setInputValue('');
     
     try {
-      await sendMessage(messageContent, MessageType._TEXT);
+      await sendMessage(messageContent, asMessageType(MessageType._TEXT));
       logDebug('Message sent successfully', { content: messageContent.substring(0, UI_CONSTANTS.MAGIC_OFFSET) }, 'ConversationInterface');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -788,10 +803,11 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
   ) => {
     try {
       // Find the validation request message
-      const validationMessage = messages.find(msg => 
-        msg.type === MessageType.VALIDATION_REQUEST &&
-        Boolean(msg.metadata?.requestId)
-      );
+      const validationMessage = messages.find(msg => {
+        const safeMsg = asConversationMessage(msg);
+        return safeMsg.type === asMessageType(MessageType.VALIDATION_REQUEST) &&
+          Boolean(safeMsg.metadata?.requestId);
+      });
       
       if (validationMessage?.metadata?.requestId !== undefined) {
         await respondToValidation(

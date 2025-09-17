@@ -241,12 +241,12 @@ export function ParlantValidatedClass(classOptions: {
   defaultSecurityLevel?: SecurityLevel;
   enableValidation?: boolean;
 }) {
-  return function <T extends new (..._args: unknown[]) => object>(
-    constructor: T,
-  ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return function <T extends new (..._args: any[]) => object>(constructor: T) {
     return class extends constructor {
-      constructor(..._args: unknown[]) {
-        super(..._args);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      constructor(...args: any[]) {
+        super(...args);
 
         if (classOptions.enableValidation !== false) {
           // Auto-wrap all methods with Parlant validation

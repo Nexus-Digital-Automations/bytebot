@@ -494,11 +494,13 @@ class ConversationStorage {
       
       request.onerror = (): void => { reject(request.error); };
       request.onsuccess = (): void => {
-        let results = request.result ?? [];
+        let results = (request.result as ConversationSnapshot[]) ?? [];
         
-        // Apply filters
+        // Apply filters with type-safe access
         if (options.states && options.states.length > 0) {
-          results = results.filter(s => options.states?.includes(s.conversation.state) ?? false);
+          results = results.filter(s => 
+            options.states?.includes(s.conversation.state) ?? false
+          );
         }
         
         if (options.priorities && options.priorities.length > 0) {
@@ -514,15 +516,19 @@ class ConversationStorage {
           );
         }
         
-        if (options.query && options.query.length > 0) {
+        if (typeof options.query === 'string' && options.query.length > 0) {
           const query = options.query.toLowerCase();
-          results = results.filter(s =>
-            s.contextSummary.summary.toLowerCase().includes(query) ||
-            s.contextSummary.topics.some(topic => topic.toLowerCase().includes(query))
-          );
+          results = results.filter(s => (
+            (typeof s.contextSummary?.summary === 'string' && 
+             s.contextSummary.summary.toLowerCase().includes(query)) ||
+            (Array.isArray(s.contextSummary?.topics) &&
+             s.contextSummary.topics.some(topic => 
+               typeof topic === 'string' && topic.toLowerCase().includes(query)
+             ))
+          ));
         }
         
-        // Sort results
+        // Sort results with type-safe access
         results.sort((a, b) => {
           switch (options.sortBy) {
             case 'date':
@@ -534,16 +540,17 @@ class ConversationStorage {
                 ? b.lastActivity.getTime() - a.lastActivity.getTime()
                 : a.lastActivity.getTime() - b.lastActivity.getTime();
             case 'priority': {
-              const priorityOrder = {
+              // Define priority ordering constants to avoid magic numbers
+              const PRIORITY_ORDER = {
                 [ConversationPriority.EMERGENCY]: 5,
                 [ConversationPriority.CRITICAL]: 4,
                 [ConversationPriority.HIGH]: 3,
                 [ConversationPriority.NORMAL]: 2,
                 [ConversationPriority.LOW]: 1
-              };
+              } as const;
               return options.sortDirection === 'desc'
-                ? priorityOrder[b.conversation.metadata.priority] - priorityOrder[a.conversation.metadata.priority]
-                : priorityOrder[a.conversation.metadata.priority] - priorityOrder[b.conversation.metadata.priority];
+                ? PRIORITY_ORDER[b.conversation.metadata.priority] - PRIORITY_ORDER[a.conversation.metadata.priority]
+                : PRIORITY_ORDER[a.conversation.metadata.priority] - PRIORITY_ORDER[b.conversation.metadata.priority];
             }
             case 'relevance':
             case undefined:
@@ -552,10 +559,10 @@ class ConversationStorage {
           }
         });
         
-        // Apply pagination
-        if (options.offset || options.limit) {
-          const start = options.offset || 0;
-          const end = options.limit ? start + options.limit : undefined;
+        // Apply pagination with explicit null handling
+        if (typeof options.offset === 'number' || typeof options.limit === 'number') {
+          const start = options.offset ?? 0;
+          const end = typeof options.limit === 'number' ? start + options.limit : undefined;
           results = results.slice(start, end);
         }
         
@@ -642,11 +649,14 @@ const ConversationAnalyticsEngine = {
       ? messages.reduce((sum, msg) => sum + msg.content.length, 0) / messages.length
       : 0;
     
+    // Define timing constants for response time analysis
+    const MAX_RESPONSE_TIME_ANALYSIS_MS = 300000; // 5 minutes in milliseconds
+    
     // Calculate response times
     const responseTimes: number[] = [];
     for (let i = 1; i < messages.length; i++) {
       const timeDiff = messages[i].timestamp.getTime() - messages[i - 1].timestamp.getTime();
-      if (timeDiff > 0 && timeDiff < 300000) { // Ignore gaps > 5 minutes
+      if (timeDiff > 0 && timeDiff < MAX_RESPONSE_TIME_ANALYSIS_MS) { // Ignore gaps > 5 minutes
         responseTimes.push(timeDiff);
       }
     }
@@ -683,8 +693,11 @@ const ConversationAnalyticsEngine = {
     const validationResponses = messages.filter(msg => 
       msg.type === MessageType.VALIDATION_RESPONSE
     ).length;
+    
+    // Define percentage constant
+    const PERCENTAGE_MULTIPLIER = 100;
     const resolutionRate = validationRequests > 0 
-      ? (validationResponses / validationRequests) * 100 
+      ? (validationResponses / validationRequests) * PERCENTAGE_MULTIPLIER 
       : 0;
     
     return {
@@ -722,8 +735,9 @@ const ContextPredictionEngine = {
     // Recommend participants
     const recommendedParticipants = this.predictParticipants(context, analytics);
     
-    // Predict response time
-    const expectedResponseTime = analytics.avgResponseTime * 1.1; // Slight buffer
+    // Predict response time with buffer
+    const RESPONSE_TIME_BUFFER_MULTIPLIER = 1.1; // 10% buffer for response time predictions
+    const expectedResponseTime = analytics.avgResponseTime * RESPONSE_TIME_BUFFER_MULTIPLIER;
     
     // Calculate confidence
     const confidence = this.calculatePredictionConfidence(recentMessages, analytics);
@@ -788,9 +802,10 @@ const ContextPredictionEngine = {
     const topics: string[] = [];
     
     // Get current trending topics
+    const MAX_PREDICTED_TOPICS = 3; // Limit to top 3 trending topics
     const sortedTopics = Object.entries(topicDistribution)
       .sort(([,a], [,b]) => b - a)
-      .slice(0, 3)
+      .slice(0, MAX_PREDICTED_TOPICS)
       .map(([topic]) => topic);
     
     topics.push(...sortedTopics);
@@ -853,10 +868,14 @@ const ContextPredictionEngine = {
     topics: string[],
     confidence: number
   ): string {
+    // Define confidence level thresholds
+    const HIGH_CONFIDENCE_THRESHOLD = 0.8;   // 80% confidence for high level
+    const MODERATE_CONFIDENCE_THRESHOLD = 0.5; // 50% confidence for moderate level
+    
     let confidenceLevel: string;
-    if (confidence > 0.8) {
+    if (confidence > HIGH_CONFIDENCE_THRESHOLD) {
       confidenceLevel = 'high';
-    } else if (confidence > 0.5) {
+    } else if (confidence > MODERATE_CONFIDENCE_THRESHOLD) {
       confidenceLevel = 'moderate';
     } else {
       confidenceLevel = 'low';
@@ -1176,7 +1195,10 @@ export const useConversationContext = ({
     }
   }, [onError]);
   
-  const getRecentContexts = useCallback(async (limit = 10): Promise<ConversationSnapshot[]> => {
+  // Define default limits for context retrieval
+  const DEFAULT_RECENT_CONTEXTS_LIMIT = 10;
+  
+  const getRecentContexts = useCallback(async (limit = DEFAULT_RECENT_CONTEXTS_LIMIT): Promise<ConversationSnapshot[]> => {
     return searchContexts({
       sortBy: 'activity',
       sortDirection: 'desc',

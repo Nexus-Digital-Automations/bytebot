@@ -1650,10 +1650,134 @@
       "updated_at": "2025-09-16T19:57:28.414Z",
       "archived_at": "2025-09-16T19:57:28.418Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-16T19:18:04.048Z",
+      "title": "Fix ValidationWorkflowVisualization ESLint errors",
+      "description": "Fix 20 ESLint errors in ValidationWorkflowVisualization.tsx component while preserving validation workflow visualization functionality",
+      "category": "error",
+      "id": "error_1758050284048_2wg0jjd69ui",
+      "assigned_agent": "dev_session_1758052595178_1_general_f97738e6",
+      "started_at": "2025-09-16T19:57:10.906Z",
+      "claimed_by": "dev_session_1758052595178_1_general_f97738e6",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758052595178_1_general_f97738e6",
+          "role": "primary",
+          "assignedAt": "2025-09-16T19:57:10.906Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-17T04:10:40.877Z",
+      "updated_at": "2025-09-17T04:10:40.877Z",
+      "archived_at": "2025-09-17T04:10:40.898Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T04:12:12.651Z",
+      "title": "CRITICAL: Fix 200+ ESLint violations across bytebot-ui package",
+      "description": "Fix extensive TypeScript ESLint violations across multiple components: ConversationInterface.tsx (116 warnings - unsafe member access on error types), ComputerToolContentNormal.tsx (40+ unsafe assignments), ComputerToolContentTakeOver.tsx (15+ unsafe operations), ComputerToolUtils.tsx (console statements, unsafe member access), and other files. These violations break zero tolerance policy and prevent enterprise-grade TypeScript compliance. Focus on unsafe member access, strict boolean expressions, magic numbers, and explicit return types.",
+      "category": "linter-error",
+      "priority": "normal",
+      "id": "linter-error_1758082332651_k2sitfuq2dl",
+      "assigned_agent": "dev_session_1758082873424_1_general_40349b65",
+      "started_at": "2025-09-17T04:22:00.345Z",
+      "claimed_by": "dev_session_1758082873424_1_general_40349b65",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758082873424_1_general_40349b65",
+          "role": "primary",
+          "assignedAt": "2025-09-17T04:22:00.345Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-17T04:27:56.397Z",
+      "updated_at": "2025-09-17T04:27:56.397Z",
+      "archived_at": "2025-09-17T04:27:56.400Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T06:01:03.865Z",
+      "title": "Continue ESLint improvements: Target next high-violation file for 30%+ reduction",
+      "description": "Continue systematic ESLint violation reduction initiative. Successfully reduced useParlantWebSocket.ts from 125→88 violations (30% reduction). Now target the next highest violation file for similar improvement. Focus on: unsafe member access, strict boolean expressions, unnecessary type assertions, explicit any types. Apply proven patterns from previous successes.",
+      "category": "error",
+      "priority": "high",
+      "id": "error_1758088863865_wavojsnr01s",
+      "assigned_agent": "dev_session_1758088836649_1_general_e62d6642",
+      "started_at": "2025-09-17T06:01:25.300Z",
+      "claimed_by": "dev_session_1758088836649_1_general_e62d6642",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758088836649_1_general_e62d6642",
+          "role": "primary",
+          "assignedAt": "2025-09-17T06:01:25.300Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-17T06:21:04.535Z",
+      "updated_at": "2025-09-17T06:21:04.535Z",
+      "archived_at": "2025-09-17T06:21:04.538Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T06:24:01.888Z",
+      "title": "Continue systematic ESLint improvements: Target next highest violation file",
+      "description": "Continue proven ESLint violation reduction methodology. Previous successes: useParlantWebSocket.ts (125→88, 30% reduction), ConversationInterface.tsx (95→77, 18.9% reduction). Now identify and target the next highest violation file for similar systematic improvement. Focus on: unsafe member access, strict boolean expressions, unnecessary type assertions, explicit any types. Target 20%+ violation reduction using established patterns.",
+      "category": "error",
+      "priority": "high",
+      "id": "error_1758090241888_imssg46mwf",
+      "assigned_agent": "dev_session_1758090182980_1_general_4c26c591",
+      "started_at": "2025-09-17T06:24:25.383Z",
+      "claimed_by": "dev_session_1758090182980_1_general_4c26c591",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758090182980_1_general_4c26c591",
+          "role": "primary",
+          "assignedAt": "2025-09-17T06:24:25.383Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-17T06:50:53.227Z",
+      "updated_at": "2025-09-17T06:50:53.228Z",
+      "archived_at": "2025-09-17T06:50:53.238Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T07:09:24.229Z",
+      "title": "Fix TypeScript unsafe access violations in ConversationInterface.tsx",
+      "description": "Fix 14+ ESLint TypeScript violations in ConversationInterface.tsx including: unsafe member access on error typed values, unsafe assignments, unsafe arguments to Date parameters, confusing void expressions. Focus on proper type guards and null checks for error objects. Improve type safety while maintaining functionality.",
+      "category": "error",
+      "priority": "high",
+      "id": "error_1758092964229_4jfwbuh6iiv",
+      "assigned_agent": "dev_session_1758092803214_1_general_98980db2",
+      "started_at": "2025-09-17T07:09:41.594Z",
+      "claimed_by": "dev_session_1758092803214_1_general_98980db2",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758092803214_1_general_98980db2",
+          "role": "primary",
+          "assignedAt": "2025-09-17T07:09:41.594Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-17T07:17:02.931Z",
+      "updated_at": "2025-09-17T07:17:02.931Z",
+      "archived_at": "2025-09-17T07:17:02.933Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 44,
+  "total_completed": 49,
   "last_completion": "2025-09-11T08:31:32.558Z",
   "created_at": "2025-09-11T06:47:03.082Z",
-  "last_archived": "2025-09-16T19:57:28.418Z"
+  "last_archived": "2025-09-17T07:17:02.933Z"
 }

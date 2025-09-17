@@ -33,6 +33,7 @@ import {
   CurrentUser,
   ByteBotdUser,
 } from '../auth/decorators/roles.decorator';
+import { ParlantCritical, ParlantSecure, SecurityLevel } from '@bytebot/shared/server';
 import { ComputerUseService } from './computer-use.service';
 import { AsyncJobService } from './async-job.service';
 import { ComputerActionValidationPipe } from './dto/computer-action-validation.pipe';
@@ -259,6 +260,7 @@ export class ComputerUseController {
     status: 503,
     description: 'Job queue full or service temporarily unavailable',
   })
+  @ParlantCritical('Submits computer automation actions for async execution - requires validation for system security and user safety')
   async submitAsyncAction(
     @Body(new ComputerActionValidationPipe())
     params: ComputerActionDto & AsyncActionSubmissionDto,
@@ -397,6 +399,7 @@ export class ComputerUseController {
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
+  @ParlantSecure('Retrieves status of async computer automation jobs', SecurityLevel._MEDIUM)
   async getJobStatus(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
@@ -505,6 +508,7 @@ export class ComputerUseController {
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
+  @ParlantSecure('Retrieves results of completed computer automation jobs', SecurityLevel._MEDIUM) 
   async getJobResult(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
@@ -764,6 +768,7 @@ export class ComputerUseController {
     status: 429,
     description: 'Rate limit exceeded',
   })
+  @ParlantCritical('Executes immediate computer automation actions including mouse, keyboard, file operations, and system control')
   async action(
     @Body(new ComputerActionValidationPipe()) params: ComputerActionDto,
     @CurrentUser() user: ByteBotdUser,

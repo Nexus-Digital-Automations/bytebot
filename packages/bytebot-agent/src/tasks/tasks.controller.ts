@@ -35,6 +35,11 @@ import { GOOGLE_MODELS } from '../google/google.constants';
 import { BytebotAgentModel } from 'src/agent/agent.types';
 import { VersionInterceptor } from '../common/versioning/version.interceptor';
 import {
+  ParlantSecure,
+  ParlantValidated,
+  SecurityLevel,
+} from '@bytebot/shared/server';
+import {
   ForVersion,
   MultiVersion,
   SUPPORTED_API_VERSIONS,
@@ -131,6 +136,9 @@ export class TasksController {
   @RequirePermission(Permission.TASK_WRITE)
   @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @HttpCode(HttpStatus.CREATED)
+  @ParlantSecure(
+    'Create AI automation task with validation for security and resource constraints',
+  )
   @ApiOperation({
     summary: 'Create a new task',
     description:
@@ -209,6 +217,13 @@ export class TasksController {
   @Get()
   @Authenticated()
   @MultiVersion([SUPPORTED_API_VERSIONS.V1, SUPPORTED_API_VERSIONS.V2])
+  @ParlantValidated({
+    description:
+      'Retrieve task list with filtering and pagination controls for data access validation',
+    securityLevel: SecurityLevel._MEDIUM,
+    cacheable: true,
+    cacheTtl: 300000,
+  })
   @ApiOperation({
     summary: 'Get all tasks',
     description:
@@ -546,6 +561,9 @@ export class TasksController {
   @Delete(':id')
   @OperatorOrAdmin()
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ParlantSecure(
+    'Delete AI automation task with validation for data protection and audit requirements',
+  )
   async delete(@Param('id') id: string): Promise<void> {
     await this.tasksService.delete(id);
   }
@@ -553,6 +571,9 @@ export class TasksController {
   @Post(':id/takeover')
   @OperatorOrAdmin()
   @HttpCode(HttpStatus.OK)
+  @ParlantSecure(
+    'Take control of AI automation task with security validation for unauthorized access prevention',
+  )
   async takeOver(@Param('id') taskId: string): Promise<Task> {
     return this.tasksService.takeOver(taskId);
   }
@@ -567,6 +588,12 @@ export class TasksController {
   @Post(':id/cancel')
   @OperatorOrAdmin()
   @HttpCode(HttpStatus.OK)
+  @ParlantValidated({
+    description:
+      'Cancel AI automation task execution with validation for operation safety and resource cleanup',
+    securityLevel: SecurityLevel._MEDIUM,
+    cacheable: false,
+  })
   async cancel(@Param('id') taskId: string): Promise<Task> {
     return this.tasksService.cancel(taskId);
   }

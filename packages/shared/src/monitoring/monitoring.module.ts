@@ -21,6 +21,8 @@ import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MetricsService } from './metrics.service';
 import { MonitoringController } from './monitoring.controller';
+import { ParlantMonitoringService } from './parlant-monitoring.service';
+import { ParlantMonitoringController } from './parlant-monitoring.controller';
 
 /**
  * Global monitoring module for local deployment
@@ -34,16 +36,22 @@ import { MonitoringController } from './monitoring.controller';
   ],
   providers: [
     MetricsService,
+    ParlantMonitoringService,
   ],
   controllers: [
     MonitoringController,
+    ParlantMonitoringController,
   ],
   exports: [
     MetricsService,
+    ParlantMonitoringService,
   ],
 })
 export class MonitoringModule {
-  constructor(private readonly metricsService: MetricsService) {
+  constructor(
+    private readonly metricsService: MetricsService,
+    private readonly parlantMonitoringService: ParlantMonitoringService,
+  ) {
     // Initialize monitoring on module load
     this.initializeMonitoring();
   }
@@ -65,5 +73,18 @@ export class MonitoringModule {
       platform: process.platform,
       arch: process.arch,
     });
+
+    // Initialize Parlant conversational monitoring
+    this.metricsService.incrementCounter('parlant_monitoring_initialized', 1, {
+      module: 'parlant-monitoring',
+      timestamp: new Date().toISOString(),
+      features: 'conversational-analytics,real-time-insights,anomaly-detection',
+    });
+
+    console.log('🤖 Parlant Conversational Monitoring initialized');
+    console.log('   ✅ Natural language query interface active');
+    console.log('   ✅ Real-time conversational dashboard available');
+    console.log('   ✅ Intelligent anomaly detection enabled');
+    console.log('   ✅ Performance analytics with explanations ready');
   }
 }

@@ -364,6 +364,28 @@ interface ValidationWorkflowVisualizationProps {
 }
 
 // ===========================
+// CONSTANTS
+// ===========================
+
+/** Time constants in milliseconds */
+const TIME_CONSTANTS = {
+  VALIDATION_STEP_DURATION: 1000,
+  DEFAULT_TIMEOUT: 30000,
+  ONE_MINUTE: 60000
+} as const;
+
+/** Workflow constants */
+const WORKFLOW_CONSTANTS = {
+  EFFICIENCY_SCALE: 100,
+  MAX_PERCENTAGE: 100,
+  MIN_PARTICIPANTS_FOR_DUAL: 2,
+  DEFAULT_SLA_PERCENTAGE: 90,
+  PARTICIPANT_DISPLAY_LIMIT: 3,
+  MOCK_NETWORK_LATENCY: 50,
+  SLA_WARNING_THRESHOLD: 0.9
+} as const;
+
+// ===========================
 // DEFAULT CONFIGURATION
 // ===========================
 
@@ -388,6 +410,8 @@ const DEFAULT_CONFIG: ValidationWorkflowConfig = {
  * Generate workflow steps from validation request
  */
 const generateWorkflowSteps = (request: ParlantValidationRequest): WorkflowStep[] => {
+  // Type assertion to help TypeScript understand the correct type
+  const typedRequest = request;
   const steps: WorkflowStep[] = [];
   
   // Initial validation step
@@ -399,15 +423,15 @@ const generateWorkflowSteps = (request: ParlantValidationRequest): WorkflowStep[
     type: 'validation',
     requiredParticipants: [],
     currentParticipants: [],
-    startTime: request.timestamp,
-    endTime: new Date(request.timestamp.getTime() + 1000),
-    duration: 1000,
+    startTime: typedRequest.timestamp,
+    endTime: new Date(typedRequest.timestamp.getTime() + TIME_CONSTANTS.VALIDATION_STEP_DURATION),
+    duration: TIME_CONSTANTS.VALIDATION_STEP_DURATION,
     metadata: { automated: true },
     dependencies: []
   });
   
   // Security analysis step
-  if (request.functionContext.securityLevel !== FunctionSecurityLevel.PUBLIC) {
+  if (typedRequest.functionContext.securityLevel !== FunctionSecurityLevel.PUBLIC) {
     steps.push({
       id: 'security-analysis',
       name: 'Security Analysis',
@@ -418,15 +442,15 @@ const generateWorkflowSteps = (request: ParlantValidationRequest): WorkflowStep[
       currentParticipants: [],
       startTime: new Date(),
       metadata: { 
-        securityLevel: request.functionContext.securityLevel,
-        riskLevel: request.functionContext.riskLevel 
+        securityLevel: typedRequest.functionContext.securityLevel,
+        riskLevel: typedRequest.functionContext.riskLevel 
       },
       dependencies: ['initial-validation']
     });
   }
   
   // Human approval step
-  if (request.validationParams.approvalLevel !== ApprovalLevel.AUTOMATIC) {
+  if (typedRequest.validationParams.approvalLevel !== ApprovalLevel.AUTOMATIC) {
     steps.push({
       id: 'human-approval',
       name: 'Human Approval',
@@ -435,13 +459,13 @@ const generateWorkflowSteps = (request: ParlantValidationRequest): WorkflowStep[
       type: 'approval',
       requiredParticipants: [],
       currentParticipants: [],
-      metadata: { approvalLevel: request.validationParams.approvalLevel },
-      dependencies: request.functionContext.securityLevel !== FunctionSecurityLevel.PUBLIC 
+      metadata: { approvalLevel: typedRequest.validationParams.approvalLevel },
+      dependencies: typedRequest.functionContext.securityLevel !== FunctionSecurityLevel.PUBLIC 
         ? ['security-analysis'] 
         : ['initial-validation'],
       approvalRequirements: {
-        level: request.validationParams.approvalLevel,
-        minimumApprovers: request.validationParams.approvalLevel === ApprovalLevel.DUAL_APPROVAL ? 2 : 1,
+        level: typedRequest.validationParams.approvalLevel,
+        minimumApprovers: typedRequest.validationParams.approvalLevel === ApprovalLevel.DUAL_APPROVAL ? WORKFLOW_CONSTANTS.MIN_PARTICIPANTS_FOR_DUAL : 1,
         requiredRoles: [ParticipantRole.APPROVER]
       }
     });
@@ -457,11 +481,11 @@ const generateWorkflowSteps = (request: ParlantValidationRequest): WorkflowStep[
     requiredParticipants: [],
     currentParticipants: [],
     metadata: {},
-    dependencies: (() => {
-      if (request.validationParams.approvalLevel !== ApprovalLevel.AUTOMATIC) {
+    dependencies: ((): string[] => {
+      if (typedRequest.validationParams.approvalLevel !== ApprovalLevel.AUTOMATIC) {
         return ['human-approval'];
       }
-      if (request.functionContext.securityLevel !== FunctionSecurityLevel.PUBLIC) {
+      if (typedRequest.functionContext.securityLevel !== FunctionSecurityLevel.PUBLIC) {
         return ['security-analysis'];
       }
       return ['initial-validation'];
@@ -476,19 +500,19 @@ const generateWorkflowSteps = (request: ParlantValidationRequest): WorkflowStep[
  */
 const calculateWorkflowMetrics = (workflow: ValidationWorkflow): WorkflowMetrics => {
   const completedSteps = workflow.steps.filter(step => 
-    step.status === WorkflowStepStatus.COMPLETED && step.duration
+    step.status === WorkflowStepStatus.COMPLETED && (step.duration !== undefined && step.duration > 0)
   );
   
-  const totalProcessingTime = workflow.totalDuration || 
+  const totalProcessingTime = workflow.totalDuration ?? 
     (workflow.endTime ? workflow.endTime.getTime() - workflow.startTime.getTime() : 0);
   
   const averageStepDuration = completedSteps.length > 0
-    ? completedSteps.reduce((sum, step) => sum + (step.duration || 0), 0) / completedSteps.length
+    ? completedSteps.reduce((sum, step) => sum + (step.duration ?? 0), 0) / completedSteps.length
     : 0;
   
   const participantResponseTimes: Record<string, number> = {};
   workflow.participantTimeline.forEach(activity => {
-    if (activity.type === 'responded' && activity.participant) {
+    if (activity.type === 'responded' && activity.participant !== undefined && activity.participant !== null) {
       participantResponseTimes[activity.participant.id] = 
         activity.timestamp.getTime() - workflow.startTime.getTime();
     }
@@ -496,12 +520,12 @@ const calculateWorkflowMetrics = (workflow: ValidationWorkflow): WorkflowMetrics
   
   const bottleneckStep = completedSteps.length > 0
     ? completedSteps.reduce((max, step) => 
-        (step.duration || 0) > (max.duration || 0) ? step : max
+        (step.duration ?? 0) > (max.duration ?? 0) ? step : max
       ).id
     : undefined;
   
-  const efficiencyScore = Math.min(100, Math.max(0, 
-    100 - (totalProcessingTime / (workflow.sla.targetDuration || 30000)) * 100
+  const efficiencyScore = Math.min(WORKFLOW_CONSTANTS.MAX_PERCENTAGE, Math.max(0, 
+    WORKFLOW_CONSTANTS.EFFICIENCY_SCALE - (totalProcessingTime / (workflow.sla.targetDuration ?? TIME_CONSTANTS.DEFAULT_TIMEOUT)) * WORKFLOW_CONSTANTS.EFFICIENCY_SCALE
   ));
   
   return {
@@ -511,7 +535,7 @@ const calculateWorkflowMetrics = (workflow: ValidationWorkflow): WorkflowMetrics
     bottleneckStep,
     efficiencyScore,
     ruleProcessingTime: {},
-    networkLatency: 50 // Mock value
+    networkLatency: WORKFLOW_CONSTANTS.MOCK_NETWORK_LATENCY
   };
 };
 
@@ -563,12 +587,12 @@ const getStepStatusIcon = (status: WorkflowStepStatus): typeof CheckmarkCircle02
  * Format duration
  */
 const formatDuration = (milliseconds: number): string => {
-  if (milliseconds < 1000) {
+  if (milliseconds < TIME_CONSTANTS.VALIDATION_STEP_DURATION) {
     return `${milliseconds}ms`;
-  } else if (milliseconds < 60000) {
-    return `${Math.round(milliseconds / 1000)}s`;
+  } else if (milliseconds < TIME_CONSTANTS.ONE_MINUTE) {
+    return `${Math.round(milliseconds / TIME_CONSTANTS.VALIDATION_STEP_DURATION)}s`;
   } 
-    return `${Math.round(milliseconds / 60000)}m`;
+    return `${Math.round(milliseconds / TIME_CONSTANTS.ONE_MINUTE)}m`;
   
 };
 
@@ -644,7 +668,7 @@ const WorkflowStepComponent: React.FC<{
             {/* Participants */}
             {step.currentParticipants.length > 0 && (
               <div className="flex -space-x-1">
-                {step.currentParticipants.slice(0, 3).map((participant) => (
+                {step.currentParticipants.slice(0, WORKFLOW_CONSTANTS.PARTICIPANT_DISPLAY_LIMIT).map((participant) => (
                   <div
                     key={participant.id}
                     className="w-6 h-6 bg-gray-300 rounded-full border-2 border-white flex items-center justify-center"
@@ -653,10 +677,10 @@ const WorkflowStepComponent: React.FC<{
                     <HugeiconsIcon icon={UserIcon} className="w-3 h-3 text-gray-600" />
                   </div>
                 ))}
-                {step.currentParticipants.length > 3 && (
+                {step.currentParticipants.length > WORKFLOW_CONSTANTS.PARTICIPANT_DISPLAY_LIMIT && (
                   <div className="w-6 h-6 bg-gray-100 rounded-full border-2 border-white flex items-center justify-center">
                     <span className="text-xs text-gray-600">
-                      +{step.currentParticipants.length - 3}
+                      +{step.currentParticipants.length - WORKFLOW_CONSTANTS.PARTICIPANT_DISPLAY_LIMIT}
                     </span>
                   </div>
                 )}
@@ -702,7 +726,7 @@ const SLATracker: React.FC<{
   sla: WorkflowSLA;
   className?: string;
 }> = ({ sla, className }) => {
-  const getSLAColor = () => {
+  const getSLAColor = (): string => {
     switch (sla.status) {
       case 'on_track':
         return 'text-green-600';
@@ -715,7 +739,7 @@ const SLATracker: React.FC<{
     }
   };
   
-  const getSLAIcon = () => {
+  const getSLAIcon = (): typeof CheckmarkCircle02Icon => {
     switch (sla.status) {
       case 'on_track':
         return CheckmarkCircle02Icon;
@@ -852,7 +876,7 @@ const MetricsDashboard: React.FC<{
           </div>
         </div>
         
-        {metrics.bottleneckStep && (
+        {(metrics.bottleneckStep !== undefined && metrics.bottleneckStep !== null && metrics.bottleneckStep !== '') && (
           <div className="mt-4 pt-3 border-t">
             <div className="text-xs text-gray-500">Bottleneck:</div>
             <div className="text-sm font-medium text-orange-600">
@@ -935,16 +959,16 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
       startTime: new Date(),
       metrics: calculateWorkflowMetrics({} as ValidationWorkflow),
       sla: {
-        expectedCompletion: new Date(Date.now() + (request.timeout || 30000)),
-        targetDuration: request.timeout || 30000,
+        expectedCompletion: new Date(Date.now() + (typedRequest.timeout ?? TIME_CONSTANTS.DEFAULT_TIMEOUT)),
+        targetDuration: typedRequest.timeout ?? TIME_CONSTANTS.DEFAULT_TIMEOUT,
         progressPercentage: 0,
         status: 'on_track',
-        timeRemaining: request.timeout || 30000,
+        timeRemaining: typedRequest.timeout ?? TIME_CONSTANTS.DEFAULT_TIMEOUT,
         escalationTriggers: [
           {
             id: 'time_exceeded',
             condition: 'time_exceeded',
-            threshold: 0.9,
+            threshold: WORKFLOW_CONSTANTS.SLA_WARNING_THRESHOLD,
             action: 'notify_manager',
             triggered: false
           }
@@ -1104,7 +1128,7 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
     let unsubscribe: (() => void) | undefined;
     
     if (config.enableRealTime) {
-      unsubscribe = subscribeToValidationUpdates((update) => {
+      unsubscribe = subscribeToValidationUpdates((update): void => {
         updateWorkflowFromUpdate(update);
       });
     }
@@ -1119,7 +1143,7 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
   // Set up refresh timer
   useEffect(() => {
     if (config.refreshInterval > 0 && isPlaying) {
-      refreshTimer.current = setInterval(() => {
+      refreshTimer.current = setInterval((): void => {
         // Simulate workflow updates for demo
         if (workflowRef.current && workflowRef.current.overallStatus === WorkflowStepStatus.IN_PROGRESS) {
           const randomUpdate = {
@@ -1142,7 +1166,7 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
   // RENDER HELPERS
   // ===========================
   
-  const renderStepsView = () => {
+  const renderStepsView = (): React.ReactNode => {
     if (!workflow) {return null;}
     
     return (
@@ -1200,7 +1224,7 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
     );
   };
   
-  const renderTimelineView = () => {
+  const renderTimelineView = (): React.ReactNode => {
     if (!workflow) {return null;}
     
     return (
@@ -1244,7 +1268,7 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
     );
   };
   
-  const renderParticipantsView = () => {
+  const renderParticipantsView = (): React.ReactNode => {
     if (!workflow) {return null;}
     
     const allParticipants = new Map<string, ConversationParticipant>();

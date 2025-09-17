@@ -493,12 +493,12 @@ export class ParlantEnhancedRBACGuard
   })
   @SecurityClassification({
     securityLevel: FunctionSecurityLevel._RESTRICTED,
-    riskLevel: RiskLevel.HIGH,
+    riskLevel: RiskLevel._HIGH,
   })
   @ConversationContext({
     topic: "Authorization Request Validation",
-    priority: ConversationPriority.HIGH,
-    requiredParticipants: [ParticipantRole.APPROVER],
+    priority: ConversationPriority._HIGH,
+    requiredParticipants: [ParticipantRole._APPROVER],
   })
   async performConversationalAuthorization(
     authContext: ConversationalAuthorizationContext,
@@ -532,7 +532,7 @@ export class ParlantEnhancedRBACGuard
 
       // Step 3: Perform Parlant validation
       const validationResponse =
-        await this.parlantService.validateFunctionExecution(validationRequest);
+        await this._parlantService.validateFunctionExecution(validationRequest);
 
       // Step 4: Process validation result
       const result = this.processAuthorizationValidationResponse(
@@ -579,17 +579,20 @@ export class ParlantEnhancedRBACGuard
    */
   @ParlantValidation({
     mode: ValidationMode._INTERACTIVE,
-    approvalLevel: ApprovalLevel.DUAL_APPROVAL,
+    approvalLevel: ApprovalLevel._DUAL_APPROVAL,
     timeout: 120000,
   })
   @SecurityClassification({
-    securityLevel: FunctionSecurityLevel.SECRET,
-    riskLevel: RiskLevel.CRITICAL,
+    securityLevel: FunctionSecurityLevel._SECRET,
+    riskLevel: RiskLevel._CRITICAL,
   })
   @ConversationContext({
     topic: "High-Risk Authorization Validation",
-    priority: ConversationPriority.CRITICAL,
-    requiredParticipants: [ParticipantRole.APPROVER, ParticipantRole.VALIDATOR],
+    priority: ConversationPriority._CRITICAL,
+    requiredParticipants: [
+      ParticipantRole.APPROVER,
+      ParticipantRole._VALIDATOR,
+    ],
   })
   async performHighRiskAuthorization(
     authContext: ConversationalAuthorizationContext,
@@ -611,10 +614,10 @@ export class ParlantEnhancedRBACGuard
     );
 
     const validationResponse =
-      await this.parlantService.validateFunctionExecution(validationRequest);
+      await this._parlantService.validateFunctionExecution(validationRequest);
 
     // Additional security measures for high-risk authorization
-    if (validationResponse.result.decision === ValidationDecision.APPROVED) {
+    if (validationResponse.result.decision === ValidationDecision._APPROVED) {
       await this.implementAdditionalSecurityMeasures(authContext, operationId);
     }
 
@@ -694,12 +697,12 @@ export class ParlantEnhancedRBACGuard
       cacheStrategy: this.determineCacheStrategy(riskAssessment),
       performanceRequirements: [
         {
-          type: PerformanceRequirementType.RESPONSE_TIME,
+          type: PerformanceRequirementType._RESPONSE_TIME,
           target: 500,
           maximum: 1000,
         },
         {
-          type: PerformanceRequirementType.CACHE_HIT_RATE,
+          type: PerformanceRequirementType._CACHE_HIT_RATE,
           target: 85,
           maximum: 100,
         },
@@ -735,7 +738,7 @@ export class ParlantEnhancedRBACGuard
     // Check for privilege escalation
     if (this.isPrivilegeEscalation(user, rbacMetadata)) {
       riskFactors.push({
-        type: AuthorizationRiskType.PRIVILEGE_ESCALATION,
+        type: AuthorizationRiskType._PRIVILEGE_ESCALATION,
         contribution: 35,
         description: "Operation requires privilege escalation",
         critical: true,
@@ -745,7 +748,7 @@ export class ParlantEnhancedRBACGuard
     // Check for administrative operations
     if (rbacMetadata.adminOnly) {
       riskFactors.push({
-        type: AuthorizationRiskType.ADMIN_OPERATION,
+        type: AuthorizationRiskType._ADMIN_OPERATION,
         contribution: 30,
         description: "Administrative operation",
         critical: false,
@@ -755,7 +758,7 @@ export class ParlantEnhancedRBACGuard
     // Check for sensitive resources
     if (this.involvesSensitiveResource(context, rbacMetadata)) {
       riskFactors.push({
-        type: AuthorizationRiskType.SENSITIVE_RESOURCE,
+        type: AuthorizationRiskType._SENSITIVE_RESOURCE,
         contribution: 25,
         description: "Access to sensitive resource",
         critical: false,
@@ -765,7 +768,7 @@ export class ParlantEnhancedRBACGuard
     // Check for unusual access patterns
     if (await this.isUnusualAccessPattern(user, context)) {
       riskFactors.push({
-        type: AuthorizationRiskType.UNUSUAL_ACCESS_PATTERN,
+        type: AuthorizationRiskType._UNUSUAL_ACCESS_PATTERN,
         contribution: 20,
         description: "Unusual access pattern detected",
         critical: false,
@@ -781,14 +784,14 @@ export class ParlantEnhancedRBACGuard
     // Determine risk level
     let riskLevel: RiskLevel;
     if (totalRiskScore >= this.riskThresholds.critical)
-      riskLevel = RiskLevel.CRITICAL;
+      riskLevel = RiskLevel._CRITICAL;
     else if (totalRiskScore >= this.riskThresholds.high)
-      riskLevel = RiskLevel.HIGH;
+      riskLevel = RiskLevel._HIGH;
     else if (totalRiskScore >= this.riskThresholds.medium)
-      riskLevel = RiskLevel.MODERATE;
+      riskLevel = RiskLevel._MODERATE;
     else if (totalRiskScore >= this.riskThresholds.low)
-      riskLevel = RiskLevel.LOW;
-    else riskLevel = RiskLevel.MINIMAL;
+      riskLevel = RiskLevel._LOW;
+    else riskLevel = RiskLevel._MINIMAL;
 
     // Determine if conversation is required
     const requiresConversation =
@@ -837,7 +840,7 @@ export class ParlantEnhancedRBACGuard
       complianceRequirements: this.getComplianceRequirements(context),
       auditRequired:
         rbacMetadata.auditAccess ||
-        securityClassification !== FunctionSecurityLevel.PUBLIC,
+        securityClassification !== FunctionSecurityLevel._PUBLIC,
     };
   }
 
@@ -914,14 +917,14 @@ export class ParlantEnhancedRBACGuard
     // Enhanced parameters for high-risk scenarios
     baseRequest.validationParams = {
       ...baseRequest.validationParams,
-      approvalLevel: ApprovalLevel.DUAL_APPROVAL,
+      approvalLevel: ApprovalLevel._DUAL_APPROVAL,
       timeout: 120000, // 2 minutes for high-risk
       cacheable: false, // Don't cache high-risk decisions
     };
 
     // Update conversation context for high-risk
     baseRequest.conversationContext.metadata.priority =
-      ConversationPriority.CRITICAL;
+      ConversationPriority._CRITICAL;
     baseRequest.conversationContext.metadata.properties = {
       ...baseRequest.conversationContext.metadata.properties,
       highRisk: true,
@@ -949,7 +952,7 @@ export class ParlantEnhancedRBACGuard
     const totalTime = Date.now() - startTime;
 
     const result: ConversationalAuthorizationResult = {
-      granted: response.result.decision === ValidationDecision.APPROVED,
+      granted: response.result.decision === ValidationDecision._APPROVED,
       reason: response.result.reasoning,
       evaluatedConditions: ["conversational-validation"],
       conversationContext: response.conversationContext,
@@ -972,7 +975,7 @@ export class ParlantEnhancedRBACGuard
 
     // Handle different validation decisions
     switch (response.result.decision) {
-      case ValidationDecision.APPROVED:
+      case ValidationDecision._APPROVED:
         result.granted = true;
         break;
 
@@ -1167,7 +1170,7 @@ export class ParlantEnhancedRBACGuard
   ): FunctionSecurityLevel {
     if (rbacMetadata.adminOnly) return FunctionSecurityLevel._RESTRICTED;
     if (rbacMetadata.permissions?.length) return FunctionSecurityLevel.INTERNAL;
-    return FunctionSecurityLevel.PUBLIC;
+    return FunctionSecurityLevel._PUBLIC;
   }
 
   private async getActiveSecurityPolicies(
@@ -1227,8 +1230,8 @@ export class ParlantEnhancedRBACGuard
   private determineApprovalLevel(
     authContext: ConversationalAuthorizationContext,
   ): ApprovalLevel {
-    if (authContext.riskAssessment.riskLevel === RiskLevel.CRITICAL) {
-      return ApprovalLevel.DUAL_APPROVAL;
+    if (authContext.riskAssessment.riskLevel === RiskLevel._CRITICAL) {
+      return ApprovalLevel._DUAL_APPROVAL;
     }
 
     if (authContext.securityContext.isPrivilegedOperation) {
@@ -1241,7 +1244,7 @@ export class ParlantEnhancedRBACGuard
   private determineTimeout(
     authContext: ConversationalAuthorizationContext,
   ): number {
-    if (authContext.riskAssessment.riskLevel === RiskLevel.CRITICAL) {
+    if (authContext.riskAssessment.riskLevel === RiskLevel._CRITICAL) {
       return 120000; // 2 minutes
     }
 
@@ -1252,7 +1255,7 @@ export class ParlantEnhancedRBACGuard
     authContext: ConversationalAuthorizationContext,
   ): boolean {
     // Don't cache high-risk decisions
-    return authContext.riskAssessment.riskLevel !== RiskLevel.CRITICAL;
+    return authContext.riskAssessment.riskLevel !== RiskLevel._CRITICAL;
   }
 
   private createAuthorizationConversation(
@@ -1268,11 +1271,11 @@ export class ParlantEnhancedRBACGuard
   ): string[] {
     const enhancements: string[] = [];
 
-    if (decision === ValidationDecision.APPROVED) {
+    if (decision === ValidationDecision._APPROVED) {
       enhancements.push("conversational_approval");
     }
 
-    if (authContext.riskAssessment.riskLevel === RiskLevel.CRITICAL) {
+    if (authContext.riskAssessment.riskLevel === RiskLevel._CRITICAL) {
       enhancements.push("high_risk_monitoring");
     }
 
@@ -1282,11 +1285,11 @@ export class ParlantEnhancedRBACGuard
   private determineCacheStrategy(
     riskAssessment: AuthorizationRiskAssessment,
   ): CacheStrategy {
-    if (riskAssessment.riskLevel === RiskLevel.CRITICAL) {
+    if (riskAssessment.riskLevel === RiskLevel._CRITICAL) {
       return CacheStrategy.NONE;
     }
 
-    if (riskAssessment.riskLevel === RiskLevel.HIGH) {
+    if (riskAssessment.riskLevel === RiskLevel._HIGH) {
       return CacheStrategy.CONSERVATIVE;
     }
 
@@ -1297,11 +1300,11 @@ export class ParlantEnhancedRBACGuard
     authContext: ConversationalAuthorizationContext,
     _result: ConversationalAuthorizationResult,
   ): number {
-    if (authContext.riskAssessment.riskLevel === RiskLevel.CRITICAL) {
+    if (authContext.riskAssessment.riskLevel === RiskLevel._CRITICAL) {
       return 60000; // 1 minute
     }
 
-    if (authContext.riskAssessment.riskLevel === RiskLevel.HIGH) {
+    if (authContext.riskAssessment.riskLevel === RiskLevel._HIGH) {
       return 300000; // 5 minutes
     }
 

@@ -24,6 +24,11 @@ import { BrowserUseModule } from './browser-use/browser-use.module';
 import { ConfigurationModule } from './config/config.module';
 import { EnterpriseConfigModule } from './config/enterprise-config.module';
 import { ReliabilityModule } from './common/reliability/reliability.module';
+import {
+  GlobalParlantIntegrationModule,
+  ParlantIntegrationUtils,
+} from '@bytebot/shared/modules/global-parlant-integration.module';
+import { ParlantValidationInterceptor } from '@bytebot/shared/interceptors/parlant-validation.interceptor';
 
 @Module({
   imports: [
@@ -68,6 +73,13 @@ import { ReliabilityModule } from './common/reliability/reliability.module';
     // Security and authentication (must be imported early)
     AuthModule,
 
+    // Parlant conversational AI validation (must be imported after auth for proper security context)
+    GlobalParlantIntegrationModule.forRoot(
+      process.env.NODE_ENV === 'production'
+        ? ParlantIntegrationUtils.forHighThroughput()
+        : ParlantIntegrationUtils.forDevelopment(),
+    ),
+
     // Reliability and resilience patterns (must be imported early)
     ReliabilityModule,
 
@@ -86,7 +98,7 @@ import { ReliabilityModule } from './common/reliability/reliability.module';
   providers: [
     AppService,
 
-    // Global interceptors for comprehensive observability
+    // Global interceptors for comprehensive observability and validation
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
@@ -94,6 +106,10 @@ import { ReliabilityModule } from './common/reliability/reliability.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: MetricsInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ParlantValidationInterceptor,
     },
   ],
 })
@@ -108,6 +124,13 @@ export class AppModule {
     console.log('   ✅ Configuration security validation');
     console.log('   ✅ Secrets rotation and hot-reload');
     console.log('   ✅ Enterprise secrets audit logging');
+    console.log('🤖 Parlant Conversational AI Integration:');
+    console.log('   ✅ Universal API endpoint validation');
+    console.log('   ✅ Real-time conversational security analysis');
+    console.log('   ✅ Risk-based security level assignment');
+    console.log('   ✅ High-performance validation caching');
+    console.log('   ✅ Comprehensive audit trails');
+    console.log('   ✅ Global interceptor and middleware coverage');
     console.log('📊 Observability features active:');
     console.log('   ✅ Health monitoring endpoints');
     console.log('   ✅ Prometheus metrics collection');
