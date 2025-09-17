@@ -119,6 +119,9 @@ export {
   ResourceGuard,
   OwnershipGuard,
   CompositeGuard,
+  RoleGuard,
+  AuditGuard,
+  HealthGuard,
   IPWhitelistGuard,
   TimeBasedAccessGuard,
   PermissionConfig,
@@ -135,6 +138,8 @@ export {
   COMPOSITE_GUARD_KEY,
   IP_WHITELIST_KEY,
   TIME_BASED_ACCESS_KEY,
+  AUDIT_GUARD_KEY,
+  HEALTH_GUARD_KEY,
 } from "./guards/permission-based-guards";
 
 // Security Interceptors - server-only (NestJS + requires @nestjs/microservices)

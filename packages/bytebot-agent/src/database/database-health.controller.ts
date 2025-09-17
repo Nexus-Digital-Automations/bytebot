@@ -287,6 +287,45 @@ export class DatabaseHealthController {
   }
 
   /**
+   * Kubernetes liveness probe endpoint
+   */
+  @Get('health/liveness')
+  @HttpCode(HttpStatus.OK)
+  async getLivenessProbe() {
+    const result = await this.databaseHealthService.getLivenessStatus();
+    if (!result.status) {
+      throw new Error('Database liveness check failed');
+    }
+    return { status: 'ok', ...result };
+  }
+
+  /**
+   * Kubernetes readiness probe endpoint
+   */
+  @Get('health/readiness')
+  @HttpCode(HttpStatus.OK)
+  async getReadinessProbe() {
+    const result = await this.databaseHealthService.getReadinessStatus();
+    if (!result.status) {
+      throw new Error('Database readiness check failed');
+    }
+    return { status: 'ok', ...result };
+  }
+
+  /**
+   * Kubernetes startup probe endpoint
+   */
+  @Get('health/startup')
+  @HttpCode(HttpStatus.OK)
+  async getStartupProbe() {
+    const result = await this.databaseHealthService.getStartupStatus();
+    if (!result.status) {
+      throw new Error('Database startup check failed');
+    }
+    return { status: 'ok', ...result };
+  }
+
+  /**
    * Perform manual health check
    */
   @Post('health/check')
@@ -299,19 +338,16 @@ export class DatabaseHealthController {
         operationId,
       });
 
-      const healthResult = await this.databaseHealthGuard.performHealthCheck();
+      const healthResult = await this.databaseHealthService.performHealthCheck(true);
 
       const response = {
-        success: healthResult.success,
-        responseTime: healthResult.responseTime,
-        timestamp: healthResult.timestamp,
-        error: healthResult.error,
+        ...healthResult,
         operationId,
       };
 
       this.logger.log(`[${operationId}] Manual health check completed`, {
-        success: healthResult.success,
-        responseTime: healthResult.responseTime,
+        status: healthResult.status,
+        duration: healthResult.duration,
         operationId,
       });
 

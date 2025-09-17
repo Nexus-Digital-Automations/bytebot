@@ -23,7 +23,6 @@ import {
   Controller,
   Post,
   Get,
-  Delete,
   Body,
   Param,
   Query,
@@ -47,44 +46,36 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 
-// Parlant-validated services
-import { ParlantValidatedBrowserUseService } from './parlant-validated-browser-use.service';
-import { ParlantValidatedBrowserSessionService } from './parlant-validated-browser-session.service';
-import { ParlantValidatedBrowserTaskService } from './parlant-validated-browser-task.service';
-import { ParlantValidatedBrowserAsyncJobService } from './parlant-validated-browser-async-job.service';
-
-// Validation context interfaces
+// Parlant-validated services and interfaces
 import {
+  ParlantValidatedBrowserUseService,
   BrowserActionValidationContext,
   BrowserActionAuditEntry,
   BrowserStateInfo,
 } from './parlant-validated-browser-use.service';
 import {
+  ParlantValidatedBrowserSessionService,
   BrowserSessionValidationContext,
   SessionValidationResult,
 } from './parlant-validated-browser-session.service';
 import {
+  ParlantValidatedBrowserTaskService,
   BrowserTaskValidationContext,
-  TaskValidationResult,
 } from './parlant-validated-browser-task.service';
 import {
+  ParlantValidatedBrowserAsyncJobService,
   AsyncJobValidationContext,
   AsyncJobResourceRequirements,
   AsyncJobQueueInfo,
-  JobCleanupValidationResult,
 } from './parlant-validated-browser-async-job.service';
 
 // DTOs and types
 import {
   CreateBrowserTaskDto,
   BrowserTaskResultDto,
-  BrowserTaskStatus,
-  BrowserTaskPriority,
 } from './dto/browser-task.dto';
 import {
   CreateBrowserSessionDto,
-  BrowserSessionDto,
-  BrowserSessionStatus,
 } from './dto/browser-session.dto';
 import { CreateAsyncJobDto, AsyncJobResultDto, AsyncJobPriority } from './dto/async-job.dto';
 
@@ -219,8 +210,8 @@ export class ParlantValidatedBrowserUseController {
       `[${operationId}] Parlant-validated browser task execution requested`,
       {
         taskName: taskDto.name,
-        userId: userId || taskDto.parlantContext.userId,
-        sessionId: sessionId || taskDto.parlantContext.sessionId,
+        userId: userId ?? taskDto.parlantContext.userId,
+        sessionId: sessionId ?? taskDto.parlantContext.sessionId,
         actionsCount: taskDto.actions.length,
       }
     );
@@ -231,8 +222,8 @@ export class ParlantValidatedBrowserUseController {
         throw new BadRequestException('User ID required for Parlant validation');
       }
 
-      const finalUserId = userId || taskDto.parlantContext.userId;
-      const finalSessionId = sessionId || taskDto.parlantContext.sessionId;
+      const finalUserId = userId ?? taskDto.parlantContext.userId;
+      const finalSessionId = sessionId ?? taskDto.parlantContext.sessionId;
 
       // Build browser state info
       const browserState: BrowserStateInfo = {
@@ -255,7 +246,7 @@ export class ParlantValidatedBrowserUseController {
         targetUrl: this.extractTargetUrlFromTask(taskDto),
         actionSequence: [],
         browserState,
-        securityLevel: taskDto.parlantContext.securityLevel || 'MODERATE',
+        securityLevel: taskDto.parlantContext.securityLevel ?? 'MODERATE',
       };
 
       // Execute with Parlant validation
@@ -312,8 +303,8 @@ export class ParlantValidatedBrowserUseController {
           auditTrail: {
             operationId,
             timestamp: new Date(),
-            userId: userId || taskDto.parlantContext.userId,
-            sessionId: sessionId || taskDto.parlantContext.sessionId,
+            userId: userId ?? taskDto.parlantContext.userId,
+            sessionId: sessionId ?? taskDto.parlantContext.sessionId,
           },
         };
       }
@@ -450,17 +441,17 @@ export class ParlantValidatedBrowserUseController {
       throw new BadRequestException('User ID required for Parlant validation');
     }
 
-    const finalUserId = userId || sessionDto.parlantContext.userId;
+    const finalUserId = userId ?? sessionDto.parlantContext.userId;
 
     try {
       // Create session validation context
       const validationContext: BrowserSessionValidationContext = {
         userId: finalUserId,
-        sessionId: sessionId || sessionDto.parlantContext.sessionId,
+        sessionId: sessionId ?? sessionDto.parlantContext.sessionId,
         conversationId: sessionDto.parlantContext.conversationId,
         intent: sessionDto.parlantContext.intent,
-        requestedCapabilities: sessionDto.capabilities || [],
-        securityLevel: sessionDto.parlantContext.securityLevel || 'MODERATE',
+        requestedCapabilities: sessionDto.capabilities ?? [],
+        securityLevel: sessionDto.parlantContext.securityLevel ?? 'MODERATE',
         resourceConstraints: {
           maxTabs: 5,
           maxMemoryMB: 1000,
@@ -543,7 +534,7 @@ export class ParlantValidatedBrowserUseController {
       throw new BadRequestException('User ID required for Parlant validation');
     }
 
-    const finalUserId = userId || jobDto.parlantContext.userId;
+    const finalUserId = userId ?? jobDto.parlantContext.userId;
 
     try {
       // Get current queue status for context
@@ -566,20 +557,20 @@ export class ParlantValidatedBrowserUseController {
       // Create async job validation context
       const validationContext: AsyncJobValidationContext = {
         userId: finalUserId,
-        sessionId: sessionId || jobDto.parlantContext.sessionId,
+        sessionId: sessionId ?? jobDto.parlantContext.sessionId,
         conversationId: jobDto.parlantContext.conversationId,
         intent: jobDto.parlantContext.intent,
         jobType: jobDto.jobType,
         estimatedDurationMs: jobDto.estimatedDurationMs,
         maxRetries: jobDto.maxRetries,
-        resourceRequirements: jobDto.resourceRequirements || {
+        resourceRequirements: jobDto.resourceRequirements ?? {
           memoryEstimateMB: 500,
           cpuIntensive: false,
           networkIntensive: false,
           diskSpaceRequiredMB: 100,
           expectedConcurrency: 1,
         },
-        securityLevel: jobDto.parlantContext.securityLevel || 'MODERATE',
+        securityLevel: jobDto.parlantContext.securityLevel ?? 'MODERATE',
         queueState: queueInfo,
       };
 
@@ -657,7 +648,7 @@ export class ParlantValidatedBrowserUseController {
       const validationContext: AsyncJobValidationContext = {
         userId,
         sessionId,
-        jobType: 'CUSTOM_WORKFLOW' as any, // Will be updated based on actual job
+        jobType: 'CUSTOM_WORKFLOW' as const, // Will be updated based on actual job
         securityLevel: 'SAFE',
         resourceRequirements: {
           memoryEstimateMB: 0,
@@ -670,7 +661,7 @@ export class ParlantValidatedBrowserUseController {
           queueLength: 0,
           processingJobs: 0,
           averageWaitTimeMs: 0,
-          currentPriorityDistribution: {} as any,
+          currentPriorityDistribution: {} as Record<string, number>,
           systemLoadPercent: 0,
         },
       };
