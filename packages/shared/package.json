@@ -74,6 +74,7 @@
     "@types/jsdom": "^21.1.7",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
+    "@types/ws": "8.18.1",
     "axios": "^1.7.7",
     "bcryptjs": "^3.0.2",
     "cache-manager": "^7.2.0",
@@ -89,6 +90,7 @@
     "multer": "^2.0.2",
     "rxjs": "^7.8.2",
     "sanitize-html": "^2.17.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "ws": "8.18.3"
   }
 }

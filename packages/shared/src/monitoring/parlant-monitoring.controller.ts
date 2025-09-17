@@ -35,6 +35,7 @@ import {
   ApiBody,
   ApiQuery,
   ApiParam,
+  ApiProperty,
 } from '@nestjs/swagger';
 import { IsString, IsOptional, IsArray, IsBoolean, IsDateString } from 'class-validator';
 import { 
@@ -58,7 +59,7 @@ class MonitoringQueryDto implements Omit<ParlantMonitoringQuery, 'timeRange'> {
     example: 'How is the API performance over the last hour?',
   })
   @IsString()
-  query: string;
+  query!: string;
 
   @ApiProperty({
     description: 'Start time for query range',
@@ -125,14 +126,14 @@ class FollowUpQueryDto {
     example: 'What about security metrics?',
   })
   @IsString()
-  query: string;
+  query!: string;
 
   @ApiProperty({
     description: 'Conversation context from previous query',
     example: 'parlant_monitor_1234567890_abc123',
   })
   @IsString()
-  conversationContext: string;
+  conversationContext!: string;
 }
 
 /**
@@ -564,7 +565,3 @@ export class ParlantMonitoringController {
   }
 }
 
-// Fix for missing ApiProperty import
-function ApiProperty(options: any): PropertyDecorator {
-  return () => {};
-}

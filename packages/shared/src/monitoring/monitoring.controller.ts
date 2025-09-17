@@ -90,7 +90,7 @@ export class MonitoringController {
    */
   @Get('metrics/summary')
   async getMetricsSummary(): Promise<{
-    summary: ReturnType<typeof this._metricsService.getMetricsSummary>;
+    summary: any;
     timestamp: string;
     operationId: string;
   }> {

@@ -271,7 +271,7 @@ export class ParlantCacheService
       }
 
       // Level 3: Persistent Cache (slower but comprehensive)
-      if (this.config.type === "hybrid" || this.config.type === "persistent") {
+      if (this.config.type === "hybrid") {
         const persistentResult = await this.getFromPersistent(cacheKey);
         if (persistentResult.found) {
           this.stats.persistentHits++;
@@ -365,10 +365,7 @@ export class ParlantCacheService
       }
 
       // Store in persistent cache for high-priority or frequently accessed items
-      if (
-        (this.config.type === "hybrid" || this.config.type === "persistent") &&
-        priority >= 8
-      ) {
+      if (this.config.type === "hybrid" && priority >= 8) {
         await this.setInPersistent(cacheKey, cacheEntry);
       }
 

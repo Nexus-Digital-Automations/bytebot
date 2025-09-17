@@ -132,7 +132,7 @@ export class ParlantAuthBridgeService
   private readonly logger = new Logger(ParlantAuthBridgeService.name);
 
   // HTTP client for Parlant API
-  private parlantClient: AxiosInstance;
+  private parlantClient!: AxiosInstance;
 
   // Session and user management
   private sessionMappings = new Map<string, SessionMapping>();
@@ -579,13 +579,13 @@ export class ParlantAuthBridgeService
   async getUserProfile(
     userId: string,
   ): Promise<SynchronizedUserProfile | null> {
-    let profile = this.userProfiles.get(userId);
+    let profile: SynchronizedUserProfile | null = this.userProfiles.get(userId) || null;
 
     if (!profile || this.isProfileStale(profile)) {
       profile = await this.syncUserProfileFromParlant(userId);
     }
 
-    return profile || null;
+    return profile;
   }
 
   /**

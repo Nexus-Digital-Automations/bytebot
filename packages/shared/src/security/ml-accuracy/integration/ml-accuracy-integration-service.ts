@@ -94,12 +94,12 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
   private readonly eventEmitter = new EventEmitter();
 
   // Core service components
-  private componentOrchestrator: ComponentOrchestrator;
-  private consensusEngine: ConsensusEngine;
-  private healthMonitor: HealthMonitor;
-  private performanceOptimizer: PerformanceOptimizer;
-  private eventBus: EventBus;
-  private crossSystemCoordination: CrossSystemCoordination;
+  private componentOrchestrator!: ComponentOrchestrator;
+  private consensusEngine!: ConsensusEngine;
+  private healthMonitor!: HealthMonitor;
+  private performanceOptimizer!: PerformanceOptimizer;
+  private eventBus!: EventBus;
+  private crossSystemCoordination!: CrossSystemCoordination;
 
   // Component registry and state management
   private registeredComponents: Map<string, MLComponent> = new Map();

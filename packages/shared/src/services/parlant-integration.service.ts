@@ -19,7 +19,7 @@ import {
 import { EventEmitter } from "events";
 import * as jwt from "jsonwebtoken";
 import axios, { AxiosInstance } from "axios";
-import * as WebSocket from "ws";
+import WebSocket from "ws";
 import {
   ParlantServiceConfig,
   ParlantValidationRequest,
@@ -55,7 +55,7 @@ export class ParlantIntegrationService
   private readonly logger = new Logger(ParlantIntegrationService.name);
 
   // Core connections
-  private httpClient: AxiosInstance;
+  private httpClient!: AxiosInstance;
   private websocket: WebSocket | null = null;
   private isConnected: boolean = false;
 
@@ -80,7 +80,7 @@ export class ParlantIntegrationService
   private auditEntries: ParlantAuditEntry[] = [];
 
   // Configuration
-  private config: ParlantServiceConfig;
+  private config!: ParlantServiceConfig;
 
   constructor() {
     super();
