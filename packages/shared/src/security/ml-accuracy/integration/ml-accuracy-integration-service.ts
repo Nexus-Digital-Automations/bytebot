@@ -1266,7 +1266,7 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
         await this.handleFalsePositiveEvent(event);
         break;
       case "performance_degraded":
-        await this.handlePerformanceDegradation(event);
+        await this.handlePerformanceDegradation(event as unknown as Record<string, unknown>);
         break;
       default:
         this.logger.debug(
@@ -1313,7 +1313,7 @@ export class MLAccuracyIntegrationService implements MLIntegrationService {
     );
 
     // Clean up completed tuning session
-    this.activeTuningSessions.delete(data.operationId);
+    this.activeTuningSessions.delete(data.operationId as string);
   }
 
   private handleComponentFailure(data: Record<string, unknown>): void {
