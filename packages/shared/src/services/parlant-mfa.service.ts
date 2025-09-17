@@ -587,13 +587,13 @@ export class ParlantMFAService {
    * @returns Promise<MFAChallenge> - MFA challenge details
    */
   @ParlantValidation({
-    mode: ValidationMode.SYNCHRONOUS,
-    approvalLevel: ApprovalLevel.AUTOMATIC,
+    mode: ValidationMode._SYNCHRONOUS,
+    approvalLevel: ApprovalLevel._AUTOMATIC,
     timeout: 15000,
   })
   @ConversationContext({
     topic: "Multi-Factor Authentication Challenge",
-    priority: ConversationPriority.NORMAL,
+    priority: ConversationPriority._NORMAL,
   })
   async createConversationalMFAChallenge(
     userId: string,
@@ -677,17 +677,17 @@ export class ParlantMFAService {
    * @returns Promise<MFAChallenge> - Enhanced MFA challenge
    */
   @ParlantValidation({
-    mode: ValidationMode.INTERACTIVE,
+    mode: ValidationMode._INTERACTIVE,
     approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
     timeout: 120000,
   })
   @SecurityClassification({
-    securityLevel: FunctionSecurityLevel.RESTRICTED,
-    riskLevel: RiskLevel.HIGH,
+    securityLevel: FunctionSecurityLevel._RESTRICTED,
+    riskLevel: RiskLevel._HIGH,
   })
   @ConversationContext({
     topic: "High-Risk Multi-Factor Authentication",
-    priority: ConversationPriority.CRITICAL,
+    priority: ConversationPriority._CRITICAL,
     requiredParticipants: [ParticipantRole.VALIDATOR, ParticipantRole.APPROVER],
   })
   async initiateHighRiskMFA(
@@ -743,8 +743,8 @@ export class ParlantMFAService {
    * @returns Promise<MFAValidationResult> - Validation result
    */
   @ParlantValidation({
-    mode: ValidationMode.SYNCHRONOUS,
-    approvalLevel: ApprovalLevel.AUTOMATIC,
+    mode: ValidationMode._SYNCHRONOUS,
+    approvalLevel: ApprovalLevel._AUTOMATIC,
     timeout: 10000,
   })
   async validateConversationalMFA(
@@ -837,13 +837,13 @@ export class ParlantMFAService {
    * @returns Promise<MFASetupResult> - Setup result
    */
   @ParlantValidation({
-    mode: ValidationMode.INTERACTIVE,
+    mode: ValidationMode._INTERACTIVE,
     approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
     timeout: 300000, // 5 minutes for setup
   })
   @ConversationContext({
     topic: "Multi-Factor Authentication Setup",
-    priority: ConversationPriority.NORMAL,
+    priority: ConversationPriority._NORMAL,
     requiredParticipants: [ParticipantRole.VALIDATOR],
   })
   async setupConversationalMFA(
@@ -910,17 +910,17 @@ export class ParlantMFAService {
    * @returns Promise<MFAChallenge> - Recovery challenge
    */
   @ParlantValidation({
-    mode: ValidationMode.INTERACTIVE,
+    mode: ValidationMode._INTERACTIVE,
     approvalLevel: ApprovalLevel.DUAL_APPROVAL,
     timeout: 600000, // 10 minutes for recovery
   })
   @SecurityClassification({
-    securityLevel: FunctionSecurityLevel.RESTRICTED,
-    riskLevel: RiskLevel.HIGH,
+    securityLevel: FunctionSecurityLevel._RESTRICTED,
+    riskLevel: RiskLevel._HIGH,
   })
   @ConversationContext({
     topic: "MFA Account Recovery",
-    priority: ConversationPriority.HIGH,
+    priority: ConversationPriority._HIGH,
     requiredParticipants: [
       ParticipantRole.APPROVER,
       ParticipantRole.VALIDATOR,
@@ -1024,11 +1024,11 @@ export class ParlantMFAService {
 
     // Determine risk level
     let riskLevel: RiskLevel;
-    if (totalRisk >= 80) riskLevel = RiskLevel.CRITICAL;
-    else if (totalRisk >= 60) riskLevel = RiskLevel.HIGH;
-    else if (totalRisk >= 40) riskLevel = RiskLevel.MODERATE;
-    else if (totalRisk >= 20) riskLevel = RiskLevel.LOW;
-    else riskLevel = RiskLevel.MINIMAL;
+    if (totalRisk >= 80) riskLevel = RiskLevel._CRITICAL;
+    else if (totalRisk >= 60) riskLevel = RiskLevel._HIGH;
+    else if (totalRisk >= 40) riskLevel = RiskLevel._MODERATE;
+    else if (totalRisk >= 20) riskLevel = RiskLevel._LOW;
+    else riskLevel = RiskLevel._MINIMAL;
 
     // Recommend MFA methods based on risk
     const recommendedMethods = this.getRecommendedMFAMethods(riskLevel, method);
@@ -1052,9 +1052,9 @@ export class ParlantMFAService {
   ): Promise<ParlantConversationContext> {
     const topic = `MFA Challenge - ${method} (Risk: ${riskAssessment.riskLevel})`;
     const priority =
-      riskAssessment.riskLevel === RiskLevel.CRITICAL
-        ? ConversationPriority.CRITICAL
-        : ConversationPriority.NORMAL;
+      riskAssessment.riskLevel === RiskLevel._CRITICAL
+        ? ConversationPriority._CRITICAL
+        : ConversationPriority._NORMAL;
 
     return this.parlantService.createConversation(topic, priority);
   }
@@ -1118,7 +1118,7 @@ export class ParlantMFAService {
         methodName: "validateConversationalMFA",
         className: ParlantMFAService.name,
       },
-      securityLevel: FunctionSecurityLevel.RESTRICTED,
+      securityLevel: FunctionSecurityLevel._RESTRICTED,
       riskLevel: challenge.riskAssessment.riskLevel,
       executionContext: {
         environment: this.getExecutionEnvironment(),
@@ -1136,8 +1136,8 @@ export class ParlantMFAService {
     };
 
     const validationParams: ValidationParameters = {
-      mode: ValidationMode.SYNCHRONOUS,
-      approvalLevel: ApprovalLevel.AUTOMATIC,
+      mode: ValidationMode._SYNCHRONOUS,
+      approvalLevel: ApprovalLevel._AUTOMATIC,
       timeout: 10000,
       cacheable: false, // Don't cache MFA validations
       rules: [],
@@ -1152,7 +1152,7 @@ export class ParlantMFAService {
             conversationId: challenge.conversationId,
             metadata: {
               topic: "MFA Validation",
-              priority: ConversationPriority.HIGH,
+              priority: ConversationPriority._HIGH,
               properties: {
                 challengeId: challenge.challengeId,
                 method: challenge.method,
@@ -1243,7 +1243,7 @@ export class ParlantMFAService {
 
     const finalResult =
       methodValidation &&
-      validationResponse.result.decision === ValidationDecision.APPROVED;
+      validationResponse.result.decision === ValidationDecision._APPROVED;
 
     return {
       valid: finalResult,
@@ -1353,7 +1353,7 @@ export class ParlantMFAService {
   private isAdminOperation(context: AuthenticationContext): boolean {
     return (
       context.securityContext?.classification ===
-      FunctionSecurityLevel.RESTRICTED
+      FunctionSecurityLevel._RESTRICTED
     );
   }
 
@@ -1368,9 +1368,9 @@ export class ParlantMFAService {
   ): MFAMethod[] {
     const methods: MFAMethod[] = [];
 
-    if (riskLevel === RiskLevel.CRITICAL) {
+    if (riskLevel === RiskLevel._CRITICAL) {
       methods.push(MFAMethod.HARDWARE_TOKEN, MFAMethod.BIOMETRIC);
-    } else if (riskLevel === RiskLevel.HIGH) {
+    } else if (riskLevel === RiskLevel._HIGH) {
       methods.push(MFAMethod.TOTP, MFAMethod.PUSH_NOTIFICATION);
     } else {
       methods.push(preferredMethod);
@@ -1407,13 +1407,13 @@ export class ParlantMFAService {
 
     switch (env.toLowerCase()) {
       case "production":
-        return ExecutionEnvironment.PRODUCTION;
+        return ExecutionEnvironment._PRODUCTION;
       case "staging":
-        return ExecutionEnvironment.STAGING;
+        return ExecutionEnvironment._STAGING;
       case "test":
-        return ExecutionEnvironment.TESTING;
+        return ExecutionEnvironment._TESTING;
       default:
-        return ExecutionEnvironment.DEVELOPMENT;
+        return ExecutionEnvironment._DEVELOPMENT;
     }
   }
 
@@ -1443,7 +1443,7 @@ export class ParlantMFAService {
     const topic = `High-Risk MFA - User ${userId}`;
     return this.parlantService.createConversation(
       topic,
-      ConversationPriority.CRITICAL,
+      ConversationPriority._CRITICAL,
     );
   }
 
@@ -1511,7 +1511,7 @@ export class ParlantMFAService {
     const topic = `MFA Setup - ${method}`;
     return this.parlantService.createConversation(
       topic,
-      ConversationPriority.NORMAL,
+      ConversationPriority._NORMAL,
     );
   }
 
@@ -1522,7 +1522,7 @@ export class ParlantMFAService {
     const topic = `MFA Recovery - User ${userId}`;
     return this.parlantService.createConversation(
       topic,
-      ConversationPriority.HIGH,
+      ConversationPriority._HIGH,
     );
   }
 
@@ -1544,7 +1544,7 @@ export class ParlantMFAService {
     const riskAssessment: MFARiskAssessment = {
       riskScore: 90, // High risk for recovery
       riskFactors: [],
-      riskLevel: RiskLevel.CRITICAL,
+      riskLevel: RiskLevel._CRITICAL,
       recommendedMethods: [MFAMethod.EMAIL],
       assessedAt: new Date(),
     };

@@ -365,18 +365,18 @@ export class ParlantEnhancedAuthService {
    * @returns Promise<ConversationalAuthResult> - Authentication result with conversation context
    */
   @ParlantValidation({
-    mode: ValidationMode.INTERACTIVE,
+    mode: ValidationMode._INTERACTIVE,
     approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
     timeout: 30000,
     cacheable: true,
   })
   @SecurityClassification({
-    securityLevel: FunctionSecurityLevel.RESTRICTED,
-    riskLevel: RiskLevel.HIGH,
+    securityLevel: FunctionSecurityLevel._RESTRICTED,
+    riskLevel: RiskLevel._HIGH,
   })
   @ConversationContext({
     topic: "User Authentication Validation",
-    priority: ConversationPriority.HIGH,
+    priority: ConversationPriority._HIGH,
     requiredParticipants: [ParticipantRole.VALIDATOR],
   })
   async validateConversationalAuthentication(
@@ -477,17 +477,17 @@ export class ParlantEnhancedAuthService {
    * @returns Promise<ConversationalAuthResult> - Authentication result
    */
   @ParlantValidation({
-    mode: ValidationMode.INTERACTIVE,
+    mode: ValidationMode._INTERACTIVE,
     approvalLevel: ApprovalLevel.DUAL_APPROVAL,
     timeout: 120000,
   })
   @SecurityClassification({
-    securityLevel: FunctionSecurityLevel.SECRET,
-    riskLevel: RiskLevel.CRITICAL,
+    securityLevel: FunctionSecurityLevel._SECRET,
+    riskLevel: RiskLevel._CRITICAL,
   })
   @ConversationContext({
     topic: "High-Risk Authentication Validation",
-    priority: ConversationPriority.CRITICAL,
+    priority: ConversationPriority._CRITICAL,
     requiredParticipants: [ParticipantRole.APPROVER, ParticipantRole.VALIDATOR],
   })
   async validateHighRiskAuthentication(
@@ -517,7 +517,7 @@ export class ParlantEnhancedAuthService {
       await this.parlantService.validateFunctionExecution(validationRequest);
 
     // Additional security measures for high-risk authentication
-    if (validationResponse.result.decision === ValidationDecision.APPROVED) {
+    if (validationResponse.result.decision === ValidationDecision._APPROVED) {
       await this.implementAdditionalSecurityMeasures(authContext);
     }
 
@@ -536,17 +536,17 @@ export class ParlantEnhancedAuthService {
    * @returns Promise<boolean> - Whether operation is approved
    */
   @ParlantValidation({
-    mode: ValidationMode.INTERACTIVE,
+    mode: ValidationMode._INTERACTIVE,
     approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
     timeout: 45000,
   })
   @SecurityClassification({
-    securityLevel: FunctionSecurityLevel.RESTRICTED,
-    riskLevel: RiskLevel.HIGH,
+    securityLevel: FunctionSecurityLevel._RESTRICTED,
+    riskLevel: RiskLevel._HIGH,
   })
   @ConversationContext({
     topic: "Token Operation Validation",
-    priority: ConversationPriority.HIGH,
+    priority: ConversationPriority._HIGH,
   })
   async validateTokenOperation(
     tokenOperation: TokenOperation,
@@ -574,7 +574,7 @@ export class ParlantEnhancedAuthService {
           methodName: "validateTokenOperation",
           className: ParlantEnhancedAuthService.name,
         },
-        securityLevel: FunctionSecurityLevel.RESTRICTED,
+        securityLevel: FunctionSecurityLevel._RESTRICTED,
         riskLevel: this.assessTokenOperationRisk(tokenOperation),
         executionContext: {
           environment: this.getExecutionEnvironment(),
@@ -583,7 +583,7 @@ export class ParlantEnhancedAuthService {
         },
       },
       validationParams: {
-        mode: ValidationMode.INTERACTIVE,
+        mode: ValidationMode._INTERACTIVE,
         approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
         timeout: 45000,
         cacheable: false,
@@ -599,7 +599,7 @@ export class ParlantEnhancedAuthService {
     const response =
       await this.parlantService.validateFunctionExecution(validationRequest);
 
-    return response.result.decision === ValidationDecision.APPROVED;
+    return response.result.decision === ValidationDecision._APPROVED;
   }
 
   /**
@@ -611,13 +611,13 @@ export class ParlantEnhancedAuthService {
    * @returns Promise<MFAChallenge> - MFA challenge details
    */
   @ParlantValidation({
-    mode: ValidationMode.SYNCHRONOUS,
-    approvalLevel: ApprovalLevel.AUTOMATIC,
+    mode: ValidationMode._SYNCHRONOUS,
+    approvalLevel: ApprovalLevel._AUTOMATIC,
     timeout: 15000,
   })
   @ConversationContext({
     topic: "Multi-Factor Authentication Setup",
-    priority: ConversationPriority.NORMAL,
+    priority: ConversationPriority._NORMAL,
   })
   async createConversationalMFAChallenge(
     userId: string,
@@ -636,7 +636,7 @@ export class ParlantEnhancedAuthService {
     // Create conversational context for MFA
     const conversation = await this.parlantService.createConversation(
       `MFA Challenge - ${mfaMethod}`,
-      ConversationPriority.NORMAL,
+      ConversationPriority._NORMAL,
     );
 
     const challenge: MFAChallenge = {
@@ -670,8 +670,8 @@ export class ParlantEnhancedAuthService {
    * @returns Promise<MFAValidationResult> - Validation result
    */
   @ParlantValidation({
-    mode: ValidationMode.SYNCHRONOUS,
-    approvalLevel: ApprovalLevel.AUTOMATIC,
+    mode: ValidationMode._SYNCHRONOUS,
+    approvalLevel: ApprovalLevel._AUTOMATIC,
     timeout: 10000,
   })
   async validateConversationalMFA(
@@ -786,11 +786,11 @@ export class ParlantEnhancedAuthService {
 
     // Determine risk level
     let riskLevel: RiskLevel;
-    if (totalRiskScore >= 80) riskLevel = RiskLevel.CRITICAL;
-    else if (totalRiskScore >= 60) riskLevel = RiskLevel.HIGH;
-    else if (totalRiskScore >= 40) riskLevel = RiskLevel.MODERATE;
-    else if (totalRiskScore >= 20) riskLevel = RiskLevel.LOW;
-    else riskLevel = RiskLevel.MINIMAL;
+    if (totalRiskScore >= 80) riskLevel = RiskLevel._CRITICAL;
+    else if (totalRiskScore >= 60) riskLevel = RiskLevel._HIGH;
+    else if (totalRiskScore >= 40) riskLevel = RiskLevel._MODERATE;
+    else if (totalRiskScore >= 20) riskLevel = RiskLevel._LOW;
+    else riskLevel = RiskLevel._MINIMAL;
 
     return {
       overallRiskScore: totalRiskScore,
@@ -879,7 +879,7 @@ export class ParlantEnhancedAuthService {
     };
 
     const validationParams: ValidationParameters = {
-      mode: ValidationMode.INTERACTIVE,
+      mode: ValidationMode._INTERACTIVE,
       approvalLevel: this.determineApprovalLevel(authContext),
       timeout: 30000,
       cacheable: true,
@@ -920,7 +920,7 @@ export class ParlantEnhancedAuthService {
     // Enhanced parameters for high-risk scenarios
     baseRequest.validationParams = {
       ...baseRequest.validationParams,
-      mode: ValidationMode.INTERACTIVE,
+      mode: ValidationMode._INTERACTIVE,
       approvalLevel: ApprovalLevel.DUAL_APPROVAL,
       timeout: 120000, // 2 minutes for high-risk scenarios
       cacheable: false, // Don't cache high-risk validations
@@ -928,7 +928,7 @@ export class ParlantEnhancedAuthService {
 
     // Update conversation context for high-risk
     baseRequest.conversationContext.metadata.priority =
-      ConversationPriority.CRITICAL;
+      ConversationPriority._CRITICAL;
     baseRequest.conversationContext.metadata.properties = {
       ...baseRequest.conversationContext.metadata.properties,
       highRisk: true,
@@ -951,9 +951,9 @@ export class ParlantEnhancedAuthService {
   ): Promise<ParlantConversationContext> {
     const topic = `Authentication Request - ${authContext.authMethod} (Risk: ${authContext.riskAssessment.riskLevel})`;
     const priority =
-      authContext.riskAssessment.riskLevel === RiskLevel.CRITICAL
-        ? ConversationPriority.CRITICAL
-        : ConversationPriority.HIGH;
+      authContext.riskAssessment.riskLevel === RiskLevel._CRITICAL
+        ? ConversationPriority._CRITICAL
+        : ConversationPriority._HIGH;
 
     return this.parlantService.createConversation(topic, priority);
   }
@@ -983,13 +983,13 @@ export class ParlantEnhancedAuthService {
     };
 
     switch (response.result.decision) {
-      case ValidationDecision.APPROVED:
+      case ValidationDecision._APPROVED:
         // Authentication approved - perform actual authentication
         result.success = true;
         result.tokens = await this.generateAuthenticationTokens(authContext);
         break;
 
-      case ValidationDecision.DENIED:
+      case ValidationDecision._DENIED:
         result.error = response.result.reasoning;
         break;
 
@@ -1010,7 +1010,7 @@ export class ParlantEnhancedAuthService {
         ];
         break;
 
-      case ValidationDecision.ESCALATE:
+      case ValidationDecision._ESCALATE:
         result.error = "Authentication requires manual review";
         result.requiredActions = [
           {
@@ -1082,7 +1082,7 @@ export class ParlantEnhancedAuthService {
   private determineApprovalLevel(
     authContext: ConversationalAuthContext,
   ): ApprovalLevel {
-    if (authContext.riskAssessment.riskLevel === RiskLevel.CRITICAL) {
+    if (authContext.riskAssessment.riskLevel === RiskLevel._CRITICAL) {
       return ApprovalLevel.DUAL_APPROVAL;
     }
 
@@ -1090,7 +1090,7 @@ export class ParlantEnhancedAuthService {
       return ApprovalLevel.SINGLE_APPROVAL;
     }
 
-    return ApprovalLevel.AUTOMATIC;
+    return ApprovalLevel._AUTOMATIC;
   }
 
   /**
@@ -1103,15 +1103,15 @@ export class ParlantEnhancedAuthService {
 
     switch (env.toLowerCase()) {
       case "production":
-        return ExecutionEnvironment.PRODUCTION;
+        return ExecutionEnvironment._PRODUCTION;
       case "staging":
-        return ExecutionEnvironment.STAGING;
+        return ExecutionEnvironment._STAGING;
       case "test":
-        return ExecutionEnvironment.TESTING;
+        return ExecutionEnvironment._TESTING;
       case "local":
-        return ExecutionEnvironment.LOCAL;
+        return ExecutionEnvironment._LOCAL;
       default:
-        return ExecutionEnvironment.DEVELOPMENT;
+        return ExecutionEnvironment._DEVELOPMENT;
     }
   }
 
@@ -1145,13 +1145,13 @@ export class ParlantEnhancedAuthService {
   private assessTokenOperationRisk(operation: TokenOperation): RiskLevel {
     switch (operation.type) {
       case "revoke_all":
-        return RiskLevel.CRITICAL;
+        return RiskLevel._CRITICAL;
       case "revoke_user":
-        return RiskLevel.HIGH;
+        return RiskLevel._HIGH;
       case "refresh":
-        return RiskLevel.LOW;
+        return RiskLevel._LOW;
       default:
-        return RiskLevel.MODERATE;
+        return RiskLevel._MODERATE;
     }
   }
 
@@ -1162,7 +1162,7 @@ export class ParlantEnhancedAuthService {
     const topic = `Token Operation: ${operation.type}`;
     return this.parlantService.createConversation(
       topic,
-      ConversationPriority.HIGH,
+      ConversationPriority._HIGH,
     );
   }
 

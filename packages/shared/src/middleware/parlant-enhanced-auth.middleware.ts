@@ -473,18 +473,18 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
    * @param operationId - Operation identifier
    */
   @ParlantValidation({
-    mode: ValidationMode.INTERACTIVE,
+    mode: ValidationMode._INTERACTIVE,
     approvalLevel: ApprovalLevel.SINGLE_APPROVAL,
     timeout: 30000,
     cacheable: true,
   })
   @SecurityClassification({
-    securityLevel: FunctionSecurityLevel.RESTRICTED,
-    riskLevel: RiskLevel.HIGH,
+    securityLevel: FunctionSecurityLevel._RESTRICTED,
+    riskLevel: RiskLevel._HIGH,
   })
   @ConversationContext({
     topic: "Authentication Security Validation",
-    priority: ConversationPriority.HIGH,
+    priority: ConversationPriority._HIGH,
     requiredParticipants: [ParticipantRole.VALIDATOR],
   })
   async performConversationalAuthentication(
@@ -572,17 +572,17 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
    * @param operationId - Operation identifier
    */
   @ParlantValidation({
-    mode: ValidationMode.INTERACTIVE,
+    mode: ValidationMode._INTERACTIVE,
     approvalLevel: ApprovalLevel.DUAL_APPROVAL,
     timeout: 60000,
   })
   @SecurityClassification({
-    securityLevel: FunctionSecurityLevel.SECRET,
-    riskLevel: RiskLevel.CRITICAL,
+    securityLevel: FunctionSecurityLevel._SECRET,
+    riskLevel: RiskLevel._CRITICAL,
   })
   @ConversationContext({
     topic: "High-Risk Authentication Validation",
-    priority: ConversationPriority.CRITICAL,
+    priority: ConversationPriority._CRITICAL,
     requiredParticipants: [ParticipantRole.APPROVER, ParticipantRole.VALIDATOR],
   })
   async performHighRiskAuthentication(
@@ -682,8 +682,8 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     // Determine risk level
     let riskLevel: RiskLevel;
     if (totalRisk >= this.riskThresholds.critical)
-      riskLevel = RiskLevel.CRITICAL;
-    else if (totalRisk >= this.riskThresholds.high) riskLevel = RiskLevel.HIGH;
+      riskLevel = RiskLevel._CRITICAL;
+    else if (totalRisk >= this.riskThresholds.high) riskLevel = RiskLevel._HIGH;
     else if (totalRisk >= this.riskThresholds.medium)
       riskLevel = RiskLevel.MODERATE;
     else if (totalRisk >= this.riskThresholds.low) riskLevel = RiskLevel.LOW;
@@ -810,7 +810,7 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
     };
 
     const validationParams: ValidationParameters = {
-      mode: ValidationMode.INTERACTIVE,
+      mode: ValidationMode._INTERACTIVE,
       approvalLevel: this.determineApprovalLevel(req),
       timeout: this.securityConfig.conversationTimeout,
       cacheable: true,
@@ -852,7 +852,7 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
 
     // Update conversation context for high-risk
     baseRequest.conversationContext.metadata.priority =
-      ConversationPriority.CRITICAL;
+      ConversationPriority._CRITICAL;
     baseRequest.conversationContext.metadata.properties = {
       ...baseRequest.conversationContext.metadata.properties,
       highRisk: true,
@@ -976,10 +976,10 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
 
     // Apply measures based on risk level
     switch (riskLevel) {
-      case RiskLevel.CRITICAL:
+      case RiskLevel._CRITICAL:
         await this.applyCriticalSecurityMeasures(req, res, operationId);
         break;
-      case RiskLevel.HIGH:
+      case RiskLevel._HIGH:
         await this.applyHighSecurityMeasures(req, res, operationId);
         break;
       case RiskLevel.MODERATE:
@@ -1131,12 +1131,12 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   private determineSecurityLevel(
     req: ParlantAuthenticatedRequest,
   ): FunctionSecurityLevel {
-    if (req.riskAssessment?.riskLevel === RiskLevel.CRITICAL) {
-      return FunctionSecurityLevel.SECRET;
+    if (req.riskAssessment?.riskLevel === RiskLevel._CRITICAL) {
+      return FunctionSecurityLevel._SECRET;
     }
 
     if (this.isSensitiveEndpoint(req)) {
-      return FunctionSecurityLevel.RESTRICTED;
+      return FunctionSecurityLevel._RESTRICTED;
     }
 
     return FunctionSecurityLevel.INTERNAL;
@@ -1145,11 +1145,11 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
   private determineApprovalLevel(
     req: ParlantAuthenticatedRequest,
   ): ApprovalLevel {
-    if (req.riskAssessment?.riskLevel === RiskLevel.CRITICAL) {
+    if (req.riskAssessment?.riskLevel === RiskLevel._CRITICAL) {
       return ApprovalLevel.DUAL_APPROVAL;
     }
 
-    if (req.riskAssessment?.riskLevel === RiskLevel.HIGH) {
+    if (req.riskAssessment?.riskLevel === RiskLevel._HIGH) {
       return ApprovalLevel.SINGLE_APPROVAL;
     }
 
@@ -1198,7 +1198,7 @@ export class ParlantEnhancedAuthMiddleware implements NestMiddleware {
       conversationId: `auth-conv-${Date.now()}`,
       metadata: {
         topic: "Request Authentication Validation",
-        priority: ConversationPriority.HIGH,
+        priority: ConversationPriority._HIGH,
         properties: {
           url: req.url,
           method: req.method,

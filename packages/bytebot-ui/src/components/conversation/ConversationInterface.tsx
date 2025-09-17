@@ -102,7 +102,6 @@ import {
   BotIcon,
   CheckmarkCircle02Icon,
   ClockIcon,
-  HugeiconsIcon,
   SearchIcon as MicrophoneIcon,
   RefreshIcon,
   Search01Icon as SearchIcon,
@@ -407,7 +406,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
     
     setIsValidationPending(true);
     try {
-      await onValidationResponse(decision, reasoning);
+      onValidationResponse(decision, reasoning);
       // Validation response submitted successfully
       logInfo('Validation response submitted', { messageId: safeMessage.id, decision }, 'ConversationInterface');
     } catch (error) {
@@ -525,7 +524,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               disabled={isValidationPending}
               className="text-green-600 border-green-600 hover:bg-green-50"
             >
-              <HugeiconsIcon icon={CheckmarkCircle02Icon} className="w-4 h-4 mr-1" />
+              <div className="w-4 h-4 mr-1 bg-green-600 rounded-full"></div>
               Approve
             </Button>
             <Button
@@ -537,7 +536,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               disabled={isValidationPending}
               className="text-red-600 border-red-600 hover:bg-red-50"
             >
-              <HugeiconsIcon icon={AlertCircleIcon} className="w-4 h-4 mr-1" />
+              <div className="w-4 h-4 mr-1 bg-red-600 rounded-full"></div>
               Deny
             </Button>
             <Button
@@ -549,7 +548,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = React.memo(({
               disabled={isValidationPending}
               className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
             >
-              <HugeiconsIcon icon={ClockIcon} className="w-4 h-4 mr-1" />
+              <div className="w-4 h-4 mr-1 bg-yellow-600 rounded-full"></div>
               More Info
             </Button>
           </div>
@@ -650,7 +649,7 @@ const ConversationHeader: React.FC<ConversationHeaderProps> = React.memo(({
             onClick={onSearch}
             aria-label="Search messages"
           >
-            <HugeiconsIcon icon={SearchIcon} className="w-4 h-4" />
+            <div className="w-4 h-4 bg-blue-600 rounded-full"></div>
           </Button>
         )}
         
@@ -661,7 +660,7 @@ const ConversationHeader: React.FC<ConversationHeaderProps> = React.memo(({
             onClick={onExport}
             aria-label="Export conversation"
           >
-            <HugeiconsIcon icon={ArrowRight02Icon} className="w-4 h-4" />
+            <div className="w-4 h-4 bg-gray-600 rounded-full"></div>
           </Button>
         )}
         
@@ -672,7 +671,7 @@ const ConversationHeader: React.FC<ConversationHeaderProps> = React.memo(({
             onClick={onRefresh}
             aria-label="Refresh conversation"
           >
-            <HugeiconsIcon icon={RefreshIcon} className="w-4 h-4" />
+            <div className="w-4 h-4 bg-green-600 rounded-full"></div>
           </Button>
         )}
         
@@ -683,7 +682,7 @@ const ConversationHeader: React.FC<ConversationHeaderProps> = React.memo(({
             onClick={onSettings}
             aria-label="Conversation settings"
           >
-            <HugeiconsIcon icon={SettingsIcon} className="w-4 h-4" />
+            <div className="w-4 h-4 bg-gray-600 rounded-full"></div>
           </Button>
         )}
       </div>
@@ -1031,12 +1030,10 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           state={conversationState}
           metrics={metrics}
           onSearch={config.enableSearch ? (): void => { setShowSearch(!showSearch); } : undefined}
-          onExport={config.enableExport ? async (): Promise<void> => {
-            try {
-              await handleExportConversation();
-            } catch {
+          onExport={config.enableExport ? (): void => {
+            handleExportConversation().catch(() => {
               // Export failed silently
-            }
+            });
           } : undefined}
           onRefresh={(): void => { 
             window.location.reload(); 
@@ -1078,7 +1075,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           {currentConversation === null && (
             <div className="flex flex-col items-center justify-center h-96 text-center px-6">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <HugeiconsIcon icon={BotIcon} className="w-8 h-8 text-blue-600" />
+                <BotIcon className="w-8 h-8 text-blue-600" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Welcome to AIgent Enterprise
@@ -1135,7 +1132,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
           {/* Selected File Display */}
           {Boolean(selectedFile) && (
             <div className="mb-3 flex items-center gap-2 p-2 bg-gray-100 rounded-lg">
-              <HugeiconsIcon icon={AttachmentIcon} className="w-4 h-4 text-gray-500" />
+              <AttachmentIcon className="w-4 h-4 text-gray-500" />
               <span className="text-sm text-gray-700 flex-1 truncate">
                 {selectedFile.name}
               </span>
@@ -1165,7 +1162,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 aria-label={isVoiceRecording ? 'Stop recording' : 'Start voice input'}
                 aria-pressed={isVoiceRecording}
               >
-                <HugeiconsIcon icon={MicrophoneIcon} className="w-4 h-4" />
+                <MicrophoneIcon className="w-4 h-4" />
               </Button>
             )}
             
@@ -1178,7 +1175,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
                 className="flex-shrink-0 text-gray-500"
                 aria-label="Attach file"
               >
-                <HugeiconsIcon icon={AttachmentIcon} className="w-4 h-4" />
+                <AttachmentIcon className="w-4 h-4" />
               </Button>
             )}
             
@@ -1216,7 +1213,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
               aria-label="Send message"
             >
-              <HugeiconsIcon icon={SendIcon} className="w-4 h-4" />
+              <SendIcon className="w-4 h-4" />
             </Button>
             
             {/* Custom Actions */}
