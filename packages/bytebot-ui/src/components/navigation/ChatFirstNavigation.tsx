@@ -1026,11 +1026,10 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
               });
             }
           } else if (action.path) {
-            const navigationResult = router.push(action.path);
-            if (navigationResult instanceof Promise) {
-              navigationResult.catch((error) => {
-                logWarn('Navigation failed', { error: error.message }, 'ChatFirstNavigation');
-              });
+            try {
+              router.push(action.path);
+            } catch (error) {
+              logWarn('Navigation failed', { error: (error as Error).message }, 'ChatFirstNavigation');
             }
             onNavigate?.(action.path);
           }
@@ -1046,6 +1045,9 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
     const parts = shortcut.toLowerCase().split('+');
     const key = parts[parts.length - 1];
     const modifiers = parts.slice(0, -1);
+    
+    // Safety check for key
+    if (!key) return false;
     
     const hasCtrl = modifiers.includes('ctrl') && e.ctrlKey;
     const hasAlt = modifiers.includes('alt') && e.altKey;

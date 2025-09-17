@@ -313,6 +313,9 @@ export function getLabel(block: ComputerToolUseContentBlock | unknown): string {
     return "Unknown";
   }
 
+  // Type assertion for type guard functions  
+  const safeBlock: unknown = block;
+
   if (safeTypeGuard(isScreenshotToolUseBlock, safeBlock)) {
     return "Screenshot";
   }
