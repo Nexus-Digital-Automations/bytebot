@@ -53,7 +53,7 @@ const STATUS_CONFIGS: Record<TaskStatus, StatusIconConfig> = {
 
 export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
   // Format date to match the screenshot (e.g., "Today 9:13am" or "April 13, 2025, 12:01pm")
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const today = new Date();
 
@@ -68,13 +68,16 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
     return capitalizeFirstChar(formatted);
   };
 
-  const StatusIcon = ({ status }: { status: TaskStatus }) => {
+  const StatusIcon = ({ status }: { status: TaskStatus }): React.ReactElement | null => {
     const config = STATUS_CONFIGS[status];
-    if (!config) {return null;}
+    if (config === undefined || config === null) {return null;}
 
-    const { icon, color, useLoader } = config;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- HugeIcons requires any type
+    const icon = config.icon;
+    const color = config.color;
+    const useLoader = config.useLoader;
 
-    if (useLoader) {
+    if (useLoader === true) {
       return (
         <div className="flex items-center justify-center">
           <Loader size={16} />
@@ -84,7 +87,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
 
     return (
       <div className="flex items-center justify-center">
-        <HugeiconsIcon icon={icon} className={`h-5 w-5 ${color}`} />
+        <HugeiconsIcon icon={icon as React.ComponentType} className={`h-5 w-5 ${color}`} />
       </div>
     );
   };
