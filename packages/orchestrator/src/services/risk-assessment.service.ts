@@ -106,10 +106,10 @@ export class RiskAssessmentService {
   }
 
   private determineRiskLevel(score: number): SecurityLevel {
-    if (score >= 0.8) return SecurityLevel.CRITICAL;
-    if (score >= 0.6) return SecurityLevel.HIGH;
-    if (score >= 0.3) return SecurityLevel.MEDIUM;
-    return SecurityLevel.LOW;
+    if (score >= 0.8) return SecurityLevel._CRITICAL;
+    if (score >= 0.6) return SecurityLevel._HIGH;
+    if (score >= 0.3) return SecurityLevel._MEDIUM;
+    return SecurityLevel._LOW;
   }
 
   private generateMitigationStrategies(factors: RiskFactor[]): string[] {

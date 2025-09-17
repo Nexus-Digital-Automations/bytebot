@@ -34,9 +34,15 @@ export class ApprovalWorkflowService {
       return false;
     }
 
-    // Update approval status
-    request.status = approved ? ApprovalStatus.APPROVED : ApprovalStatus.REJECTED;
-    request.response = { approved, reason, confidence: 1.0 };
+    // Update approval status - create new object due to readonly properties
+    const updatedRequest: ApprovalRequest = {
+      ...request,
+      status: approved ? ApprovalStatus.APPROVED : ApprovalStatus.REJECTED,
+      response: { approved, reason, confidence: 1.0 }
+    };
+    
+    // Replace the request in the map
+    this.approvalRequests.set(requestId, updatedRequest);
     
     this.logger.log(`Approval processed: ${requestId} - ${approved ? 'APPROVED' : 'REJECTED'}`);
     

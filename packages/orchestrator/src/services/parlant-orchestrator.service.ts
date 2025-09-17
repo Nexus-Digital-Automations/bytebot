@@ -61,6 +61,8 @@ import {
   PerformanceRequirements as _PerformanceRequirements,
   ComplianceRequirements as _ComplianceRequirements,
   OrchestratorConfiguration,
+  ConversationSummary,
+  ApprovalOutcome,
   RecoveryStrategy,
   RecoveryStrategyType as _RecoveryStrategyType,
   ConversationTracking as _ConversationTracking,
@@ -188,33 +190,7 @@ export interface OrchestrationAuditEntry {
   readonly securityLevel: SecurityLevel;
 }
 
-export interface ConversationSummary {
-  /** Conversation ID */
-  readonly conversationId: string;
-  /** Summary text */
-  readonly summary: string;
-  /** Key decisions made */
-  readonly decisions: string[];
-  /** Risk factors identified */
-  readonly riskFactors: string[];
-  /** Mitigation strategies applied */
-  readonly mitigationStrategies: string[];
-  /** Approval outcomes */
-  readonly approvalOutcomes: ApprovalOutcome[];
-}
-
-export interface ApprovalOutcome {
-  /** Approval request ID */
-  readonly requestId: string;
-  /** Final outcome */
-  readonly outcome: ApprovalStatus;
-  /** Approver information */
-  readonly approver: string;
-  /** Approval reasoning */
-  readonly reasoning: string;
-  /** Approval timestamp */
-  readonly timestamp: Date;
-}
+// ConversationSummary and ApprovalOutcome interfaces are now imported from orchestrator.types.ts
 
 // ===== MAIN ORCHESTRATOR SERVICE =====
 
@@ -223,7 +199,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
   private readonly logger = new Logger(ParlantOrchestratorService.name);
 
   // Configuration
-  private config: OrchestratorConfiguration;
+  private config!: OrchestratorConfiguration; // Will be initialized in loadConfiguration()
 
   // Execution tracking
   private readonly activeExecutions = new Map<string, OrchestrationExecutionContext>();
@@ -959,7 +935,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
         }
       },
       conversationTracking: {
-        conversationIds: [conversationContext.conversationId || uuidv4()],
+        conversationIds: [uuidv4()], // Generate new conversation ID
         approvalRequests: [],
         summaries: []
       }
@@ -1175,7 +1151,7 @@ export class ParlantOrchestratorService implements OnModuleInit, OnModuleDestroy
         }
       },
       auditTrail: this.generateAuditTrail(context),
-      conversationSummaries: context.conversationTracking.summaries
+      conversationSummaries: context.conversationTracking.summaries as ConversationSummary[]
     };
   }
 

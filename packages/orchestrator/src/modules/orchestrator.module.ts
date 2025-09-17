@@ -223,7 +223,7 @@ export class OrchestratorModule {
           verboseMemoryLeak: true,
           ignoreErrors: false
         }),
-        ...(options.imports || [])
+        ...(options.imports as any[] || [])
       ],
       providers: [
         // Async configuration provider
@@ -236,7 +236,7 @@ export class OrchestratorModule {
             }
             return this.buildConfiguration({});
           },
-          inject: options.inject || []
+          inject: (options.inject as any[]) || []
         },
         
         // Core services

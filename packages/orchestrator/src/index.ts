@@ -35,10 +35,10 @@ export type {
   OrchestrationUserContext,
   OrchestrationExecutionOptions,
   OrchestrationPerformanceMetrics,
-  OrchestrationAuditEntry,
-  ConversationSummary,
-  ApprovalOutcome
+  OrchestrationAuditEntry
 } from './services/parlant-orchestrator.service';
+
+// Note: ConversationSummary and ApprovalOutcome are exported from orchestrator.types
 
 export type {
   ServiceEndpoint

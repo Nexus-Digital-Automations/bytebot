@@ -13,9 +13,15 @@
 import { 
   ParlantValidationRequest as _ParlantValidationRequest, 
   ParlantValidationResponse,
-  ParlantConversationContext,
   SecurityLevel
 } from './parlant-shared.types';
+
+// Define ParlantConversationContext locally since it doesn't exist in shared types
+export interface ParlantConversationContext {
+  conversationId: string;
+  participants: string[];
+  context: Record<string, unknown>;
+}
 
 // ===== ORCHESTRATION CORE INTERFACES =====
 
@@ -484,8 +490,23 @@ export interface ConversationSummary {
   readonly decisions: string[];
   /** Risk factors identified */
   readonly riskFactors: string[];
-  /** Mitigation strategies */
-  readonly mitigations: string[];
+  /** Mitigation strategies applied */
+  readonly mitigationStrategies: string[];
+  /** Approval outcomes */
+  readonly approvalOutcomes: ApprovalOutcome[];
+}
+
+export interface ApprovalOutcome {
+  /** Approval request ID */
+  readonly requestId: string;
+  /** Final outcome */
+  readonly outcome: ApprovalStatus;
+  /** Approver information */
+  readonly approver: string;
+  /** Approval reasoning */
+  readonly reasoning: string;
+  /** Approval timestamp */
+  readonly timestamp: Date;
 }
 
 // ===== ERROR HANDLING =====
