@@ -468,7 +468,7 @@ export class SecurityAuditService {
           userIds: request.userIds,
           resources: request.resources,
         },
-        actionDescription: `Query audit entries from ${request.startDate.toISOString()} to ${request.endDate.toISOString()} with filters: ${request.eventTypes?.length || 0} event types, ${request.severities?.length || 0} severities`,
+        actionDescription: `Query audit entries from ${request.startDate.toISOString()} to ${request.endDate.toISOString()} with filters: ${request.eventTypes?.length ?? 0} event types, ${request.severities?.length ?? 0} severities`,
         context: request.context,
         riskLevel: RiskLevel.HIGH, // Audit queries are HIGH risk
         operationId: request.operationId,
@@ -489,7 +489,7 @@ export class SecurityAuditService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -585,7 +585,7 @@ export class SecurityAuditService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -712,25 +712,25 @@ export class SecurityAuditService {
 
     if (request.eventTypes?.length) {
       filteredEntries = filteredEntries.filter(entry => 
-        request.eventTypes!.includes(entry.eventType)
+        request.eventTypes?.includes(entry.eventType) ?? false
       );
     }
 
     if (request.severities?.length) {
       filteredEntries = filteredEntries.filter(entry => 
-        request.severities!.includes(entry.severity)
+        request.severities?.includes(entry.severity) ?? false
       );
     }
 
     if (request.userIds?.length) {
       filteredEntries = filteredEntries.filter(entry => 
-        request.userIds!.includes(entry.userId)
+        request.userIds?.includes(entry.userId) ?? false
       );
     }
 
     if (request.resources?.length) {
       filteredEntries = filteredEntries.filter(entry => 
-        request.resources!.some(resource => entry.resource.includes(resource))
+        request.resources?.some(resource => entry.resource.includes(resource)) ?? false
       );
     }
 
@@ -827,7 +827,7 @@ export class SecurityAuditService {
     return null;
   }
 
-  private async detectAuditAnomalies(entry: SecurityAuditEntry): Promise<void> {
+  private async detectAuditAnomalies(_entry: SecurityAuditEntry): Promise<void> {
     // Real-time anomaly detection
     // Implementation would use ML models for pattern analysis
   }
@@ -839,7 +839,7 @@ export class SecurityAuditService {
     // Check for unusual access patterns
     const userAccess = new Map<string, number>();
     entries.forEach(entry => {
-      const count = userAccess.get(entry.userId) || 0;
+      const count = userAccess.get(entry.userId) ?? 0;
       userAccess.set(entry.userId, count + 1);
     });
 
@@ -860,7 +860,7 @@ export class SecurityAuditService {
     return anomalies;
   }
 
-  private generateComplianceSummary(entries: SecurityAuditEntry[]): Record<ComplianceFramework, ComplianceStatus> {
+  private generateComplianceSummary(_entries: SecurityAuditEntry[]): Record<ComplianceFramework, ComplianceStatus> {
     const summary = {} as Record<ComplianceFramework, ComplianceStatus>;
     
     Object.values(ComplianceFramework).forEach(framework => {
@@ -897,8 +897,8 @@ export class SecurityAuditService {
       eventsByType[entry.eventType]++;
       eventsBySeverity[entry.severity]++;
       
-      userCounts.set(entry.userId, (userCounts.get(entry.userId) || 0) + 1);
-      resourceCounts.set(entry.resource, (resourceCounts.get(entry.resource) || 0) + 1);
+      userCounts.set(entry.userId, (userCounts.get(entry.userId) ?? 0) + 1);
+      resourceCounts.set(entry.resource, (resourceCounts.get(entry.resource) ?? 0) + 1);
       
       if (entry.outcome === 'SUCCESS') successCount++;
       totalCount++;
@@ -930,7 +930,7 @@ export class SecurityAuditService {
     entries: SecurityAuditEntry[],
     frameworks?: ComplianceFramework[]
   ): Record<ComplianceFramework, ComplianceStatus> {
-    const targetFrameworks = frameworks || this.getAuditConfig().supportedFrameworks;
+    const targetFrameworks = frameworks ?? this.getAuditConfig().supportedFrameworks;
     const assessment = {} as Record<ComplianceFramework, ComplianceStatus>;
 
     targetFrameworks.forEach(framework => {

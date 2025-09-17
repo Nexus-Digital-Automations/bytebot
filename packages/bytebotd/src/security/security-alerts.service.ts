@@ -26,7 +26,7 @@ import {
   RiskLevel,
   ConversationalValidationError 
 } from '../parlant/parlant-integration.service';
-import { SecurityEvent, SecurityEventSeverity, SecurityEventType } from './security-monitoring.service';
+import { SecurityEvent, SecurityEventType } from './security-monitoring.service';
 
 // ===== SECURITY ALERTS INTERFACES =====
 
@@ -257,7 +257,7 @@ export class SecurityAlertsService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -367,7 +367,7 @@ export class SecurityAlertsService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -459,7 +459,7 @@ export class SecurityAlertsService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -639,7 +639,7 @@ export class SecurityAlertsService {
     this.escalationTimers.set(alert.id, timer);
   }
 
-  private async performAutomaticEscalation(alertId: string, step: EscalationStep): Promise<void> {
+  private async performAutomaticEscalation(alertId: string, _step: EscalationStep): Promise<void> {
     const operationId = `auto_escalate_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Performing automatic escalation for alert ${alertId}`);
@@ -660,7 +660,7 @@ export class SecurityAlertsService {
 
   private async performAlertEscalation(
     alert: SecurityAlert,
-    conversationId: string
+    _conversationId: string
   ): Promise<SecurityAlert> {
     const updatedAlert: SecurityAlert = {
       ...alert,
@@ -696,7 +696,7 @@ export class SecurityAlertsService {
 
   private findDuplicateAlert(event: SecurityEvent): SecurityAlert | null {
     const alertHash = this.generateAlertHash(event);
-    return Array.from(this.activeAlerts.values()).find(alert => alert.alertHash === alertHash) || null;
+    return Array.from(this.activeAlerts.values()).find(alert => alert.alertHash === alertHash) ?? null;
   }
 
   private async updateExistingAlert(
