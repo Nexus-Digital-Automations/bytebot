@@ -488,6 +488,10 @@ export class ParlantWebSocketBridgeService
    */
   private handleValidationResponse(message: ParlantWebSocketMessage): void {
     const originalMessageId = message.payload.originalMessageId;
+    if (typeof originalMessageId !== 'string') {
+      this.logger.warn(`⚠️ Invalid originalMessageId type: ${typeof originalMessageId}`);
+      return;
+    }
     const pending = this.pendingValidations.get(originalMessageId);
     const pendingDirect = this.pendingDirectValidations.get(originalMessageId);
 

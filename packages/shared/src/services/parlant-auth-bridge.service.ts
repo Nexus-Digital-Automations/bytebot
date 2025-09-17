@@ -193,7 +193,7 @@ export class ParlantAuthBridgeService
       throw new ParlantIntegrationError(
         "Authentication Bridge initialization failed",
         "AUTH_INIT_ERROR",
-        { error: error.message },
+        { error: error instanceof Error ? error.message : String(error) },
       );
     }
   }
@@ -335,13 +335,13 @@ export class ParlantAuthBridgeService
     } catch (error) {
       this.stats.failedAuthentications++;
 
-      if (error.name === "JsonWebTokenError") {
+      if (error instanceof Error && error.name === "JsonWebTokenError") {
         throw new ParlantAuthenticationError("Invalid JWT token", {
           error: error.message,
         });
       }
 
-      if (error.name === "TokenExpiredError") {
+      if (error instanceof Error && error.name === "TokenExpiredError") {
         throw new ParlantAuthenticationError("JWT token expired", {
           error: error.message,
         });
@@ -349,7 +349,7 @@ export class ParlantAuthBridgeService
 
       this.logger.error("❌ Authentication failed", error);
       throw new ParlantAuthenticationError("Authentication failed", {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -437,7 +437,7 @@ export class ParlantAuthBridgeService
 
     // Remove from local mappings
     this.sessionMappings.delete(sessionId);
-    this.stats.activeSession--;
+    this.stats.activeSessions--;
 
     this.logger.debug(`🗑️ Session invalidated: ${sessionId}`);
     this.emit("session:invalidated", {
@@ -532,7 +532,7 @@ export class ParlantAuthBridgeService
 
     try {
       const decoded = jwt.verify(refreshToken, this.config.jwtSecret) as any;
-      const userId = decoded.sub || decoded.userId;
+      const userId = String(decoded.sub || decoded.userId);
 
       // Generate new access token
       const accessToken = jwt.sign(
@@ -568,7 +568,7 @@ export class ParlantAuthBridgeService
       };
     } catch (error) {
       throw new ParlantAuthenticationError("Invalid refresh token", {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -650,7 +650,7 @@ export class ParlantAuthBridgeService
       cacheStatus: true, // Session cache is always available
       lastCheck: new Date(),
       metrics: {
-        activeConnections: this.stats.activeSession,
+        activeConnections: this.stats.activeSessions,
         requestRate: this.stats.totalAuthentications,
         averageResponseTime: this.stats.averageSessionDuration,
         errorRate:
@@ -898,7 +898,7 @@ export class ParlantAuthBridgeService
     for (const [sessionId, mapping] of this.sessionMappings.entries()) {
       if (this.isSessionExpired(mapping)) {
         this.sessionMappings.delete(sessionId);
-        this.stats.activeSession--;
+        this.stats.activeSessions--;
         this.stats.expiredSessions++;
         cleanedCount++;
       }
@@ -943,7 +943,7 @@ export class ParlantAuthBridgeService
         if (!validSessions.has(mapping.parlantSessionId)) {
           this.logger.debug(`🗑️ Removing invalid session: ${sessionId}`);
           this.sessionMappings.delete(sessionId);
-          this.stats.activeSession--;
+          this.stats.activeSessions--;
         }
       }
     } catch (error) {
@@ -966,6 +966,6 @@ export class ParlantAuthBridgeService
       );
     }
 
-    this.stats.activeSession = sessions.length;
+    this.stats.activeSessions = sessions.length;
   }
 }

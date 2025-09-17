@@ -31,9 +31,12 @@ import { Cache } from "cache-manager";
 
 // Import Parlant types and services
 import {
-  ParlantConversationContext,
   ParlantValidationRequest,
   ParlantValidationResponse,
+} from "../types/parlant-integration.types";
+
+import {
+  ParlantConversationContext,
   ValidationMode,
   ApprovalLevel,
   FunctionSecurityLevel,

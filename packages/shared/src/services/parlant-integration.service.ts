@@ -472,7 +472,7 @@ export class ParlantIntegrationService
         endTime: new Date(),
         processingTime: 10,
         cacheStatus: "miss",
-        source: "rbac",
+        source: "fallback",
       },
     };
   }
@@ -549,10 +549,10 @@ export class ParlantIntegrationService
     _request: ParlantValidationRequest,
   ): ParlantValidationResponse {
     return {
-      approved: data.approved || false,
-      conversationId: data.conversation_id || "",
-      reason: data.reason || "",
-      confidence: data.confidence || 0,
+      approved: typeof data.approved === 'boolean' ? data.approved : false,
+      conversationId: typeof data.conversation_id === 'string' ? data.conversation_id : "",
+      reason: typeof data.reason === 'string' ? data.reason : "",
+      confidence: typeof data.confidence === 'number' ? data.confidence : 0,
       executionContext: data.execution_context
         ? {
             constraints: data.execution_context.constraints || {},
@@ -583,10 +583,10 @@ export class ParlantIntegrationService
         cacheStatus: "miss",
         source: "parlant",
         riskAssessment: {
-          level: data.risk_level || SecurityLevel._MEDIUM,
-          factors: data.risk_factors || [],
-          score: data.risk_score || 50,
-          mitigations: data.mitigations || [],
+          level: (Object.values(SecurityLevel).includes(data.risk_level as SecurityLevel) ? data.risk_level as SecurityLevel : SecurityLevel._MEDIUM),
+          factors: (Array.isArray(data.risk_factors) ? data.risk_factors as string[] : []),
+          score: (typeof data.risk_score === 'number' ? data.risk_score : 50),
+          mitigations: (Array.isArray(data.mitigations) ? data.mitigations as string[] : []),
         },
       },
     };

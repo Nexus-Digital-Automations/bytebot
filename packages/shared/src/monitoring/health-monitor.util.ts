@@ -118,7 +118,7 @@ export class HealthMonitorUtil {
       }
 
       // Execute health check with timeout
-      const result = await this.executeWithTimeout(checkFunction, fullContext.timeout);
+      const result = await this.executeWithTimeout(checkFunction, fullContext.timeout ?? 5000);
       const duration = Date.now() - startTime;
 
       // Update circuit breaker on success

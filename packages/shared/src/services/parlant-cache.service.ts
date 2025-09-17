@@ -376,7 +376,7 @@ export class ParlantCacheService
       this.setMetadata(cacheKey, {
         key: cacheKey,
         layer: CacheLayer.MEMORY,
-        size: cacheEntry.metadata.size,
+        size: (typeof cacheEntry.metadata.size === 'number' ? cacheEntry.metadata.size : 0),
         frequency: 1,
         lastAccess: new Date(),
         createdAt: new Date(),
@@ -518,7 +518,7 @@ export class ParlantCacheService
       defaultTtl: parseInt(process.env.PARLANT_CACHE_TTL || "3600000"),
       maxSize: parseInt(process.env.PARLANT_CACHE_MAX_SIZE || "10000"),
       evictionPolicy:
-        (process.env.PARLANT_CACHE_EVICTION as "lru" | "lfu" | "fifo") || "lru",
+        (process.env.PARLANT_CACHE_EVICTION as "lru" | "fifo" | "ttl") || "lru",
     };
 
     this.persistentCachePath =
@@ -700,7 +700,7 @@ export class ParlantCacheService
         responseTime,
       };
     } catch (error) {
-      if (error.code !== "ENOENT") {
+      if (error instanceof Error && 'code' in error && error.code !== "ENOENT") {
         this.logger.error("❌ Persistent cache get operation failed", error);
       }
       return {

@@ -32,6 +32,9 @@ import { Cache } from "cache-manager";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
+} from "../types/parlant-integration.types";
+
+import {
   ParlantConversationContext,
   ValidationMode,
   ApprovalLevel,
@@ -46,6 +49,8 @@ import {
   ExecutionEnvironment,
   UserContext,
   RequestContext,
+  ConversationState,
+  ConversationMetadata,
 } from "../types/parlant.types";
 
 // Import Parlant decorators
@@ -1056,7 +1061,24 @@ export class ParlantMFAService {
         ? ConversationPriority._CRITICAL
         : ConversationPriority._NORMAL;
 
-    return this.parlantService.createConversation(topic, priority);
+    const conversationId = await this.parlantService.createConversation(topic, priority);
+    
+    return {
+      conversationId,
+      userId,
+      sessionId: `session_${Date.now()}`,
+      state: ConversationState._ACTIVE,
+      metadata: {
+        topic,
+        priority,
+        tags: ['mfa', method, riskAssessment.riskLevel],
+        properties: {},
+        history: []
+      },
+      participants: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
   }
 
   /**
@@ -1442,10 +1464,27 @@ export class ParlantMFAService {
     context: AuthenticationContext,
   ): Promise<ParlantConversationContext> {
     const topic = `High-Risk MFA - User ${userId}`;
-    return this.parlantService.createConversation(
+    const conversationId = await this.parlantService.createConversation(
       topic,
       ConversationPriority._CRITICAL,
     );
+    
+    return {
+      conversationId,
+      userId,
+      sessionId: `session_${Date.now()}`,
+      state: ConversationState._ACTIVE,
+      metadata: {
+        topic,
+        priority: ConversationPriority._CRITICAL,
+        tags: ['high-risk-mfa', riskAssessment.riskLevel],
+        properties: { riskAssessment, context },
+        history: []
+      },
+      participants: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
   }
 
   private async generateHighRiskMFAChallenge(
@@ -1510,10 +1549,27 @@ export class ParlantMFAService {
     method: MFAMethod,
   ): Promise<ParlantConversationContext> {
     const topic = `MFA Setup - ${method}`;
-    return this.parlantService.createConversation(
+    const conversationId = await this.parlantService.createConversation(
       topic,
       ConversationPriority._NORMAL,
     );
+    
+    return {
+      conversationId,
+      userId,
+      sessionId: `session_${Date.now()}`,
+      state: ConversationState._ACTIVE,
+      metadata: {
+        topic,
+        priority: ConversationPriority._NORMAL,
+        tags: ['mfa-setup', method],
+        properties: {},
+        history: []
+      },
+      participants: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
   }
 
   private async createMFARecoveryConversation(
@@ -1521,10 +1577,27 @@ export class ParlantMFAService {
     recoveryContext: AuthenticationContext,
   ): Promise<ParlantConversationContext> {
     const topic = `MFA Recovery - User ${userId}`;
-    return this.parlantService.createConversation(
+    const conversationId = await this.parlantService.createConversation(
       topic,
       ConversationPriority._HIGH,
     );
+    
+    return {
+      conversationId,
+      userId,
+      sessionId: `session_${Date.now()}`,
+      state: ConversationState._ACTIVE,
+      metadata: {
+        topic,
+        priority: ConversationPriority._HIGH,
+        tags: ['mfa-recovery'],
+        properties: { recoveryContext },
+        history: []
+      },
+      participants: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
   }
 
   private async performIdentityVerification(

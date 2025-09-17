@@ -187,7 +187,7 @@ export class ParlantHuginnBridgeService
       throw new ParlantIntegrationError(
         "Huginn bridge initialization failed",
         "HUGINN_BRIDGE_INIT_ERROR",
-        { error: error.message },
+        { error: error instanceof Error ? error.message : String(error) },
       );
     }
   }
@@ -650,7 +650,11 @@ export class ParlantHuginnBridgeService
       },
     };
 
-    const serviceConfig = serviceMapping[workflowConfig.workflowType];
+    const workflowType = workflowConfig.workflowType;
+    if (typeof workflowType !== 'string' || !(workflowType in serviceMapping)) {
+      throw new Error(`Invalid workflow type: ${workflowType}`);
+    }
+    const serviceConfig = serviceMapping[workflowType as keyof typeof serviceMapping];
 
     return {
       service: serviceConfig.service,
