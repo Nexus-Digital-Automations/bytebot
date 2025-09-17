@@ -21,7 +21,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtPayload } from '../types/jwt-payload.interface';
 import { User } from '@prisma/client';
-import { AppConfig } from '../../config/configuration';
+// import { AppConfig } from '../../config/configuration';
 
 /**
  * JWT Strategy implementation for token-based authentication
@@ -32,7 +32,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   private readonly logger = new Logger(JwtStrategy.name);
 
   constructor(
-    private readonly configService: ConfigService<AppConfig>,
+    private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
   ) {
     const operationId = `jwt-strategy-init-${Date.now()}`;

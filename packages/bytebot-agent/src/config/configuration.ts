@@ -258,7 +258,7 @@ function loadConfiguration(): AppConfig {
 
     // TODO: Restore Joi validation when dependency is installed
     // Simple validation without Joi for now
-    const validatedConfig = envVars as ValidatedEnvironmentConfig;
+    const validatedConfig = envVars as unknown as ValidatedEnvironmentConfig;
 
     // Type guard validation to ensure runtime type safety
     if (!isValidatedEnvironmentConfig(validatedConfig)) {

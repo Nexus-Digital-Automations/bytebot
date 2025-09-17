@@ -60,6 +60,7 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
   private backgroundMonitoring?: NodeJS.Timeout;
   private lastHealthReport!: HealthReport;
   private readonly healthHistory: HealthReport[] = [];
+  private readonly startTime = Date.now();
 
   constructor(
     private readonly configService: ConfigService,
@@ -730,8 +731,6 @@ export class DatabaseHealthService implements OnModuleInit, OnModuleDestroy {
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
-
-  private readonly startTime = Date.now();
 
   /**
    * Generate unique operation ID for tracking

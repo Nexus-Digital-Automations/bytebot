@@ -29,7 +29,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { SecurityMonitoringModule } from '../security/security-monitoring.module';
 import { SecurityMonitoringService as AuthSecurityMonitoringService } from './services/security-monitoring.service';
 import { SecurityMonitoringService } from '../security/security-monitoring.service';
-import { AppConfig } from '../config/configuration';
+// import { AppConfig } from '../config/configuration';
 
 /**
  * Authentication Module
@@ -47,7 +47,7 @@ import { AppConfig } from '../config/configuration';
     // JWT configuration with dynamic config injection
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService<AppConfig>) => {
+      useFactory: (configService: ConfigService) => {
         const logger = new Logger('JwtModule');
         const operationId = `jwt-module-config-${Date.now()}`;
         const startTime = Date.now();
@@ -131,7 +131,7 @@ import { AppConfig } from '../config/configuration';
     },
     {
       provide: 'AUTH_CONFIG',
-      useFactory: (configService: ConfigService<AppConfig>) => {
+      useFactory: (configService: ConfigService) => {
         const logger = new Logger('AuthModule');
         const operationId = `auth-config-${Date.now()}`;
 
@@ -192,7 +192,7 @@ import { AppConfig } from '../config/configuration';
 export class AuthModule {
   private readonly logger = new Logger(AuthModule.name);
 
-  constructor(private readonly configService: ConfigService<AppConfig>) {
+  constructor(private readonly configService: ConfigService) {
     const operationId = `auth-module-init-${Date.now()}`;
     const startTime = Date.now();
 

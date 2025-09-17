@@ -3,16 +3,16 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AgentModule } from './agent/agent.module';
-import { TasksModule } from './tasks/tasks.module';
-import { MessagesModule } from './messages/messages.module';
+// import { AgentModule } from './agent/agent.module';
+// import { TasksModule } from './tasks/tasks.module';
+// import { MessagesModule } from './messages/messages.module';
 import { AnthropicModule } from './anthropic/anthropic.module';
 import { OpenAIModule } from './openai/openai.module';
 import { GoogleModule } from './google/google.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
-import { HealthModule } from './health/health.module';
+// import { HealthModule } from './health/health.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
@@ -20,7 +20,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SummariesModule } from './summaries/summaries.module';
 import { ProxyModule } from './proxy/proxy.module';
-import { BrowserUseModule } from './browser-use/browser-use.module';
+// import { BrowserUseModule } from './browser-use/browser-use.module';
 import { ConfigurationModule } from './config/config.module';
 import { EnterpriseConfigModule } from './config/enterprise-config.module';
 import { ReliabilityModule } from './common/reliability/reliability.module';
@@ -63,7 +63,7 @@ import { ReliabilityModule } from './common/reliability/reliability.module';
     ),
 
     // Monitoring and Observability (early import for comprehensive coverage)
-    HealthModule,
+    // HealthModule,
     MetricsModule,
 
     // Database infrastructure (must be imported before modules that use database)
@@ -84,15 +84,15 @@ import { ReliabilityModule } from './common/reliability/reliability.module';
     ReliabilityModule,
 
     // Application modules
-    AgentModule,
-    TasksModule,
-    MessagesModule,
+    // AgentModule,
+    // TasksModule,
+    // MessagesModule,
     SummariesModule,
     AnthropicModule,
     OpenAIModule,
     GoogleModule,
     ProxyModule,
-    BrowserUseModule,
+    // BrowserUseModule,
   ],
   controllers: [AppController],
   providers: [

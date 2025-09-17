@@ -15,6 +15,7 @@ import {
   Header,
 } from '@nestjs/common';
 import { DatabaseService } from './database.service';
+import { DatabaseHealthService } from './health/database-health.service';
 import {
   CircuitBreakerGuard,
   CircuitBreakerState,
@@ -31,6 +32,7 @@ export class DatabaseHealthController {
 
   constructor(
     private readonly databaseService: DatabaseService,
+    private readonly databaseHealthService: DatabaseHealthService,
     private readonly circuitBreakerGuard: CircuitBreakerGuard,
     private readonly databaseHealthGuard: DatabaseHealthGuard,
   ) {}
@@ -42,30 +44,7 @@ export class DatabaseHealthController {
   @Get('health')
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
-  getHealthStatus():
-    | {
-        status: string;
-        timestamp: string;
-        database: {
-          connectionStatus: string;
-          isConnected: boolean;
-          uptime: number;
-          lastHealthCheck: Date;
-        };
-        healthGuard: {
-          status: string;
-          consecutiveFailures: number;
-          consecutiveSuccesses: number;
-          errorRate: number;
-          totalChecks: number;
-        };
-        checks: any;
-      }
-    | {
-        status: string;
-        error: string;
-        timestamp: string;
-      } {
+  async getHealthStatus() {
     const operationId = this.generateOperationId();
 
     try {
@@ -73,17 +52,17 @@ export class DatabaseHealthController {
         operationId,
       });
 
-      const healthStatus = this.databaseService.getHealthStatus();
+      const healthReport = await this.databaseHealthService.performHealthCheck(true);
       const detailedHealth = this.databaseHealthGuard.getDetailedHealthReport();
 
       const response = {
-        status: healthStatus.isHealthy ? 'healthy' : 'unhealthy',
-        timestamp: new Date().toISOString(),
+        status: healthReport.status,
+        timestamp: healthReport.timestamp.toISOString(),
+        duration: healthReport.duration,
         database: {
-          connectionStatus: healthStatus.connectionStatus,
-          isConnected: healthStatus.isHealthy,
-          uptime: healthStatus.uptime,
-          lastHealthCheck: healthStatus.lastHealthCheck,
+          connectionStatus: healthReport.status,
+          isConnected: healthReport.status !== 'unhealthy',
+          checks: healthReport.checks,
         },
         healthGuard: {
           status: detailedHealth.status,
@@ -92,11 +71,9 @@ export class DatabaseHealthController {
           errorRate: detailedHealth.errorRate,
           totalChecks: detailedHealth.totalChecks,
         },
-        checks: {
-          connectivity: healthStatus.isHealthy,
-          performance: detailedHealth.responseTime < 1000, // Under 1 second
-          errorRate: detailedHealth.errorRate < 0.05, // Under 5% error rate
-        },
+        kubernetes: healthReport.kubernetes,
+        summary: healthReport.summary,
+        operationId,
       };
 
       this.logger.debug(`[${operationId}] Database health check completed`, {
@@ -115,11 +92,7 @@ export class DatabaseHealthController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         error: error instanceof Error ? error.message : String(error),
-        checks: {
-          connectivity: false,
-          performance: false,
-          errorRate: false,
-        },
+        operationId,
       };
     }
   }

@@ -35,7 +35,7 @@ import {
 } from './types/jwt-payload.interface';
 import { LoginDto, RegisterDto, ChangePasswordDto } from './dto/login.dto';
 import { User, UserSession, UserRole } from '@prisma/client';
-import { AppConfig } from '../config/configuration';
+// import { AppConfig } from '../config/configuration';
 import { SecurityMonitoringService } from './services/security-monitoring.service';
 
 /**
@@ -48,7 +48,7 @@ export class AuthService {
   private readonly SALT_ROUNDS = 12; // High security salt rounds for bcrypt
 
   constructor(
-    private readonly configService: ConfigService<AppConfig>,
+    private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly prismaService: PrismaService,
     private readonly securityMonitoring: SecurityMonitoringService,
