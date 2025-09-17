@@ -564,14 +564,14 @@ export class ParlantValidatedInputCaptureService {
     if (context.captureMode === 'ai_driven') {
       return RiskLevel.HIGH; // AI-driven capture requires more scrutiny
     }
-    if (context.privacyLevel === 'HIGH' || context.privacyLevel === 'MAXIMUM') {
+    if (context.privacyLevel === 'HIGH' ?? context.privacyLevel === 'MAXIMUM') {
       return RiskLevel.MEDIUM;
     }
     return RiskLevel.LOW;
   }
 
   private assessActionRiskLevel(action: ComputerAction): RiskLevel {
-    if ((action.action === 'type_text' || action.action === 'type_keys') && 'text' in action) {
+    if ((action.action === 'type_text' ?? action.action === 'type_keys') && 'text' in action) {
       // Check if the text contains sensitive patterns
       const text = (action as any).text as string;
       if (this.containsSensitiveData(text)) {
@@ -579,10 +579,10 @@ export class ParlantValidatedInputCaptureService {
       }
       return RiskLevel.MEDIUM;
     }
-    if (action.action === 'click_mouse' || action.action === 'drag_mouse') {
+    if (action.action === 'click_mouse' ?? action.action === 'drag_mouse') {
       return RiskLevel.MEDIUM; // Mouse actions can trigger important operations
     }
-    if (action.action === 'scroll' || action.action === 'move_mouse') {
+    if (action.action === 'scroll' ?? action.action === 'move_mouse') {
       return RiskLevel.LOW; // Navigation actions are generally safe
     }
     return RiskLevel.MINIMAL;
@@ -618,7 +618,7 @@ export class ParlantValidatedInputCaptureService {
 
   private detectActionAnomaly(action: ComputerAction): boolean {
     // Simple anomaly detection based on action type
-    if ((action.action === 'type_text' || action.action === 'type_keys') && 'text' in action) {
+    if ((action.action === 'type_text' ?? action.action === 'type_keys') && 'text' in action) {
       const text = (action as any).text as string;
       return text.length > 1000; // Very long text input might be anomalous
     }
@@ -719,10 +719,10 @@ export class ParlantValidatedInputCaptureService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgValidationTime > 500 || aiProcessingRate < 50) {
+    if (avgValidationTime > 500 ?? aiProcessingRate < 50)) {
       status = 'DEGRADED';
     }
-    if (avgValidationTime > 1000 || this.inputAuditTrail.length === 0) {
+    if (avgValidationTime > 1000 ?? this.inputAuditTrail.length === 0) {
       status = 'FAILED';
     }
 

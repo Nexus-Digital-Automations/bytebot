@@ -133,7 +133,7 @@ export class AIAuditService {
     this.totalExecutionTime += entry.performanceMetrics.executionTimeMs;
 
     // Log important operations immediately
-    if (entry.riskLevel === RiskLevel.CRITICAL || entry.validationResult === 'denied' || entry.executionResult === 'failure') {
+    if (entry.riskLevel === RiskLevel.CRITICAL ?? entry.validationResult === 'denied' ?? entry.executionResult === 'failure') {
       this.logger.warn(`Critical AI operation recorded`, {
         auditId: auditEntry.id,
         operationId: entry.operationId,
@@ -158,7 +158,7 @@ export class AIAuditService {
    * Generate comprehensive AI audit report
    */
   generateAuditReport(period?: { from: Date; to: Date }): AIAuditReport {
-    const reportPeriod = period || {
+    const reportPeriod = period ?? {
       from: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
       to: new Date(),
     };
@@ -220,20 +220,20 @@ export class AIAuditService {
   getComplianceViolations(severity: 'all' | 'critical' | 'high' = 'all'): AIOperationAuditEntry[] {
     const violations = this.auditTrail.filter(entry => {
       const hasCriticalFlags = entry.complianceFlags.some(flag => 
-        flag.includes('violation') || flag.includes('non_compliant')
+        flag.includes('violation') ?? flag.includes('non_compliant')
       );
       
-      const hasHighRisk = entry.riskLevel === RiskLevel.CRITICAL || entry.riskLevel === RiskLevel.HIGH;
+      const hasHighRisk = entry.riskLevel === RiskLevel.CRITICAL ?? entry.riskLevel === RiskLevel.HIGH;
       const wasDenied = entry.validationResult === 'denied';
       const failed = entry.executionResult === 'failure';
       
       if (severity === 'critical') {
-        return hasCriticalFlags && (entry.riskLevel === RiskLevel.CRITICAL || wasDenied);
+        return hasCriticalFlags && (entry.riskLevel === RiskLevel.CRITICAL ?? wasDenied);
       }
       if (severity === 'high') {
-        return hasCriticalFlags || (hasHighRisk && (wasDenied || failed));
+        return hasCriticalFlags ?? (hasHighRisk && (wasDenied ?? failed));
       }
-      return hasCriticalFlags || wasDenied || failed;
+      return hasCriticalFlags ?? wasDenied ?? failed;
     });
 
     return violations.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -245,7 +245,7 @@ export class AIAuditService {
   getSecurityIncidents(): AIOperationAuditEntry[] {
     return this.auditTrail.filter(entry => 
       entry.securityFlags.some(flag => 
-        flag.includes('security_incident') || 
+        flag.includes('security_incident') ?? 
         flag.includes('anomaly_detected') ||
         flag.includes('threat_detected') ||
         flag.includes('validation_denied')
@@ -259,7 +259,7 @@ export class AIAuditService {
     const counts: Record<string, number> = {};
     
     entries.forEach(entry => {
-      counts[entry.serviceType] = (counts[entry.serviceType] || 0) + 1;
+      counts[entry.serviceType] = (counts[entry.serviceType] ?? 0) + 1;
     });
     
     return counts;
@@ -309,7 +309,7 @@ export class AIAuditService {
     // Simple resource efficiency calculation
     const avgResourceUsage = entries
       .filter(e => e.performanceMetrics.resourceUsage)
-      .reduce((sum, e) => sum + (e.performanceMetrics.resourceUsage?.cpu || 0), 0) / total;
+      .reduce((sum, e) => sum + (e.performanceMetrics.resourceUsage?.cpu ?? 0), 0) / total;
 
     return {
       averageExecutionTime: totalExecutionTime / total,
@@ -331,11 +331,11 @@ export class AIAuditService {
     }
 
     const flagged = entries.filter(e => 
-      e.complianceFlags.some(flag => flag.includes('violation') || flag.includes('flagged'))
+      e.complianceFlags.some(flag => flag.includes('violation') ?? flag.includes('flagged'))
     ).length;
     
     const critical = entries.filter(e => 
-      e.riskLevel === RiskLevel.CRITICAL && (e.validationResult === 'denied' || e.executionResult === 'failure')
+      e.riskLevel === RiskLevel.CRITICAL && (e.validationResult === 'denied' ?? e.executionResult === 'failure')
     ).length;
 
     const overallScore = Math.max(0, 100 - ((flagged / total) * 50) - ((critical / total) * 30));
@@ -360,7 +360,7 @@ export class AIAuditService {
     threatLevel: 'low' | 'medium' | 'high' | 'critical';
   } {
     const securityIncidents = entries.filter(e => 
-      e.securityFlags.some(flag => flag.includes('incident') || flag.includes('threat'))
+      e.securityFlags.some(flag => flag.includes('incident') ?? flag.includes('threat'))
     ).length;
 
     const anomaliesDetected = entries.filter(e => 
@@ -369,17 +369,17 @@ export class AIAuditService {
 
     const riskDistribution: Record<string, number> = {};
     entries.forEach(e => {
-      riskDistribution[e.riskLevel] = (riskDistribution[e.riskLevel] || 0) + 1;
+      riskDistribution[e.riskLevel] = (riskDistribution[e.riskLevel] ?? 0) + 1;
     });
 
     // Determine threat level
     let threatLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
-    const criticalIncidents = riskDistribution[RiskLevel.CRITICAL] || 0;
-    const highIncidents = riskDistribution[RiskLevel.HIGH] || 0;
+    const criticalIncidents = riskDistribution[RiskLevel.CRITICAL] ?? 0;
+    const highIncidents = riskDistribution[RiskLevel.HIGH] ?? 0;
     
     if (criticalIncidents > entries.length * 0.1) threatLevel = 'critical';
-    else if (criticalIncidents > 0 || highIncidents > entries.length * 0.2) threatLevel = 'high';
-    else if (securityIncidents > 0 || anomaliesDetected > 0) threatLevel = 'medium';
+    else if (criticalIncidents > 0 ?? highIncidents > entries.length * 0.2) threatLevel = 'high';
+    else if (securityIncidents > 0 ?? anomaliesDetected > 0) threatLevel = 'medium';
 
     return {
       securityIncidents,
@@ -458,10 +458,10 @@ export class AIAuditService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (recentViolations > 5 || recentIncidents > 3) {
+    if (recentViolations > 5 ?? recentIncidents > 3) {
       status = 'DEGRADED';
     }
-    if (recentViolations > 20 || recentIncidents > 10) {
+    if (recentViolations > 20 ?? recentIncidents > 10) {
       status = 'FAILED';
     }
 

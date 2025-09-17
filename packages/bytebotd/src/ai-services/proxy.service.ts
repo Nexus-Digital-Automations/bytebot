@@ -229,12 +229,12 @@ export class ProxyService {
           'Content-Type': 'application/json',
           'X-Proxy-Service': 'Bytebot-AI-Proxy',
           'X-Cache-Status': cacheHit ? 'HIT' : 'MISS',
-          'X-Routing-Decision': routingDecision?.selectedService || request.context.targetService,
+          'X-Routing-Decision': routingDecision?.selectedService ?? request.context.targetService,
         },
         body: {
           message: 'Proxy request processed successfully',
           proxyType: request.context.proxyType,
-          targetService: routingDecision?.selectedService || request.context.targetService,
+          targetService: routingDecision?.selectedService ?? request.context.targetService,
           aiRouting: !!aiDecisionMaking,
         },
         processingTimeMs: processingTime,
@@ -268,13 +268,13 @@ export class ProxyService {
     let random = Math.random() * totalWeight;
     
     for (let i = 0; i < services.length; i++) {
-      random -= weights[i] || 0;
+      random -= weights[i] ?? 0;
       if (random <= 0) {
-        return services[i] || 'anthropic';
+        return services[i] ?? 'anthropic';
       }
     }
     
-    return services[0] || 'anthropic'; // fallback
+    return services[0] ?? 'anthropic'; // fallback
   }
 
   private calculateServiceWeights(request: ProxyRequest): number[] {
@@ -290,7 +290,7 @@ export class ProxyService {
     if (request.context.securityLevel === 'CRITICAL') {
       return RiskLevel.HIGH;
     }
-    if (request.metadata.requestSize > (request.context.requestSizeLimit || 1000000)) {
+    if (request.metadata.requestSize > (request.context.requestSizeLimit ?? 1000000)) {
       return RiskLevel.MEDIUM; // Large requests need more scrutiny
     }
     return RiskLevel.LOW;
@@ -338,10 +338,10 @@ export class ProxyService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgProcessingTime > 500 || validationRate < 95 || cacheHitRate < 20) {
+    if (avgProcessingTime > 500 ?? validationRate < 95 ?? cacheHitRate < 20)) {
       status = 'DEGRADED';
     }
-    if (avgProcessingTime > 1500 || validationRate < 80 || cacheHitRate < 10) {
+    if (avgProcessingTime > 1500 ?? validationRate < 80 ?? cacheHitRate < 10)) {
       status = 'FAILED';
     }
 

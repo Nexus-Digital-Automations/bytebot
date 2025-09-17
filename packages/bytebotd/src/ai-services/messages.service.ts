@@ -188,7 +188,7 @@ export class MessagesService {
         processingType: request.processingType,
         userId: request.context.userId,
         contentSensitivity: request.context.contentSensitivity,
-        aiModelPreference: request.context.aiModelPreference || 'auto',
+        aiModelPreference: request.context.aiModelPreference ?? 'auto',
       }
     );
 
@@ -315,7 +315,7 @@ export class MessagesService {
           maxLength: request.parameters?.maxLength,
           hasTemplate: !!request.parameters?.template,
         },
-        actionDescription: `Generate AI messages with ${request.processingType} processing and ${request.parameters?.tone || 'default'} tone`,
+        actionDescription: `Generate AI messages with ${request.processingType} processing and ${request.parameters?.tone ?? 'default'} tone`,
         context: request.context,
         riskLevel: RiskLevel.HIGH, // Content generation is HIGH risk
         operationId,
@@ -336,7 +336,7 @@ export class MessagesService {
       this.logger.log(`[${operationId}] AI message generation completed successfully`, {
         operationId,
         responseId: response.id,
-        generatedLength: response.results.generatedContent?.length || 0,
+        generatedLength: response.results.generatedContent?.length ?? 0,
         aiModelUsed: response.aiModelUsed,
         duration,
         validationId: validationResponse.conversationId,
@@ -381,11 +381,11 @@ export class MessagesService {
         functionName: 'MessagesService.translateMessages',
         functionParams: {
           messageCount: request.messages.length,
-          sourceLanguage: request.context.languageCode || 'auto-detect',
-          targetLanguage: request.parameters?.targetLanguage || 'en',
+          sourceLanguage: request.context.languageCode ?? 'auto-detect',
+          targetLanguage: request.parameters?.targetLanguage ?? 'en',
           contentSensitivity: request.context.contentSensitivity,
         },
-        actionDescription: `Translate ${request.messages.length} messages from ${request.context.languageCode || 'auto-detect'} to ${request.parameters?.targetLanguage || 'en'}`,
+        actionDescription: `Translate ${request.messages.length} messages from ${request.context.languageCode ?? 'auto-detect'} to ${request.parameters?.targetLanguage ?? 'en'}`,
         context: request.context,
         riskLevel: RiskLevel.MEDIUM, // Translation is MEDIUM risk
         operationId,
@@ -509,8 +509,8 @@ export class MessagesService {
     
     const mockAnalysis: MessageAnalysisResult[] = request.messages.map((message, index) => ({
       messageId: message.id,
-      sentiment: ['positive', 'negative', 'neutral', 'mixed'][index % 4] as any,
-      topics: [['technology', 'business', 'communication', 'support'][index % 4] || 'general'],
+      sentiment: (['positive', 'negative', 'neutral', 'mixed'] as const)[index % 4],
+      topics: [['technology', 'business', 'communication', 'support'][index % 4] ?? 'general'],
       intent: {
         primary: 'information_request',
         confidence: 0.85 + Math.random() * 0.1,
@@ -520,7 +520,7 @@ export class MessagesService {
         ]
       },
       language: {
-        detected: request.context.languageCode || 'en',
+        detected: request.context.languageCode ?? 'en',
         confidence: 0.95
       },
       contentSafety: {
@@ -546,7 +546,7 @@ export class MessagesService {
       results: {
         analysis: mockAnalysis,
       },
-      aiModelUsed: request.context.aiModelPreference || 'auto-selected',
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
       processingTimeMs: 150 + Math.random() * 200,
       tokensUsed: {
         input: this.estimateInputTokens(request),
@@ -577,9 +577,9 @@ export class MessagesService {
       conversationId,
       processingType: request.processingType,
       results: {
-        generatedContent: `Mock AI-generated content with ${request.parameters?.tone || 'default'} tone. This is a sample response that would be generated based on the input parameters and requirements.`,
+        generatedContent: `Mock AI-generated content with ${request.parameters?.tone ?? 'default'} tone. This is a sample response that would be generated based on the input parameters and requirements.`,
       },
-      aiModelUsed: request.context.aiModelPreference || 'auto-selected',
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
       processingTimeMs: 200 + Math.random() * 300,
       tokensUsed: {
         input: this.estimateInputTokens(request),
@@ -608,9 +608,9 @@ export class MessagesService {
       conversationId,
       processingType: request.processingType,
       results: {
-        translatedContent: `Mock translated content to ${request.parameters?.targetLanguage || 'en'} language. Translation would preserve meaning and context while adapting to target language conventions.`,
+        translatedContent: `Mock translated content to ${request.parameters?.targetLanguage ?? 'en'} language. Translation would preserve meaning and context while adapting to target language conventions.`,
       },
-      aiModelUsed: request.context.aiModelPreference || 'auto-selected',
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
       processingTimeMs: 180 + Math.random() * 220,
       tokensUsed: {
         input: this.estimateInputTokens(request),
@@ -645,7 +645,7 @@ export class MessagesService {
           subcategories: ['professional', 'informational', 'request'],
         },
       },
-      aiModelUsed: request.context.aiModelPreference || 'auto-selected',
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
       processingTimeMs: 120 + Math.random() * 180,
       tokensUsed: {
         input: this.estimateInputTokens(request),
@@ -683,7 +683,7 @@ export class MessagesService {
       .map(m => m.content as string)
       .join(' ');
     
-    const parametersContent = JSON.stringify(request.parameters || {});
+    const parametersContent = JSON.stringify(request.parameters ?? {});
     
     return Math.ceil((textContent.length + parametersContent.length) / 4);
   }
@@ -731,10 +731,10 @@ export class MessagesService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgProcessingTime > 800 || validationRate < 95) {
+    if (avgProcessingTime > 800 ?? validationRate < 95)) {
       status = 'DEGRADED';
     }
-    if (avgProcessingTime > 2000 || validationRate < 80) {
+    if (avgProcessingTime > 2000 ?? validationRate < 80)) {
       status = 'FAILED';
     }
 

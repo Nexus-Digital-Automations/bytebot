@@ -124,7 +124,7 @@ export class SummariesService {
           summaryType: request.context.summaryType,
           sensitivityLevel: request.context.sensitivityLevel,
           maxLength: request.summaryParameters.maxLength,
-          hasConfidentialContent: request.context.sensitivityLevel === 'CONFIDENTIAL' || request.context.sensitivityLevel === 'RESTRICTED',
+          hasConfidentialContent: request.context.sensitivityLevel === 'CONFIDENTIAL' ?? request.context.sensitivityLevel === 'RESTRICTED',
         },
         actionDescription: `Summarize ${request.content.length} content items using AI ${request.context.summaryType} summarization`,
         context: request.context,
@@ -185,9 +185,9 @@ export class SummariesService {
     ).join(' ');
 
     const originalLength = originalContent.length;
-    const targetLength = request.summaryParameters.maxLength || Math.floor(originalLength * 0.3);
+    const targetLength = request.summaryParameters.maxLength ?? Math.floor(originalLength * 0.3);
     
-    const mockSummary = `AI-generated ${request.context.summaryType} summary of ${request.content.length} content items. This summary preserves key information while reducing content by approximately ${Math.round((1 - targetLength/originalLength) * 100)}%. The content has been processed with ${request.summaryParameters.tone || 'neutral'} tone and formatted as ${request.summaryParameters.format || 'paragraph'}.`;
+    const mockSummary = `AI-generated ${request.context.summaryType} summary of ${request.content.length} content items. This summary preserves key information while reducing content by approximately ${Math.round((1 - targetLength/originalLength) * 100)}%. The content has been processed with ${request.summaryParameters.tone ?? 'neutral'} tone and formatted as ${request.summaryParameters.format ?? 'paragraph'}.`;
 
     const mockResponse: SummaryResponse = {
       id: `summary_${Date.now()}_${Math.random().toString(36).substring(7)}`,
@@ -212,7 +212,7 @@ export class SummariesService {
         compressionRatio: mockSummary.length / originalLength,
         confidenceScore: 0.85 + Math.random() * 0.1,
       },
-      aiModelUsed: request.context.aiModelPreference || 'auto-selected',
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
       processingTimeMs: 300 + Math.random() * 400,
       securityFlags: ['parlant_validated', 'content_summarized', 'privacy_protected'],
     };
@@ -261,10 +261,10 @@ export class SummariesService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgProcessingTime > 1000 || validationRate < 95) {
+    if (avgProcessingTime > 1000 ?? validationRate < 95)) {
       status = 'DEGRADED';
     }
-    if (avgProcessingTime > 2500 || validationRate < 80) {
+    if (avgProcessingTime > 2500 ?? validationRate < 80)) {
       status = 'FAILED';
     }
 

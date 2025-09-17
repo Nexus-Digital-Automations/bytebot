@@ -220,8 +220,8 @@ export class OpenAIService {
         model: request.config.model,
         messageCount: request.messages.length,
         userId: request.context.userId,
-        functionsCount: request.functions?.length || 0,
-        toolsCount: request.tools?.length || 0,
+        functionsCount: request.functions?.length ?? 0,
+        toolsCount: request.tools?.length ?? 0,
       }
     );
 
@@ -232,8 +232,8 @@ export class OpenAIService {
         functionParams: {
           model: request.config.model,
           messageCount: request.messages.length,
-          hasFunctions: (request.functions?.length || 0) > 0,
-          hasTools: (request.tools?.length || 0) > 0,
+          hasFunctions: (request.functions?.length ?? 0) > 0,
+          hasTools: (request.tools?.length ?? 0) > 0,
           toolChoice: request.toolChoice,
         },
         actionDescription: `Execute OpenAI ${request.config.model} chat completion with ${request.messages.length} messages`,
@@ -397,7 +397,7 @@ export class OpenAIService {
       {
         operationId,
         model: request.config.model,
-        functionsCount: request.functions?.length || 0,
+        functionsCount: request.functions?.length ?? 0,
         functionCall: request.functionCall,
       }
     );
@@ -408,11 +408,11 @@ export class OpenAIService {
         functionName: 'OpenAIService.executeFunctionCalling',
         functionParams: {
           model: request.config.model,
-          functionsCount: request.functions?.length || 0,
+          functionsCount: request.functions?.length ?? 0,
           functionCall: request.functionCall,
-          functionNames: request.functions?.map(f => f.name) || [],
+          functionNames: request.functions?.map(f => f.name) ?? [],
         },
-        actionDescription: `Execute OpenAI function calling with ${request.functions?.length || 0} available functions`,
+        actionDescription: `Execute OpenAI function calling with ${request.functions?.length ?? 0} available functions`,
         context: request.context,
         riskLevel: RiskLevel.CRITICAL, // Function calling is CRITICAL risk
         operationId,
@@ -434,7 +434,7 @@ export class OpenAIService {
         operationId,
         responseId: response.id,
         functionCalls: response.choices[0]?.message.functionCall ? 1 : 0,
-        toolCalls: response.choices[0]?.message.toolCalls?.length || 0,
+        toolCalls: response.choices[0]?.message.toolCalls?.length ?? 0,
         duration,
         validationId: validationResponse.conversationId,
       });
@@ -478,7 +478,7 @@ export class OpenAIService {
         operationId,
         assistantName: assistantConfig.name,
         model: assistantConfig.model,
-        toolsCount: assistantConfig.tools?.length || 0,
+        toolsCount: assistantConfig.tools?.length ?? 0,
       }
     );
 
@@ -489,7 +489,7 @@ export class OpenAIService {
         functionParams: {
           assistantName: assistantConfig.name,
           model: assistantConfig.model,
-          toolsCount: assistantConfig.tools?.length || 0,
+          toolsCount: assistantConfig.tools?.length ?? 0,
           hasInstructions: assistantConfig.instructions.length > 0,
         },
         actionDescription: `Create OpenAI Assistant '${assistantConfig.name}' with ${assistantConfig.model}`,
@@ -555,11 +555,9 @@ export class OpenAIService {
       usage: {
         promptTokens: this.estimatePromptTokens(request),
         completionTokens: 120, // Mock completion tokens
-        totalTokens: 0, // Will be calculated
+        totalTokens: this.estimatePromptTokens(request) + 120, // Calculate directly
       },
     };
-
-    (mockResponse.usage as any).totalTokens = mockResponse.usage.promptTokens + mockResponse.usage.completionTokens;
 
     // Simulate API latency
     await new Promise(resolve => setTimeout(resolve, 150 + Math.random() * 250));
@@ -621,7 +619,7 @@ export class OpenAIService {
     // TODO: Implement actual OpenAI function calling SDK integration
     
     const mockFunctionCall: OpenAIFunctionCall = {
-      name: request.functions?.[0]?.name || 'mock_function',
+      name: request.functions?.[0]?.name ?? 'mock_function',
       arguments: JSON.stringify({ param: 'mock_value' }),
     };
 
@@ -642,11 +640,9 @@ export class OpenAIService {
       usage: {
         promptTokens: this.estimatePromptTokens(request),
         completionTokens: 80,
-        totalTokens: 0,
+        totalTokens: this.estimatePromptTokens(request) + 80,
       },
     };
-
-    (mockResponse.usage as any).totalTokens = mockResponse.usage.promptTokens + mockResponse.usage.completionTokens;
 
     await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 200));
     return mockResponse;
@@ -672,8 +668,8 @@ export class OpenAIService {
       description: config.description,
       model: config.model,
       instructions: config.instructions,
-      tools: config.tools || [],
-      metadata: config.metadata || {},
+      tools: config.tools ?? [],
+      metadata: config.metadata ?? {},
     };
 
     await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 200));
@@ -684,8 +680,8 @@ export class OpenAIService {
 
   private estimatePromptTokens(request: OpenAIChatRequest): number {
     // Rough token estimation (4 characters per token)
-    const messageContent = request.messages.map(m => m.content || '').join(' ');
-    const functionsContent = JSON.stringify(request.functions || []);
+    const messageContent = request.messages.map(m => m.content ?? '').join(' ');
+    const functionsContent = JSON.stringify(request.functions ?? []);
     return Math.ceil((messageContent.length + functionsContent.length) / 4);
   }
 
@@ -724,10 +720,10 @@ export class OpenAIService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgResponseTime > 1500 || validationRate < 95) {
+    if (avgResponseTime > 1500 ?? validationRate < 95)) {
       status = 'DEGRADED';
     }
-    if (avgResponseTime > 4000 || validationRate < 80 || !this.apiKey) {
+    if (avgResponseTime > 4000 ?? validationRate < 80 ?? !this.apiKey) {
       status = 'FAILED';
     }
 

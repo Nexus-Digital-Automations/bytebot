@@ -82,6 +82,15 @@ export interface GeminiChatRequest {
 }
 
 /**
+ * Google AI multimodal request interface
+ */
+export interface GeminiMultimodalRequest extends GeminiChatRequest {
+  readonly hasImages?: boolean;
+  readonly imageCount?: number;
+  readonly totalImageSize?: number;
+}
+
+/**
  * Google AI function declaration
  */
 export interface GeminiFunctionDeclaration {
@@ -218,8 +227,8 @@ export class GoogleService {
         model: request.config.model,
         contentCount: request.contents.length,
         userId: request.context.userId,
-        systemInstructionLength: request.systemInstruction?.length || 0,
-        toolsCount: request.tools?.length || 0,
+        systemInstructionLength: request.systemInstruction?.length ?? 0,
+        toolsCount: request.tools?.length ?? 0,
       }
     );
 
@@ -231,8 +240,8 @@ export class GoogleService {
           model: request.config.model,
           contentCount: request.contents.length,
           hasSystemInstruction: !!request.systemInstruction,
-          toolsCount: request.tools?.length || 0,
-          toolMode: request.toolConfig?.functionCallingConfig?.mode || 'NONE',
+          toolsCount: request.tools?.length ?? 0,
+          toolMode: request.toolConfig?.functionCallingConfig?.mode ?? 'NONE',
         },
         actionDescription: `Execute Gemini ${request.config.model} chat completion with ${request.contents.length} content parts`,
         context: request.context,
@@ -277,7 +286,7 @@ export class GoogleService {
           candidatesTokens: response.usageMetadata.candidatesTokenCount,
           totalTokens: response.usageMetadata.totalTokenCount,
           candidatesCount: response.candidates.length,
-          finishReason: response.candidates.length > 0 ? response.candidates[0]?.finishReason || 'FINISH_REASON_UNSPECIFIED' : 'FINISH_REASON_UNSPECIFIED',
+          finishReason: response.candidates.length > 0 ? response.candidates[0]?.finishReason ?? 'FINISH_REASON_UNSPECIFIED' : 'FINISH_REASON_UNSPECIFIED',
           duration,
           validationId: validationResponse.conversationId,
         }
@@ -396,7 +405,7 @@ export class GoogleService {
       {
         operationId,
         model: request.config.model,
-        toolsCount: request.tools?.length || 0,
+        toolsCount: request.tools?.length ?? 0,
         toolMode: request.toolConfig?.functionCallingConfig?.mode,
         allowedFunctions: request.toolConfig?.functionCallingConfig?.allowedFunctionNames,
       }
@@ -408,12 +417,12 @@ export class GoogleService {
         functionName: 'GoogleService.executeFunctionCalling',
         functionParams: {
           model: request.config.model,
-          toolsCount: request.tools?.length || 0,
-          toolMode: request.toolConfig?.functionCallingConfig?.mode || 'AUTO',
-          toolNames: request.tools?.map(t => t.name) || [],
-          allowedFunctions: request.toolConfig?.functionCallingConfig?.allowedFunctionNames || [],
+          toolsCount: request.tools?.length ?? 0,
+          toolMode: request.toolConfig?.functionCallingConfig?.mode ?? 'AUTO',
+          toolNames: request.tools?.map(t => t.name) ?? [],
+          allowedFunctions: request.toolConfig?.functionCallingConfig?.allowedFunctionNames ?? [],
         },
-        actionDescription: `Execute Gemini function calling with ${request.tools?.length || 0} available functions`,
+        actionDescription: `Execute Gemini function calling with ${request.tools?.length ?? 0} available functions`,
         context: request.context,
         riskLevel: RiskLevel.CRITICAL, // Function calling is CRITICAL risk
         operationId,
@@ -432,7 +441,7 @@ export class GoogleService {
       this.updatePerformanceMetrics(duration, response.usageMetadata);
 
       const firstCandidate = response.candidates.length > 0 ? response.candidates[0] : null;
-      const functionCalls = firstCandidate?.content.parts.filter(part => part.functionCall) || [];
+      const functionCalls = firstCandidate?.content.parts.filter(part => part.functionCall) ?? [];
 
       this.logger.log(`[${operationId}] Gemini function calling completed successfully`, {
         operationId,
@@ -463,11 +472,7 @@ export class GoogleService {
    * conversational approval for content analysis and generation.
    */
   async executeMultimodalProcessing(
-    request: GeminiChatRequest & { 
-      hasImages?: boolean;
-      imageCount?: number;
-      totalImageSize?: number;
-    }
+    request: GeminiMultimodalRequest
   ): Promise<GeminiChatResponse> {
     const operationId = `${request.operationId}_multimodal`;
     const startTime = Date.now();
@@ -479,8 +484,8 @@ export class GoogleService {
         model: request.config.model,
         contentCount: request.contents.length,
         hasImages: request.hasImages,
-        imageCount: request.imageCount || 0,
-        totalImageSize: request.totalImageSize || 0,
+        imageCount: request.imageCount ?? 0,
+        totalImageSize: request.totalImageSize ?? 0,
       }
     );
 
@@ -491,11 +496,11 @@ export class GoogleService {
         functionParams: {
           model: request.config.model,
           contentCount: request.contents.length,
-          hasImages: request.hasImages || false,
-          imageCount: request.imageCount || 0,
-          totalImageSize: request.totalImageSize || 0,
+          hasImages: request.hasImages ?? false,
+          imageCount: request.imageCount ?? 0,
+          totalImageSize: request.totalImageSize ?? 0,
         },
-        actionDescription: `Execute Gemini multimodal processing with ${request.contents.length} content parts including ${(request as any).imageCount || 0} images`,
+        actionDescription: `Execute Gemini multimodal processing with ${request.contents.length} content parts including ${request.imageCount ?? 0} images`,
         context: request.context,
         riskLevel: RiskLevel.HIGH, // Multimodal processing is HIGH risk
         operationId,
@@ -518,7 +523,7 @@ export class GoogleService {
         modelVersion: response.modelVersion,
         promptTokens: response.usageMetadata.promptTokenCount,
         candidatesTokens: response.usageMetadata.candidatesTokenCount,
-        safetyRatings: response.candidates.length > 0 ? response.candidates[0]?.safetyRatings || [] : [],
+        safetyRatings: response.candidates.length > 0 ? response.candidates[0]?.safetyRatings ?? [] : [],
         duration,
         validationId: validationResponse.conversationId,
       });
@@ -576,13 +581,10 @@ export class GoogleService {
       usageMetadata: {
         promptTokenCount: this.estimatePromptTokens(request),
         candidatesTokenCount: 100, // Mock candidates tokens
-        totalTokenCount: 0, // Will be calculated
+        totalTokenCount: this.estimatePromptTokens(request) + 100, // Calculate directly
       },
       modelVersion: request.config.model,
     };
-
-    (mockResponse.usageMetadata as any).totalTokenCount = 
-      mockResponse.usageMetadata.promptTokenCount + mockResponse.usageMetadata.candidatesTokenCount;
 
     // Simulate API latency
     await new Promise(resolve => setTimeout(resolve, 180 + Math.random() * 320));
@@ -654,7 +656,7 @@ export class GoogleService {
     // TODO: Implement actual Google AI function calling SDK integration
     
     const mockFunctionCall = {
-      name: request.tools?.[0]?.name || 'mock_function',
+      name: request.tools?.[0]?.name ?? 'mock_function',
       args: { param: 'mock_value', timestamp: Date.now() }
     };
 
@@ -677,13 +679,10 @@ export class GoogleService {
       usageMetadata: {
         promptTokenCount: this.estimatePromptTokens(request),
         candidatesTokenCount: 50,
-        totalTokenCount: 0,
+        totalTokenCount: this.estimatePromptTokens(request) + 50,
       },
       modelVersion: request.config.model,
     };
-
-    (mockResponse.usageMetadata as any).totalTokenCount = 
-      mockResponse.usageMetadata.promptTokenCount + mockResponse.usageMetadata.candidatesTokenCount;
 
     await new Promise(resolve => setTimeout(resolve, 250 + Math.random() * 250));
     return mockResponse;
@@ -692,7 +691,7 @@ export class GoogleService {
   /**
    * Perform Gemini multimodal call (mock implementation)
    */
-  private async performGeminiMultimodalCall(request: GeminiChatRequest): Promise<GeminiChatResponse> {
+  private async performGeminiMultimodalCall(request: GeminiMultimodalRequest): Promise<GeminiChatResponse> {
     // TODO: Implement actual Google AI multimodal SDK integration
     
     const mockResponse: GeminiChatResponse = {
@@ -700,7 +699,7 @@ export class GoogleService {
         content: {
           role: 'model',
           parts: [{
-            text: `Mock Gemini multimodal analysis with ${(request as any).imageCount || 0} images processed`
+            text: `Mock Gemini multimodal analysis with ${request.imageCount ?? 0} images processed`
           }]
         },
         finishReason: 'STOP',
@@ -716,15 +715,12 @@ export class GoogleService {
         ]
       }],
       usageMetadata: {
-        promptTokenCount: this.estimatePromptTokens(request) + ((request as any).imageCount || 0) * 200, // Images add tokens
+        promptTokenCount: this.estimatePromptTokens(request) + (request.imageCount ?? 0) * 200, // Images add tokens
         candidatesTokenCount: 150,
-        totalTokenCount: 0,
+        totalTokenCount: this.estimatePromptTokens(request) + (request.imageCount ?? 0) * 200 + 150,
       },
       modelVersion: request.config.model,
     };
-
-    (mockResponse.usageMetadata as any).totalTokenCount = 
-      mockResponse.usageMetadata.promptTokenCount + mockResponse.usageMetadata.candidatesTokenCount;
 
     await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 300)); // Multimodal takes longer
     return mockResponse;
@@ -737,11 +733,11 @@ export class GoogleService {
     const textContent = request.contents
       .flatMap(content => content.parts)
       .filter(part => part.text)
-      .map(part => part.text!)
+      .map(part => part.text ?? '')
       .join(' ');
     
-    const systemContent = request.systemInstruction || '';
-    const toolsContent = JSON.stringify(request.tools || []);
+    const systemContent = request.systemInstruction ?? '';
+    const toolsContent = JSON.stringify(request.tools ?? []);
     
     return Math.ceil((textContent.length + systemContent.length + toolsContent.length) / 4);
   }
@@ -781,10 +777,10 @@ export class GoogleService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgResponseTime > 2500 || validationRate < 95) {
+    if (avgResponseTime > 2500 ?? validationRate < 95)) {
       status = 'DEGRADED';
     }
-    if (avgResponseTime > 6000 || validationRate < 80 || !this.apiKey) {
+    if (avgResponseTime > 6000 ?? validationRate < 80 ?? !this.apiKey) {
       status = 'FAILED';
     }
 

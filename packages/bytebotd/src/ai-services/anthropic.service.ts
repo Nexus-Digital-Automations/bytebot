@@ -173,7 +173,7 @@ export class AnthropicService {
         model: request.config.model,
         messageCount: request.messages.length,
         userId: request.context.userId,
-        systemPromptLength: request.systemPrompt?.length || 0,
+        systemPromptLength: request.systemPrompt?.length ?? 0,
       }
     );
 
@@ -185,7 +185,7 @@ export class AnthropicService {
           model: request.config.model,
           messageCount: request.messages.length,
           hasSystemPrompt: !!request.systemPrompt,
-          toolsCount: request.tools?.length || 0,
+          toolsCount: request.tools?.length ?? 0,
         },
         actionDescription: `Execute Claude ${request.config.model} chat completion with ${request.messages.length} messages`,
         context: request.context,
@@ -347,7 +347,7 @@ export class AnthropicService {
       {
         operationId,
         model: request.config.model,
-        toolsCount: request.tools?.length || 0,
+        toolsCount: request.tools?.length ?? 0,
         toolChoice: request.toolChoice,
       }
     );
@@ -358,11 +358,11 @@ export class AnthropicService {
         functionName: 'AnthropicService.executeToolCalling',
         functionParams: {
           model: request.config.model,
-          toolsCount: request.tools?.length || 0,
+          toolsCount: request.tools?.length ?? 0,
           toolChoice: request.toolChoice,
-          toolNames: request.tools?.map(t => t.name) || [],
+          toolNames: request.tools?.map(t => t.name) ?? [],
         },
-        actionDescription: `Execute Claude tool calling with ${request.tools?.length || 0} available functions`,
+        actionDescription: `Execute Claude tool calling with ${request.tools?.length ?? 0} available functions`,
         context: request.context,
         riskLevel: RiskLevel.CRITICAL, // Tool calling is CRITICAL risk
         operationId,
@@ -383,7 +383,7 @@ export class AnthropicService {
       this.logger.log(`[${operationId}] Claude tool calling completed successfully`, {
         operationId,
         responseId: response.id,
-        toolCallsCount: response.toolCalls?.length || 0,
+        toolCallsCount: response.toolCalls?.length ?? 0,
         duration,
         validationId: validationResponse.conversationId,
       });
@@ -461,7 +461,7 @@ export class AnthropicService {
       id: `tool_${Date.now()}`,
       type: 'function',
       function: {
-        name: request.tools?.[0]?.name || 'mock_function',
+        name: request.tools?.[0]?.name ?? 'mock_function',
         arguments: JSON.stringify({ param: 'mock_value' }),
       },
     };
@@ -488,7 +488,7 @@ export class AnthropicService {
   private estimateInputTokens(request: ClaudeChatRequest): number {
     // Rough token estimation (4 characters per token)
     const messageContent = request.messages.map(m => m.content).join(' ');
-    const systemContent = request.systemPrompt || '';
+    const systemContent = request.systemPrompt ?? '';
     return Math.ceil((messageContent.length + systemContent.length) / 4);
   }
 
@@ -527,10 +527,10 @@ export class AnthropicService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgResponseTime > 2000 || validationRate < 95) {
+    if (avgResponseTime > 2000 ?? validationRate < 95)) {
       status = 'DEGRADED';
     }
-    if (avgResponseTime > 5000 || validationRate < 80 || !this.apiKey) {
+    if (avgResponseTime > 5000 ?? validationRate < 80 ?? !this.apiKey) {
       status = 'FAILED';
     }
 

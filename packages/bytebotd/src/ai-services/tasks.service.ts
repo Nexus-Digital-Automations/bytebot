@@ -362,9 +362,9 @@ export class TasksService {
       this.logger.log(`[${operationId}] Autonomous task execution completed successfully`, {
         operationId,
         responseId: response.id,
-        tasksCompleted: response.results.executionResults?.completedTasks.length || 0,
-        tasksFailed: response.results.executionResults?.failedTasks.length || 0,
-        totalExecutionTime: response.results.executionResults?.totalExecutionTime || 0,
+        tasksCompleted: response.results.executionResults?.completedTasks.length ?? 0,
+        tasksFailed: response.results.executionResults?.failedTasks.length ?? 0,
+        totalExecutionTime: response.results.executionResults?.totalExecutionTime ?? 0,
         aiModelUsed: response.aiModelUsed,
         duration,
         validationId: validationResponse.conversationId,
@@ -503,13 +503,13 @@ export class TasksService {
             action: `Execute ${task.name}`,
             estimatedDuration: 300 + (index * 200),
             dependencies: task.dependencies,
-            riskLevel: ['low', 'medium', 'high'][index % 3] || 'low',
+            riskLevel: ['low', 'medium', 'high'][index % 3] ?? 'low',
           })),
           totalEstimatedDuration: request.tasks.length * 500,
           parallelizationOpportunities: ['independent_tasks', 'resource_pooling'],
         } : undefined,
       },
-      aiModelUsed: request.context.aiModelPreference || 'auto-selected',
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
       processingTimeMs: 400 + Math.random() * 600,
       resourcesUsed: {
         cpu: 0.3 + Math.random() * 0.5,
@@ -552,7 +552,7 @@ export class TasksService {
           totalExecutionTime: 1500 + Math.random() * 3000,
         },
       },
-      aiModelUsed: request.context.aiModelPreference || 'auto-selected',
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
       processingTimeMs: 800 + Math.random() * 1200,
       resourcesUsed: {
         cpu: 0.7 + Math.random() * 0.8,
@@ -601,7 +601,7 @@ export class TasksService {
           ],
         },
       },
-      aiModelUsed: request.context.aiModelPreference || 'auto-selected',
+      aiModelUsed: request.context.aiModelPreference ?? 'auto-selected',
       processingTimeMs: 500 + Math.random() * 700,
       resourcesUsed: {
         cpu: 0.4 + Math.random() * 0.4,
@@ -676,10 +676,10 @@ export class TasksService {
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     
-    if (avgProcessingTime > 1500 || validationRate < 95) {
+    if (avgProcessingTime > 1500 ?? validationRate < 95)) {
       status = 'DEGRADED';
     }
-    if (avgProcessingTime > 3000 || validationRate < 80) {
+    if (avgProcessingTime > 3000 ?? validationRate < 80)) {
       status = 'FAILED';
     }
 
