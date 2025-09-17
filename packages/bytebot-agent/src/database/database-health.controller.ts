@@ -52,7 +52,8 @@ export class DatabaseHealthController {
         operationId,
       });
 
-      const healthReport = await this.databaseHealthService.performHealthCheck(true);
+      const healthReport =
+        await this.databaseHealthService.performHealthCheck(true);
       const detailedHealth = this.databaseHealthGuard.getDetailedHealthReport();
 
       const response = {
@@ -296,7 +297,12 @@ export class DatabaseHealthController {
     if (!result.status) {
       throw new Error('Database liveness check failed');
     }
-    return { status: 'ok', ...result };
+    return {
+      probe: 'liveness',
+      healthy: result.status,
+      details: result.details,
+      timestamp: new Date().toISOString(),
+    };
   }
 
   /**
@@ -309,7 +315,12 @@ export class DatabaseHealthController {
     if (!result.status) {
       throw new Error('Database readiness check failed');
     }
-    return { status: 'ok', ...result };
+    return {
+      probe: 'readiness',
+      healthy: result.status,
+      details: result.details,
+      timestamp: new Date().toISOString(),
+    };
   }
 
   /**
@@ -322,7 +333,12 @@ export class DatabaseHealthController {
     if (!result.status) {
       throw new Error('Database startup check failed');
     }
-    return { status: 'ok', ...result };
+    return {
+      probe: 'startup',
+      healthy: result.status,
+      details: result.details,
+      timestamp: new Date().toISOString(),
+    };
   }
 
   /**
@@ -338,7 +354,8 @@ export class DatabaseHealthController {
         operationId,
       });
 
-      const healthResult = await this.databaseHealthService.performHealthCheck(true);
+      const healthResult =
+        await this.databaseHealthService.performHealthCheck(true);
 
       const response = {
         ...healthResult,
