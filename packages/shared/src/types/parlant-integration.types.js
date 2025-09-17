@@ -14,6 +14,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ParlantTimeoutError = exports.ParlantAuthenticationError = exports.ParlantConnectionError = exports.ParlantValidationError = exports.ParlantIntegrationError = exports.ParlantMessageType = exports.SecurityLevel = void 0;
 var SecurityLevel;
 (function (SecurityLevel) {
+    SecurityLevel["_MINIMAL"] = "minimal";
     SecurityLevel["_LOW"] = "low";
     SecurityLevel["_MEDIUM"] = "medium";
     SecurityLevel["_HIGH"] = "high";

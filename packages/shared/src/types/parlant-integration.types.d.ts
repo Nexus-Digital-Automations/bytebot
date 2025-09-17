@@ -128,6 +128,7 @@ export interface ParlantRiskAssessment {
     mitigations: string[];
 }
 export declare enum SecurityLevel {
+    _MINIMAL = "minimal",
     _LOW = "low",
     _MEDIUM = "medium",
     _HIGH = "high",
@@ -344,6 +345,8 @@ export interface ParlantAuthConfig {
 export interface ParlantDecoratorOptions {
     /** Human-readable description of the function */
     description: string;
+    /** Intent or purpose of the function for AI validation */
+    intent?: string;
     /** Required security level */
     securityLevel?: SecurityLevel;
     /** Enable caching for this function */

@@ -58,9 +58,9 @@ app
     // Determine security level based on environment for standardized security
     const securityLevel =
       environment === "production"
-        ? SecurityLevel._STANDARD
+        ? SecurityLevel._HIGH
         : environment === "staging"
-          ? SecurityLevel._STANDARD
+          ? SecurityLevel._MEDIUM
           : SecurityLevel._MINIMAL;
 
     console.log(`Bytebot-UI standardized security configuration applied`, {
