@@ -452,9 +452,9 @@ export class ParlantCacheService
 
       // Invalidate from Redis
       if (this.redisClient) {
-        const keys = await this.redisClient.keys(`*${pattern}*`);
+        const keys = await (this.redisClient as any).keys(`*${pattern}*`);
         if (keys.length > 0) {
-          await this.redisClient.del(keys);
+          await (this.redisClient as any).del(keys);
           invalidatedCount += keys.length;
         }
       }
@@ -629,7 +629,7 @@ export class ParlantCacheService
 
     try {
       const startTime = Date.now();
-      const data = await this.redisClient.get(key);
+      const data = await (this.redisClient as any).get(key);
       const responseTime = Date.now() - startTime;
 
       if (!data) {
@@ -644,7 +644,7 @@ export class ParlantCacheService
       const entry: ParlantCacheEntry = JSON.parse(data);
 
       if (this.isExpired(entry)) {
-        await this.redisClient.del(key);
+        await (this.redisClient as any).del(key);
         return {
           found: false,
           data: null,
@@ -737,7 +737,7 @@ export class ParlantCacheService
 
     try {
       const ttlSeconds = Math.floor(ttl / 1000);
-      await this.redisClient.setex(key, ttlSeconds, JSON.stringify(entry));
+      await (this.redisClient as any).setex(key, ttlSeconds, JSON.stringify(entry));
     } catch (error) {
       this.logger.error("❌ Redis set operation failed", error);
     }
@@ -762,7 +762,7 @@ export class ParlantCacheService
     if (!this.redisClient) return false;
 
     try {
-      const exists = await this.redisClient.exists(key);
+      const exists = await (this.redisClient as any).exists(key);
       return exists === 1;
     } catch (_error) {
       return false;
@@ -1121,7 +1121,7 @@ export class ParlantCacheService
   private async shutdownRedisCache(): Promise<void> {
     if (this.redisClient) {
       try {
-        await this.redisClient.quit();
+        await (this.redisClient as any).quit();
         this.logger.log("🔄 Redis connection closed");
       } catch (error) {
         this.logger.error("❌ Failed to close Redis connection", error);
