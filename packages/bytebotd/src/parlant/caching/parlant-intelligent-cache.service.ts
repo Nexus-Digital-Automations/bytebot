@@ -194,7 +194,7 @@ export class ParlantIntelligentCacheService {
    * @returns Cached response or null if not found
    */
   async getCachedValidation(request: ParlantValidationRequest): Promise<ParlantValidationResponse | null> {
-    const startTime = performance.now();
+    const startTime = Date.now();
     this.cacheStats.totalRequests++;
 
     try {
@@ -206,7 +206,7 @@ export class ParlantIntelligentCacheService {
       if (memoryCacheEntry && this.isCacheEntryValid(memoryCacheEntry, config)) {
         await this.updateCacheAccessMetrics(memoryCacheEntry);
         this.cacheStats.cacheHits++;
-        this.updateAverageLookupTime(performance.now() - startTime);
+        this.updateAverageLookupTime(Date.now() - startTime);
         
         this.logger.debug(`[${request.operationId}] Cache HIT (memory): ${cacheKey}`);
         return memoryCacheEntry.value;
@@ -220,7 +220,7 @@ export class ParlantIntelligentCacheService {
           await this.setMemoryCache(cacheKey, redisCacheEntry.value, config);
           await this.updateCacheAccessMetrics(redisCacheEntry);
           this.cacheStats.cacheHits++;
-          this.updateAverageLookupTime(performance.now() - startTime);
+          this.updateAverageLookupTime(Date.now() - startTime);
           
           this.logger.debug(`[${request.operationId}] Cache HIT (Redis): ${cacheKey}`);
           return redisCacheEntry.value;
@@ -229,7 +229,7 @@ export class ParlantIntelligentCacheService {
 
       // Cache miss
       this.cacheStats.cacheMisses++;
-      this.updateAverageLookupTime(performance.now() - startTime);
+      this.updateAverageLookupTime(Date.now() - startTime);
       this.updateCacheHitRate();
 
       this.logger.debug(`[${request.operationId}] Cache MISS: ${cacheKey}`);
@@ -376,7 +376,7 @@ export class ParlantIntelligentCacheService {
     }
 
     const operationId = `cache_warm_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const functionsToWarm = functionNames || this.warmingConfig.priorityFunctions;
+    const functionsToWarm = functionNames ?? this.warmingConfig.priorityFunctions;
 
     this.logger.log(`[${operationId}] Starting cache warming for ${functionsToWarm.length} functions`);
 
@@ -462,11 +462,11 @@ export class ParlantIntelligentCacheService {
   }
 
   private getCacheConfigForRiskLevel(riskLevel: RiskLevel): CacheConfig {
-    return this.cacheConfigs.get(riskLevel) || this.cacheConfigs.get(RiskLevel.MEDIUM)!;
+    return this.cacheConfigs.get(riskLevel) ?? this.cacheConfigs.get(RiskLevel.MEDIUM) as CacheConfig;
   }
 
   private getFromMemoryCache(key: string): CacheEntry<ParlantValidationResponse> | null {
-    return this.memoryCache.get(key) || null;
+    return this.memoryCache.get(key) ?? null;
   }
 
   private async setMemoryCache(
@@ -494,7 +494,7 @@ export class ParlantIntelligentCacheService {
     }
   }
 
-  private async getFromRedisCache(key: string): Promise<CacheEntry<ParlantValidationResponse> | null> {
+  private async getFromRedisCache(_key: string): Promise<CacheEntry<ParlantValidationResponse> | null> {
     // TODO: Implement Redis cache retrieval
     // if (this.redisClient) {
     //   const cached = await this.redisClient.get(key);
@@ -506,9 +506,9 @@ export class ParlantIntelligentCacheService {
   }
 
   private async setRedisCache(
-    key: string,
-    value: ParlantValidationResponse,
-    config: CacheConfig
+    _key: string,
+    _value: ParlantValidationResponse,
+    _config: CacheConfig
   ): Promise<void> {
     // TODO: Implement Redis cache storage
     // if (this.redisClient) {
@@ -576,7 +576,7 @@ export class ParlantIntelligentCacheService {
 
   private calculateEstimatedMemoryUsage(): string {
     let totalEstimate = 0;
-    for (const [riskLevel, config] of this.cacheConfigs) {
+    for (const [_riskLevel, config] of this.cacheConfigs) {
       totalEstimate += config.maxEntries * 1024; // Rough estimate per entry
     }
     return `${Math.round(totalEstimate / 1024 / 1024)}MB`;
@@ -592,7 +592,7 @@ export class ParlantIntelligentCacheService {
     }
   }
 
-  private generateSampleRequests(functionName: string): ParlantValidationRequest[] {
+  private generateSampleRequests(_functionName: string): ParlantValidationRequest[] {
     // TODO: Generate realistic sample requests for cache warming
     // This would analyze historical patterns and generate common variations
     return [];

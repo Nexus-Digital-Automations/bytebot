@@ -1186,12 +1186,24 @@
       ]
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-17T16:43:13.383Z",
       "title": "Fix TypeScript compilation errors in bytebot-agent",
       "description": "Resolve Node.js/NestJS TypeScript compilation errors including module resolution, export conflicts, duplicate declarations, and isolatedModules compatibility issues",
       "category": "error",
-      "id": "error_1758127393382_nrm5bjcdj3r"
+      "id": "error_1758127393382_nrm5bjcdj3r",
+      "assigned_agent": "dev_session_1758144217354_1_general_020c9f71",
+      "started_at": "2025-09-17T21:24:24.014Z",
+      "claimed_by": "dev_session_1758144217354_1_general_020c9f71",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758144217354_1_general_020c9f71",
+          "role": "primary",
+          "assignedAt": "2025-09-17T21:24:24.014Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "in_progress",
@@ -1209,6 +1221,66 @@
           "agentId": "dev_session_1758129028666_1_general_284d8e08",
           "role": "primary",
           "assignedAt": "2025-09-17T17:13:22.443Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T21:24:39.927Z",
+      "title": "Fix ESLint violations in encryption and security service files",
+      "description": "Fix all ESLint violations in encryption-service.ts and similar security files, focusing on unsafe any assignments, unsafe calls, unsafe member access, explicit any types, and nullish coalescing. Target zero violations in encryption services.",
+      "category": "error",
+      "id": "error_1758144279927_kurwbp0z6x8",
+      "assigned_agent": "dev_session_1758144260776_1_general_9c7201c4",
+      "started_at": "2025-09-17T21:25:37.066Z",
+      "claimed_by": "dev_session_1758144260776_1_general_9c7201c4",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758144260776_1_general_9c7201c4",
+          "role": "primary",
+          "assignedAt": "2025-09-17T21:25:37.066Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T21:24:41.465Z",
+      "title": "Fix all ESLint violations in enterprise API files",
+      "description": "Fix ESLint violations in enterprise-*.ts files and remaining large services: nullish coalescing (|| to ??), unused variables/parameters (prefix with _), unsafe any assignments, and unsafe member access. Target zero violations.",
+      "category": "error",
+      "id": "error_1758144281465_nkxcuyl366e",
+      "assigned_agent": "dev_session_1758144258809_1_general_3e455c2b",
+      "started_at": "2025-09-17T21:25:29.806Z",
+      "claimed_by": "dev_session_1758144258809_1_general_3e455c2b",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758144258809_1_general_3e455c2b",
+          "role": "primary",
+          "assignedAt": "2025-09-17T21:25:29.806Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-17T21:24:46.267Z",
+      "title": "Fix all ESLint violations in browser-use service files",
+      "description": "Comprehensive ESLint violation fix in browser-use directory: unsafe any assignments, explicit any types, nullish coalescing, unused variables/parameters, forbidden non-null assertions. Target zero violations.",
+      "category": "error",
+      "id": "error_1758144286267_awktvw4xjm",
+      "assigned_agent": "dev_session_1758144259141_1_general_ceab2bad",
+      "started_at": "2025-09-17T21:25:21.559Z",
+      "claimed_by": "dev_session_1758144259141_1_general_ceab2bad",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758144259141_1_general_ceab2bad",
+          "role": "primary",
+          "assignedAt": "2025-09-17T21:25:21.559Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
@@ -4592,6 +4664,153 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-17T16:42:37.998Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758142931016_1_general_3597d042": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:02:11.017Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:02:11.017Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758144217354_1_general_020c9f71": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:23:37.354Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:23:37.354Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758144258809_1_general_3e455c2b": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:24:18.810Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:24:18.810Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758144258925_1_general_d8893049": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:24:18.926Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:24:18.926Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758144259141_1_general_ceab2bad": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:24:19.141Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:24:19.141Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758144260043_1_general_dcc5c26d": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:24:20.043Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:24:20.043Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758144260776_1_general_9c7201c4": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T21:24:20.777Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T21:24:20.777Z",
       "sessionId": null,
       "metadata": {}
     }

@@ -51,10 +51,10 @@ class IndexTestUtils {
    * Validate that an export exists and has correct type
    */
   static validateExport(
-    exportObj: any,
+    exportObj: unknown,
     name: string,
     expectedType: string,
-    expectedConstructor?: any,
+    expectedConstructor?: unknown,
   ): void {
     expect(exportObj).toBeDefined();
     expect(typeof exportObj).toBe(expectedType);
@@ -70,7 +70,7 @@ class IndexTestUtils {
   static isConstructor(obj: unknown): boolean {
     return (typeof obj === 'function' &&
       obj.prototype &&
-      obj.prototype.constructor === obj) as boolean;
+      (obj as { prototype: { constructor: unknown } }).prototype.constructor === obj) as boolean;
   }
 
   /**

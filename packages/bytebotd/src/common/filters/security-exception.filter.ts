@@ -37,6 +37,14 @@ enum SecurityErrorType {
 }
 
 /**
+ * Error details structure for development responses
+ */
+interface ErrorDetails {
+  name: string;
+  cause: string | null;
+}
+
+/**
  * Secure error response structure
  */
 interface SecureErrorResponse {
@@ -47,7 +55,7 @@ interface SecureErrorResponse {
   path: string;
   requestId: string;
   // Only include in development
-  details?: any;
+  details?: ErrorDetails;
   stack?: string;
 }
 
@@ -167,7 +175,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
           threatIndicators.push('rate_limit_exceeded');
           break;
         default:
-          if (statusCode >= 400 && statusCode < 500) {
+          if (statusCode >= HttpStatus.BAD_REQUEST && statusCode < HttpStatus.INTERNAL_SERVER_ERROR) {
             riskScore = 3;
           }
       }
@@ -244,7 +252,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
 
     // Only include detailed information in development
     if (isDevelopment) {
-      response.details = this.sanitizeErrorDetails(exception);
+      response.details = this.sanitizeErrorDetails(exception) ?? undefined;
 
       if (exception instanceof Error && exception.stack) {
         response.stack = exception.stack;
@@ -340,16 +348,47 @@ export class SecurityExceptionFilter implements ExceptionFilter {
   /**
    * Sanitize error details for development responses
    */
-  private sanitizeErrorDetails(exception: unknown): any {
+  private sanitizeErrorDetails(exception: unknown): ErrorDetails | null {
     if (!(exception instanceof Error)) {
       return null;
     }
 
+    // Type guard for exception cause property
+    const cause = this.getErrorCause(exception);
+
     return {
       name: exception.name,
-      cause: (exception as any).cause ?? 'Unknown',
+      cause,
       // Don't include the full stack trace in JSON response
     };
+  }
+
+  /**
+   * Safely extract cause from error with proper type checking
+   */
+  private getErrorCause(error: Error): string | null {
+    // Check if error has cause property and it's a valid type
+    if ('cause' in error) {
+      const cause = (error as { cause?: unknown }).cause;
+      if (typeof cause === 'string') {
+        return cause;
+      }
+      if (cause instanceof Error) {
+        return cause.message;
+      }
+      if (cause !== null && cause !== undefined) {
+        // Safely stringify non-null, non-undefined values
+        if (typeof cause === 'object') {
+          return '[object Object]';
+        }
+        if (typeof cause === 'number' || typeof cause === 'boolean' || typeof cause === 'bigint') {
+          return String(cause);
+        }
+        // For other types, ensure it's a string or convertible
+        return typeof cause === 'string' ? cause : '[Unknown Type]';
+      }
+    }
+    return null;
   }
 
   /**
@@ -501,7 +540,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
   /**
    * Sanitize headers to remove sensitive information
    */
-  private sanitizeHeaders(headers: any): any {
+  private sanitizeHeaders(headers: Record<string, unknown>): Record<string, unknown> {
     const sanitized = { ...headers };
 
     const sensitiveHeaders = [

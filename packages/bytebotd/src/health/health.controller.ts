@@ -50,9 +50,10 @@ import {
 import {
   ParlantHealthMetricsValidationService,
   HealthOperationType,
+  MetricsOperationType,
   HealthMetricsValidationResult,
 } from '../parlant/services/parlant-health-metrics-validation.service';
-import { MetricsService } from '@bytebot/shared/server';
+import { MetricsService } from '@bytebot/shared';
 
 /**
  * Health monitoring controller providing system status endpoints with Parlant validation
@@ -553,7 +554,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Metrics endpoint (MEDIUM risk - exposes system metrics)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        HealthOperationType.METRICS_ENDPOINT,
+        MetricsOperationType.PROMETHEUS_COLLECTION,
         {
           endpoint: '/health/metrics',
           method: 'GET',

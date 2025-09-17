@@ -19,7 +19,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createHash, randomBytes, createCipher, createDecipher } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
 
 // ===== AUDIT INTERFACES =====
@@ -223,7 +223,7 @@ export class ParlantEnterpriseAuditService {
       geoLocation?: string;
     } = {}
   ): Promise<ParlantAuditEntry> {
-    const startTime = performance.now();
+    const startTime = Date.now();
     const auditId = `audit_${Date.now()}_${randomBytes(8).toString('hex')}`;
     
     try {
@@ -240,7 +240,7 @@ export class ParlantEnterpriseAuditService {
       const auditEntry: Omit<ParlantAuditEntry, 'auditHash' | 'digitalSignature'> = {
         auditId,
         operationId: request.operationId,
-        conversationId: response?.conversationId || 'N/A',
+        conversationId: response?.conversationId ?? 'N/A',
         timestamp: new Date(),
         userId: request.context.userId,
         sessionId: request.context.sessionId,
@@ -271,7 +271,7 @@ export class ParlantEnterpriseAuditService {
       await this.storeAuditEntry(completeAuditEntry);
       
       // Update performance metrics
-      const auditTime = performance.now() - startTime;
+      const auditTime = Date.now() - startTime;
       this.updateAuditPerformanceMetrics(auditTime);
       
       this.logger.debug(`[${request.operationId}] Audit entry created: ${auditId}`, {
@@ -310,17 +310,17 @@ export class ParlantEnterpriseAuditService {
    * @returns Filtered audit entries
    */
   async queryAuditEntries(query: AuditQuery): Promise<ParlantAuditEntry[]> {
-    const startTime = performance.now();
+    const startTime = Date.now();
     
     let filteredEntries = Array.from(this.auditEntries.values());
     
     // Apply filters
     if (query.startDate) {
-      filteredEntries = filteredEntries.filter(entry => entry.timestamp >= query.startDate!);
+      filteredEntries = filteredEntries.filter(entry => entry.timestamp >= query.startDate);
     }
     
     if (query.endDate) {
-      filteredEntries = filteredEntries.filter(entry => entry.timestamp <= query.endDate!);
+      filteredEntries = filteredEntries.filter(entry => entry.timestamp <= query.endDate);
     }
     
     if (query.userId) {
@@ -349,11 +349,11 @@ export class ParlantEnterpriseAuditService {
     filteredEntries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     
     // Apply pagination
-    const offset = query.offset || 0;
-    const limit = query.limit || 100;
+    const offset = query.offset ?? 0;
+    const limit = query.limit ?? 100;
     const paginatedEntries = filteredEntries.slice(offset, offset + limit);
     
-    const queryTime = performance.now() - startTime;
+    const queryTime = Date.now() - startTime;
     
     this.logger.debug('Audit query executed', {
       totalEntries: this.auditEntries.size,
@@ -380,7 +380,7 @@ export class ParlantEnterpriseAuditService {
     endDate: Date
   ): Promise<ComplianceReport> {
     const reportId = `compliance_${regulation}_${Date.now()}_${randomBytes(4).toString('hex')}`;
-    const startTime = performance.now();
+    const startTime = Date.now();
     
     this.logger.log(`Generating compliance report: ${reportId}`, {
       regulation,
@@ -422,7 +422,7 @@ export class ParlantEnterpriseAuditService {
       executiveSummary,
     };
     
-    const reportTime = performance.now() - startTime;
+    const reportTime = Date.now() - startTime;
     
     this.logger.log(`Compliance report generated: ${reportId}`, {
       reportId,
@@ -444,8 +444,8 @@ export class ParlantEnterpriseAuditService {
    * @returns Integrity verification results
    */
   async verifyAuditTrailIntegrity(entries?: ParlantAuditEntry[]): Promise<AuditIntegrityCheck> {
-    const startTime = performance.now();
-    const entriesToVerify = entries || Array.from(this.auditEntries.values());
+    const startTime = Date.now();
+    const entriesToVerify = entries ?? Array.from(this.auditEntries.values());
     
     let verifiedCount = 0;
     let tamperedCount = 0;
@@ -484,7 +484,7 @@ export class ParlantEnterpriseAuditService {
       ? (verifiedCount / entriesToVerify.length) * 100 
       : 100;
     
-    const verificationTime = performance.now() - startTime;
+    const verificationTime = Date.now() - startTime;
     
     const result: AuditIntegrityCheck = {
       totalEntries: entriesToVerify.length,
@@ -549,7 +549,7 @@ export class ParlantEnterpriseAuditService {
   private async generateComplianceFlags(
     request: ParlantValidationRequest,
     response: ParlantValidationResponse | null,
-    executionResult: ParlantAuditEntry['executionResult']
+    _executionResult: ParlantAuditEntry['executionResult']
   ): Promise<ComplianceFlag[]> {
     const flags: ComplianceFlag[] = [];
     
@@ -679,7 +679,7 @@ export class ParlantEnterpriseAuditService {
     this.auditEntries.set(entry.auditId, entry);
     
     // Update user index
-    const userEntries = this.auditIndex.get(entry.userId) || [];
+    const userEntries = this.auditIndex.get(entry.userId) ?? [];
     userEntries.push(entry.auditId);
     this.auditIndex.set(entry.userId, userEntries);
     
@@ -781,7 +781,7 @@ export class ParlantEnterpriseAuditService {
 
   private generateComplianceRecommendations(
     analysis: { complianceRate: number },
-    regulation: string
+    _regulation: string
   ): ComplianceRecommendation[] {
     const recommendations: ComplianceRecommendation[] = [];
     
@@ -830,7 +830,7 @@ ${analysis.complianceRate < 95 ? 'Recommended actions:\n- Implement enhanced val
     
     for (const entry of entries) {
       for (const flag of entry.complianceFlags) {
-        distribution[flag.regulation] = (distribution[flag.regulation] || 0) + 1;
+        distribution[flag.regulation] = (distribution[flag.regulation] ?? 0) + 1;
       }
     }
     
@@ -841,7 +841,7 @@ ${analysis.complianceRate < 95 ? 'Recommended actions:\n- Implement enhanced val
     const distribution: Record<string, number> = {};
     
     for (const entry of entries) {
-      distribution[entry.riskLevel] = (distribution[entry.riskLevel] || 0) + 1;
+      distribution[entry.riskLevel] = (distribution[entry.riskLevel] ?? 0) + 1;
     }
     
     return distribution;

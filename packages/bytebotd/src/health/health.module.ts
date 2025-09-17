@@ -25,7 +25,7 @@ import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
 import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
-import { MonitoringModule } from '@bytebot/shared/server';
+import { MonitoringModule } from '@bytebot/shared';
 
 /**
  * Enterprise health monitoring module providing Kubernetes observability

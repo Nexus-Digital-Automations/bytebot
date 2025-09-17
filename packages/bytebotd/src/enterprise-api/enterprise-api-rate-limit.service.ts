@@ -752,8 +752,14 @@ export class EnterpriseApiRateLimitService {
   /**
    * Map urgency level to risk level
    */
-  private mapUrgencyToRiskLevel(urgency: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    return this.mapUrgencyToSecurityLevel(urgency);
+  private mapUrgencyToRiskLevel(urgency: string): RiskLevel {
+    switch (urgency) {
+      case 'LOW': return RiskLevel.LOW;
+      case 'MEDIUM': return RiskLevel.MEDIUM;
+      case 'HIGH': return RiskLevel.HIGH;
+      case 'CRITICAL': return RiskLevel.CRITICAL;
+      default: return RiskLevel.LOW; // Default fallback
+    }
   }
 
   /**

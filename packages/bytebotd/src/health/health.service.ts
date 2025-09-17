@@ -37,7 +37,6 @@ import {
 import {
   ParlantHealthMetricsValidationService,
   HealthOperationType,
-  HealthMetricsValidationResult,
 } from '../parlant/services/parlant-health-metrics-validation.service';
 
 // Re-export interfaces for test files

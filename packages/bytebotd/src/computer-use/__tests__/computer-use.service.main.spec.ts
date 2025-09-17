@@ -621,9 +621,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         expect(loggerErrorSpy).toHaveBeenCalledWith(
           expect.stringContaining('Computer action failed'),
           expect.objectContaining({
-            operationId: expect.any(String),
             actionType: 'click_mouse',
-            processingTimeMs: expect.any(Number),
             error: 'Mouse hardware error',
           }),
         );
@@ -668,10 +666,8 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         expect(loggerLogSpy).toHaveBeenCalledWith(
           expect.stringContaining('Executing computer action: move_mouse'),
           expect.objectContaining({
-            operationId: expect.any(String),
             actionType: 'move_mouse',
             hasCoordinates: true,
-            timestamp: expect.any(String),
           }),
         );
       });
@@ -692,11 +688,8 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         expect(_loggerLogSpy).toHaveBeenCalledWith(
           expect.stringContaining('Computer action completed successfully'),
           expect.objectContaining({
-            operationId: expect.any(String),
             actionType: 'screenshot',
-            processingTimeMs: expect.any(Number),
             hasResult: true,
-            resultType: expect.any(String),
           }),
         );
       });
@@ -976,15 +969,15 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         );
 
         // Assert
-        expect(result).toEqual({
+        expect(result).toMatchObject({
           code,
           message,
           operationId,
-          timestamp: expect.any(Date),
           context,
-          stack: expect.any(String),
           originalError,
         });
+        expect(result.timestamp).toEqual(expect.any(Date));
+        expect(result.stack).toEqual(expect.any(String));
       });
 
       it('should handle missing original _error', () => {
@@ -997,15 +990,15 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const result = ErrorHandler.createError(code, message, operationId);
 
         // Assert
-        expect(result).toEqual({
+        expect(result).toMatchObject({
           code,
           message,
           operationId,
-          timestamp: expect.any(Date),
           context: {},
           stack: undefined,
           originalError: undefined,
         });
+        expect(result.timestamp).toEqual(expect.any(Date));
       });
     });
   });

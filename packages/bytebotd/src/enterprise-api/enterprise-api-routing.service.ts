@@ -512,7 +512,7 @@ export class EnterpriseApiRoutingService {
     } else {
       // Fall back to traditional load balancing
       selectedEndpoint = this.selectEndpointByLoadBalancing(request.operation, availableEndpoints);
-      routingStrategy = this.loadBalancingConfig.strategy === 'CONVERSATION_BASED' ? 'WEIGHTED' : this.loadBalancingConfig.strategy;
+      routingStrategy = this.mapLoadBalancingStrategyToRoutingStrategy(this.loadBalancingConfig.strategy);
       routingReason = `Traditional load balancing using ${routingStrategy} strategy`;
     }
 
@@ -584,7 +584,13 @@ export class EnterpriseApiRoutingService {
     });
     
     scores.sort((a, b) => b.score - a.score);
-    return scores[0]?.endpoint || availableEndpoints[0];
+    const selectedEndpoint = scores[0]?.endpoint || availableEndpoints[0];
+    
+    if (!selectedEndpoint) {
+      throw new Error('No available endpoints for routing');
+    }
+    
+    return selectedEndpoint;
   }
 
   /**
@@ -598,7 +604,11 @@ export class EnterpriseApiRoutingService {
       const degradedEndpoints = availableEndpoints.filter(e => e.health === 'DEGRADED');
       if (degradedEndpoints.length > 0) {
         this.analytics.loadBalancingMetrics.failoverEvents++;
-        return degradedEndpoints[0];
+        const endpoint = degradedEndpoints[0];
+        if (!endpoint) {
+          throw new Error('Degraded endpoint is undefined');
+        }
+        return endpoint;
       }
       throw new Error('No healthy endpoints available');
     }
@@ -611,7 +621,11 @@ export class EnterpriseApiRoutingService {
       case 'LEAST_CONNECTIONS':
         return this.selectLeastConnectionsEndpoint(healthyEndpoints);
       default:
-        return healthyEndpoints[0];
+        const endpoint = healthyEndpoints[0];
+        if (!endpoint) {
+          throw new Error('No healthy endpoints available');
+        }
+        return endpoint;
     }
   }
 
@@ -932,7 +946,11 @@ export class EnterpriseApiRoutingService {
     const counter = this.roundRobinCounters.get(operation) || 0;
     const selectedIndex = counter % endpoints.length;
     this.roundRobinCounters.set(operation, counter + 1);
-    return endpoints[selectedIndex];
+    const endpoint = endpoints[selectedIndex];
+    if (!endpoint) {
+      throw new Error('Selected endpoint is undefined');
+    }
+    return endpoint;
   }
 
   private selectWeightedEndpoint(endpoints: ServiceEndpoint[]): ServiceEndpoint {
@@ -947,7 +965,11 @@ export class EnterpriseApiRoutingService {
       }
     }
     
-    return endpoints[0];
+    const endpoint = endpoints[0];
+    if (!endpoint) {
+      throw new Error('No endpoints available for weighted selection');
+    }
+    return endpoint;
   }
 
   private selectLeastConnectionsEndpoint(endpoints: ServiceEndpoint[]): ServiceEndpoint {
@@ -982,5 +1004,18 @@ export class EnterpriseApiRoutingService {
 
   private sanitizeOperationForFunction(operation: string): string {
     return operation.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+  }
+
+  /**
+   * Map load balancing strategy to routing strategy
+   */
+  private mapLoadBalancingStrategyToRoutingStrategy(strategy: string): 'ROUND_ROBIN' | 'WEIGHTED' | 'CONVERSATION_BASED' | 'HEALTH_AWARE' {
+    switch (strategy) {
+      case 'ROUND_ROBIN': return 'ROUND_ROBIN';
+      case 'WEIGHTED': return 'WEIGHTED';
+      case 'CONVERSATION_BASED': return 'CONVERSATION_BASED';
+      case 'LEAST_CONNECTIONS': return 'HEALTH_AWARE'; // Map LEAST_CONNECTIONS to HEALTH_AWARE
+      default: return 'ROUND_ROBIN'; // Default fallback
+    }
   }
 }

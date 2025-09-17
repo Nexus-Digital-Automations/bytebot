@@ -136,7 +136,7 @@ export const ParlantUtils = {
       conversationId: response.conversationId,
       ...(response.suggestedAlternatives && { suggestedAlternatives: response.suggestedAlternatives }),
       ...(response.executionContext && { executionContext: response.executionContext }),
-    };
+    } as Record<string, unknown>;
   },
 
   /**
@@ -146,8 +146,8 @@ export const ParlantUtils = {
     const totalTime = Date.now() - startTime;
     return {
       totalTimeMs: totalTime,
-      validationTimeMs: validationTime || 0,
-      executionTimeMs: totalTime - (validationTime || 0),
+      validationTimeMs: validationTime ?? 0,
+      executionTimeMs: totalTime - (validationTime ?? 0),
       withinTarget: totalTime < 1000, // Sub-1000ms target
     };
   },
@@ -241,11 +241,10 @@ export const PARLANT_VERSION = {
 
 // ===== DEFAULT EXPORT =====
 
-import { ParlantIntegrationService } from './parlant-integration.service';
+import { ParlantIntegrationService, ConversationalValidationError } from './parlant-integration.service';
 import { ParlantValidatedComputerUseService } from './parlant-validated-computer-use.service';
 import { ParlantComputerUseController } from './parlant-computer-use.controller';
 import { ParlantModule } from './parlant.module';
-import { ConversationalValidationError } from './parlant-integration.service';
 
 /**
  * Default export with all Parlant integration components

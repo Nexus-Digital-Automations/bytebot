@@ -112,6 +112,25 @@ export interface RetryAnalytics {
 }
 
 /**
+ * Mutable version of RetryAnalytics for internal state management
+ */
+interface MutableRetryAnalytics {
+  totalRetries: number;
+  successfulRetries: number;
+  failedRetries: number;
+  averageRetryCount: number;
+  averageRecoveryTime: number;
+  endpointSuccessRates: Map<string, number>;
+  errorDistribution: Map<string, number>;
+  timeDistribution: {
+    immediate: number;
+    fast: number;
+    medium: number;
+    slow: number;
+  };
+}
+
+/**
  * Graceful degradation strategy
  */
 export interface DegradationStrategy {
@@ -208,7 +227,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   }>();
   
   // Retry analytics tracking
-  private retryAnalytics: RetryAnalytics = {
+  private retryAnalytics: MutableRetryAnalytics = {
     totalRetries: 0,
     successfulRetries: 0,
     failedRetries: 0,
@@ -723,12 +742,12 @@ export class ParlantRetryFailoverService extends EventEmitter {
   }
 
   private updateSuccessAnalytics(attempts: number, totalTime: number, endpoint: string): void {
-    (this.retryAnalytics as any).totalRetries += (attempts - 1);
-    (this.retryAnalytics as any).successfulRetries++;
+    this.retryAnalytics.totalRetries += (attempts - 1);
+    this.retryAnalytics.successfulRetries++;
     
     // Update average retry count
     const totalOperations = this.retryAnalytics.successfulRetries + this.retryAnalytics.failedRetries;
-    (this.retryAnalytics as any).averageRetryCount = 
+    this.retryAnalytics.averageRetryCount = 
       (this.retryAnalytics.averageRetryCount * (totalOperations - 1) + (attempts - 1)) / totalOperations;
     
     // Update endpoint success rate
@@ -740,12 +759,12 @@ export class ParlantRetryFailoverService extends EventEmitter {
   }
 
   private updateFailureAnalytics(attempts: number, totalTime: number): void {
-    (this.retryAnalytics as any).totalRetries += (attempts - 1);
-    (this.retryAnalytics as any).failedRetries++;
+    this.retryAnalytics.totalRetries += (attempts - 1);
+    this.retryAnalytics.failedRetries++;
     
     // Update average retry count
     const totalOperations = this.retryAnalytics.successfulRetries + this.retryAnalytics.failedRetries;
-    (this.retryAnalytics as any).averageRetryCount = 
+    this.retryAnalytics.averageRetryCount = 
       (this.retryAnalytics.averageRetryCount * (totalOperations - 1) + (attempts - 1)) / totalOperations;
     
     // Update time distribution
@@ -814,7 +833,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
     
     return {
       success: true,
-      data: strategy.fallbackResponse as any, // Type assertion for generic
+      data: strategy.fallbackResponse as T, // Type assertion to match return type
       totalAttempts: 0,
       totalTime,
       failedEndpoints: [],

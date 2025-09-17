@@ -366,7 +366,7 @@ export class SecurityThreatDetectorService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -472,7 +472,7 @@ export class SecurityThreatDetectorService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -570,7 +570,7 @@ export class SecurityThreatDetectorService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -967,12 +967,12 @@ export class SecurityThreatDetectorService {
         actions.push({
           actionId: `action_${Date.now()}_1`,
           actionType: 'NETWORK_BLOCK',
-          target: threat.sourceDetails.sourceIp || 'unknown',
+          target: threat.sourceDetails.sourceIp ?? 'unknown',
         });
         actions.push({
           actionId: `action_${Date.now()}_2`,
           actionType: 'QUARANTINE',
-          target: threat.affectedAssets[0] || 'unknown',
+          target: threat.affectedAssets[0] ?? 'unknown',
         });
         break;
 
@@ -980,7 +980,7 @@ export class SecurityThreatDetectorService {
         actions.push({
           actionId: `action_${Date.now()}_1`,
           actionType: 'NETWORK_BLOCK',
-          target: threat.sourceDetails.sourceIp || 'unknown',
+          target: threat.sourceDetails.sourceIp ?? 'unknown',
         });
         break;
 

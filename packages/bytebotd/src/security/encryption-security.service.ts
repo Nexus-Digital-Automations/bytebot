@@ -319,7 +319,7 @@ export class EncryptionSecurityService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -428,7 +428,7 @@ export class EncryptionSecurityService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -530,7 +530,7 @@ export class EncryptionSecurityService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -671,7 +671,7 @@ export class EncryptionSecurityService {
     let result: Buffer | undefined;
     const keyId = request.keyId;
     const metadata: EncryptionMetadata = {
-      keySize: request.options?.keySize || 256,
+      keySize: request.options?.keySize ?? 256,
       timestamp: new Date(),
     };
 
@@ -697,11 +697,12 @@ export class EncryptionSecurityService {
           success = true;
           break;
 
-        case CryptographicOperation.VERIFY:
+        case CryptographicOperation.VERIFY: {
           const verified = await this.performSignatureVerification(request);
           result = Buffer.from(verified ? '1' : '0');
           success = true;
           break;
+        }
 
         default:
           throw new Error(`Unsupported cryptographic operation: ${request.operation}`);
@@ -756,7 +757,7 @@ export class EncryptionSecurityService {
     let tag: Buffer | undefined;
     try {
       // Only GCM ciphers have getAuthTag method
-      tag = (cipher as any).getAuthTag?.();
+      tag = (cipher as crypto.CipherGCM).getAuthTag?.();
     } catch {
       // Not a GCM cipher, no auth tag
       tag = undefined;
@@ -781,7 +782,7 @@ export class EncryptionSecurityService {
 
     // In production, retrieve actual key material securely
     const key = crypto.randomBytes(32); // Mock key
-    const decryptIv = request.options?.iv || crypto.randomBytes(16);
+    const decryptIv = request.options?.iv ?? crypto.randomBytes(16);
 
     const decipher = crypto.createDecipheriv(this.mapAlgorithmToCrypto(request.algorithm), key, decryptIv);
     
@@ -789,7 +790,7 @@ export class EncryptionSecurityService {
     if (request.options?.iv) {
       try {
         // Only GCM deciphers have setAuthTag method
-        (decipher as any).setAuthTag?.(Buffer.from('mock-tag')); // Mock auth tag
+        (decipher as crypto.DecipherGCM).setAuthTag?.(Buffer.from('mock-tag')); // Mock auth tag
       } catch {
         // Not a GCM decipher, no auth tag needed
       }
@@ -874,7 +875,7 @@ export class EncryptionSecurityService {
       expiresAt,
       rotationDue,
       usage: request.usage,
-      metadata: request.metadata || {},
+      metadata: request.metadata ?? {},
       conversationId,
     };
 
@@ -915,7 +916,7 @@ export class EncryptionSecurityService {
       keyType: existingKey.keyType,
       algorithm: existingKey.algorithm,
       keySize: existingKey.keySize,
-      securityLevel: request.newSecurityLevel || existingKey.securityLevel,
+      securityLevel: request.newSecurityLevel ?? existingKey.securityLevel,
       usage: existingKey.usage,
       metadata: { ...existingKey.metadata, rotatedFrom: existingKey.keyId },
       context: request.context,

@@ -519,7 +519,7 @@ export class EnterpriseApiGatewayController {
 
     try {
       // Calculate service metrics
-      const services: Record<string, any> = {};
+      const services: Record<string, unknown> = {};
       this.analytics.serviceMetrics.forEach((metrics, serviceName) => {
         services[serviceName] = {
           requestCount: metrics.requests,
@@ -681,7 +681,7 @@ export class EnterpriseApiGatewayController {
       }
 
       // Get endpoint configuration
-      const config = this.apiEndpoints.get(apiKey) || {
+      const config = this.apiEndpoints.get(apiKey) ?? {
         endpoint,
         service,
         requiresValidation: true,
@@ -709,7 +709,7 @@ export class EnterpriseApiGatewayController {
           actionDescription: `Execute ${method} API call to /${service}/${endpoint}`,
           context: {
             userId: context.user.id,
-            sessionId: context.headers?.['x-conversation-id'] || `api_session_${Date.now()}`,
+            sessionId: context.headers?.['x-conversation-id'] ?? `api_session_${Date.now()}`,
             agentRole: context.user.role,
             securityLevel: this.mapUserRoleToSecurityLevel(context.user.role),
             conversationHistory: [],
@@ -799,7 +799,7 @@ export class EnterpriseApiGatewayController {
           },
           performance: {
             cacheHit: false, // TODO: Implement cache hit tracking
-            circuitBreakerState: circuitBreaker?.state || 'CLOSED',
+            circuitBreakerState: circuitBreaker?.state ?? 'CLOSED',
             resourceUsage: {
               cpu: 0, // TODO: Implement resource usage tracking
               memory: 0,
@@ -905,7 +905,7 @@ export class EnterpriseApiGatewayController {
     method: string,
     service: string,
     endpoint: string,
-    context: any,
+    _context: unknown,
   ): Promise<unknown> {
     // TODO: Implement actual API proxying to target controllers
     // This would typically use HttpService to make internal HTTP calls
@@ -929,7 +929,7 @@ export class EnterpriseApiGatewayController {
    * Initialize circuit breakers for all configured endpoints
    */
   private initializeCircuitBreakers(): void {
-    this.apiEndpoints.forEach((config, apiKey) => {
+    this.apiEndpoints.forEach((config, _apiKey) => {
       const circuitBreakerKey = `${config.service}:${config.endpoint}`;
       this.circuitBreakers.set(circuitBreakerKey, {
         state: 'CLOSED',
@@ -973,9 +973,9 @@ export class EnterpriseApiGatewayController {
    */
   private getClientIpAddress(request: Request): string {
     return (
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      (request.headers['x-real-ip'] as string) ||
-      request.socket?.remoteAddress ||
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??
+      (request.headers['x-real-ip'] as string) ??
+      request.socket?.remoteAddress ??
       'unknown'
     );
   }

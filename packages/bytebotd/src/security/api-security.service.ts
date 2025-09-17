@@ -303,7 +303,7 @@ export class ApiSecurityService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -515,7 +515,7 @@ export class ApiSecurityService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -589,7 +589,7 @@ export class ApiSecurityService {
     // Calculate compliance status
     this.scanHistory.forEach(scan => {
       Object.entries(scan.complianceResults).forEach(([standard, compliant]) => {
-        if (!complianceStatus[standard]) complianceStatus[standard] = 0;
+        complianceStatus[standard] ??= 0;
         if (compliant) complianceStatus[standard]++;
       });
     });
@@ -654,7 +654,7 @@ export class ApiSecurityService {
 
   private async scanEndpointForVulnerabilities(
     endpoint: string,
-    scanType: ApiSecurityScanType
+    _scanType: ApiSecurityScanType
   ): Promise<ApiSecurityVulnerability[]> {
     // Mock vulnerability detection - would use actual security scanning tools
     const vulnerabilities: ApiSecurityVulnerability[] = [];
@@ -750,7 +750,7 @@ export class ApiSecurityService {
     });
   }
 
-  private async updateEndpointSecurityProfiles(scanResult: ApiSecurityScanResult): Promise<void> {
+  private async updateEndpointSecurityProfiles(_scanResult: ApiSecurityScanResult): Promise<void> {
     // Update security profiles for scanned endpoints
     // Implementation would update endpoint profiles with scan results
   }

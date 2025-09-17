@@ -237,7 +237,7 @@ export class SecurityMonitoringService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -448,7 +448,7 @@ export class SecurityMonitoringService {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives || []
+          validation.suggestedAlternatives ?? []
         );
       }
 
@@ -601,7 +601,7 @@ export class SecurityMonitoringService {
 
   private async triggerSecurityAlert(
     event: SecurityEvent,
-    context: ParlantConversationContext
+    _context: ParlantConversationContext
   ): Promise<void> {
     this.alertHistory.push(event);
     
@@ -628,7 +628,8 @@ export class SecurityMonitoringService {
       throw new Error(`Monitoring session ${monitoringId} not found`);
     }
 
-    (session as any).endTime = new Date();
+    const mutableSession = session as SecurityMonitoringResult & { endTime: Date };
+    mutableSession.endTime = new Date();
     session.conversationalAuditTrail.push(`Monitoring stopped via conversation ${conversationId}`);
     
     this.activeMonitoringSessions.delete(monitoringId);

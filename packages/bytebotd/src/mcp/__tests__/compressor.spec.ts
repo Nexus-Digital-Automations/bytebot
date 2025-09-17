@@ -325,7 +325,7 @@ describe('Base64ImageCompressor', () => {
       // @ts-ignore - Testing with invalid format
       await expect(
         Base64ImageCompressor.compressToSize(inputImage, {
-          format: 'gif' as any,
+          format: 'gif' as 'gif',
         }),
       ).rejects.toThrow('Unsupported format');
     });
@@ -366,8 +366,8 @@ describe('Base64ImageCompressor', () => {
         _resizeCallCount++;
         expect(width).toBeGreaterThan(0);
         expect(height).toBeGreaterThan(0);
-        expect(options.fit).toBe('inside');
-        expect(options.withoutEnlargement).toBe(true);
+        expect((options as { fit: string }).fit).toBe('inside');
+        expect((options as { withoutEnlargement: boolean }).withoutEnlargement).toBe(true);
         return mockSharpInstance;
       });
 

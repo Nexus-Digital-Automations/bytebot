@@ -19,7 +19,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
-import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
+import { ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
 
 // ===== MULTI-LEVEL CACHE INTERFACES =====
 
@@ -145,7 +145,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
   };
 
   // L2 Cache: Distributed Redis (placeholder for now)
-  private redisClient: any = null;
+  private redisClient: unknown = null;
   private readonly l2Config: L2CacheConfig = {
     redis: {
       cluster: [],
@@ -162,7 +162,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
   };
 
   // L3 Cache: Persistent Storage (placeholder for now)
-  private dbClient: any = null;
+  private dbClient: unknown = null;
   private readonly l3Config: L3CacheConfig = {
     database: 'sqlite',
     retention: {
@@ -271,7 +271,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
       userId: context.userId,
       sessionId: context.sessionId,
       permissions: Array.isArray(context.permissions) ? 
-        [...context.permissions].sort() : context.permissions,
+        [...(context.permissions as unknown[])].sort() : context.permissions,
       // 1-minute precision for temporal locality
       timestamp: Math.floor(Date.now() / 60000) * 60000
     };
@@ -345,8 +345,8 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
 
   private async setL2Cache(
     key: string,
-    result: ParlantValidationResponse,
-    pattern?: ValidationPattern
+    _result: ParlantValidationResponse,
+    _pattern?: ValidationPattern
   ): Promise<void> {
     // TODO: Implement Redis cluster caching
     // For now, placeholder implementation
@@ -362,7 +362,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
 
   private async cacheValidationPattern(
     functionSignature: string,
-    pattern: ValidationPattern
+    _pattern: ValidationPattern
   ): Promise<void> {
     // TODO: Implement pattern caching in Redis
     this.logger.debug(`L2 Pattern Cache: ${functionSignature} (placeholder)`);
@@ -372,8 +372,8 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
 
   private async setL3Cache(
     key: string,
-    result: ParlantValidationResponse,
-    metadata: ValidationMetadata
+    _result: ParlantValidationResponse,
+    _metadata: ValidationMetadata
   ): Promise<void> {
     // TODO: Implement persistent database caching
     this.logger.debug(`L3 Cache SET: ${key} (placeholder)`);

@@ -33,10 +33,8 @@ import {
   CreateBrowserTaskDto,
   BrowserTaskResultDto,
   BrowserActionType,
-  BrowserActionDto,
 } from './dto/browser-task.dto';
-import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';
-import { BrowserSessionDto } from './dto/browser-session.dto';
+import { CreateAsyncJobDto, AsyncJobResultDto, AsyncJobType } from './dto/async-job.dto';
 
 // ===== PARLANT BROWSER VALIDATION INTERFACES =====
 
@@ -225,7 +223,7 @@ export class ParlantValidatedBrowserUseService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -375,7 +373,7 @@ export class ParlantValidatedBrowserUseService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -458,7 +456,7 @@ export class ParlantValidatedBrowserUseService {
         throw new ConversationalValidationError(
           validationResponse.conversationId,
           validationResponse.reasoning,
-          validationResponse.suggestedAlternatives || []
+          validationResponse.suggestedAlternatives ?? []
         );
       }
 
@@ -558,10 +556,10 @@ export class ParlantValidatedBrowserUseService {
       riskFactors.push('high_session_count');
     }
 
-    // Check for file operations
-    if (taskDto.actions.some(action => action.type === 'upload')) {
+    // Check for file operations and form submissions
+    if (taskDto.actions.some(action => action.type === BrowserActionType.FILL_FORM || action.type === BrowserActionType.SUBMIT_FORM)) {
       riskLevel = RiskLevel.HIGH;
-      riskFactors.push('file_upload_operation');
+      riskFactors.push('form_submission_operation');
     }
 
     const mitigationStrategies = this.generateMitigationStrategies(riskLevel, riskFactors);
@@ -591,7 +589,7 @@ export class ParlantValidatedBrowserUseService {
       riskFactors.push('long_running_job');
     }
 
-    if (jobDto.jobType === 'DATA_EXTRACTION') {
+    if (jobDto.jobType === AsyncJobType.DATA_EXTRACTION) {
       riskLevel = this.escalateRiskLevel(riskLevel);
       riskFactors.push('data_extraction_job');
     }
@@ -617,7 +615,7 @@ export class ParlantValidatedBrowserUseService {
   private assessDataExtractionRisk(
     url: string,
     selectors: string[],
-    context: BrowserActionValidationContext
+    _context: BrowserActionValidationContext
   ): BrowserActionRiskAssessment {
     const riskFactors: string[] = [];
     let riskLevel: RiskLevel = RiskLevel.LOW;
@@ -762,8 +760,8 @@ export class ParlantValidatedBrowserUseService {
   private extractUrlsFromTask(taskDto: CreateBrowserTaskDto): string[] {
     return taskDto.actions
       .filter(action => action.url)
-      .map(action => action.url!)
-      .filter(Boolean);
+      .map(action => action.url)
+      .filter((url): url is string => Boolean(url));
   }
 
   /**
@@ -771,7 +769,7 @@ export class ParlantValidatedBrowserUseService {
    */
   private isExternalDomain(url: string): boolean {
     try {
-      const urlObj = new URL(url);
+      const urlObj = new globalThis.URL(url);
       const allowedDomains = ['localhost', '127.0.0.1', 'local.dev'];
       return !allowedDomains.some(domain => urlObj.hostname.includes(domain));
     } catch {

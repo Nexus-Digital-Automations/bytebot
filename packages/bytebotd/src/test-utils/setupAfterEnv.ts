@@ -43,6 +43,7 @@ interface OcrResult {
   processingTimeMs: number;
   method: string;
   operationId: string;
+  language?: string;
   boundingBoxes?: Array<{
     text: string;
     x: number;
@@ -51,6 +52,43 @@ interface OcrResult {
     height: number;
     confidence: number;
   }>;
+}
+
+interface FindTextResult {
+  found: boolean;
+  processingTimeMs: number;
+  operationId: string;
+  searchCriteria: {
+    text: string;
+    caseSensitive: boolean;
+    wholeWord: boolean;
+  };
+  matches?: Array<{
+    text: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    confidence: number;
+  }>;
+}
+
+interface EnhancedScreenshotResult {
+  image: string;
+  processingTimeMs: number;
+  enhancementsApplied: string[];
+  operationId: string;
+  ocr: OcrResult;
+  textDetection: {
+    regions: Array<{
+      text: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      confidence: number;
+    }>;
+  };
 }
 
 // Type guard functions for safe property access
@@ -146,7 +184,7 @@ expect.extend({
     } catch (_error) {
       return {
         message: () =>
-          `Expected ${received} to be valid base64, but decoding failed: ${_error}`,
+          `Expected ${received} to be valid base64, but decoding failed: ${String(_error)}`,
         pass: false,
       };
     }
@@ -168,7 +206,7 @@ expect.extend({
     } else {
       return {
         message: () =>
-          `Expected ${received} to have processingTimeMs, duration property, or be a number`,
+          `Expected ${JSON.stringify(received)} to have processingTimeMs, duration property, or be a number`,
         pass: false,
       };
     }
@@ -196,14 +234,14 @@ expect.extend({
   toBeValidScreenshotResult(received: unknown): jest.CustomMatcherResult {
     if (!received || typeof received !== 'object') {
       return {
-        message: () => `Expected ${received} to be an object`,
+        message: () => `Expected ${JSON.stringify(received)} to be an object`,
         pass: false,
       };
     }
 
     if (!isScreenshotResult(received)) {
       return {
-        message: () => `Expected ${received} to have required screenshot result properties`,
+        message: () => `Expected ${JSON.stringify(received)} to have required screenshot result properties`,
         pass: false,
       };
     }
@@ -220,19 +258,27 @@ expect.extend({
     if (pass) {
       return {
         message: () =>
-          `Expected ${received} not to be a valid screenshot result`,
+          `Expected ${JSON.stringify(received)} not to be a valid screenshot result`,
         pass: true,
       };
     } else {
       const issues: string[] = [];
-      if (!hasImage) issues.push('missing or invalid image');
-      if (!hasMetadata) issues.push('missing metadata');
-      if (!hasValidTimestamp) issues.push('missing or invalid captureTime');
-      if (!hasOperationId) issues.push('missing or invalid operationId');
+      if (!hasImage) {
+        issues.push('missing or invalid image');
+      }
+      if (!hasMetadata) {
+        issues.push('missing metadata');
+      }
+      if (!hasValidTimestamp) {
+        issues.push('missing or invalid captureTime');
+      }
+      if (!hasOperationId) {
+        issues.push('missing or invalid operationId');
+      }
 
       return {
         message: () =>
-          `Expected ${received} to be a valid screenshot result. Issues: ${issues.join(', ')}`,
+          `Expected ${JSON.stringify(received)} to be a valid screenshot result. Issues: ${issues.join(', ')}`,
         pass: false,
       };
     }
@@ -247,14 +293,14 @@ expect.extend({
   ): jest.CustomMatcherResult {
     if (!received || typeof received !== 'object') {
       return {
-        message: () => `Expected ${received} to be an object`,
+        message: () => `Expected ${JSON.stringify(received)} to be an object`,
         pass: false,
       };
     }
 
     if (!isFileOperationResult(received)) {
       return {
-        message: () => `Expected ${received} to have required file operation result properties`,
+        message: () => `Expected ${JSON.stringify(received)} to have required file operation result properties`,
         pass: false,
       };
     }
@@ -272,13 +318,17 @@ expect.extend({
         ? typeof received.data === 'string' && typeof received.name === 'string'
         : true;
       operationSpecificChecks = hasValidReadData;
-      if (!hasValidReadData) issues.push('missing read-specific data');
+      if (!hasValidReadData) {
+        issues.push('missing read-specific data');
+      }
     } else if (operation === 'write') {
       const hasValidWriteData = received.success
         ? typeof received.path === 'string' && typeof received.size === 'number'
         : true;
       operationSpecificChecks = hasValidWriteData;
-      if (!hasValidWriteData) issues.push('missing write-specific data');
+      if (!hasValidWriteData) {
+        issues.push('missing write-specific data');
+      }
     }
 
     const pass =
@@ -291,18 +341,26 @@ expect.extend({
     if (pass) {
       return {
         message: () =>
-          `Expected ${received} not to be a valid ${operation} file result`,
+          `Expected ${JSON.stringify(received)} not to be a valid ${operation} file result`,
         pass: true,
       };
     } else {
-      if (!hasSuccess) issues.push('missing or invalid success');
-      if (!hasOperationId) issues.push('missing or invalid operationId');
-      if (!hasTimestamp) issues.push('missing or invalid timestamp');
-      if (!received.success && !hasMessage) issues.push('missing error message');
+      if (!hasSuccess) {
+        issues.push('missing or invalid success');
+      }
+      if (!hasOperationId) {
+        issues.push('missing or invalid operationId');
+      }
+      if (!hasTimestamp) {
+        issues.push('missing or invalid timestamp');
+      }
+      if (!received.success && !hasMessage) {
+        issues.push('missing error message');
+      }
 
       return {
         message: () =>
-          `Expected ${received} to be a valid ${operation} file result. Issues: ${issues.join(', ')}`,
+          `Expected ${JSON.stringify(received)} to be a valid ${operation} file result. Issues: ${issues.join(', ')}`,
         pass: false,
       };
     }
@@ -314,14 +372,14 @@ expect.extend({
   toBeValidOcrResult(received: unknown): jest.CustomMatcherResult {
     if (!received || typeof received !== 'object') {
       return {
-        message: () => `Expected ${received} to be an object`,
+        message: () => `Expected ${JSON.stringify(received)} to be an object`,
         pass: false,
       };
     }
 
     if (!isOcrResult(received)) {
       return {
-        message: () => `Expected ${received} to have required OCR result properties`,
+        message: () => `Expected ${JSON.stringify(received)} to have required OCR result properties`,
         pass: false,
       };
     }
@@ -349,22 +407,33 @@ expect.extend({
 
     if (pass) {
       return {
-        message: () => `Expected ${received} not to be a valid OCR result`,
+        message: () => `Expected ${JSON.stringify(received)} not to be a valid OCR result`,
         pass: true,
       };
     } else {
       const issues: string[] = [];
-      if (!hasText) issues.push('missing or invalid text');
-      if (!hasConfidence) issues.push('missing or invalid confidence');
-      if (!hasProcessingTime)
+      if (!hasText) {
+        issues.push('missing or invalid text');
+      }
+      if (!hasConfidence) {
+        issues.push('missing or invalid confidence');
+      }
+      if (!hasProcessingTime) {
         issues.push('missing or invalid processingTimeMs');
-      if (!hasMethod) issues.push('missing or invalid method');
-      if (!hasOperationId) issues.push('missing or invalid operationId');
-      if (!hasBoundingBoxes) issues.push('invalid boundingBoxes format');
+      }
+      if (!hasMethod) {
+        issues.push('missing or invalid method');
+      }
+      if (!hasOperationId) {
+        issues.push('missing or invalid operationId');
+      }
+      if (!hasBoundingBoxes) {
+        issues.push('invalid boundingBoxes format');
+      }
 
       return {
         message: () =>
-          `Expected ${received} to be a valid OCR result. Issues: ${issues.join(', ')}`,
+          `Expected ${JSON.stringify(received)} to be a valid OCR result. Issues: ${issues.join(', ')}`,
         pass: false,
       };
     }
@@ -419,7 +488,7 @@ export const TestDataFactory = {
   /**
    * Creates a valid screenshot result object
    */
-  createScreenshotResult(overrides: Partial<any> = {}): any {
+  createScreenshotResult(overrides: Partial<ScreenshotResult> = {}): ScreenshotResult {
     return {
       image: Buffer.from('fake-screenshot-data').toString('base64'),
       metadata: {
@@ -436,7 +505,7 @@ export const TestDataFactory = {
   /**
    * Creates a valid file write result object
    */
-  createFileWriteResult(success = true, overrides: Partial<any> = {}): any {
+  createFileWriteResult(success = true, overrides: Partial<FileOperationResult> = {}): FileOperationResult {
     const base = {
       success,
       operationId: `write_file_${Date.now()}_def5678`,
@@ -463,7 +532,7 @@ export const TestDataFactory = {
   /**
    * Creates a valid file read result object
    */
-  createFileReadResult(success = true, overrides: Partial<any> = {}): any {
+  createFileReadResult(success = true, overrides: Partial<FileOperationResult> = {}): FileOperationResult {
     const base = {
       success,
       operationId: `read_file_${Date.now()}_ghi9012`,
@@ -492,7 +561,7 @@ export const TestDataFactory = {
   /**
    * Creates a valid OCR result object
    */
-  createOcrResult(overrides: Partial<any> = {}): any {
+  createOcrResult(overrides: Partial<OcrResult> = {}): OcrResult {
     return {
       text: 'Sample OCR extracted text',
       confidence: 0.95,
@@ -525,7 +594,7 @@ export const TestDataFactory = {
   /**
    * Creates a valid find text result object
    */
-  createFindTextResult(found = true, overrides: Partial<any> = {}): any {
+  createFindTextResult(found = true, overrides: Partial<FindTextResult> = {}): FindTextResult {
     const base = {
       found,
       processingTimeMs: 150,
@@ -564,7 +633,7 @@ export const TestDataFactory = {
   /**
    * Creates a valid enhanced screenshot result object
    */
-  createEnhancedScreenshotResult(overrides: Partial<any> = {}): any {
+  createEnhancedScreenshotResult(overrides: Partial<EnhancedScreenshotResult> = {}): EnhancedScreenshotResult {
     return {
       image: Buffer.from('fake-enhanced-screenshot-data').toString('base64'),
       processingTimeMs: 450,

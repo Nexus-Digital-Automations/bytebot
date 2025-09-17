@@ -158,9 +158,8 @@ describe('ComputerUseService Integration Tests', () => {
 
       // Mock application not running initially
       const util = await import('util');
-      (
-        jest.spyOn(util, 'promisify') as jest.MockedFunction<any>
-      ).mockReturnValue(jest.fn().mockRejectedValue({ code: 1 }));
+      const promisifySpy = jest.spyOn(util, 'promisify');
+      promisifySpy.mockReturnValue(jest.fn().mockRejectedValue({ code: 1 }));
 
       await context.service.action(appAction as unknown as ComputerAction);
 
@@ -374,12 +373,11 @@ describe('ComputerUseService Integration Tests', () => {
     it('should handle and recover from temporary service failures', async () => {
       // Mock temporary NUT service failure
       const originalMouseMove = context.nutService.mouseMoveEvent;
-      (
-        jest.spyOn(
-          context.nutService,
-          'mouseMoveEvent',
-        ) as jest.MockedFunction<any>
-      )
+      const mouseMoveEventSpy = jest.spyOn(
+        context.nutService,
+        'mouseMoveEvent',
+      );
+      mouseMoveEventSpy
         .mockRejectedValueOnce(new Error('Temporary failure'))
         .mockImplementation(originalMouseMove);
 
@@ -416,9 +414,8 @@ describe('ComputerUseService Integration Tests', () => {
     it('should handle resource cleanup on operation failures', async () => {
       // Mock file write failure after temporary file creation
       const util = await import('util');
-      (
-        jest.spyOn(util, 'promisify') as jest.MockedFunction<any>
-      ).mockReturnValue(jest.fn().mockRejectedValue(new Error('Copy failed')));
+      const promisifySpy = jest.spyOn(util, 'promisify');
+      promisifySpy.mockReturnValue(jest.fn().mockRejectedValue(new Error('Copy failed')));
 
       const testFile = createTestFile('failure-test.txt', 'Test content');
       const writeAction: WriteFileAction = {

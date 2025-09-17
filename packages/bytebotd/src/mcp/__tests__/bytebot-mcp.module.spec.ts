@@ -62,7 +62,7 @@ const mockComputerUseService: unknown = {
   readFile: jest.fn(),
   initializeNutJS: jest.fn(),
   validateCoordinates: jest.fn(),
-} as any;
+} as unknown as ComputerUseService;
 
 const mockMcpModule = {
   forRoot: jest.fn(() => ({
@@ -185,11 +185,11 @@ describe('BytebotMcpModule', () => {
      * Test module metadata and configuration
      */
     it('should have correct module configuration', () => {
-      const moduleMetadata = Reflect.getMetadata('imports', BytebotMcpModule);
+      const moduleMetadata = Reflect.getMetadata('imports', BytebotMcpModule) as unknown[];
       const providersMetadata = Reflect.getMetadata(
         'providers',
         BytebotMcpModule,
-      );
+      ) as unknown[];
 
       expect(moduleMetadata).toBeDefined();
       expect(providersMetadata).toBeDefined();

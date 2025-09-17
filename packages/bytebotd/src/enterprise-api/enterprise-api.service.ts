@@ -258,7 +258,7 @@ export class EnterpriseApiService {
 
       // Check cache for GET requests (with Parlant context awareness)
       if (request.method === 'GET') {
-        const cachedResult = this.getCachedResponse(endpointKey, request.params, request.parlantContext?.userId);
+        const cachedResult = this.getCachedResponse(endpointKey, request.params);
         if (cachedResult) {
           this.logger.debug(`[${operationId}] Cache hit for ${endpointKey}`);
           this.updateMetrics(endpointKey, Date.now() - startTime, true, true);
@@ -284,8 +284,7 @@ export class EnterpriseApiService {
           request.params, 
           response, 
           300000, // 5 minutes TTL
-          [`user_${request.parlantContext?.userId}`, `risk_${request.parlantContext?.riskLevel}`],
-          parlantCacheContext
+          [`user_${request.parlantContext?.userId}`, `risk_${request.parlantContext?.riskLevel}`]
         );
       }
 
