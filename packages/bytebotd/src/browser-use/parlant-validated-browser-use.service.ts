@@ -48,7 +48,7 @@ export interface BrowserActionValidationContext extends ParlantConversationConte
   readonly sessionId?: string;
   readonly actionSequence: BrowserActionAuditEntry[];
   readonly browserState: BrowserStateInfo;
-  readonly securityLevel: 'SAFE' | 'MODERATE' | 'ELEVATED' | 'CRITICAL';
+  readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 }
 
 /**

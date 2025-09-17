@@ -242,7 +242,13 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
    */
   async validateWithOptimization(
     request: OptimizedValidationRequest,
-    context: ParlantConversationContext = {}
+    context: ParlantConversationContext = {
+      userId: 'system',
+      agentRole: 'optimization-service',
+      securityLevel: 'LOW',
+      conversationHistory: [],
+      metadata: {}
+    }
   ): Promise<OptimizedValidationResponse> {
     const startTime = Date.now();
     const optimizationPath: string[] = [];
@@ -263,8 +269,8 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
         
         const cachedResult = await this.cacheService.getCachedValidation(
           request.functionName,
-          request.parameters,
-          context
+          Object.values(request.functionParams),
+          context as unknown as Record<string, unknown>
         );
 
         if (cachedResult) {
@@ -299,8 +305,8 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
           if (this.config.caching.enabled && response) {
             await this.cacheService.setCachedValidation(
               request.functionName,
-              request.parameters,
-              context,
+              Object.values(request.functionParams),
+              context as unknown as Record<string, unknown>,
               response,
               this.createValidationMetadata(request, context)
             );
@@ -356,7 +362,13 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
    */
   async validateBulkWithOptimization(
     requests: OptimizedValidationRequest[],
-    context: ParlantConversationContext = {},
+    context: ParlantConversationContext = {
+      userId: 'system',
+      agentRole: 'optimization-service',
+      securityLevel: 'LOW',
+      conversationHistory: [],
+      metadata: {}
+    },
     priority: ValidationPriority = ValidationPriority.MEDIUM
   ): Promise<OptimizedValidationResponse[]> {
     if (!this.config.batching.enabled) {
@@ -415,34 +427,20 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
       approved: true,
       confidence: 0.9,
       reasoning: `Direct validation for ${request.functionName}`,
-      riskAssessment: {
-        level: RiskLevel.LOW,
-        factors: [],
-        mitigation: 'Standard validation passed'
-      },
-      executionPlan: {
-        steps: ['Execute function'],
-        estimatedDuration: 100,
-        requiredApprovals: []
-      },
-      auditTrail: {
-        entries: [{
-          timestamp: new Date(),
-          action: 'DIRECT_VALIDATION',
-          details: `Direct processing for ${request.functionName}`,
-          actor: 'SYSTEM'
-        }],
-        complianceStatus: 'COMPLIANT'
-      },
-      conversationSummary: 'Direct validation completed successfully'
+      validationTimestamp: new Date(),
+      additionalContext: {
+        riskLevel: 'LOW',
+        processingType: 'direct-validation',
+        functionName: request.functionName
+      }
     };
 
     // Cache successful result
     if (this.config.caching.enabled) {
       await this.cacheService.setCachedValidation(
         request.functionName,
-        request.parameters,
-        context,
+        Object.values(request.functionParams),
+        context as unknown as Record<string, unknown>,
         mockResponse,
         this.createValidationMetadata(request, context)
       );
@@ -470,26 +468,12 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
       approved: false,
       confidence: 0,
       reasoning: `Validation failed: ${errorMessage}`,
-      riskAssessment: {
-        level: RiskLevel.HIGH,
-        factors: ['Validation service error'],
-        mitigation: 'Manual review required'
-      },
-      executionPlan: {
-        steps: ['Manual intervention required'],
-        estimatedDuration: 0,
-        requiredApprovals: ['human']
-      },
-      auditTrail: {
-        entries: [{
-          timestamp: new Date(),
-          action: 'VALIDATION_ERROR',
-          details: errorMessage,
-          actor: 'SYSTEM'
-        }],
-        complianceStatus: 'ERROR'
-      },
-      conversationSummary: 'Validation service encountered an error'
+      validationTimestamp: new Date(),
+      additionalContext: {
+        errorDetails: errorMessage,
+        errorSource: 'optimization-service',
+        riskLevel: 'HIGH'
+      }
     };
 
     return this.createOptimizedResponse(
@@ -795,8 +779,14 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
   resolveAlert(alertId: string): boolean {
     const alert = this.activeAlerts.get(alertId);
     if (alert) {
-      alert.resolved = true;
-      this.eventEmitter.emit('alertResolved', alert);
+      // Create a resolved version of the alert
+      const resolvedAlert: PerformanceAlert = {
+        ...alert,
+        resolved: true
+      };
+      // Remove from active alerts and emit resolved event
+      this.activeAlerts.delete(alertId);
+      this.eventEmitter.emit('alertResolved', resolvedAlert);
       return true;
     }
     return false;

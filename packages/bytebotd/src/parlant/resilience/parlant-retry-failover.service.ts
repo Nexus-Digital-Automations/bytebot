@@ -386,12 +386,15 @@ export class ParlantRetryFailoverService extends EventEmitter {
         lastError = error as Error;
         const attemptTime = performance.now() - attemptStartTime;
         
+        // Calculate delay for next attempt before creating retry attempt object
+        const delayMs = currentAttempt < config.maxAttempts ? this.calculateRetryDelay(currentAttempt, config) : 0;
+        
         // Record failed attempt
         const retryAttempt: RetryAttempt = {
           attemptNumber: currentAttempt,
           timestamp: new Date(),
           endpoint: endpoint.url,
-          delayMs: 0,
+          delayMs: delayMs,
           error: lastError,
           responseTime: attemptTime,
           circuitBreakerState: this.circuitBreakerService.getCircuitBreakerStats().state,
@@ -417,14 +420,9 @@ export class ParlantRetryFailoverService extends EventEmitter {
         }
         
         // Apply delay before next attempt (if not last attempt)
-        if (currentAttempt < config.maxAttempts) {
-          const delayMs = this.calculateRetryDelay(currentAttempt, config);
-          retryAttempt.delayMs = delayMs;
-          
-          if (delayMs > 0) {
-            this.logger.debug(`[${request.operationId}] Delaying ${delayMs}ms before retry ${currentAttempt + 1}`);
-            await this.delay(delayMs);
-          }
+        if (currentAttempt < config.maxAttempts && delayMs > 0) {
+          this.logger.debug(`[${request.operationId}] Delaying ${delayMs}ms before retry ${currentAttempt + 1}`);
+          await this.delay(delayMs);
         }
       }
     }

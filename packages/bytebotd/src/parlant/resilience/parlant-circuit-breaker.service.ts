@@ -642,11 +642,11 @@ export class ParlantCircuitBreakerService extends EventEmitter {
     
     if (healthyEndpoints.length === 0) {
       // Fallback to first endpoint if none are marked healthy
-      return this.parlantEndpoints[0];
+      return this.parlantEndpoints[0] || '';
     }
     
     // Simple round-robin selection
-    return healthyEndpoints[Math.floor(Math.random() * healthyEndpoints.length)];
+    return healthyEndpoints[Math.floor(Math.random() * healthyEndpoints.length)] || '';
   }
 
   private startHealthMonitoring(): void {

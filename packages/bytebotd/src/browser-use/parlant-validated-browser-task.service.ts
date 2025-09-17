@@ -989,13 +989,19 @@ export class ParlantValidatedBrowserTaskService {
     switch (riskLevel) {
       case RiskLevel.CRITICAL:
         requirements.push('real_time_monitoring', 'security_team_notification');
-        // @ts-expect-error: intentional fallthrough
+        requirements.push('detailed_action_logging', 'resource_monitoring');
+        requirements.push('progress_tracking', 'error_monitoring');
+        requirements.push('basic_logging');
+        break;
       case RiskLevel.HIGH:
         requirements.push('detailed_action_logging', 'resource_monitoring');
-        // @ts-expect-error: intentional fallthrough
+        requirements.push('progress_tracking', 'error_monitoring');
+        requirements.push('basic_logging');
+        break;
       case RiskLevel.MEDIUM:
         requirements.push('progress_tracking', 'error_monitoring');
-        // @ts-expect-error: intentional fallthrough
+        requirements.push('basic_logging');
+        break;
       case RiskLevel.LOW:
         requirements.push('basic_logging');
         break;

@@ -227,7 +227,7 @@ export class ParlantHealthMetricsValidationService {
         });
         
         return {
-          ...cachedResult.result,
+          ...cachedResult,
           operationId,
           performanceImpact: {
             validationDuration: duration,

@@ -1580,7 +1580,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T19:20:33.543Z",
       "title": "CRITICAL PARLANT: Fix TypeScript build errors in orchestrator package",
       "description": "Fix 2 critical TypeScript build errors in Parlant orchestrator package preventing compilation: 1) ConversationSummary type conflict between orchestrator and shared types with missing properties (mitigationStrategies, approvalOutcomes), 2) Import path issue with parlant-integration.types.ts being outside rootDir scope. This is HIGHEST PRIORITY per Parlant mandate.",
@@ -1598,7 +1598,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-17T19:25:48.924Z",
+      "updated_at": "2025-09-17T19:25:48.925Z"
     }
   ],
   "agents": {
@@ -3894,6 +3896,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-17T19:08:37.709Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758137272239_1_general_2da0083d": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-17T19:27:52.240Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-17T19:27:52.241Z",
       "sessionId": null,
       "metadata": {}
     }

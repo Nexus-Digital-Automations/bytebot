@@ -243,7 +243,7 @@ export class ParlantPerformanceMonitorService {
     // Calculate latency statistics
     const latencies = recentMetrics.map(m => m.duration).sort((a, b) => a - b);
     const averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
-    const medianLatency = latencies[Math.floor(latencies.length / 2)];
+    const medianLatency = latencies[Math.floor(latencies.length / 2)] || 0;
     const p95Index = Math.floor(latencies.length * 0.95);
     const p99Index = Math.floor(latencies.length * 0.99);
 

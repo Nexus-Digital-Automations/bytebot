@@ -33,9 +33,11 @@ import {
   ParlantValidationResponse,
   RiskLevel,
   ExecutionContext,
-  ConversationalValidationError,
-  ParlantAuditEntry
+  ConversationalValidationError
 } from './parlant-integration.service';
+
+// Import audit entry from enterprise audit service
+import { ParlantAuditEntry } from './audit/parlant-enterprise-audit.service';
 
 // ===== OPTIMIZED INTEGRATION INTERFACES =====
 
@@ -220,7 +222,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
     });
 
     try {
-      let validationResponse: ParlantValidationResponse;
+      let validationResponse: ParlantValidationResponse | undefined;
       let cacheHit = false;
       let retryAttempts = 0;
       let circuitBreakerState = 'CLOSED';
@@ -291,6 +293,11 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
           cacheHit,
           false
         );
+      }
+
+      // Ensure validationResponse was assigned
+      if (!validationResponse) {
+        throw new Error('Validation response was not properly assigned in any execution path');
       }
 
       // Step 5: Create enterprise audit entry (if enabled)

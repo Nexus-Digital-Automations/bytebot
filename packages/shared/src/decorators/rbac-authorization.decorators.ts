@@ -968,7 +968,24 @@ export function validateTimeBasedAccess(
 
     // Check allowed hours
     if (config.allowedHours && config.allowedHours.length > 0) {
-      const currentHour = currentTime.getHours();
+      // Use UTC hours if no timezone specified, otherwise convert to specified timezone
+      let currentHour: number;
+      if (config.timezone && config.timezone !== "UTC") {
+        try {
+          // Convert to specified timezone
+          const timeInTimezone = new Date(
+            currentTime.toLocaleString("en-US", { timeZone: config.timezone }),
+          );
+          currentHour = timeInTimezone.getHours();
+        } catch {
+          // If timezone conversion fails, use UTC
+          currentHour = currentTime.getUTCHours();
+        }
+      } else {
+        // Default to UTC hours for consistent behavior
+        currentHour = currentTime.getUTCHours();
+      }
+
       if (!config.allowedHours.includes(currentHour)) {
         return false;
       }
@@ -976,7 +993,24 @@ export function validateTimeBasedAccess(
 
     // Check allowed days of week
     if (config.allowedDaysOfWeek && config.allowedDaysOfWeek.length > 0) {
-      const currentDay = currentTime.getDay();
+      // Use UTC day if no timezone specified, otherwise convert to specified timezone
+      let currentDay: number;
+      if (config.timezone && config.timezone !== "UTC") {
+        try {
+          // Convert to specified timezone
+          const timeInTimezone = new Date(
+            currentTime.toLocaleString("en-US", { timeZone: config.timezone }),
+          );
+          currentDay = timeInTimezone.getDay();
+        } catch {
+          // If timezone conversion fails, use UTC
+          currentDay = currentTime.getUTCDay();
+        }
+      } else {
+        // Default to UTC day for consistent behavior
+        currentDay = currentTime.getUTCDay();
+      }
+
       if (!config.allowedDaysOfWeek.includes(currentDay)) {
         return false;
       }

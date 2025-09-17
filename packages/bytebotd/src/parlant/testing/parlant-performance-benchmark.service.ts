@@ -693,7 +693,7 @@ export class ParlantPerformanceBenchmarkService {
       }
     }
     
-    return journeys[journeys.length - 1]; // Fallback
+    return journeys[journeys.length - 1] || journeys[0]; // Fallback
   }
 
   private async simulateUserJourney(
@@ -803,7 +803,7 @@ export class ParlantPerformanceBenchmarkService {
     // Calculate latency statistics
     const latencies = successfulResults.map(r => r.latency).sort((a, b) => a - b);
     const averageLatency = latencies.length > 0 ? latencies.reduce((sum, l) => sum + l, 0) / latencies.length : 0;
-    const medianLatency = latencies.length > 0 ? latencies[Math.floor(latencies.length / 2)] : 0;
+    const medianLatency = latencies.length > 0 ? (latencies[Math.floor(latencies.length / 2)] || 0) : 0;
     const p95Index = Math.floor(latencies.length * 0.95);
     const p99Index = Math.floor(latencies.length * 0.99);
     

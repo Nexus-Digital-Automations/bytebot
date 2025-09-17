@@ -747,14 +747,20 @@ export class EncryptionSecurityService {
       keyId = `ephemeral_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     }
 
-    const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(this.mapAlgorithmToCrypto(request.algorithm), key, iv);
-    cipher.setAuthTag ? cipher.update(request.data) : null;
     
     let encrypted = cipher.update(request.data);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
 
-    const tag = cipher.getAuthTag ? cipher.getAuthTag() : undefined;
+    // Get auth tag for GCM modes
+    let tag: Buffer | undefined;
+    try {
+      // Only GCM ciphers have getAuthTag method
+      tag = (cipher as any).getAuthTag?.();
+    } catch {
+      // Not a GCM cipher, no auth tag
+      tag = undefined;
+    }
 
     return {
       result: encrypted,
@@ -775,11 +781,18 @@ export class EncryptionSecurityService {
 
     // In production, retrieve actual key material securely
     const key = crypto.randomBytes(32); // Mock key
-    const iv = request.options?.iv || crypto.randomBytes(16);
+    const decryptIv = request.options?.iv || crypto.randomBytes(16);
 
-    const decipher = crypto.createDecipheriv(this.mapAlgorithmToCrypto(request.algorithm), key, iv);
-    if (request.options?.iv && decipher.setAuthTag) {
-      decipher.setAuthTag(Buffer.from('mock-tag')); // Mock auth tag
+    const decipher = crypto.createDecipheriv(this.mapAlgorithmToCrypto(request.algorithm), key, decryptIv);
+    
+    // Set auth tag for GCM modes if available
+    if (request.options?.iv) {
+      try {
+        // Only GCM deciphers have setAuthTag method
+        (decipher as any).setAuthTag?.(Buffer.from('mock-tag')); // Mock auth tag
+      } catch {
+        // Not a GCM decipher, no auth tag needed
+      }
     }
 
     let decrypted = decipher.update(request.data);

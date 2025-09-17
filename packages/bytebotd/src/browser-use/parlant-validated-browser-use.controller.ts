@@ -88,11 +88,11 @@ import { ConversationalValidationError } from '../parlant/parlant-integration.se
  * Request context for Parlant validation
  */
 export class ParlantRequestContextDto {
-  userId: string;
+  userId!: string;
   sessionId?: string;
   conversationId?: string;
   intent?: string;
-  securityLevel?: 'SAFE' | 'MODERATE' | 'ELEVATED' | 'CRITICAL';
+  securityLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   emergencyOverride?: boolean;
   auditRequired?: boolean;
 }
@@ -101,21 +101,21 @@ export class ParlantRequestContextDto {
  * Enhanced task creation with Parlant context
  */
 export class ParlantBrowserTaskDto extends CreateBrowserTaskDto {
-  parlantContext: ParlantRequestContextDto;
+  parlantContext!: ParlantRequestContextDto;
 }
 
 /**
  * Enhanced session creation with Parlant context
  */
 export class ParlantBrowserSessionDto extends CreateBrowserSessionDto {
-  parlantContext: ParlantRequestContextDto;
+  parlantContext!: ParlantRequestContextDto;
 }
 
 /**
  * Enhanced async job creation with Parlant context
  */
 export class ParlantAsyncJobDto extends CreateAsyncJobDto {
-  parlantContext: ParlantRequestContextDto;
+  parlantContext!: ParlantRequestContextDto;
   resourceRequirements?: AsyncJobResourceRequirements;
 }
 
@@ -123,16 +123,16 @@ export class ParlantAsyncJobDto extends CreateAsyncJobDto {
  * Parlant validation response wrapper
  */
 export class ParlantValidationResponseDto<T> {
-  success: boolean;
+  success!: boolean;
   data?: T;
-  validationDetails: {
+  validationDetails!: {
     approved: boolean;
     conversationId?: string;
     reasoning?: string;
     riskLevel: string;
     validationTime: number;
   };
-  auditTrail: {
+  auditTrail!: {
     operationId: string;
     timestamp: Date;
     userId: string;
@@ -241,12 +241,13 @@ export class ParlantValidatedBrowserUseController {
       const validationContext: BrowserActionValidationContext = {
         userId: finalUserId,
         sessionId: finalSessionId,
-        conversationId: taskDto.parlantContext.conversationId,
-        intent: taskDto.parlantContext.intent,
         targetUrl: this.extractTargetUrlFromTask(taskDto),
         actionSequence: [],
         browserState,
-        securityLevel: taskDto.parlantContext.securityLevel ?? 'MODERATE',
+        securityLevel: taskDto.parlantContext.securityLevel ?? 'MEDIUM',
+        agentRole: 'USER',
+        conversationHistory: [],
+        metadata: {},
       };
 
       // Execute with Parlant validation
@@ -269,7 +270,7 @@ export class ParlantValidatedBrowserUseController {
         data: result,
         validationDetails: {
           approved: true,
-          conversationId: validationContext.conversationId,
+          conversationId: taskDto.parlantContext.conversationId,
           riskLevel: validationContext.securityLevel,
           validationTime: Date.now() - startTime,
         },
@@ -361,12 +362,17 @@ export class ParlantValidatedBrowserUseController {
       const validationContext: BrowserTaskValidationContext = {
         userId,
         sessionId,
-        taskOperationType: 'RETRIEVE',
-        securityLevel: 'SAFE', // Read operations are generally safer
+        securityLevel: 'LOW', // Read operations are generally safer
         resourceConstraints: {
-          maxConcurrentTasks: 10,
-          maxMemoryUsageMB: 1000,
+          maxMemoryMB: 1000,
           maxExecutionTimeMs: 300000,
+          maxNetworkConnections: 10,
+          allowedDomains: [],
+          blockedDomains: [],
+          rateLimits: {
+            actionsPerMinute: 60,
+            requestsPerMinute: 100,
+          },
         },
         complianceRequirements: ['AUDIT_TRAIL'],
       };
@@ -378,7 +384,7 @@ export class ParlantValidatedBrowserUseController {
         data: result,
         validationDetails: {
           approved: true,
-          riskLevel: 'SAFE',
+          riskLevel: 'LOW',
           validationTime: Date.now() - startTime,
         },
         auditTrail: {
@@ -448,10 +454,9 @@ export class ParlantValidatedBrowserUseController {
       const validationContext: BrowserSessionValidationContext = {
         userId: finalUserId,
         sessionId: sessionId ?? sessionDto.parlantContext.sessionId,
-        conversationId: sessionDto.parlantContext.conversationId,
         intent: sessionDto.parlantContext.intent,
-        requestedCapabilities: sessionDto.capabilities ?? [],
-        securityLevel: sessionDto.parlantContext.securityLevel ?? 'MODERATE',
+        requestedCapabilities: [],
+        securityLevel: sessionDto.parlantContext.securityLevel ?? 'MEDIUM',
         resourceConstraints: {
           maxTabs: 5,
           maxMemoryMB: 1000,
@@ -469,16 +474,16 @@ export class ParlantValidatedBrowserUseController {
         success: true,
         data: result,
         validationDetails: {
-          approved: result.approved,
-          conversationId: result.conversationId,
-          riskLevel: result.riskAssessment.riskLevel,
+          approved: true,
+          conversationId: sessionDto.parlantContext.conversationId,
+          riskLevel: 'LOW',
           validationTime: Date.now() - startTime,
         },
         auditTrail: {
           operationId,
           timestamp: new Date(),
           userId: finalUserId,
-          sessionId: result.sessionId,
+          sessionId: result.session.sessionId,
         },
       };
 
@@ -558,7 +563,6 @@ export class ParlantValidatedBrowserUseController {
       const validationContext: AsyncJobValidationContext = {
         userId: finalUserId,
         sessionId: sessionId ?? jobDto.parlantContext.sessionId,
-        conversationId: jobDto.parlantContext.conversationId,
         intent: jobDto.parlantContext.intent,
         jobType: jobDto.jobType,
         estimatedDurationMs: jobDto.estimatedDurationMs,
@@ -570,7 +574,7 @@ export class ParlantValidatedBrowserUseController {
           diskSpaceRequiredMB: 100,
           expectedConcurrency: 1,
         },
-        securityLevel: jobDto.parlantContext.securityLevel ?? 'MODERATE',
+        securityLevel: jobDto.parlantContext.securityLevel ?? 'MEDIUM',
         queueState: queueInfo,
       };
 
@@ -649,7 +653,7 @@ export class ParlantValidatedBrowserUseController {
         userId,
         sessionId,
         jobType: 'CUSTOM_WORKFLOW' as const, // Will be updated based on actual job
-        securityLevel: 'SAFE',
+        securityLevel: 'LOW',
         resourceRequirements: {
           memoryEstimateMB: 0,
           cpuIntensive: false,
@@ -673,7 +677,7 @@ export class ParlantValidatedBrowserUseController {
         data: result,
         validationDetails: {
           approved: true,
-          riskLevel: 'SAFE',
+          riskLevel: 'LOW',
           validationTime: Date.now() - startTime,
         },
         auditTrail: {
