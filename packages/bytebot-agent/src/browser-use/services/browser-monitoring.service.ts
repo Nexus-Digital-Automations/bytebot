@@ -494,14 +494,14 @@ export class BrowserMonitoringService {
     level: 'error' | 'warning' | 'info',
     message: string,
     source: string,
-    details?: unknown,
+    details?: Record<string, unknown>,
   ): void {
-    const issue = {
+    const issue: IssueRecord = {
       timestamp: new Date(),
       level,
       message,
       source,
-      details: details as Record<string, unknown> | undefined,
+      details,
     };
 
     this.recentIssues.push(issue);

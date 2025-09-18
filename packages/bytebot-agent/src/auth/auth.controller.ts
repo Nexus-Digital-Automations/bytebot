@@ -41,7 +41,7 @@ import {
   ParlantSecure,
   ParlantValidated,
   SecurityLevel,
-} from '@bytebot/shared/server';
+} from '@bytebot/shared/dist/index-server';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from './guards/jwt-auth.guard';

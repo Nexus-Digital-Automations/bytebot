@@ -20,7 +20,7 @@ import {
   isApplicationToolUseBlock,
   isPasteTextToolUseBlock,
   isReadFileToolUseBlock,
-} from '@bytebot/shared/server';
+} from '@bytebot/shared/dist/index-server';
 import { Logger } from '@nestjs/common';
 
 // Type definitions for computer-use API responses

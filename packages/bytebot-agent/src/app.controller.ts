@@ -1,6 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ParlantValidated, SecurityLevel } from '@bytebot/shared/dist/index-server';
+import {
+  ParlantValidated,
+  SecurityLevel,
+} from '@bytebot/shared/dist/index-server';
 import { AppService } from './app.service';
 
 @ApiTags('Application')
