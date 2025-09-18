@@ -57,15 +57,12 @@ jest.mock(
   () =>
     ({
       ...jest.requireActual('util'),
-      promisify: Object.assign(
-        jest.fn(
-          (fn: (...args: unknown[]) => unknown) =>
-            (...args: unknown[]) =>
-              Promise.resolve(fn(...args)),
-        ),
-        { custom: Symbol.for('nodejs.util.promisify.custom') },
-      ) as jest.MockedFunction<typeof import('util').promisify>,
-    }) as jest.Mocked<typeof import('util')>,
+      promisify: jest.fn(
+        (fn: (...args: unknown[]) => unknown) =>
+          (...args: unknown[]) =>
+            Promise.resolve(fn(...args)),
+      ),
+    }) as unknown as jest.Mocked<typeof import('util')>,
 );
 
 /**
@@ -547,7 +544,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         const invalidAction = {
           action: 'invalid_action',
           someParam: 'value',
-        } as ComputerAction;
+        } as unknown as ComputerAction;
 
         // Act & Assert
         await expect(service.action(invalidAction)).rejects.toThrow(
@@ -559,7 +556,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         // Arrange - Create action with unknown type
         const unknownAction = {
           action: 'completely_unknown',
-        } as ComputerAction;
+        } as unknown as ComputerAction;
 
         // Act & Assert
         await expect(service.action(unknownAction)).rejects.toThrow();

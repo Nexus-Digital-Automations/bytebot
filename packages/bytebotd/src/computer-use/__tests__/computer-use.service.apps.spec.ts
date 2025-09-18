@@ -190,8 +190,9 @@ import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
 import { ApplicationActionDto } from '../dto/computer-action.dto';
 import { ApplicationName } from '../dto/base.dto';
-import { spawn, SpawnOptions } from 'child_process';
+import { spawn, SpawnOptions, ChildProcess } from 'child_process';
 import { promisify } from 'util';
+import { Readable } from 'stream';
 
 describe('ComputerUseService - Application Management', () => {
   let service: ComputerUseService;
@@ -218,18 +219,29 @@ describe('ComputerUseService - Application Management', () => {
 
   // Note: CUA framework integration services removed - no longer needed for Linux desktop automation
 
-  // Mock process object for spawn return value
-  const mockProcess = {
+  // Mock process object for spawn return value with complete ChildProcess interface
+  const mockProcess: Partial<ChildProcess> = {
     unref: jest.fn(),
     on: jest.fn(),
     kill: jest.fn(),
     pid: 12345,
     stdout: {
       on: jest.fn(),
-    },
+    } as unknown as Readable,
     stderr: {
       on: jest.fn(),
-    },
+    } as unknown as Readable,
+    stdin: null,
+    stdio: [null, null, null, null, null],
+    killed: false,
+    connected: false,
+    exitCode: null,
+    signalCode: null,
+    spawnargs: [],
+    spawnfile: '',
+    ref: jest.fn(),
+    disconnect: jest.fn(),
+    send: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -241,7 +253,7 @@ describe('ComputerUseService - Application Management', () => {
 
     // Setup spawn mock to return mock process
     (mockSpawn).mockReturnValue(
-      mockProcess as ReturnType<typeof spawn>,
+      mockProcess as ChildProcess,
     );
 
     // Create testing module with mocked dependencies
