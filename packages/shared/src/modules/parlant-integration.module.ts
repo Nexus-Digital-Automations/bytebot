@@ -10,7 +10,13 @@
  * @author AIgent Integration Team
  */
 
-import { Module, DynamicModule, Provider, Type, ForwardReference } from "@nestjs/common";
+import {
+  Module,
+  DynamicModule,
+  Provider,
+  Type,
+  ForwardReference,
+} from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ModuleMetadata } from "@nestjs/common/interfaces";
 import { ParlantIntegrationService } from "../services/parlant-integration.service";
@@ -61,7 +67,8 @@ export interface ParlantIntegrationModuleOptions {
 /**
  * Async configuration options
  */
-export interface ParlantIntegrationModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+export interface ParlantIntegrationModuleAsyncOptions
+  extends Pick<ModuleMetadata, "imports"> {
   /** Configuration factory function */
   useFactory?: (
     ...args: any[]
@@ -73,7 +80,9 @@ export interface ParlantIntegrationModuleAsyncOptions extends Pick<ModuleMetadat
   inject?: any[];
 
   /** Imports for configuration dependencies */
-  imports?: Array<Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference>;
+  imports?: Array<
+    Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference
+  >;
 
   /** Use existing provider */
   useExisting?: Type<any>;
@@ -115,7 +124,11 @@ export class ParlantIntegrationModule {
 
     return {
       module: ParlantIntegrationModule,
-      imports: options.imports || [] as Array<Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference>,
+      imports:
+        options.imports ||
+        ([] as Array<
+          Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference
+        >),
       providers,
       exports: [
         ParlantIntegrationService,
@@ -536,7 +549,9 @@ export function ParlantEnabled(options?: {
   securityLevel?: string;
   cacheResponses?: boolean;
 }) {
-  return function <T extends { new (...args: any[]): Record<string, any> }>(constructor: T) {
+  return function <T extends { new (...args: any[]): Record<string, any> }>(
+    constructor: T,
+  ) {
     return class extends constructor {
       constructor(...args: any[]) {
         super(...args);

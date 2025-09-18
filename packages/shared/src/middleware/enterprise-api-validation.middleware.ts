@@ -30,7 +30,7 @@
 import {
   Injectable,
   NestMiddleware,
-  HttpException,
+  // HttpException, // Unused import
   HttpStatus,
   Logger,
   Inject,
@@ -48,20 +48,18 @@ import {
   ParlantValidationError,
   ParlantTimeoutError,
   SecurityLevel,
-  ParlantUserContext,
-  ParlantExecutionContext,
-  ParlantValidationMetadata,
-  ParlantAuditEntry,
-  ParlantHealthStatus,
+  // ParlantUserContext, // Unused import
+  // ParlantExecutionContext, // Unused import
+  // ParlantValidationMetadata, // Unused import
+  // ParlantAuditEntry, // Unused import
+  // ParlantHealthStatus, // Unused import
 } from "../types/parlant-integration.types";
 
 // Import Parlant decorators
-import {
-  ParlantValidation,
-} from "../decorators/parlant-validation.decorators";
+import { ParlantValidation } from "../decorators/parlant-validation.decorators";
 
 // Import Parlant utility functions
-import { parlantWrapper } from "../utils/parlant-wrapper.utils";
+// import { parlantWrapper } from "../utils/parlant-wrapper.utils"; // Unused import
 
 // ===== ENTERPRISE API VALIDATION TYPES =====
 
@@ -966,7 +964,8 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       const patternThreats = await this.analyzeRequestPatterns(req);
       identifiedThreats.push(...patternThreats);
       overallScore -= patternThreats.reduce(
-        (sum: number, threat: SecurityThreat) => sum + this.getThreatScoreDeduction(threat),
+        (sum: number, threat: SecurityThreat) =>
+          sum + this.getThreatScoreDeduction(threat),
         0,
       );
 
@@ -974,7 +973,8 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       const authThreats = await this.analyzeAuthenticationSecurity(req);
       identifiedThreats.push(...authThreats);
       overallScore -= authThreats.reduce(
-        (sum: number, threat: SecurityThreat) => sum + this.getThreatScoreDeduction(threat),
+        (sum: number, threat: SecurityThreat) =>
+          sum + this.getThreatScoreDeduction(threat),
         0,
       );
 
@@ -982,7 +982,8 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       const dataThreats = await this.analyzeDataSecurity(req);
       identifiedThreats.push(...dataThreats);
       overallScore -= dataThreats.reduce(
-        (sum: number, threat: SecurityThreat) => sum + this.getThreatScoreDeduction(threat),
+        (sum: number, threat: SecurityThreat) =>
+          sum + this.getThreatScoreDeduction(threat),
         0,
       );
 
@@ -990,7 +991,8 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       const infraThreats = await this.analyzeInfrastructureSecurity(req);
       identifiedThreats.push(...infraThreats);
       overallScore -= infraThreats.reduce(
-        (sum: number, threat: SecurityThreat) => sum + this.getThreatScoreDeduction(threat),
+        (sum: number, threat: SecurityThreat) =>
+          sum + this.getThreatScoreDeduction(threat),
         0,
       );
 
@@ -1321,12 +1323,12 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
     operationId: string,
   ): Promise<void> {
     this.logger.debug(`[${operationId}] Applying validation results`);
-    
+
     // Add validation headers to response
-    res.setHeader('X-Validation-Status', 'passed');
-    res.setHeader('X-Operation-ID', operationId);
-    res.setHeader('X-Validation-Timestamp', new Date().toISOString());
-    
+    res.setHeader("X-Validation-Status", "passed");
+    res.setHeader("X-Operation-ID", operationId);
+    res.setHeader("X-Validation-Timestamp", new Date().toISOString());
+
     // Store validation context in request
     req.validationContext = {
       operationId,
@@ -1342,14 +1344,17 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
     req: EnterpriseValidatedRequest,
     processingTime: number,
   ): void {
-    this.logger.debug(`Processing time: ${processingTime}ms for ${req.method} ${req.url}`);
-    
+    this.logger.debug(
+      `Processing time: ${processingTime}ms for ${req.method} ${req.url}`,
+    );
+
     // Update performance metrics
     this.performanceMetrics.totalRequests++;
     this.performanceMetrics.totalProcessingTime += processingTime;
-    this.performanceMetrics.averageProcessingTime = 
-      this.performanceMetrics.totalProcessingTime / this.performanceMetrics.totalRequests;
-    
+    this.performanceMetrics.averageProcessingTime =
+      this.performanceMetrics.totalProcessingTime /
+      this.performanceMetrics.totalRequests;
+
     // Track slowest requests
     if (processingTime > this.performanceMetrics.slowestRequestTime) {
       this.performanceMetrics.slowestRequestTime = processingTime;
@@ -1364,15 +1369,21 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
     res: Response,
   ): void {
     // Standard security headers
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-    
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("X-XSS-Protection", "1; mode=block");
+    res.setHeader(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+    );
+
     // Enterprise-specific headers
-    res.setHeader('X-Enterprise-Validation', 'enabled');
-    res.setHeader('X-Risk-Level', req.riskAssessment?.overallRisk || 'unknown');
-    res.setHeader('X-Conversation-Context', req.conversationContext?.conversationId || 'none');
+    res.setHeader("X-Enterprise-Validation", "enabled");
+    res.setHeader("X-Risk-Level", req.riskAssessment?.overallRisk || "unknown");
+    res.setHeader(
+      "X-Conversation-Context",
+      req.conversationContext?.conversationId || "none",
+    );
   }
 
   /**
@@ -1386,20 +1397,23 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
     processingTime: number,
   ): Promise<void> {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
-    this.logger.error(`[${operationId}] Validation error after ${processingTime}ms`, {
-      error: errorMessage,
-      url: req.url,
-      method: req.method,
-    });
-    
+
+    this.logger.error(
+      `[${operationId}] Validation error after ${processingTime}ms`,
+      {
+        error: errorMessage,
+        url: req.url,
+        method: req.method,
+      },
+    );
+
     // Update error metrics
     this.performanceMetrics.errorCount++;
-    
+
     // Set error response headers
-    res.setHeader('X-Validation-Status', 'error');
-    res.setHeader('X-Error-ID', operationId);
-    res.setHeader('X-Error-Timestamp', new Date().toISOString());
+    res.setHeader("X-Validation-Status", "error");
+    res.setHeader("X-Error-ID", operationId);
+    res.setHeader("X-Error-Timestamp", new Date().toISOString());
   }
 
   /**
@@ -1408,11 +1422,14 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
   private updateCircuitBreakerOnFailure(): void {
     this.circuitBreakerState.failureCount++;
     this.circuitBreakerState.lastFailureTime = new Date();
-    
+
     // Open circuit if failure threshold reached
-    if (this.circuitBreakerState.failureCount >= this.validationConfig.circuitBreakerFailureThreshold) {
+    if (
+      this.circuitBreakerState.failureCount >=
+      this.validationConfig.circuitBreakerFailureThreshold
+    ) {
       this.circuitBreakerState.isOpen = true;
-      this.logger.warn('Circuit breaker opened due to validation failures', {
+      this.logger.warn("Circuit breaker opened due to validation failures", {
         failureCount: this.circuitBreakerState.failureCount,
         threshold: this.validationConfig.circuitBreakerFailureThreshold,
       });
@@ -1450,12 +1467,14 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
   /**
    * Sanitize error details for client response
    */
-  private sanitizeErrorDetails(error: Error | unknown): Record<string, unknown> {
+  private sanitizeErrorDetails(
+    error: Error | unknown,
+  ): Record<string, unknown> {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
+
     return {
       message: errorMessage,
-      type: error instanceof Error ? error.constructor.name : 'UnknownError',
+      type: error instanceof Error ? error.constructor.name : "UnknownError",
       timestamp: new Date().toISOString(),
       // Omit sensitive stack traces and internal details
     };
@@ -1466,10 +1485,10 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    */
   private extractClientIp(req: EnterpriseValidatedRequest): string {
     return (
-      req.headers['x-forwarded-for'] as string ||
-      req.headers['x-real-ip'] as string ||
+      (req.headers["x-forwarded-for"] as string) ||
+      (req.headers["x-real-ip"] as string) ||
       req.socket.remoteAddress ||
-      'unknown'
+      "unknown"
     );
   }
 
@@ -1477,39 +1496,46 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    * Calculate request payload size
    */
   private calculateRequestSize(req: EnterpriseValidatedRequest): number {
-    const contentLength = req.headers['content-length'];
+    const contentLength = req.headers["content-length"];
     return contentLength ? parseInt(contentLength, 10) : 0;
   }
 
   /**
    * Sanitize request headers for logging
    */
-  private sanitizeHeaders(headers: Record<string, unknown>): Record<string, unknown> {
+  private sanitizeHeaders(
+    headers: Record<string, unknown>,
+  ): Record<string, unknown> {
     const sanitized = { ...headers };
-    const sensitiveHeaders = ['authorization', 'cookie', 'x-api-key', 'x-auth-token'];
-    
-    sensitiveHeaders.forEach(header => {
+    const sensitiveHeaders = [
+      "authorization",
+      "cookie",
+      "x-api-key",
+      "x-auth-token",
+    ];
+
+    sensitiveHeaders.forEach((header) => {
       if (sanitized[header]) {
-        sanitized[header] = '[REDACTED]';
+        sanitized[header] = "[REDACTED]";
       }
     });
-    
+
     return sanitized;
   }
 
   /**
    * Get geolocation information from IP
    */
-  private async getGeolocation(ipAddress: string): Promise<GeolocationInfo> {
+  private async getGeolocation(_ipAddress: string): Promise<GeolocationInfo> {
     // Placeholder implementation - would integrate with geolocation service
     return {
-      country: 'unknown',
-      region: 'unknown',
-      city: 'unknown',
+      country: "unknown",
+      region: "unknown",
+      city: "unknown",
       coordinates: {
         latitude: 0,
-        longitude: 0
-      }
+        longitude: 0,
+      },
     };
   }
 
@@ -1517,7 +1543,7 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    * Extract service name from request context
    */
   private extractServiceName(req: EnterpriseValidatedRequest): string {
-    return req.headers['x-service-name'] as string || 'unknown-service';
+    return (req.headers["x-service-name"] as string) || "unknown-service";
   }
 
   /**
@@ -1533,16 +1559,16 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    */
   private extractOperationTags(req: EnterpriseValidatedRequest): string[] {
     const tags: string[] = [];
-    
+
     // Add method tag
     tags.push(req.method.toLowerCase());
-    
+
     // Add path-based tags
-    const pathParts = req.path.split('/').filter(Boolean);
+    const pathParts = req.path.split("/").filter(Boolean);
     if (pathParts.length > 0) {
       tags.push(`path:${pathParts[0]}`);
     }
-    
+
     return tags;
   }
 
@@ -1556,32 +1582,35 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
     const keyParts = [
       req.method,
       req.path,
-      req.headers['x-user-id'] || 'anonymous',
-      operationId.split('_')[0], // Use timestamp part for cache grouping
+      req.headers["x-user-id"] || "anonymous",
+      operationId.split("_")[0], // Use timestamp part for cache grouping
     ];
-    
-    return `enterprise-validation:${keyParts.join(':')}`;
+
+    return `enterprise-validation:${keyParts.join(":")}`;
   }
 
   /**
    * Get cached validation result
    */
-  private async getCachedValidationResult(cacheKey: string): Promise<CachedValidationResult | null> {
+  private async getCachedValidationResult(
+    cacheKey: string,
+  ): Promise<CachedValidationResult | null> {
     try {
-      const cached = await this._cacheManager.get<CachedValidationResult>(cacheKey);
-      
+      const cached =
+        await this._cacheManager.get<CachedValidationResult>(cacheKey);
+
       if (cached && cached.expiresAt > new Date()) {
         return cached;
       }
-      
+
       // Remove expired cache entry
       if (cached) {
         await this._cacheManager.del(cacheKey);
       }
-      
+
       return null;
     } catch (error) {
-      this.logger.warn('Cache retrieval failed', { cacheKey, error });
+      this.logger.warn("Cache retrieval failed", { cacheKey, error });
       return null;
     }
   }
@@ -1593,11 +1622,11 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
     req: EnterpriseValidatedRequest,
     cached: CachedValidationResult,
   ): void {
-    this.logger.debug('Applying cached validation result', {
+    this.logger.debug("Applying cached validation result", {
       result: cached.result,
       timestamp: cached.timestamp,
     });
-    
+
     // Apply cached validation context
     req.validationContext = {
       operationId: `cached_${Date.now()}`,
@@ -1610,40 +1639,43 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
   /**
    * Analyze request patterns for threat detection
    */
-  private async analyzeRequestPatterns(req: EnterpriseValidatedRequest): Promise<SecurityThreat[]> {
+  private async analyzeRequestPatterns(
+    req: EnterpriseValidatedRequest,
+  ): Promise<SecurityThreat[]> {
     const threats: SecurityThreat[] = [];
-    
+
     // Check for suspicious headers
-    const suspiciousHeaders = ['x-forwarded-for', 'x-real-ip', 'user-agent'];
+    const suspiciousHeaders = ["x-forwarded-for", "x-real-ip", "user-agent"];
     let suspiciousHeaderCount = 0;
-    suspiciousHeaders.forEach(header => {
+    suspiciousHeaders.forEach((header) => {
       if (req.headers[header]) {
         suspiciousHeaderCount++;
       }
     });
-    
+
     if (suspiciousHeaderCount > 2) {
       threats.push({
         type: SecurityThreatType._SUSPICIOUS_PATTERN,
         severity: "MEDIUM",
         description: "Multiple suspicious headers detected",
-        indicators: suspiciousHeaders.filter(h => req.headers[h]),
-        mitigations: ["header_validation", "ip_verification"]
+        indicators: suspiciousHeaders.filter((h) => req.headers[h]),
+        mitigations: ["header_validation", "ip_verification"],
       });
     }
-    
+
     // Check for unusual request size
     const requestSize = this.calculateRequestSize(req);
-    if (requestSize > 1024 * 1024) { // > 1MB
+    if (requestSize > 1024 * 1024) {
+      // > 1MB
       threats.push({
         type: SecurityThreatType._MALICIOUS_PAYLOAD,
         severity: "HIGH",
         description: "Unusually large request payload detected",
         indicators: [`payload_size:${requestSize}`],
-        mitigations: ["payload_size_limit", "content_validation"]
+        mitigations: ["payload_size_limit", "content_validation"],
       });
     }
-    
+
     return threats;
   }
 
@@ -1653,20 +1685,27 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
   private getThreatScoreDeduction(threat: SecurityThreat): number {
     // Convert threat severity to risk deduction
     switch (threat.severity) {
-      case "LOW": return 5;
-      case "MEDIUM": return 15;
-      case "HIGH": return 30;
-      case "CRITICAL": return 50;
-      default: return 10;
+      case "LOW":
+        return 5;
+      case "MEDIUM":
+        return 15;
+      case "HIGH":
+        return 30;
+      case "CRITICAL":
+        return 50;
+      default:
+        return 10;
     }
   }
 
   /**
    * Analyze authentication security
    */
-  private async analyzeAuthenticationSecurity(req: EnterpriseValidatedRequest): Promise<SecurityThreat[]> {
+  private async analyzeAuthenticationSecurity(
+    req: EnterpriseValidatedRequest,
+  ): Promise<SecurityThreat[]> {
     const threats: SecurityThreat[] = [];
-    
+
     // Check for proper authentication headers
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -1675,90 +1714,94 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
         severity: "HIGH",
         description: "Missing authentication header",
         indicators: ["no_auth_header"],
-        mitigations: ["require_authentication", "block_unauthenticated"]
+        mitigations: ["require_authentication", "block_unauthenticated"],
       });
-    } else if (!authHeader.startsWith('Bearer ')) {
+    } else if (!authHeader.startsWith("Bearer ")) {
       threats.push({
         type: SecurityThreatType._UNAUTHORIZED_ACCESS,
         severity: "MEDIUM",
         description: "Invalid authentication scheme",
         indicators: ["invalid_auth_scheme"],
-        mitigations: ["enforce_bearer_token", "auth_scheme_validation"]
+        mitigations: ["enforce_bearer_token", "auth_scheme_validation"],
       });
     }
-    
+
     // Check for session security
-    const sessionHeader = req.headers['x-session-id'];
+    const sessionHeader = req.headers["x-session-id"];
     if (!sessionHeader) {
       threats.push({
         type: SecurityThreatType._UNAUTHORIZED_ACCESS,
         severity: "MEDIUM",
         description: "Missing session identifier",
         indicators: ["no_session_id"],
-        mitigations: ["require_session", "session_tracking"]
+        mitigations: ["require_session", "session_tracking"],
       });
     }
-    
+
     return threats;
   }
 
   /**
    * Analyze data security measures
    */
-  private async analyzeDataSecurity(req: EnterpriseValidatedRequest): Promise<SecurityThreat[]> {
+  private async analyzeDataSecurity(
+    req: EnterpriseValidatedRequest,
+  ): Promise<SecurityThreat[]> {
     const threats: SecurityThreat[] = [];
-    
+
     // Check for HTTPS
-    if (req.protocol !== 'https') {
+    if (req.protocol !== "https") {
       threats.push({
         type: SecurityThreatType._DATA_EXFILTRATION,
         severity: "HIGH",
         description: "Insecure HTTP protocol used",
         indicators: ["http_protocol"],
-        mitigations: ["enforce_https", "redirect_to_ssl"]
+        mitigations: ["enforce_https", "redirect_to_ssl"],
       });
     }
-    
+
     // Check for security headers
-    const securityHeaders = ['x-csrf-token', 'x-requested-with'];
-    securityHeaders.forEach(header => {
+    const securityHeaders = ["x-csrf-token", "x-requested-with"];
+    securityHeaders.forEach((header) => {
       if (!req.headers[header]) {
         threats.push({
           type: SecurityThreatType._INJECTION_ATTACK,
           severity: "MEDIUM",
           description: `Missing security header: ${header}`,
           indicators: [`missing_header:${header}`],
-          mitigations: ["add_security_headers", "csrf_protection"]
+          mitigations: ["add_security_headers", "csrf_protection"],
         });
       }
     });
-    
+
     return threats;
   }
 
   /**
    * Analyze infrastructure security
    */
-  private async analyzeInfrastructureSecurity(req: EnterpriseValidatedRequest): Promise<SecurityThreat[]> {
+  private async analyzeInfrastructureSecurity(
+    req: EnterpriseValidatedRequest,
+  ): Promise<SecurityThreat[]> {
     const threats: SecurityThreat[] = [];
-    
+
     // Check for proxy indicators
-    const proxyHeaders = ['x-forwarded-for', 'x-real-ip', 'x-forwarded-proto'];
+    const proxyHeaders = ["x-forwarded-for", "x-real-ip", "x-forwarded-proto"];
     let proxyCount = 0;
-    proxyHeaders.forEach(header => {
+    proxyHeaders.forEach((header) => {
       if (req.headers[header]) proxyCount++;
     });
-    
+
     if (proxyCount > 1) {
       threats.push({
         type: SecurityThreatType._SUSPICIOUS_PATTERN,
         severity: "MEDIUM",
         description: "Multiple proxy headers detected",
-        indicators: proxyHeaders.filter(h => req.headers[h]),
-        mitigations: ["proxy_validation", "ip_whitelisting"]
+        indicators: proxyHeaders.filter((h) => req.headers[h]),
+        mitigations: ["proxy_validation", "ip_whitelisting"],
       });
     }
-    
+
     return threats;
   }
 
@@ -1767,16 +1810,19 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    */
   private generateSecurityMeasures(threat: SecurityThreat): SecurityMeasure[] {
     const measures: SecurityMeasure[] = [];
-    
-    threat.mitigations.forEach(mitigation => {
+
+    threat.mitigations.forEach((mitigation) => {
       measures.push({
         type: this.mapMitigationToMeasureType(mitigation),
         configuration: { threat: threat.type, mitigation },
         priority: this.mapSeverityToPriority(threat.severity),
-        effectiveness: this.calculateMitigationEffectiveness(threat, mitigation)
+        effectiveness: this.calculateMitigationEffectiveness(
+          threat,
+          mitigation,
+        ),
       });
     });
-    
+
     return measures;
   }
 
@@ -1785,56 +1831,72 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    */
   private mapMitigationToMeasureType(mitigation: string): SecurityMeasureType {
     const mapping: Record<string, SecurityMeasureType> = {
-      'header_validation': SecurityMeasureType._REQUEST_VALIDATION,
-      'ip_verification': SecurityMeasureType._IP_FILTERING,
-      'payload_size_limit': SecurityMeasureType._REQUEST_VALIDATION,
-      'require_authentication': SecurityMeasureType._ENHANCED_AUTHENTICATION,
-      'enforce_bearer_token': SecurityMeasureType._ENHANCED_AUTHENTICATION,
-      'require_session': SecurityMeasureType._SESSION_MONITORING,
-      'enforce_https': SecurityMeasureType._REQUEST_VALIDATION,
-      'add_security_headers': SecurityMeasureType._RESPONSE_FILTERING,
-      'proxy_validation': SecurityMeasureType._REQUEST_VALIDATION,
-      'ip_whitelisting': SecurityMeasureType._IP_FILTERING
+      header_validation: SecurityMeasureType._REQUEST_VALIDATION,
+      ip_verification: SecurityMeasureType._IP_FILTERING,
+      payload_size_limit: SecurityMeasureType._REQUEST_VALIDATION,
+      require_authentication: SecurityMeasureType._ENHANCED_AUTHENTICATION,
+      enforce_bearer_token: SecurityMeasureType._ENHANCED_AUTHENTICATION,
+      require_session: SecurityMeasureType._SESSION_MONITORING,
+      enforce_https: SecurityMeasureType._REQUEST_VALIDATION,
+      add_security_headers: SecurityMeasureType._RESPONSE_FILTERING,
+      proxy_validation: SecurityMeasureType._REQUEST_VALIDATION,
+      ip_whitelisting: SecurityMeasureType._IP_FILTERING,
     };
-    
+
     return mapping[mitigation] || SecurityMeasureType._REQUEST_VALIDATION;
   }
 
   /**
    * Map threat severity to priority
    */
-  private mapSeverityToPriority(severity: string): "LOW" | "MEDIUM" | "HIGH" | "IMMEDIATE" {
+  private mapSeverityToPriority(
+    severity: string,
+  ): "LOW" | "MEDIUM" | "HIGH" | "IMMEDIATE" {
     switch (severity) {
-      case "LOW": return "LOW";
-      case "MEDIUM": return "MEDIUM";
-      case "HIGH": return "HIGH";
-      case "CRITICAL": return "IMMEDIATE";
-      default: return "MEDIUM";
+      case "LOW":
+        return "LOW";
+      case "MEDIUM":
+        return "MEDIUM";
+      case "HIGH":
+        return "HIGH";
+      case "CRITICAL":
+        return "IMMEDIATE";
+      default:
+        return "MEDIUM";
     }
   }
 
   /**
    * Calculate mitigation effectiveness
    */
-  private calculateMitigationEffectiveness(threat: SecurityThreat, mitigation: string): number {
+  private calculateMitigationEffectiveness(
+    threat: SecurityThreat,
+    _mitigation: string,
+  ): number {
     // Base effectiveness on threat severity and mitigation type
-    const severityMultiplier = {
-      "LOW": 0.7,
-      "MEDIUM": 0.8,
-      "HIGH": 0.9,
-      "CRITICAL": 0.95
-    }[threat.severity] || 0.8;
-    
+    const severityMultiplier =
+      {
+        LOW: 0.7,
+        MEDIUM: 0.8,
+        HIGH: 0.9,
+        CRITICAL: 0.95,
+      }[threat.severity] || 0.8;
+
     return Math.min(95, severityMultiplier * 100);
   }
 
   /**
    * Determine security level based on score and threats
    */
-  private determineSecurityLevel(overallScore: number, threats: SecurityThreat[]): SecurityLevel {
-    const criticalThreats = threats.filter(t => t.severity === "CRITICAL").length;
-    const highThreats = threats.filter(t => t.severity === "HIGH").length;
-    
+  private determineSecurityLevel(
+    overallScore: number,
+    threats: SecurityThreat[],
+  ): SecurityLevel {
+    const criticalThreats = threats.filter(
+      (t) => t.severity === "CRITICAL",
+    ).length;
+    const highThreats = threats.filter((t) => t.severity === "HIGH").length;
+
     if (criticalThreats > 0 || overallScore < 30) {
       return SecurityLevel._CRITICAL;
     } else if (highThreats > 0 || overallScore < 60) {
@@ -1852,7 +1914,7 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
   private async validateComplianceFramework(
     req: EnterpriseValidatedRequest,
     frameworkName: string,
-    operationId: string
+    _operationId: string,
   ): Promise<{
     framework: ComplianceFramework;
     violations: ComplianceViolation[];
@@ -1866,15 +1928,15 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
       version: "2024.1",
       regulations: [`${frameworkName}_REGULATION`],
       requiredLevel: "STANDARD",
-      currentStatus: "COMPLIANT"
+      currentStatus: "COMPLIANT",
     };
-    
+
     return {
       framework,
       violations: [],
       recommendations: [],
       auditRequirements: [],
-      scoreDeduction: 0
+      scoreDeduction: 0,
     };
   }
 
@@ -1883,51 +1945,54 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    */
   private async createParlantValidationRequest(
     req: EnterpriseValidatedRequest,
-    operationId: string
+    operationId: string,
   ): Promise<ParlantValidationRequest> {
     return {
       operationId,
       functionName: `${req.method}:${req.path}`,
-      packageName: 'enterprise-api',
+      packageName: "enterprise-api",
       description: `Enterprise API validation for ${req.method} ${req.path}`,
       parameters: {
         method: req.method,
         path: req.path,
         headers: this.sanitizeHeaders(req.headers),
-        timestamp: new Date()
+        timestamp: new Date(),
       },
       userContext: {
-        userId: req.headers['x-user-id'] as string || 'anonymous',
-        roles: ['user'], // Default role
-        sessionId: req.parlantContext?.sessionId || 'unknown',
+        userId: (req.headers["x-user-id"] as string) || "anonymous",
+        roles: ["user"], // Default role
+        sessionId: req.parlantContext?.sessionId || "unknown",
         ipAddress: this.extractClientIp(req),
         metadata: {
-          userAgent: req.headers['user-agent'] || 'unknown'
-        }
+          userAgent: req.headers["user-agent"] || "unknown",
+        },
       },
-      securityLevel: req.securityAssessment?.securityLevel || SecurityLevel._MEDIUM,
-      timeout: this.performanceTargets.maxValidationTime
+      securityLevel:
+        req.securityAssessment?.securityLevel || SecurityLevel._MEDIUM,
+      timeout: this.performanceTargets.maxValidationTime,
     };
   }
 
   /**
    * Execute Parlant validation
    */
-  private async executeParlantValidation(request: ParlantValidationRequest): Promise<ParlantValidationResponse> {
+  private async executeParlantValidation(
+    request: ParlantValidationRequest,
+  ): Promise<ParlantValidationResponse> {
     // Create a validation function to wrap
     const validationFunction = async () => {
       // Simulate validation logic
       return {
         approved: true,
-        reason: 'Enterprise validation completed',
-        confidence: 0.95
+        reason: "Enterprise validation completed",
+        confidence: 0.95,
       };
     };
-    
+
     // For now, execute a simple validation
     // In production, this would integrate with the actual Parlant service
     const result = await validationFunction();
-    
+
     return {
       approved: result.approved,
       conversationId: `conv-${request.operationId}`,
@@ -1943,9 +2008,9 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
           level: SecurityLevel._MEDIUM,
           factors: [],
           score: 75,
-          mitigations: []
-        }
-      }
+          mitigations: [],
+        },
+      },
     };
   }
 
@@ -1955,7 +2020,9 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
   private createTimeoutPromise(timeoutMs: number): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new ParlantTimeoutError(`Validation timeout after ${timeoutMs}ms`));
+        reject(
+          new ParlantTimeoutError(`Validation timeout after ${timeoutMs}ms`),
+        );
       }, timeoutMs);
     });
   }
@@ -1966,16 +2033,18 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
   private async processParlantValidationResponse(
     req: EnterpriseValidatedRequest,
     response: ParlantValidationResponse,
-    operationId: string
+    operationId: string,
   ): Promise<void> {
     if (!req.enterpriseValidation) {
       throw new Error("Enterprise validation context not initialized");
     }
-    
-    req.enterpriseValidation.validationResult = response.approved ? "APPROVED" : "DENIED";
+
+    req.enterpriseValidation.validationResult = response.approved
+      ? "APPROVED"
+      : "DENIED";
     req.enterpriseValidation.reasoning = response.reason;
     req.enterpriseValidation.conversationId = response.conversationId;
-    
+
     // Update conversation context
     if (req.parlantContext) {
       req.parlantContext.conversationHistory.push({
@@ -1983,7 +2052,7 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
         speaker: "SYSTEM",
         message: `Validation result: ${response.approved ? "APPROVED" : "DENIED"}`,
         intent: "validation_result",
-        metadata: { operationId, result: response.approved }
+        metadata: { operationId, result: response.approved },
       });
     }
   }
@@ -1993,13 +2062,19 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    */
   private updateCircuitBreakerOnSuccess(): void {
     this.circuitBreakerState.successCount++;
-    this.circuitBreakerState.failureCount = Math.max(0, this.circuitBreakerState.failureCount - 1);
-    
+    this.circuitBreakerState.failureCount = Math.max(
+      0,
+      this.circuitBreakerState.failureCount - 1,
+    );
+
     // Close circuit if enough successes
-    if (this.circuitBreakerState.successCount >= 3 && this.circuitBreakerState.isOpen) {
+    if (
+      this.circuitBreakerState.successCount >= 3 &&
+      this.circuitBreakerState.isOpen
+    ) {
       this.circuitBreakerState.isOpen = false;
       this.circuitBreakerState.failureCount = 0;
-      this.logger.log('Circuit breaker closed after successful validations');
+      this.logger.log("Circuit breaker closed after successful validations");
     }
   }
 
@@ -2008,16 +2083,17 @@ export class EnterpriseApiValidationMiddleware implements NestMiddleware {
    */
   private async applyFallbackValidation(
     req: EnterpriseValidatedRequest,
-    operationId: string
+    operationId: string,
   ): Promise<void> {
     if (!req.enterpriseValidation) {
       throw new Error("Enterprise validation context not initialized");
     }
-    
+
     // Apply conservative fallback validation
     req.enterpriseValidation.validationResult = "CONDITIONAL";
-    req.enterpriseValidation.reasoning = "Fallback validation applied due to service unavailability";
-    
+    req.enterpriseValidation.reasoning =
+      "Fallback validation applied due to service unavailability";
+
     this.logger.warn(`[${operationId}] Applied fallback validation`);
   }
 

@@ -1,10 +1,10 @@
 /**
  * Unified Health Monitoring Utility
- * 
+ *
  * Provides standardized health monitoring capabilities across all AIgent services.
  * Ensures consistent health check behavior, metrics collection, and alerting
  * for local monitoring deployment.
- * 
+ *
  * Features:
  * - Standardized health check execution
  * - Automatic metrics recording
@@ -12,24 +12,24 @@
  * - Correlation ID tracking
  * - Performance monitoring
  * - Service-specific health validation
- * 
+ *
  * @author Claude Code - Monitoring Integration Specialist
  * @version 1.0.0
  */
 
-import { Logger } from '@nestjs/common';
-import { MetricsService } from './metrics.service';
-import { 
-  HealthCheckResult, 
-  HealthStatus, 
+import { Logger } from "@nestjs/common";
+import { MetricsService } from "./metrics.service";
+import {
+  HealthCheckResult,
+  HealthStatus,
   ServiceHealthStatus,
   SystemResourceMetrics,
   CircuitBreakerStatus,
-} from './types';
-import { 
+} from "./types";
+import {
   getServiceMonitoringConfig,
   ServiceMonitoringConfig,
-} from './config/monitoring.config';
+} from "./config/monitoring.config";
 
 /**
  * Health check execution context
@@ -59,7 +59,7 @@ export interface HealthCheckExecutionResult {
  * Circuit breaker state for health checks
  */
 interface CircuitBreakerState {
-  state: 'closed' | 'open' | 'half-open';
+  state: "closed" | "open" | "half-open";
   failureCount: number;
   lastFailureTime?: number;
   nextAttemptTime?: number;
@@ -72,8 +72,11 @@ interface CircuitBreakerState {
 export class HealthMonitorUtil {
   private readonly logger = new Logger(HealthMonitorUtil.name);
   private readonly circuitBreakers = new Map<string, CircuitBreakerState>();
-  private readonly executionHistory = new Map<string, HealthCheckExecutionResult[]>();
-  
+  private readonly executionHistory = new Map<
+    string,
+    HealthCheckExecutionResult[]
+  >();
+
   constructor(
     private readonly metricsService: MetricsService,
     private readonly serviceName: string,
@@ -87,7 +90,7 @@ export class HealthMonitorUtil {
   async executeHealthCheck(
     checkName: string,
     checkFunction: () => Promise<HealthCheckResult> | HealthCheckResult,
-    context: Partial<HealthCheckContext> = {}
+    context: Partial<HealthCheckContext> = {},
   ): Promise<HealthCheckExecutionResult> {
     const fullContext: HealthCheckContext = {
       serviceName: this.serviceName,
@@ -99,26 +102,38 @@ export class HealthMonitorUtil {
     };
 
     const startTime = Date.now();
-    this.logger.debug(`[${fullContext.operationId}] Executing health check: ${checkName}`, {
-      serviceName: fullContext.serviceName,
-      checkName,
-      operationId: fullContext.operationId,
-    });
+    this.logger.debug(
+      `[${fullContext.operationId}] Executing health check: ${checkName}`,
+      {
+        serviceName: fullContext.serviceName,
+        checkName,
+        operationId: fullContext.operationId,
+      },
+    );
 
     try {
       // Check circuit breaker
       if (!this.isCircuitBreakerClosed(checkName)) {
-        const error = 'Circuit breaker is open - health check skipped';
+        const error = "Circuit breaker is open - health check skipped";
         this.logger.warn(`[${fullContext.operationId}] ${error}`, {
           checkName,
           circuitBreakerState: this.getCircuitBreakerState(checkName),
         });
 
-        return this.createExecutionResult(fullContext, false, undefined, error, startTime);
+        return this.createExecutionResult(
+          fullContext,
+          false,
+          undefined,
+          error,
+          startTime,
+        );
       }
 
       // Execute health check with timeout
-      const result = await this.executeWithTimeout(checkFunction, fullContext.timeout ?? 5000);
+      const result = await this.executeWithTimeout(
+        checkFunction,
+        fullContext.timeout ?? 5000,
+      );
       const duration = Date.now() - startTime;
 
       // Update circuit breaker on success
@@ -127,35 +142,59 @@ export class HealthMonitorUtil {
       // Record metrics
       this.recordHealthCheckMetrics(fullContext, result, duration, true);
 
-      this.logger.debug(`[${fullContext.operationId}] Health check completed successfully`, {
-        checkName,
-        duration,
-        isHealthy: result.isHealthy,
-      });
+      this.logger.debug(
+        `[${fullContext.operationId}] Health check completed successfully`,
+        {
+          checkName,
+          duration,
+          isHealthy: result.isHealthy,
+        },
+      );
 
-      const executionResult = this.createExecutionResult(fullContext, true, result, undefined, startTime);
+      const executionResult = this.createExecutionResult(
+        fullContext,
+        true,
+        result,
+        undefined,
+        startTime,
+      );
       this.storeExecutionHistory(checkName, executionResult);
 
       return executionResult;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
 
       // Update circuit breaker on failure
       this.updateCircuitBreaker(checkName, false);
 
       // Record error metrics
-      this.recordHealthCheckMetrics(fullContext, undefined, duration, false, errorMessage);
-
-      this.logger.error(`[${fullContext.operationId}] Health check failed: ${errorMessage}`, {
-        checkName,
+      this.recordHealthCheckMetrics(
+        fullContext,
+        undefined,
         duration,
-        error: errorMessage,
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+        false,
+        errorMessage,
+      );
 
-      const executionResult = this.createExecutionResult(fullContext, false, undefined, errorMessage, startTime);
+      this.logger.error(
+        `[${fullContext.operationId}] Health check failed: ${errorMessage}`,
+        {
+          checkName,
+          duration,
+          error: errorMessage,
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+      );
+
+      const executionResult = this.createExecutionResult(
+        fullContext,
+        false,
+        undefined,
+        errorMessage,
+        startTime,
+      );
       this.storeExecutionHistory(checkName, executionResult);
 
       return executionResult;
@@ -167,7 +206,9 @@ export class HealthMonitorUtil {
    */
   async getServiceHealthStatus(): Promise<Record<string, unknown>> {
     const operationId = this.generateOperationId();
-    this.logger.debug(`[${operationId}] Getting comprehensive service health status`);
+    this.logger.debug(
+      `[${operationId}] Getting comprehensive service health status`,
+    );
 
     const config = getServiceMonitoringConfig(this.serviceName);
     const executionHistory = this.getAllExecutionHistory();
@@ -176,13 +217,14 @@ export class HealthMonitorUtil {
     // Calculate overall health based on recent checks
     const recentFailures = this.getRecentFailures(300000); // Last 5 minutes
     const totalChecks = this.getTotalChecks(300000);
-    const errorRate = totalChecks > 0 ? (recentFailures / totalChecks) * 100 : 0;
+    const errorRate =
+      totalChecks > 0 ? (recentFailures / totalChecks) * 100 : 0;
 
-    let overallStatus: HealthStatus = 'healthy';
+    let overallStatus: HealthStatus = "healthy";
     if (errorRate > 20) {
-      overallStatus = 'unhealthy';
+      overallStatus = "unhealthy";
     } else if (errorRate > 10) {
-      overallStatus = 'degraded';
+      overallStatus = "degraded";
     }
 
     const healthStatus = {
@@ -237,11 +279,13 @@ export class HealthMonitorUtil {
       });
 
       return metrics;
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Failed to collect system resource metrics`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(
+        `[${operationId}] Failed to collect system resource metrics`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
 
       // Return default metrics on error
       return {
@@ -260,7 +304,7 @@ export class HealthMonitorUtil {
    */
   resetCircuitBreaker(checkName: string): void {
     this.circuitBreakers.set(checkName, {
-      state: 'closed',
+      state: "closed",
       failureCount: 0,
       successCount: 0,
     });
@@ -281,8 +325,9 @@ export class HealthMonitorUtil {
       allHistory.push(...history);
     });
 
-    return allHistory.sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    return allHistory.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
     );
   }
 
@@ -296,14 +341,16 @@ export class HealthMonitorUtil {
       this.executionHistory.clear();
     }
 
-    this.logger.log(`Execution history cleared${checkName ? ` for check: ${checkName}` : ''}`);
+    this.logger.log(
+      `Execution history cleared${checkName ? ` for check: ${checkName}` : ""}`,
+    );
   }
 
   // Private helper methods
 
   private executeWithTimeout<T>(
     fn: () => Promise<T> | T,
-    timeout: number
+    timeout: number,
   ): Promise<T> {
     return new Promise(async (resolve, reject) => {
       const timeoutId = setTimeout(() => {
@@ -323,18 +370,18 @@ export class HealthMonitorUtil {
 
   private isCircuitBreakerClosed(checkName: string): boolean {
     const breaker = this.getCircuitBreakerState(checkName);
-    
-    if (breaker.state === 'closed') return true;
-    if (breaker.state === 'open') {
+
+    if (breaker.state === "closed") return true;
+    if (breaker.state === "open") {
       // Check if we should transition to half-open
       if (breaker.nextAttemptTime && Date.now() >= breaker.nextAttemptTime) {
-        breaker.state = 'half-open';
+        breaker.state = "half-open";
         breaker.successCount = 0;
         return true;
       }
       return false;
     }
-    if (breaker.state === 'half-open') return true;
+    if (breaker.state === "half-open") return true;
 
     return false;
   }
@@ -342,7 +389,7 @@ export class HealthMonitorUtil {
   private getCircuitBreakerState(checkName: string): CircuitBreakerState {
     if (!this.circuitBreakers.has(checkName)) {
       this.circuitBreakers.set(checkName, {
-        state: 'closed',
+        state: "closed",
         failureCount: 0,
         successCount: 0,
       });
@@ -355,16 +402,16 @@ export class HealthMonitorUtil {
 
     if (success) {
       breaker.successCount++;
-      if (breaker.state === 'half-open' && breaker.successCount >= 3) {
-        breaker.state = 'closed';
+      if (breaker.state === "half-open" && breaker.successCount >= 3) {
+        breaker.state = "closed";
         breaker.failureCount = 0;
       }
     } else {
       breaker.failureCount++;
       breaker.lastFailureTime = Date.now();
-      
+
       if (breaker.failureCount >= 5) {
-        breaker.state = 'open';
+        breaker.state = "open";
         breaker.nextAttemptTime = Date.now() + 60000; // 1 minute
       }
     }
@@ -375,7 +422,7 @@ export class HealthMonitorUtil {
     result: HealthCheckResult | undefined,
     duration: number,
     success: boolean,
-    error?: string
+    error?: string,
   ): void {
     try {
       // Create a health check result for the standard method
@@ -387,29 +434,37 @@ export class HealthMonitorUtil {
       };
 
       // Record execution metrics using the standard interface
-      this.metricsService.recordHealthCheck(context.serviceName, healthCheckResult);
-      
+      this.metricsService.recordHealthCheck(
+        context.serviceName,
+        healthCheckResult,
+      );
+
       // Record detailed metrics with proper labels parameter
-      this.metricsService.incrementCounter('health_check_executions_total', 1, {
+      this.metricsService.incrementCounter("health_check_executions_total", 1, {
         service: context.serviceName,
         check_name: context.checkName,
-        status: success ? 'success' : 'failure',
-        user_id: context.userId || 'system',
+        status: success ? "success" : "failure",
+        user_id: context.userId || "system",
       });
 
-      this.metricsService.observeHistogram('health_check_duration_seconds', duration / 1000);
+      this.metricsService.observeHistogram(
+        "health_check_duration_seconds",
+        duration / 1000,
+      );
 
       if (error) {
-        this.metricsService.incrementCounter('health_check_errors_total', 1, {
+        this.metricsService.incrementCounter("health_check_errors_total", 1, {
           service: context.serviceName,
           check_name: context.checkName,
-          error_type: error.includes('timeout') ? 'timeout' : 'execution_error',
+          error_type: error.includes("timeout") ? "timeout" : "execution_error",
         });
       }
-
     } catch (metricsError) {
-      this.logger.warn('Failed to record health check metrics', {
-        error: metricsError instanceof Error ? metricsError.message : String(metricsError),
+      this.logger.warn("Failed to record health check metrics", {
+        error:
+          metricsError instanceof Error
+            ? metricsError.message
+            : String(metricsError),
       });
     }
   }
@@ -419,7 +474,7 @@ export class HealthMonitorUtil {
     success: boolean,
     result: HealthCheckResult | undefined,
     error: string | undefined,
-    startTime: number
+    startTime: number,
   ): HealthCheckExecutionResult {
     return {
       success,
@@ -431,7 +486,10 @@ export class HealthMonitorUtil {
     };
   }
 
-  private storeExecutionHistory(checkName: string, result: HealthCheckExecutionResult): void {
+  private storeExecutionHistory(
+    checkName: string,
+    result: HealthCheckExecutionResult,
+  ): void {
     if (!this.executionHistory.has(checkName)) {
       this.executionHistory.set(checkName, []);
     }
@@ -445,28 +503,39 @@ export class HealthMonitorUtil {
     }
   }
 
-  private getAllExecutionHistory(): Record<string, HealthCheckExecutionResult[]> {
+  private getAllExecutionHistory(): Record<
+    string,
+    HealthCheckExecutionResult[]
+  > {
     const allHistory: Record<string, HealthCheckExecutionResult[]> = {};
-    
-    Array.from(this.executionHistory.entries()).forEach(([checkName, history]) => {
-      allHistory[checkName] = [...history];
-    });
+
+    Array.from(this.executionHistory.entries()).forEach(
+      ([checkName, history]) => {
+        allHistory[checkName] = [...history];
+      },
+    );
 
     return allHistory;
   }
 
   private getAllCircuitBreakerStates(): Map<string, CircuitBreakerStatus> {
     const states = new Map<string, CircuitBreakerStatus>();
-    
-    Array.from(this.circuitBreakers.entries()).forEach(([checkName, breaker]) => {
-      states.set(checkName, {
-        state: breaker.state as 'CLOSED' | 'OPEN' | 'HALF_OPEN',
-        failureCount: breaker.failureCount,
-        successCount: breaker.successCount,
-        lastFailureTime: breaker.lastFailureTime ? new Date(breaker.lastFailureTime) : undefined,
-        nextAttemptTime: breaker.nextAttemptTime ? new Date(breaker.nextAttemptTime) : undefined,
-      });
-    });
+
+    Array.from(this.circuitBreakers.entries()).forEach(
+      ([checkName, breaker]) => {
+        states.set(checkName, {
+          state: breaker.state as "CLOSED" | "OPEN" | "HALF_OPEN",
+          failureCount: breaker.failureCount,
+          successCount: breaker.successCount,
+          lastFailureTime: breaker.lastFailureTime
+            ? new Date(breaker.lastFailureTime)
+            : undefined,
+          nextAttemptTime: breaker.nextAttemptTime
+            ? new Date(breaker.nextAttemptTime)
+            : undefined,
+        });
+      },
+    );
 
     return states;
   }
@@ -477,7 +546,10 @@ export class HealthMonitorUtil {
 
     Array.from(this.executionHistory.values()).forEach((history) => {
       history.forEach((execution) => {
-        if (new Date(execution.timestamp).getTime() >= cutoff && !execution.success) {
+        if (
+          new Date(execution.timestamp).getTime() >= cutoff &&
+          !execution.success
+        ) {
           failures++;
         }
       });
@@ -535,7 +607,7 @@ export class HealthMonitorUtil {
 
   private getLoadAverage(): number[] {
     try {
-      const os = require('os');
+      const os = require("os");
       return os.loadavg();
     } catch {
       return [0, 0, 0]; // Default if not available

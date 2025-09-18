@@ -1,17 +1,17 @@
 /**
  * Shared Monitoring Types for Local-Only Architecture
- * 
+ *
  * Comprehensive type definitions for health checks, metrics collection,
  * and monitoring system integration across all Bytebot services.
- * 
+ *
  * Features:
  * - Local health check interfaces
- * - Prometheus metrics type definitions  
+ * - Prometheus metrics type definitions
  * - Performance monitoring structures
  * - Alert and notification schemas
  * - Local storage monitoring types
  * - System resource monitoring interfaces
- * 
+ *
  * @author Claude Code - Local Health Checks & Monitoring Integration Specialist
  * @version 1.0.0 - Local-Only Architecture Compliant
  */
@@ -19,30 +19,39 @@
 /**
  * Health check status levels with degraded state support
  */
-export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
+export type HealthStatus = "healthy" | "degraded" | "unhealthy" | "unknown";
 
 /**
  * Service status for dependency monitoring
  */
-export type ServiceStatus = 
-  | 'connected' | 'disconnected' 
-  | 'active' | 'inactive' 
-  | 'available' | 'unavailable'
-  | 'operational' | 'degraded' | 'offline'
-  | 'enabled' | 'disabled'
-  | 'loaded' | 'missing'
-  | 'reachable' | 'unreachable'
-  | 'collecting' | 'unknown';
+export type ServiceStatus =
+  | "connected"
+  | "disconnected"
+  | "active"
+  | "inactive"
+  | "available"
+  | "unavailable"
+  | "operational"
+  | "degraded"
+  | "offline"
+  | "enabled"
+  | "disabled"
+  | "loaded"
+  | "missing"
+  | "reachable"
+  | "unreachable"
+  | "collecting"
+  | "unknown";
 
 /**
  * Metric types for Prometheus integration
  */
-export type MetricType = 'counter' | 'gauge' | 'histogram' | 'summary';
+export type MetricType = "counter" | "gauge" | "histogram" | "summary";
 
 /**
  * Alert severity levels
  */
-export type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type AlertSeverity = "low" | "medium" | "high" | "critical";
 
 /**
  * Base health check result interface
@@ -225,7 +234,7 @@ export interface AlertConfig {
   /** Metric threshold */
   threshold: number;
   /** Comparison operator */
-  operator: '>' | '<' | '>=' | '<=' | '==' | '!=';
+  operator: ">" | "<" | ">=" | "<=" | "==" | "!=";
   /** Alert enabled flag */
   enabled: boolean;
   /** Cool-down period in seconds */
@@ -290,7 +299,7 @@ export interface HealthDashboardData {
  */
 export interface MonitoringEvent {
   /** Event type */
-  type: 'health_check' | 'metric_update' | 'alert_triggered' | 'system_event';
+  type: "health_check" | "metric_update" | "alert_triggered" | "system_event";
   /** Event severity */
   severity: AlertSeverity;
   /** Event source service */
@@ -373,7 +382,7 @@ export interface ComplianceStatus {
  */
 export interface CircuitBreakerStatus {
   /** Circuit breaker state */
-  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+  state: "CLOSED" | "OPEN" | "HALF_OPEN";
   /** Failure count */
   failureCount: number;
   /** Success count */

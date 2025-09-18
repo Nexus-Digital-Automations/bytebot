@@ -695,7 +695,10 @@ export class ParlantMFAService {
   @ConversationContext({
     topic: "High-Risk Multi-Factor Authentication",
     priority: ConversationPriority._CRITICAL,
-    requiredParticipants: [ParticipantRole._VALIDATOR, ParticipantRole._APPROVER],
+    requiredParticipants: [
+      ParticipantRole._VALIDATOR,
+      ParticipantRole._APPROVER,
+    ],
   })
   async initiateHighRiskMFA(
     userId: string,
@@ -1063,8 +1066,11 @@ export class ParlantMFAService {
         ? ConversationPriority._CRITICAL
         : ConversationPriority._NORMAL;
 
-    const conversationId = await this.parlantService.createConversation(topic, priority);
-    
+    const conversationId = await this.parlantService.createConversation(
+      topic,
+      priority,
+    );
+
     return {
       conversationId,
       userId,
@@ -1073,13 +1079,13 @@ export class ParlantMFAService {
       metadata: {
         topic,
         priority,
-        tags: ['mfa', method, riskAssessment.riskLevel],
+        tags: ["mfa", method, riskAssessment.riskLevel],
         properties: {},
-        history: []
+        history: [],
       },
       participants: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
@@ -1187,7 +1193,9 @@ export class ParlantMFAService {
       description: "Validate MFA response with conversational verification",
       parameters: functionContext.arguments,
       userContext: userContext,
-      securityLevel: this.mapFunctionSecurityLevelToSecurityLevel(functionContext.securityLevel),
+      securityLevel: this.mapFunctionSecurityLevelToSecurityLevel(
+        functionContext.securityLevel,
+      ),
       timeout: validationParams.timeout,
     };
   }
@@ -1270,9 +1278,7 @@ export class ParlantMFAService {
       challenge,
     );
 
-    const finalResult =
-      methodValidation &&
-      validationResponse.approved;
+    const finalResult = methodValidation && validationResponse.approved;
 
     return {
       valid: finalResult,
@@ -1286,7 +1292,7 @@ export class ParlantMFAService {
         riskScore: challenge.riskAssessment.riskScore,
         conversationalValidation: true,
         properties: {
-          parlantDecision: validationResponse.approved ? 'APPROVED' : 'DENIED',
+          parlantDecision: validationResponse.approved ? "APPROVED" : "DENIED",
           confidence: validationResponse.confidence,
         },
       },
@@ -1474,7 +1480,7 @@ export class ParlantMFAService {
       topic,
       ConversationPriority._CRITICAL,
     );
-    
+
     return {
       conversationId,
       userId,
@@ -1483,13 +1489,13 @@ export class ParlantMFAService {
       metadata: {
         topic,
         priority: ConversationPriority._CRITICAL,
-        tags: ['high-risk-mfa', riskAssessment.riskLevel],
+        tags: ["high-risk-mfa", riskAssessment.riskLevel],
         properties: { riskAssessment, context },
-        history: []
+        history: [],
       },
       participants: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
@@ -1559,7 +1565,7 @@ export class ParlantMFAService {
       topic,
       ConversationPriority._NORMAL,
     );
-    
+
     return {
       conversationId,
       userId,
@@ -1568,13 +1574,13 @@ export class ParlantMFAService {
       metadata: {
         topic,
         priority: ConversationPriority._NORMAL,
-        tags: ['mfa-setup', method],
+        tags: ["mfa-setup", method],
         properties: {},
-        history: []
+        history: [],
       },
       participants: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
@@ -1587,7 +1593,7 @@ export class ParlantMFAService {
       topic,
       ConversationPriority._HIGH,
     );
-    
+
     return {
       conversationId,
       userId,
@@ -1596,13 +1602,13 @@ export class ParlantMFAService {
       metadata: {
         topic,
         priority: ConversationPriority._HIGH,
-        tags: ['mfa-recovery'],
+        tags: ["mfa-recovery"],
         properties: { recoveryContext },
-        history: []
+        history: [],
       },
       participants: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
@@ -1641,7 +1647,9 @@ export class ParlantMFAService {
   /**
    * Map FunctionSecurityLevel to SecurityLevel
    */
-  private mapFunctionSecurityLevelToSecurityLevel(functionSecurityLevel: FunctionSecurityLevel): SecurityLevel {
+  private mapFunctionSecurityLevelToSecurityLevel(
+    functionSecurityLevel: FunctionSecurityLevel,
+  ): SecurityLevel {
     switch (functionSecurityLevel) {
       case FunctionSecurityLevel._PUBLIC:
         return SecurityLevel._MINIMAL;

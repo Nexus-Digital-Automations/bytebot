@@ -20,7 +20,12 @@
 
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { EventEmitter } from "events";
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
+import axios, {
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+} from "axios";
 import WebSocket from "ws";
 import {
   ParlantValidationRequest,
@@ -489,23 +494,35 @@ export class ParlantHuginnBridgeService
     });
 
     // Add request interceptor for performance monitoring
-    this.httpClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-      // Extend config with metadata for performance tracking
-      (config as InternalAxiosRequestConfig & { metadata?: { startTime: number } }).metadata = { startTime: Date.now() };
-      return config;
-    });
+    this.httpClient.interceptors.request.use(
+      (config: InternalAxiosRequestConfig) => {
+        // Extend config with metadata for performance tracking
+        (
+          config as InternalAxiosRequestConfig & {
+            metadata?: { startTime: number };
+          }
+        ).metadata = { startTime: Date.now() };
+        return config;
+      },
+    );
 
     // Add response interceptor for metrics collection
     this.httpClient.interceptors.response.use(
       (response: AxiosResponse) => {
-        const config = response.config as InternalAxiosRequestConfig & { metadata?: { startTime: number } };
-        const duration = Date.now() - (config.metadata?.startTime ?? Date.now());
+        const config = response.config as InternalAxiosRequestConfig & {
+          metadata?: { startTime: number };
+        };
+        const duration =
+          Date.now() - (config.metadata?.startTime ?? Date.now());
         this.updateRequestMetrics(duration, true);
         return response;
       },
       (error: AxiosError) => {
-        const config = error.config as InternalAxiosRequestConfig & { metadata?: { startTime: number } } | undefined;
-        const duration = Date.now() - (config?.metadata?.startTime ?? Date.now());
+        const config = error.config as
+          | (InternalAxiosRequestConfig & { metadata?: { startTime: number } })
+          | undefined;
+        const duration =
+          Date.now() - (config?.metadata?.startTime ?? Date.now());
         this.updateRequestMetrics(duration, false);
         return Promise.reject(error);
       },

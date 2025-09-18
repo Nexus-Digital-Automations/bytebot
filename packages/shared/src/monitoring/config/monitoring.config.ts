@@ -1,16 +1,16 @@
 /**
  * Standardized Monitoring Configuration for AIgent Platform
- * 
+ *
  * Provides unified configuration for health monitoring, metrics collection,
  * and observability across all services in the AIgent platform.
- * 
+ *
  * Features:
  * - Standardized health check intervals and timeouts
  * - Consistent Prometheus metrics configuration
  * - Unified alerting thresholds
  * - Service-specific monitoring settings
  * - Local-only deployment optimization
- * 
+ *
  * @author Claude Code - Monitoring Integration Specialist
  * @version 1.0.0
  */
@@ -100,7 +100,7 @@ export const DEFAULT_HEALTH_CHECK_CONFIG: HealthCheckConfig = {
  */
 export const DEFAULT_PROMETHEUS_CONFIG: PrometheusConfig = {
   enabled: true,
-  endpoint: '/metrics',
+  endpoint: "/metrics",
   collectInterval: 15000, // 15 seconds
   retentionDays: 7, // 1 week retention for local deployment
   buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
@@ -112,7 +112,7 @@ export const DEFAULT_PROMETHEUS_CONFIG: PrometheusConfig = {
  */
 export const DEFAULT_ALERTING_CONFIG: AlertingConfig = {
   enabled: true,
-  channels: ['console', 'webhook'],
+  channels: ["console", "webhook"],
   thresholds: {
     cpu: 80, // 80% CPU usage
     memory: 85, // 85% memory usage
@@ -127,7 +127,7 @@ export const DEFAULT_ALERTING_CONFIG: AlertingConfig = {
  * Bytebot Agent monitoring configuration
  */
 export const BYTEBOT_AGENT_CONFIG: ServiceMonitoringConfig = {
-  serviceName: 'bytebot-agent',
+  serviceName: "bytebot-agent",
   healthChecks: {
     ...DEFAULT_HEALTH_CHECK_CONFIG,
     interval: 10000, // More frequent for agent
@@ -144,11 +144,11 @@ export const BYTEBOT_AGENT_CONFIG: ServiceMonitoringConfig = {
     },
   },
   customMetrics: [
-    'task_processing_duration',
-    'active_tasks_count',
-    'authentication_attempts',
-    'security_events',
-    'parlant_validation_duration',
+    "task_processing_duration",
+    "active_tasks_count",
+    "authentication_attempts",
+    "security_events",
+    "parlant_validation_duration",
   ],
 };
 
@@ -156,7 +156,7 @@ export const BYTEBOT_AGENT_CONFIG: ServiceMonitoringConfig = {
  * Bytebotd service monitoring configuration
  */
 export const BYTEBOTD_CONFIG: ServiceMonitoringConfig = {
-  serviceName: 'bytebotd',
+  serviceName: "bytebotd",
   healthChecks: {
     ...DEFAULT_HEALTH_CHECK_CONFIG,
     interval: 15000, // Standard interval
@@ -173,11 +173,11 @@ export const BYTEBOTD_CONFIG: ServiceMonitoringConfig = {
     },
   },
   customMetrics: [
-    'daemon_uptime',
-    'background_tasks_count',
-    'system_resource_usage',
-    'security_monitoring_events',
-    'parlant_conversations_active',
+    "daemon_uptime",
+    "background_tasks_count",
+    "system_resource_usage",
+    "security_monitoring_events",
+    "parlant_conversations_active",
   ],
 };
 
@@ -185,7 +185,7 @@ export const BYTEBOTD_CONFIG: ServiceMonitoringConfig = {
  * Orchestrator monitoring configuration
  */
 export const ORCHESTRATOR_CONFIG: ServiceMonitoringConfig = {
-  serviceName: 'orchestrator',
+  serviceName: "orchestrator",
   healthChecks: {
     ...DEFAULT_HEALTH_CHECK_CONFIG,
     interval: 20000, // Less frequent for orchestrator
@@ -202,10 +202,10 @@ export const ORCHESTRATOR_CONFIG: ServiceMonitoringConfig = {
     },
   },
   customMetrics: [
-    'orchestration_tasks_count',
-    'service_coordination_latency',
-    'resource_allocation_efficiency',
-    'inter_service_communication',
+    "orchestration_tasks_count",
+    "service_coordination_latency",
+    "resource_allocation_efficiency",
+    "inter_service_communication",
   ],
 };
 
@@ -214,8 +214,8 @@ export const ORCHESTRATOR_CONFIG: ServiceMonitoringConfig = {
  */
 export const AIGENT_MONITORING_CONFIG: MonitoringConfig = {
   global: {
-    environment: process.env.NODE_ENV || 'development',
-    logLevel: process.env.LOG_LEVEL || 'info',
+    environment: process.env.NODE_ENV || "development",
+    logLevel: process.env.LOG_LEVEL || "info",
     correlationIds: true,
     structuredLogging: true,
     localOnly: true, // 100% local deployment
@@ -224,19 +224,23 @@ export const AIGENT_MONITORING_CONFIG: MonitoringConfig = {
   prometheus: DEFAULT_PROMETHEUS_CONFIG,
   alerting: DEFAULT_ALERTING_CONFIG,
   services: {
-    'bytebot-agent': BYTEBOT_AGENT_CONFIG,
-    'bytebotd': BYTEBOTD_CONFIG,
-    'orchestrator': ORCHESTRATOR_CONFIG,
+    "bytebot-agent": BYTEBOT_AGENT_CONFIG,
+    bytebotd: BYTEBOTD_CONFIG,
+    orchestrator: ORCHESTRATOR_CONFIG,
   },
 };
 
 /**
  * Get monitoring configuration for a specific service
  */
-export function getServiceMonitoringConfig(serviceName: string): ServiceMonitoringConfig {
+export function getServiceMonitoringConfig(
+  serviceName: string,
+): ServiceMonitoringConfig {
   const config = AIGENT_MONITORING_CONFIG.services[serviceName];
   if (!config) {
-    throw new Error(`No monitoring configuration found for service: ${serviceName}`);
+    throw new Error(
+      `No monitoring configuration found for service: ${serviceName}`,
+    );
   }
   return config;
 }
@@ -253,7 +257,7 @@ export function getGlobalMonitoringConfig(): MonitoringConfig {
  */
 export function createServiceConfig(
   serviceName: string,
-  overrides: Partial<ServiceMonitoringConfig> = {}
+  overrides: Partial<ServiceMonitoringConfig> = {},
 ): ServiceMonitoringConfig {
   return {
     serviceName,
@@ -301,27 +305,27 @@ export function validateMonitoringConfig(config: MonitoringConfig): boolean {
  */
 export function adjustConfigForEnvironment(
   config: MonitoringConfig,
-  environment: string
+  environment: string,
 ): MonitoringConfig {
   const adjustedConfig = { ...config };
 
   switch (environment) {
-    case 'development':
+    case "development":
       // More verbose logging and frequent checks in development
-      adjustedConfig.global.logLevel = 'debug';
+      adjustedConfig.global.logLevel = "debug";
       adjustedConfig.healthChecks.interval = 5000; // 5 seconds
       adjustedConfig.prometheus.collectInterval = 5000;
       break;
 
-    case 'production':
+    case "production":
       // Optimized for performance in production
-      adjustedConfig.global.logLevel = 'warn';
+      adjustedConfig.global.logLevel = "warn";
       adjustedConfig.healthChecks.interval = 30000; // 30 seconds
       adjustedConfig.prometheus.collectInterval = 30000;
       adjustedConfig.prometheus.retentionDays = 30; // Longer retention
       break;
 
-    case 'testing':
+    case "testing":
       // Minimal monitoring for testing
       adjustedConfig.alerting.enabled = false;
       adjustedConfig.healthChecks.interval = 60000; // 1 minute

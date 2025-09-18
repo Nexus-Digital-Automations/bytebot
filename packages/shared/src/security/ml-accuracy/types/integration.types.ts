@@ -1284,7 +1284,7 @@ export interface AdaptiveConfiguration {
 export interface AdaptationCondition {
   readonly conditionId: string;
   readonly metricThreshold: number;
-  readonly comparisonType: 'greater_than' | 'less_than' | 'equals';
+  readonly comparisonType: "greater_than" | "less_than" | "equals";
   readonly enabled: boolean;
 }
 
@@ -1317,7 +1317,7 @@ export interface EventRouting {
 export interface RoutingRule {
   readonly ruleId: string;
   readonly condition: string; // expression
-  readonly action: 'forward' | 'filter' | 'transform';
+  readonly action: "forward" | "filter" | "transform";
   readonly targetTopic?: string;
   readonly transformation?: string;
 }

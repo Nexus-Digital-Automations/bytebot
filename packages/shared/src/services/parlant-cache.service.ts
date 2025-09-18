@@ -249,7 +249,7 @@ export class ParlantCacheService
           data: memoryResult.data?.response || null,
           layer: memoryResult.layer,
           responseTime: memoryResult.responseTime,
-          metadata: memoryResult.metadata
+          metadata: memoryResult.metadata,
         };
       }
 
@@ -278,7 +278,7 @@ export class ParlantCacheService
             data: redisResult.data?.response || null,
             layer: redisResult.layer,
             responseTime: redisResult.responseTime,
-            metadata: redisResult.metadata
+            metadata: redisResult.metadata,
           };
         }
       }
@@ -315,7 +315,7 @@ export class ParlantCacheService
             data: persistentResult.data?.response || null,
             layer: persistentResult.layer,
             responseTime: persistentResult.responseTime,
-            metadata: persistentResult.metadata
+            metadata: persistentResult.metadata,
           };
         }
       }
@@ -392,7 +392,10 @@ export class ParlantCacheService
       this.setMetadata(cacheKey, {
         key: cacheKey,
         layer: CacheLayer._MEMORY,
-        size: (typeof cacheEntry.metadata.size === 'number' ? cacheEntry.metadata.size : 0),
+        size:
+          typeof cacheEntry.metadata.size === "number"
+            ? cacheEntry.metadata.size
+            : 0,
         frequency: 1,
         lastAccess: new Date(),
         createdAt: new Date(),
@@ -716,7 +719,11 @@ export class ParlantCacheService
         responseTime,
       };
     } catch (error) {
-      if (error instanceof Error && 'code' in error && error.code !== "ENOENT") {
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        error.code !== "ENOENT"
+      ) {
         this.logger.error("❌ Persistent cache get operation failed", error);
       }
       return {
@@ -879,7 +886,9 @@ export class ParlantCacheService
       ) {
         sanitized[key] = "[REDACTED]";
       } else if (typeof value === "object" && value !== null) {
-        sanitized[key] = this.sanitizeParameters(value as Record<string, unknown>);
+        sanitized[key] = this.sanitizeParameters(
+          value as Record<string, unknown>,
+        );
       } else {
         sanitized[key] = value;
       }

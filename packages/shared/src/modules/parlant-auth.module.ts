@@ -16,7 +16,13 @@
  * @author Parlant Integration Research Agent #3
  */
 
-import { Module, DynamicModule, Type, ForwardReference, Provider } from "@nestjs/common";
+import {
+  Module,
+  DynamicModule,
+  Type,
+  ForwardReference,
+  Provider,
+} from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { CacheModule } from "@nestjs/cache-manager";
@@ -124,9 +130,12 @@ export interface ParlantAuthModuleOptions {
 /**
  * Async configuration options for Parlant Authentication Module
  */
-export interface ParlantAuthModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+export interface ParlantAuthModuleAsyncOptions
+  extends Pick<ModuleMetadata, "imports"> {
   /** Imports for dependency injection */
-  imports?: Array<Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference>;
+  imports?: Array<
+    Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference
+  >;
 
   /** Providers for dependency injection */
   providers?: Provider[];
@@ -357,7 +366,7 @@ export class ParlantAuthModule {
       ],
       providers: [
         // Async configuration providers
-        ...(options.providers || [] as Provider[]),
+        ...(options.providers || ([] as Provider[])),
 
         // Options provider
         {
@@ -468,7 +477,9 @@ export class ParlantAuthModule {
     return {
       module: ParlantAuthModule,
       providers: providers as Provider[],
-      exports: exports as Array<string | symbol | Type<any> | DynamicModule | Provider>,
+      exports: exports as Array<
+        string | symbol | Type<any> | DynamicModule | Provider
+      >,
     };
   }
 }

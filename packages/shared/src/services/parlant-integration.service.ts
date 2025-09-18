@@ -18,7 +18,12 @@ import {
 } from "@nestjs/common";
 import { EventEmitter } from "events";
 import * as jwt from "jsonwebtoken";
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
+import axios, {
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+} from "axios";
 import WebSocket from "ws";
 import {
   ParlantServiceConfig,
@@ -234,22 +239,34 @@ export class ParlantIntegrationService
     });
 
     // Add request interceptor for metrics
-    this.httpClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-      (config as InternalAxiosRequestConfig & { metadata?: { startTime: number } }).metadata = { startTime: Date.now() };
-      return config;
-    });
+    this.httpClient.interceptors.request.use(
+      (config: InternalAxiosRequestConfig) => {
+        (
+          config as InternalAxiosRequestConfig & {
+            metadata?: { startTime: number };
+          }
+        ).metadata = { startTime: Date.now() };
+        return config;
+      },
+    );
 
     // Add response interceptor for metrics and error handling
     this.httpClient.interceptors.response.use(
       (response: AxiosResponse) => {
-        const config = response.config as InternalAxiosRequestConfig & { metadata?: { startTime: number } };
-        const duration = Date.now() - (config.metadata?.startTime ?? Date.now());
+        const config = response.config as InternalAxiosRequestConfig & {
+          metadata?: { startTime: number };
+        };
+        const duration =
+          Date.now() - (config.metadata?.startTime ?? Date.now());
         this.updateMetrics({ responseTime: duration, success: true });
         return response;
       },
       (error: AxiosError) => {
-        const config = error.config as InternalAxiosRequestConfig & { metadata?: { startTime: number } } | undefined;
-        const duration = Date.now() - (config?.metadata?.startTime ?? Date.now());
+        const config = error.config as
+          | (InternalAxiosRequestConfig & { metadata?: { startTime: number } })
+          | undefined;
+        const duration =
+          Date.now() - (config?.metadata?.startTime ?? Date.now());
         this.updateMetrics({ responseTime: duration, success: false });
         return Promise.reject(error);
       },
@@ -323,7 +340,7 @@ export class ParlantIntegrationService
         this.logger.error("❌ WebSocket error", error);
         reject(
           new ParlantConnectionError("WebSocket connection failed", {
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
           }),
         );
       });
@@ -603,19 +620,37 @@ export class ParlantIntegrationService
       confidence: typeof data.confidence === "number" ? data.confidence : 0,
       executionContext: data.execution_context
         ? {
-            constraints: (data.execution_context as RawExecutionContextData).constraints ?? {},
+            constraints:
+              (data.execution_context as RawExecutionContextData).constraints ??
+              {},
             resourceLimits: {
               maxExecutionTime:
-                (data.execution_context as RawExecutionContextData).max_execution_time ?? 30000,
-              maxMemoryUsage: (data.execution_context as RawExecutionContextData).max_memory_usage ?? 512,
-              maxCpuUsage: (data.execution_context as RawExecutionContextData).max_cpu_usage ?? 80,
-              fileSystemAccess:
-                ((data.execution_context as RawExecutionContextData).filesystem_access ?? "read") as "read" | "write" | "none" | "full",
-              networkAccess:
-                ((data.execution_context as RawExecutionContextData).network_access ?? "internal") as "none" | "internal" | "external" | "full",
+                (data.execution_context as RawExecutionContextData)
+                  .max_execution_time ?? 30000,
+              maxMemoryUsage:
+                (data.execution_context as RawExecutionContextData)
+                  .max_memory_usage ?? 512,
+              maxCpuUsage:
+                (data.execution_context as RawExecutionContextData)
+                  .max_cpu_usage ?? 80,
+              fileSystemAccess: ((
+                data.execution_context as RawExecutionContextData
+              ).filesystem_access ?? "read") as
+                | "read"
+                | "write"
+                | "none"
+                | "full",
+              networkAccess: ((
+                data.execution_context as RawExecutionContextData
+              ).network_access ?? "internal") as
+                | "none"
+                | "internal"
+                | "external"
+                | "full",
             },
             securityRestrictions:
-              (data.execution_context as RawExecutionContextData).security_restrictions ?? [],
+              (data.execution_context as RawExecutionContextData)
+                .security_restrictions ?? [],
             monitoring: {
               realTimeMonitoring: true,
               logAllOperations: true,

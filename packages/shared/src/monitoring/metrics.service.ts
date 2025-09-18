@@ -1,10 +1,10 @@
 /**
  * Local Metrics Collection Service with Prometheus Integration
- * 
+ *
  * Comprehensive metrics collection service optimized for local deployment.
- * Provides Prometheus metrics endpoints, health check metrics, and 
+ * Provides Prometheus metrics endpoints, health check metrics, and
  * performance monitoring for the Bytebot platform.
- * 
+ *
  * Features:
  * - Prometheus metrics collection and exposure
  * - Health check metrics aggregation
@@ -13,14 +13,14 @@
  * - Local storage metrics monitoring
  * - Circuit breaker pattern implementation
  * - Real-time metrics dashboard support
- * 
+ *
  * @author Claude Code - Local Health Checks & Monitoring Integration Specialist
  * @version 1.0.0 - Local-Only Architecture Compliant
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   PrometheusMetric,
   MetricType,
@@ -31,7 +31,7 @@ import {
   PerformanceMetrics,
   SecurityMetrics,
   CircuitBreakerStatus,
-} from './types';
+} from "./types";
 
 /**
  * Prometheus metric registry interface
@@ -39,15 +39,21 @@ import {
 interface MetricRegistry {
   counters: Map<string, { value: number; labels: Record<string, string> }>;
   gauges: Map<string, { value: number; labels: Record<string, string> }>;
-  histograms: Map<string, { buckets: Map<string, number>; sum: number; count: number }>;
-  summaries: Map<string, { sum: number; count: number; quantiles: Map<string, number> }>;
+  histograms: Map<
+    string,
+    { buckets: Map<string, number>; sum: number; count: number }
+  >;
+  summaries: Map<
+    string,
+    { sum: number; count: number; quantiles: Map<string, number> }
+  >;
 }
 
 /**
  * Circuit breaker state for monitoring reliability
  */
 interface CircuitBreaker {
-  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+  state: "CLOSED" | "OPEN" | "HALF_OPEN";
   failureCount: number;
   successCount: number;
   lastFailureTime?: Date;
@@ -87,12 +93,12 @@ export class MetricsService {
     };
 
     this.alertThresholds = new Map([
-      ['cpu_usage_percent', 80],
-      ['memory_usage_percent', 85],
-      ['disk_usage_percent', 90],
-      ['response_time_ms', 5000],
-      ['error_rate_percent', 5],
-      ['security_events_per_hour', 50],
+      ["cpu_usage_percent", 80],
+      ["memory_usage_percent", 85],
+      ["disk_usage_percent", 90],
+      ["response_time_ms", 5000],
+      ["error_rate_percent", 5],
+      ["security_events_per_hour", 50],
     ]);
 
     this.circuitBreakers = new Map();
@@ -102,12 +108,15 @@ export class MetricsService {
     this.initializeDefaultMetrics();
     this.startMetricsCollection();
 
-    this.logger.log('Local Metrics Service initialized with Prometheus integration', {
-      metricsEnabled: this._config.get<boolean>('METRICS_ENABLED', true),
-      prometheusPort: this._config.get<number>('PROMETHEUS_PORT', 9090),
-      alertThresholds: Object.fromEntries(this.alertThresholds),
-      histogramBuckets: this.defaultHistogramBuckets,
-    });
+    this.logger.log(
+      "Local Metrics Service initialized with Prometheus integration",
+      {
+        metricsEnabled: this._config.get<boolean>("METRICS_ENABLED", true),
+        prometheusPort: this._config.get<number>("PROMETHEUS_PORT", 9090),
+        alertThresholds: Object.fromEntries(this.alertThresholds),
+        histogramBuckets: this.defaultHistogramBuckets,
+      },
+    );
   }
 
   /**
@@ -119,48 +128,91 @@ export class MetricsService {
 
     try {
       // System resource metrics
-      this.registerGauge('system_cpu_usage_percent', 'CPU usage percentage');
-      this.registerGauge('system_memory_usage_percent', 'Memory usage percentage');
-      this.registerGauge('system_disk_usage_percent', 'Disk usage percentage');
-      this.registerGauge('system_uptime_seconds', 'System uptime in seconds');
+      this.registerGauge("system_cpu_usage_percent", "CPU usage percentage");
+      this.registerGauge(
+        "system_memory_usage_percent",
+        "Memory usage percentage",
+      );
+      this.registerGauge("system_disk_usage_percent", "Disk usage percentage");
+      this.registerGauge("system_uptime_seconds", "System uptime in seconds");
 
       // Application metrics
-      this.registerCounter('http_requests_total', 'Total HTTP requests');
-      this.registerCounter('http_errors_total', 'Total HTTP errors');
-      this.registerHistogram('http_request_duration_seconds', 'HTTP request duration');
-      this.registerHistogram('database_query_duration_seconds', 'Database query duration');
+      this.registerCounter("http_requests_total", "Total HTTP requests");
+      this.registerCounter("http_errors_total", "Total HTTP errors");
+      this.registerHistogram(
+        "http_request_duration_seconds",
+        "HTTP request duration",
+      );
+      this.registerHistogram(
+        "database_query_duration_seconds",
+        "Database query duration",
+      );
 
       // Health check metrics
-      this.registerGauge('health_check_status', 'Health check status (1=healthy, 0=unhealthy)');
-      this.registerCounter('health_check_failures_total', 'Total health check failures');
-      this.registerHistogram('health_check_duration_seconds', 'Health check duration');
+      this.registerGauge(
+        "health_check_status",
+        "Health check status (1=healthy, 0=unhealthy)",
+      );
+      this.registerCounter(
+        "health_check_failures_total",
+        "Total health check failures",
+      );
+      this.registerHistogram(
+        "health_check_duration_seconds",
+        "Health check duration",
+      );
 
       // Security metrics
-      this.registerCounter('security_events_total', 'Total security events');
-      this.registerCounter('authentication_attempts_total', 'Total authentication attempts');
-      this.registerCounter('authorization_failures_total', 'Total authorization failures');
-      this.registerGauge('active_sessions', 'Number of active user sessions');
+      this.registerCounter("security_events_total", "Total security events");
+      this.registerCounter(
+        "authentication_attempts_total",
+        "Total authentication attempts",
+      );
+      this.registerCounter(
+        "authorization_failures_total",
+        "Total authorization failures",
+      );
+      this.registerGauge("active_sessions", "Number of active user sessions");
 
       // Performance metrics
-      this.registerGauge('task_processing_rate', 'Task processing rate per second');
-      this.registerGauge('connection_pool_active', 'Active database connections');
-      this.registerGauge('connection_pool_idle', 'Idle database connections');
+      this.registerGauge(
+        "task_processing_rate",
+        "Task processing rate per second",
+      );
+      this.registerGauge(
+        "connection_pool_active",
+        "Active database connections",
+      );
+      this.registerGauge("connection_pool_idle", "Idle database connections");
 
       // Circuit breaker metrics
-      this.registerGauge('circuit_breaker_state', 'Circuit breaker state (0=closed, 1=open, 2=half-open)');
-      this.registerCounter('circuit_breaker_trips_total', 'Total circuit breaker trips');
+      this.registerGauge(
+        "circuit_breaker_state",
+        "Circuit breaker state (0=closed, 1=open, 2=half-open)",
+      );
+      this.registerCounter(
+        "circuit_breaker_trips_total",
+        "Total circuit breaker trips",
+      );
 
-      this.logger.debug(`[${operationId}] Default system metrics initialized successfully`, {
-        counters: this.metrics.counters.size,
-        gauges: this.metrics.gauges.size,
-        histograms: this.metrics.histograms.size,
-      });
+      this.logger.debug(
+        `[${operationId}] Default system metrics initialized successfully`,
+        {
+          counters: this.metrics.counters.size,
+          gauges: this.metrics.gauges.size,
+          histograms: this.metrics.histograms.size,
+        },
+      );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to initialize default metrics: ${errorMessage}`, {
-        error: errorMessage,
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to initialize default metrics: ${errorMessage}`,
+        {
+          error: errorMessage,
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+      );
       throw error;
     }
   }
@@ -170,7 +222,10 @@ export class MetricsService {
    */
   private startMetricsCollection(): void {
     const operationId = this.generateOperationId();
-    const collectInterval = this._config.get<number>('METRICS_COLLECT_INTERVAL', 30000);
+    const collectInterval = this._config.get<number>(
+      "METRICS_COLLECT_INTERVAL",
+      30000,
+    );
 
     this.logger.debug(`[${operationId}] Starting periodic metrics collection`, {
       intervalMs: collectInterval,
@@ -192,17 +247,17 @@ export class MetricsService {
       const memoryUsage = process.memoryUsage();
       const uptime = process.uptime();
 
-      this.setGauge('system_uptime_seconds', uptime);
-      this.setGauge('process_memory_rss_bytes', memoryUsage.rss);
-      this.setGauge('process_memory_heap_used_bytes', memoryUsage.heapUsed);
-      this.setGauge('process_memory_heap_total_bytes', memoryUsage.heapTotal);
+      this.setGauge("system_uptime_seconds", uptime);
+      this.setGauge("process_memory_rss_bytes", memoryUsage.rss);
+      this.setGauge("process_memory_heap_used_bytes", memoryUsage.heapUsed);
+      this.setGauge("process_memory_heap_total_bytes", memoryUsage.heapTotal);
 
       // Emit monitoring event
       this.emitMonitoringEvent({
-        type: 'metric_update',
-        severity: 'low',
-        source: 'metrics_service',
-        message: 'System metrics collected successfully',
+        type: "metric_update",
+        severity: "low",
+        source: "metrics_service",
+        message: "System metrics collected successfully",
         metadata: {
           uptime,
           memoryUsageMB: Math.round(memoryUsage.rss / 1024 / 1024),
@@ -211,17 +266,25 @@ export class MetricsService {
         operationId,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to collect system metrics: ${errorMessage}`, {
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to collect system metrics: ${errorMessage}`,
+        {
+          error: errorMessage,
+        },
+      );
     }
   }
 
   /**
    * Register a counter metric
    */
-  registerCounter(name: string, help: string, labels: Record<string, string> = {}): void {
+  registerCounter(
+    name: string,
+    help: string,
+    labels: Record<string, string> = {},
+  ): void {
     this.metrics.counters.set(name, { value: 0, labels });
     this.logger.debug(`Registered counter metric: ${name}`, { help, labels });
   }
@@ -229,7 +292,11 @@ export class MetricsService {
   /**
    * Register a gauge metric
    */
-  registerGauge(name: string, help: string, labels: Record<string, string> = {}): void {
+  registerGauge(
+    name: string,
+    help: string,
+    labels: Record<string, string> = {},
+  ): void {
     this.metrics.gauges.set(name, { value: 0, labels });
     this.logger.debug(`Registered gauge metric: ${name}`, { help, labels });
   }
@@ -240,24 +307,31 @@ export class MetricsService {
   registerHistogram(name: string, help: string, buckets?: number[]): void {
     const bucketMap = new Map<string, number>();
     const useBuckets = buckets || this.defaultHistogramBuckets;
-    
-    useBuckets.forEach(bucket => {
+
+    useBuckets.forEach((bucket) => {
       bucketMap.set(bucket.toString(), 0);
     });
-    bucketMap.set('+Inf', 0);
+    bucketMap.set("+Inf", 0);
 
     this.metrics.histograms.set(name, {
       buckets: bucketMap,
       sum: 0,
       count: 0,
     });
-    this.logger.debug(`Registered histogram metric: ${name}`, { help, buckets: useBuckets });
+    this.logger.debug(`Registered histogram metric: ${name}`, {
+      help,
+      buckets: useBuckets,
+    });
   }
 
   /**
    * Increment a counter metric
    */
-  incrementCounter(name: string, value = 1, labels: Record<string, string> = {}): void {
+  incrementCounter(
+    name: string,
+    value = 1,
+    labels: Record<string, string> = {},
+  ): void {
     const metric = this.metrics.counters.get(name);
     if (metric) {
       metric.value += value;
@@ -270,12 +344,16 @@ export class MetricsService {
   /**
    * Set a gauge metric value
    */
-  setGauge(name: string, value: number, labels: Record<string, string> = {}): void {
+  setGauge(
+    name: string,
+    value: number,
+    labels: Record<string, string> = {},
+  ): void {
     const metric = this.metrics.gauges.get(name);
     if (metric) {
       metric.value = value;
       Object.assign(metric.labels, labels);
-      
+
       // Check alert thresholds
       this.checkAlertThreshold(name, value);
     } else {
@@ -294,7 +372,7 @@ export class MetricsService {
 
       // Update buckets
       histogram.buckets.forEach((count, bucket) => {
-        if (bucket === '+Inf' || value <= parseFloat(bucket)) {
+        if (bucket === "+Inf" || value <= parseFloat(bucket)) {
           histogram.buckets.set(bucket, count + 1);
         }
       });
@@ -337,19 +415,26 @@ export class MetricsService {
    */
   recordHealthCheck(serviceName: string, result: HealthCheckResult): void {
     const operationId = this.generateOperationId();
-    
+
     try {
       // Record health check status
-      this.setGauge('health_check_status', result.isHealthy ? 1 : 0, { service: serviceName });
-      
+      this.setGauge("health_check_status", result.isHealthy ? 1 : 0, {
+        service: serviceName,
+      });
+
       // Record failure if unhealthy
       if (!result.isHealthy) {
-        this.incrementCounter('health_check_failures_total', 1, { service: serviceName });
+        this.incrementCounter("health_check_failures_total", 1, {
+          service: serviceName,
+        });
       }
 
       // Record response time if available
       if (result.responseTime) {
-        this.observeHistogram('health_check_duration_seconds', result.responseTime / 1000);
+        this.observeHistogram(
+          "health_check_duration_seconds",
+          result.responseTime / 1000,
+        );
       }
 
       // Add to history
@@ -361,39 +446,53 @@ export class MetricsService {
 
       // Maintain history size
       if (this.healthCheckHistory.length > this.maxHistorySize) {
-        this.healthCheckHistory.splice(0, this.healthCheckHistory.length - this.maxHistorySize);
+        this.healthCheckHistory.splice(
+          0,
+          this.healthCheckHistory.length - this.maxHistorySize,
+        );
       }
 
-      this.logger.debug(`[${operationId}] Health check recorded for ${serviceName}`, {
-        isHealthy: result.isHealthy,
-        responseTime: result.responseTime,
-        historySize: this.healthCheckHistory.length,
-      });
+      this.logger.debug(
+        `[${operationId}] Health check recorded for ${serviceName}`,
+        {
+          isHealthy: result.isHealthy,
+          responseTime: result.responseTime,
+          historySize: this.healthCheckHistory.length,
+        },
+      );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to record health check: ${errorMessage}`, {
-        serviceName,
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to record health check: ${errorMessage}`,
+        {
+          serviceName,
+          error: errorMessage,
+        },
+      );
     }
   }
 
   /**
    * Record security event
    */
-  recordSecurityEvent(eventType: string, severity: AlertSeverity, source: string): void {
+  recordSecurityEvent(
+    eventType: string,
+    severity: AlertSeverity,
+    source: string,
+  ): void {
     const operationId = this.generateOperationId();
-    
+
     try {
-      this.incrementCounter('security_events_total', 1, { 
-        event_type: eventType, 
-        severity, 
-        source 
+      this.incrementCounter("security_events_total", 1, {
+        event_type: eventType,
+        severity,
+        source,
       });
 
       // Emit security monitoring event
       this.emitMonitoringEvent({
-        type: 'system_event',
+        type: "system_event",
         severity,
         source,
         message: `Security event recorded: ${eventType}`,
@@ -408,31 +507,39 @@ export class MetricsService {
         source,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to record security event: ${errorMessage}`, {
-        eventType,
-        severity,
-        source,
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to record security event: ${errorMessage}`,
+        {
+          eventType,
+          severity,
+          source,
+          error: errorMessage,
+        },
+      );
     }
   }
 
   /**
    * Record alert triggered
    */
-  recordAlertTriggered(alertName: string, severity: AlertSeverity, source: string): void {
+  recordAlertTriggered(
+    alertName: string,
+    severity: AlertSeverity,
+    source: string,
+  ): void {
     const operationId = this.generateOperationId();
-    
+
     try {
-      this.incrementCounter('alerts_triggered_total', 1, { 
-        alert: alertName, 
-        severity, 
-        source 
+      this.incrementCounter("alerts_triggered_total", 1, {
+        alert: alertName,
+        severity,
+        source,
       });
 
       this.emitMonitoringEvent({
-        type: 'alert_triggered',
+        type: "alert_triggered",
         severity,
         source,
         message: `Alert triggered: ${alertName}`,
@@ -447,35 +554,47 @@ export class MetricsService {
         source,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to record alert: ${errorMessage}`, {
-        alertName,
-        severity,
-        source,
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to record alert: ${errorMessage}`,
+        {
+          alertName,
+          severity,
+          source,
+          error: errorMessage,
+        },
+      );
     }
   }
 
   /**
    * Record compliance check result
    */
-  recordComplianceCheck(checkName: string, component: string, status: 'compliant' | 'non_compliant'): void {
-    this.incrementCounter('compliance_checks_total', 1, { 
-      check: checkName, 
-      component, 
-      status 
+  recordComplianceCheck(
+    checkName: string,
+    component: string,
+    status: "compliant" | "non_compliant",
+  ): void {
+    this.incrementCounter("compliance_checks_total", 1, {
+      check: checkName,
+      component,
+      status,
     });
   }
 
   /**
    * Record threat detection
    */
-  recordThreatDetection(threatType: string, severity: AlertSeverity, source: string): void {
-    this.incrementCounter('threats_detected_total', 1, { 
-      threat_type: threatType, 
-      severity, 
-      source 
+  recordThreatDetection(
+    threatType: string,
+    severity: AlertSeverity,
+    source: string,
+  ): void {
+    this.incrementCounter("threats_detected_total", 1, {
+      threat_type: threatType,
+      severity,
+      source,
     });
   }
 
@@ -483,11 +602,12 @@ export class MetricsService {
    * Update circuit breaker status
    */
   updateCircuitBreaker(name: string, status: CircuitBreakerStatus): void {
-    const stateValue = status.state === 'CLOSED' ? 0 : status.state === 'OPEN' ? 1 : 2;
-    this.setGauge('circuit_breaker_state', stateValue, { name });
-    
-    if (status.state === 'OPEN') {
-      this.incrementCounter('circuit_breaker_trips_total', 1, { name });
+    const stateValue =
+      status.state === "CLOSED" ? 0 : status.state === "OPEN" ? 1 : 2;
+    this.setGauge("circuit_breaker_state", stateValue, { name });
+
+    if (status.state === "OPEN") {
+      this.incrementCounter("circuit_breaker_trips_total", 1, { name });
     }
   }
 
@@ -496,42 +616,48 @@ export class MetricsService {
    */
   generatePrometheusMetrics(): string {
     const operationId = this.generateOperationId();
-    
+
     try {
       const lines: string[] = [];
 
       // Export counters
       this.metrics.counters.forEach((metric, name) => {
         lines.push(`# TYPE ${name} counter`);
-        const labelStr = Object.keys(metric.labels).length > 0 
-          ? `{${Object.entries(metric.labels).map(([k, v]) => `${k}="${v}"`).join(',')}}` 
-          : '';
+        const labelStr =
+          Object.keys(metric.labels).length > 0
+            ? `{${Object.entries(metric.labels)
+                .map(([k, v]) => `${k}="${v}"`)
+                .join(",")}}`
+            : "";
         lines.push(`${name}${labelStr} ${metric.value}`);
       });
 
       // Export gauges
       this.metrics.gauges.forEach((metric, name) => {
         lines.push(`# TYPE ${name} gauge`);
-        const labelStr = Object.keys(metric.labels).length > 0 
-          ? `{${Object.entries(metric.labels).map(([k, v]) => `${k}="${v}"`).join(',')}}` 
-          : '';
+        const labelStr =
+          Object.keys(metric.labels).length > 0
+            ? `{${Object.entries(metric.labels)
+                .map(([k, v]) => `${k}="${v}"`)
+                .join(",")}}`
+            : "";
         lines.push(`${name}${labelStr} ${metric.value}`);
       });
 
       // Export histograms
       this.metrics.histograms.forEach((histogram, name) => {
         lines.push(`# TYPE ${name} histogram`);
-        
+
         histogram.buckets.forEach((count, bucket) => {
           lines.push(`${name}_bucket{le="${bucket}"} ${count}`);
         });
-        
+
         lines.push(`${name}_sum ${histogram.sum}`);
         lines.push(`${name}_count ${histogram.count}`);
       });
 
-      const output = lines.join('\n') + '\n';
-      
+      const output = lines.join("\n") + "\n";
+
       this.logger.debug(`[${operationId}] Prometheus metrics generated`, {
         metricsCount: lines.length,
         outputSize: output.length,
@@ -539,20 +665,28 @@ export class MetricsService {
 
       return output;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to generate Prometheus metrics: ${errorMessage}`, {
-        error: errorMessage,
-      });
-      return '# Error generating metrics\n';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.error(
+        `[${operationId}] Failed to generate Prometheus metrics: ${errorMessage}`,
+        {
+          error: errorMessage,
+        },
+      );
+      return "# Error generating metrics\n";
     }
   }
 
   /**
    * Get health check history
    */
-  getHealthCheckHistory(serviceName?: string): Array<{ timestamp: Date; result: HealthCheckResult; service: string }> {
+  getHealthCheckHistory(
+    serviceName?: string,
+  ): Array<{ timestamp: Date; result: HealthCheckResult; service: string }> {
     if (serviceName) {
-      return this.healthCheckHistory.filter(entry => entry.service === serviceName);
+      return this.healthCheckHistory.filter(
+        (entry) => entry.service === serviceName,
+      );
     }
     return [...this.healthCheckHistory];
   }
@@ -563,7 +697,11 @@ export class MetricsService {
   private checkAlertThreshold(metricName: string, value: number): void {
     const threshold = this.alertThresholds.get(metricName);
     if (threshold && value > threshold) {
-      this.recordAlertTriggered(`${metricName}_threshold_exceeded`, 'high', 'metrics_service');
+      this.recordAlertTriggered(
+        `${metricName}_threshold_exceeded`,
+        "high",
+        "metrics_service",
+      );
     }
   }
 
@@ -572,10 +710,10 @@ export class MetricsService {
    */
   private emitMonitoringEvent(event: MonitoringEvent): void {
     try {
-      this._eventEmitter.emit('monitoring.event', event);
+      this._eventEmitter.emit("monitoring.event", event);
     } catch (error) {
-      this.logger.error('Failed to emit monitoring event', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+      this.logger.error("Failed to emit monitoring event", {
+        error: error instanceof Error ? error.message : "Unknown error",
         event,
       });
     }
@@ -591,7 +729,12 @@ export class MetricsService {
   /**
    * Get current metrics summary
    */
-  getMetricsSummary(): { counters: number; gauges: number; histograms: number; summaries: number } {
+  getMetricsSummary(): {
+    counters: number;
+    gauges: number;
+    histograms: number;
+    summaries: number;
+  } {
     return {
       counters: this.metrics.counters.size,
       gauges: this.metrics.gauges.size,
@@ -610,8 +753,8 @@ export class MetricsService {
     this.metrics.summaries.clear();
     this.healthCheckHistory.length = 0;
     this.operationTimers.clear();
-    
+
     this.initializeDefaultMetrics();
-    this.logger.debug('All metrics reset and reinitialized');
+    this.logger.debug("All metrics reset and reinitialized");
   }
 }

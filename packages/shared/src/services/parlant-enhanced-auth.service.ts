@@ -509,7 +509,10 @@ export class ParlantEnhancedAuthService {
   @ConversationContext({
     topic: "High-Risk Authentication Validation",
     priority: ConversationPriority._CRITICAL,
-    requiredParticipants: [ParticipantRole._APPROVER, ParticipantRole._VALIDATOR],
+    requiredParticipants: [
+      ParticipantRole._APPROVER,
+      ParticipantRole._VALIDATOR,
+    ],
   })
   async validateHighRiskAuthentication(
     credentials: Record<string, unknown>,
@@ -954,7 +957,7 @@ export class ParlantEnhancedAuthService {
         },
       },
     };
-    
+
     // Add enhanced metadata to user context for processing
     baseRequest.userContext.metadata = {
       ...baseRequest.userContext.metadata,
@@ -979,7 +982,10 @@ export class ParlantEnhancedAuthService {
         ? ConversationPriority._CRITICAL
         : ConversationPriority._HIGH;
 
-    const conversationId = await this.parlantService.createConversation(topic, priority);
+    const conversationId = await this.parlantService.createConversation(
+      topic,
+      priority,
+    );
     return {
       conversationId,
       userId: authContext.userId,
@@ -1018,7 +1024,9 @@ export class ParlantEnhancedAuthService {
       metadata: {
         processingTime: 0, // response.processingTime not available in parlant-integration.types
         confidence: response.confidence,
-        decision: response.approved ? ValidationDecision._APPROVED : ValidationDecision._DENIED,
+        decision: response.approved
+          ? ValidationDecision._APPROVED
+          : ValidationDecision._DENIED,
       },
     };
 
@@ -1179,7 +1187,7 @@ export class ParlantEnhancedAuthService {
         properties: {
           operationType: operation.type,
           targetUserId: operation.targetUserId,
-          requestingUserId: user.userId
+          requestingUserId: user.userId,
         },
       },
     } as unknown as ParlantConversationContext;
@@ -1202,13 +1210,15 @@ export class ParlantEnhancedAuthService {
     recommendations: string | ValidationRecommendation[],
   ): RequiredAction[] {
     // Implementation would map Parlant recommendations to required actions
-    if (typeof recommendations === 'string') {
-      return [{
-        type: RequiredActionType.SECURITY_ACKNOWLEDGMENT,
-        description: recommendations,
-        parameters: {},
-        mandatory: false
-      }];
+    if (typeof recommendations === "string") {
+      return [
+        {
+          type: RequiredActionType.SECURITY_ACKNOWLEDGMENT,
+          description: recommendations,
+          parameters: {},
+          mandatory: false,
+        },
+      ];
     }
     return [];
   }

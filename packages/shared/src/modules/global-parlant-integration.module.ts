@@ -233,8 +233,14 @@ export class GlobalParlantIntegrationModule implements NestModule {
           ? [
               {
                 provide: ParlantValidationInterceptor,
-                useFactory: (reflector: Reflector, parlantService: ParlantIntegrationService) => {
-                  return new ParlantValidationInterceptor(reflector, parlantService);
+                useFactory: (
+                  reflector: Reflector,
+                  parlantService: ParlantIntegrationService,
+                ) => {
+                  return new ParlantValidationInterceptor(
+                    reflector,
+                    parlantService,
+                  );
                 },
                 inject: [Reflector, ParlantIntegrationService],
               },

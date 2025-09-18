@@ -154,7 +154,8 @@ export class ParlantWebSocketBridgeService
       this.logger.log("✅ Parlant WebSocket Bridge initialized successfully");
       this.emit("bridge:initialized");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.error("❌ Failed to initialize WebSocket Bridge", error);
       throw new ParlantIntegrationError(
         "WebSocket Bridge initialization failed",
@@ -249,14 +250,11 @@ export class ParlantWebSocketBridgeService
         this.logger.error("❌ Client WebSocket error", error);
         this.stats.errors++;
         reject(
-          new ParlantConnectionError(
-            "Client WebSocket connection failed",
-            {
-              message: error.message,
-              name: error.name,
-              stack: error.stack,
-            },
-          ),
+          new ParlantConnectionError("Client WebSocket connection failed", {
+            message: error.message,
+            name: error.name,
+            stack: error.stack,
+          }),
         );
       });
 
@@ -488,8 +486,10 @@ export class ParlantWebSocketBridgeService
    */
   private handleValidationResponse(message: ParlantWebSocketMessage): void {
     const originalMessageId = message.payload.originalMessageId;
-    if (typeof originalMessageId !== 'string') {
-      this.logger.warn(`⚠️ Invalid originalMessageId type: ${typeof originalMessageId}`);
+    if (typeof originalMessageId !== "string") {
+      this.logger.warn(
+        `⚠️ Invalid originalMessageId type: ${typeof originalMessageId}`,
+      );
       return;
     }
     const pending = this.pendingValidations.get(originalMessageId);
@@ -575,7 +575,10 @@ export class ParlantWebSocketBridgeService
   /**
    * Send message to client
    */
-  private sendToClient(ws: WebSocket.WebSocket, message: ParlantWebSocketMessage): void {
+  private sendToClient(
+    ws: WebSocket.WebSocket,
+    message: ParlantWebSocketMessage,
+  ): void {
     if (ws.readyState !== WebSocket.WebSocket.OPEN) {
       this.logger.warn("⚠️ Cannot send message to closed client connection");
       return;

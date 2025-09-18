@@ -53,7 +53,10 @@ import {
   ParlantValidationConfig,
 } from "../decorators/parlant-validation.decorators";
 
-import { parlantWrapper, ParlantWrapperBuilder } from "../utils/parlant-wrapper.utils";
+import {
+  parlantWrapper,
+  ParlantWrapperBuilder,
+} from "../utils/parlant-wrapper.utils";
 
 // ===== ENTERPRISE COMPLIANCE TYPES =====
 
@@ -342,7 +345,7 @@ export interface DataStorageInfo {
   /** Storage location */
   location: string;
   /** Storage type */
-  type: 'local' | 'cloud' | 'hybrid';
+  type: "local" | "cloud" | "hybrid";
   /** Encryption status */
   encrypted: boolean;
   /** Retention period */
@@ -534,7 +537,7 @@ export interface RegulatoryLicense {
   /** Expiry date */
   expiryDate: Date;
   /** License status */
-  status: 'active' | 'expired' | 'suspended';
+  status: "active" | "expired" | "suspended";
 }
 
 /**
@@ -582,7 +585,7 @@ export interface ComplianceDeficiency {
   /** Deficiency type */
   type: string;
   /** Severity level */
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   /** Description */
   description: string;
   /** Remediation required */
@@ -604,7 +607,7 @@ export interface TestingProcedure {
   /** Expected outcome */
   expectedOutcome: string;
   /** Test frequency */
-  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annually';
+  frequency: "daily" | "weekly" | "monthly" | "quarterly" | "annually";
 }
 
 /**
@@ -1392,7 +1395,7 @@ export class EnterpriseComplianceService {
         this.complianceCache.set(cacheKey, {
           result: validationResult,
           timestamp: new Date(),
-          expiresAt: new Date(Date.now() + 300000) // 5 minutes
+          expiresAt: new Date(Date.now() + 300000), // 5 minutes
         });
       }
 
@@ -1493,7 +1496,7 @@ export class EnterpriseComplianceService {
 
   /**
    * Performs framework-specific compliance validations
-   * 
+   *
    * @param _context Compliance validation context
    * @param validationResult Validation result to populate
    * @returns Promise<void>
@@ -1520,14 +1523,15 @@ export class EnterpriseComplianceService {
       // Process each target framework
       for (const framework of _context.targetFrameworks) {
         const frameworkStartTime = Date.now();
-        
+
         this.logger.debug(
           `[${operationId}] Validating framework: ${framework}`,
           { operationId, framework },
         );
 
         // Get or create framework validation engine
-        const engine = this.frameworkEngines.get(framework) || 
+        const engine =
+          this.frameworkEngines.get(framework) ||
           this.createDefaultFrameworkEngine(framework);
 
         try {
@@ -1554,7 +1558,9 @@ export class EnterpriseComplianceService {
           );
 
           // Check performance target for individual framework
-          if (frameworkTime > this.performanceTargets.maxFrameworkValidationTime) {
+          if (
+            frameworkTime > this.performanceTargets.maxFrameworkValidationTime
+          ) {
             this.logger.warn(
               `[${operationId}] Framework validation exceeded performance target`,
               {
@@ -1571,7 +1577,10 @@ export class EnterpriseComplianceService {
             {
               operationId,
               framework,
-              error: frameworkError instanceof Error ? frameworkError.message : String(frameworkError),
+              error:
+                frameworkError instanceof Error
+                  ? frameworkError.message
+                  : String(frameworkError),
             },
           );
 
@@ -1582,15 +1591,17 @@ export class EnterpriseComplianceService {
             status: ComplianceStatus._NON_COMPLIANT,
             score: 0,
             controlAssessments: [],
-            violations: [{
-              violationId: `${operationId}-${framework}-validation-failure`,
-              violationType: ComplianceViolationType._CONTROL_DEFICIENCY,
-              severity: ComplianceSeverity._HIGH,
-              description: `Framework validation failed: ${frameworkError instanceof Error ? frameworkError.message : String(frameworkError)}`,
-              affectedSystems: [framework],
-              discoveryDate: new Date(),
-              status: ViolationStatus._OPEN,
-            }],
+            violations: [
+              {
+                violationId: `${operationId}-${framework}-validation-failure`,
+                violationType: ComplianceViolationType._CONTROL_DEFICIENCY,
+                severity: ComplianceSeverity._HIGH,
+                description: `Framework validation failed: ${frameworkError instanceof Error ? frameworkError.message : String(frameworkError)}`,
+                affectedSystems: [framework],
+                discoveryDate: new Date(),
+                status: ViolationStatus._OPEN,
+              },
+            ],
             recommendations: [],
             evidence: [],
             lastAssessment: new Date(),
@@ -1605,35 +1616,32 @@ export class EnterpriseComplianceService {
       this.calculateOverallComplianceStatus(validationResult);
 
       const totalTime = Date.now() - startTime;
-      this.logger.debug(
-        `[${operationId}] Framework validations completed`,
-        {
-          operationId,
-          frameworksProcessed: frameworkResults.length,
-          totalTime,
-          overallStatus: validationResult.overallStatus,
-          overallScore: validationResult.overallScore,
-        },
-      );
+      this.logger.debug(`[${operationId}] Framework validations completed`, {
+        operationId,
+        frameworksProcessed: frameworkResults.length,
+        totalTime,
+        overallStatus: validationResult.overallStatus,
+        overallScore: validationResult.overallScore,
+      });
     } catch (error) {
-      this.logger.error(
-        `[${operationId}] Framework validations failed`,
-        {
-          operationId,
-          error: error instanceof Error ? error.message : String(error),
-        },
-      );
+      this.logger.error(`[${operationId}] Framework validations failed`, {
+        operationId,
+        error: error instanceof Error ? error.message : String(error),
+      });
 
       throw new ParlantValidationError(
         `Framework validations failed: ${error instanceof Error ? error.message : String(error)}`,
-        { errorCode: "FRAMEWORK_VALIDATION_FAILED", originalError: error instanceof Error ? error.message : String(error) },
+        {
+          errorCode: "FRAMEWORK_VALIDATION_FAILED",
+          originalError: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
 
   /**
    * Performs cross-framework analysis to identify conflicts and synergies
-   * 
+   *
    * @param _context Compliance validation context
    * @param validationResult Validation result to analyze
    * @returns Promise<void>
@@ -1645,30 +1653,34 @@ export class EnterpriseComplianceService {
     const operationId = _context.operationId;
     const startTime = Date.now();
 
-    this.logger.debug(
-      `[${operationId}] Performing cross-framework analysis`,
-      {
-        operationId,
-        frameworkCount: validationResult.frameworkResults.length,
-      },
-    );
+    this.logger.debug(`[${operationId}] Performing cross-framework analysis`, {
+      operationId,
+      frameworkCount: validationResult.frameworkResults.length,
+    });
 
     try {
       // Analyze conflicts between frameworks
-      const frameworkConflicts = this.analyzeFrameworkConflicts(validationResult.frameworkResults);
-      
+      const frameworkConflicts = this.analyzeFrameworkConflicts(
+        validationResult.frameworkResults,
+      );
+
       // Analyze synergies between frameworks
-      const frameworkSynergies = this.analyzeFrameworkSynergies(validationResult.frameworkResults);
+      const frameworkSynergies = this.analyzeFrameworkSynergies(
+        validationResult.frameworkResults,
+      );
 
       // Identify overlapping controls
-      const overlappingControls = this.identifyOverlappingControls(validationResult.frameworkResults);
+      const overlappingControls = this.identifyOverlappingControls(
+        validationResult.frameworkResults,
+      );
 
       // Generate cross-framework recommendations
-      const crossFrameworkRecommendations = this.generateCrossFrameworkRecommendations(
-        frameworkConflicts,
-        frameworkSynergies,
-        overlappingControls,
-      );
+      const crossFrameworkRecommendations =
+        this.generateCrossFrameworkRecommendations(
+          frameworkConflicts,
+          frameworkSynergies,
+          overlappingControls,
+        );
 
       // Add cross-framework recommendations to validation result
       validationResult.recommendations.push(...crossFrameworkRecommendations);
@@ -1693,35 +1705,32 @@ export class EnterpriseComplianceService {
       validationResult.auditTrail.push(auditEntry);
 
       const totalTime = Date.now() - startTime;
-      this.logger.debug(
-        `[${operationId}] Cross-framework analysis completed`,
-        {
-          operationId,
-          totalTime,
-          conflictsFound: frameworkConflicts.length,
-          synergiesFound: frameworkSynergies.length,
-          recommendationsGenerated: crossFrameworkRecommendations.length,
-        },
-      );
+      this.logger.debug(`[${operationId}] Cross-framework analysis completed`, {
+        operationId,
+        totalTime,
+        conflictsFound: frameworkConflicts.length,
+        synergiesFound: frameworkSynergies.length,
+        recommendationsGenerated: crossFrameworkRecommendations.length,
+      });
     } catch (error) {
-      this.logger.error(
-        `[${operationId}] Cross-framework analysis failed`,
-        {
-          operationId,
-          error: error instanceof Error ? error.message : String(error),
-        },
-      );
+      this.logger.error(`[${operationId}] Cross-framework analysis failed`, {
+        operationId,
+        error: error instanceof Error ? error.message : String(error),
+      });
 
       throw new ParlantValidationError(
         `Cross-framework analysis failed: ${error instanceof Error ? error.message : String(error)}`,
-        { errorCode: "CROSS_FRAMEWORK_ANALYSIS_FAILED", originalError: error instanceof Error ? error.message : String(error) },
+        {
+          errorCode: "CROSS_FRAMEWORK_ANALYSIS_FAILED",
+          originalError: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
 
   /**
    * Performs comprehensive compliance risk assessment with AI enhancement
-   * 
+   *
    * @param _context Compliance validation context
    * @param validationResult Validation result to analyze for risks
    * @returns Promise<void>
@@ -1752,15 +1761,21 @@ export class EnterpriseComplianceService {
       };
 
       // Analyze risk factors from violations
-      const violationRiskFactors = this.analyzeViolationRiskFactors(validationResult.violations);
+      const violationRiskFactors = this.analyzeViolationRiskFactors(
+        validationResult.violations,
+      );
       riskAssessment.riskFactors.push(...violationRiskFactors);
 
       // Analyze risk factors from control deficiencies
-      const controlRiskFactors = this.analyzeControlRiskFactors(validationResult.frameworkResults);
+      const controlRiskFactors = this.analyzeControlRiskFactors(
+        validationResult.frameworkResults,
+      );
       riskAssessment.riskFactors.push(...controlRiskFactors);
 
       // Analyze risk factors from business context
-      const businessRiskFactors = this.analyzeBusinessRiskFactors(_context.businessContext);
+      const businessRiskFactors = this.analyzeBusinessRiskFactors(
+        _context.businessContext,
+      );
       riskAssessment.riskFactors.push(...businessRiskFactors);
 
       // Analyze risk factors from data context
@@ -1768,10 +1783,14 @@ export class EnterpriseComplianceService {
       riskAssessment.riskFactors.push(...dataRiskFactors);
 
       // Calculate overall risk score
-      riskAssessment.riskScore = this.calculateRiskScore(riskAssessment.riskFactors);
+      riskAssessment.riskScore = this.calculateRiskScore(
+        riskAssessment.riskFactors,
+      );
 
       // Determine overall risk level
-      riskAssessment.overallRisk = this.determineRiskLevel(riskAssessment.riskScore);
+      riskAssessment.overallRisk = this.determineRiskLevel(
+        riskAssessment.riskScore,
+      );
 
       // Generate mitigation strategies
       riskAssessment.mitigationStrategies = this.generateMitigationStrategies(
@@ -1781,10 +1800,7 @@ export class EnterpriseComplianceService {
 
       // Apply Parlant AI enhancement for risk assessment
       if (_context.conversationContext) {
-        await this.enhanceRiskAssessmentWithParlant(
-          riskAssessment,
-          _context,
-        );
+        await this.enhanceRiskAssessmentWithParlant(riskAssessment, _context);
       }
 
       // Update validation result with risk assessment
@@ -1818,7 +1834,8 @@ export class EnterpriseComplianceService {
           riskFactors: riskAssessment.riskFactors.length,
           mitigationStrategies: riskAssessment.mitigationStrategies.length,
           totalTime,
-          performanceMet: totalTime <= this.performanceTargets.maxRiskAssessmentTime,
+          performanceMet:
+            totalTime <= this.performanceTargets.maxRiskAssessmentTime,
         },
       );
 
@@ -1834,24 +1851,24 @@ export class EnterpriseComplianceService {
         );
       }
     } catch (error) {
-      this.logger.error(
-        `[${operationId}] Compliance risk assessment failed`,
-        {
-          operationId,
-          error: error instanceof Error ? error.message : String(error),
-        },
-      );
+      this.logger.error(`[${operationId}] Compliance risk assessment failed`, {
+        operationId,
+        error: error instanceof Error ? error.message : String(error),
+      });
 
       throw new ParlantValidationError(
         `Compliance risk assessment failed: ${error instanceof Error ? error.message : String(error)}`,
-        { errorCode: "RISK_ASSESSMENT_FAILED", originalError: error instanceof Error ? error.message : String(error) },
+        {
+          errorCode: "RISK_ASSESSMENT_FAILED",
+          originalError: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
 
   /**
    * Performs conversational compliance validation using Parlant AI
-   * 
+   *
    * @param _context Compliance validation context with conversation data
    * @param validationResult Validation result to enhance with conversational insights
    * @returns Promise<void>
@@ -1890,13 +1907,17 @@ export class EnterpriseComplianceService {
       );
 
       // Apply insights to validation result
-      this.applyConversationalInsights(validationResult, conversationalInsights);
+      this.applyConversationalInsights(
+        validationResult,
+        conversationalInsights,
+      );
 
       // Generate conversational compliance recommendations
-      const conversationalRecommendations = this.generateConversationalRecommendations(
-        conversationalInsights,
-        _context,
-      );
+      const conversationalRecommendations =
+        this.generateConversationalRecommendations(
+          conversationalInsights,
+          _context,
+        );
 
       validationResult.recommendations.push(...conversationalRecommendations);
 
@@ -1955,7 +1976,7 @@ export class EnterpriseComplianceService {
 
   /**
    * Generates compliance recommendations based on validation results
-   * 
+   *
    * @param _context Compliance validation context
    * @param validationResult Validation result to generate recommendations for
    * @returns Promise<void>
@@ -2001,10 +2022,8 @@ export class EnterpriseComplianceService {
       recommendations.push(...riskRecommendations);
 
       // Generate optimization recommendations
-      const optimizationRecommendations = this.generateOptimizationRecommendations(
-        validationResult,
-        _context,
-      );
+      const optimizationRecommendations =
+        this.generateOptimizationRecommendations(validationResult, _context);
       recommendations.push(...optimizationRecommendations);
 
       // Generate remediation actions from recommendations
@@ -2061,14 +2080,17 @@ export class EnterpriseComplianceService {
 
       throw new ParlantValidationError(
         `Compliance recommendations generation failed: ${error instanceof Error ? error.message : String(error)}`,
-        { errorCode: "RECOMMENDATIONS_GENERATION_FAILED", originalError: error instanceof Error ? error.message : String(error) },
+        {
+          errorCode: "RECOMMENDATIONS_GENERATION_FAILED",
+          originalError: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
 
   /**
    * Finalizes compliance validation by calculating final scores and status
-   * 
+   *
    * @param validationResult Validation result to finalize
    * @returns void
    */
@@ -2077,22 +2099,21 @@ export class EnterpriseComplianceService {
   ): void {
     const operationId = validationResult.validationId;
 
-    this.logger.debug(
-      `[${operationId}] Finalizing compliance validation`,
-      {
-        operationId,
-        frameworkResults: validationResult.frameworkResults.length,
-        violations: validationResult.violations.length,
-        recommendations: validationResult.recommendations.length,
-      },
-    );
+    this.logger.debug(`[${operationId}] Finalizing compliance validation`, {
+      operationId,
+      frameworkResults: validationResult.frameworkResults.length,
+      violations: validationResult.violations.length,
+      recommendations: validationResult.recommendations.length,
+    });
 
     try {
       // Calculate final overall score
-      validationResult.overallScore = this.calculateFinalComplianceScore(validationResult);
+      validationResult.overallScore =
+        this.calculateFinalComplianceScore(validationResult);
 
       // Determine final compliance status
-      validationResult.overallStatus = this.determineFinalComplianceStatus(validationResult);
+      validationResult.overallStatus =
+        this.determineFinalComplianceStatus(validationResult);
 
       // Update metadata with final metrics
       this.updateValidationMetadata(validationResult);
@@ -2117,17 +2138,15 @@ export class EnterpriseComplianceService {
 
       validationResult.auditTrail.push(finalAuditEntry);
 
-      this.logger.log(
-        `[${operationId}] Compliance validation finalized`,
-        {
-          operationId,
-          finalStatus: validationResult.overallStatus,
-          finalScore: validationResult.overallScore,
-          isCompliant: validationResult.overallStatus === ComplianceStatus._COMPLIANT,
-          violationCount: validationResult.violations.length,
-          recommendationCount: validationResult.recommendations.length,
-        },
-      );
+      this.logger.log(`[${operationId}] Compliance validation finalized`, {
+        operationId,
+        finalStatus: validationResult.overallStatus,
+        finalScore: validationResult.overallScore,
+        isCompliant:
+          validationResult.overallStatus === ComplianceStatus._COMPLIANT,
+        violationCount: validationResult.violations.length,
+        recommendationCount: validationResult.recommendations.length,
+      });
     } catch (error) {
       this.logger.error(
         `[${operationId}] Compliance validation finalization failed`,
@@ -2156,7 +2175,7 @@ export class EnterpriseComplianceService {
 
   /**
    * Creates a fallback compliance result for critical failures
-   * 
+   *
    * @param operationId Operation identifier
    * @param error Error that occurred
    * @returns ComplianceValidationResult fallback result
@@ -2165,13 +2184,10 @@ export class EnterpriseComplianceService {
     operationId: string,
     error: unknown,
   ): ComplianceValidationResult {
-    this.logger.warn(
-      `[${operationId}] Creating fallback compliance result`,
-      {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-      },
-    );
+    this.logger.warn(`[${operationId}] Creating fallback compliance result`, {
+      operationId,
+      error: error instanceof Error ? error.message : String(error),
+    });
 
     const fallbackResult: ComplianceValidationResult = {
       validationId: operationId,
@@ -2222,24 +2238,30 @@ export class EnterpriseComplianceService {
           type: RecommendationType._MONITORING,
           priority: CompliancePriority._IMMEDIATE,
           description: "Immediately review compliance validation system status",
-          implementation: "Perform manual review of compliance validation system and investigate failure",
-          expectedOutcome: "System status assessment and failure root cause identification",
+          implementation:
+            "Perform manual review of compliance validation system and investigate failure",
+          expectedOutcome:
+            "System status assessment and failure root cause identification",
           resources: ["compliance-team", "technical-support"],
         },
         {
           recommendationId: `${operationId}-fallback-rec-2`,
           type: RecommendationType._PROCESS_IMPROVEMENT,
           priority: CompliancePriority._CRITICAL,
-          description: "Implement manual compliance validation as temporary measure",
-          implementation: "Execute manual compliance checks according to established procedures",
-          expectedOutcome: "Temporary compliance validation coverage during system recovery",
+          description:
+            "Implement manual compliance validation as temporary measure",
+          implementation:
+            "Execute manual compliance checks according to established procedures",
+          expectedOutcome:
+            "Temporary compliance validation coverage during system recovery",
           resources: ["compliance-officers", "subject-matter-experts"],
         },
       ],
       remediationActions: [
         {
           actionId: `${operationId}-fallback-action-1`,
-          action: "Escalate compliance validation failure to compliance officer",
+          action:
+            "Escalate compliance validation failure to compliance officer",
           responsible: "compliance-team",
           deadline: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
           status: RemediationStatus._PLANNED,
@@ -2263,7 +2285,8 @@ export class EnterpriseComplianceService {
           resource: "validation_system",
           outcome: "fallback_result_created",
           details: {
-            originalError: error instanceof Error ? error.message : String(error),
+            originalError:
+              error instanceof Error ? error.message : String(error),
             fallbackReason: "validation_system_failure",
             riskLevel: ComplianceRiskLevel._CRITICAL,
           },
@@ -2292,27 +2315,28 @@ export class EnterpriseComplianceService {
       },
     };
 
-    this.logger.warn(
-      `[${operationId}] Fallback compliance result created`,
-      {
-        operationId,
-        status: fallbackResult.overallStatus,
-        riskLevel: fallbackResult.riskAssessment.overallRisk,
-        violationCount: fallbackResult.violations.length,
-        recommendationCount: fallbackResult.recommendations.length,
-      },
-    );
+    this.logger.warn(`[${operationId}] Fallback compliance result created`, {
+      operationId,
+      status: fallbackResult.overallStatus,
+      riskLevel: fallbackResult.riskAssessment.overallRisk,
+      violationCount: fallbackResult.violations.length,
+      recommendationCount: fallbackResult.recommendations.length,
+    });
 
     return fallbackResult;
   }
 
   // Supporting helper methods for the main implementation methods
 
-  private createDefaultFrameworkEngine(framework: ComplianceFramework): FrameworkValidationEngine {
+  private createDefaultFrameworkEngine(
+    framework: ComplianceFramework,
+  ): FrameworkValidationEngine {
     return {
       framework,
       version: "1.0.0",
-      validate: async (_context: ComplianceValidationContext): Promise<ComplianceFrameworkResult> => {
+      validate: async (
+        _context: ComplianceValidationContext,
+      ): Promise<ComplianceFrameworkResult> => {
         return {
           framework,
           version: "1.0.0",
@@ -2336,16 +2360,32 @@ export class EnterpriseComplianceService {
     return await engine.validate(_context);
   }
 
-  private calculateOverallComplianceStatus(validationResult: ComplianceValidationResult): void {
-    const frameworkStatuses = validationResult.frameworkResults.map(fr => fr.status);
-    const totalScore = validationResult.frameworkResults.reduce((sum, fr) => sum + fr.score, 0);
-    const avgScore = frameworkStatuses.length > 0 ? totalScore / frameworkStatuses.length : 0;
+  private calculateOverallComplianceStatus(
+    validationResult: ComplianceValidationResult,
+  ): void {
+    const frameworkStatuses = validationResult.frameworkResults.map(
+      (fr) => fr.status,
+    );
+    const totalScore = validationResult.frameworkResults.reduce(
+      (sum, fr) => sum + fr.score,
+      0,
+    );
+    const avgScore =
+      frameworkStatuses.length > 0 ? totalScore / frameworkStatuses.length : 0;
 
     validationResult.overallScore = avgScore;
 
-    if (frameworkStatuses.every(status => status === ComplianceStatus._COMPLIANT)) {
+    if (
+      frameworkStatuses.every(
+        (status) => status === ComplianceStatus._COMPLIANT,
+      )
+    ) {
       validationResult.overallStatus = ComplianceStatus._COMPLIANT;
-    } else if (frameworkStatuses.every(status => status === ComplianceStatus._NON_COMPLIANT)) {
+    } else if (
+      frameworkStatuses.every(
+        (status) => status === ComplianceStatus._NON_COMPLIANT,
+      )
+    ) {
       validationResult.overallStatus = ComplianceStatus._NON_COMPLIANT;
     } else {
       validationResult.overallStatus = ComplianceStatus._PARTIALLY_COMPLIANT;
@@ -2355,24 +2395,36 @@ export class EnterpriseComplianceService {
   // Additional helper methods would continue here with proper implementation...
   // For brevity, providing key method signatures that would be implemented
 
-  private analyzeFrameworkConflicts(frameworkResults: ComplianceFrameworkResult[]): any[] {
+  private analyzeFrameworkConflicts(
+    frameworkResults: ComplianceFrameworkResult[],
+  ): any[] {
     return []; // Implementation would analyze conflicts between framework requirements
   }
 
-  private analyzeFrameworkSynergies(frameworkResults: ComplianceFrameworkResult[]): any[] {
+  private analyzeFrameworkSynergies(
+    frameworkResults: ComplianceFrameworkResult[],
+  ): any[] {
     return []; // Implementation would analyze synergies between frameworks
   }
 
-  private identifyOverlappingControls(frameworkResults: ComplianceFrameworkResult[]): any[] {
+  private identifyOverlappingControls(
+    frameworkResults: ComplianceFrameworkResult[],
+  ): any[] {
     return []; // Implementation would identify overlapping controls
   }
 
-  private generateCrossFrameworkRecommendations(conflicts: any[], synergies: any[], overlaps: any[]): ComplianceRecommendation[] {
+  private generateCrossFrameworkRecommendations(
+    conflicts: any[],
+    synergies: any[],
+    overlaps: any[],
+  ): ComplianceRecommendation[] {
     return []; // Implementation would generate cross-framework recommendations
   }
 
-  private analyzeViolationRiskFactors(violations: ComplianceViolation[]): ComplianceRiskFactor[] {
-    return violations.map(v => ({
+  private analyzeViolationRiskFactors(
+    violations: ComplianceViolation[],
+  ): ComplianceRiskFactor[] {
+    return violations.map((v) => ({
       factor: `Violation: ${v.description}`,
       impact: this.mapSeverityToImpact(v.severity),
       likelihood: 80,
@@ -2380,15 +2432,21 @@ export class EnterpriseComplianceService {
     }));
   }
 
-  private analyzeControlRiskFactors(frameworkResults: ComplianceFrameworkResult[]): ComplianceRiskFactor[] {
+  private analyzeControlRiskFactors(
+    frameworkResults: ComplianceFrameworkResult[],
+  ): ComplianceRiskFactor[] {
     return []; // Implementation would analyze control-related risk factors
   }
 
-  private analyzeBusinessRiskFactors(businessContext: ComplianceBusinessContext): ComplianceRiskFactor[] {
+  private analyzeBusinessRiskFactors(
+    businessContext: ComplianceBusinessContext,
+  ): ComplianceRiskFactor[] {
     return []; // Implementation would analyze business-related risk factors
   }
 
-  private analyzeDataRiskFactors(dataContext: ComplianceDataContext): ComplianceRiskFactor[] {
+  private analyzeDataRiskFactors(
+    dataContext: ComplianceDataContext,
+  ): ComplianceRiskFactor[] {
     return []; // Implementation would analyze data-related risk factors
   }
 
@@ -2404,11 +2462,17 @@ export class EnterpriseComplianceService {
     return ComplianceRiskLevel._MINIMAL;
   }
 
-  private generateMitigationStrategies(riskFactors: ComplianceRiskFactor[], _context: ComplianceValidationContext): ComplianceMitigationStrategy[] {
+  private generateMitigationStrategies(
+    riskFactors: ComplianceRiskFactor[],
+    _context: ComplianceValidationContext,
+  ): ComplianceMitigationStrategy[] {
     return []; // Implementation would generate mitigation strategies
   }
 
-  private async enhanceRiskAssessmentWithParlant(riskAssessment: ComplianceRiskAssessment, _context: ComplianceValidationContext): Promise<void> {
+  private async enhanceRiskAssessmentWithParlant(
+    riskAssessment: ComplianceRiskAssessment,
+    _context: ComplianceValidationContext,
+  ): Promise<void> {
     // Implementation would enhance risk assessment using Parlant AI
   }
 
@@ -2418,7 +2482,7 @@ export class EnterpriseComplianceService {
   ): any[] {
     // Analyze conversation history for compliance-related insights
     const insights: any[] = [];
-    
+
     // Check for compliance decisions in conversation
     for (const decision of conversationContext.decisions) {
       insights.push({
@@ -2432,9 +2496,17 @@ export class EnterpriseComplianceService {
 
     // Analyze conversation entries for compliance keywords
     for (const entry of conversationContext.history) {
-      const complianceKeywords = ['gdpr', 'hipaa', 'sox', 'compliance', 'regulation', 'audit', 'privacy'];
+      const complianceKeywords = [
+        "gdpr",
+        "hipaa",
+        "sox",
+        "compliance",
+        "regulation",
+        "audit",
+        "privacy",
+      ];
       const lowerMessage = entry.message.toLowerCase();
-      
+
       for (const keyword of complianceKeywords) {
         if (lowerMessage.includes(keyword)) {
           insights.push({
@@ -2455,35 +2527,58 @@ export class EnterpriseComplianceService {
     return []; // Implementation would extract insights from Parlant response
   }
 
-  private applyConversationalInsights(validationResult: ComplianceValidationResult, insights: any[]): void {
+  private applyConversationalInsights(
+    validationResult: ComplianceValidationResult,
+    insights: any[],
+  ): void {
     // Implementation would apply conversational insights to validation result
   }
 
-  private generateConversationalRecommendations(insights: any[], _context: ComplianceValidationContext): ComplianceRecommendation[] {
+  private generateConversationalRecommendations(
+    insights: any[],
+    _context: ComplianceValidationContext,
+  ): ComplianceRecommendation[] {
     return []; // Implementation would generate conversational recommendations
   }
 
-  private generateViolationRecommendations(violations: ComplianceViolation[], _context: ComplianceValidationContext): ComplianceRecommendation[] {
+  private generateViolationRecommendations(
+    violations: ComplianceViolation[],
+    _context: ComplianceValidationContext,
+  ): ComplianceRecommendation[] {
     return []; // Implementation would generate recommendations from violations
   }
 
-  private generateControlRecommendations(frameworkResults: ComplianceFrameworkResult[], _context: ComplianceValidationContext): ComplianceRecommendation[] {
+  private generateControlRecommendations(
+    frameworkResults: ComplianceFrameworkResult[],
+    _context: ComplianceValidationContext,
+  ): ComplianceRecommendation[] {
     return []; // Implementation would generate recommendations from control deficiencies
   }
 
-  private generateRiskRecommendations(riskAssessment: ComplianceRiskAssessment, _context: ComplianceValidationContext): ComplianceRecommendation[] {
+  private generateRiskRecommendations(
+    riskAssessment: ComplianceRiskAssessment,
+    _context: ComplianceValidationContext,
+  ): ComplianceRecommendation[] {
     return []; // Implementation would generate recommendations from risk assessment
   }
 
-  private generateOptimizationRecommendations(validationResult: ComplianceValidationResult, _context: ComplianceValidationContext): ComplianceRecommendation[] {
+  private generateOptimizationRecommendations(
+    validationResult: ComplianceValidationResult,
+    _context: ComplianceValidationContext,
+  ): ComplianceRecommendation[] {
     return []; // Implementation would generate optimization recommendations
   }
 
-  private generateRemediationActions(recommendations: ComplianceRecommendation[], _context: ComplianceValidationContext): ComplianceRemediationAction[] {
+  private generateRemediationActions(
+    recommendations: ComplianceRecommendation[],
+    _context: ComplianceValidationContext,
+  ): ComplianceRemediationAction[] {
     return []; // Implementation would generate remediation actions
   }
 
-  private prioritizeRecommendations(recommendations: ComplianceRecommendation[]): void {
+  private prioritizeRecommendations(
+    recommendations: ComplianceRecommendation[],
+  ): void {
     recommendations.sort((a, b) => {
       const priorityOrder = {
         [CompliancePriority._IMMEDIATE]: 5,
@@ -2496,28 +2591,39 @@ export class EnterpriseComplianceService {
     });
   }
 
-  private calculateFinalComplianceScore(validationResult: ComplianceValidationResult): number {
+  private calculateFinalComplianceScore(
+    validationResult: ComplianceValidationResult,
+  ): number {
     // Implementation would calculate final compliance score based on all factors
     return validationResult.overallScore;
   }
 
-  private determineFinalComplianceStatus(validationResult: ComplianceValidationResult): ComplianceStatus {
+  private determineFinalComplianceStatus(
+    validationResult: ComplianceValidationResult,
+  ): ComplianceStatus {
     // Implementation would determine final status based on violations, scores, etc.
     return validationResult.overallStatus;
   }
 
-  private updateValidationMetadata(validationResult: ComplianceValidationResult): void {
+  private updateValidationMetadata(
+    validationResult: ComplianceValidationResult,
+  ): void {
     // Implementation would update validation metadata with final metrics
     validationResult.metadata.validationTimestamp = new Date();
   }
 
   private mapSeverityToImpact(severity: ComplianceSeverity): number {
     switch (severity) {
-      case ComplianceSeverity._CRITICAL: return 100;
-      case ComplianceSeverity._HIGH: return 75;
-      case ComplianceSeverity._MEDIUM: return 50;
-      case ComplianceSeverity._LOW: return 25;
-      default: return 25;
+      case ComplianceSeverity._CRITICAL:
+        return 100;
+      case ComplianceSeverity._HIGH:
+        return 75;
+      case ComplianceSeverity._MEDIUM:
+        return 50;
+      case ComplianceSeverity._LOW:
+        return 25;
+      default:
+        return 25;
     }
   }
 
