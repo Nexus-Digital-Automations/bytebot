@@ -637,7 +637,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
   private selectHealthyEndpoint(): string {
     const healthyEndpoints = this.parlantEndpoints.filter(endpoint => {
       const health = this.endpointHealth.get(endpoint);
-      return !health ?? health.healthy;
+      return !health || health.healthy;
     });
     
     if (healthyEndpoints.length === 0) {

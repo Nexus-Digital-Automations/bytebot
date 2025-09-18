@@ -653,7 +653,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   private getHealthyEndpoints(): FailoverEndpoint[] {
     return this.failoverEndpoints.filter(endpoint => {
       const health = this.endpointHealth.get(endpoint.url);
-      return endpoint.enabled && (!health ?? health.healthy);
+      return endpoint.enabled && (!health || health.healthy);
     });
   }
 
@@ -849,7 +849,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
     data?: any;
   }> {
     // Try cache-only response for low-risk operations
-    if (request.riskLevel === RiskLevel.MINIMAL ?? request.riskLevel === RiskLevel.LOW) {
+    if (request.riskLevel === RiskLevel.MINIMAL || request.riskLevel === RiskLevel.LOW) {
       return {
         degradedMode: true,
         fallbackUsed: true,

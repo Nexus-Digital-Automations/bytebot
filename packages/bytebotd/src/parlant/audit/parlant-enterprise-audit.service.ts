@@ -243,7 +243,7 @@ export class ParlantEnterpriseAuditService {
         conversationId: response?.conversationId ?? 'N/A',
         timestamp: new Date(),
         userId: request.context.userId,
-        sessionId: request.context.sessionId,
+        sessionId: request.context.sessionId ?? 'no-session',
         functionName: request.functionName,
         actionDescription: request.actionDescription,
         riskLevel: request.riskLevel,
@@ -316,11 +316,11 @@ export class ParlantEnterpriseAuditService {
     
     // Apply filters
     if (query.startDate) {
-      filteredEntries = filteredEntries.filter(entry => entry.timestamp >= query.startDate);
+      filteredEntries = filteredEntries.filter(entry => entry.timestamp >= query.startDate!);
     }
     
     if (query.endDate) {
-      filteredEntries = filteredEntries.filter(entry => entry.timestamp <= query.endDate);
+      filteredEntries = filteredEntries.filter(entry => entry.timestamp <= query.endDate!);
     }
     
     if (query.userId) {
@@ -516,7 +516,12 @@ export class ParlantEnterpriseAuditService {
     averageAuditTime: number;
     complianceDistribution: Record<string, number>;
     riskLevelDistribution: Record<string, number>;
-    performanceMetrics: typeof this.auditPerformanceMetrics;
+    performanceMetrics: {
+      totalAuditEntries: number;
+      averageAuditTime: number;
+      encryptionOverhead: number;
+      complianceCheckTime: number;
+    };
   } {
     const now = Date.now();
     const oneHourAgo = now - (60 * 60 * 1000);

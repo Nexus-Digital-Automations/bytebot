@@ -492,24 +492,62 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
     this.updateCacheStats();
   }
 
+  /**
+   * Helper methods to update readonly cache stats properties
+   */
+  private updateMultiLevelStats(updates: Partial<MultiLevelCacheStats>): void {
+    this.stats = { ...this.stats, ...updates };
+  }
+
+  private updateL1Stats(updates: Partial<MultiLevelCacheStats['l1Stats']>): void {
+    this.updateMultiLevelStats({
+      l1Stats: { ...this.stats.l1Stats, ...updates }
+    });
+  }
+
+  private updateL2Stats(updates: Partial<MultiLevelCacheStats['l2Stats']>): void {
+    this.updateMultiLevelStats({
+      l2Stats: { ...this.stats.l2Stats, ...updates }
+    });
+  }
+
+  private updateL3Stats(updates: Partial<MultiLevelCacheStats['l3Stats']>): void {
+    this.updateMultiLevelStats({
+      l3Stats: { ...this.stats.l3Stats, ...updates }
+    });
+  }
+
+  private updateOverallStats(updates: Partial<MultiLevelCacheStats['overallStats']>): void {
+    this.updateMultiLevelStats({
+      overallStats: { ...this.stats.overallStats, ...updates }
+    });
+  }
+
   private updateCacheStats(): void {
     const total = this.performanceMetrics.totalRequests;
     if (total === 0) return;
     
-    this.stats.l1Stats.hitRate = this.performanceMetrics.l1Hits / total;
-    this.stats.l2Stats.hitRate = this.performanceMetrics.l2Hits / total;
-    this.stats.l3Stats.hitRate = this.performanceMetrics.l3Hits / total;
+    // Calculate hit rates
+    const l1HitRate = this.performanceMetrics.l1Hits / total;
+    const l2HitRate = this.performanceMetrics.l2Hits / total;
+    const l3HitRate = this.performanceMetrics.l3Hits / total;
+    const totalHitRate = (this.performanceMetrics.l1Hits + 
+                         this.performanceMetrics.l2Hits + 
+                         this.performanceMetrics.l3Hits) / total;
+    const averageLatency = this.performanceMetrics.latencySum / total;
     
-    this.stats.overallStats.totalHitRate = 
-      (this.performanceMetrics.l1Hits + 
-       this.performanceMetrics.l2Hits + 
-       this.performanceMetrics.l3Hits) / total;
-       
-    this.stats.overallStats.averageLatency = 
-      this.performanceMetrics.latencySum / total;
-      
-    this.stats.l1Stats.totalEntries = this.l1Cache.size;
-    this.stats.l1Stats.memoryUsage = this.l1Cache.size * 1024; // Estimate 1KB per entry
+    // Update stats using helper methods
+    this.updateL1Stats({ 
+      hitRate: l1HitRate,
+      totalEntries: this.l1Cache.size,
+      memoryUsage: this.l1Cache.size * 1024 // Estimate 1KB per entry
+    });
+    this.updateL2Stats({ hitRate: l2HitRate });
+    this.updateL3Stats({ hitRate: l3HitRate });
+    this.updateOverallStats({ 
+      totalHitRate,
+      averageLatency 
+    });
   }
 
   // ===== CONFIGURATION =====

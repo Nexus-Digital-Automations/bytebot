@@ -376,7 +376,7 @@ export class ParlantPerformanceOptimizationModule {
     // Monitor performance metrics updates
     this.orchestrator.onPerformanceEvent('performanceMetricsUpdated', (metrics) => {
       const compliance = metrics.targetCompliance;
-      if (!compliance.p95Target ?? !compliance.cacheHitTarget ?? !compliance.throughputTarget) {
+      if (!compliance.p95Target || !compliance.cacheHitTarget || !compliance.throughputTarget) {
         logger.warn('Performance targets not met', {
           p95ResponseTime: compliance.p95Target ? '✅' : '❌',
           cacheHitRate: compliance.cacheHitTarget ? '✅' : '❌',  

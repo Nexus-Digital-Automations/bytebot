@@ -174,11 +174,11 @@ export class ParlantHealthMetricsValidationService {
 
   /** Mock Parlant client - In production, this would be actual Parlant integration */
   private readonly parlantClient = {
-    createValidationSession: async (context: any) => ({
+    createValidationSession: async (context: { operationType: HealthOperationType | MetricsOperationType }) => ({
       id: `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`,
       validate: async () => ({ approved: true, reason: 'Validated through conversational AI' }),
       explainAction: async () => `Health/metrics operation: ${context.operationType}`,
-      logAudit: async (audit: any) => this.logger.debug('Parlant audit logged', audit),
+      logAudit: async (audit: { action: string; timestamp: Date; details?: any }) => this.logger.debug('Parlant audit logged', audit),
     }),
   };
 
@@ -472,7 +472,7 @@ export class ParlantHealthMetricsValidationService {
    */
   private getMetricsOperationRiskLevel(
     operationType: MetricsOperationType,
-    parameters: Record<string, unknown>,
+    _parameters: Record<string, unknown>,
   ): HealthMetricsRiskLevel {
     // Most metrics collection is low risk
     const lowRiskOperations = [
@@ -677,7 +677,7 @@ export class ParlantHealthMetricsValidationService {
       MetricsOperationType.SYSTEM_METRICS,
     ];
 
-    if (highFrequencyOps.includes(operationType as any)) {
+    if (highFrequencyOps.includes(operationType as HealthOperationType | MetricsOperationType)) {
       return 'high-frequency';
     }
 
@@ -687,7 +687,7 @@ export class ParlantHealthMetricsValidationService {
       MetricsOperationType.PROMETHEUS_COLLECTION,
     ];
 
-    if (periodicOps.includes(operationType as any)) {
+    if (periodicOps.includes(operationType as HealthOperationType | MetricsOperationType)) {
       return 'periodic';
     }
 

@@ -405,7 +405,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
         parameters: request.functionParams,
         riskAssessment: {
           level: request.riskLevel,
-          requiresConfirmation: request.riskLevel === RiskLevel.HIGH ?? request.riskLevel === RiskLevel.CRITICAL,
+          requiresConfirmation: request.riskLevel === RiskLevel.HIGH || request.riskLevel === RiskLevel.CRITICAL,
         },
         userContext: request.context,
       });
@@ -871,7 +871,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
       });
       
       // Return conservative approval based on risk level
-      const approved = params.riskAssessment.level === RiskLevel.MINIMAL ?? 
+      const approved = params.riskAssessment.level === RiskLevel.MINIMAL ||
                       params.riskAssessment.level === RiskLevel.LOW;
       
       return {

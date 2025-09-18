@@ -28,6 +28,15 @@ import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '
 // ===== ASYNC BATCH PROCESSING INTERFACES =====
 
 /**
+ * Worker representation for mock implementation
+ */
+interface WorkerInstance {
+  id: string;
+  created: number;
+  lastUsed: number;
+}
+
+/**
  * Validation priority levels for batch scheduling
  */
 export enum ValidationPriority {
@@ -143,10 +152,14 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
   };
 
   // Worker pool management
-  private readonly workerPool: Worker[] = [];
-  private readonly availableWorkers: Worker[] = [];
-  private readonly busyWorkers = new Set<Worker>();
-  private readonly taskQueue: Array<{task: ValidationTask, resolve: Function, reject: Function}> = [];
+  private readonly workerPool: WorkerInstance[] = [];
+  private readonly availableWorkers: WorkerInstance[] = [];
+  private readonly busyWorkers = new Set<WorkerInstance>();
+  private readonly taskQueue: Array<{
+    task: ValidationTask;
+    resolve: (value: ParlantValidationResponse[]) => void;
+    reject: (reason?: Error) => void;
+  }> = [];
   private readonly workerPoolConfig: WorkerPoolConfig = {
     minWorkers: 2,
     maxWorkers: 20,
@@ -307,11 +320,9 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     }
     
     // Schedule delayed processing if not already scheduled
-    if (!this.batchTimer) {
-      this.batchTimer = setTimeout(() => {
-        this.processBatch();
-      }, this.batchConfig.maxWaitTimeMs);
-    }
+    this.batchTimer ??= setTimeout(() => {
+      this.processBatch();
+    }, this.batchConfig.maxWaitTimeMs);
   }
 
   private shouldFlushImmediately(): boolean {
@@ -526,14 +537,14 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     this.availableWorkers.push(...newWorkers);
   }
 
-  private async createWorker(): Promise<Worker> {
+  private async createWorker(): Promise<WorkerInstance> {
     // TODO: Implement actual worker creation
     // For now, return a mock worker
     return {
       id: `worker-${Date.now()}-${Math.random().toString(36).substring(7)}`,
       created: Date.now(),
       lastUsed: Date.now()
-    } as any;
+    };
   }
 
   private async executeTaskOnWorkerPool(task: ValidationTask): Promise<ParlantValidationResponse[]> {
@@ -545,8 +556,14 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
 
   private async processTaskQueue(): Promise<void> {
     while (this.taskQueue.length > 0 && this.availableWorkers.length > 0) {
-      const { task, resolve, reject } = this.taskQueue.shift()!;
-      const worker = this.availableWorkers.pop()!;
+      const queueItem = this.taskQueue.shift();
+      const worker = this.availableWorkers.pop();
+      
+      if (!queueItem || !worker) {
+        break; // Safety check in case of race conditions
+      }
+      
+      const { task, resolve, reject } = queueItem;
       
       this.busyWorkers.add(worker);
       
@@ -646,14 +663,14 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
       if (this.workerPool.length <= minWorkers) break;
       
       const worker = this.availableWorkers[i];
-      if (now - (worker as any).lastUsed > idleThreshold) {
+      if (now - worker.lastUsed > idleThreshold) {
         this.availableWorkers.splice(i, 1);
         const poolIndex = this.workerPool.indexOf(worker);
         if (poolIndex >= 0) {
           this.workerPool.splice(poolIndex, 1);
         }
         
-        this.logger.debug(`Cleaned up idle worker ${(worker as any).id}`);
+        this.logger.debug(`Cleaned up idle worker ${worker.id}`);
       }
     }
   }
@@ -800,7 +817,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
   private async optimizeBatchSize(): Promise<void> {
     if (this.performanceHistory.length < 10) return;
     
-    const recentPerformance = this.calculateRecentPerformance();
+    const _recentPerformance = this.calculateRecentPerformance();
     const performanceTrend = this.calculatePerformanceTrend();
     
     if (performanceTrend > 0.1) {

@@ -143,7 +143,7 @@ export class HealthController {
       
       // Record metrics for health check
       try {
-        this.metricsService.recordHealthCheck('basic', { status: 'healthy', responseTime });
+        this.metricsService.recordHealthCheck('basic', { isHealthy: true, details: {}, responseTime });
         this.metricsService.incrementCounter('health_requests_total', 1, {
           endpoint: '/health',
           method: 'GET',
@@ -553,7 +553,7 @@ export class HealthController {
 
     try {
       // PARLANT VALIDATION: Metrics endpoint (MEDIUM risk - exposes system metrics)
-      const validation = await this.parlantValidationService.validateHealthOperation(
+      const validation = await this.parlantValidationService.validateMetricsOperation(
         MetricsOperationType.PROMETHEUS_COLLECTION,
         {
           endpoint: '/health/metrics',

@@ -36,6 +36,19 @@ import { ConfigService } from '@nestjs/config';
 // ===== INTERCEPTOR TYPES =====
 
 /**
+ * Extended Request interface with optional route and user properties
+ */
+interface ExtendedRequest extends Request<any, any, any, any, Record<string, any>> {
+  route?: {
+    path?: string;
+  };
+  user?: {
+    id?: string;
+    role?: string;
+  };
+}
+
+/**
  * Request context for Enterprise API processing
  */
 interface EnterpriseRequestContext {
@@ -257,15 +270,17 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
    */
   private buildRequestContext(request: Request): EnterpriseRequestContext {
     const operationId = `intercept_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const endpoint = `${request.method}:${(request as Request & { route?: { path?: string } }).route?.path ?? request.url}`;
+    const extendedRequest = request as ExtendedRequest;
+    const routePath = extendedRequest.route?.path;
+    const endpoint = `${request.method}:${routePath ?? request.url}`;
     
     return {
       operationId,
       startTime: Date.now(),
       endpoint,
       method: request.method,
-      userId: (request as Request & { user?: { id?: string; role?: string } }).user?.id,
-      userRole: (request as Request & { user?: { id?: string; role?: string } }).user?.role,
+      userId: extendedRequest.user?.id,
+      userRole: extendedRequest.user?.role,
       ipAddress: this.getClientIpAddress(request),
       userAgent: request.headers['user-agent'] ?? 'unknown',
       conversationId: request.headers['x-conversation-id'] as string,

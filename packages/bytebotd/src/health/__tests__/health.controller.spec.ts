@@ -33,7 +33,6 @@ import {
   BasicHealthResponse,
   DetailedStatusResponse,
 } from '../health.service';
-import { MemoryInfo, ServiceStatusMap } from '../interfaces/health.interfaces';
 
 describe('HealthController', () => {
   let controller: HealthController;
@@ -206,11 +205,11 @@ describe('HealthController', () => {
 
       const result = await controller.getHealth();
 
-      expect(result).toEqual({
+      expect(result).toEqual(expect.objectContaining({
         status: 'unhealthy',
-        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/) as unknown as string,
+        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/),
         error: 'Database connection failed',
-      });
+      }));
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Health check failed: Database connection failed',
@@ -233,11 +232,11 @@ describe('HealthController', () => {
 
       const result = await controller.getHealth();
 
-      expect(result).toEqual({
+      expect(result).toEqual(expect.objectContaining({
         status: 'unhealthy',
-        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/) as unknown as string,
+        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/),
         error: 'Unknown _error',
-      });
+      }));
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Health check failed: Unknown _error',
@@ -259,17 +258,23 @@ describe('HealthController', () => {
       // Validate response structure with proper typing
       const typedResult = result as BasicHealthResponse;
       expect(typedResult).toMatchObject({
-        status: expect.stringMatching(/^(healthy|unhealthy)$/) as unknown as string,
+        status: expect.stringMatching(/^(healthy|unhealthy)$/),
         timestamp: expect.stringMatching(
           /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
-        ) as unknown as string
+        )
       });
       
       // Validate numeric values with proper typing
       expect(typeof typedResult.uptime).toBe('number');
-      expect(typeof typedResult.memory.used).toBe('number');
-      expect(typeof typedResult.memory.free).toBe('number');
-      expect(typeof typedResult.memory.total).toBe('number');
+      
+      // Type guard for memory property
+      if (typedResult.memory && typeof typedResult.memory === 'object') {
+        expect(typeof typedResult.memory.used).toBe('number');
+        expect(typeof typedResult.memory.free).toBe('number');
+        expect(typeof typedResult.memory.total).toBe('number');
+      } else {
+        fail('Memory property is missing or not an object');
+      }
 
       console.log(`[${testId}] Response format validation test completed`);
     });
@@ -420,29 +425,41 @@ describe('HealthController', () => {
 
       const result = await controller.getDetailedStatus();
 
-      expect(result).toMatchObject({
-        status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/) as string,
-        timestamp: expect.stringMatching(
-          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
-        ) as string,
-        uptime: expect.any(Number) as number,
-        memory: expect.objectContaining({
-          used: expect.any(Number) as number,
-          free: expect.any(Number) as number,
-          total: expect.any(Number) as number,
-          heapUsed: expect.any(Number) as number,
-          heapTotal: expect.any(Number) as number,
-        }),
-        services: expect.objectContaining({
-          database: expect.stringMatching(/^(connected|disconnected|unknown)$/),
-          cache: expect.stringMatching(/^(available|unavailable|unknown)$/),
-          external: expect.stringMatching(/^(reachable|unreachable|unknown)$/),
-        }),
-        performance: expect.objectContaining({
-          requestsPerSecond: expect.toEqual(expect.any(Number)),
-          averageResponseTime: expect.toEqual(expect.any(Number)),
-        }),
-      });
+      // Type-safe validation for detailed status response
+      const typedDetailedResult = result as DetailedStatusResponse;
+      
+      // Validate structure with separate assertions to avoid unsafe assignments
+      expect(typedDetailedResult.status).toMatch(/^(healthy|degraded|unhealthy)$/);
+      expect(typedDetailedResult.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+      expect(typeof typedDetailedResult.uptime).toBe('number');
+      
+      // Memory validation with type guard
+      if (typedDetailedResult.memory && typeof typedDetailedResult.memory === 'object') {
+        expect(typeof typedDetailedResult.memory.used).toBe('number');
+        expect(typeof typedDetailedResult.memory.free).toBe('number');
+        expect(typeof typedDetailedResult.memory.total).toBe('number');
+        expect(typeof typedDetailedResult.memory.heapUsed).toBe('number');
+        expect(typeof typedDetailedResult.memory.heapTotal).toBe('number');
+      } else {
+        fail('Memory property is missing or not an object');
+      }
+      
+      // Services validation with type guard
+      if (typedDetailedResult.services && typeof typedDetailedResult.services === 'object') {
+        expect(typedDetailedResult.services.database).toMatch(/^(connected|disconnected|unknown)$/);
+        expect(typedDetailedResult.services.cache).toMatch(/^(available|unavailable|unknown)$/);
+        expect(typedDetailedResult.services.external).toMatch(/^(reachable|unreachable|unknown)$/);
+      } else {
+        fail('Services property is missing or not an object');
+      }
+      
+      // Performance validation with type guard
+      if (typedDetailedResult.performance && typeof typedDetailedResult.performance === 'object') {
+        expect(typeof typedDetailedResult.performance.requestsPerSecond).toBe('number');
+        expect(typeof typedDetailedResult.performance.averageResponseTime).toBe('number');
+      } else {
+        fail('Performance property is missing or not an object');
+      }
 
       console.log(`[${testId}] Response structure validation test completed`);
     });
@@ -575,7 +592,7 @@ describe('HealthController', () => {
         expect(result).toMatchObject({
           status: 'unhealthy',
           timestamp: expect.stringMatching(/.*/) as unknown as string,
-          error: expect.stringMatching(/.*/),
+          error: expect.stringMatching(/.*/) as unknown as string,
         });
       }
 

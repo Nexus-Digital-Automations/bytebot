@@ -182,8 +182,8 @@ export class NutService {
 
   constructor() {
     // Initialize nut-js settings
-    (mouse as any).config.autoDelayMs = 100;
-    (keyboard as any).config.autoDelayMs = 100;
+    typedMouse.config.autoDelayMs = 100;
+    typedKeyboard.config.autoDelayMs = 100;
 
     // Create screenshot directory if it doesn't exist
     this.screenshotDir = path.join('/tmp', 'bytebot-screenshots');
@@ -686,8 +686,8 @@ export class NutService {
       return {
         healthy: true,
         screenshotDir: this.screenshotDir,
-        mouseConfig: { autoDelayMs: (mouse as any).config.autoDelayMs },
-        keyboardConfig: { autoDelayMs: (keyboard as any).config.autoDelayMs },
+        mouseConfig: { autoDelayMs: typedMouse.config.autoDelayMs },
+        keyboardConfig: { autoDelayMs: typedKeyboard.config.autoDelayMs },
       };
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
@@ -695,8 +695,8 @@ export class NutService {
       return {
         healthy: false,
         screenshotDir: this.screenshotDir ?? 'not set',
-        mouseConfig: { autoDelayMs: (mouse as any).config.autoDelayMs },
-        keyboardConfig: { autoDelayMs: (keyboard as any).config.autoDelayMs },
+        mouseConfig: { autoDelayMs: typedMouse.config.autoDelayMs },
+        keyboardConfig: { autoDelayMs: typedKeyboard.config.autoDelayMs },
       };
     }
   }

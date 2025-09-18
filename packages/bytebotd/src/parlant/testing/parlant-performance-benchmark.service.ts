@@ -884,6 +884,29 @@ export class ParlantPerformanceBenchmarkService {
     };
   }
 
+  /**
+   * Type guard to check if a metric is a valid numeric property of BenchmarkResult
+   */
+  private isValidNumericMetric(metric: string, result: BenchmarkResult): metric is keyof BenchmarkResult {
+    const validMetrics = [
+      'averageLatency', 'medianLatency', 'p95Latency', 'p99Latency', 
+      'maxLatency', 'minLatency', 'throughput', 'errorRate', 'cacheHitRate',
+      'totalRequests', 'successfulRequests', 'failedRequests', 'duration'
+    ];
+    return validMetrics.includes(metric) && typeof result[metric as keyof BenchmarkResult] === 'number';
+  }
+
+  /**
+   * Safely get numeric value from BenchmarkResult for a given metric
+   */
+  private getMetricValue(result: BenchmarkResult, metric: string): number | null {
+    if (!this.isValidNumericMetric(metric, result)) {
+      return null;
+    }
+    const value = result[metric as keyof BenchmarkResult];
+    return typeof value === 'number' ? value : null;
+  }
+
   private analyzeRegression(baseline: BenchmarkResult, current: BenchmarkResult): RegressionResult {
     const tolerance = this.regressionConfig.tolerancePercent / 100;
     const improvements: string[] = [];
@@ -892,10 +915,10 @@ export class ParlantPerformanceBenchmarkService {
     
     // Check each critical metric
     for (const metric of this.regressionConfig.criticalMetrics) {
-      const baselineValue = (baseline as Record<string, unknown>)[metric];
-      const currentValue = (current as Record<string, unknown>)[metric];
+      const baselineValue = this.getMetricValue(baseline, metric);
+      const currentValue = this.getMetricValue(current, metric);
       
-      if (typeof baselineValue === 'number' && typeof currentValue === 'number') {
+      if (baselineValue !== null && currentValue !== null) {
         const change = (currentValue - baselineValue) / baselineValue;
         
         if (metric === 'averageLatency' || metric === 'p95Latency' || metric === 'errorRate') {

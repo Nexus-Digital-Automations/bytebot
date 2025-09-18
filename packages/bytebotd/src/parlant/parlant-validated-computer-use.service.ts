@@ -422,7 +422,7 @@ export class ParlantValidatedComputerUseService {
    * Check if action involves system-critical files
    */
   private involvesSystemFiles(params: ComputerAction): boolean {
-    if (params.action === 'write_file' ?? params.action === 'read_file') {
+    if (params.action === 'write_file' || params.action === 'read_file') {
       const fileAction = params as WriteFileAction | ReadFileAction;
       const systemPaths = ['/etc/', '/sys/', '/proc/', '/boot/', 'C:\\Windows\\', 'C:\\System32\\'];
       return systemPaths.some(path => fileAction.path?.startsWith(path));

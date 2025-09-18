@@ -32,6 +32,41 @@ interface JwtPayload {
   iat?: number;
 }
 
+// Type guard functions for safe type checking
+function isAuthenticatedRequest(req: unknown): req is AuthenticatedRequest {
+  return typeof req === 'object' && req !== null && 'headers' in req;
+}
+
+function isJwtPayload(payload: unknown): payload is JwtPayload {
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    'sub' in payload &&
+    'email' in payload &&
+    'role' in payload &&
+    typeof (payload as { sub: unknown }).sub === 'string' &&
+    typeof (payload as { email: unknown }).email === 'string' &&
+    typeof (payload as { role: unknown }).role === 'string'
+  );
+}
+
+function isStringOrUndefined(value: unknown): value is string | undefined {
+  return typeof value === 'string' || value === undefined;
+}
+
+// Proper typing for Jest mocks
+type MockJwtService = {
+  verifyAsync: jest.MockedFunction<(token: string, options: { secret: string }) => Promise<unknown>>;
+};
+
+type MockConfigService = {
+  get: jest.MockedFunction<(key: string) => string | undefined>;
+};
+
+type MockReflector = {
+  getAllAndOverride: jest.MockedFunction<(key: string, targets: unknown[]) => boolean>;
+};
+
 interface AuthenticatedRequest {
   headers: Record<string, string | string[] | undefined>;
   user?: {
@@ -65,7 +100,11 @@ class MockJwtAuthGuard {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
+    const rawRequest = context.switchToHttp().getRequest();
+    if (!isAuthenticatedRequest(rawRequest)) {
+      throw new UnauthorizedException('Invalid request format');
+    }
+    const request = rawRequest;
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
@@ -73,9 +112,14 @@ class MockJwtAuthGuard {
     }
 
     try {
-      const _payload = await this.jwtService.verifyAsync(token, {
+      const rawPayload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
-      }) as JwtPayload;
+      });
+      
+      if (!isJwtPayload(rawPayload)) {
+        throw new UnauthorizedException('Invalid token payload structure');
+      }
+      const _payload = rawPayload;
 
       // Validate token payload structure
       if (!_payload.sub || !_payload.email || !_payload.role) {
@@ -106,12 +150,12 @@ class MockJwtAuthGuard {
   }
 
   private extractTokenFromHeader(request: AuthenticatedRequest): string | undefined {
-    const authHeader = request.headers?.authorization as string | undefined;
-    if (!authHeader) {
+    const authHeader = request.headers?.authorization;
+    if (!isStringOrUndefined(authHeader) || !authHeader) {
       return undefined;
     }
 
-    const [type, token] = (authHeader as string).split(' ');
+    const [type, token] = authHeader.split(' ');
     return type === 'Bearer' ? token : undefined;
   }
 }
@@ -156,7 +200,7 @@ describe('JwtAuthGuard', () => {
         getData: jest.fn(),
       }),
       getType: jest.fn().mockReturnValue('http'),
-    } as ExecutionContext;
+    } satisfies ExecutionContext;
   };
 
   beforeEach(async () => {
@@ -353,8 +397,13 @@ describe('JwtAuthGuard', () => {
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(validPayload);
 
       const result = await guard.canActivate(context);
-      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
 
+      const rawRequest = context.switchToHttp().getRequest();
+      if (!isAuthenticatedRequest(rawRequest)) {
+        throw new Error('Invalid request format in test');
+      }
+      const request = rawRequest;
+      
       expect(result).toBe(true);
       expect(request.user).toEqual({
         id: validPayload.sub,
@@ -381,9 +430,8 @@ describe('JwtAuthGuard', () => {
       };
 
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      (
-        jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<typeof jwtService.verifyAsync>
-      ).mockResolvedValue(incompletePayload as JwtPayload);
+      const mockVerifyAsync = jest.spyOn(jwtService, 'verifyAsync') as jest.MockedFunction<typeof jwtService.verifyAsync>;
+      mockVerifyAsync.mockResolvedValue(incompletePayload);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         new UnauthorizedException('Invalid token _payload structure'),
@@ -464,7 +512,11 @@ describe('JwtAuthGuard', () => {
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(userPayload);
 
       await guard.canActivate(context);
-      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
+      const rawRequest = context.switchToHttp().getRequest();
+      if (!isAuthenticatedRequest(rawRequest)) {
+        throw new Error('Invalid request format in test');
+      }
+      const request = rawRequest;
 
       expect(request.user).toEqual({
         id: userPayload.sub,
@@ -499,9 +551,13 @@ describe('JwtAuthGuard', () => {
         .mockResolvedValue(payloadWithoutPermissions);
 
       await guard.canActivate(context);
-      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
+      const rawRequest = context.switchToHttp().getRequest();
+      if (!isAuthenticatedRequest(rawRequest)) {
+        throw new Error('Invalid request format in test');
+      }
+      const request = rawRequest;
 
-      expect(request.user.permissions).toEqual([]);
+      expect(request.user?.permissions).toEqual([]);
 
       console.log(
         `[${testId}] Token without permissions handling test completed`,
@@ -544,7 +600,11 @@ describe('JwtAuthGuard', () => {
 
       // Verify user information is correctly attached to each request
       contexts.forEach((context) => {
-        const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
+        const rawRequest = context.switchToHttp().getRequest();
+        if (!isAuthenticatedRequest(rawRequest)) {
+          throw new Error('Invalid request format in test');
+        }
+        const request = rawRequest;
         expect(request.user.id).toBe(_payload.sub);
         expect(request.user.email).toBe(_payload.email);
       });
@@ -757,7 +817,11 @@ describe('JwtAuthGuard', () => {
       expect(result).toBe(true);
 
       // Verify no persistent references or leaks
-      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
+      const rawRequest = context.switchToHttp().getRequest();
+      if (!isAuthenticatedRequest(rawRequest)) {
+        throw new Error('Invalid request format in test');
+      }
+      const request = rawRequest;
       expect(request.user).toBeDefined();
 
       console.log(`[${testId}] Resource cleanup test completed`);

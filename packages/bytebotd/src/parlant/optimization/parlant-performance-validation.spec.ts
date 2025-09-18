@@ -93,13 +93,13 @@ describe('Parlant Performance Optimization Validation', () => {
       const key1 = cacheService.generateFunctionKey(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
-        sampleRequest.context as any
+        sampleRequest.context
       );
       
       const key2 = cacheService.generateFunctionKey(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
-        sampleRequest.context as any
+        sampleRequest.context
       );
 
       expect(key1).toBe(key2);
@@ -110,14 +110,14 @@ describe('Parlant Performance Optimization Validation', () => {
       const key = cacheService.generateFunctionKey(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
-        sampleRequest.context as any
+        sampleRequest.context
       );
 
       // Set cache
       await cacheService.setCachedValidation(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
-        sampleRequest.context as any,
+        sampleRequest.context,
         sampleResponse,
         {
           functionName: sampleRequest.functionName,
@@ -125,7 +125,7 @@ describe('Parlant Performance Optimization Validation', () => {
           userId: sampleRequest.context.userId,
           sessionId: sampleRequest.context.sessionId,
           timestamp: new Date(),
-          context: sampleRequest.context as any
+          context: sampleRequest.context
         }
       );
 
@@ -133,7 +133,7 @@ describe('Parlant Performance Optimization Validation', () => {
       const cachedResult = await cacheService.getCachedValidation(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
-        sampleRequest.context as any
+        sampleRequest.context
       );
 
       expect(cachedResult).toBeDefined();
@@ -146,13 +146,25 @@ describe('Parlant Performance Optimization Validation', () => {
       await cacheService.setCachedValidation(
         'fastFunction',
         [{ test: 'value' }],
-        { userId: 'fast-test' } as any,
+        {
+          userId: 'fast-test',
+          agentRole: 'assistant',
+          securityLevel: 'LOW' as const,
+          conversationHistory: [],
+          metadata: {}
+        },
         sampleResponse,
         {
           functionName: 'fastFunction',
           riskLevel: RiskLevel.LOW,
           timestamp: new Date(),
-          context: {} as any
+          context: {
+            userId: 'test-user',
+            agentRole: 'assistant',
+            securityLevel: 'LOW' as const,
+            conversationHistory: [],
+            metadata: {}
+          }
         }
       );
 
@@ -161,7 +173,13 @@ describe('Parlant Performance Optimization Validation', () => {
       const startTime = Date.now();
 
       for (let i = 0; i < iterations; i++) {
-        await cacheService.getCachedValidation('fastFunction', [{ test: 'value' }], { userId: 'fast-test' } as any);
+        await cacheService.getCachedValidation('fastFunction', [{ test: 'value' }], {
+          userId: 'fast-test',
+          agentRole: 'assistant',
+          securityLevel: 'LOW' as const,
+          conversationHistory: [],
+          metadata: {}
+        });
       }
 
       const totalTime = Date.now() - startTime;
@@ -172,8 +190,20 @@ describe('Parlant Performance Optimization Validation', () => {
 
     it('should maintain cache statistics', async () => {
       // Perform some cache operations
-      await cacheService.getCachedValidation('miss1', [], {} as any);
-      await cacheService.getCachedValidation('miss2', [], {} as any);
+      await cacheService.getCachedValidation('miss1', [], {
+        userId: 'test-user',
+        agentRole: 'assistant',
+        securityLevel: 'LOW' as const,
+        conversationHistory: [],
+        metadata: {}
+      });
+      await cacheService.getCachedValidation('miss2', [], {
+        userId: 'test-user',
+        agentRole: 'assistant',
+        securityLevel: 'LOW' as const,
+        conversationHistory: [],
+        metadata: {}
+      });
       
       const stats = cacheService.getCacheStats();
       
@@ -291,7 +321,7 @@ describe('Parlant Performance Optimization Validation', () => {
 
   describe('Performance Orchestration', () => {
     it('should achieve sub-1000ms P95 response time target', async () => {
-      const testRequests: any[] = Array.from({ length: 100 }, (_, i) => ({
+      const testRequests: ParlantValidationRequest[] = Array.from({ length: 100 }, (_, i) => ({
         functionName: `perfTest${i}`,
         functionParams: { index: i, testData: 'test' },
         actionDescription: `Performance test ${i}`,
@@ -355,7 +385,7 @@ describe('Parlant Performance Optimization Validation', () => {
     });
 
     it('should handle bulk validation efficiently', async () => {
-      const bulkRequests: any[] = Array.from({ length: 50 }, (_, i) => ({
+      const bulkRequests: ParlantValidationRequest[] = Array.from({ length: 50 }, (_, i) => ({
         functionName: `bulkTest${i}`,
         functionParams: { bulkIndex: i },
         actionDescription: `Bulk test ${i}`,

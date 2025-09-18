@@ -519,7 +519,17 @@ export class EnterpriseApiGatewayController {
 
     try {
       // Calculate service metrics
-      const services: Record<string, unknown> = {};
+      const services: Record<string, {
+        requestCount: number;
+        successRate: number;
+        averageResponseTime: number;
+        errorTypes: Record<string, number>;
+        performanceTrend: Array<{
+          timestamp: Date;
+          responseTime: number;
+          successRate: number;
+        }>;
+      }> = {};
       this.analytics.serviceMetrics.forEach((metrics, serviceName) => {
         services[serviceName] = {
           requestCount: metrics.requests,

@@ -38,6 +38,18 @@ interface MockLogger {
   verbose: jest.MockedFunction<Logger['verbose']>;
 }
 
+/**
+ * Helper type for type-safe Jest mock call arguments
+ */
+type MockCallArgs<T extends jest.MockedFunction<unknown>> = T extends jest.MockedFunction<(...args: infer P) => unknown> ? P : never;
+
+/**
+ * Type guard for logger debug calls with string messages
+ */
+function isStringCall(call: MockCallArgs<MockLogger['debug']>): call is [string, ...unknown[]] {
+  return typeof call[0] === 'string';
+}
+
 interface _ServiceStatus {
   name: string;
   status: 'healthy' | 'unhealthy' | 'unknown';
@@ -132,7 +144,7 @@ describe('HealthService', () => {
       const testId = `${operationId}_basic_health`;
       console.log(`[${testId}] Testing basic health monitoring`);
       // Mock process.memoryUsage and process.uptime
-      const mockMemoryUsage = {
+      const mockMemoryUsage: NodeJS.MemoryUsage = {
         rss: 134217728, // 128 MB
         heapTotal: 67108864, // 64 MB
         heapUsed: 33554432, // 32 MB
@@ -144,14 +156,14 @@ describe('HealthService', () => {
       const result = (await service.getBasicHealth()) as BasicHealthResponse;
       expect(result).toMatchObject({
         status: 'healthy',
-        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/) as string,
         uptime: 300,
         memory: {
           used: 128, // MB (rss converted)
           free: 32, // MB (heapTotal - heapUsed converted)
           total: 64, // MB (heapTotal converted)
         },
-      });
+      } as NodeJS.MemoryUsage);
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Getting basic health status'),
       );
@@ -213,7 +225,7 @@ describe('HealthService', () => {
         heapUsed: 16777216,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       for (const uptime of uptimeValues) {
         jest.spyOn(process, 'uptime').mockReturnValue(uptime);
         const result = (await service.getBasicHealth()) as BasicHealthResponse;
@@ -231,7 +243,7 @@ describe('HealthService', () => {
         heapUsed: 16777216,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       // Execute multiple health checks
       await service.getBasicHealth();
@@ -240,7 +252,7 @@ describe('HealthService', () => {
       // Check that operation IDs were generated (present in log messages)
       const debugCalls = mockLogger.debug.mock.calls;
       const operationIdCalls = debugCalls.filter(
-        (call) => call[0].includes('[health_') ?? call[0].includes('[status_'),
+        (call): call is [string, ...unknown[]] => isStringCall(call) && (call[0].includes('[health_') || call[0].includes('[status_')),
       );
       expect(operationIdCalls.length).toBeGreaterThanOrEqual(6); // 3 operations × 2 logs each
       console.log(`[${testId}] Operation ID generation test completed`);
@@ -278,8 +290,8 @@ describe('HealthService', () => {
       jest.spyOn(process, 'uptime').mockReturnValue(1800); // 30 minutes
       const result = service.getDetailedStatus() as DetailedStatusResponse;
       expect(result).toMatchObject({
-        status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/),
-        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+        status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/) as string,
+        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/) as string,
         uptime: 1800,
         memory: {
           used: 256, // MB (rss)
@@ -289,15 +301,15 @@ describe('HealthService', () => {
           heapTotal: 128, // MB
         },
         services: {
-          database: expect.stringMatching(/^(connected|disconnected|unknown)$/),
-          cache: expect.stringMatching(/^(available|unavailable|unknown)$/),
-          external: expect.stringMatching(/^(reachable|unreachable|unknown)$/),
+          database: expect.stringMatching(/^(connected|disconnected|unknown)$/) as string,
+          cache: expect.stringMatching(/^(available|unavailable|unknown)$/) as string,
+          external: expect.stringMatching(/^(reachable|unreachable|unknown)$/) as string,
         },
         performance: {
-          requestsPerSecond: expect.any(Number),
-          averageResponseTime: expect.any(Number),
+          requestsPerSecond: expect.any(Number) as number,
+          averageResponseTime: expect.any(Number) as number,
         },
-      });
+      } as NodeJS.MemoryUsage);
       console.log(
         `[${testId}] Detailed status monitoring test completed successfully`,
       );
@@ -311,7 +323,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       // Mock the private service health check method
       const _originalCheckServiceHealth = service.checkServiceHealth;
@@ -320,7 +332,7 @@ describe('HealthService', () => {
         database: 'connected',
         cache: 'available',
         external: 'reachable',
-      });
+      } as NodeJS.MemoryUsage);
       const result = await service.getDetailedStatus();
       expect(result.status).toBe('healthy');
       // Test degraded status (unknown services)
@@ -328,7 +340,7 @@ describe('HealthService', () => {
         database: 'unknown',
         cache: 'unknown',
         external: 'unknown',
-      });
+      } as NodeJS.MemoryUsage);
       const result2 = await service.getDetailedStatus();
       expect(result2.status).toBe('degraded');
       // Test unhealthy status (failed services)
@@ -336,7 +348,7 @@ describe('HealthService', () => {
         database: 'disconnected',
         cache: 'unavailable',
         external: 'unreachable',
-      });
+      } as NodeJS.MemoryUsage);
       const result3 = await service.getDetailedStatus();
       expect(result3.status).toBe('unhealthy');
       console.log(`[${testId}] Overall status determination test completed`);
@@ -350,7 +362,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(600);
       await service.getDetailedStatus();
       // Verify detailed logging with context
@@ -360,10 +372,10 @@ describe('HealthService', () => {
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Detailed status retrieved successfully'),
         expect.objectContaining({
-          status: expect.any(String),
-          memoryUsage: expect.stringContaining('MB'),
-          uptime: expect.stringContaining('s'),
-          servicesCount: expect.any(Number),
+          status: expect.any(String) as string,
+          memoryUsage: expect.stringContaining('MB') as string,
+          uptime: expect.stringContaining('s') as string,
+          servicesCount: expect.any(Number) as number,
         }),
       );
       console.log(`[${testId}] Detailed logging test completed`);
@@ -374,7 +386,7 @@ describe('HealthService', () => {
       // Mock process.uptime to throw an error
       jest.spyOn(process, 'uptime').mockImplementation(() => {
         throw new Error('System uptime unavailable');
-      });
+      } as NodeJS.MemoryUsage);
       await expect(service.getDetailedStatus()).rejects.toThrow(
         'System uptime unavailable',
       );
@@ -396,7 +408,7 @@ describe('HealthService', () => {
         database: 'unknown',
         cache: 'unknown',
         external: 'unknown',
-      });
+      } as NodeJS.MemoryUsage);
       expect(mockLogger.debug).toHaveBeenCalledWith('Checking service health');
       console.log(`[${testId}] Service health unknown status test completed`);
     });
@@ -433,7 +445,7 @@ describe('HealthService', () => {
           'reachable',
           'unreachable',
         ]).toContain(status);
-      });
+      } as NodeJS.MemoryUsage);
       console.log(`[${testId}] Service health structure test completed`);
     });
   });
@@ -445,7 +457,7 @@ describe('HealthService', () => {
       expect(result.performance).toEqual({
         requestsPerSecond: 0,
         averageResponseTime: 0,
-      });
+      } as NodeJS.MemoryUsage);
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Getting performance metrics',
       );
@@ -459,7 +471,7 @@ describe('HealthService', () => {
       expect(performanceResult).toEqual({
         requestsPerSecond: 0,
         averageResponseTime: 0,
-      });
+      } as NodeJS.MemoryUsage);
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Getting performance metrics',
       );
@@ -512,8 +524,8 @@ describe('HealthService', () => {
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringMatching(/Service stability check: (stable|warming up)/),
         expect.objectContaining({
-          uptime: expect.stringMatching(/\d+s/),
-          minimumRequired: expect.stringMatching(/\d+s/),
+          uptime: expect.stringMatching(/\d+s/) as string,
+          minimumRequired: expect.stringMatching(/\d+s/) as string,
         }),
       );
       console.log(`[${testId}] Stability logging test completed`);
@@ -540,7 +552,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       const startTime = Date.now();
       await service.getBasicHealth();
@@ -560,7 +572,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       const startTime = Date.now();
       await service.getDetailedStatus();
@@ -580,7 +592,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       const startTime = Date.now();
       // Execute 20 concurrent health checks
@@ -609,7 +621,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       const initialMemory = process.memoryUsage();
       // Execute many health checks
@@ -634,7 +646,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       const executionTimes: number[] = [];
       // Execute 10 health checks and measure individual times
@@ -668,7 +680,7 @@ describe('HealthService', () => {
         heapUsed: 524288, // 0.5 MB (100% usage)
         external: 0,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(10);
       const result = (await service.getBasicHealth()) as BasicHealthResponse;
       expect(result.status).toBe('healthy');
@@ -697,7 +709,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       const beforeTime = new Date();
       const result = (await service.getBasicHealth()) as BasicHealthResponse;
@@ -732,7 +744,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       // Execute mixed concurrent operations
       const operations = [
@@ -751,7 +763,7 @@ describe('HealthService', () => {
             );
           }
           return operation();
-        });
+        } as NodeJS.MemoryUsage);
       const results = await Promise.all(promises);
       // All operations should complete successfully
       expect(results).toHaveLength(20);
@@ -781,7 +793,7 @@ describe('HealthService', () => {
           heapUsed: 33554432, // 32 MB
           external: 1048576,
           arrayBuffers: 0,
-        });
+        } as NodeJS.MemoryUsage);
         const result =
           (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
@@ -799,7 +811,7 @@ describe('HealthService', () => {
           ),
         );
         console.log(`[${testId}] Process health valid metrics test completed`);
-      });
+      } as NodeJS.MemoryUsage);
       it('should fail process health check with invalid state', async () => {
         const testId = `${operationId}_process_health_invalid`;
         console.log(
@@ -813,7 +825,7 @@ describe('HealthService', () => {
           heapUsed: 0,
           external: 0,
           arrayBuffers: 0,
-        });
+        } as NodeJS.MemoryUsage);
         const result =
           (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
@@ -827,21 +839,21 @@ describe('HealthService', () => {
           ),
         );
         console.log(`[${testId}] Process health invalid state test completed`);
-      });
+      } as NodeJS.MemoryUsage);
       it('should handle process health check errors gracefully', async () => {
         const testId = `${operationId}_process_health_error`;
         console.log(`[${testId}] Testing process health check error handling`);
         // Mock process.uptime to throw error
         jest.spyOn(process, 'uptime').mockImplementation(() => {
           throw new Error('Process uptime unavailable');
-        });
+        } as NodeJS.MemoryUsage);
         const result =
           (await service.checkProcessHealth()) as HealthIndicatorResult;
         expect(result).toHaveProperty('process' as keyof typeof result);
         expect(result.process?.status).toEqual('down');
         expect(result.process?.error).toEqual('Process uptime unavailable');
         console.log(`[${testId}] Process health error handling test completed`);
-      });
+      } as NodeJS.MemoryUsage);
     });
     describe('Database Health Check (Readiness)', () => {
       it('should pass database health check with good connection', async () => {
@@ -851,7 +863,7 @@ describe('HealthService', () => {
         );
         // Mock successful database ping
         jest
-          .spyOn(service as any, 'performDatabasePing')
+          .spyOn(service as TestableHealthService, 'performDatabasePing')
           .mockResolvedValue(true);
         const result =
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
@@ -870,13 +882,13 @@ describe('HealthService', () => {
           ),
         );
         console.log(`[${testId}] Database health connected test completed`);
-      });
+      } as NodeJS.MemoryUsage);
       it('should fail database health check with connection failure', async () => {
         const testId = `${operationId}_database_health_disconnected`;
         console.log(`[${testId}] Testing database health check with failure`);
         // Mock failed database ping
         jest
-          .spyOn(service as any, 'performDatabasePing')
+          .spyOn(service as TestableHealthService, 'performDatabasePing')
           .mockResolvedValue(false);
         const result =
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
@@ -890,7 +902,7 @@ describe('HealthService', () => {
           ),
         );
         console.log(`[${testId}] Database health disconnected test completed`);
-      });
+      } as NodeJS.MemoryUsage);
       it('should handle database health check exceptions', async () => {
         const testId = `${operationId}_database_health_exception`;
         console.log(
@@ -907,7 +919,7 @@ describe('HealthService', () => {
         expect(result.database?.error).toEqual('Database timeout');
         expect(result.database?.connectionStatus).toEqual('disconnected');
         console.log(`[${testId}] Database health exception test completed`);
-      });
+      } as NodeJS.MemoryUsage);
       it('should measure database response time accurately', async () => {
         const testId = `${operationId}_database_response_time`;
         console.log(`[${testId}] Testing database response time measurement`);
@@ -925,7 +937,7 @@ describe('HealthService', () => {
         );
         expect(responseTime).toBeGreaterThan(40); // Should be at least 40ms due to delay
         console.log(`[${testId}] Database response time test completed`);
-      });
+      } as NodeJS.MemoryUsage);
     });
     describe('External Services Health Check', () => {
       it('should check multiple external services successfully', async () => {
@@ -950,7 +962,7 @@ describe('HealthService', () => {
           ),
         );
         console.log(`[${testId}] External services success test completed`);
-      });
+      } as NodeJS.MemoryUsage);
       it('should handle external service failures gracefully', async () => {
         const testId = `${operationId}_external_services_failure`;
         console.log(`[${testId}] Testing external services failure handling`);
@@ -963,7 +975,7 @@ describe('HealthService', () => {
           (await service.checkExternalServices()) as HealthIndicatorResult;
         expect(result.external_services?.status).toBe('down');
         console.log(`[${testId}] External services failure test completed`);
-      });
+      } as NodeJS.MemoryUsage);
       it('should handle complete external services failure', async () => {
         const testId = `${operationId}_external_services_complete_failure`;
         console.log(`[${testId}] Testing complete external services failure`);
@@ -981,7 +993,7 @@ describe('HealthService', () => {
         console.log(
           `[${testId}] Complete external services failure test completed`,
         );
-      });
+      } as NodeJS.MemoryUsage);
     });
     describe('Startup Health Check', () => {
       it('should pass startup check for well-established service', async () => {
@@ -1001,7 +1013,7 @@ describe('HealthService', () => {
           expect.stringMatching(/\[startup_\d+\] Startup check passed/),
         );
         console.log(`[${testId}] Startup established service test completed`);
-      });
+      } as NodeJS.MemoryUsage);
       it('should fail startup check for recently started service', async () => {
         const testId = `${operationId}_startup_recent`;
         console.log(
@@ -1019,7 +1031,7 @@ describe('HealthService', () => {
           expect.stringMatching(/\[startup_\d+\] Startup still in progress/),
         );
         console.log(`[${testId}] Startup recent service test completed`);
-      });
+      } as NodeJS.MemoryUsage);
       it('should handle startup check errors', async () => {
         const testId = `${operationId}_startup_error`;
         console.log(`[${testId}] Testing startup check error handling`);
@@ -1027,7 +1039,7 @@ describe('HealthService', () => {
         const originalNow = Date.now;
         Date.now = jest.fn(() => {
           throw new Error('Time unavailable');
-        });
+        } as NodeJS.MemoryUsage);
         const result =
           (await service.checkStartupComplete()) as HealthIndicatorResult;
         expect(result.startup?.status).toBe('down');
@@ -1035,7 +1047,7 @@ describe('HealthService', () => {
         // Restore Date.now
         Date.now = originalNow;
         console.log(`[${testId}] Startup error handling test completed`);
-      });
+      } as NodeJS.MemoryUsage);
     });
     describe('Module Initialization Check', () => {
       it('should validate all modules are initialized', async () => {
@@ -1051,7 +1063,7 @@ describe('HealthService', () => {
             'input-tracking': true,
             health: true,
           },
-        });
+        } as NodeJS.MemoryUsage);
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(
             /\[modules_\d+\] Module initialization check completed/,
@@ -1060,7 +1072,7 @@ describe('HealthService', () => {
         console.log(
           `[${testId}] Complete module initialization test completed`,
         );
-      });
+      } as NodeJS.MemoryUsage);
       it('should handle module initialization check errors', async () => {
         const testId = `${operationId}_module_initialization_error`;
         console.log(`[${testId}] Testing module initialization error handling`);
@@ -1068,7 +1080,7 @@ describe('HealthService', () => {
         const originalValues = Object.values;
         Object.values = jest.fn(() => {
           throw new Error('Module check failed');
-        });
+        } as NodeJS.MemoryUsage);
         const result =
           (await service.checkModuleInitialization()) as HealthIndicatorResult;
         expect(result.modules?.status).toBe('down');
@@ -1076,7 +1088,7 @@ describe('HealthService', () => {
         // Restore Object.values
         Object.values = originalValues;
         console.log(`[${testId}] Module initialization error test completed`);
-      });
+      } as NodeJS.MemoryUsage);
     });
     describe('Private Method Testing', () => {
       it('should simulate database ping with realistic timing', async () => {
@@ -1089,7 +1101,7 @@ describe('HealthService', () => {
         expect(endTime - startTime).toBeGreaterThan(0);
         expect(endTime - startTime).toBeLessThan(200); // Should complete within 200ms
         console.log(`[${testId}] Database ping timing test completed`);
-      });
+      } as NodeJS.MemoryUsage);
       it('should check individual external service with proper error handling', async () => {
         const testId = `${operationId}_external_service_individual`;
         console.log(`[${testId}] Testing individual external service check`);
@@ -1102,7 +1114,7 @@ describe('HealthService', () => {
         expect(['healthy', 'unhealthy']).toContain(healthyResult.status);
         expect(healthyResult.responseTime).toMatch(/\d+ms/);
         console.log(`[${testId}] Individual external service test completed`);
-      });
+      } as NodeJS.MemoryUsage);
       it('should handle external service timeout scenarios', async () => {
         const testId = `${operationId}_external_service_timeout`;
         console.log(`[${testId}] Testing external service timeout scenarios`);
@@ -1137,11 +1149,11 @@ describe('HealthService', () => {
         expect(results).toHaveLength(2);
         results.forEach((result) => {
           expect(['healthy', 'unhealthy']).toContain(result.status);
-        });
+        } as NodeJS.MemoryUsage);
         // Restore setTimeout
         global.setTimeout = originalSetTimeout;
         console.log(`[${testId}] External service timeout test completed`);
-      });
+      } as NodeJS.MemoryUsage);
     });
   });
   describe('Integration and End-to-End Health Scenarios', () => {
@@ -1156,7 +1168,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(service as any, 'performDatabasePing').mockResolvedValue(true);
       jest
         .spyOn(service as any, 'checkExternalService')
@@ -1197,7 +1209,7 @@ describe('HealthService', () => {
       // Mock system under stress
       jest.spyOn(process, 'uptime').mockImplementation(() => {
         throw new Error('System overload');
-      });
+      } as NodeJS.MemoryUsage);
       jest
         .spyOn(service as any, 'performDatabasePing')
         .mockRejectedValue(new Error('Database overloaded'));
@@ -1233,7 +1245,7 @@ describe('HealthService', () => {
             (result as { status?: string }).status;
           expect(['up', 'down']).toContain(statusValue);
         }
-      });
+      } as NodeJS.MemoryUsage);
       console.log(`[${testId}] Cascading failures test completed`);
     });
     it('should maintain performance under concurrent health checks', async () => {
@@ -1247,7 +1259,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(service as any, 'performDatabasePing').mockResolvedValue(true);
       (service as any).startTime = Date.now() - 60000;
       const startTime = Date.now();
@@ -1270,7 +1282,7 @@ describe('HealthService', () => {
         expect(result.basicHealth.status).toBe('healthy');
         expect(result.processHealth.process?.status).toBe('up');
         expect(result.databaseHealth.database?.status).toBe('up');
-      });
+      } as NodeJS.MemoryUsage);
       console.log(
         `[${testId}] Concurrent performance test completed (${totalTime}ms for 50 checks)`,
       );
@@ -1288,7 +1300,7 @@ describe('HealthService', () => {
         heapUsed: 33554432,
         external: 1048576,
         arrayBuffers: 0,
-      });
+      } as NodeJS.MemoryUsage);
       jest.spyOn(service as any, 'performDatabasePing').mockResolvedValue(true);
       (service as any).startTime = Date.now() - 60000;
       const healthChecks = await Promise.all([
@@ -1320,7 +1332,7 @@ describe('HealthService', () => {
           free: expect.any(Number),
           total: expect.any(Number),
         }),
-      });
+      } as NodeJS.MemoryUsage);
       // Detailed status schema
       expect(detailed).toMatchObject({
         status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/),
@@ -1330,7 +1342,7 @@ describe('HealthService', () => {
         }),
         services: expect.any(Object),
         performance: expect.any(Object),
-      });
+      } as NodeJS.MemoryUsage);
       // Process health schema
       expect(processHealth.process?.status).toEqual(
         expect.stringMatching(/^(up|down)$/),
