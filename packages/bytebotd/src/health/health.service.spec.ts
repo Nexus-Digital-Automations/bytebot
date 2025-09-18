@@ -12,12 +12,15 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
+import { HealthIndicatorResult } from '@nestjs/terminus';
 import { HealthService } from './health.service';
+import { ParlantHealthMetricsValidationService } from '../parlant/services/parlant-health-metrics-validation.service';
+import { BasicHealthResponse, DetailedStatusResponse } from './interfaces/health.interfaces';
 
 // Type definitions for test mocking - simplified for ESLint compliance
 
 // Type-safe interface for accessing private methods in tests
-interface HealthServiceWithPrivateMethods extends HealthService {
+interface HealthServiceWithPrivateMethods {
   performDatabasePing(): Promise<boolean>;
   checkExternalService(
     serviceName: string,
@@ -25,6 +28,15 @@ interface HealthServiceWithPrivateMethods extends HealthService {
   ): Promise<{ status: string; responseTime?: string; error?: string }>;
   checkServiceHealth(): { database: string; cache: string; external: string };
   startTime: number;
+  getBasicHealth(): BasicHealthResponse;
+  getDetailedStatus(): DetailedStatusResponse;
+  getInitializationTime(): number;
+  isServiceStable(minimumSeconds?: number): boolean;
+  checkProcessHealth(): HealthIndicatorResult;
+  checkDatabaseHealth(): Promise<HealthIndicatorResult>;
+  checkExternalServices(): Promise<HealthIndicatorResult>;
+  checkStartupComplete(): HealthIndicatorResult;
+  checkModuleInitialization(): HealthIndicatorResult;
 }
 
 describe('HealthService', () => {
@@ -33,12 +45,28 @@ describe('HealthService', () => {
   let _logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
+    const mockParlantValidationService: Partial<ParlantHealthMetricsValidationService> = {
+      validateHealthOperation: jest.fn().mockResolvedValue({
+        approved: true,
+        riskLevel: 'LOW' as const,
+        conversationId: 'test-123',
+        auditTrail: {},
+        reason: ''
+      })
+    };
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [HealthService],
+      providers: [
+        HealthService,
+        {
+          provide: ParlantHealthMetricsValidationService,
+          useValue: mockParlantValidationService,
+        },
+      ],
     }).compile();
 
     service = module.get<HealthService>(HealthService);
-    serviceWithPrivates = service as HealthServiceWithPrivateMethods;
+    serviceWithPrivates = service as unknown as HealthServiceWithPrivateMethods;
     _logger = module.get<Logger>(Logger) as jest.Mocked<Logger>;
   });
 
@@ -99,7 +127,7 @@ describe('HealthService', () => {
 
         process.memoryUsage = jest.fn(() => {
           throw new Error('Memory error');
-        }) as jest.MockedFunction<typeof process.memoryUsage>;
+        }) as unknown as jest.MockedFunction<typeof process.memoryUsage>;
 
         const result = await service.checkProcessHealth();
 
@@ -159,7 +187,17 @@ describe('HealthService', () => {
     describe('Startup Health Check', () => {
       it('should fail startup check for new service', async () => {
         // Create a new service instance (will have recent start time)
-        const newService = new HealthService();
+        // Note: HealthService requires parlantValidationService parameter
+        const mockParlantService: Partial<ParlantHealthMetricsValidationService> = {
+          validateHealthOperation: jest.fn().mockResolvedValue({
+            approved: true,
+            riskLevel: 'LOW' as const,
+            conversationId: 'test-123',
+            auditTrail: {},
+            reason: ''
+          })
+        };
+        const newService = new HealthService(mockParlantService as ParlantHealthMetricsValidationService);
 
         const result = await newService.checkStartupComplete();
 
@@ -217,7 +255,17 @@ describe('HealthService', () => {
     });
 
     it('should return false for newly started service', () => {
-      const newService = new HealthService();
+      // Note: HealthService requires parlantValidationService parameter
+      const mockParlantService: Partial<ParlantHealthMetricsValidationService> = {
+        validateHealthOperation: jest.fn().mockResolvedValue({
+          approved: true,
+          riskLevel: 'LOW' as const,
+          conversationId: 'test-123',
+          auditTrail: {},
+          reason: ''
+        })
+      };
+      const newService = new HealthService(mockParlantService as ParlantHealthMetricsValidationService);
       const isStable = newService.isServiceStable();
       expect(isStable).toBe(false);
     });
