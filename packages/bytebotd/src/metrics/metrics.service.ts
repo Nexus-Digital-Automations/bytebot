@@ -485,7 +485,7 @@ export class BytebotMetricsService {
     try {
       // PARLANT VALIDATION: Database metrics (MEDIUM risk - data sensitivity)
       const validation = await this.parlantValidationService.validateMetricsOperation(
-        _MetricsOperationType.DATABASE_METRICS,
+        MetricsOperationType.DATABASE_METRICS,
         {
           operation: 'database_query_metrics',
           dbOperation: operation,

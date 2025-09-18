@@ -294,7 +294,7 @@ describe('HealthService', () => {
         'Memory access denied',
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
-        _expect.stringContaining(
+        expect.stringContaining(
           'Failed to get basic health: Memory access denied',
         ),
       );
@@ -352,7 +352,6 @@ describe('HealthService', () => {
       } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       // Mock the private service health check method
-      const originalCheckServiceHealth = service.checkServiceHealth;
       // Test healthy status
       jest.spyOn(service, 'checkServiceHealth').mockReturnValue({
         database: 'connected',
@@ -417,7 +416,7 @@ describe('HealthService', () => {
         'System uptime unavailable',
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
-        _expect.stringContaining(
+        expect.stringContaining(
           'Failed to get detailed status: System uptime unavailable',
         ),
       );
@@ -548,7 +547,7 @@ describe('HealthService', () => {
       console.log(`[${testId}] Testing stability check logging`);
       service.isServiceStable(10);
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        _expect.stringMatching(/Service stability check: (stable|warming up)/),
+        expect.stringMatching(/Service stability check: (stable|warming up)/),
         expect.objectContaining({
           uptime: expect.stringMatching(/\d+s/) as string,
           minimumRequired: expect.stringMatching(/\d+s/) as string,
@@ -1238,7 +1237,7 @@ describe('HealthService', () => {
         throw new Error('System overload');
       });
       jest
-        .spyOn(_service as unknown as { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing')
+        .spyOn(service as unknown as { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing')
         .mockRejectedValue(new Error('Database overloaded'));
       jest
         .spyOn(service as TestableHealthService, 'checkExternalService')

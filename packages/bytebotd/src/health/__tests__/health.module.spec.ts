@@ -31,7 +31,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
-import { HttpModule } from '@nestjs/axios';
 import { HealthModule } from '../health.module';
 import { HealthController } from '../health.controller';
 import { HealthService } from '../health.service';
@@ -208,7 +207,6 @@ describe('HealthModule', () => {
       console.log(`[${testId}] Testing module initialization error handling`);
 
       // Mock Logger constructor to throw an error during module initialization
-      const originalLogger = Logger;
       const errorMessage = 'Logger initialization failed';
 
       try {
@@ -297,16 +295,11 @@ describe('HealthModule', () => {
       const testId = `${operationId}_http_module_integration`;
       console.log(`[${testId}] Testing HttpModule integration`);
 
-      // Verify HttpModule is available for external service health checks
-      try {
-        const httpModule = module.get(_HttpModule, { strict: false });
-        expect(httpModule).toBeDefined();
-      } catch (_error) {
-        // HttpModule might not be directly accessible, but functionality should work
-        console.log(
-          `HttpModule not directly accessible, testing functionality instead`,
-        );
-      }
+      // HttpModule integration is handled internally by NestJS
+      // Test external service health check functionality instead
+      console.log(
+        `HttpModule integration tested via functionality`,
+      );
 
       // Test external service health check functionality
       try {
@@ -741,9 +734,6 @@ describe('HealthModule', () => {
       // Most requests should succeed, but some may fail gracefully
       const successfulResults = exhaustionResults.filter(
         (r) => r.status === 'healthy',
-      );
-      const errorResults = exhaustionResults.filter(
-        (r) => r.status === 'error',
       );
 
       // At least 80% should succeed under normal test conditions

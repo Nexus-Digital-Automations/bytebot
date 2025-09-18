@@ -473,7 +473,7 @@ export class ParlantHealthMetricsValidationService {
    */
   private getMetricsOperationRiskLevel(
     operationType: MetricsOperationType,
-    parameters: Record<string, unknown>,
+    _parameters: Record<string, unknown>,
   ): HealthMetricsRiskLevel {
     // Most metrics collection is low risk
     const lowRiskOperations = [
@@ -753,7 +753,7 @@ export class ParlantHealthMetricsValidationService {
     const expiryMinutes = result.riskLevel === HealthMetricsRiskLevel.LOW ? 15 : 5;
     const expiry = new Date(Date.now() + expiryMinutes * 60 * 1000);
 
-    this.validationCache.set(_cacheKey, {
+    this.validationCache.set(cacheKey, {
       result,
       expiry,
       hitCount: 0,

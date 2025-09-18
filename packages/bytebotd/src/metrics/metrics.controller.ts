@@ -79,7 +79,7 @@ export class MetricsController {
     try {
       // PARLANT VALIDATION: Prometheus metrics collection (LOW risk - optimized with caching)
       const validation = await this.parlantValidationService.validateMetricsOperation(
-        _MetricsOperationType.PROMETHEUS_COLLECTION,
+        MetricsOperationType.PROMETHEUS_COLLECTION,
         {
           endpoint: '/metrics',
           method: 'GET',

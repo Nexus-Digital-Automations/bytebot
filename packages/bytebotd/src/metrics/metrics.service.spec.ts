@@ -17,7 +17,7 @@ import { register } from 'prom-client';
 
 describe('MetricsService', () => {
   let service: MetricsService;
-  let logger: jest.Mocked<Logger>;
+  let _logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
     // Clear all metrics before each test
@@ -28,7 +28,7 @@ describe('MetricsService', () => {
     }).compile();
 
     service = module.get<MetricsService>(MetricsService);
-    logger = module.get<Logger>(Logger) as jest.Mocked<Logger>;
+    _logger = module.get<Logger>(Logger) as jest.Mocked<Logger>;
   });
 
   afterEach(() => {

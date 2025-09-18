@@ -287,7 +287,7 @@ export class HealthService extends HealthIndicator {
     try {
       // PARLANT VALIDATION: Database health check (HIGH risk - critical system component)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        _HealthOperationType.DATABASE_HEALTH,
+        HealthOperationType.DATABASE_HEALTH,
         {
           operation: 'database_connectivity_check',
           component: 'database',
@@ -368,7 +368,7 @@ export class HealthService extends HealthIndicator {
     try {
       // PARLANT VALIDATION: External services check (HIGH risk - network dependencies)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        _HealthOperationType.EXTERNAL_SERVICES,
+        HealthOperationType.EXTERNAL_SERVICES,
         {
           operation: 'external_service_dependency_check',
           component: 'external_services',
@@ -531,17 +531,17 @@ export class HealthService extends HealthIndicator {
         health: true, // We know this is initialized since we're running
       };
 
-      const allInitialized = Object.values(_modules).every(Boolean);
+      const allInitialized = Object.values(modules).every(Boolean);
 
       this.logger.debug(
         `[${operationId}] Module initialization check completed`,
         {
           allInitialized,
-          modules: _modules,
+          modules,
         },
       );
 
-      return this.getStatus('modules', allInitialized, { modules: _modules });
+      return this.getStatus('modules', allInitialized, { modules });
     } catch (_error) {
       const errorMessage =
         _error instanceof Error ? _error.message : 'Unknown _error';
@@ -579,8 +579,8 @@ export class HealthService extends HealthIndicator {
    * @returns Service health status
    */
   private async checkExternalService(
-    serviceName: string,
-    healthUrl: string,
+    _serviceName: string,
+    _healthUrl: string,
   ): Promise<{ status: string; responseTime?: string; error?: string }> {
     const startTime = Date.now();
 

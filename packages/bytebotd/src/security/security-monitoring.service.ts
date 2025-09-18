@@ -601,7 +601,7 @@ export class SecurityMonitoringService {
 
   private async triggerSecurityAlert(
     event: SecurityEvent,
-    context: ParlantConversationContext
+    _context: ParlantConversationContext
   ): Promise<void> {
     this.alertHistory.push(event);
     

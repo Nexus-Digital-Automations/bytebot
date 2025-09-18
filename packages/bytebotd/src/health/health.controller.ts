@@ -104,7 +104,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Basic health check (LOW risk - auto-approved with caching)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        _HealthOperationType.BASIC_HEALTH_CHECK,
+        HealthOperationType.BASIC_HEALTH_CHECK,
         {
           endpoint: '/health',
           method: 'GET',
@@ -211,7 +211,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Liveness probe (LOW risk - auto-approved with caching)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        _HealthOperationType.LIVENESS_PROBE,
+        HealthOperationType.LIVENESS_PROBE,
         {
           endpoint: '/health/live',
           method: 'GET',
@@ -294,7 +294,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Readiness probe (MEDIUM risk - includes database and external services)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        _HealthOperationType.READINESS_PROBE,
+        HealthOperationType.READINESS_PROBE,
         {
           endpoint: '/health/ready',
           method: 'GET',
@@ -383,7 +383,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Startup probe (MEDIUM risk - includes module initialization and database)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        _HealthOperationType.STARTUP_PROBE,
+        HealthOperationType.STARTUP_PROBE,
         {
           endpoint: '/health/startup',
           method: 'GET',
@@ -467,7 +467,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Detailed status (MEDIUM risk - comprehensive system information)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        _HealthOperationType.DETAILED_STATUS,
+        HealthOperationType.DETAILED_STATUS,
         {
           endpoint: '/health/status',
           method: 'GET',
@@ -556,7 +556,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Metrics endpoint (MEDIUM risk - exposes system metrics)
       const validation = await this.parlantValidationService.validateMetricsOperation(
-        _MetricsOperationType.PROMETHEUS_COLLECTION,
+        MetricsOperationType.PROMETHEUS_COLLECTION,
         {
           endpoint: '/health/metrics',
           method: 'GET',
