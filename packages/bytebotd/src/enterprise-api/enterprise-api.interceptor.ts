@@ -530,11 +530,16 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
       const now = Date.now();
       const cutoff = now - (this.config.rateLimitWindow * 2); // Keep data for 2 windows
       
-      for (const [ip, tracking] of this.requestTracking.entries()) {
+      const entriesToDelete: string[] = [];
+      this.requestTracking.forEach((tracking, ip) => {
         if (now - tracking.lastReset.getTime() > cutoff) {
-          this.requestTracking.delete(ip);
+          entriesToDelete.push(ip);
         }
-      }
+      });
+      
+      entriesToDelete.forEach(ip => {
+        this.requestTracking.delete(ip);
+      });
       
       this.logger.debug(`Cleaned up rate limiting data, ${this.requestTracking.size} entries remaining`);
     }, 300000); // 5 minutes

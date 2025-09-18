@@ -59,18 +59,18 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ActivityIcon,
   Alert01Icon,
+  ArrowUp01Icon,
+  Cancel01Icon,
   CheckmarkCircle02Icon,
   ClockIcon,
   Download01Icon,
-  ForwardIcon,
   FlowIcon,
+  ForwardIcon,
   PauseIcon,
   PlayIcon,
   RefreshIcon,
   TimeIcon,
-  ArrowUp01Icon,
-  UserIcon,
-  Cancel01Icon
+  UserIcon
 } from '@hugeicons/core-free-icons';
 
 // ===========================

@@ -87,7 +87,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
 
     return (
       <div className="flex items-center justify-center">
-        <HugeiconsIcon icon={icon as any} className={`h-5 w-5 ${color}`} />
+        <HugeiconsIcon icon={icon} className={`h-5 w-5 ${color}`} />
       </div>
     );
   };

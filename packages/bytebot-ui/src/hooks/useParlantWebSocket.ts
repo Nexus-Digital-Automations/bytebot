@@ -32,8 +32,8 @@ import {
   ParlantError,
   ParlantValidationRequest,
   ParlantValidationResponse,
-  ParticipantType,
   ParticipantRole,
+  ParticipantType,
   ValidationDecision
 } from '@bytebot/shared/types/parlant.types';
 import { logDebug, logError, logInfo, logWarn } from '@/utils/logger';

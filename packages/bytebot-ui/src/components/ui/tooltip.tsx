@@ -30,8 +30,8 @@ const Tooltip: React.FC<TooltipProps> = ({ children }) => {
   return (
     <div
       className="relative inline-block"
-      onMouseEnter={() => setIsVisible(true)}
-      onMouseLeave={() => setIsVisible(false)}
+      onMouseEnter={() => { setIsVisible(true); }}
+      onMouseLeave={() => { setIsVisible(false); }}
     >
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
@@ -55,7 +55,7 @@ const TooltipContent: React.FC<TooltipContentProps & { isVisible?: boolean }> = 
   isVisible = false,
   ...props
 }) => {
-  if (!isVisible) return null;
+  if (!isVisible) {return null;}
 
   const sideClasses = {
     top: "bottom-full left-1/2 transform -translate-x-1/2 mb-2",

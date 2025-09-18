@@ -136,7 +136,7 @@ function ToolDetailsNormal({
 
   return (
     <>
-      {safeTypeGuardCall(isApplicationToolUseBlock, block as ComputerToolUseContentBlock) && (
+      {safeTypeGuardCall(isApplicationToolUseBlock, block) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
@@ -156,8 +156,8 @@ function ToolDetailsNormal({
       )}
 
       {/* Text for type and key actions */}
-      {(safeTypeGuardCall(isTypeKeysToolUseBlock, block as ComputerToolUseContentBlock) ||
-        safeTypeGuardCall(isPressKeysToolUseBlock, block as ComputerToolUseContentBlock)) && (
+      {(safeTypeGuardCall(isTypeKeysToolUseBlock, block) ||
+        safeTypeGuardCall(isPressKeysToolUseBlock, block)) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
@@ -172,8 +172,8 @@ function ToolDetailsNormal({
         </p>
       )}
 
-      {(safeTypeGuardCall(isTypeTextToolUseBlock, block as ComputerToolUseContentBlock) ||
-        safeTypeGuardCall(isPasteTextToolUseBlock, block as ComputerToolUseContentBlock)) && (
+      {(safeTypeGuardCall(isTypeTextToolUseBlock, block) ||
+        safeTypeGuardCall(isPasteTextToolUseBlock, block)) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
