@@ -25,11 +25,11 @@ import {
   ParlantMessageType,
   ParlantValidationRequest,
   ParlantValidationResponse,
-  ParlantUserContext,
+  // ParlantUserContext, // Unused import
   ParlantHealthStatus,
   ParlantWebSocketConfig,
   ParlantConnectionError,
-  ParlantAuthenticationError,
+  // ParlantAuthenticationError, // Unused import
   ParlantIntegrationError,
 } from "../types/parlant-integration.types";
 
@@ -60,8 +60,8 @@ interface PendingValidation {
  * Pending Direct Validation Entry for API requests
  */
 interface PendingDirectValidation {
-  resolve: (response: ParlantValidationResponse) => void;
-  reject: (error: Error) => void;
+  resolve: (_response: ParlantValidationResponse) => void;
+  reject: (_error: Error) => void;
   timestamp: Date;
 }
 
@@ -274,7 +274,11 @@ export class ParlantWebSocketBridgeService
 
     this.serverWs = new WebSocket.Server({
       port,
-      verifyClient: (info: { req: any; origin?: string; secure?: boolean }) => {
+      verifyClient: (info: {
+        req: Record<string, unknown> & { headers: Record<string, string> };
+        origin?: string;
+        secure?: boolean;
+      }) => {
         // Verify JWT token from AIgent components
         const token = info.req.headers.authorization?.replace("Bearer ", "");
         if (!token) return false;

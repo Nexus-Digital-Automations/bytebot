@@ -25,7 +25,7 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   SecurityLevel,
-  ParlantValidationError,
+  // ParlantValidationError, // Unused import
 } from "../types/parlant-integration.types";
 
 /**
@@ -232,7 +232,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
   };
 
   constructor(
-    private readonly parlantService: ParlantIntegrationService,
+    private readonly _parlantService: ParlantIntegrationService,
     config: Partial<UniversalParlantConfig> = {},
   ) {
     // Merge provided config with defaults
@@ -408,7 +408,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
   /**
    * Check if request handler already has explicit Parlant decorators
    */
-  private hasExplicitParlantDecorator(req: Request): boolean {
+  private hasExplicitParlantDecorator(_req: Request): boolean {
     // This would need to be implemented by checking route metadata
     // For now, return false to ensure all endpoints get validation
     // In a real implementation, this would check if the route handler
@@ -470,7 +470,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
     try {
       const validationRequest: ParlantValidationRequest = {
         operationId: metadata.operationId,
-        functionName: `API.${metadata.method}.${metadata.endpoint.replace(/[\/\-:]/g, "_")}`,
+        functionName: `API.${metadata.method}.${metadata.endpoint.replace(/[/\-:]/g, "_")}`,
         packageName: "universal-api-layer",
         description: `Universal API validation for ${metadata.method} ${metadata.endpoint}`,
         parameters: {
@@ -485,7 +485,8 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
           userId: metadata.userId || "anonymous",
           roles: ["api_user"],
           sessionId:
-            (req as any).sessionID || `universal_session_${Date.now()}`,
+            ((req as Record<string, unknown>).sessionID as string) ||
+            `universal_session_${Date.now()}`,
           ipAddress: metadata.ipAddress,
           metadata: {
             timestamp: Date.now(),
@@ -599,14 +600,18 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
    */
   private extractUserId(req: Request): string | undefined {
     // Try to extract user ID from various sources
-    const reqWithUser = req as any;
+    const reqWithUser = req as Record<string, unknown> & {
+      user?: { id?: string; userId?: string };
+    };
     return reqWithUser.user?.id || reqWithUser.user?.userId || undefined;
   }
 
   /**
    * Sanitize headers for validation (remove sensitive information)
    */
-  private sanitizeHeaders(headers: any): Record<string, string> {
+  private sanitizeHeaders(
+    headers: Record<string, unknown>,
+  ): Record<string, string> {
     const sanitized: Record<string, string> = {};
     const sensitiveHeaders = [
       "authorization",
@@ -630,7 +635,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
   /**
    * Sanitize request body for validation
    */
-  private sanitizeBody(body: any): any {
+  private sanitizeBody(body: unknown): unknown {
     if (!body) return undefined;
 
     // Remove sensitive fields

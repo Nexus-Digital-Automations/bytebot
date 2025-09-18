@@ -134,7 +134,7 @@ export interface ParlantAuthModuleAsyncOptions
   extends Pick<ModuleMetadata, "imports"> {
   /** Imports for dependency injection */
   imports?: Array<
-    Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference
+    Type<unknown> | DynamicModule | Promise<DynamicModule> | ForwardReference
   >;
 
   /** Providers for dependency injection */
@@ -142,11 +142,11 @@ export interface ParlantAuthModuleAsyncOptions
 
   /** Factory function to create options */
   useFactory?: (
-    ...args: any[]
+    ..._args: unknown[]
   ) => Promise<ParlantAuthModuleOptions> | ParlantAuthModuleOptions;
 
   /** Providers to inject into factory function */
-  inject?: any[];
+  inject?: unknown[];
 }
 
 /**
@@ -328,7 +328,7 @@ export class ParlantAuthModule {
         // JWT module with async configuration
         JwtModule.registerAsync({
           imports: options.imports,
-          useFactory: async (...args: any[]) => {
+          useFactory: async (...args: unknown[]) => {
             const parlantOptions = options.useFactory
               ? await options.useFactory(...args)
               : {};
@@ -350,7 +350,7 @@ export class ParlantAuthModule {
         // Cache module with async configuration
         CacheModule.registerAsync({
           imports: options.imports,
-          useFactory: async (...args: any[]) => {
+          useFactory: async (...args: unknown[]) => {
             const parlantOptions = options.useFactory
               ? await options.useFactory(...args)
               : {};
@@ -387,7 +387,7 @@ export class ParlantAuthModule {
         // Dynamic configuration providers
         {
           provide: "PARLANT_RISK_THRESHOLDS",
-          useFactory: async (...args: any[]) => {
+          useFactory: async (...args: unknown[]) => {
             const parlantOptions = options.useFactory
               ? await options.useFactory(...args)
               : {};
@@ -399,7 +399,7 @@ export class ParlantAuthModule {
 
         {
           provide: "PARLANT_MFA_CONFIG",
-          useFactory: async (...args: any[]) => {
+          useFactory: async (...args: unknown[]) => {
             const parlantOptions = options.useFactory
               ? await options.useFactory(...args)
               : {};
@@ -411,7 +411,7 @@ export class ParlantAuthModule {
 
         {
           provide: "PARLANT_CONVERSATION_CONFIG",
-          useFactory: async (...args: any[]) => {
+          useFactory: async (...args: unknown[]) => {
             const parlantOptions = options.useFactory
               ? await options.useFactory(...args)
               : {};
@@ -478,7 +478,7 @@ export class ParlantAuthModule {
       module: ParlantAuthModule,
       providers: providers as Provider[],
       exports: exports as Array<
-        string | symbol | Type<any> | DynamicModule | Provider
+        string | symbol | Type<unknown> | DynamicModule | Provider
       >,
     };
   }
