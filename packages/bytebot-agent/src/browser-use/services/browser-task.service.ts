@@ -20,13 +20,8 @@ import {
 import { BrowserUseService } from '../browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
 
-export enum TaskStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-}
+// Use TaskStatus alias for backward compatibility in this service
+export type TaskStatus = BrowserTaskStatus;
 
 export enum TaskPriority {
   LOW = 'low',
@@ -109,16 +104,9 @@ function isTaskError(
   );
 }
 
-// Convert between enum types safely
+// Convert between enum types safely (no longer needed as TaskStatus is alias to BrowserTaskStatus)
 function convertToBrowserTaskStatus(status: TaskStatus): BrowserTaskStatus {
-  const statusMap: Record<TaskStatus, BrowserTaskStatus> = {
-    [TaskStatus.PENDING]: BrowserTaskStatus.PENDING,
-    [TaskStatus.RUNNING]: BrowserTaskStatus.RUNNING,
-    [TaskStatus.COMPLETED]: BrowserTaskStatus.COMPLETED,
-    [TaskStatus.FAILED]: BrowserTaskStatus.FAILED,
-    [TaskStatus.CANCELLED]: BrowserTaskStatus.CANCELLED,
-  };
-  return statusMap[status];
+  return status; // Direct return since they're the same now
 }
 
 function convertToBrowserTaskPriority(

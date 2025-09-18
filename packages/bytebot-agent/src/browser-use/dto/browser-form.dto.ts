@@ -325,3 +325,6 @@ export class FormValidationResponseDto {
   @ApiProperty({ description: 'Warnings encountered during operation' })
   warnings?: string[];
 }
+
+// Type aliases for backward compatibility
+export type BrowserFormDto = FillFormDto;

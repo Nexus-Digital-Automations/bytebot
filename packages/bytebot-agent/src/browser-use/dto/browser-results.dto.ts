@@ -436,3 +436,6 @@ export class ResultsStatisticsDto {
   @ApiProperty({ description: 'Statistics generation timestamp' })
   generatedAt!: Date;
 }
+
+// Type aliases for backward compatibility
+export type BrowserResultsDto = BrowserResultsResponseDto;

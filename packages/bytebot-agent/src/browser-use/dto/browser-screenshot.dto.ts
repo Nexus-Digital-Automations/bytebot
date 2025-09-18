@@ -272,3 +272,6 @@ export class ScreenshotResponseDto {
     timestamp?: Date;
   };
 }
+
+// Type aliases for backward compatibility
+export type BrowserScreenshotDto = CaptureScreenshotDto;

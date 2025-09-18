@@ -3606,10 +3606,58 @@
       "updated_at": "2025-09-18T02:47:02.947Z",
       "archived_at": "2025-09-18T02:47:02.953Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T01:53:32.653Z",
+      "title": "Fix TypeScript compilation errors in health.service.spec.ts",
+      "description": "Continue fixes started with MockCallArgs and TestableHealthService interfaces. Address remaining type mismatches, setTimeout mocking issues, and interface compatibility problems while maintaining zero ESLint violations.",
+      "category": "error",
+      "id": "error_1758160412653_22tjk2xleaz",
+      "assigned_agent": "dev_session_1758160364303_1_general_e7cc71b6",
+      "started_at": "2025-09-18T01:59:00.850Z",
+      "claimed_by": "dev_session_1758160364303_1_general_e7cc71b6",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758160364303_1_general_e7cc71b6",
+          "role": "primary",
+          "assignedAt": "2025-09-18T01:59:00.850Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T02:47:24.160Z",
+      "updated_at": "2025-09-18T02:47:24.160Z",
+      "archived_at": "2025-09-18T02:47:24.165Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T01:53:32.055Z",
+      "title": "Fix TypeScript compilation errors in security test files",
+      "description": "Address interface compatibility, mock type issues, and type safety violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/security/__tests__/ while maintaining zero ESLint violations and security test functionality",
+      "category": "error",
+      "id": "error_1758160412055_8xep2ojl5wq",
+      "assigned_agent": "dev_session_1758160364305_1_general_3069486b",
+      "started_at": "2025-09-18T02:15:56.329Z",
+      "claimed_by": "dev_session_1758160364305_1_general_3069486b",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758160364305_1_general_3069486b",
+          "role": "primary",
+          "assignedAt": "2025-09-18T02:15:56.329Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T02:47:45.235Z",
+      "updated_at": "2025-09-18T02:47:45.235Z",
+      "archived_at": "2025-09-18T02:47:45.240Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 83,
+  "total_completed": 85,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-18T02:47:02.953Z"
+  "last_archived": "2025-09-18T02:47:45.240Z"
 }

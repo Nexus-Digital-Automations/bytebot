@@ -284,3 +284,6 @@ export class DataExtractionResponseDto {
   @ApiProperty({ description: 'Warnings encountered during extraction' })
   warnings?: string[];
 }
+
+// Type aliases for backward compatibility
+export type BrowserDataDto = ExtractDataDto;

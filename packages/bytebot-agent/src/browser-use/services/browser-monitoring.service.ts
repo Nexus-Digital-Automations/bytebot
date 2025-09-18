@@ -13,12 +13,12 @@ import {
   TaskStatusResponseDto,
 } from '../dto/browser-monitoring.dto';
 import { BrowserSessionStatus } from '../dto/browser-session.dto';
-import { BrowserTaskStatusDto } from '../dto/browser-task.dto';
+import { BrowserTaskStatusDto, BrowserTaskStatus } from '../dto/browser-task.dto';
 import { BrowserUseService } from '../browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
 import {
   BrowserTaskService,
-  TaskStatus as BrowserTaskStatus,
+  TaskStatus,
 } from './browser-task.service';
 import * as os from 'os';
 import * as fs from 'fs/promises';

@@ -1795,7 +1795,7 @@
       "updated_at": "2025-09-18T02:35:54.325Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T01:53:32.055Z",
       "title": "Fix TypeScript compilation errors in security test files",
       "description": "Address interface compatibility, mock type issues, and type safety violations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/security/__tests__/ while maintaining zero ESLint violations and security test functionality",
@@ -1812,7 +1812,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T02:47:45.235Z",
+      "updated_at": "2025-09-18T02:47:45.235Z"
     },
     {
       "status": "completed",
@@ -1879,7 +1881,7 @@
       "updated_at": "2025-09-18T02:41:09.389Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T01:53:32.653Z",
       "title": "Fix TypeScript compilation errors in health.service.spec.ts",
       "description": "Continue fixes started with MockCallArgs and TestableHealthService interfaces. Address remaining type mismatches, setTimeout mocking issues, and interface compatibility problems while maintaining zero ESLint violations.",
@@ -1896,7 +1898,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T02:47:24.160Z",
+      "updated_at": "2025-09-18T02:47:24.160Z"
     },
     {
       "status": "pending",
@@ -1907,12 +1911,24 @@
       "id": "feature_1758163249716_a5l7ehuwtx"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-18T02:46:55.615Z",
       "title": "CRITICAL: Fix TypeScript compilation errors in validation.pipe.spec.ts",
       "description": "Fix critical TypeScript compilation errors in bytebotd/src/common/__tests__/validation.pipe.spec.ts: 1) Argument of type object not assignable to Record<string, unknown>, 2) Multiple result is of type unknown errors (lines 404, 405, 430, 431, 498, 499, 525, 550). These errors block TypeScript compilation and CI/CD pipeline.",
       "category": "error",
-      "id": "error_1758163615615_2gggoh72fex"
+      "id": "error_1758163615615_2gggoh72fex",
+      "assigned_agent": "dev_session_1758163408228_1_general_e8df838a",
+      "started_at": "2025-09-18T02:47:14.552Z",
+      "claimed_by": "dev_session_1758163408228_1_general_e8df838a",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758163408228_1_general_e8df838a",
+          "role": "primary",
+          "assignedAt": "2025-09-18T02:47:14.552Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {

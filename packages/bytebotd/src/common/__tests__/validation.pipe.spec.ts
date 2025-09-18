@@ -19,16 +19,7 @@
 
 // Test imports removed - not used in this mock implementation
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
-import {
-  IsString,
-  IsNumber,
-  IsEmail,
-  IsOptional,
-  MinLength,
-  MaxLength,
-  IsEnum,
-} from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+// Removed unused class-validator and class-transformer imports for simplified test DTOs
 
 interface ValidationError {
   property: string;
@@ -109,7 +100,7 @@ class MockValidationPipe {
     }
 
     // Simulate validation errors for testing
-    const errors = this.mockValidate(instance, metatype);
+    const errors = this.mockValidate(instance as Record<string, unknown>, metatype);
 
     if (errors.length > 0) {
       const errorMessages = errors
@@ -208,59 +199,24 @@ class MockValidationPipe {
   }
 }
 
-// Mock DTOs for testing
+// Mock DTOs for testing - simplified for TypeScript compatibility
 class CreateUserDto {
-  @IsEmail()
   email: string = '';
-
-  @IsString()
-  @MinLength(6)
   password: string = '';
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
   name?: string;
-
-  @IsOptional()
-  @IsEnum(['admin', 'operator', 'viewer'])
   role?: string = 'viewer';
 }
 
 class UpdateTaskDto {
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
   title?: string;
-
-  @IsOptional()
-  @IsString()
   description?: string;
-
-  @IsOptional()
-  @IsEnum(['low', 'medium', 'high'])
   priority?: string;
-
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
   estimatedHours?: number;
 }
 
 class SearchDto {
-  @IsOptional()
-  @IsString()
-  @Transform(({ value }): string | undefined => typeof value === 'string' ? value.trim() : undefined)
   query?: string;
-
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
   limit?: number = 10;
-
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
   offset?: number = 0;
 }
 
@@ -399,7 +355,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(minimalUserData, metadata);
+      const result = await pipe.transform(minimalUserData, metadata) as Record<string, unknown>;
 
       expect(result.email).toBe('minimal@example.com');
       expect(result.password).toBe('password123');
@@ -425,7 +381,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(maliciousData, metadata);
+      const result = await pipe.transform(maliciousData, metadata) as Record<string, unknown>;
 
       expect(result.name).toBe('Test User');
       expect(result.name).not.toContain('<script>');
@@ -493,7 +449,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(nestedMaliciousData, metadata);
+      const result = await pipe.transform(nestedMaliciousData, metadata) as Record<string, unknown>;
 
       expect(result.description).not.toContain('<script>');
       expect(result.description).toContain('Description');
@@ -518,7 +474,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(pollutionAttempt, metadata);
+      const result = await pipe.transform(pollutionAttempt, metadata) as Record<string, unknown>;
 
       expect(result).not.toHaveProperty('__proto__');
       expect(result).not.toHaveProperty('constructor');
@@ -545,7 +501,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(searchData, metadata);
+      const result = await pipe.transform(searchData, metadata) as Record<string, unknown>;
 
       expect(typeof result.limit).toBe('number');
       expect(typeof result.offset).toBe('number');
@@ -572,7 +528,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(searchData, metadata);
+      const result = await pipe.transform(searchData, metadata) as Record<string, unknown>;
 
       expect(result.query).toBe('padded search query');
       expect(result.query).not.toMatch(/^\s|\s$/); // No leading/trailing whitespace
@@ -597,7 +553,7 @@ describe('ValidationPipe', () => {
       };
 
       // Should not throw but may have undefined/NaN values
-      const result = await pipe.transform(searchData, metadata);
+      const result = await pipe.transform(searchData, metadata) as Record<string, unknown>;
 
       expect(result.query).toBe('test');
       // Transform behavior for invalid numbers may vary
@@ -620,7 +576,7 @@ describe('ValidationPipe', () => {
         data: '',
       };
 
-      const result = await pipe.transform(searchData, metadata);
+      const result = await pipe.transform(searchData, metadata) as Record<string, unknown>;
 
       expect(result.limit).toBe(10); // Default value
       expect(result.offset).toBe(0); // Default value
@@ -920,7 +876,8 @@ describe('ValidationPipe', () => {
 
       expect(results).toHaveLength(20);
       results.forEach((result, _index) => {
-        expect(result.email).toBe(`user${_index}@example.com`);
+        const typedResult = result as Record<string, unknown>;
+        expect(typedResult.email).toBe(`user${_index}@example.com`);
       });
 
       console.log(

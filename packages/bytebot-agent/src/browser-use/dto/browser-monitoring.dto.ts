@@ -142,3 +142,6 @@ export class TaskStatusResponseDto {
   @ApiProperty({ description: 'Status check timestamp' })
   timestamp!: Date;
 }
+
+// Type aliases for backward compatibility
+export type BrowserMonitoringDto = BrowserMonitoringResponseDto;
