@@ -1162,7 +1162,7 @@ describe('HealthService', () => {
           },
         );
          
-        global.setTimeout = mockSetTimeout as typeof setTimeout;
+        global.setTimeout = mockSetTimeout as unknown as typeof setTimeout;
         const results = await Promise.all([
           (service as TestableHealthService).checkExternalService(
             'service-1',
