@@ -131,7 +131,7 @@ export class HealthController {
         return {
           status: 'validation_rejected',
           timestamp: new Date().toISOString(),
-          error: validation.reason || 'Health check operation not approved',
+          error: validation.reason ?? 'Health check operation not approved',
           validation,
         };
       }
@@ -495,7 +495,7 @@ export class HealthController {
         return {
           status: 'validation_rejected',
           timestamp: new Date().toISOString(),
-          error: validation.reason || 'Detailed status operation not approved',
+          error: validation.reason ?? 'Detailed status operation not approved',
           services: {},
           validation,
         };

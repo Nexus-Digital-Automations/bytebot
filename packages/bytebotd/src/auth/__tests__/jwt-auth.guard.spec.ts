@@ -63,6 +63,16 @@ function isHttpContext(context: unknown): context is { getRequest: () => unknown
   );
 }
 
+function safeGetRequest(httpContext: { getRequest: () => unknown }): unknown {
+  // This wrapper function helps TypeScript understand that we're safely handling the any return
+  return httpContext.getRequest();
+}
+
+function safeJwtVerify(jwtService: { verifyAsync: (token: string, options: { secret: string }) => Promise<unknown> }, token: string, options: { secret: string }): Promise<unknown> {
+  // This wrapper function helps TypeScript understand that we're safely handling the any return
+  return jwtService.verifyAsync(token, options);
+}
+
 // Proper typing for Jest mocks
 type MockJwtService = {
   verifyAsync: jest.MockedFunction<(token: string, options: { secret: string }) => Promise<unknown>>;
@@ -113,7 +123,7 @@ class MockJwtAuthGuard {
     if (!isHttpContext(httpContext)) {
       throw new UnauthorizedException('Invalid execution context');
     }
-    const rawRequest = httpContext.getRequest();
+    const rawRequest = safeGetRequest(httpContext);
     if (!isAuthenticatedRequest(rawRequest)) {
       throw new UnauthorizedException('Invalid request format');
     }
@@ -125,7 +135,7 @@ class MockJwtAuthGuard {
     }
 
     try {
-      const rawPayload = await this.jwtService.verifyAsync(token, {
+      const rawPayload = await safeJwtVerify(this.jwtService, token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
       
@@ -411,7 +421,11 @@ describe('JwtAuthGuard', () => {
 
       const result = await guard.canActivate(context);
 
-      const rawRequest = context.switchToHttp().getRequest();
+      const httpContext = context.switchToHttp();
+      if (!isHttpContext(httpContext)) {
+        throw new Error('Invalid execution context in test');
+      }
+      const rawRequest = safeGetRequest(httpContext);
       if (!isAuthenticatedRequest(rawRequest)) {
         throw new Error('Invalid request format in test');
       }
@@ -525,7 +539,11 @@ describe('JwtAuthGuard', () => {
       jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(userPayload);
 
       await guard.canActivate(context);
-      const rawRequest = context.switchToHttp().getRequest();
+      const httpContext = context.switchToHttp();
+      if (!isHttpContext(httpContext)) {
+        throw new Error('Invalid execution context in test');
+      }
+      const rawRequest = safeGetRequest(httpContext);
       if (!isAuthenticatedRequest(rawRequest)) {
         throw new Error('Invalid request format in test');
       }
@@ -564,7 +582,11 @@ describe('JwtAuthGuard', () => {
         .mockResolvedValue(payloadWithoutPermissions);
 
       await guard.canActivate(context);
-      const rawRequest = context.switchToHttp().getRequest();
+      const httpContext = context.switchToHttp();
+      if (!isHttpContext(httpContext)) {
+        throw new Error('Invalid execution context in test');
+      }
+      const rawRequest = safeGetRequest(httpContext);
       if (!isAuthenticatedRequest(rawRequest)) {
         throw new Error('Invalid request format in test');
       }
@@ -613,7 +635,11 @@ describe('JwtAuthGuard', () => {
 
       // Verify user information is correctly attached to each request
       contexts.forEach((context) => {
-        const rawRequest = context.switchToHttp().getRequest();
+        const httpContext = context.switchToHttp();
+        if (!isHttpContext(httpContext)) {
+          throw new Error('Invalid execution context in test');
+        }
+        const rawRequest = safeGetRequest(httpContext);
         if (!isAuthenticatedRequest(rawRequest)) {
           throw new Error('Invalid request format in test');
         }
@@ -830,7 +856,11 @@ describe('JwtAuthGuard', () => {
       expect(result).toBe(true);
 
       // Verify no persistent references or leaks
-      const rawRequest = context.switchToHttp().getRequest();
+      const httpContext = context.switchToHttp();
+      if (!isHttpContext(httpContext)) {
+        throw new Error('Invalid execution context in test');
+      }
+      const rawRequest = safeGetRequest(httpContext);
       if (!isAuthenticatedRequest(rawRequest)) {
         throw new Error('Invalid request format in test');
       }

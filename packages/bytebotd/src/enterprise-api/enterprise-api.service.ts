@@ -362,7 +362,7 @@ export class EnterpriseApiService {
           })
         )
         .subscribe({
-          next: (data: AxiosResponse) => resolve(data),
+          next: (data: unknown) => resolve(data),
           error: (error: unknown) => reject(error),
         });
     });

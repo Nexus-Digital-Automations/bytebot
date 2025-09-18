@@ -25,7 +25,7 @@ import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
 
 // Import our optimization services
-import { ParlantMultiLevelCacheService, MultiLevelCacheStats } from '../caching/parlant-multi-level-cache.service';
+import { ParlantMultiLevelCacheService, MultiLevelCacheStats, ValidationMetadata } from '../caching/parlant-multi-level-cache.service';
 import { 
   ParlantAsyncBatchProcessorService,
   ValidationPriority,
@@ -416,7 +416,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     context: ParlantConversationContext,
     startTime: number,
     optimizationPath: string[],
-    metadata: any
+    metadata: ValidationMetadata
   ): Promise<OptimizedValidationResponse> {
     optimizationPath.push('direct-processing');
     
@@ -459,7 +459,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     error: unknown,
     startTime: number,
     optimizationPath: string[],
-    metadata: any
+    metadata: ValidationMetadata
   ): OptimizedValidationResponse {
     const errorMessage = error instanceof Error ? error.message : String(error);
     
@@ -534,14 +534,14 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
   private createValidationMetadata(
     request: OptimizedValidationRequest,
     context: ParlantConversationContext
-  ): any {
+  ): ValidationMetadata {
     return {
       functionName: request.functionName,
       riskLevel: request.riskLevel,
       userId: context.userId,
       sessionId: context.sessionId,
       timestamp: new Date(),
-      context: context
+      context: context as unknown as Record<string, unknown>
     };
   }
 
@@ -578,14 +578,14 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
 
   private startHealthMonitoring(): void {
     // Monitor cache service health
-    this.eventEmitter.on('cacheHealthUpdate', (health) => {
+    this.eventEmitter.on('cacheHealthUpdate', (health: { healthy: boolean; [key: string]: unknown }) => {
       if (!health.healthy) {
         this.createAlert('cache-health', 'warning', 'Cache service health degraded', health);
       }
     });
 
     // Monitor batch processor health
-    this.eventEmitter.on('batchHealthUpdate', (health) => {
+    this.eventEmitter.on('batchHealthUpdate', (health: { healthy: boolean; [key: string]: unknown }) => {
       if (!health.healthy) {
         this.createAlert('batch-health', 'warning', 'Batch processor health degraded', health);
       }
@@ -636,7 +636,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     id: string,
     level: 'warning' | 'error' | 'critical',
     message: string,
-    data: any
+    data: { current?: number; target?: number; [key: string]: unknown }
   ): void {
     const alert: PerformanceAlert = {
       id,
@@ -733,7 +733,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
    */
   getOptimizationRecommendations(): OptimizationRecommendation[] {
     const recommendations: OptimizationRecommendation[] = [];
-    const metrics = this.getComprehensiveMetrics();
+    const _metrics = this.getComprehensiveMetrics();
     
     // Cache optimization recommendations
     const cacheRecommendations = this.cacheService.getCacheOptimizationRecommendations();
@@ -754,7 +754,8 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     recommendations.push(
       ...batchRecommendations.map(rec => ({
         category: 'batching' as const,
-        priority: rec.priority as any,
+        priority: rec.priority === ValidationPriority.HIGH ? 'high' : 
+                  rec.priority === ValidationPriority.MEDIUM ? 'medium' : 'low',
         title: `Batch ${rec.type}`,
         description: rec.action,
         expectedImprovement: '10-30% throughput improvement',
@@ -769,7 +770,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
   /**
    * Subscribe to performance events
    */
-  onPerformanceEvent(event: string, listener: (...args: any[]) => void): void {
+  onPerformanceEvent(event: string, listener: (...args: unknown[]) => void): void {
     this.eventEmitter.on(event, listener);
   }
 

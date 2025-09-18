@@ -694,7 +694,12 @@ export class ParlantPerformanceBenchmarkService {
       }
     }
     
-    return journeys[journeys.length - 1] ?? journeys[0]; // Fallback
+    // Fallback to last journey
+    const fallback = journeys[journeys.length - 1];
+    if (!fallback) {
+      throw new Error('No user journeys available for selection');
+    }
+    return fallback;
   }
 
   private async simulateUserJourney(

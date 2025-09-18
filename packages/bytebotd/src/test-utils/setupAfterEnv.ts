@@ -15,7 +15,7 @@
 import { expect } from '@jest/globals';
 
 // Type interfaces for test result validation
-interface ScreenshotResult {
+export interface ScreenshotResult {
   image: string;
   metadata: {
     captureTime: Date;
@@ -26,7 +26,7 @@ interface ScreenshotResult {
   };
 }
 
-interface FileOperationResult {
+export interface FileOperationResult {
   success: boolean;
   operationId: string;
   timestamp: Date;
@@ -37,7 +37,7 @@ interface FileOperationResult {
   size?: number;
 }
 
-interface OcrResult {
+export interface OcrResult {
   text: string;
   confidence: number;
   processingTimeMs: number;
@@ -54,7 +54,7 @@ interface OcrResult {
   }>;
 }
 
-interface FindTextResult {
+export interface FindTextResult {
   found: boolean;
   processingTimeMs: number;
   operationId: string;
@@ -73,7 +73,7 @@ interface FindTextResult {
   }>;
 }
 
-interface EnhancedScreenshotResult {
+export interface EnhancedScreenshotResult {
   image: string;
   processingTimeMs: number;
   enhancementsApplied: string[];
@@ -545,8 +545,6 @@ export const TestDataFactory = {
         data: Buffer.from('test file content').toString('base64'),
         name: 'test-file.txt',
         size: 17,
-        mediaType: 'text/plain',
-        lastModified: new Date(Date.now() - 86400000), // 1 day ago
         ...overrides,
       };
     } else {

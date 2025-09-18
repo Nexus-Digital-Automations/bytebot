@@ -114,13 +114,13 @@ export enum CircuitState {
  * Async processing performance metrics
  */
 export interface AsyncPerformanceMetrics {
-  readonly batchEfficiency: number;
-  readonly queueDepth: number;
-  readonly workerUtilization: number;
-  readonly concurrencyLevel: number;
-  readonly avgBatchLatency: number;
-  readonly throughputRequestsPerSecond: number;
-  readonly circuitBreakerState: CircuitState;
+  batchEfficiency: number;
+  queueDepth: number;
+  workerUtilization: number;
+  concurrencyLevel: number;
+  avgBatchLatency: number;
+  throughputRequestsPerSecond: number;
+  circuitBreakerState: CircuitState;
 }
 
 /**
@@ -482,6 +482,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
       approved: false,
       confidence: 0,
       reasoning: 'Validation service temporarily unavailable (circuit breaker open)',
+      validationTimestamp: new Date(),
       riskAssessment: {
         level: RiskLevel.MEDIUM,
         factors: ['Service degradation'],
@@ -510,7 +511,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
     results: ParlantValidationResponse[]
   ): void {
     batch.forEach((item, index) => {
-      if (index < results.length) {
+      if (index < results.length && results[index]) {
         item.resolve(results[index]);
       } else {
         item.reject(new Error('Batch processing incomplete'));
@@ -571,7 +572,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
         const result = await this.executeTaskOnWorker(worker, task);
         resolve(result);
       } catch (error) {
-        reject(error);
+        reject(error instanceof Error ? error : new Error(String(error)));
       } finally {
         this.busyWorkers.delete(worker);
         this.availableWorkers.push(worker);
@@ -586,7 +587,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
   }
 
   private async executeTaskOnWorker(
-    worker: Worker,
+    worker: WorkerInstance,
     task: ValidationTask
   ): Promise<ParlantValidationResponse[]> {
     // TODO: Implement actual worker task execution
@@ -617,7 +618,8 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
         }],
         complianceStatus: 'COMPLIANT'
       },
-      conversationSummary: 'Batch validation completed successfully'
+      conversationSummary: 'Batch validation completed successfully',
+      validationTimestamp: new Date()
     }));
   }
 
@@ -663,7 +665,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
       if (this.workerPool.length <= minWorkers) break;
       
       const worker = this.availableWorkers[i];
-      if (now - worker.lastUsed > idleThreshold) {
+      if (worker && now - worker.lastUsed > idleThreshold) {
         this.availableWorkers.splice(i, 1);
         const poolIndex = this.workerPool.indexOf(worker);
         if (poolIndex >= 0) {
@@ -704,12 +706,13 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
       ]);
       
       this.onCircuitSuccess();
-      return result;
+      return result as T;
       
     } catch (error) {
       this.onCircuitFailure();
       
-      if (this.circuitState === CircuitState.OPEN) {
+      // Circuit breaker may have opened due to failure
+      if ((this.circuitState as CircuitState) === CircuitState.OPEN) {
         return fallback();
       }
       

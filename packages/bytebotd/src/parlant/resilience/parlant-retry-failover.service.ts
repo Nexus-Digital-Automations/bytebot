@@ -20,6 +20,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
+import { performance } from 'perf_hooks';
 import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
 import { ParlantCircuitBreakerService, CircuitBreakerState } from './parlant-circuit-breaker.service';
 
@@ -727,7 +728,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   private async executeWithTimeout<T>(
     operation: () => Promise<T>,
     timeoutMs: number,
-    operationId: string
+    _operationId: string
   ): Promise<T> {
     return Promise.race([
       operation(),

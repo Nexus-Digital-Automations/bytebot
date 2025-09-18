@@ -205,11 +205,9 @@ describe('HealthController', () => {
 
       const result = await controller.getHealth();
 
-      expect(result).toEqual(expect.objectContaining({
-        status: 'unhealthy',
-        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/),
-        error: 'Database connection failed',
-      }));
+      expect(result).toHaveProperty('status', 'unhealthy');
+      expect(result).toHaveProperty('error', 'Database connection failed');
+      expect((result as { timestamp: string }).timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Health check failed: Database connection failed',
@@ -232,11 +230,9 @@ describe('HealthController', () => {
 
       const result = await controller.getHealth();
 
-      expect(result).toEqual(expect.objectContaining({
-        status: 'unhealthy',
-        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/),
-        error: 'Unknown _error',
-      }));
+      expect(result).toHaveProperty('status', 'unhealthy');
+      expect(result).toHaveProperty('error', 'Unknown _error');
+      expect((result as { timestamp: string }).timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Health check failed: Unknown _error',
@@ -257,12 +253,8 @@ describe('HealthController', () => {
 
       // Validate response structure with proper typing
       const typedResult = result as BasicHealthResponse;
-      expect(typedResult).toMatchObject(expect.objectContaining({
-        status: expect.stringMatching(/^(healthy|unhealthy)$/),
-        timestamp: expect.stringMatching(
-          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
-        )
-      }));
+      expect(typedResult.status).toMatch(/^(healthy|unhealthy)$/);
+      expect(typedResult.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
       
       // Validate numeric values with proper typing
       expect(typeof typedResult.uptime).toBe('number');

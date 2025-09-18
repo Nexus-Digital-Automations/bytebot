@@ -39,7 +39,7 @@ import { ConfigService } from '@nestjs/config';
  * Extended Request interface with optional route and user properties
  */
 interface ExtendedRequest extends Request<any, any, any, any, Record<string, any>> {
-  route?: {
+  route: {
     path?: string;
   };
   user?: {
@@ -271,8 +271,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
   private buildRequestContext(request: Request): EnterpriseRequestContext {
     const operationId = `intercept_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const extendedRequest = request as ExtendedRequest;
-    const routePath = extendedRequest.route?.path;
-    const endpoint = `${request.method}:${routePath ?? request.url}`;
+    const endpoint = `${request.method}:${extendedRequest.route?.path ?? request.url}`;
     
     return {
       operationId,

@@ -136,7 +136,7 @@ export class ParlantValidatedComputerUseService {
   async action(
     params: ComputerAction,
     context: ComputerActionValidationContext
-  ): Promise<any> {
+  ): Promise<unknown> {
     const operationId = `parlant_action_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     this.totalOperations++;
@@ -214,7 +214,7 @@ export class ParlantValidatedComputerUseService {
 
       // Step 4: Execute the original action with enhanced monitoring
       const executionStartTime = Date.now();
-      let executionResult: any;
+      let executionResult: unknown;
       let executionStatus: 'SUCCESS' | 'FAILURE' | 'TIMEOUT' = 'SUCCESS';
 
       try {

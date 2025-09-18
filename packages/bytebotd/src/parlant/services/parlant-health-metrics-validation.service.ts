@@ -174,11 +174,11 @@ export class ParlantHealthMetricsValidationService {
 
   /** Mock Parlant client - In production, this would be actual Parlant integration */
   private readonly parlantClient = {
-    createValidationSession: async (context: { operationType: HealthOperationType | MetricsOperationType }) => ({
+    createValidationSession: async (context: { operationType: HealthOperationType | MetricsOperationType | AlertOperationType }) => ({
       id: `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`,
       validate: async () => ({ approved: true, reason: 'Validated through conversational AI' }),
       explainAction: async () => `Health/metrics operation: ${context.operationType}`,
-      logAudit: async (audit: { action: string; timestamp: Date; details?: any }) => this.logger.debug('Parlant audit logged', audit),
+      logAudit: async (audit: { action: string; timestamp: Date; details?: Record<string, unknown> }) => this.logger.debug('Parlant audit logged', audit),
     }),
   };
 
@@ -579,7 +579,16 @@ export class ParlantHealthMetricsValidationService {
     };
 
     // Log audit trail
-    await session.logAudit(result.auditTrail);
+    await session.logAudit({
+      action: result.auditTrail.decision,
+      timestamp: result.auditTrail.timestamp,
+      details: {
+        operationId: result.auditTrail.operationId,
+        validator: result.auditTrail.validator,
+        reasoning: result.auditTrail.reasoning,
+        evidence: result.auditTrail.evidence || {}
+      }
+    });
 
     return result;
   }
@@ -670,7 +679,7 @@ export class ParlantHealthMetricsValidationService {
   private determineOperationFrequency(
     operationType: HealthOperationType | MetricsOperationType | AlertOperationType,
   ): 'once' | 'periodic' | 'high-frequency' {
-    const highFrequencyOps = [
+    const highFrequencyOps: (HealthOperationType | MetricsOperationType)[] = [
       HealthOperationType.BASIC_HEALTH_CHECK,
       HealthOperationType.LIVENESS_PROBE,
       MetricsOperationType.API_REQUEST_TRACKING,
@@ -681,7 +690,7 @@ export class ParlantHealthMetricsValidationService {
       return 'high-frequency';
     }
 
-    const periodicOps = [
+    const periodicOps: (HealthOperationType | MetricsOperationType)[] = [
       HealthOperationType.READINESS_PROBE,
       HealthOperationType.DETAILED_STATUS,
       MetricsOperationType.PROMETHEUS_COLLECTION,

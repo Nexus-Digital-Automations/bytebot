@@ -61,7 +61,7 @@ interface TestCoordinates {
   y: number;
 }
 
-interface ScreenshotResult {
+export interface ScreenshotResult {
   image: string;
   metadata: Record<string, unknown>;
 }

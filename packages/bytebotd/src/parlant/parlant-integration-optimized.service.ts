@@ -27,12 +27,9 @@ import { ParlantEnterpriseAuditService } from './audit/parlant-enterprise-audit.
 
 // Import interfaces from original service
 import {
-  ParlantConversationContext,
-  ConversationEntry,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
-  ExecutionContext,
   ConversationalValidationError
 } from './parlant-integration.service';
 
@@ -285,9 +282,9 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
       }
 
       // Step 4: Complete performance tracking
-      let performanceMetrics;
+      let _performanceMetrics;
       if (this.optimizedConfig.enablePerformanceMonitoring) {
-        performanceMetrics = this.performanceMonitor.completePerformanceTracking(
+        _performanceMetrics = this.performanceMonitor.completePerformanceTracking(
           request.operationId,
           cacheHit ? 'cache_hit' : 'real_time',
           cacheHit,
@@ -420,7 +417,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
         
         // Convert results to optimized format
         results = bulkResult.results.map((result, index) => {
-          const request = bulkRequest.requests[index];
+          const _request = bulkRequest.requests[index];
           if (result && result.success) {
             return {
               ...result.data as ParlantValidationResponse,
@@ -525,15 +522,15 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
    */
   getOptimizationStatus(): {
     config: OptimizedValidationConfig;
-    performance: any;
-    cache: any;
-    circuitBreaker: any;
-    audit: any;
+    performance: unknown | null;
+    cache: unknown | null;
+    circuitBreaker: unknown | null;
+    audit: unknown | null;
     uptime: number;
     targetsMet: boolean;
   } {
     const uptime = Date.now() - this.startTime;
-    const successRate = this.totalValidations > 0 ? (this.successfulValidations / this.totalValidations) * 100 : 100;
+    const _successRate = this.totalValidations > 0 ? (this.successfulValidations / this.totalValidations) * 100 : 100;
     
     return {
       config: this.optimizedConfig,
@@ -558,7 +555,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
 
   private async executeValidationOperation(
     request: ParlantValidationRequest, 
-    endpoint?: string
+    _endpoint?: string
   ): Promise<ParlantValidationResponse> {
     // This method would contain the actual Parlant API integration
     // For now, we'll simulate the validation process
@@ -627,7 +624,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
     }
   }
 
-  private validatePerformanceTargets(totalTime: number, cacheHit: boolean): void {
+  private validatePerformanceTargets(totalTime: number, _cacheHit: boolean): void {
     if (totalTime > this.optimizedConfig.performanceTargets.averageLatency) {
       this.logger.warn(`Performance target exceeded: ${totalTime.toFixed(2)}ms > ${this.optimizedConfig.performanceTargets.averageLatency}ms target`);
     }
@@ -635,7 +632,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
 
   private analyzeBulkPerformance(
     summary: BulkValidationResult['summary'],
-    results: OptimizedValidationResult[]
+    _results: OptimizedValidationResult[]
   ): BulkValidationResult['performanceAnalysis'] {
     const bottlenecks: string[] = [];
     const recommendations: string[] = [];

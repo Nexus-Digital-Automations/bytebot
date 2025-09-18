@@ -3086,10 +3086,106 @@
       "updated_at": "2025-09-17T21:48:09.428Z",
       "archived_at": "2025-09-17T21:48:09.432Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T23:16:21.915Z",
+      "title": "Fix constant nullishness violations in bytebotd package",
+      "description": "Search for and fix no-constant-binary-expression errors where ?? has constant left-hand side. Review parlant performance benchmark service lines 762, 852, 901 and similar. Replace patterns like constantValue ?? fallback with direct assignment or proper conditional logic.",
+      "category": "error",
+      "id": "error_1758150981915_2jkf8fqcofo",
+      "assigned_agent": "dev_session_1758150948096_1_general_f340de28",
+      "started_at": "2025-09-17T23:17:26.376Z",
+      "claimed_by": "dev_session_1758150948096_1_general_f340de28",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150948096_1_general_f340de28",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:17:26.376Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T00:13:55.018Z",
+      "updated_at": "2025-09-18T00:13:55.018Z",
+      "archived_at": "2025-09-18T00:13:55.029Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T23:40:44.794Z",
+      "title": "Fix high-density unsafe violations in test files - health.service.spec.ts and similar",
+      "description": "Systematically fix 84+ unsafe assignment and unsafe call violations in src/health/__tests__/health.service.spec.ts and other high-density test files. Focus on patterns not covered by other agents: test mocking with proper types, fixture data typing, assertion property access. Coordinate to avoid conflicts with concurrent agents.",
+      "category": "error",
+      "id": "error_1758152444793_bgzacxbk3dd",
+      "assigned_agent": "dev_session_1758150947542_1_general_d8b1ecbc",
+      "started_at": "2025-09-17T23:43:36.669Z",
+      "claimed_by": "dev_session_1758150947542_1_general_d8b1ecbc",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150947542_1_general_d8b1ecbc",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:43:36.669Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T00:46:01.259Z",
+      "updated_at": "2025-09-18T00:46:01.259Z",
+      "archived_at": "2025-09-18T00:46:01.272Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T23:16:22.359Z",
+      "title": "Coordinate comprehensive ESLint violation sweep across bytebotd package",
+      "description": "Monitor and coordinate with other subagents to identify missed ESLint violations, apply systematic fixes for edge cases, ensure zero conflicts between agents, and achieve exactly 0 ESLint violations across entire bytebotd package with documented evidence",
+      "category": "error",
+      "id": "error_1758150982358_2mfdy003a0g",
+      "assigned_agent": "dev_session_1758150947542_1_general_d8b1ecbc",
+      "started_at": "2025-09-17T23:17:28.560Z",
+      "claimed_by": "dev_session_1758150947542_1_general_d8b1ecbc",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150947542_1_general_d8b1ecbc",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:17:28.560Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T00:47:56.039Z",
+      "updated_at": "2025-09-18T00:47:56.039Z",
+      "archived_at": "2025-09-18T00:47:56.048Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T23:16:22.418Z",
+      "title": "Zero tolerance ESLint validation - achieve 0 violations",
+      "description": "Run comprehensive ESLint check on bytebotd package and systematically fix all remaining violations to achieve exactly 0 problems",
+      "category": "error",
+      "id": "error_1758150982417_8pl6whc32as",
+      "assigned_agent": "dev_session_1758150950922_1_general_5b313793",
+      "started_at": "2025-09-17T23:17:08.031Z",
+      "claimed_by": "dev_session_1758150950922_1_general_5b313793",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150950922_1_general_5b313793",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:17:08.031Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T00:50:00.201Z",
+      "updated_at": "2025-09-18T00:50:00.201Z",
+      "archived_at": "2025-09-18T00:50:00.215Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 62,
+  "total_completed": 66,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-17T21:48:09.432Z"
+  "last_archived": "2025-09-18T00:50:00.215Z"
 }

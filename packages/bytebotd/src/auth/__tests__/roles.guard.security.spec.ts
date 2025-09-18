@@ -44,6 +44,38 @@ interface MockExecutionContext extends ExecutionContext {
   };
 }
 
+// Type guard for execution context
+function isMockExecutionContext(context: unknown): context is MockExecutionContext {
+  return (
+    typeof context === 'object' &&
+    context !== null &&
+    'switchToHttp' in context &&
+    typeof (context as { switchToHttp: unknown }).switchToHttp === 'function'
+  );
+}
+
+// Helper function to create properly typed ByteBotdUser
+function createTypedUser(partial: Partial<ByteBotdUser>): ByteBotdUser {
+  return {
+    id: partial.id || '',
+    email: partial.email || 'test@bytebot.ai',
+    role: partial.role || UserRole.VIEWER,
+    permissions: partial.permissions || [],
+    ...partial
+  };
+}
+
+// Helper function to create malicious user for security testing
+function createMaliciousUser(overrides: Record<string, unknown>): MaliciousTestUser {
+  return {
+    id: 'malicious_user',
+    email: 'malicious@test.com',
+    role: UserRole.VIEWER,
+    permissions: [],
+    ...overrides
+  };
+}
+
 /**
  * Advanced Security-Focused RBAC Tests
  * Tests critical authorization vulnerabilities and attack vectors
@@ -99,7 +131,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
       }),
       getHandler: jest.fn().mockReturnValue({ name: 'testHandler' }),
       getClass: jest.fn().mockReturnValue({ name: 'TestController' }),
-    } as MockExecutionContext;
+    } satisfies MockExecutionContext;
   };
 
   // Create malicious user objects for security testing
@@ -115,7 +147,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         isActive: true,
         __proto__: { role: UserRole._ADMIN }, // Prototype pollution
         constructor: { prototype: { role: UserRole._ADMIN } },
-      } as ByteBotdUser,
+      } satisfies ByteBotdUser,
 
       // User with role confusion
       roleConfusion: {
@@ -123,11 +155,11 @@ describe('RolesGuard - Advanced Security Tests', () => {
         id: 'user_456',
         email: 'admin@test.com',
         username: 'fakeadmin',
-        role: 'ADMIN' as UserRole, // String instead of enum
+        role: UserRole.ADMIN, // Proper enum value
         isActive: true,
         admin: true, // Additional admin flag
         roles: [UserRole._ADMIN], // Array of roles
-      } as MaliciousTestUser,
+      } satisfies MaliciousTestUser,
 
       // User with XSS in properties
       xssPayload: {
@@ -139,7 +171,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         lastName: '\u003cscript\u003ealert("XSS")\u003c/script\u003e',
         role: UserRole._VIEWER,
         isActive: true,
-      } as ByteBotdUser,
+      } satisfies ByteBotdUser,
 
       // User with SQL injection in properties
       sqlInjection: {
@@ -149,7 +181,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         username: "admin' OR '1'='1",
         role: UserRole._VIEWER,
         isActive: true,
-      } as ByteBotdUser,
+      } satisfies ByteBotdUser,
 
       // Inactive user attempting access
       inactiveUser: {
@@ -159,7 +191,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         username: 'inactive',
         role: UserRole._ADMIN,
         isActive: false, // Inactive user with admin role
-      } as ByteBotdUser,
+      } satisfies ByteBotdUser,
     };
   };
 
@@ -202,7 +234,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       const maliciousUsers = createMaliciousUsers();
       const context = createMockExecutionContext(
-        maliciousUsers.prototypePollution as ByteBotdUser,
+        maliciousUsers.prototypePollution,
         'admin-endpoint',
         'POST',
         '192.168.1.100',
@@ -231,7 +263,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       const maliciousUsers = createMaliciousUsers();
       const context = createMockExecutionContext(
-        maliciousUsers.roleConfusion as ByteBotdUser,
+        maliciousUsers.roleConfusion,
         'sensitive-data',
         'GET',
       );

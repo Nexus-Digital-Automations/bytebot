@@ -392,7 +392,6 @@ export class ComplianceFrameworkService {
         approvedBy: request.context.externalAuditor,
         evidenceCollected: requirementResults.filter(r => r.evidence.length > 0).length,
         testsPerforme: controlResults.length,
-        processingTimeMs: processingTime,
       },
       nextActions: {
         remediationRequired: findings.length > 0,

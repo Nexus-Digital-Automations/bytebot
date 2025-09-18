@@ -87,6 +87,13 @@ export interface ValidationMetadata {
   readonly sessionId?: string;
   readonly timestamp: Date;
   readonly context: Record<string, unknown>;
+  readonly cacheHit: boolean;
+  readonly cacheLevel?: 'L1' | 'L2' | 'L3';
+  readonly batchProcessed: boolean;
+  readonly batchId?: string;
+  readonly circuitBreakerUsed: boolean;
+  readonly degradedMode: boolean;
+  readonly retryAttempts: number;
 }
 
 /**

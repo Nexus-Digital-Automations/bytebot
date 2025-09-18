@@ -32,6 +32,24 @@ import {
   RiskLevel 
 } from '../parlant-integration.service';
 
+// Test interfaces for health checks and metrics
+interface PerformanceHealthCheck {
+  status: string;
+  performance: {
+    p95ResponseTime: number;
+    cacheHitRate: number;
+    throughput: number;
+  };
+  targetCompliance: unknown;
+  cacheHealth: unknown;
+  batchProcessing: unknown;
+  activeAlerts: unknown;
+}
+
+interface PerformanceMetrics {
+  [key: string]: unknown;
+}
+
 describe('Parlant Performance Optimization Validation', () => {
   let module: TestingModule;
   let cacheService: ParlantMultiLevelCacheService;
@@ -107,7 +125,7 @@ describe('Parlant Performance Optimization Validation', () => {
     });
 
     it('should cache and retrieve validation results', async () => {
-      const key = cacheService.generateFunctionKey(
+      const _key = cacheService.generateFunctionKey(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
         sampleRequest.context
@@ -600,7 +618,7 @@ describe('Parlant Performance Optimization Validation', () => {
 /**
  * Utility class for performance benchmarking
  */
-class PerformanceBenchmark {
+class _PerformanceBenchmark {
   static async measureExecutionTime<T>(
     operation: () => Promise<T>,
     iterations: number = 1

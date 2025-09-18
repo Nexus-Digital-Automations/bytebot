@@ -96,9 +96,11 @@ export const ParlantUtils = {
    * Validate conversation context structure
    */
   validateConversationContext: (context: unknown): boolean => {
-    return !!(context?.userId && 
-             context.sessionId && 
-             Array.isArray(context.conversationHistory));
+    if (!context || typeof context !== 'object') return false;
+    const ctx = context as Record<string, unknown>;
+    return !!(ctx.userId && 
+             ctx.sessionId && 
+             Array.isArray(ctx.conversationHistory));
   },
 
   /**
@@ -128,15 +130,23 @@ export const ParlantUtils = {
    * Format validation response for API output
    */
   formatValidationResponse: (response: Record<string, unknown>): Record<string, unknown> => {
-    return {
+    const result: Record<string, unknown> = {
       approved: response.approved,
       reasoning: response.reasoning,
       confidence: response.confidence,
       timestamp: response.validationTimestamp,
       conversationId: response.conversationId,
-      ...(response.suggestedAlternatives && { suggestedAlternatives: response.suggestedAlternatives }),
-      ...(response.executionContext && { executionContext: response.executionContext }),
-    } as Record<string, unknown>;
+    };
+    
+    if (response.suggestedAlternatives) {
+      result.suggestedAlternatives = response.suggestedAlternatives;
+    }
+    
+    if (response.executionContext) {
+      result.executionContext = response.executionContext;
+    }
+    
+    return result;
   },
 
   /**

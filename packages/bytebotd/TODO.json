@@ -1429,7 +1429,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T23:16:21.915Z",
       "title": "Fix constant nullishness violations in bytebotd package",
       "description": "Search for and fix no-constant-binary-expression errors where ?? has constant left-hand side. Review parlant performance benchmark service lines 762, 852, 901 and similar. Replace patterns like constantValue ?? fallback with direct assignment or proper conditional logic.",
@@ -1446,7 +1446,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T00:13:55.018Z",
+      "updated_at": "2025-09-18T00:13:55.018Z"
     },
     {
       "status": "in_progress",
@@ -1469,7 +1471,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T23:16:22.359Z",
       "title": "Coordinate comprehensive ESLint violation sweep across bytebotd package",
       "description": "Monitor and coordinate with other subagents to identify missed ESLint violations, apply systematic fixes for edge cases, ensure zero conflicts between agents, and achieve exactly 0 ESLint violations across entire bytebotd package with documented evidence",
@@ -1486,7 +1488,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T00:47:56.039Z",
+      "updated_at": "2025-09-18T00:47:56.039Z"
     },
     {
       "status": "in_progress",
@@ -1509,7 +1513,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T23:16:22.418Z",
       "title": "Zero tolerance ESLint validation - achieve 0 violations",
       "description": "Run comprehensive ESLint check on bytebotd package and systematically fix all remaining violations to achieve exactly 0 problems",
@@ -1526,10 +1530,12 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T00:50:00.201Z",
+      "updated_at": "2025-09-18T00:50:00.201Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T23:40:44.794Z",
       "title": "Fix high-density unsafe violations in test files - health.service.spec.ts and similar",
       "description": "Systematically fix 84+ unsafe assignment and unsafe call violations in src/health/__tests__/health.service.spec.ts and other high-density test files. Focus on patterns not covered by other agents: test mocking with proper types, fixture data typing, assertion property access. Coordinate to avoid conflicts with concurrent agents.",
@@ -1543,6 +1549,29 @@
           "agentId": "dev_session_1758150947542_1_general_d8b1ecbc",
           "role": "primary",
           "assignedAt": "2025-09-17T23:43:36.669Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T00:46:01.259Z",
+      "updated_at": "2025-09-18T00:46:01.259Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-18T00:21:33.848Z",
+      "title": "CRITICAL BUILD FAILURE: Fix 39 TypeScript errors blocking bytebotd deployment",
+      "description": "Build completely broken with 39 TypeScript compilation errors. Critical issues: ExtendedRequest interface, RxJS subscription types, Parlant context properties, validation timestamp mismatches, undefined return types, compliance framework properties, test utils export conflicts. Production deployment blocked.",
+      "category": "error",
+      "priority": "normal",
+      "id": "error_1758154893848_rxf86i0ppi",
+      "assigned_agent": "dev_session_1758154438630_1_general_1dc693da",
+      "started_at": "2025-09-18T00:22:49.016Z",
+      "claimed_by": "dev_session_1758154438630_1_general_1dc693da",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758154438630_1_general_1dc693da",
+          "role": "primary",
+          "assignedAt": "2025-09-18T00:22:49.016Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
