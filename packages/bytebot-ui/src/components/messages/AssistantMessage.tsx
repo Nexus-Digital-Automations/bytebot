@@ -45,7 +45,7 @@ function isValidToolResultContent(
   is_error?: false | undefined;
 } {
   // Comprehensive type safety check
-  if (block == null || typeof block !== "object") {
+  if (block === null || block === undefined || typeof block !== "object") {
     return false;
   }
 
@@ -59,7 +59,7 @@ function isValidToolResultContent(
     Array.isArray(obj.content) &&
     (obj.content as unknown[]).length > 0 &&
     (obj.content as unknown[]).every(
-      (item) => item != null && typeof item === "object",
+      (item) => item !== null && item !== undefined && typeof item === "object",
     )
   );
 }
@@ -75,7 +75,7 @@ function isNonErrorToolResult(
   content: MessageContentBlock[];
 } {
   // Comprehensive type safety check
-  if (block == null || typeof block !== "object") {
+  if (block === null || block === undefined || typeof block !== "object") {
     return false;
   }
 
@@ -89,7 +89,7 @@ function isNonErrorToolResult(
     Array.isArray(obj.content) &&
     (obj.content as unknown[]).length > 0 &&
     (obj.content as unknown[]).every(
-      (item) => item != null && typeof item === "object",
+      (item) => item !== null && item !== undefined && typeof item === "object",
     )
   );
 }

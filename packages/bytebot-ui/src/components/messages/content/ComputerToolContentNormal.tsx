@@ -78,19 +78,6 @@ function isValidApplication(value: unknown): value is Application {
   );
 }
 
-/**
- * Safe wrapper for type guard calls that handles error types
- */
-function safeTypeGuardCall(
-  typeGuard: (block: unknown) => boolean,
-  block: ComputerToolUseContentBlock,
-): boolean {
-  try {
-    return Boolean(typeGuard(block));
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Type guard to check if a block is a valid ComputerToolUseContentBlock with input
@@ -136,19 +123,19 @@ function ToolDetailsNormal({
 
   return (
     <>
-      {safeTypeGuardCall(isApplicationToolUseBlock, block) && (
+      {isApplicationToolUseBlock(block) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
               return "Unknown Application";
             }
-            // Type assertion after type guard to fix unsafe member access
-            const validatedBlock = block as ComputerToolUseContentBlock;
-            const input = validatedBlock.input as { application?: unknown };
-            const app = input.application;
-            if (isValidApplication(app)) {
-              // TypeScript should know app is Application here, but explicit cast for safety
-              return applicationMap[app];
+            // After type guard, we know block has input property
+            const input = block.input;
+            if (typeof input === "object" && input !== null && "application" in input) {
+              const app = (input as { application?: unknown }).application;
+              if (isValidApplication(app)) {
+                return applicationMap[app];
+              }
             }
             return "Unknown Application";
           })()}
@@ -156,57 +143,63 @@ function ToolDetailsNormal({
       )}
 
       {/* Text for type and key actions */}
-      {(safeTypeGuardCall(isTypeKeysToolUseBlock, block) ||
-        safeTypeGuardCall(isPressKeysToolUseBlock, block)) && (
+      {(isTypeKeysToolUseBlock(block) || isPressKeysToolUseBlock(block)) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
               return "Invalid keys";
             }
-            // Type assertion after type guard to fix unsafe member access
-            const validatedBlock = block as ComputerToolUseContentBlock;
-            const input = validatedBlock.input as { keys?: unknown };
-            const keys = input.keys;
-            return Array.isArray(keys) ? keys.join(" + ") : "Invalid keys";
+            // After type guard, we know block has input property
+            const input = block.input;
+            if (typeof input === "object" && input !== null && "keys" in input) {
+              const keys = (input as { keys?: unknown }).keys;
+              return Array.isArray(keys) ? keys.join(" + ") : "Invalid keys";
+            }
+            return "Invalid keys";
           })()}
         </p>
       )}
 
-      {(safeTypeGuardCall(isTypeTextToolUseBlock, block) ||
-        safeTypeGuardCall(isPasteTextToolUseBlock, block)) && (
+      {(isTypeTextToolUseBlock(block) || isPasteTextToolUseBlock(block)) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
               return "Invalid text";
             }
-            // Type assertion after type guard to fix unsafe member access
-            const validatedBlock = block as ComputerToolUseContentBlock;
-            const input = validatedBlock.input as { text?: unknown; isSensitive?: unknown };
-            const text = input.text;
-            const isSensitive = Boolean(input.isSensitive ?? false);
+            // After type guard, we know block has input property
+            const input = block.input;
+            if (typeof input === "object" && input !== null) {
+              const inputObj = input as { text?: unknown; isSensitive?: unknown };
+              const text = inputObj.text;
+              const isSensitive = Boolean(inputObj.isSensitive ?? false);
 
-            if (typeof text !== "string") {
-              return "Invalid text";
+              if (typeof text !== "string") {
+                return "Invalid text";
+              }
+
+              return isSensitive ? "●".repeat(text.length) : text;
             }
-
-            return isSensitive ? "●".repeat(text.length) : text;
+            return "Invalid text";
           })()}
         </p>
       )}
 
       {/* Duration for wait actions */}
-      {safeTypeGuardCall(isWaitToolUseBlock, block) && (
+      {isWaitToolUseBlock(block) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
               return "Invalid duration";
             }
             // After type guard, we know block has input property
-            const input = (block as ComputerToolUseContentBlock).input as { duration?: unknown };
-            const duration = input.duration;
-            return typeof duration === "number"
-              ? `${duration}ms`
-              : "Invalid duration";
+            const input = block.input;
+            if (typeof input === "object" && input !== null && "duration" in input) {
+              const duration = (input as { duration?: unknown }).duration;
+              return typeof duration === "number"
+                ? `${duration}ms`
+                : "Invalid duration";
+            }
+            return "Invalid duration";
           })()}
         </p>
       )}
@@ -216,8 +209,11 @@ function ToolDetailsNormal({
         <p className={baseClasses}>
           {((): string => {
             // hasCoordinates type guard already confirmed structure
-            const coords = block.input.coordinates;
-            return `${coords.x}, ${coords.y}`;
+            if (hasCoordinates(block.input)) {
+              const coords = block.input.coordinates;
+              return `${coords.x}, ${coords.y}`;
+            }
+            return "Invalid coordinates";
           })()}
         </p>
       )}
@@ -227,21 +223,24 @@ function ToolDetailsNormal({
         <p className={baseClasses}>
           {((): string => {
             // hasPathCoordinates type guard already confirmed structure  
-            const path = block.input.path;
-            const firstPoint = path[0];
-            const lastPoint = path[path.length - 1];
+            if (hasPathCoordinates(block.input)) {
+              const path = block.input.path;
+              const firstPoint = path[0];
+              const lastPoint = path[path.length - 1];
 
-            if (firstPoint === undefined || lastPoint === undefined) {
-              return "Invalid path coordinates";
+              if (firstPoint === undefined || lastPoint === undefined) {
+                return "Invalid path coordinates";
+              }
+
+              return `From: ${firstPoint.x}, ${firstPoint.y} → To: ${lastPoint.x}, ${lastPoint.y}`;
             }
-
-            return `From: ${firstPoint.x}, ${firstPoint.y} → To: ${lastPoint.x}, ${lastPoint.y}`;
+            return "Invalid path coordinates";
           })()}
         </p>
       )}
 
       {/* Scroll information */}
-      {safeTypeGuardCall(isScrollToolUseBlock, block) && (
+      {isScrollToolUseBlock(block) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
@@ -249,23 +248,27 @@ function ToolDetailsNormal({
             }
             // After type guard, we know block has input property
             const input = block.input;
-            const direction = input.direction;
-            const scrollCount = input.scrollCount;
+            if (typeof input === "object" && input !== null) {
+              const inputObj = input as { direction?: unknown; scrollCount?: unknown };
+              const direction = inputObj.direction;
+              const scrollCount = inputObj.scrollCount;
 
-            const validDirection =
-              typeof direction === "string" ? direction : "unknown";
-            const validScrollCount =
-              typeof scrollCount === "number" && !Number.isNaN(scrollCount)
-                ? scrollCount
-                : 0;
+              const validDirection =
+                typeof direction === "string" ? direction : "unknown";
+              const validScrollCount =
+                typeof scrollCount === "number" && !Number.isNaN(scrollCount)
+                  ? scrollCount
+                  : 0;
 
-            return `${validDirection} ${validScrollCount}`;
+              return `${validDirection} ${validScrollCount}`;
+            }
+            return "unknown 0";
           })()}
         </p>
       )}
 
       {/* File information */}
-      {safeTypeGuardCall(isReadFileToolUseBlock, block) && (
+      {isReadFileToolUseBlock(block) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
@@ -273,8 +276,11 @@ function ToolDetailsNormal({
             }
             // After type guard, we know block has input property
             const input = block.input;
-            const path = input.path;
-            return typeof path === "string" ? path : "Invalid file path";
+            if (typeof input === "object" && input !== null && "path" in input) {
+              const path = (input as { path?: unknown }).path;
+              return typeof path === "string" ? path : "Invalid file path";
+            }
+            return "Invalid file path";
           })()}
         </p>
       )}
