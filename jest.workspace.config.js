@@ -91,7 +91,6 @@ module.exports = {
    * - Tailored setup files and test patterns
    */
   projects: [
-  projects: [
     {
       displayName: { name: "Shared", color: "yellow" },
       rootDir: "<rootDir>/packages/shared",

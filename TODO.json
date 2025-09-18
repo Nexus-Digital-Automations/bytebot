@@ -1624,6 +1624,27 @@
       ],
       "completed_at": "2025-09-18T00:12:07.925Z",
       "updated_at": "2025-09-18T00:12:07.925Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-18T05:27:26.876Z",
+      "title": "URGENT: Fix TypeScript compilation errors preventing workspace builds",
+      "description": "Fix critical TypeScript compilation errors in ML algorithms that are blocking builds across the entire workspace. Primary files with errors: ml-performance-metrics.ts (30+ TS2693, TS2538, TS2362 errors), naive-bayes-classifier.ts, neural-network-classifier.ts. Issues include VulnerabilitySeverity enum usage errors, index type errors, and arithmetic operation type mismatches. This is a recovery task from stale agent error_1757475538717_u187e183i.",
+      "category": "error",
+      "priority": "normal",
+      "id": "error_1758173246876_mbmr52jr53c",
+      "assigned_agent": "dev_session_1758173110446_1_general_54c5e9c3",
+      "started_at": "2025-09-18T05:27:45.225Z",
+      "claimed_by": "dev_session_1758173110446_1_general_54c5e9c3",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758173110446_1_general_54c5e9c3",
+          "role": "primary",
+          "assignedAt": "2025-09-18T05:27:45.225Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "agents": {
@@ -4050,6 +4071,69 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-18T02:55:43.885Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758167944453_1_general_13e72504": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-18T03:59:04.453Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-18T03:59:04.453Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758169555798_1_general_91c68bf2": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-18T04:25:55.799Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-18T04:25:55.799Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758169933720_1_general_b6d5055d": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-18T04:32:13.721Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-18T04:32:13.721Z",
       "sessionId": null,
       "metadata": {}
     }
