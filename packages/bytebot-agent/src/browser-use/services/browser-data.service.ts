@@ -350,7 +350,11 @@ export class BrowserDataService {
         error: {
           code: (error as Error).name || 'EXTRACTION_ERROR',
           message: (error as Error).message,
-          details: error as Error,
+          details: {
+            name: (error as Error).name,
+            message: (error as Error).message,
+            stack: (error as Error).stack,
+          } as Record<string, unknown>,
         },
       };
 
@@ -719,7 +723,7 @@ export class BrowserDataService {
     canonicalUrl?: string;
     ogTags?: Record<string, string>;
     twitterTags?: Record<string, string>;
-    structuredData?: unknown[];
+    structuredData?: Record<string, unknown>[];
   }> {
     try {
       const pageState = await this.browserDomService.getState(sessionId);
@@ -734,7 +738,7 @@ export class BrowserDataService {
         canonicalUrl: '', // Would be extracted from link rel="canonical"
         ogTags: {}, // Would be extracted from Open Graph tags
         twitterTags: {}, // Would be extracted from Twitter Card tags
-        structuredData: [], // Would be extracted from JSON-LD
+        structuredData: [] as Record<string, unknown>[], // Would be extracted from JSON-LD
       };
     } catch (error) {
       this.logger.warn('Failed to get page metadata:', error);
@@ -1019,7 +1023,9 @@ export class BrowserDataService {
 
       const normalizedItem = item;
       return {
-        data: normalizedItem.data || normalizedItem,
+        data:
+          (normalizedItem.data as Record<string, unknown>) ||
+          (normalizedItem as Record<string, unknown>),
         source: {
           tagName: this.safeGetString(normalizedItem, 'tagName', 'unknown'),
           textContent: this.safeGetString(normalizedItem, 'textContent', ''),

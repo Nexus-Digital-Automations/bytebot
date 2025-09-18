@@ -656,7 +656,7 @@ export class BrowserResultsService {
             ? {
                 code: 'EXECUTION_ERROR',
                 message: result.data.errors[0],
-                details: result.data.errors,
+                details: { errors: result.data.errors } as Record<string, unknown>,
               }
             : undefined,
           screenshots: result.data.screenshots?.map((screenshotId) => ({
@@ -841,7 +841,7 @@ export class BrowserResultsService {
           timestamp: new Date(),
           failedStep: undefined,
           recoverable: false,
-          details: this.getErrorStack(error),
+          details: this.getErrorStack(error) ? { stack: this.getErrorStack(error) } as Record<string, unknown> : undefined,
         },
         archived: false,
         retrievedAt: new Date(),

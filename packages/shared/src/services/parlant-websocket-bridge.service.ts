@@ -18,6 +18,7 @@ import {
   OnModuleDestroy,
 } from "@nestjs/common";
 import { EventEmitter } from "events";
+import { IncomingMessage } from "http";
 import * as WebSocket from "ws";
 import * as jwt from "jsonwebtoken";
 import {
@@ -275,7 +276,7 @@ export class ParlantWebSocketBridgeService
     this.serverWs = new WebSocket.Server({
       port,
       verifyClient: (info: {
-        req: Record<string, unknown> & { headers: Record<string, string> };
+        req: IncomingMessage;
         origin?: string;
         secure?: boolean;
       }) => {

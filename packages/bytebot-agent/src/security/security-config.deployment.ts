@@ -24,7 +24,7 @@ import {
   StandardizedValidationPipe,
   StandardizedRateLimitGuard,
   StandardizedValidationPipes,
-} from '@bytebot/shared/server';
+} from '@bytebot/shared/dist/index-server';
 
 /**
  * Bytebot-Agent Security Configuration Service

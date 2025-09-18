@@ -317,7 +317,7 @@ export class BrowserTaskService {
       sessionId: task.sessionId,
       metrics: task.metrics,
       executionSteps: task.executionSteps,
-      result: task.result?.data,
+      result: task.result?.data as Record<string, unknown> | undefined,
       error: task.error,
       timestamp: new Date(),
     };
@@ -429,12 +429,12 @@ export class BrowserTaskService {
         success: step.status === TaskStatus.COMPLETED,
         error: step.error,
       })),
-      result: task.result?.data,
+      result: task.result?.data as Record<string, unknown> | undefined,
       error: task.error
         ? {
             message: task.error.message,
             code: task.error.code,
-            details: task.error.stack,
+            details: { stack: task.error.stack } as Record<string, unknown>,
             timestamp: task.error.timestamp,
           }
         : undefined,
@@ -727,7 +727,7 @@ export class BrowserTaskService {
       sessionId: task.sessionId,
       metrics: task.metrics,
       executionSteps: task.executionSteps,
-      result: task.result?.data,
+      result: task.result?.data as Record<string, unknown> | undefined,
       error: task.error,
       timestamp: new Date(),
     }));
@@ -1069,12 +1069,12 @@ export class BrowserTaskService {
         success: step.status === TaskStatus.COMPLETED,
         error: step.error,
       })),
-      result: task.result?.data,
+      result: task.result?.data as Record<string, unknown> | undefined,
       error: task.error
         ? {
             message: task.error.message,
             code: task.error.code,
-            details: task.error.stack,
+            details: { stack: task.error.stack } as Record<string, unknown>,
             timestamp: task.error.timestamp,
           }
         : undefined,

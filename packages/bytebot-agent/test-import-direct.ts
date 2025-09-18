@@ -1,4 +1,4 @@
-import { StandardizedSecurityMiddleware, ServiceType } from "@bytebot/shared/server";
+import { StandardizedSecurityMiddleware, ServiceType } from "@bytebot/shared/dist/index-server";
 
 console.log("Import test successful");
 console.log(typeof StandardizedSecurityMiddleware);

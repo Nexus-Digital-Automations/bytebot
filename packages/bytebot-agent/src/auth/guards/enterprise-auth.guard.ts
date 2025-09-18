@@ -583,13 +583,30 @@ export class EnterpriseAuthGuard implements CanActivate {
    */
   private calculateRiskScore(
     payload: EnhancedJwtPayload,
-    _securityContext: SecurityContext,
+    securityContext: SecurityContext,
   ): number {
     let riskScore = 0;
 
     // Check for existing risk indicators
     if (payload.riskScore) {
       riskScore += payload.riskScore;
+    }
+
+    // Security context-based risk factors
+    if (securityContext.authentication.strength === 'weak') {
+      riskScore += 0.2;
+    } else if (securityContext.authentication.strength === 'medium') {
+      riskScore += 0.1;
+    }
+
+    // MFA verification status
+    if (!securityContext.authentication.mfaVerified) {
+      riskScore += 0.15;
+    }
+
+    // Session risk score from context
+    if (securityContext.session.riskScore) {
+      riskScore += securityContext.session.riskScore * 0.3;
     }
 
     // Time-based risk factors
@@ -606,6 +623,16 @@ export class EnterpriseAuthGuard implements CanActivate {
     const sessionAge = Date.now() / 1000 - (payload.iat || 0);
     if (sessionAge > 3600) {
       // 1 hour
+      riskScore += 0.1;
+    }
+
+    // Token age-based risk
+    const tokenAge = securityContext.authentication.tokenAge;
+    if (tokenAge > 86400) {
+      // 24 hours
+      riskScore += 0.2;
+    } else if (tokenAge > 43200) {
+      // 12 hours
       riskScore += 0.1;
     }
 

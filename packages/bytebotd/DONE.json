@@ -4108,10 +4108,82 @@
       "updated_at": "2025-09-18T07:52:08.893Z",
       "archived_at": "2025-09-18T07:52:08.917Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T16:44:05.080Z",
+      "title": "Fix Express Request type conversion errors in bytebot shared package middleware",
+      "description": "CRITICAL ERRORS to resolve in universal-parlant-validation.middleware.ts: 1. Line 488: Conversion of Request to Record<string, unknown> type error 2. Line 505: Property parlantService does not exist - should be _parlantService 3. Line 603: Request type conversion to Record<string, unknown> & { user?: { id?: string; userId?: string; }; } 4. Line 649: Spread types may only be created from object types. Fix Request type conversions using proper type guards or interface extensions, resolve property access issues, and fix spread operator type compatibility.",
+      "category": "error",
+      "id": "error_1758213845080_cw0rxu021kr",
+      "assigned_agent": "dev_session_1758213824127_1_general_59ec19df",
+      "started_at": "2025-09-18T16:44:25.163Z",
+      "claimed_by": "dev_session_1758213824127_1_general_59ec19df",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758213824127_1_general_59ec19df",
+          "role": "primary",
+          "assignedAt": "2025-09-18T16:44:25.163Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T16:48:05.180Z",
+      "updated_at": "2025-09-18T16:48:05.180Z",
+      "archived_at": "2025-09-18T16:48:05.198Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T16:44:02.970Z",
+      "title": "Fix NestJS Provider dependency injection type errors in parlant-auth.module.ts",
+      "description": "Resolve Type unknown[] is not assignable to type (InjectionToken | OptionalFactoryDependency)[] errors on lines 369, 372, 381, 384, 385, 388, 400, 412. Convert unknown[] arrays to properly typed injection token arrays and ensure factory functions receive correctly typed parameters.",
+      "category": "error",
+      "id": "error_1758213842970_7ofyi2fw29t",
+      "assigned_agent": "dev_session_1758213824602_1_general_1a8d3d3e",
+      "started_at": "2025-09-18T16:47:05.398Z",
+      "claimed_by": "dev_session_1758213824602_1_general_1a8d3d3e",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758213824602_1_general_1a8d3d3e",
+          "role": "primary",
+          "assignedAt": "2025-09-18T16:47:05.398Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T16:49:55.370Z",
+      "updated_at": "2025-09-18T16:49:55.370Z",
+      "archived_at": "2025-09-18T16:49:55.375Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T16:44:03.363Z",
+      "title": "Fix WebSocket VerifyClientCallback type incompatibilities in bytebot shared package",
+      "description": "Resolve critical TypeScript error in parlant-websocket-bridge.service.ts line 277 where callback signature incompatible with VerifyClientCallbackAsync/Sync. Need to investigate WebSocket library types, understand IncomingMessage vs Record<string,unknown> incompatibility, and implement proper type-safe solution.",
+      "category": "error",
+      "id": "error_1758213843363_vzc7o4cinck",
+      "assigned_agent": "dev_session_1758213824898_1_general_c8d3aa20",
+      "started_at": "2025-09-18T16:47:06.057Z",
+      "claimed_by": "dev_session_1758213824898_1_general_c8d3aa20",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758213824898_1_general_c8d3aa20",
+          "role": "primary",
+          "assignedAt": "2025-09-18T16:47:06.057Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T16:51:38.933Z",
+      "updated_at": "2025-09-18T16:51:38.933Z",
+      "archived_at": "2025-09-18T16:51:38.938Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 104,
+  "total_completed": 107,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-18T07:52:08.917Z"
+  "last_archived": "2025-09-18T16:51:38.938Z"
 }

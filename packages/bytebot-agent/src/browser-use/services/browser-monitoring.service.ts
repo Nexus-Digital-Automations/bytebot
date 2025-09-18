@@ -180,7 +180,7 @@ export interface IssueRecord {
   level: 'error' | 'warning' | 'info';
   message: string;
   source: string;
-  details?: unknown;
+  details?: Record<string, unknown>;
 }
 
 @Injectable()
@@ -501,7 +501,7 @@ export class BrowserMonitoringService {
       level,
       message,
       source,
-      details,
+      details: details as Record<string, unknown> | undefined,
     };
 
     this.recentIssues.push(issue);

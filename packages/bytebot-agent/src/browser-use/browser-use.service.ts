@@ -132,6 +132,8 @@ interface CommandResponse {
     width?: number;
     height?: number;
   }>;
+  // Index signature to allow for Record<string, unknown> compatibility
+  [key: string]: unknown;
 }
 
 @Injectable()
@@ -849,14 +851,38 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
    * Wait for response from browser process (simplified implementation)
    */
   private async waitForResponse(
-    _processId: string,
-    _timeout = 30000,
+    processId: string,
+    timeout = 30000,
   ): Promise<CommandResponse> {
     // This is a simplified implementation
     // In production, you'd implement proper JSON-RPC communication
-    return new Promise((resolve) => {
+    const browserProcess = this.processes.get(processId);
+
+    if (!browserProcess) {
+      throw new Error(`Browser process ${processId} not found`);
+    }
+
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(
+          new Error(
+            `Response timeout for process ${processId} after ${timeout}ms`,
+          ),
+        );
+      }, timeout);
+
+      // Simulate response processing with process context
       setTimeout(() => {
-        resolve({ success: true, message: 'Command executed' });
+        clearTimeout(timeoutId);
+
+        // Update process activity
+        this.updateProcessActivity(processId);
+
+        resolve({
+          success: true,
+          message: `Command executed successfully for process ${processId}`,
+          processId,
+        });
       }, 1000);
     });
   }
@@ -924,7 +950,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
 
       return {
         success: true,
-        results: result,
+        results: result as unknown as Record<string, unknown>,
         executionTimeMs,
         screenshotsTaken: params.options?.screenshots ? 1 : 0,
       };
@@ -987,7 +1013,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
 
       return {
         success: result.success || true,
-        result,
+        result: result as unknown as Record<string, unknown>,
       };
     } catch (error: unknown) {
       const errorMessage =
@@ -1039,7 +1065,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
 
       return {
         success: result.success || true,
-        result,
+        result: result as unknown as Record<string, unknown>,
       };
     } catch (error: unknown) {
       const errorMessage =
@@ -1261,7 +1287,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
 
       return {
         success: result.success || true,
-        result: result.result,
+        result: result.result as unknown as Record<string, unknown> | undefined,
       };
     } catch (error: unknown) {
       const errorMessage =

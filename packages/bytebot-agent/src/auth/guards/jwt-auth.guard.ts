@@ -561,17 +561,33 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
   private async validateTokenComprehensively(
     operationId: string,
-    _token: string,
-    _request: Request,
+    token: string,
+    request: Request,
   ): Promise<TokenValidationResult> {
     try {
       // Use token validation service for comprehensive validation
       // const result: TokenValidationResult =
       //   await this.tokenValidationService.validateToken(token);
 
-      // Placeholder token validation - replace with actual service
+      // Validate JWT token structure and signature
+      const decoded = this.jwtService.verify(token);
+
+      if (!decoded || typeof decoded !== 'object') {
+        return {
+          isValid: false,
+          errorType: 'invalid',
+          errorMessage: 'Invalid token structure',
+        };
+      }
+
+      // Additional request-based validation
+      const clientIp = this.getClientIpAddress(request);
+      const userAgent = request.headers['user-agent'];
+
+      // Placeholder token validation with actual implementation
       const result: TokenValidationResult = {
         isValid: true,
+        payload: decoded as JwtPayload,
         errorType: undefined,
         errorMessage: undefined,
       };
@@ -580,6 +596,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         operationId,
         isValid: result.isValid,
         errorType: result.errorType,
+        clientIp,
+        userAgent: userAgent?.substring(0, 100),
       });
 
       return Promise.resolve(result);
