@@ -1,13 +1,13 @@
 /**
  * Browser Use DTOs - Index
- * 
+ *
  * Centralized exports for all browser use related Data Transfer Objects
  */
 
 // Browser Task DTOs
 export * from './browser-task.dto';
 
-// Browser Session DTOs  
+// Browser Session DTOs
 export * from './browser-session.dto';
 
 // Browser Data DTOs

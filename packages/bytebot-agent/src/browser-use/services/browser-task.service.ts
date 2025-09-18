@@ -21,6 +21,7 @@ import { BrowserUseService } from '../browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
 
 // Use TaskStatus alias for backward compatibility in this service
+export const TaskStatus = BrowserTaskStatus;
 export type TaskStatus = BrowserTaskStatus;
 
 export enum TaskPriority {

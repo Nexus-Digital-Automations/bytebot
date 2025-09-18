@@ -13,13 +13,13 @@ import {
   TaskStatusResponseDto,
 } from '../dto/browser-monitoring.dto';
 import { BrowserSessionStatus } from '../dto/browser-session.dto';
-import { BrowserTaskStatusDto, BrowserTaskStatus } from '../dto/browser-task.dto';
+import {
+  BrowserTaskStatusDto,
+  BrowserTaskStatus,
+} from '../dto/browser-task.dto';
 import { BrowserUseService } from '../browser-use.service';
 import { BrowserSessionService } from './browser-session.service';
-import {
-  BrowserTaskService,
-  TaskStatus,
-} from './browser-task.service';
+import { BrowserTaskService } from './browser-task.service';
 import * as os from 'os';
 import * as fs from 'fs/promises';
 import * as dns from 'dns';
@@ -143,7 +143,7 @@ export interface TaskExecutionStep {
   error?: TaskError;
 }
 
-export interface TaskStatus {
+export interface TaskStatusInfo {
   success: boolean;
   found: boolean;
   sessionId?: string;
