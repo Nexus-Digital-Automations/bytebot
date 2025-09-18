@@ -1,6 +1,6 @@
 /**
  * Jest Setup After Environment
- * 
+ *
  * Global test environment setup that runs after the test environment is set up.
  * Configures global test utilities, mocks, and testing infrastructure.
  *
@@ -14,13 +14,24 @@ jest.setTimeout(30000);
 process.env.NODE_ENV = 'test';
 process.env.LOG_LEVEL = 'error'; // Reduce noise during testing
 
-// Global test utilities
+// Global test utilities - Extend Jest matchers interface
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
+    interface Expect {
+      toBeValidUuid(): any;
+      toBeValidEmail(): any;
+      toBeValidDate(): any;
+    }
     interface Matchers<R> {
       toBeValidUuid(): R;
       toBeValidEmail(): R;
       toBeValidDate(): R;
+    }
+    interface InverseAsymmetricMatchers {
+      toBeValidUuid(): any;
+      toBeValidEmail(): any;
+      toBeValidDate(): any;
     }
   }
 }
@@ -28,11 +39,13 @@ declare global {
 // Custom Jest matchers
 expect.extend({
   toBeValidUuid(received: string) {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const pass = typeof received === 'string' && uuidRegex.test(received);
-    
+
     return {
-      message: () => `expected ${received} ${pass ? 'not ' : ''}to be a valid UUID`,
+      message: () =>
+        `expected ${received} ${pass ? 'not ' : ''}to be a valid UUID`,
       pass,
     };
   },
@@ -40,9 +53,10 @@ expect.extend({
   toBeValidEmail(received: string) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const pass = typeof received === 'string' && emailRegex.test(received);
-    
+
     return {
-      message: () => `expected ${received} ${pass ? 'not ' : ''}to be a valid email`,
+      message: () =>
+        `expected ${received} ${pass ? 'not ' : ''}to be a valid email`,
       pass,
     };
   },
@@ -50,9 +64,10 @@ expect.extend({
   toBeValidDate(received: string | Date) {
     const date = new Date(received);
     const pass = !isNaN(date.getTime());
-    
+
     return {
-      message: () => `expected ${received} ${pass ? 'not ' : ''}to be a valid date`,
+      message: () =>
+        `expected ${received} ${pass ? 'not ' : ''}to be a valid date`,
       pass,
     };
   },
@@ -62,7 +77,7 @@ expect.extend({
 afterEach(() => {
   // Clear all mocks after each test
   jest.clearAllMocks();
-  
+
   // Reset modules to prevent state leakage between tests
   jest.resetModules();
 });
@@ -82,9 +97,11 @@ beforeAll(() => {
   // Suppress noisy console output during tests unless explicitly needed
   console.error = jest.fn((message, ...args) => {
     // Only show errors that aren't expected test errors
-    if (typeof message === 'string' && 
-        !message.includes('Warning:') && 
-        !message.includes('deprecated')) {
+    if (
+      typeof message === 'string' &&
+      !message.includes('Warning:') &&
+      !message.includes('deprecated')
+    ) {
       originalConsoleError(message, ...args);
     }
   });
@@ -122,19 +139,22 @@ export const testUtils = {
   /**
    * Wait for async operations to complete
    */
-  async waitFor(condition: () => boolean | Promise<boolean>, timeout = 5000): Promise<void> {
+  async waitFor(
+    condition: () => boolean | Promise<boolean>,
+    timeout = 5000,
+  ): Promise<void> {
     const start = Date.now();
-    
+
     while (Date.now() - start < timeout) {
       const result = await condition();
       if (result) {
         return;
       }
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    
+
     throw new Error(`Condition not met within ${timeout}ms`);
-  }
+  },
 };
 
 // Export for use in individual test files

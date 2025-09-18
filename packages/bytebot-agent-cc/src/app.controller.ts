@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ParlantValidated } from '@bytebot/shared/server';
+import { ParlantValidated, SecurityLevel } from '@bytebot/shared/server';
 import { AppService } from './app.service';
 
 @ApiTags('Application - Creative Coding')
@@ -19,10 +19,9 @@ export class AppController {
     description: 'Creative Coding Agent greeting message',
     schema: { type: 'string', example: 'Hello World!' },
   })
-  // @ts-expect-error - ParlantValidated decorator type resolution issue
   @ParlantValidated({
     intent: 'Get Creative Coding Agent status',
-    securityLevel: 'MINIMAL',
+    securityLevel: SecurityLevel._MINIMAL,
     description:
       'Basic health check endpoint for Creative Coding Agent service',
   })

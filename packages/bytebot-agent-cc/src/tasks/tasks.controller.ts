@@ -9,7 +9,11 @@ import {
   HttpCode,
   Query,
 } from '@nestjs/common';
-import { ParlantValidated, ParlantSecure } from '@bytebot/shared/server';
+import {
+  ParlantValidated,
+  ParlantSecure,
+  SecurityLevel,
+} from '@bytebot/shared/server';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { Message, Task } from '@prisma/client';
@@ -24,11 +28,10 @@ export class TasksController {
   ) {}
 
   @Post()
-  // @ts-expect-error - ParlantValidated decorator type resolution issue
   @ParlantValidated({
     intent:
       'Create new task for creative coding agent with specified parameters and configuration',
-    securityLevel: 'MEDIUM',
+    securityLevel: SecurityLevel._MEDIUM,
     description:
       'Standard endpoint for creating new creative coding tasks with validation and processing',
   })
@@ -38,11 +41,10 @@ export class TasksController {
   }
 
   @Get()
-  // @ts-expect-error - ParlantValidated decorator type resolution issue
   @ParlantValidated({
     intent:
       'Retrieve paginated list of creative coding tasks with optional filtering by status',
-    securityLevel: 'MEDIUM',
+    securityLevel: SecurityLevel._MEDIUM,
     description:
       'Standard endpoint for querying tasks with pagination and status filtering capabilities',
   })
@@ -136,14 +138,10 @@ export class TasksController {
   }
 
   @Delete(':id')
-  // @ts-expect-error - ParlantSecure decorator type resolution issue
-  @ParlantSecure({
-    intent:
-      'Delete specified creative coding task and associated data permanently',
-    securityLevel: 'HIGH',
-    description:
-      'Critical endpoint for permanent task deletion requiring elevated security validation',
-  })
+  @ParlantSecure(
+    'Critical endpoint for permanent task deletion requiring elevated security validation',
+    SecurityLevel._HIGH,
+  )
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id') id: string): Promise<void> {
     await this.tasksService.delete(id);

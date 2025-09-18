@@ -63,7 +63,7 @@ import { InputCaptureService } from './input-capture.service';
 import { OnEvent } from '@nestjs/event-emitter';
 // Import from agent.types as needed
 import { AGENT_SYSTEM_PROMPT } from './agent.constants';
-import { query } from '@anthropic-ai/claude-code';
+// Dynamic import for @anthropic-ai/claude-code to resolve CommonJS/ECMAScript module issue
 import Anthropic from '@anthropic-ai/sdk';
 
 @Injectable()
@@ -210,6 +210,10 @@ export class AgentProcessor {
       // Refresh abort controller for this iteration to avoid accumulating
       // "abort" listeners on a single AbortSignal across iterations.
       this.abortController = new AbortController();
+
+      // Dynamic import for @anthropic-ai/claude-code
+      const { query } = await import('@anthropic-ai/claude-code');
+
       for await (const message of query({
         prompt: task.description,
         options: {

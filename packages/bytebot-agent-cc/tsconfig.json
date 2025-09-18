@@ -2,7 +2,8 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "Bytebot Agent CC Package",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "Node16",
+    "moduleResolution": "node16",
     "declaration": true,
     "declarationMap": true,
     "removeComments": true,
