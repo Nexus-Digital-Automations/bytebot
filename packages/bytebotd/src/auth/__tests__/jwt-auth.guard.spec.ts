@@ -135,8 +135,12 @@ class MockJwtAuthGuard {
     }
 
     try {
+      const jwtSecret = this.configService.get<string>('JWT_SECRET');
+      if (!jwtSecret) {
+        throw new UnauthorizedException('JWT secret not configured');
+      }
       const rawPayload = await safeJwtVerify(this.jwtService, token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
+        secret: jwtSecret,
       });
       
       if (!isJwtPayload(rawPayload)) {
@@ -146,7 +150,7 @@ class MockJwtAuthGuard {
 
       // Validate token payload structure
       if (!_payload.sub || !_payload.email || !_payload.role) {
-        throw new UnauthorizedException('Invalid token _payload structure');
+        throw new UnauthorizedException('Invalid token payload structure');
       }
 
       // Check token expiration
@@ -210,9 +214,9 @@ describe('JwtAuthGuard', () => {
       getHandler: jest.fn(),
       getClass: jest.fn(),
       getArgs: jest.fn().mockReturnValue([mockRequest, {}, jest.fn()]),
-      getArgByIndex: jest.fn((index: number) => {
+      getArgByIndex: jest.fn().mockImplementation(<T = unknown>(index: number): T => {
         const args = [mockRequest, {}, jest.fn()];
-        return args[index];
+        return args[index] as T;
       }),
       switchToRpc: jest.fn().mockReturnValue({
         getContext: jest.fn(),
@@ -461,7 +465,7 @@ describe('JwtAuthGuard', () => {
       mockVerifyAsync.mockResolvedValue(incompletePayload);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        new UnauthorizedException('Invalid token _payload structure'),
+        new UnauthorizedException('Invalid token payload structure'),
       );
 
       console.log(
@@ -644,6 +648,9 @@ describe('JwtAuthGuard', () => {
           throw new Error('Invalid request format in test');
         }
         const request = rawRequest;
+        if (!request.user) {
+          throw new Error('User not attached to request in test');
+        }
         expect(request.user.id).toBe(_payload.sub);
         expect(request.user.email).toBe(_payload.email);
       });
