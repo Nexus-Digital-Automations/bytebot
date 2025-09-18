@@ -22,12 +22,10 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
 import { CacheKeyGenerator } from '../cache-key.generator';
 
 describe('CacheKeyGenerator', () => {
   let generator: CacheKeyGenerator;
-  let logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,7 +33,6 @@ describe('CacheKeyGenerator', () => {
     }).compile();
 
     generator = module.get<CacheKeyGenerator>(CacheKeyGenerator);
-    logger = module.get(Logger);
   });
 
   afterEach(() => {

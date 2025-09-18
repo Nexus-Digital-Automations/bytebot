@@ -824,7 +824,7 @@ describe('MCP Comprehensive Coverage', () => {
       console.log(`[${operationId}] Testing all exports from index module`);
 
       // Import everything from index
-      const * as McpIndex = require('../index');
+      const McpIndex = require('../index');
 
       // Test class exports
       expect(McpIndex.BytebotMcpModule).toBeDefined();
@@ -859,7 +859,7 @@ describe('MCP Comprehensive Coverage', () => {
       console.log(`[${operationId}] Testing re-export functionality`);
 
       // Test that re-exported items work correctly
-      const * as McpIndex = require('../index');
+      const McpIndex = require('../index');
 
       // Test BytebotMcpModule can be instantiated
       const moduleInstance = new McpIndex.BytebotMcpModule();

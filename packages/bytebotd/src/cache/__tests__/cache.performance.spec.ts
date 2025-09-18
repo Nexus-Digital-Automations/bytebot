@@ -31,7 +31,7 @@ import { MetricsService } from '../../metrics/metrics.service';
 describe('Cache Performance Tests', () => {
   let module: TestingModule;
   let cacheService: CacheService;
-  let keyGenerator: CacheKeyGenerator;
+  let keyGenerator: jest.Mocked<CacheKeyGenerator>;
   let cacheManager: jest.Mocked<Cache>;
   let metricsService: jest.Mocked<MetricsService>;
 
@@ -96,12 +96,12 @@ describe('Cache Performance Tests', () => {
     metricsService = module.get(MetricsService);
 
     // Setup fast mock behaviors for performance testing
-    keyGenerator.generate.mockImplementation((key, namespace) => 
+    keyGenerator.generate.mockImplementation((key: string | string[] | Record<string, unknown>, namespace?: string) => 
       `${namespace || 'bytebot'}:${typeof key === 'string' ? key : JSON.stringify(key)}`
     );
     cacheManager.get.mockResolvedValue('"test-value"');
     cacheManager.set.mockResolvedValue(undefined);
-    cacheManager.del.mockResolvedValue(undefined);
+    cacheManager.del.mockResolvedValue(true);
   });
 
   afterEach(async () => {

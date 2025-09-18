@@ -27,7 +27,6 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { HttpStatus, HttpException } from '@nestjs/common';
 import { ParlantValidatedComputerUseService, ComputerActionValidationContext } from '../parlant-validated-computer-use.service';
 import { ParlantIntegrationService, ConversationalValidationError, RiskLevel } from '../parlant-integration.service';
 import { ParlantComputerUseController } from '../parlant-computer-use.controller';
@@ -39,13 +38,8 @@ import { ByteBotdUser } from '../../auth/decorators/roles.decorator';
 import {
   ComputerAction,
   MoveMouseAction,
-  ClickMouseAction,
-  ScreenshotAction,
-  WriteFileAction,
-  ReadFileAction,
 } from '@bytebot/shared';
 import * as fs from 'fs/promises';
-import * as path from 'path';
 
 // Parlant integration test interfaces
 interface ParlantIntegrationContext {
@@ -688,7 +682,7 @@ describe('Parlant Computer Use Integration Tests', () => {
         testScenario: true,
       },
       recentActions: [],
-      systemState: params.systemState || {
+      systemState: params.systemState ?? {
         cpuUsage: 25,
         memoryUsage: 50,
         networkActivity: false,
@@ -766,44 +760,47 @@ describe('Parlant Computer Use Integration Tests', () => {
     validationContext: ComputerActionValidationContext
   ): Promise<ConversationalValidationMetrics> {
     const startTime = Date.now();
-    const memoryBefore = process.memoryUsage();
+    const _memoryBefore = process.memoryUsage();
 
-    let approved = false;
-    let confidence = 0;
-    let riskLevel = RiskLevel.UNKNOWN;
+    let approved: boolean = false;
+    let confidence: number = 0;
+    let riskLevel: RiskLevel = RiskLevel.UNKNOWN;
+    let endTime = 0;
+    let memoryAfter!: NodeJS.MemoryUsage;
 
     try {
       await context.parlantValidatedService.action(action, validationContext);
       approved = true;
       confidence = 0.9; // Default for successful validation
       riskLevel = RiskLevel.LOW; // Default for approved actions
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof ConversationalValidationError) {
+        const validationError = error as ConversationalValidationError;
         approved = false;
-        confidence = error.confidence || 0.8;
-        riskLevel = error.riskLevel || RiskLevel.MEDIUM;
+        confidence = validationError.confidence ?? 0.8;
+        riskLevel = validationError.riskLevel ?? RiskLevel.MEDIUM;
       }
       throw error;
     } finally {
-      const endTime = Date.now();
-      const memoryAfter = process.memoryUsage();
-
-      const metrics: ConversationalValidationMetrics = {
-        validationId,
-        startTime,
-        endTime,
-        validationTime: endTime - startTime,
-        approved,
-        confidence,
-        riskLevel,
-        contextComplexity: calculateContextComplexity(validationContext),
-        conversationLength: validationContext.conversationHistory.length,
-        memoryUsage: memoryAfter,
-      };
-
-      validationMetrics.push(metrics);
-      return metrics;
+      endTime = Date.now();
+      memoryAfter = process.memoryUsage();
     }
+
+    const metrics: ConversationalValidationMetrics = {
+      validationId,
+      startTime,
+      endTime,
+      validationTime: endTime - startTime,
+      approved,
+      confidence,
+      riskLevel,
+      contextComplexity: calculateContextComplexity(validationContext),
+      conversationLength: validationContext.conversationHistory.length,
+      memoryUsage: memoryAfter,
+    };
+
+    validationMetrics.push(metrics);
+    return metrics;
   }
 
   /**
@@ -873,7 +870,7 @@ describe('Parlant Computer Use Integration Tests', () => {
   async function cleanupTestData(): Promise<void> {
     try {
       await fs.rm(testDataDir, { recursive: true, force: true });
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('Failed to cleanup Parlant integration test data:', error);
     }
   }

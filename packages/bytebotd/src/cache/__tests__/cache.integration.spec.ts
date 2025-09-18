@@ -266,7 +266,7 @@ describe('Cache Redis Integration Tests', () => {
       });
 
       it('should handle bulk set operations', async () => {
-        const entries = [
+        const entries: Array<{ key: string; value: unknown }> = [
           { key: 'mset-key-1', value: 'mset value 1' },
           { key: 'mset-key-2', value: { complex: 'object' } },
           { key: 'mset-key-3', value: [1, 2, 3] },
@@ -464,7 +464,7 @@ describe('Cache Redis Integration Tests', () => {
         };
 
         await cacheService.set('large-data', largeData);
-        const retrieved = await cacheService.get('large-data');
+        const retrieved = await cacheService.get('large-data') as typeof largeData;
 
         expect(retrieved).toEqual(largeData);
         expect(Array.isArray(retrieved.data)).toBe(true);

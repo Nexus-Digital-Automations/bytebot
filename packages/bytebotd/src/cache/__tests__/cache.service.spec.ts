@@ -228,7 +228,7 @@ describe('CacheService', () => {
       const fullKey = 'bytebot:delete-key';
       
       keyGenerator.generate.mockReturnValue(fullKey);
-      cacheManager.del.mockResolvedValue();
+      cacheManager.del.mockResolvedValue(true);
 
       await service.del(key);
 
