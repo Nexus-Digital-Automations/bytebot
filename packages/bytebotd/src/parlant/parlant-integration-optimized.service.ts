@@ -23,7 +23,7 @@ import { ParlantPerformanceMonitorService } from './performance/parlant-performa
 import { ParlantIntelligentCacheService } from './caching/parlant-intelligent-cache.service';
 import { ParlantCircuitBreakerService } from './resilience/parlant-circuit-breaker.service';
 import { ParlantRetryFailoverService } from './resilience/parlant-retry-failover.service';
-import { ParlantEnterpriseAuditService } from './audit/parlant-enterprise-audit.service';
+import { ParlantEnterpriseAuditService, ParlantAuditEntry } from './audit/parlant-enterprise-audit.service';
 
 // Import interfaces from original service
 import {
@@ -32,9 +32,6 @@ import {
   RiskLevel,
   ConversationalValidationError
 } from './parlant-integration.service';
-
-// Import audit entry from enterprise audit service
-import { ParlantAuditEntry } from './audit/parlant-enterprise-audit.service';
 
 // ===== OPTIMIZED INTEGRATION INTERFACES =====
 
@@ -247,7 +244,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
           );
           
           if (failoverResult.success) {
-            validationResponse = failoverResult.data!;
+            validationResponse = failoverResult.data ?? { success: false, riskLevel: RiskLevel.HIGH, validationTime: Date.now(), message: 'No data returned from failover' };
             retryAttempts = failoverResult.totalAttempts - 1;
             endpointUsed = failoverResult.successfulEndpoint;
             degradedMode = failoverResult.degradedMode;
@@ -265,7 +262,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
           circuitBreakerState = this.circuitBreaker.getCircuitBreakerStats().state;
           
           if (circuitResult.success) {
-            validationResponse = circuitResult.data!;
+            validationResponse = circuitResult.data ?? { success: false, riskLevel: RiskLevel.HIGH, validationTime: Date.now(), message: 'No data returned from circuit breaker' };
           } else {
             throw circuitResult.error ?? new Error('Circuit breaker blocked validation');
           }
@@ -418,7 +415,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
         // Convert results to optimized format
         results = bulkResult.results.map((result, index) => {
           const _request = bulkRequest.requests[index];
-          if (result && result.success) {
+          if (result?.success) {
             return {
               ...result.data as ParlantValidationResponse,
               performanceMetrics: {

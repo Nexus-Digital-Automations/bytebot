@@ -910,7 +910,7 @@ describe('HealthService', () => {
         );
         // Mock database ping to throw exception
         jest
-          .spyOn(service as any, 'performDatabasePing')
+          .spyOn(service as unknown as { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing')
           .mockRejectedValue(new Error('Database timeout'));
         const result =
           (await service.checkDatabaseHealth()) as HealthIndicatorResult;
@@ -925,7 +925,7 @@ describe('HealthService', () => {
         console.log(`[${testId}] Testing database response time measurement`);
         // Mock database ping with delay
         jest
-          .spyOn(service as any, 'performDatabasePing')
+          .spyOn(service as unknown as { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing')
           .mockImplementation(
             () => new Promise((resolve) => setTimeout(() => resolve(true), 50)),
           );
@@ -947,7 +947,7 @@ describe('HealthService', () => {
         );
         // Mock successful external service checks
         jest
-          .spyOn(service as any, 'checkExternalService')
+          .spyOn(service as unknown as { checkExternalService: () => Promise<unknown> }, 'checkExternalService')
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '25ms' })
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '30ms' });
         const result =
@@ -968,7 +968,7 @@ describe('HealthService', () => {
         console.log(`[${testId}] Testing external services failure handling`);
         // Mock external service failures
         jest
-          .spyOn(service as any, 'checkExternalService')
+          .spyOn(service as unknown as { checkExternalService: () => Promise<unknown> }, 'checkExternalService')
           .mockRejectedValueOnce(new Error('Service unavailable'))
           .mockResolvedValueOnce({ status: 'healthy', responseTime: '20ms' });
         const result =
@@ -1002,7 +1002,7 @@ describe('HealthService', () => {
           `[${testId}] Testing startup check for established service`,
         );
         // Mock service that has been running for sufficient time
-        (service as any).startTime = Date.now() - 30000; // 30 seconds ago
+        (service as unknown as { startTime: number }).startTime = Date.now() - 30000; // 30 seconds ago
         const result =
           (await service.checkStartupComplete()) as HealthIndicatorResult;
         expect(result).toHaveProperty('startup' as keyof typeof result);
@@ -1020,7 +1020,7 @@ describe('HealthService', () => {
           `[${testId}] Testing startup check for recently started service`,
         );
         // Mock service that was just started
-        (service as any).startTime = Date.now() - 5000; // 5 seconds ago
+        (service as unknown as { startTime: number }).startTime = Date.now() - 5000; // 5 seconds ago
         const result =
           (await service.checkStartupComplete()) as HealthIndicatorResult;
         expect(result).toHaveProperty('startup' as keyof typeof result);
@@ -1095,7 +1095,7 @@ describe('HealthService', () => {
         const testId = `${operationId}_database_ping_timing`;
         console.log(`[${testId}] Testing database ping timing simulation`);
         const startTime = Date.now();
-        const result = await (service as any).performDatabasePing();
+        const result = await (service as unknown as { performDatabasePing: () => Promise<boolean> }).performDatabasePing();
         const endTime = Date.now();
         expect(result).toBe(true);
         expect(endTime - startTime).toBeGreaterThan(0);
@@ -1105,7 +1105,7 @@ describe('HealthService', () => {
       it('should check individual external service with proper error handling', async () => {
         const testId = `${operationId}_external_service_individual`;
         console.log(`[${testId}] Testing individual external service check`);
-        const healthyResult = await (service as any).checkExternalService(
+        const healthyResult = await (service as unknown as { checkExternalService: (name: string, url: string) => Promise<unknown> }).checkExternalService(
           'test-service',
           'http://test.com/health',
         );
@@ -1121,27 +1121,27 @@ describe('HealthService', () => {
         // Mock setTimeout to reject immediately for some calls
         const originalSetTimeout = setTimeout;
         let timeoutCallCount = 0;
-        global.setTimeout = (jest.fn() as any).mockImplementation(
-          (callback: any, delay: number) => {
+        global.setTimeout = (jest.fn() as jest.MockedFunction<typeof setTimeout>).mockImplementation(
+          (callback: (...args: unknown[]) => void, delay: number) => {
             timeoutCallCount++;
             if (timeoutCallCount % 2 === 0) {
               // Simulate timeout/rejection on every other call
 
               originalSetTimeout(
-                () => callback(new Error('Service unavailable')),
+                () => (callback as (error: Error) => void)(new Error('Service unavailable')),
                 1,
               );
             } else {
-              originalSetTimeout(() => callback(null, true), delay);
+              originalSetTimeout(() => (callback as (arg1: null, arg2: boolean) => void)(null, true), delay);
             }
           },
         ) as unknown as typeof setTimeout;
         const results = await Promise.all([
-          (service as any).checkExternalService(
+          (service as unknown as { checkExternalService: (name: string, url: string) => Promise<unknown> }).checkExternalService(
             'service-1',
             'http://test1.com',
           ),
-          (service as any).checkExternalService(
+          (service as unknown as { checkExternalService: (name: string, url: string) => Promise<unknown> }).checkExternalService(
             'service-2',
             'http://test2.com',
           ),
@@ -1169,12 +1169,12 @@ describe('HealthService', () => {
         external: 1048576,
         arrayBuffers: 0,
       } as NodeJS.MemoryUsage);
-      jest.spyOn(service as any, 'performDatabasePing').mockResolvedValue(true);
+      jest.spyOn(service as unknown as { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing').mockResolvedValue(true);
       jest
-        .spyOn(service as any, 'checkExternalService')
+        .spyOn(service as unknown as { checkExternalService: (name: string, url: string) => Promise<unknown> }, 'checkExternalService')
         .mockResolvedValue({ status: 'healthy', responseTime: '25ms' });
       // Mock well-established service
-      (service as any).startTime = Date.now() - 60000; // 1 minute ago
+      (service as unknown as { startTime: number }).startTime = Date.now() - 60000; // 1 minute ago
       // Execute all health checks
       const [
         basicHealth,
@@ -1211,18 +1211,18 @@ describe('HealthService', () => {
         throw new Error('System overload');
       });
       jest
-        .spyOn(service as any, 'performDatabasePing')
+        .spyOn(service as unknown as { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing')
         .mockRejectedValue(new Error('Database overloaded'));
       jest
-        .spyOn(service as any, 'checkExternalService')
+        .spyOn(service as unknown as { checkExternalService: (name: string, url: string) => Promise<unknown> }, 'checkExternalService')
         .mockRejectedValue(new Error('External services down'));
       // Execute health checks that should fail gracefully
       const basicHealthPromise = Promise.resolve(
         service.getBasicHealth(),
-      ).catch((e) => ({ error: e.message }));
+      ).catch((e: Error) => ({ error: e.message }));
       const detailedStatusPromise = Promise.resolve(
         service.getDetailedStatus(),
-      ).catch((e) => ({ error: e.message }));
+      ).catch((e: Error) => ({ error: e.message }));
       const processHealthPromise = service.checkProcessHealth();
       const databaseHealthPromise = service.checkDatabaseHealth();
       const externalServicesPromise = service.checkExternalServices();
@@ -1260,8 +1260,8 @@ describe('HealthService', () => {
         external: 1048576,
         arrayBuffers: 0,
       } as NodeJS.MemoryUsage);
-      jest.spyOn(service as any, 'performDatabasePing').mockResolvedValue(true);
-      (service as any).startTime = Date.now() - 60000;
+      jest.spyOn(service as unknown as { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing').mockResolvedValue(true);
+      (service as unknown as { startTime: number }).startTime = Date.now() - 60000;
       const startTime = Date.now();
       // Execute 50 concurrent health checks
       const concurrentChecks = Array(50)
@@ -1301,8 +1301,8 @@ describe('HealthService', () => {
         external: 1048576,
         arrayBuffers: 0,
       } as NodeJS.MemoryUsage);
-      jest.spyOn(service as any, 'performDatabasePing').mockResolvedValue(true);
-      (service as any).startTime = Date.now() - 60000;
+      jest.spyOn(service as unknown as { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing').mockResolvedValue(true);
+      (service as unknown as { startTime: number }).startTime = Date.now() - 60000;
       const healthChecks = await Promise.all([
         service.getBasicHealth(),
         service.getDetailedStatus(),
@@ -1321,7 +1321,7 @@ describe('HealthService', () => {
         _external,
         _startup,
         _modules,
-      ] = healthChecks;
+      ] = healthChecks as unknown[];
       // Basic health schema
       expect(basic).toMatchObject({
         status: expect.stringMatching(/^(healthy|unhealthy)$/),

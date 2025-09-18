@@ -190,7 +190,7 @@ describe('HealthService', () => {
         expect(result.modules).toHaveProperty('status', 'up');
         expect(result.modules).toHaveProperty('modules');
 
-        const _modules = result.modules?.modules;
+        const _modules = result.modules?.modules as Record<string, boolean> | undefined;
         expect(_modules).toHaveProperty('computer-use', true);
         expect(_modules).toHaveProperty('input-tracking', true);
         expect(_modules).toHaveProperty('cua-integration', true);

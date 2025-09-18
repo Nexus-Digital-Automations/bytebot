@@ -16,6 +16,7 @@ module.exports = [
       'node_modules/**',
       'benchmarks/**/*.js', // Ignore compiled JS files in benchmarks
       'benchmarks/**/*.js.map', // Ignore source maps
+      '**/*.d.ts', // Ignore TypeScript declaration files
       '**/*.d.ts.map',
       'test_shared_exports.js',
       'root/**',

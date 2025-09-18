@@ -56,24 +56,24 @@ function _isMockExecutionContext(context: unknown): context is MockExecutionCont
 
 // Helper function to create properly typed ByteBotdUser
 function _createTypedUser(partial: Partial<ByteBotdUser>): ByteBotdUser {
-  return {
-    id: partial.id || '',
-    email: partial.email || 'test@bytebot.ai',
-    role: partial.role || UserRole.VIEWER,
-    permissions: partial.permissions || [],
-    ...partial
+  const baseUser: ByteBotdUser = {
+    id: (partial.id as string) ?? '',
+    email: (partial.email as string) ?? 'test@bytebot.ai',
+    role: (partial.role as UserRole) ?? UserRole.VIEWER,
+    permissions: (partial.permissions as string[]) ?? [],
   };
+  return { ...baseUser, ...partial } as ByteBotdUser;
 }
 
 // Helper function to create malicious user for security testing
 function _createMaliciousUser(overrides: Record<string, unknown>): MaliciousTestUser {
-  return {
+  const baseUser: MaliciousTestUser = {
     id: 'malicious_user',
     email: 'malicious@test.com',
-    role: UserRole.VIEWER,
-    permissions: [],
-    ...overrides
+    role: UserRole.VIEWER as UserRole,
+    permissions: [] as string[],
   };
+  return { ...baseUser, ...overrides } as MaliciousTestUser;
 }
 
 /**
@@ -155,7 +155,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         id: 'user_456',
         email: 'admin@test.com',
         username: 'fakeadmin',
-        role: UserRole.ADMIN, // Proper enum value
+        role: UserRole.ADMIN as UserRole, // Proper enum value
         isActive: true,
         admin: true, // Additional admin flag
         roles: [UserRole._ADMIN], // Array of roles

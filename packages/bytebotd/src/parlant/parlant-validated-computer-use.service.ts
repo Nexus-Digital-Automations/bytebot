@@ -470,7 +470,7 @@ export class ParlantValidatedComputerUseService {
       
       case 'type_text': {
         const typeAction = params as TypeTextAction;
-        return `Type text: "${typeAction.text?.substring(0, 50)}${typeAction.text && typeAction.text.length > 50 ? '...' : ''}";
+        return `Type text: "${typeAction.text?.substring(0, 50)}${typeAction.text && typeAction.text.length > 50 ? '...' : ''}"`;
       }
       
       case 'write_file': {
@@ -483,9 +483,10 @@ export class ParlantValidatedComputerUseService {
         return `Read file from path: ${readAction.path}`;
       }
       
-      case 'application':
+      case 'application': {
         const appAction = params as ApplicationAction;
         return `Control application: ${appAction.application} (${appAction.action})`;
+      }
       
       default:
         return `Execute computer action: ${params.action}`;
