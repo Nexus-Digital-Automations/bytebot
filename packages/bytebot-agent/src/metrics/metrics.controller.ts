@@ -28,7 +28,7 @@ import {
   ParlantSecure,
   ParlantValidated,
   SecurityLevel,
-} from '@bytebot/shared/server';
+} from '@bytebot/shared/dist/index-server';
 import { MetricsService } from './metrics.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
