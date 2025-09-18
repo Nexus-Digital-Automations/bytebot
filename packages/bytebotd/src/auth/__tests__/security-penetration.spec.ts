@@ -1232,7 +1232,6 @@ describe('Security Penetration Testing Suite', () => {
             {
               attackVector: 'low-and-slow',
               ip: '192.0.2.100',
-              sessionId: `slow-session-${attemptCount}`,
             },
           );
 

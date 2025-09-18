@@ -510,9 +510,10 @@ class ConversationStorage {
         }
         
         if (options.dateRange) {
+          const dateRange = options.dateRange;
           results = results.filter(s => 
-            s.lastActivity >= options.dateRange.start &&
-            s.lastActivity <= options.dateRange.end
+            s.lastActivity >= dateRange.start &&
+            s.lastActivity <= dateRange.end
           );
         }
         
@@ -542,11 +543,11 @@ class ConversationStorage {
             case 'priority': {
               // Define priority ordering constants to avoid magic numbers
               const PRIORITY_ORDER = {
-                [ConversationPriority.EMERGENCY]: 5,
-                [ConversationPriority.CRITICAL]: 4,
-                [ConversationPriority.HIGH]: 3,
-                [ConversationPriority.NORMAL]: 2,
-                [ConversationPriority.LOW]: 1
+                [ConversationPriority._EMERGENCY]: 5,
+                [ConversationPriority._CRITICAL]: 4,
+                [ConversationPriority._HIGH]: 3,
+                [ConversationPriority._NORMAL]: 2,
+                [ConversationPriority._LOW]: 1
               } as const;
               return options.sortDirection === 'desc'
                 ? PRIORITY_ORDER[b.conversation.metadata.priority] - PRIORITY_ORDER[a.conversation.metadata.priority]
@@ -655,9 +656,13 @@ const ConversationAnalyticsEngine = {
     // Calculate response times
     const responseTimes: number[] = [];
     for (let i = 1; i < messages.length; i++) {
-      const timeDiff = messages[i].timestamp.getTime() - messages[i - 1].timestamp.getTime();
-      if (timeDiff > 0 && timeDiff < MAX_RESPONSE_TIME_ANALYSIS_MS) { // Ignore gaps > 5 minutes
-        responseTimes.push(timeDiff);
+      const currentMsg = messages[i];
+      const prevMsg = messages[i - 1];
+      if (currentMsg?.timestamp && prevMsg?.timestamp) {
+        const timeDiff = currentMsg.timestamp.getTime() - prevMsg.timestamp.getTime();
+        if (timeDiff > 0 && timeDiff < MAX_RESPONSE_TIME_ANALYSIS_MS) { // Ignore gaps > 5 minutes
+          responseTimes.push(timeDiff);
+        }
       }
     }
     
@@ -686,12 +691,12 @@ const ConversationAnalyticsEngine = {
     
     // Count validation requests
     const validationRequests = messages.filter(msg => 
-      msg.type === MessageType.VALIDATION_REQUEST
+      msg.type === MessageType._VALIDATION_REQUEST
     ).length;
     
     // Calculate resolution rate (simplified)
     const validationResponses = messages.filter(msg => 
-      msg.type === MessageType.VALIDATION_RESPONSE
+      msg.type === MessageType._VALIDATION_RESPONSE
     ).length;
     
     // Define percentage constant
@@ -724,7 +729,6 @@ const ContextPredictionEngine = {
     analytics: ConversationAnalytics
   ): ContextPrediction {
     const recentMessages = messages.slice(RECENT_MESSAGES_SLICE); // Look at recent messages
-    const _lastMessage = recentMessages[recentMessages.length - 1];
     
     // Predict next actions based on conversation patterns
     const suggestedActions = this.predictActions(recentMessages, context);
@@ -779,11 +783,11 @@ const ContextPredictionEngine = {
       actions.push('Create new resource or task');
     }
     
-    if (lastMessage.type === MessageType.VALIDATION_REQUEST) {
+    if (lastMessage.type === MessageType._VALIDATION_REQUEST) {
       actions.push('Review and approve/deny validation request');
     }
     
-    if (_context.state === ConversationState.VALIDATING) {
+    if (_context.state === ConversationState._VALIDATING) {
       actions.push('Complete validation process');
     }
     
@@ -927,7 +931,6 @@ export const useConversationContext = ({
   
   // Refs for timers and storage
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
-  const _syncTimer = useRef<NodeJS.Timeout | null>(null);
   const storage = useRef(new ConversationStorage());
   
   // ===========================
@@ -950,9 +953,9 @@ export const useConversationContext = ({
           joinedAt: h.timestamp
         },
         content: h.content,
-        type: MessageType.TEXT,
+        type: MessageType._TEXT,
         timestamp: h.timestamp,
-        metadata: h.metadata
+        metadata: h.metadata ?? {}
       })) || []);
       setParticipants(context.participants);
     } else {
@@ -1104,10 +1107,10 @@ export const useConversationContext = ({
       const historyEntry: ConversationHistoryEntry = {
         id: message.id,
         timestamp: message.timestamp,
-        type: ConversationHistoryType.MESSAGE,
+        type: ConversationHistoryType._MESSAGE,
         actor: message.sender.id,
         content: message.content,
-        metadata: message.metadata
+        metadata: message.metadata ?? {}
       };
       
       await updateContext({
@@ -1208,7 +1211,7 @@ export const useConversationContext = ({
   
   const getArchivedContexts = useCallback(async (limit = 10): Promise<ConversationSnapshot[]> => {
     return searchContexts({
-      states: [ConversationState.COMPLETED],
+      states: [ConversationState._COMPLETED],
       sortBy: 'date',
       sortDirection: 'desc',
       limit,

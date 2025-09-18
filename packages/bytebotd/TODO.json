@@ -1839,7 +1839,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T01:53:32.579Z",
       "title": "Fix TypeScript compilation errors in input tracking test files",
       "description": "Address type mismatches, interface compatibility issues, and mock type problems in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/input-tracking/__tests__/ directory while maintaining zero ESLint violations and existing functionality",
@@ -1856,7 +1856,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T02:41:09.389Z",
+      "updated_at": "2025-09-18T02:41:09.389Z"
     },
     {
       "status": "in_progress",
@@ -1877,6 +1879,14 @@
           "claimPriority": "normal"
         }
       ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-18T02:40:49.716Z",
+      "title": "Infrastructure verification completed for bytebot-ui package",
+      "description": "Successfully resolved all TypeScript compilation errors in bytebot-ui package. Fixed: 1) ConversationState.ACTIVE to ConversationState._ACTIVE, 2) MessageType.TEXT to MessageType._TEXT, 3) ParticipantType enum usage with proper imports, 4) Conversation type assertions in useParlantWebSocket.ts, 5) Removed unused type declarations in shared/decorators. Build now compiles successfully with only ESLint warnings remaining (non-blocking).",
+      "category": "feature",
+      "id": "feature_1758163249716_a5l7ehuwtx"
     }
   ],
   "agents": {

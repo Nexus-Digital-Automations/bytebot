@@ -15,11 +15,6 @@ import "reflect-metadata";
 
 // Type for constructor functions (classes) - compatible with strict TypeScript
 // Ensures proper type constraints for decorator target parameters
-type ClassConstructor<T = object> = new (..._args: unknown[]) => T;
-
-// Type aliases for better type safety in decorator implementations
-type _ClassConstructor = ClassConstructor<object>;
-type _ConstructorFunction = new (..._args: unknown[]) => object;
 
 // ===========================
 // TYPE DEFINITIONS

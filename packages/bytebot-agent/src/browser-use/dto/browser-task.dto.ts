@@ -22,7 +22,6 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TaskStatus } from '../services/browser-task.service';
 
 export enum BrowserTaskStatus {
   PENDING = 'pending',
@@ -343,8 +342,8 @@ export class BrowserTaskStatusDto {
   @ApiProperty({ description: 'Whether the task was found' })
   found!: boolean;
 
-  @ApiProperty({ description: 'Current task status', enum: TaskStatus })
-  status?: TaskStatus;
+  @ApiProperty({ description: 'Current task status', enum: BrowserTaskStatus })
+  status?: BrowserTaskStatus;
 
   @ApiProperty({ description: 'Task progress information' })
   progress?: {
@@ -379,7 +378,7 @@ export class BrowserTaskStatusDto {
   executionSteps?: Array<{
     stepNumber: number;
     action: string;
-    status: TaskStatus;
+    status: BrowserTaskStatus;
     startedAt?: Date;
     completedAt?: Date;
     result?: string;
@@ -430,3 +429,6 @@ export class BrowserTaskListResponseDto {
   @ApiProperty({ description: 'Whether there are previous pages' })
   hasPrevious!: boolean;
 }
+
+// Type aliases for backward compatibility
+export type BrowserTaskDto = CreateBrowserTaskDto;

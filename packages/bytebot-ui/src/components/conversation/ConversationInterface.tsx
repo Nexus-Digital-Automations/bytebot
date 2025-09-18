@@ -1034,9 +1034,9 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
       {currentConversation !== null && currentConversation !== undefined && (
         <ConversationHeader
           conversation={currentConversation as { conversationId: string; metadata?: { topic?: string; }; } | null}
-          participants={participants as unknown[]}
-          state={conversationState}
-          metrics={metrics}
+          participants={participants as ConversationParticipant[]}
+          state={conversationState as ConversationState}
+          metrics={metrics as { totalMessages: number; averageResponseTime: number; }}
           {...(config.enableSearch && { onSearch: (): void => { setShowSearch(!showSearch); } })}
           {...(config.enableExport && { onExport: (): void => {
             handleExportConversation().catch(() => {
@@ -1238,7 +1238,7 @@ export const ConversationInterface: React.FC<ConversationInterfaceProps> = ({
               )}
               {Boolean(metrics) && (
                 <span>
-                  {metrics.totalMessages} messages • {metrics.averageResponseTime}ms avg response
+                  {(metrics as { totalMessages: number; averageResponseTime: number; }).totalMessages} messages • {(metrics as { totalMessages: number; averageResponseTime: number; }).averageResponseTime}ms avg response
                 </span>
               )}
             </div>

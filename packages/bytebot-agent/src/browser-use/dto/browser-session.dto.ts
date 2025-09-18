@@ -424,3 +424,6 @@ export class BrowserSessionListResponseDto {
   @ApiProperty({ description: 'Length property for legacy support' })
   length?: number;
 }
+
+// Type aliases for backward compatibility
+export type BrowserSessionDto = CreateBrowserSessionDto;

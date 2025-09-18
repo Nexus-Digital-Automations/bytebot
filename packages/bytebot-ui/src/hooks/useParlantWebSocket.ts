@@ -25,15 +25,18 @@ import {
   ConversationPriority,
   ConversationState,
   ConversationStatusUpdate,
+  ErrorSeverity,
   IntentAnalysis,
   MessageType,
   ParlantConversationContext,
   ParlantError,
   ParlantValidationRequest,
   ParlantValidationResponse,
+  ParticipantType,
+  ParticipantRole,
   ValidationDecision
 } from '@bytebot/shared/types/parlant.types';
-import { logDebug, logError, logInfo, logWarning } from '@/utils/logger';
+import { logDebug, logError, logInfo, logWarn } from '@/utils/logger';
 
 // ===========================
 // HOOK TYPES AND INTERFACES
@@ -328,10 +331,15 @@ const calculateMetrics = (
   
   // Calculate average response time from message timestamps
   const responseTimes = messages
-    .filter((msg, index) => index > 0)
-    .map((msg, index) => 
-      msg.timestamp.getTime() - messages[index].timestamp.getTime()
-    )
+    .filter((_, index) => index > 0)
+    .map((msg, index) => {
+      const currentMsg = msg;
+      const prevMsg = messages[index];
+      if (currentMsg?.timestamp && prevMsg?.timestamp) {
+        return currentMsg.timestamp.getTime() - prevMsg.timestamp.getTime();
+      }
+      return 0;
+    })
     .filter(time => time > 0 && time < RESPONSE_TIME_MAX_MS); // Filter unrealistic response times
   
   const averageResponseTime = responseTimes.length > 0
@@ -413,7 +421,7 @@ export const useParlantWebSocket = (
   
   // Conversation state
   const [currentConversation, setCurrentConversation] = useState<ParlantConversationContext | null>(null);
-  const [conversationState, setConversationState] = useState<ConversationState>(ConversationState.INITIATED);
+  const [conversationState, setConversationState] = useState<ConversationState>(ConversationState._INITIATED);
   const [participants, setParticipants] = useState<ConversationParticipant[]>([]);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   
@@ -451,7 +459,7 @@ export const useParlantWebSocket = (
   
   const connect = useCallback(() => {
     if (!config.enabled) {
-      logWarning('Parlant WebSocket is disabled', null, 'useParlantWebSocket');
+      logWarn('Parlant WebSocket is disabled', null, 'useParlantWebSocket');
       return;
     }
     
@@ -493,7 +501,7 @@ export const useParlantWebSocket = (
       });
       
       socket.on('disconnect', (reason) => {
-        logWarning('Disconnected from Parlant WebSocket', { reason }, 'useParlantWebSocket');
+        logWarn('Disconnected from Parlant WebSocket', { reason }, 'useParlantWebSocket');
         setIsConnected(false);
         setIsOffline(true);
         stopHeartbeat();
@@ -515,7 +523,7 @@ export const useParlantWebSocket = (
           code: 'CONNECTION_ERROR',
           message: error.message,
           timestamp: new Date(),
-          severity: 'HIGH' as const,
+          severity: ErrorSeverity._HIGH,
         });
       });
       
@@ -585,7 +593,7 @@ export const useParlantWebSocket = (
       setConnectionError('Failed to initialize connection');
       errorCount.current++;
     }
-  }, [config, onConnected, onDisconnected, onReconnecting, onError, onMessageReceived, onValidationResponse, onConversationUpdate, onParticipantJoined, onParticipantLeft, onMessageError, currentConversation, processOfflineQueue, startHeartbeat, stopHeartbeat, updatePerformanceMetrics]);
+  }, [config, onConnected, onDisconnected, onReconnecting, onError, onMessageReceived, onValidationResponse, onConversationUpdate, onParticipantJoined, onParticipantLeft, onMessageError, currentConversation]);
   
   const disconnect = useCallback(() => {
     logInfo('Disconnecting from Parlant WebSocket', null, 'useParlantWebSocket');
@@ -608,7 +616,7 @@ export const useParlantWebSocket = (
     });
     pendingValidations.current.clear();
     
-  }, [stopHeartbeat, stopMetricsTracking]);
+  }, []);
   
   const reconnect = useCallback(async () => {
     const RECONNECT_DELAY_MS = 1000;
@@ -624,7 +632,7 @@ export const useParlantWebSocket = (
   
   const startConversation = useCallback(async (
     topic?: string,
-    priority: ConversationPriority = ConversationPriority.NORMAL
+    priority: ConversationPriority = ConversationPriority._NORMAL
   ): Promise<string> => {
     if (!isConnected || !socketRef.current) {
       throw new Error('Not connected to Parlant WebSocket');
@@ -635,9 +643,9 @@ export const useParlantWebSocket = (
       conversationId,
       userId: 'current-user', // TODO: Get from auth context
       sessionId: `session_${Date.now()}`,
-      state: ConversationState.INITIATED,
+      state: ConversationState._INITIATED,
       metadata: {
-        topic,
+        topic: topic ?? 'New Conversation',
         priority,
         tags: [],
         properties: {},
@@ -656,7 +664,7 @@ export const useParlantWebSocket = (
       socketRef.current.emit('parlant:start_conversation', conversation, (response: { success: boolean; error?: string }) => {
         if (response.success) {
           setCurrentConversation(conversation);
-          setConversationState(ConversationState.ACTIVE);
+          setConversationState(ConversationState._ACTIVE);
           setMessages([]);
           setParticipants([]);
           onConversationStart?.(conversation);
@@ -682,8 +690,9 @@ export const useParlantWebSocket = (
       }
       socketRef.current.emit('parlant:join_conversation', conversationId, (response: { success: boolean; error?: string; conversation?: ParlantConversationContext; messages?: ConversationMessage[]; participants?: ConversationParticipant[] }) => {
         if (Boolean(response.success) && Boolean(response.conversation)) {
-          setCurrentConversation(response.conversation);
-          setConversationState(response.conversation.state);
+          const conversation = response.conversation as ParlantConversationContext;
+          setCurrentConversation(conversation);
+          setConversationState(conversation.state);
           setMessages(response.messages ?? []);
           setParticipants(response.participants ?? []);
           resolve();
@@ -742,7 +751,7 @@ export const useParlantWebSocket = (
   
   const sendMessage = useCallback(async (
     content: string,
-    type: MessageType = MessageType.TEXT
+    type: MessageType = MessageType._TEXT
   ): Promise<void> => {
     if (currentConversation === null) {
       throw new Error('No active conversation');
@@ -753,9 +762,9 @@ export const useParlantWebSocket = (
       conversationId: currentConversation.conversationId,
       sender: {
         id: 'current-user', // TODO: Get from auth context
-        type: 'HUMAN',
+        type: ParticipantType._HUMAN,
         name: 'User', // TODO: Get from auth context
-        role: 'REQUESTOR',
+        role: ParticipantRole._REQUESTOR,
         capabilities: [],
         joinedAt: new Date(),
       },

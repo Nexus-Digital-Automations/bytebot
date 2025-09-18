@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 // Removed unused UI components: ScrollArea, Popover, PopoverContent, PopoverTrigger
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Directions01Icon } from "@hugeicons/core-free-icons";
 import { logDebug, logInfo, logWarn } from '@/utils/logger';
 
 // ===========================
@@ -1011,16 +1012,16 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const results = Array.from(event.results);
       const transcript = results
-        .map((result: SpeechRecognitionResult) => result[0].transcript)
+        .map((result: SpeechRecognitionResult) => result[0]?.transcript ?? '')
         .join('');
       
       setVoiceState(prev => ({
         ...prev,
         transcript,
-        confidence: results[results.length - 1][0].confidence
+        confidence: results[results.length - 1]?.[0]?.confidence ?? 0
       }));
       
-      if (event.results[event.results.length - 1].isFinal) {
+      if (event.results[event.results.length - 1]?.isFinal) {
         setCommand(transcript);
         processCommand(transcript).catch((error) => {
           logWarn('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
@@ -1163,7 +1164,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       )}>
         {/* Navigation Icon */}
         <HugeiconsIcon 
-          icon={NavigationIcon} 
+          icon={Directions01Icon} 
           className="w-5 h-5 text-gray-400 flex-shrink-0" 
           aria-hidden="true"
         />
@@ -1281,7 +1282,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
               >
                 {suggestion.action?.icon && (
                   <HugeiconsIcon
-                    icon={suggestion.action.icon}
+                    icon={suggestion.action.icon as any}
                     className="w-4 h-4 text-gray-400 flex-shrink-0"
                   />
                 )}

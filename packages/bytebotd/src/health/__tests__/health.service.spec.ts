@@ -1161,8 +1161,8 @@ describe('HealthService', () => {
             }
           },
         );
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        global.setTimeout = mockSetTimeout as any;
+         
+        global.setTimeout = mockSetTimeout as typeof setTimeout;
         const results = await Promise.all([
           (service as TestableHealthService).checkExternalService(
             'service-1',
