@@ -1346,27 +1346,20 @@ describe('HealthService', () => {
         HealthIndicatorResult,
         HealthIndicatorResult
       ];
-      // Basic health schema
-      expect(basic).toMatchObject({
-        status: expect.stringMatching(/^(healthy|unhealthy)$/),
-        timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
-        uptime: expect.any(Number) as number,
-        memory: expect.objectContaining({
-          used: expect.any(Number) as number,
-          free: expect.any(Number) as number,
-          total: expect.any(Number) as number,
-        }),
-      });
-      // Detailed status schema
-      expect(detailed).toMatchObject({
-        status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/),
-        memory: expect.objectContaining({
-          heapUsed: expect.any(Number) as number,
-          heapTotal: expect.any(Number) as number,
-        }),
-        services: expect.any(Object) as object,
-        performance: expect.any(Object) as object,
-      });
+      // Basic health schema - using individual assertions for type safety
+      expect(basic.status).toMatch(/^(healthy|unhealthy)$/);
+      expect(basic.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(typeof basic.uptime).toBe('number');
+      expect(typeof basic.memory.used).toBe('number');
+      expect(typeof basic.memory.free).toBe('number');
+      expect(typeof basic.memory.total).toBe('number');
+      
+      // Detailed status schema - using individual assertions for type safety
+      expect(detailed.status).toMatch(/^(healthy|degraded|unhealthy)$/);
+      expect(typeof detailed.memory.heapUsed).toBe('number');
+      expect(typeof detailed.memory.heapTotal).toBe('number');
+      expect(typeof detailed.services).toBe('object');
+      expect(typeof detailed.performance).toBe('object');
       // Process health schema with proper type checking
       const processResult = processHealth as ProcessHealthResult;
       expect(processResult.process?.status).toEqual(
