@@ -453,7 +453,7 @@ describe('Parlant Performance Optimization Validation', () => {
 
   describe('Integration and Health Monitoring', () => {
     it('should have healthy performance optimization module', async () => {
-      const healthCheck = module.get('PARLANT_PERFORMANCE_HEALTH_CHECK');
+      const healthCheck = module.get('PARLANT_PERFORMANCE_HEALTH_CHECK') as () => Promise<PerformanceHealthCheck>;
       const health = await healthCheck();
       
       expect(health).toBeDefined();
@@ -473,7 +473,7 @@ describe('Parlant Performance Optimization Validation', () => {
     });
 
     it('should provide performance metrics for monitoring', () => {
-      const metricsProvider = module.get('PARLANT_PERFORMANCE_METRICS');
+      const metricsProvider = module.get('PARLANT_PERFORMANCE_METRICS') as () => PerformanceMetrics;
       const metrics = metricsProvider();
       
       expect(metrics).toBeDefined();

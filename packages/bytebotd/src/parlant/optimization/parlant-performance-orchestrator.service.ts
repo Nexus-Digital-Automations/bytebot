@@ -754,8 +754,8 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     recommendations.push(
       ...batchRecommendations.map(rec => ({
         category: 'batching' as const,
-        priority: rec.priority === ValidationPriority.HIGH ? 'high' : 
-                  rec.priority === ValidationPriority.MEDIUM ? 'medium' : 'low',
+        priority: rec.priority === 'high' ? 'high' : 
+                  rec.priority === 'medium' ? 'medium' : 'low',
         title: `Batch ${rec.type}`,
         description: rec.action,
         expectedImprovement: '10-30% throughput improvement',

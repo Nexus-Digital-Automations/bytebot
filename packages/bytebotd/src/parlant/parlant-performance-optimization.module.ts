@@ -365,17 +365,19 @@ export class ParlantPerformanceOptimizationModule {
 
     // Set up real-time performance monitoring
     this.orchestrator.onPerformanceEvent('responseTimeRecorded', (event) => {
-      if (event.latencyMs > 2000) {
+      const eventData = event as any;
+      if (eventData.latencyMs > 2000) {
         logger.warn('High latency detected', {
-          latency: `${event.latencyMs}ms`,
-          timestamp: new Date(event.timestamp).toISOString()
+          latency: `${eventData.latencyMs}ms`,
+          timestamp: new Date(eventData.timestamp).toISOString()
         });
       }
     });
 
     // Monitor performance metrics updates
     this.orchestrator.onPerformanceEvent('performanceMetricsUpdated', (metrics) => {
-      const compliance = metrics.targetCompliance;
+      const metricsData = metrics as any;
+      const compliance = metricsData.targetCompliance;
       if (!compliance.p95Target || !compliance.cacheHitTarget || !compliance.throughputTarget) {
         logger.warn('Performance targets not met', {
           p95ResponseTime: compliance.p95Target ? '✅' : '❌',
@@ -388,11 +390,12 @@ export class ParlantPerformanceOptimizationModule {
 
     // Monitor alerts
     this.orchestrator.onPerformanceEvent('alertCreated', (alert) => {
-      logger.warn(`Performance Alert: ${alert.message}`, {
-        level: alert.level,
-        metric: alert.metric,
-        threshold: alert.threshold,
-        currentValue: alert.currentValue
+      const alertData = alert as any;
+      logger.warn(`Performance Alert: ${alertData.message}`, {
+        level: alertData.level,
+        metric: alertData.metric,
+        threshold: alertData.threshold,
+        currentValue: alertData.currentValue
       });
     });
 

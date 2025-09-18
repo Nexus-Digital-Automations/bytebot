@@ -847,7 +847,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   private async attemptFallbackResponse(request: ParlantValidationRequest): Promise<{
     degradedMode: boolean;
     fallbackUsed: boolean;
-    data?: any;
+    data?: unknown;
   }> {
     // Try cache-only response for low-risk operations
     if (request.riskLevel === RiskLevel.MINIMAL || request.riskLevel === RiskLevel.LOW) {
@@ -942,7 +942,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
     }, 5 * 60 * 1000);
   }
 
-  private handleCircuitBreakerStateChange(event: any): void {
+  private handleCircuitBreakerStateChange(event: { previousState: string; newState: string; timestamp: Date; failureCount?: number; lastFailure?: Date }): void {
     this.logger.log(`Circuit breaker state changed: ${event.previousState} -> ${event.newState}`, {
       previousState: event.previousState,
       newState: event.newState,
