@@ -28,6 +28,8 @@ import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { ParlantModule } from '../parlant/parlant.module';
+import { SecurityModule } from '../common/security/security.module';
+import { MetricsModule } from '../metrics/metrics.module';
 import { EnterpriseApiGatewayController } from './enterprise-api-gateway.controller';
 import { EnterpriseApiService } from './enterprise-api.service';
 import { EnterpriseApiInterceptor } from './enterprise-api.interceptor';
@@ -59,6 +61,8 @@ import { EnterpriseApiRoutingService } from './enterprise-api-routing.service';
       signOptions: { expiresIn: '8h' },
     }),
     ParlantModule, // Required for MAXIMUM conversational validation
+    SecurityModule, // Required for EnterpriseRateLimitGuard throttler dependencies
+    MetricsModule, // Required for LoggingInterceptor BytebotMetricsService dependency
   ],
   controllers: [
     EnterpriseApiGatewayController,

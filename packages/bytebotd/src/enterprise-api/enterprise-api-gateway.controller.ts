@@ -370,7 +370,7 @@ export class EnterpriseApiGatewayController {
   /**
    * Universal POST endpoint with Parlant validation
    */
-  @Post(':service/:endpoint*')
+  @Post(':service/*path')
   @OperatorOrAdmin()
   @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
@@ -378,7 +378,7 @@ export class EnterpriseApiGatewayController {
     description: 'Execute any POST API endpoint with comprehensive Parlant conversational validation and enterprise monitoring.',
   })
   @ApiParam({ name: 'service', description: 'Target service name' })
-  @ApiParam({ name: 'endpoint', description: 'Target endpoint path' })
+  @ApiParam({ name: 'path', description: 'Target endpoint path' })
   @ApiHeader({ name: 'x-conversation-id', description: 'Conversation ID for validation context', required: false })
   @ApiHeader({ name: 'x-user-intent', description: 'User intent description', required: false })
   @ApiResponse({ status: 200, description: 'API request executed successfully with validation' })
@@ -386,7 +386,7 @@ export class EnterpriseApiGatewayController {
   @ApiResponse({ status: 503, description: 'Service unavailable - circuit breaker open' })
   async executePostApi(
     @Param('service') service: string,
-    @Param('endpoint') endpoint: string,
+    @Param('path') endpoint: string,
     @Body() body: unknown,
     @Query() query: Record<string, unknown>,
     @Headers() headers: Record<string, string>,
@@ -407,7 +407,7 @@ export class EnterpriseApiGatewayController {
   /**
    * Universal GET endpoint with Parlant validation
    */
-  @Get(':service/:endpoint*')
+  @Get(':service/*path')
   @OperatorOrAdmin()
   @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
@@ -415,11 +415,11 @@ export class EnterpriseApiGatewayController {
     description: 'Execute any GET API endpoint with comprehensive Parlant conversational validation and enterprise monitoring.',
   })
   @ApiParam({ name: 'service', description: 'Target service name' })
-  @ApiParam({ name: 'endpoint', description: 'Target endpoint path' })
+  @ApiParam({ name: 'path', description: 'Target endpoint path' })
   @ApiResponse({ status: 200, description: 'API request executed successfully with validation' })
   async executeGetApi(
     @Param('service') service: string,
-    @Param('endpoint') endpoint: string,
+    @Param('path') endpoint: string,
     @Query() query: Record<string, unknown>,
     @Headers() headers: Record<string, string>,
     @CurrentUser() user: ByteBotdUser,
@@ -438,7 +438,7 @@ export class EnterpriseApiGatewayController {
   /**
    * Universal PUT endpoint with Parlant validation
    */
-  @Put(':service/:endpoint*')
+  @Put(':service/*path')
   @OperatorOrAdmin()
   @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
@@ -447,7 +447,7 @@ export class EnterpriseApiGatewayController {
   })
   async executePutApi(
     @Param('service') service: string,
-    @Param('endpoint') endpoint: string,
+    @Param('path') endpoint: string,
     @Body() body: unknown,
     @Query() query: Record<string, unknown>,
     @Headers() headers: Record<string, string>,
@@ -468,7 +468,7 @@ export class EnterpriseApiGatewayController {
   /**
    * Universal DELETE endpoint with Parlant validation
    */
-  @Delete(':service/:endpoint*')
+  @Delete(':service/*path')
   @OperatorOrAdmin()
   @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
@@ -477,7 +477,7 @@ export class EnterpriseApiGatewayController {
   })
   async executeDeleteApi(
     @Param('service') service: string,
-    @Param('endpoint') endpoint: string,
+    @Param('path') endpoint: string,
     @Query() query: Record<string, unknown>,
     @Headers() headers: Record<string, string>,
     @CurrentUser() user: ByteBotdUser,

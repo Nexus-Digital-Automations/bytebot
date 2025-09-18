@@ -333,28 +333,30 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
       const wsUrl = this.parlantServerUrl.replace(/^http/, 'ws') + '/ws';
       this.parlantWebSocket = new WebSocket(wsUrl);
       
-      this.parlantWebSocket.on('open', () => {
-        this.logger.log('Parlant WebSocket connection established');
-      });
-      
-      this.parlantWebSocket.on('message', (data: WebSocket.Data) => {
-        try {
-          const message = JSON.parse(data.toString()) as ParlantWebSocketMessage;
-          this.handleParlantWebSocketMessage(message);
-        } catch (error) {
-          this.logger.error('Failed to parse Parlant WebSocket message', { error: error instanceof Error ? error.message : String(error) });
-        }
-      });
-      
-      this.parlantWebSocket.on('error', (error) => {
-        this.logger.error('Parlant WebSocket error', { error: error.message });
-      });
-      
-      this.parlantWebSocket.on('close', () => {
-        this.logger.log('Parlant WebSocket connection closed');
-        // Attempt to reconnect after 5 seconds
-        setTimeout(() => this.initializeParlantWebSocket(), 5000);
-      });
+      if (this.parlantWebSocket) {
+        this.parlantWebSocket.on('open', () => {
+          this.logger.log('Parlant WebSocket connection established');
+        });
+        
+        this.parlantWebSocket.on('message', (data: WebSocket.RawData) => {
+          try {
+            const message = JSON.parse(data.toString()) as ParlantWebSocketMessage;
+            this.handleParlantWebSocketMessage(message);
+          } catch (error) {
+            this.logger.error('Failed to parse Parlant WebSocket message', { error: error instanceof Error ? error.message : String(error) });
+          }
+        });
+        
+        this.parlantWebSocket.on('error', (error: Error) => {
+          this.logger.error('Parlant WebSocket error', { error: error.message });
+        });
+        
+        this.parlantWebSocket.on('close', () => {
+          this.logger.log('Parlant WebSocket connection closed');
+          // Attempt to reconnect after 5 seconds
+          setTimeout(() => this.initializeParlantWebSocket(), 5000);
+        });
+      }
     } catch (error) {
       this.logger.error('Failed to initialize Parlant WebSocket', { error: error instanceof Error ? error.message : String(error) });
     }

@@ -384,5 +384,6 @@ export async function compressPngBase64Under1MB(
   return _result.base64;
 }
 
-// Export the class for more control
-export { Base64ImageCompressor, CompressionOptions, CompressionResult };
+// Export the class and types for more control
+export { Base64ImageCompressor };
+export type { CompressionOptions, CompressionResult };

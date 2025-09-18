@@ -3690,10 +3690,186 @@
       "updated_at": "2025-09-18T03:26:19.139Z",
       "archived_at": "2025-09-18T03:26:19.146Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T02:59:15.737Z",
+      "title": "CRITICAL: Fix ExtendedRequest interface compatibility in enterprise-api.interceptor.ts",
+      "description": "Fix critical TypeScript interface compatibility error in bytebotd/src/enterprise-api/enterprise-api.interceptor.ts. ExtendedRequest interface incorrectly extends Request interface - user property type mismatch. Missing required properties sub, email in user object type. This blocks entire bytebotd package compilation.",
+      "category": "error",
+      "id": "error_1758164355737_s6gb3akeo6o",
+      "assigned_agent": "dev_session_1758164143884_1_general_b22c2a2c",
+      "started_at": "2025-09-18T02:59:40.112Z",
+      "claimed_by": "dev_session_1758164143884_1_general_b22c2a2c",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758164143884_1_general_b22c2a2c",
+          "role": "primary",
+          "assignedAt": "2025-09-18T02:59:40.112Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T03:38:59.912Z",
+      "updated_at": "2025-09-18T03:38:59.912Z",
+      "archived_at": "2025-09-18T03:38:59.931Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T02:46:55.615Z",
+      "title": "CRITICAL: Fix TypeScript compilation errors in validation.pipe.spec.ts",
+      "description": "Fix critical TypeScript compilation errors in bytebotd/src/common/__tests__/validation.pipe.spec.ts: 1) Argument of type object not assignable to Record<string, unknown>, 2) Multiple result is of type unknown errors (lines 404, 405, 430, 431, 498, 499, 525, 550). These errors block TypeScript compilation and CI/CD pipeline.",
+      "category": "error",
+      "id": "error_1758163615615_2gggoh72fex",
+      "assigned_agent": "dev_session_1758163408228_1_general_e8df838a",
+      "started_at": "2025-09-18T02:47:14.552Z",
+      "claimed_by": "dev_session_1758163408228_1_general_e8df838a",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758163408228_1_general_e8df838a",
+          "role": "primary",
+          "assignedAt": "2025-09-18T02:47:14.552Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T03:39:17.799Z",
+      "updated_at": "2025-09-18T03:39:17.799Z",
+      "archived_at": "2025-09-18T03:39:17.804Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "id": "error_1757736019148_labrv7rx3",
+      "title": "EMERGENCY: Fix 186 TypeScript compilation errors blocking BytebotD package build",
+      "description": "CRITICAL BUILD FAILURE: BytebotD package has 186 TypeScript compilation errors preventing successful build. Errors span multiple modules including JWT auth guards, browser services, test utilities, security middleware, and error handlers. This blocks the entire CI/CD pipeline and deployment. Requires immediate systematic resolution using concurrent specialized subagents for maximum parallel efficiency.",
+      "priority": "normal",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/auth/guards/jwt-auth.guard.ts",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/browser-use/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/test-utils/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/security/",
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/utils/error-handler.ts"
+      ],
+      "success_criteria": [
+        "All 186 TypeScript compilation errors resolved",
+        "npm run build completes successfully without errors",
+        "All type safety violations corrected",
+        "Existing functionality preserved",
+        "Code follows TypeScript strict mode standards"
+      ],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-13T04:00:19.148Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757735375203_1_general_c7609592",
+      "started_at": "2025-09-13T04:00:42.728Z",
+      "claimed_by": "development_session_1757735375203_1_general_c7609592",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757735375203_1_general_c7609592",
+          "role": "primary",
+          "assignedAt": "2025-09-13T04:00:42.728Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T03:39:40.806Z",
+      "updated_at": "2025-09-18T03:39:40.806Z",
+      "archived_at": "2025-09-18T03:39:40.814Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "id": "error_1757477906659_bvxkxu3qy",
+      "title": "CRITICAL: Fix TypeScript compilation errors in bytebotd test files",
+      "description": "Fix critical TypeScript compilation errors in bytebotd package test files preventing build: 1) Remove C/ua integration imports and references (cua-integration.service, cua-vision.service, cua-performance.service), 2) Fix missing exported members from @bytebot/shared (OcrAction, FindTextAction, EnhancedScreenshotAction), 3) Update action interfaces for proper typing (DragMouseAction, TraceMouseAction, PressKeysAction), 4) Fix InputTrackingGateway test mocks for missing methods (broadcastActionEvent, broadcastInputEvent, getConnectedClients), 5) Resolve type conflicts and property mismatches. Focus on: computer-use.service.desktop-automation.spec.ts, computer-use.service.spec.ts, input-tracking.realtime-comprehensive.spec.ts",
+      "priority": "normal",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [
+        "bytebot/packages/bytebotd/src/computer-use/__tests__/computer-use.service.desktop-automation.spec.ts",
+        "bytebot/packages/bytebotd/src/computer-use/__tests__/computer-use.service.spec.ts",
+        "bytebot/packages/bytebotd/src/input-tracking/__tests__/input-tracking.realtime-comprehensive.spec.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-10T04:18:26.659Z",
+      "auto_research_created": false,
+      "assigned_agent": "development_session_1757477776666_1_general_b422bd30",
+      "started_at": "2025-09-10T04:18:54.422Z",
+      "claimed_by": "development_session_1757477776666_1_general_b422bd30",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757477776666_1_general_b422bd30",
+          "role": "primary",
+          "assignedAt": "2025-09-10T04:18:54.422Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T03:40:02.710Z",
+      "updated_at": "2025-09-18T03:40:02.710Z",
+      "archived_at": "2025-09-18T03:40:02.715Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T03:41:12.110Z",
+      "title": "Comprehensive Build & Lint Validation - SUBAGENT 9",
+      "description": "Perform comprehensive build and lint validation across entire bytebotd package with zero tolerance standards. Execute pnpm run lint, pnpm run build, and npx tsc --noEmit validation sequence.",
+      "category": "subtask",
+      "id": "subtask_1758166872109_xpnesx5q5k",
+      "completed_at": "2025-09-18T03:48:37.723Z",
+      "updated_at": "2025-09-18T03:48:37.723Z",
+      "archived_at": "2025-09-18T03:48:37.729Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T03:41:21.683Z",
+      "title": "TypeScript Compliance Check - Auth Modules",
+      "description": "Perform comprehensive TypeScript compilation validation on authentication and authorization modules in src/auth directory. Fix JWT guards, strategies, decorators, user interfaces, and authentication services. Ensure type safety without compromising security.",
+      "category": "error",
+      "id": "error_1758166881683_r72cagqzse",
+      "completed_at": "2025-09-18T03:54:23.751Z",
+      "updated_at": "2025-09-18T03:54:23.751Z",
+      "archived_at": "2025-09-18T03:54:23.754Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T01:53:31.147Z",
+      "title": "TypeScript Test Compilation Validation",
+      "description": "Perform comprehensive TypeScript compilation validation across entire bytebotd package using npx tsc --noEmit, coordinate with subagents for complete coverage, and run final build/lint validation",
+      "category": "test",
+      "id": "test_1758160411147_n2b5jxt8tzk",
+      "assigned_agent": "dev_session_1758166641898_1_general_6fdb5121",
+      "started_at": "2025-09-18T03:38:17.628Z",
+      "claimed_by": "dev_session_1758166641898_1_general_6fdb5121",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758166641898_1_general_6fdb5121",
+          "role": "primary",
+          "assignedAt": "2025-09-18T03:38:17.628Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T04:05:41.886Z",
+      "updated_at": "2025-09-18T04:05:41.886Z",
+      "archived_at": "2025-09-18T04:05:41.891Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 87,
+  "total_completed": 94,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-18T03:26:19.146Z"
+  "last_archived": "2025-09-18T04:05:41.891Z"
 }

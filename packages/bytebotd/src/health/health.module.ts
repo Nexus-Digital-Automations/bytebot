@@ -26,6 +26,7 @@ import { HttpModule } from '@nestjs/axios';
 import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
 import { ParlantModule } from '../parlant/parlant.module';
+import { MetricsModule } from '../metrics/metrics.module';
 
 /**
  * Enterprise health monitoring module providing Kubernetes observability
@@ -35,7 +36,7 @@ import { ParlantModule } from '../parlant/parlant.module';
     TerminusModule, // Provides health check indicators
     HttpModule, // For external service health checks
     ParlantModule, // Provides ParlantHealthMetricsValidationService for conversational validation
-    // MonitoringModule, // Provides MetricsService for Prometheus metrics - temporarily disabled due to EventEmitter dependency issue
+    MetricsModule, // Provides BytebotMetricsService for Prometheus metrics and health controller dependency
   ],
   controllers: [HealthController],
   providers: [HealthService],
