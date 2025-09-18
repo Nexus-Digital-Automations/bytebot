@@ -195,7 +195,7 @@ export class PerformanceTestingFramework extends EventEmitter {
     console.log(`📊 [PERF] Measurement phase: ${config.measurementIterations} iterations`);
     
     for (let i = 0; i < config.measurementIterations; i++) {
-      const iterationName = `${config.name}_iteration_${i + 1}`;
+      const iterationName = `${config.name}_iteration${i + 1}`;
       this.startMeasurement(iterationName, 'benchmark');
 
       const errors: Error[] = [];
@@ -227,9 +227,9 @@ export class PerformanceTestingFramework extends EventEmitter {
     const averageExecutionTime = executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length;
     const minExecutionTime = Math.min(...executionTimes);
     const maxExecutionTime = Math.max(...executionTimes);
-    const p50ExecutionTime = sortedTimes[Math.floor(sortedTimes.length * 0.5)] || 0;
-    const p95ExecutionTime = sortedTimes[Math.floor(sortedTimes.length * 0.95)] || 0;
-    const p99ExecutionTime = sortedTimes[Math.floor(sortedTimes.length * 0.99)] || 0;
+    const p50ExecutionTime = sortedTimes[Math.floor(sortedTimes.length * 0.5)] ?? 0;
+    const p95ExecutionTime = sortedTimes[Math.floor(sortedTimes.length * 0.95)] ?? 0;
+    const p99ExecutionTime = sortedTimes[Math.floor(sortedTimes.length * 0.99)] ?? 0;
 
     const averageMemoryUsage = memoryUsages.reduce((a, b) => a + b, 0) / memoryUsages.length;
 
@@ -240,7 +240,7 @@ export class PerformanceTestingFramework extends EventEmitter {
     const performanceGrade = this.calculatePerformanceGrade(config, averageExecutionTime, averageMemoryUsage, memoryLeakDetected);
 
     // Generate recommendations
-    const recommendations = this.generateRecommendations(config, {
+    const recommendations = this.generateRecommendations(_config, {
       averageExecutionTime,
       averageMemoryUsage,
       memoryLeakDetected,
@@ -295,7 +295,7 @@ export class PerformanceTestingFramework extends EventEmitter {
     }, new Map<string, string[]>());
 
     for (const [suiteName, testKeys] of testSuites) {
-      const suiteMetrics = testKeys.flatMap(key => this.metrics.get(key) || []);
+      const suiteMetrics = testKeys.flatMap(key => this.metrics.get(key) ?? []);
       
       const totalTests = testKeys.length;
       const passedTests = suiteMetrics.filter(m => m.passed).length;

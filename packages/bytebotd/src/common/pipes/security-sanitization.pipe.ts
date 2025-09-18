@@ -186,7 +186,7 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
         transformedValue = plainToClass(metadata.metatype, sanitizedValue);
 
         // Perform class-validator validation
-        const validationErrors = await validate(transformedValue as object, {
+        const validationErrors = await validate(_transformedValue as object, {
           whitelist: this.options.whitelist,
           forbidNonWhitelisted: this.options.strictMode,
           skipMissingProperties: false,

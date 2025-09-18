@@ -51,7 +51,7 @@ export class InputTrackingService implements OnModuleDestroy {
    * @param gateway - WebSocket gateway for real-time event broadcasting
    */
   constructor(
-    private readonly computerUseService: ComputerUseService,
+    _private readonly computerUseService: ComputerUseService,
     private readonly gateway: InputTrackingGateway,
   ) {}
 
@@ -116,7 +116,7 @@ export class InputTrackingService implements OnModuleDestroy {
         this.screenshotTimeout = setTimeout(() => {
           void (async () => {
             try {
-              const _result = await (
+              const result = await (
                 this.computerUseService.screenshot as () => Promise<{
                   image: string;
                 }>

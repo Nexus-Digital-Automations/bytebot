@@ -31,7 +31,7 @@ import { MetricsService } from '../../metrics/metrics.service';
 
 // Mock the redis store import
 jest.mock('cache-manager-redis-store', () => ({
-  __esModule: true,
+  _esModule: true,
   default: jest.fn(),
 }));
 
@@ -108,7 +108,7 @@ describe('CacheModule', () => {
     });
 
     it('should be a global module', () => {
-      const moduleMetadata = Reflect.getMetadata('__module:global__', CacheModule);
+      const moduleMetadata = Reflect.getMetadata('_module:global__', CacheModule);
       expect(moduleMetadata).toBe(true);
     });
   });
@@ -140,7 +140,7 @@ describe('CacheModule', () => {
 
     it('should apply default values correctly', async () => {
       // Capture the configuration that would be used
-      const CacheModuleClass = CacheModule as any;
+      const CacheModuleClass = CacheModule as unknown;
       const factory = CacheModuleClass.prototype.constructor;
       
       // We can't directly test the factory function, but we can test
@@ -234,7 +234,7 @@ describe('CacheModule', () => {
         REDIS_HOST: undefined,
         REDIS_PORT: undefined,
         REDIS_PASSWORD: undefined,
-      } as any);
+      } as unknown);
 
       module = await Test.createTestingModule({
         imports: [CacheModule],
@@ -377,7 +377,7 @@ describe('CacheModule', () => {
       };
 
       // Replace the cache manager in the service
-      (cacheService as any).cacheManager = mockCacheManager;
+      (cacheService as unknown).cacheManager = mockCacheManager;
 
       // Test cache operations
       await cacheService.set('test-key', 'test-value');
@@ -396,7 +396,7 @@ describe('CacheModule', () => {
       expect(simpleKey).toBe('bytebot:simple');
 
       const apiKey = keyGenerator.generateApiKey('GET', '/api/test');
-      expect(apiKey).toMatch(/^api:api:get:api_test$/);
+      expect(apiKey).toMatch(_/^api:api:get:api_test$/);
 
       const dbKey = keyGenerator.generateDbKey('users', 'SELECT');
       expect(dbKey).toBe('database:db:users:select');
@@ -408,7 +408,7 @@ describe('CacheModule', () => {
         get: jest.fn().mockResolvedValue(null),
         set: jest.fn().mockResolvedValue(undefined),
       };
-      (cacheService as any).cacheManager = mockCacheManager;
+      (cacheService as unknown).cacheManager = mockCacheManager;
 
       // Use CacheService which should use CacheKeyGenerator internally
       await cacheService.set('coordination-test', 'test-value');
@@ -426,7 +426,7 @@ describe('CacheModule', () => {
     it('should handle MetricsService dependency injection errors', async () => {
       // Test with missing MetricsService
       await expect(
-        Test.createTestingModule({
+        _Test.createTestingModule({
           imports: [CacheModule],
           // No MetricsService provided
         }).compile()

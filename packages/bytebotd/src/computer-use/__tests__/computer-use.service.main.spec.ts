@@ -148,7 +148,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
     // Mock child_process.exec with proper typing
     const childProcess = jest.requireMock<MockChildProcess>('child_process');
-    const _util = jest.requireMock<MockUtil>('util');
+    const util = jest.requireMock<MockUtil>('util');
 
     // Mock exec to resolve quickly for tests
     const mockChildProcess = {
@@ -661,7 +661,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
         // Assert
         expect(loggerLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Executing computer action: move_mouse'),
+          _expect.stringContaining('Executing computer action: move_mouse'),
           expect.objectContaining({
             actionType: 'move_mouse',
             hasCoordinates: true,
@@ -671,7 +671,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should log action completion with performance metrics', async () => {
         // Arrange
-        const _loggerLogSpy = jest.spyOn(Logger.prototype, 'log');
+        const loggerLogSpy = jest.spyOn(Logger.prototype, 'log');
         const action = createTestAction<ScreenshotAction>({
           action: 'screenshot',
         });
@@ -795,7 +795,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         action: 'wait',
         duration: excessiveDuration,
       });
-      const _loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn');
+      const loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn');
 
       // Act
       const delayPromise = service.action(action);
@@ -815,7 +815,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         action: 'wait',
         duration: negativeDuration,
       });
-      const _loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn');
+      const loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn');
 
       // Act
       const delayPromise = service.action(action);
@@ -836,7 +836,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
         action: 'wait',
         duration,
       });
-      const _loggerDebugSpy = jest.spyOn(Logger.prototype, 'debug');
+      const loggerDebugSpy = jest.spyOn(Logger.prototype, 'debug');
 
       // Act
       const delayPromise = service.action(action);
@@ -857,7 +857,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
     describe('extractErrorMessage', () => {
       it('should extract message from Error instances', () => {
         // Arrange
-        const _error = new Error('Test error message');
+        const error = new Error('Test error message');
 
         // Act
         const result = ErrorHandler.extractErrorMessage(_error);
@@ -868,7 +868,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should handle string errors', () => {
         // Arrange
-        const _error = 'String error message';
+        const error = 'String error message';
 
         // Act
         const result = ErrorHandler.extractErrorMessage(_error);
@@ -879,7 +879,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should handle objects with message property', () => {
         // Arrange
-        const _error = { message: 'Object error message', code: 'ERR001' };
+        const error = { message: 'Object error message', code: 'ERR001' };
 
         // Act
         const result = ErrorHandler.extractErrorMessage(_error);
@@ -890,7 +890,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should handle non-_error objects', () => {
         // Arrange
-        const _error = { status: 500, detail: 'Server error' };
+        const error = { status: 500, detail: 'Server error' };
 
         // Act
         const result = ErrorHandler.extractErrorMessage(_error);
@@ -923,7 +923,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
 
       it('should handle objects with stack property', () => {
         // Arrange
-        const _error = {
+        const error = {
           message: 'Custom error',
           stack: 'Custom error\n    at custom.js:1:1',
         };
@@ -1018,7 +1018,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {
           text: 'Hello World',
         },
       ];
-      const _loggerLogSpy = jest.spyOn(Logger.prototype, 'log');
+      const loggerLogSpy = jest.spyOn(Logger.prototype, 'log');
 
       // Act
       for (const action of actions) {

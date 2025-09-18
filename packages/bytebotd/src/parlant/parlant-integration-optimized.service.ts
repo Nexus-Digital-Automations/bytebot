@@ -115,7 +115,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
   private successfulValidations = 0;
   
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly performanceMonitor: ParlantPerformanceMonitorService,
     private readonly intelligentCache: ParlantIntelligentCacheService,
     private readonly circuitBreaker: ParlantCircuitBreakerService,
@@ -138,7 +138,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
       degradationStrategy: this.configService.get<'FAIL_FAST' | 'GRACEFUL_DEGRADATION' | 'CACHE_ONLY'>('PARLANT_DEGRADATION_STRATEGY', 'GRACEFUL_DEGRADATION'),
     };
     
-    const operationId = `parlant_optimized_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_optimized_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Optimized Parlant Integration Service`, {
       optimizedConfig: this.optimizedConfig,
@@ -155,7 +155,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     // Initialize all services and warm up caches
-    const operationId = `module_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `module_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Starting module initialization`);
     
@@ -281,7 +281,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
       // Step 4: Complete performance tracking
       let _performanceMetrics;
       if (this.optimizedConfig.enablePerformanceMonitoring) {
-        _performanceMetrics = this.performanceMonitor.completePerformanceTracking(
+        performanceMetrics = this.performanceMonitor.completePerformanceTracking(
           request.operationId,
           cacheHit ? 'cache_hit' : 'real_time',
           cacheHit,
@@ -299,7 +299,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
       if (this.optimizedConfig.enableEnterpriseAudit) {
         const totalTime = Date.now() - operationStartTime;
         auditEntry = await this.enterpriseAudit.createAuditEntry(
-          request,
+          _request,
           validationResponse,
           'SUCCESS',
           totalTime,
@@ -392,7 +392,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
   async validateBulkOperationsOptimized(
     bulkRequest: BulkValidationRequest
   ): Promise<BulkValidationResult> {
-    const operationId = `bulk_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `bulk${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     
     this.logger.log(`[${operationId}] Starting bulk validation`, {
@@ -414,7 +414,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
         
         // Convert results to optimized format
         results = bulkResult.results.map((result, index) => {
-          const _request = bulkRequest.requests[index];
+          const request = bulkRequest.requests[index];
           if (result?.success) {
             return {
               ...result.data as ParlantValidationResponse,
@@ -431,7 +431,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
             // Return error response
             return {
               approved: false,
-              conversationId: `bulk_error_${Date.now()}`,
+              conversationId: `bulk_error${Date.now()}`,
               validationTimestamp: new Date(),
               reasoning: `Bulk validation failed: ${result?.error?.message ?? 'Unknown error'}`,
               confidence: 0,
@@ -455,7 +455,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
           } catch (error) {
             results.push({
               approved: false,
-              conversationId: `error_${Date.now()}`,
+              conversationId: `error${Date.now()}`,
               validationTimestamp: new Date(),
               reasoning: `Validation error: ${error instanceof Error ? error.message : String(error)}`,
               confidence: 0,
@@ -527,7 +527,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
     targetsMet: boolean;
   } {
     const uptime = Date.now() - this.startTime;
-    const _successRate = this.totalValidations > 0 ? (this.successfulValidations / this.totalValidations) * 100 : 100;
+    const successRate = this.totalValidations > 0 ? (this.successfulValidations / this.totalValidations) * 100 : 100;
     
     return {
       config: this.optimizedConfig,
@@ -565,7 +565,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
     
     return {
       approved,
-      conversationId: `conv_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      conversationId: `conv${Date.now()}${Math.random().toString(36).substring(7)}`,
       validationTimestamp: new Date(),
       reasoning: approved 
         ? `Operation approved: ${request.actionDescription} meets security requirements`
@@ -621,7 +621,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
     }
   }
 
-  private validatePerformanceTargets(totalTime: number, _cacheHit: boolean): void {
+  private validatePerformanceTargets(totalTime: number, cacheHit: boolean): void {
     if (totalTime > this.optimizedConfig.performanceTargets.averageLatency) {
       this.logger.warn(`Performance target exceeded: ${totalTime.toFixed(2)}ms > ${this.optimizedConfig.performanceTargets.averageLatency}ms target`);
     }
@@ -629,7 +629,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
 
   private analyzeBulkPerformance(
     summary: BulkValidationResult['summary'],
-    _results: OptimizedValidationResult[]
+    results: OptimizedValidationResult[]
   ): BulkValidationResult['performanceAnalysis'] {
     const bottlenecks: string[] = [];
     const recommendations: string[] = [];

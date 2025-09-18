@@ -163,7 +163,7 @@ export class EnterpriseApiService {
   };
 
   constructor(
-    private readonly httpService: HttpService,
+    _private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
@@ -179,7 +179,7 @@ export class EnterpriseApiService {
    * Execute internal API request with full enterprise features and Parlant validation
    */
   async executeApiRequest(request: InternalApiRequest): Promise<unknown> {
-    const operationId = `api_request_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `api_request${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     const endpointKey = `${request.method}:${request.url}`;
 
@@ -237,7 +237,7 @@ export class EnterpriseApiService {
           this.updateCircuitBreaker(endpointKey, false);
           
           throw new ConversationalValidationError(
-            validationResult.conversationId,
+            _validationResult.conversationId,
             `Internal API request denied: ${validationResult.reasoning}`,
             validationResult.suggestedAlternatives
           );
@@ -272,7 +272,7 @@ export class EnterpriseApiService {
 
       // Cache successful GET responses with Parlant context
       if (request.method === 'GET' && response) {
-        const _parlantCacheContext = validationResult ? {
+        const parlantCacheContext = validationResult ? {
           conversationId: validationResult.conversationId,
           validationResult: 'APPROVED' as const,
           riskLevel: request.parlantContext?.riskLevel ?? 'MEDIUM',
@@ -284,7 +284,7 @@ export class EnterpriseApiService {
           request.params, 
           response, 
           300000, // 5 minutes TTL
-          [`user_${request.parlantContext?.userId}`, `risk_${request.parlantContext?.riskLevel}`]
+          [`user${request.parlantContext?.userId}`, `risk${request.parlantContext?.riskLevel}`]
         );
       }
 
@@ -412,7 +412,7 @@ export class EnterpriseApiService {
       this.evictOldestCacheEntries();
     }
 
-    this.cache.set(cacheKey, {
+    this.cache.set(_cacheKey, {
       data,
       timestamp: new Date(),
       ttl,
@@ -734,7 +734,7 @@ export class EnterpriseApiService {
    * Sanitize URL for function name generation
    */
   private sanitizeUrlForFunction(url: string): string {
-    return url.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+    return url.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');
   }
 
   /**
@@ -819,7 +819,7 @@ export class EnterpriseApiService {
     operation: string,
     businessJustification?: string
   ): Promise<boolean> {
-    const operationId = `rate_limit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `rate_limit${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     try {
       const validationRequest: ParlantValidationRequest = {
@@ -833,7 +833,7 @@ export class EnterpriseApiService {
         actionDescription: `Rate limit validation for ${operation} on ${endpoint}`,
         context: {
           userId,
-          sessionId: `rate_limit_${Date.now()}`,
+          sessionId: `rate_limit${Date.now()}`,
           agentRole: 'RATE_LIMITER',
           securityLevel: 'MEDIUM',
           conversationHistory: [],
@@ -876,11 +876,11 @@ export class EnterpriseApiService {
     context: Record<string, unknown>,
     userId: string
   ): Promise<{ allowed: boolean; reason: string; alternatives?: string[] }> {
-    const operationId = `policy_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `policy${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     try {
       const validationRequest: ParlantValidationRequest = {
-        functionName: `EnterpriseAPI.Policy.${policyName.replace(/[^a-zA-Z0-9]/g, '_')}`,
+        functionName: `EnterpriseAPI.Policy.${policyName.replace(/[^a-zA-Z0-9]/g, '')}`,
         functionParams: {
           policyName,
           operation,
@@ -890,7 +890,7 @@ export class EnterpriseApiService {
         actionDescription: `Policy enforcement validation for ${policyName}: ${operation}`,
         context: {
           userId,
-          sessionId: `policy_${Date.now()}`,
+          sessionId: `policy${Date.now()}`,
           agentRole: 'POLICY_ENFORCER',
           securityLevel: 'HIGH',
           conversationHistory: [],

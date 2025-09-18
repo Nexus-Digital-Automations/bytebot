@@ -250,7 +250,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
   };
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly httpService: HttpService,
     private readonly enterpriseApiService: EnterpriseApiService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
@@ -317,7 +317,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_MINUTE)
   async performScheduledHealthCheck(): Promise<void> {
-    const operationId = `health_check_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `health_check${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     try {
       // Validate health check operation through Parlant
@@ -350,7 +350,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_30_SECONDS)
   async collectPerformanceMetrics(): Promise<void> {
-    const operationId = `perf_metrics_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `perf_metrics${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     try {
       // Validate metrics collection through Parlant (lightweight validation)
@@ -976,7 +976,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     message: string,
     actions: string[],
   ): Promise<void> {
-    const alertId = `${component}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const alertId = `${component}${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     try {
       // Validate alert creation through Parlant
@@ -1076,7 +1076,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
    * Update SLA metrics with Parlant validation
    */
   private async updateSlaMetrics(): Promise<void> {
-    const operationId = `sla_update_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `sla_update${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     try {
       const validationResult = await this.validateHealthOperation(
@@ -1114,7 +1114,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     operationId: string
   ): Promise<ParlantValidationResponse> {
     const validationRequest: ParlantValidationRequest = {
-      functionName: `HealthService.${operationType.replace(/[^a-zA-Z0-9]/g, '_')}`,
+      functionName: `HealthService.${operationType.replace(/[^a-zA-Z0-9]/g, '')}`,
       functionParams: {
         operationType,
         description,
@@ -1124,7 +1124,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
       actionDescription: `Health monitoring operation: ${description}`,
       context: {
         userId: 'health_service',
-        sessionId: `health_session_${Date.now()}`,
+        sessionId: `health_session${Date.now()}`,
         agentRole: 'HEALTH_MONITOR',
         securityLevel: this.mapRiskToSecurityLevel(riskLevel),
         conversationHistory: [],
@@ -1166,7 +1166,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
       actionDescription: `Create ${severity} health alert for ${component}: ${message}`,
       context: {
         userId: 'health_service',
-        sessionId: `alert_session_${Date.now()}`,
+        sessionId: `alert_session${Date.now()}`,
         agentRole: 'ALERT_MANAGER',
         securityLevel: this.mapRiskToSecurityLevel(riskLevel),
         conversationHistory: [],
@@ -1268,7 +1268,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
     userId: string,
     justification: string
   ): Promise<{ approved: boolean; reason: string; approvedConfig?: Partial<HealthCheckConfig> }> {
-    const operationId = `health_config_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `health_config${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     try {
       const validationRequest: ParlantValidationRequest = {
@@ -1282,7 +1282,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
         actionDescription: `Modify health check configuration for ${component}: ${justification}`,
         context: {
           userId,
-          sessionId: `config_session_${Date.now()}`,
+          sessionId: `config_session${Date.now()}`,
           agentRole: 'CONFIG_MANAGER',
           securityLevel: 'HIGH',
           conversationHistory: [],

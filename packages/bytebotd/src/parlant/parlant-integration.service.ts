@@ -133,7 +133,7 @@ export interface ExecutionContext {
  */
 export class ConversationalValidationError extends Error {
   constructor(
-    public readonly conversationId: string,
+    _public readonly conversationId: string,
     public readonly reasoning: string,
     public readonly suggestedAlternatives: string[] = []
   ) {
@@ -179,8 +179,8 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
   private cacheHitCount = 0;
   private averageValidationTime = 0;
 
-  constructor(private readonly configService: ConfigService) {
-    const operationId = `parlant_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  constructor(_private readonly configService: ConfigService) {
+    const operationId = `parlant_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     // Initialize Parlant connection configuration
     this.parlantServerUrl = this.configService.get<string>('PARLANT_SERVER_URL', 'http://localhost:8000');
@@ -449,7 +449,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
    * Fallback mock validation when Parlant API is unavailable
    */
   private async performMockValidation(request: ParlantValidationRequest): Promise<ParlantValidationResponse> {
-    const conversationId = `conv_mock_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const conversationId = `conv_mock${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     // Risk-based validation logic
     const riskBasedApproval = this.assessRiskBasedApproval(request);
@@ -534,7 +534,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
   // ===== HELPER METHODS =====
 
   private generateCacheKey(request: ParlantValidationRequest): string {
-    return `${request.functionName}_${request.context.userId}_${JSON.stringify(request.functionParams)}`;
+    return `${request.functionName}${request.context.userId}${JSON.stringify(request.functionParams)}`;
   }
 
   private getCachedValidation(cacheKey: string): ParlantValidationResponse | null {
@@ -627,12 +627,12 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
     );
   }
 
-  private checkUserPermissions(_context: ParlantConversationContext, _functionName: string): boolean {
+  private checkUserPermissions(context: ParlantConversationContext, functionName: string): boolean {
     // TODO: Implement actual permission checking logic
     return true; // Mock implementation
   }
 
-  private detectSuspiciousActivity(_context: ParlantConversationContext): boolean {
+  private detectSuspiciousActivity(context: ParlantConversationContext): boolean {
     // TODO: Implement suspicious activity detection
     return false; // Mock implementation
   }
@@ -642,7 +642,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
     return true; // Mock implementation
   }
 
-  private assessContextClarity(_context: ParlantConversationContext): number {
+  private assessContextClarity(context: ParlantConversationContext): number {
     // TODO: Implement context clarity assessment
     return 1.0; // Mock implementation
   }
@@ -654,7 +654,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
     return 'Unknown validation failure';
   }
 
-  private generateAlternatives(_request: ParlantValidationRequest): string[] {
+  private generateAlternatives(request: ParlantValidationRequest): string[] {
     // TODO: Generate contextual alternatives based on function and risk level
     return [
       'Request explicit user authorization',
@@ -705,7 +705,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
     }
   }
 
-  private getSafeguardsForFunction(_functionName: string): string[] {
+  private getSafeguardsForFunction(functionName: string): string[] {
     // TODO: Define function-specific safeguards
     return ['operation_logging', 'permission_verification', 'state_monitoring'];
   }
@@ -736,7 +736,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
         },
       });
 
-      const sessionId = response.data.id ?? `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      const sessionId = response.data.id ?? `session${Date.now()}${Math.random().toString(36).substring(7)}`;
       
       // Store session context
       this.conversationSessions.set(context.userId, {
@@ -778,7 +778,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
         },
       });
 
-      const conversationId = response.data.id ?? `conv_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      const conversationId = response.data.id ?? `conv${Date.now()}${Math.random().toString(36).substring(7)}`;
       
       this.logger.log(`Created Parlant conversation context: ${conversationId}`, {
         sessionId: params.sessionId,

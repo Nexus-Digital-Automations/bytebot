@@ -155,8 +155,8 @@ export class ParlantIntelligentCacheService {
   // Cache warming configuration
   private readonly warmingConfig: CacheWarmingConfig;
 
-  constructor(private readonly configService: ConfigService) {
-    const operationId = `cache_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  constructor(_private readonly configService: ConfigService) {
+    const operationId = `cache_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.warmingConfig = {
       enabled: this.configService.get<boolean>('PARLANT_CACHE_WARMING_ENABLED', true),
@@ -410,7 +410,7 @@ export class ParlantIntelligentCacheService {
       return;
     }
 
-    const operationId = `cache_warm_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `cache_warm${Date.now()}${Math.random().toString(36).substring(7)}`;
     const functionsToWarm = functionNames ?? this.warmingConfig.priorityFunctions;
 
     this.logger.log(`[${operationId}] Starting cache warming for ${functionsToWarm.length} functions`);
@@ -529,7 +529,7 @@ export class ParlantIntelligentCacheService {
     }
   }
 
-  private async getFromRedisCache(_key: string): Promise<CacheEntry<ParlantValidationResponse> | null> {
+  private async getFromRedisCache(key: string): Promise<CacheEntry<ParlantValidationResponse> | null> {
     // TODO: Implement Redis cache retrieval
     // if (this.redisClient) {
     //   const cached = await this.redisClient.get(key);
@@ -541,9 +541,9 @@ export class ParlantIntelligentCacheService {
   }
 
   private async setRedisCache(
-    _key: string,
-    _value: ParlantValidationResponse,
-    _config: CacheConfig
+    key: string,
+    value: ParlantValidationResponse,
+    config: CacheConfig
   ): Promise<void> {
     // TODO: Implement Redis cache storage
     // if (this.redisClient) {
@@ -633,7 +633,7 @@ export class ParlantIntelligentCacheService {
     }
   }
 
-  private generateSampleRequests(_functionName: string): ParlantValidationRequest[] {
+  private generateSampleRequests(functionName: string): ParlantValidationRequest[] {
     // TODO: Generate realistic sample requests for cache warming
     // This would analyze historical patterns and generate common variations
     return [];
@@ -643,7 +643,7 @@ export class ParlantIntelligentCacheService {
     // Generate warm-up response for cache preloading
     return {
       approved: request.riskLevel === RiskLevel.MINIMAL || request.riskLevel === RiskLevel.LOW,
-      conversationId: `warmup_${Date.now()}`,
+      conversationId: `warmup${Date.now()}`,
       validationTimestamp: new Date(),
       reasoning: 'Cache warm-up validation - pre-approved low-risk operation',
       confidence: 0.95,

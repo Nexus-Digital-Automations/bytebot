@@ -93,7 +93,7 @@ export class CacheKeyGenerator {
     namespace?: string,
     options: KeyGenerationOptions = {},
   ): string {
-    const operationId = `keygen_${Date.now()}`;
+    const operationId = `keygen${Date.now()}`;
 
     try {
       // Normalize the input key
@@ -186,7 +186,7 @@ export class CacheKeyGenerator {
     const keyParts = [
       'api',
       method.toLowerCase(),
-      path.replace(/\//g, '_').replace(/^_/, ''),
+      path.replace(/\//g, '').replace(/^_/, ''),
     ];
 
     if (queryParams && Object.keys(queryParams).length > 0) {
@@ -205,7 +205,7 @@ export class CacheKeyGenerator {
     }
 
     if (userId) {
-      keyParts.push(`user_${userId}`);
+      keyParts.push(`user${userId}`);
     }
 
     return this.generate(keyParts, 'api');
@@ -336,8 +336,8 @@ export class CacheKeyGenerator {
    */
   private sanitizeKey(key: string): string {
     return key
-      .replace(/[^a-zA-Z0-9_\-.]/g, '_') // Replace invalid characters
-      .replace(/_+/g, '_') // Collapse multiple underscores
+      .replace(/[^a-zA-Z0-9_\-.]/g, '') // Replace invalid characters
+      .replace(/_+/g, '') // Collapse multiple underscores
       .replace(/^_|_$/g, '') // Remove leading/trailing underscores
       .toLowerCase();
   }
@@ -350,7 +350,7 @@ export class CacheKeyGenerator {
       .update(key)
       .digest('hex')
       .substring(0, 16);
-    return `${namespace}${this.KEY_SEPARATOR}hash_${hash}`;
+    return `${namespace}${this.KEY_SEPARATOR}hash${hash}`;
   }
 
   /**

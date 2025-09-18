@@ -158,7 +158,7 @@ export class DeprecationGuard implements CanActivate {
   private readonly stats: DeprecationStats;
 
   constructor(
-    private readonly reflector: Reflector,
+    _private readonly reflector: Reflector,
     private readonly configService: ConfigService,
   ) {
     // Load deprecation policy from configuration with BytebotD defaults
@@ -399,7 +399,7 @@ export class DeprecationGuard implements CanActivate {
     const desktopClient = request.get('X-Desktop-Client') ?? 'unknown';
     const computerUseClient = request.get('X-Computer-Use-Client');
     const vncClient = request.get('X-VNC-Client') ?? 'unknown';
-    const _userAgent = request.get('User-Agent') ?? 'unknown';
+    const userAgent = request.get('User-Agent') ?? 'unknown';
 
     // Extract version from client header (e.g., "BytebotD-Desktop-1.0.0")
     const versionMatch = desktopClient.match(/-([0-9]+\.[0-9]+\.[0-9]+)/);
@@ -851,7 +851,7 @@ export class DeprecationGuard implements CanActivate {
     } catch (_error) {
       this.logger.error('Failed to log BytebotD deprecation access', {
         operationId,
-        _error: (_error as Error).message,
+        error: (_error as Error).message,
       });
     }
   }
@@ -884,7 +884,7 @@ export class DeprecationGuard implements CanActivate {
     } catch (_error) {
       this.logger.error('Failed to log BytebotD deprecation bypass', {
         operationId,
-        _error: (_error as Error).message,
+        error: (_error as Error).message,
       });
     }
   }

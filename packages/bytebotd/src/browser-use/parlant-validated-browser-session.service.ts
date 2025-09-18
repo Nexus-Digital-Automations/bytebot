@@ -157,10 +157,10 @@ export class ParlantValidatedBrowserSessionService {
   private averageValidationTime = 0;
 
   constructor(
-    private readonly originalBrowserSessionService: BrowserSessionService,
+    _private readonly originalBrowserSessionService: BrowserSessionService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
-    const operationId = `parlant_session_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_session_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Session Service`, {
       hasOriginalService: !!this.originalBrowserSessionService,
@@ -188,7 +188,7 @@ export class ParlantValidatedBrowserSessionService {
     sessionDto: CreateBrowserSessionDto,
     context: BrowserSessionValidationContext
   ): Promise<SessionValidationResult> {
-    const operationId = `parlant_session_create_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_session_create${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     this.totalSessionOperations++;
 
@@ -389,7 +389,7 @@ export class ParlantValidatedBrowserSessionService {
     sessionId: string,
     context: BrowserSessionValidationContext
   ): Promise<void> {
-    const operationId = `parlant_session_delete_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_session_delete${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.log(
@@ -489,7 +489,7 @@ export class ParlantValidatedBrowserSessionService {
     url: string,
     context: BrowserSessionValidationContext
   ): Promise<BrowserTabInfoDto> {
-    const operationId = `parlant_tab_create_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_tab_create${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.log(
@@ -648,7 +648,7 @@ export class ParlantValidatedBrowserSessionService {
    */
   private assessSessionDeletionRisk(
     sessionId: string,
-    _context: BrowserSessionValidationContext
+    context: BrowserSessionValidationContext
   ): SessionOperationRiskAssessment {
     const riskFactors: string[] = [];
     let riskLevel: RiskLevel = RiskLevel.LOW;
@@ -878,7 +878,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Check if session has active tasks (mock implementation)
    */
-  private hasActiveTasksInSession(_sessionId: string): boolean {
+  private hasActiveTasksInSession(sessionId: string): boolean {
     // Mock implementation - in production would check actual task status
     return Math.random() > 0.8; // 20% chance of having active tasks
   }
@@ -886,7 +886,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Check if session has unsaved data (mock implementation)
    */
-  private hasUnsavedDataInSession(_sessionId: string): boolean {
+  private hasUnsavedDataInSession(sessionId: string): boolean {
     // Mock implementation - in production would check actual session state
     return Math.random() > 0.9; // 10% chance of having unsaved data
   }
@@ -1058,7 +1058,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Get security profile for validation context
    */
-  async getSecurityProfile(_userId: string): Promise<SessionSecurityProfile> {
+  async getSecurityProfile(userId: string): Promise<SessionSecurityProfile> {
     // Mock implementation - in production would check actual security data
     return {
       userTrustLevel: 'MEDIUM',

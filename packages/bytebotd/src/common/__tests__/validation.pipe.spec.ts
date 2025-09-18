@@ -45,7 +45,7 @@ class MockValidationPipe {
   }
 
   async transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown> {
-    const operationId = `validation_${Date.now()}`;
+    const operationId = `validation${Date.now()}`;
     console.log(`[${operationId}] Validating input`, {
       type: metadata.type,
       metatype: metadata.metatype?.name,
@@ -85,7 +85,7 @@ class MockValidationPipe {
       // Basic XSS prevention
       return value
         .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/javascript:/gi, '')
+        .replace(_/javascript:/gi, '')
         .replace(/on\w+\s*=/gi, '')
         .trim();
     }
@@ -223,7 +223,7 @@ class SearchDto {
 describe('ValidationPipe', () => {
   let pipe: MockValidationPipe;
 
-  const operationId = `validation_pipe_test_${Date.now()}`;
+  const operationId = `validation_pipe_test${Date.now()}`;
 
   beforeEach(() => {
     console.log(`[${operationId}] Setting up ValidationPipe test module`);
@@ -464,7 +464,7 @@ describe('ValidationPipe', () => {
       const pollutionAttempt = {
         email: 'test@example.com',
         password: 'password123',
-        __proto__: { isAdmin: true },
+        _proto__: { isAdmin: true },
         constructor: { prototype: { isAdmin: true } },
       };
 
@@ -861,7 +861,7 @@ describe('ValidationPipe', () => {
         .fill(null)
         .map((_, _i) => ({
           email: `user${_i}@example.com`,
-          password: `password123_${_i}`,
+          password: `password123${_i}`,
           name: `User ${_i}`,
         }));
 

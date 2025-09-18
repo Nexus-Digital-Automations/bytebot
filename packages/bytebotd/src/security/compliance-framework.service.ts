@@ -198,10 +198,10 @@ export class ComplianceFrameworkService {
   private frameworksCovered = new Set<string>();
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `compliance_framework_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `compliance_framework_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Compliance Framework Service initialized with MAXIMUM Parlant integration`, {
       parlantEnabled: true,
@@ -308,7 +308,7 @@ export class ComplianceFrameworkService {
       
       if (!isCompliant) {
         findings.push({
-          id: `finding_${index}_${Date.now()}`,
+          id: `finding${index}${Date.now()}`,
           severity: 'MEDIUM',
           category: 'gap',
           description: `Requirement ${reqId} not fully met`,
@@ -348,7 +348,7 @@ export class ComplianceFrameworkService {
     ];
 
     recommendations.push({
-      id: `rec_${Date.now()}`,
+      id: `rec${Date.now()}`,
       priority: 'HIGH',
       category: 'control_enhancement',
       description: 'Implement comprehensive audit logging',
@@ -362,10 +362,10 @@ export class ComplianceFrameworkService {
     const maxScore = requirementResults.reduce((sum, r) => sum + r.maxScore, 0);
     const percentage = maxScore > 0 ? (overallScore / maxScore) * 100 : 0;
 
-    const _processingTime = Date.now() - startTime;
+    const processingTime = Date.now() - startTime;
 
     const mockResponse: ComplianceAssessmentResponse = {
-      id: `compliance_assessment_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `compliance_assessment${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
       operationId: request.operationId,
       conversationId,

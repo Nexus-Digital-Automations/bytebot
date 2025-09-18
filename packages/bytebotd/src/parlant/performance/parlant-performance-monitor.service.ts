@@ -109,8 +109,8 @@ export class ParlantPerformanceMonitorService {
   private metricsRetentionDays = 7;
   private maxMetricsInMemory = 10000;
 
-  constructor(private readonly configService: ConfigService) {
-    const operationId = `perf_monitor_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  constructor(_private readonly configService: ConfigService) {
+    const operationId = `perf_monitor_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.performanceAlerts = {
       enabled: this.configService.get<boolean>('PARLANT_PERFORMANCE_ALERTS_ENABLED', true),

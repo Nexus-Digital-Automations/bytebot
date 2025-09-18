@@ -128,7 +128,7 @@ class MockMcpClient extends EventEmitter {
   private capabilities: any = {};
   private tools: any[] = [];
 
-  constructor(private serverUrl: string) {
+  constructor(_private serverUrl: string) {
     super();
   }
 
@@ -136,7 +136,7 @@ class MockMcpClient extends EventEmitter {
    * Generate unique message ID
    */
   private generateId(): string {
-    return `client_msg_${++this.messageId}`;
+    return `client_msg${++this.messageId}`;
   }
 
   /**
@@ -207,7 +207,7 @@ class MockMcpClient extends EventEmitter {
 
     const response = await this.sendMessage('initialize', initParams);
     this.sessionId = response.sessionInfo?.sessionId || 'test-session';
-    this.capabilities = response.capabilities || {};
+    this.capabilities = response.capabilities ?? {};
 
     return response;
   }
@@ -217,7 +217,7 @@ class MockMcpClient extends EventEmitter {
    */
   async listTools(): Promise<any> {
     const response = await this.sendMessage('tools/list');
-    this.tools = response.tools || [];
+    this.tools = response.tools ?? [];
     return response;
   }
 
@@ -260,7 +260,7 @@ class IntegrationPerformanceMonitor {
   private concurrencyData: Array<{ timestamp: number; concurrent: number }> = [];
 
   recordOperation(operationType: string, duration: number) {
-    const times = this.operationTimes.get(operationType) || [];
+    const times = this.operationTimes.get(operationType) ?? [];
     times.push(duration);
     this.operationTimes.set(operationType, times);
   }
@@ -280,7 +280,7 @@ class IntegrationPerformanceMonitor {
   }
 
   getOperationStats(operationType: string) {
-    const times = this.operationTimes.get(operationType) || [];
+    const times = this.operationTimes.get(operationType) ?? [];
     if (times.length === 0) return null;
 
     return {
@@ -510,7 +510,7 @@ describe('MCP Integration and Protocol Compliance', () => {
           const result = await mockClient.callTool(test.name, test.args);
           const executionTime = performance.now() - startExecution;
           
-          performanceMonitor.recordOperation(`tool_execution_${test.category}`, executionTime);
+          performanceMonitor.recordOperation(`tool_execution${test.category}`, executionTime);
 
           expect(result).toBeDefined();
           expect(result).toHaveProperty('content');

@@ -70,7 +70,7 @@ import { ComputerAction } from '@bytebot/shared';
  */
 export class ParlantComputerActionDto {
   /** Base computer action type */
-  action!: string;
+  (action ?? "default"): string;
   
   /** Action-specific properties - will vary based on action type */
   [key: string]: unknown;
@@ -104,19 +104,19 @@ export class ParlantComputerActionDto {
  */
 export class ParlantValidationResponseDto {
   /** Whether the action was approved */
-  approved!: boolean;
+  (approved ?? "default"): boolean;
 
   /** Conversation ID for audit trail */
-  conversationId!: string;
+  (conversationId ?? "default"): string;
 
   /** Validation timestamp */
-  validationTimestamp!: Date;
+  (validationTimestamp ?? "default"): Date;
 
   /** Human-readable reasoning for the decision */
-  reasoning!: string;
+  (reasoning ?? "default"): string;
 
   /** Confidence score for the validation */
-  confidence!: number;
+  (confidence ?? "default"): number;
 
   /** Suggested alternatives if denied */
   suggestedAlternatives?: string[];
@@ -135,20 +135,20 @@ export class ParlantValidationResponseDto {
  */
 export class ParlantComputerActionResultDto {
   /** Action execution result */
-  result!: unknown;
+  (result ?? "default"): unknown;
 
   /** Validation details */
-  validation!: ParlantValidationResponseDto;
+  (validation ?? "default"): ParlantValidationResponseDto;
 
   /** Performance metrics */
-  performance!: {
+  (performance ?? "default"): {
     validationTimeMs: number;
     executionTimeMs: number;
     totalTimeMs: number;
   };
 
   /** Audit information */
-  audit!: {
+  (audit ?? "default"): {
     operationId: string;
     userId: string;
     timestamp: Date;
@@ -162,13 +162,13 @@ export class ParlantComputerActionResultDto {
  */
 export class ParlantSystemStatusDto {
   /** Whether Parlant validation is enabled */
-  enabled!: boolean;
+  (enabled ?? "default"): boolean;
 
   /** Current system status */
-  status!: 'HEALTHY' | 'DEGRADED' | 'FAILED';
+  (status ?? "default"): 'HEALTHY' | 'DEGRADED' | 'FAILED';
 
   /** Performance metrics */
-  metrics!: {
+  (metrics ?? "default"): {
     totalOperations: number;
     approvedOperations: number;
     deniedOperations: number;
@@ -178,14 +178,14 @@ export class ParlantSystemStatusDto {
   };
 
   /** System health indicators */
-  health!: {
+  (health ?? "default"): {
     validationService: 'healthy' | 'degraded' | 'failed';
     cacheService: 'healthy' | 'degraded' | 'failed';
     auditService: 'healthy' | 'degraded' | 'failed';
   };
 
   /** Last health check timestamp */
-  lastHealthCheck!: Date;
+  (lastHealthCheck ?? "default"): Date;
 }
 
 // ===== PARLANT-ENHANCED CONTROLLER =====
@@ -200,7 +200,7 @@ export class ParlantComputerUseController {
   private readonly logger = new Logger(ParlantComputerUseController.name);
 
   constructor(
-    private readonly parlantComputerUseService: ParlantValidatedComputerUseService,
+    _private readonly parlantComputerUseService: ParlantValidatedComputerUseService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
     this.logger.log('Parlant Computer Use Controller initialized - Conversational validation active');
@@ -265,7 +265,7 @@ export class ParlantComputerUseController {
     @Headers('x-conversation-id') conversationId?: string,
     @Headers('x-session-context') sessionContext?: string,
   ): Promise<ParlantComputerActionResultDto> {
-    const operationId = `parlant_validated_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_validated${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.log(
@@ -284,7 +284,7 @@ export class ParlantComputerUseController {
       // Build comprehensive validation context
       const validationContext: ComputerActionValidationContext = {
         userId: user.id,
-        sessionId: conversationId ?? params.conversationContext?.sessionId ?? `session_${Date.now()}`,
+        sessionId: conversationId ?? params.conversationContext?.sessionId ?? `session${Date.now()}`,
         agentRole: user.role,
         securityLevel: this.mapUserRoleToSecurityLevel(user.role),
         conversationHistory: params.conversationContext?.conversationHistory?.map(entry => ({
@@ -440,7 +440,7 @@ export class ParlantComputerUseController {
     @CurrentUser() user: ByteBotdUser,
     @Headers('x-conversation-id') conversationId?: string,
   ): Promise<ParlantValidationResponseDto> {
-    const operationId = `parlant_prevalidate_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_prevalidate${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     this.logger.log(
       `[${operationId}] Pre-validating computer action: ${params.action}`,
@@ -456,7 +456,7 @@ export class ParlantComputerUseController {
       // Build validation context
       const validationContext: ComputerActionValidationContext = {
         userId: user.id,
-        sessionId: conversationId ?? `prevalidate_session_${Date.now()}`,
+        sessionId: conversationId ?? `prevalidate_session${Date.now()}`,
         agentRole: user.role,
         securityLevel: this.mapUserRoleToSecurityLevel(user.role),
         conversationHistory: params.conversationContext?.conversationHistory?.map(entry => ({
@@ -606,7 +606,7 @@ export class ParlantComputerUseController {
     return { action: String(params.action) };
   }
 
-  private async assessActionRiskLevel(_params: ParlantComputerActionDto, _context: ComputerActionValidationContext): Promise<RiskLevel> {
+  private async assessActionRiskLevel(params: ParlantComputerActionDto, context: ComputerActionValidationContext): Promise<RiskLevel> {
     // TODO: Implement risk level assessment
     return RiskLevel.MEDIUM;
   }

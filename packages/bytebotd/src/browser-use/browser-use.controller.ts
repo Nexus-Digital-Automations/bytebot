@@ -66,7 +66,7 @@ export class BrowserUseController {
   private readonly logger = new Logger(BrowserUseController.name);
 
   constructor(
-    private readonly browserUseService: BrowserUseService,
+    _private readonly browserUseService: BrowserUseService,
     private readonly sessionService: BrowserSessionService,
     private readonly taskService: BrowserTaskService,
   ) {
@@ -741,7 +741,7 @@ export class BrowserUseController {
       );
 
       // Update session activity
-      await this.sessionService.updateActivity(sessionId, {
+      await this.sessionService.updateActivity(_sessionId, {
         screenshot: true,
       });
 

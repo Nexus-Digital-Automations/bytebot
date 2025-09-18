@@ -134,7 +134,7 @@ let globalErrorHandler: ErrorHandler;
  * Main error handler class
  */
 export class ErrorHandler {
-  constructor(private config: ErrorHandlerConfig = defaultErrorHandlerConfig) {}
+  constructor(_private config: ErrorHandlerConfig = defaultErrorHandlerConfig) {}
 
   /**
    * Safe execution wrapper that catches and transforms errors
@@ -146,7 +146,7 @@ export class ErrorHandler {
     const startTime = Date.now();
     const operationId =
       context.operationId ??
-      `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      `op${Date.now()}${Math.random().toString(36).substr(2, 9)}`;
 
     const fullContext: ErrorLogContext = {
       operationId,
@@ -194,7 +194,7 @@ export class ErrorHandler {
     const startTime = Date.now();
     const operationId =
       context.operationId ??
-      `op_sync_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      `op_sync${Date.now()}${Math.random().toString(36).substr(2, 9)}`;
 
     const fullContext: ErrorLogContext = {
       operationId,
@@ -284,7 +284,7 @@ export class ErrorHandler {
       errorName === 'ForbiddenException' ||
       errorMessage.includes('forbidden')
     ) {
-      return ErrorFactory.authorization.forbidden(undefined, undefined, {
+      return ErrorFactory.authorization.forbidden(_undefined, undefined, {
         originalError: error,
         stack: errorStack,
         context,
@@ -296,7 +296,7 @@ export class ErrorHandler {
       errorMessage.includes('validation')
     ) {
       return ErrorFactory.validation.invalidInput(
-        undefined,
+        _undefined,
         undefined,
         undefined,
         {
@@ -327,7 +327,7 @@ export class ErrorHandler {
       errorMessage.includes('rate limit') ||
       errorMessage.includes('too many requests')
     ) {
-      return ErrorFactory.security.rateLimitExceeded(undefined, 'medium', {
+      return ErrorFactory.security.rateLimitExceeded(_undefined, 'medium', {
         originalError: error,
         stack: errorStack,
         context,
@@ -338,7 +338,7 @@ export class ErrorHandler {
       errorMessage.includes('database') ||
       errorMessage.includes('connection')
     ) {
-      return ErrorFactory.system.database(undefined, true, {
+      return ErrorFactory.system.database(_undefined, true, {
         originalError: error,
         stack: errorStack,
         context,
@@ -354,7 +354,7 @@ export class ErrorHandler {
     }
 
     // Default to system error for unclassified errors
-    return ErrorFactory.system.serviceUnavailable(undefined, {
+    return ErrorFactory.system.serviceUnavailable(_undefined, {
       originalError: error,
       errorName,
       stack: errorStack,
@@ -514,8 +514,8 @@ export class ErrorHandler {
     if (contextStr.length > this.config.maxContextSize) {
       sanitized.additionalContext = {
         ...sanitized.additionalContext,
-        _truncated: true,
-        _originalSize: contextStr.length,
+        truncated: true,
+        originalSize: contextStr.length,
       };
     }
 

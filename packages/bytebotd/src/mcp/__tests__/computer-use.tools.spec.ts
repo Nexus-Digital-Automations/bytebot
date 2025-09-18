@@ -61,7 +61,7 @@ class ComputerUseTestData {
         height,
         format: 'png' as const,
         captureTime: new Date(),
-        operationId: `screenshot_${Date.now()}`,
+        operationId: `screenshot${Date.now()}`,
       },
     };
   }
@@ -71,7 +71,7 @@ class ComputerUseTestData {
       x,
       y,
       timestamp: new Date(),
-      operationId: `cursor_${Date.now()}`,
+      operationId: `cursor${Date.now()}`,
     };
   }
 
@@ -82,7 +82,7 @@ class ComputerUseTestData {
       mediaType: 'text/plain',
       name: 'test.txt',
       size: content.length,
-      operationId: `file_read_${Date.now()}`,
+      operationId: `file_read${Date.now()}`,
       timestamp: new Date(),
     };
   }
@@ -91,7 +91,7 @@ class ComputerUseTestData {
     return {
       success: true,
       message: 'File written successfully',
-      operationId: `file_write_${Date.now()}`,
+      operationId: `file_write${Date.now()}`,
       timestamp: new Date(),
     };
   }

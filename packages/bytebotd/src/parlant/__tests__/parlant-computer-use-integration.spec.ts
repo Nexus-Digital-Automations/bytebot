@@ -336,7 +336,7 @@ describe('Parlant Computer Use Integration Tests', () => {
 
       for (const testCase of testCases) {
         const scenario = createValidationScenario({
-          scenarioId: `role_based_validation_${testCase.userRole}`,
+          scenarioId: `role_based_validation${testCase.userRole}`,
           userRole: testCase.userRole as 'ADMIN' | 'OPERATOR' | 'USER',
           securityLevel: testCase.securityLevel as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW',
           action: {
@@ -395,7 +395,7 @@ describe('Parlant Computer Use Integration Tests', () => {
     it('should meet sub-1000ms validation performance targets', async () => {
       const performanceTests = Array.from({ length: 10 }, (_, i) => ({
         action: { action: 'move_mouse', coordinates: { x: 100 + i * 10, y: 200 + i * 10 } } as MoveMouseAction,
-        scenarioId: `performance_test_${i}`,
+        scenarioId: `performance_test${i}`,
       }));
 
       const validationTimes: number[] = [];
@@ -445,7 +445,7 @@ describe('Parlant Computer Use Integration Tests', () => {
       const concurrentValidations = 5;
       const validationPromises = Array.from({ length: concurrentValidations }, (_, i) => {
         const scenario = createValidationScenario({
-          scenarioId: `concurrent_validation_${i}`,
+          scenarioId: `concurrent_validation${i}`,
           userRole: 'OPERATOR',
           securityLevel: 'HIGH',
           action: { action: 'screenshot' },
@@ -760,13 +760,13 @@ describe('Parlant Computer Use Integration Tests', () => {
     validationContext: ComputerActionValidationContext
   ): Promise<ConversationalValidationMetrics> {
     const startTime = Date.now();
-    const _memoryBefore = process.memoryUsage();
+    const memoryBefore = process.memoryUsage();
 
     let approved: boolean = false;
     let confidence: number = 0;
     let riskLevel: RiskLevel = RiskLevel.UNKNOWN;
     let endTime = 0;
-    let memoryAfter!: NodeJS.MemoryUsage;
+    let (memoryAfter ?? "default"): NodeJS.MemoryUsage;
 
     try {
       await context.parlantValidatedService.action(action, validationContext);
@@ -858,7 +858,7 @@ describe('Parlant Computer Use Integration Tests', () => {
    */
   async function createTestDataDirectory(): Promise<void> {
     try {
-      await fs.mkdir(testDataDir, { recursive: true });
+      await fs.mkdir(_testDataDir, { recursive: true });
     } catch {
       // Directory might already exist
     }
@@ -869,7 +869,7 @@ describe('Parlant Computer Use Integration Tests', () => {
    */
   async function cleanupTestData(): Promise<void> {
     try {
-      await fs.rm(testDataDir, { recursive: true, force: true });
+      await fs.rm(_testDataDir, { recursive: true, force: true });
     } catch (error: unknown) {
       console.warn('Failed to cleanup Parlant integration test data:', error);
     }

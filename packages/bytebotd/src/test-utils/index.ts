@@ -93,7 +93,7 @@ export const AssertionHelpers = {
     // Check common fields
     if (result.operationId) {
       // Use custom matcher if available, otherwise use regex
-      const operationIdPattern = /^[a-z_]+_\d{13}_[a-z0-9]{7}$/;
+      const operationIdPattern = /^[a-z_]+_\d{13}[a-z0-9]{7}$/;
       expect(result.operationId).toMatch(operationIdPattern);
     }
     if (result.timestamp) {
@@ -124,7 +124,7 @@ export const AssertionHelpers = {
    * Assert that an error has expected structure
    */
   expectValidError: (
-    _error: TestError,
+    error: TestError,
     expectedMessage?: string,
     expectedCode?: string,
   ) => {

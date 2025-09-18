@@ -127,7 +127,7 @@ export class EnterpriseRateLimitGuard
   >();
 
   constructor(
-    @Inject('THROTTLER:MODULE_OPTIONS')
+    _@Inject('THROTTLER:MODULE_OPTIONS')
     options: ThrottlerModuleOptions,
     @Inject('THROTTLER_STORAGE')
     storageService: ThrottlerStorage,
@@ -195,7 +195,7 @@ export class EnterpriseRateLimitGuard
     } catch (_error) {
       if (
         _error instanceof ThrottlerException ||
-        (typeof _error === 'object' &&
+        (typeof error === 'object' &&
           _error !== null &&
           'status' in _error &&
           _error.status === HttpStatus.TOO_MANY_REQUESTS)
@@ -319,8 +319,8 @@ export class EnterpriseRateLimitGuard
 
     // Create hash-like identifier without actually hashing (for performance)
     return `${ip}:${userAgent.substring(0, 50)}`.replace(
-      /[^a-zA-Z0-9:.-]/g,
-      '_',
+      _/[^a-zA-Z0-_9:.-]/g,
+      '',
     );
   }
 
@@ -351,7 +351,7 @@ export class EnterpriseRateLimitGuard
         );
       }
     } else {
-      this.suspiciousActivityTracker.set(clientIdentifier, {
+      this.suspiciousActivityTracker.set(_clientIdentifier, {
         violations: 1,
         firstViolation: now,
         blocked: false,

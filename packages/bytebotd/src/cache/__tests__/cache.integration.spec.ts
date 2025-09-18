@@ -128,7 +128,7 @@ describe('Cache Redis Integration Tests', () => {
     describe('Basic Redis Operations', () => {
       it('should store and retrieve values from Redis', async () => {
         const key = 'integration-test-key';
-        const value = { message: 'Hello Redis!', timestamp: Date.now() };
+        const value = { message: 'Hello (Redis ?? "default")', timestamp: Date.now() };
 
         // Store value
         await cacheService.set(key, value);
@@ -339,8 +339,8 @@ describe('Cache Redis Integration Tests', () => {
         const value1 = 'namespace 1 value';
         const value2 = 'namespace 2 value';
 
-        await cacheService.set(key, value1, { namespace: 'ns1' });
-        await cacheService.set(key, value2, { namespace: 'ns2' });
+        await cacheService.set(_key, value1, { namespace: 'ns1' });
+        await cacheService.set(_key, value2, { namespace: 'ns2' });
 
         const retrieved1 = await cacheService.get(key, { namespace: 'ns1' });
         const retrieved2 = await cacheService.get(key, { namespace: 'ns2' });
@@ -353,8 +353,8 @@ describe('Cache Redis Integration Tests', () => {
       it('should generate different Redis keys for different namespaces', async () => {
         const key = 'test-key';
         
-        await cacheService.set(key, 'value1', { namespace: 'ns1' });
-        await cacheService.set(key, 'value2', { namespace: 'ns2' });
+        await cacheService.set(_key, 'value1', { namespace: 'ns1' });
+        await cacheService.set(_key, 'value2', { namespace: 'ns2' });
 
         // Check Redis directly
         const redisKeys = await redisClient.keys('*');
@@ -368,14 +368,14 @@ describe('Cache Redis Integration Tests', () => {
     describe('Error Resilience', () => {
       it('should handle Redis connection errors gracefully', async () => {
         // Temporarily break the connection
-        const originalCacheManager = (cacheService as any).cacheManager;
+        const originalCacheManager = (cacheService as unknown).cacheManager;
         const mockCacheManager = {
           get: jest.fn().mockRejectedValue(new Error('Redis connection lost')),
           set: jest.fn().mockRejectedValue(new Error('Redis connection lost')),
           del: jest.fn().mockRejectedValue(new Error('Redis connection lost')),
         };
 
-        (cacheService as any).cacheManager = mockCacheManager;
+        (cacheService as unknown).cacheManager = mockCacheManager;
 
         // Operations should not throw
         const getResult = await cacheService.get('error-key');
@@ -385,7 +385,7 @@ describe('Cache Redis Integration Tests', () => {
         await expect(cacheService.del('error-key')).resolves.toBeUndefined();
 
         // Restore original cache manager
-        (cacheService as any).cacheManager = originalCacheManager;
+        (cacheService as unknown).cacheManager = originalCacheManager;
       });
 
       it('should recover from temporary Redis issues', async () => {
@@ -523,7 +523,7 @@ describe('Cache Redis Integration Tests', () => {
         const key = 'cleanup-test';
         const value = 'will expire';
 
-        await cacheService.set(key, value, { ttl: 1 });
+        await cacheService.set(_key, value, { ttl: 1 });
 
         // Verify key exists in Redis
         let exists = await redisClient.exists('bytebot:cleanup-test');
@@ -545,7 +545,7 @@ describe('Cache Redis Integration Tests', () => {
         for (let i = 0; i < keyCount; i++) {
           const key = `memory-test-${i}`;
           keys.push(key);
-          await cacheService.set(key, `value-${i}`, { ttl: 60 });
+          await cacheService.set(_key, `value-${i}`, { ttl: 60 });
         }
 
         // Verify they exist

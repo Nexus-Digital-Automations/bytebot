@@ -111,7 +111,7 @@ export class ComputerActionValidationPipe
    * Safely typed wrapper for XSS detection
    */
   private safeDetectAdvancedXSS(input: string): XSSDetectionResult {
-    const _result = detectAdvancedXSS(input) as XSSDetectionResult;
+    const result = detectAdvancedXSS(input) as XSSDetectionResult;
     return _result;
   }
 
@@ -119,7 +119,7 @@ export class ComputerActionValidationPipe
    * Safely typed wrapper for SQL injection detection
    */
   private safeDetectSQLInjection(input: string): SQLInjectionDetectionResult {
-    const _result = detectSQLInjection(input) as SQLInjectionDetectionResult;
+    const result = detectSQLInjection(input) as SQLInjectionDetectionResult;
     return _result;
   }
 
@@ -128,12 +128,12 @@ export class ComputerActionValidationPipe
    */
   private safeDetectCommandInjection(
     input: string,
-    _options: {
+    options: {
       strictMode?: boolean;
       contextType?: 'url' | 'form' | 'api' | 'file' | 'general';
     } = {},
   ): CommandInjectionDetectionResult {
-    const _result = detectCommandInjection(
+    const result = detectCommandInjection(
       input,
     ) as CommandInjectionDetectionResult;
     return _result;
@@ -146,7 +146,7 @@ export class ComputerActionValidationPipe
     filePath: string,
     _options?: unknown,
   ): FilePathValidationResult {
-    const _result = validateFilePath(
+    const result = validateFilePath(
       filePath,
     ) as unknown as FilePathValidationResult;
     return _result;
@@ -162,7 +162,7 @@ export class ComputerActionValidationPipe
     _multiMonitorConfig?: Record<string, unknown>,
     _validationOptions?: Record<string, unknown>,
   ): CoordinatesValidationResult {
-    const _result = validateCoordinates(
+    const result = validateCoordinates(
       x,
       y,
     ) as unknown as CoordinatesValidationResult;
@@ -204,7 +204,7 @@ export class ComputerActionValidationPipe
    */
   async transform(
     value: unknown,
-    _metadata: ArgumentMetadata,
+    metadata: ArgumentMetadata,
   ): Promise<ComputerActionDto> {
     const operationId = `computer-action-validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
@@ -232,7 +232,7 @@ export class ComputerActionValidationPipe
       const dtoInstance = plainToClass(dtoClass, rawInput);
 
       // Perform class-validator validation on the DTO instance
-      const validationErrors = await validate(dtoInstance, {
+      const validationErrors = await validate(_dtoInstance, {
         whitelist: true,
         forbidNonWhitelisted: true,
         skipMissingProperties: false,
@@ -319,7 +319,7 @@ export class ComputerActionValidationPipe
 
     if (payloadSize > MAX_PAYLOAD_SIZE) {
       this.logSecurityEvent(
-        operationId,
+        _operationId,
         SecurityEventType._VALIDATION_FAILED,
         'Payload size limit exceeded',
         { payloadSize, maxAllowed: MAX_PAYLOAD_SIZE },
@@ -423,7 +423,7 @@ export class ComputerActionValidationPipe
     try {
       // ========== STAGE 1: INPUT PREPROCESSING ==========
       this.logger.debug(
-        `[${operationId}] Stage 1: Input preprocessing and normalization`,
+        `[${operationId}] Stage _1: Input preprocessing and normalization`,
       );
       securityContext.validationStages.push('input-preprocessing');
 
@@ -441,7 +441,7 @@ export class ComputerActionValidationPipe
 
       // ========== STAGE 2: ADVANCED XSS DETECTION ==========
       this.logger.debug(
-        `[${operationId}] Stage 2: Advanced XSS pattern analysis`,
+        `[${operationId}] Stage _2: Advanced XSS pattern analysis`,
       );
       securityContext.validationStages.push('xss-detection');
 
@@ -475,7 +475,7 @@ export class ComputerActionValidationPipe
 
       // ========== STAGE 3: ENHANCED SQL INJECTION DETECTION ==========
       this.logger.debug(
-        `[${operationId}] Stage 3: Advanced SQL injection analysis`,
+        `[${operationId}] Stage _3: Advanced SQL injection analysis`,
       );
       securityContext.validationStages.push('sql-injection-detection');
 
@@ -510,12 +510,12 @@ export class ComputerActionValidationPipe
 
       // ========== STAGE 4: COMMAND INJECTION DETECTION ==========
       this.logger.debug(
-        `[${operationId}] Stage 4: Command injection pattern analysis`,
+        `[${operationId}] Stage _4: Command injection pattern analysis`,
       );
       securityContext.validationStages.push('command-injection-detection');
 
       const cmdAnalysis: CommandInjectionDetectionResult =
-        this.safeDetectCommandInjection(inputString, {
+        this.safeDetectCommandInjection(_inputString, {
           strictMode: true,
           contextType: this.getSecurityContext(rawInput.action),
         });
@@ -551,7 +551,7 @@ export class ComputerActionValidationPipe
       // ========== STAGE 5: FILE OPERATION SECURITY VALIDATION ==========
       if (rawInput.action === 'write_file' || rawInput.action === 'read_file') {
         this.logger.debug(
-          `[${operationId}] Stage 5: File operation security validation`,
+          `[${operationId}] Stage _5: File operation security validation`,
         );
         securityContext.validationStages.push('file-security-validation');
 
@@ -559,7 +559,7 @@ export class ComputerActionValidationPipe
         if (typeof filePath === 'string') {
           // Enhanced file path validation with comprehensive security checks
           const pathValidation: FilePathValidationResult =
-            this.safeValidateFilePath(filePath, {
+            this.safeValidateFilePath(_filePath, {
               allowAbsolutePaths: false,
               maxPathLength: 1000,
               allowSymlinks: false,
@@ -626,7 +626,7 @@ export class ComputerActionValidationPipe
       // ========== STAGE 6: COORDINATE VALIDATION WITH OVERFLOW PROTECTION ==========
       if (this.isCoordinateAction(rawInput.action)) {
         this.logger.debug(
-          `[${operationId}] Stage 6: Enhanced coordinate validation`,
+          `[${operationId}] Stage _6: Enhanced coordinate validation`,
         );
         securityContext.validationStages.push('coordinate-validation');
 
@@ -639,7 +639,7 @@ export class ComputerActionValidationPipe
             // Enhanced coordinate validation with overflow protection and multi-monitor support
             const coordValidation: CoordinatesValidationResult =
               this.safeValidateCoordinates(
-                x,
+                _x,
                 y,
                 { width: 7680, height: 4320 }, // 8K resolution support
                 {
@@ -694,7 +694,7 @@ export class ComputerActionValidationPipe
 
       // ========== STAGE 7: THREAT AGGREGATION AND RISK ASSESSMENT ==========
       this.logger.debug(
-        `[${operationId}] Stage 7: Threat aggregation and final risk assessment`,
+        `[${operationId}] Stage _7: Threat aggregation and final risk assessment`,
       );
       securityContext.validationStages.push('threat-aggregation');
 
@@ -926,7 +926,7 @@ export class ComputerActionValidationPipe
   ): void {
     try {
       const securityEvent = createSecurityEvent(
-        eventType,
+        _eventType,
         'computer-action-validation',
         'POST',
         false,

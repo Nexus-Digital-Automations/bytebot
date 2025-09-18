@@ -199,12 +199,12 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
   private readonly logger = new Logger(SecurityHeadersMiddleware.name);
   private readonly config: SecurityMiddlewareConfig;
   private readonly helmetMiddleware: (
-    _req: Request,
+    req: Request,
     res: Response,
     next: NextFunction,
   ) => void;
 
-  constructor(private configService: ConfigService) {
+  constructor(_private configService: ConfigService) {
     const environment =
       this.configService.get<string>('NODE_ENV') ?? 'development';
     const corsOrigins = this.configService.get<string[]>('CORS_ORIGINS') ?? [
@@ -505,7 +505,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       );
 
       this.logSecurityEvent(
-        req,
+        _req,
         'CORS_VIOLATION',
         `Unauthorized origin: ${origin}`,
         operationId,
@@ -534,7 +534,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
             return origin.endsWith(domain);
           }
           // Support localhost with any port
-          if (allowed.includes('localhost:*')) {
+          if (_allowed.includes('localhost:*')) {
             const baseOrigin = allowed.replace(':*', '');
             return origin.startsWith(baseOrigin);
           }
@@ -563,7 +563,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       const securityEventType = this.mapEventType(eventType);
 
       const securityEvent = createSecurityEvent(
-        securityEventType,
+        _securityEventType,
         req.url,
         req.method,
         false,

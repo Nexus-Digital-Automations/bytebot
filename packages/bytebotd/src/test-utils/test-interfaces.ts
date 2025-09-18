@@ -20,11 +20,11 @@ import { JwtPayload } from 'jsonwebtoken';
  * User roles enumeration for type-safe role management
  */
 export enum UserRole {
-  _ADMIN = 'admin',
-  _OPERATOR = 'operator',
-  _VIEWER = 'viewer',
-  _USER = 'user',
-  _GUEST = 'guest',
+  ADMIN = 'admin',
+  OPERATOR = 'operator',
+  VIEWER = 'viewer',
+  USER = 'user',
+  GUEST = 'guest',
 }
 
 /**

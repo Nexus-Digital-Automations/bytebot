@@ -202,7 +202,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
   private readonly windowSize = 1000; // Keep last 1000 requests for percentile calculation
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly cacheService: ParlantMultiLevelCacheService,
     private readonly batchProcessor: ParlantAsyncBatchProcessorService,
   ) {}
@@ -342,7 +342,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
           
           // Fall back to direct processing
           return this.fallbackToDirectProcessing(
-            request,
+            _request,
             context,
             startTime,
             optimizationPath,
@@ -352,7 +352,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
               userId: context.userId, 
               sessionId: context.sessionId, 
               timestamp: new Date(),
-              context: request.context as unknown as Record<string, unknown> || {},
+              context: request.context as unknown as Record<string, unknown> ?? {},
               cacheHit, 
               cacheLevel, 
               batchProcessed: false, 
@@ -367,7 +367,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
 
       // Step 3: Direct processing fallback
       return this.fallbackToDirectProcessing(
-        request,
+        _request,
         context,
         startTime,
         optimizationPath,
@@ -377,7 +377,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
           userId: context.userId, 
           sessionId: context.sessionId, 
           timestamp: new Date(),
-          context: request.context as unknown as Record<string, unknown> || {},
+          context: request.context as unknown as Record<string, unknown> ?? {},
           cacheHit, 
           cacheLevel, 
           batchProcessed, 
@@ -393,7 +393,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
       this.logger.error(`Validation error for ${request.functionName}:`, error);
       
       return this.createErrorResponse(
-        error,
+        _error,
         startTime,
         optimizationPath,
         { 
@@ -402,7 +402,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
           userId: context.userId, 
           sessionId: context.sessionId, 
           timestamp: new Date(),
-          context: request.context as unknown as Record<string, unknown> || {},
+          context: request.context as unknown as Record<string, unknown> ?? {},
           cacheHit, 
           cacheLevel, 
           batchProcessed, 
@@ -535,7 +535,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     };
 
     return this.createOptimizedResponse(
-      errorResponse,
+      _errorResponse,
       startTime,
       optimizationPath,
       { 
@@ -804,7 +804,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
    */
   getOptimizationRecommendations(): OptimizationRecommendation[] {
     const recommendations: OptimizationRecommendation[] = [];
-    const _metrics = this.getComprehensiveMetrics();
+    const metrics = this.getComprehensiveMetrics();
     
     // Cache optimization recommendations
     const cacheRecommendations = this.cacheService.getCacheOptimizationRecommendations();

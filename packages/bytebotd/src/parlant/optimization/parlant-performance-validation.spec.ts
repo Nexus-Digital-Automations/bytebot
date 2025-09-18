@@ -122,11 +122,11 @@ describe('Parlant Performance Optimization Validation', () => {
       );
 
       expect(key1).toBe(key2);
-      expect(key1).toMatch(/^testFunction:.+:.+$/);
+      expect(key1).toMatch(_/^testFunction:.+:.+$/);
     });
 
     it('should cache and retrieve validation results', async () => {
-      const _key = cacheService.generateFunctionKey(
+      const key = cacheService.generateFunctionKey(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
         sampleRequest.context as unknown as Record<string, unknown>
@@ -134,7 +134,7 @@ describe('Parlant Performance Optimization Validation', () => {
 
       // Set cache
       await cacheService.setCachedValidation(
-        sampleRequest.functionName,
+        _sampleRequest.functionName,
         [sampleRequest.functionParams],
         sampleRequest.context as unknown as Record<string, unknown>,
         sampleResponse,
@@ -299,9 +299,9 @@ describe('Parlant Performance Optimization Validation', () => {
 
       for (let b = 0; b < batches; b++) {
         const requests: ParlantValidationRequest[] = Array.from({ length: batchSize }, (_, i) => ({
-          functionName: `efficiencyTest${b}_${i}`,
+          functionName: `efficiencyTest${b}${i}`,
           functionParams: { batchId: b, index: i },
-          actionDescription: `Efficiency test ${b}_${i}`,
+          actionDescription: `Efficiency test ${b}${i}`,
           riskLevel: RiskLevel.MEDIUM,
           operationId: `efficiency-op-${b}-${i}`,
           context: { 
@@ -431,7 +431,7 @@ describe('Parlant Performance Optimization Validation', () => {
 
       const startTime = Date.now();
       const results = await orchestrator.validateBulkWithOptimization(
-        bulkRequests,
+        _bulkRequests,
         {
           userId: 'bulk-test-user',
           sessionId: 'bulk-test',

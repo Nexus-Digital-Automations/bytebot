@@ -107,11 +107,11 @@ export class ParlantValidatedInputCaptureService {
   private aiProcessingCount = 0;
 
   constructor(
-    private readonly inputTrackingService: InputTrackingService,
+    _private readonly inputTrackingService: InputTrackingService,
     private readonly parlantIntegration: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `parlant-input-init-${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant-input-init-${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     this.logger.log(`[${operationId}] Initializing Parlant-Validated Input Capture Service with AI agent processing`, {
       operationId,
@@ -609,7 +609,7 @@ export class ParlantValidatedInputCaptureService {
   }
 
   private analyzeUserBehaviorPattern(context: InputAgentContext): string {
-    return `${context.inputType}_${context.captureMode}_pattern_detected`;
+    return `${context.inputType}${context.captureMode}_pattern_detected`;
   }
 
   private generateActionRiskAssessment(action: ComputerAction): string {

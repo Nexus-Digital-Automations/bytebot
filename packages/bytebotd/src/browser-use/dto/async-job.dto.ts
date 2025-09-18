@@ -210,7 +210,7 @@ export class CreateAsyncJobDto {
     example: 'Data extraction from e-commerce site',
   })
   @IsString()
-  name!: string;
+  (name ?? "default"): string;
 
   @ApiPropertyOptional({
     description: 'Detailed job description',
@@ -227,7 +227,7 @@ export class CreateAsyncJobDto {
     example: AsyncJobType.DATA_EXTRACTION,
   })
   @IsEnum(AsyncJobType)
-  jobType!: AsyncJobType;
+  (jobType ?? "default"): AsyncJobType;
 
   @ApiPropertyOptional({
     description: 'Job priority level',
@@ -261,7 +261,7 @@ export class CreateAsyncJobDto {
     },
   })
   @IsObject()
-  configuration!: JobConfiguration;
+  (configuration ?? "default"): JobConfiguration;
 
   @ApiPropertyOptional({
     description: 'Maximum retry attempts on failure',
@@ -301,13 +301,13 @@ export class AsyncJobResultDto {
     description: 'Unique job identifier',
     example: 'job_browser_1234567890_abcdef',
   })
-  jobId!: string;
+  (jobId ?? "default"): string;
 
   @ApiProperty({
     description: 'Human-readable job _name',
     example: 'Data extraction from e-commerce site',
   })
-  name!: string;
+  (name ?? "default"): string;
 
   @ApiPropertyOptional({
     description: 'Detailed job description',
@@ -318,19 +318,19 @@ export class AsyncJobResultDto {
     description: 'Job type for automation task',
     enum: AsyncJobType,
   })
-  jobType!: AsyncJobType;
+  (jobType ?? "default"): AsyncJobType;
 
   @ApiProperty({
     description: 'Current job status',
     enum: AsyncJobStatus,
   })
-  status!: AsyncJobStatus;
+  (status ?? "default"): AsyncJobStatus;
 
   @ApiProperty({
     description: 'Job priority level',
     enum: AsyncJobPriority,
   })
-  priority!: AsyncJobPriority;
+  (priority ?? "default"): AsyncJobPriority;
 
   @ApiProperty({
     description: 'Job execution progress information',
@@ -344,7 +344,7 @@ export class AsyncJobResultDto {
       estimatedRemainingMs: { type: 'number' },
     },
   })
-  progress!: {
+  (progress ?? "default"): {
     currentStep: string;
     completedSteps: number;
     totalSteps: number;
@@ -355,7 +355,7 @@ export class AsyncJobResultDto {
   @ApiProperty({
     description: 'Job creation timestamp',
   })
-  createdAt!: Date;
+  (createdAt ?? "default"): Date;
 
   @ApiPropertyOptional({
     description: 'Job queued timestamp',
@@ -375,7 +375,7 @@ export class AsyncJobResultDto {
   @ApiProperty({
     description: 'Estimated duration in milliseconds',
   })
-  estimatedDurationMs!: number;
+  (estimatedDurationMs ?? "default"): number;
 
   @ApiPropertyOptional({
     description: 'Actual execution duration in milliseconds',
@@ -387,7 +387,7 @@ export class AsyncJobResultDto {
     type: 'object',
     additionalProperties: true,
   })
-  configuration!: JobConfiguration;
+  (configuration ?? "default"): JobConfiguration;
 
   @ApiProperty({
     description: 'Job execution results',
@@ -414,7 +414,7 @@ export class AsyncJobResultDto {
       },
     },
   })
-  results!: JobResults;
+  (results ?? "default"): JobResults;
 
   @ApiPropertyOptional({
     description: 'Associated task IDs for this job',
@@ -446,7 +446,7 @@ export class AsyncJobResultDto {
     type: 'object',
     additionalProperties: true,
   })
-  metadata!: JobMetadata;
+  (metadata ?? "default"): JobMetadata;
 }
 
 /**
@@ -457,23 +457,23 @@ export class JobSubmissionResponseDto {
     description: 'Unique job identifier for status tracking',
     example: 'job_browser_1234567890_abcdef',
   })
-  jobId!: string;
+  (jobId ?? "default"): string;
 
   @ApiProperty({
     description: 'Job submission status',
     enum: AsyncJobStatus,
   })
-  status!: AsyncJobStatus;
+  (status ?? "default"): AsyncJobStatus;
 
   @ApiProperty({
     description: 'Job submission timestamp',
   })
-  submittedAt!: Date;
+  (submittedAt ?? "default"): Date;
 
   @ApiProperty({
     description: 'Estimated completion time in milliseconds',
   })
-  estimatedCompletionTimeMs!: number;
+  (estimatedCompletionTimeMs ?? "default"): number;
 
   @ApiPropertyOptional({
     description: 'Position in execution queue',
@@ -484,19 +484,19 @@ export class JobSubmissionResponseDto {
     description: 'Job priority level',
     enum: AsyncJobPriority,
   })
-  priority!: AsyncJobPriority;
+  (priority ?? "default"): AsyncJobPriority;
 
   @ApiProperty({
     description: 'Polling URL for job status',
     example: '/api/v1/browser-use/jobs/job_browser_1234567890_abcdef/status',
   })
-  statusUrl!: string;
+  (statusUrl ?? "default"): string;
 
   @ApiProperty({
     description: 'Results URL (available once completed)',
     example: '/api/v1/browser-use/jobs/job_browser_1234567890_abcdef/results',
   })
-  resultsUrl!: string;
+  (resultsUrl ?? "default"): string;
 
   @ApiPropertyOptional({
     description: 'WebSocket URL for real-time updates',
@@ -520,18 +520,18 @@ export class JobStatusResponseDto {
   @ApiProperty({
     description: 'Job identifier',
   })
-  jobId!: string;
+  (jobId ?? "default"): string;
 
   @ApiProperty({
     description: 'Current job status',
     enum: AsyncJobStatus,
   })
-  status!: AsyncJobStatus;
+  (status ?? "default"): AsyncJobStatus;
 
   @ApiProperty({
     description: 'Job creation timestamp',
   })
-  createdAt!: Date;
+  (createdAt ?? "default"): Date;
 
   @ApiPropertyOptional({
     description: 'Job start timestamp',
@@ -548,17 +548,17 @@ export class JobStatusResponseDto {
     minimum: 0,
     maximum: 100,
   })
-  progress!: number;
+  (progress ?? "default"): number;
 
   @ApiProperty({
     description: 'Current step description',
   })
-  currentStep!: string;
+  (currentStep ?? "default"): string;
 
   @ApiProperty({
     description: 'Total execution time in milliseconds',
   })
-  executionTimeMs!: number;
+  (executionTimeMs ?? "default"): number;
 
   @ApiPropertyOptional({
     description: 'Estimated remaining time in milliseconds',
@@ -583,7 +583,7 @@ export class JobStatusResponseDto {
       dataExtracted: { type: 'number' },
     },
   })
-  statistics!: {
+  (statistics ?? "default"): {
     actionsCompleted: number;
     totalActions: number;
     screenshotsCaptured: number;
@@ -640,7 +640,7 @@ export class JobStatusResponseDto {
   @ApiProperty({
     description: 'Whether results are ready for retrieval',
   })
-  resultsReady!: boolean;
+  (resultsReady ?? "default"): boolean;
 }
 
 /**
@@ -650,28 +650,28 @@ export class JobResultResponseDto {
   @ApiProperty({
     description: 'Job identifier',
   })
-  jobId!: string;
+  (jobId ?? "default"): string;
 
   @ApiProperty({
     description: 'Final job status',
     enum: AsyncJobStatus,
   })
-  status!: AsyncJobStatus;
+  (status ?? "default"): AsyncJobStatus;
 
   @ApiProperty({
     description: 'Job completion timestamp',
   })
-  completedAt!: Date;
+  (completedAt ?? "default"): Date;
 
   @ApiProperty({
     description: 'Total execution time in milliseconds',
   })
-  totalExecutionTimeMs!: number;
+  (totalExecutionTimeMs ?? "default"): number;
 
   @ApiProperty({
     description: 'Job execution success flag',
   })
-  success!: boolean;
+  (success ?? "default"): boolean;
 
   @ApiPropertyOptional({
     description: 'Extracted data from browser automation',
@@ -721,7 +721,7 @@ export class JobResultResponseDto {
       },
     },
   })
-  logs!: JobLogEntry[];
+  (logs ?? "default"): JobLogEntry[];
 
   @ApiProperty({
     description: 'Final execution statistics',
@@ -739,7 +739,7 @@ export class JobResultResponseDto {
       dataPoints: { type: 'number' },
     },
   })
-  statistics!: JobExecutionStatistics;
+  (statistics ?? "default"): JobExecutionStatistics;
 
   @ApiPropertyOptional({
     description: 'Error information if job failed',
@@ -775,7 +775,7 @@ export class JobResultResponseDto {
       reportUrl: { type: 'string' },
     },
   })
-  resources!: JobResourceUrls;
+  (resources ?? "default"): JobResourceUrls;
 
   @ApiProperty({
     description: 'Data export options',
@@ -789,7 +789,7 @@ export class JobResultResponseDto {
       },
     },
   })
-  exports!: JobExportOptions;
+  (exports ?? "default"): JobExportOptions;
 }
 
 /**
@@ -801,7 +801,7 @@ export class AsyncBrowserJobSubmissionDto {
     example: 'browser_automation',
   })
   @IsString()
-  jobType!: string;
+  (jobType ?? "default"): string;
 
   @ApiPropertyOptional({
     description: 'Job priority level',
@@ -830,7 +830,7 @@ export class AsyncBrowserJobSubmissionDto {
     additionalProperties: true,
   })
   @IsObject()
-  payload!: JobConfiguration;
+  (payload ?? "default"): JobConfiguration;
 
   @ApiPropertyOptional({
     description: 'Enable real-time streaming of job progress',

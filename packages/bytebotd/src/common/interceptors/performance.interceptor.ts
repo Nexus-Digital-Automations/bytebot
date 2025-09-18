@@ -127,7 +127,7 @@ export class PerformanceInterceptor implements NestInterceptor {
     const response = context.switchToHttp().getResponse<Response>();
 
     // Generate unique operation ID for request tracking
-    const operationId = `perf_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `perf${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     const memoryBefore = process.memoryUsage();
 
@@ -208,7 +208,7 @@ export class PerformanceInterceptor implements NestInterceptor {
       this.storeResponseTime(metrics.duration);
     } catch (_error) {
       this.logger.error(
-        `[${metrics.operationId}] Failed to record performance metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
+        `[${metrics.operationId}] Failed to record performance metrics: ${error instanceof Error ? _error.message : 'Unknown error'}`,
       );
     }
   }
@@ -366,7 +366,7 @@ export class PerformanceInterceptor implements NestInterceptor {
     if (this.responseTimes.length === 0) return;
 
     const sortedTimes = [...this.responseTimes].sort((a, b) => a - b);
-    const _length = sortedTimes.length;
+    const length = sortedTimes.length;
 
     this.stats.p50ResponseTime = this.getPercentile(sortedTimes, 50);
     this.stats.p90ResponseTime = this.getPercentile(sortedTimes, 90);
@@ -379,7 +379,7 @@ export class PerformanceInterceptor implements NestInterceptor {
    */
   private getPercentile(sortedArray: number[], percentile: number): number {
     if (sortedArray.length === 0) return 0;
-    const _index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
+    const index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
     return sortedArray[Math.max(0, _index)] ?? 0;
   }
 
@@ -408,7 +408,7 @@ export class PerformanceInterceptor implements NestInterceptor {
    * Clear performance statistics
    */
   clearStats(): void {
-    Object.assign(this.stats, {
+    Object.assign(_this.stats, {
       requestCount: 0,
       averageResponseTime: 0,
       slowRequests: 0,

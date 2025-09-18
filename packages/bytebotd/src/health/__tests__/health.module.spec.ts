@@ -58,7 +58,7 @@ describe('HealthModule', () => {
   let healthService: HealthService;
   let mockLogger: jest.Mocked<Logger>;
 
-  const operationId = `health_module_test_${Date.now()}`;
+  const operationId = `health_module_test${Date.now()}`;
 
   // Mock user for authenticated calls
   const mockUser: ByteBotdUser = {
@@ -208,7 +208,7 @@ describe('HealthModule', () => {
       console.log(`[${testId}] Testing module initialization error handling`);
 
       // Mock Logger constructor to throw an error during module initialization
-      const _originalLogger = Logger;
+      const originalLogger = Logger;
       const errorMessage = 'Logger initialization failed';
 
       try {
@@ -299,7 +299,7 @@ describe('HealthModule', () => {
 
       // Verify HttpModule is available for external service health checks
       try {
-        const httpModule = module.get(HttpModule, { strict: false });
+        const httpModule = module.get(_HttpModule, { strict: false });
         expect(httpModule).toBeDefined();
       } catch (_error) {
         // HttpModule might not be directly accessible, but functionality should work
@@ -742,7 +742,7 @@ describe('HealthModule', () => {
       const successfulResults = exhaustionResults.filter(
         (r) => r.status === 'healthy',
       );
-      const _errorResults = exhaustionResults.filter(
+      const errorResults = exhaustionResults.filter(
         (r) => r.status === 'error',
       );
 

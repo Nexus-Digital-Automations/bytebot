@@ -109,7 +109,7 @@ export class CacheService {
    * @returns Promise<T | null> Cached value or null if not found
    */
   async get<T>(key: string, options: CacheOptions = {}): Promise<T | null> {
-    const operationId = `cache_get_${Date.now()}`;
+    const operationId = `cache_get${Date.now()}`;
     const startTime = Date.now();
 
     try {
@@ -124,17 +124,17 @@ export class CacheService {
         this.stats.hits++;
         this.recordOperation('get', 'hit', duration);
 
-        let _result: T;
+        let result: T;
         if (options.serialize !== false) {
           const parsedValue = safeJsonParse<T>(cachedValue);
           if (parsedValue !== null) {
-            _result = parsedValue;
+            result = parsedValue;
           } else {
             // Fallback to treating cached value as raw data
-            _result = cachedValue as unknown as T;
+            result = cachedValue as unknown as T;
           }
         } else {
-          _result = cachedValue as unknown as T;
+          result = cachedValue as unknown as T;
         }
 
         this.logger.debug(
@@ -179,7 +179,7 @@ export class CacheService {
     value: T,
     options: CacheOptions = {},
   ): Promise<void> {
-    const operationId = `cache_set_${Date.now()}`;
+    const operationId = `cache_set${Date.now()}`;
     const startTime = Date.now();
 
     try {
@@ -234,7 +234,7 @@ export class CacheService {
    * @param options Cache options
    */
   async del(key: string, options: CacheOptions = {}): Promise<void> {
-    const operationId = `cache_del_${Date.now()}`;
+    const operationId = `cache_del${Date.now()}`;
     const startTime = Date.now();
 
     try {
@@ -274,7 +274,7 @@ export class CacheService {
     keys: string[],
     options: CacheOptions = {},
   ): Promise<Map<string, T>> {
-    const operationId = `cache_mget_${Date.now()}`;
+    const operationId = `cache_mget${Date.now()}`;
     const startTime = Date.now();
     const results = new Map<string, T>();
 
@@ -323,7 +323,7 @@ export class CacheService {
     entries: Array<{ key: string; value: T }>,
     options: CacheOptions = {},
   ): Promise<void> {
-    const operationId = `cache_mset_${Date.now()}`;
+    const operationId = `cache_mset${Date.now()}`;
     const startTime = Date.now();
 
     try {
@@ -369,7 +369,7 @@ export class CacheService {
     keys: string[],
     options: CacheOptions = {},
   ): Promise<void> {
-    const operationId = `cache_warm_${Date.now()}`;
+    const operationId = `cache_warm${Date.now()}`;
     const startTime = Date.now();
 
     try {
@@ -385,7 +385,7 @@ export class CacheService {
           }
         } catch (_error) {
           this.logger.warn(
-            `Cache warming failed for key ${key}: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
+            `Cache warming failed for key ${key}: ${error instanceof Error ? _error.message : 'Unknown error'}`,
           );
         }
       });
@@ -441,7 +441,7 @@ export class CacheService {
    * @param namespace Optional namespace
    */
   invalidatePattern(pattern: string, _namespace?: string): void {
-    const operationId = `cache_invalidate_${Date.now()}`;
+    const operationId = `cache_invalidate${Date.now()}`;
 
     try {
       // For Redis, we would use SCAN with pattern matching

@@ -113,7 +113,7 @@ export class CircuitBreakerService {
 
   getCircuitBreakerState(serviceId: string): CircuitBreakerState {
     if (!this.circuitBreakers.has(serviceId)) {
-      this.circuitBreakers.set(serviceId, {
+      this.circuitBreakers.set(_serviceId, {
         serviceId,
         state: 'CLOSED',
         failureCount: 0,
@@ -215,7 +215,7 @@ export class RetryManagerService {
       }
     }
     
-    throw lastError!;
+    throw (lastError ?? "default");
   }
 
   private isRetryableError(error: Error, retryableErrors: string[]): boolean {
@@ -399,7 +399,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       const lastResult = results[results.length - 1] as Error;
       expect(lastResult.message).toContain('Circuit breaker OPEN');
 
-      recordRecoveryMetrics(scenario, startTime, endTime, {
+      recordRecoveryMetrics(_scenario, startTime, endTime, {
         totalFailures: 6,
         successfulRecoveries: 0,
         circuitBreakerTriggered: true,
@@ -564,7 +564,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
           functionName: 'test',
           functionParams: {},
           actionDescription: 'test',
-          context: {} as any,
+          context: {} as unknown,
           riskLevel: RiskLevel.LOW,
           operationId: 'test',
         }),
@@ -662,7 +662,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
           return {
             content: [{
               type: 'image' as const,
-              data: (result as any).image,
+              data: (result as unknown).image,
               mimeType: 'image/png',
             }]
           };
@@ -709,9 +709,9 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       const endTime = Date.now();
 
       expect(result).toBeDefined();
-      expect((result as any).image).toBeDefined();
+      expect((result as unknown).image).toBeDefined();
 
-      recordRecoveryMetrics(scenario, startTime, endTime, {
+      recordRecoveryMetrics(_scenario, startTime, endTime, {
         totalFailures: 0, // Cache failure shouldn't fail the operation
         successfulRecoveries: 1,
         gracefulDegradationActivated: true,
@@ -843,7 +843,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
                 functionName: 'test',
                 functionParams: {},
                 actionDescription: 'test',
-                context: {} as any,
+                context: {} as unknown,
                 riskLevel: RiskLevel.LOW,
                 operationId: 'test',
               });
@@ -860,7 +860,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       expect(recoveryEvents.filter(e => e.includes('recovery-started'))).toHaveLength(3);
       expect(recoveryEvents.filter(e => e.includes('recovery-completed'))).toHaveLength(3);
 
-      recordRecoveryMetrics(scenario, startTime, endTime, {
+      recordRecoveryMetrics(_scenario, startTime, endTime, {
         totalFailures: 3,
         successfulRecoveries: 3,
         retryAttempts: 6,
@@ -971,12 +971,12 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
       scenarioId: scenario.scenarioId,
       startTime,
       endTime,
-      totalFailures: results.totalFailures || 0,
-      successfulRecoveries: results.successfulRecoveries || 0,
-      failedRecoveries: results.failedRecoveries || 0,
+      totalFailures: results.totalFailures ?? 0,
+      successfulRecoveries: results.successfulRecoveries ?? 0,
+      failedRecoveries: results.failedRecoveries ?? 0,
       averageRecoveryTime: endTime - startTime,
       maxRecoveryTime: endTime - startTime,
-      retryAttempts: results.retryAttempts || 0,
+      retryAttempts: results.retryAttempts ?? 0,
       circuitBreakerTriggered: results.circuitBreakerTriggered || false,
       gracefulDegradationActivated: results.gracefulDegradationActivated || false,
       dataConsistencyMaintained: results.dataConsistencyMaintained || true,
@@ -990,7 +990,7 @@ describe('CUA Error Recovery and Failover Integration Tests', () => {
    * Generate unique scenario ID
    */
   function generateScenarioId(): string {
-    return `scenario_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    return `scenario${Date.now()}${Math.random().toString(36).substring(7)}`;
   }
 
   /**

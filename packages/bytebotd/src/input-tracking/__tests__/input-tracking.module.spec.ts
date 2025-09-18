@@ -37,7 +37,7 @@ describe('InputTrackingModule', () => {
   let inputTrackingGateway: InputTrackingGateway;
   let computerUseService: ComputerUseService;
 
-  const operationId = `input_tracking_module_test_${Date.now()}`;
+  const operationId = `input_tracking_module_test${Date.now()}`;
 
   beforeEach(async () => {
     console.log(
@@ -109,7 +109,7 @@ describe('InputTrackingModule', () => {
       const testId = `${operationId}_module_metadata`;
       console.log(`[${testId}] Testing module metadata structure`);
 
-      const _moduleMetadata: unknown =
+      const moduleMetadata: unknown =
         Reflect.getMetadata('imports', InputTrackingModule) ??
         Reflect.getMetadata('module', InputTrackingModule);
 
@@ -317,7 +317,7 @@ describe('InputTrackingModule', () => {
       console.log(`[${testId}] Testing service and gateway integration`);
 
       // Mock gateway methods
-      const _emitActionSpy = jest.spyOn(inputTrackingGateway, 'emitAction');
+      const emitActionSpy = jest.spyOn(inputTrackingGateway, 'emitAction');
 
       // Start tracking to enable communication
       inputTrackingService.startTracking();
@@ -477,7 +477,7 @@ describe('InputTrackingModule', () => {
 
       // Try creating module without required imports
       await expect(
-        Test.createTestingModule({
+        _Test.createTestingModule({
           // Missing ComputerUseModule import
           controllers: [InputTrackingController],
           providers: [InputTrackingService, InputTrackingGateway],
@@ -495,7 +495,7 @@ describe('InputTrackingModule', () => {
 
       // Test with incomplete provider configuration
       await expect(
-        Test.createTestingModule({
+        _Test.createTestingModule({
           imports: [InputTrackingModule],
           providers: [
             // Invalid provider configuration

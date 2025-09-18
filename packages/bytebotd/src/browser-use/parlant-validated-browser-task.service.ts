@@ -217,10 +217,10 @@ export class ParlantValidatedBrowserTaskService {
   private averageValidationTime = 0;
 
   constructor(
-    private readonly originalBrowserTaskService: BrowserTaskService,
+    _private readonly originalBrowserTaskService: BrowserTaskService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
-    const operationId = `parlant_task_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_task_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Task Service`, {
       hasOriginalService: !!this.originalBrowserTaskService,
@@ -248,7 +248,7 @@ export class ParlantValidatedBrowserTaskService {
     taskData: TaskCreationData,
     context: BrowserTaskValidationContext
   ): Promise<TaskValidationResult> {
-    const operationId = `parlant_task_create_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_task_create${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     this.totalTaskOperations++;
 
@@ -453,7 +453,7 @@ export class ParlantValidatedBrowserTaskService {
     updateData: TaskUpdateData,
     context: BrowserTaskValidationContext
   ): Promise<BrowserTaskResultDto> {
-    const operationId = `parlant_task_update_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_task_update${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.log(
@@ -562,7 +562,7 @@ export class ParlantValidatedBrowserTaskService {
     taskId: string,
     context: BrowserTaskValidationContext
   ): Promise<BrowserTaskResultDto | null> {
-    const operationId = `parlant_task_get_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_task_get${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.log(
@@ -655,7 +655,7 @@ export class ParlantValidatedBrowserTaskService {
     taskId: string,
     context: BrowserTaskValidationContext
   ): Promise<void> {
-    const operationId = `parlant_task_delete_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_task_delete${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.log(
@@ -826,7 +826,7 @@ export class ParlantValidatedBrowserTaskService {
   private assessTaskUpdateRisk(
     taskId: string,
     updateData: TaskUpdateData,
-    _context: BrowserTaskValidationContext
+    context: BrowserTaskValidationContext
   ): TaskOperationRiskAssessment {
     const riskFactors: string[] = [];
     let riskLevel: RiskLevel = RiskLevel.LOW;
@@ -890,7 +890,7 @@ export class ParlantValidatedBrowserTaskService {
    */
   private assessTaskDeletionRisk(
     taskId: string,
-    _context: BrowserTaskValidationContext
+    context: BrowserTaskValidationContext
   ): TaskOperationRiskAssessment {
     const riskFactors: string[] = [];
     let riskLevel: RiskLevel = RiskLevel.MEDIUM;
@@ -1078,7 +1078,7 @@ export class ParlantValidatedBrowserTaskService {
    */
   private extractPerformanceMetrics(task: BrowserTaskResultDto): TaskPerformanceMetrics | undefined {
     return {
-      executionTime: task.executionTimeMs || 0,
+      executionTime: task.executionTimeMs ?? 0,
       actionsExecuted: task.actionsCompleted,
       actionsSuccessful: task.actionsCompleted, // Assume successful if completed
       actionsFailed: task.totalActions - task.actionsCompleted,
@@ -1178,7 +1178,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Check if task is currently running (mock implementation)
    */
-  private isTaskCurrentlyRunning(_taskId: string): boolean {
+  private isTaskCurrentlyRunning(taskId: string): boolean {
     // Mock implementation - in production would check actual task status
     return Math.random() > 0.8; // 20% chance of being running
   }
@@ -1278,7 +1278,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Get task security profile for validation context
    */
-  async getTaskSecurityProfile(_userId: string): Promise<TaskSecurityProfile> {
+  async getTaskSecurityProfile(userId: string): Promise<TaskSecurityProfile> {
     // Mock implementation - in production would check actual security data
     return {
       userTrustLevel: 'MEDIUM',

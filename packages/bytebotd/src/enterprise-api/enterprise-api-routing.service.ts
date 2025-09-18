@@ -263,7 +263,7 @@ export class EnterpriseApiRoutingService {
   };
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
     this.logger.log('Enterprise API Routing Service initialized with MAXIMUM Parlant integration');
@@ -277,7 +277,7 @@ export class EnterpriseApiRoutingService {
    * Route request with comprehensive Parlant validation
    */
   async routeRequest(request: RoutingRequest): Promise<RoutingDecision> {
-    const operationId = `route_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `route${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     
     this.analytics.totalRoutings++;
@@ -354,7 +354,7 @@ export class EnterpriseApiRoutingService {
       details: Record<string, unknown>;
     }
   ): Promise<void> {
-    const operationId = `health_update_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `health_update${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.debug(`[${operationId}] Updating service health with Parlant validation`, {
       operationId,
@@ -651,7 +651,7 @@ export class EnterpriseApiRoutingService {
       actionDescription: `Update health status for service ${serviceId} to ${health}`,
       context: {
         userId: 'routing_service',
-        sessionId: `health_session_${Date.now()}`,
+        sessionId: `health_session${Date.now()}`,
         agentRole: 'HEALTH_MONITOR',
         securityLevel: health === 'FAILED' ? 'CRITICAL' : 'MEDIUM',
         conversationHistory: [],
@@ -915,7 +915,7 @@ export class EnterpriseApiRoutingService {
     return 85; // Mock value
   }
 
-  private calculateEndpointScore(endpoint: ServiceEndpoint, _request: RoutingRequest): number {
+  private calculateEndpointScore(endpoint: ServiceEndpoint, request: RoutingRequest): number {
     let score = 0;
     
     // Health score
@@ -1004,7 +1004,7 @@ export class EnterpriseApiRoutingService {
   }
 
   private sanitizeOperationForFunction(operation: string): string {
-    return operation.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+    return operation.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');
   }
 
   /**

@@ -142,10 +142,10 @@ export class SecurityPolicyValidatorService {
   private complianceViolations = 0;
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `policy_validator_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `policy_validator_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Security Policy Validator Service initialized with MAXIMUM Parlant integration`, {
       parlantEnabled: true,
@@ -279,7 +279,7 @@ export class SecurityPolicyValidatorService {
     const processingTime = Date.now() - startTime;
 
     const mockResponse: PolicyValidationResponse = {
-      id: `policy_validation_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `policy_validation${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
       operationId: request.operationId,
       conversationId,

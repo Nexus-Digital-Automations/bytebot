@@ -414,7 +414,7 @@ describe('Security Validation E2E Tests', () => {
     it('should complete requests within reasonable time', async () => {
       const startTime = Date.now();
 
-      const _response = await request(server)
+      const response = await request(server)
         .post('/computer-use')
         .send({ action: 'screenshot' });
 

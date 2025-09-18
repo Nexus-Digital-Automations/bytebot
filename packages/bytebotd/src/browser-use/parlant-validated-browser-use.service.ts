@@ -119,10 +119,10 @@ export class ParlantValidatedBrowserUseService {
   private averageValidationTime = 0;
 
   constructor(
-    private readonly originalBrowserUseService: BrowserUseService,
+    _private readonly originalBrowserUseService: BrowserUseService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
-    const operationId = `parlant_browser_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_browser_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Use Service`, {
       hasOriginalService: !!this.originalBrowserUseService,
@@ -150,7 +150,7 @@ export class ParlantValidatedBrowserUseService {
     taskDto: CreateBrowserTaskDto,
     context: BrowserActionValidationContext
   ): Promise<BrowserTaskResultDto> {
-    const operationId = `parlant_browser_task_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_browser_task${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     this.totalOperations++;
 
@@ -330,7 +330,7 @@ export class ParlantValidatedBrowserUseService {
     jobDto: CreateAsyncJobDto,
     context: BrowserActionValidationContext
   ): Promise<AsyncJobResultDto> {
-    const operationId = `parlant_async_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_async_job${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.log(
@@ -423,7 +423,7 @@ export class ParlantValidatedBrowserUseService {
     selectors: string[],
     context: BrowserActionValidationContext
   ): Promise<BrowserDataExtractionValidationResult> {
-    const operationId = `parlant_data_extract_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_data_extract${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.log(
@@ -615,7 +615,7 @@ export class ParlantValidatedBrowserUseService {
   private assessDataExtractionRisk(
     url: string,
     selectors: string[],
-    _context: BrowserActionValidationContext
+    context: BrowserActionValidationContext
   ): BrowserActionRiskAssessment {
     const riskFactors: string[] = [];
     let riskLevel: RiskLevel = RiskLevel.LOW;

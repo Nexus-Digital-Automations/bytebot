@@ -228,23 +228,23 @@ export class CIPerformanceValidator extends EventEmitter {
       };
 
       // Step 1: Test execution performance validation
-      console.log('🧪 [CI-PERF] Step 1: Validating test execution performance...');
+      console.log('🧪 [CI-PERF] Step _1: Validating test execution performance...');
       const testResults = await this.validateTestExecutionPerformance();
 
       // Step 2: Load testing validation
-      console.log('🔄 [CI-PERF] Step 2: Running load test scenarios...');
+      console.log('🔄 [CI-PERF] Step _2: Running load test scenarios...');
       const loadResults = await this.validateLoadTestPerformance();
 
       // Step 3: Performance optimization validation
-      console.log('⚡ [CI-PERF] Step 3: Validating performance optimizations...');
+      console.log('⚡ [CI-PERF] Step _3: Validating performance optimizations...');
       const optimizationResults = await this.validateOptimizationPerformance();
 
       // Step 4: Regression detection
-      console.log('📊 [CI-PERF] Step 4: Detecting performance regressions...');
+      console.log('📊 [CI-PERF] Step _4: Detecting performance regressions...');
       const regressions = await this.detectPerformanceRegressions(context);
 
       // Step 5: Performance bottleneck analysis
-      console.log('🔍 [CI-PERF] Step 5: Analyzing performance bottlenecks...');
+      console.log('🔍 [CI-PERF] Step _5: Analyzing performance bottlenecks...');
       const bottleneckAnalysis = await this.analyzePerformanceBottlenecks();
 
       // Calculate derived values
@@ -254,7 +254,7 @@ export class CIPerformanceValidator extends EventEmitter {
 
       // Create final validation result
       this.currentValidation = {
-        ...this.currentValidation!,
+        ...this.(currentValidation ?? "default"),
         testResults,
         loadTestResults: loadResults,
         optimizationResults,
@@ -286,7 +286,7 @@ export class CIPerformanceValidator extends EventEmitter {
       
       // Create failed result
       const failedResult: CIPerformanceResult = {
-        ...this.currentValidation!,
+        ...this.(currentValidation ?? "default"),
         overallStatus: 'failed',
         performanceGrade: 'F',
         recommendations: ['Fix performance validation setup and retry']
@@ -375,9 +375,9 @@ export class CIPerformanceValidator extends EventEmitter {
       const loadResults = {
         scenarios: allResults.length,
         passedScenarios: passedResults.length,
-        averageResponseTime: allResults.reduce((sum, r) => sum + r.averageResponseTime, 0) / allResults.length || 0,
-        throughput: allResults.reduce((sum, r) => sum + r.actualRps, 0) / allResults.length || 0,
-        errorRate: allResults.reduce((sum, r) => sum + r.errorRate, 0) / allResults.length || 0
+        averageResponseTime: allResults.reduce((sum, r) => sum + r.averageResponseTime, 0) / allResults.length ?? 0,
+        throughput: allResults.reduce((sum, r) => sum + r.actualRps, 0) / allResults.length ?? 0,
+        errorRate: allResults.reduce((sum, r) => sum + r.errorRate, 0) / allResults.length ?? 0
       };
 
       // Check against thresholds
@@ -484,7 +484,7 @@ export class CIPerformanceValidator extends EventEmitter {
       return regressions;
     }
     
-    const current = this.currentValidation!;
+    const current = this.(currentValidation ?? "default");
 
     // Check for test execution time regression
     const testTimeChange = ((current.testResults.executionTime - latestBaseline.testResults.executionTime) / latestBaseline.testResults.executionTime) * 100;
@@ -560,7 +560,7 @@ export class CIPerformanceValidator extends EventEmitter {
    * Determine overall validation status
    */
   private determineOverallStatus(): 'passed' | 'failed' | 'warning' {
-    const current = this.currentValidation!;
+    const current = this.(currentValidation ?? "default");
 
     // Check for critical failures
     const hasCriticalRegressions = current.regressions.some(r => r.severity === 'critical');
@@ -588,7 +588,7 @@ export class CIPerformanceValidator extends EventEmitter {
    * Calculate performance grade
    */
   private calculatePerformanceGrade(): 'A' | 'B' | 'C' | 'D' | 'F' {
-    const current = this.currentValidation!;
+    const current = this.(currentValidation ?? "default");
 
     // Calculate score based on multiple factors
     let score = 100;
@@ -618,7 +618,7 @@ export class CIPerformanceValidator extends EventEmitter {
    */
   private generateRecommendations(bottleneckAnalysis: any): string[] {
     const recommendations: string[] = [];
-    const current = this.currentValidation!;
+    const current = this.(currentValidation ?? "default");
 
     // Test execution recommendations
     if (current.testResults.executionTime > this.config.performanceThresholds.testExecutionTime.max) {
@@ -656,11 +656,11 @@ export class CIPerformanceValidator extends EventEmitter {
    * Generate validation artifacts
    */
   private async generateArtifacts(): Promise<void> {
-    const current = this.currentValidation!;
+    const current = this.(currentValidation ?? "default");
     const artifactsDir = `./artifacts/${current.buildId}`;
 
     try {
-      await fs.mkdir(artifactsDir, { recursive: true });
+      await fs.mkdir(_artifactsDir, { recursive: true });
 
       // Generate JSON report
       if (this.config.reporting.generateJsonReport) {
@@ -949,7 +949,7 @@ ${result.recommendations.map(rec => `- ${rec}`).join('\n')}
    */
   private getBaselineResults(branch: string): CIPerformanceResult[] | null {
     const baselineBranch = this.config.regressionDetection.baselineBranch;
-    return this.historicalResults.get(baselineBranch) || this.historicalResults.get(branch) || null;
+    return this.historicalResults.get(baselineBranch) || this.historicalResults.get(branch) ?? null;
   }
 }
 

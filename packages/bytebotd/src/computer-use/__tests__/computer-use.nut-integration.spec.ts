@@ -449,7 +449,7 @@ describe('Computer Use NUT Integration', () => {
     describe('Text Typing', () => {
       const typeAction: TypeTextAction = {
         action: 'type_text',
-        text: 'Hello, World!',
+        text: 'Hello, (World ?? "default")',
       };
 
       it('should integrate with NUT text typing', async () => {
@@ -793,7 +793,7 @@ describe('Computer Use NUT Integration', () => {
         const keyAction: PressKeysAction = {
           action: 'press_keys',
           keys,
-          platform: platform as any,
+          platform: platform as unknown,
         };
 
         await nutService.pressKeys(keyAction);

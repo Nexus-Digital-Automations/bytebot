@@ -40,7 +40,7 @@ export class BrowserSessionService {
    * Create a new browser session
    */
   async createSession(
-    _dto: CreateBrowserSessionDto,
+    dto: CreateBrowserSessionDto,
   ): Promise<BrowserSessionDto> {
     const sessionId = uuidv4();
     const now = new Date();
@@ -49,7 +49,7 @@ export class BrowserSessionService {
       sessionId,
       name: _dto.name,
       headless: _dto.headless,
-      viewport: `${_dto.viewportWidth}x${_dto.viewportHeight}`,
+      viewport: `${dto.viewportWidth}x${_dto.viewportHeight}`,
     });
 
     try {
@@ -98,7 +98,7 @@ export class BrowserSessionService {
       // Create initial tabs if specified
       if (_dto.initialUrls && _dto.initialUrls.length > 0) {
         for (const url of _dto.initialUrls) {
-          await this.createTab(sessionId, { url, makeActive: false });
+          await this.createTab(_sessionId, { url, makeActive: false });
         }
 
         // Make first tab active
@@ -108,7 +108,7 @@ export class BrowserSessionService {
         }
       } else {
         // Create default blank tab
-        const tab = await this.createTab(sessionId, {
+        const tab = await this.createTab(_sessionId, {
           url: 'about:blank',
           title: 'New Tab',
           makeActive: true,
@@ -392,7 +392,7 @@ export class BrowserSessionService {
    */
   private initializeBrowserSession(
     session: BrowserSessionDto,
-    _dto: CreateBrowserSessionDto,
+    dto: CreateBrowserSessionDto,
   ): void {
     // In production, this would:
     // 1. Start browser process with specified configuration

@@ -207,7 +207,7 @@ export class ComputerUseController {
   private readonly logger = new Logger(ComputerUseController.name);
 
   constructor(
-    private readonly computerUseService: ComputerUseService,
+    _private readonly computerUseService: ComputerUseService,
     private readonly asyncJobService: AsyncJobService,
   ) {}
 
@@ -265,7 +265,7 @@ export class ComputerUseController {
     params: ComputerActionDto & AsyncActionSubmissionDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobSubmissionResponseDto> {
-    const operationId = `async_submit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `async_submit${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     try {
@@ -322,7 +322,7 @@ export class ComputerUseController {
       );
 
       return jobResponse;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
       const errorMessage = getErrorMessage(_error);
 
@@ -403,7 +403,7 @@ export class ComputerUseController {
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobStatusResponseDto> {
-    const operationId = `status_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `status${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     try {
@@ -431,7 +431,7 @@ export class ComputerUseController {
       );
 
       return jobStatus;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
       const errorMessage = getErrorMessage(_error);
 
@@ -512,7 +512,7 @@ export class ComputerUseController {
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobResultResponseDto> {
-    const operationId = `result_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `result${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     try {
@@ -530,7 +530,7 @@ export class ComputerUseController {
       // Create safe copy for logging (avoid logging large base64 data)
       const resultCopy = { ...jobResult };
       if (resultCopy.result && typeof resultCopy.result === 'object') {
-        const _result = resultCopy.result as Record<string, unknown>;
+        const result = resultCopy.result as Record<string, unknown>;
         if (
           _result.image &&
           typeof _result.image === 'string' &&
@@ -562,7 +562,7 @@ export class ComputerUseController {
       );
 
       return jobResult;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
       const errorMessage = getErrorMessage(_error);
 
@@ -652,7 +652,7 @@ export class ComputerUseController {
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<{ cancelled: boolean; message: string; jobId: string }> {
-    const operationId = `cancel_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `cancel${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     try {
@@ -690,7 +690,7 @@ export class ComputerUseController {
         message,
         jobId,
       };
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
       const errorMessage = getErrorMessage(_error);
 
@@ -773,7 +773,7 @@ export class ComputerUseController {
     @CurrentUser() user: ByteBotdUser,
   ): Promise<ComputerActionResponse> {
     // Generate unique operation ID for tracking this action request
-    const operationId = `action_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `action${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     try {
@@ -796,7 +796,7 @@ export class ComputerUseController {
 
       // Execute the computer action through the service
       // Cast to ComputerActionResponse since we know the service returns proper typed responses
-      const _result = (await this.computerUseService.action(
+      const result = (await this.computerUseService.action(
         params,
       )) as ComputerActionResponse;
 
@@ -813,7 +813,7 @@ export class ComputerUseController {
       );
 
       return _result;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
       const errorMessage = getErrorMessage(_error);
       const errorStack = getErrorStack(_error);

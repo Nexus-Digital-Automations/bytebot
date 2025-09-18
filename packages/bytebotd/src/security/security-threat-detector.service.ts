@@ -291,10 +291,10 @@ export class SecurityThreatDetectorService {
   private threatsContained = 0;
 
   constructor(
-    private readonly parlantService: ParlantIntegrationService,
+    _private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `threat_detector_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `threat_detector_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Security Threat Detector Service with Parlant integration`, {
       parlantIntegrationEnabled: true,
@@ -538,7 +538,7 @@ export class SecurityThreatDetectorService {
     entityType: 'USER' | 'DEVICE' | 'APPLICATION' | 'NETWORK',
     context: ParlantConversationContext
   ): Promise<BehavioralAnalysisProfile> {
-    const operationId = `behavioral_analysis_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `behavioral_analysis${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(
       `[${operationId}] Analyzing behavioral anomalies with Parlant validation`,
@@ -658,7 +658,7 @@ export class SecurityThreatDetectorService {
     request: ThreatDetectionRequest,
     conversationId: string
   ): Promise<ThreatDetectionResult> {
-    const detectionId = `detection_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const detectionId = `detection${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = new Date();
     
     // Mock threat detection - would integrate with actual detection engines
@@ -729,7 +729,7 @@ export class SecurityThreatDetectorService {
     threat: SecurityThreat,
     conversationId: string
   ): Promise<ThreatResponseResult> {
-    const responseId = `response_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const responseId = `response${Date.now()}${Math.random().toString(36).substring(7)}`;
     const actionsExecuted: ThreatResponseAction[] = [];
 
     // Generate response actions based on threat type and response type
@@ -783,7 +783,7 @@ export class SecurityThreatDetectorService {
     entityType: 'USER' | 'DEVICE' | 'APPLICATION' | 'NETWORK'
   ): Promise<BehavioralAnalysisProfile> {
     // Mock behavioral analysis - would integrate with ML models
-    const profileId = `profile_${entityId}_${Date.now()}`;
+    const profileId = `profile${entityId}${Date.now()}`;
 
     const baselineProfile: BehavioralBaseline = {
       typicalLoginTimes: [8, 9, 10, 17, 18], // 8-10 AM, 5-6 PM
@@ -809,7 +809,7 @@ export class SecurityThreatDetectorService {
 
     if (currentBehavior.deviationScore > 0.7) {
       anomalies.push({
-        anomalyId: `anomaly_${Date.now()}_1`,
+        anomalyId: `anomaly${Date.now()}_1`,
         type: 'BEHAVIOR_BASED',
         severity: ThreatSeverity.HIGH,
         description: 'Unusual data transfer volume detected',
@@ -825,7 +825,7 @@ export class SecurityThreatDetectorService {
 
     if (currentBehavior.location === 'Unknown Location') {
       anomalies.push({
-        anomalyId: `anomaly_${Date.now()}_2`,
+        anomalyId: `anomaly${Date.now()}_2`,
         type: 'LOCATION_BASED',
         severity: ThreatSeverity.MEDIUM,
         description: 'Access from unknown location',
@@ -895,7 +895,7 @@ export class SecurityThreatDetectorService {
     severity: ThreatSeverity,
     source: ThreatSource
   ): SecurityThreat {
-    const threatId = `threat_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const threatId = `threat${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     return {
       threatId,
@@ -965,12 +965,12 @@ export class SecurityThreatDetectorService {
     switch (responseType) {
       case 'CONTAIN':
         actions.push({
-          actionId: `action_${Date.now()}_1`,
+          actionId: `action${Date.now()}_1`,
           actionType: 'NETWORK_BLOCK',
           target: threat.sourceDetails.sourceIp ?? 'unknown',
         });
         actions.push({
-          actionId: `action_${Date.now()}_2`,
+          actionId: `action${Date.now()}_2`,
           actionType: 'QUARANTINE',
           target: threat.affectedAssets[0] ?? 'unknown',
         });
@@ -978,7 +978,7 @@ export class SecurityThreatDetectorService {
 
       case 'BLOCK':
         actions.push({
-          actionId: `action_${Date.now()}_1`,
+          actionId: `action${Date.now()}_1`,
           actionType: 'NETWORK_BLOCK',
           target: threat.sourceDetails.sourceIp ?? 'unknown',
         });
@@ -986,7 +986,7 @@ export class SecurityThreatDetectorService {
 
       case 'ALERT_ONLY':
         actions.push({
-          actionId: `action_${Date.now()}_1`,
+          actionId: `action${Date.now()}_1`,
           actionType: 'ALERT',
           target: 'security_team',
         });

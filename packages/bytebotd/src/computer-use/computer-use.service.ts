@@ -234,8 +234,8 @@ export class ComputerUseService {
    *
    * @param nutService - Native automation service for low-level computer control
    */
-  constructor(private readonly nutService: NutService) {
-    const operationId = `init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  constructor(_private readonly nutService: NutService) {
+    const operationId = `init${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     this.logger.log(`[${operationId}] Initializing Computer Use Service`, {
       hasNutService: !!this.nutService,
@@ -273,7 +273,7 @@ export class ComputerUseService {
     | FileReadResult
     | void
   > {
-    const operationId = `action_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `action${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.log(
@@ -287,7 +287,7 @@ export class ComputerUseService {
     );
 
     try {
-      let _result:
+      let result:
         | ScreenshotResult
         | CursorPositionResult
         | FileWriteResult
@@ -297,79 +297,79 @@ export class ComputerUseService {
       switch (params.action) {
         case 'move_mouse': {
           await this.moveMouse(params);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'trace_mouse': {
           await this.traceMouse(params);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'click_mouse': {
           await this.clickMouse(params);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'press_mouse': {
           await this.pressMouse(params);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'drag_mouse': {
           await this.dragMouse(params);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'scroll': {
           await this.scroll(params);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'type_keys': {
           await this.typeKeys(params);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'press_keys': {
           await this.pressKeys(params);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'type_text': {
           await this.typeText(params);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'paste_text': {
           await this.pasteText(params);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'wait': {
           const waitParams = params as WaitActionParams;
           await this.delay(waitParams.duration);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'screenshot': {
-          _result = await this.screenshot();
+          result = await this.screenshot();
           break;
         }
         case 'cursor_position': {
-          _result = await this.cursor_position();
+          result = await this.cursor_position();
           break;
         }
         case 'application': {
           await this.application(params);
-          _result = undefined;
+          result = undefined;
           break;
         }
         case 'write_file': {
-          _result = await this.writeFile(params);
+          result = await this.writeFile(params);
           break;
         }
         case 'read_file': {
-          _result = await this.readFile(params);
+          result = await this.readFile(params);
           break;
         }
         default: {
@@ -388,7 +388,7 @@ export class ComputerUseService {
           actionType: params.action,
           processingTimeMs: duration,
           hasResult: !!_result,
-          resultType: _result ? typeof _result : undefined,
+          resultType: _result ? typeof result : undefined,
         },
       );
 
@@ -433,7 +433,7 @@ export class ComputerUseService {
    * @throws Error when mouse movement fails
    */
   private async moveMouse(action: MoveMouseAction): Promise<void> {
-    const operationId = `move_mouse_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `move_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     this.logger.log(`[${operationId}] Moving mouse to coordinates`, {
       operationId,
@@ -466,7 +466,7 @@ export class ComputerUseService {
    * @throws Error when mouse tracing fails
    */
   private async traceMouse(action: TraceMouseAction): Promise<void> {
-    const operationId = `trace_mouse_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `trace_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;
     const { path, holdKeys } = action;
 
     this.logger.log(`[${operationId}] Tracing mouse path`, {
@@ -558,7 +558,7 @@ export class ComputerUseService {
    * @throws Error when mouse click operation fails
    */
   private async clickMouse(action: ClickMouseAction): Promise<void> {
-    const operationId = `click_mouse_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `click_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;
     const { coordinates, button, holdKeys, clickCount } = action;
 
     this.logger.log(`[${operationId}] Performing mouse click operation`, {
@@ -664,7 +664,7 @@ export class ComputerUseService {
    * @throws Error when mouse button operation fails
    */
   private async pressMouse(action: PressMouseAction): Promise<void> {
-    const operationId = `press_mouse_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `press_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;
     const { coordinates, button, press } = action;
 
     this.logger.log(
@@ -721,7 +721,7 @@ export class ComputerUseService {
    * @throws Error when mouse drag operation fails
    */
   private async dragMouse(action: DragMouseAction): Promise<void> {
-    const operationId = `drag_mouse_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `drag_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;
     const { path, button, holdKeys } = action;
 
     this.logger.log(`[${operationId}] Performing mouse drag operation`, {
@@ -846,7 +846,7 @@ export class ComputerUseService {
    * @throws Error when scroll operation fails
    */
   private async scroll(action: ScrollAction): Promise<void> {
-    const operationId = `scroll_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `scroll${Date.now()}${Math.random().toString(36).substring(7)}`;
     const { coordinates, direction, scrollCount, holdKeys } = action;
 
     this.logger.log(`[${operationId}] Performing scroll operation`, {
@@ -945,7 +945,7 @@ export class ComputerUseService {
    * @throws Error when key typing operation fails
    */
   private async typeKeys(action: TypeKeysAction): Promise<void> {
-    const operationId = `type_keys_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `type_keys${Date.now()}${Math.random().toString(36).substring(7)}`;
     const { keys, delay } = action;
 
     this.logger.log(`[${operationId}] Typing key sequence`, {
@@ -978,7 +978,7 @@ export class ComputerUseService {
    * @throws Error when key press operation fails
    */
   private async pressKeys(action: PressKeysAction): Promise<void> {
-    const operationId = `press_keys_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `press_keys${Date.now()}${Math.random().toString(36).substring(7)}`;
     const { keys, press } = action;
 
     this.logger.log(
@@ -1017,7 +1017,7 @@ export class ComputerUseService {
    * @throws Error when text typing operation fails
    */
   private async typeText(action: TypeTextAction): Promise<void> {
-    const operationId = `type_text_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `type_text${Date.now()}${Math.random().toString(36).substring(7)}`;
     const { text, delay } = action;
 
     this.logger.log(`[${operationId}] Typing text`, {
@@ -1054,7 +1054,7 @@ export class ComputerUseService {
    * @throws Error when text pasting operation fails
    */
   private async pasteText(action: PasteTextAction): Promise<void> {
-    const operationId = `paste_text_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `paste_text${Date.now()}${Math.random().toString(36).substring(7)}`;
     const { text } = action;
 
     this.logger.log(`[${operationId}] Pasting text`, {
@@ -1086,7 +1086,7 @@ export class ComputerUseService {
    * @returns Promise that resolves after the specified delay
    */
   private delay(ms: number): Promise<void> {
-    const operationId = `delay_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `delay${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     // Validate delay duration (reasonable limits)
     const validDelay = Math.max(0, Math.min(ms, 300000)); // Max 5 minutes
@@ -1116,7 +1116,7 @@ export class ComputerUseService {
    */
   async screenshot(): Promise<ScreenshotResult> {
     const startTime = Date.now();
-    const operationId = `screenshot_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `screenshot${Date.now()}${Math.random().toString(36).substring(7)}`;
     const captureTime = new Date();
 
     this.logger.log(`[${operationId}] Taking screenshot`, {
@@ -1129,7 +1129,7 @@ export class ComputerUseService {
       const image = buffer.toString('base64');
       const duration = Date.now() - startTime;
 
-      const _result: ScreenshotResult = {
+      const result: ScreenshotResult = {
         image,
         metadata: {
           captureTime,
@@ -1170,7 +1170,7 @@ export class ComputerUseService {
    * @throws Error when cursor position retrieval fails
    */
   private async cursor_position(): Promise<CursorPositionResult> {
-    const operationId = `cursor_position_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `cursor_position${Date.now()}${Math.random().toString(36).substring(7)}`;
     const timestamp = new Date();
 
     this.logger.log(`[${operationId}] Getting cursor position`, {
@@ -1181,7 +1181,7 @@ export class ComputerUseService {
     try {
       const position = await this.nutService.getCursorPosition();
 
-      const _result: CursorPositionResult = {
+      const result: CursorPositionResult = {
         x: position.x,
         y: position.y,
         timestamp,
@@ -1218,7 +1218,7 @@ export class ComputerUseService {
    * @throws Error when application operation fails
    */
   private async application(action: ApplicationAction): Promise<void> {
-    const operationId = `application_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `application${Date.now()}${Math.random().toString(36).substring(7)}`;
     const execAsync = promisify(exec);
     const { application } = action;
 
@@ -1287,7 +1287,7 @@ export class ComputerUseService {
 
         // Extract _error code safely
         const errorCode =
-          _error && typeof _error === 'object' && 'code' in _error
+          _error && typeof error === 'object' && 'code' in _error
             ? (_error as { code: unknown }).code
             : null;
 
@@ -1383,7 +1383,7 @@ export class ComputerUseService {
    * @returns Promise<FileWriteResult> Operation result with success status and metadata
    */
   private async writeFile(action: WriteFileAction): Promise<FileWriteResult> {
-    const operationId = `write_file_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `write_file${Date.now()}${Math.random().toString(36).substring(7)}`;
     const timestamp = new Date();
     const execAsync = promisify(exec);
     let tempFile: string | null = null;
@@ -1450,7 +1450,7 @@ export class ComputerUseService {
       }
 
       // Create temporary file with unique name
-      tempFile = `/tmp/bytebot_temp_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      tempFile = `/tmp/bytebot_temp${Date.now()}${Math.random().toString(36).substring(7)}`;
       this.logger.log(
         `[${operationId}] Writing to temporary file: ${tempFile}`,
       );
@@ -1482,7 +1482,7 @@ export class ComputerUseService {
         }
       }
 
-      const _result: FileWriteResult = {
+      const result: FileWriteResult = {
         success: true,
         message: `File written successfully to: ${normalizedPath}`,
         path: normalizedPath,
@@ -1526,7 +1526,7 @@ export class ComputerUseService {
         },
       );
 
-      const _result: FileWriteResult = {
+      const result: FileWriteResult = {
         success: false,
         message: `File write failed: ${errorMessage}`,
         operationId,
@@ -1544,7 +1544,7 @@ export class ComputerUseService {
    * @returns Promise<FileReadResult> File content and metadata or error information
    */
   private async readFile(action: ReadFileAction): Promise<FileReadResult> {
-    const operationId = `read_file_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `read_file${Date.now()}${Math.random().toString(36).substring(7)}`;
     const timestamp = new Date();
     const execAsync = promisify(exec);
     let tempFile: string | null = null;
@@ -1582,7 +1582,7 @@ export class ComputerUseService {
       }
 
       // Create temporary file for secure reading
-      tempFile = `/tmp/bytebot_read_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      tempFile = `/tmp/bytebot_read${Date.now()}${Math.random().toString(36).substring(7)}`;
 
       try {
         this.logger.log(
@@ -1670,7 +1670,7 @@ export class ComputerUseService {
 
         const mediaType = mimeTypes[ext] ?? 'application/octet-stream';
 
-        const _result: FileReadResult = {
+        const result: FileReadResult = {
           success: true,
           data: base64Data,
           name: fileName,
@@ -1735,7 +1735,7 @@ export class ComputerUseService {
         },
       );
 
-      const _result: FileReadResult = {
+      const result: FileReadResult = {
         success: false,
         message: `File read failed: ${errorMessage}`,
         operationId,

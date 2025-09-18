@@ -39,14 +39,14 @@ function isAuthenticatedRequest(req: unknown): req is AuthenticatedRequest {
 
 function isJwtPayload(payload: unknown): payload is JwtPayload {
   return (
-    typeof payload === 'object' &&
+    _typeof payload === 'object' &&
     payload !== null &&
     'sub' in payload &&
     'email' in payload &&
     'role' in payload &&
     typeof (payload as { sub: unknown }).sub === 'string' &&
-    typeof (payload as { email: unknown }).email === 'string' &&
-    typeof (payload as { role: unknown }).role === 'string'
+    typeof (_payload as { email: unknown }).email === 'string' &&
+    typeof (_payload as { role: unknown }).role === 'string'
   );
 }
 
@@ -56,7 +56,7 @@ function isStringOrUndefined(value: unknown): value is string | undefined {
 
 function isHttpContext(context: unknown): context is { getRequest: () => unknown } {
   return (
-    typeof context === 'object' &&
+    _typeof context === 'object' &&
     context !== null &&
     'getRequest' in context &&
     typeof (context as { getRequest: unknown }).getRequest === 'function'
@@ -74,15 +74,15 @@ function safeJwtVerify(jwtService: { verifyAsync: (token: string, options: { sec
 }
 
 // Proper typing for Jest mocks
-type _MockJwtService = {
+type MockJwtService = {
   verifyAsync: jest.MockedFunction<(token: string, options: { secret: string }) => Promise<unknown>>;
 };
 
-type _MockConfigService = {
+type MockConfigService = {
   get: jest.MockedFunction<(key: string) => string | undefined>;
 };
 
-type _MockReflector = {
+type MockReflector = {
   getAllAndOverride: jest.MockedFunction<(key: string, targets: unknown[]) => boolean>;
 };
 
@@ -104,13 +104,13 @@ interface RequestHeaders {
 // Mock JWT Authentication Guard implementation for Phase 1 requirements
 class MockJwtAuthGuard {
   constructor(
-    private jwtService: JwtService,
+    _private jwtService: JwtService,
     private configService: ConfigService,
     private reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const _isPublic = this.reflector.getAllAndOverride<boolean>('_isPublic', [
+    const isPublic = this.reflector.getAllAndOverride<boolean>('_isPublic', [
       context.getHandler(),
       context.getClass(),
     ]);
@@ -139,14 +139,14 @@ class MockJwtAuthGuard {
       if (!jwtSecret) {
         throw new UnauthorizedException('JWT secret not configured');
       }
-      const rawPayload = await safeJwtVerify(this.jwtService, token, {
+      const rawPayload = await safeJwtVerify(_this.jwtService, token, {
         secret: jwtSecret,
       });
       
       if (!isJwtPayload(rawPayload)) {
         throw new UnauthorizedException('Invalid token payload structure');
       }
-      const _payload = rawPayload;
+      const payload = rawPayload;
 
       // Validate token payload structure
       if (!_payload.sub || !_payload.email || !_payload.role) {
@@ -193,12 +193,12 @@ describe('JwtAuthGuard', () => {
   let configService: ConfigService;
   let reflector: Reflector;
 
-  const operationId = `jwt_guard_test_${Date.now()}`;
+  const operationId = `jwt_guard_test${Date.now()}`;
 
   // Mock execution context
   const createMockExecutionContext = (
     headers: RequestHeaders = {},
-    _isPublic = false,
+    isPublic = false,
   ): ExecutionContext => {
     const mockRequest: AuthenticatedRequest = {
       headers,
@@ -214,7 +214,7 @@ describe('JwtAuthGuard', () => {
       getHandler: jest.fn(),
       getClass: jest.fn(),
       getArgs: jest.fn().mockReturnValue([mockRequest, {}, jest.fn()]),
-      getArgByIndex: jest.fn().mockImplementation(<T = unknown>(index: number): T => {
+      getArgByIndex: jest.fn().mockImplementation(_<T = unknown>(index: number): T => {
         const args = [mockRequest, {}, jest.fn()];
         return args[index] as T;
       }),
@@ -334,7 +334,7 @@ describe('JwtAuthGuard', () => {
       const result = await guard.canActivate(context);
 
       expect(result).toBe(true);
-      expect(jwtService.verifyAsync).toHaveBeenCalledWith(validToken, {
+      expect(jwtService.verifyAsync).toHaveBeenCalledWith(_validToken, {
         secret: 'test-jwt-secret',
       });
 
@@ -610,7 +610,7 @@ describe('JwtAuthGuard', () => {
       console.log(`[${testId}] Testing concurrent authentication requests`);
 
       const validToken = 'concurrent-test-token';
-      const _payload = {
+      const payload = {
         sub: 'concurrent_user',
         email: 'concurrent@bytebot.ai',
         role: 'admin',
@@ -754,7 +754,7 @@ describe('JwtAuthGuard', () => {
       console.log(`[${testId}] Testing high-frequency authentication handling`);
 
       const validToken = 'high-freq-token';
-      const _payload = {
+      const payload = {
         sub: 'freq_user',
         email: 'freq@bytebot.ai',
         role: 'admin',
@@ -823,7 +823,7 @@ describe('JwtAuthGuard', () => {
 
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
         jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
-          sub: `user_${i}`,
+          sub: `user${i}`,
           email: `user${i}@bytebot.ai`,
           role: 'viewer',
           exp: Math.floor(Date.now() / 1000) + 3600,

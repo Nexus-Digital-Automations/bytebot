@@ -49,7 +49,7 @@ export class MetricsController {
   private readonly logger = new Logger(MetricsController.name);
 
   constructor(
-    private readonly metricsService: BytebotMetricsService,
+    _private readonly metricsService: BytebotMetricsService,
     private readonly parlantValidationService: ParlantHealthMetricsValidationService,
   ) {
     this.logger.log('Metrics Controller initialized with Parlant validation');
@@ -67,7 +67,7 @@ export class MetricsController {
   @Authenticated()
   @Header('Content-Type', 'text/plain; charset=utf-8')
   async getMetrics(@CurrentUser() user: ByteBotdUser): Promise<string> {
-    const operationId = `metrics_${Date.now()}`;
+    const operationId = `metrics${Date.now()}`;
     this.logger.debug(`[${operationId}] Metrics collection requested with Parlant validation`, {
       operationId,
       userId: user.id,
@@ -79,7 +79,7 @@ export class MetricsController {
     try {
       // PARLANT VALIDATION: Prometheus metrics collection (LOW risk - optimized with caching)
       const validation = await this.parlantValidationService.validateMetricsOperation(
-        MetricsOperationType.PROMETHEUS_COLLECTION,
+        _MetricsOperationType.PROMETHEUS_COLLECTION,
         {
           endpoint: '/metrics',
           method: 'GET',

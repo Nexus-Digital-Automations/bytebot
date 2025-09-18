@@ -96,7 +96,7 @@ interface StandardJwtPayload {
 export class JwtAuthGuard extends AuthGuard('jwt') {
   private readonly logger = new Logger(JwtAuthGuard.name);
 
-  constructor(private readonly reflector: Reflector) {
+  constructor(_private readonly reflector: Reflector) {
     super();
   }
 
@@ -156,7 +156,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     try {
       // Call parent authentication logic (Passport JWT strategy)
-      const _result = await super.canActivate(context); // Note: const reassignment issue fixed
+      const result = await super.canActivate(context); // Note: const reassignment issue fixed
 
       if (_result) {
         const authTime = Date.now() - startTime;
@@ -248,7 +248,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Computer control authentication error`,
         {
           operationId,
-          _error: err instanceof Error ? err.message : String(err),
+          error: err instanceof Error ? err.message : String(err),
           stack: err instanceof Error ? err.stack : undefined,
           url: request.url,
           method: request.method,
@@ -372,7 +372,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   private extractMessageFromInfo(info: unknown): string {
     // Type guard for objects with message property
     if (info && typeof info === 'object' && 'message' in info) {
-      const messageValue = (info as { message: unknown }).message;
+      const messageValue = (_info as { message: unknown }).message;
       if (typeof messageValue === 'string') {
         return messageValue;
       }
@@ -380,7 +380,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     // Type guard for objects with name property
     if (info && typeof info === 'object' && 'name' in info) {
-      const nameValue = (info as { name: unknown }).name;
+      const nameValue = (_info as { name: unknown }).name;
       if (typeof nameValue === 'string') {
         return nameValue;
       }
@@ -602,7 +602,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     } catch (_error) {
       // If we can't decode the token, let the main JWT validation handle it
       this.logger.debug(
-        `[${operationId}] Could not decode JWT for replay check: ${_error instanceof Error ? _error.message : String(_error)}`,
+        `[${operationId}] Could not decode JWT for replay check: ${error instanceof Error ? _error.message : String(_error)}`,
       );
     }
 

@@ -185,7 +185,7 @@ describe('MCP Comprehensive Coverage', () => {
       console.log(`[${operationId}] Testing private generateOperationId method`);
 
       // Access private method through any casting
-      const tools = computerUseTools as any;
+      const tools = computerUseTools as unknown;
       
       // Test multiple ID generations to ensure uniqueness
       const id1 = tools.generateOperationId();
@@ -206,7 +206,7 @@ describe('MCP Comprehensive Coverage', () => {
       const operationId = `${testId}_private_logging`;
       console.log(`[${operationId}] Testing private logging methods`);
 
-      const tools = computerUseTools as any;
+      const tools = computerUseTools as unknown;
       const testOpId = 'test_operation_123';
       const testParams = { test: 'data', nested: { value: 42 } };
 
@@ -253,7 +253,7 @@ describe('MCP Comprehensive Coverage', () => {
 
       for (const test of errorTests) {
         try {
-          const result = await (computerUseTools as any)[test.method](test.params);
+          const result = await (computerUseTools as unknown)[test.method](test.params);
           
           // Should return error content, not throw
           expect(result).toBeDefined();
@@ -381,7 +381,7 @@ describe('MCP Comprehensive Coverage', () => {
       ];
 
       for (const test of advancedTests) {
-        const result = await (computerUseTools as any)[test.method](test.params);
+        const result = await (computerUseTools as unknown)[test.method](test.params);
         
         expect(result).toBeDefined();
         expect(result.content).toBeDefined();
@@ -443,7 +443,7 @@ describe('MCP Comprehensive Coverage', () => {
       const testBase64 = 'data:image/png;base64,' + Buffer.alloc(4096, 'B').toString('base64');
 
       const result = await Base64ImageCompressor.compressWithResize(
-        testBase64,
+        _testBase64,
         { targetSizeKB: 100, format: 'jpeg' },
         { maxWidth: 800, maxHeight: 600 }
       );
@@ -471,7 +471,7 @@ describe('MCP Comprehensive Coverage', () => {
       ];
 
       testCases.forEach((testCase, index) => {
-        const format = (Base64ImageCompressor as any).getBestCompressionFormat(testCase.base64);
+        const format = (Base64ImageCompressor as unknown).getBestCompressionFormat(testCase.base64);
         expect(format).toBe(testCase.expected);
         console.log(`[${operationId}] Test case ${index + 1}: ${testCase.base64.slice(0, 20)}... -> ${format}`);
       });
@@ -509,7 +509,7 @@ describe('MCP Comprehensive Coverage', () => {
       ];
 
       testCases.forEach((testCase, index) => {
-        const result = (Base64ImageCompressor as any).parseBase64Image(testCase.input);
+        const result = (Base64ImageCompressor as unknown).parseBase64Image(testCase.input);
         
         expect(result.mimeType).toBe(testCase.expected.mimeType);
         expect(result.format).toBe(testCase.expected.format);
@@ -941,7 +941,7 @@ describe('MCP Comprehensive Coverage', () => {
       // Perform many operations to test memory handling
       const operations = [];
       for (let i = 0; i < 20; i++) {
-        operations.push(computerUseTools.screenshot({ display: 0 }));
+        operations.push(_computerUseTools.screenshot({ display: 0 }));
       }
 
       await Promise.all(operations);
@@ -960,7 +960,7 @@ describe('MCP Comprehensive Coverage', () => {
       const operationId = `${testId}_counter_overflow`;
       console.log(`[${operationId}] Testing operation counter overflow handling`);
 
-      const tools = computerUseTools as any;
+      const tools = computerUseTools as unknown;
       
       // Set counter near overflow point
       tools.operationCounter = 9998;

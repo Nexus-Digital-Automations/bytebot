@@ -178,10 +178,10 @@ export class OpenAIService {
   private tokenUsage = { prompt: 0, completion: 0 };
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `openai_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `openai_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.apiKey = this.configService.get<string>('OPENAI_API_KEY', '');
     if (!this.apiKey) {
@@ -540,7 +540,7 @@ export class OpenAIService {
     // For now, return mock response to demonstrate structure
     
     const mockResponse: OpenAIChatResponse = {
-      id: `chatcmpl_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `chatcmpl${Date.now()}${Math.random().toString(36).substring(7)}`,
       object: 'chat.completion',
       created: Math.floor(Date.now() / 1000),
       model: request.config.model,
@@ -577,28 +577,28 @@ export class OpenAIService {
     // Mock streaming response
     const chunks: OpenAIStreamChunk[] = [
       {
-        id: `stream_${Date.now()}`,
+        id: `stream${Date.now()}`,
         object: 'chat.completion.chunk',
         created: Math.floor(Date.now() / 1000),
         model: request.config.model,
         choices: [{ index: 0, delta: { role: 'assistant' } }],
       },
       {
-        id: `stream_${Date.now()}`,
+        id: `stream${Date.now()}`,
         object: 'chat.completion.chunk',
         created: Math.floor(Date.now() / 1000),
         model: request.config.model,
         choices: [{ index: 0, delta: { content: 'Mock streaming response ' } }],
       },
       {
-        id: `stream_${Date.now()}`,
+        id: `stream${Date.now()}`,
         object: 'chat.completion.chunk',
         created: Math.floor(Date.now() / 1000),
         model: request.config.model,
         choices: [{ index: 0, delta: { content: 'from OpenAI with validation.' } }],
       },
       {
-        id: `stream_${Date.now()}`,
+        id: `stream${Date.now()}`,
         object: 'chat.completion.chunk',
         created: Math.floor(Date.now() / 1000),
         model: request.config.model,
@@ -624,7 +624,7 @@ export class OpenAIService {
     };
 
     const mockResponse: OpenAIChatResponse = {
-      id: `chatcmpl_func_${Date.now()}`,
+      id: `chatcmpl_func${Date.now()}`,
       object: 'chat.completion',
       created: Math.floor(Date.now() / 1000),
       model: request.config.model,
@@ -662,7 +662,7 @@ export class OpenAIService {
     // TODO: Implement actual OpenAI Assistant API integration
     
     const mockAssistant: OpenAIAssistant = {
-      id: `asst_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `asst${Date.now()}${Math.random().toString(36).substring(7)}`,
       object: 'assistant',
       name: config.name,
       description: config.description,

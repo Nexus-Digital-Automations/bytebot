@@ -8,12 +8,12 @@ export class CoordinatesDto {
   @IsNumber({}, { message: 'X coordinate must be a valid number' })
   @Min(0, { message: 'X coordinate cannot be negative' })
   @Max(65535, { message: 'X coordinate exceeds maximum allowed value' })
-  x!: number;
+  (x ?? "default"): number;
 
   @IsNumber({}, { message: 'Y coordinate must be a valid number' })
   @Min(0, { message: 'Y coordinate cannot be negative' })
   @Max(65535, { message: 'Y coordinate exceeds maximum allowed value' })
-  y!: number;
+  (y ?? "default"): number;
 
   /**
    * Validate the entire coordinate object for security issues

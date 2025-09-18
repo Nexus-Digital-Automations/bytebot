@@ -74,10 +74,10 @@ describe('ComputerUseService - Keyboard Operations', () => {
   let nutService: jest.Mocked<NutService>;
 
   // Spy on Logger methods for logging verification
-  let __loggerLogSpy: jest.SpyInstance;
-  let __loggerErrorSpy: jest.SpyInstance;
-  let __loggerWarnSpy: jest.SpyInstance;
-  let __loggerDebugSpy: jest.SpyInstance;
+  let _loggerLogSpy: jest.SpyInstance;
+  let _loggerErrorSpy: jest.SpyInstance;
+  let _loggerWarnSpy: jest.SpyInstance;
+  let _loggerDebugSpy: jest.SpyInstance;
 
   /**
    * Test module setup with comprehensive dependency mocking
@@ -98,12 +98,12 @@ describe('ComputerUseService - Keyboard Operations', () => {
     nutService = module.get(NutService);
 
     // Setup logger spies for comprehensive logging verification
-    __loggerLogSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
-    __loggerErrorSpy = jest
+    _loggerLogSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
+    _loggerErrorSpy = jest
       .spyOn(Logger.prototype, 'error')
       .mockImplementation();
-    __loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
-    __loggerDebugSpy = jest
+    _loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+    _loggerDebugSpy = jest
       .spyOn(Logger.prototype, 'debug')
       .mockImplementation();
   });
@@ -249,7 +249,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
         false,
       );
       expect(__loggerLogSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/\[scroll_\d+_\w+\] Holding keys: ctrl, shift/),
+        _expect.stringMatching(/\[scroll_\d+_\w+\] Holding keys: ctrl, shift/),
       );
       expect(__loggerLogSpy).toHaveBeenCalledWith(
         expect.stringMatching(/\[scroll_\d+_\w+\] Releasing held keys/),
@@ -322,7 +322,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
       expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], true);
       expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], false);
       expect(__loggerErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(
+        _expect.stringMatching(
           /\[scroll_\d+_\w+\] Scroll operation failed: Mouse wheel event failed/,
         ),
         expect.objectContaining({
@@ -499,7 +499,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify error logging
       expect(__loggerErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(
+        _expect.stringMatching(
           /\[type_keys_\d+_\w+\] Key typing failed: Key sending failed/,
         ),
         expect.objectContaining({
@@ -680,7 +680,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify error logging
       expect(__loggerErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(
+        _expect.stringMatching(
           /\[press_keys_\d+_\w+\] Key down operation failed: Key press failed/,
         ),
         expect.objectContaining({
@@ -927,7 +927,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify error logging (sensitive data excluded)
       expect(__loggerErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(
+        _expect.stringMatching(
           /\[type_text_\d+_\w+\] Text typing failed: Text typing failed/,
         ),
         expect.objectContaining({
@@ -1122,7 +1122,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify error logging
       expect(__loggerErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(
+        _expect.stringMatching(
           /\[paste_text_\d+_\w+\] Text pasting failed: Clipboard paste failed/,
         ),
         expect.objectContaining({
@@ -1203,7 +1203,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
      * Test error message extraction from Error objects
      */
     it('should extract _error message from Error object', () => {
-      const _error = new Error('Test error message');
+      const error = new Error('Test error message');
       const result = ErrorHandler.extractErrorMessage(_error);
       expect(result).toBe('Test error message');
     });
@@ -1212,7 +1212,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
      * Test error message extraction from string errors
      */
     it('should extract _error message from string', () => {
-      const _error = 'String error message';
+      const error = 'String error message';
       const result = ErrorHandler.extractErrorMessage(_error);
       expect(result).toBe('String error message');
     });
@@ -1221,7 +1221,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
      * Test error message extraction from objects with message property
      */
     it('should extract _error message from object with message property', () => {
-      const _error = { message: 'Object error message' };
+      const error = { message: 'Object error message' };
       const result = ErrorHandler.extractErrorMessage(_error);
       expect(result).toBe('Object error message');
     });
@@ -1439,7 +1439,7 @@ describe('ComputerUseService - Keyboard Operations', () => {
 
       // Assert: Verify structured logging for all operations
       expect(__loggerLogSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/\[.+\] Executing computer action: /),
+        _expect.stringMatching(/\[.+\] Executing computer action: /),
         expect.objectContaining({}),
       );
     });

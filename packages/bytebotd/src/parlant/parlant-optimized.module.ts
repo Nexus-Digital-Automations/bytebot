@@ -251,7 +251,7 @@ export const parlantOptimizationConfig = () => ({
     },
 
     // API endpoints configuration
-    endpoints: (process.env.PARLANT_API_ENDPOINTS ?? 'http://localhost:8000').split(','),
+    endpoints: (_process.env.PARLANT_API_ENDPOINTS ?? 'http://localhost:8000').split(','),
 
     // Degradation strategy
     degradationStrategy: process.env.PARLANT_DEGRADATION_STRATEGY ?? 'GRACEFUL_DEGRADATION',
@@ -338,7 +338,7 @@ export const parlantOptimizationConfig = () => ({
 })
 export class ParlantOptimizedModule {
   constructor(
-    private readonly optimizedService: ParlantIntegrationOptimizedService,
+    _private readonly optimizedService: ParlantIntegrationOptimizedService,
     private readonly performanceMonitor: ParlantPerformanceMonitorService,
     private readonly intelligentCache: ParlantIntelligentCacheService,
     private readonly circuitBreaker: ParlantCircuitBreakerService,
@@ -372,7 +372,7 @@ export class ParlantOptimizedModule {
  */
 export class ParlantHealthController {
   constructor(
-    private readonly optimizedService: ParlantIntegrationOptimizedService,
+    _private readonly optimizedService: ParlantIntegrationOptimizedService,
   ) {}
 
   /**

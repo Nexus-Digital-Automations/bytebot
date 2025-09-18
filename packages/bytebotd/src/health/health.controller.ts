@@ -65,7 +65,7 @@ export class HealthController {
   private readonly logger = new Logger(HealthController.name);
 
   constructor(
-    private readonly healthService: HealthService,
+    _private readonly healthService: HealthService,
     private readonly health: HealthCheckService,
     private readonly http: HttpHealthIndicator,
     private readonly memory: MemoryHealthIndicator,
@@ -92,7 +92,7 @@ export class HealthController {
   @Authenticated()
   async getHealth(@CurrentUser() user: ByteBotdUser):
     Promise<BasicHealthResponse | { status: string; timestamp: string; error: string; validation?: HealthMetricsValidationResult }> {
-    const operationId = `health_basic_${Date.now()}`;
+    const operationId = `health_basic${Date.now()}`;
     
     this.logger.debug(`[${operationId}] Basic health check requested with Parlant validation`, {
       operationId,
@@ -104,7 +104,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Basic health check (LOW risk - auto-approved with caching)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        HealthOperationType.BASIC_HEALTH_CHECK,
+        _HealthOperationType.BASIC_HEALTH_CHECK,
         {
           endpoint: '/health',
           method: 'GET',
@@ -200,7 +200,7 @@ export class HealthController {
   @Authenticated()
   @HealthCheck()
   async checkLiveness(@CurrentUser() user: ByteBotdUser): Promise<HealthCheckResult> {
-    const operationId = `liveness_${Date.now()}`;
+    const operationId = `liveness${Date.now()}`;
     
     this.logger.debug(`[${operationId}] Liveness probe requested with Parlant validation`, {
       operationId,
@@ -211,7 +211,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Liveness probe (LOW risk - auto-approved with caching)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        HealthOperationType.LIVENESS_PROBE,
+        _HealthOperationType.LIVENESS_PROBE,
         {
           endpoint: '/health/live',
           method: 'GET',
@@ -283,7 +283,7 @@ export class HealthController {
   @Authenticated()
   @HealthCheck()
   async checkReadiness(@CurrentUser() user: ByteBotdUser): Promise<HealthCheckResult> {
-    const operationId = `readiness_${Date.now()}`;
+    const operationId = `readiness${Date.now()}`;
     
     this.logger.debug(`[${operationId}] Readiness probe requested with Parlant validation`, {
       operationId,
@@ -294,7 +294,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Readiness probe (MEDIUM risk - includes database and external services)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        HealthOperationType.READINESS_PROBE,
+        _HealthOperationType.READINESS_PROBE,
         {
           endpoint: '/health/ready',
           method: 'GET',
@@ -372,7 +372,7 @@ export class HealthController {
   @Authenticated()
   @HealthCheck()
   async checkStartup(@CurrentUser() user: ByteBotdUser): Promise<HealthCheckResult> {
-    const operationId = `startup_${Date.now()}`;
+    const operationId = `startup${Date.now()}`;
     
     this.logger.debug(`[${operationId}] Startup probe requested with Parlant validation`, {
       operationId,
@@ -383,7 +383,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Startup probe (MEDIUM risk - includes module initialization and database)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        HealthOperationType.STARTUP_PROBE,
+        _HealthOperationType.STARTUP_PROBE,
         {
           endpoint: '/health/startup',
           method: 'GET',
@@ -455,7 +455,7 @@ export class HealthController {
   @Authenticated()
   async getDetailedStatus(@CurrentUser() user: ByteBotdUser):
     Promise<DetailedStatusResponse | { status: string; timestamp: string; error: string; services: {}; validation?: HealthMetricsValidationResult }> {
-    const operationId = `status_detailed_${Date.now()}`;
+    const operationId = `status_detailed${Date.now()}`;
     
     this.logger.debug(`[${operationId}] Detailed status requested with Parlant validation`, {
       operationId,
@@ -467,7 +467,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Detailed status (MEDIUM risk - comprehensive system information)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        HealthOperationType.DETAILED_STATUS,
+        _HealthOperationType.DETAILED_STATUS,
         {
           endpoint: '/health/status',
           method: 'GET',
@@ -546,7 +546,7 @@ export class HealthController {
     @CurrentUser() user: ByteBotdUser, 
     @Res() response: Response
   ): Promise<void> {
-    const operationId = `metrics_${Date.now()}`;
+    const operationId = `metrics${Date.now()}`;
     this.logger.debug(`[${operationId}] Prometheus metrics endpoint accessed with Parlant validation`, {
       operationId,
       userId: user.id,
@@ -556,7 +556,7 @@ export class HealthController {
     try {
       // PARLANT VALIDATION: Metrics endpoint (MEDIUM risk - exposes system metrics)
       const validation = await this.parlantValidationService.validateMetricsOperation(
-        MetricsOperationType.PROMETHEUS_COLLECTION,
+        _MetricsOperationType.PROMETHEUS_COLLECTION,
         {
           endpoint: '/health/metrics',
           method: 'GET',

@@ -41,7 +41,7 @@ interface CacheRule {
   varyBy?: string[]; // Request headers/params to vary cache by
   includeUserId?: boolean; // Include user ID in cache key
   cacheableStatuses?: number[]; // HTTP status codes that should be cached
-  skipCacheIf?: (_req: Request, res: Response) => boolean; // Dynamic cache skipping
+  skipCacheIf?: (req: Request, res: Response) => boolean; // Dynamic cache skipping
 }
 
 /**
@@ -187,7 +187,7 @@ export class CacheInterceptor implements NestInterceptor {
   ];
 
   constructor(
-    private readonly cacheService: CacheService,
+    _private readonly cacheService: CacheService,
     private readonly keyGenerator: CacheKeyGenerator,
     private readonly metricsService?: MetricsService,
   ) {
@@ -214,7 +214,7 @@ export class CacheInterceptor implements NestInterceptor {
 
     const operationId =
       (request as Request & { operationId?: string }).operationId ??
-      `cache_${Date.now()}`;
+      `cache${Date.now()}`;
     const startTime = Date.now();
 
     // Find applicable cache rule
@@ -299,7 +299,7 @@ export class CacheInterceptor implements NestInterceptor {
         .catch((_error) => {
           // Cache error - proceed without cache
           this.logger.error(
-            `[${operationId}] Cache retrieval error: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
+            `[${operationId}] Cache retrieval error: ${error instanceof Error ? _error.message : 'Unknown error'}`,
           );
 
           next.handle().subscribe({
@@ -387,7 +387,7 @@ export class CacheInterceptor implements NestInterceptor {
           };
 
           // Store in cache
-          await this.cacheService.set(cacheKey, cachedResponse, {
+          await this.cacheService.set(_cacheKey, cachedResponse, {
             ttl: cacheRule.ttl,
             namespace: 'api-cache',
           });
@@ -580,7 +580,7 @@ export class CacheInterceptor implements NestInterceptor {
       }
     } catch (_error) {
       this.logger.error(
-        `Cache invalidation _error: ${_error instanceof Error ? _error.message : 'Unknown _error'}`,
+        `Cache invalidation error: ${_error instanceof Error ? _error.message : 'Unknown _error'}`,
       );
     }
   }
@@ -623,7 +623,7 @@ export class CacheInterceptor implements NestInterceptor {
     const normalizedUrl = this.normalizeUrlForStats(url);
 
     if (!this.stats.endpointStats.has(normalizedUrl)) {
-      this.stats.endpointStats.set(normalizedUrl, {
+      this.stats.endpointStats.set(_normalizedUrl, {
         hits: 0,
         misses: 0,
         hitRate: 0,
@@ -685,7 +685,7 @@ export class CacheInterceptor implements NestInterceptor {
    * Clear cache statistics
    */
   clearStats(): void {
-    Object.assign(this.stats, {
+    Object.assign(_this.stats, {
       totalRequests: 0,
       cacheHits: 0,
       cacheMisses: 0,

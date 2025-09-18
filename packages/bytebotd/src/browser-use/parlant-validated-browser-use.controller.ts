@@ -88,7 +88,7 @@ import { ConversationalValidationError } from '../parlant/parlant-integration.se
  * Request context for Parlant validation
  */
 export class ParlantRequestContextDto {
-  userId!: string;
+  (userId ?? "default"): string;
   sessionId?: string;
   conversationId?: string;
   intent?: string;
@@ -101,21 +101,21 @@ export class ParlantRequestContextDto {
  * Enhanced task creation with Parlant context
  */
 export class ParlantBrowserTaskDto extends CreateBrowserTaskDto {
-  parlantContext!: ParlantRequestContextDto;
+  (parlantContext ?? "default"): ParlantRequestContextDto;
 }
 
 /**
  * Enhanced session creation with Parlant context
  */
 export class ParlantBrowserSessionDto extends CreateBrowserSessionDto {
-  parlantContext!: ParlantRequestContextDto;
+  (parlantContext ?? "default"): ParlantRequestContextDto;
 }
 
 /**
  * Enhanced async job creation with Parlant context
  */
 export class ParlantAsyncJobDto extends CreateAsyncJobDto {
-  parlantContext!: ParlantRequestContextDto;
+  (parlantContext ?? "default"): ParlantRequestContextDto;
   resourceRequirements?: AsyncJobResourceRequirements;
 }
 
@@ -123,16 +123,16 @@ export class ParlantAsyncJobDto extends CreateAsyncJobDto {
  * Parlant validation response wrapper
  */
 export class ParlantValidationResponseDto<T> {
-  success!: boolean;
+  (success ?? "default"): boolean;
   data?: T;
-  validationDetails!: {
+  (validationDetails ?? "default"): {
     approved: boolean;
     conversationId?: string;
     reasoning?: string;
     riskLevel: string;
     validationTime: number;
   };
-  auditTrail!: {
+  (auditTrail ?? "default"): {
     operationId: string;
     timestamp: Date;
     userId: string;
@@ -149,7 +149,7 @@ export class ParlantValidatedBrowserUseController {
   private readonly logger = new Logger(ParlantValidatedBrowserUseController.name);
 
   constructor(
-    private readonly parlantBrowserUseService: ParlantValidatedBrowserUseService,
+    _private readonly parlantBrowserUseService: ParlantValidatedBrowserUseService,
     private readonly parlantSessionService: ParlantValidatedBrowserSessionService,
     private readonly parlantTaskService: ParlantValidatedBrowserTaskService,
     private readonly parlantAsyncJobService: ParlantValidatedBrowserAsyncJobService,
@@ -203,7 +203,7 @@ export class ParlantValidatedBrowserUseController {
     @Headers('X-User-ID') userId?: string,
     @Headers('X-Session-ID') sessionId?: string,
   ): Promise<ParlantValidationResponseDto<BrowserTaskResultDto>> {
-    const operationId = `parlant_task_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_task${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.log(
@@ -350,7 +350,7 @@ export class ParlantValidatedBrowserUseController {
     @Headers('X-User-ID') userId?: string,
     @Headers('X-Session-ID') sessionId?: string,
   ): Promise<ParlantValidationResponseDto<BrowserTaskResultDto | null>> {
-    const operationId = `parlant_get_task_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_get_task${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     if (!userId) {
@@ -472,7 +472,7 @@ export class ParlantValidatedBrowserUseController {
     @Headers('X-User-ID') userId?: string,
     @Headers('X-Session-ID') sessionId?: string,
   ): Promise<ParlantValidationResponseDto<SessionValidationResult>> {
-    const operationId = `parlant_session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_session${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     if (!userId && !sessionDto.parlantContext.userId) {
@@ -578,7 +578,7 @@ export class ParlantValidatedBrowserUseController {
     @Headers('X-User-ID') userId?: string,
     @Headers('X-Session-ID') sessionId?: string,
   ): Promise<ParlantValidationResponseDto<AsyncJobResultDto>> {
-    const operationId = `parlant_async_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_async_job${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     if (!userId && !jobDto.parlantContext.userId) {
@@ -688,7 +688,7 @@ export class ParlantValidatedBrowserUseController {
     @Headers('X-User-ID') userId?: string,
     @Headers('X-Session-ID') sessionId?: string,
   ): Promise<ParlantValidationResponseDto<AsyncJobResultDto | null>> {
-    const operationId = `parlant_get_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_get_job${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     if (!userId) {

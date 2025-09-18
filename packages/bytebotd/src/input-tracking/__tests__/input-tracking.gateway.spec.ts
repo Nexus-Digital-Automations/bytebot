@@ -53,7 +53,7 @@ describe('InputTrackingGateway', () => {
   let mockServer: MockServer;
   let logger: Logger;
 
-  const operationId = `input_tracking_gateway_test_${Date.now()}`;
+  const operationId = `input_tracking_gateway_test${Date.now()}`;
 
   // Mock computer actions for testing
   const mockClickAction: ComputerAction = {
@@ -211,7 +211,7 @@ describe('InputTrackingGateway', () => {
       console.log(`[${testId}] Testing multiple simultaneous connections`);
 
       const clients = Array.from({ length: 10 }, (_, i) =>
-        createMockSocket(`client_${i}`),
+        createMockSocket(`client${i}`),
       );
 
       clients.forEach((client) => {
@@ -221,7 +221,7 @@ describe('InputTrackingGateway', () => {
       expect(logger.log).toHaveBeenCalledTimes(10);
       clients.forEach((client, i) => {
         expect(logger.log).toHaveBeenCalledWith(
-          `Client connected: client_${i}`,
+          `Client connected: client${i}`,
         );
       });
 
@@ -426,7 +426,7 @@ describe('InputTrackingGateway', () => {
 
       for (let i = 0; i < burstCount; i++) {
         gateway.emitScreenshotAndAction(
-          { image: `screenshot_${i}` },
+          { image: `screenshot${i}` },
           {
             action: 'click_mouse',
             button: 'left',
@@ -501,7 +501,7 @@ describe('InputTrackingGateway', () => {
 
       expect(() => {
         gateway.emitScreenshotAndAction(
-          undefined as unknown as { image: string },
+          _undefined as unknown as { image: string },
           mockClickAction,
         );
       }).not.toThrow();
@@ -593,7 +593,7 @@ describe('InputTrackingGateway', () => {
       const connectionCount = 1000;
 
       for (let i = 0; i < connectionCount; i++) {
-        const client = createMockSocket(`stress_client_${i}`);
+        const client = createMockSocket(`stress_client${i}`);
         gateway.handleConnection(client as unknown as _Socket);
         gateway.handleDisconnect(client as unknown as _Socket);
       }
@@ -665,7 +665,7 @@ describe('InputTrackingGateway', () => {
       const startTime = Date.now();
 
       for (let i = 0; i < connectionCount; i++) {
-        const client = createMockSocket(`perf_client_${i}`);
+        const client = createMockSocket(`perf_client${i}`);
         gateway.handleConnection(client as unknown as _Socket);
       }
 
@@ -689,7 +689,7 @@ describe('InputTrackingGateway', () => {
       // Simulate multiple connected clients
       const clientCount = 5;
       for (let i = 0; i < clientCount; i++) {
-        const client = createMockSocket(`broadcast_client_${i}`);
+        const client = createMockSocket(`broadcast_client${i}`);
         gateway.handleConnection(client as unknown as _Socket);
       }
 
@@ -773,7 +773,7 @@ describe('InputTrackingGateway', () => {
       // Simulate concurrent connections
       const connectionPromises = Array.from({ length: 10 }, (_, i) =>
         Promise.resolve().then(() => {
-          const client = createMockSocket(`concurrent_client_${i}`);
+          const client = createMockSocket(`concurrent_client${i}`);
           gateway.handleConnection(client as unknown as _Socket);
         }),
       );

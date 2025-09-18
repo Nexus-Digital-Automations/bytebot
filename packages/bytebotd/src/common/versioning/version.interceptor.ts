@@ -90,7 +90,7 @@ export class VersionInterceptor implements NestInterceptor {
   private readonly strictVersioning: boolean;
 
   constructor(
-    private readonly reflector: Reflector,
+    _private readonly reflector: Reflector,
     private readonly configService: ConfigService,
   ) {
     this.defaultVersion = this.configService.get<SupportedVersion>(
@@ -194,7 +194,7 @@ export class VersionInterceptor implements NestInterceptor {
           if (typeof data === 'object' && data !== null) {
             return {
               ...(data as Record<string, unknown>),
-              _metadata: {
+              metadata: {
                 apiVersion: versionResolution.resolvedVersion,
                 service: 'BytebotD',
                 isDesktopEndpoint,
@@ -437,7 +437,7 @@ export class VersionInterceptor implements NestInterceptor {
   private checkDesktopCompatibility(
     desktopClientInfo: Record<string, unknown>,
     desktopCompatibility: DesktopCompatibility | null,
-    _resolvedVersion: string,
+    resolvedVersion: string,
   ): string[] {
     const issues: string[] = [];
 

@@ -89,8 +89,8 @@ export const mockDecorators = {
   Get:
     (path?: string) =>
     (
-      _target: DecoratorTarget,
-      _propertyKey: string,
+      target: DecoratorTarget,
+      propertyKey: string,
       descriptor: PropertyDescriptor,
     ): PropertyDescriptor => {
       if (descriptor.value && typeof descriptor.value === 'object') {
@@ -103,8 +103,8 @@ export const mockDecorators = {
   Post:
     (path?: string) =>
     (
-      _target: DecoratorTarget,
-      _propertyKey: string,
+      target: DecoratorTarget,
+      propertyKey: string,
       descriptor: PropertyDescriptor,
     ): PropertyDescriptor => {
       if (descriptor.value && typeof descriptor.value === 'object') {
@@ -117,8 +117,8 @@ export const mockDecorators = {
   Put:
     (path?: string) =>
     (
-      _target: DecoratorTarget,
-      _propertyKey: string,
+      target: DecoratorTarget,
+      propertyKey: string,
       descriptor: PropertyDescriptor,
     ): PropertyDescriptor => {
       if (descriptor.value && typeof descriptor.value === 'object') {
@@ -131,8 +131,8 @@ export const mockDecorators = {
   Delete:
     (path?: string) =>
     (
-      _target: DecoratorTarget,
-      _propertyKey: string,
+      target: DecoratorTarget,
+      propertyKey: string,
       descriptor: PropertyDescriptor,
     ): PropertyDescriptor => {
       if (descriptor.value && typeof descriptor.value === 'object') {
@@ -149,9 +149,9 @@ export const mockDecorators = {
   Body:
     () =>
     (
-      _target: DecoratorTarget,
-      _propertyKey: string | undefined,
-      _parameterIndex: number,
+      target: DecoratorTarget,
+      propertyKey: string | undefined,
+      parameterIndex: number,
     ): void => {
       // Mock parameter decorator behavior
     },
@@ -159,9 +159,9 @@ export const mockDecorators = {
   Param:
     (_key?: string) =>
     (
-      _target: DecoratorTarget,
-      _propertyKey: string | undefined,
-      _parameterIndex: number,
+      target: DecoratorTarget,
+      propertyKey: string | undefined,
+      parameterIndex: number,
     ): void => {
       // Mock parameter decorator behavior
     },
@@ -169,9 +169,9 @@ export const mockDecorators = {
   Query:
     (_key?: string) =>
     (
-      _target: DecoratorTarget,
-      _propertyKey: string | undefined,
-      _parameterIndex: number,
+      target: DecoratorTarget,
+      propertyKey: string | undefined,
+      parameterIndex: number,
     ): void => {
       // Mock parameter decorator behavior
     },
@@ -189,8 +189,8 @@ export const mockDecorators = {
   SubscribeMessage:
     (message: string) =>
     (
-      _target: DecoratorTarget,
-      _propertyKey: string,
+      target: DecoratorTarget,
+      propertyKey: string,
       descriptor: PropertyDescriptor,
     ): PropertyDescriptor => {
       if (descriptor.value && typeof descriptor.value === 'object') {
@@ -202,9 +202,9 @@ export const mockDecorators = {
   MessageBody:
     () =>
     (
-      _target: DecoratorTarget,
-      _propertyKey: string | undefined,
-      _parameterIndex: number,
+      target: DecoratorTarget,
+      propertyKey: string | undefined,
+      parameterIndex: number,
     ): void => {
       // Mock message body decorator
     },
@@ -212,9 +212,9 @@ export const mockDecorators = {
   ConnectedSocket:
     () =>
     (
-      _target: DecoratorTarget,
-      _propertyKey: string | undefined,
-      _parameterIndex: number,
+      target: DecoratorTarget,
+      propertyKey: string | undefined,
+      parameterIndex: number,
     ): void => {
       // Mock connected socket decorator
     },
@@ -409,7 +409,7 @@ export const createMockWebSocketClient = () => ({
  * Mock HTTP context for controllers
  */
 export const createMockHttpContext = () => ({
-  _req: {
+  req: {
     method: 'GET',
     url: '/test',
     headers: {},
@@ -463,7 +463,7 @@ export const createMockGuard = (shouldActivate = true) => ({
 export const createMockInterceptor = () => ({
   intercept: jest
     .fn()
-    .mockImplementation((_context: unknown, next: { handle(): unknown }) =>
+    .mockImplementation((context: unknown, next: { handle(): unknown }) =>
       next.handle(),
     ),
 });

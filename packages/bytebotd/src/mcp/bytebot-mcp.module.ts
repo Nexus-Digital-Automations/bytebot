@@ -37,7 +37,7 @@ import { ComputerUseModule } from '../computer-use/computer-use.module';
 import { ComputerUseTools } from './computer-use.tools';
 
 // Initialize module logger
-const _logger = new Logger('BytebotMcpModule');
+const logger = new Logger('BytebotMcpModule');
 
 /**
  * Bytebot MCP Module Configuration

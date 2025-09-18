@@ -121,7 +121,7 @@ export class BrowserUseService {
   private readonly pythonExecutable: string = 'python3';
 
   constructor(
-    private readonly sessionService: BrowserSessionService,
+    _private readonly sessionService: BrowserSessionService,
     private readonly taskService: BrowserTaskService,
     private readonly asyncJobService: BrowserAsyncJobService,
   ) {
@@ -198,10 +198,10 @@ export class BrowserUseService {
       const session = await this.getOrCreateSession(taskDto.sessionConfig);
 
       // Execute task actions sequentially
-      const _result = await this.executeTaskActions(task, taskDto, session);
+      const result = await this.executeTaskActions(task, taskDto, session);
 
       // Update task status
-      await this.taskService.updateTaskStatus(taskId, {
+      await this.taskService.updateTaskStatus(_taskId, {
         status: _result.status,
         completedAt: new Date(),
         executionTimeMs: Date.now() - startTime,
@@ -241,7 +241,7 @@ export class BrowserUseService {
       });
 
       // Update task with error status
-      await this.taskService.updateTaskStatus(taskId, {
+      await this.taskService.updateTaskStatus(_taskId, {
         status: BrowserTaskStatus.FAILED,
         completedAt: new Date(),
         executionTimeMs,
@@ -310,7 +310,7 @@ export class BrowserUseService {
 
       // Generate unique filename
       const timestamp = new Date();
-      const filename = `screenshot_${sessionId}_${Date.now()}.${config?.format ?? 'png'}`;
+      const filename = `screenshot${sessionId}${Date.now()}.${config?.format ?? 'png'}`;
       const filepath = path.join(this.tempDirectory, filename);
 
       // Execute Python script for screenshot capture
@@ -409,7 +409,7 @@ export class BrowserUseService {
   /**
    * Create async job for long-running browser automation tasks
    */
-  async createAsyncJob(_dto: CreateAsyncJobDto): Promise<AsyncJobResultDto> {
+  async createAsyncJob(dto: CreateAsyncJobDto): Promise<AsyncJobResultDto> {
     this.logger.log(`Creating job: ${_dto.name}`, {
       jobName: _dto.name,
       jobType: _dto.jobType,
@@ -462,14 +462,14 @@ export class BrowserUseService {
     });
 
     try {
-      const _result = await this.captureScreenshot(sessionId, {
+      const result = await this.captureScreenshot(_sessionId, {
         fullPage: options.fullPage,
         quality: options.quality,
         format: 'png',
       });
 
       // Update session activity
-      await this.sessionService.updateActivity(sessionId, {
+      await this.sessionService.updateActivity(_sessionId, {
         screenshot: true,
       });
 
@@ -508,7 +508,7 @@ export class BrowserUseService {
       // Extract data for each selector
       for (const [key, selector] of Object.entries(config.selectors)) {
         try {
-          const _result = await this.extractDomData(sessionId, {
+          const result = await this.extractDomData(_sessionId, {
             selector,
             includeText: true,
             includeAttributes: true,
@@ -642,7 +642,7 @@ export class BrowserUseService {
         }
 
         // Update task progress
-        await this.taskService.updateTaskProgress(task.taskId, {
+        await this.taskService.updateTaskProgress(_task.taskId, {
           actionsCompleted,
           currentStep: `Completed: ${action.type}`,
           progress: Math.round(
@@ -690,7 +690,7 @@ export class BrowserUseService {
   private async executeAction(
     sessionId: string,
     action: BrowserActionDto,
-    _actionIndex: number,
+    actionIndex: number,
   ): Promise<{
     success: boolean;
     executionTime: number;
@@ -799,8 +799,8 @@ export class BrowserUseService {
    */
   private async initializeWorkspace(): Promise<void> {
     try {
-      await fs.mkdir(this.workingDirectory, { recursive: true });
-      await fs.mkdir(this.tempDirectory, { recursive: true });
+      await fs.mkdir(_this.workingDirectory, { recursive: true });
+      await fs.mkdir(_this.tempDirectory, { recursive: true });
 
       this.logger.log('Browser-use workspace initialized', {
         workingDirectory: this.workingDirectory,
@@ -809,7 +809,7 @@ export class BrowserUseService {
       });
     } catch (_err) {
       throw new Error(
-        `Failed to initialize workspace: ${_err instanceof Error ? _err.message : String(_err)}`,
+        `Failed to initialize workspace: ${err instanceof Error ? _err.message : String(_err)}`,
       );
     }
   }
@@ -825,7 +825,7 @@ export class BrowserUseService {
     return new Promise((resolve) => {
       const scriptFile = path.join(
         this.tempDirectory,
-        `script_${Date.now()}_${Math.random().toString(36).substring(7)}.py`,
+        `script${Date.now()}${Math.random().toString(36).substring(7)}.py`,
       );
 
       // Write script to temporary file
@@ -919,10 +919,10 @@ async def main():
         await session.close()
         
     except Exception as e:
-        print(f"Navigation failed: {e}")
+        print(_f"Navigation failed: {e}")
         raise e
 
-if __name__ == "__main__":
+if _name__ == "__main__":
     asyncio.run(main())
 `;
   }
@@ -949,10 +949,10 @@ async def main():
         await session.close()
         
     except Exception as e:
-        print(f"Click failed: {e}")
+        print(_f"Click failed: {e}")
         raise e
 
-if __name__ == "__main__":
+if _name__ == "__main__":
     asyncio.run(main())
 `;
   }
@@ -983,10 +983,10 @@ async def main():
         await session.close()
         
     except Exception as e:
-        print(f"Type failed: {e}")
+        print(_f"Type failed: {e}")
         raise e
 
-if __name__ == "__main__":
+if _name__ == "__main__":
     asyncio.run(main())
 `;
   }
@@ -1023,10 +1023,10 @@ async def main():
         await session.close()
         
     except Exception as e:
-        print(f"Screenshot failed: {e}")
+        print(_f"Screenshot failed: {e}")
         raise e
 
-if __name__ == "__main__":
+if _name__ == "__main__":
     asyncio.run(main())
 `;
   }
@@ -1071,10 +1071,10 @@ async def main():
         await session.close()
         
     except Exception as e:
-        print(f"Extraction failed: {e}")
+        print(_f"Extraction failed: {e}")
         raise e
 
-if __name__ == "__main__":
+if _name__ == "__main__":
     asyncio.run(main())
 `;
   }

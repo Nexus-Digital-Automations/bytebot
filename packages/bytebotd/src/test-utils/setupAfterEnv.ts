@@ -94,30 +94,30 @@ export interface EnhancedScreenshotResult {
 // Type guard functions for safe property access
 const isScreenshotResult = (obj: unknown): obj is ScreenshotResult => {
   return (
-    typeof obj === 'object' &&
+    _typeof obj === 'object' &&
     obj !== null &&
     'image' in obj &&
     'metadata' in obj &&
     typeof (obj as { image: unknown }).image === 'string' &&
-    typeof (obj as { metadata: unknown }).metadata === 'object'
+    typeof (_obj as { metadata: unknown }).metadata === 'object'
   );
 };
 
 const isFileOperationResult = (obj: unknown): obj is FileOperationResult => {
   return (
-    typeof obj === 'object' &&
+    _typeof obj === 'object' &&
     obj !== null &&
     'success' in obj &&
     'operationId' in obj &&
     'timestamp' in obj &&
     typeof (obj as { success: unknown }).success === 'boolean' &&
-    typeof (obj as { operationId: unknown }).operationId === 'string'
+    typeof (_obj as { operationId: unknown }).operationId === 'string'
   );
 };
 
 const isOcrResult = (obj: unknown): obj is OcrResult => {
   return (
-    typeof obj === 'object' &&
+    _typeof obj === 'object' &&
     obj !== null &&
     'text' in obj &&
     'confidence' in obj &&
@@ -125,8 +125,8 @@ const isOcrResult = (obj: unknown): obj is OcrResult => {
     'method' in obj &&
     'operationId' in obj &&
     typeof (obj as { text: unknown }).text === 'string' &&
-    typeof (obj as { confidence: unknown }).confidence === 'number' &&
-    typeof (obj as { processingTimeMs: unknown }).processingTimeMs === 'number'
+    typeof (_obj as { confidence: unknown }).confidence === 'number' &&
+    typeof (_obj as { processingTimeMs: unknown }).processingTimeMs === 'number'
   );
 };
 
@@ -138,7 +138,7 @@ expect.extend({
   toBeValidOperationId(received: unknown): jest.CustomMatcherResult {
     const pass =
       typeof received === 'string' &&
-      /^[a-z_]+_\d{13}_[a-z0-9]{7}$/.test(received);
+      /^[a-z_]+_\d{13}[a-z0-9]{7}$/.test(received);
 
     if (pass) {
       return {
@@ -493,7 +493,7 @@ export const TestDataFactory = {
       image: Buffer.from('fake-screenshot-data').toString('base64'),
       metadata: {
         captureTime: new Date(),
-        operationId: `screenshot_${Date.now()}_abc1234`,
+        operationId: `screenshot${Date.now()}_abc1234`,
         format: 'png',
         width: 1920,
         height: 1080,
@@ -508,7 +508,7 @@ export const TestDataFactory = {
   createFileWriteResult(success = true, overrides: Partial<FileOperationResult> = {}): FileOperationResult {
     const base = {
       success,
-      operationId: `write_file_${Date.now()}_def5678`,
+      operationId: `write_file${Date.now()}_def5678`,
       timestamp: new Date(),
     };
 
@@ -535,7 +535,7 @@ export const TestDataFactory = {
   createFileReadResult(success = true, overrides: Partial<FileOperationResult> = {}): FileOperationResult {
     const base = {
       success,
-      operationId: `read_file_${Date.now()}_ghi9012`,
+      operationId: `read_file${Date.now()}_ghi9012`,
       timestamp: new Date(),
     };
 
@@ -565,7 +565,7 @@ export const TestDataFactory = {
       confidence: 0.95,
       processingTimeMs: 250,
       method: 'ANE',
-      operationId: `ocr_${Date.now()}_jkl3456`,
+      operationId: `ocr${Date.now()}_jkl3456`,
       language: 'en',
       boundingBoxes: [
         {
@@ -596,7 +596,7 @@ export const TestDataFactory = {
     const base = {
       found,
       processingTimeMs: 150,
-      operationId: `find_text_${Date.now()}_mno7890`,
+      operationId: `find_text${Date.now()}_mno7890`,
       searchCriteria: {
         text: 'search term',
         caseSensitive: false,
@@ -636,7 +636,7 @@ export const TestDataFactory = {
       image: Buffer.from('fake-enhanced-screenshot-data').toString('base64'),
       processingTimeMs: 450,
       enhancementsApplied: ['screenshot', 'ocr', 'text_detection'],
-      operationId: `enhanced_screenshot_${Date.now()}_pqr4567`,
+      operationId: `enhanced_screenshot${Date.now()}_pqr4567`,
       ocr: this.createOcrResult(),
       textDetection: {
         regions: [
@@ -692,7 +692,7 @@ export const TestUtils = {
       os.tmpdir(),
       `${prefix}-${Date.now()}-${Math.random().toString(36).substring(7)}`,
     );
-    await fs.mkdir(tempDir, { recursive: true });
+    await fs.mkdir(_tempDir, { recursive: true });
     return tempDir;
   },
 
@@ -704,7 +704,7 @@ export const TestUtils = {
 
     for (const path of paths) {
       try {
-        await fs.rm(path, { recursive: true, force: true });
+        await fs.rm(_path, { recursive: true, force: true });
       } catch (_error) {
         console.warn(`Failed to cleanup ${path}:`, _error);
       }

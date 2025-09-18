@@ -434,7 +434,7 @@ describe('ComputerUseService - Application Management', () => {
 
         // Verify window activation command
         expect(mockSpawn).toHaveBeenNthCalledWith(
-          1,
+          _1,
           'sudo',
           ['-u', 'user', 'wmctrl', '-x', '-a', processName],
           expect.objectContaining({
@@ -446,7 +446,7 @@ describe('ComputerUseService - Application Management', () => {
 
         // Verify window maximization command
         expect(mockSpawn).toHaveBeenNthCalledWith(
-          2,
+          _2,
           'sudo',
           [
             '-u',

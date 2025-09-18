@@ -176,14 +176,14 @@ export class ParlantHealthMetricsValidationService {
   /** Mock Parlant client - In production, this would be actual Parlant integration */
   private readonly parlantClient = {
     createValidationSession: async (context: { operationType: HealthOperationType | MetricsOperationType | AlertOperationType }) => ({
-      id: `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `validation${Date.now()}${Math.random().toString(36).substring(7)}`,
       validate: async () => ({ approved: true, reason: 'Validated through conversational AI' }),
       explainAction: async () => `Health/metrics operation: ${context.operationType}`,
       logAudit: async (audit: { action: string; timestamp: Date; details?: Record<string, unknown> }) => this.logger.debug('Parlant audit logged', audit),
     }),
   };
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(_private readonly configService: ConfigService) {
     this.initializeRiskMappings();
     this.logger.log('Parlant Health & Metrics Validation Service initialized');
     this.logger.log('Risk-based validation system active with performance optimization');
@@ -199,7 +199,7 @@ export class ParlantHealthMetricsValidationService {
     parameters: Record<string, unknown>,
     userContext?: { userId?: string; userRole?: string },
   ): Promise<HealthMetricsValidationResult> {
-    const operationId = `health_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `health${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.debug(`[${operationId}] Validating health operation: ${operationType}`, {
@@ -296,7 +296,7 @@ export class ParlantHealthMetricsValidationService {
     parameters: Record<string, unknown>,
     userContext?: { userId?: string; userRole?: string },
   ): Promise<HealthMetricsValidationResult> {
-    const operationId = `metrics_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `metrics${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.debug(`[${operationId}] Validating metrics operation: ${operationType}`, {
@@ -368,7 +368,7 @@ export class ParlantHealthMetricsValidationService {
     parameters: Record<string, unknown>,
     userContext?: { userId?: string; userRole?: string },
   ): Promise<HealthMetricsValidationResult> {
-    const operationId = `alert_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `alert${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.debug(`[${operationId}] Validating alert operation: ${operationType}`, {
@@ -473,7 +473,7 @@ export class ParlantHealthMetricsValidationService {
    */
   private getMetricsOperationRiskLevel(
     operationType: MetricsOperationType,
-    _parameters: Record<string, unknown>,
+    parameters: Record<string, unknown>,
   ): HealthMetricsRiskLevel {
     // Most metrics collection is low risk
     const lowRiskOperations = [
@@ -585,7 +585,7 @@ export class ParlantHealthMetricsValidationService {
         operationId: result.auditTrail.operationId,
         validator: result.auditTrail.validator,
         reasoning: result.auditTrail.reasoning,
-        evidence: result.auditTrail.evidence || {}
+        evidence: result.auditTrail.evidence ?? {}
       }
     });
 
@@ -603,7 +603,7 @@ export class ParlantHealthMetricsValidationService {
     return {
       approved: true,
       riskLevel: HealthMetricsRiskLevel.LOW,
-      conversationId: `optimized_${operationId}`,
+      conversationId: `optimized${operationId}`,
       operationId,
       reason: 'High-frequency, low-risk operation - optimized approval',
       recommendations: ['Continue monitoring for patterns'],
@@ -725,7 +725,7 @@ export class ParlantHealthMetricsValidationService {
     riskLevel: HealthMetricsRiskLevel,
   ): string {
     const paramHash = JSON.stringify(parameters);
-    return `${operationType}_${riskLevel}_${Buffer.from(paramHash).toString('base64').substring(0, 16)}`;
+    return `${operationType}${riskLevel}${Buffer.from(paramHash).toString('base64').substring(0, 16)}`;
   }
 
   /**
@@ -753,7 +753,7 @@ export class ParlantHealthMetricsValidationService {
     const expiryMinutes = result.riskLevel === HealthMetricsRiskLevel.LOW ? 15 : 5;
     const expiry = new Date(Date.now() + expiryMinutes * 60 * 1000);
 
-    this.validationCache.set(cacheKey, {
+    this.validationCache.set(_cacheKey, {
       result,
       expiry,
       hitCount: 0,
@@ -821,7 +821,7 @@ export class ParlantHealthMetricsValidationService {
     return {
       approved,
       riskLevel: HealthMetricsRiskLevel.HIGH,
-      conversationId: `failsafe_${operationId}`,
+      conversationId: `failsafe${operationId}`,
       operationId,
       reason: approved 
         ? `Failsafe approval for health operation: ${errorMessage}`

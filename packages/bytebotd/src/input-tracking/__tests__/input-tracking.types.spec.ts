@@ -37,7 +37,7 @@ import {
 import { UserRole, Permission } from '@bytebot/shared';
 
 describe('InputTrackingTypes', () => {
-  const operationId = `input_tracking_types_test_${Date.now()}`;
+  const operationId = `input_tracking_types_test${Date.now()}`;
 
   describe('Type Guard Functions', () => {
     describe('isMouseEventData', () => {
@@ -91,7 +91,7 @@ describe('InputTrackingTypes', () => {
 
         // Valid with minimal required fields
         expect(
-          isMouseEventData({
+          _isMouseEventData({
             button: 0,
             x: 0,
             y: 0,
@@ -100,7 +100,7 @@ describe('InputTrackingTypes', () => {
 
         // Valid with negative coordinates
         expect(
-          isMouseEventData({
+          _isMouseEventData({
             button: 1,
             x: -100,
             y: -200,
@@ -109,7 +109,7 @@ describe('InputTrackingTypes', () => {
 
         // Valid with large coordinates
         expect(
-          isMouseEventData({
+          _isMouseEventData({
             button: 1,
             x: 99999,
             y: 99999,
@@ -240,7 +240,7 @@ describe('InputTrackingTypes', () => {
 
         // Minimal valid user
         expect(
-          isMockByteBotdUser({
+          _isMockByteBotdUser({
             id: 'test',
             username: 'test',
             role: 'viewer',
@@ -249,7 +249,7 @@ describe('InputTrackingTypes', () => {
 
         // Missing critical fields
         expect(
-          isMockByteBotdUser({
+          _isMockByteBotdUser({
             username: 'test',
             role: 'admin',
           }),
@@ -303,16 +303,16 @@ describe('InputTrackingTypes', () => {
         console.log(`[${testId}] Testing coordinates edge cases`);
 
         // Zero coordinates
-        expect(isValidCoordinates({ x: 0, y: 0 })).toBe(true);
+        expect(_isValidCoordinates({ x: 0, y: 0 })).toBe(true);
 
         // Negative coordinates
-        expect(isValidCoordinates({ x: -100, y: -200 })).toBe(true);
+        expect(_isValidCoordinates({ x: -100, y: -200 })).toBe(true);
 
         // Fractional coordinates
-        expect(isValidCoordinates({ x: 100.5, y: 200.7 })).toBe(true);
+        expect(_isValidCoordinates({ x: 100.5, y: 200.7 })).toBe(true);
 
         // Large coordinates
-        expect(isValidCoordinates({ x: 999999, y: 999999 })).toBe(true);
+        expect(_isValidCoordinates({ x: 999999, y: 999999 })).toBe(true);
 
         console.log(`[${testId}] Coordinates edge cases test completed`);
       });
@@ -608,8 +608,8 @@ describe('InputTrackingTypes', () => {
           metaKey: false,
         },
         metadata: Array.from({ length: 1000 }, (_, i) => ({
-          key: `metadata_${i}`,
-          value: `value_${i}`,
+          key: `metadata${i}`,
+          value: `value${i}`,
         })),
       };
 

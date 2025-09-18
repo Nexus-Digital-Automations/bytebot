@@ -269,7 +269,7 @@ export class EnterpriseApiAuthService {
   };
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
@@ -283,7 +283,7 @@ export class EnterpriseApiAuthService {
    * Authenticate user with comprehensive Parlant validation
    */
   async authenticateUser(request: AuthenticationRequest): Promise<AuthenticationDecision> {
-    const operationId = `auth_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `auth${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     
     this.analytics.totalAuthentications++;
@@ -381,7 +381,7 @@ export class EnterpriseApiAuthService {
    * Authorize user action with Parlant validation
    */
   async authorizeUserAction(request: AuthorizationRequest): Promise<AuthorizationDecision> {
-    const operationId = `authz_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `authz${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.debug(`[${operationId}] Authorizing user action with Parlant validation`, {
       operationId,
@@ -492,7 +492,7 @@ export class EnterpriseApiAuthService {
    */
   private async validateCredentials(
     request: AuthenticationRequest, 
-    _operationId: string
+    operationId: string
   ): Promise<{ valid: boolean; userId: string; parlantValidation?: ParlantValidationResponse }> {
     // TODO: Implement actual credential validation
     // This would typically involve checking against user database
@@ -504,7 +504,7 @@ export class EnterpriseApiAuthService {
 
     // Simulate credential validation
     const isValid = request.credentials.password === 'valid_password'; // Mock validation
-    const userId = isValid ? `user_${request.username}` : '';
+    const userId = isValid ? `user${request.username}` : '';
 
     return { valid: isValid, userId };
   }
@@ -534,7 +534,7 @@ export class EnterpriseApiAuthService {
       actionDescription: `Authenticate user ${request.username} for system access`,
       context: {
         userId,
-        sessionId: request.conversationalContext?.sessionId ?? `auth_session_${Date.now()}`,
+        sessionId: request.conversationalContext?.sessionId ?? `auth_session${Date.now()}`,
         agentRole: 'AUTHENTICATOR',
         securityLevel: this.mapRiskLevelToSecurityLevel(riskLevel),
         conversationHistory: request.conversationalContext?.conversationHistory?.map(h => ({
@@ -576,7 +576,7 @@ export class EnterpriseApiAuthService {
       expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000); // 8 hours
       
       // Store active session
-      this.activeSessions.set(sessionToken, {
+      this.activeSessions.set(_sessionToken, {
         userId,
         sessionToken,
         createdAt: new Date(),
@@ -710,7 +710,7 @@ export class EnterpriseApiAuthService {
     request: AuthenticationRequest,
     operationId: string
   ): Promise<void> {
-    const eventId = `sec_event_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const eventId = `sec_event${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     try {
       // Analyze security event through Parlant
@@ -727,7 +727,7 @@ export class EnterpriseApiAuthService {
         actionDescription: `Analyze security event: ${eventType} for user ${userId}`,
         context: {
           userId,
-          sessionId: `security_${Date.now()}`,
+          sessionId: `security${Date.now()}`,
           agentRole: 'SECURITY_ANALYST',
           securityLevel: severity === 'CRITICAL' ? 'CRITICAL' : 'HIGH',
           conversationHistory: [],
@@ -986,16 +986,16 @@ export class EnterpriseApiAuthService {
     return parlantValidation.approved ? [] : ['access_denied_by_policy'];
   }
 
-  private isKnownLocation(_location: { country: string; region: string; city: string }): boolean {
+  private isKnownLocation(location: { country: string; region: string; city: string }): boolean {
     // TODO: Implement location verification
     return true;
   }
 
   private sanitizeUsernameForFunction(username: string): string {
-    return username.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+    return username.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');
   }
 
   private sanitizeResourceForFunction(resource: string): string {
-    return resource.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+    return resource.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');
   }
 }

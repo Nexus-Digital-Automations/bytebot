@@ -324,10 +324,10 @@ export class TestExecutionOptimizer extends EventEmitter {
 
     // Analyze current performance and suggest improvements
     const avgTestTime = Array.from(this.testMetrics.values())
-      .reduce((sum, m) => sum + m.executionTime, 0) / this.testMetrics.size || 0;
+      .reduce((sum, m) => sum + m.executionTime, 0) / this.testMetrics.size ?? 0;
 
     const avgMemoryUsage = Array.from(this.testMetrics.values())
-      .reduce((sum, m) => sum + m.memoryUsage, 0) / this.testMetrics.size || 0;
+      .reduce((sum, m) => sum + m.memoryUsage, 0) / this.testMetrics.size ?? 0;
 
     // Caching recommendations
     if (!this.config.enableCaching) {
@@ -395,7 +395,7 @@ export class TestExecutionOptimizer extends EventEmitter {
 
     // Create cache directory if it doesn't exist
     try {
-      await fs.mkdir(this.config.cacheDirectory, { recursive: true });
+      await fs.mkdir(_this.config.cacheDirectory, { recursive: true });
     } catch (error) {
       console.warn(`⚠️ [OPTIMIZER] Failed to create cache directory: ${error}`);
     }
@@ -490,7 +490,7 @@ export class TestExecutionOptimizer extends EventEmitter {
     for (const testFile of sortedFiles) {
       if (processedFiles.has(testFile)) continue;
 
-      const dependencies = dependencyMap.get(testFile) || [];
+      const dependencies = dependencyMap.get(testFile) ?? [];
       const estimatedTime = this.testMetrics.get(testFile)?.executionTime || 1000;
       const memoryRequirement = this.testMetrics.get(testFile)?.memoryUsage || 50 * 1024 * 1024; // 50MB default
 
@@ -499,7 +499,7 @@ export class TestExecutionOptimizer extends EventEmitter {
 
       // Create test group
       const group: TestGroup = {
-        id: `group_${testGroups.length + 1}`,
+        id: `group${testGroups.length + 1}`,
         tests: [testFile],
         estimatedTime,
         memoryRequirement,
@@ -517,7 +517,7 @@ export class TestExecutionOptimizer extends EventEmitter {
         for (const otherFile of sortedFiles) {
           if (processedFiles.has(otherFile) || otherFile === testFile) continue;
 
-          const otherDeps = dependencyMap.get(otherFile) || [];
+          const otherDeps = dependencyMap.get(otherFile) ?? [];
           const otherTime = this.testMetrics.get(otherFile)?.executionTime || 1000;
           const otherMemory = this.testMetrics.get(otherFile)?.memoryUsage || 50 * 1024 * 1024;
 
@@ -783,7 +783,7 @@ export class TestExecutionOptimizer extends EventEmitter {
       const metrics = JSON.parse(metricsData);
       
       for (const [key, entry] of Object.entries(metrics)) {
-        this.testMetrics.set(key, entry as any);
+        this.testMetrics.set(key, entry as unknown);
       }
       
       console.log(`📊 [OPTIMIZER] Loaded ${this.testMetrics.size} test metrics`);
@@ -907,7 +907,7 @@ export class TestExecutionOptimizer extends EventEmitter {
       existing.memoryUsage = existing.memoryUsage * (1 - alpha) + result.memoryUsage * alpha;
       existing.stability = existing.stability * 0.9 + (result.passed ? 1 : 0) * 0.1;
     } else {
-      this.testMetrics.set(testFile, {
+      this.testMetrics.set(_testFile, {
         executionTime: result.executionTime,
         memoryUsage: result.memoryUsage,
         stability: result.passed ? 1 : 0
@@ -927,7 +927,7 @@ export class TestExecutionOptimizer extends EventEmitter {
           codeHash: await this.calculateFileHash(result.testFile),
           result: result.result,
           timestamp: Date.now(),
-          dependencies: Array.from(this.dependencyGraph.get(result.testFile) || [])
+          dependencies: Array.from(this.dependencyGraph.get(result.testFile) ?? [])
         };
 
         this.testCache.set(result.testFile, cacheEntry);

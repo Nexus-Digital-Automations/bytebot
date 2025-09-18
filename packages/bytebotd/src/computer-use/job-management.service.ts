@@ -283,7 +283,7 @@ export class JobStorage implements JobStorageInterface {
    * Save job to Redis with encryption and proper serialization
    */
   async saveJob(job: JobResult): Promise<void> {
-    const operationId = `save_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `save_job${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.log(`[${operationId}] Saving job to Redis`, {
@@ -321,7 +321,7 @@ export class JobStorage implements JobStorageInterface {
         error: _error instanceof Error ? _error.message : String(_error),
       });
       throw new Error(
-        `Failed to save job ${job.jobId}: ${_error instanceof Error ? _error.message : String(_error)}`,
+        `Failed to save job ${job.jobId}: ${error instanceof Error ? _error.message : String(_error)}`,
       );
     }
   }
@@ -330,7 +330,7 @@ export class JobStorage implements JobStorageInterface {
    * Retrieve job from Redis with decryption
    */
   async getJob(jobId: string): Promise<JobResult | null> {
-    const operationId = `get_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `get_job${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.debug(`[${operationId}] Retrieving job from Redis`, {
@@ -388,7 +388,7 @@ export class JobStorage implements JobStorageInterface {
     result?: ComputerActionResponse,
     error?: JobError,
   ): Promise<void> {
-    const operationId = `update_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `update_job${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.log(`[${operationId}] Updating job status`, {
@@ -468,7 +468,7 @@ export class JobStorage implements JobStorageInterface {
    * Delete job from Redis with cleanup
    */
   async deleteJob(jobId: string): Promise<void> {
-    const operationId = `delete_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `delete_job${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.log(`[${operationId}] Deleting job from Redis`, { jobId });
@@ -509,7 +509,7 @@ export class JobStorage implements JobStorageInterface {
    * Get jobs by status with efficient Redis queries
    */
   async getJobsByStatus(status: JobStatus): Promise<JobResult[]> {
-    const operationId = `get_jobs_by_status_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `get_jobs_by_status${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.debug(`[${operationId}] Getting jobs by status`, { status });
@@ -566,7 +566,7 @@ export class JobStorage implements JobStorageInterface {
    * Get jobs by priority
    */
   async getJobsByPriority(priority: JobPriority): Promise<JobResult[]> {
-    const operationId = `get_jobs_by_priority_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `get_jobs_by_priority${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.debug(`[${operationId}] Getting jobs by priority`, {
@@ -621,7 +621,7 @@ export class JobStorage implements JobStorageInterface {
    * Cleanup expired jobs from Redis
    */
   async cleanupExpiredJobs(olderThanMs: number): Promise<number> {
-    const operationId = `cleanup_jobs_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `cleanup_jobs${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.log(`[${operationId}] Starting job cleanup`, { olderThanMs });
@@ -777,11 +777,11 @@ export class BackgroundWorker
   private readonly stats: WorkerStats;
 
   constructor(
-    private readonly jobStorage: JobStorage,
+    _private readonly jobStorage: JobStorage,
     private readonly computerUseService: ComputerUseService,
     private readonly configService: ConfigService,
   ) {
-    this.workerId = `worker_${process.pid}_${_uuidv4().split('-')[0]}`;
+    this.workerId = `worker${process.pid}${_uuidv4().split('-')[0]}`;
     this.stats = {
       workerId: this.workerId,
       isRunning: false,
@@ -881,7 +881,7 @@ export class BackgroundWorker
    * Process the next available job
    */
   private async processNextJob(): Promise<void> {
-    const operationId = `process_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `process_job${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       // Get highest priority pending job
@@ -947,7 +947,7 @@ export class BackgroundWorker
 
         // Handle retry logic
         if (jobError.retryable && job.retryCount < job.maxRetries) {
-          const _retryJob = {
+          const retryJob = {
             ...job,
             retryCount: job.retryCount + 1,
             status: JobStatus.RETRY,
@@ -1137,7 +1137,7 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
   private readonly config: CleanupConfig;
 
   constructor(
-    private readonly jobStorage: JobStorage,
+    _private readonly jobStorage: JobStorage,
     private readonly configService: ConfigService,
   ) {
     this.config = {
@@ -1211,7 +1211,7 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
    * Perform cleanup of expired jobs
    */
   async performCleanup(): Promise<void> {
-    const operationId = `cleanup_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `cleanup${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.log(`[${operationId}] Starting job cleanup`);
@@ -1242,7 +1242,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(JobManagementService.name);
 
   constructor(
-    private readonly jobStorage: JobStorage,
+    _private readonly jobStorage: JobStorage,
     private readonly backgroundWorker: BackgroundWorker,
     private readonly cleanupManager: JobCleanupManager,
     private readonly configService: ConfigService,
@@ -1267,7 +1267,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
     action: ComputerAction,
     options: JobOptions = {},
   ): Promise<string> {
-    const operationId = `create_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `create_job${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       const jobId = _uuidv4();
@@ -1331,7 +1331,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
    * Get job status and result
    */
   async getJobStatus(jobId: string): Promise<JobResult | null> {
-    const operationId = `get_job_status_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `get_job_status${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.debug(`[${operationId}] Getting job status`, { jobId });
@@ -1359,7 +1359,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
    * Get job result (throws if not completed)
    */
   async getJobResult(jobId: string): Promise<ComputerActionResponse> {
-    const operationId = `get_job_result_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `get_job_result${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.debug(`[${operationId}] Getting job result`, { jobId });
@@ -1404,7 +1404,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
    * Cancel a pending or running job
    */
   async cancelJob(jobId: string): Promise<void> {
-    const operationId = `cancel_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `cancel_job${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.log(`[${operationId}] Cancelling job`, { jobId });
@@ -1490,7 +1490,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
     cancelled: number;
     timeout: number;
   }> {
-    const operationId = `get_queue_stats_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `get_queue_stats${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     try {
       this.logger.debug(`[${operationId}] Getting queue statistics`);

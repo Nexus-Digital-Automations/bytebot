@@ -566,7 +566,7 @@ describe('ComputerUseService Integration Tests', () => {
    */
   async function createTestDataDirectory(): Promise<void> {
     try {
-      await fs.mkdir(testDataDir, { recursive: true });
+      await fs.mkdir(_testDataDir, { recursive: true });
     } catch {
       // Directory might already exist
     }
@@ -607,7 +607,7 @@ describe('ComputerUseService Integration Tests', () => {
    */
   async function cleanupTestData(): Promise<void> {
     try {
-      await fs.rm(testDataDir, { recursive: true, force: true });
+      await fs.rm(_testDataDir, { recursive: true, force: true });
     } catch (error) {
       // Directory might not exist or already cleaned up
       console.warn('Failed to cleanup test data:', error);

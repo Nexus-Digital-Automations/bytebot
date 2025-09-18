@@ -152,7 +152,7 @@ export class LoggingInterceptor implements NestInterceptor {
           this.metricsService.recordRequestEnd(request.method, route);
         }
       }),
-      catchError((_error: Error) => {
+      catchError((error: Error) => {
         // Handle error response
         const processingTime = Date.now() - startTime;
         const responseContext = this.createResponseContext(
@@ -219,8 +219,8 @@ export class LoggingInterceptor implements NestInterceptor {
       userAgent: request.headers['user-agent'],
       remoteAddress: this.getClientIpAddress(request),
       timestamp: new Date().toISOString(),
-      userId: (request as Request & { user?: { id: string } }).user?.id, // If authentication is implemented
-      sessionId: (request as Request & { session?: { id: string } }).session
+      userId: (_request as Request & { user?: { id: string } }).user?.id, // If authentication is implemented
+      sessionId: (_request as Request & { session?: { id: string } }).session
         ?.id, // If sessions are used
     };
   }

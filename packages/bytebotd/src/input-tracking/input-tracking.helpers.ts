@@ -324,7 +324,7 @@ export const keyInfoMap: Record<number, KeyInfo> = {
     name: 'Minus',
     isPrintable: true,
     string: '-',
-    shiftString: '_',
+    shiftString: '',
   },
   [UiohookKey.Period]: {
     name: 'Period',

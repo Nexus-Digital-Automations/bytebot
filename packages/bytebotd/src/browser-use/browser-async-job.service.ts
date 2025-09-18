@@ -72,7 +72,7 @@ export class BrowserAsyncJobService {
   private readonly jobProcessingInterval: NodeJS.Timeout;
 
   constructor(
-    private readonly browserService: BrowserUseService,
+    _private readonly browserService: BrowserUseService,
     private readonly taskService: BrowserTaskService,
   ) {
     // Start job processor
@@ -88,7 +88,7 @@ export class BrowserAsyncJobService {
   /**
    * Create a new async job
    */
-  createAsyncJob(_dto: CreateAsyncJobDto): AsyncJobResultDto {
+  createAsyncJob(dto: CreateAsyncJobDto): AsyncJobResultDto {
     const jobId = uuidv4();
     const now = new Date();
 
@@ -522,7 +522,7 @@ export class BrowserAsyncJobService {
         }
 
         if (taskResult.extractedData) {
-          job.results.extractedData[`task_${i}`] = taskResult.extractedData;
+          job.results.extractedData[`task${i}`] = taskResult.extractedData;
         }
 
         job.results.tasksCompleted++;
@@ -584,7 +584,7 @@ export class BrowserAsyncJobService {
         const sessionId = await this.createExtractionSession();
 
         const extractedData = await this.browserService.extractPageData(
-          sessionId,
+          _sessionId,
           {
             selectors:
               typeof config.selectors === 'object' &&
@@ -833,7 +833,7 @@ export class BrowserAsyncJobService {
   /**
    * Estimate total steps for job
    */
-  private estimateTotalSteps(_dto: CreateAsyncJobDto): number {
+  private estimateTotalSteps(dto: CreateAsyncJobDto): number {
     switch (_dto.jobType) {
       case AsyncJobType.BATCH_AUTOMATION:
         return Array.isArray(_dto.configuration.tasks)
@@ -854,7 +854,7 @@ export class BrowserAsyncJobService {
   private createExtractionSession(): string {
     // This would create a browser session for data extraction
     // For now, return a mock session ID
-    return `extraction_session_${Date.now()}`;
+    return `extraction_session${Date.now()}`;
   }
 
   /**

@@ -40,7 +40,7 @@ interface AuthenticatedRequest {
 
 // Mock RBAC Roles Guard implementation for Phase 1 requirements
 class MockRolesGuard {
-  constructor(private reflector: Reflector) {}
+  constructor(_private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
@@ -99,7 +99,7 @@ class MockRolesGuard {
       return false;
     }
 
-    // Check if user has any of the required roles
+    // Check if user has unknown of the required roles
     return (
       requiredRoles.includes(user.role) ||
       this.hasImplicitRoleAccess(user.role, requiredRoles)
@@ -183,7 +183,7 @@ describe('RolesGuard', () => {
   let guard: MockRolesGuard;
   let reflector: Reflector;
 
-  const operationId = `roles_guard_test_${Date.now()}`;
+  const operationId = `roles_guard_test${Date.now()}`;
 
   // Mock execution context factory
   const createMockExecutionContext = (
@@ -213,7 +213,7 @@ describe('RolesGuard', () => {
     permissions?: Permission[],
     overrides?: Partial<AuthenticatedUser>,
   ): AuthenticatedUser => ({
-    id: `user_${Date.now()}`,
+    id: `user${Date.now()}`,
     email: `${role}@bytebot.ai`,
     role,
     permissions: permissions ?? guard?.getRolePermissions(role) ?? [],
@@ -295,7 +295,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        new ForbiddenException('Access denied. Required roles: admin'),
+        _new ForbiddenException('Access denied. Required roles: admin'),
       );
 
       console.log(`[${testId}] Viewer access denial test completed`);
@@ -469,7 +469,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        new ForbiddenException(
+        _new ForbiddenException(
           'Access denied. Required permissions: system:admin',
         ),
       );
@@ -729,8 +729,8 @@ describe('RolesGuard', () => {
       const users = Array(20)
         .fill(null)
         .map((_, _i) =>
-          createMockUser(UserRole._OPERATOR, [], {
-            id: `concurrent_user_${_i}`,
+          createMockUser(_UserRole._OPERATOR, [], {
+            id: `concurrent_user${_i}`,
           }),
         );
 
@@ -966,7 +966,7 @@ describe('RolesGuard', () => {
       const testId = `${operationId}_case_sensitivity`;
       console.log(`[${testId}] Testing role case sensitivity`);
 
-      const user = createMockUser(UserRole._ADMIN, [], {
+      const user = createMockUser(_UserRole._ADMIN, [], {
         role: 'ADMIN' as UserRole,
       });
       const context = createMockExecutionContext(user);

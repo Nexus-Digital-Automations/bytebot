@@ -292,8 +292,8 @@ describe('Security Validation Tests', () => {
     };
 
     it('should have secure CORS configuration', () => {
-      expect(isAllowedOrigin('http://localhost:3000')).toBe(true);
-      expect(isAllowedOrigin('https://malicious.com')).toBe(false);
+      expect(_isAllowedOrigin('http://localhost:3000')).toBe(true);
+      expect(_isAllowedOrigin('https://malicious.com')).toBe(false);
       expect(isAllowedOrigin('')).toBe(true); // Allow no origin (same-origin)
     });
 

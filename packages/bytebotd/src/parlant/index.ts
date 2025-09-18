@@ -89,7 +89,7 @@ export const ParlantUtils = {
    * Generate operation ID for tracking
    */
   generateOperationId: (prefix: string = 'parlant'): string => {
-    return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    return `${prefix}${Date.now()}${Math.random().toString(36).substring(7)}`;
   },
 
   /**

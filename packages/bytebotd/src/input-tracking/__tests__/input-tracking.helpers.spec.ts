@@ -21,7 +21,7 @@ import { keyInfoMap, KeyInfo as _KeyInfo } from '../input-tracking.helpers';
 import { UiohookKey } from 'uiohook-napi';
 
 describe('InputTrackingHelpers', () => {
-  const operationId = `input_tracking_helpers_test_${Date.now()}`;
+  const operationId = `input_tracking_helpers_test${Date.now()}`;
 
   describe('Key Information Map Structure', () => {
     it('should have keyInfoMap defined', () => {
@@ -692,7 +692,7 @@ describe('InputTrackingHelpers', () => {
       // Test keys that produce special characters with shift
       const minusKey = keyInfoMap[UiohookKey.Minus];
       expect(minusKey?.string).toBe('-');
-      expect(minusKey?.shiftString).toBe('_');
+      expect(minusKey?.shiftString).toBe('');
 
       const equalKey = keyInfoMap[UiohookKey.Equal];
       expect(equalKey?.string).toBe('=');

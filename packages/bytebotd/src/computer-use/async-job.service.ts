@@ -58,7 +58,7 @@ interface JobData {
 interface QueueItem {
   jobData: JobData;
   resolve: (result: unknown) => void;
-  reject: (_error: Error) => void;
+  reject: (error: Error) => void;
 }
 
 /**
@@ -82,7 +82,7 @@ export class AsyncJobService {
   private isProcessing = false;
 
   constructor(
-    private readonly computerUseService: ComputerUseService,
+    _private readonly computerUseService: ComputerUseService,
     private readonly cacheService: CacheService,
     private readonly metricsService: MetricsService,
   ) {
@@ -321,7 +321,7 @@ export class AsyncJobService {
    * @returns string Unique job ID
    */
   private generateJobId(): string {
-    return `job_${Date.now()}_${_uuidv4().substring(0, 8)}`;
+    return `job${Date.now()}${_uuidv4().substring(0, 8)}`;
   }
 
   /**
@@ -489,13 +489,13 @@ export class AsyncJobService {
   ): Promise<unknown | null> {
     try {
       const cacheKey = this.generateCacheKey(action);
-      return await this.cacheService.get(cacheKey, {
+      return await this.cacheService.get(_cacheKey, {
         namespace: 'computer-actions',
         ttl: 300, // 5 minutes
       });
     } catch (_error) {
       this.logger.warn(
-        `Failed to get cached result: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
+        `Failed to get cached result: ${error instanceof Error ? _error.message : 'Unknown error'}`,
       );
       return null;
     }
@@ -513,7 +513,7 @@ export class AsyncJobService {
   ): Promise<void> {
     try {
       const cacheKey = this.generateCacheKey(action);
-      await this.cacheService.set(cacheKey, result, {
+      await this.cacheService.set(_cacheKey, result, {
         namespace: 'computer-actions',
         ttl: 300, // 5 minutes
       });
@@ -534,7 +534,7 @@ export class AsyncJobService {
     // Create deterministic cache key based on action content
     const actionString = JSON.stringify(action);
     const hash = Buffer.from(actionString).toString('base64');
-    return `action_${hash.substring(0, 32)}`;
+    return `action${hash.substring(0, 32)}`;
   }
 
   /**

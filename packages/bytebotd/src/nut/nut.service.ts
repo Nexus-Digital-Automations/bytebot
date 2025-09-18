@@ -190,7 +190,7 @@ export class NutService {
     void import('fs')
       .then((fs) => {
         return fs.promises
-          ?.mkdir(this.screenshotDir, { recursive: true })
+          ?.mkdir(_this.screenshotDir, { recursive: true })
           ?.catch((err: unknown) => {
             const errorMessage =
               err instanceof Error ? err.message : 'Unknown error';
@@ -525,7 +525,7 @@ export class NutService {
       return { success: true };
     } catch (_error) {
       throw new Error(
-        `Failed to send mouse ${button} button ${pressed ? 'press' : 'release'} event: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
+        `Failed to send mouse ${button} button ${pressed ? 'press' : 'release'} event: ${error instanceof Error ? _error.message : 'Unknown error'}`,
       );
     }
   }
@@ -633,7 +633,7 @@ export class NutService {
   private generateOperationId(): string {
     const timestamp = Date.now();
     const randomSuffix = Math.random().toString(36).substring(2, 8);
-    return `nut_operation_${timestamp}_${randomSuffix}`;
+    return `nut_operation${timestamp}${randomSuffix}`;
   }
 
   /**

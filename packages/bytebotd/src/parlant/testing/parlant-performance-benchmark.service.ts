@@ -292,10 +292,10 @@ export class ParlantPerformanceBenchmarkService {
   private readonly baselines: Map<string, BenchmarkResult> = new Map();
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly performanceMonitor: ParlantPerformanceMonitorService
   ) {
-    const operationId = `benchmark_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `benchmark_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Parlant Performance Benchmark Service`, {
       benchmarkConfigs: Array.from(this.benchmarkConfigs.keys()),
@@ -320,7 +320,7 @@ export class ParlantPerformanceBenchmarkService {
     customConfig?: Partial<BenchmarkConfig>
   ): Promise<BenchmarkResult> {
     const config = this.getBenchmarkConfig(benchmarkName, customConfig);
-    const testId = `bench_${benchmarkName}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const testId = `bench${benchmarkName}${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`Starting benchmark: ${benchmarkName}`, {
       testId,
@@ -407,7 +407,7 @@ export class ParlantPerformanceBenchmarkService {
       throw new Error(`Load test scenario not found: ${scenarioName}`);
     }
 
-    const testId = `load_${scenarioName}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const testId = `load${scenarioName}${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`Starting load test: ${scenarioName}`, {
       testId,
@@ -442,7 +442,7 @@ export class ParlantPerformanceBenchmarkService {
       };
 
       const benchmarkResult = this.analyzeBenchmarkResults(
-        `load_${scenarioName}`,
+        `load${scenarioName}`,
         testId,
         config,
         startTime,
@@ -452,7 +452,7 @@ export class ParlantPerformanceBenchmarkService {
         cpuUsage
       );
 
-      this.storeBenchmarkResult(`load_${scenarioName}`, benchmarkResult);
+      this.storeBenchmarkResult(`load${scenarioName}`, benchmarkResult);
 
       this.logger.log(`Load test completed: ${scenarioName}`, {
         testId,
@@ -759,7 +759,7 @@ export class ParlantPerformanceBenchmarkService {
     }
   }
 
-  private async executeValidationRequest(_request: ParlantValidationRequest): Promise<void> {
+  private async executeValidationRequest(request: ParlantValidationRequest): Promise<void> {
     // Mock validation execution for benchmarking
     const delay = 50 + Math.random() * 100; // 50-150ms simulated processing
     await this.delay(delay);
@@ -780,7 +780,7 @@ export class ParlantPerformanceBenchmarkService {
       functionParams: parameters,
       actionDescription: `Test ${functionName} execution`,
       riskLevel,
-      operationId: `test_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      operationId: `test${Date.now()}${Math.random().toString(36).substring(7)}`,
       context: {
         userId: 'benchmark_user',
         sessionId: 'benchmark_session',

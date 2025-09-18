@@ -148,7 +148,7 @@ class TestWebSocketManager {
     appUrl: string,
     clientId: string = TestUtils.generateTestId(),
   ): Promise<Socket> {
-    const client = io(appUrl, {
+    const client = io(_appUrl, {
       transports: ['websocket'],
       timeout: 5000,
     });
@@ -158,7 +158,7 @@ class TestWebSocketManager {
 
     // Track all messages for this client
     client.onAny((event, ...args) => {
-      const messages = this.messageHistory.get(clientId) || [];
+      const messages = this.messageHistory.get(clientId) ?? [];
       messages.push({ event, args, timestamp: Date.now() });
       this.messageHistory.set(clientId, messages);
     });
@@ -185,7 +185,7 @@ class TestWebSocketManager {
   }
 
   getMessageHistory(clientId: string): unknown[] {
-    return this.messageHistory.get(clientId) || [];
+    return this.messageHistory.get(clientId) ?? [];
   }
 
   async disconnectClient(clientId: string): Promise<void> {

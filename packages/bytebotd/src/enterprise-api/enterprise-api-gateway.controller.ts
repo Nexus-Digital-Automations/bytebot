@@ -359,7 +359,7 @@ export class EnterpriseApiGatewayController {
   };
 
   constructor(
-    private readonly parlantIntegrationService: ParlantIntegrationService,
+    _private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
     this.logger.log('Enterprise API Gateway initialized - Parlant validation active for all endpoints');
     this.initializeCircuitBreakers();
@@ -510,7 +510,7 @@ export class EnterpriseApiGatewayController {
     type: 'object',
   })
   async getApiAnalytics(@CurrentUser() user: ByteBotdUser): Promise<EnterpriseApiAnalytics> {
-    const operationId = `api_analytics_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `api_analytics${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     this.logger.log(`[${operationId}] API analytics request`, {
       operationId,
@@ -638,7 +638,7 @@ export class EnterpriseApiGatewayController {
       response: Response;
     },
   ): Promise<void> {
-    const operationId = `enterprise_api_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `enterprise_api${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     const apiKey = `${method}:/${service}/${endpoint}`;
     
@@ -647,7 +647,7 @@ export class EnterpriseApiGatewayController {
     
     // Initialize service metrics if not exists
     if (!this.analytics.serviceMetrics.has(service)) {
-      this.analytics.serviceMetrics.set(service, {
+      this.analytics.serviceMetrics.set(_service, {
         requests: 0,
         successes: 0,
         failures: 0,
@@ -707,7 +707,7 @@ export class EnterpriseApiGatewayController {
       // Perform Parlant validation if required
       if (config.requiresValidation) {
         const validationRequest: ParlantValidationRequest = {
-          functionName: `API.${service}.${endpoint.replace(/[/:]/g, '_')}`,
+          functionName: `API.${service}.${endpoint.replace(/[/:]/g, '')}`,
           functionParams: {
             method,
             service,
@@ -719,7 +719,7 @@ export class EnterpriseApiGatewayController {
           actionDescription: `Execute ${method} API call to /${service}/${endpoint}`,
           context: {
             userId: context.user.id,
-            sessionId: context.headers?.['x-conversation-id'] ?? `api_session_${Date.now()}`,
+            sessionId: context.headers?.['x-conversation-id'] ?? `api_session${Date.now()}`,
             agentRole: context.user.role,
             securityLevel: this.mapUserRoleToSecurityLevel(context.user.role),
             conversationHistory: [],
@@ -915,7 +915,7 @@ export class EnterpriseApiGatewayController {
     method: string,
     service: string,
     endpoint: string,
-    _context: unknown,
+    context: unknown,
   ): Promise<unknown> {
     // TODO: Implement actual API proxying to target controllers
     // This would typically use HttpService to make internal HTTP calls
@@ -941,7 +941,7 @@ export class EnterpriseApiGatewayController {
   private initializeCircuitBreakers(): void {
     this.apiEndpoints.forEach((config, _apiKey) => {
       const circuitBreakerKey = `${config.service}:${config.endpoint}`;
-      this.circuitBreakers.set(circuitBreakerKey, {
+      this.circuitBreakers.set(_circuitBreakerKey, {
         state: 'CLOSED',
         failureCount: 0,
       });

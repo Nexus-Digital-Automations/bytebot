@@ -48,7 +48,7 @@ export class ComputerUseTools {
   private readonly logger = new Logger(ComputerUseTools.name);
   private operationCounter = 0;
 
-  constructor(private readonly computerUseService: ComputerUseService) {
+  constructor(_private readonly computerUseService: ComputerUseService) {
     this.logger.log('ComputerUseTools initialized - MCP integration ready');
   }
 
@@ -58,7 +58,7 @@ export class ComputerUseTools {
    */
   private generateOperationId(): string {
     this.operationCounter = (this.operationCounter + 1) % 10000;
-    return `mcp_op_${Date.now()}_${this.operationCounter.toString().padStart(4, '0')}`;
+    return `mcp_op${Date.now()}${this.operationCounter.toString().padStart(4, '0')}`;
   }
 
   /**
@@ -160,7 +160,7 @@ export class ComputerUseTools {
         coordinates,
       });
 
-      const _result = `mouse moved to (${coordinates.x}, ${coordinates.y})`;
+      const result = `mouse moved to (${coordinates.x}, ${coordinates.y})`;
       this.logOperationSuccess(
         operationId,
         'computer_move_mouse',
@@ -181,7 +181,7 @@ export class ComputerUseTools {
         content: [
           {
             type: 'text',
-            text: `Error moving mouse: ${_err instanceof Error ? _err.message : String(_err)}`,
+            text: `Error moving mouse: ${err instanceof Error ? _err.message : String(_err)}`,
           },
         ],
       };
@@ -218,7 +218,7 @@ export class ComputerUseTools {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
 
-    this.logOperationStart(operationId, 'computer_trace_mouse', {
+    this.logOperationStart(_operationId, 'computer_trace_mouse', {
       pathLength: path.length,
       holdKeys,
       startPoint: path[0],
@@ -233,7 +233,7 @@ export class ComputerUseTools {
         holdKeys,
       });
 
-      const _result = `mouse traced along ${path.length} points${holdKeys ? ` with keys: ${holdKeys.join(', ')}` : ''}`;
+      const result = `mouse traced along ${path.length} points${holdKeys ? ` with keys: ${holdKeys.join(', ')}` : ''}`;
       this.logOperationSuccess(
         operationId,
         'computer_trace_mouse',
@@ -677,7 +677,7 @@ V, W, X, Y, Z
         compressionPercentage: `${((1 - compressionRatio) * 100).toFixed(1)}%`,
       });
 
-      const _result = `screenshot captured and compressed (${((1 - compressionRatio) * 100).toFixed(1)}% reduction)`;
+      const result = `screenshot captured and compressed (${((1 - compressionRatio) * 100).toFixed(1)}% reduction)`;
       this.logOperationSuccess(
         operationId,
         'computer_screenshot',
@@ -751,14 +751,14 @@ V, W, X, Y, Z
   })
   async writeFile({ path, data }: { path: string; data: string }) {
     try {
-      const _result = await this.computerUseService.action({
+      const result = await this.computerUseService.action({
         action: 'write_file',
         path,
         data,
       });
 
       const message = (() => {
-        if (_result && typeof _result === 'object' && 'message' in _result) {
+        if (_result && typeof result === 'object' && 'message' in _result) {
           const msg = (_result as { message: unknown }).message;
           return typeof msg === 'string' ? msg : 'File operation completed';
         }
@@ -793,7 +793,7 @@ V, W, X, Y, Z
   })
   async readFile({ path }: { path: string }) {
     try {
-      const _result = await this.computerUseService.action({
+      const result = await this.computerUseService.action({
         action: 'read_file',
         path,
       });
@@ -801,7 +801,7 @@ V, W, X, Y, Z
       // Type guard to check if result has the expected structure
       const hasValidResult =
         _result &&
-        typeof _result === 'object' &&
+        typeof result === 'object' &&
         'success' in _result &&
         'data' in _result &&
         (_result as { success: unknown; data: unknown }).success &&
@@ -833,7 +833,7 @@ V, W, X, Y, Z
         };
       } else {
         const errorMessage = (() => {
-          if (_result && typeof _result === 'object' && 'message' in _result) {
+          if (_result && typeof result === 'object' && 'message' in _result) {
             const msg = (_result as { message: unknown }).message;
             return typeof msg === 'string' ? msg : 'Unknown error';
           }

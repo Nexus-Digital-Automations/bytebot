@@ -170,11 +170,11 @@ export class PerformanceMonitorService {
   recordOperation(operationType: string, responseTime: number, success: boolean): void {
     this.metrics.responseTimeSamples.push(responseTime);
     
-    const operationCount = this.metrics.operationCounts.get(operationType) || 0;
+    const operationCount = this.metrics.operationCounts.get(operationType) ?? 0;
     this.metrics.operationCounts.set(operationType, operationCount + 1);
     
     if (!success) {
-      const errorCount = this.metrics.errorCounts.get(operationType) || 0;
+      const errorCount = this.metrics.errorCounts.get(operationType) ?? 0;
       this.metrics.errorCounts.set(operationType, errorCount + 1);
     }
   }
@@ -185,9 +185,9 @@ export class PerformanceMonitorService {
     
     return {
       averageResponseTime: responseTimes.reduce((sum, rt) => sum + rt, 0) / responseTimes.length,
-      p50ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.5)] || 0,
-      p95ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.95)] || 0,
-      p99ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.99)] || 0,
+      p50ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.5)] ?? 0,
+      p95ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.95)] ?? 0,
+      p99ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.99)] ?? 0,
       maxResponseTime: Math.max(...responseTimes),
       minResponseTime: Math.min(...responseTimes),
       cpuUsage: {
@@ -242,7 +242,7 @@ export class LoadGeneratorService {
     configuration: LoadTestConfiguration
   ): Promise<Array<{ success: boolean; responseTime: number; error?: Error }>> {
     const { concurrentUsers, operationsPerUser, rampUpTime, sustainedLoadTime } = configuration;
-    const testId = `load_${Date.now()}`;
+    const testId = `load${Date.now()}`;
     
     this.activeLoadTests.set(testId, true);
     
@@ -481,11 +481,11 @@ describe('CUA Performance and Scalability Tests', () => {
       // Performance assertions
       expect(operationsPerSecond).toBeGreaterThan(testConfig.targetThroughput * 0.8); // Within 20% of target
       expect(successfulOperations / totalOperations).toBeGreaterThan(1 - testConfig.errorThreshold);
-      expect(metrics.averageResponseTime!).toBeLessThan(testConfig.maxResponseTime);
-      expect(metrics.p95ResponseTime!).toBeLessThan(testConfig.maxResponseTime * 2);
+      expect(metrics.(averageResponseTime ?? "default")).toBeLessThan(testConfig.maxResponseTime);
+      expect(metrics.(p95ResponseTime ?? "default")).toBeLessThan(testConfig.maxResponseTime * 2);
 
       // Memory usage should be reasonable
-      const memoryGrowth = metrics.memoryUsage!.peak.heapUsed - metrics.memoryUsage!.initial.heapUsed;
+      const memoryGrowth = metrics.(memoryUsage ?? "default").peak.heapUsed - metrics.(memoryUsage ?? "default").initial.heapUsed;
       expect(memoryGrowth).toBeLessThan(200 * 1024 * 1024); // Less than 200MB growth
     });
 
@@ -579,7 +579,7 @@ describe('CUA Performance and Scalability Tests', () => {
       // Verify mixed operations performance
       expect(operationsPerSecond).toBeGreaterThan(testConfig.targetThroughput * 0.7);
       expect(successfulOperations / totalOperations).toBeGreaterThan(0.95);
-      expect(metrics.averageResponseTime!).toBeLessThan(testConfig.maxResponseTime);
+      expect(metrics.(averageResponseTime ?? "default")).toBeLessThan(testConfig.maxResponseTime);
     });
   });
 
@@ -768,7 +768,7 @@ describe('CUA Performance and Scalability Tests', () => {
       expect(totalOperations).toBeGreaterThan(1000); // Minimum operations under stress
       expect(failureRate).toBeLessThan(0.1); // Less than 10% failure rate under stress
       expect(metrics.operationsPerSecond).toBeGreaterThan(50); // Minimum throughput under stress
-      expect(metrics.cpuUsage!.peak).toBeLessThan(100); // Should not max out CPU
+      expect(metrics.(cpuUsage ?? "default").peak).toBeLessThan(100); // Should not max out CPU
     });
 
     it('should recover gracefully from memory pressure', async () => {
@@ -825,7 +825,7 @@ describe('CUA Performance and Scalability Tests', () => {
 
       // Memory pressure recovery assertions
       expect(successfulOps / memoryIntensiveOperations).toBeGreaterThan(0.8); // At least 80% success under memory pressure
-      expect(metrics.memoryUsage!.growth).toBeLessThan(500 * 1024 * 1024); // Memory growth under 500MB
+      expect(metrics.(memoryUsage ?? "default").growth).toBeLessThan(500 * 1024 * 1024); // Memory growth under 500MB
     });
   });
 
@@ -842,7 +842,7 @@ describe('CUA Performance and Scalability Tests', () => {
 
       for (const config of scalabilityConfigurations) {
         const testConfig: LoadTestConfiguration = {
-          testName: `scalability_${config.concurrentUsers}_users`,
+          testName: `scalability${config.concurrentUsers}_users`,
           concurrentUsers: config.concurrentUsers,
           operationsPerUser: config.operationsPerUser,
           rampUpTime: 2000,
@@ -1004,7 +1004,7 @@ describe('CUA Performance and Scalability Tests', () => {
    * Generate unique test ID
    */
   function generateTestId(): string {
-    return `perf_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    return `perf${Date.now()}${Math.random().toString(36).substring(7)}`;
   }
 
   /**
@@ -1014,15 +1014,15 @@ describe('CUA Performance and Scalability Tests', () => {
     const bottlenecks: string[] = [];
     
     // Simple heuristics for bottleneck identification
-    if (metrics.cpuUsage!.peak > 80) {
+    if (metrics.(cpuUsage ?? "default").peak > 80) {
       bottlenecks.push('CPU');
     }
     
-    if (metrics.memoryUsage!.growth > 100 * 1024 * 1024) { // > 100MB growth
+    if (metrics.(memoryUsage ?? "default").growth > 100 * 1024 * 1024) { // > 100MB growth
       bottlenecks.push('Memory');
     }
     
-    if (metrics.p95ResponseTime! > metrics.averageResponseTime! * 3) {
+    if (metrics.(p95ResponseTime ?? "default") > metrics.(averageResponseTime ?? "default") * 3) {
       bottlenecks.push('ResponseTime');
     }
     
@@ -1033,8 +1033,8 @@ describe('CUA Performance and Scalability Tests', () => {
    * Calculate overall resource utilization
    */
   function calculateResourceUtilization(metrics: PerformanceMetrics): number {
-    const cpuUtilization = Math.min(metrics.cpuUsage!.average / 100, 1);
-    const memoryUtilization = Math.min(metrics.memoryUsage!.peak.heapUsed / (1024 * 1024 * 1024), 1); // Normalize to 1GB
+    const cpuUtilization = Math.min(metrics.(cpuUsage ?? "default").average / 100, 1);
+    const memoryUtilization = Math.min(metrics.(memoryUsage ?? "default").peak.heapUsed / (1024 * 1024 * 1024), 1); // Normalize to 1GB
     
     return (cpuUtilization + memoryUtilization) / 2;
   }

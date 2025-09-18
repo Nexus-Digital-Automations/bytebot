@@ -394,7 +394,7 @@ describe('MCP Computer Use Integration Tests', () => {
       const results = await Promise.all(
         operations.map(async (op, index) => {
           const metrics = await executeAndTrackMcpOperation(
-            `${op.toolName}_${index}`,
+            `${op.toolName}${index}`,
             op.operation,
             op.parameters
           );
@@ -580,14 +580,14 @@ describe('MCP Computer Use Integration Tests', () => {
    * Generate unique operation ID
    */
   function generateOperationId(): string {
-    return `mcp_op_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    return `mcp_op${Date.now()}${Math.random().toString(36).substring(7)}`;
   }
 
   /**
    * Generate unique workflow ID
    */
   function generateWorkflowId(): string {
-    return `mcp_workflow_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    return `mcp_workflow${Date.now()}${Math.random().toString(36).substring(7)}`;
   }
 
   /**
@@ -613,7 +613,7 @@ describe('MCP Computer Use Integration Tests', () => {
    */
   async function createTestDataDirectory(): Promise<void> {
     try {
-      await fs.mkdir(testDataDir, { recursive: true });
+      await fs.mkdir(_testDataDir, { recursive: true });
     } catch {
       // Directory might already exist
     }
@@ -624,7 +624,7 @@ describe('MCP Computer Use Integration Tests', () => {
    */
   async function cleanupTestData(): Promise<void> {
     try {
-      await fs.rm(testDataDir, { recursive: true, force: true });
+      await fs.rm(_testDataDir, { recursive: true, force: true });
     } catch (error) {
       console.warn('Failed to cleanup MCP integration test data:', error);
     }

@@ -35,7 +35,7 @@ describe('InputTrackingController', () => {
   let service: MockInputTrackingService;
   let logger: MockLogger;
 
-  const operationId = `input_tracking_controller_test_${Date.now()}`;
+  const operationId = `input_tracking_controller_test${Date.now()}`;
 
   // Mock users for testing
   const mockAdminUser: MockByteBotdUser = {
@@ -67,7 +67,7 @@ describe('InputTrackingController', () => {
     isActive: true,
   };
 
-  const _mockViewerUser: MockByteBotdUser = {
+  const mockViewerUser: MockByteBotdUser = {
     id: 'viewer_user_1',
     sub: 'viewer_user_1',
     username: 'viewer',
@@ -221,8 +221,8 @@ describe('InputTrackingController', () => {
       let callCount = 0;
       Date.now = jest.fn(() => originalDateNow() + callCount++);
 
-      const _result1 = controller.start(mockAdminUser);
-      const _result2 = controller.start(mockOperatorUser);
+      const result1 = controller.start(mockAdminUser);
+      const result2 = controller.start(mockOperatorUser);
 
       expect(logger.log).toHaveBeenCalledTimes(2);
       const firstCallArgs = (logger.log as jest.Mock).mock
@@ -457,7 +457,7 @@ describe('InputTrackingController', () => {
           return Promise.resolve(
             controller.start({
               ...mockAdminUser,
-              id: `user_${_index}`,
+              id: `user${_index}`,
             }),
           );
         });
@@ -469,7 +469,7 @@ describe('InputTrackingController', () => {
       expect(results).toHaveLength(10);
       results.forEach((result, _index) => {
         expect(result.status).toBe('started');
-        expect(result.userId).toBe(`user_${_index}`);
+        expect(result.userId).toBe(`user${_index}`);
       });
 
       // Should complete within 100ms total (very efficient)

@@ -135,7 +135,7 @@ export class CompressionInterceptor implements NestInterceptor {
     const response = context.switchToHttp().getResponse<Response>();
 
     return next.handle().pipe(
-      mergeMap((data: unknown) => {
+      _mergeMap((data: unknown) => {
         return from(this.handleCompressionAsync(data, request, response));
       }),
     );
@@ -198,7 +198,7 @@ export class CompressionInterceptor implements NestInterceptor {
   ): Promise<CompressionResult> {
     const operationId =
       (request as Request & { operationId?: string }).operationId ??
-      `compress_${Date.now()}`;
+      `compress${Date.now()}`;
     const startTime = Date.now();
 
     try {
@@ -322,7 +322,7 @@ export class CompressionInterceptor implements NestInterceptor {
   ): Promise<Buffer> {
     switch (algorithm) {
       case 'brotli':
-        return await brotliCompressAsync(data, {
+        return await brotliCompressAsync(_data, {
           params: {
             [zlibConstants.BROTLI_PARAM_QUALITY]: this.config.level,
           },
@@ -402,7 +402,7 @@ export class CompressionInterceptor implements NestInterceptor {
       }
     } catch (_error) {
       this.logger.error(
-        `Failed to update compression statistics: ${_error instanceof Error ? _error.message : 'Unknown _error'}`,
+        `Failed to update compression statistics: ${error instanceof Error ? _error.message : 'Unknown _error'}`,
       );
     }
   }
@@ -421,7 +421,7 @@ export class CompressionInterceptor implements NestInterceptor {
    * Clear compression statistics
    */
   clearStats(): void {
-    Object.assign(this.stats, {
+    Object.assign(_this.stats, {
       totalRequests: 0,
       compressedRequests: 0,
       compressionRatio: 0,

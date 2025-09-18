@@ -185,10 +185,10 @@ export class GoogleService {
   private tokenUsage = { prompt: 0, candidates: 0 };
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `google_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `google_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.apiKey = this.configService.get<string>('GOOGLE_AI_API_KEY', '');
     if (!this.apiKey) {

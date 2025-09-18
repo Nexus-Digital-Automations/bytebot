@@ -42,7 +42,7 @@ interface HealthServiceWithPrivateMethods {
 describe('HealthService', () => {
   let service: HealthService;
   let serviceWithPrivates: HealthServiceWithPrivateMethods;
-  let _logger: jest.Mocked<Logger>;
+  let logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
     const mockParlantValidationService: Partial<ParlantHealthMetricsValidationService> = {
@@ -82,7 +82,7 @@ describe('HealthService', () => {
 
     service = module.get<HealthService>(HealthService);
     serviceWithPrivates = service as unknown as HealthServiceWithPrivateMethods;
-    _logger = module.get<Logger>(Logger) as jest.Mocked<Logger>;
+    logger = module.get<Logger>(Logger) as jest.Mocked<Logger>;
   });
 
   describe('Service Initialization', () => {
@@ -243,7 +243,7 @@ describe('HealthService', () => {
         expect(result.modules).toHaveProperty('status', 'up');
         expect(result.modules).toHaveProperty('modules');
 
-        const _modules = result.modules?.modules as Record<string, boolean> | undefined;
+        const modules = result.modules?.modules as Record<string, boolean> | undefined;
         expect(_modules).toHaveProperty('computer-use', true);
         expect(_modules).toHaveProperty('input-tracking', true);
         expect(_modules).toHaveProperty('cua-integration', true);

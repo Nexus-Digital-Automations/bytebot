@@ -222,7 +222,7 @@ export class EnterpriseApiRateLimitService {
   };
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
     this.logger.log('Enterprise API Rate Limiting Service initialized with MAXIMUM Parlant integration');
@@ -236,7 +236,7 @@ export class EnterpriseApiRateLimitService {
    * Evaluate rate limit with comprehensive Parlant validation
    */
   async evaluateRateLimit(request: RateLimitRequest): Promise<RateLimitDecision> {
-    const operationId = `rate_limit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `rate_limit${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     
     this.analytics.totalRequests++;
@@ -320,7 +320,7 @@ export class EnterpriseApiRateLimitService {
       };
     }
   ): Promise<{ approved: boolean; reason: string; duration?: number }> {
-    const operationId = `rate_override_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `rate_override${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Processing rate limit override request`, {
       operationId,
@@ -342,7 +342,7 @@ export class EnterpriseApiRateLimitService {
         actionDescription: `Rate limit override request: ${request.overrideRequest.reason}`,
         context: {
           userId: request.userId,
-          sessionId: request.conversationalContext?.sessionId ?? `override_${Date.now()}`,
+          sessionId: request.conversationalContext?.sessionId ?? `override${Date.now()}`,
           agentRole: 'RATE_LIMIT_MANAGER',
           securityLevel: this.mapUrgencyToSecurityLevel(request.overrideRequest.urgencyLevel),
           conversationHistory: request.conversationalContext?.conversationHistory?.map(h => ({
@@ -455,7 +455,7 @@ export class EnterpriseApiRateLimitService {
         : `Rate limit check for ${request.endpoint} - validate normal request`,
       context: {
         userId: request.userId,
-        sessionId: request.conversationalContext?.sessionId ?? `rate_${Date.now()}`,
+        sessionId: request.conversationalContext?.sessionId ?? `rate${Date.now()}`,
         agentRole: 'RATE_LIMITER',
         securityLevel: this.mapRiskLevelToSecurityLevel(config.riskLevel),
         conversationHistory: request.conversationalContext?.conversationHistory?.map(h => ({
@@ -571,7 +571,7 @@ export class EnterpriseApiRateLimitService {
     if (!existing || now >= existing.resetTime) {
       // Create new tracking window
       const resetTime = new Date(now.getTime() + config.windowMs);
-      this.rateLimitTracking.set(trackingKey, {
+      this.rateLimitTracking.set(_trackingKey, {
         count: 0,
         resetTime,
         firstRequest: now,
@@ -733,7 +733,7 @@ export class EnterpriseApiRateLimitService {
    * Sanitize endpoint for function name generation
    */
   private sanitizeEndpointForFunction(endpoint: string): string {
-    return endpoint.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+    return endpoint.replace(/[^a-zA-Z0-9]/g, '').replace(/_+/g, '').replace(/^_|_$/g, '');
   }
 
   /**

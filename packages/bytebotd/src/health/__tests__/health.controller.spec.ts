@@ -45,7 +45,7 @@ describe('HealthController', () => {
   let diskHealthIndicator: jest.Mocked<DiskHealthIndicator>;
   let mockLogger: jest.Mocked<Logger>;
 
-  const operationId = `health_controller_test_${Date.now()}`;
+  const operationId = `health_controller_test${Date.now()}`;
 
   // Mock user for authenticated calls
   const mockUser: ByteBotdUser = {
@@ -583,7 +583,7 @@ describe('HealthController', () => {
         .map(() => controller.getHealth(mockUser));
       await Promise.all(promises);
 
-      // Should log debug messages for each request (20 total: 10 request + 10 completion)
+      // Should log debug messages for each request (_20 total: 10 request + 10 completion)
       expect(mockLogger.debug).toHaveBeenCalledTimes(20);
 
       console.log(`[${testId}] Concurrent logging test completed`);

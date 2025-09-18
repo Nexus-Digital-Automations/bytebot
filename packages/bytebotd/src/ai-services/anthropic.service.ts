@@ -131,10 +131,10 @@ export class AnthropicService {
   private tokenUsage = { input: 0, output: 0 };
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `anthropic_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `anthropic_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.apiKey = this.configService.get<string>('ANTHROPIC_API_KEY', '');
     if (!this.apiKey) {
@@ -411,7 +411,7 @@ export class AnthropicService {
     // For now, return mock response to demonstrate structure
     
     const mockResponse: ClaudeChatResponse = {
-      id: `claude_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `claude${Date.now()}${Math.random().toString(36).substring(7)}`,
       content: `Mock Claude ${request.config.model} response for ${request.messages.length} messages`,
       role: 'assistant',
       model: request.config.model,
@@ -439,7 +439,7 @@ export class AnthropicService {
     
     // Mock streaming response
     const chunks: ClaudeStreamChunk[] = [
-      { type: 'message_start', message: { id: `stream_${Date.now()}`, role: 'assistant', model: request.config.model } },
+      { type: 'message_start', message: { id: `stream${Date.now()}`, role: 'assistant', model: request.config.model } },
       { type: 'content_block_delta', delta: { text: 'Mock streaming response ' } },
       { type: 'content_block_delta', delta: { text: 'from Claude with validation.' } },
       { type: 'message_stop' },
@@ -458,7 +458,7 @@ export class AnthropicService {
     // TODO: Implement actual Anthropic tool calling SDK integration
     
     const mockToolCall: ClaudeToolCall = {
-      id: `tool_${Date.now()}`,
+      id: `tool${Date.now()}`,
       type: 'function',
       function: {
         name: request.tools?.[0]?.name ?? 'mock_function',
@@ -467,7 +467,7 @@ export class AnthropicService {
     };
 
     const mockResponse: ClaudeChatResponse = {
-      id: `claude_tools_${Date.now()}`,
+      id: `claude_tools${Date.now()}`,
       content: 'Function call executed',
       role: 'assistant',
       model: request.config.model,

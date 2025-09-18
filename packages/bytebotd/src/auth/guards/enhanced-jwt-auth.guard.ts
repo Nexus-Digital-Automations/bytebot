@@ -116,7 +116,7 @@ interface JwtAuthInfo {
 /**
  * Verification callback type for JWT authentication
  */
-type _JwtVerifyCallback = (
+type JwtVerifyCallback = (
   error?: Error | null,
   user?: ByteBotdUser | false,
 ) => void;
@@ -153,7 +153,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   >();
 
   constructor(
-    private readonly reflector: Reflector,
+    _private readonly reflector: Reflector,
     private readonly jwtService: JwtService,
   ) {
     super();
@@ -339,7 +339,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
       // Validate and decode refresh token
       const refreshPayload =
-        await this.jwtService.verifyAsync<EnhancedJwtPayload>(refreshToken, {
+        await this.jwtService.verifyAsync<EnhancedJwtPayload>(_refreshToken, {
           secret: process.env.JWT_REFRESH_SECRET ?? process.env.JWT_SECRET,
         });
 
@@ -435,7 +435,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       screenAccessLevel: refreshPayload.screenAccessLevel,
     };
 
-    return this.jwtService.signAsync(accessPayload, {
+    return this.jwtService.signAsync(_accessPayload, {
       expiresIn: process.env.JWT_ACCESS_EXPIRY ?? '15m',
       issuer: 'bytebotd-enhanced',
       audience: 'computer-control',
@@ -502,7 +502,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
     try {
       const payload = await this.jwtService.verifyAsync<EnhancedJwtPayload>(
-        token,
+        _token,
         {
           secret: process.env.SERVICE_JWT_SECRET ?? process.env.JWT_SECRET,
           audience: 'service-to-service',
@@ -516,7 +516,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       );
 
       // Cache result for 5 minutes
-      this.serviceAuthCache.set(token, {
+      this.serviceAuthCache.set(_token, {
         valid: isValid,
         expires: Date.now() + 5 * 60 * 1000,
       });
@@ -537,7 +537,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       });
 
       // Cache negative result for 1 minute
-      this.serviceAuthCache.set(token, {
+      this.serviceAuthCache.set(_token, {
         valid: false,
         expires: Date.now() + 60 * 1000,
       });
@@ -801,7 +801,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
    * Check if user exceeds concurrent session limit
    */
   private exceedsConcurrentSessionLimit(
-    _userId: string,
+    userId: string,
   ): Promise<boolean> {
     // TODO: In a real implementation, check against session store
     // For now, assume limit is not exceeded
@@ -829,7 +829,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     const now = Date.now();
 
     // Clean up refresh attempts (older than 15 minutes)
-    const _fifteenMinutesAgo = now - 15 * 60 * 1000;
+    const fifteenMinutesAgo = now - 15 * 60 * 1000;
 
     // Clean up service auth cache (expired entries)
     for (const [token, entry] of Array.from(this.serviceAuthCache.entries())) {

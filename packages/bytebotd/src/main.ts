@@ -19,13 +19,13 @@ import type { Socket } from 'net';
  * Initializes NestJS application with proxy middleware and WebSocket handling
  */
 async function bootstrap(): Promise<void> {
-  const _logger = new Logger('Bootstrap');
+  const logger = new Logger('Bootstrap');
 
   try {
     const app = await NestFactory.create(AppModule);
 
     // Get configuration service for standardized security
-    const _configService = app.get(ConfigService);
+    const configService = app.get(ConfigService);
     const environment = process.env.NODE_ENV ?? 'development';
 
     // Deploy standardized security middleware for BytebotD - MAXIMUM SECURITY
@@ -107,8 +107,8 @@ async function bootstrap(): Promise<void> {
     );
 
     // Configure body parser with increased payload size limit (50MB)
-    app.use(json({ limit: '50mb' }));
-    app.use(urlencoded({ limit: '50mb', extended: true }));
+    app.use(_json({ limit: '50mb' }));
+    app.use(_urlencoded({ limit: '50mb', extended: true }));
 
     // Enable CORS with strict origin validation - SECURITY CRITICAL
     const baseAllowedOrigins = [
@@ -205,7 +205,7 @@ async function bootstrap(): Promise<void> {
     // Additional security headers for BytebotD
     app.use(
       (
-        _req: express.Request,
+        req: express.Request,
         res: express.Response,
         next: express.NextFunction,
       ): void => {
@@ -235,7 +235,7 @@ async function bootstrap(): Promise<void> {
     // Selective upgrade routing with proper typing
     server.on(
       'upgrade',
-      (_req: IncomingMessage, socket: Socket, head: Buffer) => {
+      (req: IncomingMessage, socket: Socket, head: Buffer) => {
         if (_req.url?.startsWith('/websockify')) {
           // Type-safe upgrade handling - http-proxy-middleware expects a Socket from 'net'
           if (wsProxy && typeof wsProxy.upgrade === 'function') {

@@ -169,10 +169,10 @@ export class TasksService {
   private autonomousExecutions = 0;
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `tasks_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `tasks_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Tasks AI Service initialized with MAXIMUM Parlant integration`, {
       parlantEnabled: true,
@@ -475,7 +475,7 @@ export class TasksService {
       },
       dependencies: {
         required: task.dependencies,
-        optional: [`optional_${index}`],
+        optional: [`optional${index}`],
         conflicts: [],
       },
       recommendations: {
@@ -490,7 +490,7 @@ export class TasksService {
     }));
 
     const mockResponse: TaskProcessingResponse = {
-      id: `task_processing_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `task_processing${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
       operationId: request.operationId,
       conversationId,
@@ -499,7 +499,7 @@ export class TasksService {
         analysis: request.processingMode === 'analyze' ? mockAnalysis : undefined,
         executionPlan: request.processingMode === 'plan' ? {
           steps: request.tasks.map((task, index) => ({
-            id: `step_${index}`,
+            id: `step${index}`,
             action: `Execute ${task.name}`,
             estimatedDuration: 300 + (index * 200),
             dependencies: task.dependencies,
@@ -539,7 +539,7 @@ export class TasksService {
     const partialTasks = request.tasks.length > 2 ? request.tasks.slice(-2, -1).map(t => t.id) : [];
 
     const mockResponse: TaskProcessingResponse = {
-      id: `autonomous_execution_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `autonomous_execution${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
       operationId: request.operationId,
       conversationId,
@@ -576,7 +576,7 @@ export class TasksService {
     // TODO: Implement actual AI workflow optimization
     
     const mockResponse: TaskProcessingResponse = {
-      id: `optimization_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `optimization${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
       operationId: request.operationId,
       conversationId,

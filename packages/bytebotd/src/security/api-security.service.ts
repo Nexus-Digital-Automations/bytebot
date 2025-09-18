@@ -229,10 +229,10 @@ export class ApiSecurityService {
   private averageScanTime = 0;
 
   constructor(
-    private readonly parlantService: ParlantIntegrationService,
+    _private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `api_security_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `api_security_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing API Security Service with Parlant integration`, {
       parlantIntegrationEnabled: true,
@@ -371,7 +371,7 @@ export class ApiSecurityService {
     requestDetails: ApiRequestDetails,
     context: ParlantConversationContext
   ): Promise<ApiThreatDetectionResult> {
-    const operationId = `detect_threat_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `detect_threat${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(
       `[${operationId}] Analyzing API request for threats with Parlant validation`,
@@ -479,7 +479,7 @@ export class ApiSecurityService {
     policy: RateLimitingPolicy,
     context: ParlantConversationContext
   ): Promise<{ configured: boolean; policyId: string; conversationId: string }> {
-    const operationId = `configure_rate_limit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `configure_rate_limit${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(
       `[${operationId}] Configuring API rate limiting with Parlant validation`,
@@ -613,7 +613,7 @@ export class ApiSecurityService {
     request: ApiSecurityScanRequest,
     conversationId: string
   ): Promise<ApiSecurityScanResult> {
-    const scanId = `scan_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const scanId = `scan${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = new Date();
     
     // Mock implementation - would integrate with actual security scanning tools
@@ -654,7 +654,7 @@ export class ApiSecurityService {
 
   private async scanEndpointForVulnerabilities(
     endpoint: string,
-    _scanType: ApiSecurityScanType
+    scanType: ApiSecurityScanType
   ): Promise<ApiSecurityVulnerability[]> {
     // Mock vulnerability detection - would use actual security scanning tools
     const vulnerabilities: ApiSecurityVulnerability[] = [];
@@ -662,7 +662,7 @@ export class ApiSecurityService {
     // Simulate different types of vulnerabilities based on scan type
     if (Math.random() > 0.8) { // 20% chance of vulnerability
       vulnerabilities.push({
-        id: `vuln_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+        id: `vuln${Date.now()}${Math.random().toString(36).substring(7)}`,
         type: ApiThreatType.SECURITY_MISCONFIGURATION,
         severity: ApiSecurityRiskLevel.MEDIUM,
         description: `Security misconfiguration detected in ${endpoint}`,
@@ -679,7 +679,7 @@ export class ApiSecurityService {
   private async analyzeRequestForThreats(
     requestDetails: ApiRequestDetails
   ): Promise<ApiThreatDetectionResult> {
-    const detectionId = `threat_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const detectionId = `threat${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     // Mock threat analysis - would use ML models and pattern matching
     let threatType = ApiThreatType.SECURITY_MISCONFIGURATION;
@@ -750,7 +750,7 @@ export class ApiSecurityService {
     });
   }
 
-  private async updateEndpointSecurityProfiles(_scanResult: ApiSecurityScanResult): Promise<void> {
+  private async updateEndpointSecurityProfiles(scanResult: ApiSecurityScanResult): Promise<void> {
     // Update security profiles for scanned endpoints
     // Implementation would update endpoint profiles with scan results
   }

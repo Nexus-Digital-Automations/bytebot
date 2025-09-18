@@ -142,7 +142,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
     },
   };
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(_private readonly configService: ConfigService) {
     this.logger.log('Enterprise API Interceptor initialized');
     this.startMetricsCleanup();
   }
@@ -267,7 +267,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
    * Build comprehensive request context
    */
   private buildRequestContext(request: Request): EnterpriseRequestContext {
-    const operationId = `intercept_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `intercept${Date.now()}${Math.random().toString(36).substring(7)}`;
     const extendedRequest = request as ExtendedRequest;
     const endpoint = `${request.method}:${extendedRequest.route?.path ?? request.url}`;
     
@@ -478,7 +478,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
     // Add enterprise metadata to response
     return {
       ...data,
-      _enterprise: {
+      enterprise: {
         operationId: metadata.operationId,
         timestamp: metadata.timestamp,
         processingTime: metadata.processingTime,

@@ -131,7 +131,7 @@ interface App {
 
 /**
  * Type-safe helper function to create supertest requests
- * Eliminates need for 'as any' casting with proper typing
+ * Eliminates need for 'as unknown' casting with proper typing
  */
 function createRequest(app: INestApplication) {
   return request(app.getHttpServer() as Server);
@@ -252,7 +252,7 @@ class MockSecurityJwtService {
     return Promise.resolve(user);
   }
 
-  sign(_payload: Record<string, unknown>) {
+  sign(payload: Record<string, unknown>) {
     return 'generated-token';
   }
 }
@@ -264,9 +264,9 @@ describe('Controller Security Integration Tests', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
   let jwtService: JwtService;
-  let _configService: ConfigService;
+  let configService: ConfigService;
 
-  const operationId = `controller_security_test_${Date.now()}`;
+  const operationId = `controller_security_test${Date.now()}`;
   const securityLogger = {
     info: (message: string, meta?: Record<string, unknown>) =>
       console.log(`[CONTROLLER-SECURITY] ${message}`, meta ?? ''),
@@ -316,13 +316,13 @@ describe('Controller Security Integration Tests', () => {
 
     app = moduleRef.createNestApplication();
     jwtService = moduleRef.get<JwtService>(JwtService);
-    _configService = moduleRef.get<ConfigService>(ConfigService);
+    configService = moduleRef.get<ConfigService>(ConfigService);
 
     const controller = new MockSecureController();
-    const _reflector = moduleRef.get<Reflector>(Reflector);
+    const reflector = moduleRef.get<Reflector>(Reflector);
 
     // Configure security middleware
-    app.use((_req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
+    app.use((req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
       // Security headers middleware
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('X-Frame-Options', 'DENY');
@@ -446,7 +446,7 @@ describe('Controller Security Integration Tests', () => {
     // Setup routes
     (app as App)
       .getHttpAdapter()
-      .get('/public/data', (_req: SafeRequest, res: SafeResponse) => {
+      .get('/public/data', (req: SafeRequest, res: SafeResponse) => {
         res.json(controller.getPublicData());
       });
 
@@ -1034,7 +1034,7 @@ describe('Controller Security Integration Tests', () => {
         .fill(null)
         .map(() => {
           return new Promise<{ error: boolean; status?: number }>((resolve) => {
-            const _req = createRequest(app)
+            const req = createRequest(app)
               .post('/api/resources')
               .set('Authorization', 'Bearer admin-token')
               .send({ name: 'Slow Request' })
@@ -1070,7 +1070,7 @@ describe('Controller Security Integration Tests', () => {
         'User-Agent': 'Normal-Agent\r\nX-Evil-Header: injected',
       };
 
-      const _response = await createRequest(app)
+      const response = await createRequest(app)
         .get('/api/protected')
         .set(maliciousHeaders)
         .expect((res) => {
@@ -1096,7 +1096,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of splittingPayloads) {
-        const _response = await createRequest(app)
+        const response = await createRequest(app)
           .get('/api/users/search')
           .query({ q: _payload })
           .set('Authorization', 'Bearer operator-token')
@@ -1117,7 +1117,7 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Testing request smuggling prevention`);
 
       // Attempt request smuggling with conflicting headers
-      const _response = await createRequest(app)
+      const response = await createRequest(app)
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .set('Content-Length', '100')
@@ -1146,7 +1146,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of traversalPayloads) {
-        const _response = await createRequest(app)
+        const response = await createRequest(app)
           .delete(`/api/resources/${encodeURIComponent(_payload)}`)
           .set('Authorization', 'Bearer admin-token')
           .expect((res) => {

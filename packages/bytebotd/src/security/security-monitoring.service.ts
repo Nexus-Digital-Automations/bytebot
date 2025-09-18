@@ -164,10 +164,10 @@ export class SecurityMonitoringService {
   private falsePositives = 0;
 
   constructor(
-    private readonly parlantService: ParlantIntegrationService,
+    _private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `security_monitor_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `security_monitor_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Security Monitoring Service with Parlant integration`, {
       parlantIntegrationEnabled: true,
@@ -303,7 +303,7 @@ export class SecurityMonitoringService {
     event: SecurityEvent,
     context: ParlantConversationContext
   ): Promise<{ processed: boolean; actionTaken: string; conversationId: string }> {
-    const operationId = `process_event_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `process_event${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     this.logger.log(
@@ -327,7 +327,7 @@ export class SecurityMonitoringService {
           severity: event.severity,
           riskScore: event.riskScore,
         },
-        actionDescription: `Process security event: ${event.eventType} with ${event.severity} severity (risk score: ${event.riskScore})`,
+        actionDescription: `Process security event: ${event.eventType} with ${event.severity} severity (_risk score: ${event.riskScore})`,
         context,
         riskLevel: event.severity === SecurityEventSeverity.CRITICAL ? RiskLevel.CRITICAL : RiskLevel.HIGH,
         operationId,
@@ -420,7 +420,7 @@ export class SecurityMonitoringService {
     monitoringId: string,
     context: ParlantConversationContext
   ): Promise<SecurityMonitoringResult> {
-    const operationId = `stop_monitoring_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `stop_monitoring${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(
       `[${operationId}] Stopping security monitoring with Parlant validation`,
@@ -531,7 +531,7 @@ export class SecurityMonitoringService {
     request: SecurityMonitoringRequest,
     conversationId: string
   ): Promise<SecurityMonitoringResult> {
-    const monitoringId = `monitor_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const monitoringId = `monitor${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     const result: SecurityMonitoringResult = {
       monitoringId,
@@ -601,7 +601,7 @@ export class SecurityMonitoringService {
 
   private async triggerSecurityAlert(
     event: SecurityEvent,
-    _context: ParlantConversationContext
+    context: ParlantConversationContext
   ): Promise<void> {
     this.alertHistory.push(event);
     

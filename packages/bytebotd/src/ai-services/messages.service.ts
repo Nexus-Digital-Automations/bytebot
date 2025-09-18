@@ -150,10 +150,10 @@ export class MessagesService {
   private tokensProcessed = { input: 0, output: 0 };
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `messages_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `messages_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Messages AI Service initialized with MAXIMUM Parlant integration`, {
       parlantEnabled: true,
@@ -538,7 +538,7 @@ export class MessagesService {
     }));
 
     const mockResponse: MessageProcessingResponse = {
-      id: `analysis_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `analysis${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
       operationId: request.operationId,
       conversationId,
@@ -571,7 +571,7 @@ export class MessagesService {
     // TODO: Implement actual AI message generation
     
     const mockResponse: MessageProcessingResponse = {
-      id: `generation_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `generation${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
       operationId: request.operationId,
       conversationId,
@@ -602,7 +602,7 @@ export class MessagesService {
     // TODO: Implement actual AI translation
     
     const mockResponse: MessageProcessingResponse = {
-      id: `translation_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `translation${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
       operationId: request.operationId,
       conversationId,
@@ -633,7 +633,7 @@ export class MessagesService {
     // TODO: Implement actual AI classification
     
     const mockResponse: MessageProcessingResponse = {
-      id: `classification_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `classification${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
       operationId: request.operationId,
       conversationId,

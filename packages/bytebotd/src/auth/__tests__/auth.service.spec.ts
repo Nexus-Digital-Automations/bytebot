@@ -73,7 +73,7 @@ interface JwtPayload {
 // Mock implementation for testing Phase 1 requirements
 class MockAuthService {
   constructor(
-    private jwtService: JwtService,
+    _private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
 
@@ -120,7 +120,7 @@ class MockAuthService {
 
   async refreshToken(refreshToken: string): Promise<TokenResponse> {
     try {
-      const payload = this.jwtService.verify(refreshToken, {
+      const payload = this.jwtService.verify(_refreshToken, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       }) as JwtPayload;
 
@@ -149,7 +149,7 @@ class MockAuthService {
       role: user.role,
     };
 
-    const accessToken = this.jwtService.sign(payload, {
+    const accessToken = this.jwtService.sign(_payload, {
       secret: this.configService.get('JWT_SECRET'),
       expiresIn: '15m', // 15 minutes as per research spec
     });
@@ -234,9 +234,9 @@ class MockAuthService {
 describe('AuthService', () => {
   let service: MockAuthService;
   let jwtService: JwtService;
-  let _configService: ConfigService;
+  let configService: ConfigService;
 
-  const operationId = `auth_test_${Date.now()}`;
+  const operationId = `auth_test${Date.now()}`;
 
   beforeEach(async () => {
     console.log(`[${operationId}] Setting up AuthService test module`);
@@ -276,7 +276,7 @@ describe('AuthService', () => {
       module.get<ConfigService>(ConfigService),
     );
     jwtService = module.get<JwtService>(JwtService);
-    _configService = module.get<ConfigService>(ConfigService);
+    configService = module.get<ConfigService>(ConfigService);
 
     console.log(`[${operationId}] AuthService test setup completed`);
   });
@@ -452,7 +452,7 @@ describe('AuthService', () => {
       await service['generateTokens'](mockUser);
 
       expect(jwtService.sign).toHaveBeenCalledWith(
-        expectedAccessPayload,
+        _expectedAccessPayload,
         expect.objectContaining({
           secret: 'test-secret-key',
           expiresIn: '15m',
@@ -460,7 +460,7 @@ describe('AuthService', () => {
       );
 
       expect(jwtService.sign).toHaveBeenCalledWith(
-        expectedRefreshPayload,
+        _expectedRefreshPayload,
         expect.objectContaining({
           secret: 'test-refresh-secret-key',
           expiresIn: '7d',

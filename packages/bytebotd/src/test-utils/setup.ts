@@ -236,9 +236,9 @@ declare global {
   interface CustomMatchers<R = unknown> {
     toBeValidOperationId(): R;
     toBeValidBase64(): R;
-    toHaveReasonableExecutionTime(_maxMs: number): R;
+    toHaveReasonableExecutionTime(maxMs: number): R;
     toBeValidScreenshotResult(): R;
-    toBeValidFileResult(_operation: 'read' | 'write'): R;
+    toBeValidFileResult(operation: 'read' | 'write'): R;
     toBeValidOcrResult(): R;
   }
 }

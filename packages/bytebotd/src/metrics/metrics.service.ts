@@ -84,7 +84,7 @@ export class BytebotMetricsService {
   private readonly cpuUsage: Gauge<string>;
 
   constructor(
-    private readonly parlantValidationService: ParlantHealthMetricsValidationService,
+    _private readonly parlantValidationService: ParlantHealthMetricsValidationService,
   ) {
     this.logger.log('Metrics Service initializing with Prometheus client and Parlant validation');
 
@@ -252,7 +252,7 @@ export class BytebotMetricsService {
    * @returns Prometheus metrics string
    */
   async getPrometheusMetrics(): Promise<string> {
-    const operationId = `prometheus_${Date.now()}`;
+    const operationId = `prometheus${Date.now()}`;
     this.logger.debug(`[${operationId}] Collecting Prometheus metrics`);
 
     try {
@@ -480,12 +480,12 @@ export class BytebotMetricsService {
     table: string,
     duration: number,
   ): Promise<void> {
-    const operationId = `db_metrics_${Date.now()}`;
+    const operationId = `db_metrics${Date.now()}`;
     
     try {
       // PARLANT VALIDATION: Database metrics (MEDIUM risk - data sensitivity)
       const validation = await this.parlantValidationService.validateMetricsOperation(
-        MetricsOperationType.DATABASE_METRICS,
+        _MetricsOperationType.DATABASE_METRICS,
         {
           operation: 'database_query_metrics',
           dbOperation: operation,

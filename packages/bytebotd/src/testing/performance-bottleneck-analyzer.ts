@@ -246,7 +246,7 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
   ): Promise<PerformanceBottleneck[]> {
     console.log(`🔬 [ANALYZER] Analyzing function: ${functionName}`);
 
-    const analysisId = `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const analysisId = `analysis${Date.now()}${Math.random().toString(36).substr(2, 9)}`;
     const startTime = performance.now();
     const initialMemory = process.memoryUsage();
     const initialCpu = process.cpuUsage();
@@ -300,7 +300,7 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
 
       // Create error bottleneck
       const errorBottleneck: PerformanceBottleneck = {
-        id: `error_${analysisId}`,
+        id: `error${analysisId}`,
         type: 'algorithm',
         severity: 'critical',
         location: {
@@ -366,7 +366,7 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     const slowTests = testResults.filter(test => test.executionTime > averageTestTime * 3);
     slowTests.forEach(test => {
       const bottleneck: PerformanceBottleneck = {
-        id: `slow_test_${suiteName}_${test.testName}`,
+        id: `slow_test${suiteName}${test.testName}`,
         type: 'algorithm',
         severity: test.executionTime > 5000 ? 'critical' : 'high',
         location: {
@@ -408,7 +408,7 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     
     memoryIntensiveTests.forEach(test => {
       const bottleneck: PerformanceBottleneck = {
-        id: `memory_intensive_${suiteName}_${test.testName}`,
+        id: `memory_intensive${suiteName}${test.testName}`,
         type: 'memory',
         severity: test.memoryUsage > 100 * 1024 * 1024 ? 'high' : 'medium', // 100MB threshold
         location: {
@@ -587,7 +587,7 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     if (entry.entryType === 'measure' && entry.duration > 1000) {
       // Slow execution detected
       const bottleneck: PerformanceBottleneck = {
-        id: `slow_measure_${entry.name}_${Date.now()}`,
+        id: `slow_measure${entry.name}${Date.now()}`,
         type: 'algorithm',
         severity: entry.duration > 5000 ? 'critical' : 'high',
         location: {
@@ -642,7 +642,7 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     // CPU bottleneck detection
     if (metrics.cpuTime > 1000) { // More than 1 second of CPU time
       bottlenecks.push({
-        id: `cpu_${metrics.functionName}_${Date.now()}`,
+        id: `cpu${metrics.functionName}${Date.now()}`,
         type: 'cpu',
         severity: metrics.cpuTime > 5000 ? 'critical' : 'high',
         location: metrics.location,
@@ -678,7 +678,7 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     // Memory bottleneck detection
     if (metrics.memoryIncrease > 50 * 1024 * 1024) { // More than 50MB
       bottlenecks.push({
-        id: `memory_${metrics.functionName}_${Date.now()}`,
+        id: `memory${metrics.functionName}${Date.now()}`,
         type: 'memory',
         severity: metrics.memoryIncrease > 200 * 1024 * 1024 ? 'critical' : 'high',
         location: metrics.location,
@@ -803,8 +803,8 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     memoryImpact: number;
     reliabilityImpact: number;
   } {
-    const executionTimeImpact = bottlenecks.reduce((sum, b) => sum + b.impact.performanceDegradation, 0) / bottlenecks.length || 0;
-    const memoryImpact = bottlenecks.reduce((sum, b) => sum + b.impact.resourceWaste, 0) / bottlenecks.length || 0;
+    const executionTimeImpact = bottlenecks.reduce((sum, b) => sum + b.impact.performanceDegradation, 0) / bottlenecks.length ?? 0;
+    const memoryImpact = bottlenecks.reduce((sum, b) => sum + b.impact.resourceWaste, 0) / bottlenecks.length ?? 0;
     const reliabilityImpact = bottlenecks.filter(b => b.severity === 'critical').length * 25;
 
     return {
@@ -857,7 +857,7 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     bottlenecks.forEach(bottleneck => {
       bottleneck.recommendations.forEach(rec => {
         if (!priorityGroups.has(rec.priority)) {
-          priorityGroups.set(rec.priority, { impact: 0, recommendations: [] });
+          priorityGroups.set(_rec.priority, { impact: 0, recommendations: [] });
         }
         
         const group = priorityGroups.get(rec.priority)!;
@@ -924,7 +924,7 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
    * Generate unique session ID
    */
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `session${Date.now()}${Math.random().toString(36).substr(2, 9)}`;
   }
 }
 

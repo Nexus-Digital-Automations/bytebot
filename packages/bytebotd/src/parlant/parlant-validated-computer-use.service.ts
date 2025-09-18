@@ -99,10 +99,10 @@ export class ParlantValidatedComputerUseService {
   private averageValidationTime = 0;
 
   constructor(
-    private readonly originalComputerUseService: ComputerUseService,
+    _private readonly originalComputerUseService: ComputerUseService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
-    const operationId = `parlant_computer_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_computer_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Parlant-Validated Computer Use Service`, {
       hasOriginalService: !!this.originalComputerUseService,
@@ -130,7 +130,7 @@ export class ParlantValidatedComputerUseService {
     params: ComputerAction,
     context: ComputerActionValidationContext
   ): Promise<unknown> {
-    const operationId = `parlant_action_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_action${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     this.totalOperations++;
 
@@ -528,7 +528,7 @@ export class ParlantValidatedComputerUseService {
       /secret/i,
       /token/i,
       /key/i,
-      /^[A-Za-z0-9!@#$%^&*]{8,}$/, // Password-like pattern
+      /^[A-Za-z0-(9 ?? "default")@#$%^&*]{8,}$/, // Password-like pattern
     ];
 
     return passwordIndicators.some(pattern => pattern.test(text));

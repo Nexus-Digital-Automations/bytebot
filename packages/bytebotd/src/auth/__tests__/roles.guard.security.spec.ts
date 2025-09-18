@@ -40,7 +40,7 @@ interface AuthenticatedRequest {
 // Type guard for execution context
 function _isMockExecutionContext(context: unknown): context is ExecutionContext {
   return (
-    typeof context === 'object' &&
+    _typeof context === 'object' &&
     context !== null &&
     'switchToHttp' in context &&
     typeof (context as { switchToHttp: unknown }).switchToHttp === 'function'
@@ -90,7 +90,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
   let reflector: Reflector;
   let module: TestingModule;
 
-  const operationId = `roles_security_test_${Date.now()}`;
+  const operationId = `roles_security_test${Date.now()}`;
   const securityLogger = {
     info: (message: string, meta?: Record<string, unknown>) =>
       console.log(`[RBAC-SECURITY] ${message}`, meta ?? ''),
@@ -348,12 +348,12 @@ describe('RolesGuard - Advanced Security Tests', () => {
       // Simulate concurrent requests where user role might be modified
       const promises = contexts.map(async (context, _index) => {
         // Simulate role modification during concurrent requests
-        if (_index === 5) {
+        if (index === 5) {
           user.role = UserRole._ADMIN; // Simulate role escalation mid-flight
         }
 
         try {
-          const _result = await guard.canActivate(context);
+          const result = await guard.canActivate(context);
           return { success: true, index: _index };
         } catch (error) {
           return {
@@ -400,14 +400,14 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
       // Attempt to manipulate permissions during request
-      const _originalPermissions = Object.values(Permission);
+      const originalPermissions = Object.values(Permission);
       const maliciousRequest = context.switchToHttp().getRequest() as AuthenticatedRequest;
 
       // Try to inject permissions
       (maliciousRequest.user as unknown as Record<string, unknown>).permissions = [
         Permission._SYSTEM_ADMIN,
       ];
-      (maliciousRequest.user as unknown as Record<string, unknown>).__permissions = [
+      (maliciousRequest.user as unknown as Record<string, unknown>)._permissions = [
         Permission._SYSTEM_ADMIN,
       ];
 
@@ -483,8 +483,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       for (const testUser of users) {
         const user: ByteBotdUser = {
-          sub: `timing_${Date.now()}`,
-          id: `timing_${Date.now()}`,
+          sub: `timing${Date.now()}`,
+          id: `timing${Date.now()}`,
           email: 'timing@test.com',
           username: 'timinguser',
           role: testUser.role,
@@ -650,8 +650,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .map(
           (_, _index) =>
             ({
-              sub: `attacker_${_index}`,
-              id: `attacker_${_index}`,
+              sub: `attacker${_index}`,
+              id: `attacker${_index}`,
               email: `attacker${_index}@malicious.com`,
               username: `attacker${_index}`,
               role: UserRole._VIEWER,
@@ -675,7 +675,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
         );
 
         try {
-          const _result = await guard.canActivate(context);
+          const result = await guard.canActivate(context);
           return { success: true, userId: user.id };
         } catch (error) {
           return {
@@ -734,14 +734,14 @@ describe('RolesGuard - Advanced Security Tests', () => {
       // Simulate race condition by modifying user role during concurrent checks
       const promises = contexts.map(async (context, _index) => {
         // Simulate role modification during concurrent access
-        if (_index === 10) {
+        if (index === 10) {
           setTimeout(() => {
             sharedUser.role = UserRole._ADMIN;
           }, 10);
         }
 
         try {
-          const _result = await guard.canActivate(context);
+          const result = await guard.canActivate(context);
           return { success: true, index: _index };
         } catch (_error) {
           return { success: false, index: _index };
@@ -871,7 +871,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
           .mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
         try {
           return guard.canActivate(context);
-        } catch (_error: unknown) {
+        } catch (error: unknown) {
           return 'blocked';
         }
       });
@@ -900,8 +900,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
       // Simulate sustained authorization attacks
       for (let i = 0; i < 500; i++) {
         const attackUser: ByteBotdUser = {
-          sub: `memory_attacker_${i}`,
-          id: `memory_attacker_${i}`,
+          sub: `memory_attacker${i}`,
+          id: `memory_attacker${i}`,
           email: `attacker${i}@malicious.com`,
           username: `attacker${i}`,
           role: UserRole._VIEWER,

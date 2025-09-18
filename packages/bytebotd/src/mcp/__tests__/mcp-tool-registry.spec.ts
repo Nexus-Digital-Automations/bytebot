@@ -298,7 +298,7 @@ class ToolRegistryTestData {
   static generateToolExecutionResult(toolName: string, success = true) {
     const baseResult = {
       success,
-      operationId: `${toolName}_${Date.now()}`,
+      operationId: `${toolName}${Date.now()}`,
       timestamp: new Date().toISOString(),
       executionTime: Math.random() * 100 + 50, // 50-150ms
     };
@@ -365,34 +365,34 @@ class ToolExecutionMonitor {
 
   recordExecution(toolName: string, executionTime: number, success: boolean) {
     // Record execution time
-    const times = this.executionTimes.get(toolName) || [];
+    const times = this.executionTimes.get(toolName) ?? [];
     times.push(executionTime);
     this.executionTimes.set(toolName, times);
 
     // Record success/error counts
     if (success) {
-      this.successCounts.set(toolName, (this.successCounts.get(toolName) || 0) + 1);
+      this.successCounts.set(toolName, (this.successCounts.get(toolName) ?? 0) + 1);
     } else {
-      this.errorCounts.set(toolName, (this.errorCounts.get(toolName) || 0) + 1);
+      this.errorCounts.set(toolName, (this.errorCounts.get(toolName) ?? 0) + 1);
     }
   }
 
   getAverageExecutionTime(toolName: string): number {
-    const times = this.executionTimes.get(toolName) || [];
+    const times = this.executionTimes.get(toolName) ?? [];
     return times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0;
   }
 
   getSuccessRate(toolName: string): number {
-    const success = this.successCounts.get(toolName) || 0;
-    const errors = this.errorCounts.get(toolName) || 0;
+    const success = this.successCounts.get(toolName) ?? 0;
+    const errors = this.errorCounts.get(toolName) ?? 0;
     const total = success + errors;
     return total > 0 ? success / total : 0;
   }
 
   getExecutionStats(toolName: string) {
-    const times = this.executionTimes.get(toolName) || [];
-    const success = this.successCounts.get(toolName) || 0;
-    const errors = this.errorCounts.get(toolName) || 0;
+    const times = this.executionTimes.get(toolName) ?? [];
+    const success = this.successCounts.get(toolName) ?? 0;
+    const errors = this.errorCounts.get(toolName) ?? 0;
     
     return {
       totalExecutions: success + errors,
@@ -588,7 +588,7 @@ describe('MCP Tool Registry and Execution', () => {
       ];
 
       methodNames.forEach((methodName) => {
-        expect(typeof (computerUseTools as any)[methodName]).toBe('function');
+        expect(typeof (computerUseTools as unknown)[methodName]).toBe('function');
       });
 
       console.log(`[${operationId}] All ${methodNames.length} tools successfully registered`);
@@ -623,7 +623,7 @@ describe('MCP Tool Registry and Execution', () => {
 
       const supportedTools = ToolRegistryTestData.getAllSupportedTools();
       const categories = supportedTools.reduce((acc, tool) => {
-        acc[tool.category] = (acc[tool.category] || 0) + 1;
+        acc[tool.category] = (acc[tool.category] ?? 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
@@ -653,8 +653,8 @@ describe('MCP Tool Registry and Execution', () => {
         
         try {
           // Get the method name from the tool name
-          const methodName = tool.name.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-          const method = (computerUseTools as any)[methodName];
+          const methodName = tool.name.replace(/([a-z])/g, (_, letter) => letter.toUpperCase());
+          const method = (computerUseTools as unknown)[methodName];
           
           if (typeof method === 'function') {
             const result = await method.call(computerUseTools, tool.testParams);
@@ -696,7 +696,7 @@ describe('MCP Tool Registry and Execution', () => {
 
       for (const test of errorTests) {
         try {
-          await (computerUseTools as any)[test.method](test.params);
+          await (computerUseTools as unknown)[test.method](test.params);
           // If we reach here, the method should have handled the error gracefully
           console.log(`[${operationId}] Tool ${test.method} handled error gracefully`);
         } catch (error) {
@@ -734,7 +734,7 @@ describe('MCP Tool Registry and Execution', () => {
 
       for (const test of invalidTests) {
         try {
-          await (computerUseTools as any)[test.method](test.params);
+          await (computerUseTools as unknown)[test.method](test.params);
           // Should not reach here with invalid parameters
           console.warn(`[${operationId}] Tool ${test.method} did not validate parameters`);
         } catch (error) {
@@ -765,7 +765,7 @@ describe('MCP Tool Registry and Execution', () => {
       const startTime = performance.now();
       const results = await Promise.allSettled(
         concurrentTests.map((test) =>
-          (computerUseTools as any)[test.method](test.params),
+          (computerUseTools as unknown)[test.method](test.params),
         ),
       );
       const totalTime = performance.now() - startTime;
@@ -794,7 +794,7 @@ describe('MCP Tool Registry and Execution', () => {
       const startTime = performance.now();
       const results = await Promise.allSettled(
         mouseOperations.map((op) =>
-          (computerUseTools as any)[op.method](op.params),
+          (computerUseTools as unknown)[op.method](op.params),
         ),
       );
       const totalTime = performance.now() - startTime;
@@ -830,7 +830,7 @@ describe('MCP Tool Registry and Execution', () => {
         for (let i = 0; i < iterations; i++) {
           const startTime = performance.now();
           try {
-            await (computerUseTools as any)[test.method](test.params);
+            await (computerUseTools as unknown)[test.method](test.params);
             const executionTime = performance.now() - startTime;
             times.push(executionTime);
             performanceMonitor.recordExecution(test.method, executionTime, true);
@@ -875,7 +875,7 @@ describe('MCP Tool Registry and Execution', () => {
       const baselineTimes: number[] = [];
       for (let i = 0; i < baselineRuns; i++) {
         const startTime = performance.now();
-        await (computerUseTools as any)[baselineTest.method](baselineTest.params);
+        await (computerUseTools as unknown)[baselineTest.method](baselineTest.params);
         baselineTimes.push(performance.now() - startTime);
       }
 
@@ -885,7 +885,7 @@ describe('MCP Tool Registry and Execution', () => {
       const regressionTimes: number[] = [];
       for (let i = 0; i < regressionRuns; i++) {
         const startTime = performance.now();
-        await (computerUseTools as any)[baselineTest.method](baselineTest.params);
+        await (computerUseTools as unknown)[baselineTest.method](baselineTest.params);
         regressionTimes.push(performance.now() - startTime);
       }
 
@@ -930,7 +930,7 @@ describe('MCP Tool Registry and Execution', () => {
 
       for (const test of securityTests) {
         try {
-          await (computerUseTools as any)[test.method](test.params);
+          await (computerUseTools as unknown)[test.method](test.params);
           console.log(`[${operationId}] ${test.description} allowed (check security implications)`);
         } catch (error) {
           console.log(`[${operationId}] ${test.description} properly restricted`);
@@ -964,7 +964,7 @@ describe('MCP Tool Registry and Execution', () => {
 
       for (const test of dangerousInputs) {
         try {
-          const result = await (computerUseTools as any)[test.method](test.params);
+          const result = await (computerUseTools as unknown)[test.method](test.params);
           // If execution succeeds, verify the input was sanitized
           expect(result).toBeDefined();
           console.log(`[${operationId}] ${test.description} input processed (verify sanitization)`);

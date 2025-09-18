@@ -278,10 +278,10 @@ export class SecurityAuditService {
   private complianceChecksPerformed = 0;
 
   constructor(
-    private readonly parlantService: ParlantIntegrationService,
+    _private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `security_audit_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `security_audit_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Security Audit Service with Parlant integration`, {
       parlantIntegrationEnabled: true,
@@ -309,8 +309,8 @@ export class SecurityAuditService {
     entry: Omit<SecurityAuditEntry, 'auditId' | 'timestamp' | 'validated' | 'conversationId'>,
     context: ParlantConversationContext
   ): Promise<{ auditId: string; validated: boolean; conversationId?: string }> {
-    const operationId = `create_audit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const auditId = `audit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `create_audit${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const auditId = `audit${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     try {
       let validated = false;
@@ -702,7 +702,7 @@ export class SecurityAuditService {
     request: AuditQueryRequest,
     conversationId: string
   ): Promise<AuditQueryResult> {
-    const queryId = `query_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const queryId = `query${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     // Filter audit entries based on request criteria
@@ -757,7 +757,7 @@ export class SecurityAuditService {
     request: AuditReportRequest,
     conversationId: string
   ): Promise<AuditReport> {
-    const reportId = `report_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const reportId = `report${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     // Determine time frame
     const timeframe = this.calculateTimeframe(request);
@@ -814,7 +814,7 @@ export class SecurityAuditService {
     // Mock compliance violation assessment - would implement actual framework rules
     if (entry.outcome === 'FAILURE' && entry.severity === AuditSeverity.CRITICAL) {
       return {
-        violationId: `violation_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+        violationId: `violation${Date.now()}${Math.random().toString(36).substring(7)}`,
         framework,
         requirement: `${framework} Security Control`,
         description: `Critical security failure detected in ${entry.resource}`,
@@ -827,7 +827,7 @@ export class SecurityAuditService {
     return null;
   }
 
-  private async detectAuditAnomalies(_entry: SecurityAuditEntry): Promise<void> {
+  private async detectAuditAnomalies(entry: SecurityAuditEntry): Promise<void> {
     // Real-time anomaly detection
     // Implementation would use ML models for pattern analysis
   }
@@ -846,7 +846,7 @@ export class SecurityAuditService {
     for (const [userId, count] of userAccess.entries()) {
       if (count > 100) { // Threshold for unusual activity
         anomalies.push({
-          anomalyId: `anomaly_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+          anomalyId: `anomaly${Date.now()}${Math.random().toString(36).substring(7)}`,
           type: 'UNUSUAL_ACCESS_PATTERN',
           confidence: 0.85,
           description: `User ${userId} has ${count} audit events, indicating unusual activity`,
@@ -860,7 +860,7 @@ export class SecurityAuditService {
     return anomalies;
   }
 
-  private generateComplianceSummary(_entries: SecurityAuditEntry[]): Record<ComplianceFramework, ComplianceStatus> {
+  private generateComplianceSummary(entries: SecurityAuditEntry[]): Record<ComplianceFramework, ComplianceStatus> {
     const summary = {} as Record<ComplianceFramework, ComplianceStatus>;
     
     Object.values(ComplianceFramework).forEach(framework => {
@@ -956,7 +956,7 @@ export class SecurityAuditService {
     const failureRate = entries.filter(e => e.outcome === 'FAILURE').length / entries.length;
     if (failureRate > 0.1) { // 10% threshold
       insights.push({
-        insightId: `insight_${Date.now()}_1`,
+        insightId: `insight${Date.now()}_1`,
         category: 'RISK',
         title: 'High Authentication Failure Rate',
         description: `${(failureRate * 100).toFixed(1)}% of audit events indicate failures, which may indicate security issues or system problems`,

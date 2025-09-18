@@ -745,7 +745,7 @@ describe('CUA Integration Comprehensive Tests', () => {
    * Generate unique operation ID for tracking
    */
   function generateOperationId(): string {
-    return `cua_integration_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    return `cua_integration${Date.now()}${Math.random().toString(36).substring(7)}`;
   }
 
   /**
@@ -811,7 +811,7 @@ describe('CUA Integration Comprehensive Tests', () => {
    */
   async function createTestDataDirectory(): Promise<void> {
     try {
-      await fs.mkdir(testDataDir, { recursive: true });
+      await fs.mkdir(_testDataDir, { recursive: true });
     } catch {
       // Directory might already exist
     }
@@ -822,7 +822,7 @@ describe('CUA Integration Comprehensive Tests', () => {
    */
   async function cleanupTestData(): Promise<void> {
     try {
-      await fs.rm(testDataDir, { recursive: true, force: true });
+      await fs.rm(_testDataDir, { recursive: true, force: true });
     } catch (error) {
       console.warn('Failed to cleanup CUA integration test data:', error);
     }

@@ -274,12 +274,12 @@ export class ParlantRetryFailoverService extends EventEmitter {
   };
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly circuitBreakerService: ParlantCircuitBreakerService
   ) {
     super();
     
-    const operationId = `retry_failover_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `retry_failover_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Parlant Retry & Failover Service`, {
       retryConfigs: Object.fromEntries(this.retryConfigs),
@@ -748,7 +748,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   private async executeWithTimeout<T>(
     operation: () => Promise<T>,
     timeoutMs: number,
-    _operationId: string
+    operationId: string
   ): Promise<T> {
     return Promise.race([
       operation(),
@@ -887,7 +887,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   private createFallbackResponse(): ParlantValidationResponse {
     return {
       approved: false,
-      conversationId: `fallback_${Date.now()}`,
+      conversationId: `fallback${Date.now()}`,
       validationTimestamp: new Date(),
       reasoning: 'Fallback response due to service degradation - operation blocked for safety',
       confidence: 0,
@@ -898,7 +898,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   private createEmergencyFallbackResponse(): ParlantValidationResponse {
     return {
       approved: false,
-      conversationId: `emergency_${Date.now()}`,
+      conversationId: `emergency${Date.now()}`,
       validationTimestamp: new Date(),
       reasoning: 'Emergency fallback - validation service unavailable',
       confidence: 0,

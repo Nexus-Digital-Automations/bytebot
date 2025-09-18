@@ -242,10 +242,10 @@ export class EncryptionSecurityService {
   private averageOperationTime = 0;
 
   constructor(
-    private readonly parlantService: ParlantIntegrationService,
+    _private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `encryption_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `encryption_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Encryption Security Service with Parlant integration`, {
       parlantIntegrationEnabled: true,
@@ -745,7 +745,7 @@ export class EncryptionSecurityService {
     } else {
       // Generate ephemeral key
       key = crypto.randomBytes(32);
-      keyId = `ephemeral_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      keyId = `ephemeral${Date.now()}${Math.random().toString(36).substring(7)}`;
     }
 
     const cipher = crypto.createCipheriv(this.mapAlgorithmToCrypto(request.algorithm), key, iv);
@@ -851,7 +851,7 @@ export class EncryptionSecurityService {
     request: KeyGenerationRequest,
     conversationId: string
   ): Promise<CryptographicKey> {
-    const keyId = `key_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const keyId = `key${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     // Calculate expiration and rotation dates
     const createdAt = new Date();
@@ -912,7 +912,7 @@ export class EncryptionSecurityService {
   ): Promise<string> {
     // Generate new key with same parameters as existing key
     const newKeyRequest: KeyGenerationRequest = {
-      operationId: `rotation_${request.operationId}`,
+      operationId: `rotation${request.operationId}`,
       keyType: existingKey.keyType,
       algorithm: existingKey.algorithm,
       keySize: existingKey.keySize,
@@ -949,7 +949,7 @@ export class EncryptionSecurityService {
     // Detect weak algorithms
     if (this.isWeakAlgorithm(request.algorithm)) {
       const threat: CryptographicThreat = {
-        threatId: `threat_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+        threatId: `threat${Date.now()}${Math.random().toString(36).substring(7)}`,
         type: 'WEAK_ALGORITHM',
         severity: 'HIGH',
         description: `Use of weak cryptographic algorithm: ${request.algorithm}`,
@@ -975,7 +975,7 @@ export class EncryptionSecurityService {
     // Detect timing attacks (mock implementation)
     if (result.executionTime > 1000) { // Operations taking longer than 1 second
       const threat: CryptographicThreat = {
-        threatId: `threat_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+        threatId: `threat${Date.now()}${Math.random().toString(36).substring(7)}`,
         type: 'TIMING_ATTACK',
         severity: 'MEDIUM',
         description: `Potential timing attack vulnerability detected in ${request.operation} operation`,

@@ -114,7 +114,7 @@ interface _PerformanceMetrics {
 describe('HealthService', () => {
   let service: TestableHealthService;
   let mockLogger: MockLogger;
-  const operationId = `health_service_test_${Date.now()}`;
+  const operationId = `health_service_test${Date.now()}`;
   beforeEach(async () => {
     console.log(`[${operationId}] Setting up HealthService test module`);
     // Create mock logger
@@ -294,7 +294,7 @@ describe('HealthService', () => {
         'Memory access denied',
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining(
+        _expect.stringContaining(
           'Failed to get basic health: Memory access denied',
         ),
       );
@@ -352,7 +352,7 @@ describe('HealthService', () => {
       } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       // Mock the private service health check method
-      const _originalCheckServiceHealth = service.checkServiceHealth;
+      const originalCheckServiceHealth = service.checkServiceHealth;
       // Test healthy status
       jest.spyOn(service, 'checkServiceHealth').mockReturnValue({
         database: 'connected',
@@ -417,7 +417,7 @@ describe('HealthService', () => {
         'System uptime unavailable',
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining(
+        _expect.stringContaining(
           'Failed to get detailed status: System uptime unavailable',
         ),
       );
@@ -548,7 +548,7 @@ describe('HealthService', () => {
       console.log(`[${testId}] Testing stability check logging`);
       service.isServiceStable(10);
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        expect.stringMatching(/Service stability check: (stable|warming up)/),
+        _expect.stringMatching(/Service stability check: (stable|warming up)/),
         expect.objectContaining({
           uptime: expect.stringMatching(/\d+s/) as string,
           minimumRequired: expect.stringMatching(/\d+s/) as string,
@@ -1238,7 +1238,7 @@ describe('HealthService', () => {
         throw new Error('System overload');
       });
       jest
-        .spyOn(service as unknown as { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing')
+        .spyOn(_service as unknown as { performDatabasePing: () => Promise<boolean> }, 'performDatabasePing')
         .mockRejectedValue(new Error('Database overloaded'));
       jest
         .spyOn(service as TestableHealthService, 'checkExternalService')

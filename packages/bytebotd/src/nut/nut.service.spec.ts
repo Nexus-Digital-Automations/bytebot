@@ -887,8 +887,8 @@ describe('NutService', () => {
         const id1: string = serviceWithTestAccess.generateOperationId();
         const id2: string = serviceWithTestAccess.generateOperationId();
 
-        expect(id1).toMatch(/^nut_operation_\d+_[a-z0-9]{6}$/);
-        expect(id2).toMatch(/^nut_operation_\d+_[a-z0-9]{6}$/);
+        expect(id1).toMatch(/^nut_operation_\d+[a-z0-9]{6}$/);
+        expect(id2).toMatch(/^nut_operation_\d+[a-z0-9]{6}$/);
         expect(id1).not.toBe(id2);
       });
     });
@@ -915,7 +915,7 @@ describe('NutService', () => {
       it('should handle objects with non-string message', () => {
         const errorObj = { message: { nested: 'error' } };
         const result: string = serviceWithTestAccess.getErrorMessage(errorObj);
-        expect(result).toBe(JSON.stringify({ nested: 'error' }));
+        expect(result).toBe(_JSON.stringify({ nested: 'error' }));
       });
 
       it('should return default message for unknown error types', () => {

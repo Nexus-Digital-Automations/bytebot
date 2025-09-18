@@ -46,7 +46,7 @@ interface CacheConfig {
     MetricsModule, // Import MetricsModule to provide MetricsService dependency
     NestCacheModule.registerAsync({
       useFactory: (): CacheConfig => {
-        const _logger = new Logger('CacheModule');
+        const logger = new Logger('CacheModule');
 
         const config: CacheConfig = {
           store: redisStore,

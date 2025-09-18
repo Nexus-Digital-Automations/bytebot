@@ -144,7 +144,7 @@ describe('Base64ImageCompressor', () => {
       const inputImage = TestDataGenerator.generateBase64Image(2000); // 2MB
       const targetSizeKB = 1024;
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
         targetSizeKB,
         format: 'png',
       });
@@ -211,7 +211,7 @@ describe('Base64ImageCompressor', () => {
 
       const inputImage = TestDataGenerator.generateBase64Image(2000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
         targetSizeKB: 1024,
         initialQuality: 95,
         minQuality: 10,
@@ -245,7 +245,7 @@ describe('Base64ImageCompressor', () => {
     it('should respect quality constraints', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(2000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
         targetSizeKB: 1024,
         initialQuality: 80,
         minQuality: 20,
@@ -266,7 +266,7 @@ describe('Base64ImageCompressor', () => {
       });
 
       expect(result).toBeDefined();
-      expect(result.base64).not.toMatch(/^data:image\//);
+      expect(result.base64).not.toMatch(_/^data:image\//);
     });
 
     /**
@@ -324,9 +324,9 @@ describe('Base64ImageCompressor', () => {
 
       // Testing with invalid format - intentionally using unsupported type
       await expect(
-        Base64ImageCompressor.compressToSize(inputImage, {
+        _Base64ImageCompressor.compressToSize(inputImage, {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-          format: 'gif' as any,
+          format: 'gif' as unknown,
         }),
       ).rejects.toThrow('Unsupported format');
     });
@@ -346,7 +346,7 @@ describe('Base64ImageCompressor', () => {
       const inputImage = TestDataGenerator.generateBase64Image(2000);
 
       const result = await Base64ImageCompressor.compressWithResize(
-        inputImage,
+        _inputImage,
         {
           targetSizeKB: 1024,
           maxWidth: 1920,
@@ -362,7 +362,7 @@ describe('Base64ImageCompressor', () => {
      * Test progressive scaling
      */
     it('should apply progressive scaling when needed', async () => {
-      let _resizeCallCount = 0;
+      let resizeCallCount = 0;
       mockSharpInstance.resize.mockImplementation((width, height, options) => {
         _resizeCallCount++;
         expect(width).toBeGreaterThan(0);
@@ -399,7 +399,7 @@ describe('Base64ImageCompressor', () => {
       const inputImage = TestDataGenerator.generateBase64Image(5000);
 
       const result = await Base64ImageCompressor.compressWithResize(
-        inputImage,
+        _inputImage,
         {
           targetSizeKB: 500,
         },
@@ -491,7 +491,7 @@ describe('Base64ImageCompressor', () => {
       await compressPngBase64Under1MB(inputImage);
 
       expect(Base64ImageCompressor.compressToSize).toHaveBeenCalledWith(
-        inputImage,
+        _inputImage,
         {
           targetSizeKB: 1024,
           format: 'png',
@@ -532,7 +532,7 @@ describe('Base64ImageCompressor', () => {
         .fill(null)
         .map((_, i) => {
           const image = TestDataGenerator.generateBase64Image(1000 + i * 100);
-          return Base64ImageCompressor.compressToSize(image, {
+          return Base64ImageCompressor.compressToSize(_image, {
             targetSizeKB: 800,
           });
         });
@@ -553,7 +553,7 @@ describe('Base64ImageCompressor', () => {
       const largeImage = TestDataGenerator.generateBase64Image(10000); // 10MB
 
       const startTime = performance.now();
-      const result = await Base64ImageCompressor.compressToSize(largeImage, {
+      const result = await Base64ImageCompressor.compressToSize(_largeImage, {
         targetSizeKB: 1024,
         maxIterations: 5,
       });
@@ -578,7 +578,7 @@ describe('Base64ImageCompressor', () => {
     it('should handle very small target sizes', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
         targetSizeKB: 1, // Very small target
         minQuality: 1,
       });
@@ -607,7 +607,7 @@ describe('Base64ImageCompressor', () => {
     it('should handle invalid quality ranges', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
         targetSizeKB: 800,
         initialQuality: 50,
         minQuality: 60, // Min greater than initial
@@ -623,7 +623,7 @@ describe('Base64ImageCompressor', () => {
     it('should handle zero max iterations', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
         targetSizeKB: 800,
         maxIterations: 0,
       });
@@ -681,7 +681,7 @@ describe('Base64ImageCompressor', () => {
      * Test compression ratio calculations
      */
     it('should calculate compression ratios correctly', async () => {
-      const _inputSize = 1000 * 1024; // 1MB
+      const inputSize = 1000 * 1024; // 1MB
       const outputSize = 800 * 1024; // 800KB
 
       mockSharpInstance.toBuffer.mockResolvedValue(
@@ -704,7 +704,7 @@ describe('Base64ImageCompressor', () => {
     it('should maintain consistent metadata', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      const result = await Base64ImageCompressor.compressToSize(inputImage, {
+      const result = await Base64ImageCompressor.compressToSize(_inputImage, {
         targetSizeKB: 800,
         format: 'jpeg',
       });

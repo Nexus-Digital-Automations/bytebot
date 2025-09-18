@@ -320,11 +320,11 @@ export class ModuleLoadTestingOrchestrator {
       : 0;
 
     const p95ResponseTime = sortedTimes.length > 0 
-      ? (sortedTimes[Math.floor(sortedTimes.length * 0.95)] || 0) 
+      ? (sortedTimes[Math.floor(sortedTimes.length * 0.95)] ?? 0) 
       : 0;
 
     const p99ResponseTime = sortedTimes.length > 0 
-      ? (sortedTimes[Math.floor(sortedTimes.length * 0.99)] || 0) 
+      ? (sortedTimes[Math.floor(sortedTimes.length * 0.99)] ?? 0) 
       : 0;
 
     const actualRps = totalRequests > 0 ? (totalRequests / executionTime) * 1000 : 0;
@@ -569,7 +569,7 @@ export class ModuleLoadTestingOrchestrator {
 
       try {
         // Attempt to get the service/resource
-        const service = this.moduleRef.get(resource, { strict: false });
+        const service = this.moduleRef.get(_resource, { strict: false });
         if (!service) {
           throw new Error(`Required resource ${resource} not available`);
         }
@@ -588,7 +588,7 @@ export class ModuleLoadTestingOrchestrator {
       throw new Error('Application not initialized');
     }
 
-    if (endpoint.startsWith('ws://')) {
+    if (_endpoint.startsWith('ws://')) {
       // WebSocket endpoint - simulate connection
       return { status: 200 };
     }

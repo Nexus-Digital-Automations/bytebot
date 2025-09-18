@@ -20,7 +20,7 @@ import { ApiHeader, ApiTags } from '@nestjs/swagger';
  * API versioning strategy enumeration
  */
 export enum VersioningStrategy {
-  /** Version specified in request header (e.g., Accept-Version: v1) */
+  /** Version specified in request header (_e.g., Accept-Version: v1) */
   HEADER = 'header',
 
   /** Version specified in URL path (e.g., /api/v1/computer-use) */
@@ -29,7 +29,7 @@ export enum VersioningStrategy {
   /** Version specified as query parameter (e.g., ?version=v1) */
   QUERY = 'query',
 
-  /** Version specified in Accept header (e.g., Accept: application/vnd.bytebotd.v1+json) */
+  /** Version specified in Accept header (_e.g., Accept: application/vnd.bytebotd.v1+json) */
   MEDIA_TYPE = 'media_type',
 }
 
@@ -242,7 +242,7 @@ export const MultiVersion = (versions: SupportedVersion[]) => {
  */
 export const ExperimentalApi = (version: SupportedVersion) => {
   return applyDecorators(
-    ForVersion(version, {
+    _ForVersion(version, {
       stability: 'experimental',
       desktopCompatibility: {
         minDesktopVersion: '1.0.0-beta',
@@ -280,7 +280,7 @@ export const ExperimentalApi = (version: SupportedVersion) => {
  */
 export const BetaApi = (version: SupportedVersion) => {
   return applyDecorators(
-    ForVersion(version, {
+    _ForVersion(version, {
       stability: 'beta',
       desktopCompatibility: {
         minDesktopVersion: '1.0.0-rc',
@@ -312,7 +312,7 @@ export const ComputerUseApi = (
   features?: string[],
 ) => {
   return applyDecorators(
-    ForVersion(version, {
+    _ForVersion(version, {
       desktopCompatibility: {
         minDesktopVersion: '1.0.0',
         vncRequirements: ['noVNC 1.3.0+', 'WebSocket support'],

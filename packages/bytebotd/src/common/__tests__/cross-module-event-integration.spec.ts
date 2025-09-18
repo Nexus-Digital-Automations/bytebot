@@ -117,10 +117,10 @@ export class EventCollectorService {
       source: payload?.source || 'unknown',
       target: payload?.target || 'all',
       timestamp: new Date(),
-      payload: payload || {},
+      payload: payload ?? {},
       correlationId: payload?.correlationId,
       sequenceNumber: payload?.sequenceNumber,
-      retryCount: payload?.retryCount || 0,
+      retryCount: payload?.retryCount ?? 0,
       processingTime: payload?.processingTime,
     };
 
@@ -139,7 +139,7 @@ export class EventCollectorService {
   }
 
   getEventSequence(correlationId: string): string[] {
-    return this.eventSequences.get(correlationId) || [];
+    return this.eventSequences.get(correlationId) ?? [];
   }
 
   clearEvents(): void {
@@ -149,19 +149,19 @@ export class EventCollectorService {
   }
 
   private generateEventId(): string {
-    return `evt_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    return `evt${Date.now()}${Math.random().toString(36).substring(7)}`;
   }
 
   private updateSequenceTracking(event: EventRecord): void {
     if (event.correlationId) {
-      const sequence = this.eventSequences.get(event.correlationId) || [];
+      const sequence = this.eventSequences.get(event.correlationId) ?? [];
       sequence.push(event.eventName);
       this.eventSequences.set(event.correlationId, sequence);
     }
   }
 
   private updateMetrics(event: EventRecord): void {
-    const count = this.eventMetrics.get(event.eventName) || 0;
+    const count = this.eventMetrics.get(event.eventName) ?? 0;
     this.eventMetrics.set(event.eventName, count + 1);
   }
 }
@@ -417,7 +417,7 @@ describe('Cross-Module Event Integration Tests', () => {
         e => e.eventName === 'computer-use.action.approved' && e.correlationId === correlationId
       );
       expect(approvalEvent).toBeDefined();
-      expect(approvalEvent!.payload.validationResult).toBe('approved');
+      expect((approvalEvent ?? "default").payload.validationResult).toBe('approved');
 
       recordEventFlowMetrics(flowId, startTime, context.eventCollector.getEvents(), correlationId);
     });
@@ -546,7 +546,7 @@ describe('Cross-Module Event Integration Tests', () => {
         e => e.eventName === 'enterprise-api.rate-limit.allowed' && e.correlationId === correlationId
       );
       expect(rateLimitEvent).toBeDefined();
-      expect(rateLimitEvent!.payload.remainingRequests).toBe(955);
+      expect((rateLimitEvent ?? "default").payload.remainingRequests).toBe(955);
 
       recordEventFlowMetrics(flowId, startTime, context.eventCollector.getEvents(), correlationId);
     });
@@ -618,7 +618,7 @@ describe('Cross-Module Event Integration Tests', () => {
           setTimeout(() => {
             context.eventEmitter.emit('test.retryable.event', {
               ...payload,
-              retryCount: (payload.retryCount || 0) + 1,
+              retryCount: (payload.retryCount ?? 0) + 1,
             });
           }, 10);
         } else {
@@ -627,7 +627,7 @@ describe('Cross-Module Event Integration Tests', () => {
             originalEvent: 'test.retryable.event',
             originalCorrelationId: correlationId,
             failureReason: 'Max retries exceeded',
-            retryCount: payload.retryCount || 0,
+            retryCount: payload.retryCount ?? 0,
           });
         }
       });
@@ -687,7 +687,7 @@ describe('Cross-Module Event Integration Tests', () => {
       expect(orderedEvents).toHaveLength(concurrentEventCount);
 
       // Check if events maintain their sequence numbers (they may not be in order due to concurrency)
-      const sequenceNumbers = orderedEvents.map(e => e.sequenceNumber!).sort((a, b) => a - b);
+      const sequenceNumbers = orderedEvents.map(e => e.(sequenceNumber ?? "default")).sort((a, b) => a - b);
       const expectedSequence = Array.from({ length: concurrentEventCount }, (_, i) => i + 1);
       
       expect(sequenceNumbers).toEqual(expectedSequence);
@@ -695,7 +695,7 @@ describe('Cross-Module Event Integration Tests', () => {
       // Calculate ordering violations (events processed out of sequence)
       let orderingViolations = 0;
       for (let i = 1; i < orderedEvents.length; i++) {
-        if (orderedEvents[i].sequenceNumber! < orderedEvents[i-1].sequenceNumber!) {
+        if (orderedEvents[i].(sequenceNumber ?? "default") < orderedEvents[i-1].(sequenceNumber ?? "default")) {
           orderingViolations++;
         }
       }
@@ -900,14 +900,14 @@ describe('Cross-Module Event Integration Tests', () => {
    * Generate unique correlation ID
    */
   function generateCorrelationId(): string {
-    return `corr_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    return `corr${Date.now()}${Math.random().toString(36).substring(7)}`;
   }
 
   /**
    * Generate unique flow ID
    */
   function generateFlowId(): string {
-    return `flow_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    return `flow${Date.now()}${Math.random().toString(36).substring(7)}`;
   }
 
   /**

@@ -382,7 +382,7 @@ describe('ComputerActionValidationPipe - Integration Tests', () => {
       };
 
       await expect(
-        pipe.transform(
+        _pipe.transform(
           largePayload,
           createArgumentMetadata({
             type: 'body',

@@ -29,7 +29,7 @@ import { Logger } from '@nestjs/common';
 import { CompressionOptions, CompressionResult } from './types';
 
 // Initialize logger for compression operations
-const _logger = new Logger('Base64ImageCompressor');
+const logger = new Logger('Base64ImageCompressor');
 
 // Lazy-loaded sharp module
 let sharpModule: typeof import('sharp') | null = null;
@@ -86,7 +86,7 @@ class Base64ImageCompressor {
     base64String: string,
     options: CompressionOptions = {},
   ): Promise<CompressionResult> {
-    const operationId = `compress_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+    const operationId = `compress${Date.now()}${Math.random().toString(36).substr(2, 6)}`;
     const startTime = Date.now();
 
     _logger.log(`[${operationId}] Starting image compression`, {
@@ -205,7 +205,7 @@ class Base64ImageCompressor {
       const compressionRatio = sizeBytes / inputBuffer.length;
       const totalTime = Date.now() - startTime;
 
-      const _result = {
+      const result = {
         base64: outputBase64,
         sizeBytes,
         sizeKB: finalSizeKB,
@@ -307,7 +307,7 @@ class Base64ImageCompressor {
     } = options;
 
     // First try compression without resizing
-    let _result = await this.compressToSize(base64String, compressionOptions);
+    let result = await this.compressToSize(base64String, compressionOptions);
 
     // If still too large, apply progressive resizing
     if (_result.sizeKB > targetSizeKB) {
@@ -327,7 +327,7 @@ class Base64ImageCompressor {
 
         const resizedSharpInstance = await createSharp(inputBuffer);
         const resizedBuffer = await resizedSharpInstance
-          .resize(newWidth, newHeight, {
+          .resize(_newWidth, newHeight, {
             fit: 'inside',
             withoutEnlargement: true,
           })
@@ -335,7 +335,7 @@ class Base64ImageCompressor {
 
         const resizedBase64 = resizedBuffer.toString('base64');
 
-        _result = await this.compressToSize(resizedBase64, compressionOptions);
+        result = await this.compressToSize(resizedBase64, compressionOptions);
         scale -= 0.1;
       }
     }
@@ -374,7 +374,7 @@ class Base64ImageCompressor {
 export async function compressPngBase64Under1MB(
   base64String: string,
 ): Promise<string> {
-  const _result = await Base64ImageCompressor.compressToSize(base64String, {
+  const result = await Base64ImageCompressor.compressToSize(_base64String, {
     targetSizeKB: 1024,
     format: 'png',
     initialQuality: 95,

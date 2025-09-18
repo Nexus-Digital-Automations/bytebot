@@ -162,7 +162,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
   private readonly circuitConfig: CircuitBreakerConfig;
   private readonly poolConfig: ConnectionPoolConfig;
   
-  constructor(private readonly configService: ConfigService) {
+  constructor(_private readonly configService: ConfigService) {
     super();
     
     this.circuitConfig = {
@@ -187,7 +187,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
       'http://localhost:8000',
     ]);
     
-    const operationId = `circuit_breaker_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `circuit_breaker_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Parlant Circuit Breaker Service`, {
       circuitConfig: this.circuitConfig,
@@ -492,7 +492,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
 
   private async executeWithTimeout<T>(
     operation: () => Promise<T>,
-    _operationId: string
+    operationId: string
   ): Promise<T> {
     const timeoutMs = 30000; // 30 second timeout
     
@@ -618,7 +618,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
   }
 
   private async createConnection(): Promise<Connection> {
-    const connectionId = `conn_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const connectionId = `conn${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     // Select healthy endpoint
     const endpoint = this.selectHealthyEndpoint();
@@ -688,7 +688,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
         // const response = await fetch(`${endpoint}/health`);
         const responseTime = performance.now() - startTime;
         
-        this.endpointHealth.set(endpoint, {
+        this.endpointHealth.set(_endpoint, {
           url: endpoint,
           healthy: true,
           lastCheck: new Date(),
@@ -698,7 +698,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
         
       } catch (error) {
         const currentHealth = this.endpointHealth.get(endpoint);
-        this.endpointHealth.set(endpoint, {
+        this.endpointHealth.set(_endpoint, {
           url: endpoint,
           healthy: false,
           lastCheck: new Date(),

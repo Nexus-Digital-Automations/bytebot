@@ -154,7 +154,7 @@ describe('JobManagementService', () => {
     };
 
     // Mock Redis constructor
-    (Redis as jest.MockedClass<typeof Redis>).mockImplementation(() => mockRedisInstance as any);
+    (Redis as jest.MockedClass<typeof Redis>).mockImplementation(() => mockRedisInstance as unknown);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -177,7 +177,7 @@ describe('JobManagementService', () => {
     service = module.get<JobManagementService>(JobManagementService);
     computerUseService = module.get(ComputerUseService);
     configService = module.get(ConfigService);
-    redisClient = mockRedisInstance as any;
+    redisClient = mockRedisInstance as unknown;
     logger = module.get(Logger);
 
     // Initialize the service
@@ -649,11 +649,11 @@ describe('JobManagementService', () => {
       redisClient.hset.mockResolvedValue(1);
       redisClient.setex.mockResolvedValue('OK');
 
-      const highPriorityJob = await service.createJob(mockScreenshotAction, userId, {
+      const highPriorityJob = await service.createJob(_mockScreenshotAction, userId, {
         priority: JobPriority.HIGH,
       });
 
-      const lowPriorityJob = await service.createJob(mockMoveAction, userId, {
+      const lowPriorityJob = await service.createJob(_mockMoveAction, userId, {
         priority: JobPriority.LOW,
       });
 

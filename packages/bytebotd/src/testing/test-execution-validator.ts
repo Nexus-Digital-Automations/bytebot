@@ -18,7 +18,7 @@
  */
 
 import { spawn, ChildProcess } from 'child_process';
-import { promises as fs } from 'fs';
+import { promises as _fs } from 'fs';
 import { performance } from 'perf_hooks';
 import { EventEmitter } from 'events';
 import { performanceFramework } from './performance-framework';
@@ -199,7 +199,7 @@ export class TestExecutionValidator extends EventEmitter {
       let jestOutput = '';
       let jestError = '';
 
-      jestProcess.stdout?.on('data', (data) => {
+      jestProcess.stdout?.on('data', (data: Buffer) => {
         jestOutput += data.toString();
         
         // Monitor memory usage during execution
@@ -209,12 +209,12 @@ export class TestExecutionValidator extends EventEmitter {
         }
       });
 
-      jestProcess.stderr?.on('data', (data) => {
-        jestError += data.toString();
+      jestProcess.stderr?.on('data', (data: Buffer) => {
+        _jestError += data.toString();
       });
 
       const exitCode = await new Promise<number>((resolve) => {
-        jestProcess.on('close', (code) => resolve(code || 0));
+        jestProcess.on('close', (code) => resolve(code ?? 0));
       });
 
       // Parse Jest output for individual test results
@@ -224,7 +224,7 @@ export class TestExecutionValidator extends EventEmitter {
       // Track error types
       parsedResults.errors.forEach((error) => {
         const errorType = this.categorizeError(error);
-        errorTypes.set(errorType, (errorTypes.get(errorType) || 0) + 1);
+        errorTypes.set(errorType, (errorTypes.get(errorType) ?? 0) + 1);
       });
 
       const executionTime = performance.now() - executionStart;
@@ -717,7 +717,7 @@ export class TestExecutionValidator extends EventEmitter {
       ? allMetrics.reduce((sum, m) => sum + m.reliability.successRate, 0) / allMetrics.length 
       : 100;
 
-    const recommendations = this.generateOptimizationOpportunities(allMetrics, { parallelizationBenefit: 50 });
+    const recommendations = this.generateOptimizationOpportunities(_allMetrics, { parallelizationBenefit: 50 });
 
     return {
       totalSuites,

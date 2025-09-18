@@ -93,10 +93,10 @@ export class ProxyService {
   private aiRoutingDecisions = 0;
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `proxy_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `proxy_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Proxy AI Service initialized with MAXIMUM Parlant integration`, {
       parlantEnabled: true,
@@ -219,7 +219,7 @@ export class ProxyService {
     await new Promise(resolve => setTimeout(resolve, processingTime));
     
     const mockResponse: ProxyResponse = {
-      id: `proxy_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `proxy${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
       operationId: request.operationId,
       conversationId,
@@ -277,7 +277,7 @@ export class ProxyService {
     return services[0] ?? 'anthropic'; // fallback
   }
 
-  private calculateServiceWeights(_request: ProxyRequest): number[] {
+  private calculateServiceWeights(request: ProxyRequest): number[] {
     // TODO: Implement actual weight calculation based on service performance, load, etc.
     // For now, return mock weights
     return [0.4, 0.35, 0.25]; // Slightly favor anthropic, then openai, then google

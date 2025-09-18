@@ -434,7 +434,7 @@ describe('MCP Protocol Validation', () => {
       console.log(`[${operationId}] Testing JSON-RPC 2.0 error response validation`);
 
       const validError = ProtocolTestData.createValidJsonRpcError(
-        -32602,
+        _-32602,
         'Invalid params',
         { details: 'Parameter validation failed' },
         'error-id',
@@ -675,7 +675,7 @@ describe('MCP Protocol Validation', () => {
       expect(errorResponse.success).toBe(false);
       expect(errorResponse.error).toBeDefined();
 
-      const errorValid = ProtocolComplianceValidator.validateMcpError(errorResponse.error!);
+      const errorValid = ProtocolComplianceValidator.validateMcpError(errorResponse.(error ?? "default"));
       expect(errorValid).toBe(true);
 
       console.log(`[${operationId}] MCP error response validation completed`);
@@ -794,7 +794,7 @@ describe('MCP Protocol Validation', () => {
 
       const maliciousPayloads = [
         // Prototype pollution attempt
-        { __proto__: { isAdmin: true }, jsonrpc: '2.0', method: 'test' },
+        { _proto__: { isAdmin: true }, jsonrpc: '2.0', method: 'test' },
         // Extremely long strings
         { jsonrpc: '2.0', method: 'x'.repeat(10000), id: 1 },
         // Circular references (would be caught during JSON serialization)

@@ -56,7 +56,7 @@ describe('Security Validation Mock Tests', () => {
       };
 
       expect(() => {
-        sanitizationPipe.transform(safeInput, {
+        sanitizationPipe.transform(_safeInput, {
           metatype: Object,
           type: 'body',
           data: undefined,
@@ -153,7 +153,7 @@ describe('Security Validation Mock Tests', () => {
       };
 
       expect(() => {
-        sanitizationPipe.transform(invalidAction, {
+        sanitizationPipe.transform(_invalidAction, {
           metatype: Object,
           type: 'body',
           data: undefined,
@@ -168,7 +168,7 @@ describe('Security Validation Mock Tests', () => {
       };
 
       expect(() => {
-        sanitizationPipe.transform(largeInput, {
+        sanitizationPipe.transform(_largeInput, {
           metatype: Object,
           type: 'body',
           data: undefined,
@@ -183,7 +183,7 @@ describe('Security Validation Mock Tests', () => {
       };
 
       expect(() => {
-        sanitizationPipe.transform(validInput, {
+        sanitizationPipe.transform(_validInput, {
           metatype: Object,
           type: 'body',
           data: undefined,
@@ -414,7 +414,7 @@ describe('Security Validation Mock Tests', () => {
         text: 'Test input for performance validation',
       };
 
-      const result = sanitizationPipe.transform(validInput, {
+      const result = sanitizationPipe.transform(_validInput, {
         metatype: Object,
         type: 'body',
         data: undefined,

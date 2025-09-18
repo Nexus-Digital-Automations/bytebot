@@ -95,10 +95,10 @@ export class AIAuditService {
   private totalExecutionTime = 0;
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `ai_audit_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `ai_audit_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] AI Audit Service initialized with comprehensive monitoring`, {
       parlantEnabled: true,
@@ -120,7 +120,7 @@ export class AIAuditService {
    */
   async recordAIOperation(entry: Omit<AIOperationAuditEntry, 'id' | 'timestamp'>): Promise<void> {
     const auditEntry: AIOperationAuditEntry = {
-      id: `audit_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `audit${Date.now()}${Math.random().toString(36).substring(7)}`,
       timestamp: new Date(),
       ...entry,
     };
@@ -157,7 +157,7 @@ export class AIAuditService {
   /**
    * Generate comprehensive AI audit report
    */
-  generateAuditReport(period?: { from: Date; to: Date }): AIAuditReport {
+  generateAuditReport(_period?: { from: Date; to: Date }): AIAuditReport {
     const reportPeriod = period ?? {
       from: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
       to: new Date(),
@@ -177,7 +177,7 @@ export class AIAuditService {
     const securityAnalysis = this.calculateSecurityAnalysis(relevantEntries);
 
     const report: AIAuditReport = {
-      id: `report_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `report${Date.now()}${Math.random().toString(36).substring(7)}`,
       generatedAt: new Date(),
       period: reportPeriod,
       totalOperations,

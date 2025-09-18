@@ -70,12 +70,12 @@ describe('CacheKeyGenerator', () => {
       const result = generator.generate(key, namespace);
 
       expect(result).toBe('custom:test-key');
-      expect(result).toMatch(/^custom:/);
+      expect(result).toMatch(_/^custom:/);
     });
 
     it('should add version when specified', () => {
       const key = 'versioned-key';
-      const result = generator.generate(key, undefined, { version: '2.0' });
+      const result = generator.generate(_key, undefined, { version: '2.0' });
 
       expect(result).toBe('bytebot:v2.0:versioned-key');
       expect(result).toContain(':v2.0:');
@@ -84,29 +84,29 @@ describe('CacheKeyGenerator', () => {
     it('should add timestamp when requested', () => {
       const key = 'timestamped-key';
       const beforeTime = Date.now();
-      const result = generator.generate(key, undefined, { includeTimestamp: true });
+      const result = generator.generate(_key, undefined, { includeTimestamp: true });
       const afterTime = Date.now();
 
-      expect(result).toMatch(/^bytebot:timestamped-key:\d+$/);
+      expect(result).toMatch(_/^bytebot:timestamped-key:\d+$/);
       
       // Extract timestamp from result
       const timestampStr = result.split(':')[2];
       expect(timestampStr).toBeDefined();
-      const timestamp = parseInt(timestampStr!);
+      const timestamp = parseInt(timestampStr ?? '0');
       expect(timestamp).toBeGreaterThanOrEqual(beforeTime);
       expect(timestamp).toBeLessThanOrEqual(afterTime);
     });
 
     it('should use namespace from options', () => {
       const key = 'options-key';
-      const result = generator.generate(key, undefined, { namespace: 'options' });
+      const result = generator.generate(_key, undefined, { namespace: 'options' });
 
       expect(result).toBe('options:options-key');
     });
 
     it('should prioritize direct namespace parameter over options', () => {
       const key = 'priority-key';
-      const result = generator.generate(key, 'direct', { namespace: 'options' });
+      const result = generator.generate(_key, 'direct', { namespace: 'options' });
 
       expect(result).toBe('direct:priority-key');
     });
@@ -114,7 +114,7 @@ describe('CacheKeyGenerator', () => {
 
   describe('Key Normalization and Sanitization', () => {
     it('should sanitize invalid characters in keys', () => {
-      const key = 'key with spaces!@#$%^&*()';
+      const key = 'key with (spaces ?? "default")@#$%^&*()';
       const result = generator.generate(key);
 
       expect(result).toBe('bytebot:key_with_spaces');
@@ -136,7 +136,7 @@ describe('CacheKeyGenerator', () => {
       const result = generator.generate(key);
 
       expect(result).toBe('bytebot:leading_and_trailing');
-      expect(result).not.toMatch(/^.*:_/);
+      expect(result).not.toMatch(/^.*:/);
       expect(result).not.toMatch(/_$/);
     });
 
@@ -231,14 +231,14 @@ describe('CacheKeyGenerator', () => {
 
     it('should respect custom max length threshold', () => {
       const key = 'a'.repeat(50);
-      const result = generator.generate(key, undefined, { maxLength: 40 });
+      const result = generator.generate(_key, undefined, { maxLength: 40 });
 
       expect(result).toMatch(/^bytebot:hash_[a-f0-9]{16}$/);
     });
 
     it('should allow disabling hash for long keys', () => {
       const longKey = 'a'.repeat(300);
-      const result = generator.generate(longKey, undefined, { hashLongKeys: false });
+      const result = generator.generate(_longKey, undefined, { hashLongKeys: false });
 
       expect(result).toBe(`bytebot:${'a'.repeat(300)}`);
       expect(result).not.toContain('hash_');
@@ -256,7 +256,7 @@ describe('CacheKeyGenerator', () => {
       const queryParams = { limit: 10, offset: 0, sort: 'name' };
       const result = generator.generateApiKey('POST', '/api/search', queryParams);
 
-      expect(result).toMatch(/^api:api:post:api_search:[a-f0-9]{12}$/);
+      expect(result).toMatch(_/^api:api:post:api_search:[a-f0-9]{12}$/);
     });
 
     it('should include user ID when provided', () => {
@@ -282,7 +282,7 @@ describe('CacheKeyGenerator', () => {
       };
 
       const result = generator.generateApiKey('GET', '/api/data', queryParams);
-      expect(result).toMatch(/^api:api:get:api_data:[a-f0-9]{12}$/);
+      expect(result).toMatch(_/^api:api:get:api_data:[a-f0-9]{12}$/);
     });
   });
 
@@ -297,7 +297,7 @@ describe('CacheKeyGenerator', () => {
       const params = { id: 123, status: 'active' };
       const result = generator.generateDbKey('users', 'SELECT', params);
 
-      expect(result).toMatch(/^database:db:users:select:[a-f0-9]{12}$/);
+      expect(result).toMatch(_/^database:db:users:select:[a-f0-9]{12}$/);
     });
 
     it('should handle empty parameters', () => {
@@ -318,7 +318,7 @@ describe('CacheKeyGenerator', () => {
       const params = { userId: 'user456', priority: 'high' };
       const result = generator.generateTaskKey('task123', 'execute', params);
 
-      expect(result).toMatch(/^tasks:task:task123:execute:[a-f0-9]{12}$/);
+      expect(result).toMatch(_/^tasks:task:task123:execute:[a-f0-9]{12}$/);
     });
   });
 
@@ -358,7 +358,7 @@ describe('CacheKeyGenerator', () => {
     it('should reject extremely long keys', () => {
       const extremelyLongKey = 'a'.repeat(1000);
       expect(() => {
-        generator.generate(extremelyLongKey, undefined, { 
+        generator.generate(_extremelyLongKey, undefined, { 
           hashLongKeys: false,
           maxLength: 999 
         });
@@ -371,14 +371,14 @@ describe('CacheKeyGenerator', () => {
       
       // Mock the sanitization to let whitespace through for testing
       const originalGenerate = generator.generate;
-      jest.spyOn(generator as any, 'sanitizeKey').mockReturnValue(keyWithTabs);
+      jest.spyOn(generator as unknown as { sanitizeKey: jest.Mock }, 'sanitizeKey').mockReturnValue(keyWithTabs);
       
       expect(() => {
         generator.generate(keyWithTabs);
       }).toThrow('Generated key contains whitespace characters');
       
       // Restore original method
-      (generator as any).sanitizeKey.mockRestore();
+      (generator as unknown as { sanitizeKey: jest.Mock }).sanitizeKey.mockRestore();
     });
   });
 
@@ -386,15 +386,15 @@ describe('CacheKeyGenerator', () => {
     it('should track key metadata', () => {
       const key = 'metadata-key';
       const namespace = 'test';
-      const result = generator.generate(key, namespace, { version: '1.0' });
+      const result = generator.generate(_key, namespace, { version: '1.0' });
 
       const metadata = generator.getKeyMetadata(result);
       expect(metadata).toBeDefined();
-      expect(metadata!.originalKey).toBe(key);
-      expect(metadata!.generatedKey).toBe(result);
-      expect(metadata!.namespace).toBe(namespace);
-      expect(metadata!.version).toBe('1.0');
-      expect(metadata!.hashedKey).toBe(false);
+      expect(metadata?.originalKey).toBe(key);
+      expect(metadata?.generatedKey).toBe(result);
+      expect(metadata?.namespace).toBe(namespace);
+      expect(metadata?.version).toBe('1.0');
+      expect(metadata?.hashedKey).toBe(false);
     });
 
     it('should track hashed key metadata', () => {
@@ -403,7 +403,7 @@ describe('CacheKeyGenerator', () => {
 
       const metadata = generator.getKeyMetadata(result);
       expect(metadata).toBeDefined();
-      expect(metadata!.hashedKey).toBe(true);
+      expect(metadata?.hashedKey).toBe(true);
     });
 
     it('should update statistics on key generation', () => {
@@ -456,21 +456,21 @@ describe('CacheKeyGenerator', () => {
 
   describe('Error Handling and Edge Cases', () => {
     it('should handle null and undefined inputs', () => {
-      const nullResult = generator.generate(null as any);
-      const undefinedResult = generator.generate(undefined as any);
+      const nullResult = generator.generate(null as unknown as string);
+      const undefinedResult = generator.generate(undefined as unknown as string);
 
       expect(nullResult).toBe('bytebot:null');
       expect(undefinedResult).toBe('bytebot:undefined');
     });
 
     it('should handle numeric inputs', () => {
-      const result = generator.generate(123 as any);
+      const result = generator.generate(123 as unknown as string);
       expect(result).toBe('bytebot:123');
     });
 
     it('should handle boolean inputs', () => {
-      const trueResult = generator.generate(true as any);
-      const falseResult = generator.generate(false as any);
+      const trueResult = generator.generate(true as unknown as string);
+      const falseResult = generator.generate(false as unknown as string);
 
       expect(trueResult).toBe('bytebot:true');
       expect(falseResult).toBe('bytebot:false');
@@ -478,8 +478,8 @@ describe('CacheKeyGenerator', () => {
 
     it('should use fallback key generation on errors', () => {
       // Mock the generate method to throw an error during processing
-      const originalNormalizeKey = (generator as any).normalizeKey;
-      jest.spyOn(generator as any, 'normalizeKey').mockImplementation(() => {
+      const originalNormalizeKey = (generator as unknown as { normalizeKey: jest.Mock }).normalizeKey;
+      jest.spyOn(generator as unknown as { normalizeKey: jest.Mock }, 'normalizeKey').mockImplementation(() => {
         throw new Error('Normalization error');
       });
 
@@ -489,11 +489,11 @@ describe('CacheKeyGenerator', () => {
       expect(result).toBe('error-namespace:error-key');
       
       // Restore original method
-      (generator as any).normalizeKey.mockRestore();
+      (generator as unknown as { normalizeKey: jest.Mock }).normalizeKey.mockRestore();
     });
 
     it('should handle circular references in objects gracefully', () => {
-      const circularObj: any = { prop: 'value' };
+      const circularObj: Record<string, unknown> = { prop: 'value' };
       circularObj.circular = circularObj;
 
       // Should not throw and should generate a hash

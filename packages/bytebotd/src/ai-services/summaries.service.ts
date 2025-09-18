@@ -85,10 +85,10 @@ export class SummariesService {
   private contentSummarized = 0; // Total characters/words processed
 
   constructor(
-    private readonly configService: ConfigService,
+    _private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
-    const operationId = `summaries_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `summaries_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Summaries AI Service initialized with MAXIMUM Parlant integration`, {
       parlantEnabled: true,
@@ -190,7 +190,7 @@ export class SummariesService {
     const mockSummary = `AI-generated ${request.context.summaryType} summary of ${request.content.length} content items. This summary preserves key information while reducing content by approximately ${Math.round((1 - targetLength/originalLength) * 100)}%. The content has been processed with ${request.summaryParameters.tone ?? 'neutral'} tone and formatted as ${request.summaryParameters.format ?? 'paragraph'}.`;
 
     const mockResponse: SummaryResponse = {
-      id: `summary_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `summary${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
       operationId: request.operationId,
       conversationId,

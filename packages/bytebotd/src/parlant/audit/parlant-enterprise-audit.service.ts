@@ -183,8 +183,8 @@ export class ParlantEnterpriseAuditService {
     complianceCheckTime: 0,
   };
 
-  constructor(private readonly configService: ConfigService) {
-    const operationId = `audit_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  constructor(_private readonly configService: ConfigService) {
+    const operationId = `audit_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     // Initialize encryption keys (in production, use proper key management)
     this.encryptionKey = this.configService.get('PARLANT_AUDIT_ENCRYPTION_KEY', randomBytes(32).toString('hex'));
@@ -224,7 +224,7 @@ export class ParlantEnterpriseAuditService {
     } = {}
   ): Promise<ParlantAuditEntry> {
     const startTime = Date.now();
-    const auditId = `audit_${Date.now()}_${randomBytes(8).toString('hex')}`;
+    const auditId = `audit${Date.now()}${randomBytes(8).toString('hex')}`;
     
     try {
       // Determine validation result
@@ -381,7 +381,7 @@ export class ParlantEnterpriseAuditService {
     startDate: Date,
     endDate: Date
   ): Promise<ComplianceReport> {
-    const reportId = `compliance_${regulation}_${Date.now()}_${randomBytes(4).toString('hex')}`;
+    const reportId = `compliance${regulation}${Date.now()}${randomBytes(4).toString('hex')}`;
     const startTime = Date.now();
     
     this.logger.log(`Generating compliance report: ${reportId}`, {
@@ -556,7 +556,7 @@ export class ParlantEnterpriseAuditService {
   private async generateComplianceFlags(
     request: ParlantValidationRequest,
     response: ParlantValidationResponse | null,
-    _executionResult: ParlantAuditEntry['executionResult']
+    executionResult: ParlantAuditEntry['executionResult']
   ): Promise<ComplianceFlag[]> {
     const flags: ComplianceFlag[] = [];
     
@@ -772,7 +772,7 @@ export class ParlantEnterpriseAuditService {
     
     if (nonCompliantEntries.length > 0) {
       findings.push({
-        findingId: `finding_${Date.now()}_${randomBytes(4).toString('hex')}`,
+        findingId: `finding${Date.now()}${randomBytes(4).toString('hex')}`,
         severity: 'HIGH',
         regulation,
         requirement: 'General compliance requirements',
@@ -788,7 +788,7 @@ export class ParlantEnterpriseAuditService {
 
   private generateComplianceRecommendations(
     analysis: { complianceRate: number },
-    _regulation: string
+    regulation: string
   ): ComplianceRecommendation[] {
     const recommendations: ComplianceRecommendation[] = [];
     

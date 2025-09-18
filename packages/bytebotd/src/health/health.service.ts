@@ -51,7 +51,7 @@ export class HealthService extends HealthIndicator {
   private readonly startTime: number;
 
   constructor(
-    private readonly parlantValidationService: ParlantHealthMetricsValidationService,
+    _private readonly parlantValidationService: ParlantHealthMetricsValidationService,
   ) {
     super();
     this.startTime = Date.now();
@@ -65,7 +65,7 @@ export class HealthService extends HealthIndicator {
    * @returns Basic health status with uptime and memory info
    */
   getBasicHealth(): BasicHealthResponse {
-    const operationId = `health_${Date.now()}`;
+    const operationId = `health${Date.now()}`;
     this.logger.debug(`[${operationId}] Getting basic health status`);
 
     try {
@@ -105,7 +105,7 @@ export class HealthService extends HealthIndicator {
    * @returns Comprehensive system status with service dependencies
    */
   getDetailedStatus(): DetailedStatusResponse {
-    const operationId = `status_${Date.now()}`;
+    const operationId = `status${Date.now()}`;
     this.logger.debug(`[${operationId}] Getting detailed system status`);
 
     try {
@@ -240,7 +240,7 @@ export class HealthService extends HealthIndicator {
    * @returns Health indicator result for process health
    */
   checkProcessHealth(): HealthIndicatorResult {
-    const operationId = `process_health_${Date.now()}`;
+    const operationId = `process_health${Date.now()}`;
     this.logger.debug(`[${operationId}] Checking process health`);
 
     try {
@@ -281,13 +281,13 @@ export class HealthService extends HealthIndicator {
    * @returns Health indicator result for database connectivity with conversational approval
    */
   async checkDatabaseHealth(): Promise<HealthIndicatorResult> {
-    const operationId = `db_health_${Date.now()}`;
+    const operationId = `db_health${Date.now()}`;
     this.logger.debug(`[${operationId}] Checking database health with Parlant validation`);
 
     try {
       // PARLANT VALIDATION: Database health check (HIGH risk - critical system component)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        HealthOperationType.DATABASE_HEALTH,
+        _HealthOperationType.DATABASE_HEALTH,
         {
           operation: 'database_connectivity_check',
           component: 'database',
@@ -362,13 +362,13 @@ export class HealthService extends HealthIndicator {
    * @returns Health indicator result for external services with conversational approval
    */
   async checkExternalServices(): Promise<HealthIndicatorResult> {
-    const operationId = `external_services_${Date.now()}`;
+    const operationId = `external_services${Date.now()}`;
     this.logger.debug(`[${operationId}] Checking external services with Parlant validation`);
 
     try {
       // PARLANT VALIDATION: External services check (HIGH risk - network dependencies)
       const validation = await this.parlantValidationService.validateHealthOperation(
-        HealthOperationType.EXTERNAL_SERVICES,
+        _HealthOperationType.EXTERNAL_SERVICES,
         {
           operation: 'external_service_dependency_check',
           component: 'external_services',
@@ -423,7 +423,7 @@ export class HealthService extends HealthIndicator {
           }>,
           index: number,
         ) => {
-          const serviceName = `service_${index}`;
+          const serviceName = `service${index}`;
 
           if (result.status === 'fulfilled') {
             results[serviceName] = result.value;
@@ -472,7 +472,7 @@ export class HealthService extends HealthIndicator {
    * @returns Health indicator result for startup completion
    */
   checkStartupComplete(): HealthIndicatorResult {
-    const operationId = `startup_${Date.now()}`;
+    const operationId = `startup${Date.now()}`;
     this.logger.debug(`[${operationId}] Checking startup completion`);
 
     try {
@@ -519,13 +519,13 @@ export class HealthService extends HealthIndicator {
    * @returns Health indicator result for module initialization
    */
   checkModuleInitialization(): HealthIndicatorResult {
-    const operationId = `modules_${Date.now()}`;
+    const operationId = `modules${Date.now()}`;
     this.logger.debug(`[${operationId}] Checking module initialization`);
 
     try {
       // Check if core modules are initialized
       // This is a simplified check - in a real app you'd check actual module states
-      const _modules = {
+      const modules = {
         'computer-use': true, // Assume initialized
         'input-tracking': true, // Assume initialized
         health: true, // We know this is initialized since we're running
@@ -579,8 +579,8 @@ export class HealthService extends HealthIndicator {
    * @returns Service health status
    */
   private async checkExternalService(
-    _serviceName: string,
-    _healthUrl: string,
+    serviceName: string,
+    healthUrl: string,
   ): Promise<{ status: string; responseTime?: string; error?: string }> {
     const startTime = Date.now();
 

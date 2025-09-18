@@ -56,11 +56,11 @@ interface MockRequest {
 describe('JwtAuthGuard - Advanced Security Tests', () => {
   let guard: JwtAuthGuard;
   let jwtService: JwtService;
-  let _configService: ConfigService;
+  let configService: ConfigService;
   let reflector: Reflector;
   let module: TestingModule;
 
-  const operationId = `jwt_security_test_${Date.now()}`;
+  const operationId = `jwt_security_test${Date.now()}`;
   const securityLogger = {
     info: (message: string, meta?: Record<string, unknown>) =>
       console.log(`[SECURITY] ${message}`, meta ?? ''),
@@ -73,7 +73,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
   // Mock execution context factory with enhanced security metadata
   const createMockExecutionContext = (
     headers: Record<string, string | null | undefined> = {},
-    _isPublic = false,
+    isPublic = false,
     route = 'test-route',
     ip = '127.0.0.1',
   ): ExecutionContext => {
@@ -114,8 +114,8 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
   // Create malicious JWT tokens for security testing
   const createMaliciousTokens = () => {
-    const _validSecret = 'test-jwt-secret';
-    const _maliciousSecret = 'malicious-secret';
+    const validSecret = 'test-jwt-secret';
+    const maliciousSecret = 'malicious-secret';
 
     return {
       // Token with malicious payload injection
@@ -184,7 +184,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
     guard = module.get<JwtAuthGuard>(JwtAuthGuard);
     jwtService = module.get<JwtService>(JwtService);
-    _configService = module.get<ConfigService>(ConfigService);
+    configService = module.get<ConfigService>(ConfigService);
     reflector = module.get<Reflector>(Reflector);
 
     securityLogger.info(`[${operationId}] JWT Security test setup completed`);
@@ -259,7 +259,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
       // Create a token with valid structure but invalid signature
       const validPayload = Buffer.from(
-        JSON.stringify({
+        _JSON.stringify({
           sub: 'admin',
           email: 'admin@bytebot.ai',
           role: 'admin',
@@ -268,7 +268,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       ).toString('base64url');
 
       const validHeader = Buffer.from(
-        JSON.stringify({
+        _JSON.stringify({
           alg: 'HS256',
           typ: 'JWT',
         }),
@@ -307,7 +307,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
         sub: 'user123',
         email: 'user@test.com',
         role: 'viewer',
-        __proto__: { role: 'admin' }, // Prototype pollution attempt
+        _proto__: { role: 'admin' }, // Prototype pollution attempt
         constructor: { prototype: { role: 'admin' } }, // Constructor manipulation
         admin: true, // Role confusion
         exp: Math.floor(Date.now() / 1000) + 3600,

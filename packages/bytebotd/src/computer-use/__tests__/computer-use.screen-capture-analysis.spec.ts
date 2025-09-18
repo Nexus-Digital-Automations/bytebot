@@ -138,7 +138,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
     };
 
     // Setup Sharp mock
-    (sharp as jest.MockedFunction<typeof sharp>).mockReturnValue(mockSharpInstance as any);
+    (sharp as jest.MockedFunction<typeof sharp>).mockReturnValue(mockSharpInstance as unknown);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

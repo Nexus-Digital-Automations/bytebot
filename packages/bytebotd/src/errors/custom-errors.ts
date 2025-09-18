@@ -476,7 +476,7 @@ export class HttpErrorImpl extends BaseCustomError implements HttpError {
     } = {},
   ) {
     super(message ?? `HTTP ${statusCode}: ${statusText}`, options.context);
-    this.code = `HTTP_${statusCode}`;
+    this.code = `HTTP${statusCode}`;
     this.statusCode = statusCode;
     this.statusText = statusText;
     this.headers = options.headers;
@@ -515,12 +515,12 @@ export const ErrorFactory = {
       permissions?: string[],
       context?: Record<string, unknown>,
     ) =>
-      new InsufficientPermissionsError(undefined, {
+      new InsufficientPermissionsError(_undefined, {
         requiredPermissions: permissions,
         context,
       }),
     roleRequired: (role: string, context?: Record<string, unknown>) =>
-      new RoleRequiredError(undefined, { requiredRole: role, context }),
+      new RoleRequiredError(_undefined, { requiredRole: role, context }),
   },
 
   /**
@@ -544,7 +544,7 @@ export const ErrorFactory = {
       rules?: string[],
       context?: Record<string, unknown>,
     ) =>
-      new SchemaValidationError(undefined, {
+      new SchemaValidationError(_undefined, {
         field,
         validationRules: rules,
         context,
@@ -571,7 +571,7 @@ export const ErrorFactory = {
       clientIp?: string,
       context?: Record<string, unknown>,
     ) =>
-      new AttackDetectedError(undefined, {
+      new AttackDetectedError(_undefined, {
         attackType,
         clientIp,
         severity: 'critical',
@@ -589,7 +589,7 @@ export const ErrorFactory = {
       context?: Record<string, unknown>,
     ) => new DatabaseError(undefined, { operation, retryable, context }),
     network: (service?: string, context?: Record<string, unknown>) =>
-      new NetworkError(undefined, { service, retryable: true, context }),
+      new NetworkError(_undefined, { service, retryable: true, context }),
     serviceUnavailable: (service?: string, context?: Record<string, unknown>) =>
       new ServiceUnavailableError(undefined, { service, context }),
   },

@@ -58,7 +58,7 @@ export class BytebotDSecurityConfigService {
    * Create BytebotD rate limit guard with strict rate limits
    */
   createRateLimitGuard(
-    _reflector: unknown,
+    reflector: unknown,
     _redisClient?: unknown,
   ): StandardizedRateLimitGuard {
     return StandardizedRateLimitGuard.createBytebotDGuard(

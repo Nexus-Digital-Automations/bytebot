@@ -141,10 +141,10 @@ export class ParlantValidatedBrowserAsyncJobService {
   };
 
   constructor(
-    private readonly originalAsyncJobService: BrowserAsyncJobService,
+    _private readonly originalAsyncJobService: BrowserAsyncJobService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
-    const operationId = `parlant_async_job_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_async_job_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Parlant-Validated Browser Async Job Service`, {
       hasOriginalService: !!this.originalAsyncJobService,
@@ -172,7 +172,7 @@ export class ParlantValidatedBrowserAsyncJobService {
     dto: CreateAsyncJobDto,
     context: AsyncJobValidationContext
   ): Promise<AsyncJobResultDto> {
-    const operationId = `parlant_async_job_create_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_async_job_create${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     this.totalOperations++;
 
@@ -354,7 +354,7 @@ export class ParlantValidatedBrowserAsyncJobService {
     jobId: string,
     context: AsyncJobValidationContext
   ): Promise<AsyncJobResultDto | null> {
-    const operationId = `parlant_async_job_get_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_async_job_get${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     this.totalOperations++;
 
@@ -439,7 +439,7 @@ export class ParlantValidatedBrowserAsyncJobService {
   async getAllAsyncJobs(
     context: AsyncJobValidationContext
   ): Promise<AsyncJobResultDto[]> {
-    const operationId = `parlant_async_job_get_all_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_async_job_get_all${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     this.totalOperations++;
 
@@ -503,7 +503,7 @@ export class ParlantValidatedBrowserAsyncJobService {
     jobId: string,
     context: AsyncJobValidationContext
   ): Promise<void> {
-    const operationId = `parlant_async_job_cancel_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_async_job_cancel${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     this.totalOperations++;
 
@@ -604,7 +604,7 @@ export class ParlantValidatedBrowserAsyncJobService {
     jobId: string,
     context: AsyncJobValidationContext
   ): Promise<void> {
-    const operationId = `parlant_async_job_delete_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_async_job_delete${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     this.totalOperations++;
 
@@ -711,7 +711,7 @@ export class ParlantValidatedBrowserAsyncJobService {
     maxAge: number,
     context: AsyncJobValidationContext
   ): Promise<JobCleanupValidationResult> {
-    const operationId = `parlant_async_job_cleanup_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `parlant_async_job_cleanup${Date.now()}${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
     this.totalOperations++;
 
@@ -782,7 +782,7 @@ export class ParlantValidatedBrowserAsyncJobService {
         validationDetails: {
           conversationId: validationResponse.conversationId,
           riskAssessment,
-          complianceFlags: [`CLEANED_${cleanedCount}_JOBS`],
+          complianceFlags: [`CLEANED${cleanedCount}_JOBS`],
         },
       };
 
@@ -893,8 +893,8 @@ export class ParlantValidatedBrowserAsyncJobService {
    * Assess risk for job retrieval operations
    */
   private assessJobRetrievalRisk(
-    _jobId: string,
-    _context: AsyncJobValidationContext
+    jobId: string,
+    context: AsyncJobValidationContext
   ): AsyncJobRiskAssessment {
     return {
       riskLevel: RiskLevel.MINIMAL,
@@ -938,7 +938,7 @@ export class ParlantValidatedBrowserAsyncJobService {
    */
   private assessJobCancellationRisk(
     jobDetails: AsyncJobResultDto,
-    _context: AsyncJobValidationContext
+    context: AsyncJobValidationContext
   ): AsyncJobRiskAssessment {
     const riskFactors: string[] = [];
     let riskLevel = RiskLevel.MEDIUM; // Default medium for operational changes
@@ -1099,7 +1099,7 @@ export class ParlantValidatedBrowserAsyncJobService {
     const duration = dto.estimatedDurationMs ? 
       `(estimated ${Math.round(dto.estimatedDurationMs / 60000)} minutes)` : '';
     
-    return `Create ${dto.jobType.toLowerCase().replace('_', ' ')} async job "${dto.name}" ${duration}`;
+    return `Create ${dto.jobType.toLowerCase().replace('', ' ')} async job "${dto.name}" ${duration}`;
   }
 
   /**

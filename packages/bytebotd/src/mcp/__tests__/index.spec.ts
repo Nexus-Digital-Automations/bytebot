@@ -68,7 +68,7 @@ class IndexTestUtils {
    * Check if an object is a constructor function
    */
   static isConstructor(obj: unknown): boolean {
-    return (typeof obj === 'function' &&
+    return (_typeof obj === 'function' &&
       obj.prototype &&
       (obj as { prototype: { constructor: unknown } }).prototype.constructor === obj) as boolean;
   }
@@ -125,11 +125,11 @@ class IndexTestUtils {
 }
 
 describe('MCP Index Module', () => {
-  let _mockLogger: Record<string, jest.Mock>;
+  let mockLogger: Record<string, jest.Mock>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    _mockLogger = createMockLogger() as unknown as Record<string, jest.Mock>;
+    mockLogger = createMockLogger() as unknown as Record<string, jest.Mock>;
   });
 
   afterEach(() => {
@@ -584,7 +584,7 @@ describe('MCP Index Module', () => {
      * Test that exports are immutable from external access
      */
     it('should protect exports from external modification', () => {
-      const _originalModule = McpIndex.BytebotMcpModule;
+      const originalModule = McpIndex.BytebotMcpModule;
 
       // Attempt to modify export
       try {

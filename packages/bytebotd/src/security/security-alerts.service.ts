@@ -181,10 +181,10 @@ export class SecurityAlertsService {
   private escalationsTriggered = 0;
 
   constructor(
-    private readonly parlantService: ParlantIntegrationService,
+    _private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
-    const operationId = `security_alerts_init_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `security_alerts_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Initializing Security Alerts Service with Parlant integration`, {
       parlantIntegrationEnabled: true,
@@ -334,7 +334,7 @@ export class SecurityAlertsService {
   async acknowledgeAlert(
     request: AlertAcknowledgmentRequest
   ): Promise<{ acknowledged: boolean; alert: SecurityAlert; conversationId: string }> {
-    const operationId = `ack_alert_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `ack_alert${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(
       `[${operationId}] Acknowledging security alert with Parlant validation`,
@@ -431,7 +431,7 @@ export class SecurityAlertsService {
     alertId: string,
     context: ParlantConversationContext
   ): Promise<{ escalated: boolean; alert: SecurityAlert; conversationId: string }> {
-    const operationId = `escalate_alert_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const operationId = `escalate_alert${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(
       `[${operationId}] Escalating security alert with Parlant validation`,
@@ -543,7 +543,7 @@ export class SecurityAlertsService {
     request: AlertGenerationRequest,
     conversationId: string
   ): Promise<SecurityAlert> {
-    const alertId = `alert_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const alertId = `alert${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     const alert: SecurityAlert = {
       id: alertId,
@@ -639,8 +639,8 @@ export class SecurityAlertsService {
     this.escalationTimers.set(alert.id, timer);
   }
 
-  private async performAutomaticEscalation(alertId: string, _step: EscalationStep): Promise<void> {
-    const operationId = `auto_escalate_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  private async performAutomaticEscalation(alertId: string, step: EscalationStep): Promise<void> {
+    const operationId = `auto_escalate${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.logger.log(`[${operationId}] Performing automatic escalation for alert ${alertId}`);
 
@@ -660,7 +660,7 @@ export class SecurityAlertsService {
 
   private async performAlertEscalation(
     alert: SecurityAlert,
-    _conversationId: string
+    conversationId: string
   ): Promise<SecurityAlert> {
     const updatedAlert: SecurityAlert = {
       ...alert,
@@ -779,7 +779,7 @@ export class SecurityAlertsService {
 
   private generateAlertHash(event: SecurityEvent): string {
     // Create hash for deduplication based on event type, source, and affected resources
-    const hashInput = `${event.eventType}_${event.source}_${event.affectedResources.join(',')}_${Math.floor(event.timestamp.getTime() / (60 * 60 * 1000))}`; // Hour-based grouping
+    const hashInput = `${event.eventType}${event.source}${event.affectedResources.join(',')}${Math.floor(event.timestamp.getTime() / (60 * 60 * 1000))}`; // Hour-based grouping
     return Buffer.from(hashInput).toString('base64');
   }
 

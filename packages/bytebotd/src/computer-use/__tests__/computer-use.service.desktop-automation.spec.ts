@@ -161,7 +161,7 @@ const mockNutService = {
 };
 
 // Standard performance tracking for desktop automation
-const _mockPerformanceTracker = {
+const mockPerformanceTracker = {
   recordMetric: jest.fn().mockResolvedValue(undefined),
   getMetrics: jest.fn().mockResolvedValue({
     operationCount: 42,
@@ -241,7 +241,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       // Action should complete without throwing errors
       await expect(service.action(dragAction)).resolves.not.toThrow();
       expect(nutService.mouseButtonEvent).toHaveBeenCalledWith(
-        expect.objectContaining({
+        _expect.objectContaining({
           button: 'left',
           coordinates: { x: 100, y: 100 },
           pressed: true,
@@ -251,7 +251,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       // Verify drag movements
       expect(nutService.mouseMoveEvent).toHaveBeenCalled();
       expect(nutService.mouseButtonEvent).toHaveBeenCalledWith(
-        expect.objectContaining({
+        _expect.objectContaining({
           button: 'left',
           coordinates: { x: 400, y: 300 },
           pressed: false,
@@ -507,7 +507,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
           coordinates: { x: test.x, y: test.y },
         };
 
-        const _result = await service.action(moveAction);
+        const result = await service.action(moveAction);
 
         if (test.shouldSucceed) {
           // Action should complete without throwing errors
@@ -527,7 +527,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
 
       for (const platform of platforms) {
         // Mock platform detection
-        Object.defineProperty(process, 'platform', {
+        Object.defineProperty(_process, 'platform', {
           value: platform,
           configurable: true,
         });
@@ -628,14 +628,14 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         // Mix different operation types
         if (i % 3 === 0) {
           concurrentOperations.push(
-            service.action({
+            _service.action({
               action: 'move_mouse' as const,
               coordinates: { x: i * 10, y: i * 10 },
             }),
           );
         } else if (i % 3 === 1) {
           concurrentOperations.push(
-            service.action({
+            _service.action({
               action: 'click_mouse' as const,
               coordinates: { x: i * 10, y: i * 10 },
               button: 'left' as const,
@@ -644,7 +644,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
           );
         } else {
           concurrentOperations.push(
-            service.action({
+            _service.action({
               action: 'type_text' as const,
               text: `Text ${i}`,
             }),
@@ -785,7 +785,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
       const operations = [];
       for (let i = 0; i < 50; i++) {
         operations.push(
-          service.action({
+          _service.action({
             action: 'screenshot' as const,
           }),
         );
@@ -872,7 +872,7 @@ describe('ComputerUseService - Advanced Desktop Automation', () => {
         button: 'left',
       };
 
-      const _result = await service.action(coordinatedAction);
+      const result = await service.action(coordinatedAction);
 
       // Action should complete without throwing errors
       await expect(service.action(coordinatedAction)).resolves.not.toThrow();

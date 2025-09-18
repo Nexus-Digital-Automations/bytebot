@@ -160,15 +160,15 @@ describe('ComputerUseService', () => {
         await service.action(action);
 
         expect(mockNutService.mouseMoveEvent).toHaveBeenCalledTimes(3);
-        expect(mockNutService.mouseMoveEvent).toHaveBeenNthCalledWith(1, {
+        expect(mockNutService.mouseMoveEvent).toHaveBeenNthCalledWith(_1, {
           x: 0,
           y: 0,
         });
-        expect(mockNutService.mouseMoveEvent).toHaveBeenNthCalledWith(2, {
+        expect(mockNutService.mouseMoveEvent).toHaveBeenNthCalledWith(_2, {
           x: 50,
           y: 50,
         });
-        expect(mockNutService.mouseMoveEvent).toHaveBeenNthCalledWith(3, {
+        expect(mockNutService.mouseMoveEvent).toHaveBeenNthCalledWith(_3, {
           x: 100,
           y: 100,
         });
@@ -761,7 +761,7 @@ describe('ComputerUseService', () => {
       it('should handle unsupported application', async () => {
         const action = {
           action: 'application' as const,
-          application: 'unsupported-app' as any,
+          application: 'unsupported-app' as unknown,
         };
 
         await expect(service.action(action)).rejects.toThrow(
@@ -1001,7 +1001,7 @@ describe('ComputerUseService', () => {
   describe('Error Handling', () => {
     describe('ErrorHandler utility', () => {
       it('should extract _error messages from Error objects', () => {
-        const _error = new Error('Test error message');
+        const error = new Error('Test error message');
         const message = ErrorHandler.extractErrorMessage(_error);
         expect(message).toBe('Test error message');
       });
@@ -1012,39 +1012,39 @@ describe('ComputerUseService', () => {
       });
 
       it('should extract _error messages from objects with message property', () => {
-        const _error = { message: 'Object error message' };
+        const error = { message: 'Object error message' };
         const message = ErrorHandler.extractErrorMessage(_error);
         expect(message).toBe('Object error message');
       });
 
       it('should handle unknown _error types', () => {
-        const _error = { unknownProperty: 'value' };
+        const error = { unknownProperty: 'value' };
         const message = ErrorHandler.extractErrorMessage(_error);
         expect(message).toBe(JSON.stringify(_error));
       });
 
       it('should extract stack traces from Error objects', () => {
-        const _error = new Error('Test error');
+        const error = new Error('Test error');
         const stack = ErrorHandler.extractErrorStack(_error);
         expect(stack).toBeDefined();
         expect(stack).toContain('Error: Test error');
       });
 
       it('should extract stack traces from objects with stack property', () => {
-        const _error = { stack: 'Custom stack trace' };
+        const error = { stack: 'Custom stack trace' };
         const stack = ErrorHandler.extractErrorStack(_error);
         expect(stack).toBe('Custom stack trace');
       });
 
       it('should return undefined for objects without stack', () => {
-        const _error = { message: 'No stack' };
+        const error = { message: 'No stack' };
         const stack = ErrorHandler.extractErrorStack(_error);
         expect(stack).toBeUndefined();
       });
 
       it('should create comprehensive _error objects', () => {
         const originalError = new Error('Original error');
-        const _error = ErrorHandler.createError(
+        const error = ErrorHandler.createError(
           'TEST_ERROR',
           'Test message',
           'operation_123',
@@ -1064,7 +1064,7 @@ describe('ComputerUseService', () => {
       });
 
       it('should create _error objects without original error', () => {
-        const _error = ErrorHandler.createError(
+        const error = ErrorHandler.createError(
           'SIMPLE_ERROR',
           'Simple message',
           'operation_456',

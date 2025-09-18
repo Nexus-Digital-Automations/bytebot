@@ -246,7 +246,7 @@ class ErrorRecoveryManager {
     maxRetries = 3,
     baseDelay = 100,
   ): Promise<T> {
-    const currentAttempts = this.retryAttempts.get(operationId) || 0;
+    const currentAttempts = this.retryAttempts.get(operationId) ?? 0;
     
     if (currentAttempts >= maxRetries) {
       throw new Error(`Max retries (${maxRetries}) exceeded for operation ${operationId}`);
@@ -381,7 +381,7 @@ class ResourceMonitor {
    * Track resource allocation
    */
   trackResourceAllocation(resourceType: string, amount = 1) {
-    const current = this.resourceAllocations.get(resourceType) || 0;
+    const current = this.resourceAllocations.get(resourceType) ?? 0;
     this.resourceAllocations.set(resourceType, current + amount);
   }
 
@@ -389,7 +389,7 @@ class ResourceMonitor {
    * Track resource deallocation
    */
   trackResourceDeallocation(resourceType: string, amount = 1) {
-    const current = this.resourceAllocations.get(resourceType) || 0;
+    const current = this.resourceAllocations.get(resourceType) ?? 0;
     this.resourceAllocations.set(resourceType, Math.max(0, current - amount));
   }
 
@@ -511,7 +511,7 @@ describe('MCP Error Handling and Recovery', () => {
       // Mock service to simulate timeout
       mockComputerUseService.screenshot.mockImplementation(() => 
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('ETIMEDOUT: Operation timed out')), 100)
+          setTimeout(() => reject(_new Error('ETIMEDOUT: Operation timed out')), 100)
         )
       );
 
@@ -648,8 +648,8 @@ describe('MCP Error Handling and Recovery', () => {
           if (errorScenario.retryable) {
             try {
               const result = await recoveryManager.retryWithBackoff(
-                () => (computerUseTools as any)[errorScenario.tool]({ test: true }),
-                `${operationId}_${errorScenario.tool}`,
+                () => (computerUseTools as unknown)[errorScenario.tool]({ test: true }),
+                `${operationId}${errorScenario.tool}`,
                 3,
                 50
               );
@@ -663,7 +663,7 @@ describe('MCP Error Handling and Recovery', () => {
           } else {
             // Non-retryable errors should fail immediately
             try {
-              await (computerUseTools as any)[errorScenario.tool]({ test: true });
+              await (computerUseTools as unknown)[errorScenario.tool]({ test: true });
             } catch (error) {
               expect(error).toBe(errorScenario.error);
               console.log(`[${operationId}] Tool ${errorScenario.tool} correctly failed for non-retryable error`);
@@ -826,7 +826,7 @@ describe('MCP Error Handling and Recovery', () => {
       const shouldThrottleError = (errorType: string): boolean => {
         const now = Date.now();
         const windowStart = errorWindows.get(errorType) || now;
-        const count = errorCounts.get(errorType) || 0;
+        const count = errorCounts.get(errorType) ?? 0;
 
         // Reset window if expired
         if (now - windowStart > timeWindow) {
@@ -991,7 +991,7 @@ describe('MCP Error Handling and Recovery', () => {
       mockComputerUseService.writeFile.mockImplementation(async (params) => {
         // Simulate checking available disk space
         const fakeAvailableSpace = 1024; // 1KB
-        const contentSize = params.content?.length || 0;
+        const contentSize = params.content?.length ?? 0;
 
         if (contentSize > fakeAvailableSpace) {
           throw new Error('ENOSPC: No space left on device');
@@ -1060,7 +1060,7 @@ describe('MCP Error Handling and Recovery', () => {
 
       // Start multiple competing operations
       const operations = Array(5).fill(null).map((_, index) =>
-        competingOperation(`operation_${index}`)
+        competingOperation(`operation${index}`)
           .then(result => {
             results.push(result);
             return result;

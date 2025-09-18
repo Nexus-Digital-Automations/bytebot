@@ -156,9 +156,9 @@ describe('Enterprise API CUA Integration Tests', () => {
 
       const response = await request(context.app.getHttpServer())
         .post('/enterprise/computer-use/action')
-        .set('Authorization', `Bearer ${client!.authToken}`)
-        .set('X-Client-ID', client!.clientId)
-        .set('X-Tenant-ID', client!.tenantId)
+        .set('Authorization', `Bearer ${(client ?? "default").authToken}`)
+        .set('X-Client-ID', (client ?? "default").clientId)
+        .set('X-Tenant-ID', (client ?? "default").tenantId)
         .send(moveMouseAction)
         .expect(HttpStatus.OK);
 
@@ -171,7 +171,7 @@ describe('Enterprise API CUA Integration Tests', () => {
       expect(response.headers).toHaveProperty('x-rate-limit-remaining');
       expect(response.headers).toHaveProperty('x-tenant-id');
 
-      client!.successfulRequests++;
+      (client ?? "default").successfulRequests++;
     });
 
     it('should handle enterprise API versioning and backward compatibility', async () => {
@@ -181,8 +181,8 @@ describe('Enterprise API CUA Integration Tests', () => {
       // Test v1 API endpoint
       const v1Response = await request(context.app.getHttpServer())
         .post('/enterprise/v1/computer-use/screenshot')
-        .set('Authorization', `Bearer ${client!.authToken}`)
-        .set('X-Client-ID', client!.clientId)
+        .set('Authorization', `Bearer ${(client ?? "default").authToken}`)
+        .set('X-Client-ID', (client ?? "default").clientId)
         .set('API-Version', '1.0')
         .expect(HttpStatus.OK);
 
@@ -192,15 +192,15 @@ describe('Enterprise API CUA Integration Tests', () => {
       // Test v2 API endpoint (future compatibility)
       const v2Response = await request(context.app.getHttpServer())
         .post('/enterprise/v2/computer-use/screenshot')
-        .set('Authorization', `Bearer ${client!.authToken}`)
-        .set('X-Client-ID', client!.clientId)
+        .set('Authorization', `Bearer ${(client ?? "default").authToken}`)
+        .set('X-Client-ID', (client ?? "default").clientId)
         .set('API-Version', '2.0')
         .expect(HttpStatus.OK);
 
       expect(v2Response.body).toBeDefined();
       expect(v2Response.headers['api-version']).toBe('2.0');
 
-      client!.successfulRequests += 2;
+      (client ?? "default").successfulRequests += 2;
     });
 
     it('should provide enterprise multi-tenant isolation', async () => {
@@ -213,28 +213,28 @@ describe('Enterprise API CUA Integration Tests', () => {
       // Execute action for tenant 1
       const tenant1Response = await request(context.app.getHttpServer())
         .post('/enterprise/computer-use/cursor-position')
-        .set('Authorization', `Bearer ${tenant1Client!.authToken}`)
-        .set('X-Tenant-ID', tenant1Client!.tenantId)
+        .set('Authorization', `Bearer ${(tenant1Client ?? "default").authToken}`)
+        .set('X-Tenant-ID', (tenant1Client ?? "default").tenantId)
         .expect(HttpStatus.OK);
 
       // Execute action for tenant 2
       const tenant2Response = await request(context.app.getHttpServer())
         .post('/enterprise/computer-use/cursor-position')
-        .set('Authorization', `Bearer ${tenant2Client!.authToken}`)
-        .set('X-Tenant-ID', tenant2Client!.tenantId)
+        .set('Authorization', `Bearer ${(tenant2Client ?? "default").authToken}`)
+        .set('X-Tenant-ID', (tenant2Client ?? "default").tenantId)
         .expect(HttpStatus.OK);
 
       // Verify tenant isolation
-      expect(tenant1Response.headers['x-tenant-id']).toBe(tenant1Client!.tenantId);
-      expect(tenant2Response.headers['x-tenant-id']).toBe(tenant2Client!.tenantId);
+      expect(tenant1Response.headers['x-tenant-id']).toBe((tenant1Client ?? "default").tenantId);
+      expect(tenant2Response.headers['x-tenant-id']).toBe((tenant2Client ?? "default").tenantId);
       expect(tenant1Response.headers['x-tenant-id']).not.toBe(tenant2Response.headers['x-tenant-id']);
 
       // Verify both tenants can access the service independently
       expect(tenant1Response.body.success).toBe(true);
       expect(tenant2Response.body.success).toBe(true);
 
-      tenant1Client!.successfulRequests++;
-      tenant2Client!.successfulRequests++;
+      (tenant1Client ?? "default").successfulRequests++;
+      (tenant2Client ?? "default").successfulRequests++;
     });
   });
 
@@ -250,8 +250,8 @@ describe('Enterprise API CUA Integration Tests', () => {
       const standardRequests = Array.from({ length: 15 }, () => 
         request(context.app.getHttpServer())
           .post('/enterprise/computer-use/cursor-position')
-          .set('Authorization', `Bearer ${standardClient!.authToken}`)
-          .set('X-Client-ID', standardClient!.clientId)
+          .set('Authorization', `Bearer ${(standardClient ?? "default").authToken}`)
+          .set('X-Client-ID', (standardClient ?? "default").clientId)
       );
 
       const standardResults = await Promise.allSettled(standardRequests);
@@ -264,8 +264,8 @@ describe('Enterprise API CUA Integration Tests', () => {
       const enterpriseRequests = Array.from({ length: 15 }, () => 
         request(context.app.getHttpServer())
           .post('/enterprise/computer-use/cursor-position')
-          .set('Authorization', `Bearer ${enterpriseClient!.authToken}`)
-          .set('X-Client-ID', enterpriseClient!.clientId)
+          .set('Authorization', `Bearer ${(enterpriseClient ?? "default").authToken}`)
+          .set('X-Client-ID', (enterpriseClient ?? "default").clientId)
       );
 
       const enterpriseResults = await Promise.allSettled(enterpriseRequests);
@@ -282,8 +282,8 @@ describe('Enterprise API CUA Integration Tests', () => {
       const highVolumeRequests = Array.from({ length: 50 }, (_, i) => 
         request(context.app.getHttpServer())
           .post('/enterprise/computer-use/screenshot')
-          .set('Authorization', `Bearer ${client!.authToken}`)
-          .set('X-Client-ID', client!.clientId)
+          .set('Authorization', `Bearer ${(client ?? "default").authToken}`)
+          .set('X-Client-ID', (client ?? "default").clientId)
           .set('X-Request-Priority', i < 10 ? 'HIGH' : 'NORMAL') // First 10 requests have high priority
       );
 
@@ -321,7 +321,7 @@ describe('Enterprise API CUA Integration Tests', () => {
       const loadTestRequests = Array.from({ length: 20 }, () => 
         request(context.app.getHttpServer())
           .post('/enterprise/computer-use/action')
-          .set('Authorization', `Bearer ${client!.authToken}`)
+          .set('Authorization', `Bearer ${(client ?? "default").authToken}`)
           .send({ action: 'move_mouse', coordinates: { x: 100, y: 200 } })
       );
 
@@ -422,7 +422,7 @@ describe('Enterprise API CUA Integration Tests', () => {
       // First request (should hit cache miss and set cache)
       const firstResponse = await request(context.app.getHttpServer())
         .post('/enterprise/computer-use/cursor-position')
-        .set('Authorization', `Bearer ${client!.authToken}`)
+        .set('Authorization', `Bearer ${(client ?? "default").authToken}`)
         .set('X-Cache-Strategy', 'enterprise-optimized')
         .expect(HttpStatus.OK);
 
@@ -432,7 +432,7 @@ describe('Enterprise API CUA Integration Tests', () => {
       // Second request (should hit cache)
       const secondResponse = await request(context.app.getHttpServer())
         .post('/enterprise/computer-use/cursor-position')
-        .set('Authorization', `Bearer ${client!.authToken}`)
+        .set('Authorization', `Bearer ${(client ?? "default").authToken}`)
         .set('X-Cache-Strategy', 'enterprise-optimized')
         .expect(HttpStatus.OK);
 
@@ -455,7 +455,7 @@ describe('Enterprise API CUA Integration Tests', () => {
       // Execute monitored operation
       const response = await request(context.app.getHttpServer())
         .post('/enterprise/computer-use/action')
-        .set('Authorization', `Bearer ${client!.authToken}`)
+        .set('Authorization', `Bearer ${(client ?? "default").authToken}`)
         .set('X-Audit-Required', 'true')
         .set('X-Compliance-Level', 'SOC2')
         .send({
@@ -508,7 +508,7 @@ describe('Enterprise API CUA Integration Tests', () => {
       const userClient = testClients.find(c => c.userRole === 'USER');
       await request(context.app.getHttpServer())
         .post('/enterprise/admin/computer-use/system-action')
-        .set('Authorization', `Bearer ${userClient!.authToken}`)
+        .set('Authorization', `Bearer ${(userClient ?? "default").authToken}`)
         .send({ action: 'system_shutdown' })
         .expect(HttpStatus.FORBIDDEN);
     });
@@ -526,7 +526,7 @@ describe('Enterprise API CUA Integration Tests', () => {
 
       const response = await request(context.app.getHttpServer())
         .post('/enterprise/computer-use/secure-action')
-        .set('Authorization', `Bearer ${client!.authToken}`)
+        .set('Authorization', `Bearer ${(client ?? "default").authToken}`)
         .set('X-Encryption-Required', 'true')
         .set('X-Data-Classification', 'confidential')
         .send({
@@ -559,7 +559,7 @@ describe('Enterprise API CUA Integration Tests', () => {
       for (const operation of complianceOperations) {
         await request(context.app.getHttpServer())
           .post('/enterprise/computer-use/action')
-          .set('Authorization', `Bearer ${adminClient!.authToken}`)
+          .set('Authorization', `Bearer ${(adminClient ?? "default").authToken}`)
           .set('X-Compliance-Tracking', 'enabled')
           .set('X-Data-Classification', operation.classification)
           .send(operation)
@@ -569,7 +569,7 @@ describe('Enterprise API CUA Integration Tests', () => {
       // Request compliance report
       const reportResponse = await request(context.app.getHttpServer())
         .get('/enterprise/compliance/report')
-        .set('Authorization', `Bearer ${adminClient!.authToken}`)
+        .set('Authorization', `Bearer ${(adminClient ?? "default").authToken}`)
         .query({
           startDate: new Date(Date.now() - 3600000).toISOString(), // Last hour
           endDate: new Date().toISOString(),
@@ -641,7 +641,7 @@ describe('Enterprise API CUA Integration Tests', () => {
    * Generate unique test ID
    */
   function generateTestId(): string {
-    return `enterprise_test_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    return `enterprise_test${Date.now()}${Math.random().toString(36).substring(7)}`;
   }
 
   /**

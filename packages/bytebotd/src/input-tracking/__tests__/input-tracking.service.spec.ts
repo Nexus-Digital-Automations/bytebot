@@ -148,7 +148,7 @@ describe('InputTrackingService', () => {
   let gateway: InputTrackingGateway;
   let logger: Logger;
 
-  const operationId = `input_tracking_service_test_${Date.now()}`;
+  const operationId = `input_tracking_service_test${Date.now()}`;
 
   // Define proper handler type for better type safety
   type EventHandler = (event: unknown) => void;
@@ -561,21 +561,21 @@ describe('InputTrackingService', () => {
 
       // Ctrl+C combination
       keydownHandler?.(
-        createMockKeyboardEvent({
+        _createMockKeyboardEvent({
           keycode: 17, // Ctrl
           ctrlKey: true,
         }),
       );
 
       keydownHandler?.(
-        createMockKeyboardEvent({
+        _createMockKeyboardEvent({
           keycode: 67, // C
           ctrlKey: true,
         }),
       );
 
       keyupHandler?.(
-        createMockKeyboardEvent({
+        _createMockKeyboardEvent({
           keycode: 67,
           ctrlKey: true,
         }),
@@ -806,8 +806,8 @@ describe('InputTrackingService', () => {
 
       // Rapid mouse movements
       mouseMoveHandler?.(createMockMouseEvent({ x: 100, y: 100 }));
-      mouseMoveHandler?.(createMockMouseEvent({ x: 101, y: 101 }));
-      mouseMoveHandler?.(createMockMouseEvent({ x: 102, y: 102 }));
+      mouseMoveHandler?.(_createMockMouseEvent({ x: 101, y: 101 }));
+      mouseMoveHandler?.(_createMockMouseEvent({ x: 102, y: 102 }));
 
       // Should not capture screenshot immediately
       expect(computerUseService.screenshot).not.toHaveBeenCalled();
@@ -839,7 +839,7 @@ describe('InputTrackingService', () => {
 
       // Simulate 1000 mouse move events
       for (let i = 0; i < 1000; i++) {
-        mouseMoveHandler?.(createMockMouseEvent({ x: i, y: i }));
+        mouseMoveHandler?.(_createMockMouseEvent({ x: i, y: i }));
       }
 
       const processingTime = Date.now() - startTime;
@@ -1155,7 +1155,7 @@ describe('InputTrackingService', () => {
       jest.runAllTimers();
 
       expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining('Detected action:'),
+        _expect.stringContaining('Detected action:'),
         expect.any(String),
       );
 

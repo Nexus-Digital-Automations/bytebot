@@ -241,7 +241,7 @@ describe('ComputerUseService - File Operations', () => {
     service = testModule.get<ComputerUseService>(ComputerUseService);
 
     // Replace the logger instance to ensure our mock is used
-    (service as unknown as { logger: Logger }).logger = mockLogger;
+    (_service as unknown as { logger: Logger }).logger = mockLogger;
   });
 
   afterEach(async () => {
@@ -287,7 +287,7 @@ describe('ComputerUseService - File Operations', () => {
 
         // Verify file system operations were called correctly
         expect(mockFs.writeFile).toHaveBeenCalledWith(
-          expect.stringMatching(/^\/tmp\/bytebot_temp_\d+_[a-z0-9]+$/),
+          expect.stringMatching(/^\/tmp\/bytebot_temp_\d+[a-z0-9]+$/),
           Buffer.from(validBase64Data, 'base64'),
         );
 
@@ -297,7 +297,7 @@ describe('ComputerUseService - File Operations', () => {
         );
         expect(mockExecAsync).toHaveBeenCalledWith(
           expect.stringMatching(
-            /sudo cp "\/tmp\/bytebot_temp_\d+_[a-z0-9]+" "\/home\/user\/documents\/test\.txt"/,
+            /sudo cp "\/tmp\/bytebot_temp_\d+[a-z0-9]+" "\/home\/user\/documents\/test\.txt"/,
           ),
         );
         expect(mockExecAsync).toHaveBeenCalledWith(
@@ -309,12 +309,12 @@ describe('ComputerUseService - File Operations', () => {
 
         // Verify temporary file cleanup
         expect(mockFs.unlink).toHaveBeenCalledWith(
-          expect.stringMatching(/^\/tmp\/bytebot_temp_\d+_[a-z0-9]+$/),
+          expect.stringMatching(/^\/tmp\/bytebot_temp_\d+[a-z0-9]+$/),
         );
 
         // Verify comprehensive logging
         expect(mockLogger.log).toHaveBeenCalledWith(
-          expect.stringMatching(/^\[write_file_\d+_[a-z0-9]+\] Writing file$/),
+          expect.stringMatching(/^\[write_file_\d+[a-z0-9]+\] Writing file$/),
           expect.objectContaining({
             operationId: expect.any(String) as string,
             originalPath: '/home/user/documents/test.txt',
@@ -325,7 +325,7 @@ describe('ComputerUseService - File Operations', () => {
 
         expect(mockLogger.log).toHaveBeenCalledWith(
           expect.stringMatching(
-            /^\[write_file_\d+_[a-z0-9]+\] File write operation completed successfully$/,
+            /^\[write_file_\d+[a-z0-9]+\] File write operation completed successfully$/,
           ),
           expect.objectContaining({
             operationId: expect.any(String) as string,
@@ -594,8 +594,8 @@ describe('ComputerUseService - File Operations', () => {
 
         // Verify directory error was logged but didn't stop operation
         expect(mockLogger.debug).toHaveBeenCalledWith(
-          expect.stringMatching(
-            /\[write_file_\d+_[a-z0-9]+\] Directory creation note: Permission denied for directory creation/,
+          _expect.stringMatching(
+            /\[write_file_\d+[a-z0-9]+\] Directory creation note: Permission denied for directory creation/,
           ),
         );
       });
@@ -754,18 +754,18 @@ describe('ComputerUseService - File Operations', () => {
           mediaType: 'text/plain',
           lastModified: new Date(1609459200 * 1000), // Unix timestamp conversion
         } as Partial<FileReadResult>);
-        expect(result.operationId).toEqual((expect.stringMatching(/^read_file_\d+_[a-z0-9]+$/) as unknown) as string);
+        expect(result.operationId).toEqual((expect.stringMatching(/^read_file_\d+[a-z0-9]+$/) as unknown) as string);
         expect(result.timestamp).toEqual(expect.any(Date) as Date);
 
         // Verify file system operations
         expect(mockExecAsync).toHaveBeenCalledWith(
           expect.stringMatching(
-            /sudo cp "\/home\/user\/documents\/test\.txt" "\/tmp\/bytebot_read_\d+_[a-z0-9]+"/,
+            /sudo cp "\/home\/user\/documents\/test\.txt" "\/tmp\/bytebot_read_\d+[a-z0-9]+"/,
           ),
         );
         expect(mockExecAsync).toHaveBeenCalledWith(
           expect.stringMatching(
-            /sudo chmod 644 "\/tmp\/bytebot_read_\d+_[a-z0-9]+"/,
+            /sudo chmod 644 "\/tmp\/bytebot_read_\d+[a-z0-9]+"/,
           ),
         );
         expect(mockExecAsync).toHaveBeenCalledWith(
@@ -774,7 +774,7 @@ describe('ComputerUseService - File Operations', () => {
 
         // Verify temporary file cleanup
         expect(mockFs.unlink).toHaveBeenCalledWith(
-          expect.stringMatching(/^\/tmp\/bytebot_read_\d+_[a-z0-9]+$/),
+          expect.stringMatching(/^\/tmp\/bytebot_read_\d+[a-z0-9]+$/),
         );
       });
 
@@ -1189,7 +1189,7 @@ describe('ComputerUseService - File Operations', () => {
 
           const action: ReadFileActionDto = {
             action: 'read_file',
-            path: `/home/user/${testCase.description.replace(/\s+/g, '_')}.txt`,
+            path: `/home/user/${testCase.description.replace(/\s+/g, '')}.txt`,
           };
 
           const contentBuffer = Buffer.from(testCase.content);
@@ -1249,11 +1249,11 @@ describe('ComputerUseService - File Operations', () => {
         mockFs.readFile as jest.MockedFunction<typeof mockFs.readFile>
       ).mockResolvedValue(Buffer.from('test2'));
 
-      const _result1 = (await service.action(action1)) as FileWriteResult;
-      const _result2 = (await service.action(action2)) as FileReadResult;
+      const result1 = (await service.action(action1)) as FileWriteResult;
+      const result2 = (await service.action(action2)) as FileReadResult;
 
-      expect(_result1.operationId).toMatch(/^write_file_\d+_[a-z0-9]+$/);
-      expect(_result2.operationId).toMatch(/^read_file_\d+_[a-z0-9]+$/);
+      expect(_result1.operationId).toMatch(/^write_file_\d+[a-z0-9]+$/);
+      expect(_result2.operationId).toMatch(/^read_file_\d+[a-z0-9]+$/);
       expect(_result1.operationId).not.toBe(_result2.operationId);
     });
 
@@ -1354,7 +1354,7 @@ describe('ComputerUseService - File Operations', () => {
 
       // Verify error logging format consistency
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringMatching(/File write operation failed:/),
+        _expect.stringMatching(/File write operation failed:/),
         expect.objectContaining({
           operationId: expect.any(String) as string,
           error: expect.any(String) as string,
@@ -1363,7 +1363,7 @@ describe('ComputerUseService - File Operations', () => {
       );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringMatching(/File read operation failed:/),
+        _expect.stringMatching(/File read operation failed:/),
         expect.objectContaining({
           operationId: expect.any(String) as string,
           error: expect.any(String) as string,
