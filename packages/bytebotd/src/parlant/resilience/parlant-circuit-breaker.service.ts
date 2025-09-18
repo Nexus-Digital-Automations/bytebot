@@ -20,6 +20,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
+import { performance } from 'perf_hooks';
 
 // ===== CIRCUIT BREAKER INTERFACES =====
 

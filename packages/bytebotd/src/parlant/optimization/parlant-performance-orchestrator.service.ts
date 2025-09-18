@@ -283,7 +283,15 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
             cachedResult,
             startTime,
             optimizationPath,
-            { cacheHit, cacheLevel, batchProcessed, batchId, circuitBreakerUsed, degradedMode, retryAttempts }
+            { 
+              cacheHit, 
+              cacheLevel, 
+              batchProcessed, 
+              batchId, 
+              circuitBreakerUsed, 
+              degradedMode, 
+              retryAttempts 
+            }
           );
         }
       }
@@ -317,7 +325,15 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
             response,
             startTime,
             optimizationPath,
-            { cacheHit, cacheLevel, batchProcessed, batchId, circuitBreakerUsed, degradedMode, retryAttempts }
+            { 
+              cacheHit, 
+              cacheLevel, 
+              batchProcessed, 
+              batchId, 
+              circuitBreakerUsed, 
+              degradedMode, 
+              retryAttempts 
+            }
           );
 
         } catch (error) {
@@ -330,7 +346,21 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
             context,
             startTime,
             optimizationPath,
-            { cacheHit, cacheLevel, batchProcessed: false, batchId, circuitBreakerUsed, degradedMode, retryAttempts }
+            { 
+              functionName: request.functionName, 
+              riskLevel: request.riskLevel, 
+              userId: context.userId, 
+              sessionId: context.sessionId, 
+              timestamp: new Date(),
+              context: request.context as Record<string, unknown> || {},
+              cacheHit, 
+              cacheLevel, 
+              batchProcessed: false, 
+              batchId, 
+              circuitBreakerUsed, 
+              degradedMode, 
+              retryAttempts 
+            }
           );
         }
       }
@@ -341,7 +371,21 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
         context,
         startTime,
         optimizationPath,
-        { cacheHit, cacheLevel, batchProcessed, batchId, circuitBreakerUsed, degradedMode, retryAttempts }
+        { 
+          functionName: request.functionName, 
+          riskLevel: request.riskLevel, 
+          userId: context.userId, 
+          sessionId: context.sessionId, 
+          timestamp: new Date(),
+          context: request.context || {},
+          cacheHit, 
+          cacheLevel, 
+          batchProcessed, 
+          batchId, 
+          circuitBreakerUsed, 
+          degradedMode, 
+          retryAttempts 
+        }
       );
 
     } catch (error) {
@@ -352,7 +396,21 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
         error,
         startTime,
         optimizationPath,
-        { cacheHit, cacheLevel, batchProcessed, batchId, circuitBreakerUsed, degradedMode, retryAttempts }
+        { 
+          functionName: request.functionName, 
+          riskLevel: request.riskLevel, 
+          userId: context.userId, 
+          sessionId: context.sessionId, 
+          timestamp: new Date(),
+          context: request.context || {},
+          cacheHit, 
+          cacheLevel, 
+          batchProcessed, 
+          batchId, 
+          circuitBreakerUsed, 
+          degradedMode, 
+          retryAttempts 
+        }
       );
     }
   }
@@ -480,7 +538,15 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
       errorResponse,
       startTime,
       optimizationPath,
-      { ...metadata, degradedMode: true }
+      { 
+        cacheHit: metadata.cacheHit,
+        cacheLevel: metadata.cacheLevel,
+        batchProcessed: metadata.batchProcessed,
+        batchId: metadata.batchId,
+        circuitBreakerUsed: metadata.circuitBreakerUsed,
+        degradedMode: true,
+        retryAttempts: metadata.retryAttempts
+      }
     );
   }
 
@@ -541,7 +607,12 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
       userId: context.userId,
       sessionId: context.sessionId,
       timestamp: new Date(),
-      context: context as unknown as Record<string, unknown>
+      context: context as unknown as Record<string, unknown>,
+      cacheHit: false,
+      batchProcessed: false,
+      circuitBreakerUsed: false,
+      degradedMode: false,
+      retryAttempts: 0
     };
   }
 
@@ -754,8 +825,8 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     recommendations.push(
       ...batchRecommendations.map(rec => ({
         category: 'batching' as const,
-        priority: rec.priority === 'high' ? 'high' : 
-                  rec.priority === 'medium' ? 'medium' : 'low',
+        priority: (rec.priority === 'high' ? 'high' : 
+                  rec.priority === 'medium' ? 'medium' : 'low') as 'low' | 'high' | 'medium' | 'critical',
         title: `Batch ${rec.type}`,
         description: rec.action,
         expectedImprovement: '10-30% throughput improvement',

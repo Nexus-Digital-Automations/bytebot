@@ -623,8 +623,12 @@ class _PerformanceBenchmark {
     operation: () => Promise<T>,
     iterations: number = 1
   ): Promise<{ result: T; avgTimeMs: number; minTimeMs: number; maxTimeMs: number }> {
+    if (iterations < 1) {
+      throw new Error('Iterations must be at least 1');
+    }
+    
     const times: number[] = [];
-    let lastResult: T;
+    let lastResult: T | undefined;
 
     for (let i = 0; i < iterations; i++) {
       const start = Date.now();
@@ -632,8 +636,12 @@ class _PerformanceBenchmark {
       times.push(Date.now() - start);
     }
 
+    if (lastResult === undefined) {
+      throw new Error('Operation completed but returned undefined');
+    }
+
     return {
-      result: lastResult!,
+      result: lastResult,
       avgTimeMs: times.reduce((sum, time) => sum + time, 0) / times.length,
       minTimeMs: Math.min(...times),
       maxTimeMs: Math.max(...times)

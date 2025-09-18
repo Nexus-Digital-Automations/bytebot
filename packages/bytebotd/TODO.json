@@ -1409,7 +1409,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T23:16:21.693Z",
       "title": "Fix unsafe assignment violations in bytebotd package",
       "description": "Search for @typescript-eslint/no-unsafe-assignment errors and fix them by adding proper type assertions for test mocks, creating interfaces for complex objects, using type guards. Focus on parlant performance benchmark lines 895, 896 and similar unsafe any assignments. Target zero unsafe assignment violations.",
@@ -1426,7 +1426,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T00:54:50.701Z",
+      "updated_at": "2025-09-18T00:54:50.701Z"
     },
     {
       "status": "completed",
@@ -1451,7 +1453,7 @@
       "updated_at": "2025-09-18T00:13:55.018Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T23:16:21.990Z",
       "title": "Fix unsafe member access violations in bytebotd package",
       "description": "Search for @typescript-eslint/no-unsafe-member-access errors. Add type guards, create proper interfaces, use safe property access patterns. Focus on parlant performance benchmark lines 895, 896 with [metric] access on any values. Target zero unsafe member access violations.",
@@ -1468,7 +1470,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T00:54:02.960Z",
+      "updated_at": "2025-09-18T00:54:02.960Z"
     },
     {
       "status": "completed",

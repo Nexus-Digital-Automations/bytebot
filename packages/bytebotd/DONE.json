@@ -3182,10 +3182,58 @@
       "updated_at": "2025-09-18T00:50:00.201Z",
       "archived_at": "2025-09-18T00:50:00.215Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T23:16:21.990Z",
+      "title": "Fix unsafe member access violations in bytebotd package",
+      "description": "Search for @typescript-eslint/no-unsafe-member-access errors. Add type guards, create proper interfaces, use safe property access patterns. Focus on parlant performance benchmark lines 895, 896 with [metric] access on any values. Target zero unsafe member access violations.",
+      "category": "error",
+      "id": "error_1758150981990_w104n64uco",
+      "assigned_agent": "dev_session_1758150947980_1_general_8e5c9231",
+      "started_at": "2025-09-17T23:23:35.105Z",
+      "claimed_by": "dev_session_1758150947980_1_general_8e5c9231",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150947980_1_general_8e5c9231",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:23:35.105Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T00:54:02.960Z",
+      "updated_at": "2025-09-18T00:54:02.960Z",
+      "archived_at": "2025-09-18T00:54:03.021Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T23:16:21.693Z",
+      "title": "Fix unsafe assignment violations in bytebotd package",
+      "description": "Search for @typescript-eslint/no-unsafe-assignment errors and fix them by adding proper type assertions for test mocks, creating interfaces for complex objects, using type guards. Focus on parlant performance benchmark lines 895, 896 and similar unsafe any assignments. Target zero unsafe assignment violations.",
+      "category": "error",
+      "id": "error_1758150981693_yzg7f6mozyj",
+      "assigned_agent": "dev_session_1758150950941_1_general_9b245d91",
+      "started_at": "2025-09-17T23:23:22.817Z",
+      "claimed_by": "dev_session_1758150950941_1_general_9b245d91",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150950941_1_general_9b245d91",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:23:22.817Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T00:54:50.701Z",
+      "updated_at": "2025-09-18T00:54:50.701Z",
+      "archived_at": "2025-09-18T00:54:50.714Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 66,
+  "total_completed": 68,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-18T00:50:00.215Z"
+  "last_archived": "2025-09-18T00:54:50.714Z"
 }

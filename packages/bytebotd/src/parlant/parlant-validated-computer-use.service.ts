@@ -32,16 +32,9 @@ import {
 import {
   ComputerAction,
   MoveMouseAction,
-  TraceMouseAction,
   ClickMouseAction,
-  PressMouseAction,
-  DragMouseAction,
-  ScrollAction,
-  TypeKeysAction,
-  PressKeysAction,
   TypeTextAction,
   ApplicationAction,
-  PasteTextAction,
   WriteFileAction,
   ReadFileAction,
 } from '@bytebot/shared';

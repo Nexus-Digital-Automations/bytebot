@@ -362,7 +362,7 @@ export class ComplianceFrameworkService {
     const maxScore = requirementResults.reduce((sum, r) => sum + r.maxScore, 0);
     const percentage = maxScore > 0 ? (overallScore / maxScore) * 100 : 0;
 
-    const processingTime = Date.now() - startTime;
+    const _processingTime = Date.now() - startTime;
 
     const mockResponse: ComplianceAssessmentResponse = {
       id: `compliance_assessment_${Date.now()}_${Math.random().toString(36).substring(7)}`,

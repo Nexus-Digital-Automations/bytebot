@@ -151,7 +151,7 @@ describe('InputTrackingService', () => {
   const operationId = `input_tracking_service_test_${Date.now()}`;
 
   // Define proper handler type for better type safety
-  type EventHandler = (event: any) => void;
+  type EventHandler = (event: unknown) => void;
   type MockCall = [string, EventHandler];
 
   // Mock event objects for testing
@@ -937,7 +937,7 @@ describe('InputTrackingService', () => {
       const malformedEvent: unknown = {
         // Missing required properties
         keycode: null,
-      } as any;
+      } as unknown;
 
       expect(() => {
         keydownHandler?.(malformedEvent);

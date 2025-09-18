@@ -115,6 +115,7 @@ export interface HealthMetricsValidationResult {
   approved: boolean;
   riskLevel: HealthMetricsRiskLevel;
   conversationId: string;
+  operationId: string;
   reason?: string;
   recommendations?: string[];
   auditTrail: {
@@ -539,9 +540,6 @@ export class ParlantHealthMetricsValidationService {
   ): Promise<HealthMetricsValidationResult> {
     const session = await this.parlantClient.createValidationSession({
       operationType: context.operationType,
-      riskLevel: context.riskLevel,
-      parameters: context.parameters,
-      systemContext: context.systemContext,
     });
 
     // For low-risk operations, auto-approve with minimal validation
@@ -557,6 +555,7 @@ export class ParlantHealthMetricsValidationService {
       approved: validation.approved,
       riskLevel: riskAssessment.level,
       conversationId: session.id,
+      operationId: context.operationId,
       reason: validation.reason,
       recommendations: this.generateRecommendations(context, riskAssessment),
       auditTrail: {
@@ -605,6 +604,7 @@ export class ParlantHealthMetricsValidationService {
       approved: true,
       riskLevel: HealthMetricsRiskLevel.LOW,
       conversationId: `optimized_${operationId}`,
+      operationId,
       reason: 'High-frequency, low-risk operation - optimized approval',
       recommendations: ['Continue monitoring for patterns'],
       auditTrail: {
@@ -784,6 +784,7 @@ export class ParlantHealthMetricsValidationService {
       approved: true,
       riskLevel: context.riskLevel,
       conversationId,
+      operationId: context.operationId,
       reason,
       recommendations: ['Operation approved - continue monitoring'],
       auditTrail: {
@@ -821,6 +822,7 @@ export class ParlantHealthMetricsValidationService {
       approved,
       riskLevel: HealthMetricsRiskLevel.HIGH,
       conversationId: `failsafe_${operationId}`,
+      operationId,
       reason: approved 
         ? `Failsafe approval for health operation: ${errorMessage}`
         : `Validation failed, operation rejected: ${errorMessage}`,

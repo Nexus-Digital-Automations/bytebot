@@ -74,15 +74,15 @@ function safeJwtVerify(jwtService: { verifyAsync: (token: string, options: { sec
 }
 
 // Proper typing for Jest mocks
-type MockJwtService = {
+type _MockJwtService = {
   verifyAsync: jest.MockedFunction<(token: string, options: { secret: string }) => Promise<unknown>>;
 };
 
-type MockConfigService = {
+type _MockConfigService = {
   get: jest.MockedFunction<(key: string) => string | undefined>;
 };
 
-type MockReflector = {
+type _MockReflector = {
   getAllAndOverride: jest.MockedFunction<(key: string, targets: unknown[]) => boolean>;
 };
 

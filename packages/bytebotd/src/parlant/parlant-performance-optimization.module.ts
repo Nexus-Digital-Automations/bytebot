@@ -27,7 +27,7 @@
  */
 
 import { Module, Global, Provider } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 
 // Performance optimization services
 import { ParlantMultiLevelCacheService } from './caching/parlant-multi-level-cache.service';
@@ -285,16 +285,16 @@ const optimizationRecommendationsProvider: Provider = {
       ) => {
         // Create enhanced service instance with performance orchestrator
         const service = new ParlantIntegrationOptimizedService(
-          null as any, // ConfigService will be injected
+          null as unknown as ConfigService, // ConfigService will be injected
           monitor,
           cache,
           circuitBreaker,
           retryFailover,
-          null as any  // ParlantEnterpriseAuditService will be injected
+          null as unknown as ParlantEnterpriseAuditService  // ParlantEnterpriseAuditService will be injected
         );
         
         // Inject the performance orchestrator
-        (service as any).performanceOrchestrator = orchestrator;
+        (service as unknown as { performanceOrchestrator: ParlantPerformanceOrchestratorService }).performanceOrchestrator = orchestrator;
         
         return service;
       },
@@ -365,7 +365,7 @@ export class ParlantPerformanceOptimizationModule {
 
     // Set up real-time performance monitoring
     this.orchestrator.onPerformanceEvent('responseTimeRecorded', (event) => {
-      const eventData = event as any;
+      const eventData = event as { latencyMs: number; timestamp: number };
       if (eventData.latencyMs > 2000) {
         logger.warn('High latency detected', {
           latency: `${eventData.latencyMs}ms`,
@@ -376,7 +376,7 @@ export class ParlantPerformanceOptimizationModule {
 
     // Monitor performance metrics updates
     this.orchestrator.onPerformanceEvent('performanceMetricsUpdated', (metrics) => {
-      const metricsData = metrics as any;
+      const metricsData = metrics as Record<string, unknown>;
       const compliance = metricsData.targetCompliance;
       if (!compliance.p95Target || !compliance.cacheHitTarget || !compliance.throughputTarget) {
         logger.warn('Performance targets not met', {
@@ -390,7 +390,7 @@ export class ParlantPerformanceOptimizationModule {
 
     // Monitor alerts
     this.orchestrator.onPerformanceEvent('alertCreated', (alert) => {
-      const alertData = alert as any;
+      const alertData = alert as { message: string; level: string; metric: string; threshold: number; currentValue: number };
       logger.warn(`Performance Alert: ${alertData.message}`, {
         level: alertData.level,
         metric: alertData.metric,

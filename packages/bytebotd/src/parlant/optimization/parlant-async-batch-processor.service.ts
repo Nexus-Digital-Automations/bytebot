@@ -22,7 +22,6 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
-import { Worker } from 'worker_threads';
 import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
 
 // ===== ASYNC BATCH PROCESSING INTERFACES =====

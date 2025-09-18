@@ -295,7 +295,13 @@ export class ParlantRetryFailoverService extends EventEmitter {
     this.startHealthMonitoring();
     
     // Listen to circuit breaker events
-    this.circuitBreakerService.on('stateChanged', (event) => {
+    this.circuitBreakerService.on('stateChanged', (event: { 
+      previousState: string; 
+      newState: string; 
+      timestamp: Date; 
+      failureCount?: number; 
+      lastFailure?: Date 
+    }) => {
       this.handleCircuitBreakerStateChange(event);
     });
   }
@@ -511,7 +517,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
     
     // Split into batches
     const batches = this.createBatches(sortedRequests, this.bulkRetryConfig.batchSize);
-    const results: Array<FailoverResult<T> | null> = new Array(totalRequests).fill(null);
+    const results: Array<FailoverResult<T> | null> = new Array<FailoverResult<T> | null>(totalRequests).fill(null);
     
     let processedBatches = 0;
     let successfulRequests = 0;
@@ -648,7 +654,21 @@ export class ParlantRetryFailoverService extends EventEmitter {
   // ===== PRIVATE HELPER METHODS =====
 
   private getRetryConfig(riskLevel: RiskLevel): RetryConfig {
-    return this.retryConfigs.get(riskLevel) ?? this.retryConfigs.get(RiskLevel.MEDIUM)!;
+    const config = this.retryConfigs.get(riskLevel) ?? this.retryConfigs.get(RiskLevel.MEDIUM);
+    if (!config) {
+      // Fallback configuration if none found
+      return {
+        maxAttempts: 3,
+        baseDelayMs: 1000,
+        maxDelayMs: 10000,
+        backoffMultiplier: 2,
+        jitterMs: 100,
+        timeoutMs: 30000,
+        retryableErrors: ['TIMEOUT', 'NETWORK_ERROR', 'RATE_LIMIT'],
+        circuitBreakerEnabled: true
+      };
+    }
+    return config;
   }
 
   private getHealthyEndpoints(): FailoverEndpoint[] {
