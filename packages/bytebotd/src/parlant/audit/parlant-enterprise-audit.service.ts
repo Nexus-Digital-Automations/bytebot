@@ -316,11 +316,13 @@ export class ParlantEnterpriseAuditService {
     
     // Apply filters
     if (query.startDate) {
-      filteredEntries = filteredEntries.filter(entry => entry.timestamp >= query.startDate);
+      const startDate = query.startDate;
+      filteredEntries = filteredEntries.filter(entry => entry.timestamp >= startDate);
     }
     
     if (query.endDate) {
-      filteredEntries = filteredEntries.filter(entry => entry.timestamp <= query.endDate);
+      const endDate = query.endDate;
+      filteredEntries = filteredEntries.filter(entry => entry.timestamp <= endDate);
     }
     
     if (query.userId) {

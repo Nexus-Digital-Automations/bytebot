@@ -244,7 +244,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
           );
           
           if (failoverResult.success) {
-            validationResponse = failoverResult.data ?? { success: false, riskLevel: RiskLevel.HIGH, validationTime: Date.now(), message: 'No data returned from failover' };
+            validationResponse = failoverResult.data ?? { approved: false, conversationId: 'failover', validationTimestamp: new Date(), reasoning: 'No data returned from failover', confidence: 0 };
             retryAttempts = failoverResult.totalAttempts - 1;
             endpointUsed = failoverResult.successfulEndpoint;
             degradedMode = failoverResult.degradedMode;
@@ -262,7 +262,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
           circuitBreakerState = this.circuitBreaker.getCircuitBreakerStats().state;
           
           if (circuitResult.success) {
-            validationResponse = circuitResult.data ?? { success: false, riskLevel: RiskLevel.HIGH, validationTime: Date.now(), message: 'No data returned from circuit breaker' };
+            validationResponse = circuitResult.data ?? { approved: false, conversationId: 'circuit-breaker', validationTimestamp: new Date(), reasoning: 'No data returned from circuit breaker', confidence: 0 };
           } else {
             throw circuitResult.error ?? new Error('Circuit breaker blocked validation');
           }
@@ -273,7 +273,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
         }
 
         // Step 3: Cache successful validation (if enabled)
-        if (this.optimizedConfig.enableIntelligentCaching && validationResponse.approved) {
+        if (this.optimizedConfig.enableIntelligentCaching && validationResponse?.approved) {
           await this.intelligentCache.setCachedValidation(request, validationResponse);
         }
       }
