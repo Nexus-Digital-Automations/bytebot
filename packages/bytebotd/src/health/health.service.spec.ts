@@ -55,12 +55,27 @@ describe('HealthService', () => {
       })
     };
 
+    const mockLogger = {
+      log: jest.fn(),
+      debug: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      verbose: jest.fn(),
+      fatal: jest.fn(),
+      setContext: jest.fn(),
+      localInstance: undefined,
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HealthService,
         {
           provide: ParlantHealthMetricsValidationService,
           useValue: mockParlantValidationService,
+        },
+        {
+          provide: Logger,
+          useValue: mockLogger,
         },
       ],
     }).compile();
