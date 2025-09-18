@@ -30,13 +30,13 @@ async function bootstrap(): Promise<void> {
 
     // Deploy standardized security middleware for BytebotD - MAXIMUM SECURITY
     const securityMiddleware =
-      StandardizedSecurityMiddleware.createBytebotDMiddleware(_configService);
+      StandardizedSecurityMiddleware.createBytebotDMiddleware(configService);
     app.use('/api', securityMiddleware.use.bind(securityMiddleware));
 
-    _logger.log(
+    logger.log(
       'BytebotD standardized security middleware deployed successfully',
       {
-        serviceType: ServiceType._BYTEBOTD,
+        serviceType: ServiceType.BYTEBOTD,
         environment,
         securityLevel: securityMiddleware.getSecurityConfig().securityLevel,
       },
@@ -107,8 +107,8 @@ async function bootstrap(): Promise<void> {
     );
 
     // Configure body parser with increased payload size limit (50MB)
-    app.use(_json({ limit: '50mb' }));
-    app.use(_urlencoded({ limit: '50mb', extended: true }));
+    app.use(json({ limit: '50mb' }));
+    app.use(urlencoded({ limit: '50mb', extended: true }));
 
     // Enable CORS with strict origin validation - SECURITY CRITICAL
     const baseAllowedOrigins = [
@@ -166,7 +166,7 @@ async function bootstrap(): Promise<void> {
         }
 
         // Block unauthorized origins with detailed logging
-        _logger.warn(`CORS blocked unauthorized origin: ${origin}`, {
+        logger.warn(`CORS blocked unauthorized origin: ${origin}`, {
           blockedOrigin: origin,
           allowedOrigins,
           environment,
@@ -236,25 +236,25 @@ async function bootstrap(): Promise<void> {
     server.on(
       'upgrade',
       (req: IncomingMessage, socket: Socket, head: Buffer) => {
-        if (_req.url?.startsWith('/websockify')) {
+        if (req.url?.startsWith('/websockify')) {
           // Type-safe upgrade handling - http-proxy-middleware expects a Socket from 'net'
           if (wsProxy && typeof wsProxy.upgrade === 'function') {
             // Safe type assertion: socket parameter is guaranteed to be Socket from 'net' module
-            wsProxy.upgrade(_req, socket, head);
+            wsProxy.upgrade(req, socket, head);
           } else {
-            _logger.warn('WebSocket proxy upgrade method not available');
+            logger.warn('WebSocket proxy upgrade method not available');
           }
         }
         // else let Socket.IO/Nest handle it by not hijacking the socket
       },
     );
 
-    _logger.log('Application bootstrap completed successfully');
-    _logger.log('Server listening on port 9990');
-  } catch (_error) {
-    _logger.error(
+    logger.log('Application bootstrap completed successfully');
+    logger.log('Server listening on port 9990');
+  } catch (error) {
+    logger.error(
       'Failed to bootstrap application',
-      _error instanceof Error ? _error.stack : String(_error),
+      error instanceof Error ? error.stack : String(error),
     );
     process.exit(1);
   }

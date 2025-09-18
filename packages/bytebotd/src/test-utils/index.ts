@@ -128,12 +128,12 @@ export const AssertionHelpers = {
     expectedMessage?: string,
     expectedCode?: string,
   ) => {
-    expect(_error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(Error);
     if (expectedMessage) {
-      expect(_error.message).toContain(expectedMessage);
+      expect(error.message).toContain(expectedMessage);
     }
     if (expectedCode) {
-      expect(_error.code).toBe(expectedCode);
+      expect(error.code).toBe(expectedCode);
     }
   },
 
