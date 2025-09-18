@@ -3254,10 +3254,82 @@
       "updated_at": "2025-09-18T01:15:35.116Z",
       "archived_at": "2025-09-18T01:15:35.127Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T23:16:22.389Z",
+      "title": "Fix explicit any type violations in bytebotd package",
+      "description": "Run ESLint to find all no-explicit-any violations in bytebotd package and replace any types with proper TypeScript types: unknown, Record<string, unknown>, specific interfaces, or function signatures. Focus on parlant performance benchmark and other high-violation files. Target zero explicit any violations.",
+      "category": "error",
+      "id": "error_1758150982389_45qxuy314ed",
+      "assigned_agent": "dev_session_1758150950927_1_general_06163e85",
+      "started_at": "2025-09-17T23:18:25.933Z",
+      "claimed_by": "dev_session_1758150950927_1_general_06163e85",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150950927_1_general_06163e85",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:18:25.933Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T01:20:07.730Z",
+      "updated_at": "2025-09-18T01:20:07.730Z",
+      "archived_at": "2025-09-18T01:20:07.734Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T23:16:21.449Z",
+      "title": "Fix unused variable violations in bytebotd package",
+      "description": "Search for @typescript-eslint/no-unused-vars errors and prefix unused variables with underscore. Focus on catch blocks, function parameters, destructured assignments. Target files like parlant performance benchmark lines 746, 757.",
+      "category": "error",
+      "id": "error_1758150981449_ag227izm7dd",
+      "assigned_agent": "dev_session_1758150950876_1_general_f91689c5",
+      "started_at": "2025-09-17T23:17:28.547Z",
+      "claimed_by": "dev_session_1758150950876_1_general_f91689c5",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150950876_1_general_f91689c5",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:17:28.547Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T01:20:08.670Z",
+      "updated_at": "2025-09-18T01:20:08.670Z",
+      "archived_at": "2025-09-18T01:20:08.673Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T23:16:21.416Z",
+      "title": "Fix ESLint violations in test files",
+      "description": "Fix all remaining ESLint violations in test files across bytebotd package. Focus on jest mock type assertions, unsafe any usage in tests, proper test typing patterns. Add type assertions like `as jest.MockedFunction`, create proper mock interfaces, fix unsafe assignments in test expectations. Target zero violations in all test files.",
+      "category": "error",
+      "id": "error_1758150981416_2e7f7mwapyl",
+      "assigned_agent": "dev_session_1758150950878_1_general_3a7a0575",
+      "started_at": "2025-09-17T23:18:16.999Z",
+      "claimed_by": "dev_session_1758150950878_1_general_3a7a0575",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758150950878_1_general_3a7a0575",
+          "role": "primary",
+          "assignedAt": "2025-09-17T23:18:16.999Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T01:20:43.460Z",
+      "updated_at": "2025-09-18T01:20:43.460Z",
+      "archived_at": "2025-09-18T01:20:43.463Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 69,
+  "total_completed": 72,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-18T01:15:35.127Z"
+  "last_archived": "2025-09-18T01:20:43.463Z"
 }

@@ -476,7 +476,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
       retryAttempts,
       degradedMode: fallbackResult.degradedMode,
       fallbackUsed: fallbackResult.fallbackUsed,
-      data: fallbackResult.data,
+      data: fallbackResult.data as T | undefined,
     };
   }
 
@@ -661,10 +661,10 @@ export class ParlantRetryFailoverService extends EventEmitter {
         maxAttempts: 3,
         baseDelayMs: 1000,
         maxDelayMs: 10000,
-        backoffMultiplier: 2,
-        jitterMs: 100,
+        exponentialBase: 2,
+        jitterEnabled: true,
+        retryOnErrors: ['TIMEOUT', 'NETWORK_ERROR', 'RATE_LIMIT'],
         timeoutMs: 30000,
-        retryableErrors: ['TIMEOUT', 'NETWORK_ERROR', 'RATE_LIMIT'],
         circuitBreakerEnabled: true
       };
     }

@@ -458,25 +458,30 @@ export class ParlantValidatedComputerUseService {
       case 'screenshot':
         return 'Capture screenshot of current screen';
       
-      case 'move_mouse':
+      case 'move_mouse': {
         const moveAction = params as MoveMouseAction;
         return `Move mouse to coordinates (${moveAction.coordinates?.x}, ${moveAction.coordinates?.y})`;
+      }
       
-      case 'click_mouse':
+      case 'click_mouse': {
         const clickAction = params as ClickMouseAction;
         return `Click mouse at coordinates (${clickAction.coordinates?.x}, ${clickAction.coordinates?.y}) with ${clickAction.button ?? 'left'} button`;
+      }
       
-      case 'type_text':
+      case 'type_text': {
         const typeAction = params as TypeTextAction;
-        return `Type text: "${typeAction.text?.substring(0, 50)}${typeAction.text && typeAction.text.length > 50 ? '...' : ''}"`;
+        return `Type text: "${typeAction.text?.substring(0, 50)}${typeAction.text && typeAction.text.length > 50 ? '...' : ''}";
+      }
       
-      case 'write_file':
+      case 'write_file': {
         const writeAction = params as WriteFileAction;
         return `Write file to path: ${writeAction.path}`;
+      }
       
-      case 'read_file':
+      case 'read_file': {
         const readAction = params as ReadFileAction;
         return `Read file from path: ${readAction.path}`;
+      }
       
       case 'application':
         const appAction = params as ApplicationAction;
