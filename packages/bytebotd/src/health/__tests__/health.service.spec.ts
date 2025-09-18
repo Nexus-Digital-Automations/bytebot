@@ -41,7 +41,7 @@ interface MockLogger {
 /**
  * Helper type for type-safe Jest mock call arguments
  */
-type MockCallArgs<T extends jest.MockedFunction<unknown>> = T extends jest.MockedFunction<(...args: infer P) => unknown> ? P : never;
+type MockCallArgs<T extends jest.MockedFunction<(...args: unknown[]) => unknown>> = T extends jest.MockedFunction<(...args: infer P) => unknown> ? P : never;
 
 /**
  * Type guard for logger debug calls with string messages
@@ -65,7 +65,7 @@ interface _ServiceHealthMockReturn {
 }
 
 // Type for Health Service with access to private methods (for testing)
-interface TestableHealthService extends HealthService {
+interface TestableHealthService {
   checkServiceHealth(): _ServiceHealthMockReturn;
   performDatabasePing(): Promise<boolean>;
   checkExternalService(
@@ -77,6 +77,16 @@ interface TestableHealthService extends HealthService {
     averageResponseTime: number;
   };
   startTime: number;
+  // Include actual HealthService methods we need
+  getBasicHealth(): BasicHealthResponse;
+  getDetailedStatus(): DetailedStatusResponse;
+  getInitializationTime(): number;
+  isServiceStable(minimumSeconds?: number): boolean;
+  checkProcessHealth(): HealthIndicatorResult;
+  checkDatabaseHealth(): Promise<HealthIndicatorResult>;
+  checkExternalServices(): Promise<HealthIndicatorResult>;
+  checkStartupComplete(): HealthIndicatorResult;
+  checkModuleInitialization(): HealthIndicatorResult;
 }
 
 // Type definitions for health check results
@@ -169,7 +179,7 @@ describe('HealthService', () => {
       };
       jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300); // 5 minutes
-      const result = (await service.getBasicHealth()) as BasicHealthResponse;
+      const result = service.getBasicHealth();
       expect(result).toMatchObject({
         status: 'healthy',
         timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/) as string,
@@ -222,7 +232,7 @@ describe('HealthService', () => {
       for (const mockMemory of edgeCases) {
         jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemory);
         jest.spyOn(process, 'uptime').mockReturnValue(100);
-        const result = (await service.getBasicHealth()) as BasicHealthResponse;
+        const result = service.getBasicHealth();
         expect(result.status).toBe('healthy');
         expect(result.memory.used).toBeGreaterThanOrEqual(0);
         expect(result.memory.total).toBeGreaterThanOrEqual(0);
@@ -244,7 +254,7 @@ describe('HealthService', () => {
       } as NodeJS.MemoryUsage);
       for (const uptime of uptimeValues) {
         jest.spyOn(process, 'uptime').mockReturnValue(uptime);
-        const result = (await service.getBasicHealth()) as BasicHealthResponse;
+        const result = service.getBasicHealth();
         expect(result.uptime).toBe(Math.round(uptime));
         expect(result.status).toBe('healthy');
       }
@@ -304,7 +314,7 @@ describe('HealthService', () => {
       };
       jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(1800); // 30 minutes
-      const result = service.getDetailedStatus() as DetailedStatusResponse;
+      const result = service.getDetailedStatus();
       expect(result).toMatchObject({
         status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/) as string,
         timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/) as string,
@@ -439,7 +449,7 @@ describe('HealthService', () => {
     it('should provide extensible service health structure', () => {
       const testId = `${operationId}_service_health_structure`;
       console.log(`[${testId}] Testing service health structure extensibility`);
-      const result = service.getDetailedStatus() as DetailedStatusResponse;
+      const result = service.getDetailedStatus();
       // Verify service structure supports expected services
       expect(result.services).toHaveProperty(
         'database' as keyof typeof result.services,
@@ -469,7 +479,7 @@ describe('HealthService', () => {
     it('should return placeholder performance metrics', () => {
       const testId = `${operationId}_performance_metrics`;
       console.log(`[${testId}] Testing performance metrics collection`);
-      const result = service.getDetailedStatus() as DetailedStatusResponse;
+      const result = service.getDetailedStatus();
       expect(result.performance).toEqual({
         requestsPerSecond: 0,
         averageResponseTime: 0,
@@ -496,7 +506,7 @@ describe('HealthService', () => {
     it('should provide extensible performance metrics structure', () => {
       const testId = `${operationId}_performance_structure`;
       console.log(`[${testId}] Testing performance metrics structure`);
-      const result = service.getDetailedStatus() as DetailedStatusResponse;
+      const result = service.getDetailedStatus();
       expect(result.performance).toHaveProperty(
         'requestsPerSecond' as keyof typeof result.performance,
       );
@@ -620,7 +630,7 @@ describe('HealthService', () => {
       expect(results).toHaveLength(20);
       expect(
         results.every(
-          (result) => (result as BasicHealthResponse).status === 'healthy',
+          (result) => result.status === 'healthy',
         ),
       ).toBe(true);
       expect(totalTime).toBeLessThan(500); // Should complete within 500ms
@@ -698,10 +708,10 @@ describe('HealthService', () => {
         arrayBuffers: 0,
       } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(10);
-      const result = (await service.getBasicHealth()) as BasicHealthResponse;
+      const result = service.getBasicHealth();
       expect(result.status).toBe('healthy');
-      expect((result as BasicHealthResponse).memory.used).toBe(1); // 1 MB
-      expect((result as BasicHealthResponse).memory.free).toBe(0); // No free memory
+      expect(result.memory.used).toBe(1); // 1 MB
+      expect(result.memory.free).toBe(0); // No free memory
       console.log(`[${testId}] Resource constraints handling test completed`);
     });
     it('should provide accurate uptime calculations across service lifecycle', () => {
@@ -710,7 +720,7 @@ describe('HealthService', () => {
       const testUptimes = [0.1, 1, 59.9, 60, 61, 3599, 3600, 3601];
       for (const testUptime of testUptimes) {
         jest.spyOn(process, 'uptime').mockReturnValue(testUptime);
-        const result = service.getBasicHealth() as BasicHealthResponse;
+        const result = service.getBasicHealth();
         const expectedUptime = Math.round(testUptime);
         expect(result.uptime).toBe(expectedUptime);
       }
@@ -728,7 +738,7 @@ describe('HealthService', () => {
       } as NodeJS.MemoryUsage);
       jest.spyOn(process, 'uptime').mockReturnValue(300);
       const beforeTime = new Date();
-      const result = (await service.getBasicHealth()) as BasicHealthResponse;
+      const result = service.getBasicHealth();
       const afterTime = new Date();
       const resultTime = new Date(result.timestamp);
       expect(resultTime.getTime()).toBeGreaterThanOrEqual(beforeTime.getTime());
@@ -784,11 +794,11 @@ describe('HealthService', () => {
       // All operations should complete successfully
       expect(results).toHaveLength(20);
       // Health check results should be consistent
-      const healthResults = results.filter(
-        (r) => r && typeof r === 'object' && 'status' in r,
-      );
+      const healthResults = results.filter((r) => {
+        return r !== null && typeof r === 'object' && 'status' in r;
+      }) as (BasicHealthResponse | DetailedStatusResponse)[];
       const allHealthy = healthResults.every(
-        (r) => (r as BasicHealthResponse).status === 'healthy',
+        (r) => r.status === 'healthy',
       );
       expect(allHealthy).toBe(true);
       console.log(`[${testId}] Thread safety test completed successfully`);
@@ -1135,23 +1145,24 @@ describe('HealthService', () => {
         const testId = `${operationId}_external_service_timeout`;
         console.log(`[${testId}] Testing external service timeout scenarios`);
         // Mock setTimeout to reject immediately for some calls
-        const originalSetTimeout = setTimeout;
+        const originalSetTimeout = global.setTimeout;
         let timeoutCallCount = 0;
-        global.setTimeout = (jest.fn() as jest.MockedFunction<typeof setTimeout>).mockImplementation(
-          (callback: (...args: unknown[]) => void, delay: number) => {
+        const mockSetTimeout = jest.fn().mockImplementation(
+          (callback: (error?: Error | null, result?: boolean) => void, delay: number) => {
             timeoutCallCount++;
             if (timeoutCallCount % 2 === 0) {
               // Simulate timeout/rejection on every other call
-
-              originalSetTimeout(
-                () => (callback as (error: Error) => void)(new Error('Service unavailable')),
+              return originalSetTimeout(
+                () => callback(new Error('Service unavailable')),
                 1,
               );
             } else {
-              originalSetTimeout(() => (callback as (arg1: null, arg2: boolean) => void)(null, true), delay);
+              return originalSetTimeout(() => callback(null, true), delay);
             }
           },
-        ) as ReturnType<typeof setTimeout>;
+        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        global.setTimeout = mockSetTimeout as any;
         const results = await Promise.all([
           (service as TestableHealthService).checkExternalService(
             'service-1',

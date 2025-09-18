@@ -36,13 +36,7 @@ interface AuthenticatedRequest {
   user?: AuthenticatedUser;
 }
 
-interface MockExecutionContext extends ExecutionContext {
-  switchToHttp(): {
-    getRequest(): AuthenticatedRequest;
-    getResponse(): Record<string, unknown>;
-    getNext(): Function;
-  };
-}
+// Remove MockExecutionContext interface - use ExecutionContext directly
 
 // Mock RBAC Roles Guard implementation for Phase 1 requirements
 class MockRolesGuard {
@@ -194,17 +188,23 @@ describe('RolesGuard', () => {
   // Mock execution context factory
   const createMockExecutionContext = (
     user?: AuthenticatedUser,
-  ): MockExecutionContext => {
+  ): ExecutionContext => {
     const mockRequest: AuthenticatedRequest = { user };
 
     return {
       switchToHttp: jest.fn().mockReturnValue({
         getRequest: jest.fn().mockReturnValue(mockRequest),
         getResponse: jest.fn().mockReturnValue({}),
+        getNext: jest.fn().mockReturnValue({}),
       }),
       getHandler: jest.fn(),
       getClass: jest.fn(),
-    } as MockExecutionContext;
+      getArgs: jest.fn().mockReturnValue([]),
+      getArgByIndex: jest.fn().mockReturnValue({}),
+      switchToRpc: jest.fn().mockReturnValue({}),
+      switchToWs: jest.fn().mockReturnValue({}),
+      getType: jest.fn().mockReturnValue('http'),
+    } as ExecutionContext;
   };
 
   // Mock user factory

@@ -590,7 +590,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     }
 
     // Check for suspicious path patterns
-    if (path.includes('../') ?? path.includes('..\\')) {
+    if (path.includes('../') || path.includes('..\\')) {
       return true;
     }
 
@@ -659,19 +659,19 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
     let requiredPermissions = ComputerUsePermission.NONE;
 
     // Determine required permissions based on endpoint
-    if (path.includes('/screenshot') ?? path.includes('/screen')) {
+    if (path.includes('/screenshot') || path.includes('/screen')) {
       requiredPermissions |= ComputerUsePermission.VIEW_SCREEN;
     }
 
-    if (path.includes('/mouse') ?? path.includes('/click')) {
+    if (path.includes('/mouse') || path.includes('/click')) {
       requiredPermissions |= ComputerUsePermission.MOUSE_CONTROL;
     }
 
-    if (path.includes('/keyboard') ?? path.includes('/type')) {
+    if (path.includes('/keyboard') || path.includes('/type')) {
       requiredPermissions |= ComputerUsePermission.KEYBOARD_CONTROL;
     }
 
-    if (path.includes('/file') ?? path.includes('/upload')) {
+    if (path.includes('/file') || path.includes('/upload')) {
       requiredPermissions |= ComputerUsePermission.FILE_ACCESS;
     }
 
@@ -774,7 +774,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
     // Increase risk based on endpoint sensitivity
     const path = request.url.toLowerCase();
-    if (path.includes('/file') ?? path.includes('/upload')) {
+    if (path.includes('/file') || path.includes('/upload')) {
       riskScore += 25;
     }
 

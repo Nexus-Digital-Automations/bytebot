@@ -252,7 +252,7 @@ export function getErrorSeverity(error: unknown): ErrorSeverity {
       : ErrorSeverity.HIGH;
   }
 
-  if (isAuthenticationError(error) ?? isAuthorizationError(error)) {
+  if (isAuthenticationError(error) || isAuthorizationError(error)) {
     return ErrorSeverity.MEDIUM;
   }
 

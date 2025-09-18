@@ -61,11 +61,7 @@ export class InputTrackingController {
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
-  start(@CurrentUser() user: ByteBotdUser): {
-    status: string;
-    timestamp: string;
-    userId: string;
-  } {
+  start(@CurrentUser() user: ByteBotdUser) {
     const operationId = `input-tracking-start-${Date.now()}`;
 
     this.logger.log(`[${operationId}] Starting input tracking`, {
@@ -116,11 +112,7 @@ export class InputTrackingController {
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
-  stop(@CurrentUser() user: ByteBotdUser): {
-    status: string;
-    timestamp: string;
-    userId: string;
-  } {
+  stop(@CurrentUser() user: ByteBotdUser) {
     const operationId = `input-tracking-stop-${Date.now()}`;
 
     this.logger.log(`[${operationId}] Stopping input tracking`, {
