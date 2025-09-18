@@ -32,6 +32,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { ByteBotdUser } from '../auth/guards/jwt-auth.guard';
 
 // ===== INTERCEPTOR TYPES =====
 
@@ -42,10 +43,7 @@ interface ExtendedRequest extends Request<Record<string, unknown>, unknown, unkn
   route: {
     path?: string;
   };
-  user?: {
-    id?: string;
-    role?: string;
-  };
+  user?: ByteBotdUser;
 }
 
 /**

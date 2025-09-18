@@ -1839,7 +1839,7 @@
       "updated_at": "2025-09-18T02:26:49.355Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T01:53:32.339Z",
       "title": "Fix TypeScript compilation errors in browser use test files",
       "description": "Address interface mismatches, mock type problems, and browser automation type issues in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/browser-use/__tests__/ while maintaining zero ESLint violations",
@@ -1856,7 +1856,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T03:00:08.951Z",
+      "updated_at": "2025-09-18T03:00:08.951Z"
     },
     {
       "status": "completed",
@@ -1925,6 +1927,26 @@
           "agentId": "dev_session_1758163408228_1_general_e8df838a",
           "role": "primary",
           "assignedAt": "2025-09-18T02:47:14.552Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-18T02:59:15.737Z",
+      "title": "CRITICAL: Fix ExtendedRequest interface compatibility in enterprise-api.interceptor.ts",
+      "description": "Fix critical TypeScript interface compatibility error in bytebotd/src/enterprise-api/enterprise-api.interceptor.ts. ExtendedRequest interface incorrectly extends Request interface - user property type mismatch. Missing required properties sub, email in user object type. This blocks entire bytebotd package compilation.",
+      "category": "error",
+      "id": "error_1758164355737_s6gb3akeo6o",
+      "assigned_agent": "dev_session_1758164143884_1_general_b22c2a2c",
+      "started_at": "2025-09-18T02:59:40.112Z",
+      "claimed_by": "dev_session_1758164143884_1_general_b22c2a2c",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758164143884_1_general_b22c2a2c",
+          "role": "primary",
+          "assignedAt": "2025-09-18T02:59:40.112Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
