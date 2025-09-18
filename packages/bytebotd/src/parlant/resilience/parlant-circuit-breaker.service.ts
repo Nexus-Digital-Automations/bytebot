@@ -146,10 +146,10 @@ export class ParlantCircuitBreakerService extends EventEmitter {
   private failureCount = 0;
   
   // Connection pool
-  private readonly connectionPool: Map<string, unknown> = new Map();
+  private readonly connectionPool: Map<string, Connection> = new Map();
   private readonly activeConnections = new Set<string>();
   private readonly pendingRequests: Array<{
-    resolve: (connection: unknown) => void;
+    resolve: (connection: Connection) => void;
     reject: (error: Error) => void;
     timestamp: number;
   }> = [];
