@@ -388,7 +388,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
 
       const responses = await this.batchProcessor.processBulkValidation(baseRequests, priority);
       
-      return responses.map((response, index) => 
+      return responses.map((response, _index) => 
         this.createOptimizedResponse(
           response,
           Date.now(), // Simplified timing for bulk operations

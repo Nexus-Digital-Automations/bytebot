@@ -54,6 +54,15 @@ function isStringOrUndefined(value: unknown): value is string | undefined {
   return typeof value === 'string' || value === undefined;
 }
 
+function isHttpContext(context: unknown): context is { getRequest: () => unknown } {
+  return (
+    typeof context === 'object' &&
+    context !== null &&
+    'getRequest' in context &&
+    typeof (context as { getRequest: unknown }).getRequest === 'function'
+  );
+}
+
 // Proper typing for Jest mocks
 type MockJwtService = {
   verifyAsync: jest.MockedFunction<(token: string, options: { secret: string }) => Promise<unknown>>;
@@ -100,7 +109,11 @@ class MockJwtAuthGuard {
       return true;
     }
 
-    const rawRequest = context.switchToHttp().getRequest();
+    const httpContext = context.switchToHttp();
+    if (!isHttpContext(httpContext)) {
+      throw new UnauthorizedException('Invalid execution context');
+    }
+    const rawRequest = httpContext.getRequest();
     if (!isAuthenticatedRequest(rawRequest)) {
       throw new UnauthorizedException('Invalid request format');
     }

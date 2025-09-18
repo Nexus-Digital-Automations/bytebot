@@ -963,7 +963,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
   /**
    * Subscribe to batch processing events
    */
-  onBatchEvent(event: string, listener: (...args: any[]) => void): void {
+  onBatchEvent(event: string, listener: (...args: unknown[]) => void): void {
     this.eventEmitter.on(event, listener);
   }
 
