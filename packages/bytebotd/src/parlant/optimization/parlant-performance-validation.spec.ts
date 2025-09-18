@@ -22,7 +22,11 @@ import {
   ParlantAsyncBatchProcessorService,
   ValidationPriority 
 } from './parlant-async-batch-processor.service';
-import { ParlantPerformanceOrchestratorService } from './parlant-performance-orchestrator.service';
+import { 
+  ParlantPerformanceOrchestratorService,
+  OptimizedValidationRequest,
+  ComprehensivePerformanceMetrics 
+} from './parlant-performance-orchestrator.service';
 import { ParlantPerformanceOptimizationModule } from '../parlant-performance-optimization.module';
 
 // Import types
@@ -32,12 +36,6 @@ import {
   ParlantConversationContext,
   RiskLevel 
 } from '../parlant-integration.service';
-import { ValidationMetadata } from '../caching/parlant-multi-level-cache.service';
-import { 
-  OptimizedValidationRequest,
-  OptimizedValidationResponse,
-  ComprehensivePerformanceMetrics 
-} from './parlant-performance-orchestrator.service';
 
 // Test interfaces for health checks and metrics
 interface PerformanceHealthCheck {
@@ -51,21 +49,6 @@ interface PerformanceHealthCheck {
   cacheHealth: unknown;
   batchProcessing: unknown;
   activeAlerts: unknown;
-}
-
-interface PerformanceMetrics {
-  readonly timestamp: Date;
-  readonly orchestratorMetrics: {
-    readonly totalRequests: number;
-    readonly avgResponseTime: number;
-    readonly p95ResponseTime: number;
-    readonly p99ResponseTime: number;
-    readonly throughputPerSecond: number;
-    readonly errorRate: number;
-    readonly availabilityPercent: number;
-    readonly optimizationEffectiveness: number;
-  };
-  [key: string]: unknown;
 }
 
 describe('Parlant Performance Optimization Validation', () => {
@@ -129,13 +112,13 @@ describe('Parlant Performance Optimization Validation', () => {
       const key1 = cacheService.generateFunctionKey(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
-        sampleRequest.context as Record<string, unknown>
+        sampleRequest.context as unknown as Record<string, unknown>
       );
       
       const key2 = cacheService.generateFunctionKey(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
-        sampleRequest.context as Record<string, unknown>
+        sampleRequest.context as unknown as Record<string, unknown>
       );
 
       expect(key1).toBe(key2);
@@ -146,14 +129,14 @@ describe('Parlant Performance Optimization Validation', () => {
       const _key = cacheService.generateFunctionKey(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
-        sampleRequest.context
+        sampleRequest.context as unknown as Record<string, unknown>
       );
 
       // Set cache
       await cacheService.setCachedValidation(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
-        sampleRequest.context as Record<string, unknown>,
+        sampleRequest.context as unknown as Record<string, unknown>,
         sampleResponse,
         {
           functionName: sampleRequest.functionName,
@@ -161,7 +144,7 @@ describe('Parlant Performance Optimization Validation', () => {
           userId: sampleRequest.context.userId,
           sessionId: sampleRequest.context.sessionId,
           timestamp: new Date(),
-          context: sampleRequest.context as Record<string, unknown>,
+          context: sampleRequest.context as unknown as Record<string, unknown>,
           cacheHit: false,
           batchProcessed: false,
           circuitBreakerUsed: false,
@@ -174,7 +157,7 @@ describe('Parlant Performance Optimization Validation', () => {
       const cachedResult = await cacheService.getCachedValidation(
         sampleRequest.functionName,
         [sampleRequest.functionParams],
-        sampleRequest.context as Record<string, unknown>
+        sampleRequest.context as unknown as Record<string, unknown>
       );
 
       expect(cachedResult).toBeDefined();
@@ -205,7 +188,7 @@ describe('Parlant Performance Optimization Validation', () => {
             securityLevel: 'LOW' as const,
             conversationHistory: [],
             metadata: {}
-          } as Record<string, unknown>,
+          } as unknown as Record<string, unknown>,
           cacheHit: false,
           batchProcessed: false,
           circuitBreakerUsed: false,
@@ -367,7 +350,7 @@ describe('Parlant Performance Optimization Validation', () => {
 
   describe('Performance Orchestration', () => {
     it('should achieve sub-1000ms P95 response time target', async () => {
-      const testRequests: ParlantValidationRequest[] = Array.from({ length: 100 }, (_, i) => ({
+      const testRequests: OptimizedValidationRequest[] = Array.from({ length: 100 }, (_, i) => ({
         functionName: `perfTest${i}`,
         functionParams: { index: i, testData: 'test' },
         actionDescription: `Performance test ${i}`,
@@ -535,7 +518,7 @@ describe('Parlant Performance Optimization Validation', () => {
       for (let i = 0; i < iterations; i++) {
         const funcName = testFunctions[i % testFunctions.length];
         const request: OptimizedValidationRequest = {
-          functionName: funcName,
+          functionName: funcName ?? 'defaultFunction',
           functionParams: { cacheIndex: i % 10 }, // Repeat parameters to increase cache hits
           actionDescription: `Cache test ${i}`,
           riskLevel: RiskLevel.LOW,
@@ -567,7 +550,7 @@ describe('Parlant Performance Optimization Validation', () => {
     });
 
     it('should handle stress test with 500+ requests', async () => {
-      const stressRequests = Array.from({ length: 500 }, (_, i) => ({
+      const stressRequests: OptimizedValidationRequest[] = Array.from({ length: 500 }, (_, i) => ({
         functionName: `stressTest${i % 20}`, // Reuse function names for cache hits
         functionParams: { stressIndex: i % 100 }, // Pattern in parameters
         actionDescription: `Stress test ${i}`,
@@ -617,7 +600,7 @@ describe('Parlant Performance Optimization Validation', () => {
   describe('Error Handling and Degradation', () => {
     it('should handle validation errors gracefully', async () => {
       // Create a request that might cause errors
-      const errorRequest = {
+      const errorRequest: OptimizedValidationRequest = {
         functionName: 'errorTest',
         functionParams: { nullValue: null, undefinedValue: undefined, complexObject: { complex: 'object' } },
         actionDescription: 'Error test case',
