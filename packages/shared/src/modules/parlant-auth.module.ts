@@ -22,6 +22,8 @@ import {
   Type,
   ForwardReference,
   Provider,
+  InjectionToken,
+  OptionalFactoryDependency,
 } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
@@ -146,7 +148,7 @@ export interface ParlantAuthModuleAsyncOptions
   ) => Promise<ParlantAuthModuleOptions> | ParlantAuthModuleOptions;
 
   /** Providers to inject into factory function */
-  inject?: unknown[];
+  inject?: (InjectionToken | OptionalFactoryDependency)[];
 }
 
 /**
@@ -344,7 +346,7 @@ export class ParlantAuthModule {
               },
             };
           },
-          inject: options.inject || [],
+          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
         }),
 
         // Cache module with async configuration
@@ -361,7 +363,7 @@ export class ParlantAuthModule {
               max: 1000,
             };
           },
-          inject: options.inject || [],
+          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
         }),
       ],
       providers: [
@@ -372,7 +374,7 @@ export class ParlantAuthModule {
         {
           provide: "PARLANT_AUTH_OPTIONS",
           useFactory: options.useFactory || (() => ({})),
-          inject: options.inject || [],
+          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
         },
 
         // Core services
@@ -394,7 +396,7 @@ export class ParlantAuthModule {
             const mergedOptions = { ...DEFAULT_OPTIONS, ...parlantOptions };
             return mergedOptions.riskAssessment?.thresholds;
           },
-          inject: options.inject || [],
+          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
         },
 
         {
@@ -406,7 +408,7 @@ export class ParlantAuthModule {
             const mergedOptions = { ...DEFAULT_OPTIONS, ...parlantOptions };
             return mergedOptions.mfa;
           },
-          inject: options.inject || [],
+          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
         },
 
         {
@@ -418,7 +420,7 @@ export class ParlantAuthModule {
             const mergedOptions = { ...DEFAULT_OPTIONS, ...parlantOptions };
             return mergedOptions.conversation;
           },
-          inject: options.inject || [],
+          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
         },
       ],
       exports: [
