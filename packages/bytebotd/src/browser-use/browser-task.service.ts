@@ -1,9 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { v4 as _uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   BrowserTaskResultDto,
   BrowserTaskStatus,
   BrowserTaskPriority,
+  CreateBrowserTaskDto,
 } from './dto/browser-task.dto';
 
 /**
@@ -124,45 +125,37 @@ export class BrowserTaskService {
   /**
    * Create a new browser automation task
    */
-  createTask(_taskData: taskDataType): BrowserTaskResultDto {
+  createTask(_taskData: CreateBrowserTaskDto): BrowserTaskResultDto {
     const task: BrowserTaskResultDto = {
-      taskId: taskData.taskId,
-      status: taskData.status,
-      startedAt: taskData.startedAt,
+      taskId: uuidv4(),
+      status: BrowserTaskStatus.PENDING,
+      startedAt: new Date(),
       executionTimeMs: 0,
-      actionsCompleted: taskData.actionsCompleted,
-      totalActions: taskData.totalActions,
-      logs: taskData.logs,
+      actionsCompleted: 0,
+      totalActions: _taskData.actions?.length ?? 0,
+      logs: [],
       metadata: {
-        ...taskData.metadata,
-        name: taskData.name,
-        description: taskData.description,
-        priority: taskData.priority ?? BrowserTaskPriority.NORMAL,
-        maxExecutionTimeMs: taskData.maxExecutionTimeMs ?? 300000,
-        enableLogging: taskData.enableLogging ?? true,
-        continueOnError: taskData.continueOnError ?? false,
+        ..._taskData.metadata,
+        name: _taskData.name,
+        description: _taskData.description,
+        priority: _taskData.priority ?? BrowserTaskPriority.NORMAL,
+        maxExecutionTimeMs: _taskData.maxExecutionTimeMs ?? 300000,
+        enableLogging: _taskData.enableLogging ?? true,
+        continueOnError: _taskData.continueOnError ?? false,
         createdAt: new Date(),
       },
     };
 
     // Store task
-    this.tasks.set(taskData.taskId, task);
+    this.tasks.set(task.taskId, task);
     this.taskMetrics.totalTasks++;
 
-    // Add to queue if needed
-    if (taskData.status === BrowserTaskStatus.PENDING) {
-      this.addToQueue(
-        taskData.taskId,
-        taskData.priority ?? BrowserTaskPriority.NORMAL,
-      );
-    }
-
-    this.logger.log(`Created browser task: ${taskData.taskId}`, {
-      taskId: taskData.taskId,
-      name: taskData.name,
-      totalActions: taskData.totalActions,
-      priority: taskData.priority,
-      status: taskData.status,
+    this.logger.log(`Created browser task: ${task.taskId}`, {
+      taskId: task.taskId,
+      name: _taskData.name,
+      totalActions: task.totalActions,
+      priority: _taskData.priority,
+      status: task.status,
     });
 
     return task;
@@ -171,7 +164,7 @@ export class BrowserTaskService {
   /**
    * Get task by ID
    */
-  getTask(_taskId: taskIdType): BrowserTaskResultDto | null {
+  getTask(taskId: string): BrowserTaskResultDto | null {
     const task = this.tasks.get(taskId);
 
     if (!task) {
@@ -205,7 +198,7 @@ export class BrowserTaskService {
   /**
    * Update task status
    */
-  updateTaskStatus(_taskId: taskIdType): void {
+  updateTaskStatus(taskId: string, updates: Partial<BrowserTaskResultDto>): void {
     const task = this.tasks.get(taskId);
     if (!task) {
       throw new Error(`Task not found: ${taskId}`);
@@ -318,13 +311,13 @@ export class BrowserTaskService {
   /**
    * Get tasks by status
    */
-  getTasksByStatus(_status: statusType): BrowserTaskResultDto[] {
+  getTasksByStatus(_status: BrowserTaskStatus): BrowserTaskResultDto[] {
     const tasks = Array.from(this.tasks.values()).filter(
-      (task) => task.status === status,
+      (task) => task.status === _status,
     );
 
     // Update execution times for running tasks
-    if (status === BrowserTaskStatus.RUNNING) {
+    if (_status === BrowserTaskStatus.RUNNING) {
       tasks.forEach((task) => {
         if (task.startedAt) {
           task.executionTimeMs = Date.now() - task.startedAt.getTime();
@@ -370,7 +363,7 @@ export class BrowserTaskService {
   /**
    * Cancel task
    */
-  cancelTask(_taskId: taskIdType): void {
+  cancelTask(taskId: string): void {
     const task = this.tasks.get(taskId);
     if (!task) {
       throw new Error(`Task not found: ${taskId}`);
@@ -422,7 +415,7 @@ export class BrowserTaskService {
   /**
    * Delete task (cleanup)
    */
-  deleteTask(_taskId: taskIdType): void {
+  deleteTask(taskId: string): void {
     const task = this.tasks.get(taskId);
     if (!task) {
       return;
@@ -500,7 +493,7 @@ export class BrowserTaskService {
   /**
    * Clean up old completed tasks
    */
-  cleanupOldTasks(_maxAge: maxAgeType): number {
+  cleanupOldTasks(_maxAge: number): number {
     // 24 hours default
     const now = Date.now();
     let cleanedCount = 0;
@@ -519,7 +512,7 @@ export class BrowserTaskService {
         ? now - task.completedAt.getTime()
         : now - task.startedAt.getTime();
 
-      if (taskAge > maxAge) {
+      if (taskAge > _maxAge) {
         this.tasks.delete(taskId);
         cleanedCount++;
       }
@@ -528,7 +521,7 @@ export class BrowserTaskService {
     if (cleanedCount > 0) {
       this.logger.log(`Cleaned up ${cleanedCount} old tasks`, {
         cleanedCount,
-        maxAgeHours: maxAge / (1000 * 60 * 60),
+        maxAgeHours: _maxAge / (1000 * 60 * 60),
         remainingTasks: this.tasks.size,
       });
     }
@@ -539,7 +532,12 @@ export class BrowserTaskService {
   /**
    * Add task to priority queue
    */
-  private addToQueue(_taskId: taskIdType): void {
+  private addToQueue(taskId: string): void {
+    const task = this.tasks.get(taskId);
+    if (!task) {
+      return;
+    }
+
     // Insert based on priority
     const priorityOrder = {
       [BrowserTaskPriority.CRITICAL]: 0,
@@ -548,7 +546,8 @@ export class BrowserTaskService {
       [BrowserTaskPriority.LOW]: 3,
     };
 
-    const taskPriorityValue = priorityOrder[priority];
+    const taskPriority = task.metadata?.priority as BrowserTaskPriority ?? BrowserTaskPriority.NORMAL;
+    const taskPriorityValue = priorityOrder[taskPriority];
     let insertIndex = this.taskQueue.length;
 
     // Find correct insertion position
@@ -571,7 +570,7 @@ export class BrowserTaskService {
 
     this.logger.log(`Added task to queue: ${taskId}`, {
       taskId,
-      priority,
+      priority: taskPriority,
       queuePosition: insertIndex,
       queueLength: this.taskQueue.length,
     });

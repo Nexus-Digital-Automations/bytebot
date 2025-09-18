@@ -93,12 +93,12 @@ export class BrowserSessionService {
       this.sessions.set(sessionId, session);
 
       // Initialize browser (mock implementation - in production would start actual browser)
-      await this.initializeBrowserSession(session, _dto);
+      await this.initializeBrowserSession(session, dto);
 
       // Create initial tabs if specified
       if (dto.initialUrls && dto.initialUrls.length > 0) {
         for (const url of dto.initialUrls) {
-          await this.createTab(sessionId, { url, makeActive: false });
+          this.createTab(sessionId, { url, makeActive: false });
         }
 
         // Make first tab active
@@ -108,7 +108,7 @@ export class BrowserSessionService {
         }
       } else {
         // Create default blank tab
-        const tab = await this.createTab(sessionId, {
+        const tab = this.createTab(sessionId, {
           url: 'about:blank',
           title: 'New Tab',
           makeActive: true,
@@ -152,8 +152,8 @@ export class BrowserSessionService {
   /**
    * Get browser session by ID
    */
-  getSession(_sessionId: sessionIdType): BrowserSessionDto | null {
-    const session = this.sessions.get(sessionId);
+  getSession(_sessionId: string): BrowserSessionDto | null {
+    const session = this.sessions.get(_sessionId);
 
     if (!session) {
       return null;
@@ -182,12 +182,12 @@ export class BrowserSessionService {
   /**
    * Close browser session
    */
-  async closeSession(_sessionId: sessionIdType): Promise<void> {
-    this.logger.log(`Closing browser session: ${sessionId}`);
+  async closeSession(_sessionId: string): Promise<void> {
+    this.logger.log(`Closing browser session: ${_sessionId}`);
 
-    const session = this.sessions.get(sessionId);
+    const session = this.sessions.get(_sessionId);
     if (!session) {
-      throw new Error(`Session not found: ${sessionId}`);
+      throw new Error(`Session not found: ${_sessionId}`);
     }
 
     try {
@@ -197,7 +197,7 @@ export class BrowserSessionService {
 
       // Close all tabs
       for (const tab of session.tabs) {
-        await this.closeTab(sessionId, tab.tabId);
+        this.closeTab(_sessionId, tab.tabId);
       }
 
       // Terminate browser process (mock - in production would kill actual process)
@@ -207,13 +207,13 @@ export class BrowserSessionService {
       session.status = BrowserSessionStatus.CLOSED;
       session.closedAt = new Date();
 
-      this.logger.log(`Browser session closed successfully: ${sessionId}`, {
-        sessionId,
+      this.logger.log(`Browser session closed successfully: ${_sessionId}`, {
+        sessionId: _sessionId,
         upTimeMs: session.statistics.upTimeMs,
         tabsProcessed: session.statistics.totalTabs,
       });
     } catch (error) {
-      this.logger.error(`Failed to close browser session: ${sessionId}`, error);
+      this.logger.error(`Failed to close browser session: ${_sessionId}`, error);
 
       session.status = BrowserSessionStatus.ERROR;
       session.errorInfo = {
@@ -286,10 +286,10 @@ export class BrowserSessionService {
   /**
    * Close tab in session
    */
-  closeTab(_sessionId: sessionIdType): void {
-    const session = this.sessions.get(sessionId);
+  closeTab(_sessionId: string, tabId: string): void {
+    const session = this.sessions.get(_sessionId);
     if (!session) {
-      throw new Error(`Session not found: ${sessionId}`);
+      throw new Error(`Session not found: ${_sessionId}`);
     }
 
     const tabIndex = session.tabs.findIndex((t) => t.tabId === tabId);
@@ -315,10 +315,10 @@ export class BrowserSessionService {
       session.activeTabId = '';
     }
 
-    this.sessions.set(sessionId, session);
+    this.sessions.set(_sessionId, session);
 
     this.logger.log(`Closed tab: ${tabId}`, {
-      sessionId,
+      sessionId: _sessionId,
       tabId,
       remainingTabs: session.tabs.length,
     });
@@ -327,10 +327,10 @@ export class BrowserSessionService {
   /**
    * Switch active tab
    */
-  switchTab(_sessionId: sessionIdType): void {
-    const session = this.sessions.get(sessionId);
+  switchTab(_sessionId: string, tabId: string): void {
+    const session = this.sessions.get(_sessionId);
     if (!session) {
-      throw new Error(`Session not found: ${sessionId}`);
+      throw new Error(`Session not found: ${_sessionId}`);
     }
 
     const tab = session.tabs.find((t) => t.tabId === tabId);
@@ -348,10 +348,10 @@ export class BrowserSessionService {
     session.activeTabId = tabId;
     session.lastActivityAt = new Date();
 
-    this.sessions.set(sessionId, session);
+    this.sessions.set(_sessionId, session);
 
     this.logger.log(`Switched to tab: ${tabId}`, {
-      sessionId,
+      sessionId: _sessionId,
       tabId,
       url: tab.url,
     });
@@ -392,7 +392,7 @@ export class BrowserSessionService {
    */
   private initializeBrowserSession(
     session: BrowserSessionDto,
-    dto: CreateBrowserSessionDto,
+    _dto: CreateBrowserSessionDto,
   ): void {
     // In production, this would:
     // 1. Start browser process with specified configuration
@@ -415,15 +415,15 @@ export class BrowserSessionService {
   /**
    * Terminate browser session (mock implementation)
    */
-  private terminateBrowserSession(_session: sessionType): void {
+  private terminateBrowserSession(_session: BrowserSessionDto): void {
     // In production, this would:
     // 1. Close all browser tabs
     // 2. Disconnect from CDP
     // 3. Terminate browser process
     // 4. Clean up temporary files
 
-    this.logger.log(`Mock browser terminated PID: ${session.browserPid}`, {
-      sessionId: session.sessionId,
+    this.logger.log(`Mock browser terminated PID: ${_session.browserPid}`, {
+      sessionId: _session.sessionId,
     });
   }
 

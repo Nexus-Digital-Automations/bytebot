@@ -168,7 +168,7 @@ export class BrowserUseController {
   ): Promise<BrowserTaskResultDto> {
     this.logger.log(`Getting task: ${taskId}`);
 
-    const task = await this.taskService.getTask(taskId);
+    const task = this.taskService.getTask(taskId);
     if (!task) {
       throw new NotFoundException(`Task not found: ${taskId}`);
     }
@@ -208,7 +208,7 @@ export class BrowserUseController {
   ): Promise<BrowserTaskResultDto[]> {
     this.logger.log('Getting all tasks', { status, priority });
 
-    let tasks = await this.taskService.getAllTasks();
+    let tasks = this.taskService.getAllTasks();
 
     // Apply filters
     if (status) {
@@ -248,7 +248,7 @@ export class BrowserUseController {
     this.logger.log(`Cancelling task: ${taskId}`);
 
     try {
-      await this.taskService.cancelTask(taskId);
+      this.taskService.cancelTask(taskId);
       this.logger.log(`Task cancelled successfully: ${taskId}`);
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
@@ -274,7 +274,7 @@ export class BrowserUseController {
   async getTaskMetrics() {
     this.logger.log('Getting task metrics');
 
-    const metrics = await this.taskService.getTaskMetrics();
+    const metrics = this.taskService.getTaskMetrics();
 
     this.logger.debug('Task metrics retrieved', {
       totalTasks: metrics.totalTasks,
@@ -378,7 +378,7 @@ export class BrowserUseController {
   ): Promise<BrowserSessionDto> {
     this.logger.log(`Getting session: ${sessionId}`);
 
-    const session = await this.sessionService.getSession(sessionId);
+    const session = this.sessionService.getSession(sessionId);
     if (!session) {
       throw new NotFoundException(`Session not found: ${sessionId}`);
     }
@@ -411,7 +411,7 @@ export class BrowserUseController {
   ): Promise<BrowserSessionDto[]> {
     this.logger.log('Getting all sessions', { status });
 
-    let sessions = await this.sessionService.getAllSessions();
+    let sessions = this.sessionService.getAllSessions();
 
     if (status) {
       sessions = sessions.filter((session) => session.status === status);
@@ -502,7 +502,7 @@ export class BrowserUseController {
     });
 
     try {
-      const tab = await this.sessionService.createTab(sessionId, tabOptions);
+      const tab = this.sessionService.createTab(sessionId, tabOptions);
 
       this.logger.log(`Tab created successfully: ${tab.tabId}`, {
         sessionId,
@@ -553,7 +553,7 @@ export class BrowserUseController {
     this.logger.log(`Closing tab: ${tabId} in session: ${sessionId}`);
 
     try {
-      await this.sessionService.closeTab(sessionId, tabId);
+      this.sessionService.closeTab(sessionId, tabId);
       this.logger.log(`Tab closed successfully: ${tabId}`);
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {

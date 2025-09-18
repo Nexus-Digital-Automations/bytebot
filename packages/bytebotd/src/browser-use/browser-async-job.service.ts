@@ -157,8 +157,8 @@ export class BrowserAsyncJobService {
   /**
    * Get async job by ID
    */
-  async getAsyncJob(_jobId: jobIdType): Promise<AsyncJobResultDto | null> {
-    const job = this.jobs.get(jobId);
+  async getAsyncJob(_jobId: string): Promise<AsyncJobResultDto | null> {
+    const job = this.jobs.get(_jobId);
 
     if (!job) {
       return null;
@@ -166,7 +166,7 @@ export class BrowserAsyncJobService {
 
     // Update progress for running jobs
     if (job.status === AsyncJobStatus.RUNNING) {
-      await this.updateJobProgress(jobId);
+      await this.updateJobProgress(_jobId);
     }
 
     return job;
@@ -192,10 +192,10 @@ export class BrowserAsyncJobService {
   /**
    * Cancel async job
    */
-  async cancelAsyncJob(_jobId: jobIdType): Promise<void> {
-    const job = this.jobs.get(jobId);
+  async cancelAsyncJob(_jobId: string): Promise<void> {
+    const job = this.jobs.get(_jobId);
     if (!job) {
-      throw new Error(`Async job not found: ${jobId}`);
+      throw new Error(`Async job not found: ${_jobId}`);
     }
 
     if (
@@ -206,8 +206,8 @@ export class BrowserAsyncJobService {
       throw new Error(`Cannot cancel job in status: ${job.status}`);
     }
 
-    this.logger.log(`Cancelling job: ${jobId}`, {
-      jobId,
+    this.logger.log(`Cancelling job: ${_jobId}`, {
+      jobId: _jobId,
       currentStatus: job.status,
     });
 
@@ -232,7 +232,7 @@ export class BrowserAsyncJobService {
     });
 
     // Remove from queue if not yet started
-    const queueIndex = this.jobQueue.indexOf(jobId);
+    const queueIndex = this.jobQueue.indexOf(_jobId);
     if (queueIndex >= 0) {
       this.jobQueue.splice(queueIndex, 1);
     }
@@ -249,12 +249,12 @@ export class BrowserAsyncJobService {
     }
 
     // Remove from processing set
-    this.processingJobs.delete(jobId);
+    this.processingJobs.delete(_jobId);
 
-    this.jobs.set(jobId, job);
+    this.jobs.set(_jobId, job);
 
-    this.logger.log(`Async job cancelled: ${jobId}`, {
-      jobId,
+    this.logger.log(`Async job cancelled: ${_jobId}`, {
+      jobId: _jobId,
       completedSteps: job.progress.completedSteps,
       totalSteps: job.progress.totalSteps,
     });
@@ -263,8 +263,8 @@ export class BrowserAsyncJobService {
   /**
    * Delete completed job (cleanup)
    */
-  async deleteAsyncJob(_jobId: jobIdType): Promise<void> {
-    const job = this.jobs.get(jobId);
+  async deleteAsyncJob(_jobId: string): Promise<void> {
+    const job = this.jobs.get(_jobId);
     if (!job) {
       return;
     }
@@ -278,7 +278,7 @@ export class BrowserAsyncJobService {
     }
 
     // Remove from queue if present
-    const queueIndex = this.jobQueue.indexOf(jobId);
+    const queueIndex = this.jobQueue.indexOf(_jobId);
     if (queueIndex >= 0) {
       this.jobQueue.splice(queueIndex, 1);
     }
@@ -295,10 +295,10 @@ export class BrowserAsyncJobService {
     }
 
     // Delete job
-    this.jobs.delete(jobId);
+    this.jobs.delete(_jobId);
 
-    this.logger.log(`Async job deleted: ${jobId}`, {
-      jobId,
+    this.logger.log(`Async job deleted: ${_jobId}`, {
+      jobId: _jobId,
       status: job.status,
     });
   }
@@ -344,7 +344,7 @@ export class BrowserAsyncJobService {
   /**
    * Clean up old jobs
    */
-  async cleanupOldJobs(_maxAge: maxAgeType): Promise<number> {
+  async cleanupOldJobs(_maxAge: number): Promise<number> {
     // 24 hours default
     const now = Date.now();
     let cleanedCount = 0;
@@ -363,7 +363,7 @@ export class BrowserAsyncJobService {
         ? now - job.completedAt.getTime()
         : now - job.createdAt.getTime();
 
-      if (jobAge > maxAge) {
+      if (jobAge > _maxAge) {
         await this.deleteAsyncJob(jobId);
         cleanedCount++;
       }
@@ -372,7 +372,7 @@ export class BrowserAsyncJobService {
     if (cleanedCount > 0) {
       this.logger.log(`Cleaned up ${cleanedCount} old jobs`, {
         cleanedCount,
-        maxAgeHours: maxAge / (1000 * 60 * 60),
+        maxAgeHours: _maxAge / (1000 * 60 * 60),
         remainingJobs: this.jobs.size,
       });
     }
@@ -426,55 +426,55 @@ export class BrowserAsyncJobService {
   /**
    * Process individual job
    */
-  private async processJob(_job: jobType): Promise<void> {
+  private async processJob(_job: AsyncJobResultDto): Promise<void> {
     // Update job status
-    job.status = AsyncJobStatus.RUNNING;
-    job.startedAt = new Date();
-    job.progress.currentStep = 'Initializing job processing';
+    _job.status = AsyncJobStatus.RUNNING;
+    _job.startedAt = new Date();
+    _job.progress.currentStep = 'Initializing job processing';
 
-    this.jobs.set(job.jobId, job);
+    this.jobs.set(_job.jobId, _job);
 
-    switch (job.jobType) {
+    switch (_job.jobType) {
       case AsyncJobType.BATCH_AUTOMATION:
-        await this.processBatchAutomation(job);
+        await this.processBatchAutomation(_job);
         break;
 
       case AsyncJobType.DATA_EXTRACTION:
-        await this.processDataExtraction(job);
+        await this.processDataExtraction(_job);
         break;
 
       case AsyncJobType.FORM_FILLING:
-        await this.processFormFilling(job);
+        await this.processFormFilling(_job);
         break;
 
       case AsyncJobType.SCREENSHOT_CAPTURE:
-        await this.processScreenshotCapture(job);
+        await this.processScreenshotCapture(_job);
         break;
 
       case AsyncJobType.CUSTOM_WORKFLOW:
-        await this.processCustomWorkflow(job);
+        await this.processCustomWorkflow(_job);
         break;
 
       default:
         // TypeScript exhaustiveness check - this should never be reached
-        throw new Error(`Unsupported job type: ${job.jobType as string}`);
+        throw new Error(`Unsupported job type: ${_job.jobType as string}`);
     }
 
     // Mark job as completed
-    await this.completeJob(job);
+    await this.completeJob(_job);
   }
 
   /**
    * Process batch automation job
    */
-  private async processBatchAutomation(_job: jobType): Promise<void> {
-    const config = job.configuration as TypedJobConfiguration;
+  private async processBatchAutomation(_job: AsyncJobResultDto): Promise<void> {
+    const config = _job.configuration as TypedJobConfiguration;
     const tasks = Array.isArray(config.tasks)
       ? config.tasks
       : ([] as TaskConfig[]);
 
-    job.progress.totalSteps = tasks.length;
-    job.results.totalTasks = tasks.length;
+    _job.progress.totalSteps = tasks.length;
+    _job.results.totalTasks = tasks.length;
 
     for (let i = 0; i < tasks.length; i++) {
       const taskConfig = tasks[i];
@@ -484,11 +484,11 @@ export class BrowserAsyncJobService {
         continue;
       }
 
-      job.progress.currentStep = `Processing task ${i + 1}/${tasks.length}: ${taskConfig.name}`;
-      job.progress.completedSteps = i;
-      job.progress.percentage = Math.round((i / tasks.length) * 100);
+      _job.progress.currentStep = `Processing task ${i + 1}/${tasks.length}: ${taskConfig.name}`;
+      _job.progress.completedSteps = i;
+      _job.progress.percentage = Math.round((i / tasks.length) * 100);
 
-      this.jobs.set(job.jobId, job);
+      this.jobs.set(_job.jobId, _job);
 
       try {
         // Convert TaskConfig to CreateBrowserTaskDto format
@@ -513,21 +513,21 @@ export class BrowserAsyncJobService {
           await this.browserService.executeBrowserTask(taskDto);
 
         // Store task ID for tracking
-        job.taskIds ??= [];
-        job.taskIds.push(taskResult.taskId);
+        _job.taskIds ??= [];
+        _job.taskIds.push(taskResult.taskId);
 
         // Collect results
         if (taskResult.screenshots) {
-          job.results.screenshots.push(...taskResult.screenshots);
+          _job.results.screenshots.push(...taskResult.screenshots);
         }
 
         if (taskResult.extractedData) {
-          job.results.extractedData[`task${i}`] = taskResult.extractedData;
+          _job.results.extractedData[`task${i}`] = taskResult.extractedData;
         }
 
-        job.results.tasksCompleted++;
+        _job.results.tasksCompleted++;
 
-        job.results.logs.push({
+        _job.results.logs.push({
           timestamp: new Date(),
           level: 'info',
           message: `Task completed: ${taskConfig.name}`,
@@ -538,7 +538,7 @@ export class BrowserAsyncJobService {
           },
         });
       } catch (error) {
-        job.results.logs.push({
+        _job.results.logs.push({
           timestamp: new Date(),
           level: 'error',
           message: `Task failed: ${taskConfig?.name ?? 'Unknown task'}`,
@@ -559,11 +559,11 @@ export class BrowserAsyncJobService {
   /**
    * Process data extraction job
    */
-  private async processDataExtraction(_job: jobType): Promise<void> {
-    const config = job.configuration as TypedJobConfiguration;
+  private async processDataExtraction(_job: AsyncJobResultDto): Promise<void> {
+    const config = _job.configuration as TypedJobConfiguration;
     const urls = Array.isArray(config.urls) ? config.urls : ([] as string[]);
 
-    job.progress.totalSteps = urls.length;
+    _job.progress.totalSteps = urls.length;
 
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
@@ -573,11 +573,11 @@ export class BrowserAsyncJobService {
         continue;
       }
 
-      job.progress.currentStep = `Extracting data from ${url}`;
-      job.progress.completedSteps = i;
-      job.progress.percentage = Math.round((i / urls.length) * 100);
+      _job.progress.currentStep = `Extracting data from ${url}`;
+      _job.progress.completedSteps = i;
+      _job.progress.percentage = Math.round((i / urls.length) * 100);
 
-      this.jobs.set(job.jobId, job);
+      this.jobs.set(_job.jobId, _job);
 
       try {
         // Create session for data extraction
@@ -601,9 +601,9 @@ export class BrowserAsyncJobService {
           },
         );
 
-        job.results.extractedData[url] = extractedData;
+        _job.results.extractedData[url] = extractedData;
 
-        job.results.logs.push({
+        _job.results.logs.push({
           timestamp: new Date(),
           level: 'info',
           message: `Data extracted from: ${url}`,
@@ -613,7 +613,7 @@ export class BrowserAsyncJobService {
           },
         });
       } catch (error) {
-        job.results.logs.push({
+        _job.results.logs.push({
           timestamp: new Date(),
           level: 'error',
           message: `Data extraction failed for: ${url}`,
@@ -633,61 +633,61 @@ export class BrowserAsyncJobService {
   /**
    * Process other job types (placeholder implementations)
    */
-  private processFormFilling(_job: jobType): void {
+  private processFormFilling(_job: AsyncJobResultDto): void {
     // Implementation for form filling jobs
-    job.progress.currentStep = 'Processing form filling job';
-    job.progress.completedSteps = 1;
-    job.progress.totalSteps = 1;
-    job.progress.percentage = 100;
+    _job.progress.currentStep = 'Processing form filling job';
+    _job.progress.completedSteps = 1;
+    _job.progress.totalSteps = 1;
+    _job.progress.percentage = 100;
   }
 
-  private processScreenshotCapture(_job: jobType): void {
+  private processScreenshotCapture(_job: AsyncJobResultDto): void {
     // Implementation for screenshot capture jobs
-    job.progress.currentStep = 'Processing screenshot capture job';
-    job.progress.completedSteps = 1;
-    job.progress.totalSteps = 1;
-    job.progress.percentage = 100;
+    _job.progress.currentStep = 'Processing screenshot capture job';
+    _job.progress.completedSteps = 1;
+    _job.progress.totalSteps = 1;
+    _job.progress.percentage = 100;
   }
 
-  private processCustomWorkflow(_job: jobType): void {
+  private processCustomWorkflow(_job: AsyncJobResultDto): void {
     // Implementation for custom workflow jobs
-    job.progress.currentStep = 'Processing custom workflow job';
-    job.progress.completedSteps = 1;
-    job.progress.totalSteps = 1;
-    job.progress.percentage = 100;
+    _job.progress.currentStep = 'Processing custom workflow job';
+    _job.progress.completedSteps = 1;
+    _job.progress.totalSteps = 1;
+    _job.progress.percentage = 100;
   }
 
   /**
    * Complete job processing
    */
-  private completeJob(_job: jobType): void {
-    job.status = AsyncJobStatus.COMPLETED;
-    job.completedAt = new Date();
-    job.progress.currentStep = 'Job completed successfully';
-    job.progress.percentage = 100;
+  private completeJob(_job: AsyncJobResultDto): void {
+    _job.status = AsyncJobStatus.COMPLETED;
+    _job.completedAt = new Date();
+    _job.progress.currentStep = 'Job completed successfully';
+    _job.progress.percentage = 100;
 
-    if (job.startedAt) {
-      job.actualDurationMs =
-        job.completedAt.getTime() - job.startedAt.getTime();
+    if (_job.startedAt) {
+      _job.actualDurationMs =
+        _job.completedAt.getTime() - _job.startedAt.getTime();
     }
 
-    job.results.logs.push({
+    _job.results.logs.push({
       timestamp: new Date(),
       level: 'info',
       message: 'Async job completed successfully',
       metadata: {
-        tasksCompleted: job.results.tasksCompleted,
-        totalTasks: job.results.totalTasks,
-        actualDurationMs: job.actualDurationMs,
+        tasksCompleted: _job.results.tasksCompleted,
+        totalTasks: _job.results.totalTasks,
+        actualDurationMs: _job.actualDurationMs,
       },
     });
 
-    this.jobs.set(job.jobId, job);
+    this.jobs.set(_job.jobId, _job);
 
-    this.logger.log(`Async job completed: ${job.jobId}`, {
-      jobId: job.jobId,
-      actualDurationMs: job.actualDurationMs,
-      tasksCompleted: job.results.tasksCompleted,
+    this.logger.log(`Async job completed: ${_job.jobId}`, {
+      jobId: _job.jobId,
+      actualDurationMs: _job.actualDurationMs,
+      tasksCompleted: _job.results.tasksCompleted,
     });
   }
 
@@ -752,8 +752,8 @@ export class BrowserAsyncJobService {
   /**
    * Update job progress
    */
-  private updateJobProgress(_jobId: jobIdType): void {
-    const job = this.jobs.get(jobId);
+  private updateJobProgress(_jobId: string): void {
+    const job = this.jobs.get(_jobId);
     if (!job || job.status !== AsyncJobStatus.RUNNING) {
       return;
     }
@@ -767,14 +767,14 @@ export class BrowserAsyncJobService {
       job.progress.estimatedRemainingMs = remainingSteps * avgTimePerStep;
     }
 
-    this.jobs.set(jobId, job);
+    this.jobs.set(_jobId, job);
   }
 
   /**
    * Add job to priority queue
    */
-  private addToQueue(_jobId: jobIdType): void {
-    const job = this.jobs.get(jobId);
+  private addToQueue(_jobId: string): void {
+    const job = this.jobs.get(_jobId);
     if (!job) {
       return;
     }
@@ -806,10 +806,10 @@ export class BrowserAsyncJobService {
       }
     }
 
-    this.jobQueue.splice(insertIndex, 0, jobId);
+    this.jobQueue.splice(insertIndex, 0, _jobId);
 
-    this.logger.log(`Job added to queue: ${jobId}`, {
-      jobId,
+    this.logger.log(`Job added to queue: ${_jobId}`, {
+      jobId: _jobId,
       priority: job.priority,
       queuePosition: insertIndex,
       queueLength: this.jobQueue.length,
@@ -826,22 +826,22 @@ export class BrowserAsyncJobService {
   /**
    * Get queue position
    */
-  private getQueuePosition(_jobId: jobIdType): number {
-    return this.jobQueue.indexOf(jobId);
+  private getQueuePosition(_jobId: string): number {
+    return this.jobQueue.indexOf(_jobId);
   }
 
   /**
    * Estimate total steps for job
    */
-  private estimateTotalSteps(_dto: dtoType): number {
-    switch (dto.jobType) {
+  private estimateTotalSteps(_dto: CreateAsyncJobDto): number {
+    switch (_dto.jobType) {
       case AsyncJobType.BATCH_AUTOMATION:
-        return Array.isArray(dto.configuration.tasks)
-          ? dto.configuration.tasks.length
+        return Array.isArray(_dto.configuration.tasks)
+          ? _dto.configuration.tasks.length
           : 1;
       case AsyncJobType.DATA_EXTRACTION:
-        return Array.isArray(dto.configuration.urls)
-          ? dto.configuration.urls.length
+        return Array.isArray(_dto.configuration.urls)
+          ? _dto.configuration.urls.length
           : 1;
       default:
         return 1;

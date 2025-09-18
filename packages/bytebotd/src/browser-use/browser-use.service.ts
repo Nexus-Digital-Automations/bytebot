@@ -10,7 +10,7 @@ import {
   BrowserActionType,
   BrowserActionDto,
 } from './dto/browser-task.dto';
-import { CreateAsyncJobDto, AsyncJobResultDto } from './dto/async-job.dto';
+import { AsyncJobResultDto } from './dto/async-job.dto';
 import { BrowserSessionService } from './browser-session.service';
 import { BrowserTaskService } from './browser-task.service';
 import { BrowserAsyncJobService } from './browser-async-job.service';
@@ -201,13 +201,13 @@ export class BrowserUseService {
       const result = await this.executeTaskActions(task, taskDto, session);
 
       // Update task status
-      await this.taskService.updateTaskStatus(_taskId, {
-        status: _result.status,
+      await this.taskService.updateTaskStatus(taskId, {
+        status: result.status,
         completedAt: new Date(),
         executionTimeMs: Date.now() - startTime,
-        extractedData: _result.extractedData,
-        screenshots: _result.screenshots,
-        logs: (_result.logs ?? []).map((log) => {
+        extractedData: result.extractedData,
+        screenshots: result.screenshots,
+        logs: (result.logs ?? []).map((log) => {
           const enhancedLog = log as EnhancedBrowserTaskLog;
           return {
             timestamp: log.timestamp,

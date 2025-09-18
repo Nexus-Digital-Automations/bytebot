@@ -768,12 +768,12 @@ export class ParlantValidatedBrowserUseController {
     status: HttpStatus.OK,
     description: 'Parlant metrics retrieved successfully',
   })
-  async getParlantBrowserMetrics(): Promise<{
+  getParlantBrowserMetrics(): {
     browserUseMetrics: Record<string, unknown>;
     sessionMetrics: Record<string, unknown>;
     taskMetrics: Record<string, unknown>;
     asyncJobMetrics: Record<string, unknown>;
-  }> {
+  } {
     return {
       browserUseMetrics: this.parlantBrowserUseService.getPerformanceMetrics(),
       sessionMetrics: this.parlantSessionService.getPerformanceMetrics(),
@@ -805,10 +805,10 @@ export class ParlantValidatedBrowserUseController {
     status: HttpStatus.OK,
     description: 'Parlant audit history retrieved successfully',
   })
-  async getParlantBrowserAuditHistory(
+  getParlantBrowserAuditHistory(
     @Query('limit') limit: number = 100,
     @Headers('X-User-ID') userId?: string,
-  ): Promise<{
+  ): {
     browserActionHistory: readonly BrowserActionAuditEntry[];
     totalEntries: number;
     auditContext: {
@@ -816,7 +816,7 @@ export class ParlantValidatedBrowserUseController {
       timestamp: Date;
       accessLevel: string;
     };
-  }> {
+  } {
     if (!userId) {
       throw new UnauthorizedException('User ID required for audit access');
     }
