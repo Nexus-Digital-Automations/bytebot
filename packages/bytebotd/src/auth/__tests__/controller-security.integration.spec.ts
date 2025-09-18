@@ -252,7 +252,7 @@ class MockSecurityJwtService {
     return Promise.resolve(user);
   }
 
-  sign(payload: Record<string, unknown>) {
+  sign(_payload: Record<string, unknown>) {
     return 'generated-token';
   }
 }
@@ -264,7 +264,7 @@ describe('Controller Security Integration Tests', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
   let jwtService: JwtService;
-  let configService: ConfigService;
+  let _configService: ConfigService;
 
   const operationId = `controller_security_test${Date.now()}`;
   const securityLogger = {
@@ -316,10 +316,10 @@ describe('Controller Security Integration Tests', () => {
 
     app = moduleRef.createNestApplication();
     jwtService = moduleRef.get<JwtService>(JwtService);
-    configService = moduleRef.get<ConfigService>(ConfigService);
+    _configService = moduleRef.get<ConfigService>(ConfigService);
 
     const controller = new MockSecureController();
-    const reflector = moduleRef.get<Reflector>(Reflector);
+    const _reflector = moduleRef.get<Reflector>(Reflector);
 
     // Configure security middleware
     app.use((req: SafeRequest, res: SafeResponse, next: SafeNextFunction) => {
@@ -1034,7 +1034,7 @@ describe('Controller Security Integration Tests', () => {
         .fill(null)
         .map(() => {
           return new Promise<{ error: boolean; status?: number }>((resolve) => {
-            const req = createRequest(app)
+            const _req = createRequest(app)
               .post('/api/resources')
               .set('Authorization', 'Bearer admin-token')
               .send({ name: 'Slow Request' })
@@ -1070,7 +1070,7 @@ describe('Controller Security Integration Tests', () => {
         'User-Agent': 'Normal-Agent\r\nX-Evil-Header: injected',
       };
 
-      const response = await createRequest(app)
+      const _response = await createRequest(app)
         .get('/api/protected')
         .set(maliciousHeaders)
         .expect((res) => {
@@ -1096,7 +1096,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of splittingPayloads) {
-        const response = await createRequest(app)
+        const _response = await createRequest(app)
           .get('/api/users/search')
           .query({ q: _payload })
           .set('Authorization', 'Bearer operator-token')
@@ -1117,7 +1117,7 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Testing request smuggling prevention`);
 
       // Attempt request smuggling with conflicting headers
-      const response = await createRequest(app)
+      const _response = await createRequest(app)
         .post('/api/resources')
         .set('Authorization', 'Bearer admin-token')
         .set('Content-Length', '100')
@@ -1146,7 +1146,7 @@ describe('Controller Security Integration Tests', () => {
       ];
 
       for (const _payload of traversalPayloads) {
-        const response = await createRequest(app)
+        const _response = await createRequest(app)
           .delete(`/api/resources/${encodeURIComponent(_payload)}`)
           .set('Authorization', 'Bearer admin-token')
           .expect((res) => {

@@ -85,7 +85,7 @@ export class SummariesService {
   private contentSummarized = 0; // Total characters/words processed
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
     const operationId = `summaries_init${Date.now()}${Math.random().toString(36).substring(7)}`;

@@ -274,7 +274,7 @@ export class ParlantRetryFailoverService extends EventEmitter {
   };
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly circuitBreakerService: ParlantCircuitBreakerService
   ) {
     super();

@@ -263,7 +263,7 @@ export class EnterpriseApiRoutingService {
   };
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
     this.logger.log('Enterprise API Routing Service initialized with MAXIMUM Parlant integration');

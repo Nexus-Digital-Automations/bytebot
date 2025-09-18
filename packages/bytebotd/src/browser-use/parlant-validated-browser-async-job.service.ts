@@ -141,7 +141,7 @@ export class ParlantValidatedBrowserAsyncJobService {
   };
 
   constructor(
-    _private readonly originalAsyncJobService: BrowserAsyncJobService,
+    private readonly originalAsyncJobService: BrowserAsyncJobService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
     const operationId = `parlant_async_job_init${Date.now()}${Math.random().toString(36).substring(7)}`;
@@ -1067,7 +1067,7 @@ export class ParlantValidatedBrowserAsyncJobService {
   /**
    * Generate mitigation strategies based on risk factors
    */
-  private generateMitigationStrategies(riskFactors: string[]): string[] {
+  private generateMitigationStrategies(_riskFactors: riskFactorsType): string[] {
     const strategies: string[] = [];
 
     if (riskFactors.some(f => f.includes('memory'))) {
@@ -1095,7 +1095,7 @@ export class ParlantValidatedBrowserAsyncJobService {
   /**
    * Generate job creation description for validation
    */
-  private generateJobCreationDescription(dto: CreateAsyncJobDto): string {
+  private generateJobCreationDescription(_dto: dtoType): string {
     const duration = dto.estimatedDurationMs ? 
       `(estimated ${Math.round(dto.estimatedDurationMs / 60000)} minutes)` : '';
     
@@ -1105,7 +1105,7 @@ export class ParlantValidatedBrowserAsyncJobService {
   /**
    * Sanitize job DTO for validation (remove sensitive data)
    */
-  private sanitizeJobDtoForValidation(dto: CreateAsyncJobDto): Partial<CreateAsyncJobDto> {
+  private sanitizeJobDtoForValidation(_dto: dtoType): Partial<CreateAsyncJobDto> {
     return {
       name: dto.name,
       description: dto.description,
@@ -1121,7 +1121,7 @@ export class ParlantValidatedBrowserAsyncJobService {
   /**
    * Create audit entry for async job operations
    */
-  private async createAsyncJobAuditEntry(entry: AsyncJobAuditEntry): Promise<void> {
+  private async createAsyncJobAuditEntry(_entry: entryType): Promise<void> {
     this.jobAuditHistory.push(entry);
     
     // Keep audit history manageable (last 1000 entries)
@@ -1140,7 +1140,7 @@ export class ParlantValidatedBrowserAsyncJobService {
   /**
    * Create timeout promise for validation enforcement
    */
-  private createTimeoutPromise<T>(timeoutMs: number): Promise<T> {
+  private createTimeoutPromise<T>(_timeoutMs: timeoutMsType): Promise<T> {
     return new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error(`Operation timed out after ${timeoutMs}ms`));
@@ -1151,7 +1151,7 @@ export class ParlantValidatedBrowserAsyncJobService {
   /**
    * Update performance metrics
    */
-  private updatePerformanceMetrics(operationTime: number): void {
+  private updatePerformanceMetrics(_operationTime: operationTimeType): void {
     const alpha = 0.1; // Exponential moving average factor
     this.averageValidationTime = 
       this.averageValidationTime === 0 

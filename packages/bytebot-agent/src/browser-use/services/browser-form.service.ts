@@ -510,7 +510,7 @@ export class BrowserFormService {
     }
 
     const name =
-      element.attributes.name || element.id || `field_${element.index}`;
+      element.attributes.name ?? element.id ?? `field_${element.index}`;
     const label = this.extractFieldLabel(element);
     const placeholder = element.attributes.placeholder;
     const required = 'required' in element.attributes;

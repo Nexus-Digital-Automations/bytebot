@@ -459,7 +459,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     const now = new Date();
 
     if (!this.errorPatterns.has(clientIdentifier)) {
-      this.errorPatterns.set(_clientIdentifier, {
+      this.errorPatterns.set(clientIdentifier, {
         count: 1,
         lastSeen: now,
         riskScore: errorAnalysis.riskScore,
@@ -521,7 +521,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
   private getClientIdentifier(request: Request): string {
     const ip = this.getClientIP(request);
     const userAgent = (request.headers['user-agent'] ?? '').substring(0, 50);
-    return `${ip}:${userAgent}`.replace(_/[^a-zA-Z0-_9:.-]/g, '');
+    return `${ip}:${userAgent}`.replace(/[^a-zA-Z0-9:.-]/g, '');
   }
 
   /**

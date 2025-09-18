@@ -150,7 +150,7 @@ export class MessagesService {
   private tokensProcessed = { input: 0, output: 0 };
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
     const operationId = `messages_init${Date.now()}${Math.random().toString(36).substring(7)}`;

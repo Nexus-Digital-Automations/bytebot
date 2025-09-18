@@ -113,7 +113,7 @@ describe('Security Penetration Testing Suite', () => {
       const encodedHeader = Buffer.from(JSON.stringify(header)).toString(
         'base64url',
       );
-      const encodedPayload = Buffer.from(JSON.stringify(_payload)).toString(
+      const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
         'base64url',
       );
 
@@ -925,9 +925,9 @@ describe('Security Penetration Testing Suite', () => {
       );
 
       const bruteForceResults = await AttackSimulator.simulateBruteForceAttack(
-        _async (attackToken: string) => {
+        async (attackToken: string) => {
           const context = createPentestExecutionContext(
-            _undefined,
+            undefined,
             { authorization: `Bearer ${attackToken}` },
             { attackVector: 'brute-force-auth', ip: '192.168.1.100' },
           );

@@ -618,10 +618,10 @@ export const performanceFramework = new PerformanceTestingFramework();
  * Performance test decorator for automatic measurement
  */
 export function performanceTest(config: Partial<PerformanceTestConfig> = {}) {
-  return function(target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function(target: unknown, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
 
-    descriptor.value = async function(...args: any[]) {
+    descriptor.value = async function(...args: unknown[]) {
       const testConfig: PerformanceTestConfig = {
         name: propertyName,
         description: `Performance test for ${propertyName}`,

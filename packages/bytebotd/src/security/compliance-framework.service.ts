@@ -198,7 +198,7 @@ export class ComplianceFrameworkService {
   private frameworksCovered = new Set<string>();
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
     const operationId = `compliance_framework_init${Date.now()}${Math.random().toString(36).substring(7)}`;

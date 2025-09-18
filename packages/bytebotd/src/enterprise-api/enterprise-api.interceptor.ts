@@ -142,7 +142,7 @@ export class EnterpriseApiInterceptor implements NestInterceptor {
     },
   };
 
-  constructor(_private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     this.logger.log('Enterprise API Interceptor initialized');
     this.startMetricsCleanup();
   }

@@ -90,7 +90,7 @@ export class VersionInterceptor implements NestInterceptor {
   private readonly strictVersioning: boolean;
 
   constructor(
-    _private readonly reflector: Reflector,
+    private readonly reflector: Reflector,
     private readonly configService: ConfigService,
   ) {
     this.defaultVersion = this.configService.get<SupportedVersion>(

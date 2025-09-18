@@ -777,7 +777,7 @@ export class BackgroundWorker
   private readonly stats: WorkerStats;
 
   constructor(
-    _private readonly jobStorage: JobStorage,
+    private readonly jobStorage: JobStorage,
     private readonly computerUseService: ComputerUseService,
     private readonly configService: ConfigService,
   ) {
@@ -1137,7 +1137,7 @@ export class JobCleanupManager implements OnModuleInit, OnModuleDestroy {
   private readonly config: CleanupConfig;
 
   constructor(
-    _private readonly jobStorage: JobStorage,
+    private readonly jobStorage: JobStorage,
     private readonly configService: ConfigService,
   ) {
     this.config = {
@@ -1242,7 +1242,7 @@ export class JobManagementService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(JobManagementService.name);
 
   constructor(
-    _private readonly jobStorage: JobStorage,
+    private readonly jobStorage: JobStorage,
     private readonly backgroundWorker: BackgroundWorker,
     private readonly cleanupManager: JobCleanupManager,
     private readonly configService: ConfigService,

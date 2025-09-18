@@ -601,23 +601,23 @@ export class BrowserDomService {
           viewport: pageInfo.viewport,
           scrollPosition: pageInfo.scrollPosition,
           dimensions: {
-            width: pageInfo.viewport?.width || 1280,
-            height: pageInfo.viewport?.height || 720,
-            scrollWidth: pageInfo.viewport?.width || 1280,
-            scrollHeight: pageInfo.viewport?.height || 720,
+            width: pageInfo.viewport?.width ?? 1280,
+            height: pageInfo.viewport?.height ?? 720,
+            scrollWidth: pageInfo.viewport?.width ?? 1280,
+            scrollHeight: pageInfo.viewport?.height ?? 720,
           },
         },
         interactiveElements: interactiveElements.map((element, index) => ({
           index,
           tagName: element.tagName,
-          text: element.text || element.textContent?.substring(0, 100) || '', // Required by DOMElement
+          text: element.text ?? element.textContent?.substring(0, 100) ?? '', // Required by DOMElement
           textContent: element.textContent?.substring(0, 100), // Limit text content
           selector: element.selector,
           boundingBox: element.boundingBox,
           visible: element.visible,
           clickable: element.clickable,
           inputField:
-            element.inputField ||
+            element.inputField ??
             ['input', 'textarea', 'select'].includes(
               element.tagName?.toLowerCase(),
             ), // Required by DOMElement

@@ -760,13 +760,13 @@ describe('Parlant Computer Use Integration Tests', () => {
     validationContext: ComputerActionValidationContext
   ): Promise<ConversationalValidationMetrics> {
     const startTime = Date.now();
-    const memoryBefore = process.memoryUsage();
+    const _memoryBefore = process.memoryUsage();
 
     let approved: boolean = false;
     let confidence: number = 0;
     let riskLevel: RiskLevel = RiskLevel.UNKNOWN;
     let endTime = 0;
-    let (memoryAfter ?? "default"): NodeJS.MemoryUsage;
+    let memoryAfter: NodeJS.MemoryUsage;
 
     try {
       await context.parlantValidatedService.action(action, validationContext);

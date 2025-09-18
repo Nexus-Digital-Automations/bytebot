@@ -99,7 +99,7 @@ export class ParlantValidatedComputerUseService {
   private averageValidationTime = 0;
 
   constructor(
-    _private readonly originalComputerUseService: ComputerUseService,
+    private readonly originalComputerUseService: ComputerUseService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
     const operationId = `parlant_computer_init${Date.now()}${Math.random().toString(36).substring(7)}`;

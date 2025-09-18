@@ -133,9 +133,11 @@ export interface ExecutionContext {
  */
 export class ConversationalValidationError extends Error {
   constructor(
-    _public readonly conversationId: string,
+    public readonly conversationId: string,
     public readonly reasoning: string,
-    public readonly suggestedAlternatives: string[] = []
+    public readonly suggestedAlternatives: string[] = [],
+    public readonly confidence?: number,
+    public readonly riskLevel?: RiskLevel
   ) {
     super(`Conversational validation failed: ${reasoning}`);
     this.name = 'ConversationalValidationError';
@@ -179,7 +181,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
   private cacheHitCount = 0;
   private averageValidationTime = 0;
 
-  constructor(_private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     const operationId = `parlant_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     // Initialize Parlant connection configuration

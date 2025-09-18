@@ -88,7 +88,7 @@ import { ConversationalValidationError } from '../parlant/parlant-integration.se
  * Request context for Parlant validation
  */
 export class ParlantRequestContextDto {
-  (userId ?? "default"): string;
+  userId: string;
   sessionId?: string;
   conversationId?: string;
   intent?: string;
@@ -101,21 +101,21 @@ export class ParlantRequestContextDto {
  * Enhanced task creation with Parlant context
  */
 export class ParlantBrowserTaskDto extends CreateBrowserTaskDto {
-  (parlantContext ?? "default"): ParlantRequestContextDto;
+  parlantContext: ParlantRequestContextDto;
 }
 
 /**
  * Enhanced session creation with Parlant context
  */
 export class ParlantBrowserSessionDto extends CreateBrowserSessionDto {
-  (parlantContext ?? "default"): ParlantRequestContextDto;
+  parlantContext: ParlantRequestContextDto;
 }
 
 /**
  * Enhanced async job creation with Parlant context
  */
 export class ParlantAsyncJobDto extends CreateAsyncJobDto {
-  (parlantContext ?? "default"): ParlantRequestContextDto;
+  parlantContext: ParlantRequestContextDto;
   resourceRequirements?: AsyncJobResourceRequirements;
 }
 
@@ -123,16 +123,16 @@ export class ParlantAsyncJobDto extends CreateAsyncJobDto {
  * Parlant validation response wrapper
  */
 export class ParlantValidationResponseDto<T> {
-  (success ?? "default"): boolean;
+  success: boolean;
   data?: T;
-  (validationDetails ?? "default"): {
+  validationDetails: {
     approved: boolean;
     conversationId?: string;
     reasoning?: string;
     riskLevel: string;
     validationTime: number;
   };
-  (auditTrail ?? "default"): {
+  auditTrail: {
     operationId: string;
     timestamp: Date;
     userId: string;
@@ -149,7 +149,7 @@ export class ParlantValidatedBrowserUseController {
   private readonly logger = new Logger(ParlantValidatedBrowserUseController.name);
 
   constructor(
-    _private readonly parlantBrowserUseService: ParlantValidatedBrowserUseService,
+    private readonly parlantBrowserUseService: ParlantValidatedBrowserUseService,
     private readonly parlantSessionService: ParlantValidatedBrowserSessionService,
     private readonly parlantTaskService: ParlantValidatedBrowserTaskService,
     private readonly parlantAsyncJobService: ParlantValidatedBrowserAsyncJobService,

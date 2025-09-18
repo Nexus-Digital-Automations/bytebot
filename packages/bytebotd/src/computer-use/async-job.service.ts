@@ -82,7 +82,7 @@ export class AsyncJobService {
   private isProcessing = false;
 
   constructor(
-    _private readonly computerUseService: ComputerUseService,
+    private readonly computerUseService: ComputerUseService,
     private readonly cacheService: CacheService,
     private readonly metricsService: MetricsService,
   ) {

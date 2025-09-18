@@ -157,7 +157,7 @@ export class ParlantValidatedBrowserSessionService {
   private averageValidationTime = 0;
 
   constructor(
-    _private readonly originalBrowserSessionService: BrowserSessionService,
+    private readonly originalBrowserSessionService: BrowserSessionService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
     const operationId = `parlant_session_init${Date.now()}${Math.random().toString(36).substring(7)}`;
@@ -724,7 +724,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Escalate risk level to next higher level
    */
-  private escalateRiskLevel(currentLevel: RiskLevel): RiskLevel {
+  private escalateRiskLevel(_currentLevel: currentLevelType): RiskLevel {
     switch (currentLevel) {
       case RiskLevel.MINIMAL: return RiskLevel.LOW;
       case RiskLevel.LOW: return RiskLevel.MEDIUM;
@@ -738,7 +738,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Generate session-specific mitigation strategies
    */
-  private generateSessionMitigationStrategies(riskLevel: RiskLevel, riskFactors: string[]): string[] {
+  private generateSessionMitigationStrategies(_riskLevel: riskLevelType): string[] {
     const strategies: string[] = [];
 
     if (riskFactors.includes('non_headless_mode')) {
@@ -763,7 +763,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Generate resource constraints based on system state
    */
-  private generateResourceConstraints(context: BrowserSessionValidationContext): string[] {
+  private generateResourceConstraints(_context: contextType): string[] {
     const constraints: string[] = [];
 
     if (context.systemResourceState.totalMemoryUsageMB > 1500) {
@@ -784,7 +784,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Generate security recommendations based on security profile
    */
-  private generateSecurityRecommendations(context: BrowserSessionValidationContext): string[] {
+  private generateSecurityRecommendations(_context: contextType): string[] {
     const recommendations: string[] = [];
 
     if (context.securityProfile.userTrustLevel === 'LOW') {
@@ -805,7 +805,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Generate session creation description
    */
-  private generateSessionCreationDescription(sessionDto: CreateBrowserSessionDto): string {
+  private generateSessionCreationDescription(_sessionDto: sessionDtoType): string {
     const features = [];
     if (!sessionDto.headless) features.push('visible mode');
     if (sessionDto.devtools) features.push('devtools enabled');
@@ -818,7 +818,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Sanitize session parameters for validation
    */
-  private sanitizeSessionForValidation(sessionDto: CreateBrowserSessionDto): Record<string, unknown> {
+  private sanitizeSessionForValidation(_sessionDto: sessionDtoType): Record<string, unknown> {
     return {
       name: sessionDto.name,
       headless: sessionDto.headless,
@@ -832,7 +832,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Sanitize URL for logging and validation
    */
-  private sanitizeUrlForValidation(url: string): string {
+  private sanitizeUrlForValidation(_url: urlType): string {
     try {
       const urlObj = new URL(url);
       return `${urlObj.protocol}//${urlObj.hostname}${urlObj.pathname.substring(0, 50)}...`;
@@ -844,7 +844,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Check if URL is external domain
    */
-  private isExternalDomain(url: string): boolean {
+  private isExternalDomain(_url: urlType): boolean {
     try {
       const urlObj = new URL(url);
       const allowedDomains = ['localhost', '127.0.0.1', 'local.dev'];
@@ -857,7 +857,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Check if URL contains sensitive keywords
    */
-  private containsSensitiveKeywords(url: string): boolean {
+  private containsSensitiveKeywords(_url: urlType): boolean {
     const sensitiveKeywords = ['admin', 'password', 'auth', 'login', 'secret', 'private'];
     return sensitiveKeywords.some(keyword => url.toLowerCase().includes(keyword));
   }
@@ -865,7 +865,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Check if URL has suspicious patterns
    */
-  private isSuspiciousUrl(url: string): boolean {
+  private isSuspiciousUrl(_url: urlType): boolean {
     const suspiciousPatterns = [
       /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/, // IP addresses
       /[a-z0-9]{20,}/, // Long random strings
@@ -878,7 +878,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Check if session has active tasks (mock implementation)
    */
-  private hasActiveTasksInSession(sessionId: string): boolean {
+  private hasActiveTasksInSession(_sessionId: sessionIdType): boolean {
     // Mock implementation - in production would check actual task status
     return Math.random() > 0.8; // 20% chance of having active tasks
   }
@@ -886,7 +886,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Check if session has unsaved data (mock implementation)
    */
-  private hasUnsavedDataInSession(sessionId: string): boolean {
+  private hasUnsavedDataInSession(_sessionId: sessionIdType): boolean {
     // Mock implementation - in production would check actual session state
     return Math.random() > 0.9; // 10% chance of having unsaved data
   }
@@ -894,7 +894,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Estimate resource impact of session creation
    */
-  private estimateResourceImpact(sessionDto: CreateBrowserSessionDto): ResourceImpactInfo {
+  private estimateResourceImpact(_sessionDto: sessionDtoType): ResourceImpactInfo {
     const baseMemory = 200; // Base memory for headless session
     const memoryMultiplier = sessionDto.headless ? 1 : 2.5; // Non-headless uses more memory
     const devtoolsOverhead = sessionDto.devtools ? 100 : 0;
@@ -972,7 +972,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Create timeout promise for execution limits
    */
-  private createTimeoutPromise(timeoutMs: number): Promise<never> {
+  private createTimeoutPromise(_timeoutMs: timeoutMsType): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error(`Session operation timed out after ${timeoutMs}ms`));
@@ -983,7 +983,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Create audit entry for session operation
    */
-  private async createSessionAuditEntry(entry: BrowserSessionAuditEntry): Promise<void> {
+  private async createSessionAuditEntry(_entry: entryType): Promise<void> {
     this.sessionHistory.push(entry);
     
     // Keep only recent entries (last 100)
@@ -997,7 +997,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Update performance metrics
    */
-  private updatePerformanceMetrics(duration: number): void {
+  private updatePerformanceMetrics(_duration: durationType): void {
     this.averageValidationTime = 
       (this.averageValidationTime * (this.totalSessionOperations - 1) + duration) / this.totalSessionOperations;
   }
@@ -1058,7 +1058,7 @@ export class ParlantValidatedBrowserSessionService {
   /**
    * Get security profile for validation context
    */
-  async getSecurityProfile(userId: string): Promise<SessionSecurityProfile> {
+  async getSecurityProfile(_userId: userIdType): Promise<SessionSecurityProfile> {
     // Mock implementation - in production would check actual security data
     return {
       userTrustLevel: 'MEDIUM',

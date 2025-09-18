@@ -229,7 +229,7 @@ export class ApiSecurityService {
   private averageScanTime = 0;
 
   constructor(
-    _private readonly parlantService: ParlantIntegrationService,
+    private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
     const operationId = `api_security_init${Date.now()}${Math.random().toString(36).substring(7)}`;

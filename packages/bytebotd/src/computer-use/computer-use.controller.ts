@@ -207,7 +207,7 @@ export class ComputerUseController {
   private readonly logger = new Logger(ComputerUseController.name);
 
   constructor(
-    _private readonly computerUseService: ComputerUseService,
+    private readonly computerUseService: ComputerUseService,
     private readonly asyncJobService: AsyncJobService,
   ) {}
 

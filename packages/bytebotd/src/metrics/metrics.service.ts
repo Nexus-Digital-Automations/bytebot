@@ -84,7 +84,7 @@ export class BytebotMetricsService {
   private readonly cpuUsage: Gauge<string>;
 
   constructor(
-    _private readonly parlantValidationService: ParlantHealthMetricsValidationService,
+    private readonly parlantValidationService: ParlantHealthMetricsValidationService,
   ) {
     this.logger.log('Metrics Service initializing with Prometheus client and Parlant validation');
 

@@ -23,6 +23,54 @@ import { promises as fs } from 'fs';
 import { createHash } from 'crypto';
 
 /**
+ * Test coverage data interface
+ */
+interface TestCoverage {
+  lines: {
+    total: number;
+    covered: number;
+    percentage: number;
+  };
+  functions: {
+    total: number;
+    covered: number;
+    percentage: number;
+  };
+  statements: {
+    total: number;
+    covered: number;
+    percentage: number;
+  };
+  branches: {
+    total: number;
+    covered: number;
+    percentage: number;
+  };
+}
+
+/**
+ * Test result interface
+ */
+interface TestResult {
+  passed: boolean;
+  executionTime: number;
+  memoryUsage: number;
+  testName: string;
+  errors?: Error[];
+}
+
+/**
+ * Worker process interface
+ */
+interface WorkerProcess {
+  id: string;
+  busy: boolean;
+  startTime: number;
+  memoryUsage: number;
+  testsExecuted: number;
+}
+
+/**
  * Test execution optimization configuration
  */
 export interface OptimizationConfig {
@@ -82,7 +130,7 @@ export interface TestCacheEntry {
     passed: boolean;
     executionTime: number;
     memoryUsage: number;
-    coverage?: any;
+    coverage?: TestCoverage;
   };
   readonly timestamp: number;
   readonly dependencies: string[];
@@ -113,7 +161,7 @@ export class TestExecutionOptimizer extends EventEmitter {
   private readonly dependencyGraph: Map<string, Set<string>> = new Map();
   private readonly testMetrics: Map<string, { executionTime: number; memoryUsage: number; stability: number }> = new Map();
   private readonly config: OptimizationConfig;
-  private workerPool: any[] = [];
+  private workerPool: WorkerProcess[] = [];
   private resourceMonitor: NodeJS.Timeout | null = null;
 
   constructor(config: OptimizationConfig) {

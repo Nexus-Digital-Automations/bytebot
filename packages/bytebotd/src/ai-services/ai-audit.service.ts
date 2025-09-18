@@ -95,7 +95,7 @@ export class AIAuditService {
   private totalExecutionTime = 0;
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
     const operationId = `ai_audit_init${Date.now()}${Math.random().toString(36).substring(7)}`;
@@ -158,7 +158,7 @@ export class AIAuditService {
    * Generate comprehensive AI audit report
    */
   generateAuditReport(_period?: { from: Date; to: Date }): AIAuditReport {
-    const reportPeriod = period ?? {
+    const reportPeriod = _period ?? {
       from: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
       to: new Date(),
     };
@@ -360,7 +360,7 @@ export class AIAuditService {
     threatLevel: 'low' | 'medium' | 'high' | 'critical';
   } {
     const securityIncidents = entries.filter(e => 
-      e.securityFlags.some(flag => flag.includes('incident') ?? flag.includes('threat'))
+      e.securityFlags.some(flag => flag.includes('incident') || flag.includes('threat'))
     ).length;
 
     const anomaliesDetected = entries.filter(e => 

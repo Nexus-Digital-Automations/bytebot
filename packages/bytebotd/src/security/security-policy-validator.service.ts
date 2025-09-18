@@ -142,7 +142,7 @@ export class SecurityPolicyValidatorService {
   private complianceViolations = 0;
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
     const operationId = `policy_validator_init${Date.now()}${Math.random().toString(36).substring(7)}`;

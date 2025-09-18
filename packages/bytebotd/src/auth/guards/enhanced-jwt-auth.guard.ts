@@ -153,7 +153,7 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
   >();
 
   constructor(
-    _private readonly reflector: Reflector,
+    private readonly reflector: Reflector,
     private readonly jwtService: JwtService,
   ) {
     super();

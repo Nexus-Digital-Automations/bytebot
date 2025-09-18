@@ -119,7 +119,7 @@ export class ParlantValidatedBrowserUseService {
   private averageValidationTime = 0;
 
   constructor(
-    _private readonly originalBrowserUseService: BrowserUseService,
+    private readonly originalBrowserUseService: BrowserUseService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
     const operationId = `parlant_browser_init${Date.now()}${Math.random().toString(36).substring(7)}`;
@@ -656,7 +656,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Escalate risk level to next higher level
    */
-  private escalateRiskLevel(currentLevel: RiskLevel): RiskLevel {
+  private escalateRiskLevel(_currentLevel: currentLevelType): RiskLevel {
     switch (currentLevel) {
       case RiskLevel.MINIMAL: return RiskLevel.LOW;
       case RiskLevel.LOW: return RiskLevel.MEDIUM;
@@ -670,7 +670,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Generate mitigation strategies based on risk factors
    */
-  private generateMitigationStrategies(riskLevel: RiskLevel, riskFactors: string[]): string[] {
+  private generateMitigationStrategies(_riskLevel: riskLevelType): string[] {
     const strategies: string[] = [];
 
     if (riskFactors.includes('external_domain_access')) {
@@ -695,7 +695,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Get monitoring level based on risk level
    */
-  private getMonitoringLevel(riskLevel: RiskLevel): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' {
+  private getMonitoringLevel(_riskLevel: riskLevelType): 'BASIC' | 'ENHANCED' | 'COMPREHENSIVE' {
     switch (riskLevel) {
       case RiskLevel.MINIMAL:
       case RiskLevel.LOW: return 'BASIC';
@@ -709,7 +709,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Generate human-readable description of browser task
    */
-  private generateTaskDescription(taskDto: CreateBrowserTaskDto): string {
+  private generateTaskDescription(_taskDto: taskDtoType): string {
     const actionSummary = taskDto.actions.map(action => action.type).join(', ');
     return `Execute browser task "${taskDto.name}" with ${taskDto.actions.length} actions: ${actionSummary}`;
   }
@@ -717,14 +717,14 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Generate human-readable description of async job
    */
-  private generateJobDescription(jobDto: CreateAsyncJobDto): string {
+  private generateJobDescription(_jobDto: jobDtoType): string {
     return `Create async job "${jobDto.name}" of type ${jobDto.jobType} with estimated duration ${jobDto.estimatedDurationMs}ms`;
   }
 
   /**
    * Sanitize task parameters for validation (remove sensitive data)
    */
-  private sanitizeTaskForValidation(taskDto: CreateBrowserTaskDto): Record<string, unknown> {
+  private sanitizeTaskForValidation(_taskDto: taskDtoType): Record<string, unknown> {
     return {
       name: taskDto.name,
       actionsCount: taskDto.actions.length,
@@ -737,7 +737,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Sanitize job parameters for validation
    */
-  private sanitizeJobForValidation(jobDto: CreateAsyncJobDto): Record<string, unknown> {
+  private sanitizeJobForValidation(_jobDto: jobDtoType): Record<string, unknown> {
     return {
       name: jobDto.name,
       jobType: jobDto.jobType,
@@ -749,7 +749,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Extract target URL from task actions
    */
-  private extractTargetUrlFromTask(taskDto: CreateBrowserTaskDto): string | undefined {
+  private extractTargetUrlFromTask(_taskDto: taskDtoType): string | undefined {
     const navigateAction = taskDto.actions.find(action => action.type === 'navigate');
     return navigateAction?.url;
   }
@@ -757,7 +757,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Extract all URLs from task actions
    */
-  private extractUrlsFromTask(taskDto: CreateBrowserTaskDto): string[] {
+  private extractUrlsFromTask(_taskDto: taskDtoType): string[] {
     return taskDto.actions
       .filter(action => action.url)
       .map(action => action.url)
@@ -767,7 +767,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Check if URL is external domain
    */
-  private isExternalDomain(url: string): boolean {
+  private isExternalDomain(_url: urlType): boolean {
     try {
       const urlObj = new globalThis.URL(url);
       const allowedDomains = ['localhost', '127.0.0.1', 'local.dev'];
@@ -780,7 +780,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Check if URL contains sensitive keywords
    */
-  private containsSensitiveKeywords(url: string): boolean {
+  private containsSensitiveKeywords(_url: urlType): boolean {
     const sensitiveKeywords = ['admin', 'password', 'auth', 'login', 'secret', 'private'];
     return sensitiveKeywords.some(keyword => url.toLowerCase().includes(keyword));
   }
@@ -788,7 +788,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Check if selector targets sensitive data
    */
-  private isSensitiveSelector(selector: string): boolean {
+  private isSensitiveSelector(_selector: selectorType): boolean {
     const sensitiveSelectors = ['input[type="password"]', '[data-sensitive]', '.password', '#password'];
     return sensitiveSelectors.some(sensitive => selector.includes(sensitive));
   }
@@ -796,7 +796,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Calculate extracted data size
    */
-  private calculateExtractedDataSize(result: BrowserTaskResultDto): number | undefined {
+  private calculateExtractedDataSize(_result: resultType): number | undefined {
     if (result.extractedData) {
       return JSON.stringify(result.extractedData).length;
     }
@@ -806,7 +806,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Perform actual data extraction (mock implementation)
    */
-  private async performDataExtraction(url: string, selectors: string[]): Promise<{
+  private async performDataExtraction(_url: urlType): Promise<{
     data: Record<string, BrowserElementData>;
     timestamp: Date;
     metadata: BrowserExtractionMetadata;
@@ -826,7 +826,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Classify extracted data for compliance
    */
-  private classifyExtractedData(data: Record<string, BrowserElementData>): 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' {
+  private classifyExtractedData(_data: dataType): 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' {
     // Mock implementation - in production would use sophisticated data classification
     const dataStr = JSON.stringify(data).toLowerCase();
     
@@ -845,7 +845,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Generate compliance flags for extracted data
    */
-  private generateComplianceFlags(data: Record<string, BrowserElementData>, url: string): string[] {
+  private generateComplianceFlags(_data: dataType): string[] {
     const flags: string[] = [];
     const dataStr = JSON.stringify(data).toLowerCase();
 
@@ -865,7 +865,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Create timeout promise for execution limits
    */
-  private createTimeoutPromise(timeoutMs: number): Promise<never> {
+  private createTimeoutPromise(_timeoutMs: timeoutMsType): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error(`Browser operation timed out after ${timeoutMs}ms`));
@@ -876,7 +876,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Create audit entry for browser action
    */
-  private async createBrowserActionAuditEntry(entry: BrowserActionAuditEntry): Promise<void> {
+  private async createBrowserActionAuditEntry(_entry: entryType): Promise<void> {
     this.actionHistory.push(entry);
     
     // Keep only recent entries (last 100)
@@ -890,7 +890,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Update performance metrics
    */
-  private updatePerformanceMetrics(duration: number): void {
+  private updatePerformanceMetrics(_duration: durationType): void {
     this.averageValidationTime = 
       (this.averageValidationTime * (this.totalOperations - 1) + duration) / this.totalOperations;
   }

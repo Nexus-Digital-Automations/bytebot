@@ -162,7 +162,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
   private readonly circuitConfig: CircuitBreakerConfig;
   private readonly poolConfig: ConnectionPoolConfig;
   
-  constructor(_private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     super();
     
     this.circuitConfig = {

@@ -155,7 +155,7 @@ export class ParlantIntelligentCacheService {
   // Cache warming configuration
   private readonly warmingConfig: CacheWarmingConfig;
 
-  constructor(_private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     const operationId = `cache_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     this.warmingConfig = {
@@ -529,7 +529,7 @@ export class ParlantIntelligentCacheService {
     }
   }
 
-  private async getFromRedisCache(key: string): Promise<CacheEntry<ParlantValidationResponse> | null> {
+  private async getFromRedisCache(_key: string): Promise<CacheEntry<ParlantValidationResponse> | null> {
     // TODO: Implement Redis cache retrieval
     // if (this.redisClient) {
     //   const cached = await this.redisClient.get(key);
@@ -541,9 +541,9 @@ export class ParlantIntelligentCacheService {
   }
 
   private async setRedisCache(
-    key: string,
-    value: ParlantValidationResponse,
-    config: CacheConfig
+    _key: string,
+    _value: ParlantValidationResponse,
+    _config: CacheConfig
   ): Promise<void> {
     // TODO: Implement Redis cache storage
     // if (this.redisClient) {
@@ -563,13 +563,13 @@ export class ParlantIntelligentCacheService {
     // }
   }
 
-  private isCacheEntryValid(entry: CacheEntry<ParlantValidationResponse>, config: CacheConfig): boolean {
+  private isCacheEntryValid(entry: CacheEntry<ParlantValidationResponse>, _config: CacheConfig): boolean {
     const now = Date.now();
     const entryAge = now - entry.timestamp.getTime();
     return entryAge < (config.ttlSeconds * 1000);
   }
 
-  private shouldCacheInRedis(request: ParlantValidationRequest, config: CacheConfig): boolean {
+  private shouldCacheInRedis(request: ParlantValidationRequest, _config: CacheConfig): boolean {
     // Cache in Redis for operations that benefit from distributed caching
     return request.riskLevel === RiskLevel.MINIMAL || 
            request.riskLevel === RiskLevel.LOW ||
@@ -633,7 +633,7 @@ export class ParlantIntelligentCacheService {
     }
   }
 
-  private generateSampleRequests(functionName: string): ParlantValidationRequest[] {
+  private generateSampleRequests(_functionName: string): ParlantValidationRequest[] {
     // TODO: Generate realistic sample requests for cache warming
     // This would analyze historical patterns and generate common variations
     return [];

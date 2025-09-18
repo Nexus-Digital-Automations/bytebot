@@ -359,7 +359,7 @@ export class EnterpriseApiGatewayController {
   };
 
   constructor(
-    _private readonly parlantIntegrationService: ParlantIntegrationService,
+    private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
     this.logger.log('Enterprise API Gateway initialized - Parlant validation active for all endpoints');
     this.initializeCircuitBreakers();

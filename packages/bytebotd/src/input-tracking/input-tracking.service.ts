@@ -51,7 +51,7 @@ export class InputTrackingService implements OnModuleDestroy {
    * @param gateway - WebSocket gateway for real-time event broadcasting
    */
   constructor(
-    _private readonly computerUseService: ComputerUseService,
+    private readonly computerUseService: ComputerUseService,
     private readonly gateway: InputTrackingGateway,
   ) {}
 

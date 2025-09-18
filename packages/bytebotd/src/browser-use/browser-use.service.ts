@@ -121,7 +121,7 @@ export class BrowserUseService {
   private readonly pythonExecutable: string = 'python3';
 
   constructor(
-    _private readonly sessionService: BrowserSessionService,
+    private readonly sessionService: BrowserSessionService,
     private readonly taskService: BrowserTaskService,
     private readonly asyncJobService: BrowserAsyncJobService,
   ) {
@@ -230,8 +230,8 @@ export class BrowserUseService {
       });
 
       return _result;
-    } catch (_err) {
-      const errorMessage = _err instanceof Error ? _err.message : String(_err);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       const executionTimeMs = Date.now() - startTime;
 
       this.logger.error(`Browser task failed: ${taskId}`, {
@@ -247,8 +247,8 @@ export class BrowserUseService {
         executionTimeMs,
         errorMessage,
         errorDetails: {
-          type: _err instanceof Error ? _err.constructor.name : 'UnknownError',
-          stack: _err instanceof Error ? _err.stack : undefined,
+          type: error instanceof Error ? error.constructor.name : 'UnknownError',
+          stack: error instanceof Error ? error.stack : undefined,
           timestamp: new Date(),
         },
       });
@@ -263,7 +263,7 @@ export class BrowserUseService {
         totalActions: taskDto.actions.length,
         errorMessage,
         errorDetails: {
-          type: _err instanceof Error ? _err.constructor.name : 'UnknownError',
+          type: error instanceof Error ? error.constructor.name : 'UnknownError',
           message: errorMessage,
           timestamp: new Date(),
         },
@@ -343,12 +343,12 @@ export class BrowserUseService {
           dimensions: { width: 1920, height: 1080 }, // TODO: Extract actual dimensions
         },
       };
-    } catch (_err) {
+    } catch (error) {
       this.logger.error(
         `Screenshot capture failed for session: ${sessionId}`,
-        _err,
+        error,
       );
-      throw _err;
+      throw error;
     }
   }
 
@@ -397,23 +397,23 @@ export class BrowserUseService {
           extractionTime,
         },
       };
-    } catch (_err) {
+    } catch (error) {
       this.logger.error(
         `DOM extraction failed for session: ${sessionId}`,
-        _err,
+        error,
       );
-      throw _err;
+      throw error;
     }
   }
 
   /**
    * Create async job for long-running browser automation tasks
    */
-  async createAsyncJob(dto: CreateAsyncJobDto): Promise<AsyncJobResultDto> {
-    this.logger.log(`Creating job: ${_dto.name}`, {
-      jobName: _dto.name,
-      jobType: _dto.jobType,
-      priority: _dto.priority,
+  async createAsyncJob(_dto: dtoType): Promise<AsyncJobResultDto> {
+    this.logger.log(`Creating job: ${dto.name}`, {
+      jobName: dto.name,
+      jobType: dto.jobType,
+      priority: dto.priority,
     });
 
     return await this.asyncJobService.createAsyncJob(_dto);
@@ -422,7 +422,7 @@ export class BrowserUseService {
   /**
    * Get async job status and results
    */
-  async getAsyncJob(jobId: string): Promise<AsyncJobResultDto | null> {
+  async getAsyncJob(_jobId: jobIdType): Promise<AsyncJobResultDto | null> {
     this.logger.log(`Getting job: ${jobId}`);
 
     return await this.asyncJobService.getAsyncJob(jobId);
@@ -431,7 +431,7 @@ export class BrowserUseService {
   /**
    * Cancel async job
    */
-  async cancelAsyncJob(jobId: string): Promise<void> {
+  async cancelAsyncJob(_jobId: jobIdType): Promise<void> {
     this.logger.log(`Cancelling job: ${jobId}`);
 
     return await this.asyncJobService.cancelAsyncJob(jobId);
@@ -462,14 +462,14 @@ export class BrowserUseService {
     });
 
     try {
-      const result = await this.captureScreenshot(_sessionId, {
+      const result = await this.captureScreenshot(sessionId, {
         fullPage: options.fullPage,
         quality: options.quality,
         format: 'png',
       });
 
       // Update session activity
-      await this.sessionService.updateActivity(_sessionId, {
+      await this.sessionService.updateActivity(sessionId, {
         screenshot: true,
       });
 
@@ -478,9 +478,9 @@ export class BrowserUseService {
         timestamp: _result.timestamp.toISOString(),
         metadata: _result.metadata,
       };
-    } catch (_err) {
-      this.logger.error(`Screenshot failed for session: ${sessionId}`, _err);
-      throw _err;
+    } catch (error) {
+      this.logger.error(`Screenshot failed for session: ${sessionId}`, error);
+      throw error;
     }
   }
 
@@ -508,7 +508,7 @@ export class BrowserUseService {
       // Extract data for each selector
       for (const [key, selector] of Object.entries(config.selectors)) {
         try {
-          const result = await this.extractDomData(_sessionId, {
+          const result = await this.extractDomData(sessionId, {
             selector,
             includeText: true,
             includeAttributes: true,
@@ -519,22 +519,22 @@ export class BrowserUseService {
             Object.values(_result.data)[0] ??
             (_result.data as unknown as BrowserElementData);
           extractedData[key] = selectorData;
-        } catch (_err) {
+        } catch (error) {
           this.logger.warn(
             `Failed to extract data for selector ${key}: ${selector}`,
-            _err,
+            error,
           );
           extractedData[key] = { error: 'Extraction failed' };
         }
       }
 
       return extractedData;
-    } catch (_err) {
+    } catch (error) {
       this.logger.error(
         `Page data extraction failed for session: ${sessionId}`,
-        _err,
+        error,
       );
-      throw _err;
+      throw error;
     }
   }
 
@@ -669,8 +669,8 @@ export class BrowserUseService {
         logs,
         metadata: task.metadata,
       };
-    } catch (_err) {
-      const errorMessage = _err instanceof Error ? _err.message : String(_err);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
 
       logs.push({
         timestamp: new Date(),
@@ -680,7 +680,7 @@ export class BrowserUseService {
         metadata: { error: errorMessage },
       });
 
-      throw _err;
+      throw error;
     }
   }
 
@@ -764,11 +764,11 @@ export class BrowserUseService {
         screenshot,
         extractedData,
       };
-    } catch (_err) {
+    } catch (error) {
       return {
         success: false,
         executionTime: Date.now() - startTime,
-        error: _err instanceof Error ? _err.message : String(_err),
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -807,9 +807,9 @@ export class BrowserUseService {
         tempDirectory: this.tempDirectory,
         browserUsePath: this.browserUsePath,
       });
-    } catch (_err) {
+    } catch (error) {
       throw new Error(
-        `Failed to initialize workspace: ${err instanceof Error ? _err.message : String(_err)}`,
+        `Failed to initialize workspace: ${err instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -817,7 +817,7 @@ export class BrowserUseService {
   /**
    * Execute Python script with browser-use library
    */
-  private async executePythonScript(script: string): Promise<{
+  private async executePythonScript(_script: scriptType): Promise<{
     success: boolean;
     output: string;
     error?: string;
@@ -843,11 +843,11 @@ export class BrowserUseService {
           let stdout = '';
           let stderr = '';
 
-          childProcess.stdout.on('data', (data: Buffer) => {
+          childProcess.stdout.on('data', (_data: dataType) => {
             stdout += data.toString();
           });
 
-          childProcess.stderr.on('data', (data: Buffer) => {
+          childProcess.stderr.on('data', (_data: dataType) => {
             stderr += data.toString();
           });
 
@@ -873,7 +873,7 @@ export class BrowserUseService {
             }
           });
 
-          childProcess.on('error', async (err: Error) => {
+          childProcess.on('error', async (_err: errType) => {
             try {
               await fs.unlink(scriptFile);
             } catch (cleanupErr) {
@@ -887,7 +887,7 @@ export class BrowserUseService {
             });
           });
         })
-        .catch((writeErr: Error) => {
+        .catch((_writeErr: writeErrType) => {
           resolve({
             success: false,
             output: '',
@@ -900,7 +900,7 @@ export class BrowserUseService {
   /**
    * Generate Python scripts for different actions
    */
-  private generateNavigationScript(sessionId: string, url: string): string {
+  private generateNavigationScript(_sessionId: sessionIdType): string {
     return `
 import asyncio
 from browser_use import Agent
@@ -927,7 +927,7 @@ if _name__ == "__main__":
 `;
   }
 
-  private generateClickScript(sessionId: string, selector: string): string {
+  private generateClickScript(_sessionId: sessionIdType): string {
     return `
 import asyncio
 from browser_use import Agent
@@ -1129,7 +1129,7 @@ if _name__ == "__main__":
   /**
    * Convert log level string to TaskLogEntry level
    */
-  private convertLogLevel(level: string): 'debug' | 'info' | 'warn' | 'error' {
+  private convertLogLevel(_level: levelType): 'debug' | 'info' | 'warn' | 'error' {
     switch (level.toLowerCase()) {
       case 'debug':
         return 'debug';

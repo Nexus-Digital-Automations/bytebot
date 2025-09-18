@@ -158,7 +158,7 @@ export class DeprecationGuard implements CanActivate {
   private readonly stats: DeprecationStats;
 
   constructor(
-    _private readonly reflector: Reflector,
+    private readonly reflector: Reflector,
     private readonly configService: ConfigService,
   ) {
     // Load deprecation policy from configuration with BytebotD defaults

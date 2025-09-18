@@ -96,7 +96,7 @@ interface StandardJwtPayload {
 export class JwtAuthGuard extends AuthGuard('jwt') {
   private readonly logger = new Logger(JwtAuthGuard.name);
 
-  constructor(_private readonly reflector: Reflector) {
+  constructor(private readonly reflector: Reflector) {
     super();
   }
 

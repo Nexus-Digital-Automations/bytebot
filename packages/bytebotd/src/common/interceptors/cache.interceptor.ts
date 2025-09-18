@@ -187,7 +187,7 @@ export class CacheInterceptor implements NestInterceptor {
   ];
 
   constructor(
-    _private readonly cacheService: CacheService,
+    private readonly cacheService: CacheService,
     private readonly keyGenerator: CacheKeyGenerator,
     private readonly metricsService?: MetricsService,
   ) {

@@ -217,7 +217,7 @@ export class ParlantValidatedBrowserTaskService {
   private averageValidationTime = 0;
 
   constructor(
-    _private readonly originalBrowserTaskService: BrowserTaskService,
+    private readonly originalBrowserTaskService: BrowserTaskService,
     private readonly parlantIntegrationService: ParlantIntegrationService
   ) {
     const operationId = `parlant_task_init${Date.now()}${Math.random().toString(36).substring(7)}`;
@@ -919,7 +919,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Escalate risk level to next higher level
    */
-  private escalateRiskLevel(currentLevel: RiskLevel): RiskLevel {
+  private escalateRiskLevel(_currentLevel: currentLevelType): RiskLevel {
     switch (currentLevel) {
       case RiskLevel.MINIMAL: return RiskLevel.LOW;
       case RiskLevel.LOW: return RiskLevel.MEDIUM;
@@ -933,7 +933,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Generate task-specific mitigation strategies
    */
-  private generateTaskMitigationStrategies(riskLevel: RiskLevel, riskFactors: string[]): string[] {
+  private generateTaskMitigationStrategies(_riskLevel: riskLevelType): string[] {
     const strategies: string[] = [];
 
     if (riskFactors.includes('high_action_count')) {
@@ -962,7 +962,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Generate resource limitations based on context
    */
-  private generateResourceLimitations(context: BrowserTaskValidationContext): string[] {
+  private generateResourceLimitations(_context: contextType): string[] {
     const limitations: string[] = [];
 
     if (context.browserEnvironment.resourceUsage.memoryMB > 500) {
@@ -983,7 +983,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Generate monitoring requirements based on risk level
    */
-  private generateMonitoringRequirements(riskLevel: RiskLevel): string[] {
+  private generateMonitoringRequirements(_riskLevel: riskLevelType): string[] {
     const requirements: string[] = [];
 
     switch (riskLevel) {
@@ -1015,7 +1015,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Generate task creation description
    */
-  private generateTaskCreationDescription(taskData: TaskCreationData): string {
+  private generateTaskCreationDescription(_taskData: taskDataType): string {
     const complexity = this.determineTaskComplexity(taskData.totalActions);
     return `Create browser task "${taskData.name}" with ${taskData.totalActions} actions (${complexity} complexity), priority: ${taskData.priority}`;
   }
@@ -1023,7 +1023,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Determine task complexity based on action count
    */
-  private determineTaskComplexity(actionCount: number): string {
+  private determineTaskComplexity(_actionCount: actionCountType): string {
     if (actionCount <= 5) return 'simple';
     if (actionCount <= 15) return 'moderate';
     if (actionCount <= 30) return 'complex';
@@ -1033,7 +1033,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Sanitize task data for validation
    */
-  private sanitizeTaskForValidation(taskData: TaskCreationData): Record<string, unknown> {
+  private sanitizeTaskForValidation(_taskData: taskDataType): Record<string, unknown> {
     return {
       name: taskData.name,
       taskId: taskData.taskId,
@@ -1049,7 +1049,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Sanitize update data for validation
    */
-  private sanitizeUpdateDataForValidation(updateData: TaskUpdateData): Record<string, unknown> {
+  private sanitizeUpdateDataForValidation(_updateData: updateDataType): Record<string, unknown> {
     return {
       status: updateData.status,
       hasExtractedData: !!updateData.extractedData,
@@ -1063,7 +1063,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Extract task metadata from task data
    */
-  private extractTaskMetadata(taskData: TaskCreationData): TaskExecutionMetadata {
+  private extractTaskMetadata(_taskData: taskDataType): TaskExecutionMetadata {
     return {
       priority: taskData.priority ?? BrowserTaskPriority.NORMAL,
       sessionConfig: taskData.sessionConfig,
@@ -1076,7 +1076,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Extract performance metrics from task result
    */
-  private extractPerformanceMetrics(task: BrowserTaskResultDto): TaskPerformanceMetrics | undefined {
+  private extractPerformanceMetrics(_task: taskType): TaskPerformanceMetrics | undefined {
     return {
       executionTime: task.executionTimeMs ?? 0,
       actionsExecuted: task.actionsCompleted,
@@ -1164,7 +1164,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Get monitoring level based on risk level
    */
-  private getMonitoringLevel(riskLevel: RiskLevel): 'BASIC' | 'DETAILED' | 'COMPREHENSIVE' {
+  private getMonitoringLevel(_riskLevel: riskLevelType): 'BASIC' | 'DETAILED' | 'COMPREHENSIVE' {
     switch (riskLevel) {
       case RiskLevel.MINIMAL:
       case RiskLevel.LOW: return 'BASIC';
@@ -1178,7 +1178,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Check if task is currently running (mock implementation)
    */
-  private isTaskCurrentlyRunning(taskId: string): boolean {
+  private isTaskCurrentlyRunning(_taskId: taskIdType): boolean {
     // Mock implementation - in production would check actual task status
     return Math.random() > 0.8; // 20% chance of being running
   }
@@ -1186,7 +1186,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Create timeout promise for execution limits
    */
-  private createTimeoutPromise(timeoutMs: number): Promise<never> {
+  private createTimeoutPromise(_timeoutMs: timeoutMsType): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error(`Task operation timed out after ${timeoutMs}ms`));
@@ -1197,7 +1197,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Create audit entry for task operation
    */
-  private async createTaskAuditEntry(entry: BrowserTaskAuditEntry): Promise<void> {
+  private async createTaskAuditEntry(_entry: entryType): Promise<void> {
     this.taskHistory.push(entry);
     
     // Keep only recent entries (last 100)
@@ -1211,7 +1211,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Update performance metrics
    */
-  private updatePerformanceMetrics(duration: number): void {
+  private updatePerformanceMetrics(_duration: durationType): void {
     this.averageValidationTime = 
       (this.averageValidationTime * (this.totalTaskOperations - 1) + duration) / this.totalTaskOperations;
   }
@@ -1278,7 +1278,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Get task security profile for validation context
    */
-  async getTaskSecurityProfile(userId: string): Promise<TaskSecurityProfile> {
+  async getTaskSecurityProfile(_userId: userIdType): Promise<TaskSecurityProfile> {
     // Mock implementation - in production would check actual security data
     return {
       userTrustLevel: 'MEDIUM',

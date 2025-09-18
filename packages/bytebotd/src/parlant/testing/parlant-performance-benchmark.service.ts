@@ -292,7 +292,7 @@ export class ParlantPerformanceBenchmarkService {
   private readonly baselines: Map<string, BenchmarkResult> = new Map();
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly performanceMonitor: ParlantPerformanceMonitorService
   ) {
     const operationId = `benchmark_init${Date.now()}${Math.random().toString(36).substring(7)}`;

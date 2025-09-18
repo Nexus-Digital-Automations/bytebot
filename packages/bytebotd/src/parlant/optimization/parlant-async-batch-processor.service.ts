@@ -205,7 +205,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
   private readonly eventEmitter = new EventEmitter();
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
   ) {
     this.initializePriorityQueues();
   }
@@ -819,7 +819,7 @@ export class ParlantAsyncBatchProcessorService implements OnModuleInit, OnModule
   private async optimizeBatchSize(): Promise<void> {
     if (this.performanceHistory.length < 10) return;
     
-    const recentPerformance = this.calculateRecentPerformance();
+    const _recentPerformance = this.calculateRecentPerformance();
     const performanceTrend = this.calculatePerformanceTrend();
     
     if (performanceTrend > 0.1) {

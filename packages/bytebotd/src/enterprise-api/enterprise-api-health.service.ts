@@ -250,7 +250,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
   };
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly httpService: HttpService,
     private readonly enterpriseApiService: EnterpriseApiService,
     private readonly parlantIntegrationService: ParlantIntegrationService,

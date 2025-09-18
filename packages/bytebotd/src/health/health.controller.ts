@@ -65,7 +65,7 @@ export class HealthController {
   private readonly logger = new Logger(HealthController.name);
 
   constructor(
-    _private readonly healthService: HealthService,
+    private readonly healthService: HealthService,
     private readonly health: HealthCheckService,
     private readonly http: HttpHealthIndicator,
     private readonly memory: MemoryHealthIndicator,

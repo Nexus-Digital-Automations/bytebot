@@ -56,7 +56,7 @@ interface MockRequest {
 describe('JwtAuthGuard - Advanced Security Tests', () => {
   let guard: JwtAuthGuard;
   let jwtService: JwtService;
-  let configService: ConfigService;
+  let _configService: ConfigService;
   let reflector: Reflector;
   let module: TestingModule;
 
@@ -73,7 +73,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
   // Mock execution context factory with enhanced security metadata
   const createMockExecutionContext = (
     headers: Record<string, string | null | undefined> = {},
-    isPublic = false,
+    _isPublic = false,
     route = 'test-route',
     ip = '127.0.0.1',
   ): ExecutionContext => {
@@ -114,8 +114,8 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
   // Create malicious JWT tokens for security testing
   const createMaliciousTokens = () => {
-    const validSecret = 'test-jwt-secret';
-    const maliciousSecret = 'malicious-secret';
+    const _validSecret = 'test-jwt-secret';
+    const _maliciousSecret = 'malicious-secret';
 
     return {
       // Token with malicious payload injection
@@ -184,7 +184,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
     guard = module.get<JwtAuthGuard>(JwtAuthGuard);
     jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigService>(ConfigService);
+    _configService = module.get<ConfigService>(ConfigService);
     reflector = module.get<Reflector>(Reflector);
 
     securityLogger.info(`[${operationId}] JWT Security test setup completed`);
@@ -259,7 +259,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
       // Create a token with valid structure but invalid signature
       const validPayload = Buffer.from(
-        _JSON.stringify({
+        JSON.stringify({
           sub: 'admin',
           email: 'admin@bytebot.ai',
           role: 'admin',
@@ -268,7 +268,7 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       ).toString('base64url');
 
       const validHeader = Buffer.from(
-        _JSON.stringify({
+        JSON.stringify({
           alg: 'HS256',
           typ: 'JWT',
         }),

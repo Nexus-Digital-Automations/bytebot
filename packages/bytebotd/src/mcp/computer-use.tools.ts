@@ -48,7 +48,7 @@ export class ComputerUseTools {
   private readonly logger = new Logger(ComputerUseTools.name);
   private operationCounter = 0;
 
-  constructor(_private readonly computerUseService: ComputerUseService) {
+  constructor(private readonly computerUseService: ComputerUseService) {
     this.logger.log('ComputerUseTools initialized - MCP integration ready');
   }
 

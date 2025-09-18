@@ -291,7 +291,7 @@ export class SecurityThreatDetectorService {
   private threatsContained = 0;
 
   constructor(
-    _private readonly parlantService: ParlantIntegrationService,
+    private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
     const operationId = `threat_detector_init${Date.now()}${Math.random().toString(36).substring(7)}`;

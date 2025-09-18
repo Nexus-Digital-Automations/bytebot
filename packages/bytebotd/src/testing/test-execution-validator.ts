@@ -197,7 +197,7 @@ export class TestExecutionValidator extends EventEmitter {
       });
 
       let jestOutput = '';
-      let jestError = '';
+      const jestError = '';
 
       jestProcess.stdout?.on('data', (data: Buffer) => {
         jestOutput += data.toString();

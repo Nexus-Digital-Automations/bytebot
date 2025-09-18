@@ -49,7 +49,7 @@ export class MetricsController {
   private readonly logger = new Logger(MetricsController.name);
 
   constructor(
-    _private readonly metricsService: BytebotMetricsService,
+    private readonly metricsService: BytebotMetricsService,
     private readonly parlantValidationService: ParlantHealthMetricsValidationService,
   ) {
     this.logger.log('Metrics Controller initialized with Parlant validation');

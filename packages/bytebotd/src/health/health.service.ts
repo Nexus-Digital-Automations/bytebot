@@ -51,7 +51,7 @@ export class HealthService extends HealthIndicator {
   private readonly startTime: number;
 
   constructor(
-    _private readonly parlantValidationService: ParlantHealthMetricsValidationService,
+    private readonly parlantValidationService: ParlantHealthMetricsValidationService,
   ) {
     super();
     this.startTime = Date.now();

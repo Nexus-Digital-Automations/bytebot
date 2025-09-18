@@ -131,7 +131,7 @@ export class AnthropicService {
   private tokenUsage = { input: 0, output: 0 };
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
     const operationId = `anthropic_init${Date.now()}${Math.random().toString(36).substring(7)}`;

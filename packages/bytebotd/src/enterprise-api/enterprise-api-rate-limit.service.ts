@@ -222,7 +222,7 @@ export class EnterpriseApiRateLimitService {
   };
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
     this.logger.log('Enterprise API Rate Limiting Service initialized with MAXIMUM Parlant integration');

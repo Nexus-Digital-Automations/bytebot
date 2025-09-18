@@ -77,7 +77,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
 export class RolesGuard implements CanActivate {
   private readonly logger = new Logger(RolesGuard.name);
 
-  constructor(_private readonly reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) {}
 
   /**
    * Determine if request can activate the route based on user roles/permissions

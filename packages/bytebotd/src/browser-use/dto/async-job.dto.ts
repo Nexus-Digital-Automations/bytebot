@@ -210,7 +210,7 @@ export class CreateAsyncJobDto {
     example: 'Data extraction from e-commerce site',
   })
   @IsString()
-  (name ?? "default"): string;
+  name: string;
 
   @ApiPropertyOptional({
     description: 'Detailed job description',

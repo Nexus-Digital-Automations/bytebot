@@ -278,7 +278,7 @@ export class SecurityAuditService {
   private complianceChecksPerformed = 0;
 
   constructor(
-    _private readonly parlantService: ParlantIntegrationService,
+    private readonly parlantService: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {
     const operationId = `security_audit_init${Date.now()}${Math.random().toString(36).substring(7)}`;

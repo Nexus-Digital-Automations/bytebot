@@ -202,7 +202,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
   private readonly windowSize = 1000; // Keep last 1000 requests for percentile calculation
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly cacheService: ParlantMultiLevelCacheService,
     private readonly batchProcessor: ParlantAsyncBatchProcessorService,
   ) {}
@@ -521,7 +521,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
   ): OptimizedValidationResponse {
     const errorMessage = error instanceof Error ? error.message : String(error);
     
-    const errorResponse: ParlantValidationResponse = {
+    const _errorResponse: ParlantValidationResponse = {
       conversationId: `error-${Date.now()}`,
       approved: false,
       confidence: 0,

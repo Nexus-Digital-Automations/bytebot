@@ -334,7 +334,7 @@ const optimizationRecommendationsProvider: Provider = {
 })
 export class ParlantPerformanceOptimizationModule {
   constructor(
-    _private readonly orchestrator: ParlantPerformanceOrchestratorService,
+    private readonly orchestrator: ParlantPerformanceOrchestratorService,
     private readonly cacheService: ParlantMultiLevelCacheService,
     private readonly batchProcessor: ParlantAsyncBatchProcessorService
   ) {

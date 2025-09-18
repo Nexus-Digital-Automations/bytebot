@@ -7,6 +7,15 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Injectable } from '@nestjs/common';
+import { AgentTask } from '@bytebot/shared';
+
+// Define message interface for WebSocket communication
+interface TaskMessage {
+  id: string;
+  content: string;
+  timestamp: Date;
+  type: 'user' | 'system' | 'agent';
+}
 
 @Injectable()
 @WebSocketGateway({
@@ -39,15 +48,18 @@ export class TasksGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`Client ${client.id} left task ${taskId}`);
   }
 
-  emitTaskUpdate(taskId: string, task: any) {
+  emitTaskUpdate(taskId: string, task: AgentTask) {
     this.server.to(`task_${taskId}`).emit('task_updated', task);
   }
 
-  emitNewMessage(taskId: string, message: any) {
+  emitNewMessage(
+    taskId: string,
+    message: TaskMessage | Record<string, unknown>,
+  ) {
     this.server.to(`task_${taskId}`).emit('new_message', message);
   }
 
-  emitTaskCreated(task: any) {
+  emitTaskCreated(task: AgentTask) {
     this.server.emit('task_created', task);
   }
 

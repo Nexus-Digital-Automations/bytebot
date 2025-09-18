@@ -183,7 +183,7 @@ export class ParlantHealthMetricsValidationService {
     }),
   };
 
-  constructor(_private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     this.initializeRiskMappings();
     this.logger.log('Parlant Health & Metrics Validation Service initialized');
     this.logger.log('Risk-based validation system active with performance optimization');

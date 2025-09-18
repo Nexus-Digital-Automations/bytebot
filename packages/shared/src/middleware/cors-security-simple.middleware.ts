@@ -227,7 +227,7 @@ export function createCorsConfig(
   const { environment, customOrigins } = config;
 
   const baseOrigins =
-    DEFAULT_ORIGINS[environment] || DEFAULT_ORIGINS.development;
+    DEFAULT_ORIGINS[environment] ?? DEFAULT_ORIGINS.development;
   const allowedOrigins = customOrigins
     ? [...baseOrigins, ...customOrigins]
     : baseOrigins;
@@ -397,7 +397,7 @@ export function getSecurityConfig(
   overrides: Partial<SecurityConfig> = {},
 ): SecurityConfig {
   const preset =
-    SECURITY_PRESETS[serviceName as keyof typeof SECURITY_PRESETS] || {};
+    SECURITY_PRESETS[serviceName as keyof typeof SECURITY_PRESETS] ?? {};
 
   return {
     environment,

@@ -115,7 +115,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
   private successfulValidations = 0;
   
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly performanceMonitor: ParlantPerformanceMonitorService,
     private readonly intelligentCache: ParlantIntelligentCacheService,
     private readonly circuitBreaker: ParlantCircuitBreakerService,

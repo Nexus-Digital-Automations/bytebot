@@ -169,7 +169,7 @@ export class TasksService {
   private autonomousExecutions = 0;
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly parlantIntegration: ParlantIntegrationService
   ) {
     const operationId = `tasks_init${Date.now()}${Math.random().toString(36).substring(7)}`;

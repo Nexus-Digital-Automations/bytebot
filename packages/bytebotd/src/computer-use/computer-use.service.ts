@@ -234,7 +234,7 @@ export class ComputerUseService {
    *
    * @param nutService - Native automation service for low-level computer control
    */
-  constructor(_private readonly nutService: NutService) {
+  constructor(private readonly nutService: NutService) {
     const operationId = `init${Date.now()}${Math.random().toString(36).substring(7)}`;
 
     this.logger.log(`[${operationId}] Initializing Computer Use Service`, {

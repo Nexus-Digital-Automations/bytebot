@@ -219,7 +219,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
   };
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -300,7 +300,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
       this.evictLRU();
     }
     
-    this.l1Cache.set(_key, {
+    this.l1Cache.set(key, {
       result,
       timestamp: now,
       accessCount: 1,
@@ -352,7 +352,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
 
   private async setL2Cache(
     key: string,
-    result: ParlantValidationResponse,
+    _result: ParlantValidationResponse,
     _pattern?: ValidationPattern
   ): Promise<void> {
     // TODO: Implement Redis cluster caching
@@ -369,7 +369,7 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
 
   private async cacheValidationPattern(
     functionSignature: string,
-    pattern: ValidationPattern
+    _pattern: ValidationPattern
   ): Promise<void> {
     // TODO: Implement pattern caching in Redis
     this.logger.debug(`L2 Pattern Cache: ${functionSignature} (placeholder)`);
@@ -379,8 +379,8 @@ export class ParlantMultiLevelCacheService implements OnModuleInit, CacheKeyGene
 
   private async setL3Cache(
     key: string,
-    result: ParlantValidationResponse,
-    metadata: ValidationMetadata
+    _result: ParlantValidationResponse,
+    _metadata: ValidationMetadata
   ): Promise<void> {
     // TODO: Implement persistent database caching
     this.logger.debug(`L3 Cache SET: ${key} (placeholder)`);

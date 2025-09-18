@@ -487,9 +487,9 @@ export class OrchestratorController {
         orchestrations,
         pagination: {
           total,
-          limit: query.limit || 50,
-          offset: query.offset || 0,
-          hasMore: total > (query.offset || 0) + (query.limit || 50)
+          limit: query.limit ?? 50,
+          offset: query.offset ?? 0,
+          hasMore: total > (query.offset ?? 0) + (query.limit ?? 50)
         }
       };
 

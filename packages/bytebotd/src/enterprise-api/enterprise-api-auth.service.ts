@@ -269,7 +269,7 @@ export class EnterpriseApiAuthService {
   };
 
   constructor(
-    _private readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {

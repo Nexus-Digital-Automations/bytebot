@@ -107,7 +107,7 @@ export class ParlantValidatedInputCaptureService {
   private aiProcessingCount = 0;
 
   constructor(
-    _private readonly inputTrackingService: InputTrackingService,
+    private readonly inputTrackingService: InputTrackingService,
     private readonly parlantIntegration: ParlantIntegrationService,
     private readonly configService: ConfigService
   ) {

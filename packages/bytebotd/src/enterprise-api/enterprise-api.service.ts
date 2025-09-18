@@ -163,7 +163,7 @@ export class EnterpriseApiService {
   };
 
   constructor(
-    _private readonly httpService: HttpService,
+    private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {

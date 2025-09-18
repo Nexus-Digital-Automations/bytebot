@@ -183,7 +183,7 @@ export class ParlantEnterpriseAuditService {
     complianceCheckTime: 0,
   };
 
-  constructor(_private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     const operationId = `audit_init${Date.now()}${Math.random().toString(36).substring(7)}`;
     
     // Initialize encryption keys (in production, use proper key management)
@@ -556,7 +556,7 @@ export class ParlantEnterpriseAuditService {
   private async generateComplianceFlags(
     request: ParlantValidationRequest,
     response: ParlantValidationResponse | null,
-    executionResult: ParlantAuditEntry['executionResult']
+    _executionResult: ParlantAuditEntry['executionResult']
   ): Promise<ComplianceFlag[]> {
     const flags: ComplianceFlag[] = [];
     
@@ -788,7 +788,7 @@ export class ParlantEnterpriseAuditService {
 
   private generateComplianceRecommendations(
     analysis: { complianceRate: number },
-    regulation: string
+    _regulation: string
   ): ComplianceRecommendation[] {
     const recommendations: ComplianceRecommendation[] = [];
     

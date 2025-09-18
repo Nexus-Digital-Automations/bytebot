@@ -338,7 +338,7 @@ export const parlantOptimizationConfig = () => ({
 })
 export class ParlantOptimizedModule {
   constructor(
-    _private readonly optimizedService: ParlantIntegrationOptimizedService,
+    private readonly optimizedService: ParlantIntegrationOptimizedService,
     private readonly performanceMonitor: ParlantPerformanceMonitorService,
     private readonly intelligentCache: ParlantIntelligentCacheService,
     private readonly circuitBreaker: ParlantCircuitBreakerService,
@@ -372,7 +372,7 @@ export class ParlantOptimizedModule {
  */
 export class ParlantHealthController {
   constructor(
-    _private readonly optimizedService: ParlantIntegrationOptimizedService,
+    private readonly optimizedService: ParlantIntegrationOptimizedService,
   ) {}
 
   /**

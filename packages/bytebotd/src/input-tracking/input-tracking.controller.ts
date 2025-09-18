@@ -28,7 +28,7 @@ import { InputTrackingService } from './input-tracking.service';
 export class InputTrackingController {
   private readonly logger = new Logger(InputTrackingController.name);
 
-  constructor(_private readonly inputTrackingService: InputTrackingService) {}
+  constructor(private readonly inputTrackingService: InputTrackingService) {}
 
   /**
    * Start input tracking

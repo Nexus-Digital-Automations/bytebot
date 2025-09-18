@@ -124,7 +124,7 @@ export class BrowserTaskService {
   /**
    * Create a new browser automation task
    */
-  createTask(taskData: TaskCreationData): BrowserTaskResultDto {
+  createTask(_taskData: taskDataType): BrowserTaskResultDto {
     const task: BrowserTaskResultDto = {
       taskId: taskData.taskId,
       status: taskData.status,
@@ -171,7 +171,7 @@ export class BrowserTaskService {
   /**
    * Get task by ID
    */
-  getTask(taskId: string): BrowserTaskResultDto | null {
+  getTask(_taskId: taskIdType): BrowserTaskResultDto | null {
     const task = this.tasks.get(taskId);
 
     if (!task) {
@@ -205,7 +205,7 @@ export class BrowserTaskService {
   /**
    * Update task status
    */
-  updateTaskStatus(taskId: string, updates: TaskUpdateData): void {
+  updateTaskStatus(_taskId: taskIdType): void {
     const task = this.tasks.get(taskId);
     if (!task) {
       throw new Error(`Task not found: ${taskId}`);
@@ -318,7 +318,7 @@ export class BrowserTaskService {
   /**
    * Get tasks by status
    */
-  getTasksByStatus(status: BrowserTaskStatus): BrowserTaskResultDto[] {
+  getTasksByStatus(_status: statusType): BrowserTaskResultDto[] {
     const tasks = Array.from(this.tasks.values()).filter(
       (task) => task.status === status,
     );
@@ -370,7 +370,7 @@ export class BrowserTaskService {
   /**
    * Cancel task
    */
-  cancelTask(taskId: string): void {
+  cancelTask(_taskId: taskIdType): void {
     const task = this.tasks.get(taskId);
     if (!task) {
       throw new Error(`Task not found: ${taskId}`);
@@ -422,7 +422,7 @@ export class BrowserTaskService {
   /**
    * Delete task (cleanup)
    */
-  deleteTask(taskId: string): void {
+  deleteTask(_taskId: taskIdType): void {
     const task = this.tasks.get(taskId);
     if (!task) {
       return;
@@ -500,7 +500,7 @@ export class BrowserTaskService {
   /**
    * Clean up old completed tasks
    */
-  cleanupOldTasks(maxAge: number = 86400000): number {
+  cleanupOldTasks(_maxAge: maxAgeType): number {
     // 24 hours default
     const now = Date.now();
     let cleanedCount = 0;
@@ -539,7 +539,7 @@ export class BrowserTaskService {
   /**
    * Add task to priority queue
    */
-  private addToQueue(taskId: string, priority: BrowserTaskPriority): void {
+  private addToQueue(_taskId: taskIdType): void {
     // Insert based on priority
     const priorityOrder = {
       [BrowserTaskPriority.CRITICAL]: 0,

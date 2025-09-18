@@ -66,7 +66,7 @@ export class BrowserUseController {
   private readonly logger = new Logger(BrowserUseController.name);
 
   constructor(
-    _private readonly browserUseService: BrowserUseService,
+    private readonly browserUseService: BrowserUseService,
     private readonly sessionService: BrowserSessionService,
     private readonly taskService: BrowserTaskService,
   ) {
@@ -126,15 +126,15 @@ export class BrowserUseController {
       });
 
       return result;
-    } catch (_err) {
+    } catch (error) {
       this.logger.error(
         `Task execution failed: ${createTaskDto.name}`,
-        _err instanceof Error ? _err.stack : String(_err),
+        error instanceof Error ? error.stack : String(error),
       );
 
       throw new InternalServerErrorException({
         message: 'Browser task execution failed',
-        error: _err instanceof Error ? _err.message : String(_err),
+        error: error instanceof Error ? error.message : String(error),
         taskName: createTaskDto.name,
       });
     }
@@ -250,11 +250,11 @@ export class BrowserUseController {
     try {
       await this.taskService.cancelTask(taskId);
       this.logger.log(`Task cancelled successfully: ${taskId}`);
-    } catch (_err) {
-      if (_err instanceof Error && _err.message.includes('not found')) {
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
         throw new NotFoundException(`Task not found: ${taskId}`);
       }
-      throw _err;
+      throw error;
     }
   }
 
@@ -336,15 +336,15 @@ export class BrowserUseController {
       });
 
       return session;
-    } catch (_err) {
+    } catch (error) {
       this.logger.error(
         `Session creation failed: ${createSessionDto.name}`,
-        _err instanceof Error ? _err.stack : String(_err),
+        error instanceof Error ? error.stack : String(error),
       );
 
       throw new InternalServerErrorException({
         message: 'Browser session creation failed',
-        error: _err instanceof Error ? _err.message : String(_err),
+        error: error instanceof Error ? error.message : String(error),
         sessionName: createSessionDto.name,
       });
     }
@@ -449,11 +449,11 @@ export class BrowserUseController {
     try {
       await this.sessionService.closeSession(sessionId);
       this.logger.log(`Session closed successfully: ${sessionId}`);
-    } catch (_err) {
-      if (_err instanceof Error && _err.message.includes('not found')) {
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
         throw new NotFoundException(`Session not found: ${sessionId}`);
       }
-      throw _err;
+      throw error;
     }
   }
 
@@ -515,11 +515,11 @@ export class BrowserUseController {
         data: tab,
         timestamp: new Date().toISOString(),
       };
-    } catch (_err) {
-      if (_err instanceof Error && _err.message.includes('not found')) {
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
         throw new NotFoundException(`Session not found: ${sessionId}`);
       }
-      throw _err;
+      throw error;
     }
   }
 
@@ -555,13 +555,13 @@ export class BrowserUseController {
     try {
       await this.sessionService.closeTab(sessionId, tabId);
       this.logger.log(`Tab closed successfully: ${tabId}`);
-    } catch (_err) {
-      if (_err instanceof Error && _err.message.includes('not found')) {
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
         throw new NotFoundException(
           `Session or tab not found: ${sessionId}/${tabId}`,
         );
       }
-      throw _err;
+      throw error;
     }
   }
 
@@ -607,15 +607,15 @@ export class BrowserUseController {
       });
 
       return job;
-    } catch (_err) {
+    } catch (error) {
       this.logger.error(
         `Async job creation failed: ${createJobDto.name}`,
-        _err instanceof Error ? _err.stack : String(_err),
+        error instanceof Error ? error.stack : String(error),
       );
 
       throw new InternalServerErrorException({
         message: 'Async job creation failed',
-        error: _err instanceof Error ? _err.message : String(_err),
+        error: error instanceof Error ? error.message : String(error),
         jobName: createJobDto.name,
       });
     }
@@ -675,11 +675,11 @@ export class BrowserUseController {
     try {
       await this.browserUseService.cancelAsyncJob(jobId);
       this.logger.log(`Async job cancelled: ${jobId}`);
-    } catch (_err) {
-      if (_err instanceof Error && _err.message.includes('not found')) {
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
         throw new NotFoundException(`Async job not found: ${jobId}`);
       }
-      throw _err;
+      throw error;
     }
   }
 
@@ -741,7 +741,7 @@ export class BrowserUseController {
       );
 
       // Update session activity
-      await this.sessionService.updateActivity(_sessionId, {
+      await this.sessionService.updateActivity(sessionId, {
         screenshot: true,
       });
 
@@ -750,19 +750,19 @@ export class BrowserUseController {
         data: screenshotData,
         timestamp: new Date().toISOString(),
       };
-    } catch (_err) {
+    } catch (error) {
       this.logger.error(
         `Screenshot failed for session: ${sessionId}`,
-        _err instanceof Error ? _err.stack : String(_err),
+        error instanceof Error ? error.stack : String(error),
       );
 
-      if (_err instanceof Error && _err.message.includes('not found')) {
+      if (error instanceof Error && error.message.includes('not found')) {
         throw new NotFoundException(`Session not found: ${sessionId}`);
       }
 
       throw new InternalServerErrorException({
         message: 'Screenshot capture failed',
-        error: _err instanceof Error ? _err.message : String(_err),
+        error: error instanceof Error ? error.message : String(error),
         sessionId,
       });
     }
@@ -833,19 +833,19 @@ export class BrowserUseController {
         data: extractedData,
         timestamp: new Date().toISOString(),
       };
-    } catch (_err) {
+    } catch (error) {
       this.logger.error(
         `Data extraction failed for session: ${sessionId}`,
-        _err instanceof Error ? _err.stack : String(_err),
+        error instanceof Error ? error.stack : String(error),
       );
 
-      if (_err instanceof Error && _err.message.includes('not found')) {
+      if (error instanceof Error && error.message.includes('not found')) {
         throw new NotFoundException(`Session not found: ${sessionId}`);
       }
 
       throw new InternalServerErrorException({
         message: 'Page data extraction failed',
-        error: _err instanceof Error ? _err.message : String(_err),
+        error: error instanceof Error ? error.message : String(error),
         sessionId,
       });
     }

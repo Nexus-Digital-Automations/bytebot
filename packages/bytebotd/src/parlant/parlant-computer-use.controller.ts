@@ -200,7 +200,7 @@ export class ParlantComputerUseController {
   private readonly logger = new Logger(ParlantComputerUseController.name);
 
   constructor(
-    _private readonly parlantComputerUseService: ParlantValidatedComputerUseService,
+    private readonly parlantComputerUseService: ParlantValidatedComputerUseService,
     private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
     this.logger.log('Parlant Computer Use Controller initialized - Conversational validation active');
