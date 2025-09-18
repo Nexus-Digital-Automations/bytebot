@@ -27,12 +27,12 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { SecurityThreatDetector } from '@bytebot/shared/server';
+import { SecurityThreatDetector } from '@bytebot/shared/dist/index-server';
 import {
   SecurityThreatContext,
   ThreatAnalysisResult,
-} from '@bytebot/shared/server';
-import { ValidationServiceType } from '@bytebot/shared/server';
+} from '@bytebot/shared/dist/index-server';
+import { ValidationServiceType } from '@bytebot/shared/dist/index-server';
 import {
   SecurityAuditService,
   SecurityEventType,

@@ -11,7 +11,7 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ParlantCritical, ParlantSecure } from '@bytebot/shared/server';
+import { ParlantCritical, ParlantSecure } from '@bytebot/shared/dist/index-server';
 import { SecurityLevel } from '@bytebot/shared';
 import * as fs from 'fs';
 

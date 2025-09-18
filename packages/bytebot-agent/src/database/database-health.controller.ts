@@ -14,7 +14,7 @@ import {
   Logger,
   Header,
 } from '@nestjs/common';
-import { ParlantSecure } from '@bytebot/shared/server';
+import { ParlantSecure } from '@bytebot/shared/dist/index-server';
 import { DatabaseService } from './database.service';
 import { DatabaseHealthService } from './health/database-health.service';
 import {

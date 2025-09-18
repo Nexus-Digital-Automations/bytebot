@@ -17,7 +17,7 @@
 
 import { Controller, Get, Logger } from '@nestjs/common';
 import { ApiTags, ApiSecurity } from '@nestjs/swagger';
-import { ParlantSecure } from '@bytebot/shared/server';
+import { ParlantSecure } from '@bytebot/shared/dist/index-server';
 import { EnhancedSecretsService } from './secrets-enhanced.service';
 import { SecretsService } from './secrets.service';
 import { ConfigService } from '@nestjs/config';
