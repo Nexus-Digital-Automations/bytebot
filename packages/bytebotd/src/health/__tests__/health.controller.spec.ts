@@ -33,6 +33,8 @@ import {
   BasicHealthResponse,
   DetailedStatusResponse,
 } from '../health.service';
+import { ByteBotdUser } from '../../auth/decorators/roles.decorator';
+import { UserRole, Permission } from '@bytebot/shared';
 
 describe('HealthController', () => {
   let controller: HealthController;
@@ -44,6 +46,20 @@ describe('HealthController', () => {
   let mockLogger: jest.Mocked<Logger>;
 
   const operationId = `health_controller_test_${Date.now()}`;
+
+  // Mock user for authenticated calls
+  const mockUser: ByteBotdUser = {
+    sub: 'test-user-id',
+    id: 'test-user-id',
+    email: 'test@example.com',
+    username: 'test-user',
+    role: UserRole._ADMIN,
+    isActive: true,
+    firstName: 'Test',
+    lastName: 'User',
+    sessionId: 'test-session-id',
+    permissions: [Permission._COMPUTER_CONTROL],
+  };
 
   // Mock health service responses
   const mockBasicHealthResponse = {
@@ -90,28 +106,43 @@ describe('HealthController', () => {
       warn: jest.fn(),
       verbose: jest.fn(),
       fatal: jest.fn(),
-      localInstance: {},
+      localInstance: {
+        log: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
+        verbose: jest.fn(),
+        fatal: jest.fn(),
+      },
       options: {},
       registerLocalInstanceRef: jest.fn(),
-    } as jest.Mocked<Logger>;
+    } as unknown as jest.Mocked<Logger>;
 
     // Create mocked Terminus dependencies
     healthCheckService = {
       check: jest.fn(),
-    } as jest.Mocked<HealthCheckService>;
+      healthCheckExecutor: jest.fn(),
+      errorLogger: jest.fn(),
+      logger: jest.fn(),
+    } as unknown as jest.Mocked<HealthCheckService>;
 
     httpHealthIndicator = {
       pingCheck: jest.fn(),
-    } as jest.Mocked<HttpHealthIndicator>;
+      responseCheck: jest.fn(),
+    } as unknown as jest.Mocked<HttpHealthIndicator>;
 
     memoryHealthIndicator = {
       checkHeap: jest.fn(),
       checkRSS: jest.fn(),
-    } as jest.Mocked<MemoryHealthIndicator>;
+      healthIndicatorService: jest.fn(),
+    } as unknown as jest.Mocked<MemoryHealthIndicator>;
 
     diskHealthIndicator = {
       checkStorage: jest.fn(),
-    } as jest.Mocked<DiskHealthIndicator>;
+      checkDiskSpace: jest.fn(),
+      healthIndicatorService: jest.fn(),
+      isOptionThresholdPercent: jest.fn(),
+    } as unknown as jest.Mocked<DiskHealthIndicator>;
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [HealthController],
@@ -180,7 +211,7 @@ describe('HealthController', () => {
         healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
-      const result = await controller.getHealth();
+      const result = await controller.getHealth(mockUser);
 
       expect(result).toEqual(mockBasicHealthResponse);
       expect(healthService.getBasicHealth).toHaveBeenCalledTimes(1);
@@ -203,7 +234,7 @@ describe('HealthController', () => {
         throw serviceError;
       });
 
-      const result = await controller.getHealth();
+      const result = await controller.getHealth(mockUser);
 
       expect(result).toHaveProperty('status', 'unhealthy');
       expect(result).toHaveProperty('error', 'Database connection failed');
@@ -228,7 +259,7 @@ describe('HealthController', () => {
         throw 'Unknown error type';
       });
 
-      const result = await controller.getHealth();
+      const result = await controller.getHealth(mockUser);
 
       expect(result).toHaveProperty('status', 'unhealthy');
       expect(result).toHaveProperty('error', 'Unknown _error');
@@ -249,7 +280,7 @@ describe('HealthController', () => {
         healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
-      const result = await controller.getHealth();
+      const result = await controller.getHealth(mockUser);
 
       // Validate response structure with proper typing
       const typedResult = result as BasicHealthResponse;
@@ -280,7 +311,7 @@ describe('HealthController', () => {
       ).mockReturnValue(mockBasicHealthResponse);
 
       const startTime = Date.now();
-      await controller.getHealth();
+      await controller.getHealth(mockUser);
       const executionTime = Date.now() - startTime;
 
       // Health check should complete within 100ms
@@ -303,7 +334,7 @@ describe('HealthController', () => {
         healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
-      const result = await controller.getDetailedStatus();
+      const result = await controller.getDetailedStatus(mockUser);
 
       expect(result).toEqual(mockDetailedStatusResponse);
       expect(healthService.getDetailedStatus).toHaveBeenCalledTimes(1);
@@ -337,7 +368,7 @@ describe('HealthController', () => {
         healthService.getDetailedStatus
       ).mockReturnValue(degradedResponse);
 
-      const result = await controller.getDetailedStatus();
+      const result = await controller.getDetailedStatus(mockUser);
 
       expect(result.status).toBe('degraded');
       expect((result as DetailedStatusResponse).services.cache).toBe(
@@ -370,7 +401,7 @@ describe('HealthController', () => {
         healthService.getDetailedStatus
       ).mockReturnValue(unhealthyResponse);
 
-      const result = await controller.getDetailedStatus();
+      const result = await controller.getDetailedStatus(mockUser);
 
       expect(result.status).toBe('unhealthy');
       expect((result as DetailedStatusResponse).services.database).toBe(
@@ -391,7 +422,7 @@ describe('HealthController', () => {
         throw serviceError;
       });
 
-      const result = await controller.getDetailedStatus();
+      const result = await controller.getDetailedStatus(mockUser);
 
       expect(result).toEqual({
         status: 'error',
@@ -415,7 +446,7 @@ describe('HealthController', () => {
         healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
-      const result = await controller.getDetailedStatus();
+      const result = await controller.getDetailedStatus(mockUser);
 
       // Type-safe validation for detailed status response
       const typedDetailedResult = result as DetailedStatusResponse;
@@ -465,7 +496,7 @@ describe('HealthController', () => {
       ).mockReturnValue(mockDetailedStatusResponse);
 
       const startTime = Date.now();
-      await controller.getDetailedStatus();
+      await controller.getDetailedStatus(mockUser);
       const executionTime = Date.now() - startTime;
 
       // Detailed status should complete within 200ms
@@ -486,7 +517,7 @@ describe('HealthController', () => {
         healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
-      await controller.getHealth();
+      await controller.getHealth(mockUser);
 
       expect(mockLogger.debug).toHaveBeenCalledWith('Health check requested');
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -504,7 +535,7 @@ describe('HealthController', () => {
         healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
-      await controller.getDetailedStatus();
+      await controller.getDetailedStatus(mockUser);
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Detailed status requested',
@@ -529,7 +560,7 @@ describe('HealthController', () => {
         throw contextualError;
       });
 
-      await controller.getDetailedStatus();
+      await controller.getDetailedStatus(mockUser);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Detailed status check failed: Connection timeout to monitoring service',
@@ -549,7 +580,7 @@ describe('HealthController', () => {
       // Simulate concurrent requests
       const promises = Array(10)
         .fill(null)
-        .map(() => controller.getHealth());
+        .map(() => controller.getHealth(mockUser));
       await Promise.all(promises);
 
       // Should log debug messages for each request (20 total: 10 request + 10 completion)
@@ -579,7 +610,7 @@ describe('HealthController', () => {
           throw _error;
         });
 
-        const result = await controller.getHealth();
+        const result = await controller.getHealth(mockUser);
 
         expect(result).toMatchObject({
           status: 'unhealthy',
@@ -603,11 +634,11 @@ describe('HealthController', () => {
         .mockReturnValueOnce(mockBasicHealthResponse);
 
       // First call should handle error gracefully
-      const errorResult = await controller.getHealth();
+      const errorResult = await controller.getHealth(mockUser);
       expect(errorResult.status).toBe('unhealthy');
 
       // Second call should succeed
-      const successResult = await controller.getHealth();
+      const successResult = await controller.getHealth(mockUser);
       expect(successResult.status).toBe('healthy');
 
       console.log(`[${testId}] Service failure recovery test completed`);
@@ -627,7 +658,7 @@ describe('HealthController', () => {
         throw timeoutError;
       });
 
-      const result = await controller.getDetailedStatus();
+      const result = await controller.getDetailedStatus(mockUser);
 
       expect(result.status).toBe('error');
       expect((result as { error: string }).error).toBe('Health check timeout');
@@ -648,13 +679,13 @@ describe('HealthController', () => {
           healthService.getBasicHealth.mockReturnValueOnce(
             mockBasicHealthResponse,
           );
-          return controller.getHealth();
+          return controller.getHealth(mockUser);
         },
         () => {
           healthService.getBasicHealth.mockImplementationOnce(() => {
             throw new Error('Service error');
           });
-          return controller.getHealth();
+          return controller.getHealth(mockUser);
         },
       ];
 
@@ -683,7 +714,7 @@ describe('HealthController', () => {
       const startTime = Date.now();
       const promises = Array(50)
         .fill(null)
-        .map(() => controller.getHealth());
+        .map(() => controller.getHealth(mockUser));
       const results = await Promise.all(promises);
       const totalTime = Date.now() - startTime;
 
@@ -712,10 +743,10 @@ describe('HealthController', () => {
       const promises = [
         ...Array(25)
           .fill(null)
-          .map(() => controller.getHealth()),
+          .map(() => controller.getHealth(mockUser)),
         ...Array(25)
           .fill(null)
-          .map(() => controller.getDetailedStatus()),
+          .map(() => controller.getDetailedStatus(mockUser)),
       ];
 
       const results = await Promise.all(promises);
@@ -740,7 +771,7 @@ describe('HealthController', () => {
       // Execute multiple concurrent requests
       const promises = Array(20)
         .fill(null)
-        .map(() => controller.getHealth());
+        .map(() => controller.getHealth(mockUser));
       const results = await Promise.all(promises);
 
       // All responses should be identical
@@ -766,7 +797,7 @@ describe('HealthController', () => {
 
       // Execute many health checks
       for (let i = 0; i < 100; i++) {
-        await controller.getHealth();
+        await controller.getHealth(mockUser);
       }
 
       const finalMemory = process.memoryUsage();
@@ -792,7 +823,7 @@ describe('HealthController', () => {
         healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
-      const result = await controller.getHealth();
+      const result = await controller.getHealth(mockUser);
 
       // Ensure response contains expected fields for backward compatibility
       expect(result).toHaveProperty('status');
@@ -823,7 +854,7 @@ describe('HealthController', () => {
           healthService.getBasicHealth
         ).mockReturnValue(variation);
 
-        const result = await controller.getHealth();
+        const result = await controller.getHealth(mockUser);
         expect(result).toEqual(variation);
       }
 
@@ -846,8 +877,8 @@ describe('HealthController', () => {
         healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
-      const basicResult = await controller.getHealth();
-      const detailedResult = await controller.getDetailedStatus();
+      const basicResult = await controller.getHealth(mockUser);
+      const detailedResult = await controller.getDetailedStatus(mockUser);
 
       expect(basicResult.status).toBeDefined();
       expect(detailedResult.services).toBeDefined();
@@ -864,8 +895,8 @@ describe('HealthController', () => {
       ).mockReturnValue(mockBasicHealthResponse);
 
       // Both endpoints should work without parameters
-      expect(await controller.getHealth()).toBeDefined();
-      expect(await controller.getDetailedStatus()).toBeDefined();
+      expect(await controller.getHealth(mockUser)).toBeDefined();
+      expect(await controller.getDetailedStatus(mockUser)).toBeDefined();
 
       console.log(`[${testId}] Parameter validation test completed`);
     });
@@ -880,7 +911,7 @@ describe('HealthController', () => {
         healthService.getDetailedStatus
       ).mockReturnValue(mockDetailedStatusResponse);
 
-      const result = await controller.getDetailedStatus();
+      const result = await controller.getDetailedStatus(mockUser);
 
       // Ensure no sensitive data is exposed
       const responseStr = JSON.stringify(result);
@@ -899,7 +930,7 @@ describe('HealthController', () => {
         healthService.getBasicHealth
       ).mockReturnValue(mockBasicHealthResponse);
 
-      const result = await controller.getHealth();
+      const result = await controller.getHealth(mockUser);
 
       expect(typeof result.status).toBe('string');
       expect(typeof result.timestamp).toBe('string');
@@ -927,7 +958,7 @@ describe('HealthController', () => {
         throw maliciousError;
       });
 
-      const result = await controller.getHealth();
+      const result = await controller.getHealth(mockUser);
 
       expect((result as { error: string }).error).toBe(
         'Database error: <script>alert("XSS")</script>',
@@ -948,7 +979,7 @@ describe('HealthController', () => {
         throw longError;
       });
 
-      const result = await controller.getHealth();
+      const result = await controller.getHealth(mockUser);
 
       expect((result as { error: string }).error).toBeDefined();
       expect((result as { error: string }).error.length).toBeGreaterThan(0);
@@ -995,7 +1026,7 @@ describe('HealthController', () => {
           details: { memory_heap: { status: 'up' }, process: { status: 'up' } },
         } as HealthCheckResult);
 
-        const result = await controller.checkLiveness();
+        const result = await controller.checkLiveness(mockUser);
 
         expect(healthCheckService.check).toHaveBeenCalledWith([
           expect.any(Function),
@@ -1022,7 +1053,7 @@ describe('HealthController', () => {
         ).mockRejectedValue(healthError);
 
         try {
-          await controller.checkLiveness();
+          await controller.checkLiveness(mockUser);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
           expect((error as Error).message).toBe('Memory limit exceeded');
@@ -1045,7 +1076,7 @@ describe('HealthController', () => {
           details: {},
         });
 
-        await controller.checkLiveness();
+        await controller.checkLiveness(mockUser);
 
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(/\[liveness_\d+\] Liveness probe requested/),
@@ -1077,7 +1108,7 @@ describe('HealthController', () => {
           details: {},
         });
 
-        await controller.checkLiveness();
+        await controller.checkLiveness(mockUser);
 
         expect(memoryHealthIndicator.checkHeap).toHaveBeenCalledWith(
           'memory_heap',
@@ -1132,7 +1163,7 @@ describe('HealthController', () => {
           details: {},
         });
 
-        const result = await controller.checkReadiness();
+        const result = await controller.checkReadiness(mockUser);
 
         expect(healthCheckService.check).toHaveBeenCalledWith([
           expect.any(Function), // database health
@@ -1162,7 +1193,7 @@ describe('HealthController', () => {
         ).mockRejectedValue(new Error('Readiness check failed'));
 
         try {
-          await controller.checkReadiness();
+          await controller.checkReadiness(mockUser);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
@@ -1208,7 +1239,7 @@ describe('HealthController', () => {
           details: {},
         });
 
-        await controller.checkReadiness();
+        await controller.checkReadiness(mockUser);
 
         // Verify threshold parameters
         expect(diskHealthIndicator.checkStorage).toHaveBeenCalledWith(
@@ -1255,7 +1286,7 @@ describe('HealthController', () => {
         ).mockRejectedValue(new Error('Some services are down'));
 
         try {
-          await controller.checkReadiness();
+          await controller.checkReadiness(mockUser);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
@@ -1301,7 +1332,7 @@ describe('HealthController', () => {
           details: {},
         });
 
-        await controller.checkReadiness();
+        await controller.checkReadiness(mockUser);
 
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(/\[readiness_\d+\] Readiness probe requested/),
@@ -1348,7 +1379,7 @@ describe('HealthController', () => {
           details: {},
         });
 
-        const result = await controller.checkStartup();
+        const result = await controller.checkStartup(mockUser);
 
         expect(healthCheckService.check).toHaveBeenCalledWith([
           expect.any(Function), // startup completion check
@@ -1376,7 +1407,7 @@ describe('HealthController', () => {
         ).mockRejectedValue(new Error('Startup not complete'));
 
         try {
-          await controller.checkStartup();
+          await controller.checkStartup(mockUser);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
@@ -1423,7 +1454,7 @@ describe('HealthController', () => {
           details: {},
         });
 
-        await controller.checkStartup();
+        await controller.checkStartup(mockUser);
 
         expect(healthService.checkModuleInitialization).toHaveBeenCalled();
         console.log(`[${testId}] Module validation test completed`);
@@ -1463,7 +1494,7 @@ describe('HealthController', () => {
         );
 
         try {
-          await controller.checkStartup();
+          await controller.checkStartup(mockUser);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
           expect((error as Error).message).toContain('still initializing');
@@ -1503,7 +1534,7 @@ describe('HealthController', () => {
           details: {},
         });
 
-        await controller.checkStartup();
+        await controller.checkStartup(mockUser);
 
         expect(mockLogger.debug).toHaveBeenCalledWith(
           expect.stringMatching(/\[startup_\d+\] Startup probe requested/),
@@ -1565,9 +1596,9 @@ describe('HealthController', () => {
 
         // Execute concurrent probe requests
         const probePromises = [
-          controller.checkLiveness(),
-          controller.checkReadiness(),
-          controller.checkStartup(),
+          controller.checkLiveness(mockUser),
+          controller.checkReadiness(mockUser),
+          controller.checkStartup(mockUser),
         ];
 
         const results = await Promise.all(probePromises);
@@ -1604,7 +1635,7 @@ describe('HealthController', () => {
         });
 
         const startTime = Date.now();
-        await controller.checkLiveness();
+        await controller.checkLiveness(mockUser);
         const executionTime = Date.now() - startTime;
 
         // Health probes should be very fast (under 500ms)
@@ -1648,7 +1679,7 @@ describe('HealthController', () => {
         // Execute multiple identical requests
         const requests = Array(5)
           .fill(null)
-          .map(() => controller.checkLiveness());
+          .map(() => controller.checkLiveness(mockUser));
         const results = await Promise.all(requests);
 
         // All results should be identical
@@ -1679,7 +1710,7 @@ describe('HealthController', () => {
         ).mockRejectedValue(timeoutError);
 
         try {
-          await controller.checkReadiness();
+          await controller.checkReadiness(mockUser);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
           expect((error as Error).name).toBe('TimeoutError');
@@ -1736,7 +1767,7 @@ describe('HealthController', () => {
           healthCheckService.check
         ).mockResolvedValue(kubernetesResponse);
 
-        const result = await controller.checkLiveness();
+        const result = await controller.checkLiveness(mockUser);
 
         // Validate Kubernetes-compatible response structure
         expect(result).toHaveProperty('status');
@@ -1770,7 +1801,7 @@ describe('HealthController', () => {
         ).mockRejectedValue(unavailableError);
 
         try {
-          await controller.checkLiveness();
+          await controller.checkLiveness(mockUser);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
           expect((error as Error).message).toContain('unavailable');
@@ -1806,13 +1837,13 @@ describe('HealthController', () => {
 
         // First call should fail
         try {
-          await controller.checkLiveness();
+          await controller.checkLiveness(mockUser);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
 
         // Second call should succeed
-        const result = await controller.checkLiveness();
+        const result = await controller.checkLiveness(mockUser);
         expect(result.status).toBe('ok');
 
         console.log(`[${testId}] Probe failure recovery test completed`);
@@ -1832,7 +1863,7 @@ describe('HealthController', () => {
         ).mockRejectedValue(memoryError);
 
         try {
-          await controller.checkLiveness();
+          await controller.checkLiveness(mockUser);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
           expect((error as Error).message).toContain('Memory');
@@ -1855,7 +1886,7 @@ describe('HealthController', () => {
         ).mockRejectedValue(diskError);
 
         try {
-          await controller.checkReadiness();
+          await controller.checkReadiness(mockUser);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
           expect((error as Error).message).toContain('disk');
@@ -1906,7 +1937,7 @@ describe('HealthController', () => {
         // Execute high load scenario
         const highLoadPromises = Array(20)
           .fill(null)
-          .map(() => controller.checkLiveness());
+          .map(() => controller.checkLiveness(mockUser));
         const results = await Promise.all(highLoadPromises);
 
         expect(results).toHaveLength(20);
