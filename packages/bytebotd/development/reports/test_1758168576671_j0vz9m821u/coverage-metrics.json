@@ -1,0 +1,423 @@
+{
+  "coverage_analysis": {
+    "generated_at": "2025-09-18T04:12:00.000Z",
+    "agent_id": "dev_session_1758168554995_1_general_5ed04226",
+    "task_id": "test_1758168576671_j0vz9m821u",
+    "project": "bytebotd",
+    "analysis_method": "file_level_inspection"
+  },
+  "overall_metrics": {
+    "total_source_files": 134,
+    "total_test_files": 38,
+    "estimated_line_coverage": 45,
+    "estimated_function_coverage": 40,
+    "estimated_branch_coverage": 35,
+    "estimated_statement_coverage": 42
+  },
+  "module_coverage": {
+    "auth": {
+      "source_files": 8,
+      "test_files": 7,
+      "estimated_coverage": 90,
+      "priority": "complete",
+      "status": "well_covered",
+      "test_files_list": [
+        "src/auth/__tests__/auth.service.spec.ts",
+        "src/auth/__tests__/controller-security.integration.spec.ts",
+        "src/auth/__tests__/jwt-auth.guard.security.spec.ts",
+        "src/auth/__tests__/jwt-auth.guard.spec.ts",
+        "src/auth/__tests__/roles.guard.security.spec.ts",
+        "src/auth/__tests__/roles.guard.spec.ts",
+        "src/auth/__tests__/security-penetration.spec.ts"
+      ]
+    },
+    "computer-use": {
+      "source_files": 17,
+      "test_files": 9,
+      "estimated_coverage": 85,
+      "priority": "good",
+      "status": "well_covered",
+      "test_files_list": [
+        "src/computer-use/__tests__/computer-use.service.apps.spec.ts",
+        "src/computer-use/__tests__/computer-use.service.desktop-automation.spec.ts",
+        "src/computer-use/__tests__/computer-use.service.files.spec.ts",
+        "src/computer-use/__tests__/computer-use.service.integration.spec.ts",
+        "src/computer-use/__tests__/computer-use.service.keyboard.spec.ts",
+        "src/computer-use/__tests__/computer-use.service.main.spec.ts",
+        "src/computer-use/__tests__/cua-integration-comprehensive.spec.ts",
+        "src/computer-use/computer-use.service.spec.ts",
+        "src/computer-use/dto/__tests__/computer-action-validation.pipe.integration.spec.ts"
+      ]
+    },
+    "input-tracking": {
+      "source_files": 10,
+      "test_files": 6,
+      "estimated_coverage": 80,
+      "priority": "good",
+      "status": "well_covered",
+      "test_files_list": [
+        "src/input-tracking/__tests__/input-tracking.controller.spec.ts",
+        "src/input-tracking/__tests__/input-tracking.gateway.spec.ts",
+        "src/input-tracking/__tests__/input-tracking.helpers.spec.ts",
+        "src/input-tracking/__tests__/input-tracking.module.spec.ts",
+        "src/input-tracking/__tests__/input-tracking.realtime-comprehensive.spec.ts",
+        "src/input-tracking/__tests__/input-tracking.service.spec.ts"
+      ]
+    },
+    "health": {
+      "source_files": 5,
+      "test_files": 4,
+      "estimated_coverage": 75,
+      "priority": "good",
+      "status": "well_covered",
+      "test_files_list": [
+        "src/health/__tests__/health.controller.spec.ts",
+        "src/health/__tests__/health.module.spec.ts",
+        "src/health/__tests__/health.service.spec.ts",
+        "src/health/health.service.spec.ts"
+      ]
+    },
+    "mcp": {
+      "source_files": 7,
+      "test_files": 4,
+      "estimated_coverage": 60,
+      "priority": "needs_improvement",
+      "status": "partially_covered",
+      "test_files_list": [
+        "src/mcp/__tests__/bytebot-mcp.module.spec.ts",
+        "src/mcp/__tests__/compressor.spec.ts",
+        "src/mcp/__tests__/computer-use.tools.spec.ts",
+        "src/mcp/__tests__/index.spec.ts"
+      ],
+      "missing_coverage": [
+        "src/mcp/mcp-gateway.service.ts",
+        "src/mcp/mcp-protocol.service.ts",
+        "src/mcp/mcp-security.service.ts"
+      ]
+    },
+    "cache": {
+      "source_files": 4,
+      "test_files": 2,
+      "estimated_coverage": 50,
+      "priority": "needs_improvement",
+      "status": "partially_covered",
+      "test_files_list": [
+        "src/cache/__tests__/cache-key.generator.spec.ts",
+        "src/cache/__tests__/cache.service.spec.ts"
+      ],
+      "missing_coverage": [
+        "src/cache/cache.module.ts",
+        "src/cache/cache-redis.service.ts"
+      ]
+    },
+    "nut": {
+      "source_files": 4,
+      "test_files": 2,
+      "estimated_coverage": 45,
+      "priority": "needs_improvement",
+      "status": "partially_covered",
+      "test_files_list": [
+        "src/nut/nut.service.minimal.spec.ts",
+        "src/nut/nut.service.spec.ts"
+      ],
+      "missing_coverage": [
+        "src/nut/nut.module.ts",
+        "src/nut/nut-config.service.ts"
+      ]
+    },
+    "metrics": {
+      "source_files": 3,
+      "test_files": 1,
+      "estimated_coverage": 40,
+      "priority": "needs_improvement",
+      "status": "partially_covered",
+      "test_files_list": [
+        "src/metrics/metrics.service.spec.ts"
+      ],
+      "missing_coverage": [
+        "src/metrics/metrics.controller.ts",
+        "src/metrics/metrics.module.ts"
+      ]
+    },
+    "common": {
+      "source_files": 15,
+      "test_files": 1,
+      "estimated_coverage": 20,
+      "priority": "critical_gap",
+      "status": "poorly_covered",
+      "test_files_list": [
+        "src/common/__tests__/validation.pipe.spec.ts"
+      ],
+      "missing_coverage": [
+        "src/common/filters/http-exception.filter.ts",
+        "src/common/guards/throttler.guard.ts",
+        "src/common/interceptors/logging.interceptor.ts",
+        "src/common/interceptors/timeout.interceptor.ts",
+        "src/common/middleware/cors.middleware.ts",
+        "src/common/pipes/parse-int.pipe.ts",
+        "src/common/security/rate-limit.service.ts",
+        "src/common/versioning/version.service.ts"
+      ]
+    },
+    "parlant": {
+      "source_files": 16,
+      "test_files": 1,
+      "estimated_coverage": 5,
+      "priority": "critical_gap",
+      "status": "poorly_covered",
+      "test_files_list": [
+        "src/parlant/optimization/parlant-performance-validation.spec.ts"
+      ],
+      "missing_coverage": [
+        "src/parlant/services/parlant.service.ts",
+        "src/parlant/services/parlant-enhanced-auth.service.ts",
+        "src/parlant/services/parlant-integration.service.ts",
+        "src/parlant/caching/parlant-cache.service.ts",
+        "src/parlant/resilience/parlant-resilience.service.ts",
+        "src/parlant/audit/parlant-audit.service.ts",
+        "src/parlant/performance/parlant-performance.service.ts"
+      ]
+    },
+    "enterprise-api": {
+      "source_files": 8,
+      "test_files": 0,
+      "estimated_coverage": 0,
+      "priority": "critical_gap",
+      "status": "no_coverage",
+      "missing_coverage": [
+        "src/enterprise-api/enterprise-api.module.ts",
+        "src/enterprise-api/enterprise-api.service.ts",
+        "src/enterprise-api/enterprise-api-routing.service.ts",
+        "src/enterprise-api/enterprise-api-health.service.ts",
+        "src/enterprise-api/enterprise-api.interceptor.ts",
+        "src/enterprise-api/enterprise-api-gateway.controller.ts",
+        "src/enterprise-api/enterprise-api-rate-limit.service.ts",
+        "src/enterprise-api/enterprise-api-auth.service.ts"
+      ]
+    },
+    "ai-services": {
+      "source_files": 11,
+      "test_files": 0,
+      "estimated_coverage": 0,
+      "priority": "critical_gap",
+      "status": "no_coverage",
+      "missing_coverage": [
+        "src/ai-services/ai-services.module.ts",
+        "src/ai-services/ai-services.service.ts",
+        "src/ai-services/ai-chat.service.ts",
+        "src/ai-services/ai-completion.service.ts",
+        "src/ai-services/ai-embedding.service.ts",
+        "src/ai-services/ai-image.service.ts",
+        "src/ai-services/ai-audio.service.ts",
+        "src/ai-services/ai-vision.service.ts",
+        "src/ai-services/ai-reasoning.service.ts",
+        "src/ai-services/ai-planning.service.ts",
+        "src/ai-services/ai-memory.service.ts"
+      ]
+    },
+    "browser-use": {
+      "source_files": 17,
+      "test_files": 0,
+      "estimated_coverage": 0,
+      "priority": "critical_gap",
+      "status": "no_coverage",
+      "missing_coverage": [
+        "src/browser-use/browser-use.module.ts",
+        "src/browser-use/browser-use.service.ts",
+        "src/browser-use/browser-automation.service.ts",
+        "src/browser-use/browser-navigation.service.ts",
+        "src/browser-use/browser-interaction.service.ts",
+        "src/browser-use/browser-data-extraction.service.ts",
+        "src/browser-use/browser-performance.service.ts",
+        "src/browser-use/browser-security.service.ts"
+      ]
+    },
+    "security": {
+      "source_files": 10,
+      "test_files": 0,
+      "estimated_coverage": 0,
+      "priority": "critical_gap",
+      "status": "no_coverage",
+      "missing_coverage": [
+        "src/security/security.module.ts",
+        "src/security/security.service.ts",
+        "src/security/security-config.service.ts",
+        "src/security/security-audit.service.ts",
+        "src/security/security-validation.service.ts",
+        "src/security/security-monitoring.service.ts",
+        "src/security/security-events.service.ts",
+        "src/security/security-compliance.service.ts",
+        "src/security/security-encryption.service.ts",
+        "src/security/security-access-control.service.ts"
+      ]
+    },
+    "testing": {
+      "source_files": 4,
+      "test_files": 0,
+      "estimated_coverage": 0,
+      "priority": "gap",
+      "status": "no_coverage",
+      "missing_coverage": [
+        "src/testing/performance-framework.ts",
+        "src/testing/load-testing-scenarios.ts",
+        "src/testing/test-data-factory.ts",
+        "src/testing/mock-factory.ts"
+      ]
+    },
+    "utils": {
+      "source_files": 3,
+      "test_files": 0,
+      "estimated_coverage": 0,
+      "priority": "gap",
+      "status": "no_coverage",
+      "missing_coverage": [
+        "src/utils/file.utils.ts",
+        "src/utils/crypto.utils.ts",
+        "src/utils/validation.utils.ts"
+      ]
+    },
+    "types": {
+      "source_files": 6,
+      "test_files": 0,
+      "estimated_coverage": 0,
+      "priority": "gap",
+      "status": "no_coverage",
+      "missing_coverage": [
+        "src/types/api.types.ts",
+        "src/types/auth.types.ts",
+        "src/types/computer-use.types.ts",
+        "src/types/health.types.ts",
+        "src/types/common.types.ts",
+        "src/types/enterprise.types.ts"
+      ]
+    },
+    "middleware": {
+      "source_files": 1,
+      "test_files": 0,
+      "estimated_coverage": 0,
+      "priority": "gap",
+      "status": "no_coverage",
+      "missing_coverage": [
+        "src/middleware/request-logging.middleware.ts"
+      ]
+    },
+    "errors": {
+      "source_files": 2,
+      "test_files": 0,
+      "estimated_coverage": 0,
+      "priority": "gap",
+      "status": "no_coverage",
+      "missing_coverage": [
+        "src/errors/custom-exceptions.ts",
+        "src/errors/error-handling.ts"
+      ]
+    }
+  },
+  "coverage_gaps": {
+    "critical_modules_without_tests": [
+      "enterprise-api",
+      "ai-services",
+      "browser-use", 
+      "security"
+    ],
+    "partially_tested_modules_needing_improvement": [
+      "mcp",
+      "cache",
+      "nut",
+      "metrics",
+      "common",
+      "parlant"
+    ],
+    "utility_modules_without_tests": [
+      "testing",
+      "utils",
+      "types",
+      "middleware",
+      "errors"
+    ],
+    "estimated_untested_files": 96,
+    "estimated_untested_functions": 800,
+    "estimated_untested_lines": 4500
+  },
+  "recommendations": {
+    "immediate_priority": [
+      {
+        "module": "security",
+        "reason": "Critical security functionality must be thoroughly tested",
+        "estimated_effort": "2-3 days",
+        "test_types": ["unit", "integration", "security", "penetration"]
+      },
+      {
+        "module": "enterprise-api",
+        "reason": "Enterprise features need comprehensive testing for reliability",
+        "estimated_effort": "3-4 days",
+        "test_types": ["unit", "integration", "e2e", "performance"]
+      }
+    ],
+    "high_priority": [
+      {
+        "module": "ai-services", 
+        "reason": "Core AI functionality requires testing for reliability",
+        "estimated_effort": "4-5 days",
+        "test_types": ["unit", "integration", "mock", "performance"]
+      },
+      {
+        "module": "browser-use",
+        "reason": "Browser automation needs testing for cross-platform reliability",
+        "estimated_effort": "3-4 days", 
+        "test_types": ["unit", "integration", "e2e", "browser"]
+      },
+      {
+        "module": "parlant",
+        "reason": "Core Parlant integration needs comprehensive testing",
+        "estimated_effort": "5-6 days",
+        "test_types": ["unit", "integration", "performance", "resilience"]
+      }
+    ],
+    "medium_priority": [
+      {
+        "module": "common",
+        "reason": "Common utilities used across all modules need testing",
+        "estimated_effort": "2-3 days",
+        "test_types": ["unit", "integration"]
+      },
+      {
+        "module": "mcp",
+        "reason": "MCP protocol implementation needs complete coverage",
+        "estimated_effort": "2 days",
+        "test_types": ["unit", "integration", "protocol"]
+      }
+    ],
+    "coverage_targets": {
+      "overall_line_coverage": 85,
+      "overall_function_coverage": 90,
+      "overall_branch_coverage": 80,
+      "overall_statement_coverage": 85,
+      "timeframe": "6 weeks"
+    },
+    "testing_infrastructure": [
+      "Implement coverage thresholds in Jest configuration",
+      "Set up continuous coverage monitoring",
+      "Create comprehensive mock service library",
+      "Establish test data management strategy",
+      "Implement performance testing framework",
+      "Set up automated coverage reporting"
+    ]
+  },
+  "test_quality_issues": {
+    "existing_test_problems": [
+      "Some tests timing out during execution",
+      "Inconsistent mocking strategies across modules",
+      "Missing edge case coverage in existing tests",
+      "Limited error scenario testing",
+      "Insufficient performance testing"
+    ],
+    "infrastructure_needs": [
+      "Better test database isolation",
+      "Improved mock service management",
+      "Enhanced test data factories",
+      "Standardized test utilities",
+      "Performance benchmarking tools"
+    ]
+  }
+}
