@@ -109,7 +109,7 @@ describe('InputTrackingModule', () => {
       const testId = `${operationId}_module_metadata`;
       console.log(`[${testId}] Testing module metadata structure`);
 
-      const _moduleMetadata =
+      const _moduleMetadata: unknown =
         Reflect.getMetadata('imports', InputTrackingModule) ??
         Reflect.getMetadata('module', InputTrackingModule);
 
@@ -277,7 +277,7 @@ describe('InputTrackingModule', () => {
         ],
       }).compile();
 
-      const testProvider = consumerModule.get('TestProvider');
+      const testProvider = consumerModule.get('TestProvider') as { hasService: boolean };
       expect(testProvider.hasService).toBe(true);
 
       await consumerModule.close();
@@ -302,7 +302,7 @@ describe('InputTrackingModule', () => {
         ],
       }).compile();
 
-      const testProvider = consumerModule.get('TestGatewayProvider');
+      const testProvider = consumerModule.get('TestGatewayProvider') as { hasGateway: boolean };
       expect(testProvider.hasGateway).toBe(true);
 
       await consumerModule.close();

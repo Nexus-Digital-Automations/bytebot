@@ -27,7 +27,7 @@
  */
 
 import { Module, Global, Provider } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 // Performance optimization services
 import { ParlantMultiLevelCacheService } from './caching/parlant-multi-level-cache.service';
@@ -40,6 +40,7 @@ import { ParlantIntelligentCacheService } from './caching/parlant-intelligent-ca
 import { ParlantCircuitBreakerService } from './resilience/parlant-circuit-breaker.service';
 import { ParlantRetryFailoverService } from './resilience/parlant-retry-failover.service';
 import { ParlantIntegrationOptimizedService } from './parlant-integration-optimized.service';
+import { ParlantEnterpriseAuditService } from './audit/parlant-enterprise-audit.service';
 
 // ===== PERFORMANCE OPTIMIZATION CONFIGURATION =====
 
@@ -377,13 +378,13 @@ export class ParlantPerformanceOptimizationModule {
     // Monitor performance metrics updates
     this.orchestrator.onPerformanceEvent('performanceMetricsUpdated', (metrics) => {
       const metricsData = metrics as Record<string, unknown>;
-      const compliance = metricsData.targetCompliance;
-      if (!compliance.p95Target || !compliance.cacheHitTarget || !compliance.throughputTarget) {
+      const compliance = metricsData.targetCompliance as Record<string, unknown>;
+      if (!compliance?.p95Target || !compliance?.cacheHitTarget || !compliance?.throughputTarget) {
         logger.warn('Performance targets not met', {
-          p95ResponseTime: compliance.p95Target ? '✅' : '❌',
-          cacheHitRate: compliance.cacheHitTarget ? '✅' : '❌',  
-          throughput: compliance.throughputTarget ? '✅' : '❌',
-          availability: compliance.availabilityTarget ? '✅' : '❌'
+          p95ResponseTime: compliance?.p95Target ? '✅' : '❌',
+          cacheHitRate: compliance?.cacheHitTarget ? '✅' : '❌',  
+          throughput: compliance?.throughputTarget ? '✅' : '❌',
+          availability: compliance?.availabilityTarget ? '✅' : '❌'
         });
       }
     });

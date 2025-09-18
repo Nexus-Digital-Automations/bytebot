@@ -45,7 +45,7 @@ interface MockExecutionContext extends ExecutionContext {
 }
 
 // Type guard for execution context
-function isMockExecutionContext(context: unknown): context is MockExecutionContext {
+function _isMockExecutionContext(context: unknown): context is MockExecutionContext {
   return (
     typeof context === 'object' &&
     context !== null &&
@@ -55,7 +55,7 @@ function isMockExecutionContext(context: unknown): context is MockExecutionConte
 }
 
 // Helper function to create properly typed ByteBotdUser
-function createTypedUser(partial: Partial<ByteBotdUser>): ByteBotdUser {
+function _createTypedUser(partial: Partial<ByteBotdUser>): ByteBotdUser {
   return {
     id: partial.id || '',
     email: partial.email || 'test@bytebot.ai',
@@ -66,7 +66,7 @@ function createTypedUser(partial: Partial<ByteBotdUser>): ByteBotdUser {
 }
 
 // Helper function to create malicious user for security testing
-function createMaliciousUser(overrides: Record<string, unknown>): MaliciousTestUser {
+function _createMaliciousUser(overrides: Record<string, unknown>): MaliciousTestUser {
   return {
     id: 'malicious_user',
     email: 'malicious@test.com',

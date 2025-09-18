@@ -1389,7 +1389,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T23:16:21.648Z",
       "title": "Fix all remaining ESLint violations in service files",
       "description": "Focus on proper typing, safe property access, correct nullish coalescing usage in enterprise API services, parlant services, security services. Target zero violations in all service files (non-test).",
@@ -1406,7 +1406,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T01:15:35.116Z",
+      "updated_at": "2025-09-18T01:15:35.116Z"
     },
     {
       "status": "completed",

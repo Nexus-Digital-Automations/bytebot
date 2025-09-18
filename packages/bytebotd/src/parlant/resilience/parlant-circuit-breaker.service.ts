@@ -46,6 +46,17 @@ export interface CircuitBreakerConfig {
 }
 
 /**
+ * Connection interface
+ */
+export interface Connection {
+  readonly id: string;
+  healthy: boolean;
+  lastUsed: Date;
+  endpoint?: string;
+  createdAt: Date;
+}
+
+/**
  * Connection pool configuration
  */
 export interface ConnectionPoolConfig {
@@ -268,7 +279,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
    * @param operationId - Operation identifier
    * @returns Connection or throws error
    */
-  async acquireConnection(operationId: string): Promise<unknown> {
+  async acquireConnection(operationId: string): Promise<Connection> {
     const startTime = performance.now();
     
     if (!this.canExecute()) {
@@ -341,7 +352,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
    * @param connection - Connection to release
    * @param operationId - Operation identifier
    */
-  async releaseConnection(connection: unknown, operationId: string): Promise<void> {
+  async releaseConnection(connection: Connection, operationId: string): Promise<void> {
     if (!connection?.id) {
       this.logger.warn(`[${operationId}] Invalid connection for release`);
       return;
@@ -481,7 +492,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
 
   private async executeWithTimeout<T>(
     operation: () => Promise<T>,
-    operationId: string
+    _operationId: string
   ): Promise<T> {
     const timeoutMs = 30000; // 30 second timeout
     
@@ -606,7 +617,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
     }
   }
 
-  private async createConnection(): Promise<unknown> {
+  private async createConnection(): Promise<Connection> {
     const connectionId = `conn_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     
     // Select healthy endpoint
@@ -625,7 +636,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
     return connection;
   }
 
-  private findAvailableConnection(): unknown | null {
+  private findAvailableConnection(): Connection | null {
     for (const [id, connection] of this.connectionPool) {
       if (!this.activeConnections.has(id) && connection.healthy) {
         connection.lastUsed = new Date();

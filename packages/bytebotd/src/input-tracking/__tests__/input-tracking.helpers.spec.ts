@@ -710,7 +710,7 @@ describe('InputTrackingHelpers', () => {
           // Should be valid UTF-8 characters
           expect(keyInfo.string.length).toBeGreaterThan(0);
           // Should not contain null bytes or other control characters
-           
+          // eslint-disable-next-line no-control-regex
           expect(keyInfo.string).not.toMatch(
             /[\x00-\x08\x0E-\x1F\x7F]/,
           );
@@ -718,7 +718,7 @@ describe('InputTrackingHelpers', () => {
 
         if (keyInfo.shiftString) {
           expect(keyInfo.shiftString.length).toBeGreaterThan(0);
-           
+          // eslint-disable-next-line no-control-regex
           expect(keyInfo.shiftString).not.toMatch(
             /[\x00-\x08\x0E-\x1F\x7F]/,
           );

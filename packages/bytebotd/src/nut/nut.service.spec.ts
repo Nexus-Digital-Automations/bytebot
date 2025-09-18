@@ -322,7 +322,7 @@ describe('NutService', () => {
     describe('sendKeys method', () => {
       it('should successfully send valid keys', async () => {
         const operationId = 'test_op_123';
-        jest.spyOn(service, 'generateOperationId').mockReturnValue(operationId);
+        (jest.spyOn(service, 'generateOperationId') as jest.SpyInstance).mockReturnValue(operationId);
 
         const result: ServiceResponse = await service.sendKeys(
           ['A', 'B', 'C'],
@@ -1055,7 +1055,7 @@ describe('NutService', () => {
   describe('Logging and Operation Tracking', () => {
     it('should log operations with unique operation IDs', async () => {
       const mockOpId = 'test_operation_12345_abc123';
-      jest.spyOn(service, 'generateOperationId').mockReturnValue(mockOpId);
+      (jest.spyOn(service, 'generateOperationId') as jest.SpyInstance).mockReturnValue(mockOpId);
 
       await service.sendKeys(['Enter']);
 
@@ -1067,7 +1067,7 @@ describe('NutService', () => {
 
     it('should log successful operations', async () => {
       const mockOpId = 'success_op_67890_def456';
-      jest.spyOn(service, 'generateOperationId').mockReturnValue(mockOpId);
+      (jest.spyOn(service, 'generateOperationId') as jest.SpyInstance).mockReturnValue(mockOpId);
 
       await service.sendKeys(['Tab']);
 

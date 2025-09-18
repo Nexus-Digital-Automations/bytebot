@@ -38,7 +38,7 @@ import { ConfigService } from '@nestjs/config';
 /**
  * Extended Request interface with optional route and user properties
  */
-interface ExtendedRequest extends Request<any, any, any, any, Record<string, any>> {
+interface ExtendedRequest extends Request<Record<string, unknown>, unknown, unknown, Record<string, unknown>, Record<string, unknown>> {
   route: {
     path?: string;
   };
