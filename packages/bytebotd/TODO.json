@@ -1355,7 +1355,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-17T23:14:04.120Z",
       "title": "EMERGENCY: Complete zero ESLint violations - 433 remaining",
       "description": "Continue emergency ESLint zero tolerance compliance work. Fix remaining 433 violations in bytebotd package: explicit any types, constant nullishness, unused variables, unsafe assignments. Deploy maximum concurrent subagents for systematic fixes. Must achieve exactly 0 violations per professional developer protocol.",
@@ -1372,7 +1372,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T02:43:34.207Z",
+      "updated_at": "2025-09-18T02:43:34.207Z"
     },
     {
       "status": "completed",
@@ -1677,12 +1679,24 @@
       "updated_at": "2025-09-18T01:40:37.126Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-18T01:48:53.972Z",
       "title": "EMERGENCY: Fix TypeScript compilation errors in health test files",
       "description": "Critical TypeScript compilation errors in health test files preventing successful builds and tests. Errors include: MockCallArgs type constraint violations, TestableHealthService interface incorrectly extending HealthService with private property conflicts, setTimeout mocking type compatibility issues. Must fix while maintaining zero ESLint violations.",
       "category": "error",
-      "id": "error_1758160133972_o6shx50fnje"
+      "id": "error_1758160133972_o6shx50fnje",
+      "assigned_agent": "dev_session_1758160361954_1_general_62452d84",
+      "started_at": "2025-09-18T02:45:15.802Z",
+      "claimed_by": "dev_session_1758160361954_1_general_62452d84",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758160361954_1_general_62452d84",
+          "role": "primary",
+          "assignedAt": "2025-09-18T02:45:15.802Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "pending",
@@ -1693,7 +1707,7 @@
       "id": "test_1758160411147_n2b5jxt8tzk"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T01:53:31.899Z",
       "title": "Fix TypeScript compilation errors in parlant-performance-validation.spec.ts",
       "description": "Fix ParlantConversationContext index signature issues, ValidationMetadata missing properties, OptimizedValidationRequest type mismatches, orchestratorMetrics type unknown issues. Add proper type definitions and interfaces while maintaining zero ESLint violations.",
@@ -1710,7 +1724,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T02:47:02.947Z",
+      "updated_at": "2025-09-18T02:47:02.947Z"
     },
     {
       "status": "completed",
@@ -1735,7 +1751,7 @@
       "updated_at": "2025-09-18T02:16:17.483Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T01:53:31.930Z",
       "title": "Fix TypeScript compilation errors in roles guard test files",
       "description": "Fix MockExecutionContext interface issues, UserRole property access (VIEWER vs _VIEWER), Permission type mismatches, ExecutionContext missing properties in roles.guard.security.spec.ts and related test files",
@@ -1752,7 +1768,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T02:46:50.694Z",
+      "updated_at": "2025-09-18T02:46:50.694Z"
     },
     {
       "status": "completed",
@@ -1887,6 +1905,14 @@
       "description": "Successfully resolved all TypeScript compilation errors in bytebot-ui package. Fixed: 1) ConversationState.ACTIVE to ConversationState._ACTIVE, 2) MessageType.TEXT to MessageType._TEXT, 3) ParticipantType enum usage with proper imports, 4) Conversation type assertions in useParlantWebSocket.ts, 5) Removed unused type declarations in shared/decorators. Build now compiles successfully with only ESLint warnings remaining (non-blocking).",
       "category": "feature",
       "id": "feature_1758163249716_a5l7ehuwtx"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-18T02:46:55.615Z",
+      "title": "CRITICAL: Fix TypeScript compilation errors in validation.pipe.spec.ts",
+      "description": "Fix critical TypeScript compilation errors in bytebotd/src/common/__tests__/validation.pipe.spec.ts: 1) Argument of type object not assignable to Record<string, unknown>, 2) Multiple result is of type unknown errors (lines 404, 405, 430, 431, 498, 499, 525, 550). These errors block TypeScript compilation and CI/CD pipeline.",
+      "category": "error",
+      "id": "error_1758163615615_2gggoh72fex"
     }
   ],
   "agents": {

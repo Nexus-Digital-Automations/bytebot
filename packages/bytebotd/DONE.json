@@ -3534,10 +3534,82 @@
       "updated_at": "2025-09-18T02:41:09.389Z",
       "archived_at": "2025-09-18T02:41:09.395Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-17T23:14:04.120Z",
+      "title": "EMERGENCY: Complete zero ESLint violations - 433 remaining",
+      "description": "Continue emergency ESLint zero tolerance compliance work. Fix remaining 433 violations in bytebotd package: explicit any types, constant nullishness, unused variables, unsafe assignments. Deploy maximum concurrent subagents for systematic fixes. Must achieve exactly 0 violations per professional developer protocol.",
+      "category": "error",
+      "id": "error_1758150844120_u3xxywn34bq",
+      "assigned_agent": "dev_session_1758160361954_1_general_62452d84",
+      "started_at": "2025-09-18T02:26:50.300Z",
+      "claimed_by": "dev_session_1758160361954_1_general_62452d84",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758160361954_1_general_62452d84",
+          "role": "primary",
+          "assignedAt": "2025-09-18T02:26:50.300Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T02:43:34.207Z",
+      "updated_at": "2025-09-18T02:43:34.207Z",
+      "archived_at": "2025-09-18T02:43:34.214Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T01:53:31.930Z",
+      "title": "Fix TypeScript compilation errors in roles guard test files",
+      "description": "Fix MockExecutionContext interface issues, UserRole property access (VIEWER vs _VIEWER), Permission type mismatches, ExecutionContext missing properties in roles.guard.security.spec.ts and related test files",
+      "category": "error",
+      "id": "error_1758160411930_9nxdx0oojts",
+      "assigned_agent": "dev_session_1758160364298_1_general_fbf0c440",
+      "started_at": "2025-09-18T01:55:46.906Z",
+      "claimed_by": "dev_session_1758160364298_1_general_fbf0c440",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758160364298_1_general_fbf0c440",
+          "role": "primary",
+          "assignedAt": "2025-09-18T01:55:46.906Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T02:46:50.694Z",
+      "updated_at": "2025-09-18T02:46:50.694Z",
+      "archived_at": "2025-09-18T02:46:50.701Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T01:53:31.899Z",
+      "title": "Fix TypeScript compilation errors in parlant-performance-validation.spec.ts",
+      "description": "Fix ParlantConversationContext index signature issues, ValidationMetadata missing properties, OptimizedValidationRequest type mismatches, orchestratorMetrics type unknown issues. Add proper type definitions and interfaces while maintaining zero ESLint violations.",
+      "category": "error",
+      "id": "error_1758160411899_hu6f8kjfa4",
+      "assigned_agent": "dev_session_1758160364384_1_general_a130878f",
+      "started_at": "2025-09-18T01:56:27.054Z",
+      "claimed_by": "dev_session_1758160364384_1_general_a130878f",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758160364384_1_general_a130878f",
+          "role": "primary",
+          "assignedAt": "2025-09-18T01:56:27.054Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T02:47:02.947Z",
+      "updated_at": "2025-09-18T02:47:02.947Z",
+      "archived_at": "2025-09-18T02:47:02.953Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 80,
+  "total_completed": 83,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-18T02:41:09.395Z"
+  "last_archived": "2025-09-18T02:47:02.953Z"
 }
