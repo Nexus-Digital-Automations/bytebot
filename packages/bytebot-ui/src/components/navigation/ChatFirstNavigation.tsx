@@ -111,6 +111,11 @@ const SCORING_CONSTANTS = {
   LOW_CONFIDENCE_THRESHOLD: 0.2,
   VERY_LOW_CONFIDENCE_THRESHOLD: 0.1,
   
+  // Base confidence scores
+  BASE_INTENT_CONFIDENCE: 0.3,
+  ENTITY_RECOGNITION_CONFIDENCE: 0.2,
+  ACTION_MATCH_CONFIDENCE: 0.3,
+  
   // Animation and UI constants
   OPACITY_LIGHT: 0.05,
   OPACITY_DISABLED: 0.1,
@@ -478,11 +483,11 @@ class NavigationNLU {
     
     return {
       intent,
-      ...(entity && { entity }),
+      ...(entity !== undefined && { entity }),
       parameters,
       confidence,
       parsedCommand: normalizedCommand,
-      ...(suggestedAction && { suggestedAction }),
+      ...(suggestedAction !== undefined && { suggestedAction }),
       alternatives
     };
   }
@@ -652,7 +657,7 @@ class NavigationNLU {
       let score = 0;
       
       // Score based on intent match
-      if (intent === NavigationIntent.NAVIGATE && action.path) {
+      if (intent === NavigationIntent.NAVIGATE && action.path !== undefined) {
         score += SCORING_CONSTANTS.NAVIGATE_INTENT_SCORE;
       } else if (intent === NavigationIntent.CREATE && action.id.includes('create')) {
         score += SCORING_CONSTANTS.CREATE_INTENT_SCORE;
@@ -661,10 +666,10 @@ class NavigationNLU {
       }
       
       // Score based on entity match
-      if (entity) {
+      if (entity !== undefined) {
         const entityInPath = action.path?.includes(entity.toLowerCase());
         const entityInId = action.id.includes(entity.toLowerCase());
-        if (entityInPath || entityInId) {
+        if (entityInPath === true || entityInId) {
           score += SCORING_CONSTANTS.ENTITY_MATCH_BONUS;
         }
       }
@@ -703,17 +708,17 @@ class NavigationNLU {
     
     // Base confidence from intent recognition
     if (intent !== NavigationIntent.UNKNOWN) {
-      confidence += 0.3;
+      confidence += SCORING_CONSTANTS.BASE_INTENT_CONFIDENCE;
     }
     
     // Confidence from entity recognition
-    if (entity) {
-      confidence += 0.2;
+    if (entity !== undefined) {
+      confidence += SCORING_CONSTANTS.ENTITY_RECOGNITION_CONFIDENCE;
     }
     
     // Confidence from action matching
-    if (action) {
-      confidence += 0.3;
+    if (action !== undefined) {
+      confidence += SCORING_CONSTANTS.ACTION_MATCH_CONFIDENCE;
     }
     
     // Confidence from command completeness (longer, more specific commands)
@@ -788,7 +793,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   enableVoice = true,
   enableKeyboard = true,
   showSuggestions = true,
-  maxSuggestions = 5,
+  maxSuggestions = SCORING_CONSTANTS.SUGGESTION_LIMIT,
   customActions = [],
   context = {},
   onCommandExecuted,
@@ -868,12 +873,16 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       }, 'ChatFirstNavigation');
       
       // Execute the suggested action
-      if (result.suggestedAction && result.confidence > SCORING_CONSTANTS.OPACITY_SEMI) {
-        if (result.suggestedAction.handler) {
+      if (result.suggestedAction !== undefined && result.confidence > SCORING_CONSTANTS.OPACITY_SEMI) {
+        if (result.suggestedAction.handler !== undefined) {
           await result.suggestedAction.handler();
-        } else if (result.suggestedAction.path) {
-          await router.push(result.suggestedAction.path);
-          onNavigate?.(result.suggestedAction.path, result.parameters);
+        } else if (result.suggestedAction.path !== undefined) {
+          router.push(result.suggestedAction.path).catch(() => {
+            // Ignore navigation errors
+          });
+          if (onNavigate !== undefined) {
+            onNavigate(result.suggestedAction.path, result.parameters);
+          }
         }
         
         // Update recent commands
@@ -930,12 +939,14 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         e.preventDefault();
         if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
           setCommand(suggestions[selectedSuggestionIndex].text);
-          processCommand(suggestions[selectedSuggestionIndex].text).catch((error) => {
-            logWarn('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
+          processCommand(suggestions[selectedSuggestionIndex].text).catch((error: unknown) => {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logWarn('Command processing failed', { error: errorMessage }, 'ChatFirstNavigation');
           });
         } else {
-          processCommand(command).catch((error) => {
-            logWarn('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
+          processCommand(command).catch((error: unknown) => {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logWarn('Command processing failed', { error: errorMessage }, 'ChatFirstNavigation');
           });
         }
         break;
@@ -979,8 +990,9 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   
   const handleSuggestionClick = useCallback((suggestion: CommandSuggestion) => {
     setCommand(suggestion.text);
-    processCommand(suggestion.text).catch((error) => {
-      logWarn('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
+    processCommand(suggestion.text).catch((error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logWarn('Command processing failed', { error: errorMessage }, 'ChatFirstNavigation');
     });
   }, [processCommand]);
   
@@ -1004,12 +1016,12 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
     recognition.interimResults = true;
     recognition.lang = 'en-US';
     
-    recognition.onstart = () => {
+    recognition.onstart = (): void => {
       setVoiceState(prev => ({ ...prev, isListening: true }));
       logDebug('Voice recognition started', null, 'ChatFirstNavigation');
     };
     
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: SpeechRecognitionEvent): void => {
       const results = Array.from(event.results);
       const transcript = results
         .map((result: SpeechRecognitionResult) => result[0]?.transcript ?? '')
@@ -1021,15 +1033,16 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         confidence: results[results.length - 1]?.[0]?.confidence ?? 0
       }));
       
-      if (event.results[event.results.length - 1]?.isFinal) {
+      if (event.results[event.results.length - 1]?.isFinal === true) {
         setCommand(transcript);
-        processCommand(transcript).catch((error) => {
-          logWarn('Command processing failed', { error: error.message }, 'ChatFirstNavigation');
+        processCommand(transcript).catch((error: unknown): void => {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logWarn('Command processing failed', { error: errorMessage }, 'ChatFirstNavigation');
         });
       }
     };
     
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent): void => {
       logWarn('Voice recognition error', event.error, 'ChatFirstNavigation');
       setVoiceState(prev => ({
         ...prev,
@@ -1039,7 +1052,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       onError?.(`Voice recognition error: ${event.error}`);
     };
     
-    recognition.onend = () => {
+    recognition.onend = (): void => {
       setVoiceState(prev => ({
         ...prev,
         isListening: false,
@@ -1065,7 +1078,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
   useEffect(() => {
     if (!enableKeyboard) { return; }
     
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+    const handleGlobalKeyDown = (e: KeyboardEvent): void => {
       // Global command palette trigger
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
@@ -1074,16 +1087,17 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
       
       // Individual action shortcuts
       for (const action of allActions) {
-        if (action.shortcut && isKeyboardShortcut(e, action.shortcut)) {
+        if (action.shortcut !== undefined && isKeyboardShortcut(e, action.shortcut)) {
           e.preventDefault();
-          if (action.handler) {
+          if (action.handler !== undefined) {
             const result = action.handler();
             if (result instanceof Promise) {
-              result.catch((error) => {
-                logWarn('Action handler failed', { error: error.message }, 'ChatFirstNavigation');
+              result.catch((error: unknown): void => {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                logWarn('Action handler failed', { error: errorMessage }, 'ChatFirstNavigation');
               });
             }
-          } else if (action.path) {
+          } else if (action.path !== undefined) {
             try {
               router.push(action.path);
             } catch (error) {
@@ -1105,7 +1119,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
     const modifiers = parts.slice(0, -1);
     
     // Safety check for key
-    if (!key) {return false;}
+    if (key === undefined || key === '') {return false;}
     
     const hasCtrl = modifiers.includes('ctrl') && e.ctrlKey;
     const hasAlt = modifiers.includes('alt') && e.altKey;
@@ -1282,7 +1296,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
               >
                 {suggestion.action?.icon && (
                   <HugeiconsIcon
-                    icon={suggestion.action.icon as any}
+                    icon={suggestion.action.icon}
                     className="w-4 h-4 text-gray-400 flex-shrink-0"
                   />
                 )}
@@ -1291,7 +1305,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
                   <div className="text-sm font-medium text-gray-900 truncate">
                     {suggestion.text}
                   </div>
-                  {suggestion.action?.description && (
+                  {suggestion.action?.description !== undefined && suggestion.action.description !== '' && (
                     <div className="text-xs text-gray-500 truncate">
                       {suggestion.action.description}
                     </div>
@@ -1299,7 +1313,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
                 </div>
                 
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  {suggestion.action?.shortcut && (
+                  {suggestion.action?.shortcut !== undefined && suggestion.action.shortcut !== '' && (
                     <div className="border border-gray-300 text-gray-600 px-2 py-1 rounded text-xs">
                       {suggestion.action.shortcut}
                     </div>
@@ -1308,7 +1322,7 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
                   <div 
                     className="w-2 h-2 rounded-full bg-gray-300" 
                     style={{
-                      backgroundColor: (() => {
+                      backgroundColor: ((): string => {
                         if (suggestion.confidence > SCORING_CONSTANTS.CREATE_INTENT_SCORE) {return '#10b981';}
                         if (suggestion.confidence > SCORING_CONSTANTS.MEDIUM_CONFIDENCE_THRESHOLD) {return '#f59e0b';}
                         return '#ef4444';

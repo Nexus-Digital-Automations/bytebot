@@ -118,7 +118,6 @@ function getValidToolResultContent(
         const validItems: MessageContentBlock[] = contentArray
           .filter((item): item is MessageContentBlock => Boolean(item) && typeof item === "object")
           .map((item: MessageContentBlock): MessageContentBlock => item);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return validItems;
       }
     }
@@ -153,7 +152,6 @@ function getNonErrorToolResultContent(
         const validItems: MessageContentBlock[] = contentArray
           .filter((item): item is MessageContentBlock => Boolean(item) && typeof item === "object")
           .map((item: MessageContentBlock): MessageContentBlock => item);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return validItems;
       }
     }

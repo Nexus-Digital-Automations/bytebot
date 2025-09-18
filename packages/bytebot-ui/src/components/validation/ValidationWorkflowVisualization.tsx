@@ -627,7 +627,21 @@ const WorkflowStepComponent: React.FC<{
   const statusColor = getStepStatusColor(step.status);
   
   if (customRenderer) {
-    return <div onClick={onClick}>{customRenderer(step)}</div>;
+    return (
+      <div 
+        onClick={onClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+      >
+        {customRenderer(step)}
+      </div>
+    );
   }
   
   return (
@@ -641,7 +655,7 @@ const WorkflowStepComponent: React.FC<{
               'flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-all',
               'hover:shadow-md hover:scale-[1.02]',
               isActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white',
-              onClick && 'cursor-pointer'
+              onClick !== undefined ? 'cursor-pointer' : ''
             )}
             onClick={onClick}
             role="button"
@@ -655,7 +669,7 @@ const WorkflowStepComponent: React.FC<{
           >
             {/* Status Icon */}
             <div className={cn('p-2 rounded-full', statusColor)}>
-              <HugeiconsIcon icon={StatusIcon as any} className="w-4 h-4" />
+              <HugeiconsIcon icon={StatusIcon as React.ComponentType} className="w-4 h-4" />
             </div>
             
             {/* Step Info */}
@@ -960,7 +974,7 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
   // WORKFLOW MANAGEMENT
   // ===========================
   
-  const initializeWorkflow = useCallback((request: ParlantValidationRequest) => {
+  const initializeWorkflow = useCallback((request: ParlantValidationRequest): void => {
     const steps = generateWorkflowSteps(request);
     
     const newWorkflow: ValidationWorkflow = {
@@ -1045,17 +1059,17 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
     
     // Update SLA progress
     const elapsed = Date.now() - updatedWorkflow.startTime.getTime();
-    updatedWorkflow.sla.progressPercentage = Math.min(100, 
-      (elapsed / updatedWorkflow.sla.targetDuration) * 100
+    updatedWorkflow.sla.progressPercentage = Math.min(WORKFLOW_CONSTANTS.MAX_PERCENTAGE, 
+      (elapsed / updatedWorkflow.sla.targetDuration) * WORKFLOW_CONSTANTS.EFFICIENCY_SCALE
     );
     updatedWorkflow.sla.timeRemaining = Math.max(0, 
       updatedWorkflow.sla.targetDuration - elapsed
     );
     
     // Check SLA status
-    if (updatedWorkflow.sla.progressPercentage >= 90 && updatedWorkflow.sla.status === 'on_track') {
+    if (updatedWorkflow.sla.progressPercentage >= WORKFLOW_CONSTANTS.DEFAULT_SLA_PERCENTAGE && updatedWorkflow.sla.status === 'on_track') {
       updatedWorkflow.sla.status = 'at_risk';
-    } else if (updatedWorkflow.sla.progressPercentage >= 100 && updatedWorkflow.overallStatus !== WorkflowStepStatus.COMPLETED) {
+    } else if (updatedWorkflow.sla.progressPercentage >= WORKFLOW_CONSTANTS.MAX_PERCENTAGE && updatedWorkflow.overallStatus !== WorkflowStepStatus.COMPLETED) {
       updatedWorkflow.sla.status = 'breached';
       onSLABreach?.(updatedWorkflow);
     }
@@ -1148,7 +1162,7 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
       });
     }
     
-    return () => {
+    return (): void => {
       if (unsubscribe) {
         unsubscribe();
       }
@@ -1170,7 +1184,7 @@ export const ValidationWorkflowVisualization: React.FC<ValidationWorkflowVisuali
       }, config.refreshInterval);
     }
     
-    return () => {
+    return (): void => {
       if (refreshTimer.current) {
         clearInterval(refreshTimer.current);
       }

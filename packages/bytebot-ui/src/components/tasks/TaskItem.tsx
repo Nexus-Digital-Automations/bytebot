@@ -72,8 +72,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
     const config = STATUS_CONFIGS[status];
     if (config === undefined || config === null) {return null;}
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- HugeIcons requires any type
-    const icon = config.icon;
+    const icon = config.icon as React.ComponentType;
     const color = config.color;
     const useLoader = config.useLoader;
 

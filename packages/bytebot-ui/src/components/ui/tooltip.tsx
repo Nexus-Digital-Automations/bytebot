@@ -1,6 +1,10 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+const TOOLTIP_CONSTANTS = {
+  DEFAULT_SIDE_OFFSET: 4,
+} as const;
+
 interface TooltipProviderProps {
   children: React.ReactNode;
 }
@@ -35,7 +39,7 @@ const Tooltip: React.FC<TooltipProps> = ({ children }) => {
     >
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-          return React.cloneElement(child, { isVisible } as any);
+          return React.cloneElement(child, { isVisible } as Partial<unknown>);
         }
         return child;
       })}
@@ -51,7 +55,7 @@ const TooltipContent: React.FC<TooltipContentProps & { isVisible?: boolean }> = 
   children,
   className,
   side = "top",
-  sideOffset = 4,
+  sideOffset = TOOLTIP_CONSTANTS.DEFAULT_SIDE_OFFSET,
   isVisible = false,
   ...props
 }) => {
