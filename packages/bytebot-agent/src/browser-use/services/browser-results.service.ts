@@ -1298,7 +1298,9 @@ export class BrowserResultsService {
 
   private async archiveResult(resultId: string): Promise<void> {
     const result = await this.getResult(resultId);
-    if (!result) return;
+    if (!result) {
+      return;
+    }
 
     const archiveDir = path.join(this.resultsDirectory, 'archive');
     const archiveFile = path.join(archiveDir, `${resultId}.json`);

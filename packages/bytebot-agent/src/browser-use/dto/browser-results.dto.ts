@@ -104,7 +104,7 @@ export class ExportResultsDto {
   })
   @IsOptional()
   @IsObject()
-  exportConfig?: Record<string, any>;
+  exportConfig?: Record<string, unknown>;
 }
 
 export class TaskExecutionStep {
@@ -127,16 +127,16 @@ export class TaskExecutionStep {
   durationMs?: number;
 
   @ApiProperty({ description: 'Step input parameters' })
-  input?: Record<string, any>;
+  input?: Record<string, unknown>;
 
   @ApiProperty({ description: 'Step output result' })
-  output?: Record<string, any>;
+  output?: Record<string, unknown>;
 
   @ApiProperty({ description: 'Step error information' })
   error?: {
     code: string;
     message: string;
-    details?: any;
+    details?: Record<string, unknown>;
   };
 
   @ApiProperty({ description: 'Screenshots taken during this step' })
@@ -155,7 +155,7 @@ export class ExtractedDataResult {
   itemCount!: number;
 
   @ApiProperty({ description: 'Extracted data items' })
-  data!: Array<Record<string, any>>;
+  data!: Array<Record<string, unknown>>;
 
   @ApiProperty({ description: 'Data quality score (0-1)' })
   qualityScore!: number;
@@ -275,7 +275,7 @@ export class BrowserResultsResponseDto {
     level: 'debug' | 'info' | 'warning' | 'error';
     message: string;
     source: string;
-    details?: any;
+    details?: Record<string, unknown>;
   }>;
 
   @ApiProperty({ description: 'Browser session information' })
@@ -292,7 +292,7 @@ export class BrowserResultsResponseDto {
   };
 
   @ApiProperty({ description: 'Task configuration used' })
-  taskConfiguration!: Record<string, any>;
+  taskConfiguration!: Record<string, unknown>;
 
   @ApiProperty({ description: 'Final result summary' })
   resultSummary!: {
@@ -325,7 +325,7 @@ export class BrowserResultsResponseDto {
     timestamp: Date;
     failedStep?: number;
     recoverable: boolean;
-    details?: any;
+    details?: Record<string, unknown>;
   };
 
   @ApiProperty({ description: 'Task archival status' })

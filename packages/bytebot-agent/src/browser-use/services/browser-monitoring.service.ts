@@ -662,8 +662,11 @@ export class BrowserMonitoringService {
       // Attempt to resolve localhost
       await new Promise<void>((resolve, reject) => {
         dns.resolve('localhost', (err) => {
-          if (err) reject(new Error('DNS resolution failed'));
-          else resolve();
+          if (err) {
+            reject(new Error('DNS resolution failed'));
+          } else {
+            resolve();
+          }
         });
       });
       return Date.now() - startTime;

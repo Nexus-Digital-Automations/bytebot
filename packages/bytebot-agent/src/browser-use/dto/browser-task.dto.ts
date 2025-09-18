@@ -145,7 +145,7 @@ export class CreateBrowserTaskDto {
   })
   @IsOptional()
   @IsObject()
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'Tags for organizing and filtering tasks',
@@ -209,7 +209,7 @@ export class UpdateBrowserTaskDto {
   })
   @IsOptional()
   @IsObject()
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'Updated tags',
@@ -273,7 +273,7 @@ export class BrowserTaskResponseDto {
   constraints?: BrowserTaskConstraints;
 
   @ApiProperty({ description: 'Task configuration parameters' })
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 
   @ApiProperty({ description: 'Task tags', type: [String] })
   tags?: string[];
@@ -312,13 +312,13 @@ export class BrowserTaskResponseDto {
   executionSteps?: BrowserTaskExecutionStep[];
 
   @ApiProperty({ description: 'Final result of task execution' })
-  result?: any;
+  result?: Record<string, unknown>;
 
   @ApiProperty({ description: 'Error information if task failed' })
   error?: {
     message: string;
     code: string;
-    details?: any;
+    details?: Record<string, unknown>;
     timestamp: Date;
   };
 
@@ -390,7 +390,7 @@ export class BrowserTaskStatusDto {
   executionTime?: number;
 
   @ApiProperty({ description: 'Task result data' })
-  result?: any;
+  result?: Record<string, unknown>;
 
   @ApiProperty({ description: 'Error information if task failed' })
   error?: {

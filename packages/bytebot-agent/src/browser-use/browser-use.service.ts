@@ -39,7 +39,7 @@ interface BrowserConfig {
   chromeExecutable?: string;
   logLevel?: string;
   videoRecording?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 import { ConfigService } from '@nestjs/config';
 import { spawn, ChildProcess } from 'child_process';
@@ -329,7 +329,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   async createBrowserProcess(
     type: 'session' | 'task',
     id: string,
-    config: any = {},
+    config: Record<string, unknown> = {},
   ): Promise<string> {
     if (this.processes.size >= this.config.maxConcurrentSessions) {
       throw new Error('Maximum concurrent browser sessions reached');
@@ -537,7 +537,9 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
    */
   private async checkProcessTimeout(processId: string): Promise<void> {
     const process = this.processes.get(processId);
-    if (!process) return;
+    if (!process) {
+      return;
+    }
 
     const timeSinceActivity = Date.now() - process.lastActivity.getTime();
     if (timeSinceActivity > this.config.sessionTimeout) {
@@ -624,8 +626,8 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
       activeSessions: number;
       maxConcurrentSessions: number;
       uptime: number;
-      resources?: any;
-      integrations?: any;
+      resources?: Record<string, unknown>;
+      integrations?: Record<string, unknown>;
     };
     error?: string;
   }> {
@@ -648,8 +650,8 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
         activeSessions: number;
         maxConcurrentSessions: number;
         uptime: number;
-        resources?: any;
-        integrations?: any;
+        resources?: Record<string, unknown>;
+        integrations?: Record<string, unknown>;
       } = {
         platform: process.platform,
         architecture: process.arch,
@@ -865,7 +867,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   async executeAutomationTask(params: {
     taskId: string;
     sessionId: string;
-    actions: any[];
+    actions: Record<string, unknown>[];
     options?: {
       timeout?: number;
       screenshots?: boolean;
@@ -873,7 +875,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
     };
   }): Promise<{
     success: boolean;
-    results?: any;
+    results?: Record<string, unknown>;
     error?: string;
     executionTimeMs?: number;
     screenshotsTaken?: number;
@@ -957,7 +959,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   }): Promise<{
     success: boolean;
     error?: string;
-    result?: any;
+    result?: Record<string, unknown>;
   }> {
     try {
       const browserProcess = this.getProcessBySession(options.sessionId);
@@ -1009,7 +1011,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
   }): Promise<{
     success: boolean;
     error?: string;
-    result?: any;
+    result?: Record<string, unknown>;
   }> {
     try {
       const browserProcess = this.getProcessBySession(options.sessionId);
@@ -1232,7 +1234,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
    */
   async executeScript(options: { sessionId: string; script: string }): Promise<{
     success: boolean;
-    result?: any;
+    result?: Record<string, unknown>;
     error?: string;
   }> {
     try {

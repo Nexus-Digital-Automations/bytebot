@@ -924,7 +924,9 @@ export class BrowserDataService {
    * Convert data to CSV format
    */
   private convertToCSV(data: ExtractedDataItem[]): string {
-    if (data.length === 0) return '';
+    if (data.length === 0) {
+      return '';
+    }
 
     // Get all unique field names
     const fieldNames = new Set<string>();
@@ -938,7 +940,7 @@ export class BrowserDataService {
     // Add data rows
     data.forEach((item) => {
       const row = headers.map((header) => {
-        const value = (item.data as Record<string, unknown>)[header] || '';
+        const value = item.data[header] || '';
         const stringValue =
           typeof value === 'string' ? value : JSON.stringify(value);
         return `"${stringValue.replace(/"/g, '""')}"`;
@@ -957,13 +959,11 @@ export class BrowserDataService {
 
     data.forEach((item, index) => {
       xml += `  <item index="${index}">\n`;
-      Object.entries(item.data as Record<string, unknown>).forEach(
-        ([key, value]) => {
-          const stringValue =
-            typeof value === 'string' ? value : JSON.stringify(value);
-          xml += `    <${key}>${stringValue}</${key}>\n`;
-        },
-      );
+      Object.entries(item.data).forEach(([key, value]) => {
+        const stringValue =
+          typeof value === 'string' ? value : JSON.stringify(value);
+        xml += `    <${key}>${stringValue}</${key}>\n`;
+      });
       xml += '  </item>\n';
     });
 
@@ -977,7 +977,7 @@ export class BrowserDataService {
   private convertToPlainText(data: ExtractedDataItem[]): string {
     return data
       .map((item, index) => {
-        const itemText = Object.entries(item.data as Record<string, unknown>)
+        const itemText = Object.entries(item.data)
           .map(([key, value]) => {
             const stringValue =
               typeof value === 'string' ? value : JSON.stringify(value);

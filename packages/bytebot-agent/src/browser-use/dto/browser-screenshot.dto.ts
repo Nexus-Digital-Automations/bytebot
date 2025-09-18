@@ -268,7 +268,7 @@ export class ScreenshotResponseDto {
   error?: {
     code: string;
     message: string;
-    details?: any;
+    details?: Record<string, unknown>;
     timestamp?: Date;
   };
 }

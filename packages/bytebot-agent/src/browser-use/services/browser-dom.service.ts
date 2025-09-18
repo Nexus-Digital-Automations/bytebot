@@ -851,7 +851,9 @@ export class BrowserDomService {
       }
 
       const element = result.element;
-      if (!element) return null;
+      if (!element) {
+        return null;
+      }
 
       // Use the safe helper function and provide fallback selector
       const extractedElement = safeExtractElement(element);

@@ -679,15 +679,21 @@ export class BrowserTaskService {
 
     if (filters) {
       filteredTasks = allTasks.filter((task) => {
-        if (filters.status && task.status !== filters.status) return false;
-        if (filters.userId && task.metadata.userId !== filters.userId)
+        if (filters.status && task.status !== filters.status) {
           return false;
-        if (filters.agentId && task.metadata.agentId !== filters.agentId)
+        }
+        if (filters.userId && task.metadata.userId !== filters.userId) {
           return false;
-        if (filters.sessionId && task.sessionId !== filters.sessionId)
+        }
+        if (filters.agentId && task.metadata.agentId !== filters.agentId) {
           return false;
-        if (filters.priority && task.priority !== filters.priority)
+        }
+        if (filters.sessionId && task.sessionId !== filters.sessionId) {
           return false;
+        }
+        if (filters.priority && task.priority !== filters.priority) {
+          return false;
+        }
         if (
           filters.tags &&
           !filters.tags.some((tag) => task.metadata.tags.includes(tag))
@@ -804,14 +810,18 @@ export class BrowserTaskService {
    * Process task queue and execute pending tasks
    */
   private processTaskQueue(): void {
-    if (this.taskQueue.length === 0) return;
+    if (this.taskQueue.length === 0) {
+      return;
+    }
 
     const runningTasks = Array.from(this.activeTasks.values()).filter(
       (t) => t.status === TaskStatus.RUNNING,
     );
 
     const availableSlots = this.maxConcurrentTasks - runningTasks.length;
-    if (availableSlots <= 0) return;
+    if (availableSlots <= 0) {
+      return;
+    }
 
     const tasksToStart = this.taskQueue.splice(0, availableSlots);
 
@@ -957,7 +967,9 @@ export class BrowserTaskService {
 
   private queueTask(taskId: string): void {
     const task = this.activeTasks.get(taskId);
-    if (!task) return;
+    if (!task) {
+      return;
+    }
 
     // Insert based on priority
     let insertIndex = this.taskQueue.length;

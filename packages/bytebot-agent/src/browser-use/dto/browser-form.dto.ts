@@ -93,7 +93,7 @@ export class FormField {
     maxLength?: number;
     min?: number; // For number fields
     max?: number; // For number fields
-    customRules?: Record<string, any>;
+    customRules?: Record<string, unknown>;
   };
 
   @ApiPropertyOptional({
@@ -319,7 +319,7 @@ export class FormValidationResponseDto {
     code: string;
     message: string;
     failedField?: string;
-    details?: any;
+    details?: Record<string, unknown>;
   };
 
   @ApiProperty({ description: 'Warnings encountered during operation' })

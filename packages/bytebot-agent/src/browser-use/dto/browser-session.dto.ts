@@ -241,7 +241,7 @@ export class CreateBrowserSessionDto {
   })
   @IsOptional()
   @IsObject()
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 }
 
 export class BrowserTabInfo {
@@ -376,7 +376,7 @@ export class BrowserSessionResponseDto {
   websocketUrl?: string;
 
   @ApiProperty({ description: 'Additional configuration' })
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 
   @ApiProperty({ description: 'Error information if session failed' })
   error?: {

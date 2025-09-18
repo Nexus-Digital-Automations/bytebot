@@ -180,7 +180,7 @@ export class ExtractDataDto {
 
 export class ExtractedDataItem {
   @ApiProperty({ description: 'Extracted field values' })
-  data!: Record<string, any>;
+  data!: Record<string, unknown>;
 
   @ApiProperty({ description: 'Source element information' })
   source!: {
@@ -236,7 +236,7 @@ export class DataExtractionResponseDto {
     canonicalUrl?: string;
     ogTags?: Record<string, string>;
     twitterTags?: Record<string, string>;
-    structuredData?: any[];
+    structuredData?: Record<string, unknown>[];
   };
 
   @ApiProperty({ description: 'Extraction statistics' })
@@ -278,7 +278,7 @@ export class DataExtractionResponseDto {
     code: string;
     message: string;
     failedRules?: string[];
-    details?: any;
+    details?: Record<string, unknown>;
   };
 
   @ApiProperty({ description: 'Warnings encountered during extraction' })

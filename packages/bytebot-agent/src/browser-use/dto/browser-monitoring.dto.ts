@@ -60,7 +60,7 @@ export class BrowserMonitoringResponseDto {
     level: 'error' | 'warning' | 'info';
     message: string;
     source: string;
-    details?: any;
+    details?: Record<string, unknown>;
   }>;
 
   @ApiProperty({ description: 'Health check timestamp' })

@@ -389,7 +389,9 @@ export class BrowserSessionService {
    * Refresh session data from browser process
    */
   private async refreshSessionData(sessionData: SessionData): Promise<void> {
-    if (!sessionData.processId) return;
+    if (!sessionData.processId) {
+      return;
+    }
 
     try {
       // Get current browser state
@@ -508,7 +510,9 @@ export class BrowserSessionService {
     }
 
     const sessionData = this.sessions.get(sessionId);
-    if (!sessionData) return;
+    if (!sessionData) {
+      return;
+    }
 
     // Set new timeout
     const timeout = setTimeout(() => {
@@ -529,7 +533,9 @@ export class BrowserSessionService {
    */
   private cleanupSession(sessionId: string): void {
     const sessionData = this.sessions.get(sessionId);
-    if (!sessionData) return;
+    if (!sessionData) {
+      return;
+    }
 
     // Clear timeout
     const timeout = this.sessionTimeouts.get(sessionId);
