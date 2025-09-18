@@ -159,7 +159,7 @@ export class LoggingInterceptor implements NestInterceptor {
           response,
           processingTime,
         );
-        const errorContext = this.createErrorContext(_error);
+        const errorContext = this.createErrorContext(error);
 
         this.logError(requestContext, responseContext, errorContext);
 
@@ -167,8 +167,8 @@ export class LoggingInterceptor implements NestInterceptor {
         if (this.metricsService) {
           const statusCode: number =
             Number(
-              (_error as HttpErrorWithStatus)?.status ??
-                (_error as HttpErrorWithStatus)?.statusCode,
+              (error as HttpErrorWithStatus)?.status ??
+                (error as HttpErrorWithStatus)?.statusCode,
             ) || 500;
           this.metricsService.recordApiRequestDuration(
             request.method,
@@ -180,7 +180,7 @@ export class LoggingInterceptor implements NestInterceptor {
         }
 
         // Re-throw the error to maintain normal error handling using throwError
-        return throwError(() => _error);
+        return throwError(() => error);
       }),
     );
   }
@@ -219,8 +219,8 @@ export class LoggingInterceptor implements NestInterceptor {
       userAgent: request.headers['user-agent'],
       remoteAddress: this.getClientIpAddress(request),
       timestamp: new Date().toISOString(),
-      userId: (_request as Request & { user?: { id: string } }).user?.id, // If authentication is implemented
-      sessionId: (_request as Request & { session?: { id: string } }).session
+      userId: (request as Request & { user?: { id: string } }).user?.id, // If authentication is implemented
+      sessionId: (request as Request & { session?: { id: string } }).session
         ?.id, // If sessions are used
     };
   }

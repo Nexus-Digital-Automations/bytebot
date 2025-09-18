@@ -39,14 +39,14 @@ function isAuthenticatedRequest(req: unknown): req is AuthenticatedRequest {
 
 function isJwtPayload(payload: unknown): payload is JwtPayload {
   return (
-    _typeof payload === 'object' &&
+    typeof payload === 'object' &&
     payload !== null &&
     'sub' in payload &&
     'email' in payload &&
     'role' in payload &&
     typeof (payload as { sub: unknown }).sub === 'string' &&
-    typeof (_payload as { email: unknown }).email === 'string' &&
-    typeof (_payload as { role: unknown }).role === 'string'
+    typeof (payload as { email: unknown }).email === 'string' &&
+    typeof (payload as { role: unknown }).role === 'string'
   );
 }
 
@@ -56,7 +56,7 @@ function isStringOrUndefined(value: unknown): value is string | undefined {
 
 function isHttpContext(context: unknown): context is { getRequest: () => unknown } {
   return (
-    _typeof context === 'object' &&
+    typeof context === 'object' &&
     context !== null &&
     'getRequest' in context &&
     typeof (context as { getRequest: unknown }).getRequest === 'function'
@@ -74,15 +74,15 @@ function safeJwtVerify(jwtService: { verifyAsync: (token: string, options: { sec
 }
 
 // Proper typing for Jest mocks
-type MockJwtService = {
+type _MockJwtService = {
   verifyAsync: jest.MockedFunction<(token: string, options: { secret: string }) => Promise<unknown>>;
 };
 
-type MockConfigService = {
+type _MockConfigService = {
   get: jest.MockedFunction<(key: string) => string | undefined>;
 };
 
-type MockReflector = {
+type _MockReflector = {
   getAllAndOverride: jest.MockedFunction<(key: string, targets: unknown[]) => boolean>;
 };
 
@@ -104,7 +104,7 @@ interface RequestHeaders {
 // Mock JWT Authentication Guard implementation for Phase 1 requirements
 class MockJwtAuthGuard {
   constructor(
-    _private jwtService: JwtService,
+    private jwtService: JwtService,
     private configService: ConfigService,
     private reflector: Reflector,
   ) {}
@@ -115,7 +115,7 @@ class MockJwtAuthGuard {
       context.getClass(),
     ]);
 
-    if (_isPublic) {
+    if (isPublic) {
       return true;
     }
 
@@ -139,7 +139,7 @@ class MockJwtAuthGuard {
       if (!jwtSecret) {
         throw new UnauthorizedException('JWT secret not configured');
       }
-      const rawPayload = await safeJwtVerify(_this.jwtService, token, {
+      const rawPayload = await safeJwtVerify(this.jwtService, token, {
         secret: jwtSecret,
       });
       
@@ -149,22 +149,22 @@ class MockJwtAuthGuard {
       const payload = rawPayload;
 
       // Validate token payload structure
-      if (!_payload.sub || !_payload.email || !_payload.role) {
+      if (!payload.sub || !payload.email || !payload.role) {
         throw new UnauthorizedException('Invalid token payload structure');
       }
 
       // Check token expiration
       const currentTime = Math.floor(Date.now() / 1000);
-      if (_payload.exp && _payload.exp < currentTime) {
+      if (payload.exp && payload.exp < currentTime) {
         throw new UnauthorizedException('Token has expired');
       }
 
       // Attach user information to request
       request.user = {
-        id: _payload.sub,
-        email: _payload.email,
-        role: _payload.role,
-        permissions: _payload.permissions ?? [],
+        id: payload.sub,
+        email: payload.email,
+        role: payload.role,
+        permissions: payload.permissions ?? [],
       };
 
       return true;
@@ -198,7 +198,7 @@ describe('JwtAuthGuard', () => {
   // Mock execution context
   const createMockExecutionContext = (
     headers: RequestHeaders = {},
-    isPublic = false,
+    _isPublic = false,
   ): ExecutionContext => {
     const mockRequest: AuthenticatedRequest = {
       headers,
@@ -214,7 +214,7 @@ describe('JwtAuthGuard', () => {
       getHandler: jest.fn(),
       getClass: jest.fn(),
       getArgs: jest.fn().mockReturnValue([mockRequest, {}, jest.fn()]),
-      getArgByIndex: jest.fn().mockImplementation(_<T = unknown>(index: number): T => {
+      getArgByIndex: jest.fn().mockImplementation(<T = unknown>(index: number): T => {
         const args = [mockRequest, {}, jest.fn()];
         return args[index] as T;
       }),
@@ -334,7 +334,7 @@ describe('JwtAuthGuard', () => {
       const result = await guard.canActivate(context);
 
       expect(result).toBe(true);
-      expect(jwtService.verifyAsync).toHaveBeenCalledWith(_validToken, {
+      expect(jwtService.verifyAsync).toHaveBeenCalledWith(validToken, {
         secret: 'test-jwt-secret',
       });
 
@@ -397,7 +397,7 @@ describe('JwtAuthGuard', () => {
   });
 
   describe('Token Validation', () => {
-    it('should validate JWT token structure and _payload', async () => {
+    it('should validate JWT token structure and payload', async () => {
       const testId = `${operationId}_token_validation_structure`;
       console.log(`[${testId}] Testing JWT token structure validation`);
 
@@ -618,7 +618,7 @@ describe('JwtAuthGuard', () => {
       };
 
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(_payload);
+      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(payload);
 
       // Create multiple concurrent authentication requests
       const contexts = Array(10)
@@ -651,8 +651,8 @@ describe('JwtAuthGuard', () => {
         if (!request.user) {
           throw new Error('User not attached to request in test');
         }
-        expect(request.user.id).toBe(_payload.sub);
-        expect(request.user.email).toBe(_payload.email);
+        expect(request.user.id).toBe(payload.sub);
+        expect(request.user.email).toBe(payload.email);
       });
 
       console.log(`[${testId}] Concurrent authentication test completed`);
@@ -762,7 +762,7 @@ describe('JwtAuthGuard', () => {
       };
 
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(_payload);
+      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(payload);
 
       // Simulate high-frequency requests (100 requests)
       const startTime = Date.now();

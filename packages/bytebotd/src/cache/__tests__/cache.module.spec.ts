@@ -396,7 +396,7 @@ describe('CacheModule', () => {
       expect(simpleKey).toBe('bytebot:simple');
 
       const apiKey = keyGenerator.generateApiKey('GET', '/api/test');
-      expect(apiKey).toMatch(_/^api:api:get:api_test$/);
+      expect(apiKey).toMatch(/^api:api:get:api_test$/);
 
       const dbKey = keyGenerator.generateDbKey('users', 'SELECT');
       expect(dbKey).toBe('database:db:users:select');

@@ -73,7 +73,7 @@ interface JwtPayload {
 // Mock implementation for testing Phase 1 requirements
 class MockAuthService {
   constructor(
-    _private jwtService: JwtService,
+    private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
 
@@ -120,7 +120,7 @@ class MockAuthService {
 
   async refreshToken(refreshToken: string): Promise<TokenResponse> {
     try {
-      const payload = this.jwtService.verify(_refreshToken, {
+      const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       }) as JwtPayload;
 
@@ -149,7 +149,7 @@ class MockAuthService {
       role: user.role,
     };
 
-    const accessToken = this.jwtService.sign(_payload, {
+    const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET'),
       expiresIn: '15m', // 15 minutes as per research spec
     });
@@ -234,7 +234,7 @@ class MockAuthService {
 describe('AuthService', () => {
   let service: MockAuthService;
   let jwtService: JwtService;
-  let configService: ConfigService;
+  let _configService: ConfigService;
 
   const operationId = `auth_test${Date.now()}`;
 
@@ -276,7 +276,7 @@ describe('AuthService', () => {
       module.get<ConfigService>(ConfigService),
     );
     jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigService>(ConfigService);
+    _configService = module.get<ConfigService>(ConfigService);
 
     console.log(`[${operationId}] AuthService test setup completed`);
   });
@@ -428,7 +428,7 @@ describe('AuthService', () => {
         isActive: true,
       };
 
-      const expectedAccessPayload = {
+      const _expectedAccessPayload = {
         sub: mockUser.id,
         email: mockUser.email,
         role: mockUser.role,
@@ -440,7 +440,7 @@ describe('AuthService', () => {
         ],
       };
 
-      const expectedRefreshPayload = {
+      const _expectedRefreshPayload = {
         sub: mockUser.id,
       };
 

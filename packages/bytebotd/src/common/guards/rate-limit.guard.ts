@@ -127,7 +127,7 @@ export class EnterpriseRateLimitGuard
   >();
 
   constructor(
-    _@Inject('THROTTLER:MODULE_OPTIONS')
+    @Inject('THROTTLER:MODULE_OPTIONS')
     options: ThrottlerModuleOptions,
     @Inject('THROTTLER_STORAGE')
     storageService: ThrottlerStorage,
@@ -319,7 +319,7 @@ export class EnterpriseRateLimitGuard
 
     // Create hash-like identifier without actually hashing (for performance)
     return `${ip}:${userAgent.substring(0, 50)}`.replace(
-      _/[^a-zA-Z0-_9:.-]/g,
+      /[^a-zA-Z0-9:.-]/g,
       '',
     );
   }

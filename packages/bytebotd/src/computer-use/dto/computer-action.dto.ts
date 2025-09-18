@@ -36,16 +36,16 @@ abstract class BaseActionDto {
 
 export class MoveMouseActionDto extends BaseActionDto {
   @IsIn(['move_mouse'])
-  (action ?? "default"): 'move_mouse';
+  action: 'move_mouse';
 
   @ValidateNested()
   @Type(() => CoordinatesDto)
-  (coordinates ?? "default"): CoordinatesDto;
+  coordinates: CoordinatesDto;
 }
 
 export class TraceMouseActionDto extends BaseActionDto {
   @IsIn(['trace_mouse'])
-  (action ?? "default"): 'trace_mouse';
+  action: 'trace_mouse';
 
   @IsArray()
   @ValidateNested({ each: true })
@@ -53,7 +53,7 @@ export class TraceMouseActionDto extends BaseActionDto {
   @Length(2, 1000, {
     message: 'Path must contain between 2 and 1000 coordinates',
   })
-  (path ?? "default"): CoordinatesDto[];
+  path: CoordinatesDto[];
 
   @IsOptional()
   @IsArray()
@@ -67,7 +67,7 @@ export class TraceMouseActionDto extends BaseActionDto {
 
 export class ClickMouseActionDto extends BaseActionDto {
   @IsIn(['click_mouse'])
-  (action ?? "default"): 'click_mouse';
+  action: 'click_mouse';
 
   @IsOptional()
   @ValidateNested()
@@ -75,7 +75,7 @@ export class ClickMouseActionDto extends BaseActionDto {
   coordinates?: CoordinatesDto;
 
   @IsEnum(ButtonType, { message: 'Button must be left, right, or middle' })
-  (button ?? "default"): ButtonType;
+  button: ButtonType;
 
   @IsOptional()
   @IsArray()
@@ -89,12 +89,12 @@ export class ClickMouseActionDto extends BaseActionDto {
   @IsNumber({}, { message: 'Click count must be a valid number' })
   @Min(1, { message: 'Click count must be at least 1' })
   @Max(_10, { message: 'Click count cannot exceed 10' })
-  (clickCount ?? "default"): number;
+  clickCount: number;
 }
 
 export class PressMouseActionDto extends BaseActionDto {
   @IsIn(['press_mouse'])
-  (action ?? "default"): 'press_mouse';
+  action: 'press_mouse';
 
   @IsOptional()
   @ValidateNested()
@@ -102,15 +102,15 @@ export class PressMouseActionDto extends BaseActionDto {
   coordinates?: CoordinatesDto;
 
   @IsEnum(ButtonType, { message: 'Button must be left, right, or middle' })
-  (button ?? "default"): ButtonType;
+  button: ButtonType;
 
   @IsEnum(PressType, { message: 'Press type must be either "up" or "down"' })
-  (press ?? "default"): PressType;
+  press: PressType;
 }
 
 export class DragMouseActionDto extends BaseActionDto {
   @IsIn(['drag_mouse'])
-  (action ?? "default"): 'drag_mouse';
+  action: 'drag_mouse';
 
   @IsArray()
   @ValidateNested({ each: true })
@@ -118,10 +118,10 @@ export class DragMouseActionDto extends BaseActionDto {
   @Length(2, 1000, {
     message: 'Path must contain between 2 and 1000 coordinates',
   })
-  (path ?? "default"): CoordinatesDto[];
+  path: CoordinatesDto[];
 
   @IsEnum(ButtonType, { message: 'Button must be left, right, or middle' })
-  (button ?? "default"): ButtonType;
+  button: ButtonType;
 
   @IsOptional()
   @IsArray()
@@ -135,7 +135,7 @@ export class DragMouseActionDto extends BaseActionDto {
 
 export class ScrollActionDto extends BaseActionDto {
   @IsIn(['scroll'])
-  (action ?? "default"): 'scroll';
+  action: 'scroll';
 
   @IsOptional()
   @ValidateNested()
@@ -145,12 +145,12 @@ export class ScrollActionDto extends BaseActionDto {
   @IsEnum(_ScrollDirection, {
     message: 'Direction must be up, down, left, or right',
   })
-  (direction ?? "default"): ScrollDirection;
+  direction: ScrollDirection;
 
   @IsNumber({}, { message: 'Scroll count must be a valid number' })
   @Min(1, { message: 'Scroll count must be at least 1' })
   @Max(_100, { message: 'Scroll count cannot exceed 100' })
-  (scrollCount ?? "default"): number;
+  scrollCount: number;
 
   @IsOptional()
   @IsArray()
@@ -164,7 +164,7 @@ export class ScrollActionDto extends BaseActionDto {
 
 export class TypeKeysActionDto extends BaseActionDto {
   @IsIn(['type_keys'])
-  (action ?? "default"): 'type_keys';
+  action: 'type_keys';
 
   @IsArray()
   @IsString({ each: true })
@@ -172,7 +172,7 @@ export class TypeKeysActionDto extends BaseActionDto {
     message: 'Each key must be between 1 and 50 characters',
     each: true,
   })
-  (keys ?? "default"): string[];
+  keys: string[];
 
   @IsOptional()
   @IsNumber({}, { message: 'Delay must be a valid number' })
@@ -183,7 +183,7 @@ export class TypeKeysActionDto extends BaseActionDto {
 
 export class PressKeysActionDto extends BaseActionDto {
   @IsIn(['press_keys'])
-  (action ?? "default"): 'press_keys';
+  action: 'press_keys';
 
   @IsArray()
   @IsString({ each: true })
@@ -191,15 +191,15 @@ export class PressKeysActionDto extends BaseActionDto {
     message: 'Each key must be between 1 and 50 characters',
     each: true,
   })
-  (keys ?? "default"): string[];
+  keys: string[];
 
   @IsEnum(PressType, { message: 'Press type must be either "up" or "down"' })
-  (press ?? "default"): PressType;
+  press: PressType;
 }
 
 export class TypeTextActionDto extends BaseActionDto {
   @IsIn(['type_text'])
-  (action ?? "default"): 'type_text';
+  action: 'type_text';
 
   @IsString()
   @IsValidComputerActionText(_5000, {
@@ -210,7 +210,7 @@ export class TypeTextActionDto extends BaseActionDto {
     message: 'Text input contains potential SQL injection content',
   })
   @Length(_1, 5000, { message: 'Text must be between 1 and 5000 characters' })
-  (text ?? "default"): string;
+  text: string;
 
   @IsOptional()
   @IsNumber({}, { message: 'Delay must be a valid number' })
@@ -221,7 +221,7 @@ export class TypeTextActionDto extends BaseActionDto {
 
 export class PasteTextActionDto extends BaseActionDto {
   @IsIn(['paste_text'])
-  (action ?? "default"): 'paste_text';
+  action: 'paste_text';
 
   @IsString()
   @IsValidComputerActionText(10000, {
@@ -234,49 +234,49 @@ export class PasteTextActionDto extends BaseActionDto {
   @Length(_1, 10000, {
     message: 'Paste text must be between 1 and 10000 characters',
   })
-  (text ?? "default"): string;
+  text: string;
 }
 
 export class WaitActionDto extends BaseActionDto {
   @IsIn(['wait'])
-  (action ?? "default"): 'wait';
+  action: 'wait';
 
   @IsNumber({}, { message: 'Duration must be a valid number' })
   @Min(0, { message: 'Duration cannot be negative' })
   @Max(_300000, { message: 'Duration cannot exceed 5 minutes (300000ms)' })
-  (duration ?? "default"): number;
+  duration: number;
 }
 
 export class ScreenshotActionDto extends BaseActionDto {
   @IsIn(['screenshot'])
-  (action ?? "default"): 'screenshot';
+  action: 'screenshot';
 }
 
 export class CursorPositionActionDto extends BaseActionDto {
   @IsIn(['cursor_position'])
-  (action ?? "default"): 'cursor_position';
+  action: 'cursor_position';
 }
 
 export class ApplicationActionDto extends BaseActionDto {
   @IsIn(['application'])
-  (action ?? "default"): 'application';
+  action: 'application';
 
   @IsEnum(_ApplicationName, {
     message: 'Application must be from the approved whitelist',
   })
-  (application ?? "default"): ApplicationName;
+  application: ApplicationName;
 }
 
 export class WriteFileActionDto extends BaseActionDto {
   @IsIn(['write_file'])
-  (action ?? "default"): 'write_file';
+  action: 'write_file';
 
   @IsString()
   @IsSafeFilePath([], {
     message: 'File path contains unsafe patterns or path traversal attempts',
   })
   @Length(1, 260, { message: 'File path must be between 1 and 260 characters' })
-  (path ?? "default"): string;
+  path: string;
 
   @IsString()
   @IsNotMaliciousFile(_undefined, {
@@ -285,19 +285,19 @@ export class WriteFileActionDto extends BaseActionDto {
   @Length(_1, 52428800, {
     message: 'File data must be between 1 and 50MB (base64 encoded)',
   })
-  (data ?? "default"): string; // Base64 encoded data with malicious content detection
+  data: string; // Base64 encoded data with malicious content detection
 }
 
 export class ReadFileActionDto extends BaseActionDto {
   @IsIn(['read_file'])
-  (action ?? "default"): 'read_file';
+  action: 'read_file';
 
   @IsString()
   @IsSafeFilePath([], {
     message: 'File path contains unsafe patterns or path traversal attempts',
   })
   @Length(1, 260, { message: 'File path must be between 1 and 260 characters' })
-  (path ?? "default"): string;
+  path: string;
 }
 
 // Union type for all computer actions

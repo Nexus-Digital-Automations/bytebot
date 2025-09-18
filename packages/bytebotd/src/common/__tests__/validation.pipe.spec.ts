@@ -85,7 +85,7 @@ class MockValidationPipe {
       // Basic XSS prevention
       return value
         .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(_/javascript:/gi, '')
+        .replace(/javascript:/gi, '')
         .replace(/on\w+\s*=/gi, '')
         .trim();
     }

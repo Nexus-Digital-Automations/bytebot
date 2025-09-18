@@ -40,7 +40,7 @@ interface AuthenticatedRequest {
 // Type guard for execution context
 function _isMockExecutionContext(context: unknown): context is ExecutionContext {
   return (
-    _typeof context === 'object' &&
+    typeof context === 'object' &&
     context !== null &&
     'switchToHttp' in context &&
     typeof (context as { switchToHttp: unknown }).switchToHttp === 'function'

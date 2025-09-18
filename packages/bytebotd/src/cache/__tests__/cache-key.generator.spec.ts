@@ -70,12 +70,12 @@ describe('CacheKeyGenerator', () => {
       const result = generator.generate(key, namespace);
 
       expect(result).toBe('custom:test-key');
-      expect(result).toMatch(_/^custom:/);
+      expect(result).toMatch(/^custom:/);
     });
 
     it('should add version when specified', () => {
       const key = 'versioned-key';
-      const result = generator.generate(_key, undefined, { version: '2.0' });
+      const result = generator.generate(key, undefined, { version: '2.0' });
 
       expect(result).toBe('bytebot:v2.0:versioned-key');
       expect(result).toContain(':v2.0:');
@@ -84,10 +84,10 @@ describe('CacheKeyGenerator', () => {
     it('should add timestamp when requested', () => {
       const key = 'timestamped-key';
       const beforeTime = Date.now();
-      const result = generator.generate(_key, undefined, { includeTimestamp: true });
+      const result = generator.generate(key, undefined, { includeTimestamp: true });
       const afterTime = Date.now();
 
-      expect(result).toMatch(_/^bytebot:timestamped-key:\d+$/);
+      expect(result).toMatch(/^bytebot:timestamped-key:\d+$/);
       
       // Extract timestamp from result
       const timestampStr = result.split(':')[2];
@@ -99,14 +99,14 @@ describe('CacheKeyGenerator', () => {
 
     it('should use namespace from options', () => {
       const key = 'options-key';
-      const result = generator.generate(_key, undefined, { namespace: 'options' });
+      const result = generator.generate(key, undefined, { namespace: 'options' });
 
       expect(result).toBe('options:options-key');
     });
 
     it('should prioritize direct namespace parameter over options', () => {
       const key = 'priority-key';
-      const result = generator.generate(_key, 'direct', { namespace: 'options' });
+      const result = generator.generate(key, 'direct', { namespace: 'options' });
 
       expect(result).toBe('direct:priority-key');
     });
@@ -231,7 +231,7 @@ describe('CacheKeyGenerator', () => {
 
     it('should respect custom max length threshold', () => {
       const key = 'a'.repeat(50);
-      const result = generator.generate(_key, undefined, { maxLength: 40 });
+      const result = generator.generate(key, undefined, { maxLength: 40 });
 
       expect(result).toMatch(/^bytebot:hash_[a-f0-9]{16}$/);
     });
@@ -256,7 +256,7 @@ describe('CacheKeyGenerator', () => {
       const queryParams = { limit: 10, offset: 0, sort: 'name' };
       const result = generator.generateApiKey('POST', '/api/search', queryParams);
 
-      expect(result).toMatch(_/^api:api:post:api_search:[a-f0-9]{12}$/);
+      expect(result).toMatch(/^api:api:post:api_search:[a-f0-9]{12}$/);
     });
 
     it('should include user ID when provided', () => {
@@ -282,7 +282,7 @@ describe('CacheKeyGenerator', () => {
       };
 
       const result = generator.generateApiKey('GET', '/api/data', queryParams);
-      expect(result).toMatch(_/^api:api:get:api_data:[a-f0-9]{12}$/);
+      expect(result).toMatch(/^api:api:get:api_data:[a-f0-9]{12}$/);
     });
   });
 
@@ -297,7 +297,7 @@ describe('CacheKeyGenerator', () => {
       const params = { id: 123, status: 'active' };
       const result = generator.generateDbKey('users', 'SELECT', params);
 
-      expect(result).toMatch(_/^database:db:users:select:[a-f0-9]{12}$/);
+      expect(result).toMatch(/^database:db:users:select:[a-f0-9]{12}$/);
     });
 
     it('should handle empty parameters', () => {
@@ -318,7 +318,7 @@ describe('CacheKeyGenerator', () => {
       const params = { userId: 'user456', priority: 'high' };
       const result = generator.generateTaskKey('task123', 'execute', params);
 
-      expect(result).toMatch(_/^tasks:task:task123:execute:[a-f0-9]{12}$/);
+      expect(result).toMatch(/^tasks:task:task123:execute:[a-f0-9]{12}$/);
     });
   });
 
@@ -386,7 +386,7 @@ describe('CacheKeyGenerator', () => {
     it('should track key metadata', () => {
       const key = 'metadata-key';
       const namespace = 'test';
-      const result = generator.generate(_key, namespace, { version: '1.0' });
+      const result = generator.generate(key, namespace, { version: '1.0' });
 
       const metadata = generator.getKeyMetadata(result);
       expect(metadata).toBeDefined();

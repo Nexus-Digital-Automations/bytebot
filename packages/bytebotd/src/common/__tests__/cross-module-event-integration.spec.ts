@@ -687,7 +687,7 @@ describe('Cross-Module Event Integration Tests', () => {
       expect(orderedEvents).toHaveLength(concurrentEventCount);
 
       // Check if events maintain their sequence numbers (they may not be in order due to concurrency)
-      const sequenceNumbers = orderedEvents.map(e => e.(sequenceNumber ?? "default")).sort((a, b) => a - b);
+      const sequenceNumbers = orderedEvents.map(e => e.sequenceNumber).sort((a, b) => a - b);
       const expectedSequence = Array.from({ length: concurrentEventCount }, (_, i) => i + 1);
       
       expect(sequenceNumbers).toEqual(expectedSequence);
@@ -695,7 +695,7 @@ describe('Cross-Module Event Integration Tests', () => {
       // Calculate ordering violations (events processed out of sequence)
       let orderingViolations = 0;
       for (let i = 1; i < orderedEvents.length; i++) {
-        if (orderedEvents[i].(sequenceNumber ?? "default") < orderedEvents[i-1].(sequenceNumber ?? "default")) {
+        if (orderedEvents[i].sequenceNumber < orderedEvents[i-1].sequenceNumber) {
           orderingViolations++;
         }
       }

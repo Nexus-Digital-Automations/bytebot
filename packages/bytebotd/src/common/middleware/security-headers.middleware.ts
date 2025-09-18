@@ -204,7 +204,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     next: NextFunction,
   ) => void;
 
-  constructor(_private configService: ConfigService) {
+  constructor(private configService: ConfigService) {
     const environment =
       this.configService.get<string>('NODE_ENV') ?? 'development';
     const corsOrigins = this.configService.get<string[]>('CORS_ORIGINS') ?? [

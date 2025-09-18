@@ -858,7 +858,7 @@ describe('Parlant Computer Use Integration Tests', () => {
    */
   async function createTestDataDirectory(): Promise<void> {
     try {
-      await fs.mkdir(_testDataDir, { recursive: true });
+      await fs.mkdir(testDataDir, { recursive: true });
     } catch {
       // Directory might already exist
     }
@@ -869,7 +869,7 @@ describe('Parlant Computer Use Integration Tests', () => {
    */
   async function cleanupTestData(): Promise<void> {
     try {
-      await fs.rm(_testDataDir, { recursive: true, force: true });
+      await fs.rm(testDataDir, { recursive: true, force: true });
     } catch (error: unknown) {
       console.warn('Failed to cleanup Parlant integration test data:', error);
     }

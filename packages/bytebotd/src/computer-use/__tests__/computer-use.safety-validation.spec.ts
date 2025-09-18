@@ -517,7 +517,7 @@ describe('Computer Use Safety and Validation', () => {
 
     it('should sanitize file system error messages', async () => {
       (fs.writeFile as jest.Mock).mockRejectedValue(
-        _new Error('EACCES: permission denied, open \'/root/.ssh/id_rsa\'')
+        new Error('EACCES: permission denied, open \'/root/.ssh/id_rsa\'')
       );
 
       const fileAction: WriteFileAction = {

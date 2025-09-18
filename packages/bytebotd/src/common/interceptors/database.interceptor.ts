@@ -324,7 +324,7 @@ export class DatabaseInterceptor implements NestInterceptor {
 
         // Cache the result
         if (this.cacheService) {
-          await this.cacheService.set(_cacheKey, result, {
+          await this.cacheService.set(cacheKey, result, {
             ttl: this.config.defaultCacheTtl,
             namespace: 'database-queries',
           });
@@ -365,7 +365,7 @@ export class DatabaseInterceptor implements NestInterceptor {
    */
   private extractDatabaseOperation(
     context: ExecutionContext,
-    request: Request,
+    _request: Request,
   ): DatabaseOperation | null {
     // This would need to be customized based on the ORM/database library used
     // For Prisma, we might extract from the handler name or method metadata
@@ -458,7 +458,7 @@ export class DatabaseInterceptor implements NestInterceptor {
     }
 
     if (typeof result === 'object' && result !== null && 'count' in result) {
-      return (_result as { count: number }).count;
+      return (result as { count: number }).count;
     }
 
     return 1; // Single result
@@ -537,7 +537,7 @@ export class DatabaseInterceptor implements NestInterceptor {
       }
     } catch (_error) {
       this.logger.error(
-        `Failed to record database metrics: ${error instanceof Error ? _error.message : 'Unknown error'}`,
+        `Failed to record database metrics: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
       );
     }
   }
@@ -552,7 +552,7 @@ export class DatabaseInterceptor implements NestInterceptor {
     const queryKey = `${operation.operation}:${operation.table}`;
 
     if (!this.slowQueries.has(queryKey)) {
-      this.slowQueries.set(_queryKey, {
+      this.slowQueries.set(queryKey, {
         totalDuration: duration,
         count: 1,
         avgDuration: duration,
@@ -602,7 +602,7 @@ export class DatabaseInterceptor implements NestInterceptor {
    * Clear database statistics
    */
   clearStats(): void {
-    Object.assign(_this.stats, {
+    Object.assign(this.stats, {
       totalQueries: 0,
       averageQueryTime: 0,
       slowQueries: 0,

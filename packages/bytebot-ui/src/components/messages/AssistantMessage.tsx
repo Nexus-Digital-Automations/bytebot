@@ -114,10 +114,10 @@ function getValidToolResultContent(
       if (
         contentArray.every((item) => Boolean(item) && typeof item === "object")
       ) {
-        // Safe type assertion with explicit return type using functional approach
+        // Return properly filtered items with explicit typing
         const validItems: MessageContentBlock[] = contentArray
-          .filter((item): item is MessageContentBlock => Boolean(item) && typeof item === "object")
-          .map((item: MessageContentBlock): MessageContentBlock => item);
+          .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object")
+          .map((item: Record<string, unknown>): MessageContentBlock => item as MessageContentBlock);
         return validItems;
       }
     }
@@ -148,10 +148,10 @@ function getNonErrorToolResultContent(
       if (
         contentArray.every((item) => Boolean(item) && typeof item === "object")
       ) {
-        // Safe type assertion with explicit return type using functional approach
+        // Return properly filtered items with explicit typing
         const validItems: MessageContentBlock[] = contentArray
-          .filter((item): item is MessageContentBlock => Boolean(item) && typeof item === "object")
-          .map((item: MessageContentBlock): MessageContentBlock => item);
+          .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object")
+          .map((item: Record<string, unknown>): MessageContentBlock => item as MessageContentBlock);
         return validItems;
       }
     }

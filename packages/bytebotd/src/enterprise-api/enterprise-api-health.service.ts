@@ -27,14 +27,14 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { HttpService } from '@nestjs/axios';
-import { EnterpriseApiService, EndpointHealth as _EndpointHealth, ApiPerformanceMetrics } from './enterprise-api.service';
+import { EnterpriseApiService, EndpointHealth as EndpointHealth, ApiPerformanceMetrics } from './enterprise-api.service';
 import {
   ParlantIntegrationService,
-  ConversationalValidationError as _ConversationalValidationError,
+  ConversationalValidationError as ConversationalValidationError,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
-  ParlantConversationContext as _ParlantConversationContext,
+  ParlantConversationContext as ParlantConversationContext,
 } from '../parlant/parlant-integration.service';
 
 // ===== HEALTH SERVICE TYPES =====

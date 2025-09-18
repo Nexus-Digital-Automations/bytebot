@@ -123,14 +123,14 @@ function ToolDetailsNormal({
 
   return (
     <>
-      {isApplicationToolUseBlock(block) && (
+      {Boolean(isApplicationToolUseBlock(block)) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
               return "Unknown Application";
             }
             // After type guard, we know block has input property
-            const input = block.input;
+            const input = (block as { input?: unknown })?.input;
             if (typeof input === "object" && input !== null && "application" in input) {
               const app = (input as { application?: unknown }).application;
               if (isValidApplication(app)) {
@@ -143,14 +143,14 @@ function ToolDetailsNormal({
       )}
 
       {/* Text for type and key actions */}
-      {(isTypeKeysToolUseBlock(block) || isPressKeysToolUseBlock(block)) && (
+      {(Boolean(isTypeKeysToolUseBlock(block)) || Boolean(isPressKeysToolUseBlock(block))) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
               return "Invalid keys";
             }
             // After type guard, we know block has input property
-            const input = block.input;
+            const input = (block as { input?: unknown })?.input;
             if (typeof input === "object" && input !== null && "keys" in input) {
               const keys = (input as { keys?: unknown }).keys;
               return Array.isArray(keys) ? keys.join(" + ") : "Invalid keys";
@@ -160,14 +160,14 @@ function ToolDetailsNormal({
         </p>
       )}
 
-      {(isTypeTextToolUseBlock(block) || isPasteTextToolUseBlock(block)) && (
+      {(Boolean(isTypeTextToolUseBlock(block)) || Boolean(isPasteTextToolUseBlock(block))) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
               return "Invalid text";
             }
             // After type guard, we know block has input property
-            const input = block.input;
+            const input = (block as { input?: unknown })?.input;
             if (typeof input === "object" && input !== null) {
               const inputObj = input as { text?: unknown; isSensitive?: unknown };
               const text = inputObj.text;
@@ -185,14 +185,14 @@ function ToolDetailsNormal({
       )}
 
       {/* Duration for wait actions */}
-      {isWaitToolUseBlock(block) && (
+      {Boolean(isWaitToolUseBlock(block)) && (
         <p className={baseClasses}>
           {((): string => {
             if (!isBlockWithInput(block)) {
               return "Invalid duration";
             }
             // After type guard, we know block has input property
-            const input = block.input;
+            const input = (block as { input?: unknown })?.input;
             if (typeof input === "object" && input !== null && "duration" in input) {
               const duration = (input as { duration?: unknown }).duration;
               return typeof duration === "number"
@@ -205,12 +205,12 @@ function ToolDetailsNormal({
       )}
 
       {/* Coordinates for click/mouse actions */}
-      {Boolean(block?.input) && hasCoordinates(block.input) && (
+      {Boolean((block as { input?: unknown })?.input) && hasCoordinates((block as { input?: unknown })?.input) && (
         <p className={baseClasses}>
           {((): string => {
             // hasCoordinates type guard already confirmed structure
-            if (hasCoordinates(block.input)) {
-              const coords = block.input.coordinates;
+            if (hasCoordinates((block as { input?: unknown })?.input)) {
+              const coords = ((block as { input?: unknown })?.input as { coordinates: Coordinates }).coordinates;
               return `${coords.x}, ${coords.y}`;
             }
             return "Invalid coordinates";
@@ -219,12 +219,12 @@ function ToolDetailsNormal({
       )}
 
       {/* Start and end coordinates for path actions */}
-      {Boolean(block?.input) && hasPathCoordinates(block.input) && (
+      {Boolean((block as { input?: unknown })?.input) && hasPathCoordinates((block as { input?: unknown })?.input) && (
         <p className={baseClasses}>
           {((): string => {
             // hasPathCoordinates type guard already confirmed structure  
-            if (hasPathCoordinates(block.input)) {
-              const path = block.input.path;
+            if (hasPathCoordinates((block as { input?: unknown })?.input)) {
+              const path = ((block as { input?: unknown })?.input as { path: Coordinates[] }).path;
               const firstPoint = path[0];
               const lastPoint = path[path.length - 1];
 
@@ -247,7 +247,7 @@ function ToolDetailsNormal({
               return "unknown 0";
             }
             // After type guard, we know block has input property
-            const input = block.input;
+            const input = (block as { input?: unknown })?.input;
             if (typeof input === "object" && input !== null) {
               const inputObj = input as { direction?: unknown; scrollCount?: unknown };
               const direction = inputObj.direction;
@@ -275,7 +275,7 @@ function ToolDetailsNormal({
               return "Invalid file path";
             }
             // After type guard, we know block has input property
-            const input = block.input;
+            const input = (block as { input?: unknown })?.input;
             if (typeof input === "object" && input !== null && "path" in input) {
               const path = (input as { path?: unknown }).path;
               return typeof path === "string" ? path : "Invalid file path";

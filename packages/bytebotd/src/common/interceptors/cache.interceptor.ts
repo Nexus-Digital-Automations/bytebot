@@ -299,7 +299,7 @@ export class CacheInterceptor implements NestInterceptor {
         .catch((_error) => {
           // Cache error - proceed without cache
           this.logger.error(
-            `[${operationId}] Cache retrieval error: ${error instanceof Error ? _error.message : 'Unknown error'}`,
+            `[${operationId}] Cache retrieval error: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
           );
 
           next.handle().subscribe({
@@ -387,7 +387,7 @@ export class CacheInterceptor implements NestInterceptor {
           };
 
           // Store in cache
-          await this.cacheService.set(_cacheKey, cachedResponse, {
+          await this.cacheService.set(cacheKey, cachedResponse, {
             ttl: cacheRule.ttl,
             namespace: 'api-cache',
           });
@@ -623,7 +623,7 @@ export class CacheInterceptor implements NestInterceptor {
     const normalizedUrl = this.normalizeUrlForStats(url);
 
     if (!this.stats.endpointStats.has(normalizedUrl)) {
-      this.stats.endpointStats.set(_normalizedUrl, {
+      this.stats.endpointStats.set(normalizedUrl, {
         hits: 0,
         misses: 0,
         hitRate: 0,
@@ -685,7 +685,7 @@ export class CacheInterceptor implements NestInterceptor {
    * Clear cache statistics
    */
   clearStats(): void {
-    Object.assign(_this.stats, {
+    Object.assign(this.stats, {
       totalRequests: 0,
       cacheHits: 0,
       cacheMisses: 0,

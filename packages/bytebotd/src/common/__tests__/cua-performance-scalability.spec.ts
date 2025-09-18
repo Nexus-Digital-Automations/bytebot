@@ -481,11 +481,11 @@ describe('CUA Performance and Scalability Tests', () => {
       // Performance assertions
       expect(operationsPerSecond).toBeGreaterThan(testConfig.targetThroughput * 0.8); // Within 20% of target
       expect(successfulOperations / totalOperations).toBeGreaterThan(1 - testConfig.errorThreshold);
-      expect(metrics.(averageResponseTime ?? "default")).toBeLessThan(testConfig.maxResponseTime);
-      expect(metrics.(p95ResponseTime ?? "default")).toBeLessThan(testConfig.maxResponseTime * 2);
+      expect(metrics.averageResponseTime).toBeLessThan(testConfig.maxResponseTime);
+      expect(metrics.p95ResponseTime).toBeLessThan(testConfig.maxResponseTime * 2);
 
       // Memory usage should be reasonable
-      const memoryGrowth = metrics.(memoryUsage ?? "default").peak.heapUsed - metrics.(memoryUsage ?? "default").initial.heapUsed;
+      const memoryGrowth = metrics.memoryUsage.peak.heapUsed - metrics.memoryUsage.initial.heapUsed;
       expect(memoryGrowth).toBeLessThan(200 * 1024 * 1024); // Less than 200MB growth
     });
 
@@ -579,7 +579,7 @@ describe('CUA Performance and Scalability Tests', () => {
       // Verify mixed operations performance
       expect(operationsPerSecond).toBeGreaterThan(testConfig.targetThroughput * 0.7);
       expect(successfulOperations / totalOperations).toBeGreaterThan(0.95);
-      expect(metrics.(averageResponseTime ?? "default")).toBeLessThan(testConfig.maxResponseTime);
+      expect(metrics.averageResponseTime).toBeLessThan(testConfig.maxResponseTime);
     });
   });
 
@@ -768,7 +768,7 @@ describe('CUA Performance and Scalability Tests', () => {
       expect(totalOperations).toBeGreaterThan(1000); // Minimum operations under stress
       expect(failureRate).toBeLessThan(0.1); // Less than 10% failure rate under stress
       expect(metrics.operationsPerSecond).toBeGreaterThan(50); // Minimum throughput under stress
-      expect(metrics.(cpuUsage ?? "default").peak).toBeLessThan(100); // Should not max out CPU
+      expect(metrics.cpuUsage.peak).toBeLessThan(100); // Should not max out CPU
     });
 
     it('should recover gracefully from memory pressure', async () => {
@@ -825,7 +825,7 @@ describe('CUA Performance and Scalability Tests', () => {
 
       // Memory pressure recovery assertions
       expect(successfulOps / memoryIntensiveOperations).toBeGreaterThan(0.8); // At least 80% success under memory pressure
-      expect(metrics.(memoryUsage ?? "default").growth).toBeLessThan(500 * 1024 * 1024); // Memory growth under 500MB
+      expect(metrics.memoryUsage.growth).toBeLessThan(500 * 1024 * 1024); // Memory growth under 500MB
     });
   });
 
@@ -1014,15 +1014,15 @@ describe('CUA Performance and Scalability Tests', () => {
     const bottlenecks: string[] = [];
     
     // Simple heuristics for bottleneck identification
-    if (metrics.(cpuUsage ?? "default").peak > 80) {
+    if (metrics.cpuUsage.peak > 80) {
       bottlenecks.push('CPU');
     }
     
-    if (metrics.(memoryUsage ?? "default").growth > 100 * 1024 * 1024) { // > 100MB growth
+    if (metrics.memoryUsage.growth > 100 * 1024 * 1024) { // > 100MB growth
       bottlenecks.push('Memory');
     }
     
-    if (metrics.(p95ResponseTime ?? "default") > metrics.(averageResponseTime ?? "default") * 3) {
+    if (metrics.p95ResponseTime > metrics.averageResponseTime * 3) {
       bottlenecks.push('ResponseTime');
     }
     
@@ -1033,8 +1033,8 @@ describe('CUA Performance and Scalability Tests', () => {
    * Calculate overall resource utilization
    */
   function calculateResourceUtilization(metrics: PerformanceMetrics): number {
-    const cpuUtilization = Math.min(metrics.(cpuUsage ?? "default").average / 100, 1);
-    const memoryUtilization = Math.min(metrics.(memoryUsage ?? "default").peak.heapUsed / (1024 * 1024 * 1024), 1); // Normalize to 1GB
+    const cpuUtilization = Math.min(metrics.cpuUsage.average / 100, 1);
+    const memoryUtilization = Math.min(metrics.memoryUsage.peak.heapUsed / (1024 * 1024 * 1024), 1); // Normalize to 1GB
     
     return (cpuUtilization + memoryUtilization) / 2;
   }

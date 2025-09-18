@@ -40,7 +40,7 @@ interface AuthenticatedRequest {
 
 // Mock RBAC Roles Guard implementation for Phase 1 requirements
 class MockRolesGuard {
-  constructor(_private reflector: Reflector) {}
+  constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
@@ -295,7 +295,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        _new ForbiddenException('Access denied. Required roles: admin'),
+        new ForbiddenException('Access denied. Required roles: admin'),
       );
 
       console.log(`[${testId}] Viewer access denial test completed`);
@@ -469,7 +469,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        _new ForbiddenException(
+        new ForbiddenException(
           'Access denied. Required permissions: system:admin',
         ),
       );

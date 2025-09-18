@@ -24,12 +24,24 @@
       "updated_at": "2025-09-16T18:01:14.733Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-17T12:29:11.613Z",
       "title": "Fix TypeScript strict mode warnings in bytebot-ui",
       "description": "Fix unsafe member access warnings, strict boolean expressions, and unsafe assignments in bytebot-ui package components and hooks",
       "category": "error",
-      "id": "error_1758112151612_5pox1thgqsq"
+      "id": "error_1758112151612_5pox1thgqsq",
+      "assigned_agent": "dev_session_1758206637729_1_general_ee1b2614",
+      "started_at": "2025-09-18T14:44:57.675Z",
+      "claimed_by": "dev_session_1758206637729_1_general_ee1b2614",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758206637729_1_general_ee1b2614",
+          "role": "primary",
+          "assignedAt": "2025-09-18T14:44:57.675Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "completed_tasks": [],
