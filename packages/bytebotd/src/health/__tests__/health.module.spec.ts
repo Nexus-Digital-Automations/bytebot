@@ -35,6 +35,8 @@ import { HttpModule } from '@nestjs/axios';
 import { HealthModule } from '../health.module';
 import { HealthController } from '../health.controller';
 import { HealthService } from '../health.service';
+import { ByteBotdUser } from '../../auth/decorators/roles.decorator';
+import { UserRole, Permission } from '@bytebot/shared';
 
 // Type definitions for health service method returns
 interface HealthCheckResponse {
@@ -58,6 +60,20 @@ describe('HealthModule', () => {
 
   const operationId = `health_module_test_${Date.now()}`;
 
+  // Mock user for authenticated calls
+  const mockUser: ByteBotdUser = {
+    sub: 'test-user-id',
+    id: 'test-user-id',
+    email: 'test@example.com',
+    username: 'test-user',
+    role: UserRole._ADMIN,
+    isActive: true,
+    firstName: 'Test',
+    lastName: 'User',
+    sessionId: 'test-session-id',
+    permissions: [Permission._COMPUTER_CONTROL],
+  };
+
   beforeEach(async () => {
     console.log(`[${operationId}] Setting up HealthModule test environment`);
 
@@ -71,8 +87,17 @@ describe('HealthModule', () => {
       verbose: jest.fn(),
       fatal: jest.fn(),
       setContext: jest.fn(),
-      localInstance: undefined,
-    } as jest.Mocked<Logger>;
+      localInstance: {
+        log: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
+        verbose: jest.fn(),
+        fatal: jest.fn(),
+      },
+      options: {},
+      registerLocalInstanceRef: jest.fn(),
+    } as unknown as jest.Mocked<Logger>;
 
     // Mock Logger constructor to return our mock
     jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);
@@ -241,7 +266,7 @@ describe('HealthModule', () => {
       expect(healthService).toBeDefined();
 
       // Test basic functionality to ensure dependencies are working
-      const basicHealth = await healthController.getHealth();
+      const basicHealth = await healthController.getHealth(mockUser);
       expect(basicHealth).toBeDefined();
       expect(basicHealth.status).toBeDefined();
 
@@ -258,7 +283,7 @@ describe('HealthModule', () => {
 
       // Test that Terminus health checks are working
       try {
-        const livenessResult = await healthController.checkLiveness();
+        const livenessResult = await healthController.checkLiveness(mockUser);
         expect(livenessResult).toBeDefined();
       } catch (error) {
         // Health checks might fail in test environment, but they should be callable
@@ -285,7 +310,7 @@ describe('HealthModule', () => {
 
       // Test external service health check functionality
       try {
-        const readinessResult = await healthController.checkReadiness();
+        const readinessResult = await healthController.checkReadiness(mockUser);
         expect(readinessResult).toBeDefined();
       } catch (error) {
         // External service checks might fail in test environment
@@ -353,7 +378,7 @@ describe('HealthModule', () => {
       expect(serviceInitTime).toBeLessThanOrEqual(Date.now());
 
       // Controller should be able to use service immediately
-      const basicHealth = await healthController.getHealth();
+      const basicHealth = await healthController.getHealth(mockUser);
       expect(basicHealth.status).toBe('healthy');
 
       console.log(`[${testId}] Service initialization order test completed`);
@@ -385,7 +410,7 @@ describe('HealthModule', () => {
       const promises = Array(10)
         .fill(null)
         .map(async (_, _i) => {
-          const health = await healthController.getHealth();
+          const health = await healthController.getHealth(mockUser);
           expect(health.status).toBe('healthy');
           return health;
         });
@@ -490,7 +515,7 @@ describe('HealthModule', () => {
       expect(appHealthService).toBeDefined();
       expect(appHealthController).toBeDefined();
 
-      const appHealth = await appHealthController.getHealth();
+      const appHealth = await appHealthController.getHealth(mockUser);
       expect(appHealth.status).toBe('healthy');
 
       await appModule.close();
@@ -604,7 +629,7 @@ describe('HealthModule', () => {
       expect(failureHealthController).toBeDefined();
 
       // Controller should handle service failures gracefully
-      const healthResult = await failureHealthController.getHealth();
+      const healthResult = await failureHealthController.getHealth(mockUser);
       expect(healthResult.status).toBe('unhealthy');
       expect((healthResult as Record<string, unknown>).error).toBeDefined();
 
@@ -632,7 +657,7 @@ describe('HealthModule', () => {
       expect(resilientHealthController).toBeDefined();
 
       // Module should continue working despite potential external dependency failures
-      const health = await resilientHealthController.getHealth();
+      const health = await resilientHealthController.getHealth(mockUser);
       expect(health).toBeDefined();
       expect(['healthy', 'unhealthy'].includes(health.status)).toBe(true);
 
@@ -653,13 +678,13 @@ describe('HealthModule', () => {
       });
 
       // Module should continue functioning despite transient errors
-      const health1 = await healthController.getHealth();
+      const health1 = await healthController.getHealth(mockUser);
       expect(health1).toBeDefined();
 
       // Restore normal functionality
       mockLogger.log = originalLog;
 
-      const health2 = await healthController.getHealth();
+      const health2 = await healthController.getHealth(mockUser);
       expect(health2.status).toBe('healthy');
 
       console.log(`[${testId}] Transient error recovery test completed`);
@@ -673,8 +698,8 @@ describe('HealthModule', () => {
       const stressPromises = Array(50)
         .fill(null)
         .map(async (_, _i) => {
-          const health = await healthController.getHealth();
-          const detailed = await healthController.getDetailedStatus();
+          const health = await healthController.getHealth(mockUser);
+          const detailed = await healthController.getDetailedStatus(mockUser);
           return { basic: health, detailed, index: _i };
         });
 
@@ -701,7 +726,7 @@ describe('HealthModule', () => {
         .fill(null)
         .map(async () => {
           try {
-            const health = await healthController.getHealth();
+            const health = await healthController.getHealth(mockUser);
             return health;
           } catch (error) {
             return { status: 'error', error: (error as Error).message };
@@ -761,7 +786,7 @@ describe('HealthModule', () => {
       // Execute 200 concurrent health checks
       const scalingPromises = Array(200)
         .fill(null)
-        .map(() => healthController.getHealth());
+        .map(() => healthController.getHealth(mockUser));
 
       const scalingResults = await Promise.all(scalingPromises);
       const totalTime = Date.now() - startTime;
@@ -784,7 +809,7 @@ describe('HealthModule', () => {
       // Execute health checks over time and measure performance
       for (let i = 0; i < 20; i++) {
         const startTime = Date.now();
-        await healthController.getHealth();
+        await healthController.getHealth(mockUser);
         const responseTime = Date.now() - startTime;
         performanceMetrics.push(responseTime);
 
@@ -820,7 +845,7 @@ describe('HealthModule', () => {
       const rapidPromises: Promise<{ status: string; timestamp: string }>[] =
         [];
       for (let i = 0; i < requestCount; i++) {
-        rapidPromises.push(Promise.resolve(healthController.getHealth()));
+        rapidPromises.push(Promise.resolve(healthController.getHealth(mockUser)));
       }
 
       const rapidResults = await Promise.all(rapidPromises);
@@ -848,7 +873,7 @@ describe('HealthModule', () => {
       for (let batch = 0; batch < 10; batch++) {
         const batchPromises = Array(50)
           .fill(null)
-          .map(() => healthController.getHealth());
+          .map(() => healthController.getHealth(mockUser));
         await Promise.all(batchPromises);
 
         // Force garbage collection if available
