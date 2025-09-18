@@ -114,11 +114,12 @@ function isCacheStatus(obj: unknown): obj is CacheStatus {
 function isAuditStatus(obj: unknown): obj is AuditStatus {
   if (!obj || typeof obj !== 'object') return false;
   const record = obj as Record<string, unknown>;
-  return (
+  const result = (
     'totalEntries' in record && typeof record.totalEntries === 'number' && 
     'complianceDistribution' in record && record.complianceDistribution &&
     typeof record.complianceDistribution === 'object'
   );
+  return result as boolean;
 }
 
 // Core optimized integration service

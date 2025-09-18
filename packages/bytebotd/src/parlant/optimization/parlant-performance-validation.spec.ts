@@ -482,7 +482,7 @@ describe('Parlant Performance Optimization Validation', () => {
     });
 
     it('should provide optimization recommendations for operations', () => {
-      const recommendationsProvider = module.get('PARLANT_OPTIMIZATION_RECOMMENDATIONS');
+      const recommendationsProvider = module.get('PARLANT_OPTIMIZATION_RECOMMENDATIONS') as () => unknown[];
       const recommendations = recommendationsProvider();
       
       expect(Array.isArray(recommendations)).toBe(true);

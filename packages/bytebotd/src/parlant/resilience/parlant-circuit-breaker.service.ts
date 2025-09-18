@@ -134,10 +134,10 @@ export class ParlantCircuitBreakerService extends EventEmitter {
   private failureCount = 0;
   
   // Connection pool
-  private readonly connectionPool: Map<string, any> = new Map();
+  private readonly connectionPool: Map<string, unknown> = new Map();
   private readonly activeConnections = new Set<string>();
   private readonly pendingRequests: Array<{
-    resolve: (connection: any) => void;
+    resolve: (connection: unknown) => void;
     reject: (error: Error) => void;
     timestamp: number;
   }> = [];
@@ -267,7 +267,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
    * @param operationId - Operation identifier
    * @returns Connection or throws error
    */
-  async acquireConnection(operationId: string): Promise<any> {
+  async acquireConnection(operationId: string): Promise<unknown> {
     const startTime = performance.now();
     
     if (!this.canExecute()) {
@@ -340,7 +340,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
    * @param connection - Connection to release
    * @param operationId - Operation identifier
    */
-  async releaseConnection(connection: any, operationId: string): Promise<void> {
+  async releaseConnection(connection: unknown, operationId: string): Promise<void> {
     if (!connection?.id) {
       this.logger.warn(`[${operationId}] Invalid connection for release`);
       return;
@@ -605,7 +605,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
     }
   }
 
-  private async createConnection(): Promise<any> {
+  private async createConnection(): Promise<unknown> {
     const connectionId = `conn_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     
     // Select healthy endpoint
@@ -624,7 +624,7 @@ export class ParlantCircuitBreakerService extends EventEmitter {
     return connection;
   }
 
-  private findAvailableConnection(): any | null {
+  private findAvailableConnection(): unknown | null {
     for (const [id, connection] of this.connectionPool) {
       if (!this.activeConnections.has(id) && connection.healthy) {
         connection.lastUsed = new Date();
