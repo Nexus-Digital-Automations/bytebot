@@ -42,8 +42,8 @@ import {
  * Metrics collection service for Prometheus integration
  */
 @Injectable()
-export class MetricsService {
-  private readonly logger = new Logger(MetricsService.name);
+export class BytebotMetricsService {
+  private readonly logger = new Logger(BytebotMetricsService.name);
 
   // API Request Metrics
   private readonly httpRequestsTotal: Counter<string>;
@@ -657,3 +657,6 @@ export class MetricsService {
     this.logger.debug('All metrics cleared');
   }
 }
+
+// Export alias for backward compatibility with existing imports
+export { BytebotMetricsService as MetricsService };

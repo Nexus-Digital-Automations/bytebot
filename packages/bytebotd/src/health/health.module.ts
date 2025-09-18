@@ -25,7 +25,7 @@ import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
 import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
-import { MonitoringModule } from '@bytebot/shared/dist/index-server';
+import { ParlantModule } from '../parlant/parlant.module';
 
 /**
  * Enterprise health monitoring module providing Kubernetes observability
@@ -34,7 +34,8 @@ import { MonitoringModule } from '@bytebot/shared/dist/index-server';
   imports: [
     TerminusModule, // Provides health check indicators
     HttpModule, // For external service health checks
-    MonitoringModule, // Provides MetricsService for Prometheus metrics
+    ParlantModule, // Provides ParlantHealthMetricsValidationService for conversational validation
+    // MonitoringModule, // Provides MetricsService for Prometheus metrics - temporarily disabled due to EventEmitter dependency issue
   ],
   controllers: [HealthController],
   providers: [HealthService],

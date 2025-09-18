@@ -33,7 +33,7 @@ import {
   CurrentUser,
   ByteBotdUser,
 } from '../auth/decorators/roles.decorator';
-import { MetricsService } from './metrics.service';
+import { BytebotMetricsService } from './metrics.service';
 import {
   ParlantHealthMetricsValidationService,
   MetricsOperationType,
@@ -49,7 +49,7 @@ export class MetricsController {
   private readonly logger = new Logger(MetricsController.name);
 
   constructor(
-    private readonly metricsService: MetricsService,
+    private readonly metricsService: BytebotMetricsService,
     private readonly parlantValidationService: ParlantHealthMetricsValidationService,
   ) {
     this.logger.log('Metrics Controller initialized with Parlant validation');

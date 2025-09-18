@@ -15,10 +15,11 @@
  * Performance: Optimized validation pipeline with sub-1000ms targets
  */
 
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ParlantIntegrationService } from './parlant-integration.service';
 import { ParlantValidatedComputerUseService } from './parlant-validated-computer-use.service';
+import { ParlantHealthMetricsValidationService } from './services/parlant-health-metrics-validation.service';
 import { ComputerUseModule } from '../computer-use/computer-use.module';
 
 /**
@@ -77,8 +78,8 @@ export const parlantConfigFactory = () => ({
       isGlobal: false, // Scoped to Parlant module
     }),
     
-    // Import computer-use module for service dependency
-    ComputerUseModule,
+    // Import computer-use module for service dependency (using forwardRef to avoid circular dependency)
+    forwardRef(() => ComputerUseModule),
   ],
   
   providers: [
@@ -87,6 +88,9 @@ export const parlantConfigFactory = () => ({
     
     // Parlant-validated service wrappers
     ParlantValidatedComputerUseService,
+    
+    // Health and metrics validation service
+    ParlantHealthMetricsValidationService,
     
     // TODO: Additional validated services will be added here:
     // ParlantValidatedInputTrackingService,
@@ -101,6 +105,9 @@ export const parlantConfigFactory = () => ({
     
     // Export validated services for dependency injection
     ParlantValidatedComputerUseService,
+    
+    // Export health and metrics validation service
+    ParlantHealthMetricsValidationService,
     
     // TODO: Export additional validated services:
     // ParlantValidatedInputTrackingService,

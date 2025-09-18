@@ -21,15 +21,17 @@
 
 import { Module, Logger } from '@nestjs/common';
 import { MetricsController } from './metrics.controller';
-import { MetricsService } from './metrics.service';
+import { BytebotMetricsService } from './metrics.service';
+import { ParlantModule } from '../parlant/parlant.module';
 
 /**
  * Metrics collection module providing application observability
  */
 @Module({
+  imports: [ParlantModule],
   controllers: [MetricsController],
-  providers: [MetricsService],
-  exports: [MetricsService], // Export service for use by other modules
+  providers: [BytebotMetricsService],
+  exports: [BytebotMetricsService], // Export service for use by other modules
 })
 export class MetricsModule {
   private readonly logger = new Logger(MetricsModule.name);

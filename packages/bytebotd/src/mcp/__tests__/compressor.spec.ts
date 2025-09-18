@@ -322,10 +322,11 @@ describe('Base64ImageCompressor', () => {
     it('should handle unsupported formats', async () => {
       const inputImage = TestDataGenerator.generateBase64Image(1000);
 
-      // @ts-ignore - Testing with invalid format
+      // Testing with invalid format - intentionally using unsupported type
       await expect(
         Base64ImageCompressor.compressToSize(inputImage, {
-          format: 'gif' as 'gif',
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+          format: 'gif' as any,
         }),
       ).rejects.toThrow('Unsupported format');
     });
