@@ -485,7 +485,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
           userId: metadata.userId || "anonymous",
           roles: ["api_user"],
           sessionId:
-            ((req as Record<string, unknown>).sessionID as string) ||
+            ((req as unknown as { sessionID?: string }).sessionID) ||
             `universal_session_${Date.now()}`,
           ipAddress: metadata.ipAddress,
           metadata: {
@@ -502,7 +502,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
 
       // Perform validation with timeout
       const validationPromise =
-        this.parlantService.validateFunction(validationRequest);
+        this._parlantService.validateFunction(validationRequest);
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(
           () => reject(new Error("Validation timeout")),
@@ -600,7 +600,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
    */
   private extractUserId(req: Request): string | undefined {
     // Try to extract user ID from various sources
-    const reqWithUser = req as Record<string, unknown> & {
+    const reqWithUser = req as unknown as {
       user?: { id?: string; userId?: string };
     };
     return reqWithUser.user?.id || reqWithUser.user?.userId || undefined;
@@ -637,6 +637,7 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
    */
   private sanitizeBody(body: unknown): unknown {
     if (!body) return undefined;
+    if (typeof body !== 'object' || Array.isArray(body)) return body;
 
     // Remove sensitive fields
     const sensitiveFields = [
@@ -646,10 +647,10 @@ export class UniversalParlantValidationMiddleware implements NestMiddleware {
       "key",
       "credential",
     ];
-    const sanitized = { ...body };
+    const sanitized = { ...(body as Record<string, unknown>) };
 
     sensitiveFields.forEach((field) => {
-      if (sanitized[field]) {
+      if (field in sanitized) {
         sanitized[field] = "[REDACTED]";
       }
     });
