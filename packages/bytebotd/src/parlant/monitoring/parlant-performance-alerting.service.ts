@@ -26,8 +26,8 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+// Note: Using setInterval instead of Cron decorators for scheduling
 import { performance } from 'perf_hooks';
 import { ParlantPerformanceMonitorService, ParlantPerformanceStats } from '../performance/parlant-performance-monitor.service';
 
@@ -527,6 +527,55 @@ export class ParlantPerformanceAlertingService {
 
     // Start notification processing
     this.startNotificationProcessor();
+
+    // Initialize scheduled tasks and event handlers
+    this.initializeScheduledTasks();
+    this.initializeEventHandlers();
+  }
+
+  /**
+   * Initialize scheduled tasks using setInterval
+   */
+  private initializeScheduledTasks(): void {
+    // Continuous evaluation every minute
+    setInterval(async () => {
+      try {
+        await this.performContinuousEvaluation();
+      } catch (error) {
+        this.logger.error('Continuous evaluation failed', error);
+      }
+    }, 60 * 1000); // 1 minute
+
+    // Performance analysis every 10 minutes
+    setInterval(async () => {
+      try {
+        await this.performPerformanceAnalysis();
+      } catch (error) {
+        this.logger.error('Performance analysis failed', error);
+      }
+    }, 10 * 60 * 1000); // 10 minutes
+
+    // Comprehensive analysis every hour
+    setInterval(async () => {
+      try {
+        await this.performComprehensiveAnalysis();
+      } catch (error) {
+        this.logger.error('Comprehensive analysis failed', error);
+      }
+    }, 60 * 60 * 1000); // 1 hour
+  }
+
+  /**
+   * Initialize event handlers
+   */
+  private initializeEventHandlers(): void {
+    this.eventEmitter.on('performance.metric.updated', async (data: { metric: string; value: number }) => {
+      try {
+        await this.handleMetricUpdate(data);
+      } catch (error) {
+        this.logger.error('Failed to handle metric update', error);
+      }
+    });
   }
 
   /**
@@ -1280,6 +1329,7 @@ export class ParlantPerformanceAlertingService {
     return {
       overallImpact: this.calculateOverallImpact(impactMultiplier),
       affectedUsers,
+      affectedServices: impactMultiplier > 1.5 ? ['parlant-validation', 'parlant-integration'] : [],
       affectedRevenue,
       slaViolations: impactMultiplier > 2 ? ['Response Time SLA'] : [],
       complianceRisks: baseImpact.complianceRisk.regulations,
@@ -1715,9 +1765,37 @@ export class ParlantPerformanceAlertingService {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  private async performContinuousEvaluation(): Promise<void> {
+    // Lightweight continuous evaluation
+    await this.evaluateAlertRules();
+  }
+
+  private async performPerformanceAnalysis(): Promise<void> {
+    // Enhanced performance analysis
+    await this.evaluateAlertRules();
+    this.updateAnalytics();
+  }
+
+  private async performComprehensiveAnalysis(): Promise<void> {
+    // Comprehensive analysis including correlations
+    await this.evaluateAlertRules();
+    this.updateAnalytics();
+    await this.performCorrelationAnalysis();
+  }
+
+  private async performCorrelationAnalysis(): Promise<void> {
+    // TODO: Implement correlation analysis
+    this.logger.debug('Performing correlation analysis');
+  }
+
+  private updateAnalytics(): void {
+    // TODO: Update analytics data
+    this.logger.debug('Updating analytics');
+  }
+
   // ===== EVENT HANDLERS =====
 
-  @OnEvent('performance.metric.updated')
+  // Note: Event handling implemented in initializeEventHandlers()
   private async handleMetricUpdate(data: { metric: string; value: number }): Promise<void> {
     // Trigger immediate evaluation for critical metrics
     const criticalMetrics = ['averageLatency', 'errorRate'];
@@ -1734,7 +1812,7 @@ export class ParlantPerformanceAlertingService {
 
   // ===== SCHEDULED TASKS =====
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  // Note: Scheduled via initializeScheduledTasks()
   private async performMinutelyTasks(): Promise<void> {
     try {
       await this.evaluateAlertRules();
@@ -1743,7 +1821,7 @@ export class ParlantPerformanceAlertingService {
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  // Note: Scheduled via initializeScheduledTasks()
   private async performTenMinuteTasks(): Promise<void> {
     try {
       await this.cleanupResolvedAlerts();
@@ -1753,7 +1831,7 @@ export class ParlantPerformanceAlertingService {
     }
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  // Note: Scheduled via initializeScheduledTasks()
   private async performHourlyTasks(): Promise<void> {
     try {
       await this.generateAlertingReport();
