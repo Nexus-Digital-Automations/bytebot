@@ -71,6 +71,7 @@ export interface File {
 
 export interface Task {
   id: string;
+  title: string;
   description: string;
   type: TaskType;
   status: TaskStatus;
@@ -90,7 +91,10 @@ export interface Task {
 }
 
 // File validation constants
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const BYTES_PER_KB = 1024;
+const KB_PER_MB = 1024;
+const MAX_FILE_SIZE_MB = 10;
+const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * KB_PER_MB * BYTES_PER_KB; // 10MB
 const ALLOWED_FILE_TYPES = [
   'image/jpeg',
   'image/jpg', 
@@ -119,7 +123,7 @@ export function validateUploadedFiles(files: FileWithBase64[]): FileWithBase64[]
 
   return files.filter((file) => {
     // Check if file object has required properties
-    if (!file || typeof file !== 'object') {
+    if (file === null || file === undefined || typeof file !== 'object') {
       return false;
     }
 
@@ -138,7 +142,8 @@ export function validateUploadedFiles(files: FileWithBase64[]): FileWithBase64[]
     }
 
     // Validate file name (basic security check)
-    if (file.name.length > 255 || file.name.includes('../') || file.name.includes('..\\')) {
+    const MAX_FILENAME_LENGTH = 255;
+    if (file.name.length > MAX_FILENAME_LENGTH || file.name.includes('../') || file.name.includes('..\\')) {
       return false;
     }
 

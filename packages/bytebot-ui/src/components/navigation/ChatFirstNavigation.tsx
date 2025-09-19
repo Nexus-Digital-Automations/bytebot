@@ -217,7 +217,8 @@ interface NavigationAction {
   requiredParams?: string[];
   
   /** Action icon */
-  icon?: React.ComponentType | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon?: any;
   
   /** Keyboard shortcut */
   shortcut?: string;
@@ -877,9 +878,11 @@ export const ChatFirstNavigation: React.FC<ChatFirstNavigationProps> = ({
         if (result.suggestedAction.handler !== undefined) {
           await result.suggestedAction.handler();
         } else if (result.suggestedAction.path !== undefined) {
-          router.push(result.suggestedAction.path).catch(() => {
+          try {
+            router.push(result.suggestedAction.path);
+          } catch {
             // Ignore navigation errors
-          });
+          }
           if (onNavigate !== undefined) {
             onNavigate(result.suggestedAction.path, result.parameters);
           }

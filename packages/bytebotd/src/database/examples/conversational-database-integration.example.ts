@@ -22,7 +22,7 @@ import { Injectable, Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ConversationalDatabaseService } from '../conversational-database.service';
 import { UserConversationalRepositoryService } from '../repositories/user-conversational-repository.service';
-import { BaseConversationalRepositoryService } from '../repositories/base-conversational-repository.service';
+// Removed unused import: BaseConversationalRepositoryService
 import { UserEntity } from '../../test-utils/database-types';
 import { Repository } from '../../types/index';
 import { ParlantModule } from '../../parlant/parlant.module';
@@ -128,7 +128,7 @@ export class ExampleUserManagementService {
         {
           userId: operationContext.userId,
           userRole: operationContext.userRole,
-          businessPurpose: operationContext.businessJustification ||
+          businessPurpose: operationContext.businessJustification ??
             `Update user profile ${isSensitiveUpdate ? '(sensitive fields)' : ''}`,
           requireRoleValidation: 'role' in updates,
         }
@@ -405,7 +405,7 @@ export class ExampleUserManagementService {
           {
             userId: operationContext.userId,
             userRole: operationContext.userRole,
-            businessPurpose: operationContext.businessJustification || 'Search user by email',
+            businessPurpose: operationContext.businessJustification ?? 'Search user by email',
           }
         );
         users = user ? [user] : [];
@@ -415,7 +415,7 @@ export class ExampleUserManagementService {
           {
             userId: operationContext.userId,
             userRole: operationContext.userRole,
-            businessPurpose: operationContext.businessJustification || `Search users by role: ${criteria.role}`,
+            businessPurpose: operationContext.businessJustification ?? `Search users by role: ${criteria.role}`,
           }
         );
       } else if (criteria.isActive !== undefined) {
@@ -423,7 +423,7 @@ export class ExampleUserManagementService {
           users = await this.userRepository.findActiveUsers({
             userId: operationContext.userId,
             userRole: operationContext.userRole,
-            businessPurpose: operationContext.businessJustification || 'Search active users',
+            businessPurpose: operationContext.businessJustification ?? 'Search active users',
           });
         } else {
           // Find all users and filter inactive (in real implementation, this would be a proper query)
@@ -432,7 +432,7 @@ export class ExampleUserManagementService {
             {
               userId: operationContext.userId,
               userRole: operationContext.userRole,
-              businessPurpose: operationContext.businessJustification || 'Search inactive users',
+              businessPurpose: operationContext.businessJustification ?? 'Search inactive users',
             }
           );
           users = allUsers.filter(user => !user.isActive);
@@ -444,7 +444,7 @@ export class ExampleUserManagementService {
           {
             userId: operationContext.userId,
             userRole: operationContext.userRole,
-            businessPurpose: operationContext.businessJustification || 'General user search',
+            businessPurpose: operationContext.businessJustification ?? 'General user search',
           }
         );
       }
@@ -494,7 +494,7 @@ export class ExampleUserManagementService {
 
       this.logger.log('Repository health retrieved', {
         totalOperations: metrics.totalOperations,
-        approvalRate: (metrics.approvedOperations / (metrics.totalOperations || 1)) * 100,
+        approvalRate: (metrics.approvedOperations / (metrics.totalOperations ?? 1)) * 100,
         cacheHitRate: cacheStatus.hitRate,
         totalBackups: backupStatus.totalBackups,
       });
@@ -839,12 +839,12 @@ export class ConversationalDatabaseUsageExamples {
         const mockRepository = {
           findById: async () => null,
           findAll: async () => [],
-          create: async (data: any) => ({ id: 'mock-id', ...data }),
+          create: async (data: Partial<UserEntity>) => ({ id: 'mock-id', ...data } as UserEntity),
           update: async () => null,
           delete: async () => false,
           count: async () => 0,
         };
-        return new UserConversationalRepositoryService(conversationalDbService, mockRepository as any);
+        return new UserConversationalRepositoryService(conversationalDbService, mockRepository as unknown as Repository<UserEntity>);
       },
       inject: [ConversationalDatabaseService],
     },

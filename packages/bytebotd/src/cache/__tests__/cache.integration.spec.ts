@@ -103,8 +103,8 @@ describe('Cache Redis Integration Tests', () => {
       }).compile();
 
       cacheService = module.get<CacheService>(CacheService);
-      keyGenerator = module.get<CacheKeyGenerator>(CacheKeyGenerator);
-      cacheManager = module.get<Cache>(CACHE_MANAGER);
+      _keyGenerator = module.get<CacheKeyGenerator>(CacheKeyGenerator);
+      _cacheManager = module.get<Cache>(CACHE_MANAGER);
 
       // Wait a moment for Redis connection to stabilize
       await new Promise(resolve => setTimeout(resolve, 100));

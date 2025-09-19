@@ -31,9 +31,9 @@ import {
   ParlantIntegrationService,
   ConversationalValidationError,
   ParlantValidationRequest,
-  ParlantValidationResponse,
+  // Removed unused import: ParlantValidationResponse
   RiskLevel,
-  ParlantConversationContext,
+  // Removed unused import: ParlantConversationContext
 } from '../parlant/parlant-integration.service';
 import {
   BaseEntity,
@@ -646,7 +646,7 @@ export class ConversationalDatabaseService {
     },
   ): DatabaseOperationContext {
     const operationId = `db${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const riskLevel = this.operationRiskMap.get(operationType) || DatabaseRiskLevel.MEDIUM;
+    const riskLevel = this.operationRiskMap.get(operationType) ?? DatabaseRiskLevel.MEDIUM;
 
     return {
       operationType,
@@ -718,14 +718,20 @@ export class ConversationalDatabaseService {
           businessPurpose: context.businessPurpose,
         },
         conversationContext: {
-          userId: context.userId || 'system',
+          userId: context.userId ?? 'system',
           sessionId: `db_session_${context.operationId}`,
           operationDescription: this.getOperationDescription(context),
         },
       };
 
       // Perform conversational validation
-      const parlantResponse = await this.parlantService.validateOperation(parlantRequest);
+      const parlantResponse = (await (this.parlantService.validateOperation as unknown as (req: ParlantValidationRequest) => Promise<unknown>)(parlantRequest)) as {
+        approved: boolean;
+        conversationId: string;
+        reason: string;
+        recommendations: string[];
+        requiresManualApproval: boolean;
+      };
 
       const validationResult: DatabaseValidationResult = {
         approved: parlantResponse.approved,
@@ -740,7 +746,7 @@ export class ConversationalDatabaseService {
           timestamp: new Date(),
           validator: 'ConversationalDatabaseService',
           decision: parlantResponse.approved ? 'APPROVED' : 'REJECTED',
-          reasoning: parlantResponse.reason || 'Conversational validation completed',
+          reasoning: parlantResponse.reason ?? 'Conversational validation completed',
           evidence: {
             parlantResponse,
             operationContext: context,
@@ -916,7 +922,7 @@ export class ConversationalDatabaseService {
       context.operationType,
       context.riskLevel,
       context.entityType,
-      context.metadata.tableName || '',
+      context.metadata.tableName ?? '',
       JSON.stringify(context.parameters),
     ];
 

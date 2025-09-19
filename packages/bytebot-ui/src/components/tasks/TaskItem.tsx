@@ -17,7 +17,7 @@ interface TaskItemProps {
 
 interface StatusIconConfig {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon?: any; // HugeIcons IconSvgObject type
+  icon?: any;
   color?: string;
   useLoader?: boolean;
 }
@@ -72,7 +72,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
     const config = STATUS_CONFIGS[status];
     if (config === undefined || config === null) {return null;}
 
-    const icon = config.icon as React.ComponentType;
+    const icon = config.icon;
     const color = config.color;
     const useLoader = config.useLoader;
 

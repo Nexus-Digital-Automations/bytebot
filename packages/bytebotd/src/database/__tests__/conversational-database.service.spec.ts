@@ -20,15 +20,17 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { ConversationalDatabaseService, DatabaseOperationType, DatabaseRiskLevel } from '../conversational-database.service';
+import { ConversationalDatabaseService } from '../conversational-database.service';
+// Removed unused imports: DatabaseOperationType, DatabaseRiskLevel
 import {
   ParlantIntegrationService,
   ConversationalValidationError,
   ParlantValidationRequest,
   ParlantValidationResponse,
-  RiskLevel,
+  // Removed unused import: RiskLevel
 } from '../../parlant/parlant-integration.service';
-import { BaseEntity, Repository, QueryOptions } from '../../types/index';
+import { BaseEntity, Repository } from '../../types/index';
+// Removed unused import: QueryOptions
 
 // ===== TEST TYPES AND MOCKS =====
 
@@ -176,7 +178,7 @@ describe('ConversationalDatabaseService', () => {
             databaseOperation: 'FIND_BY_ID',
             entityId: 'test-id-1',
             requiresBackup: false,
-          }),
+          }) as unknown,
         })
       );
       expect(mockRepository.findById).toHaveBeenCalledWith('test-id-1');
@@ -272,7 +274,7 @@ describe('ConversationalDatabaseService', () => {
           parameters: expect.objectContaining({
             databaseOperation: 'CREATE',
             requiresBackup: true,
-          }),
+          }) as unknown,
         })
       );
       expect(mockRepository.create).toHaveBeenCalledWith(createData);
@@ -363,7 +365,7 @@ describe('ConversationalDatabaseService', () => {
             databaseOperation: 'UPDATE',
             entityId: 'update-id-1',
             requiresBackup: true,
-          }),
+          }) as unknown,
         })
       );
       expect(mockRepository.update).toHaveBeenCalledWith('update-id-1', updateData);
@@ -428,7 +430,7 @@ describe('ConversationalDatabaseService', () => {
             entityId: 'delete-id-1',
             requiresBackup: true,
             requiresMultiPartyApproval: true,
-          }),
+          }) as unknown,
         })
       );
       expect(mockRepository.delete).toHaveBeenCalledWith('delete-id-1');
@@ -521,7 +523,7 @@ describe('ConversationalDatabaseService', () => {
             databaseOperation: 'BULK_CREATE',
             affectedRecords: 3,
             requiresBackup: true,
-          }),
+          }) as unknown,
         })
       );
       expect(mockRepository.create).toHaveBeenCalledTimes(3);
@@ -582,7 +584,7 @@ describe('ConversationalDatabaseService', () => {
             affectedRecords: 5,
             requiresBackup: true,
             requiresMultiPartyApproval: true,
-          }),
+          }) as unknown,
         })
       );
     });
@@ -708,7 +710,7 @@ describe('ConversationalDatabaseService', () => {
 
       try {
         await service.findById(mockRepository, 'metrics-test-2');
-      } catch (error) {
+      } catch (_error) {
         // Expected to fail
       }
 
@@ -732,7 +734,7 @@ describe('ConversationalDatabaseService', () => {
       } as TestEntity);
 
       // Act
-      await service.create(mockRepository, { name: 'Backup Test' } as any);
+      await service.create(mockRepository, { name: 'Backup Test' } as Omit<TestEntity, keyof BaseEntity>);
 
       // Assert
       const backupStatus = service.getBackupStatus();

@@ -58,7 +58,7 @@ interface CacheConfig {
           db: parseInt(process.env.REDIS_DB ?? '0', 10),
         };
 
-        _logger.log('Cache module configuration:', {
+        logger.log('Cache module configuration:', {
           host: config.host,
           port: config.port,
           ttl: config.ttl,

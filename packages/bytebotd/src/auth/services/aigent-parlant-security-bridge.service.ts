@@ -28,7 +28,7 @@ import {
   RiskLevel,
   ConversationalValidationError
 } from '../../parlant/parlant-integration.service';
-import { ByteBotdUser } from '../guards/jwt-auth.guard';
+// Removed unused import: ByteBotdUser
 import { UserRole, Permission } from '@bytebot/shared';
 import {
   SecurityAuditService,
@@ -1016,8 +1016,8 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
   }
 
   private async createParlantSession(
-    parlantContext: ParlantConversationContext,
-    conversationId: string
+    _parlantContext: ParlantConversationContext,
+    _conversationId: string
   ): Promise<string> {
     // In real implementation, this would create a session via Parlant API
     // For now, return a mock session ID
@@ -1217,7 +1217,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
         if (this.redisCluster) {
           try {
             await this.redisCluster.del(`session:${sessionId}`);
-          } catch (error) {
+          } catch (_error) {
             this.logger.debug(`Failed to remove expired session from Redis: ${sessionId}`);
           }
         }

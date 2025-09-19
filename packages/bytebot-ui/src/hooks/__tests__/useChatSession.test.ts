@@ -668,7 +668,7 @@ describe("useChatSession Hook", () => {
   });
 
   describe("Task Control Actions", () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       mockTaskUtils.takeOverTask.mockResolvedValue({
         id: "task-123",
         control: Role.USER,

@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
+import { Request as Express } from 'express';
 import { ByteBotdUser } from '../entities/auth-user.entity';
 
 @Injectable()
@@ -24,20 +25,20 @@ export class EnhancedJwtStrategy extends PassportStrategy(Strategy, 'enhanced-jw
     });
   }
 
-  async validate(request: any, payload: any): Promise<ByteBotdUser> {
+  async validate(request: Express.Request, payload: Record<string, unknown>): Promise<ByteBotdUser> {
     // Basic validation
-    if (!payload || !payload.sub) {
+    if (!payload.sub) {
       throw new UnauthorizedException('Invalid JWT payload');
     }
 
     // Create user from payload
     const user: ByteBotdUser = {
-      id: payload.sub,
-      username: payload.username,
-      email: payload.email,
-      roles: payload.roles || [],
-      permissions: payload.permissions || [],
-      isActive: payload.isActive || true,
+      id: payload.sub as string,
+      username: payload.username as string,
+      email: payload.email as string,
+      roles: (payload.roles as string[]) ?? [],
+      permissions: (payload.permissions as string[]) ?? [],
+      isActive: (payload.isActive as boolean) ?? true,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

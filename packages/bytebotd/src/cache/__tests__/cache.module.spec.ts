@@ -426,7 +426,7 @@ describe('CacheModule', () => {
     it('should handle MetricsService dependency injection errors', async () => {
       // Test with missing MetricsService
       await expect(
-        _Test.createTestingModule({
+        Test.createTestingModule({
           imports: [CacheModule],
           // No MetricsService provided
         }).compile()

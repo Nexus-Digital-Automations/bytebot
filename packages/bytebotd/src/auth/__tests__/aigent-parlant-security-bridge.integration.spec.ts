@@ -76,7 +76,7 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
     jest.clearAllMocks();
 
     // Setup default mock responses
-    mockParlantService.validateFunctionExecution.mockResolvedValue({
+    (mockParlantService.validateFunctionExecution as jest.Mock).mockResolvedValue({
       approved: true,
       conversationId: 'test-conversation-123',
       validationTimestamp: new Date(),
@@ -84,7 +84,7 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
       confidence: 0.95,
     });
 
-    mockAuditService.createAuditEntry.mockResolvedValue({
+    (mockAuditService.createAuditEntry as jest.Mock).mockResolvedValue({
       auditId: 'audit-test-123',
       validated: true,
       conversationId: 'test-conversation-123',
@@ -183,8 +183,11 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
     });
 
     it('should handle CONFIDENTIAL classification with OPERATOR role', async () => {
-      const payload = createTestJwtPayload(SecurityClassification.CONFIDENTIAL, UserRole._OPERATOR);
-      payload.permissions = [Permission._TASK_READ, Permission._TASK_WRITE, Permission._COMPUTER_CONTROL];
+      const basePayload = createTestJwtPayload(SecurityClassification.CONFIDENTIAL, UserRole._OPERATOR);
+      const payload = {
+        ...basePayload,
+        permissions: [Permission._TASK_READ, Permission._TASK_WRITE, Permission._COMPUTER_CONTROL]
+      };
 
       const session = await securityBridge.createSecureSessionBridge(payload, {
         ipAddress: '10.0.2.25',
@@ -200,7 +203,7 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
       const payload = createTestJwtPayload(SecurityClassification.RESTRICTED, UserRole._VIEWER);
 
       // Mock Parlant to require higher confidence for RESTRICTED
-      mockParlantService.validateFunctionExecution.mockResolvedValueOnce({
+      (mockParlantService.validateFunctionExecution as jest.Mock).mockResolvedValueOnce({
         approved: true,
         conversationId: 'restricted-conversation-456',
         validationTimestamp: new Date(),
@@ -218,22 +221,25 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
     });
 
     it('should handle CLASSIFIED classification with ADMIN role', async () => {
-      const payload = createTestJwtPayload(SecurityClassification.CLASSIFIED, UserRole._ADMIN);
-      payload.permissions = [
-        Permission._TASK_READ,
-        Permission._TASK_WRITE,
-        Permission._TASK_DELETE,
-        Permission._COMPUTER_CONTROL,
-        Permission._SYSTEM_ADMIN,
-        Permission._SECURITY_MANAGEMENT,
-      ];
-      payload.complianceRequirements = [
+      const basePayload = createTestJwtPayload(SecurityClassification.CLASSIFIED, UserRole._ADMIN);
+      const payload = {
+        ...basePayload,
+        permissions: [
+          Permission._TASK_READ,
+          Permission._TASK_WRITE,
+          Permission._TASK_DELETE,
+          Permission._COMPUTER_CONTROL,
+          Permission._SYSTEM_ADMIN,
+          Permission._SECURITY_MANAGEMENT,
+        ],
+        complianceRequirements: [
         ComplianceFramework.SOX,
         ComplianceFramework.GDPR,
         ComplianceFramework.HIPAA,
         ComplianceFramework.PCI_DSS,
         ComplianceFramework.ISO_27001,
-      ];
+        ]
+      };
 
       const session = await securityBridge.createSecureSessionBridge(payload, {
         ipAddress: '10.0.4.5',
@@ -403,7 +409,7 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
       };
 
       // Mock approval for emergency override
-      mockParlantService.validateFunctionExecution.mockResolvedValueOnce({
+      (mockParlantService.validateFunctionExecution as jest.Mock).mockResolvedValueOnce({
         approved: true,
         conversationId: 'emergency-conversation-789',
         validationTimestamp: new Date(),
@@ -438,7 +444,7 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
       };
 
       // Mock denial for suspicious override
-      mockParlantService.validateFunctionExecution.mockResolvedValueOnce({
+      (mockParlantService.validateFunctionExecution as jest.Mock).mockResolvedValueOnce({
         approved: false,
         conversationId: 'emergency-deny-conversation-000',
         validationTimestamp: new Date(),
@@ -577,7 +583,7 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
   describe('Performance and Monitoring', () => {
     it('should track security metrics', async () => {
       // Create multiple sessions for metrics testing
-      const sessions = await Promise.all([
+      const _sessions = await Promise.all([
         createTestSession(SecurityClassification.PUBLIC, UserRole._GUEST),
         createTestSession(SecurityClassification.INTERNAL, UserRole._USER),
         createTestSession(SecurityClassification.CONFIDENTIAL, UserRole._OPERATOR),
@@ -676,8 +682,15 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
       // Verify audit service was called
       expect(mockAuditService.createAuditEntry).toHaveBeenCalled();
 
-      const auditCall = mockAuditService.createAuditEntry.mock.calls[0];
-      const auditEntry = auditCall[0];
+      const auditCall = (mockAuditService.createAuditEntry as jest.Mock).mock.calls[0] as unknown[];
+      const auditEntry = auditCall[0] as {
+        eventType: string;
+        severity: string;
+        userId: string;
+        action: string;
+        outcome: string;
+        details: { securityClassification: string };
+      };
 
       expect(auditEntry.eventType).toBe('AUTHENTICATION_EVENT');
       expect(auditEntry.severity).toBe('HIGH');
@@ -713,7 +726,7 @@ describe('AIgent-Parlant Security Bridge Integration', () => {
 });
 
 describe('Enhanced JWT Strategy Integration', () => {
-  let strategy: EnhancedJwtStrategy;
+  let _strategy: EnhancedJwtStrategy;
   let module: TestingModule;
 
   beforeEach(async () => {
@@ -744,7 +757,7 @@ describe('Enhanced JWT Strategy Integration', () => {
       ],
     }).compile();
 
-    strategy = module.get<EnhancedJwtStrategy>(EnhancedJwtStrategy);
+    _strategy = module.get<EnhancedJwtStrategy>(EnhancedJwtStrategy);
   });
 
   afterEach(async () => {
@@ -752,7 +765,7 @@ describe('Enhanced JWT Strategy Integration', () => {
   });
 
   describe('Multi-Algorithm Token Validation', () => {
-    const createMockRequest = (algorithm: string, token: string) => ({
+    const _createMockRequest = (algorithm: string, token: string) => ({
       headers: { authorization: `Bearer ${token}` },
       ip: '10.0.1.100',
       'user-agent': 'Test Client',

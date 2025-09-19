@@ -335,7 +335,7 @@ const calculateMetrics = (
     .map((msg, index) => {
       const currentMsg = msg;
       const prevMsg = messages[index];
-      if (currentMsg?.timestamp && prevMsg?.timestamp) {
+      if (currentMsg?.timestamp !== null && currentMsg?.timestamp !== undefined && prevMsg?.timestamp !== null && prevMsg?.timestamp !== undefined) {
         return currentMsg.timestamp.getTime() - prevMsg.timestamp.getTime();
       }
       return 0;
@@ -593,7 +593,7 @@ export const useParlantWebSocket = (
       setConnectionError('Failed to initialize connection');
       errorCount.current++;
     }
-  }, [config, onConnected, onDisconnected, onReconnecting, onError, onMessageReceived, onValidationResponse, onConversationUpdate, onParticipantJoined, onParticipantLeft, onMessageError, currentConversation]);
+  }, [config, onConnected, onDisconnected, onReconnecting, onError, onMessageReceived, onValidationResponse, onConversationUpdate, onParticipantJoined, onParticipantLeft, onMessageError, currentConversation, processOfflineQueue, startHeartbeat, stopHeartbeat, updatePerformanceMetrics]);
   
   const disconnect = useCallback(() => {
     logInfo('Disconnecting from Parlant WebSocket', null, 'useParlantWebSocket');
@@ -615,8 +615,8 @@ export const useParlantWebSocket = (
       reject(new Error('Connection closed'));
     });
     pendingValidations.current.clear();
-    
-  }, []);
+
+  }, [stopHeartbeat, stopMetricsTracking]);
   
   const reconnect = useCallback(async () => {
     const RECONNECT_DELAY_MS = 1000;

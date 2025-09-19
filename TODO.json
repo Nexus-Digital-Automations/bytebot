@@ -34,6 +34,19 @@
           "action": "auto_unassign_stale",
           "timestamp": "2025-09-18T05:42:01.446Z",
           "reason": "Agent became stale (inactive >13080 minutes)"
+        },
+        {
+          "agentId": "dev_session_1758222907823_1_general_43b1ae5f",
+          "role": "primary",
+          "assignedAt": "2025-09-18T19:16:41.243Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758222907823_1_general_43b1ae5f",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-18T19:45:09.417Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
         }
       ]
     },
@@ -2007,6 +2020,27 @@
           "agentId": "dev_session_1758173110446_1_general_54c5e9c3",
           "role": "primary",
           "assignedAt": "2025-09-18T05:27:45.225Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-18T19:40:16.722Z",
+      "title": "CRITICAL: Fix remaining ESLint violations in bytebotd package (ZERO TOLERANCE)",
+      "description": "Fix critical linting violations blocking workspace validation: 1) Undefined _index variables in roles.guard.security.spec.ts (lines 357, 361, 745, 747), 2) Unused variables not matching /^_/u pattern (result, originalPermissions, error, configService, payload), 3) Various TypeScript safety violations in security tests. Zero tolerance mandate requires immediate resolution.",
+      "category": "error",
+      "priority": "normal",
+      "id": "error_1758224416722_lxei9lui1b",
+      "assigned_agent": "dev_session_1758224148806_1_general_fa8b1b1a",
+      "started_at": "2025-09-18T19:40:35.332Z",
+      "claimed_by": "dev_session_1758224148806_1_general_fa8b1b1a",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758224148806_1_general_fa8b1b1a",
+          "role": "primary",
+          "assignedAt": "2025-09-18T19:40:35.332Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }

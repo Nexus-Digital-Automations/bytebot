@@ -140,7 +140,7 @@ export class CacheService {
         this.logger.debug(
           `[${operationId}] Cache HIT: ${fullKey} (${duration}ms)`,
         );
-        return _result;
+        return result;
       } else {
         // Cache miss
         this.stats.misses++;
@@ -385,7 +385,7 @@ export class CacheService {
           }
         } catch (_error) {
           this.logger.warn(
-            `Cache warming failed for key ${key}: ${error instanceof Error ? _error.message : 'Unknown error'}`,
+            `Cache warming failed for key ${key}: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
           );
         }
       });

@@ -18,6 +18,7 @@ import React from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { ChatContainer } from "../ChatContainer";
 import { GroupedMessages, Role, TaskStatus } from "@/types";
+import { MessageContentType } from "@bytebot/shared";
 import { MessageContentBlock } from "@bytebot/shared";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 
@@ -342,7 +343,11 @@ describe("ChatContainer Component", () => {
         writable: true,
       });
 
-      defaultProps.scrollRef.current = mockScrollContainer;
+      Object.defineProperty(defaultProps.scrollRef, 'current', {
+        value: mockScrollContainer,
+        writable: true,
+        configurable: true
+      });
     });
 
     it("calls loadMoreMessages when scrolled near top", async () => {
@@ -552,7 +557,7 @@ describe("ChatContainer Component", () => {
           messages: [
             {
               id: `msg-${i}`,
-              content: [{ type: "text", text: `Message ${i}` }],
+              content: [{ type: MessageContentType._Text, text: `Message ${i}` }],
               role: i % 2 === 0 ? Role.USER : Role.ASSISTANT,
               createdAt: new Date().toISOString(),
             },
@@ -636,9 +641,11 @@ describe("ChatContainer Component", () => {
       );
 
       const mockContainer = defaultProps.scrollRef.current;
-      act(() => {
-        fireEvent.scroll(mockContainer);
-      });
+      if (mockContainer) {
+        act(() => {
+          fireEvent.scroll(mockContainer);
+        });
+      }
 
       await waitFor(() => {
         expect(loadMoreMessages).toHaveBeenCalled();

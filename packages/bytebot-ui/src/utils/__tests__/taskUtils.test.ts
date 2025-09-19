@@ -80,7 +80,7 @@ describe("TaskUtils", () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse,
+        json: () => mockResponse,
       } as Response);
 
       const result = await addMessage("task-123", "Test message");
@@ -142,7 +142,7 @@ describe("TaskUtils", () => {
       const mockResponse = { success: true };
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse,
+        json: () => mockResponse,
       } as Response);
 
       await addMessage("task-123", "  Test message  ");
@@ -165,7 +165,7 @@ describe("TaskUtils", () => {
       const mockResponse = { success: true };
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse,
+        json: () => mockResponse,
       } as Response);
 
       await addMessage("task-123", specialMessage);
@@ -187,7 +187,7 @@ describe("TaskUtils", () => {
       const mockResponse = { success: true };
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse,
+        json: () => mockResponse,
       } as Response);
 
       await addMessage("task-123", longMessage);
@@ -224,7 +224,7 @@ describe("TaskUtils", () => {
     it("fetches task messages successfully", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ messages: mockMessages }),
+        json: () => ({ messages: mockMessages }),
       } as Response);
 
       const result = await fetchTaskMessages("task-123");
@@ -236,7 +236,7 @@ describe("TaskUtils", () => {
     it("fetches messages with pagination options", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ messages: mockMessages }),
+        json: () => ({ messages: mockMessages }),
       } as Response);
 
       const result = await fetchTaskMessages("task-123", {
@@ -288,7 +288,7 @@ describe("TaskUtils", () => {
     it("handles malformed API response", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ invalid: "response" }),
+        json: () => ({ invalid: "response" }),
       } as Response);
 
       const result = await fetchTaskMessages("task-123");
@@ -299,7 +299,7 @@ describe("TaskUtils", () => {
     it("handles JSON parsing errors", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => {
+        json: () => {
           throw new Error("Invalid JSON");
         },
       } as unknown as Response);
@@ -332,7 +332,7 @@ describe("TaskUtils", () => {
     it("fetches processed messages successfully", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ groupedMessages: mockGroupedMessages }),
+        json: () => ({ groupedMessages: mockGroupedMessages }),
       } as Response);
 
       const result = await fetchTaskProcessedMessages("task-123");
@@ -346,7 +346,7 @@ describe("TaskUtils", () => {
     it("fetches processed messages with options", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ groupedMessages: mockGroupedMessages }),
+        json: () => ({ groupedMessages: mockGroupedMessages }),
       } as Response);
 
       const result = await fetchTaskProcessedMessages("task-123", {
@@ -395,7 +395,7 @@ describe("TaskUtils", () => {
     it("fetches task by ID successfully", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ task: mockTask }),
+        json: () => ({ task: mockTask }),
       } as Response);
 
       const result = await fetchTaskById("task-123");
@@ -442,7 +442,7 @@ describe("TaskUtils", () => {
     it("handles malformed API response", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ invalid: "response" }),
+        json: () => ({ invalid: "response" }),
       } as Response);
 
       const result = await fetchTaskById("task-123");
@@ -469,7 +469,7 @@ describe("TaskUtils", () => {
     it("successfully takes over a task", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ task: mockUpdatedTask }),
+        json: () => ({ task: mockUpdatedTask }),
       } as Response);
 
       const result = await takeOverTask("task-123");
@@ -526,7 +526,7 @@ describe("TaskUtils", () => {
     it("successfully resumes a task", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ task: mockResumedTask }),
+        json: () => ({ task: mockResumedTask }),
       } as Response);
 
       const result = await resumeTask("task-123");
@@ -576,7 +576,7 @@ describe("TaskUtils", () => {
     it("successfully cancels a task", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ task: mockCancelledTask }),
+        json: () => ({ task: mockCancelledTask }),
       } as Response);
 
       const result = await cancelTask("task-123");
@@ -613,7 +613,7 @@ describe("TaskUtils", () => {
       const mockResponse = { success: true };
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => mockResponse,
+        json: () => mockResponse,
       } as Response);
 
       const promises = [
@@ -655,7 +655,7 @@ describe("TaskUtils", () => {
       const mockResponse = { success: true };
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse,
+        json: () => mockResponse,
       } as Response);
 
       const startTime = performance.now();
@@ -674,7 +674,7 @@ describe("TaskUtils", () => {
         .mockRejectedValueOnce(new Error("Network error"))
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ success: true }),
+          json: () => ({ success: true }),
         } as Response);
 
       const result1 = await addMessage("task-123", "Test message");
@@ -703,7 +703,7 @@ describe("TaskUtils", () => {
     it("handles malformed server responses gracefully", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => {
+        json: () => {
           throw new Error("Malformed JSON");
         },
       } as unknown as Response);
@@ -724,7 +724,7 @@ describe("TaskUtils", () => {
       const mockResponse = { success: true };
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse,
+        json: () => mockResponse,
       } as Response);
 
       await addMessage("task-123", maliciousContent);
@@ -778,7 +778,7 @@ describe("TaskUtils", () => {
     it("handles empty API responses", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({}),
+        json: () => ({}),
       } as Response);
 
       const result = await fetchTaskMessages("task-123");
@@ -788,7 +788,7 @@ describe("TaskUtils", () => {
     it("handles null API responses", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => null,
+        json: () => null,
       } as Response);
 
       const result = await fetchTaskById("task-123");
@@ -798,7 +798,7 @@ describe("TaskUtils", () => {
     it("handles API responses with missing fields", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ task: { id: "task-123" } }), // Missing required fields
+        json: () => ({ task: { id: "task-123" } }), // Missing required fields
       } as Response);
 
       const result = await fetchTaskById("task-123");
@@ -816,7 +816,7 @@ export const TaskUtilsTestUtils = {
   ): Partial<Response> => ({
     ok,
     status,
-    json: async (): Promise<unknown> => data,
+    json: (): Promise<unknown> => Promise.resolve(data),
   }),
 
   createMockTask: (overrides: Partial<Task> = {}): Task => ({
@@ -853,7 +853,7 @@ export const TaskUtilsTestUtils = {
       mockFetch.mockResolvedValueOnce({
         ok: response.ok ?? true,
         status: response.status ?? HTTP_OK,
-        json: async () => response.data,
+        json: () => response.data,
       } as Response);
     });
   },

@@ -30,7 +30,9 @@ import {
   ConversationPriority,
   ConversationState,
   MessageType,
-  ParlantConversationContext
+  ParlantConversationContext,
+  ParticipantRole,
+  ParticipantType
 } from '@bytebot/shared/types/parlant.types';
 import { logDebug, logError, logInfo } from '@/utils/logger';
 
@@ -476,7 +478,7 @@ class ConversationStorage {
       const request = store.get(conversationId);
       
       request.onerror = (): void => { reject(request.error); };
-      request.onsuccess = (): void => { resolve(request.result ?? null); };
+      request.onsuccess = (): void => { resolve(request.result as ConversationSnapshot | null ?? null); };
     });
   }
   
@@ -940,23 +942,28 @@ export const useConversationContext = ({
   const setCurrentContext = useCallback((context: ParlantConversationContext | null) => {
     setCurrentContextState(context);
     
-    if (context) {
-      setMessages(context.metadata.history?.map(h => ({
-        id: h.id,
-        conversationId: context.conversationId,
-        sender: {
-          id: h.actor,
-          type: 'HUMAN' as any,
-          name: h.actor,
-          role: 'REQUESTOR' as any,
-          capabilities: [],
-          joinedAt: h.timestamp
-        },
-        content: h.content,
-        type: MessageType._TEXT,
-        timestamp: h.timestamp,
-        metadata: h.metadata ?? {}
-      })) || []);
+    if (context !== null && context !== undefined) {
+      const historyMessages = context.metadata?.history;
+      if (historyMessages !== null && historyMessages !== undefined && Array.isArray(historyMessages)) {
+        setMessages(historyMessages.map(h => ({
+          id: h.id,
+          conversationId: context.conversationId,
+          sender: {
+            id: h.actor,
+            type: ParticipantType._HUMAN,
+            name: h.actor,
+            role: ParticipantRole._REQUESTOR,
+            capabilities: [],
+            joinedAt: h.timestamp
+          },
+          content: h.content,
+          type: MessageType._TEXT,
+          timestamp: h.timestamp,
+          metadata: h.metadata ?? {}
+        })));
+      } else {
+        setMessages([]);
+      }
       setParticipants(context.participants);
     } else {
       setMessages([]);
@@ -966,35 +973,32 @@ export const useConversationContext = ({
     onContextChange?.(context);
     logDebug('Context changed', { contextId: context?.conversationId }, 'useConversationContext');
   }, [onContextChange]);
-  
-  const updateContext = useCallback(async (updates: Partial<ParlantConversationContext>) => {
-    if (!currentContext) {return;}
-    
-    const updatedContext = {
-      ...currentContext,
-      ...updates,
-      updatedAt: new Date()
-    };
-    
-    setCurrentContextState(updatedContext);
-    
-    if (config.enablePersistence) {
-      await saveContext();
-    }
-    
-    logDebug('Context updated', { contextId: currentContext.conversationId }, 'useConversationContext');
-  }, [currentContext, config.enablePersistence]);
-  
+
+  // Helper function declarations moved here to avoid hoisting issues
+  const generateContextSummary = useCallback((
+    messages: ConversationMessage[],
+    context: ParlantConversationContext | null
+  ): string => {
+    if (!context) {return '';}
+
+    const messageCount = messages.length;
+    const participantCount = participants.length;
+    const duration = context.updatedAt.getTime() - context.createdAt.getTime();
+    const durationHours = Math.round(duration / (1000 * 60 * 60) * 10) / 10;
+
+    return `${messageCount} messages from ${participantCount} participants over ${durationHours}h`;
+  }, [participants]);
+
   const saveContext = useCallback(async () => {
     if (!currentContext || !config.enablePersistence) {return;}
-    
+
     setIsSaving(true);
-    
+
     try {
       // Generate context summary
       const summary = generateContextSummary(messages, currentContext);
       setContextSummary(summary);
-      
+
       // Calculate analytics
       if (config.enableAnalytics) {
         const sessionStart = currentContext.createdAt;
@@ -1006,7 +1010,7 @@ export const useConversationContext = ({
         );
         setAnalytics(analyticsData);
       }
-      
+
       // Create snapshot
       const snapshot: ConversationSnapshot = {
         conversation: currentContext,
@@ -1023,22 +1027,40 @@ export const useConversationContext = ({
           syncAttempts: 0
         }
       };
-      
+
       // Save to storage
       await storage.current.saveSnapshot(snapshot);
       setLastSaved(new Date());
-      
+
       onContextSaved?.(currentContext);
       logInfo('Context saved successfully', { contextId: currentContext.conversationId }, 'useConversationContext');
-      
+
     } catch (error) {
       logError('Failed to save context', error, 'useConversationContext');
       onError?.('Failed to save conversation context');
     } finally {
       setIsSaving(false);
     }
-  }, [currentContext, messages, participants, analytics, syncStatus, config.enablePersistence, config.enableAnalytics, onContextSaved, onError]);
-  
+  }, [currentContext, messages, participants, analytics, syncStatus, config.enablePersistence, config.enableAnalytics, onContextSaved, onError, generateContextSummary]);
+
+  const updateContext = useCallback(async (updates: Partial<ParlantConversationContext>) => {
+    if (!currentContext) {return;}
+    
+    const updatedContext = {
+      ...currentContext,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    setCurrentContextState(updatedContext);
+    
+    if (config.enablePersistence) {
+      await saveContext();
+    }
+    
+    logDebug('Context updated', { contextId: currentContext.conversationId }, 'useConversationContext');
+  }, [currentContext, config.enablePersistence, saveContext]);
+
   const loadContext = useCallback(async (conversationId: string): Promise<ParlantConversationContext | null> => {
     if (!config.enablePersistence) {return null;}
     
@@ -1141,11 +1163,11 @@ export const useConversationContext = ({
   const getMessages = useCallback((limit?: number, offset?: number): ConversationMessage[] => {
     let result = [...messages];
     
-    if (offset) {
+    if (offset !== null && offset !== undefined && offset > 0) {
       result = result.slice(offset);
     }
     
-    if (limit) {
+    if (limit !== null && limit !== undefined && limit > 0) {
       result = result.slice(0, limit);
     }
     
@@ -1209,7 +1231,8 @@ export const useConversationContext = ({
     });
   }, [searchContexts]);
   
-  const getArchivedContexts = useCallback(async (limit = 10): Promise<ConversationSnapshot[]> => {
+  const DEFAULT_LIMIT = 10;
+  const getArchivedContexts = useCallback(async (limit = DEFAULT_LIMIT): Promise<ConversationSnapshot[]> => {
     return searchContexts({
       states: [ConversationState._COMPLETED],
       sortBy: 'date',
@@ -1223,25 +1246,25 @@ export const useConversationContext = ({
   // UTILITY FUNCTIONS
   // ===========================
   
-  const generateContextSummary = (
+  const generateDetailedContextSummary = useCallback((
     hookMessages: ConversationMessage[],
     _context: ParlantConversationContext
   ): ContextSummary => {
     // Extract topics from messages
     const topics = extractTopicsFromMessages(hookMessages);
-    
+
     // Extract decisions and actions
     const decisions = extractDecisions(hookMessages);
     const pendingActions = extractPendingActions(hookMessages);
-    
+
     // Get key participants
     const keyParticipants = participants
       .filter(p => hookMessages.some(m => m.sender.id === p.id))
       .map(p => p.name);
-    
+
     // Simple sentiment analysis
     const sentiment = analyzeSentiment(hookMessages);
-    
+
     // Determine complexity
     let complexity: 'simple' | 'moderate' | 'complex';
     if (hookMessages.length > HIGH_COMPLEXITY_THRESHOLD) {
@@ -1251,10 +1274,10 @@ export const useConversationContext = ({
     } else {
       complexity = 'simple';
     }
-    
+
     // Generate summary text
     const summary = generateSummaryText(hookMessages, topics, decisions);
-    
+
     return {
       topics,
       decisions,
@@ -1264,7 +1287,7 @@ export const useConversationContext = ({
       complexity,
       summary
     };
-  };
+  }, [participants]);
   
   const extractTopicsFromMessages = (hookMessages: ConversationMessage[]): string[] => {
     const topics = new Set<string>();
@@ -1375,7 +1398,9 @@ export const useConversationContext = ({
     if (config.enablePersistence && config.autoSaveInterval > 0) {
       autoSaveTimer.current = setInterval(() => {
         if (currentContext && !isSaving) {
-          saveContext().catch(console.error);
+          saveContext().catch((error) => {
+            logError('Auto-save failed', error, 'useConversationContext');
+          });
         }
       }, config.autoSaveInterval);
     }
@@ -1389,8 +1414,10 @@ export const useConversationContext = ({
   
   // Auto-load on mount
   useEffect(() => {
-    if (autoLoad && autoLoad.length > 0 && config.enablePersistence) {
-      loadContext(autoLoad).catch(console.error);
+    if (autoLoad !== null && autoLoad !== undefined && autoLoad.length > 0 && config.enablePersistence) {
+      loadContext(autoLoad).catch((error) => {
+        logError('Auto-load failed', error, 'useConversationContext');
+      });
     }
   }, [autoLoad, config.enablePersistence, loadContext]);
   

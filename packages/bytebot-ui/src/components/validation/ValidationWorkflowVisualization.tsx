@@ -633,7 +633,7 @@ const WorkflowStepComponent: React.FC<{
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            onClick();
+            onClick?.();
           }
         }}
         role="button"
@@ -669,7 +669,7 @@ const WorkflowStepComponent: React.FC<{
           >
             {/* Status Icon */}
             <div className={cn('p-2 rounded-full', statusColor)}>
-              <HugeiconsIcon icon={StatusIcon as React.ComponentType} className="w-4 h-4" />
+              <HugeiconsIcon icon={StatusIcon} className="w-4 h-4" />
             </div>
             
             {/* Step Info */}

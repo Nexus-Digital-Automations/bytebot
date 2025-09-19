@@ -76,8 +76,8 @@
       "@/constants/*": ["./src/constants/*"],
       "@/lib/*": ["./src/lib/*"],
       "@/security/*": ["./src/security/*"],
-      "@bytebot/shared": ["../shared/src"],
-      "@bytebot/shared/*": ["../shared/src/*"]
+      "@bytebot/shared": ["../shared/dist"],
+      "@bytebot/shared/*": ["../shared/dist/*"]
     },
     
     // Source Map and Debugging
