@@ -21,14 +21,13 @@ import { ConfigService } from '@nestjs/config';
 import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks';
 
-import { ConversationalWebSocketBridgeService } from '../conversational-websocket-bridge.service';
 import {
+  ConversationalWebSocketBridgeService,
   ConversationalMessage,
   ConversationalMessageType,
   ValidationRequestMessage,
   UserConfirmationMessage,
   ProgressUpdateMessage,
-  SessionStatus,
   ValidationContext,
   ValidationAction,
   SecurityContext,
@@ -53,17 +52,17 @@ class MockWebSocketClient {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, []);
     }
-    this.eventListeners.get(event)!.push(callback);
+    this.eventListeners.get(event)?.push(callback);
   }
 
   emit(event: string, ...args: unknown[]): void {
-    const listeners = this.eventListeners.get(event) || [];
-    listeners.forEach(listener => listener(...args));
+    const listeners = this.eventListeners.get(event) ?? [];
+    listeners.forEach(listener => (listener as (...args: unknown[]) => void)(...args));
   }
 
   close(code?: number, reason?: string): void {
     this.readyState = WebSocket.WebSocket.CLOSED;
-    this.emit('close', code || 1000, Buffer.from(reason || 'Test close'));
+    this.emit('close', code ?? 1000, Buffer.from(reason ?? 'Test close'));
   }
 }
 
@@ -96,7 +95,7 @@ class PerformanceTestHelper {
     concurrencyLimit: number
   ): Promise<{ totalTime: number; averageTime: number; maxTime: number }> {
     const startTime = performance.now();
-    const batches: Promise<void>[][] = [];
+    const batches: (() => Promise<void>)[][] = [];
 
     // Split operations into batches
     for (let i = 0; i < operations.length; i += concurrencyLimit) {
@@ -108,7 +107,7 @@ class PerformanceTestHelper {
     // Execute batches sequentially, operations within each batch concurrently
     for (const batch of batches) {
       const batchStart = performance.now();
-      await Promise.all(batch.map(op => op()));
+      await Promise.all(batch.map(async (op) => await op()));
       times.push(performance.now() - batchStart);
     }
 
@@ -173,7 +172,7 @@ describe('ConversationalWebSocketBridgeService', () => {
 
   describe('Session Management', () => {
     it('should create validation request successfully', async () => {
-      const mockContext: ValidationContext = {
+      const _mockContext: ValidationContext = {
         userId: 'test-user-123',
         applicationContext: 'test-app',
         environmentInfo: { env: 'test' },
@@ -186,7 +185,7 @@ describe('ConversationalWebSocketBridgeService', () => {
         } as SecurityContext,
       };
 
-      const mockAction: ValidationAction = {
+      const _mockAction: ValidationAction = {
         actionType: 'file_write',
         parameters: { path: '/tmp/test.txt', content: 'test' },
         expectedOutcome: 'File written successfully',
@@ -359,7 +358,7 @@ describe('ConversationalWebSocketBridgeService', () => {
       for (let i = 0; i < testIterations; i++) {
         const latency = await PerformanceTestHelper.measureLatency(async () => {
           // Simulate message processing
-          const message = JSON.stringify({
+          const _message = JSON.stringify({
             type: 'test',
             payload: { data: 'test'.repeat(100) }, // ~400 bytes
             timestamp: Date.now(),
@@ -472,7 +471,7 @@ describe('ConversationalWebSocketBridgeService', () => {
         undefined,
       ];
 
-      invalidMessages.forEach((invalidMessage, index) => {
+      invalidMessages.forEach((invalidMessage, _index) => {
         // Test that invalid messages don't crash the service
         // This would typically be tested through actual WebSocket connection
         expect(() => {
@@ -697,8 +696,8 @@ describe('Performance Benchmarks', () => {
           // Simulate validation processing
           setTimeout(() => {
             // Mock validation logic
-            const approved = Math.random() > 0.3; // 70% approval rate
-            const confidence = 0.5 + Math.random() * 0.5; // 50-100% confidence
+            const _approved = Math.random() > 0.3; // 70% approval rate
+            const _confidence = 0.5 + Math.random() * 0.5; // 50-100% confidence
             resolve();
           }, Math.random() * 100 + 50); // 50-150ms processing time
         })

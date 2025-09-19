@@ -22,27 +22,19 @@ import { ConfigService } from '@nestjs/config';
 import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks';
 
-import { ConversationalWebSocketBridgeService } from '../conversational-websocket-bridge.service';
-import { ParlantWebSocketIntegrationService } from '../parlant-websocket-integration.service';
-import { ParlantWebSocketBridgeService } from '../parlant-websocket-bridge.service';
-
 import {
+  ConversationalWebSocketBridgeService,
   ConversationalMessage,
   ConversationalMessageType,
   ValidationRequestMessage,
   UserConfirmationMessage,
   ProgressUpdateMessage,
-  ValidationContext,
   ValidationAction,
   SecurityContext,
   ActionImpact,
 } from '../conversational-websocket-bridge.service';
-
-import {
-  ParlantValidationRequest,
-  ParlantValidationResult,
-  ValidationPriority,
-} from '../parlant-websocket-integration.service';
+import { ParlantWebSocketIntegrationService } from '../parlant-websocket-integration.service';
+import { ParlantWebSocketBridgeService } from '../parlant-websocket-bridge.service';
 
 // ===== TEST UTILITIES =====
 
@@ -72,10 +64,10 @@ class WebSocketTestClient {
 
       this.ws.on('message', (data: WebSocket.RawData) => {
         try {
-          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8'));
+          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;
           this.messages.push(message);
-        } catch (error) {
-          console.error('Failed to parse message:', error);
+        } catch (_error) {
+          console.error('Failed to parse message:', _error);
         }
       });
 
@@ -153,7 +145,7 @@ class WebSocketTestClient {
 /**
  * Test scenario executor for complex workflows
  */
-class ValidationWorkflowTester {
+class _ValidationWorkflowTester {
   constructor(
     private client: WebSocketTestClient,
     private sessionId: string
@@ -274,7 +266,7 @@ class ValidationWorkflowTester {
         if (update.payload.status === 'completed') {
           break;
         }
-      } catch (error) {
+      } catch (_error) {
         // Timeout waiting for progress update, continue or break
         if (progressUpdates.length > 0) {
           break;
@@ -365,7 +357,7 @@ describe('WebSocket Integration Tests', () => {
   });
 
   afterEach(async () => {
-    if (testClient && testClient.isConnected()) {
+    if (testClient?.isConnected()) {
       await testClient.disconnect();
     }
   });
@@ -436,7 +428,7 @@ describe('WebSocket Integration Tests', () => {
       },
     ];
 
-    testActions.forEach((action, index) => {
+    testActions.forEach((action, _index) => {
       it(`should complete validation workflow for ${action.actionType}`, async () => {
         // Mock test for validation workflow
         const validationRequest = {
@@ -447,7 +439,7 @@ describe('WebSocket Integration Tests', () => {
 
         // Simulate validation processing
         const processingTime = Math.random() * 100 + 50; // 50-150ms
-        const approved = action.reversible && action.impact.scope !== 'external';
+        const _approved = action.reversible && action.impact.scope !== 'external';
 
         expect(validationRequest.actionType).toBe(action.actionType);
         expect(processingTime).toBeLessThan(200); // Performance requirement
@@ -613,7 +605,7 @@ describe('WebSocket Integration Tests', () => {
             break;
           }
           throw new Error('Connection failed');
-        } catch (error) {
+        } catch (_error) {
           reconnectionAttempts++;
           if (reconnectionAttempts >= maxReconnectionAttempts) {
             throw new Error('Max reconnection attempts exceeded');
