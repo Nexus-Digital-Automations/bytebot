@@ -279,7 +279,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
       }
 
       // Step 4: Complete performance tracking
-      let _performanceMetrics;
+      let performanceMetrics;
       if (this.optimizedConfig.enablePerformanceMonitoring) {
         performanceMetrics = this.performanceMonitor.completePerformanceTracking(
           request.operationId,
@@ -299,7 +299,7 @@ export class ParlantIntegrationOptimizedService implements OnModuleInit {
       if (this.optimizedConfig.enableEnterpriseAudit) {
         const totalTime = Date.now() - operationStartTime;
         auditEntry = await this.enterpriseAudit.createAuditEntry(
-          _request,
+          request,
           validationResponse,
           'SUCCESS',
           totalTime,

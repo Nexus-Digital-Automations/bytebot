@@ -134,7 +134,7 @@ describe('Parlant Performance Optimization Validation', () => {
 
       // Set cache
       await cacheService.setCachedValidation(
-        _sampleRequest.functionName,
+        sampleRequest.functionName,
         [sampleRequest.functionParams],
         sampleRequest.context as unknown as Record<string, unknown>,
         sampleResponse,
@@ -431,7 +431,7 @@ describe('Parlant Performance Optimization Validation', () => {
 
       const startTime = Date.now();
       const results = await orchestrator.validateBulkWithOptimization(
-        _bulkRequests,
+        bulkRequests,
         {
           userId: 'bulk-test-user',
           sessionId: 'bulk-test',

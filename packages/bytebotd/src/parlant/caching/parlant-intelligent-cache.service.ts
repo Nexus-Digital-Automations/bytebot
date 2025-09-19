@@ -566,14 +566,14 @@ export class ParlantIntelligentCacheService {
   private isCacheEntryValid(entry: CacheEntry<ParlantValidationResponse>, _config: CacheConfig): boolean {
     const now = Date.now();
     const entryAge = now - entry.timestamp.getTime();
-    return entryAge < (config.ttlSeconds * 1000);
+    return entryAge < (_config.ttlSeconds * 1000);
   }
 
   private shouldCacheInRedis(request: ParlantValidationRequest, _config: CacheConfig): boolean {
     // Cache in Redis for operations that benefit from distributed caching
     return request.riskLevel === RiskLevel.MINIMAL || 
            request.riskLevel === RiskLevel.LOW ||
-           config.autoWarming;
+           _config.autoWarming;
   }
 
   private async updateCacheAccessMetrics(entry: CacheEntry<ParlantValidationResponse>): Promise<void> {

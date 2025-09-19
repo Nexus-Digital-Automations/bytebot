@@ -329,7 +329,7 @@ describe('AsyncJobService', () => {
         () => new Promise(resolve => setTimeout(() => resolve(mockScreenshotResult), 50000))
       );
 
-      const submission = await service.submitAction(_mockComputerAction, userId, {
+      const submission = await service.submitAction(mockComputerAction, userId, {
         timeout: 100, // Very short timeout
       });
 
@@ -534,15 +534,15 @@ describe('AsyncJobService', () => {
 
     it('should handle priority-based job ordering', async () => {
       // Submit jobs with different priorities
-      const lowPriorityJob = await service.submitAction(_mockComputerAction, userId, {
+      const lowPriorityJob = await service.submitAction(mockComputerAction, userId, {
         priority: 'low',
       });
 
-      const highPriorityJob = await service.submitAction(_mockMoveAction, userId, {
+      const highPriorityJob = await service.submitAction(mockMoveAction, userId, {
         priority: 'high',
       });
 
-      const normalPriorityJob = await service.submitAction(_mockClickAction, userId, {
+      const normalPriorityJob = await service.submitAction(mockClickAction, userId, {
         priority: 'normal',
       });
 
@@ -561,9 +561,9 @@ describe('AsyncJobService', () => {
       });
 
       // Submit multiple jobs with different priorities
-      await service.submitAction(_mockComputerAction, userId, { priority: 'low' });
-      await service.submitAction(_mockMoveAction, userId, { priority: 'high' });
-      await service.submitAction(_mockClickAction, userId, { priority: 'normal' });
+      await service.submitAction(mockComputerAction, userId, { priority: 'low' });
+      await service.submitAction(mockMoveAction, userId, { priority: 'high' });
+      await service.submitAction(mockClickAction, userId, { priority: 'normal' });
 
       // Allow time for processing
       await new Promise(resolve => setTimeout(resolve, 300));

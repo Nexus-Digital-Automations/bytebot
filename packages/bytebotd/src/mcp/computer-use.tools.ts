@@ -165,7 +165,7 @@ export class ComputerUseTools {
         operationId,
         'computer_move_mouse',
         startTime,
-        _result,
+        result,
       );
 
       return { content: [{ type: 'text', text: 'mouse moved' }] };
@@ -181,7 +181,7 @@ export class ComputerUseTools {
         content: [
           {
             type: 'text',
-            text: `Error moving mouse: ${err instanceof Error ? _err.message : String(_err)}`,
+            text: `Error moving mouse: ${_err instanceof Error ? _err.message : String(_err)}`,
           },
         ],
       };
@@ -218,7 +218,7 @@ export class ComputerUseTools {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
 
-    this.logOperationStart(_operationId, 'computer_trace_mouse', {
+    this.logOperationStart(operationId, 'computer_trace_mouse', {
       pathLength: path.length,
       holdKeys,
       startPoint: path[0],
@@ -238,7 +238,7 @@ export class ComputerUseTools {
         operationId,
         'computer_trace_mouse',
         startTime,
-        _result,
+        result,
       );
 
       return {
@@ -682,7 +682,7 @@ V, W, X, Y, Z
         operationId,
         'computer_screenshot',
         startTime,
-        _result,
+        result,
       );
 
       return {
@@ -758,8 +758,8 @@ V, W, X, Y, Z
       });
 
       const message = (() => {
-        if (_result && typeof result === 'object' && 'message' in _result) {
-          const msg = (_result as { message: unknown }).message;
+        if (result && typeof result === 'object' && 'message' in result) {
+          const msg = (result as { message: unknown }).message;
           return typeof msg === 'string' ? msg : 'File operation completed';
         }
         return 'File written successfully';
@@ -800,15 +800,15 @@ V, W, X, Y, Z
 
       // Type guard to check if result has the expected structure
       const hasValidResult =
-        _result &&
+        result &&
         typeof result === 'object' &&
-        'success' in _result &&
-        'data' in _result &&
-        (_result as { success: unknown; data: unknown }).success &&
-        (_result as { success: unknown; data: unknown }).data;
+        'success' in result &&
+        'data' in result &&
+        (result as { success: unknown; data: unknown }).success &&
+        (result as { success: unknown; data: unknown }).data;
 
       if (hasValidResult) {
-        const fileResult = _result as {
+        const fileResult = result as {
           success: boolean;
           data: string;
           mediaType?: string;
@@ -833,8 +833,8 @@ V, W, X, Y, Z
         };
       } else {
         const errorMessage = (() => {
-          if (_result && typeof result === 'object' && 'message' in _result) {
-            const msg = (_result as { message: unknown }).message;
+          if (result && typeof result === 'object' && 'message' in result) {
+            const msg = (result as { message: unknown }).message;
             return typeof msg === 'string' ? msg : 'Unknown error';
           }
           return 'Error reading file';

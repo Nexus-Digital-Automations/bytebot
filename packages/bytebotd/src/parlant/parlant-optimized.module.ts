@@ -251,7 +251,7 @@ export const parlantOptimizationConfig = () => ({
     },
 
     // API endpoints configuration
-    endpoints: (_process.env.PARLANT_API_ENDPOINTS ?? 'http://localhost:8000').split(','),
+    endpoints: (process.env.PARLANT_API_ENDPOINTS ?? 'http://localhost:8000').split(','),
 
     // Degradation strategy
     degradationStrategy: process.env.PARLANT_DEGRADATION_STRATEGY ?? 'GRACEFUL_DEGRADATION',

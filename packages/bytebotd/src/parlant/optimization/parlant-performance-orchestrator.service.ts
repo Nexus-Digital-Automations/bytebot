@@ -342,7 +342,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
           
           // Fall back to direct processing
           return this.fallbackToDirectProcessing(
-            _request,
+            request,
             context,
             startTime,
             optimizationPath,
@@ -367,7 +367,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
 
       // Step 3: Direct processing fallback
       return this.fallbackToDirectProcessing(
-        _request,
+        request,
         context,
         startTime,
         optimizationPath,
@@ -393,7 +393,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
       this.logger.error(`Validation error for ${request.functionName}:`, error);
       
       return this.createErrorResponse(
-        _error,
+        error,
         startTime,
         optimizationPath,
         { 
@@ -521,7 +521,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
   ): OptimizedValidationResponse {
     const errorMessage = error instanceof Error ? error.message : String(error);
     
-    const _errorResponse: ParlantValidationResponse = {
+    const errorResponse: ParlantValidationResponse = {
       conversationId: `error-${Date.now()}`,
       approved: false,
       confidence: 0,
@@ -535,7 +535,7 @@ export class ParlantPerformanceOrchestratorService implements OnModuleInit, OnMo
     };
 
     return this.createOptimizedResponse(
-      _errorResponse,
+      errorResponse,
       startTime,
       optimizationPath,
       { 

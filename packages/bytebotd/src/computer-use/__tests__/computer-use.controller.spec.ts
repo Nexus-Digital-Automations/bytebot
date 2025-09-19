@@ -376,7 +376,7 @@ describe('ComputerUseController', () => {
           job: mockJobSubmission,
         });
         expect(asyncJobService.submitAction).toHaveBeenCalledWith(
-          _mockAsyncSubmission.action,
+          mockAsyncSubmission.action,
           mockUser.id,
           {
             priority: mockAsyncSubmission.priority,

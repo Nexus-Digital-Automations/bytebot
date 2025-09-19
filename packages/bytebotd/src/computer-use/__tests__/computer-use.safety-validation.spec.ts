@@ -150,7 +150,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(overflowAction, { type: 'body' } as unknown)
+        validationPipe.transform(overflowAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -161,7 +161,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(nanAction, { type: 'body' } as unknown)
+        validationPipe.transform(nanAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -174,7 +174,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(maliciousAction, { type: 'body' } as unknown)
+        validationPipe.transform(maliciousAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -185,7 +185,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(scriptInjection, { type: 'body' } as unknown)
+        validationPipe.transform(scriptInjection, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -196,7 +196,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(sqlInjection, { type: 'body' } as unknown)
+        validationPipe.transform(sqlInjection, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -207,7 +207,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(oversizedText, { type: 'body' } as unknown)
+        validationPipe.transform(oversizedText, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -218,7 +218,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(nullByteText, { type: 'body' } as unknown)
+        validationPipe.transform(nullByteText, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -242,7 +242,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(traversalAction, { type: 'body' } as unknown)
+        validationPipe.transform(traversalAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -254,7 +254,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(systemPathAction, { type: 'body' } as unknown)
+        validationPipe.transform(systemPathAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -266,7 +266,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(nullBytePathAction, { type: 'body' } as unknown)
+        validationPipe.transform(nullBytePathAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -278,7 +278,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(dangerousPathAction, { type: 'body' } as unknown)
+        validationPipe.transform(dangerousPathAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -301,7 +301,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(dangerousContentAction, { type: 'body' } as unknown)
+        validationPipe.transform(dangerousContentAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -314,7 +314,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(maliciousAppAction, { type: 'body' } as unknown)
+        validationPipe.transform(maliciousAppAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -325,7 +325,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(unauthorizedAppAction, { type: 'body' } as unknown)
+        validationPipe.transform(unauthorizedAppAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -335,7 +335,7 @@ describe('Computer Use Safety and Validation', () => {
         applicationName: 'firefox',
       };
 
-      const result = await validationPipe.transform(_safeAppAction, { type: 'body' } as unknown);
+      const result = await validationPipe.transform(safeAppAction, { type: 'body' } as unknown);
       expect(result).toEqual(safeAppAction);
     });
 
@@ -347,7 +347,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(maliciousParamsAction, { type: 'body' } as unknown)
+        validationPipe.transform(maliciousParamsAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -363,12 +363,12 @@ describe('Computer Use Safety and Validation', () => {
 
       // Simulate rapid consecutive clicks
       for (let i = 0; i < 10; i++) {
-        await validationPipe.transform(_rapidClicks[i], { type: 'body' } as unknown);
+        await validationPipe.transform(rapidClicks[i], { type: 'body' } as unknown);
       }
 
       // 11th click should be rate limited
       await expect(
-        _validationPipe.transform(rapidClicks[10], { type: 'body' } as unknown)
+        validationPipe.transform(rapidClicks[10], { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -380,7 +380,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(excessiveTypingAction, { type: 'body' } as unknown)
+        validationPipe.transform(excessiveTypingAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -393,12 +393,12 @@ describe('Computer Use Safety and Validation', () => {
 
       // Should allow reasonable number of file operations
       for (let i = 0; i < 5; i++) {
-        await validationPipe.transform(_fileActions[i], { type: 'body' } as unknown);
+        await validationPipe.transform(fileActions[i], { type: 'body' } as unknown);
       }
 
       // Excessive file operations should be blocked
       await expect(
-        _validationPipe.transform(fileActions[50], { type: 'body' } as unknown)
+        validationPipe.transform(fileActions[50], { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -412,7 +412,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(largePayload, { type: 'body' } as unknown)
+        validationPipe.transform(largePayload, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -481,7 +481,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(encodingAttack, { type: 'body' } as unknown)
+        validationPipe.transform(encodingAttack, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -544,7 +544,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(restrictedFileAction, { type: 'body' } as unknown)
+        validationPipe.transform(restrictedFileAction, { type: 'body' } as unknown)
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -569,7 +569,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(systemAppAction, { type: 'body' } as unknown)
+        validationPipe.transform(systemAppAction, { type: 'body' } as unknown)
       ).rejects.toThrow(ForbiddenException);
     });
   });
@@ -582,7 +582,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(maliciousKeys, { type: 'body' } as unknown)
+        validationPipe.transform(maliciousKeys, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -593,7 +593,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(clipboardAttack, { type: 'body' } as unknown)
+        validationPipe.transform(clipboardAttack, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -606,7 +606,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(evasionAction as unknown, { type: 'body' } as unknown)
+        validationPipe.transform(evasionAction as unknown, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -633,7 +633,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(complexAction as unknown, { type: 'body' } as unknown)
+        validationPipe.transform(complexAction as unknown, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -644,7 +644,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(highResScreenshot as unknown, { type: 'body' } as unknown)
+        validationPipe.transform(highResScreenshot as unknown, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -656,7 +656,7 @@ describe('Computer Use Safety and Validation', () => {
       };
 
       await expect(
-        _validationPipe.transform(largFileAction, { type: 'body' } as unknown)
+        validationPipe.transform(largFileAction, { type: 'body' } as unknown)
       ).rejects.toThrow(BadRequestException);
     });
   });

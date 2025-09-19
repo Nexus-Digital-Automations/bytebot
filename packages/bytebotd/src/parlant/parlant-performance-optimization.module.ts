@@ -57,7 +57,7 @@ export const performanceOptimizationConfig = () => ({
         enabled: process.env.PARLANT_L1_ENABLED !== 'false'
       },
       l2Cache: {
-        redisCluster: (_process.env.PARLANT_REDIS_CLUSTER ?? 'localhost:6379').split(','),
+        redisCluster: (process.env.PARLANT_REDIS_CLUSTER ?? 'localhost:6379').split(','),
         patternTtlMs: parseInt(process.env.PARLANT_L2_PATTERN_TTL_MS ?? '300000', 10),
         resultTtlMs: parseInt(process.env.PARLANT_L2_RESULT_TTL_MS ?? '60000', 10),
         compressionEnabled: process.env.PARLANT_L2_COMPRESSION !== 'false',
@@ -295,7 +295,7 @@ const optimizationRecommendationsProvider: Provider = {
         );
         
         // Inject the performance orchestrator
-        (_service as unknown as { performanceOrchestrator: ParlantPerformanceOrchestratorService }).performanceOrchestrator = orchestrator;
+        (service as unknown as { performanceOrchestrator: ParlantPerformanceOrchestratorService }).performanceOrchestrator = orchestrator;
         
         return service;
       },

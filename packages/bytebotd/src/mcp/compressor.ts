@@ -41,9 +41,9 @@ const createSharp = async (
   if (!sharpModule) {
     try {
       sharpModule = (await import('sharp')).default;
-      _logger.log('Sharp module loaded successfully');
+      logger.log('Sharp module loaded successfully');
     } catch (error) {
-      _logger.error('Failed to load sharp module for image processing', {
+      logger.error('Failed to load sharp module for image processing', {
         error: (error as Error).message,
         fallback: 'Image compression features will be unavailable',
       });
@@ -89,7 +89,7 @@ class Base64ImageCompressor {
     const operationId = `compress${Date.now()}${Math.random().toString(36).substr(2, 6)}`;
     const startTime = Date.now();
 
-    _logger.log(`[${operationId}] Starting image compression`, {
+    logger.log(`[${operationId}] Starting image compression`, {
       operationId,
       inputSize: base64String.length,
       targetSizeKB: options.targetSizeKB ?? 1024,
@@ -109,7 +109,7 @@ class Base64ImageCompressor {
       const inputBuffer = Buffer.from(base64Data, 'base64');
       const inputSizeKB = inputBuffer.length / 1024;
 
-      _logger.debug(`[${operationId}] Input processing completed`, {
+      logger.debug(`[${operationId}] Input processing completed`, {
         operationId,
         inputSizeKB: inputSizeKB.toFixed(2),
         inputSizeMB: (inputSizeKB / 1024).toFixed(3),
@@ -119,7 +119,7 @@ class Base64ImageCompressor {
 
       // If already under target size, return with minimal processing
       if (inputSizeKB <= targetSizeKB) {
-        _logger.debug(
+        logger.debug(
           `[${operationId}] Image already under target size, skipping compression`,
         );
         return {
@@ -143,7 +143,7 @@ class Base64ImageCompressor {
       let high = initialQuality;
       let bestResult: { buffer: Buffer; quality: number } | null = null;
 
-      _logger.debug(`[${operationId}] Starting binary search optimization`, {
+      logger.debug(`[${operationId}] Starting binary search optimization`, {
         operationId,
         searchRange: `${minQuality}-${initialQuality}`,
         maxIterations,
@@ -157,7 +157,7 @@ class Base64ImageCompressor {
         const sizeKB = outputBuffer.length / 1024;
         const iterationTime = Date.now() - iterationStartTime;
 
-        _logger.debug(`[${operationId}] Iteration ${iterations + 1}`, {
+        logger.debug(`[${operationId}] Iteration ${iterations + 1}`, {
           operationId,
           iteration: iterations + 1,
           quality,
@@ -183,7 +183,7 @@ class Base64ImageCompressor {
 
       // If no result found under target size, use lowest quality
       if (!bestResult) {
-        _logger.warn(
+        logger.warn(
           `[${operationId}] No solution found within iterations, using minimum quality`,
         );
         outputBuffer = await this.compressBuffer(
@@ -215,7 +215,7 @@ class Base64ImageCompressor {
         iterations,
       };
 
-      _logger.log(`[${operationId}] Compression completed successfully`, {
+      logger.log(`[${operationId}] Compression completed successfully`, {
         operationId,
         finalSizeKB: finalSizeKB.toFixed(2),
         finalSizeMB: finalSizeMB.toFixed(3),
@@ -231,7 +231,7 @@ class Base64ImageCompressor {
       return _result;
     } catch (_error) {
       const totalTime = Date.now() - startTime;
-      _logger.error(`[${operationId}] Compression failed`, {
+      logger.error(`[${operationId}] Compression failed`, {
         operationId,
         error: (_error as Error).message,
         totalTimeMs: totalTime,

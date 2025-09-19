@@ -68,11 +68,11 @@ const logger = new Logger('BytebotMcpModule');
 })
 export class BytebotMcpModule {
   constructor() {
-    _logger.log(
+    logger.log(
       'BytebotMcpModule initialized - MCP server ready for connections',
     );
-    _logger.log('MCP endpoints available at: /mcp (SSE)');
-    _logger.log(
+    logger.log('MCP endpoints available at: /mcp (SSE)');
+    logger.log(
       'Available tool categories: mouse, keyboard, screen, file operations',
     );
   }
