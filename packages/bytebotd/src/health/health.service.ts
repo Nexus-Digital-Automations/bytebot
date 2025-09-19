@@ -609,4 +609,62 @@ export class HealthService extends HealthIndicator {
       };
     }
   }
+
+  /**
+   * Comprehensive health check for integration tests
+   * Returns overall health status with details about all services.
+   *
+   * @returns Promise<{status: string, details: Record<string, string>}>
+   */
+  async checkHealth(): Promise<{status: string, details: Record<string, string>}> {
+    const operationId = `checkHealth${Date.now()}`;
+    this.logger.debug(`[${operationId}] Starting comprehensive health check`);
+
+    try {
+      // Get basic health status
+      const basicHealth = this.getBasicHealth();
+
+      // Check process health
+      const processHealth = this.checkProcessHealth();
+
+      // Check database health
+      const databaseHealth = await this.checkDatabaseHealth();
+
+      // Determine overall status
+      const isHealthy =
+        basicHealth.status === 'healthy' &&
+        processHealth.process.status === 'up' &&
+        databaseHealth.database.status === 'up';
+
+      const status = isHealthy ? 'healthy' : 'unhealthy';
+
+      const details: Record<string, string> = {
+        overall: status,
+        process: processHealth.process.status,
+        database: databaseHealth.database.status,
+        uptime: `${basicHealth.uptime}s`,
+        memory: `${basicHealth.memory.used}MB`,
+      };
+
+      this.logger.debug(
+        `[${operationId}] Comprehensive health check completed`,
+        { status, details }
+      );
+
+      return { status, details };
+    } catch (_error) {
+      const errorMessage = _error instanceof Error ? _error.message : 'Unknown error';
+      this.logger.error(
+        `[${operationId}] Comprehensive health check failed: ${errorMessage}`
+      );
+
+      return {
+        status: 'unhealthy',
+        details: {
+          overall: 'unhealthy',
+          error: errorMessage,
+        },
+      };
+    }
+  }
 }

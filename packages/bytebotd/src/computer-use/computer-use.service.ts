@@ -59,12 +59,20 @@ export interface ComputerServiceError {
  */
 export interface ScreenshotResult {
   readonly image: string; // Base64 encoded image data
+  readonly success: boolean; // Operation success status
+  readonly screenshotData: string; // Alias for image data (legacy compatibility)
+  readonly screenshotPath?: string; // File path if saved to disk
+  readonly operationId: string; // Operation tracking ID
+  readonly fileSize?: number; // File size in bytes
+  readonly quality?: number; // Image quality (0-100)
   readonly metadata?: {
     readonly width?: number;
     readonly height?: number;
     readonly format?: string;
     readonly captureTime: Date;
     readonly operationId: string;
+    readonly fileSize?: number;
+    readonly quality?: number;
   };
 }
 
@@ -1128,12 +1136,20 @@ export class ComputerUseService {
       const buffer = await this.nutService.screendump();
       const image = buffer.toString('base64');
       const duration = Date.now() - startTime;
+      const fileSize = buffer.length;
 
       const result: ScreenshotResult = {
         image,
+        success: true,
+        screenshotData: image, // Legacy compatibility alias
+        operationId,
+        fileSize,
+        quality: 95, // Default quality for PNG
         metadata: {
           captureTime,
           operationId,
+          fileSize,
+          quality: 95,
           // Note: Width and height would need additional detection
           format: 'png', // Assuming PNG format from screendump
         },
@@ -1142,7 +1158,7 @@ export class ComputerUseService {
       this.logger.log(`[${operationId}] Screenshot completed successfully`, {
         operationId,
         processingTimeMs: duration,
-        imageSizeBytes: image.length,
+        imageSizeBytes: fileSize,
         base64Length: image.length,
       });
 

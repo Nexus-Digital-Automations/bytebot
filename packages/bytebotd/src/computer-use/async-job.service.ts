@@ -183,6 +183,26 @@ export class AsyncJobService {
   }
 
   /**
+   * Submit a new async action for execution (legacy compatibility method)
+   * This is an alias for submitJob to maintain compatibility with tests.
+   *
+   * @param action Computer action to execute
+   * @param options Job execution options
+   * @returns JobSubmissionResponseDto Job submission details
+   */
+  async submitAction(
+    action: ComputerActionDto,
+    options: {
+      priority?: JobPriority;
+      timeout?: number;
+      useCache?: boolean;
+      metadata?: Record<string, unknown>;
+    } = {},
+  ): Promise<JobSubmissionResponseDto> {
+    return this.submitJob(action, options);
+  }
+
+  /**
    * Get job status and progress information
    *
    * @param jobId Job identifier

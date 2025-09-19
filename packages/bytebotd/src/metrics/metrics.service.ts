@@ -394,6 +394,73 @@ export class BytebotMetricsService {
   }
 
   /**
+   * Record job submission metrics
+   * Tracks when jobs are submitted to the queue.
+   *
+   * @param jobType Type of job being submitted
+   * @param priority Job priority level
+   */
+  recordJobSubmission(jobType: string, priority: string): void {
+    this.taskProcessingTotal.labels(jobType, 'submitted').inc();
+
+    this.logger.debug('Job submission metrics recorded', {
+      jobType,
+      priority,
+    });
+  }
+
+  /**
+   * Record job completion metrics
+   * Tracks successful job completions.
+   *
+   * @param jobType Type of job completed
+   * @param duration Execution duration in milliseconds
+   */
+  recordJobCompletion(jobType: string, duration: number): void {
+    const durationSeconds = duration / 1000;
+
+    this.taskProcessingTotal.labels(jobType, 'completed').inc();
+    this.taskProcessingDuration
+      .labels(jobType, 'completed')
+      .observe(durationSeconds);
+
+    this.logger.debug('Job completion metrics recorded', {
+      jobType,
+      durationMs: duration,
+    });
+  }
+
+  /**
+   * Record job error metrics
+   * Tracks job failures and error types.
+   *
+   * @param jobType Type of job that failed
+   * @param errorType Type of error encountered
+   */
+  recordJobError(jobType: string, errorType: string): void {
+    this.taskProcessingTotal.labels(jobType, 'error').inc();
+
+    this.logger.debug('Job error metrics recorded', {
+      jobType,
+      errorType,
+    });
+  }
+
+  /**
+   * Record job cancellation metrics
+   * Tracks when jobs are cancelled before completion.
+   *
+   * @param jobType Type of job cancelled
+   */
+  recordJobCancellation(jobType: string): void {
+    this.taskProcessingTotal.labels(jobType, 'cancelled').inc();
+
+    this.logger.debug('Job cancellation metrics recorded', {
+      jobType,
+    });
+  }
+
+  /**
    * Record computer-use operation metrics
    *
    * @param operationType Type of computer operation

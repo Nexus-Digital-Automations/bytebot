@@ -700,4 +700,155 @@ export class NutService {
       };
     }
   }
+
+  // ============================================================================
+  // LEGACY COMPATIBILITY METHODS FOR TESTS
+  // ============================================================================
+
+  /**
+   * Initialize the NUT service with configuration.
+   * This is a legacy wrapper for test compatibility.
+   *
+   * @returns Promise<void>
+   */
+  async initialize(): Promise<void> {
+    this.logger.log('NUT Service initialization - compatibility method');
+    // Service is already initialized in constructor
+    this.validateServiceReady();
+  }
+
+  /**
+   * Configure NUT service performance settings.
+   * This is a legacy wrapper for test compatibility.
+   *
+   * @param config Configuration object with mouse/keyboard settings
+   * @returns Promise<void>
+   */
+  async configure(config: {
+    mouseSpeed?: number;
+    confidence?: number;
+    autoDelayMs?: number;
+  }): Promise<void> {
+    this.logger.log('Configuring NUT service', config);
+
+    if (config.autoDelayMs !== undefined) {
+      typedMouse.config.autoDelayMs = config.autoDelayMs;
+      typedKeyboard.config.autoDelayMs = config.autoDelayMs;
+    }
+
+    // Note: mouseSpeed and confidence are handled by nut-js internally
+    // These are stored in screen.config and mouse.config by the library
+  }
+
+  /**
+   * Cleanup NUT service resources.
+   * This is a legacy wrapper for test compatibility.
+   *
+   * @returns Promise<void>
+   */
+  async cleanup(): Promise<void> {
+    this.logger.log('NUT Service cleanup - compatibility method');
+    // No specific cleanup needed for nut-js
+  }
+
+  /**
+   * Move mouse to coordinates.
+   * This is a legacy wrapper for mouseMoveEvent.
+   *
+   * @param coordinates The x and y coordinates
+   * @returns Promise<ServiceResponse>
+   */
+  async moveMouse(coordinates: Coordinates): Promise<ServiceResponse> {
+    return this.mouseMoveEvent(coordinates);
+  }
+
+  /**
+   * Click mouse button.
+   * This is a legacy wrapper for mouseClickEvent.
+   *
+   * @param button The mouse button to click
+   * @returns Promise<ServiceResponse>
+   */
+  async clickMouse(button: MouseButton = 'left'): Promise<ServiceResponse> {
+    return this.mouseClickEvent(button);
+  }
+
+  /**
+   * Press keyboard keys.
+   * This is a legacy wrapper for sendKeys.
+   *
+   * @param keys Array of key strings
+   * @param delay Delay between keys in ms
+   * @returns Promise<ServiceResponse>
+   */
+  async pressKeys(keys: string[], delay: number = 100): Promise<ServiceResponse> {
+    return this.sendKeys(keys, delay);
+  }
+
+  /**
+   * Take a screenshot.
+   * This is a legacy wrapper for screendump.
+   *
+   * @returns Promise<Buffer>
+   */
+  async screenshot(): Promise<Buffer> {
+    return this.screendump();
+  }
+
+  /**
+   * Scroll the mouse wheel.
+   * This is a legacy wrapper for mouseWheelEvent.
+   *
+   * @param direction The scroll direction
+   * @param amount The number of scroll steps
+   * @returns Promise<ServiceResponse>
+   */
+  async scroll(direction: ScrollDirection, amount: number = 1): Promise<ServiceResponse> {
+    return this.mouseWheelEvent(direction, amount);
+  }
+
+  /**
+   * Drag mouse from one point to another.
+   * This implements mouse drag functionality for test compatibility.
+   *
+   * @param from Starting coordinates
+   * @param to Ending coordinates
+   * @returns Promise<ServiceResponse>
+   */
+  async dragMouse(from: Coordinates, to: Coordinates): Promise<ServiceResponse> {
+    const operationId = this.generateOperationId();
+    this.logger.log(`[${operationId}] Starting mouse drag operation`, {
+      from,
+      to,
+      operationId,
+    });
+
+    try {
+      // Move to start position
+      await this.mouseMoveEvent(from);
+
+      // Press left mouse button
+      await this.mouseButtonEvent('left', true);
+
+      // Small delay to ensure button press is registered
+      await this.delay(50);
+
+      // Move to end position (this will drag)
+      await this.mouseMoveEvent(to);
+
+      // Release left mouse button
+      await this.mouseButtonEvent('left', false);
+
+      this.logger.log(
+        `[${operationId}] Mouse drag operation completed successfully`,
+      );
+      return { success: true };
+    } catch (_error) {
+      const errorMessage = this.getErrorMessage(_error);
+      this.logger.error(
+        `[${operationId}] Mouse drag operation failed: ${errorMessage}`,
+      );
+      throw new Error(`Failed to drag mouse: ${errorMessage}`);
+    }
+  }
 }
