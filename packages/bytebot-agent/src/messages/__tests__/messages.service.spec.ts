@@ -88,7 +88,7 @@ describe('MessagesService', () => {
 
   const mockUserMessage: Message = {
     id: mockMessageId,
-    content: [mockTextContentBlock] as any,
+    content: [mockTextContentBlock] as unknown as Prisma.JsonValue,
     role: MessageRole.USER,
     taskId: mockTaskId,
     summaryId: null,
