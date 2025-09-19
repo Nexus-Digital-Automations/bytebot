@@ -427,7 +427,7 @@ describe('Parlant Cache and Database Integration', () => {
 
   describe('Cache Hit Rate Validation (85%+ Target)', () => {
     it('should achieve 85%+ cache hit rate with sequential access patterns', async () => {
-      const config = CacheDatabaseTestUtils.generateCacheTestConfigs()[0]; // Sequential Cache Loading
+      const config = CacheDatabaseTestUtils.generateCacheTestConfigs()[0]!; // Sequential Cache Loading
       const requests = CacheDatabaseTestUtils.generateCacheTestRequests(config);
 
       logger.log(`Starting ${config.name} - Target hit rate: ${(config.expectedHitRate * 100).toFixed(1)}%`);
@@ -489,7 +489,7 @@ describe('Parlant Cache and Database Integration', () => {
     }, 60000);
 
     it('should maintain cache efficiency under concurrent access', async () => {
-      const config = CacheDatabaseTestUtils.generateCacheTestConfigs()[1]; // Concurrent Cache Access
+      const config = CacheDatabaseTestUtils.generateCacheTestConfigs()[1]!; // Concurrent Cache Access
       const requests = CacheDatabaseTestUtils.generateCacheTestRequests(config);
 
       logger.log(`Starting ${config.name} with ${config.concurrentUsers} concurrent users`);
@@ -566,7 +566,7 @@ describe('Parlant Cache and Database Integration', () => {
     }, 90000);
 
     it('should optimize cache based on access patterns', async () => {
-      const config = CacheDatabaseTestUtils.generateCacheTestConfigs()[2]; // Pattern-Based Cache Optimization
+      const config = CacheDatabaseTestUtils.generateCacheTestConfigs()[2]!; // Pattern-Based Cache Optimization
       const requests = CacheDatabaseTestUtils.generateCacheTestRequests(config);
 
       logger.log(`Starting ${config.name} with pattern-based optimization`);
@@ -641,7 +641,7 @@ describe('Parlant Cache and Database Integration', () => {
 
   describe('Database Operations Integration', () => {
     it('should handle high-frequency database reads efficiently', async () => {
-      const config = CacheDatabaseTestUtils.generateDatabaseTestConfigs()[0]; // High-Frequency Reads
+      const config = CacheDatabaseTestUtils.generateDatabaseTestConfigs()[0]!; // High-Frequency Reads
 
       logger.log(`Starting ${config.name} with ${config.recordCount} operations`);
 
@@ -697,8 +697,8 @@ describe('Parlant Cache and Database Integration', () => {
     }, 45000);
 
     it('should maintain data consistency during concurrent operations', async () => {
-      const readConfig = CacheDatabaseTestUtils.generateDatabaseTestConfigs()[0]; // Reads
-      const writeConfig = CacheDatabaseTestUtils.generateDatabaseTestConfigs()[1]; // Writes
+      const readConfig = CacheDatabaseTestUtils.generateDatabaseTestConfigs()[0]!; // Reads
+      const writeConfig = CacheDatabaseTestUtils.generateDatabaseTestConfigs()[1]!; // Writes
 
       logger.log('Starting concurrent read/write consistency test');
 

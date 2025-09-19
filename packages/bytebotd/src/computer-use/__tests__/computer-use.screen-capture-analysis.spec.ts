@@ -175,8 +175,8 @@ describe('Computer Use Screen Capture and Analysis', () => {
       expect(result).toEqual(mockBasicScreenshotResult);
       expect(result.success).toBe(true);
       expect(result.screenshotData).toBeInstanceOf(Buffer);
-      expect(result.metadata.width).toBe(1920);
-      expect(result.metadata.height).toBe(1080);
+      expect(result.metadata!.width).toBe(1920);
+      expect(result.metadata!.height).toBe(1080);
       expect(nutService.screenshot).toHaveBeenCalled();
     });
 
@@ -185,7 +185,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         ...mockBasicScreenshotResult,
         screenshotPath: '/tmp/screenshot_123.jpg',
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           format: 'jpeg',
           compression: 'lossy',
         },
@@ -195,7 +195,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.format).toBe('jpeg');
+      expect(result.metadata!.format).toBe('jpeg');
       expect(result.screenshotPath).toContain('.jpg');
     });
 
@@ -203,9 +203,9 @@ describe('Computer Use Screen Capture and Analysis', () => {
       const lowQualityResult = {
         ...mockBasicScreenshotResult,
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           quality: 50,
-          fileSize: mockBasicScreenshotResult.metadata.fileSize / 2,
+          fileSize: mockBasicScreenshotResult.metadata!.fileSize / 2,
         },
       };
 
@@ -213,8 +213,8 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.quality).toBe(50);
-      expect(result.metadata.fileSize).toBeLessThan(mockBasicScreenshotResult.metadata.fileSize);
+      expect(result.metadata!.quality).toBe(50);
+      expect(result.metadata!.fileSize).toBeLessThan(mockBasicScreenshotResult.metadata!.fileSize);
     });
 
     it('should handle screenshot capture failures', async () => {
@@ -242,7 +242,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
       const multiMonitorResult = {
         ...mockBasicScreenshotResult,
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           width: 3840, // Two 1920x1080 monitors side by side
           height: 1080,
           displays: [
@@ -257,16 +257,16 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.width).toBe(3840);
-      expect(result.metadata.displays).toHaveLength(2);
-      expect(result.metadata.displays[0].primary).toBe(true);
+      expect(result.metadata!.width).toBe(3840);
+      expect(result.metadata!.displays).toHaveLength(2);
+      expect(result.metadata!.displays[0].primary).toBe(true);
     });
 
     it('should capture screenshot from specific monitor', async () => {
       const singleMonitorResult = {
         ...mockBasicScreenshotResult,
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           displayId: 'display2',
           bounds: { x: 1920, y: 0, width: 1920, height: 1080 },
         },
@@ -276,8 +276,8 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.displayId).toBe('display2');
-      expect(result.metadata.bounds.x).toBe(1920);
+      expect(result.metadata!.displayId).toBe('display2');
+      expect(result.metadata!.bounds.x).toBe(1920);
     });
 
     it('should handle display configuration changes during capture', async () => {
@@ -304,7 +304,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
       const highDpiResult = {
         ...mockBasicScreenshotResult,
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           width: 2880, // Retina display scaled
           height: 1800,
           dpi: 220,
@@ -316,8 +316,8 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.dpi).toBe(220);
-      expect(result.metadata.scaleFactor).toBe(2);
+      expect(result.metadata!.dpi).toBe(220);
+      expect(result.metadata!.scaleFactor).toBe(2);
     });
   });
 
@@ -339,7 +339,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata).toMatchObject({
+      expect(result.metadata!).toMatchObject({
         width: 1920,
         height: 1080,
         format: 'png',
@@ -352,7 +352,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         ...mockBasicScreenshotResult,
         screenshotData: mockLargeScreenshotData,
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           fileSize: mockLargeScreenshotData.length,
           compressed: true,
           originalSize: mockLargeScreenshotData.length,
@@ -365,15 +365,15 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.compressed).toBe(true);
-      expect(result.metadata.compressionRatio).toBeLessThan(1);
+      expect(result.metadata!.compressed).toBe(true);
+      expect(result.metadata!.compressionRatio).toBeLessThan(1);
     });
 
     it('should resize screenshots when requested', async () => {
       const resizedResult = {
         ...mockBasicScreenshotResult,
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           width: 960,
           height: 540,
           resized: true,
@@ -388,9 +388,9 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.width).toBe(960);
-      expect(result.metadata.height).toBe(540);
-      expect(result.metadata.resized).toBe(true);
+      expect(result.metadata!.width).toBe(960);
+      expect(result.metadata!.height).toBe(540);
+      expect(result.metadata!.resized).toBe(true);
     });
 
     it('should convert screenshot formats', async () => {
@@ -398,9 +398,9 @@ describe('Computer Use Screen Capture and Analysis', () => {
         ...mockBasicScreenshotResult,
         screenshotPath: '/tmp/screenshot_123.webp',
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           format: 'webp',
-          fileSize: mockBasicScreenshotResult.metadata.fileSize * 0.6, // WebP is smaller
+          fileSize: mockBasicScreenshotResult.metadata!.fileSize * 0.6, // WebP is smaller
         },
       };
 
@@ -410,7 +410,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.format).toBe('webp');
+      expect(result.metadata!.format).toBe('webp');
       expect(result.screenshotPath).toContain('.webp');
     });
 
@@ -418,7 +418,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
       const colorAnalysisResult = {
         ...mockBasicScreenshotResult,
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           colorAnalysis: {
             dominantColors: ['#FF0000', '#00FF00', '#0000FF'],
             averageBrightness: 128,
@@ -440,9 +440,9 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.colorAnalysis).toBeDefined();
-      expect(result.metadata.colorAnalysis.dominantColors).toHaveLength(3);
-      expect(result.metadata.colorAnalysis.colorSpace).toBe('sRGB');
+      expect(result.metadata!.colorAnalysis).toBeDefined();
+      expect(result.metadata!.colorAnalysis.dominantColors).toHaveLength(3);
+      expect(result.metadata!.colorAnalysis.colorSpace).toBe('sRGB');
     });
   });
 
@@ -463,8 +463,8 @@ describe('Computer Use Screen Capture and Analysis', () => {
       const result = await service.screenshot();
       const processingTime = Date.now() - startTime;
 
-      expect(result.metadata.width).toBe(3840);
-      expect(result.metadata.height).toBe(2160);
+      expect(result.metadata!.width).toBe(3840);
+      expect(result.metadata!.height).toBe(2160);
       expect(processingTime).toBeLessThan(5000); // Should complete within 5 seconds
     });
 
@@ -491,7 +491,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
       const cachedResult = {
         ...mockBasicScreenshotResult,
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           cached: true,
           cacheKey: 'screenshot_cache_123',
         },
@@ -504,15 +504,15 @@ describe('Computer Use Screen Capture and Analysis', () => {
       const result1 = await service.screenshot();
       const result2 = await service.screenshot();
 
-      expect(result1.metadata.cached).toBeUndefined();
-      expect(result2.metadata.cached).toBe(true);
+      expect(result1.metadata!.cached).toBeUndefined();
+      expect(result2.metadata!.cached).toBe(true);
     });
 
     it('should optimize screenshot quality based on use case', async () => {
       const optimizedResult = {
         ...mockBasicScreenshotResult,
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           quality: 85,
           optimized: true,
           useCase: 'analysis',
@@ -523,8 +523,8 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.optimized).toBe(true);
-      expect(result.metadata.quality).toBe(85);
+      expect(result.metadata!.optimized).toBe(true);
+      expect(result.metadata!.quality).toBe(85);
     });
   });
 
@@ -605,7 +605,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         ...mockBasicScreenshotResult,
         operationId: 'screenshot_456',
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           changedPixels: 15000,
           changePercentage: 12.5,
           previousScreenshotId: 'screenshot_123',
@@ -621,14 +621,14 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       expect(result1.operationId).toBe('screenshot_123');
       expect(result2.operationId).toBe('screenshot_456');
-      expect(result2.metadata.changePercentage).toBe(12.5);
+      expect(result2.metadata!.changePercentage).toBe(12.5);
     });
 
     it('should analyze screenshot content for specific elements', async () => {
       const analysisResult = {
         ...mockBasicScreenshotResult,
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           analysis: {
             textDetected: true,
             textRegions: [
@@ -645,17 +645,17 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.analysis).toBeDefined();
-      expect(result.metadata.analysis.textDetected).toBe(true);
-      expect(result.metadata.analysis.textRegions).toHaveLength(1);
-      expect(result.metadata.analysis.confidence).toBe(0.95);
+      expect(result.metadata!.analysis).toBeDefined();
+      expect(result.metadata!.analysis.textDetected).toBe(true);
+      expect(result.metadata!.analysis.textRegions).toHaveLength(1);
+      expect(result.metadata!.analysis.confidence).toBe(0.95);
     });
 
     it('should provide performance metrics for screenshot operations', async () => {
       const performanceResult = {
         ...mockBasicScreenshotResult,
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           performance: {
             captureTime: 45,
             processingTime: 12,
@@ -670,9 +670,9 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.performance).toBeDefined();
-      expect(result.metadata.performance.totalTime).toBeLessThan(1000);
-      expect(result.metadata.performance.captureTime).toBeGreaterThan(0);
+      expect(result.metadata!.performance).toBeDefined();
+      expect(result.metadata!.performance.totalTime).toBeLessThan(1000);
+      expect(result.metadata!.performance.captureTime).toBeGreaterThan(0);
     });
   });
 
@@ -692,7 +692,7 @@ describe('Computer Use Screen Capture and Analysis', () => {
         ...mockBasicScreenshotResult,
         screenshotData: Buffer.alloc(100 * 1024 * 1024), // 100MB
         metadata: {
-          ...mockBasicScreenshotResult.metadata,
+          ...mockBasicScreenshotResult.metadata!,
           fileSize: 100 * 1024 * 1024,
           oversized: true,
           compressionApplied: true,
@@ -703,8 +703,8 @@ describe('Computer Use Screen Capture and Analysis', () => {
 
       const result = await service.screenshot();
 
-      expect(result.metadata.oversized).toBe(true);
-      expect(result.metadata.compressionApplied).toBe(true);
+      expect(result.metadata!.oversized).toBe(true);
+      expect(result.metadata!.compressionApplied).toBe(true);
     });
 
     it('should rotate old screenshot files', async () => {

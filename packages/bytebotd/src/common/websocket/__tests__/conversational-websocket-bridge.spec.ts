@@ -373,7 +373,7 @@ describe('ConversationalWebSocketBridgeService', () => {
 
       const averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
       const maxLatency = Math.max(...latencies);
-      const ninetyNinthPercentile = latencies.sort((a, b) => a - b)[Math.floor(latencies.length * 0.99)];
+      const ninetyNinthPercentile = latencies.sort((a, b) => a - b)[Math.floor(latencies.length * 0.99)] ?? 0;
 
       // Log performance results
       console.log('Message Delivery Performance:', {

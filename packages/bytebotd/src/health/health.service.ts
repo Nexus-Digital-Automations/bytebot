@@ -633,15 +633,15 @@ export class HealthService extends HealthIndicator {
       // Determine overall status
       const isHealthy =
         basicHealth.status === 'healthy' &&
-        processHealth.process.status === 'up' &&
-        databaseHealth.database.status === 'up';
+        processHealth.process?.status === 'up' &&
+        databaseHealth.database?.status === 'up';
 
       const status = isHealthy ? 'healthy' : 'unhealthy';
 
       const details: Record<string, string> = {
         overall: status,
-        process: processHealth.process.status,
-        database: databaseHealth.database.status,
+        process: processHealth.process?.status ?? 'unknown',
+        database: databaseHealth.database?.status ?? 'unknown',
         uptime: `${basicHealth.uptime}s`,
         memory: `${basicHealth.memory.used}MB`,
       };

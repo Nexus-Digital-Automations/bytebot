@@ -290,7 +290,7 @@ describe('Performance Testing Integration', () => {
       expect(Array.isArray(bottlenecks)).toBe(true);
       
       if (bottlenecks.length > 0) {
-        const bottleneck = bottlenecks[0];
+        const bottleneck = bottlenecks[0]!;
         expect(bottleneck.id).toBeDefined();
         expect(bottleneck.type).toBeDefined();
         expect(bottleneck.severity).toBeDefined();
@@ -407,7 +407,7 @@ describe('Performance Testing Integration', () => {
       expect(Array.isArray(recommendations)).toBe(true);
       
       if (recommendations.length > 0) {
-        const recommendation = recommendations[0];
+        const recommendation = recommendations[0]!;
         expect(recommendation.category).toBeDefined();
         expect(recommendation.recommendation).toBeDefined();
         expect(recommendation.impact).toMatch(/high|medium|low/);

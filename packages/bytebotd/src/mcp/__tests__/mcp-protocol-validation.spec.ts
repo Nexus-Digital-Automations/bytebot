@@ -543,7 +543,7 @@ describe('MCP Protocol Validation', () => {
         expect(parseResult.error.issues).toBeDefined();
         expect(parseResult.error.issues.length).toBeGreaterThan(0);
         
-        const firstIssue = parseResult.error.issues[0];
+        const firstIssue = parseResult.error.issues[0]!;
         expect(firstIssue).toHaveProperty('path');
         expect(firstIssue).toHaveProperty('message');
         expect(firstIssue.path).toContain('coordinates');

@@ -692,7 +692,7 @@ describe('Cross-Module Event Integration Tests', () => {
       expect(orderedEvents).toHaveLength(concurrentEventCount);
 
       // Check if events maintain their sequence numbers (they may not be in order due to concurrency)
-      const sequenceNumbers = orderedEvents.map(e => e.sequenceNumber).sort((a, b) => a - b);
+      const sequenceNumbers = orderedEvents.map(e => e.sequenceNumber).sort((a, b) => (a ?? 0) - (b ?? 0));
       const expectedSequence = Array.from({ length: concurrentEventCount }, (_, i) => i + 1);
       
       expect(sequenceNumbers).toEqual(expectedSequence);

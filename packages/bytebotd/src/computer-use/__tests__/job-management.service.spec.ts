@@ -295,8 +295,8 @@ describe('JobManagementService', () => {
 
       await service.createJob(mockScreenshotAction, userId);
 
-      const hsetCall = redisClient.hset.mock.calls[0];
-      const jobData = hsetCall[1];
+      const hsetCall = redisClient.hset.mock.calls[0]!;
+      const jobData = hsetCall[1]!;
 
       // Action and metadata should be encrypted
       expect(jobData.action).not.toEqual(JSON.stringify(mockScreenshotAction));

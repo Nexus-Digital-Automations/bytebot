@@ -745,7 +745,7 @@ export class ParlantPerformanceAlertingService {
       resolvedBy,
       resolvedAt: updatedAlert.resolvedAt,
       resolution,
-      duration: updatedAlert.resolvedAt.getTime() - updatedAlert.triggeredAt.getTime(),
+      duration: updatedAlert.resolvedAt!.getTime() - updatedAlert.triggeredAt.getTime(),
     });
 
     this.eventEmitter.emit('alert.resolved', updatedAlert);
@@ -1414,7 +1414,7 @@ export class ParlantPerformanceAlertingService {
     const rule = this.alertRules.get(alert.ruleId);
     if (!rule || alert.escalationLevel >= rule.escalationPolicy.steps.length) return;
 
-    const step = rule.escalationPolicy.steps[alert.escalationLevel];
+    const step = rule.escalationPolicy.steps[alert.escalationLevel]!;
     const timeoutMs = step.timeout * 60 * 1000; // Convert minutes to milliseconds
 
     setTimeout(async () => {

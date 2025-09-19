@@ -908,6 +908,8 @@ describe('CUA Performance and Scalability Tests', () => {
       for (let i = 1; i < scalabilityResults.length; i++) {
         const current = scalabilityResults[i];
         const previous = scalabilityResults[i - 1];
+
+        if (!current || !previous) continue;
         
         const userScaleFactor = current.config.concurrentUsers / previous.config.concurrentUsers;
         const throughputScaleFactor = current.metrics.operationsPerSecond / previous.metrics.operationsPerSecond;

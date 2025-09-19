@@ -562,7 +562,7 @@ describe('WebSocket Integration Tests', () => {
       }
 
       const averageDelivery = deliveryTimes.reduce((sum, time) => sum + time, 0) / deliveryTimes.length;
-      const p95Delivery = deliveryTimes.sort((a, b) => a - b)[Math.floor(deliveryTimes.length * 0.95)];
+      const p95Delivery = deliveryTimes.sort((a, b) => a - b)[Math.floor(deliveryTimes.length * 0.95)] ?? 0;
 
       console.log('Message Delivery Performance:', {
         messageCount,

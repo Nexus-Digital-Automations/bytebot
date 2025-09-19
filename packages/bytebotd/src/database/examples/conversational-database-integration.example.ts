@@ -622,6 +622,10 @@ export class ConversationalDatabaseUsageExamples {
       }
 
       const user = users[0];
+      if (!user) {
+        this.logger.warn('User data is invalid');
+        return;
+      }
 
       // Update user role (sensitive operation requiring high-level approval)
       const updatedUser = await this.userManagementService.updateUser(
@@ -725,6 +729,10 @@ export class ConversationalDatabaseUsageExamples {
       }
 
       const userToDelete = users[0];
+      if (!userToDelete) {
+        this.logger.warn('User data is invalid for deletion');
+        return;
+      }
 
       // Attempt deletion (this will require conversational approval and multi-party consent)
       const deleted = await this.userManagementService.deleteUser(
