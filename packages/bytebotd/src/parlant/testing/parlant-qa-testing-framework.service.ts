@@ -559,8 +559,16 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
       const testRequest: UltraOptimizedValidationRequest = {
         functionName: 'compliance_test',
         functionParams: scenario.testData,
+        actionDescription: `Compliance test for ${regulation} regulation - scenario ${scenario.id}`,
+        operationId: `compliance_test_${regulation}_${scenario.id}_${Date.now()}`,
         riskLevel: RiskLevel.HIGH,
-        context: { complianceTest: regulation, scenario: scenario.id },
+        context: {
+          userId: 'test-user',
+          agentRole: 'system',
+          securityLevel: 'HIGH',
+          conversationHistory: [],
+          metadata: { complianceTest: regulation, scenario: scenario.id }
+        },
         ultraOptimizationHints: {
           complianceRequired: [regulation]
         }
@@ -667,7 +675,13 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
       functionName: testCase.testData.functionName as string || 'integration_test',
       functionParams: testCase.testData.functionParams as Record<string, unknown> || {},
       riskLevel: testCase.testData.riskLevel as RiskLevel || RiskLevel.MEDIUM,
-      context: testCase.testData.context as Record<string, unknown> || {}
+      context: {
+        userId: 'test-user',
+        agentRole: 'system',
+        securityLevel: 'MEDIUM',
+        conversationHistory: [],
+        metadata: testCase.testData.context as Record<string, unknown> || {}
+      }
     };
 
     // Execute through ultra performance optimizer
@@ -737,7 +751,13 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
       functionName: 'compliance_test',
       functionParams: testCase.testData,
       riskLevel: RiskLevel.HIGH,
-      context: { complianceTest: true }
+      context: {
+        userId: 'test-user',
+        agentRole: 'system',
+        securityLevel: 'HIGH',
+        conversationHistory: [],
+        metadata: { complianceTest: true }
+      }
     };
 
     const regulations = testCase.testData.regulations as ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[] || ['GDPR'];
@@ -851,7 +871,13 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
       functionName: testData.functionName as string || 'test_function',
       functionParams: testData.functionParams as Record<string, unknown> || {},
       riskLevel: RiskLevel.LOW,
-      context: {}
+      context: {
+        userId: 'test-user',
+        agentRole: 'system',
+        securityLevel: 'LOW',
+        conversationHistory: [],
+        metadata: {}
+      }
     };
 
     await this.ultraPerformanceOptimizer.validateWithUltraOptimization(testRequest);
@@ -869,7 +895,13 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
           functionName: `test_function_${i}`,
           functionParams: { attempt: i },
           riskLevel: RiskLevel.LOW,
-          context: {}
+          context: {
+            userId: 'test-user',
+            agentRole: 'system',
+            securityLevel: 'LOW',
+            conversationHistory: [],
+            metadata: {}
+          }
         };
 
         await this.ultraPerformanceOptimizer.validateWithUltraOptimization(testRequest);

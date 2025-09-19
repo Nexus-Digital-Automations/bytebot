@@ -88,7 +88,7 @@ import { ConversationalValidationError } from '../parlant/parlant-integration.se
  * Request context for Parlant validation
  */
 export class ParlantRequestContextDto {
-  userId: string;
+  userId!: string;
   sessionId?: string;
   conversationId?: string;
   intent?: string;
@@ -101,21 +101,21 @@ export class ParlantRequestContextDto {
  * Enhanced task creation with Parlant context
  */
 export class ParlantBrowserTaskDto extends CreateBrowserTaskDto {
-  parlantContext: ParlantRequestContextDto;
+  parlantContext!: ParlantRequestContextDto;
 }
 
 /**
  * Enhanced session creation with Parlant context
  */
 export class ParlantBrowserSessionDto extends CreateBrowserSessionDto {
-  parlantContext: ParlantRequestContextDto;
+  parlantContext!: ParlantRequestContextDto;
 }
 
 /**
  * Enhanced async job creation with Parlant context
  */
 export class ParlantAsyncJobDto extends CreateAsyncJobDto {
-  parlantContext: ParlantRequestContextDto;
+  parlantContext!: ParlantRequestContextDto;
   resourceRequirements?: AsyncJobResourceRequirements;
 }
 
@@ -123,16 +123,16 @@ export class ParlantAsyncJobDto extends CreateAsyncJobDto {
  * Parlant validation response wrapper
  */
 export class ParlantValidationResponseDto<T> {
-  success: boolean;
+  success!: boolean;
   data?: T;
-  validationDetails: {
+  validationDetails!: {
     approved: boolean;
     conversationId?: string;
     reasoning?: string;
     riskLevel: string;
     validationTime: number;
   };
-  auditTrail: {
+  auditTrail!: {
     operationId: string;
     timestamp: Date;
     userId: string;

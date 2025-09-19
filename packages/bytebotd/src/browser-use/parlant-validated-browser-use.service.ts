@@ -865,19 +865,19 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Create timeout promise for execution limits
    */
-  private createTimeoutPromise(_timeoutMs: timeoutMsType): Promise<never> {
+  private createTimeoutPromise(_timeoutMs: number): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new Error(`Browser operation timed out after ${timeoutMs}ms`));
-      }, timeoutMs);
+        reject(new Error(`Browser operation timed out after ${_timeoutMs}ms`));
+      }, _timeoutMs);
     });
   }
 
   /**
    * Create audit entry for browser action
    */
-  private async createBrowserActionAuditEntry(_entry: entryType): Promise<void> {
-    this.actionHistory.push(entry);
+  private async createBrowserActionAuditEntry(_entry: BrowserActionAuditEntry): Promise<void> {
+    this.actionHistory.push(_entry);
     
     // Keep only recent entries (last 100)
     if (this.actionHistory.length > 100) {
@@ -890,7 +890,7 @@ export class ParlantValidatedBrowserUseService {
   /**
    * Update performance metrics
    */
-  private updatePerformanceMetrics(_duration: durationType): void {
+  private updatePerformanceMetrics(_duration: number): void {
     this.averageValidationTime = 
       (this.averageValidationTime * (this.totalOperations - 1) + duration) / this.totalOperations;
   }

@@ -4204,10 +4204,34 @@
       "updated_at": "2025-09-18T23:34:46.444Z",
       "archived_at": "2025-09-18T23:34:46.448Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T00:03:28.324Z",
+      "title": "Fix remaining TypeScript compilation errors",
+      "description": "Fix critical TypeScript errors: UserRole import, BrowserAction type mismatch, undefined riskFactors, function signature errors",
+      "category": "error",
+      "id": "error_1758240208324_emdbfnkgy9t",
+      "assigned_agent": "dev_session_1758240193444_1_general_88b75ad7",
+      "started_at": "2025-09-19T00:03:46.598Z",
+      "claimed_by": "dev_session_1758240193444_1_general_88b75ad7",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758240193444_1_general_88b75ad7",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:03:46.598Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T00:12:21.573Z",
+      "updated_at": "2025-09-19T00:12:21.574Z",
+      "archived_at": "2025-09-19T00:12:21.579Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 108,
+  "total_completed": 109,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-18T23:34:46.448Z"
+  "last_archived": "2025-09-19T00:12:21.579Z"
 }

@@ -1178,7 +1178,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Check if task is currently running (mock implementation)
    */
-  private isTaskCurrentlyRunning(_taskId: taskIdType): boolean {
+  private isTaskCurrentlyRunning(_taskId: string): boolean {
     // Mock implementation - in production would check actual task status
     return Math.random() > 0.8; // 20% chance of being running
   }
@@ -1186,19 +1186,19 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Create timeout promise for execution limits
    */
-  private createTimeoutPromise(_timeoutMs: timeoutMsType): Promise<never> {
+  private createTimeoutPromise(_timeoutMs: number): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new Error(`Task operation timed out after ${timeoutMs}ms`));
-      }, timeoutMs);
+        reject(new Error(`Task operation timed out after ${_timeoutMs}ms`));
+      }, _timeoutMs);
     });
   }
 
   /**
    * Create audit entry for task operation
    */
-  private async createTaskAuditEntry(_entry: entryType): Promise<void> {
-    this.taskHistory.push(entry);
+  private async createTaskAuditEntry(_entry: BrowserTaskAuditEntry): Promise<void> {
+    this.taskHistory.push(_entry);
     
     // Keep only recent entries (last 100)
     if (this.taskHistory.length > 100) {
@@ -1211,9 +1211,9 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Update performance metrics
    */
-  private updatePerformanceMetrics(_duration: durationType): void {
+  private updatePerformanceMetrics(_duration: number): void {
     this.averageValidationTime = 
-      (this.averageValidationTime * (this.totalTaskOperations - 1) + duration) / this.totalTaskOperations;
+      (this.averageValidationTime * (this.totalTaskOperations - 1) + _duration) / this.totalTaskOperations;
   }
 
   /**
@@ -1278,7 +1278,7 @@ export class ParlantValidatedBrowserTaskService {
   /**
    * Get task security profile for validation context
    */
-  async getTaskSecurityProfile(_userId: userIdType): Promise<TaskSecurityProfile> {
+  async getTaskSecurityProfile(_userId: string): Promise<TaskSecurityProfile> {
     // Mock implementation - in production would check actual security data
     return {
       userTrustLevel: 'MEDIUM',
