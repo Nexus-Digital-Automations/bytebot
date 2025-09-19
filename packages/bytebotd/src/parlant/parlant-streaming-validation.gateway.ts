@@ -61,7 +61,12 @@ import {
   ValidationConstraints,
   ValidationStreamingConfig,
   ValidationWorkflowConfig,
-} from '../../shared/src/types/parlant-streaming-integration.types';
+  EnhancedParlantValidationRequest,
+  EnhancedParlantValidationResponse,
+  ValidationDecision,
+  AuthenticationLevel,
+  ProtocolPriority,
+} from '../../../shared/src/types/parlant-streaming-integration.types';
 
 // ===== GATEWAY CONFIGURATION =====
 

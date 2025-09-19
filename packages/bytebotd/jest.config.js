@@ -89,26 +89,50 @@ module.exports = {
   // Coverage reporters
   coverageReporters: ['html', 'lcov', 'text', 'text-summary', 'json', 'clover'],
 
-  // Coverage thresholds - enforcing high code quality
+  // Coverage thresholds - enforcing >90% code quality for PARLANT Phase 1
   coverageThreshold: {
     global: {
-      branches: 75,
-      functions: 75,
-      lines: 75,
-      statements: 75,
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
     },
-    // Specific thresholds for critical modules
-    './src/computer-use/': {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+    // Specific thresholds for PARLANT Phase 1 modules (>95% for critical systems)
+    './src/parlant/': {
+      branches: 95,
+      functions: 95,
+      lines: 95,
+      statements: 95,
     },
     './src/auth/': {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+      branches: 95,
+      functions: 95,
+      lines: 95,
+      statements: 95,
+    },
+    './src/enterprise-api/': {
+      branches: 95,
+      functions: 95,
+      lines: 95,
+      statements: 95,
+    },
+    './src/security/': {
+      branches: 95,
+      functions: 95,
+      lines: 95,
+      statements: 95,
+    },
+    './src/cache/': {
+      branches: 95,
+      functions: 95,
+      lines: 95,
+      statements: 95,
+    },
+    './src/computer-use/': {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
     },
   },
 

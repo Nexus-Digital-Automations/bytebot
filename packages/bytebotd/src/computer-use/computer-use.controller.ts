@@ -851,9 +851,9 @@ export class ComputerUseController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
   @OperatorOrAdmin()
-  @UsePipes(new ComputerActionValidationPipe(), SecuritySanitizationPipes)
+  @UsePipes(new ComputerActionValidationPipe(), SecuritySanitizationPipes.HIGH_SECURITY)
   @UseInterceptors(LoggingInterceptor)
-  @ForVersion(SUPPORTED_API_VERSIONS)
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
   async executeAction(
     @Body() params: ComputerActionDto,
     @CurrentUser() user: ByteBotdUser,
@@ -873,7 +873,7 @@ export class ComputerUseController {
   @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
   @OperatorOrAdmin()
   @UseInterceptors(LoggingInterceptor)
-  @ForVersion(SUPPORTED_API_VERSIONS)
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
   async captureScreenshot(
     @CurrentUser() user: ByteBotdUser,
   ): Promise<ComputerActionResponse> {

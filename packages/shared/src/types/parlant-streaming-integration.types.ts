@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 /**
  * Parlant Streaming Integration Types
  *
@@ -12,6 +14,9 @@
  * - Security and authentication interfaces
  * - Performance monitoring and metrics types
  * - Error handling and audit trail structures
+ *
+ * Note: This file contains comprehensive type definitions for future implementation.
+ * Many enums are unused currently but are part of the complete architecture specification.
  *
  * @module ParlantStreamingIntegrationTypes
  * @version 1.0.0

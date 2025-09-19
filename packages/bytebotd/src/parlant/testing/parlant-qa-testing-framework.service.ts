@@ -280,7 +280,11 @@ export class ParlantQATestingFrameworkService implements OnModuleInit {
             if (result.status === 'fulfilled') {
               return result.value;
             } else {
-              return this.createErrorResult(chunk[index], suiteId, result.reason);
+              const testCase = chunk[index];
+              if (!testCase) {
+                throw new Error(`Test case at index ${index} is undefined`);
+              }
+              return this.createErrorResult(testCase, suiteId, result.reason);
             }
           }));
 

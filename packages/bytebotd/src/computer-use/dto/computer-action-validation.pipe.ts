@@ -112,7 +112,7 @@ export class ComputerActionValidationPipe
    */
   private safeDetectAdvancedXSS(input: string): XSSDetectionResult {
     const result = detectAdvancedXSS(input) as XSSDetectionResult;
-    return _result;
+    return result;
   }
 
   /**
@@ -120,7 +120,7 @@ export class ComputerActionValidationPipe
    */
   private safeDetectSQLInjection(input: string): SQLInjectionDetectionResult {
     const result = detectSQLInjection(input) as SQLInjectionDetectionResult;
-    return _result;
+    return result;
   }
 
   /**
@@ -136,7 +136,7 @@ export class ComputerActionValidationPipe
     const result = detectCommandInjection(
       input,
     ) as CommandInjectionDetectionResult;
-    return _result;
+    return result;
   }
 
   /**
@@ -149,7 +149,7 @@ export class ComputerActionValidationPipe
     const result = validateFilePath(
       filePath,
     ) as unknown as FilePathValidationResult;
-    return _result;
+    return result;
   }
 
   /**
@@ -166,7 +166,7 @@ export class ComputerActionValidationPipe
       x,
       y,
     ) as unknown as CoordinatesValidationResult;
-    return _result;
+    return result;
   }
 
   /**
@@ -232,7 +232,7 @@ export class ComputerActionValidationPipe
       const dtoInstance = plainToClass(dtoClass, rawInput);
 
       // Perform class-validator validation on the DTO instance
-      const validationErrors = await validate(_dtoInstance, {
+      const validationErrors = await validate(dtoInstance, {
         whitelist: true,
         forbidNonWhitelisted: true,
         skipMissingProperties: false,
@@ -319,7 +319,7 @@ export class ComputerActionValidationPipe
 
     if (payloadSize > MAX_PAYLOAD_SIZE) {
       this.logSecurityEvent(
-        _operationId,
+        operationId,
         SecurityEventType._VALIDATION_FAILED,
         'Payload size limit exceeded',
         { payloadSize, maxAllowed: MAX_PAYLOAD_SIZE },

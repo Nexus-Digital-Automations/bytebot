@@ -586,8 +586,8 @@ export class ParlantWebSocketStreamingBridgeService
         concurrencyLimit: 50, // High concurrency for streams
         clientMaxWindowBits: 15,
         serverMaxWindowBits: 15,
-        serverMaxNoContextTakeover: false,
-        clientMaxNoContextTakeover: false,
+        serverNoContextTakeover: false,
+        clientNoContextTakeover: false,
       },
       maxPayload: 32 * 1024 * 1024, // 32MB for large validation payloads
       // Enhanced security verification
@@ -1130,10 +1130,13 @@ export class ParlantWebSocketStreamingBridgeService
     sessionStreams.add(streamId);
     this.sessionStreams.set(sessionId, sessionStreams);
 
-    // Update stream info
-    stream.participants = Array.from(participants);
-    stream.lastActivity = new Date();
-    this.streams.set(streamId, stream);
+    // Update stream info with readonly properties
+    const updatedStream = {
+      ...stream,
+      participants: Array.from(participants),
+      lastActivity: new Date(),
+    };
+    this.streams.set(streamId, updatedStream);
 
     // Send confirmation
     await this.sendStreamStatus(sessionId, {

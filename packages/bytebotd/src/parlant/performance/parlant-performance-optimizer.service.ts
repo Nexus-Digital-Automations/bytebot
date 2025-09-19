@@ -348,7 +348,10 @@ export class ParlantPerformanceOptimizerService implements OnModuleInit, OnModul
     // Evict bottom 10% of entries
     const evictCount = Math.ceil(entries.length * 0.1);
     for (let i = 0; i < evictCount; i++) {
-      this.l1Cache.delete(entries[i][0]);
+      const entry = entries[i];
+      if (entry) {
+        this.l1Cache.delete(entry[0]);
+      }
     }
   }
 

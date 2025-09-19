@@ -813,7 +813,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
     operationId: string;
     stage: string;
     progress: number;
-    status: string;
+    status: 'pending' | 'active' | 'completed' | 'failed';
     details: ProgressDetails;
   }): Promise<void> {
     const message: ProgressUpdateMessage = {
@@ -913,7 +913,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       const shouldCompress = message.metadata?.compression &&
                            serialized.length > this.PERFORMANCE_TARGETS.MESSAGE_COMPRESSION_THRESHOLD;
 
-      await promisify(client.send.bind(client))(serialized, { compress: shouldCompress });
+      await promisify(client.send.bind(client))(serialized);
 
       const deliveryTime = performance.now() - startTime;
 
@@ -1134,7 +1134,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
    * Collect and log performance metrics
    */
   private collectPerformanceMetrics(): void {
-    const metrics = {
+    const metrics: any = {
       activeSessions: this.sessions.size,
       activeConnections: this.clients.size,
       pendingValidations: this.pendingValidations.size,
@@ -1149,9 +1149,9 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
       .map(s => s.performanceMetrics);
 
     if (sessionMetrics.length > 0) {
-      metrics['averageLatency'] = sessionMetrics.reduce((sum, m) => sum + m.averageLatency, 0) / sessionMetrics.length;
-      metrics['averageMessageRate'] = sessionMetrics.reduce((sum, m) => sum + m.messageRate, 0) / sessionMetrics.length;
-      metrics['averageErrorRate'] = sessionMetrics.reduce((sum, m) => sum + m.errorRate, 0) / sessionMetrics.length;
+      metrics.averageLatency = sessionMetrics.reduce((sum, m) => sum + m.averageLatency, 0) / sessionMetrics.length;
+      metrics.averageMessageRate = sessionMetrics.reduce((sum, m) => sum + m.messageRate, 0) / sessionMetrics.length;
+      metrics.averageErrorRate = sessionMetrics.reduce((sum, m) => sum + m.errorRate, 0) / sessionMetrics.length;
     }
 
     this.logger.log('Performance metrics collected', metrics);

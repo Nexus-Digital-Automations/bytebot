@@ -3073,6 +3073,62 @@
           "claimPriority": "normal"
         }
       ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-19T16:56:02.463Z",
+      "title": "SPECIALIZED TESTING AGENT: Unit Testing Suite (>90% coverage)",
+      "description": "Create comprehensive unit testing suite for all PARLANT PHASE 1 implementations with >90% code coverage target. Includes test framework setup, core module testing, mock strategy, and coverage reporting.",
+      "category": "test",
+      "id": "test_1758300962463_p5xfmnqg5tf"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-19T16:56:03.019Z",
+      "title": "Implement Comprehensive Stress Testing Suite for PARLANT PHASE 1",
+      "description": "Create enterprise-grade stress testing framework with chaos engineering, system resilience validation, and performance degradation analysis for 10x load capacity with automated recovery testing",
+      "category": "test",
+      "id": "test_1758300963019_ea6mm175k6s"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-19T16:56:03.184Z",
+      "title": "Implement comprehensive WebSocket testing suite for PARLANT PHASE 1",
+      "description": "Create enterprise-grade WebSocket testing framework with real-time validation, connection management, message streaming, conversational streaming, and scalability testing for 1000+ concurrent connections",
+      "category": "test",
+      "id": "test_1758300963184_vv06yi0pbk"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-19T16:56:03.717Z",
+      "title": "Implement Comprehensive Security Testing Suite for PARLANT PHASE 1",
+      "description": "Create enterprise-grade security testing framework including JWT authentication testing, RBAC authorization validation, conversational security testing, threat simulation, and compliance validation. Implement automated security scanning, vulnerability assessments, and comprehensive audit trail generation.",
+      "category": "feature",
+      "id": "feature_1758300963717_o501ut2hbjs"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-19T16:56:04.862Z",
+      "title": "SPECIALIZED DATABASE TESTING AGENT: Comprehensive Conversational Database Validation Suite",
+      "description": "Create enterprise-grade database testing framework for PARLANT PHASE 1 conversational validation patterns including: 1) Database test framework with transaction validation 2) Conversational validation for CRUD operations 3) Data integrity testing with ACID properties 4) Performance testing with conversational validation overhead 5) Migration testing with approval workflows 6) Compliance and security validation 7) Multi-tier approval workflows for high-risk operations 8) Transaction rollback and recovery mechanisms 9) Connection pooling optimization 10) Audit trail generation and validation",
+      "category": "feature",
+      "id": "feature_1758300964862_7bxactg4apb"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-19T16:56:07.612Z",
+      "title": "Implement E2E Integration Testing Suite for PARLANT PHASE 1 Workflows",
+      "description": "Create comprehensive end-to-end integration testing suite validating complete PARLANT PHASE 1 workflows across all system components including: E2E test framework setup with Puppeteer/Playwright, complete user journey testing, cross-service integration validation, API and WebSocket testing, database integration testing, and performance validation under realistic load conditions",
+      "category": "test",
+      "id": "test_1758300967612_gykmb8rd2gl"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-19T16:56:10.047Z",
+      "title": "SPECIALIZED TESTING AGENT: Performance Testing (sub-1000ms P95)",
+      "description": "Create comprehensive performance testing suite validating PARLANT PHASE 1 achieves sub-1000ms P95 response times with enterprise-grade performance optimization. IMPLEMENTATION: Load Testing Framework (K6/Artillery), Performance Benchmarks (caching 85%+ hit rates, sub-1000ms P95, throughput), Caching Validation (L1/L2/L3), Stress Testing (1000+ concurrent sessions), Memory & Resource Testing. TARGETS: Sub-1000ms P95, 85%+ cache hit rates, 5000+ validations/sec, 1000+ concurrent sessions, <100ms JWT validation, <2000ms conversational validation.",
+      "category": "test",
+      "id": "test_1758300970047_n1pxmbnr9y"
     }
   ],
   "agents": {
@@ -8342,6 +8398,153 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-19T07:21:23.889Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758300947691_1_general_0d9508c5": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T16:55:47.692Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T16:55:47.692Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758300947718_1_general_88e8f476": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T16:55:47.719Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T16:55:47.720Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758300947798_1_general_1eaaf4bc": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T16:55:47.799Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T16:55:47.799Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758300947873_1_general_12283c1b": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T16:55:47.874Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T16:55:47.874Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758300948027_1_general_8d4caff8": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T16:55:48.029Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T16:55:48.029Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758300951295_1_general_dc813e48": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T16:55:51.296Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T16:55:51.296Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758300952006_1_general_8b09870e": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T16:55:52.007Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T16:55:52.007Z",
       "sessionId": null,
       "metadata": {}
     }

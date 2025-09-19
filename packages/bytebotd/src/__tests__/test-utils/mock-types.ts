@@ -130,7 +130,7 @@ export interface ServiceResponse {
  * Creates a properly typed Jest mock function
  */
 export function createMockFunction<T extends (...args: any[]) => any>(): MockFunction<T> {
-  return jest.fn() as MockFunction<T>;
+  return jest.fn() as unknown as MockFunction<T>;
 }
 
 /**

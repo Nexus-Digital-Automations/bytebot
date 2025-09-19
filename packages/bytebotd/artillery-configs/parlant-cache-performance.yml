@@ -1,0 +1,141 @@
+# Artillery Load Testing Configuration - PARLANT Cache Performance Validation
+#
+# Enterprise-grade Artillery configuration specifically designed to validate
+# PARLANT PHASE 1 cache performance targets: 85%+ hit rates, sub-1000ms P95
+#
+# Test Scenarios:
+# 1. Cache Warmup Phase
+# 2. Cache Hit Rate Validation
+# 3. Cache Performance Under Load
+# 4. Multi-Level Cache Testing (L1, L2, L3)
+# 5. Cache Invalidation Performance
+# 6. Memory Usage During Caching
+#
+# Usage:
+#   artillery run parlant-cache-performance.yml
+#   artillery run parlant-cache-performance.yml --environment production
+#
+# @version 1.0.0
+# @author PARLANT Performance Testing Agent
+
+config:
+  target: '{{ $processEnvironment.PARLANT_BASE_URL || "http://localhost:3000" }}'
+  phases:
+    # Phase 1: Cache Warmup (Populate caches with realistic data)
+    - duration: 120
+      arrivalRate: 10
+      name: "Cache Warmup Phase"
+
+    # Phase 2: Gradual Load Increase (Test cache performance scaling)
+    - duration: 300
+      arrivalRate: 25
+      rampTo: 100
+      name: "Cache Performance Scaling"
+
+    # Phase 3: Sustained High Load (Validate 85%+ hit rate under load)
+    - duration: 600
+      arrivalRate: 150
+      name: "Sustained Cache Performance"
+
+    # Phase 4: Stress Testing (Push cache to limits)
+    - duration: 180
+      arrivalRate: 200
+      rampTo: 300
+      name: "Cache Stress Testing"
+
+    # Phase 5: Recovery Testing (Validate cache recovery)
+    - duration: 120
+      arrivalRate: 50
+      rampTo: 10
+      name: "Cache Recovery Validation"
+
+  # Performance targets for PARLANT cache validation
+  ensure:
+    p95: 1000                    # P95 < 1000ms (CRITICAL TARGET)
+    p99: 2000                    # P99 < 2000ms
+    maxErrorRate: 0.05           # <5% error rate
+
+  # Custom metrics for cache performance tracking
+  metrics:
+    - name: "cache_hit_rate"
+      unit: "percent"
+    - name: "cache_response_time"
+      unit: "milliseconds"
+    - name: "l1_cache_hits"
+      unit: "count"
+    - name: "l2_cache_hits"
+      unit: "count"
+    - name: "l3_cache_hits"
+      unit: "count"
+    - name: "cache_misses"
+      unit: "count"
+    - name: "memory_usage_mb"
+      unit: "megabytes"
+
+  # Artillery plugins for enhanced reporting
+  plugins:
+    metrics-by-endpoint: {}
+    publish-metrics:
+      - type: "statsd"
+        host: "localhost"
+        port: 8125
+        prefix: "parlant.cache"
+
+# Environment-specific configurations
+environments:
+  development:
+    target: 'http://localhost:3000'
+    phases:
+      - duration: 60
+        arrivalRate: 5
+
+  staging:
+    target: 'https://staging.parlant.ai'
+    phases:
+      - duration: 300
+        arrivalRate: 50
+
+  production:
+    target: 'https://api.parlant.ai'
+    phases:
+      - duration: 1800
+        arrivalRate: 200
+
+# Test scenario definitions
+scenarios:
+  # Main cache performance testing scenario
+  - name: "PARLANT Cache Performance Validation"
+    weight: 80
+    flow:
+      - function: "setupCacheTest"
+      - loop:
+        - think: 100-500
+        - function: "performCacheableValidation"
+        - think: 50-200
+        - function: "validateCachePerformance"
+        count: 20
+      - function: "cleanupCacheTest"
+
+  # Cache invalidation testing scenario
+  - name: "Cache Invalidation Performance"
+    weight: 15
+    flow:
+      - function: "setupInvalidationTest"
+      - loop:
+        - function: "performCacheableValidation"
+        - function: "invalidateCache"
+        - function: "performCacheableValidation"
+        - think: 100
+        count: 10
+
+  # Memory usage monitoring scenario
+  - name: "Cache Memory Usage Monitoring"
+    weight: 5
+    flow:
+      - loop:
+        - function: "monitorMemoryUsage"
+        - think: 5000
+        count: 100
+
+# Custom JavaScript functions for advanced cache testing
+processor: "./artillery-cache-processor.js"

@@ -259,6 +259,7 @@ export class AsyncJobService {
       submittedAt: job.submittedAt.toISOString(),
       completedAt: job.completedAt?.toISOString() ?? new Date().toISOString(),
       executionTimeMs: executionTime,
+      duration: executionTime,
       metadata: {
         ...job.metadata,
         retryCount: job.retryCount,
@@ -509,13 +510,13 @@ export class AsyncJobService {
   ): Promise<unknown | null> {
     try {
       const cacheKey = this.generateCacheKey(action);
-      return await this.cacheService.get(_cacheKey, {
+      return await this.cacheService.get(cacheKey, {
         namespace: 'computer-actions',
         ttl: 300, // 5 minutes
       });
     } catch (_error) {
       this.logger.warn(
-        `Failed to get cached result: ${error instanceof Error ? _error.message : 'Unknown error'}`,
+        `Failed to get cached result: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
       );
       return null;
     }
@@ -533,7 +534,7 @@ export class AsyncJobService {
   ): Promise<void> {
     try {
       const cacheKey = this.generateCacheKey(action);
-      await this.cacheService.set(_cacheKey, result, {
+      await this.cacheService.set(cacheKey, result, {
         namespace: 'computer-actions',
         ttl: 300, // 5 minutes
       });
