@@ -19,6 +19,21 @@
 
 // ===== CORE SERVICES =====
 
+// Import for local use in utility functions
+import {
+  ConversationalDatabaseService,
+  DatabaseOperationType,
+  DatabaseRiskLevel,
+  type DatabaseOperationContext as _DatabaseOperationContext,
+  type DatabaseValidationResult as _DatabaseValidationResult,
+  type DatabaseBackupInfo as _DatabaseBackupInfo,
+  type MultiPartyApprovalRequest as _MultiPartyApprovalRequest,
+} from './conversational-database.service';
+import { DatabaseModule } from './database.module';
+import { BaseConversationalRepositoryService } from './repositories/base-conversational-repository.service';
+import { UserConversationalRepositoryService } from './repositories/user-conversational-repository.service';
+
+// Re-export for external consumption
 export { ConversationalDatabaseService } from './conversational-database.service';
 export { DatabaseModule } from './database.module';
 
@@ -117,9 +132,9 @@ export function createOperationContext(
     userId,
     userRole,
     businessPurpose,
-    sessionId: additional?.sessionId || `session_${Date.now()}`,
-    correlationId: additional?.correlationId || `op_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-    metadata: additional?.metadata || {},
+    sessionId: additional?.sessionId ?? `session_${Date.now()}`,
+    correlationId: additional?.correlationId ?? `op_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+    metadata: additional?.metadata ?? {},
     ...additional,
   };
 }
