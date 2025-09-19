@@ -18,8 +18,7 @@ import React from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { ChatContainer } from "../ChatContainer";
 import { GroupedMessages, Role, TaskStatus } from "@/types";
-import { MessageContentType } from "@bytebot/shared";
-import { MessageContentBlock } from "@bytebot/shared";
+import { MessageContentBlock, MessageContentType } from "@bytebot/shared";
 import { TestUtils } from "@/test-utils/setupAfterEnv";
 
 // Test constants
