@@ -25,39 +25,39 @@
  */
 export enum ParlantStreamingProtocolType {
   // Connection lifecycle
-  PROTOCOL_HANDSHAKE = 'protocol_handshake',
-  PROTOCOL_ACKNOWLEDGED = 'protocol_acknowledged',
-  PROTOCOL_UPGRADE = 'protocol_upgrade',
-  PROTOCOL_DOWNGRADE = 'protocol_downgrade',
+  PROTOCOL_HANDSHAKE = "protocol_handshake",
+  PROTOCOL_ACKNOWLEDGED = "protocol_acknowledged",
+  PROTOCOL_UPGRADE = "protocol_upgrade",
+  PROTOCOL_DOWNGRADE = "protocol_downgrade",
 
   // Stream lifecycle management
-  STREAM_LIFECYCLE_CREATE = 'stream_lifecycle_create',
-  STREAM_LIFECYCLE_READY = 'stream_lifecycle_ready',
-  STREAM_LIFECYCLE_SUSPEND = 'stream_lifecycle_suspend',
-  STREAM_LIFECYCLE_RESUME = 'stream_lifecycle_resume',
-  STREAM_LIFECYCLE_TERMINATE = 'stream_lifecycle_terminate',
+  STREAM_LIFECYCLE_CREATE = "stream_lifecycle_create",
+  STREAM_LIFECYCLE_READY = "stream_lifecycle_ready",
+  STREAM_LIFECYCLE_SUSPEND = "stream_lifecycle_suspend",
+  STREAM_LIFECYCLE_RESUME = "stream_lifecycle_resume",
+  STREAM_LIFECYCLE_TERMINATE = "stream_lifecycle_terminate",
 
   // Real-time validation protocols
-  VALIDATION_PROTOCOL_INIT = 'validation_protocol_init',
-  VALIDATION_PROTOCOL_STREAM = 'validation_protocol_stream',
-  VALIDATION_PROTOCOL_BATCH = 'validation_protocol_batch',
-  VALIDATION_PROTOCOL_PRIORITY = 'validation_protocol_priority',
+  VALIDATION_PROTOCOL_INIT = "validation_protocol_init",
+  VALIDATION_PROTOCOL_STREAM = "validation_protocol_stream",
+  VALIDATION_PROTOCOL_BATCH = "validation_protocol_batch",
+  VALIDATION_PROTOCOL_PRIORITY = "validation_protocol_priority",
 
   // Interactive confirmation protocols
-  CONFIRMATION_PROTOCOL_REQUEST = 'confirmation_protocol_request',
-  CONFIRMATION_PROTOCOL_RESPONSE = 'confirmation_protocol_response',
-  CONFIRMATION_PROTOCOL_TIMEOUT = 'confirmation_protocol_timeout',
-  CONFIRMATION_PROTOCOL_ESCALATION = 'confirmation_protocol_escalation',
+  CONFIRMATION_PROTOCOL_REQUEST = "confirmation_protocol_request",
+  CONFIRMATION_PROTOCOL_RESPONSE = "confirmation_protocol_response",
+  CONFIRMATION_PROTOCOL_TIMEOUT = "confirmation_protocol_timeout",
+  CONFIRMATION_PROTOCOL_ESCALATION = "confirmation_protocol_escalation",
 
   // Performance and monitoring
-  PERFORMANCE_PROTOCOL_METRICS = 'performance_protocol_metrics',
-  PERFORMANCE_PROTOCOL_ALERT = 'performance_protocol_alert',
-  PERFORMANCE_PROTOCOL_OPTIMIZATION = 'performance_protocol_optimization',
+  PERFORMANCE_PROTOCOL_METRICS = "performance_protocol_metrics",
+  PERFORMANCE_PROTOCOL_ALERT = "performance_protocol_alert",
+  PERFORMANCE_PROTOCOL_OPTIMIZATION = "performance_protocol_optimization",
 
   // Security and compliance
-  SECURITY_PROTOCOL_CHALLENGE = 'security_protocol_challenge',
-  SECURITY_PROTOCOL_VERIFICATION = 'security_protocol_verification',
-  SECURITY_PROTOCOL_AUDIT = 'security_protocol_audit',
+  SECURITY_PROTOCOL_CHALLENGE = "security_protocol_challenge",
+  SECURITY_PROTOCOL_VERIFICATION = "security_protocol_verification",
+  SECURITY_PROTOCOL_AUDIT = "security_protocol_audit",
 }
 
 /**
@@ -93,12 +93,12 @@ export interface ParlantProtocolHeaders {
  * Protocol priority levels
  */
 export enum ProtocolPriority {
-  BACKGROUND = 'background',
-  LOW = 'low',
-  NORMAL = 'normal',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  EMERGENCY = 'emergency',
+  BACKGROUND = "background",
+  LOW = "low",
+  NORMAL = "normal",
+  HIGH = "high",
+  CRITICAL = "critical",
+  EMERGENCY = "emergency",
 }
 
 /**
@@ -118,7 +118,7 @@ export interface ProtocolReliability {
  */
 export interface ProtocolCompression {
   readonly enabled: boolean;
-  readonly algorithm: 'gzip' | 'deflate' | 'brotli' | 'lz4';
+  readonly algorithm: "gzip" | "deflate" | "brotli" | "lz4";
   readonly level: number; // 1-9 compression level
   readonly threshold: number; // Minimum bytes to compress
 }
@@ -128,7 +128,7 @@ export interface ProtocolCompression {
  */
 export interface ProtocolEncryption {
   readonly enabled: boolean;
-  readonly algorithm: 'aes-256-gcm' | 'chacha20-poly1305' | 'aes-128-gcm';
+  readonly algorithm: "aes-256-gcm" | "chacha20-poly1305" | "aes-128-gcm";
   readonly keyRotation: boolean;
   readonly endToEnd: boolean;
 }
@@ -138,8 +138,12 @@ export interface ProtocolEncryption {
  */
 export interface ProtocolRouting {
   readonly hints: string[];
-  readonly affinity: 'session' | 'user' | 'service' | 'none';
-  readonly loadBalancing: 'round_robin' | 'least_connections' | 'weighted' | 'sticky';
+  readonly affinity: "session" | "user" | "service" | "none";
+  readonly loadBalancing:
+    | "round_robin"
+    | "least_connections"
+    | "weighted"
+    | "sticky";
   readonly regionPreference?: string;
 }
 
@@ -148,7 +152,7 @@ export interface ProtocolRouting {
  */
 export interface ProtocolAudit {
   readonly enabled: boolean;
-  readonly level: 'minimal' | 'standard' | 'detailed' | 'forensic';
+  readonly level: "minimal" | "standard" | "detailed" | "forensic";
   readonly retention: number; // Days to retain audit data
   readonly compliance: string[]; // Compliance frameworks
 }
@@ -186,14 +190,14 @@ export interface EnhancedParlantValidationRequest {
  * Validation type enumeration
  */
 export enum ValidationType {
-  FUNCTION_EXECUTION = 'function_execution',
-  DATA_ACCESS = 'data_access',
-  SYSTEM_OPERATION = 'system_operation',
-  USER_ACTION = 'user_action',
-  AUTOMATED_WORKFLOW = 'automated_workflow',
-  SECURITY_OPERATION = 'security_operation',
-  COMPLIANCE_CHECK = 'compliance_check',
-  BUSINESS_PROCESS = 'business_process',
+  FUNCTION_EXECUTION = "function_execution",
+  DATA_ACCESS = "data_access",
+  SYSTEM_OPERATION = "system_operation",
+  USER_ACTION = "user_action",
+  AUTOMATED_WORKFLOW = "automated_workflow",
+  SECURITY_OPERATION = "security_operation",
+  COMPLIANCE_CHECK = "compliance_check",
+  BUSINESS_PROCESS = "business_process",
 }
 
 /**
@@ -228,12 +232,12 @@ export interface UserValidationContext {
  * Authentication levels
  */
 export enum AuthenticationLevel {
-  ANONYMOUS = 'anonymous',
-  BASIC = 'basic',
-  MULTI_FACTOR = 'multi_factor',
-  CERTIFICATE = 'certificate',
-  BIOMETRIC = 'biometric',
-  ENTERPRISE_SSO = 'enterprise_sso',
+  ANONYMOUS = "anonymous",
+  BASIC = "basic",
+  MULTI_FACTOR = "multi_factor",
+  CERTIFICATE = "certificate",
+  BIOMETRIC = "biometric",
+  ENTERPRISE_SSO = "enterprise_sso",
 }
 
 /**
@@ -242,7 +246,7 @@ export enum AuthenticationLevel {
 export interface UserActionHistory {
   readonly timestamp: number;
   readonly action: string;
-  readonly outcome: 'success' | 'failure' | 'partial';
+  readonly outcome: "success" | "failure" | "partial";
   readonly riskScore: number;
   readonly metadata?: Record<string, unknown>;
 }
@@ -262,10 +266,10 @@ export interface UserRiskProfile {
  * User validation preferences
  */
 export interface UserValidationPreferences {
-  readonly confirmationMethod: 'auto' | 'prompt' | 'always_confirm';
-  readonly riskTolerance: 'low' | 'medium' | 'high';
+  readonly confirmationMethod: "auto" | "prompt" | "always_confirm";
+  readonly riskTolerance: "low" | "medium" | "high";
   readonly notificationPreferences: NotificationPreferences;
-  readonly auditLevel: 'minimal' | 'standard' | 'detailed';
+  readonly auditLevel: "minimal" | "standard" | "detailed";
 }
 
 /**
@@ -284,7 +288,7 @@ export interface NotificationPreferences {
  */
 export interface SessionValidationContext {
   readonly sessionId: string;
-  readonly sessionType: 'interactive' | 'batch' | 'api' | 'automated';
+  readonly sessionType: "interactive" | "batch" | "api" | "automated";
   readonly startTime: number;
   readonly duration: number;
   readonly activityCount: number;
@@ -298,7 +302,7 @@ export interface SessionValidationContext {
 export interface SecurityEvent {
   readonly eventId: string;
   readonly eventType: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly severity: "low" | "medium" | "high" | "critical";
   readonly timestamp: number;
   readonly description: string;
   readonly mitigated: boolean;
@@ -332,9 +336,9 @@ export interface ApplicationValidationContext {
  */
 export interface ApplicationDependency {
   readonly dependencyId: string;
-  readonly dependencyType: 'service' | 'database' | 'api' | 'library';
+  readonly dependencyType: "service" | "database" | "api" | "library";
   readonly version: string;
-  readonly status: 'healthy' | 'degraded' | 'unavailable';
+  readonly status: "healthy" | "degraded" | "unavailable";
   readonly lastCheck: number;
 }
 
@@ -342,7 +346,7 @@ export interface ApplicationDependency {
  * Application health status
  */
 export interface ApplicationHealthStatus {
-  readonly status: 'healthy' | 'degraded' | 'unhealthy';
+  readonly status: "healthy" | "degraded" | "unhealthy";
   readonly uptime: number;
   readonly lastHealthCheck: number;
   readonly issues: string[];
@@ -353,7 +357,7 @@ export interface ApplicationHealthStatus {
  * Environment validation context
  */
 export interface EnvironmentValidationContext {
-  readonly environment: 'development' | 'staging' | 'production' | 'test';
+  readonly environment: "development" | "staging" | "production" | "test";
   readonly region: string;
   readonly zone?: string;
   readonly infrastructure: InfrastructureContext;
@@ -365,7 +369,7 @@ export interface EnvironmentValidationContext {
  * Infrastructure context
  */
 export interface InfrastructureContext {
-  readonly platform: 'cloud' | 'on_premise' | 'hybrid';
+  readonly platform: "cloud" | "on_premise" | "hybrid";
   readonly provider?: string;
   readonly instanceType?: string;
   readonly clusterInfo?: ClusterInfo;
@@ -386,7 +390,7 @@ export interface ClusterInfo {
  * Network context
  */
 export interface NetworkContext {
-  readonly networkType: 'public' | 'private' | 'hybrid';
+  readonly networkType: "public" | "private" | "hybrid";
   readonly ipAddress: string;
   readonly subnet?: string;
   readonly firewallRules: string[];
@@ -397,7 +401,7 @@ export interface NetworkContext {
  * Load balancer information
  */
 export interface LoadBalancerInfo {
-  readonly type: 'application' | 'network' | 'gateway';
+  readonly type: "application" | "network" | "gateway";
   readonly algorithm: string;
   readonly healthCheck: boolean;
   readonly sslTermination: boolean;
@@ -420,7 +424,7 @@ export interface ResourceMetric {
   readonly current: number;
   readonly maximum: number;
   readonly unit: string;
-  readonly trend: 'increasing' | 'decreasing' | 'stable';
+  readonly trend: "increasing" | "decreasing" | "stable";
 }
 
 /**
@@ -442,8 +446,13 @@ export interface BusinessValidationContext {
 export interface ProjectContext {
   readonly projectId: string;
   readonly projectName: string;
-  readonly phase: 'planning' | 'development' | 'testing' | 'deployment' | 'maintenance';
-  readonly priority: 'low' | 'medium' | 'high' | 'critical';
+  readonly phase:
+    | "planning"
+    | "development"
+    | "testing"
+    | "deployment"
+    | "maintenance";
+  readonly priority: "low" | "medium" | "high" | "critical";
   readonly deadline?: number;
 }
 
@@ -455,7 +464,7 @@ export interface BudgetContext {
   readonly allocatedAmount: number;
   readonly spentAmount: number;
   readonly currency: string;
-  readonly period: 'monthly' | 'quarterly' | 'annually';
+  readonly period: "monthly" | "quarterly" | "annually";
 }
 
 /**
@@ -483,7 +492,7 @@ export interface TechnicalValidationContext {
  * Architecture context
  */
 export interface ArchitectureContext {
-  readonly pattern: 'monolith' | 'microservices' | 'serverless' | 'hybrid';
+  readonly pattern: "monolith" | "microservices" | "serverless" | "hybrid";
   readonly technologies: string[];
   readonly databases: string[];
   readonly messageQueues: string[];
@@ -494,7 +503,7 @@ export interface ArchitectureContext {
  * Deployment context
  */
 export interface DeploymentContext {
-  readonly strategy: 'blue_green' | 'canary' | 'rolling' | 'recreate';
+  readonly strategy: "blue_green" | "canary" | "rolling" | "recreate";
   readonly version: string;
   readonly deploymentTime: number;
   readonly rollbackAvailable: boolean;
@@ -519,7 +528,7 @@ export interface MonitoringMetric {
   readonly value: number;
   readonly unit: string;
   readonly threshold?: number;
-  readonly trend: 'up' | 'down' | 'stable';
+  readonly trend: "up" | "down" | "stable";
 }
 
 /**
@@ -527,7 +536,7 @@ export interface MonitoringMetric {
  */
 export interface MonitoringAlert {
   readonly alertId: string;
-  readonly severity: 'info' | 'warning' | 'error' | 'critical';
+  readonly severity: "info" | "warning" | "error" | "critical";
   readonly message: string;
   readonly timestamp: number;
   readonly resolved: boolean;
@@ -550,7 +559,7 @@ export interface ExternalSystemInfo {
   readonly systemId: string;
   readonly systemType: string;
   readonly version: string;
-  readonly status: 'available' | 'degraded' | 'unavailable';
+  readonly status: "available" | "degraded" | "unavailable";
   readonly lastCheck: number;
 }
 
@@ -608,29 +617,29 @@ export interface EnhancedValidationAction {
  * Action types
  */
 export enum ActionType {
-  CREATE = 'create',
-  READ = 'read',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  EXECUTE = 'execute',
-  CONFIGURE = 'configure',
-  DEPLOY = 'deploy',
-  MIGRATE = 'migrate',
-  BACKUP = 'backup',
-  RESTORE = 'restore',
+  CREATE = "create",
+  READ = "read",
+  UPDATE = "update",
+  DELETE = "delete",
+  EXECUTE = "execute",
+  CONFIGURE = "configure",
+  DEPLOY = "deploy",
+  MIGRATE = "migrate",
+  BACKUP = "backup",
+  RESTORE = "restore",
 }
 
 /**
  * Action categories
  */
 export enum ActionCategory {
-  DATA_OPERATION = 'data_operation',
-  SYSTEM_OPERATION = 'system_operation',
-  USER_OPERATION = 'user_operation',
-  SECURITY_OPERATION = 'security_operation',
-  ADMINISTRATIVE = 'administrative',
-  MAINTENANCE = 'maintenance',
-  EMERGENCY = 'emergency',
+  DATA_OPERATION = "data_operation",
+  SYSTEM_OPERATION = "system_operation",
+  USER_OPERATION = "user_operation",
+  SECURITY_OPERATION = "security_operation",
+  ADMINISTRATIVE = "administrative",
+  MAINTENANCE = "maintenance",
+  EMERGENCY = "emergency",
 }
 
 /**
@@ -677,7 +686,7 @@ export interface ParameterEncryption {
  * Action execution configuration
  */
 export interface ActionExecution {
-  readonly mode: 'synchronous' | 'asynchronous' | 'deferred';
+  readonly mode: "synchronous" | "asynchronous" | "deferred";
   readonly timeout: number;
   readonly retries: number;
   readonly idempotent: boolean;
@@ -702,24 +711,24 @@ export interface ActionImpact {
  * Impact scope
  */
 export enum ImpactScope {
-  LOCAL = 'local',
-  SERVICE = 'service',
-  CLUSTER = 'cluster',
-  REGION = 'region',
-  GLOBAL = 'global',
-  EXTERNAL = 'external',
+  LOCAL = "local",
+  SERVICE = "service",
+  CLUSTER = "cluster",
+  REGION = "region",
+  GLOBAL = "global",
+  EXTERNAL = "external",
 }
 
 /**
  * Impact severity
  */
 export enum ImpactSeverity {
-  MINIMAL = 'minimal',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  CATASTROPHIC = 'catastrophic',
+  MINIMAL = "minimal",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
+  CATASTROPHIC = "catastrophic",
 }
 
 /**
@@ -729,7 +738,7 @@ export interface ActionReversibility {
   readonly reversible: boolean;
   readonly rollbackMethod?: string;
   readonly rollbackTime?: number;
-  readonly rollbackComplexity: 'simple' | 'moderate' | 'complex' | 'impossible';
+  readonly rollbackComplexity: "simple" | "moderate" | "complex" | "impossible";
   readonly dataLoss: boolean;
 }
 
@@ -750,10 +759,10 @@ export interface DataImpact {
  */
 export interface SystemImpact {
   readonly downtime: number;
-  readonly performance: 'improved' | 'neutral' | 'degraded';
-  readonly availability: 'improved' | 'neutral' | 'reduced';
-  readonly security: 'improved' | 'neutral' | 'reduced';
-  readonly scalability: 'improved' | 'neutral' | 'reduced';
+  readonly performance: "improved" | "neutral" | "degraded";
+  readonly availability: "improved" | "neutral" | "reduced";
+  readonly security: "improved" | "neutral" | "reduced";
+  readonly scalability: "improved" | "neutral" | "reduced";
 }
 
 /**
@@ -761,8 +770,8 @@ export interface SystemImpact {
  */
 export interface UserImpact {
   readonly affectedUsers: number;
-  readonly userExperience: 'improved' | 'neutral' | 'degraded';
-  readonly functionality: 'enhanced' | 'maintained' | 'reduced';
+  readonly userExperience: "improved" | "neutral" | "degraded";
+  readonly functionality: "enhanced" | "maintained" | "reduced";
   readonly training: boolean;
   readonly communication: boolean;
 }
@@ -773,9 +782,9 @@ export interface UserImpact {
 export interface BusinessImpact {
   readonly revenue: number;
   readonly cost: number;
-  readonly compliance: 'improved' | 'maintained' | 'reduced';
-  readonly reputation: 'positive' | 'neutral' | 'negative';
-  readonly competitive: 'advantage' | 'neutral' | 'disadvantage';
+  readonly compliance: "improved" | "maintained" | "reduced";
+  readonly reputation: "positive" | "neutral" | "negative";
+  readonly competitive: "advantage" | "neutral" | "disadvantage";
 }
 
 /**
@@ -783,7 +792,7 @@ export interface BusinessImpact {
  */
 export interface ActionDependency {
   readonly dependencyId: string;
-  readonly dependencyType: 'prerequisite' | 'concurrent' | 'subsequent';
+  readonly dependencyType: "prerequisite" | "concurrent" | "subsequent";
   readonly required: boolean;
   readonly description: string;
   readonly validationMethod: string;
@@ -805,11 +814,11 @@ export interface ActionRollback {
  * Rollback strategy
  */
 export enum RollbackStrategy {
-  IMMEDIATE = 'immediate',
-  DEFERRED = 'deferred',
-  MANUAL = 'manual',
-  CONDITIONAL = 'conditional',
-  NONE = 'none',
+  IMMEDIATE = "immediate",
+  DEFERRED = "deferred",
+  MANUAL = "manual",
+  CONDITIONAL = "conditional",
+  NONE = "none",
 }
 
 /**
@@ -820,7 +829,7 @@ export interface RollbackTrigger {
   readonly condition: string;
   readonly threshold: number;
   readonly timeWindow: number;
-  readonly action: 'rollback' | 'alert' | 'pause';
+  readonly action: "rollback" | "alert" | "pause";
 }
 
 /**
@@ -851,7 +860,7 @@ export interface ActionMonitoring {
 export interface ActionMetric {
   readonly metricId: string;
   readonly name: string;
-  readonly type: 'counter' | 'gauge' | 'histogram' | 'timer';
+  readonly type: "counter" | "gauge" | "histogram" | "timer";
   readonly unit: string;
   readonly labels: Record<string, string>;
 }
@@ -863,7 +872,7 @@ export interface ActionAlert {
   readonly alertId: string;
   readonly condition: string;
   readonly threshold: number;
-  readonly severity: 'info' | 'warning' | 'error' | 'critical';
+  readonly severity: "info" | "warning" | "error" | "critical";
   readonly notification: string[];
 }
 
@@ -917,7 +926,7 @@ export interface SchedulingConstraints {
 export interface Deadline {
   readonly deadlineId: string;
   readonly timestamp: number;
-  readonly priority: 'soft' | 'hard';
+  readonly priority: "soft" | "hard";
   readonly consequences: string[];
 }
 
@@ -939,7 +948,7 @@ export interface ResourceConstraints {
 export interface ResourceQuota {
   readonly resource: string;
   readonly limit: number;
-  readonly period: 'second' | 'minute' | 'hour' | 'day';
+  readonly period: "second" | "minute" | "hour" | "day";
   readonly burst?: number;
 }
 
@@ -985,7 +994,7 @@ export interface TechnicalConstraints {
 export interface CompatibilityConstraint {
   readonly component: string;
   readonly version: string;
-  readonly operator: '=' | '>' | '<' | '>=' | '<=' | '!=';
+  readonly operator: "=" | ">" | "<" | ">=" | "<=" | "!=";
   readonly required: boolean;
 }
 
@@ -1029,7 +1038,7 @@ export interface StreamingProtocol {
  */
 export interface StreamingCompression {
   readonly enabled: boolean;
-  readonly algorithm: 'gzip' | 'deflate' | 'brotli' | 'lz4';
+  readonly algorithm: "gzip" | "deflate" | "brotli" | "lz4";
   readonly level: number;
   readonly threshold: number;
   readonly adaptive: boolean;
@@ -1042,7 +1051,7 @@ export interface StreamingBatching {
   readonly enabled: boolean;
   readonly maxSize: number;
   readonly maxDelay: number;
-  readonly strategy: 'size' | 'time' | 'hybrid';
+  readonly strategy: "size" | "time" | "hybrid";
 }
 
 /**
@@ -1050,7 +1059,7 @@ export interface StreamingBatching {
  */
 export interface StreamingOrdering {
   readonly guaranteed: boolean;
-  readonly method: 'sequence' | 'timestamp' | 'custom';
+  readonly method: "sequence" | "timestamp" | "custom";
   readonly bufferSize: number;
   readonly timeout: number;
 }
@@ -1093,12 +1102,12 @@ export interface ValidationWorkflowConfig {
  * Workflow type
  */
 export enum WorkflowType {
-  AUTOMATIC = 'automatic',
-  MANUAL = 'manual',
-  HYBRID = 'hybrid',
-  CONDITIONAL = 'conditional',
-  PARALLEL = 'parallel',
-  SEQUENTIAL = 'sequential',
+  AUTOMATIC = "automatic",
+  MANUAL = "manual",
+  HYBRID = "hybrid",
+  CONDITIONAL = "conditional",
+  PARALLEL = "parallel",
+  SEQUENTIAL = "sequential",
 }
 
 /**
@@ -1107,7 +1116,7 @@ export enum WorkflowType {
 export interface WorkflowStage {
   readonly stageId: string;
   readonly name: string;
-  readonly type: 'validation' | 'approval' | 'execution' | 'verification';
+  readonly type: "validation" | "approval" | "execution" | "verification";
   readonly required: boolean;
   readonly timeout: number;
   readonly participants: string[];
@@ -1121,14 +1130,14 @@ export interface StageCondition {
   readonly conditionId: string;
   readonly expression: string;
   readonly required: boolean;
-  readonly errorAction: 'fail' | 'skip' | 'retry';
+  readonly errorAction: "fail" | "skip" | "retry";
 }
 
 /**
  * Workflow routing
  */
 export interface WorkflowRouting {
-  readonly strategy: 'round_robin' | 'random' | 'priority' | 'load_based';
+  readonly strategy: "round_robin" | "random" | "priority" | "load_based";
   readonly rules: RoutingRule[];
   readonly fallback: string[];
 }
@@ -1188,7 +1197,7 @@ export interface WorkflowNotifications {
  */
 export interface NotificationChannel {
   readonly channelId: string;
-  readonly type: 'email' | 'sms' | 'push' | 'webhook' | 'slack';
+  readonly type: "email" | "sms" | "push" | "webhook" | "slack";
   readonly config: Record<string, unknown>;
   readonly enabled: boolean;
 }
@@ -1201,7 +1210,7 @@ export interface NotificationTemplate {
   readonly name: string;
   readonly subject: string;
   readonly body: string;
-  readonly format: 'text' | 'html' | 'markdown';
+  readonly format: "text" | "html" | "markdown";
 }
 
 /**
@@ -1252,13 +1261,13 @@ export interface ValidationResult {
  * Validation decision
  */
 export enum ValidationDecision {
-  APPROVED = 'approved',
-  DENIED = 'denied',
-  CONDITIONAL = 'conditional',
-  ESCALATED = 'escalated',
-  DEFERRED = 'deferred',
-  TIMEOUT = 'timeout',
-  ERROR = 'error',
+  APPROVED = "approved",
+  DENIED = "denied",
+  CONDITIONAL = "conditional",
+  ESCALATED = "escalated",
+  DEFERRED = "deferred",
+  TIMEOUT = "timeout",
+  ERROR = "error",
 }
 
 /**
@@ -1288,9 +1297,14 @@ export interface ValidationReasoning {
  */
 export interface ReasoningFactor {
   readonly factorId: string;
-  readonly category: 'security' | 'business' | 'technical' | 'compliance' | 'risk';
+  readonly category:
+    | "security"
+    | "business"
+    | "technical"
+    | "compliance"
+    | "risk";
   readonly weight: number;
-  readonly impact: 'positive' | 'negative' | 'neutral';
+  readonly impact: "positive" | "negative" | "neutral";
   readonly description: string;
   readonly evidence: string[];
 }
@@ -1313,7 +1327,7 @@ export interface BiasAnalysis {
   readonly biasType: string;
   readonly description: string;
   readonly mitigation: string;
-  readonly impact: 'low' | 'medium' | 'high';
+  readonly impact: "low" | "medium" | "high";
 }
 
 /**
@@ -1343,7 +1357,7 @@ export interface ValidationEvidence {
  */
 export interface EvidenceSource {
   readonly sourceId: string;
-  readonly type: 'system' | 'human' | 'external' | 'historical';
+  readonly type: "system" | "human" | "external" | "historical";
   readonly credibility: number;
   readonly relevance: number;
   readonly timestamp: number;
@@ -1355,7 +1369,7 @@ export interface EvidenceSource {
  */
 export interface EvidenceArtifact {
   readonly artifactId: string;
-  readonly type: 'log' | 'screenshot' | 'document' | 'metric' | 'trace';
+  readonly type: "log" | "screenshot" | "document" | "metric" | "trace";
   readonly format: string;
   readonly size: number;
   readonly checksum: string;
@@ -1367,7 +1381,12 @@ export interface EvidenceArtifact {
  */
 export interface EvidenceReference {
   readonly referenceId: string;
-  readonly type: 'policy' | 'procedure' | 'regulation' | 'standard' | 'guideline';
+  readonly type:
+    | "policy"
+    | "procedure"
+    | "regulation"
+    | "standard"
+    | "guideline";
   readonly title: string;
   readonly version: string;
   readonly section?: string;
@@ -1402,12 +1421,12 @@ export interface ValidationCondition {
  * Condition type
  */
 export enum ConditionType {
-  PREREQUISITE = 'prerequisite',
-  MONITORING = 'monitoring',
-  APPROVAL = 'approval',
-  VERIFICATION = 'verification',
-  NOTIFICATION = 'notification',
-  ROLLBACK = 'rollback',
+  PREREQUISITE = "prerequisite",
+  MONITORING = "monitoring",
+  APPROVAL = "approval",
+  VERIFICATION = "verification",
+  NOTIFICATION = "notification",
+  ROLLBACK = "rollback",
 }
 
 /**
@@ -1439,20 +1458,20 @@ export interface ValidationRecommendation {
  * Recommendation type
  */
 export enum RecommendationType {
-  SECURITY_IMPROVEMENT = 'security_improvement',
-  PERFORMANCE_OPTIMIZATION = 'performance_optimization',
-  COST_REDUCTION = 'cost_reduction',
-  RISK_MITIGATION = 'risk_mitigation',
-  COMPLIANCE_ENHANCEMENT = 'compliance_enhancement',
-  PROCESS_IMPROVEMENT = 'process_improvement',
-  TECHNOLOGY_UPGRADE = 'technology_upgrade',
+  SECURITY_IMPROVEMENT = "security_improvement",
+  PERFORMANCE_OPTIMIZATION = "performance_optimization",
+  COST_REDUCTION = "cost_reduction",
+  RISK_MITIGATION = "risk_mitigation",
+  COMPLIANCE_ENHANCEMENT = "compliance_enhancement",
+  PROCESS_IMPROVEMENT = "process_improvement",
+  TECHNOLOGY_UPGRADE = "technology_upgrade",
 }
 
 /**
  * Recommendation implementation
  */
 export interface RecommendationImplementation {
-  readonly complexity: 'low' | 'medium' | 'high' | 'very_high';
+  readonly complexity: "low" | "medium" | "high" | "very_high";
   readonly effort: number; // Person-hours
   readonly cost: number;
   readonly timeline: number; // Days
@@ -1464,11 +1483,11 @@ export interface RecommendationImplementation {
  * Recommendation impact
  */
 export interface RecommendationImpact {
-  readonly security: 'improved' | 'neutral' | 'degraded';
-  readonly performance: 'improved' | 'neutral' | 'degraded';
-  readonly cost: 'reduced' | 'neutral' | 'increased';
-  readonly compliance: 'improved' | 'neutral' | 'degraded';
-  readonly risk: 'reduced' | 'neutral' | 'increased';
+  readonly security: "improved" | "neutral" | "degraded";
+  readonly performance: "improved" | "neutral" | "degraded";
+  readonly cost: "reduced" | "neutral" | "increased";
+  readonly compliance: "improved" | "neutral" | "degraded";
+  readonly risk: "reduced" | "neutral" | "increased";
   readonly quantified: QuantifiedImpact[];
 }
 
@@ -1502,7 +1521,7 @@ export interface EnhancedAuditTrailEntry {
  */
 export interface AuditActor {
   readonly actorId: string;
-  readonly actorType: 'user' | 'system' | 'service' | 'admin';
+  readonly actorType: "user" | "system" | "service" | "admin";
   readonly identity: string;
   readonly roles: string[];
   readonly session?: string;
@@ -1518,14 +1537,14 @@ export interface AuditAction {
   readonly category: string;
   readonly description: string;
   readonly parameters: Record<string, unknown>;
-  readonly classification: 'normal' | 'sensitive' | 'critical';
+  readonly classification: "normal" | "sensitive" | "critical";
 }
 
 /**
  * Audit outcome
  */
 export interface AuditOutcome {
-  readonly result: 'success' | 'failure' | 'partial' | 'cancelled';
+  readonly result: "success" | "failure" | "partial" | "cancelled";
   readonly statusCode?: number;
   readonly message?: string;
   readonly duration: number;
@@ -1621,7 +1640,7 @@ export interface ValidationSecurityResults {
 export interface SecurityThreat {
   readonly threatId: string;
   readonly type: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly severity: "low" | "medium" | "high" | "critical";
   readonly probability: number;
   readonly impact: number;
   readonly description: string;
@@ -1634,7 +1653,7 @@ export interface SecurityThreat {
 export interface SecurityVulnerability {
   readonly vulnerabilityId: string;
   readonly type: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly severity: "low" | "medium" | "high" | "critical";
   readonly cvss?: number;
   readonly description: string;
   readonly remediation?: string;
@@ -1649,7 +1668,7 @@ export interface SecurityMitigation {
   readonly type: string;
   readonly effectiveness: number;
   readonly cost: number;
-  readonly complexity: 'low' | 'medium' | 'high';
+  readonly complexity: "low" | "medium" | "high";
   readonly description: string;
 }
 
@@ -1693,7 +1712,11 @@ export interface ComplianceFramework {
 export interface ComplianceRequirement {
   readonly requirementId: string;
   readonly description: string;
-  readonly status: 'compliant' | 'non_compliant' | 'partially_compliant' | 'not_applicable';
+  readonly status:
+    | "compliant"
+    | "non_compliant"
+    | "partially_compliant"
+    | "not_applicable";
   readonly evidence?: string[];
   readonly exceptions?: string[];
 }
@@ -1705,7 +1728,7 @@ export interface ComplianceViolation {
   readonly violationId: string;
   readonly framework: string;
   readonly requirement: string;
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly severity: "low" | "medium" | "high" | "critical";
   readonly description: string;
   readonly remediation: string;
   readonly deadline?: number;
@@ -1720,7 +1743,7 @@ export interface ComplianceAttestation {
   readonly attestor: string;
   readonly timestamp: number;
   readonly period: number;
-  readonly status: 'active' | 'expired' | 'revoked';
+  readonly status: "active" | "expired" | "revoked";
   readonly evidence: string[];
 }
 
@@ -1733,7 +1756,7 @@ export interface ComplianceCertification {
   readonly issuer: string;
   readonly issuedDate: number;
   readonly expiryDate: number;
-  readonly status: 'active' | 'expired' | 'revoked' | 'suspended';
+  readonly status: "active" | "expired" | "revoked" | "suspended";
   readonly scope: string[];
 }
 

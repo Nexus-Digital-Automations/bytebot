@@ -61,6 +61,27 @@ export interface SecurityRequest extends Request {
 }
 
 /**
+ * Validation context interface
+ */
+interface ValidationContext {
+  user: UserContext;
+  sessionId: string;
+  security?: {
+    riskAssessment?: {
+      overall?: string;
+      factors?: string[];
+    };
+    environment?: {
+      securityLevel?: string;
+    };
+    behavioralContext?: {
+      anomalies?: string[];
+      riskScore?: number;
+    };
+  };
+}
+
+/**
  * JWT-Parlant Authentication Guard
  *
  * Comprehensive authentication guard that validates JWT tokens,
@@ -73,10 +94,10 @@ export class JwtParlantAuthGuard implements CanActivate {
 
   constructor(
     private readonly _jwtService: JwtService,
-    private readonly reflector: Reflector,
-    private readonly jwtParlantBridge: JwtParlantBridgeService,
-    private readonly rbacSecurityContext: RbacSecurityContextService,
-    private readonly securityAudit: SecurityAuditTrailService,
+    private readonly _reflector: Reflector,
+    private readonly _jwtParlantBridge: JwtParlantBridgeService,
+    private readonly _rbacSecurityContext: RbacSecurityContextService,
+    private readonly _securityAudit: SecurityAuditTrailService,
     @Inject("JWT_PARLANT_CONFIG") private readonly _config: unknown,
   ) {}
 
@@ -134,7 +155,7 @@ export class JwtParlantAuthGuard implements CanActivate {
       request.securityContext = validationContext.security;
       request.parlantSession = validationContext.sessionId;
       request.securityFlags =
-        validationContext.security.riskAssessment?.factors || [];
+        validationContext.security?.riskAssessment?.factors || [];
 
       // Perform additional security checks
       await this.performSecurityChecks(
@@ -211,13 +232,13 @@ export class JwtParlantAuthGuard implements CanActivate {
    * Get authentication metadata from decorators
    */
   private getAuthMetadata(
-    handler: (...args: unknown[]) => unknown,
-    controllerClass: (...args: unknown[]) => unknown,
+    handler: (..._args: unknown[]) => unknown,
+    controllerClass: (..._args: unknown[]) => unknown,
   ): AuthMetadata {
     // Get metadata from method and class decorators
-    const methodAuth = this.reflector.get<AuthMetadata>("auth", handler) || {};
+    const methodAuth = this._reflector.get<AuthMetadata>("auth", handler) || {};
     const classAuth =
-      this.reflector.get<AuthMetadata>("auth", controllerClass) || {};
+      this._reflector.get<AuthMetadata>("auth", controllerClass) || {};
 
     return {
       requireAuth: true,
@@ -238,7 +259,7 @@ export class JwtParlantAuthGuard implements CanActivate {
     request: SecurityRequest,
     authMetadata: AuthMetadata,
     operationId: string,
-  ): Promise<unknown> {
+  ): Promise<ValidationContext> {
     try {
       // Extract request metadata
       const requestMetadata = {
@@ -251,16 +272,17 @@ export class JwtParlantAuthGuard implements CanActivate {
       };
 
       // Create bridge session if not exists
-      const validationContext = await this.jwtParlantBridge.createBridgeSession(
-        token,
-        "", // Refresh token would come from separate endpoint
-        requestMetadata.ipAddress,
-        requestMetadata.userAgent,
-      );
+      const validationContext =
+        await this._jwtParlantBridge.createBridgeSession(
+          token,
+          "", // Refresh token would come from separate endpoint
+          requestMetadata.ipAddress,
+          requestMetadata.userAgent,
+        );
 
       // Skip Parlant validation if configured
       if (authMetadata.skipParlantValidation) {
-        return validationContext;
+        return validationContext as ValidationContext;
       }
 
       // Perform Parlant conversational validation
@@ -270,7 +292,7 @@ export class JwtParlantAuthGuard implements CanActivate {
         requestMetadata,
       );
 
-      return validationContext;
+      return validationContext as ValidationContext;
     } catch (error) {
       this.logger.warn(`[${operationId}] Token validation failed`, {
         operationId,
@@ -306,7 +328,8 @@ export class JwtParlantAuthGuard implements CanActivate {
     }
 
     // Check for suspicious activity patterns
-    const riskLevel = validationContext.security?.riskAssessment?.overall;
+    const context = validationContext as ValidationContext;
+    const riskLevel = context.security?.riskAssessment?.overall;
     if (riskLevel === "high" || riskLevel === "critical") {
       // High-risk operations require conversational validation
       this.logger.warn(
@@ -320,7 +343,7 @@ export class JwtParlantAuthGuard implements CanActivate {
    */
   private async performSecurityChecks(
     request: SecurityRequest,
-    validationContext: unknown,
+    validationContext: ValidationContext,
     authMetadata: AuthMetadata,
     operationId: string,
   ): Promise<void> {
@@ -356,7 +379,7 @@ export class JwtParlantAuthGuard implements CanActivate {
    */
   private async performCriticalSecurityChecks(
     request: SecurityRequest,
-    validationContext: unknown,
+    validationContext: ValidationContext,
     operationId: string,
   ): Promise<void> {
     // MFA verification for critical operations
@@ -392,7 +415,7 @@ export class JwtParlantAuthGuard implements CanActivate {
    */
   private async checkRateLimit(
     request: SecurityRequest,
-    validationContext: unknown,
+    validationContext: ValidationContext,
     operationId: string,
   ): Promise<void> {
     // Implement rate limiting logic
@@ -417,14 +440,17 @@ export class JwtParlantAuthGuard implements CanActivate {
    */
   private async performBehavioralAnalysis(
     request: SecurityRequest,
-    validationContext: unknown,
+    validationContext: ValidationContext,
     operationId: string,
   ): Promise<void> {
     // Implement behavioral analysis
     // Check for unusual patterns, times, locations, etc.
 
     const behavioralContext = validationContext.security?.behavioralContext;
-    if (behavioralContext?.anomalies?.length > 0) {
+    if (
+      behavioralContext?.anomalies &&
+      behavioralContext.anomalies.length > 0
+    ) {
       this.logger.warn(`[${operationId}] Behavioral anomalies detected`, {
         operationId,
         userId: validationContext.user.id,
@@ -432,7 +458,7 @@ export class JwtParlantAuthGuard implements CanActivate {
       });
 
       // For high-risk anomalies, require additional validation
-      if (behavioralContext.riskScore > 75) {
+      if (behavioralContext.riskScore && behavioralContext.riskScore > 75) {
         throw new ForbiddenException(
           "Unusual activity detected - additional verification required",
         );
@@ -467,10 +493,10 @@ export class JwtParlantAuthGuard implements CanActivate {
    */
   private async logAuthenticationSuccess(
     request: SecurityRequest,
-    validationContext: unknown,
+    validationContext: ValidationContext,
     operationId: string,
   ): Promise<void> {
-    await this.securityAudit.logSecurityEvent(
+    await this._securityAudit.logSecurityEvent(
       AuditCategory.AUTHENTICATION,
       AuditSeverity.INFORMATIONAL,
       AuditOutcome.SUCCESS,
@@ -520,7 +546,7 @@ export class JwtParlantAuthGuard implements CanActivate {
     reason: string,
     operationId: string,
   ): Promise<void> {
-    await this.securityAudit.logSecurityEvent(
+    await this._securityAudit.logSecurityEvent(
       AuditCategory.AUTHENTICATION,
       AuditSeverity.MEDIUM,
       AuditOutcome.FAILURE,

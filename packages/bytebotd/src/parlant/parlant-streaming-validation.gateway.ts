@@ -48,15 +48,10 @@ import {
   ParlantStreamingMessage,
   ParlantValidationStreamRequest,
   ParlantValidationStreamResponse,
-  EnhancedParlantValidationRequest,
-  EnhancedParlantValidationResponse,
   ParlantStreamingSession,
   StreamingSessionStatus,
   StreamInfo,
   StreamStatus,
-  ValidationDecision,
-  ProtocolPriority,
-  AuthenticationLevel,
 } from '../common/websocket/parlant-websocket-streaming-bridge.service';
 import {
   ParlantStreamingProtocolType,
