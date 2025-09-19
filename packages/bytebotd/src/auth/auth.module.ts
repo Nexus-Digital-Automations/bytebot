@@ -19,6 +19,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Algorithm } from 'jsonwebtoken';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { EnhancedJwtStrategy } from './strategies/enhanced-jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -32,7 +33,7 @@ import { SecurityAuditService } from '../security/security-audit.service';
  */
 export const enhancedJwtConfigFactory = (configService: ConfigService) => ({
   // Multi-algorithm support configuration
-  algorithms: ['HS256', 'RS256', 'ES256', 'EdDSA'],
+  algorithms: ['HS256', 'RS256', 'ES256', 'EdDSA'] as Algorithm[],
 
   // Primary secret for HS256 (backward compatibility)
   secret: configService.get<string>('JWT_SECRET_HS256', 'bytebot-default-secret-change-in-production'),
@@ -40,7 +41,7 @@ export const enhancedJwtConfigFactory = (configService: ConfigService) => ({
   // Enhanced signing options
   signOptions: {
     expiresIn: configService.get<string>('JWT_EXPIRES_IN', '1h'),
-    algorithm: configService.get<string>('JWT_DEFAULT_ALGORITHM', 'HS256'),
+    algorithm: configService.get<string>('JWT_DEFAULT_ALGORITHM', 'HS256') as Algorithm,
     issuer: configService.get<string>('JWT_ISSUER', 'aigent-bytebot-system'),
     audience: configService.get<string>('JWT_AUDIENCE', 'bytebotd-enterprise-control'),
     keyid: configService.get<string>('JWT_KEY_ID'),
@@ -48,7 +49,7 @@ export const enhancedJwtConfigFactory = (configService: ConfigService) => ({
 
   // Enhanced verification options
   verifyOptions: {
-    algorithms: ['HS256', 'RS256', 'ES256', 'EdDSA'],
+    algorithms: ['HS256', 'RS256', 'ES256', 'EdDSA'] as Algorithm[],
     issuer: configService.get<string>('JWT_ISSUER', 'aigent-bytebot-system'),
     audience: configService.get<string>('JWT_AUDIENCE', 'bytebotd-enterprise-control'),
     clockTolerance: 300, // 5 minutes
@@ -56,9 +57,9 @@ export const enhancedJwtConfigFactory = (configService: ConfigService) => ({
   },
 
   // Enterprise security options
-  secretOrKeyProvider: (request: any, rawJwtToken: string, done: any) => {
+  secretOrKeyProvider: (_requestType: unknown, _tokenOrPayload: string | object | Buffer, _options?: unknown) => {
     // Dynamic key resolution handled by EnhancedJwtStrategy
-    done(null, configService.get<string>('JWT_SECRET_HS256', 'bytebot-default-secret-change-in-production'));
+    return configService.get<string>('JWT_SECRET_HS256', 'bytebot-default-secret-change-in-production');
   },
 });
 

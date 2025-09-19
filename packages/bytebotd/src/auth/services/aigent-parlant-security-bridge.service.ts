@@ -245,6 +245,21 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     });
   }
 
+  /**
+   * Helper function to create default compliance status
+   */
+  private createDefaultComplianceStatus(): Record<ComplianceFramework, boolean> {
+    return {
+      [ComplianceFramework.SOX]: false,
+      [ComplianceFramework.GDPR]: false,
+      [ComplianceFramework.HIPAA]: false,
+      [ComplianceFramework.PCI_DSS]: false,
+      [ComplianceFramework.ISO_27001]: false,
+      [ComplianceFramework.NIST_CSF]: false,
+      [ComplianceFramework.CIS_CONTROLS]: false,
+    };
+  }
+
   async onModuleInit(): Promise<void> {
     await this.initializeRedisCluster();
     await this.initializeSessionMonitoring();
@@ -464,7 +479,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
           validationTimestamp: new Date(),
           reasoning: 'Session not found or expired',
           securityViolations: ['SESSION_NOT_FOUND'],
-          complianceStatus: {},
+          complianceStatus: this.createDefaultComplianceStatus(),
         };
       }
 
@@ -476,7 +491,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
           validationTimestamp: new Date(),
           reasoning: `Session is ${session.state.toLowerCase()} or expired`,
           securityViolations: ['SESSION_EXPIRED'],
-          complianceStatus: {},
+          complianceStatus: this.createDefaultComplianceStatus(),
         };
       }
 
@@ -505,9 +520,16 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
       // Check compliance status
       const complianceStatus = await this.checkComplianceStatus(session);
 
+      let currentSession = session;
+
+      // Update session last accessed time if validation succeeds
+      if (validation.approved && securityViolations.length === 0) {
+        currentSession = await this.updateSessionAccess(session, context);
+      }
+
       const result: SessionValidationResult = {
         valid: validation.approved && securityViolations.length === 0,
-        session,
+        session: currentSession,
         validationTimestamp: new Date(),
         reasoning: validation.reasoning,
         conversationId: validation.conversationId,
@@ -517,11 +539,6 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
 
       // Cache the validation result
       this.sessionValidationCache.set(sessionId, result);
-
-      // Update session last accessed time
-      if (result.valid) {
-        await this.updateSessionAccess(session, context);
-      }
 
       // Update performance metrics
       const duration = Date.now() - startTime;
@@ -560,7 +577,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
         validationTimestamp: new Date(),
         reasoning: `Validation error: ${error instanceof Error ? error.message : String(error)}`,
         securityViolations: ['VALIDATION_ERROR'],
-        complianceStatus: {},
+        complianceStatus: this.createDefaultComplianceStatus(),
       };
     }
   }
@@ -885,10 +902,10 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
 
     try {
       this.redisCluster = new Redis(this.bridgeConfig.redisUrl, {
-        retryDelayOnFailover: 100,
         enableReadyCheck: true,
         maxRetriesPerRequest: 3,
         commandTimeout: 5000,
+        connectTimeout: 10000,
       });
 
       this.redisCluster.on('connect', () => {
@@ -1152,21 +1169,28 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
       userAgent: string;
       requestedAction?: string;
     }
-  ): Promise<void> {
-    session.lastAccessedAt = new Date();
-    session.auditTrail.push({
+  ): Promise<ParlantSecuritySession> {
+    const auditEntry: SessionAuditEntry = {
       timestamp: new Date(),
       action: 'ACCESS',
       outcome: 'SUCCESS',
       details: `Session accessed for: ${context.requestedAction ?? 'general operation'}`,
       ipAddress: context.ipAddress,
       userAgent: context.userAgent,
-    });
+    };
+
+    const updatedSession: ParlantSecuritySession = {
+      ...session,
+      lastAccessedAt: new Date(),
+      auditTrail: [...session.auditTrail, auditEntry],
+    };
 
     // Update in Redis cluster
     if (this.bridgeConfig.sessionClusteringEnabled) {
-      await this.storeSessionInCluster(session);
+      await this.storeSessionInCluster(updatedSession);
     }
+
+    return updatedSession;
   }
 
   private updatePerformanceMetrics(duration: number): void {
