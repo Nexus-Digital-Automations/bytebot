@@ -436,7 +436,7 @@ export class ParlantWebSocketIntegrationService extends EventEmitter implements 
     sessionId: string,
     message: ValidationRequestMessage
   ): Promise<ParlantValidationRequest> {
-    const conversationId = this.conversationMappings.get(sessionId) ||
+    const conversationId = this.conversationMappings.get(sessionId) ??
                           `conv_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     // Create enhanced validation context

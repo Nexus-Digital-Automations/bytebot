@@ -455,7 +455,7 @@ export class ExampleUserManagementService {
         const pattern = criteria.namePattern.toLowerCase();
         filteredUsers = filteredUsers.filter(user =>
           user.email.toLowerCase().includes(pattern) ||
-          (user as any).name?.toLowerCase().includes(pattern)
+          (user as UserEntity & { name?: string }).name?.toLowerCase().includes(pattern)
         );
       }
 
