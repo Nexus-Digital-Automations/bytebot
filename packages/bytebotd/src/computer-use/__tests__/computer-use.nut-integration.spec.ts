@@ -23,77 +23,20 @@
  * @author Subagent 5 - Computer Use Test Coverage Enhancement
  */
 
-// Mock NUT library before imports
-jest.mock('@nut-tree-fork/nut-js', () => ({
-  screen: {
-    capture: jest.fn(),
-    find: jest.fn(),
-    waitFor: jest.fn(),
-    highlight: jest.fn(),
-    config: {
-      resourceDirectory: '/tmp/nut-resources',
-      confidence: 0.99,
-    },
-  },
-  mouse: {
-    move: jest.fn(),
-    setPosition: jest.fn(),
-    getPosition: jest.fn(),
-    leftClick: jest.fn(),
-    rightClick: jest.fn(),
-    doubleClick: jest.fn(),
-    drag: jest.fn(),
-    scrollDown: jest.fn(),
-    scrollUp: jest.fn(),
-    pressButton: jest.fn(),
-    releaseButton: jest.fn(),
-    config: {
-      mouseSpeed: 1000,
-      autoDelayMs: 100,
-    },
-  },
-  keyboard: {
-    type: jest.fn(),
-    pressKey: jest.fn(),
-    releaseKey: jest.fn(),
-    config: {
-      autoDelayMs: 100,
-    },
-  },
-  Key: {
-    Escape: 'Escape',
-    Enter: 'Return',
-    Space: 'space',
-    Tab: 'Tab',
-    Shift: 'shift',
-    Control: 'ctrl',
-    Alt: 'alt',
-    Meta: 'cmd',
-    F1: 'F1',
-    F12: 'F12',
-    Up: 'up',
-    Down: 'down',
-    Left: 'left',
-    Right: 'right',
-  },
-  Button: {
-    LEFT: 0,
-    MIDDLE: 1,
-    RIGHT: 2,
-  },
-  Point: jest.fn((x: number, y: number) => ({ x, y })),
-  Region: jest.fn((x: number, y: number, width: number, height: number) => ({
-    x, y, width, height
-  })),
-  Image: jest.fn(),
-  sleep: jest.fn(),
-  straightTo: jest.fn(),
-  linear: jest.fn(),
-  PROVIDER: {
-    CV: 'opencv',
-    TEMPLATE_MATCHING: 'template',
-  },
-}));
+// Import type-safe mock utilities
+import {
+  createNutMock,
+  MockNutInterface,
+  MockComputerUseServiceInterface,
+  MockNutServiceInterface,
+  createMockFunction,
+} from '../../__tests__/test-utils/mock-types';
+
+// Create type-safe NUT mock
+const mockNut = createNutMock();
+
+// Mock NUT library before imports with proper typing
+jest.mock('@nut-tree-fork/nut-js', () => mockNut);
 
 jest.mock('../computer-use.service');
 jest.mock('../../nut/nut.service');
@@ -102,19 +45,18 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ComputerUseService } from '../computer-use.service';
 import { NutService } from '../../nut/nut.service';
-import {
-  screen,
-  mouse,
-  keyboard,
-  Key,
-  Button,
-  Point,
-  Region,
-  Image,
-  sleep,
-  straightTo,
-  linear,
-} from '@nut-tree-fork/nut-js';
+// Extract typed mock components from the mock
+const screen = mockNut.screen;
+const mouse = mockNut.mouse;
+const keyboard = mockNut.keyboard;
+const Key = mockNut.Key;
+const Button = mockNut.Button;
+const Point = mockNut.Point;
+const Region = mockNut.Region;
+const Image = mockNut.Image;
+const sleep = mockNut.sleep;
+const straightTo = mockNut.straightTo;
+const linear = mockNut.linear;
 import {
   MoveMouseAction,
   ClickMouseAction,
@@ -145,35 +87,44 @@ const mockMousePosition = { x: 150, y: 250 };
 
 describe('Computer Use NUT Integration', () => {
   let service: ComputerUseService;
-  let nutService: NutService;
+  let nutService: jest.Mocked<NutService>;
   let logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
-    // Create mock services
-    const mockComputerUseService = {
-      action: jest.fn(),
-      screenshot: jest.fn(),
+    // Create type-safe mock services
+    const mockComputerUseService: MockComputerUseServiceInterface = {
+      executeAction: createMockFunction(),
+      generateTestId: createMockFunction(),
+      executeJob: createMockFunction(),
+      action: createMockFunction(),
+      screenshot: createMockFunction(),
     };
 
-    const mockNutService = {
-      moveMouse: jest.fn(),
-      clickMouse: jest.fn(),
-      dragMouse: jest.fn(),
-      scroll: jest.fn(),
-      typeText: jest.fn(),
-      pressKeys: jest.fn(),
-      screenshot: jest.fn(),
-      initialize: jest.fn(),
-      configure: jest.fn(),
-      cleanup: jest.fn(),
+    const mockNutService: MockNutServiceInterface = {
+      moveMouse: createMockFunction(),
+      clickMouse: createMockFunction(),
+      captureScreen: createMockFunction(),
+      typeText: createMockFunction(),
+      pressKey: createMockFunction(),
+      dragMouse: createMockFunction(),
+      scroll: createMockFunction(),
+      pressKeys: createMockFunction(),
+      screenshot: createMockFunction(),
+      initialize: createMockFunction(),
+      configure: createMockFunction(),
+      cleanup: createMockFunction(),
     };
 
-    const mockLogger = {
-      log: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-    };
+    const mockLogger: jest.Mocked<Logger> = {
+      log: createMockFunction(),
+      error: createMockFunction(),
+      warn: createMockFunction(),
+      debug: createMockFunction(),
+      verbose: createMockFunction(),
+      fatal: createMockFunction(),
+      setContext: createMockFunction(),
+      localInstance: createMockFunction(),
+    } as jest.Mocked<Logger>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
