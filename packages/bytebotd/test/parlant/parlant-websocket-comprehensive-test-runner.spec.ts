@@ -884,20 +884,511 @@ class ComprehensiveTestRunner {
   }
 
   // Error handling test implementations
-  private static async testConnectionFailureRecovery(services: any): Promise<any> {
-    return { success: true, recoveryTime: 500, dataLossRate: 0.01 };
+  /**
+   * Test WebSocket connection failure recovery for PARLANT integration
+   * Simulates various connection failure scenarios and validates recovery mechanisms
+   */
+  private static async testConnectionFailureRecovery(services: any): Promise<{
+    success: boolean;
+    recoveryTime: number;
+    dataLossRate: number;
+    error?: string;
+  }> {
+    try {
+      const startTime = performance.now();
+      let totalRecoveryTime = 0;
+      let successfulRecoveries = 0;
+      let dataLossEvents = 0;
+      const totalTests = 10;
+
+      logger.log('Testing WebSocket connection failure recovery scenarios...');
+
+      for (let i = 0; i < totalTests; i++) {
+        const testStartTime = performance.now();
+
+        try {
+          // Create a test WebSocket connection
+          const client = await ComprehensiveTestRunner.createTestClient();
+
+          // Send a PARLANT validation message
+          const testMessage: ConversationalMessage = {
+            type: ConversationalMessageType.USER_MESSAGE,
+            content: `Connection failure test ${i + 1}`,
+            sessionId: `test-session-${i}`,
+            timestamp: new Date(),
+            metadata: {
+              testType: 'connection-failure',
+              expectedResponse: 'validation-success'
+            }
+          };
+
+          // Simulate connection failure by forcefully closing the connection
+          setTimeout(() => {
+            client.terminate();
+          }, Math.random() * 100 + 50); // Random failure between 50-150ms
+
+          // Attempt to reconnect and recover
+          let reconnected = false;
+          let reconnectAttempts = 0;
+          const maxReconnectAttempts = 5;
+
+          while (!reconnected && reconnectAttempts < maxReconnectAttempts) {
+            try {
+              reconnectAttempts++;
+              await new Promise(resolve => setTimeout(resolve, 100 * reconnectAttempts)); // Exponential backoff
+
+              const recoveryClient = await ComprehensiveTestRunner.createTestClient();
+
+              // Test if PARLANT integration still works after reconnection
+              await ComprehensiveTestRunner.sendTestMessage(recoveryClient, testMessage);
+
+              reconnected = true;
+              successfulRecoveries++;
+
+              const recoveryTime = performance.now() - testStartTime;
+              totalRecoveryTime += recoveryTime;
+
+              recoveryClient.close();
+
+            } catch (reconnectError) {
+              if (reconnectAttempts === maxReconnectAttempts) {
+                dataLossEvents++;
+                logger.warn(`Failed to recover connection after ${maxReconnectAttempts} attempts`);
+              }
+            }
+          }
+
+        } catch (error) {
+          dataLossEvents++;
+          logger.error(`Connection failure test ${i + 1} failed:`, error);
+        }
+      }
+
+      const averageRecoveryTime = totalRecoveryTime / Math.max(successfulRecoveries, 1);
+      const dataLossRate = dataLossEvents / totalTests;
+      const successRate = successfulRecoveries / totalTests;
+
+      const success = successRate >= 0.9 && dataLossRate <= 0.1; // 90% success rate, max 10% data loss
+
+      return {
+        success,
+        recoveryTime: averageRecoveryTime,
+        dataLossRate,
+        error: success ? undefined : `Recovery success rate: ${(successRate * 100).toFixed(1)}%, Data loss rate: ${(dataLossRate * 100).toFixed(1)}%`
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        recoveryTime: 0,
+        dataLossRate: 1.0,
+        error: `Connection failure recovery test failed: ${error.message}`
+      };
+    }
   }
 
-  private static async testTimeoutRecovery(services: any): Promise<any> {
-    return { success: true, recoveryRate: 0.98, retryEffectiveness: 0.95 };
+  /**
+   * Test timeout recovery mechanisms for PARLANT validation
+   * Validates that the system can handle and recover from validation timeouts
+   */
+  private static async testTimeoutRecovery(services: any): Promise<{
+    success: boolean;
+    recoveryRate: number;
+    retryEffectiveness: number;
+    error?: string;
+  }> {
+    try {
+      logger.log('Testing PARLANT validation timeout recovery...');
+
+      let timeoutRecoveries = 0;
+      let successfulRetries = 0;
+      const totalTimeoutTests = 15;
+
+      for (let i = 0; i < totalTimeoutTests; i++) {
+        try {
+          const client = await ComprehensiveTestRunner.createTestClient();
+
+          // Create a complex validation message that might timeout
+          const complexMessage: ConversationalMessage = {
+            type: ConversationalMessageType.USER_MESSAGE,
+            content: `Complex validation test ${i + 1} with extensive data that requires significant processing time`,
+            sessionId: `timeout-test-session-${i}`,
+            timestamp: new Date(),
+            metadata: {
+              testType: 'timeout-simulation',
+              complexity: 'high',
+              expectedProcessingTime: 5000 // 5 seconds
+            }
+          };
+
+          // Send message with short timeout to force timeout condition
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Validation timeout')), 1000); // 1 second timeout
+          });
+
+          const validationPromise = ComprehensiveTestRunner.sendTestMessage(client, complexMessage);
+
+          try {
+            await Promise.race([validationPromise, timeoutPromise]);
+          } catch (timeoutError) {
+            // Timeout occurred, now test recovery
+            try {
+              // Implement retry mechanism with exponential backoff
+              let retryAttempt = 0;
+              const maxRetries = 3;
+              let retrySuccessful = false;
+
+              while (retryAttempt < maxRetries && !retrySuccessful) {
+                retryAttempt++;
+                const retryDelay = Math.pow(2, retryAttempt) * 100; // Exponential backoff
+
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+
+                try {
+                  // Retry with increased timeout
+                  const retryTimeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Retry timeout')), 3000); // 3 second timeout
+                  });
+
+                  const retryValidationPromise = ComprehensiveTestRunner.sendTestMessage(client, {
+                    ...complexMessage,
+                    metadata: {
+                      ...complexMessage.metadata,
+                      retryAttempt,
+                      originalTimeout: true
+                    }
+                  });
+
+                  await Promise.race([retryValidationPromise, retryTimeoutPromise]);
+                  retrySuccessful = true;
+                  successfulRetries++;
+                  timeoutRecoveries++;
+
+                } catch (retryError) {
+                  if (retryAttempt === maxRetries) {
+                    logger.warn(`Timeout recovery failed after ${maxRetries} attempts for test ${i + 1}`);
+                  }
+                }
+              }
+            } catch (recoveryError) {
+              logger.error(`Timeout recovery mechanism failed for test ${i + 1}:`, recoveryError);
+            }
+          }
+
+          client.close();
+
+        } catch (error) {
+          logger.error(`Timeout test ${i + 1} failed:`, error);
+        }
+      }
+
+      const recoveryRate = timeoutRecoveries / totalTimeoutTests;
+      const retryEffectiveness = successfulRetries / Math.max(timeoutRecoveries, 1);
+      const success = recoveryRate >= 0.8 && retryEffectiveness >= 0.7; // 80% recovery rate, 70% retry effectiveness
+
+      return {
+        success,
+        recoveryRate,
+        retryEffectiveness,
+        error: success ? undefined : `Recovery rate: ${(recoveryRate * 100).toFixed(1)}%, Retry effectiveness: ${(retryEffectiveness * 100).toFixed(1)}%`
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        recoveryRate: 0,
+        retryEffectiveness: 0,
+        error: `Timeout recovery test failed: ${error.message}`
+      };
+    }
   }
 
-  private static async testStateCorruptionRecovery(services: any): Promise<any> {
-    return { success: true, recoveryTime: 1000, integrityScore: 0.99 };
+  /**
+   * Test state corruption detection and recovery for PARLANT conversations
+   * Validates that the system can detect and recover from corrupted conversation state
+   */
+  private static async testStateCorruptionRecovery(services: any): Promise<{
+    success: boolean;
+    recoveryTime: number;
+    integrityScore: number;
+    error?: string;
+  }> {
+    try {
+      logger.log('Testing PARLANT conversation state corruption recovery...');
+
+      let stateRecoveries = 0;
+      let totalRecoveryTime = 0;
+      let integrityViolations = 0;
+      const totalStateTests = 12;
+
+      for (let i = 0; i < totalStateTests; i++) {
+        const testStartTime = performance.now();
+
+        try {
+          const client = await ComprehensiveTestRunner.createTestClient();
+          const sessionId = `state-corruption-test-${i}`;
+
+          // Build a conversation state
+          const conversationMessages = [
+            {
+              type: ConversationalMessageType.USER_MESSAGE,
+              content: `Initial message ${i}`,
+              sessionId,
+              timestamp: new Date(),
+              metadata: { messageIndex: 0 }
+            },
+            {
+              type: ConversationalMessageType.ASSISTANT_MESSAGE,
+              content: `Response to message ${i}`,
+              sessionId,
+              timestamp: new Date(),
+              metadata: { messageIndex: 1 }
+            }
+          ];
+
+          // Send conversation messages to build state
+          for (const message of conversationMessages) {
+            await ComprehensiveTestRunner.sendTestMessage(client, message);
+            await new Promise(resolve => setTimeout(resolve, 50)); // Small delay between messages
+          }
+
+          // Simulate state corruption scenarios
+          const corruptionTypes = [
+            'message_order_corruption',
+            'session_id_mismatch',
+            'timestamp_corruption',
+            'metadata_corruption'
+          ];
+
+          const corruptionType = corruptionTypes[i % corruptionTypes.length];
+
+          // Inject corrupted message based on corruption type
+          let corruptedMessage: ConversationalMessage;
+
+          switch (corruptionType) {
+            case 'message_order_corruption':
+              corruptedMessage = {
+                type: ConversationalMessageType.USER_MESSAGE,
+                content: `Corrupted message with wrong order`,
+                sessionId,
+                timestamp: new Date(Date.now() - 1000000), // Past timestamp
+                metadata: { messageIndex: -1, corruption: 'order' }
+              };
+              break;
+
+            case 'session_id_mismatch':
+              corruptedMessage = {
+                type: ConversationalMessageType.USER_MESSAGE,
+                content: `Message with wrong session`,
+                sessionId: 'wrong-session-id',
+                timestamp: new Date(),
+                metadata: { messageIndex: 2, corruption: 'session' }
+              };
+              break;
+
+            case 'timestamp_corruption':
+              corruptedMessage = {
+                type: ConversationalMessageType.USER_MESSAGE,
+                content: `Message with invalid timestamp`,
+                sessionId,
+                timestamp: new Date('invalid-date'),
+                metadata: { messageIndex: 2, corruption: 'timestamp' }
+              };
+              break;
+
+            case 'metadata_corruption':
+              corruptedMessage = {
+                type: ConversationalMessageType.USER_MESSAGE,
+                content: `Message with corrupted metadata`,
+                sessionId,
+                timestamp: new Date(),
+                metadata: null // Null metadata corruption
+              };
+              break;
+          }
+
+          // Attempt to send corrupted message and detect/recover
+          try {
+            await ComprehensiveTestRunner.sendTestMessage(client, corruptedMessage);
+
+            // If corrupted message was accepted, it's an integrity violation
+            integrityViolations++;
+            logger.warn(`State corruption not detected for type: ${corruptionType}`);
+
+          } catch (corruptionError) {
+            // Corruption was detected, now test recovery
+            try {
+              // Send a valid recovery message
+              const recoveryMessage: ConversationalMessage = {
+                type: ConversationalMessageType.USER_MESSAGE,
+                content: `Recovery message after ${corruptionType}`,
+                sessionId,
+                timestamp: new Date(),
+                metadata: {
+                  messageIndex: 2,
+                  recovery: true,
+                  previousCorruption: corruptionType
+                }
+              };
+
+              await ComprehensiveTestRunner.sendTestMessage(client, recoveryMessage);
+
+              // Test that conversation can continue normally
+              const followupMessage: ConversationalMessage = {
+                type: ConversationalMessageType.USER_MESSAGE,
+                content: `Follow-up message to verify recovery`,
+                sessionId,
+                timestamp: new Date(),
+                metadata: { messageIndex: 3, postRecovery: true }
+              };
+
+              await ComprehensiveTestRunner.sendTestMessage(client, followupMessage);
+
+              stateRecoveries++;
+              const recoveryTime = performance.now() - testStartTime;
+              totalRecoveryTime += recoveryTime;
+
+            } catch (recoveryError) {
+              logger.error(`State recovery failed for corruption type ${corruptionType}:`, recoveryError);
+            }
+          }
+
+          client.close();
+
+        } catch (error) {
+          logger.error(`State corruption test ${i + 1} failed:`, error);
+        }
+      }
+
+      const averageRecoveryTime = totalRecoveryTime / Math.max(stateRecoveries, 1);
+      const integrityScore = 1 - (integrityViolations / totalStateTests);
+      const recoveryRate = stateRecoveries / totalStateTests;
+      const success = integrityScore >= 0.95 && recoveryRate >= 0.8; // 95% integrity, 80% recovery rate
+
+      return {
+        success,
+        recoveryTime: averageRecoveryTime,
+        integrityScore,
+        error: success ? undefined : `Integrity score: ${(integrityScore * 100).toFixed(1)}%, Recovery rate: ${(recoveryRate * 100).toFixed(1)}%`
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        recoveryTime: 0,
+        integrityScore: 0,
+        error: `State corruption recovery test failed: ${error.message}`
+      };
+    }
   }
 
-  private static async testServiceFailover(services: any): Promise<any> {
-    return { success: true, failoverTime: 2000, availabilityScore: 0.999 };
+  /**
+   * Test service failover capabilities for PARLANT integration
+   * Validates that the system can failover to backup services when primary services fail
+   */
+  private static async testServiceFailover(services: any): Promise<{
+    success: boolean;
+    failoverTime: number;
+    availabilityScore: number;
+    error?: string;
+  }> {
+    try {
+      logger.log('Testing PARLANT service failover mechanisms...');
+
+      let successfulFailovers = 0;
+      let totalFailoverTime = 0;
+      let serviceUnavailableTime = 0;
+      const totalFailoverTests = 8;
+      const testDuration = 60000; // 1 minute per test
+
+      for (let i = 0; i < totalFailoverTests; i++) {
+        const testStartTime = performance.now();
+        const serviceFailureTime = testStartTime + Math.random() * 30000 + 5000; // Fail between 5-35 seconds
+
+        try {
+          const client = await ComprehensiveTestRunner.createTestClient();
+          let serviceAvailable = true;
+          let failoverInitiated = false;
+          let failoverCompleted = false;
+
+          // Simulate continuous service usage
+          const serviceUsageInterval = setInterval(async () => {
+            if (!serviceAvailable && !failoverCompleted) {
+              return; // Service is down, can't process
+            }
+
+            try {
+              const testMessage: ConversationalMessage = {
+                type: ConversationalMessageType.USER_MESSAGE,
+                content: `Failover test message ${Date.now()}`,
+                sessionId: `failover-test-${i}`,
+                timestamp: new Date(),
+                metadata: {
+                  testType: 'service-failover',
+                  serviceStatus: serviceAvailable ? 'primary' : 'backup'
+                }
+              };
+
+              await ComprehensiveTestRunner.sendTestMessage(client, testMessage);
+
+            } catch (error) {
+              if (serviceAvailable && Date.now() >= serviceFailureTime) {
+                // Primary service just failed, initiate failover
+                serviceAvailable = false;
+                failoverInitiated = true;
+                const failoverStartTime = performance.now();
+
+                logger.log(`Service failure detected, initiating failover for test ${i + 1}`);
+
+                // Simulate failover process
+                setTimeout(() => {
+                  serviceAvailable = true;
+                  failoverCompleted = true;
+                  const failoverTime = performance.now() - failoverStartTime;
+                  totalFailoverTime += failoverTime;
+                  successfulFailovers++;
+
+                  logger.log(`Failover completed in ${failoverTime.toFixed(0)}ms for test ${i + 1}`);
+                }, Math.random() * 3000 + 1000); // Failover takes 1-4 seconds
+              } else if (!serviceAvailable) {
+                // Service is down, track unavailable time
+                serviceUnavailableTime += 100; // Interval timing
+              }
+            }
+          }, 100); // Check every 100ms
+
+          // Run test for specified duration
+          await new Promise(resolve => setTimeout(resolve, testDuration));
+          clearInterval(serviceUsageInterval);
+
+          client.close();
+
+        } catch (error) {
+          logger.error(`Service failover test ${i + 1} failed:`, error);
+        }
+      }
+
+      const averageFailoverTime = totalFailoverTime / Math.max(successfulFailovers, 1);
+      const totalTestTime = totalFailoverTests * testDuration;
+      const availabilityScore = 1 - (serviceUnavailableTime / totalTestTime);
+      const failoverSuccessRate = successfulFailovers / totalFailoverTests;
+      const success = availabilityScore >= 0.99 && failoverSuccessRate >= 0.9; // 99% availability, 90% failover success
+
+      return {
+        success,
+        failoverTime: averageFailoverTime,
+        availabilityScore,
+        error: success ? undefined : `Availability: ${(availabilityScore * 100).toFixed(2)}%, Failover success: ${(failoverSuccessRate * 100).toFixed(1)}%`
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        failoverTime: 0,
+        availabilityScore: 0,
+        error: `Service failover test failed: ${error.message}`
+      };
+    }
   }
 
   // Performance measurement helpers
@@ -947,6 +1438,58 @@ class ComprehensiveTestRunner {
           reject(error);
         } else {
           resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Send test message and validate response for PARLANT integration testing
+   * This method sends a message via WebSocket and waits for a response to validate the integration
+   */
+  private static async sendTestMessage(client: WebSocket, message: ConversationalMessage): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (client.readyState !== WebSocket.OPEN) {
+        reject(new Error('WebSocket not open'));
+        return;
+      }
+
+      const timeout = setTimeout(() => {
+        client.removeAllListeners('message');
+        reject(new Error('Test message response timeout'));
+      }, 5000); // 5 second timeout for test messages
+
+      // Set up response listener
+      client.once('message', (data) => {
+        clearTimeout(timeout);
+        try {
+          const response = JSON.parse(data.toString());
+
+          // Validate response structure
+          if (!response || typeof response !== 'object') {
+            reject(new Error('Invalid response format'));
+            return;
+          }
+
+          // Check for error responses
+          if (response.error) {
+            reject(new Error(`PARLANT integration error: ${response.error}`));
+            return;
+          }
+
+          // For test purposes, accept any valid JSON response
+          resolve();
+        } catch (parseError) {
+          reject(new Error(`Failed to parse response: ${parseError.message}`));
+        }
+      });
+
+      // Send the test message
+      client.send(JSON.stringify(message), (error) => {
+        if (error) {
+          clearTimeout(timeout);
+          client.removeAllListeners('message');
+          reject(error);
         }
       });
     });
@@ -1152,16 +1695,8 @@ describe('PARLANT Phase 1 Integration WebSocket Comprehensive Test Runner', () =
         errors: []
       };
 
-      const regressionResults: TestSuiteResults = {
-        suiteName: 'Regression Testing',
-        success: true,
-        testsRun: 8,
-        testsPassed: 8,
-        testsFailed: 0,
-        executionTime: 25000,
-        performanceMetrics: { compatibilityScore: 0.98 },
-        errors: []
-      };
+      // Execute automated regression testing
+      const regressionResults = await ComprehensiveTestRunner.executeRegressionTest(comprehensiveConfig, services);
 
       const overallExecutionTime = performance.now() - overallStartTime;
 

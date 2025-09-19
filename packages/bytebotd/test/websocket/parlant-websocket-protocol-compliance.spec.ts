@@ -531,7 +531,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
       const pingPongLatency = performance.now() - testStartTime;
       this.protocolMetrics.pingPongLatency = pingPongLatency;
 
-      const dataMatches = pongData && pongData.equals(pingData);
+      const dataMatches = pongData?.equals(pingData);
 
       return {
         testName: 'ping_pong_protocol',
